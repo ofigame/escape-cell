@@ -118,7 +118,6 @@ namespace SquashBot.Gameplay
         private const float SurpriseBonusChance = 0.07f;
         private const int SurpriseFromLevel = 4;
         private const float TunnelChance = 0.7f;
-        private const int TunnelExitBonus = 10;
 
         private int World => LevelCatalog.WorldOf(levelIndex);
         private bool RescueEnabled => World >= RescueFromWorld;
@@ -186,6 +185,7 @@ namespace SquashBot.Gameplay
             runner.Init(robot, cameraRig, input, fx);
             runner.CoinCollected += OnTunnelCoin;
             runner.Finished += OnTunnelFinished;
+            runner.RiskTaken += () => FloatAt(robot.transform.position + Vector3.up * 0.5f, Loc.T("float.risk"), Palette.UiRed);
 
             CreateUi();
             ShowMenu();
@@ -430,35 +430,39 @@ namespace SquashBot.Gameplay
             gridView.gameObject.SetActive(false);
             cameraRig.SetStyle(CameraStyle.Gameplay);
             cameraRig.SetMenuFocus(false);
-            runner.Begin(Random.Range(0, 100000));
+            // Which tunnel: the air duct, the surf channel, the mine, or (from floor 3) WARDEN's chase.
+            var kinds = new List<DuctRunner.Kind> { DuctRunner.Kind.Duct, DuctRunner.Kind.Surf, DuctRunner.Kind.Mine };
+            if (levelIndex >= 20) kinds.Add(DuctRunner.Kind.Chase);
+            var tunnel = kinds[Random.Range(0, kinds.Count)];
+            runner.Begin(Random.Range(0, 100000), tunnel);
 
             State = GameState.Playing;
             ui.ShowHud(-1);
-            ui.ShowIntro(Loc.T("level.bonus"), MissionText(level, upper: true));
+            ui.ShowIntro(Loc.T("level.bonus"), Loc.T("tunnel." + tunnel));
             AudioManager.PlaySfx(Sfx.Win, 0.7f, 1.2f);
             RefreshHud();
         }
 
         private void OnTunnelCoin(Vector3 at)
         {
-            coinsThisRun++;
+            coinsThisRun = runner.Coins;
             ui.FlyCoin(cameraRig.Cam.WorldToScreenPoint(at));
         }
 
-        private void OnTunnelFinished(bool reachedExit)
+        private void OnTunnelFinished(bool reachedExit, int bonus)
         {
             if (State != GameState.Playing) return;
             State = GameState.Result;
-            if (reachedExit)
+            coinsThisRun = runner.Coins;
+            if (reachedExit && bonus > 0)
             {
-                coinsThisRun += TunnelExitBonus;
-                FloatAt(robot.transform.position, "+" + TunnelExitBonus, Palette.UiGold);
+                coinsThisRun += bonus;
+                FloatAt(robot.transform.position, "+" + bonus, Palette.UiGold);
             }
             SaveData.Coins += coinsThisRun;
             ShowBonusResult(Loc.T(reachedExit ? "result.tunnelOut" : "result.tunnelCrash"));
         }
 
-        /// <summary>Builds the platform for <see cref="level"/> and starts play.</summary>
         /// <summary>The platform for a level; a layout sets its own size.</summary>
         private static GridModel BuildGrid(LevelData data)
         {
@@ -870,6 +874,7 @@ namespace SquashBot.Gameplay
             {
                 // The tunnel runs itself (input, robot, camera); just keep the HUD current.
                 elapsed += Time.deltaTime;
+                coinsThisRun = runner.Coins;
                 RefreshHud();
                 return;
             }

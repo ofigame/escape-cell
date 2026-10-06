@@ -32,13 +32,30 @@ namespace SquashBot.Gameplay
 
         /// <summary>A coin was grabbed at this world position.</summary>
         public event Action<Vector3> CoinCollected;
-        /// <summary>The run ended: true when the robot reached the exit vent.</summary>
-        public event Action<bool> Finished;
+        /// <summary>The run ended: whether the robot got out, and the exit bonus it earned (safe gate +10, risky route +30).</summary>
+        public event Action<bool, int> Finished;
+        /// <summary>The robot took the risky gate (for a heads-up).</summary>
+        public event Action RiskTaken;
+
+        /// <summary>The flavours of bonus tunnel: same running and lanes, different world and rules.</summary>
+        public enum Kind { Duct, Surf, Mine, Chase }
+
+        public const int SafeBonus = 10, RiskBonus = 30;
+        private const int RiskLength = 34;
+        private Kind kind;
+        private bool risky;
+        private Transform ride, chaserRoot;
+        private WardenBoss chaser;
+        private float chaserGap = 3.2f, invulnerable, drainTimer;
+        private readonly HashSet<(int, int)> ramps = new HashSet<(int, int)>();
+        private int GateRow => Mathf.CeilToInt(TrackLength);
 
         /// <summary>The tunnel owns the robot, camera and input (from Begin until Stop).</summary>
         public bool Active { get; private set; }
         public int Coins { get; private set; }
         public float Progress => Mathf.Clamp01(z / TrackLength);
+        /// <summary>The chase: how close WARDEN is (0 = right behind, 1 = far).</summary>
+        public float ChaserDistance => Mathf.Clamp01(chaserGap / 3.2f);
 
         private Robot robot;
         private CameraRig rig;
@@ -93,10 +110,14 @@ namespace SquashBot.Gameplay
 
         // ---------- Start / stop ----------
 
-        public void Begin(int seed)
+        public void Begin(int seed, Kind tunnel = Kind.Duct)
         {
             Stop();
             Active = true;
+            kind = tunnel;
+            risky = false;
+            chaserGap = 3.2f;
+            invulnerable = 0f;
             Coins = 0;
             x = 0f; y = 0f; z = 0f; vy = 0f;
             lane = 1;
@@ -132,6 +153,7 @@ namespace SquashBot.Gameplay
             armL = visual.Find("ArmL");
             armR = visual.Find("ArmR");
 
+            BuildRide();
             input.ScreenMode = true;
             camPos = new Vector3(0f, 2.6f, -4.6f);
             PoseRobot(0f);
@@ -149,6 +171,11 @@ namespace SquashBot.Gameplay
             blocks.Clear();
             coins.Clear();
             if (gate != null) Destroy(gate.gameObject);
+            if (ride != null) Destroy(ride.gameObject);
+            if (chaserRoot != null) Destroy(chaserRoot.gameObject);
+            ride = chaserRoot = null;
+            chaser = null;
+            ramps.Clear();
 
             foreach (var (t, pos, rot) in limbs)
             {
@@ -167,6 +194,8 @@ namespace SquashBot.Gameplay
             input.ScreenMode = false;
         }
 
+        private Material railMat, foamMat, poolMat;
+
         private void CreateMaterials()
         {
             frameMat = MaterialFactory.Create(Palette.TileTop, Palette.TileGlow * 0.55f);
@@ -176,6 +205,35 @@ namespace SquashBot.Gameplay
             var accent = WorldTheme.Current.accent;
             archMat = MaterialFactory.Create(accent, accent * 0.9f);
             blockMat = MaterialFactory.Create(Palette.Block, Palette.BlockGlow * 0.6f);
+            switch (kind)
+            {
+                case Kind.Surf:
+                    // A water channel between sandy banks; buoys instead of blocks.
+                    frameMat = MaterialFactory.Create(new Color(0.35f, 0.75f, 0.95f), new Color(0.2f, 0.7f, 1.1f));
+                    topMat = MaterialFactory.Create(new Color(0.3f, 0.65f, 0.95f), new Color(0.05f, 0.25f, 0.45f));
+                    slabMat = MaterialFactory.Create(new Color(0.95f, 0.85f, 0.62f), Color.black);
+                    wallGlowMat = MaterialFactory.Create(new Color(0.4f, 0.8f, 0.5f), new Color(0.2f, 0.6f, 0.3f));
+                    archMat = MaterialFactory.Create(new Color(1f, 0.6f, 0.3f), new Color(0.9f, 0.4f, 0.1f));
+                    blockMat = MaterialFactory.Create(new Color(1f, 0.3f, 0.3f), new Color(0.6f, 0.1f, 0.1f));
+                    foamMat = MaterialFactory.Create(Color.white, new Color(0.8f, 1f, 1.1f));
+                    poolMat = MaterialFactory.Create(new Color(0.08f, 0.2f, 0.4f), new Color(0.05f, 0.25f, 0.6f));
+                    break;
+                case Kind.Mine:
+                    // Plank tracks with rails, rock walls, timber beams with lamps, falling rocks.
+                    frameMat = MaterialFactory.Create(new Color(0.45f, 0.3f, 0.2f), Color.black);
+                    topMat = MaterialFactory.Create(new Color(0.62f, 0.44f, 0.28f), new Color(0.08f, 0.05f, 0.02f));
+                    slabMat = MaterialFactory.Create(new Color(0.42f, 0.36f, 0.34f), Color.black);
+                    wallGlowMat = MaterialFactory.Create(new Color(1f, 0.7f, 0.3f), new Color(1.8f, 0.9f, 0.3f));
+                    archMat = MaterialFactory.Create(new Color(0.55f, 0.38f, 0.22f), Color.black);
+                    blockMat = MaterialFactory.Create(new Color(0.5f, 0.42f, 0.38f), new Color(0.15f, 0.08f, 0.05f));
+                    railMat = MaterialFactory.Create(new Color(0.75f, 0.75f, 0.82f), new Color(0.2f, 0.2f, 0.25f));
+                    break;
+                case Kind.Chase:
+                    // WARDEN's red alert corridor.
+                    archMat = MaterialFactory.Create(new Color(1f, 0.35f, 0.4f), new Color(1.8f, 0.3f, 0.35f));
+                    wallGlowMat = MaterialFactory.Create(new Color(1f, 0.4f, 0.45f), new Color(2f, 0.3f, 0.35f));
+                    break;
+            }
             coinMat = MaterialFactory.Create(Palette.Coin, Palette.CoinGlow);
             rimMat = MaterialFactory.Create(Palette.CoinRim, Palette.CoinGlow * 0.4f);
         }
@@ -188,7 +246,8 @@ namespace SquashBot.Gameplay
         /// </summary>
         private void Plan(System.Random rng)
         {
-            totalRows = Mathf.CeilToInt(TrackLength) + 30;
+            totalRows = GateRow + RiskLength + 30;
+            ramps.Clear();
             floorPlan = new bool[totalRows, Lanes];
             for (int r = 0; r < totalRows; r++)
                 for (int l = 0; l < Lanes; l++)
@@ -201,8 +260,8 @@ namespace SquashBot.Gameplay
             while (row < TrackLength - 12)
             {
                 float p = row / TrackLength;
-                int kind = rng.Next(p < 0.12f ? 3 : 5);
-                switch (kind)
+                int pattern = rng.Next(p < 0.12f ? 3 : 5);
+                switch (pattern)
                 {
                     case 0: // a line of coins in one lane
                         CoinLine(rng.Next(Lanes), row, 6);
@@ -243,6 +302,7 @@ namespace SquashBot.Gameplay
 
                     case 3: // the floor drops away across all lanes: jump!
                         for (int l = 0; l < Lanes; l++) Hole(l, row, 2);
+                        if (this.kind == Kind.Surf) for (int l = 0; l < Lanes; l++) ramps.Add((l, row - 1)); // a wave launches the board over
                         CoinArc(rng.Next(Lanes), row);
                         row += 2;
                         break;
@@ -259,6 +319,29 @@ namespace SquashBot.Gameplay
                 }
                 row += Mathf.RoundToInt(Mathf.Lerp(7f, 4.5f, p)) + rng.Next(2);
             }
+
+            // The risky route past the right-hand gate: short, dense and fast.
+            int r2 = GateRow + 4;
+            while (r2 < GateRow + RiskLength - 4)
+            {
+                if (rng.Next(2) == 0)
+                {
+                    int a = rng.Next(Lanes);
+                    blockPlan.Add((a, r2));
+                    blockPlan.Add(((a + 1 + rng.Next(Lanes - 1)) % Lanes, r2 + 3));
+                    r2 += 4;
+                }
+                else
+                {
+                    int keep = rng.Next(Lanes);
+                    for (int l = 0; l < Lanes; l++) if (l != keep) Hole(l, r2, 2);
+                    CoinLine(keep, r2 - 1, 4);
+                    r2 += 3;
+                }
+                r2 += 3;
+            }
+            // The right-hand lane leads into the risky route; a wall splits it from the safe gate.
+            blockPlan.Add((1, GateRow + 1));
         }
 
         private void Hole(int l, int row, int length)
@@ -291,11 +374,30 @@ namespace SquashBot.Gameplay
 
             for (int l = 0; l < Lanes; l++)
             {
-                if (!floorPlan[r, l]) continue;
                 float lx = LaneX(l);
+                if (!floorPlan[r, l])
+                {
+                    // Surf: a hole in the channel is a whirlpool.
+                    if (kind == Kind.Surf)
+                    {
+                        Shapes.Primitive(PrimitiveType.Cylinder, "Whirl", root, new Vector3(lx, -0.06f, 0f), new Vector3(LaneWidth * 0.9f, 0.01f, 0.95f), poolMat);
+                        Shapes.Primitive(PrimitiveType.Cylinder, "Eye", root, new Vector3(lx, -0.05f, 0f), new Vector3(0.3f, 0.012f, 0.3f), foamMat);
+                    }
+                    continue;
+                }
                 Shapes.Rounded("Frame", root, new Vector3(lx, -0.03f, 0f), new Vector3(LaneWidth * 0.93f, 0.1f, 0.95f), 0.045f, frameMat);
                 Shapes.Rounded("Top", root, new Vector3(lx, 0f, 0f), new Vector3(LaneWidth * 0.78f, 0.1f, 0.8f), 0.045f, topMat);
                 Shapes.Rounded("Slab", root, new Vector3(lx, -0.24f, 0f), new Vector3(LaneWidth * 1.02f, 0.36f, 1.02f), 0.05f, slabMat);
+                if (kind == Kind.Mine)
+                    foreach (float rx in new[] { -0.28f, 0.28f })
+                        Shapes.Rounded("Rail", root, new Vector3(lx + rx, 0.07f, 0f), new Vector3(0.05f, 0.04f, 1.02f), 0.012f, railMat);
+                if (kind == Kind.Surf && (r + l) % 4 == 0)
+                    Shapes.Rounded("Foam", root, new Vector3(lx - 0.15f, 0.06f, 0.1f), new Vector3(0.36f, 0.01f, 0.05f), 0.01f, foamMat);
+                if (ramps.Contains((l, r)))
+                {
+                    var wedge = Shapes.Rounded("Wave", root, new Vector3(lx, 0.12f, 0.1f), new Vector3(LaneWidth * 0.85f, 0.08f, 0.6f), 0.04f, foamMat);
+                    wedge.transform.localRotation = Quaternion.Euler(-16f, 0f, 0f);
+                }
             }
 
             // Duct walls with a glowing strip, and a neon arch every few rows for a sense of speed.
@@ -304,11 +406,24 @@ namespace SquashBot.Gameplay
                 Shapes.Rounded("Wall", root, new Vector3(side * WallX, 0.35f, 0f), new Vector3(0.32f, 1.3f, 1.03f), 0.06f, slabMat);
                 Shapes.Rounded("Strip", root, new Vector3(side * (WallX - 0.17f), 0.1f, 0f), new Vector3(0.04f, 0.07f, 1.04f), 0.015f, wallGlowMat);
             }
-            if (r % 6 == 0)
+            if (r % 6 == 0 && kind != Kind.Surf)
             {
                 foreach (float side in new[] { -1f, 1f })
                     Shapes.Rounded("Post", root, new Vector3(side * WallX, 1.9f, 0f), new Vector3(0.2f, 2.0f, 0.2f), 0.05f, archMat);
                 Shapes.Rounded("Beam", root, new Vector3(0f, 2.95f, 0f), new Vector3(WallX * 2f + 0.2f, 0.18f, 0.2f), 0.05f, archMat);
+                if (kind == Kind.Mine) Shapes.Rounded("Lamp", root, new Vector3(0f, 2.78f, 0f), new Vector3(0.18f, 0.18f, 0.18f), 0.06f, wallGlowMat);
+            }
+            else if (kind == Kind.Surf && r % 9 == 0)
+            {
+                // Palm trees on the banks.
+                foreach (float side in new[] { -1f, 1f })
+                {
+                    var trunk = Shapes.Rounded("Palm", root, new Vector3(side * (WallX + 0.3f), 1.2f, 0f), new Vector3(0.14f, 1.8f, 0.14f), 0.05f, archMat).transform;
+                    trunk.localRotation = Quaternion.Euler(0f, 0f, side * -8f);
+                    for (int k = 0; k < 4; k++)
+                        Shapes.Rounded("Leaf", root, new Vector3(side * (WallX + 0.15f), 2.1f, 0f), new Vector3(0.7f, 0.05f, 0.2f), 0.03f, wallGlowMat)
+                            .transform.localRotation = Quaternion.Euler(0f, k * 45f, side * 15f - 10f);
+                }
             }
             rows.Enqueue((r, root));
 
@@ -322,7 +437,20 @@ namespace SquashBot.Gameplay
         {
             var go = new GameObject("Block").transform;
             go.SetParent(transform, false);
-            Shapes.Rounded("Cube", go, Vector3.zero, new Vector3(0.9f, 0.9f, 0.9f), 0.12f, blockMat);
+            if (kind == Kind.Surf)
+            {
+                // A bobbing buoy, floating in the lane from the start.
+                Shapes.Primitive(PrimitiveType.Sphere, "Buoy", go, Vector3.zero, new Vector3(0.75f, 0.7f, 0.75f), blockMat);
+                Shapes.Primitive(PrimitiveType.Cylinder, "Stripe", go, Vector3.zero, new Vector3(0.78f, 0.08f, 0.78f), foamMat);
+            }
+            else if (kind == Kind.Mine)
+            {
+                Shapes.Rounded("Rock", go, Vector3.zero, new Vector3(0.88f, 0.8f, 0.86f), 0.3f, blockMat).transform.localRotation = Quaternion.Euler(12f, 30f, 8f);
+            }
+            else
+            {
+                Shapes.Rounded("Cube", go, Vector3.zero, new Vector3(0.9f, 0.9f, 0.9f), 0.12f, blockMat);
+            }
             var ringMaterial = MaterialFactory.CreateTransparent(new Color(1f, 0.3f, 0.35f, 0.5f), Palette.TileWarningGlow * 0.5f);
             var ring = Shapes.Primitive(PrimitiveType.Cylinder, "Warning", transform, new Vector3(LaneX(l), 0.07f, r),
                 new Vector3(0.85f, 0.004f, 0.85f), ringMaterial).transform;
@@ -330,6 +458,14 @@ namespace SquashBot.Gameplay
             go.localPosition = new Vector3(LaneX(l), 0.5f + block.y, r);
             go.gameObject.SetActive(false); // appears only when it starts to drop; until then only the warning shows
             blocks.Add(block);
+            if (kind == Kind.Surf)
+            {
+                block.y = 0f;
+                block.landed = true;
+                ring.gameObject.SetActive(false);
+                go.gameObject.SetActive(true);
+                go.localPosition = new Vector3(LaneX(l), 0.4f, r);
+            }
         }
 
         private void CreateCoin(int l, float cz, float cy)
@@ -342,23 +478,75 @@ namespace SquashBot.Gameplay
             coins.Add(new Coin { lane = l, z = cz, y = cy, go = go });
         }
 
-        /// <summary>The exit vent at the end of the course: a big glowing ring.</summary>
+        /// <summary>
+        /// The end of the course: a green gate over the left two lanes (safe, +10) and a red one over the right
+        /// lane, leading into a short, hard extra stretch (+30) that ends in the glowing exit ring.
+        /// </summary>
         private void BuildGate()
         {
-            gate = new GameObject("ExitVent").transform;
+            gate = new GameObject("Gates").transform;
             gate.SetParent(transform, false);
-            gate.localPosition = new Vector3(0f, 1.3f, TrackLength);
+            gate.localPosition = new Vector3(0f, 0f, GateRow);
+            Arch(gate, (LaneX(0) + LaneX(1)) * 0.5f, LaneWidth * 2.1f, new Color(0.4f, 1f, 0.6f), new Color(0.4f, 2f, 0.7f));
+            Arch(gate, LaneX(2), LaneWidth * 1.05f, new Color(1f, 0.4f, 0.45f), new Color(2.2f, 0.35f, 0.4f));
+
+            var ring = new GameObject("ExitRing").transform;
+            ring.SetParent(gate, false);
+            ring.localPosition = new Vector3(0f, 1.3f, RiskLength);
             var glow = MaterialFactory.Create(new Color(0.6f, 1f, 1f), new Color(0.6f, 1.9f, 2.4f));
             const int pieces = 20;
             for (int i = 0; i < pieces; i++)
             {
                 float a = i * Mathf.PI * 2f / pieces;
-                var piece = Shapes.Rounded("Ring", gate, new Vector3(Mathf.Cos(a) * 1.7f, Mathf.Sin(a) * 1.7f, 0f), new Vector3(0.5f, 0.24f, 0.24f), 0.08f, glow);
+                var piece = Shapes.Rounded("Ring", ring, new Vector3(Mathf.Cos(a) * 1.7f, Mathf.Sin(a) * 1.7f, 0f), new Vector3(0.5f, 0.24f, 0.24f), 0.08f, glow);
                 piece.transform.localRotation = Quaternion.Euler(0f, 0f, a * Mathf.Rad2Deg + 90f);
             }
-            var core = MaterialFactory.CreateTransparent(new Color(0.6f, 0.95f, 1f, 0.3f), new Color(0.5f, 1.4f, 1.8f));
-            Shapes.Primitive(PrimitiveType.Cylinder, "Light", gate, Vector3.zero, new Vector3(3.2f, 0.02f, 3.2f), core)
-                .transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            exitRing = ring;
+        }
+
+        private Transform exitRing;
+
+        private static void Arch(Transform parent, float x, float width, Color color, Color glow)
+        {
+            var m = MaterialFactory.Create(color, glow);
+            foreach (float side in new[] { -0.5f, 0.5f })
+                Shapes.Rounded("Post", parent, new Vector3(x + side * width, 1.1f, 0f), new Vector3(0.16f, 2.2f, 0.16f), 0.05f, m);
+            Shapes.Rounded("Top", parent, new Vector3(x, 2.25f, 0f), new Vector3(width + 0.16f, 0.2f, 0.16f), 0.05f, m);
+            Shapes.Rounded("Panel", parent, new Vector3(x, 1.9f, 0f), new Vector3(width * 0.6f, 0.36f, 0.06f), 0.05f, m);
+        }
+
+        /// <summary>What the robot rides: an orange-lit cell for surfing, a cart in the mine; and WARDEN on the chase.</summary>
+        private void BuildRide()
+        {
+            if (kind == Kind.Surf)
+            {
+                ride = new GameObject("Board").transform;
+                ride.SetParent(robot.transform, false);
+                var glow = MaterialFactory.Create(new Color(1f, 0.45f, 0.1f), new Color(1.45f, 0.3f, 0.02f));
+                var top = MaterialFactory.Create(Palette.TileTop, Palette.TileSelfLight);
+                Shapes.Rounded("Frame", ride, new Vector3(0f, 0.02f, 0f), new Vector3(0.62f, 0.07f, 0.8f), 0.03f, glow);
+                Shapes.Rounded("Top", ride, new Vector3(0f, 0.05f, 0f), new Vector3(0.5f, 0.05f, 0.66f), 0.02f, top);
+            }
+            else if (kind == Kind.Mine)
+            {
+                ride = new GameObject("Cart").transform;
+                ride.SetParent(robot.transform, false);
+                var wood = MaterialFactory.Create(new Color(0.55f, 0.35f, 0.22f), Color.black);
+                var metal = MaterialFactory.Create(new Color(0.35f, 0.33f, 0.42f), Color.black);
+                Shapes.Rounded("Tub", ride, new Vector3(0f, 0.18f, 0f), new Vector3(0.62f, 0.26f, 0.62f), 0.06f, wood);
+                Shapes.Rounded("Rim", ride, new Vector3(0f, 0.32f, 0f), new Vector3(0.66f, 0.04f, 0.66f), 0.02f, metal);
+                foreach (var w in new[] { new Vector2(-0.22f, -0.22f), new Vector2(0.22f, -0.22f), new Vector2(-0.22f, 0.22f), new Vector2(0.22f, 0.22f) })
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Wheel", ride, new Vector3(w.x, 0.07f, w.y), new Vector3(0.14f, 0.03f, 0.14f), metal)
+                        .transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+            }
+            else if (kind == Kind.Chase)
+            {
+                chaserRoot = new GameObject("Chaser").transform;
+                chaserRoot.SetParent(transform, false);
+                chaser = WardenBoss.Create(new Vector3(0f, 1.8f, -3f), 3, robot.transform);
+                chaser.transform.SetParent(chaserRoot, true);
+                chaser.transform.localScale = Vector3.one * 0.9f;
+            }
         }
 
         // ---------- Play ----------
@@ -379,8 +567,8 @@ namespace SquashBot.Gameplay
             PoseRobot(dt);
             UpdateCamera(dt);
 
-            if (gate != null)
-                gate.localRotation = Quaternion.Euler(0f, 0f, time * 40f);
+            if (exitRing != null)
+                exitRing.localRotation = Quaternion.Euler(0f, 0f, time * 40f);
         }
 
         private void HandleInput()
@@ -469,29 +657,95 @@ namespace SquashBot.Gameplay
 
             if (falling && !ended && y < FallDepth)
             {
-                AudioManager.PlaySfx(Sfx.Fall);
-                Haptics.Death();
-                End(false);
+                if (kind == Kind.Chase)
+                {
+                    // No falling out of the chase: the robot scrambles back up, but WARDEN gains on it.
+                    falling = false;
+                    grounded = true;
+                    y = 0f;
+                    vy = 0f;
+                    z += 2.4f;
+                    Stumble();
+                }
+                else
+                {
+                    AudioManager.PlaySfx(Sfx.Fall);
+                    Haptics.Death();
+                    End(false, 0);
+                }
             }
+
+            // Surf: waves launch the board over the whirlpools.
+            if (grounded && !ended && ramps.Contains((under, row))) { Jump(); vy = JumpVelocity * 1.15f; }
+
+            if (kind == Kind.Chase && !ended) UpdateChaser(dt);
             if (falling && y < -8f) visual.gameObject.SetActive(false);
 
-            if (!ended && z >= TrackLength)
+            // The gates: the left two lanes are the safe exit, the right lane takes the risky route.
+            if (!ended && !risky && z >= GateRow)
             {
-                escaped = true;
-                fx.Burst(new Vector3(x, 1f, z + 0.5f), Palette.UiCyan, Palette.ShieldPickupGlow, 40, 6f);
-                AudioManager.PlaySfx(Sfx.Win);
-                Haptics.Medium();
-                rig.Punch(1f);
-                End(true);
+                if (lane == 2)
+                {
+                    risky = true;
+                    RiskTaken?.Invoke();
+                    AudioManager.PlaySfx(Sfx.Warning, 0.9f, 1.2f);
+                    rig.Punch(0.6f);
+                }
+                else Escape(SafeBonus);
             }
+            if (!ended && risky && z >= GateRow + RiskLength) Escape(RiskBonus);
             if (ended) endTimer += dt;
             squash = Mathf.MoveTowards(squash, 0f, dt * 2f);
         }
 
-        private void End(bool reachedExit)
+        private void Escape(int bonus)
+        {
+            escaped = true;
+            fx.Burst(new Vector3(x, 1f, z + 0.5f), Palette.UiCyan, Palette.ShieldPickupGlow, 40, 6f);
+            AudioManager.PlaySfx(Sfx.Win);
+            Haptics.Medium();
+            rig.Punch(1f);
+            End(true, bonus);
+        }
+
+        private void End(bool reachedExit, int bonus)
         {
             ended = true;
-            Finished?.Invoke(reachedExit);
+            Finished?.Invoke(reachedExit, bonus);
+        }
+
+        /// <summary>WARDEN chase: a hit costs coins and lets WARDEN close in; it falls back slowly over time.</summary>
+        private void Stumble()
+        {
+            if (invulnerable > 0f) return;
+            invulnerable = 1.2f;
+            int lost = Mathf.Min(3, Coins);
+            Coins -= lost;
+            chaserGap = Mathf.Max(0.4f, chaserGap - 1.1f);
+            fx.Burst(robot.transform.position + Vector3.up * 0.4f, Palette.Coin, Palette.CoinGlow, 6 + lost * 4, 4f);
+            AudioManager.PlaySfx(Sfx.Bump, 0.9f, 0.8f);
+            Haptics.Medium();
+            rig.Shake(0.7f);
+        }
+
+        private void UpdateChaser(float dt)
+        {
+            invulnerable = Mathf.Max(0f, invulnerable - dt);
+            visual.gameObject.SetActive(invulnerable <= 0f || Mathf.Repeat(time, 0.2f) > 0.08f);
+            chaserGap = Mathf.Min(3.2f, chaserGap + dt * 0.12f);
+            // Too close: WARDEN snatches a coin every second.
+            if (chaserGap < 1.2f && Coins > 0)
+            {
+                drainTimer += dt;
+                if (drainTimer >= 1f)
+                {
+                    drainTimer = 0f;
+                    Coins--;
+                    AudioManager.PlaySfx(Sfx.Coin, 0.5f, 0.6f);
+                }
+            }
+            // WARDEN hovers behind and to the side, closing in as the gap shrinks.
+            if (chaser != null) chaser.MoveTo(new Vector3(x * 0.3f + 1.7f, 2.3f, z - chaserGap * 0.6f - 0.3f));
         }
 
         private void UpdateRows()
@@ -545,7 +799,18 @@ namespace SquashBot.Gameplay
 
                 // Crash: the robot runs into a block (or one lands on it) without being high enough to clear it.
                 if (!ended && !crashed && Mathf.Abs(b.row - z) < 0.6f && Mathf.Abs(LaneX(b.lane) - x) < 0.62f && y < b.y + 0.85f && b.y < 0.9f)
+                {
+                    if (kind == Kind.Chase)
+                    {
+                        Stumble();
+                        fx.Burst(b.go.position, Palette.Block, Palette.BlockGlow, 14, 4f);
+                        Destroy(b.go.gameObject);
+                        Destroy(b.ring.gameObject);
+                        blocks.RemoveAt(i);
+                        continue;
+                    }
                     Crash();
+                }
             }
         }
 
@@ -557,7 +822,7 @@ namespace SquashBot.Gameplay
             AudioManager.PlaySfx(Sfx.Squash);
             Haptics.Death();
             rig.Shake(1.2f);
-            End(false);
+            End(false, 0);
         }
 
         private void UpdateCoins()
@@ -639,6 +904,14 @@ namespace SquashBot.Gameplay
         private void UpdateCamera(float dt)
         {
             // Behind and above the robot, following the lane softly, looking down the duct.
+            // The chase looks down more steeply, so WARDEN shows behind the robot.
+            if (kind == Kind.Chase)
+            {
+                var high = new Vector3(x * 0.4f, 4.6f, z - 5.2f);
+                camPos = Vector3.Lerp(camPos, high, 1f - Mathf.Exp(-dt * 6f));
+                rig.Chase(camPos, Quaternion.LookRotation(new Vector3(x * 0.5f, 0.3f, z + 3f) - camPos), 64f);
+                return;
+            }
             var target = new Vector3(x * 0.55f, 2.1f + Mathf.Max(y, -1f) * 0.35f, z - 3.7f);
             if (falling) target.y = Mathf.Max(1.4f, target.y);
             camPos = Vector3.Lerp(camPos, target, 1f - Mathf.Exp(-dt * 8f));

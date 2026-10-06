@@ -64,6 +64,9 @@ namespace SquashBot.Visual
             }
         }
 
+        /// <summary>Moves the point it hovers around (the tunnel chase drags it along).</summary>
+        public void MoveTo(Vector3 position) => home = position;
+
         /// <summary>A button was hit: flinch, flash, one health light goes dark.</summary>
         public void Hit(int remaining)
         {
