@@ -10,7 +10,7 @@ namespace SquashBot.Data
     /// </summary>
     public static class Lives
     {
-        public const int Max = 5;
+        public static int Max => Shop.MaxLives;
         public const int RegenMinutes = 12;
 
         private const string CountKey = "sb_lives";

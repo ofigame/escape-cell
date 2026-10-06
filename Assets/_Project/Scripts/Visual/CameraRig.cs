@@ -58,6 +58,11 @@ namespace SquashBot.Visual
         private Material backgroundMaterial;
         private Volume menuVolume;
         private bool chasing;
+        private float showcase, showcaseTarget;
+        private Transform showcaseSubject;
+        private Transform followTarget;
+        private int windowW, windowH;
+        private Vector3 followPoint;
         private Vector3 chasePosition;
         private Quaternion chaseRotation;
         private float menuFocusTarget;
@@ -171,6 +176,7 @@ namespace SquashBot.Visual
         {
             gridWidth = width;
             gridHeight = height;
+            followTarget = null;
             Refit();
         }
 
@@ -197,6 +203,30 @@ namespace SquashBot.Visual
         }
 
         /// <summary>
+        /// For platforms too big to show whole: frame a window of <paramref name="width"/> x <paramref name="height"/>
+        /// tiles and glide along with <paramref name="target"/>, never showing much past the platform's ends.
+        /// Call after <see cref="Frame"/>; Frame turns it off again.
+        /// </summary>
+        public void Follow(Transform target, int width, int height)
+        {
+            followTarget = target;
+            windowW = width;
+            windowH = height;
+            followPoint = FollowGoal();
+            Refit();
+        }
+
+        private Vector3 FollowGoal()
+        {
+            var p = followTarget.position;
+            float hx = (windowW - 1) * 0.5f, hz = (windowH - 1) * 0.5f;
+            // Along an axis the platform is narrower than the window, just stay centred on it.
+            float x = gridWidth <= windowW ? (gridWidth - 1) * 0.5f : Mathf.Clamp(p.x, hx, gridWidth - 1 - hx);
+            float z = gridHeight <= windowH ? (gridHeight - 1) * 0.5f : Mathf.Clamp(p.z, hz, gridHeight - 1 - hz);
+            return new Vector3(x, 0f, z);
+        }
+
+        /// <summary>
         /// Hand the camera to a chase view (the tunnel runner): a perspective camera at the given pose.
         /// Shake and punch still apply. <see cref="EndChase"/> returns to the platform view.
         /// </summary>
@@ -216,6 +246,16 @@ namespace SquashBot.Visual
             Refit();
         }
 
+        /// <summary>
+        /// Lean in on <paramref name="subject"/> (the robot in the menu and garage) and lift it into the upper part of
+        /// the screen, above the cards. <paramref name="amount"/> 0 = normal view, 1 = close-up.
+        /// </summary>
+        public void Showcase(Transform subject, float amount)
+        {
+            if (subject != null) showcaseSubject = subject;
+            showcaseTarget = amount;
+        }
+
         /// <summary>Blur and darken the scene behind menus.</summary>
         public void SetMenuFocus(bool on) => menuFocusTarget = on ? 1f : 0f;
 
@@ -228,6 +268,10 @@ namespace SquashBot.Visual
             lastAspect = Cam.aspect;
 
             center = new Vector3((gridWidth - 1) * 0.5f, 0f, (gridHeight - 1) * 0.5f);
+            bool follow = followTarget != null;
+            int fw = follow ? windowW : gridWidth, fh = follow ? windowH : gridHeight;
+            var footCenter = new Vector3((fw - 1) * 0.5f, 0f, (fh - 1) * 0.5f);
+            if (follow) center = followPoint;
 
             // Footprint of the platform (plus room for blocks and the pillar) at the base angle.
             var rotation = Quaternion.Euler(BasePitch, BaseYaw, 0f);
@@ -236,11 +280,11 @@ namespace SquashBot.Visual
             float halfW = 0f, halfH = 0f;
             for (int i = 0; i < 4; i++)
             {
-                float cx = (i & 1) == 0 ? -0.7f : gridWidth - 0.3f;
-                float cz = (i & 2) == 0 ? -0.7f : gridHeight - 0.3f;
+                float cx = (i & 1) == 0 ? -0.7f : fw - 0.3f;
+                float cz = (i & 2) == 0 ? -0.7f : fh - 0.3f;
                 foreach (float cy in new[] { -0.6f, 1.2f })
                 {
-                    var offset = new Vector3(cx, cy, cz) - center;
+                    var offset = new Vector3(cx, cy, cz) - footCenter;
                     halfW = Mathf.Max(halfW, Mathf.Abs(Vector3.Dot(offset, right)));
                     halfH = Mathf.Max(halfH, Mathf.Abs(Vector3.Dot(offset, up)));
                 }
@@ -279,6 +323,12 @@ namespace SquashBot.Visual
             }
 
             menuVolume.weight = Mathf.MoveTowards(menuVolume.weight, menuFocusTarget, dt * 3f);
+            showcase = Mathf.MoveTowards(showcase, showcaseTarget, dt * 2.5f);
+            if (followTarget != null)
+            {
+                followPoint = Vector3.Lerp(followPoint, FollowGoal(), 1f - Mathf.Exp(-Time.deltaTime * 4f));
+                center = followPoint;
+            }
             if (chasing)
             {
                 var jitter = Random.insideUnitCircle * shake * 0.08f;
@@ -303,9 +353,16 @@ namespace SquashBot.Visual
             float focus = focusDuration > 0f ? Mathf.Sin(Mathf.Clamp01(focusTime / focusDuration) * Mathf.PI) : 0f;
             float zoom = (1f + intro * 0.7f) * (1f - punch * 0.06f) * (1f - focus * 0.12f);
             var target = Vector3.Lerp(center, focusPoint, focus * 0.25f);
+            float ease = showcase * showcase * (3f - 2f * showcase);
+            if (ease > 0.001f && showcaseSubject != null)
+            {
+                target = Vector3.Lerp(target, showcaseSubject.position + Vector3.up * 0.35f, ease);
+                // Close-up framing is absolute (about the robot plus a little floor), whatever the platform size.
+                zoom = Mathf.Lerp(zoom, 1.25f / Mathf.Max(0.5f, viewHalfHeight), ease);
+            }
 
             var jitter = Random.insideUnitCircle * shake * 0.12f;
-            var lift = transform.up * (viewHalfHeight * zoom * 0.06f);
+            var lift = transform.up * (viewHalfHeight * zoom * (0.06f - 0.42f * ease));
             var offset = transform.right * jitter.x + transform.up * jitter.y;
 
             if (Cam.orthographic)

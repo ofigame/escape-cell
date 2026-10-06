@@ -15,6 +15,7 @@ namespace SquashBot.Core
     /// The platform is a rectangle of cells, but a level layout can leave cells out (shaping the platform into
     /// an L, a T, a ring...) and put fixed obstacles (walls) on others.
     /// Layout rows use '#' for a floor tile, '.' for no tile and 'X' for a tile with an obstacle; row 0 is the far edge.
+    /// 'S', 'K' and 'D' are floor tiles that also mark the start, a key and the door.
     /// </summary>
     public class GridModel
     {
@@ -24,6 +25,11 @@ namespace SquashBot.Core
 
         /// <summary>Cells the robot can ever stand on (part of the platform, not an obstacle).</summary>
         public int FloorCount { get; }
+
+        /// <summary>Spots a layout may mark: where the robot starts ('S'), where keys lie ('K'), where the door is ('D').</summary>
+        public GridPos? StartSpot { get; }
+        public GridPos? DoorSpot { get; }
+        public List<GridPos> KeySpots { get; } = new List<GridPos>();
 
         private readonly TileState[,] tiles;
         private readonly bool[,] occupied;
@@ -47,6 +53,10 @@ namespace SquashBot.Core
                         c = layout[height - 1 - y][x];
                     exists[x, y] = c != '.';
                     wall[x, y] = c == 'X';
+                    var p = new GridPos(x, y);
+                    if (c == 'S') StartSpot = p;
+                    else if (c == 'D') DoorSpot = p;
+                    else if (c == 'K') KeySpots.Add(p);
                     if (exists[x, y] && !wall[x, y]) FloorCount++;
                 }
         }

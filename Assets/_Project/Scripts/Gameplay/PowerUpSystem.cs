@@ -15,6 +15,9 @@ namespace SquashBot.Gameplay
     /// <summary>Spawns rare power-up pickups on free tiles (from the levels that enable them).</summary>
     public class PowerUpSystem : MonoBehaviour
     {
+        /// <summary>On big platforms, pickups only appear this close to the robot (0 = anywhere).</summary>
+        public int FocusRadius;
+
         private class Pickup
         {
             public PowerUpType type;
@@ -55,6 +58,9 @@ namespace SquashBot.Gameplay
         }
 
         public void Freeze() => running = false;
+
+        /// <summary>Picks up again after a Freeze (the player continued after losing).</summary>
+        public void Resume() => running = grid != null;
 
         public void Stop()
         {
@@ -124,6 +130,7 @@ namespace SquashBot.Gameplay
             var options = new List<GridPos>();
             foreach (var p in grid.AllPositions())
             {
+                if (FocusRadius > 0 && (Mathf.Abs(p.x - robot.Position.x) > FocusRadius || Mathf.Abs(p.y - robot.Position.y) > FocusRadius)) continue;
                 if (!grid.IsStandable(p) || p.Manhattan(robot.Position) < 2 || hazards.IsThreatened(p)) continue;
                 options.Add(p);
             }

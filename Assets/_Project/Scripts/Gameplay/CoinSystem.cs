@@ -11,6 +11,9 @@ namespace SquashBot.Gameplay
     /// <summary>Spawns short-lived coins on free tiles; the robot collects them by landing on them.</summary>
     public class CoinSystem : MonoBehaviour
     {
+        /// <summary>On big platforms, pickups only appear this close to the robot (0 = anywhere).</summary>
+        public int FocusRadius;
+
         private class Coin
         {
             public GridPos pos;
@@ -52,6 +55,9 @@ namespace SquashBot.Gameplay
 
         public void Freeze() => running = false;
 
+        /// <summary>Picks up again after a Freeze (the player continued after losing).</summary>
+        public void Resume() => running = grid != null;
+
         public void Stop()
         {
             running = false;
@@ -73,6 +79,21 @@ namespace SquashBot.Gameplay
                 return true;
             }
             return false;
+        }
+
+        /// <summary>Coin magnet: coins within <paramref name="range"/> tiles of the robot are pulled in too.</summary>
+        public void CollectNear(GridPos p, int range)
+        {
+            for (int i = coins.Count - 1; i >= 0; i--)
+            {
+                if (coins[i].pos == p || coins[i].pos.Manhattan(p) > range) continue;
+                var c = coins[i];
+                fx.Burst(c.go.transform.position, Palette.Coin, Palette.CoinGlow, 8, 2.5f);
+                Destroy(c.go);
+                coins.RemoveAt(i);
+                AudioManager.PlaySfx(Sfx.Coin, 0.6f, 1.15f, 0.04f);
+                Collected?.Invoke(c.pos);
+            }
         }
 
         /// <summary>A block landed here: any coin on the tile is lost.</summary>
@@ -136,6 +157,7 @@ namespace SquashBot.Gameplay
             var options = new List<GridPos>();
             foreach (var p in grid.AllPositions())
             {
+                if (FocusRadius > 0 && (Mathf.Abs(p.x - robot.Position.x) > FocusRadius || Mathf.Abs(p.y - robot.Position.y) > FocusRadius)) continue;
                 if (!grid.IsStandable(p) || p == robot.Position || hazards.IsThreatened(p)) continue;
                 if (coins.Exists(c => c.pos == p)) continue;
                 options.Add(p);

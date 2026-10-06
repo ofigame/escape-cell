@@ -32,7 +32,7 @@ namespace SquashBot.Gameplay
 
         public static Vector3 ToWorld(GridPos p) => new Vector3(p.x, 0f, p.y);
 
-        public void Build(GridModel grid, FxSystem fxSystem)
+        public void Build(GridModel grid, FxSystem fxSystem, bool lowWalls = false)
         {
             fx = fxSystem;
             Clear();
@@ -59,7 +59,13 @@ namespace SquashBot.Gameplay
                 Shapes.Rounded("Frame", tile.transform, new Vector3(0f, -0.03f, 0f), new Vector3(0.93f, 0.1f, 0.93f), 0.045f, frame);
                 Shapes.Rounded("Top", tile.transform, new Vector3(0f, 0f, 0f), new Vector3(0.78f, 0.1f, 0.78f), 0.045f, top);
 
-                if (grid.IsWall(p))
+                if (grid.IsWall(p) && lowWalls)
+                {
+                    // Maze hedges: low enough that the robot never disappears behind them.
+                    Shapes.Rounded("Hedge", tile.transform, new Vector3(0f, 0.2f, 0f), new Vector3(0.86f, 0.34f, 0.86f), 0.1f, obstacleBody);
+                    Shapes.Rounded("Cap", tile.transform, new Vector3(0f, 0.38f, 0f), new Vector3(0.6f, 0.05f, 0.6f), 0.02f, obstacleCap);
+                }
+                else if (grid.IsWall(p))
                 {
                     // A fixed obstacle: a chunky stone pillar with a glowing cap.
                     Shapes.Rounded("Obstacle", tile.transform, new Vector3(0f, 0.47f, 0f), new Vector3(0.78f, 0.84f, 0.78f), 0.12f, obstacleBody);

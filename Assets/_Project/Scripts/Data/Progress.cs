@@ -82,6 +82,8 @@ namespace SquashBot.Data
                 }
                 case MissionType.Exit:
                     return Coins(1 + level.keys, 2 + level.keys * 2);
+                case MissionType.Boss:
+                    return Coins(2, 5);
                 case MissionType.Paint:
                     return Coins(Mathf.Ceil(floorCount / 8f), Mathf.Ceil(floorCount / 4.5f));
                 default:

@@ -50,6 +50,8 @@ namespace SquashBot.Gameplay
         private Material bubbleMaterial;
         private Transform eyeL, eyeR;
         private float shieldLeft;
+        private int shieldHits, shieldMaxHits = 1;
+        private float crackT = 1f;
         private float blinkTimer = 2f;
         private GridModel grid;
 
@@ -114,7 +116,31 @@ namespace SquashBot.Gameplay
         /// <summary>The animated model (scaled and rotated by animations); other modes may pose it directly.</summary>
         public Transform Visual => visual;
 
-        public void GiveShield(float seconds) => shieldLeft = Mathf.Max(shieldLeft, seconds);
+        /// <summary>Shield for <paramref name="seconds"/> that can take <paramref name="hits"/> blocks (upgrades add hits).</summary>
+        public void GiveShield(float seconds, int hits = 1)
+        {
+            if (shieldLeft <= 0f) shieldHits = 0;
+            shieldLeft = Mathf.Max(shieldLeft, seconds);
+            shieldHits = Mathf.Max(shieldHits, hits);
+            shieldMaxHits = Mathf.Max(1, shieldHits);
+            crackT = 1f;
+        }
+
+        /// <summary>Blocks the shield can still take.</summary>
+        public int ShieldHits => IsShielded ? shieldHits : 0;
+
+        /// <summary>
+        /// A block hit the shielded robot: the shield cracks (and changes colour) instead of vanishing, until its
+        /// last hit. Returns true when that hit broke it.
+        /// </summary>
+        public bool AbsorbHit()
+        {
+            shieldHits--;
+            crackT = 0f;
+            if (shieldHits > 0) return false;
+            shieldLeft = 0f;
+            return true;
+        }
 
         /// <summary>Dress the robot for a world: its colors and the gear it has earned so far.</summary>
         public void ApplyWorld(int world)
@@ -128,6 +154,45 @@ namespace SquashBot.Gameplay
             RobotLooks.Build(accessories, world);
         }
 
+        private Transform cosmetics;
+        private string dance = "dance.spin";
+
+        /// <summary>Hop trail colour from the garage (null = none).</summary>
+        public Color? TrailColor { get; private set; }
+
+        /// <summary>
+        /// Dress the robot in a garage outfit on top of its world look: paint, eye colour, a hat, back gear, a hop trail
+        /// and a victory dance. A garage hat or back piece replaces the world's own gear.
+        /// </summary>
+        public void ApplyOutfit(System.Collections.Generic.Dictionary<Data.Slot, Data.Cosmetic> outfit)
+        {
+            int world = Mathf.Max(0, lookWorld);
+            var paint = outfit[Data.Slot.Color];
+            var bodyColor = paint.IsDefault ? RobotLooks.BodyColor(world) : paint.color;
+            var lightColor = paint.IsDefault ? RobotLooks.LightColor(world) : Color.Lerp(paint.color, Color.white, 0.35f);
+            MaterialFactory.SetColors(bodyMaterial, bodyColor, Color.black);
+            MaterialFactory.SetColors(lightMaterial, lightColor, Color.black);
+            var eyes = outfit[Data.Slot.Eyes];
+            var eye = eyes.IsDefault ? RobotLooks.EyeColor(world) : eyes.color;
+            MaterialFactory.SetColors(eyeMaterial, eye, eye);
+
+            if (cosmetics == null)
+            {
+                cosmetics = new GameObject("Cosmetics").transform;
+                cosmetics.SetParent(visual, false);
+            }
+            for (int i = cosmetics.childCount - 1; i >= 0; i--) Destroy(cosmetics.GetChild(i).gameObject);
+            var hat = outfit[Data.Slot.Hat];
+            var back = outfit[Data.Slot.Back];
+            if (!hat.IsDefault) CosmeticModels.Hat(cosmetics, hat.id, hat.color);
+            if (!back.IsDefault) CosmeticModels.Back(cosmetics, back.id, back.color);
+            accessories.gameObject.SetActive(hat.IsDefault && back.IsDefault);
+
+            var trail = outfit[Data.Slot.Trail];
+            TrailColor = trail.IsDefault ? (Color?)null : trail.color;
+            dance = outfit[Data.Slot.Dance].id;
+        }
+
         private void UpdateShieldAndBlink()
         {
             if (shieldLeft > 0f && IsAlive) shieldLeft -= Time.deltaTime;
@@ -135,7 +200,14 @@ namespace SquashBot.Gameplay
             bubble.gameObject.SetActive(show);
             if (show)
             {
-                bubble.localScale = Vector3.one * (0.95f + Mathf.Sin(Time.time * 6f) * 0.03f);
+                // Full shield: cyan. Each hit taken shifts it toward amber, then red; a hit makes it wobble.
+                crackT = Mathf.Min(1f, crackT + Time.deltaTime * 3f);
+                float health = shieldMaxHits <= 1 ? 1f : (shieldHits - 1f) / (shieldMaxHits - 1f);
+                var tint = health >= 1f ? Palette.ShieldBubble : Color.Lerp(new Color(1f, 0.35f, 0.35f, 0.45f), new Color(1f, 0.8f, 0.3f, 0.45f), health);
+                var glow = health >= 1f ? Palette.ShieldGlow : Color.Lerp(new Color(2f, 0.3f, 0.3f), new Color(2f, 1.3f, 0.3f), health);
+                MaterialFactory.SetColors(bubbleMaterial, tint, glow);
+                float wobble = Mathf.Sin(crackT * Mathf.PI * 3f) * (1f - crackT) * 0.18f;
+                bubble.localScale = Vector3.one * (0.95f + Mathf.Sin(Time.time * 6f) * 0.03f + wobble);
                 bubble.Rotate(0f, 60f * Time.deltaTime, 0f);
             }
 
@@ -435,11 +507,16 @@ namespace SquashBot.Gameplay
                 }
                 case Anim.Cheer:
                 {
-                    // Victory dance: two happy hops with a full spin, then a proud little bounce.
-                    float bounce = Mathf.Abs(Mathf.Sin(animTime * 7.5f)) * 0.45f * Mathf.Clamp01(1.6f - animTime);
+                    // Victory dance (the garage picks the style): spin, big jumps, a wobble or a backflip.
+                    float fade = Mathf.Clamp01(1.6f - animTime);
+                    float ease = 1f - Mathf.Pow(1f - Mathf.Clamp01(animTime / 1.1f), 3f);
+                    float bounce = Mathf.Abs(Mathf.Sin(animTime * 7.5f)) * 0.45f * fade;
+                    var pose = Quaternion.Euler(0f, 720f * ease, 0f);
+                    if (dance == "dance.jump") { bounce = Mathf.Abs(Mathf.Sin(animTime * 5f)) * 0.8f * fade; pose = Quaternion.identity; }
+                    else if (dance == "dance.wobble") pose = Quaternion.Euler(0f, Mathf.Sin(animTime * 9f) * 35f * fade, Mathf.Sin(animTime * 12f) * 20f * fade);
+                    else if (dance == "dance.flip") { bounce = Mathf.Sin(Mathf.Clamp01(animTime / 0.8f) * Mathf.PI) * 0.9f; pose = Quaternion.Euler(-360f * Mathf.Clamp01(animTime / 0.8f), 0f, 0f); }
                     transform.position = from + Vector3.up * bounce;
-                    float spin = 720f * (1f - Mathf.Pow(1f - Mathf.Clamp01(animTime / 1.1f), 3f));
-                    visual.localRotation = FacingCamera * Quaternion.Euler(0f, spin, 0f);
+                    visual.localRotation = FacingCamera * pose;
                     float stretch = 1f + Mathf.Sin(animTime * 15f) * 0.08f * Mathf.Clamp01(1.6f - animTime);
                     visual.localScale = new Vector3(1f / stretch, stretch, 1f / stretch);
                     break;

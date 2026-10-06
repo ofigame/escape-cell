@@ -33,8 +33,10 @@ namespace SquashBot.Data
         public static List<LevelData> CreateDefault()
         {
             var levels = FirstWorld();
+            var used = new HashSet<Journey>();
+            int exits = 0;
             for (int index = LevelsPerWorld; index < LevelCount; index++)
-                levels.Add(Generated(index));
+                levels.Add(Generated(index, used, ref exits));
 
             for (int i = FirstPowerUpLevel - 1; i < levels.Count; i++)
                 levels[i].powerUpInterval = 11f;
@@ -43,19 +45,27 @@ namespace SquashBot.Data
 
         /// <summary>
         /// Difficulty 0..1, rising a little with every single level and never falling.
-        /// Gentle early on (level 50 ≈ 0.27), the steep part only arrives in the last worlds.
+        /// Steeper than a plain line early on, so the middle of the campaign asks for a few tries per level.
         /// </summary>
-        public static float Difficulty(int index) => Mathf.Pow(Mathf.Clamp01(index / (float)(LevelCount - 1)), 1.2f);
+        public static float Difficulty(int index) => Mathf.Pow(Mathf.Clamp01(index / (float)(LevelCount - 1)), 0.85f);
 
-        // Mission rhythm inside a world: variety every level, coin rain on the 9th, an escape for the finale.
+        // Mission rhythm inside a world: four journeys to an exit, arenas in between, coin rain, then the boss.
         private static readonly MissionType[] Rhythm =
         {
-            MissionType.CollectCoins, MissionType.Exit, MissionType.Survive, MissionType.Paint,
-            MissionType.CollectCoins, MissionType.Exit, MissionType.Paint, MissionType.Survive,
-            MissionType.CoinRain, MissionType.Exit,
+            MissionType.CollectCoins, MissionType.Exit, MissionType.Survive, MissionType.Exit,
+            MissionType.Paint, MissionType.Exit, MissionType.CollectCoins, MissionType.Exit,
+            MissionType.CoinRain, MissionType.Boss,
         };
 
-        private static LevelData Generated(int index)
+        /// <summary>The kinds of Exit level, and the level index (0-based) from which each can appear.</summary>
+        private enum Journey { Arena, Corridor, Rooms, Collapse, Maze, Chase }
+
+        private static readonly (Journey kind, int from)[] JourneyUnlocks =
+        {
+            (Journey.Arena, 0), (Journey.Corridor, 9), (Journey.Rooms, 23), (Journey.Collapse, 38), (Journey.Maze, 53), (Journey.Chase, 68),
+        };
+
+        private static LevelData Generated(int index, HashSet<Journey> used, ref int exits)
         {
             int world = WorldOf(index);
             int i = index % LevelsPerWorld;
@@ -69,8 +79,76 @@ namespace SquashBot.Data
             level.bombChance = Mathf.Lerp(0.08f, 0.28f, d);
             level.lineWaveChance = world >= 2 ? Mathf.Lerp(0.04f, 0.22f, d) : 0f;
             level.fireChance = world >= 2 ? Mathf.Lerp(0.35f, 0.55f, d) : 0f;
-            Shape(level, index, d);
+
+            if (mission == MissionType.Boss)
+            {
+                // WARDEN's arena: wide open, lines of blocks sweep it often, three buttons to hit.
+                level.layout = Journeys.Arena(6, world >= 6 ? 3 : 2, index);
+                level.keys = 3;
+                level.lineWaveChance = Mathf.Lerp(0.3f, 0.45f, d);
+                level.bombChance = Mathf.Max(level.bombChance, 0.2f);
+                level.blocksPerWave = Mathf.Min(4, level.blocksPerWave + 1);
+            }
+            else if (mission == MissionType.Exit)
+            {
+                MakeJourney(level, PickJourney(index, used, exits++), index, d);
+            }
+            else
+            {
+                Shape(level, index, d);
+            }
             return level;
+        }
+
+        /// <summary>A newly unlocked journey kind appears at the first chance; after that the kinds take turns.</summary>
+        private static Journey PickJourney(int index, HashSet<Journey> used, int exits)
+        {
+            var available = new List<Journey>();
+            foreach (var (kind, from) in JourneyUnlocks)
+                if (index >= from) available.Add(kind);
+            foreach (var kind in available)
+                if (!used.Contains(kind) && kind != Journey.Arena)
+                {
+                    used.Add(kind);
+                    return kind;
+                }
+            return available[exits % available.Count];
+        }
+
+        private static void MakeJourney(LevelData level, Journey kind, int index, float d)
+        {
+            switch (kind)
+            {
+                case Journey.Corridor:
+                    level.layout = Journeys.Corridor(d > 0.55f ? 4 : 3, 10 + Mathf.RoundToInt(d * 14f), 1 + Mathf.RoundToInt(d * 4f), index);
+                    break;
+                case Journey.Rooms:
+                    level.layout = Journeys.Rooms(d > 0.45f ? 4 : 3, d > 0.6f ? 4 : 3, index);
+                    break;
+                case Journey.Collapse:
+                    level.layout = Journeys.Winding(14 + Mathf.RoundToInt(d * 10f), index);
+                    level.collapseBehind = true;
+                    break;
+                case Journey.Maze:
+                    level.layout = Journeys.Maze(d > 0.6f ? 5 : 4, 5 + Mathf.RoundToInt(d * 2f), index);
+                    level.lowWalls = true;
+                    break;
+                case Journey.Chase:
+                    level.layout = Journeys.Corridor(d > 0.6f ? 4 : 3, 16 + Mathf.RoundToInt(d * 8f), 2 + Mathf.RoundToInt(d * 3f), index);
+                    level.chaseSpeed = Mathf.Lerp(0.9f, 1.5f, d);
+                    break;
+                default:
+                    Shape(level, index, d);
+                    return;
+            }
+            // Journey keys lie on the layout's own spots; count them for the star goals.
+            int keys = 0;
+            foreach (var row in level.layout)
+                foreach (char c in row)
+                    if (c == 'K') keys++;
+            level.keys = keys;
+            level.gridHeight = level.layout.Length;
+            level.gridWidth = level.layout[0].Length;
         }
 
         /// <summary>
@@ -91,14 +169,14 @@ namespace SquashBot.Data
         /// <summary>All the numbers that follow from a difficulty value (0 = gentle, 1 = the hardest late levels).</summary>
         private static LevelData Base(MissionType mission, float d)
         {
-            int size = d < 0.2f ? 4 : d < 0.55f ? 5 : 6;
+            int size = d < 0.15f ? 4 : d < 0.45f ? 5 : 6;
             var level = new LevelData
             {
                 gridWidth = size,
                 gridHeight = size,
                 mission = mission,
-                warningTime = Mathf.Lerp(1.38f, 0.85f, d),
-                spawnInterval = Mathf.Lerp(1.85f, 1.3f, d),
+                warningTime = Mathf.Lerp(1.38f, 0.8f, d),
+                spawnInterval = Mathf.Lerp(1.85f, 1.25f, d),
                 blocksPerWave = Mathf.Clamp(1 + Mathf.RoundToInt(d * 3f), 1, 4),
                 rampUp = Mathf.Lerp(0.2f, 0.5f, d),
                 coinTarget = 6 + Mathf.RoundToInt(d * 6f),
@@ -168,6 +246,12 @@ namespace SquashBot.Data
             for (int i = 0; i < levels.Count; i++)
                 if (shapes[i] != PlatformShape.Square || pillars[i] > 0)
                     levels[i].layout = Layouts.Generate(levels[i].gridWidth, shapes[i], pillars[i], 1000 + i);
+
+            // The finale is the first long road: key at the start, door at the far end.
+            levels[9].layout = Journeys.Corridor(3, 10, 1, 1009);
+            levels[9].keys = 1;
+            levels[9].gridWidth = 3;
+            levels[9].gridHeight = 10;
             return levels;
         }
 

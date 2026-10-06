@@ -54,6 +54,9 @@ namespace SquashBot.Gameplay
         /// <summary>Tiles nothing may fall on or break (the exit door).</summary>
         public Func<GridPos, bool> IsProtected;
 
+        /// <summary>On big platforms, hazards only fall this close to the robot (0 = anywhere).</summary>
+        public int FocusRadius;
+
         private readonly List<Hazard> hazards = new List<Hazard>();
         private readonly List<Repair> repairs = new List<Repair>();
 
@@ -100,6 +103,9 @@ namespace SquashBot.Gameplay
 
         /// <summary>Stops spawning; hazards already in the air finish their fall.</summary>
         public void Freeze() => running = false;
+
+        /// <summary>Picks up again after a Freeze (the player continued after losing).</summary>
+        public void Resume() => running = grid != null;
 
         public void Stop()
         {
@@ -174,7 +180,7 @@ namespace SquashBot.Gameplay
 
             var candidates = new List<GridPos>();
             foreach (var p in grid.AllPositions())
-                if (grid.IsStandable(p) && !taken.Contains(p) && (IsProtected == null || !IsProtected(p)))
+                if (grid.IsStandable(p) && !taken.Contains(p) && (IsProtected == null || !IsProtected(p)) && InFocus(p))
                     candidates.Add(p);
 
             float warning = CurrentWarning;
@@ -430,6 +436,22 @@ namespace SquashBot.Gameplay
 
             foreach (var p in h.area) Impact?.Invoke(p);
             TryBreakTile(h.pos);
+        }
+
+        private bool InFocus(GridPos p) =>
+            FocusRadius <= 0 || (Mathf.Abs(p.x - robot.Position.x) <= FocusRadius && Mathf.Abs(p.y - robot.Position.y) <= FocusRadius);
+
+        /// <summary>
+        /// Breaks a floor tile into a hole no matter what (collapsing paths, the chasing wave).
+        /// It mends after <paramref name="repairAfter"/> seconds, or never when that is 0.
+        /// </summary>
+        public void Collapse(GridPos p, float repairAfter)
+        {
+            if (!grid.IsFloor(p) || grid.GetTile(p) != TileState.Solid || (IsProtected != null && IsProtected(p))) return;
+            grid.SetTile(p, TileState.Broken);
+            gridView.Break(p);
+            fx.Dust(GridView.ToWorld(p), Palette.TileTop, 8, 1.8f);
+            if (repairAfter > 0f) repairs.Add(new Repair { pos = p, timeLeft = repairAfter });
         }
 
         private bool TryBreakTile(GridPos p)

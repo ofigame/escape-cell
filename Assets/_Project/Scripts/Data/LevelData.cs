@@ -18,7 +18,9 @@ namespace SquashBot.Data
         /// <summary>Bonus treasure vault: grab as many coins as you can; nothing to lose.</summary>
         Treasure,
         /// <summary>Bonus escape tunnel: a third-person run down an air duct (see DuctRunner).</summary>
-        Tunnel
+        Tunnel,
+        /// <summary>World finale: dodge WARDEN's attacks and hit the buttons that light up, three times.</summary>
+        Boss
     }
 
     [Serializable]
@@ -36,6 +38,14 @@ namespace SquashBot.Data
         public float surviveSeconds = 30f;
         [Tooltip("Exit missions: keys to collect (one at a time) before the door unlocks.")]
         public int keys = 1;
+
+        [Header("Journey")]
+        [Tooltip("Tiles crumble a moment after the robot steps off them (they mend after a while).")]
+        public bool collapseBehind;
+        [Tooltip("A wave that swallows the platform row by row from the start (tiles per second, 0 = none).")]
+        public float chaseSpeed;
+        [Tooltip("Obstacles are low hedges (mazes), so the robot never hides behind them.")]
+        public bool lowWalls;
 
         [Header("Blocks")]
         [Tooltip("Seconds between the red warning appearing and the block hitting the tile.")]

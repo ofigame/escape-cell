@@ -40,11 +40,19 @@ namespace SquashBot.UI
         public event Action WatchAdPressed;
         public event Action BonusPressed;
         public event Action<int> StoryPressed;
+        public event Action ContinuePressed;
+        public event Action DoublePressed;
+        public event Action GaragePressed;
+        public event Action ShopPressed;
+        public event Action DailyPressed;
+        /// <summary>PLAY on the before-level card: level, start with a shield, take an extra rescue.</summary>
+        public event Action<int, bool, bool> PrelevelPlay;
+        public event Action PrelevelClosed;
 
         /// <summary>Everything the result card shows.</summary>
         public struct ResultInfo
         {
-            public bool won, bonusRound, hasNext, bonusAvailable;
+            public bool won, bonusRound, hasNext, bonusAvailable, canContinue, canDouble;
             public string subtitle, note;
             public int coins, stars;
             public float meter;
@@ -62,7 +70,17 @@ namespace SquashBot.UI
 
         // Menu
         private UiScreen menu;
-        private TextMeshProUGUI menuLevel, menuWorld, menuMission, menuCoins, menuLives;
+        private TextMeshProUGUI menuLevel, menuWorld, menuMission, menuCoins, menuLives, menuStars;
+        private Button menuDaily;
+
+        // Before-level card
+        private UiScreen prelevel;
+        private TextMeshProUGUI preWorld, preTitle, preMission;
+        private readonly Image[] preStars = new Image[3];
+        private BoostView preShield, preRescue;
+        private bool preShieldOn, preRescueOn;
+        private int preLevel;
+        private int levelCount;
 
         // Out of lives
         private UiScreen noLives;
@@ -106,7 +124,7 @@ namespace SquashBot.UI
         private UiScreen pause;
         private UiScreen result;
         private TextMeshProUGUI resultTitle, resultSub, resultReward;
-        private Button resultNext, resultRetry, resultMap, resultMenu, resultBonus;
+        private Button resultNext, resultRetry, resultMap, resultMenu, resultBonus, resultContinue, resultDouble;
         private RectTransform resultStarRow;
         private readonly Image[] resultStars = new Image[3];
         private TextMeshProUGUI resultNote, resultMeterText;
@@ -117,6 +135,8 @@ namespace SquashBot.UI
 
         public MapScreen Map { get; private set; }
         public StoryScreen Story { get; private set; }
+        public ShopScreen Shop { get; private set; }
+        public GarageScreen Garage { get; private set; }
 
         private GameObject bannerPlaceholder;
 
@@ -136,6 +156,7 @@ namespace SquashBot.UI
 
         private void Build(int levelCount)
         {
+            this.levelCount = levelCount;
             canvas = UiFactory.CreateCanvas("Canvas", out scaler);
             canvas.transform.SetParent(transform, false);
 
@@ -156,6 +177,11 @@ namespace SquashBot.UI
             BuildSettings(root);
             BuildNoLives(root);
             Story = StoryScreen.Create(root);
+            Shop = ShopScreen.Create(root);
+            Garage = GarageScreen.Create(root);
+            Shop.BackPressed += () => MenuPressed?.Invoke();
+            Garage.BackPressed += () => MenuPressed?.Invoke();
+            BuildPrelevel(root);
             BuildBanner(root);
         }
 
@@ -164,42 +190,56 @@ namespace SquashBot.UI
         private void BuildMenu(Transform root)
         {
             menu = UiScreen.Create("Menu", root, out var t);
-            UiFactory.Dim(t, new Color(0.08f, 0.06f, 0.2f, 0.25f)).raycastTarget = false;
 
-            // Top bar
-            var coins = UiFactory.Pill("Coins", t, TopLeft, new Vector2(40f, -40f), new Vector2(300f, 100f), UiFactory.PillColor);
+            // Top bar: coins, lives, stars, settings.
+            var coins = UiFactory.Pill("Coins", t, TopLeft, new Vector2(40f, -40f), new Vector2(260f, 100f), UiFactory.PillColor);
             CoinIcon(coins, new Vector2(56f, 0f));
-            menuCoins = UiFactory.TextBox("Value", coins, new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Vector2(190f, 90f),
+            menuCoins = UiFactory.TextBox("Value", coins, new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Vector2(150f, 90f),
                 "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
 
-            var lives = UiFactory.Pill("Lives", t, TopLeft, new Vector2(360f, -40f), new Vector2(300f, 100f), UiFactory.PillColor);
+            var lives = UiFactory.Pill("Lives", t, TopLeft, new Vector2(320f, -40f), new Vector2(280f, 100f), UiFactory.PillColor);
             HeartIcon(lives, new Vector2(58f, 0f), 56f);
-            menuLives = UiFactory.TextBox("Value", lives, new Vector2(0f, 0.5f), new Vector2(104f, 0f), new Vector2(190f, 90f),
+            menuLives = UiFactory.TextBox("Value", lives, new Vector2(0f, 0.5f), new Vector2(104f, 0f), new Vector2(170f, 90f),
                 "", 44f, Palette.UiText, align: TextAlignmentOptions.Left);
+
+            var stars = UiFactory.Pill("Stars", t, TopLeft, new Vector2(620f, -40f), new Vector2(220f, 100f), UiFactory.PillColor);
+            var starIcon = UiFactory.Box("Star", stars, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(60f, 60f));
+            starIcon.pivot = new Vector2(0f, 0.5f);
+            UiFactory.Fill(starIcon, Palette.UiGold, UiSprites.Star).raycastTarget = false;
+            menuStars = UiFactory.TextBox("Value", stars, new Vector2(0f, 0.5f), new Vector2(96f, 0f), new Vector2(120f, 90f),
+                "0", 44f, Palette.UiGold, align: TextAlignmentOptions.Left);
 
             var gear = UiFactory.MakeButton(t, "", Kind.Icon, TopRight, new Vector2(-40f, -40f), new Vector2(110f, 110f), ShowSettings);
             SettingsIcon(gear.transform);
 
-            // Logo
-            var logo = UiFactory.TextBox("Logo", t, Top, new Vector2(0f, -190f), new Vector2(1000f, 420f), "ESCAPE\nCELL", 200f, Color.white, title: true);
+            // Logo up top; the robot itself stands in the middle of the screen, on its platform.
+            var logo = UiFactory.TextBox("Logo", t, Top, new Vector2(0f, -170f), new Vector2(1000f, 300f), "ESCAPE\nCELL", 150f, Color.white, title: true);
             logo.lineSpacing = -22f;
             logo.enableVertexGradient = true;
             logo.colorGradient = new VertexGradient(Color.white, Color.white, Palette.UiCyan, Palette.UiCyan);
+            logo.raycastTarget = false;
 
-            var tag = UiFactory.Pill("Tag", t, Top, new Vector2(0f, -630f), new Vector2(420f, 78f), new Color(1f, 0.42f, 0.5f, 0.9f));
-            UiFactory.Text(tag, Loc.T("menu.tag"), 40f, Color.white).characterSpacing = 8f;
+            // Daily chest banner (only while unclaimed today).
+            menuDaily = UiFactory.MakeButton(t, Loc.T("daily.ready"), Kind.Gold, Bottom, new Vector2(0f, Ads.BannerReserve + 700f), new Vector2(820f, 100f),
+                () => DailyPressed?.Invoke(), 36f);
+            menuDaily.gameObject.AddComponent<Pulse>();
 
-            // Bottom card
-            var card = UiFactory.Card("LevelCard", t, Bottom, new Vector2(0f, Ads.BannerReserve + 60f), new Vector2(900f, 500f));
-            menuWorld = UiFactory.TextBox("World", card, Top, new Vector2(0f, -36f), new Vector2(820f, 60f), "", 34f, Palette.UiCyan);
+            // Shortcuts.
+            var row = UiFactory.Box("Shortcuts", t, Bottom, new Vector2(0f, Ads.BannerReserve + 540f), new Vector2(900f, 130f));
+            UiFactory.MakeButton(row, Loc.T("btn.garage"), Kind.Secondary, new Vector2(0f, 0.5f), new Vector2(0f, 0f), new Vector2(285f, 130f), () => GaragePressed?.Invoke(), 46f);
+            UiFactory.MakeButton(row, Loc.T("btn.shop"), Kind.Secondary, new Vector2(0.5f, 0.5f), new Vector2(0f, 0f), new Vector2(285f, 130f), () => ShopPressed?.Invoke(), 46f)
+                .transform.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.MakeButton(row, Loc.T("btn.map"), Kind.Secondary, new Vector2(1f, 0.5f), new Vector2(0f, 0f), new Vector2(285f, 130f), () => PlayPressed?.Invoke(), 46f);
+
+            // Level card with the big PLAY button.
+            var card = UiFactory.Card("LevelCard", t, Bottom, new Vector2(0f, Ads.BannerReserve + 50f), new Vector2(900f, 460f));
+            menuWorld = UiFactory.TextBox("World", card, Top, new Vector2(0f, -30f), new Vector2(820f, 56f), "", 32f, Palette.UiCyan);
             menuWorld.characterSpacing = 4f;
-            menuLevel = UiFactory.TextBox("Level", card, Top, new Vector2(0f, -86f), new Vector2(820f, 120f), "", 88f, Palette.UiText, title: true);
-            menuMission = UiFactory.TextBox("Mission", card, Top, new Vector2(0f, -206f), new Vector2(820f, 60f), "", 40f,
+            menuLevel = UiFactory.TextBox("Level", card, Top, new Vector2(0f, -78f), new Vector2(820f, 110f), "", 80f, Palette.UiText, title: true);
+            menuMission = UiFactory.TextBox("Mission", card, Top, new Vector2(0f, -190f), new Vector2(820f, 56f), "", 38f,
                 new Color(0.85f, 0.86f, 1f, 0.8f), FontStyles.Normal);
 
-            UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(0f, 40f), new Vector2(620f, 160f), () => PlayPressed?.Invoke(), 84f);
-            UiFactory.TextBox("Hint", t, Bottom, new Vector2(0f, Ads.BannerReserve + 8f), new Vector2(1000f, 46f), Loc.T("menu.hint"), 30f,
-                new Color(1f, 1f, 1f, 0.6f), FontStyles.Normal);
+            UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(0f, 36f), new Vector2(620f, 160f), () => PlayPressed?.Invoke(), 84f);
         }
 
         public void ShowMenu(int levelIndex, int coins, string world, string mission)
@@ -211,7 +251,139 @@ namespace SquashBot.UI
             menuWorld.text = world;
             menuMission.text = mission;
             menuCoins.text = coins.ToString();
+            menuStars.text = Progress.TotalStars(levelCount).ToString();
+            menuDaily.gameObject.SetActive(DailyChest.Ready);
             RefreshLives();
+        }
+
+        /// <summary>Coins changed while the menu is up (daily chest, shop).</summary>
+        public void RefreshMenuCoins()
+        {
+            menuCoins.text = SaveData.Coins.ToString();
+            menuDaily.gameObject.SetActive(DailyChest.Ready);
+        }
+
+        public void ShowShop()
+        {
+            HideAll();
+            SetBanner(true);
+            Shop.Show();
+        }
+
+        public void ShowGarage(int worldReached)
+        {
+            HideAll();
+            SetBanner(true);
+            Garage.Show(worldReached);
+        }
+
+        // ---------- Before a level ----------
+
+        private void BuildPrelevel(Transform root)
+        {
+            prelevel = UiScreen.Create("Prelevel", root, out var t);
+            UiFactory.Dim(t, new Color(0.06f, 0.05f, 0.18f, 0.55f));
+            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1000f));
+            prelevel.SetPopTarget(card);
+
+            UiFactory.MakeButton(card, "X", Kind.Icon, TopRight, new Vector2(-24f, -24f), new Vector2(100f, 100f), () =>
+            {
+                prelevel.Hide();
+                PrelevelClosed?.Invoke();
+            }, 48f);
+            preWorld = UiFactory.TextBox("World", card, Top, new Vector2(0f, -40f), new Vector2(640f, 56f), "", 32f, Palette.UiCyan);
+            preWorld.characterSpacing = 4f;
+            preTitle = UiFactory.TextBox("Title", card, Top, new Vector2(0f, -90f), new Vector2(760f, 120f), "", 90f, Palette.UiText, title: true);
+            preMission = UiFactory.TextBox("Mission", card, Top, new Vector2(0f, -215f), new Vector2(780f, 70f), "", 38f, new Color(0.85f, 0.86f, 1f, 0.85f), FontStyles.Normal);
+
+            for (int i = 0; i < 3; i++)
+            {
+                var star = UiFactory.Box("Star" + i, card, Top, new Vector2((i - 1) * 110f, -300f), new Vector2(90f, 90f));
+                preStars[i] = UiFactory.Fill(star, Color.white, UiSprites.Star);
+                preStars[i].raycastTarget = false;
+            }
+
+            UiFactory.TextBox("Boosts", card, Top, new Vector2(0f, -420f), new Vector2(780f, 56f), Loc.T("pre.boosts"), 36f, Palette.UiText);
+            preShield = BoostTile(card, new Vector2(-195f, -490f), Boost.StartShield);
+            preRescue = BoostTile(card, new Vector2(195f, -490f), Boost.ExtraRescue);
+
+            UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(0f, 46f), new Vector2(620f, 160f),
+                () => PrelevelPlay?.Invoke(preLevel, preShieldOn, preRescueOn), 84f);
+        }
+
+        private BoostView BoostTile(Transform card, Vector2 position, Boost boost)
+        {
+            var tile = UiFactory.Box(boost.ToString(), card, Top, position, new Vector2(360f, 200f));
+            var view = new BoostView { boost = boost, bg = UiFactory.Fill(tile, new Color(0.12f, 0.1f, 0.26f, 0.9f), UiSprites.Rounded, 1.2f) };
+            view.ring = UiFactory.Fill(UiFactory.Stretch("Ring", tile), Palette.UiGold, UiSprites.Ring, 1.2f);
+            view.ring.raycastTarget = false;
+            UiFactory.TextBox("Name", tile, Top, new Vector2(0f, -24f), new Vector2(330f, 60f), Loc.T("shop." + boost), 34f, Palette.UiText);
+            view.info = UiFactory.TextBox("Info", tile, Bottom, new Vector2(0f, 24f), new Vector2(330f, 70f), "", 38f, Palette.UiGold);
+            var button = tile.gameObject.AddComponent<Button>();
+            button.targetGraphic = view.bg;
+            button.onClick.AddListener(() => ToggleBoost(view));
+            tile.gameObject.AddComponent<ButtonPress>();
+            view.root = tile.gameObject;
+            return view;
+        }
+
+        private void ToggleBoost(BoostView view)
+        {
+            bool on = view.boost == Boost.StartShield ? preShieldOn : preRescueOn;
+            if (!on && Data.Shop.Owned(view.boost) <= 0)
+            {
+                if (!Data.Shop.TryBuy(view.boost))
+                {
+                    AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                    return;
+                }
+                AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
+            }
+            else
+            {
+                AudioManager.PlaySfx(Sfx.Click, 0.7f, on ? 0.9f : 1.2f);
+            }
+            if (view.boost == Boost.StartShield) preShieldOn = !on;
+            else preRescueOn = !on;
+            RefreshBoosts();
+        }
+
+        private void RefreshBoosts()
+        {
+            foreach (var v in new[] { preShield, preRescue })
+            {
+                bool on = v.boost == Boost.StartShield ? preShieldOn : preRescueOn;
+                int owned = Data.Shop.Owned(v.boost);
+                v.ring.gameObject.SetActive(on);
+                v.info.text = owned > 0 || on ? Loc.F("shop.owned", owned) : Data.Shop.Price(v.boost).ToString();
+                v.info.color = owned > 0 || on ? Palette.UiCyan : Palette.UiGold;
+            }
+        }
+
+        /// <summary>The card before a level: mission, best stars and boosts to take along.</summary>
+        public void ShowPrelevel(int levelIndex, string world, string mission, int bestStars, bool rescueAllowed)
+        {
+            preLevel = levelIndex;
+            preShieldOn = preRescueOn = false;
+            preTitle.text = Loc.F("level", levelIndex + 1);
+            preWorld.text = world;
+            preMission.text = mission;
+            for (int i = 0; i < 3; i++) preStars[i].color = i < bestStars ? Palette.UiGold : new Color(1f, 1f, 1f, 0.15f);
+            preRescue.root.SetActive(rescueAllowed);
+            ((RectTransform)preShield.root.transform).anchoredPosition = new Vector2(rescueAllowed ? -195f : 0f, -490f);
+            RefreshBoosts();
+            prelevel.Show();
+            prelevel.transform.SetAsLastSibling();
+        }
+
+        public void HidePrelevel() => prelevel.Hide(true);
+
+        private class BoostView
+        {
+            public Boost boost;
+            public GameObject root;
+            public Image bg, ring;
+            public TextMeshProUGUI info;
         }
 
         public void ShowMap(int unlocked, int coins, int focusLevel, int animateFrom = -1)
@@ -545,8 +717,11 @@ namespace SquashBot.UI
             resultRetry = UiFactory.MakeButton(card, Loc.T("btn.retry"), Kind.Primary, Top, new Vector2(0f, -710f), new Vector2(620f, 150f), () => RetryPressed?.Invoke(), 70f);
             resultBonus = UiFactory.MakeButton(card, Loc.T("btn.bonus"), Kind.Gold, Top, new Vector2(0f, -710f), new Vector2(620f, 150f), () => BonusPressed?.Invoke(), 76f);
             resultBonus.gameObject.AddComponent<Pulse>();
-            resultMap = UiFactory.MakeButton(card, Loc.T("btn.map"), Kind.Secondary, Top, new Vector2(0f, -880f), new Vector2(620f, 135f), () => MapPressed?.Invoke(), 60f);
-            resultMenu = UiFactory.MakeButton(card, Loc.T("btn.menu"), Kind.Secondary, Top, new Vector2(0f, -1035f), new Vector2(620f, 135f), () => MenuPressed?.Invoke(), 60f);
+            resultContinue = UiFactory.MakeButton(card, Loc.T("btn.continue"), Kind.Gold, Top, new Vector2(0f, -710f), new Vector2(620f, 150f), () => ContinuePressed?.Invoke(), 50f);
+            resultContinue.gameObject.AddComponent<Pulse>();
+            resultDouble = UiFactory.MakeButton(card, Loc.T("btn.double"), Kind.Gold, Top, new Vector2(0f, -880f), new Vector2(620f, 135f), () => DoublePressed?.Invoke(), 54f);
+            resultMap = UiFactory.MakeButton(card, Loc.T("btn.map"), Kind.Secondary, Top, new Vector2(-160f, -1035f), new Vector2(300f, 125f), () => MapPressed?.Invoke(), 54f);
+            resultMenu = UiFactory.MakeButton(card, Loc.T("btn.menu"), Kind.Secondary, Top, new Vector2(160f, -1035f), new Vector2(300f, 125f), () => MenuPressed?.Invoke(), 54f);
         }
 
         public void ShowResult(ResultInfo info)
@@ -576,18 +751,37 @@ namespace SquashBot.UI
             UiFactory.SetBar(resultMeterFill, meterShown);
             resultMeterText.text = info.meterText;
 
-            // Win: NEXT (via the map) or BONUS when one is waiting, MAP, MENU.  Lose: RETRY, MAP, MENU.
-            bool bonus = info.bonusAvailable && (info.won || info.bonusRound);
-            bool next = !bonus && (info.won || info.bonusRound) && info.hasNext;
+            // Top slot: BONUS, NEXT, CONTINUE (ad) or RETRY. Second slot: 2x COINS (ad) after a win, RETRY under CONTINUE.
+            // Bottom row: MAP and MENU.
+            bool ended = info.won || info.bonusRound;
+            bool bonus = info.bonusAvailable && ended;
+            bool next = !bonus && ended && info.hasNext;
+            bool cont = !ended && info.canContinue;
+            bool retryTop = !bonus && !next && !cont;
             resultBonus.gameObject.SetActive(bonus);
             resultNext.gameObject.SetActive(next);
-            resultRetry.gameObject.SetActive(!bonus && !next);
+            resultContinue.gameObject.SetActive(cont);
+            resultRetry.gameObject.SetActive(retryTop || cont);
+            ((RectTransform)resultRetry.transform).anchoredPosition = new Vector2(0f, retryTop ? -710f : -880f);
+            resultDouble.gameObject.SetActive(ended && info.canDouble && info.coins > 0);
+            resultReward.transform.parent.localScale = Vector3.one;
+        }
+
+        /// <summary>The 2x coins ad paid out: show the doubled reward with a pop and retire the button.</summary>
+        public void ShowDoubled(int total)
+        {
+            resultReward.text = $"+{total}";
+            resultDouble.gameObject.SetActive(false);
+            resultReward.transform.parent.localScale = Vector3.one * 1.25f;
+            AudioManager.PlaySfx(Sfx.Coin, 1f, 1.3f);
         }
 
         /// <summary>Stars pop in one by one with a chime; the bonus meter fills up behind them.</summary>
         private void UpdateResultJuice(float dt)
         {
             if (!result.IsVisible) return;
+            var rewardPill = resultReward.transform.parent;
+            rewardPill.localScale = Vector3.Lerp(rewardPill.localScale, Vector3.one, dt * 8f);
 
             if (starTime < 3f)
             {
@@ -701,6 +895,9 @@ namespace SquashBot.UI
             menu.Hide();
             Map.Hide();
             Story.Hide();
+            Shop.Hide();
+            Garage.Hide();
+            prelevel.Hide(true);
             settings.Hide(true);
             noLives.Hide(true);
             hud.Hide(true);

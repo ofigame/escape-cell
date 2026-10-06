@@ -11,7 +11,7 @@ using Kind = SquashBot.UI.UiFactory.ButtonKind;
 namespace SquashBot.UI
 {
     /// <summary>
-    /// The level map: a vertical path of level nodes (level 1 at the bottom), one painted section per world.
+    /// The level map: the prison tower in its utopian city, one floor per world, with the level path climbing its face (level 1 at the bottom).
     /// Completed levels are filled, the next level pulses with the robot marker on it, the rest are locked.
     /// </summary>
     public class MapScreen : MonoBehaviour
@@ -19,7 +19,7 @@ namespace SquashBot.UI
         private const float NodeSpacing = 200f;
         private const float SectionPadding = 330f;
         private const float SectionHeight = SectionPadding + LevelCatalog.LevelsPerWorld * NodeSpacing;
-        private const float PathAmplitude = 250f;
+        private const float PathAmplitude = 180f; // keeps the path on the tower's face
 
         public event Action<int> LevelChosen;
         public event Action BackPressed;
@@ -157,9 +157,9 @@ namespace SquashBot.UI
             section.anchoredPosition = new Vector2(0f, world * SectionHeight);
             section.sizeDelta = new Vector2(0f, SectionHeight);
 
-            // The world's own painted backdrop.
-            var art = BackgroundArt.Generate(270, Mathf.RoundToInt(270 * SectionHeight / 1080f), theme);
-            textures.Add(art);
+            // This floor of the prison tower, rising out of the utopian city (cached, shared by every rebuild).
+            int worldCount = Mathf.CeilToInt(levelCount / (float)LevelCatalog.LevelsPerWorld);
+            var art = UtopiaArt.Floor(world, worldCount, 360, Mathf.RoundToInt(360 * SectionHeight / 1080f));
             var raw = UiFactory.Stretch("Art", section).gameObject.AddComponent<RawImage>();
             raw.texture = art;
             raw.raycastTarget = false;
@@ -167,7 +167,7 @@ namespace SquashBot.UI
             bool locked = world * LevelCatalog.LevelsPerWorld > unlocked;
             if (locked)
             {
-                var shade = UiFactory.Fill(UiFactory.Stretch("Locked", section), new Color(0.05f, 0.04f, 0.12f, 0.45f));
+                var shade = UiFactory.Fill(UiFactory.Stretch("Locked", section), new Color(0.05f, 0.04f, 0.12f, 0.4f));
                 shade.raycastTarget = false;
             }
 

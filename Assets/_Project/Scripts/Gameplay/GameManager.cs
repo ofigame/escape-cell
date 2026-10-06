@@ -26,15 +26,14 @@ namespace SquashBot.Gameplay
         private const float CloseCallWindow = 0.3f;
         private const float SlowMoScale = 0.35f;
         private const float SlowMoDuration = 0.45f; // real seconds
-        private const int CloseCallsForArmor = 2;
+        private const int CloseCallsForArmor = 3;
         private const float ArmorDuration = 5f;
         private const float SuperArmorDuration = 10f;
         private const int ArmorsForSuper = 3;
-        private const int CoinsPerRescue = 5;
+        private const int CoinsPerRescue = 8;
         private const int MaxRescues = 3;
-        private const float HoverDuration = 2f;
         private const float HoverCooldown = 8f;
-        private const int FailsForAssist = 3;
+        private const int FailsForAssist = 5;
 
         // Features unlock as the player progresses (world index, 0-based).
         private const int RescueFromWorld = 1;
@@ -77,12 +76,33 @@ namespace SquashBot.Gameplay
         private GameObject hoverMarker;
         private ExitPortal portal;
         private GridPos doorPos;
-        private KeyPickup keyPickup;
-        private GridPos keyPos;
-        private int keysCollected;
+        /// <summary>Something to reach: a key (Exit missions) or a lit button (the boss fight).</summary>
+        private class Objective
+        {
+            public GridPos pos, home;
+            public KeyPickup key;
+            public BossButton button;
+            public GameObject View => key != null ? key.gameObject : button != null ? button.gameObject : null;
+        }
+
+        private readonly List<Objective> objectives = new List<Objective>();
+        private int objectivesDone, objectivesTotal;
+        private bool spotKeys; // keys wait on the layout's own spots (all at once) instead of appearing far away one by one
+        private WardenBoss warden;
+
+        // Journey hazards: tiles crumbling behind the robot, and the wave eating the platform from the start.
+        private readonly List<(GridPos pos, float left)> collapses = new List<(GridPos, float)>();
+        private float chaseFront;
+        private int chaseRow;
+        private const float CollapseDelay = 0.7f;
+        private const float CollapseRepair = 7f;
+        private const float ChaseGraceRows = 3f;
+        private const int FollowWindow = 6;
         private readonly HashSet<GridPos> painted = new HashSet<GridPos>();
         private bool bonusRun;
         private bool pendingEnding;
+        private bool continued;   // the one ad-continue of this attempt is used
+        private bool doubled;     // the 2x coins ad of this result is used
         private StarRules.Goals starGoals;
 
         // A rare surprise bonus round after beating a new level, on top of the ones stars unlock.
@@ -158,14 +178,26 @@ namespace SquashBot.Gameplay
             if (ui != null) Destroy(ui.gameObject);
             ui = UIController.Create(LevelCount);
             ui.PlayPressed += () => ShowMap();
-            ui.LevelChosen += StartLevel;
-            ui.RetryPressed += () => StartLevel(levelIndex);
+            ui.LevelChosen += ShowPrelevel;
+            ui.RetryPressed += () => ShowPrelevel(levelIndex);
+            ui.PrelevelPlay += (index, shield, rescue) =>
+            {
+                ui.HidePrelevel();
+                StartLevel(index, shield, rescue);
+            };
+            ui.GaragePressed += ShowGarage;
+            ui.ShopPressed += ShowShop;
+            ui.DailyPressed += ClaimDaily;
+            ui.Garage.PreviewChanged += outfit => robot.ApplyOutfit(outfit);
+            ui.Garage.DancePreview += robot.Cheer;
             ui.NextPressed += () =>
             {
                 if (bonusRun) ShowMap();
                 else ShowMap(animateFrom: levelIndex);
             };
             ui.BonusPressed += StartBonus;
+            ui.ContinuePressed += WatchAdToContinue;
+            ui.DoublePressed += WatchAdToDouble;
             ui.StoryPressed += world => PlayStory(world, world * LevelCatalog.LevelsPerWorld, () => ShowMap());
             ui.MapPressed += () => ShowMap();
             ui.MenuPressed += ShowMenu;
@@ -196,6 +228,7 @@ namespace SquashBot.Gameplay
             themeWorld = world;
             WorldTheme.SetCurrent(world);
             robot.ApplyWorld(world);
+            robot.ApplyOutfit(Cosmetics.Outfit());
             RenderSettings.ambientLight = Palette.Ambient * 0.8f;
             cameraRig.RefreshTheme();
         }
@@ -209,9 +242,13 @@ namespace SquashBot.Gameplay
             if (hoverMarker != null) hoverMarker.SetActive(false);
             if (portal != null) Destroy(portal.gameObject);
             portal = null;
-            if (keyPickup != null) Destroy(keyPickup.gameObject);
-            keyPickup = null;
-            keysCollected = 0;
+            foreach (var o in objectives)
+                if (o.View != null) Destroy(o.View);
+            objectives.Clear();
+            objectivesDone = objectivesTotal = 0;
+            if (warden != null) Destroy(warden.gameObject);
+            warden = null;
+            collapses.Clear();
             painted.Clear();
             Time.timeScale = 1f;
             slowMoLeft = 0f;
@@ -227,8 +264,9 @@ namespace SquashBot.Gameplay
         {
             ApplyTheme(levelIdx);
             var preview = levelSet.levels[levelIdx];
-            grid = new GridModel(preview.gridWidth, preview.gridHeight, preview.layout);
-            gridView.Build(grid, fx);
+            grid = BuildGrid(preview);
+            gridView.Build(grid, fx, preview.lowWalls);
+            robot.ApplyOutfit(Cosmetics.Outfit());
             cameraRig.Frame(grid.Width, grid.Height);
             cameraRig.SetStyle(CameraStyle.MenuOrbit);
             cameraRig.SetMenuFocus(true);
@@ -241,6 +279,9 @@ namespace SquashBot.Gameplay
             State = GameState.Menu;
             ShowBackdrop(NextLevel);
             ui.ShowMenu(NextLevel, SaveData.Coins, LevelCatalog.WorldName(NextLevel), MissionText(levelSet.levels[NextLevel]));
+            // The robot is the star of the menu: crisp, close and in the middle of the screen.
+            cameraRig.SetMenuFocus(false);
+            cameraRig.Showcase(robot.transform, 0.7f);
         }
 
         private void ShowMap(int animateFrom = -1)
@@ -249,15 +290,53 @@ namespace SquashBot.Gameplay
             ResetRun();
             State = GameState.Map;
             ui.ShowMap(SaveData.UnlockedLevel, SaveData.Coins, NextLevel, animateFrom);
+            cameraRig.SetMenuFocus(true);
+            cameraRig.Showcase(null, 0f);
         }
 
-        private void StartLevel(int index)
+        /// <summary>The card before a level: its mission, best stars and boosts to take along.</summary>
+        private void ShowPrelevel(int index)
+        {
+            index = Mathf.Clamp(index, 0, LevelCount - 1);
+            ui.ShowPrelevel(index, LevelCatalog.WorldName(index), MissionText(levelSet.levels[index]), Progress.Stars(index),
+                LevelCatalog.WorldOf(index) >= RescueFromWorld);
+        }
+
+        private void ShowGarage()
+        {
+            if (State != GameState.Menu) ShowMenu();
+            ui.ShowGarage(LevelCatalog.WorldOf(SaveData.UnlockedLevel));
+            cameraRig.Showcase(robot.transform, 1f);
+            cameraRig.SetMenuFocus(false);
+        }
+
+        private void ShowShop()
+        {
+            if (State != GameState.Menu) ShowMenu();
+            ui.ShowShop();
+            cameraRig.Showcase(null, 0f);
+            cameraRig.SetMenuFocus(true);
+        }
+
+        private void ClaimDaily()
+        {
+            int got = DailyChest.Claim();
+            if (got <= 0) return;
+            fx.Burst(robot.transform.position + Vector3.up * 0.8f, Palette.Coin, Palette.CoinGlow, 40, 6f);
+            AudioManager.PlaySfx(Sfx.Win, 0.8f, 1.2f);
+            Haptics.Medium();
+            robot.Cheer();
+            FloatAt(robot.transform.position + Vector3.up * 0.4f, Loc.F("daily.got", got), Palette.UiGold);
+            ui.RefreshMenuCoins();
+        }
+
+        private void StartLevel(int index, bool boostShield = false, bool boostRescue = false)
         {
             // A new floor opens with its story scene (once; the map banner replays it).
             int floor = LevelCatalog.WorldOf(index);
             if (index % LevelCatalog.LevelsPerWorld == 0 && !Story.Seen(floor))
             {
-                PlayStory(floor, index, () => StartLevel(index));
+                PlayStory(floor, index, () => StartLevel(index, boostShield, boostRescue));
                 return;
             }
 
@@ -274,6 +353,13 @@ namespace SquashBot.Gameplay
             level = levelSet.levels[levelIndex].Clone();
             bool assisted = ApplyAssist(level);
             BeginRun();
+
+            // Boosts picked on the before-level card are spent now.
+            if (boostShield && Shop.TryUse(Boost.StartShield))
+                GiveArmor(ArmorDuration, robot.Position, Loc.T("float.shield"), Palette.UiCyan);
+            if (boostRescue && RescueEnabled && Shop.TryUse(Boost.ExtraRescue))
+                rescues++;
+
             ShowLevelIntro(assisted);
             RefreshHud();
         }
@@ -348,9 +434,19 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>Builds the platform for <see cref="level"/> and starts play.</summary>
+        /// <summary>The platform for a level; a layout sets its own size.</summary>
+        private static GridModel BuildGrid(LevelData data)
+        {
+            bool shaped = data.layout != null && data.layout.Length > 0;
+            int w = shaped ? data.layout[0].Length : data.gridWidth;
+            int h = shaped ? data.layout.Length : data.gridHeight;
+            return new GridModel(w, h, data.layout);
+        }
+
         private void BeginRun()
         {
             ResetRun();
+            continued = false;
             closeCalls = 0;
             jumpHintShown = false;
             coinsThisRun = 0;
@@ -363,13 +459,20 @@ namespace SquashBot.Gameplay
             input.HoldEnabled = HoverEnabled;
 
             ApplyTheme(levelIndex);
-            grid = new GridModel(level.gridWidth, level.gridHeight, level.layout);
-            gridView.Build(grid, fx);
+            grid = BuildGrid(level);
+            gridView.Build(grid, fx, level.lowWalls);
             cameraRig.Frame(grid.Width, grid.Height);
             cameraRig.SetStyle(CameraStyle.Gameplay);
             cameraRig.SetMenuFocus(false);
             cameraRig.PlayIntro();
-            robot.Spawn(grid, grid.CenterFloor());
+            robot.Spawn(grid, grid.StartSpot ?? grid.CenterFloor());
+
+            // Long journeys don't fit the screen: the camera rides along and hazards and pickups stay near the robot.
+            bool big = grid.Width > FollowWindow || grid.Height > FollowWindow;
+            if (big) cameraRig.Follow(robot.transform, FollowWindow, FollowWindow);
+            hazards.FocusRadius = big ? 3 : 0;
+            coins.FocusRadius = big ? 4 : 0;
+            powerUps.FocusRadius = big ? 4 : 0;
 
             SetupMission();
             hazards.Begin(grid, level, MissionProgress, LevelCatalog.WorldOf(levelIndex));
@@ -433,6 +536,55 @@ namespace SquashBot.Gameplay
                     return;
             }
             ui.RefreshSettings();
+        }
+
+        /// <summary>Lost? Watch an ad and carry on from a safe tile nearby, once per attempt.</summary>
+        private void WatchAdToContinue()
+        {
+            if (continued || State != GameState.Result || !Ads.Rewarded.IsReady) return;
+            Ads.Rewarded.Show(rewarded =>
+            {
+                if (rewarded && State == GameState.Result) Revive();
+            });
+        }
+
+        private void Revive()
+        {
+            continued = true;
+            StopAllCoroutines();
+            // The loss already banked the coins and counted a fail; this run goes on instead.
+            SaveData.Coins -= coinsThisRun;
+            PlayerPrefs.SetInt(FailKey(levelIndex), Mathf.Max(0, PlayerPrefs.GetInt(FailKey(levelIndex), 0) - 1));
+
+            var at = SafeTileNear(robot.Position, robot.Position);
+            robot.Spawn(grid, at);
+            robot.GiveShield(2.5f);
+            hazards.Resume();
+            coins.Resume();
+            powerUps.Resume();
+            State = GameState.Playing;
+            cameraRig.SetMenuFocus(false);
+            cameraRig.SetStyle(CameraStyle.Gameplay);
+            ui.ShowHud(levelIndex);
+            fx.Burst(GridView.ToWorld(at) + Vector3.up * 0.5f, Palette.ShieldPickup, Palette.ShieldPickupGlow, 30, 5f);
+            FloatAt(GridView.ToWorld(at), Loc.T("float.revive"), Palette.UiCyan);
+            AudioManager.PlaySfx(Sfx.Shield, 1f, 1.1f);
+            Haptics.Medium();
+            RefreshHud();
+        }
+
+        /// <summary>After a result: watch an ad to get the run's coins once more.</summary>
+        private void WatchAdToDouble()
+        {
+            if (doubled || State != GameState.Result || !Ads.Rewarded.IsReady) return;
+            int earned = coinsThisRun;
+            Ads.Rewarded.Show(rewarded =>
+            {
+                if (!rewarded || doubled) return;
+                doubled = true;
+                SaveData.Coins += earned;
+                ui.ShowDoubled(earned * 2);
+            });
         }
 
         private void WatchAdForLife()
@@ -507,7 +659,7 @@ namespace SquashBot.Gameplay
         {
             armorsThisLevel++;
             bool super = armorsThisLevel % ArmorsForSuper == 0;
-            robot.GiveShield(super ? SuperArmorDuration : seconds);
+            robot.GiveShield((super ? SuperArmorDuration : seconds) + Shop.ShieldBonusSeconds, Shop.ShieldHits);
             FloatAt(GridView.ToWorld(at), super ? Loc.T("float.superArmor") : label, super ? Palette.UiGold : color);
             AudioManager.PlaySfx(Sfx.Shield, 1f, super ? 0.85f : 1f);
             Haptics.Medium();
@@ -544,7 +696,7 @@ namespace SquashBot.Gameplay
                 if (command.holdStart && HoverEnabled && hoverCooldown <= 0f && robot.IsAlive && !robot.IsHopping)
                 {
                     hovering = true;
-                    hoverLeft = HoverDuration;
+                    hoverLeft = Shop.HoverSeconds;
                     hoverTarget = robot.Position;
                     robot.StartHover();
                     ShowHoverMarker(true);
@@ -618,7 +770,10 @@ namespace SquashBot.Gameplay
         private void ShowLevelIntro(bool assisted)
         {
             string feature = null;
-            if (World >= HoverFromWorld && !Seen("hover")) feature = "feature.hover";
+            string journey = level.chaseSpeed > 0f ? "chase" : level.collapseBehind ? "collapse" : level.lowWalls ? "maze"
+                : level.mission == MissionType.Exit && grid.KeySpots.Count > 0 ? "journey" : null;
+            if (journey != null && !Seen(journey)) feature = "feature." + journey;
+            else if (World >= HoverFromWorld && !Seen("hover")) feature = "feature.hover";
             else if (World >= FireFromWorld && !Seen("fire")) feature = "feature.fire";
             else if (World >= RescueFromWorld && !Seen("rescue")) feature = "feature.rescue";
 
@@ -682,6 +837,7 @@ namespace SquashBot.Gameplay
 
             ui.SetRescues(RescueEnabled, rescues, coinsTowardRescue / (float)CoinsPerRescue);
             ui.SetHover(HoverEnabled, hoverCooldown);
+            UpdateJourney(Time.deltaTime);
 
             // Armor lets the robot stand over a hole or fire; once it wears off, gravity (or heat) wins.
             if (robot.IsAlive && !robot.IsHopping && !robot.IsHovering && !robot.IsShielded && grid.IsGap(robot.Position))
@@ -710,7 +866,10 @@ namespace SquashBot.Gameplay
                     break;
                 case MissionType.Exit:
                     // A block, a hole or fire took the key's tile: it hops somewhere else.
-                    if (keyPickup != null && !grid.IsStandable(keyPos)) PlaceKey(relocate: true);
+                    UpdateObjectives();
+                    break;
+                case MissionType.Boss:
+                    UpdateObjectives();
                     break;
             }
         }
@@ -730,16 +889,69 @@ namespace SquashBot.Gameplay
             // Every landing has weight: the tile dips and a little dust puffs out.
             gridView.Bounce(p, 0.6f);
             fx.Dust(GridView.ToWorld(p) + Vector3.up * 0.06f, Palette.TileTop, 6, 1.2f);
+            if (robot.TrailColor.HasValue)
+            {
+                var trail = robot.TrailColor.Value;
+                fx.Burst(GridView.ToWorld(p) + Vector3.up * 0.2f, trail * 0.45f, trail, 7, 1.8f);
+            }
 
             coins.TryCollect(p);
+            if (Shop.MagnetRange > 0) coins.CollectNear(p, Shop.MagnetRange);
             powerUps.TryCollect(p);
 
+            // Collapsing paths: the tile just left crumbles a moment later.
+            var left = robot.LastLeftTile;
+            if (level.collapseBehind && left != p && grid.IsFloor(left) && !collapses.Exists(c => c.pos == left))
+                collapses.Add((left, CollapseDelay));
+
             if (level.mission == MissionType.Paint) PaintTile(p);
-            else if (level.mission == MissionType.Exit)
+            else if (level.mission == MissionType.Exit || level.mission == MissionType.Boss)
             {
-                if (keyPickup != null && p == keyPos) CollectKey();
-                else if (portal.IsOpen && p == doorPos) Escape();
+                var reached = objectives.Find(o => o.pos == p);
+                if (reached != null) CompleteObjective(reached);
+                else if (portal != null && portal.IsOpen && p == doorPos) Escape();
             }
+        }
+
+        /// <summary>Crumbling tiles and the chasing wave, ticking every frame of a journey level.</summary>
+        private void UpdateJourney(float dt)
+        {
+            float pulse = 0.55f + 0.45f * Mathf.Sin(Time.time * 22f);
+            for (int i = collapses.Count - 1; i >= 0; i--)
+            {
+                var (pos, timeLeft) = collapses[i];
+                timeLeft -= dt;
+                if (timeLeft <= 0f)
+                {
+                    hazards.Collapse(pos, CollapseRepair);
+                    AudioManager.PlaySfx(Sfx.Fall, 0.25f, 1.4f, 0.1f);
+                    collapses.RemoveAt(i);
+                }
+                else
+                {
+                    gridView.SetWarning(pos, pulse);
+                    collapses[i] = (pos, timeLeft);
+                }
+            }
+
+            if (level.chaseSpeed <= 0f) return;
+            chaseFront += dt * level.chaseSpeed;
+            int row = Mathf.FloorToInt(chaseFront);
+            while (chaseRow < row && chaseRow < grid.Height - 1)
+            {
+                chaseRow++;
+                for (int x = 0; x < grid.Width; x++) hazards.Collapse(new GridPos(x, chaseRow), 0f);
+                cameraRig.Shake(0.25f);
+                AudioManager.PlaySfx(Sfx.Impact, 0.35f, 0.7f, 0.1f);
+            }
+            // The next row to go glows red.
+            int next = chaseRow + 1;
+            if (next >= 0 && next < grid.Height && chaseFront > next - 1.5f)
+                for (int x = 0; x < grid.Width; x++)
+                {
+                    var p = new GridPos(x, next);
+                    if (grid.IsFloor(p)) gridView.SetWarning(p, pulse);
+                }
         }
 
         private void OnBlockImpact(GridPos p)
@@ -753,11 +965,14 @@ namespace SquashBot.Gameplay
             {
                 if (robot.IsShielded)
                 {
+                    // The shield takes the hit; upgraded shields crack and hold until their last hit.
+                    bool broke = robot.AbsorbHit();
                     hazards.Shatter(p);
                     cameraRig.Shake(0.9f);
-                    AudioManager.PlaySfx(Sfx.Blocked);
+                    AudioManager.PlaySfx(Sfx.Blocked, 1f, broke ? 0.8f : 1.2f);
                     Haptics.Medium();
-                    FloatAt(GridView.ToWorld(p), Loc.T("float.blocked"), Palette.UiCyan);
+                    if (broke) fx.Burst(robot.transform.position + Vector3.up * 0.4f, Palette.ShieldPickup, Palette.ShieldPickupGlow, 24, 5f);
+                    FloatAt(GridView.ToWorld(p), broke ? Loc.T("float.shieldBroke") : robot.ShieldHits < Shop.ShieldHits ? Loc.F("float.shieldCrack", robot.ShieldHits) : Loc.T("float.blocked"), broke ? Palette.UiRed : Palette.UiCyan);
                     return;
                 }
 
@@ -897,6 +1112,7 @@ namespace SquashBot.Gameplay
             {
                 won = true,
                 hasNext = hasNext,
+                canDouble = true,
                 subtitle = Loc.T(newWorld ? "result.newWorld" : hasNext ? "result.next" : "result.allDone"),
                 note = note,
                 coins = coinsThisRun,
@@ -923,6 +1139,7 @@ namespace SquashBot.Gameplay
             {
                 won = true,
                 bonusRound = true,
+                canDouble = true,
                 hasNext = true,
                 subtitle = subtitle ?? Loc.T("result.bonusSub"),
                 coins = coinsThisRun,
@@ -953,6 +1170,7 @@ namespace SquashBot.Gameplay
             {
                 won = false,
                 note = Story.LoseQuip(),
+                canContinue = !continued && Ads.Rewarded.IsReady,
                 subtitle = reason + "\n" + Loc.F("lives.left", Lives.Count),
                 coins = coinsThisRun,
                 meter = Progress.Meter / (float)Progress.StarsPerBonus,
@@ -962,6 +1180,7 @@ namespace SquashBot.Gameplay
 
         private IEnumerator ShowResultDelayed(UIController.ResultInfo info)
         {
+            doubled = false;
             ui.SetWarning(false);
             ui.SetShield(0f, 1f);
             yield return new WaitForSecondsRealtime(info.won ? 1.4f : 1.2f);
@@ -982,26 +1201,40 @@ namespace SquashBot.Gameplay
 
         // ---------- Mission ----------
 
-        /// <summary>Per-mission setup: the exit door far from the robot, or the first painted tile.</summary>
+        /// <summary>Per-mission setup: the exit door and its keys, WARDEN and its buttons, or the first painted tile.</summary>
         private void SetupMission()
         {
             hazards.IsProtected = null;
+            objectivesDone = 0;
+            chaseFront = -ChaseGraceRows;
+            chaseRow = -1;
+
             if (level.mission == MissionType.Exit)
             {
-                // The door goes on one of the tiles farthest from the robot, so reaching it is a little journey.
-                int best = -1;
-                var options = new List<GridPos>();
-                foreach (var t in grid.AllPositions())
-                {
-                    if (!grid.IsStandable(t)) continue;
-                    int d = t.Manhattan(robot.Position);
-                    if (d > best) { best = d; options.Clear(); }
-                    if (d == best) options.Add(t);
-                }
-                doorPos = options[Random.Range(0, options.Count)];
+                // Journey layouts mark the door; otherwise it goes on one of the tiles farthest from the robot.
+                doorPos = grid.DoorSpot ?? FarTile(avoidDoor: false) ?? robot.Position;
                 portal = ExitPortal.Create(GridView.ToWorld(doorPos) + Vector3.up * GridView.SurfaceY);
                 hazards.IsProtected = p => p == doorPos;
-                PlaceKey(relocate: false);
+
+                spotKeys = grid.KeySpots.Count > 0;
+                if (spotKeys)
+                {
+                    objectivesTotal = grid.KeySpots.Count;
+                    foreach (var spot in grid.KeySpots) AddObjective(spot);
+                }
+                else
+                {
+                    objectivesTotal = Mathf.Max(1, level.keys);
+                    AddFarObjective();
+                }
+            }
+            else if (level.mission == MissionType.Boss)
+            {
+                spotKeys = false;
+                objectivesTotal = Mathf.Max(1, level.keys);
+                var corner = GridView.ToWorld(new GridPos(grid.Width - 1, grid.Height - 1));
+                warden = WardenBoss.Create(corner + new Vector3(0.9f, 2.3f, 0.9f), objectivesTotal, robot.transform);
+                AddFarObjective();
             }
             else if (level.mission == MissionType.Paint)
             {
@@ -1009,51 +1242,120 @@ namespace SquashBot.Gameplay
             }
         }
 
-        /// <summary>
-        /// Puts the current key on a free tile far from the robot (and never on the door), so every key is a trip
-        /// across the platform. With relocate, the existing key hops to a new tile instead.
-        /// </summary>
-        private void PlaceKey(bool relocate)
+        /// <summary>A free tile far from the robot (never the door), or null if none is free right now.</summary>
+        private GridPos? FarTile(bool avoidDoor = true)
         {
             int best = -1;
             var scored = new List<(GridPos pos, int d)>();
             foreach (var t in grid.AllPositions())
             {
-                if (!grid.IsStandable(t) || t == doorPos || t == robot.Position || hazards.IsThreatened(t)) continue;
+                if (!grid.IsStandable(t) || t == robot.Position || hazards.IsThreatened(t)) continue;
+                if (avoidDoor && portal != null && t == doorPos) continue;
+                if (objectives.Exists(o => o.pos == t)) continue;
                 int d = t.Manhattan(robot.Position);
                 scored.Add((t, d));
                 best = Mathf.Max(best, d);
             }
-            if (scored.Count == 0) return; // try again next frame
-
+            if (scored.Count == 0) return null;
             var options = scored.FindAll(s => s.d >= best - 1);
-            keyPos = options[Random.Range(0, options.Count)].pos;
-            var at = GridView.ToWorld(keyPos) + Vector3.up * GridView.SurfaceY;
-            if (keyPickup == null) keyPickup = KeyPickup.Create(at);
-            else keyPickup.MoveTo(at);
-            if (relocate) fx.Dust(at + Vector3.up * 0.1f, Palette.UiCyan, 8, 1.5f);
+            return options[Random.Range(0, options.Count)].pos;
         }
 
-        private void CollectKey()
+        /// <summary>The free tile closest to <paramref name="home"/> (a key whose spot got hit moves next door).</summary>
+        private GridPos? NearTile(GridPos home)
         {
-            keysCollected++;
-            var at = GridView.ToWorld(keyPos);
+            GridPos? best = null;
+            int bestD = int.MaxValue;
+            foreach (var t in grid.AllPositions())
+            {
+                if (!grid.IsStandable(t) || t == doorPos || t == robot.Position || hazards.IsThreatened(t)) continue;
+                if (objectives.Exists(o => o.pos == t)) continue;
+                int d = t.Manhattan(home);
+                if (d < bestD) { bestD = d; best = t; }
+            }
+            return best;
+        }
+
+        private void AddFarObjective()
+        {
+            var p = FarTile();
+            if (p.HasValue) AddObjective(p.Value);
+            else objectives.Add(new Objective { pos = new GridPos(-99, -99), home = robot.Position }); // placed next frame
+        }
+
+        private void AddObjective(GridPos p)
+        {
+            var o = new Objective { pos = p, home = p };
+            MakeView(o, GridView.ToWorld(p) + Vector3.up * GridView.SurfaceY);
+            objectives.Add(o);
+        }
+
+        private void MakeView(Objective o, Vector3 at)
+        {
+            if (level.mission == MissionType.Boss) o.button = BossButton.Create(at);
+            else o.key = KeyPickup.Create(at);
+        }
+
+        /// <summary>Keys and buttons whose tile got hit, burned or broke hop to another tile.</summary>
+        private void UpdateObjectives()
+        {
+            foreach (var o in objectives)
+            {
+                if (grid.InBounds(o.pos) && grid.IsStandable(o.pos)) continue;
+                var target = spotKeys ? NearTile(o.home) : FarTile();
+                if (!target.HasValue) continue;
+                o.pos = target.Value;
+                var at = GridView.ToWorld(o.pos) + Vector3.up * GridView.SurfaceY;
+                if (o.View == null) MakeView(o, at);
+                else if (o.key != null) o.key.MoveTo(at);
+                else o.button.MoveTo(at);
+                fx.Dust(at + Vector3.up * 0.1f, Palette.UiCyan, 8, 1.5f);
+            }
+        }
+
+        private void CompleteObjective(Objective o)
+        {
+            objectives.Remove(o);
+            if (o.View != null) Destroy(o.View);
+            objectivesDone++;
+            var at = GridView.ToWorld(o.pos);
+            cameraRig.Punch(0.5f);
+            Haptics.Medium();
+
+            if (level.mission == MissionType.Boss)
+            {
+                // A hit on WARDEN: it flinches and loses a light; the last one brings it down.
+                fx.Burst(at + Vector3.up * 0.3f, new Color(1f, 0.4f, 0.45f), new Color(2.2f, 0.35f, 0.4f), 22, 5f);
+                AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.8f);
+                cameraRig.Shake(0.8f);
+                int remaining = objectivesTotal - objectivesDone;
+                FloatAt(at, Loc.T("float.bossHit"), Palette.UiGold);
+                if (remaining <= 0)
+                {
+                    warden.Defeat();
+                    fx.Burst(warden.transform.position, Palette.UiGold, Palette.CoinGlow, 40, 7f);
+                    AudioManager.PlaySfx(Sfx.Squash, 1f, 0.6f);
+                    Win();
+                }
+                else
+                {
+                    warden.Hit(remaining);
+                    AddFarObjective();
+                }
+                return;
+            }
+
             fx.Burst(at + Vector3.up * 0.5f, Palette.UiCyan, Palette.ShieldPickupGlow, 18, 4f);
             AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.3f);
-            Haptics.Medium();
-            cameraRig.Punch(0.5f);
-
-            if (keysCollected >= level.keys)
+            if (objectivesDone >= objectivesTotal)
             {
-                Destroy(keyPickup.gameObject);
-                keyPickup = null;
                 FloatAt(at, Loc.T("float.key"), Palette.UiCyan);
                 OpenDoor();
             }
             else
             {
-                FloatAt(at, Loc.F("float.keyLeft", level.keys - keysCollected), Palette.UiCyan);
-                PlaceKey(relocate: false);
+                FloatAt(at, Loc.F("float.keyLeft", objectivesTotal - objectivesDone), Palette.UiCyan);
+                if (!spotKeys) AddFarObjective();
             }
         }
 
@@ -1103,7 +1405,8 @@ namespace SquashBot.Gameplay
                 case MissionType.CollectCoins:
                 case MissionType.CoinRain: return (float)coinsThisRun / level.coinTarget;
                 case MissionType.Tunnel: return runner.Progress;
-                case MissionType.Exit: return portal != null && portal.IsOpen ? 1f : keysCollected / (level.keys + 1f);
+                case MissionType.Exit: return portal != null && portal.IsOpen ? 1f : objectivesDone / (objectivesTotal + 1f);
+                case MissionType.Boss: return objectivesDone / (float)Mathf.Max(1, objectivesTotal);
                 case MissionType.Paint: return grid == null ? 0f : painted.Count / (float)grid.FloorCount;
                 default: return elapsed / level.surviveSeconds;
             }
@@ -1120,6 +1423,7 @@ namespace SquashBot.Gameplay
                 case MissionType.CoinRain: return Loc.F("mission.rain" + suffix, data.coinTarget);
                 case MissionType.Treasure: return Loc.T("mission.treasure" + suffix);
                 case MissionType.Tunnel: return Loc.T("mission.tunnel" + suffix);
+                case MissionType.Boss: return Loc.T("mission.boss" + suffix);
                 default: return Loc.F("mission.survive" + suffix, data.surviveSeconds.ToString("0", CultureInfo.InvariantCulture));
             }
         }
@@ -1134,12 +1438,13 @@ namespace SquashBot.Gameplay
                 case MissionType.Exit:
                     text = portal != null && portal.IsOpen
                         ? Loc.T("hud.exitOpen")
-                        : Loc.F("hud.exitWait", keysCollected, level.keys);
+                        : Loc.F("hud.exitWait", objectivesDone, objectivesTotal);
                     break;
                 case MissionType.Paint: text = Loc.F("hud.paint", painted.Count, grid.FloorCount); break;
                 case MissionType.CoinRain: text = Loc.F("hud.rain", coinsThisRun, level.coinTarget, Seconds(level.surviveSeconds - elapsed)); break;
                 case MissionType.Treasure: text = Loc.F("hud.treasure", coinsThisRun, Seconds(level.surviveSeconds - elapsed)); break;
                 case MissionType.Tunnel: text = Loc.F("hud.tunnel", coinsThisRun, Mathf.RoundToInt(runner.Progress * 100f)); break;
+                case MissionType.Boss: text = Loc.F("hud.boss", objectivesDone, objectivesTotal); break;
                 default: text = Loc.F("hud.survive", Seconds(level.surviveSeconds - elapsed)); break;
             }
             ui.SetMission(text, MissionProgress(), coinsThisRun);
