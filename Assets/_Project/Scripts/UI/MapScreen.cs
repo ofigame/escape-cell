@@ -24,6 +24,7 @@ namespace SquashBot.UI
         public event Action<int> LevelChosen;
         public event Action BackPressed;
         public event Action BonusPressed;
+        public event Action<int> StoryPressed;
 
         private UiScreen screen;
         private ScrollRect scroll;
@@ -180,6 +181,21 @@ namespace SquashBot.UI
             UiFactory.TextBox("Sub", banner, new Vector2(0.5f, 0f), new Vector2(0f, 16f), new Vector2(780f, 56f), sub, 34f,
                 new Color(1f, 1f, 1f, 0.75f), FontStyles.Normal);
             if (locked) Lock(banner, new Vector2(0f, 0.5f), new Vector2(60f, 0f), 0.8f);
+            else
+            {
+                // Tapping an open world's banner replays its story scene.
+                var bannerImage = banner.GetComponent<Image>();
+                bannerImage.raycastTarget = true;
+                var replay = banner.gameObject.AddComponent<Button>();
+                replay.targetGraphic = bannerImage;
+                int captured = world;
+                replay.onClick.AddListener(() =>
+                {
+                    AudioManager.PlaySfx(Sfx.Click, 0.7f);
+                    StoryPressed?.Invoke(captured);
+                });
+                banner.gameObject.AddComponent<ButtonPress>();
+            }
         }
 
         // ---------- Path ----------

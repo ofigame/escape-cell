@@ -39,6 +39,7 @@ namespace SquashBot.UI
         public event Action<int> LevelChosen;
         public event Action WatchAdPressed;
         public event Action BonusPressed;
+        public event Action<int> StoryPressed;
 
         /// <summary>Everything the result card shows.</summary>
         public struct ResultInfo
@@ -115,6 +116,7 @@ namespace SquashBot.UI
         private float meterShown, meterTarget;
 
         public MapScreen Map { get; private set; }
+        public StoryScreen Story { get; private set; }
 
         private GameObject bannerPlaceholder;
 
@@ -148,10 +150,12 @@ namespace SquashBot.UI
             Map.LevelChosen += level => LevelChosen?.Invoke(level);
             Map.BackPressed += () => MenuPressed?.Invoke();
             Map.BonusPressed += () => BonusPressed?.Invoke();
+            Map.StoryPressed += world => StoryPressed?.Invoke(world);
             BuildPause(root);
             BuildResult(root);
             BuildSettings(root);
             BuildNoLives(root);
+            Story = StoryScreen.Create(root);
             BuildBanner(root);
         }
 
@@ -216,6 +220,14 @@ namespace SquashBot.UI
             Map.Show(unlocked, coins, focusLevel, animateFrom);
             SetBanner(true);
             RefreshLives();
+        }
+
+        /// <summary>A story scene over the blurred scene; <paramref name="onDone"/> runs when it ends.</summary>
+        public void ShowStory(int scene, int world, Action onDone)
+        {
+            HideAll();
+            SetBanner(false);
+            Story.Play(scene, world, onDone);
         }
 
         /// <summary>Three bars: a simple, universally understood "settings" glyph.</summary>
@@ -520,7 +532,9 @@ namespace SquashBot.UI
             resultReward = UiFactory.TextBox("Value", reward, new Vector2(0f, 0.5f), new Vector2(120f, 0f), new Vector2(220f, 90f),
                 "", 54f, Palette.UiGold, align: TextAlignmentOptions.Left);
 
-            resultNote = UiFactory.TextBox("Note", card, Top, new Vector2(0f, -565f), new Vector2(800f, 56f), "", 36f, Palette.UiGold, FontStyles.Bold);
+            resultNote = UiFactory.TextBox("Note", card, Top, new Vector2(0f, -545f), new Vector2(780f, 84f), "", 34f, Palette.UiGold, FontStyles.Bold);
+            resultNote.textWrappingMode = TextWrappingModes.Normal;
+            resultNote.fontSizeMin = 26f;
 
             // Bonus meter: stars fill it, a full meter unlocks a bonus round.
             UiFactory.Bar(card, Top, new Vector2(-60f, -640f), new Vector2(560f, 30f), Palette.UiGold, out resultMeterFill);
@@ -545,6 +559,7 @@ namespace SquashBot.UI
             resultSub.text = info.subtitle;
             resultReward.text = $"+{info.coins}";
             resultNote.text = info.note ?? "";
+            resultNote.color = info.won ? Palette.UiGold : new Color(1f, 0.6f, 0.65f);
 
             bool showStars = info.won && !info.bonusRound;
             resultStarRow.gameObject.SetActive(showStars);
@@ -685,6 +700,7 @@ namespace SquashBot.UI
         {
             menu.Hide();
             Map.Hide();
+            Story.Hide();
             settings.Hide(true);
             noLives.Hide(true);
             hud.Hide(true);

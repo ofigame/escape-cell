@@ -81,6 +81,7 @@ namespace SquashBot.Gameplay
         private int keysCollected;
         private readonly HashSet<GridPos> painted = new HashSet<GridPos>();
         private bool bonusRun;
+        private bool pendingEnding;
         private StarRules.Goals starGoals;
 
         // A rare surprise bonus round after beating a new level, on top of the ones stars unlock.
@@ -157,6 +158,7 @@ namespace SquashBot.Gameplay
                 else ShowMap(animateFrom: levelIndex);
             };
             ui.BonusPressed += StartBonus;
+            ui.StoryPressed += world => PlayStory(world, world * LevelCatalog.LevelsPerWorld, () => ShowMap());
             ui.MapPressed += () => ShowMap();
             ui.MenuPressed += ShowMenu;
             ui.PausePressed += Pause;
@@ -241,6 +243,14 @@ namespace SquashBot.Gameplay
 
         private void StartLevel(int index)
         {
+            // A new floor opens with its story scene (once; the map banner replays it).
+            int floor = LevelCatalog.WorldOf(index);
+            if (index % LevelCatalog.LevelsPerWorld == 0 && !Story.Seen(floor))
+            {
+                PlayStory(floor, index, () => StartLevel(index));
+                return;
+            }
+
             // Each attempt costs a life (unlocking a new level refills them). Without lives, offer the ad instead.
             if (!Lives.TryConsume())
             {
@@ -256,6 +266,16 @@ namespace SquashBot.Gameplay
             BeginRun();
             ShowLevelIntro(assisted);
             RefreshHud();
+        }
+
+        /// <summary>A story scene over the level's blurred platform, then <paramref name="done"/>.</summary>
+        private void PlayStory(int scene, int themeLevel, System.Action done)
+        {
+            ResetRun();
+            State = GameState.Map;
+            ShowBackdrop(Mathf.Clamp(themeLevel, 0, LevelCount - 1));
+            Story.MarkSeen(scene);
+            ui.ShowStory(scene, LevelCatalog.WorldOf(themeLevel), done);
         }
 
         /// <summary>A bonus treasure vault: free (no life), nothing to lose, themed like the world the player is in.</summary>
@@ -802,6 +822,7 @@ namespace SquashBot.Gameplay
                 surprise = true;
             }
 
+            pendingEnding = levelIndex == LevelCount - 1 && !Story.Seen(Story.Ending);
             bool hasNext = levelIndex + 1 < LevelCount;
             bool newWorld = unlockedNew && hasNext && (levelIndex + 1) % LevelCatalog.LevelsPerWorld == 0;
             string note = surprise ? Loc.T("bonus.surprise")
@@ -868,6 +889,7 @@ namespace SquashBot.Gameplay
             StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
             {
                 won = false,
+                note = Story.LoseQuip(),
                 subtitle = reason + "\n" + Loc.F("lives.left", Lives.Count),
                 coins = coinsThisRun,
                 meter = Progress.Meter / (float)Progress.StarsPerBonus,
@@ -884,6 +906,14 @@ namespace SquashBot.Gameplay
             Time.timeScale = 1f;
             if (!info.won) AudioManager.PlaySfx(Sfx.Lose, 0.8f);
             cameraRig.SetMenuFocus(true);
+            if (pendingEnding)
+            {
+                // The very last level: the escape scene on the roof comes before the result card.
+                pendingEnding = false;
+                Story.MarkSeen(Story.Ending);
+                ui.ShowStory(Story.Ending, World, () => ui.ShowResult(info));
+                yield break;
+            }
             ui.ShowResult(info);
         }
 
