@@ -18,17 +18,61 @@ namespace SquashBot.UI
         public static readonly Color PillColor = new Color(0.14f, 0.13f, 0.3f, 0.72f);
         public static readonly Color TextDark = new Color(0.13f, 0.12f, 0.29f);
 
-        private static TMP_FontAsset font;
+        private static TMP_FontAsset font, titleFont;
         private static Material titleMaterial;
 
+        /// <summary>
+        /// Body text: Nunito (rounded and very readable; SemiBold for normal text, ExtraBold for bold). Titles and the logo:
+        /// Lilita One. Both are open-licence (OFL) fonts in Resources/Fonts, turned into dynamic SDF fonts at startup so every
+        /// Turkish letter is drawn on demand; the old built-in font stays as the last fallback for rare symbols.
+        /// </summary>
         public static TMP_FontAsset Font
         {
             get
             {
-                if (font == null) font = TMP_Settings.defaultFontAsset;
-                if (font == null) font = Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
+                if (font != null) return font;
+                var builtIn = TMP_Settings.defaultFontAsset;
+                if (builtIn == null) builtIn = Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
+                font = Dynamic("Fonts/Nunito-SemiBold");
+                var bold = Dynamic("Fonts/Nunito-ExtraBold");
+                if (font == null) return font = builtIn;
+                if (bold != null)
+                {
+                    if (font.fontWeightTable != null && font.fontWeightTable.Length > 7) font.fontWeightTable[7].regularTypeface = bold;
+                    AddFallback(bold, builtIn);
+                }
+                AddFallback(font, builtIn);
                 return font;
             }
+        }
+
+        /// <summary>The display font for titles, big numbers and the logo (falls back to the body font for missing letters).</summary>
+        public static TMP_FontAsset TitleFont
+        {
+            get
+            {
+                if (titleFont != null) return titleFont;
+                titleFont = Dynamic("Fonts/LilitaOne-Regular");
+                if (titleFont == null) return titleFont = Font;
+                AddFallback(titleFont, Font);
+                return titleFont;
+            }
+        }
+
+        private static void AddFallback(TMP_FontAsset asset, TMP_FontAsset fallback)
+        {
+            if (fallback == null || asset == fallback) return;
+            if (asset.fallbackFontAssetTable == null) asset.fallbackFontAssetTable = new System.Collections.Generic.List<TMP_FontAsset>();
+            asset.fallbackFontAssetTable.Add(fallback);
+        }
+
+        private static TMP_FontAsset Dynamic(string path)
+        {
+            var source = Resources.Load<UnityEngine.Font>(path);
+            if (source == null) return null;
+            var asset = TMP_FontAsset.CreateFontAsset(source, 72, 8, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 1024, 1024, AtlasPopulationMode.Dynamic, true);
+            if (asset != null) asset.name = source.name;
+            return asset;
         }
 
         /// <summary>Font material with a soft drop shadow (underlay) for big titles over the scene.</summary>
@@ -37,7 +81,7 @@ namespace SquashBot.UI
             get
             {
                 if (titleMaterial != null) return titleMaterial;
-                titleMaterial = new Material(Font.material) { name = "Title Underlay" };
+                titleMaterial = new Material(TitleFont.material) { name = "Title Underlay" };
                 titleMaterial.EnableKeyword("UNDERLAY_ON");
                 titleMaterial.SetColor("_UnderlayColor", new Color(0.12f, 0.1f, 0.3f, 0.6f));
                 titleMaterial.SetFloat("_UnderlayOffsetX", 0.6f);
@@ -151,8 +195,12 @@ namespace SquashBot.UI
         {
             var rt = Stretch("Text", parent);
             var label = rt.gameObject.AddComponent<TextMeshProUGUI>();
-            label.font = Font;
-            if (title) label.fontSharedMaterial = TitleMaterial;
+            label.font = title ? TitleFont : Font;
+            if (title)
+            {
+                label.fontSharedMaterial = TitleMaterial;
+                style &= ~FontStyles.Bold; // the display font is heavy already; faux bold would blur it
+            }
             label.text = text;
             label.fontSize = size;
             label.fontStyle = style;
@@ -228,7 +276,14 @@ namespace SquashBot.UI
                 Fill(Stretch("Rim", face), new Color(1f, 1f, 1f, 0.3f), UiSprites.Ring, kind == ButtonKind.Icon ? 1.4f : 0.9f).raycastTarget = false;
             }
 
-            Text(face, text, fontSize, textColor);
+            var label = Text(face, text, fontSize, textColor);
+            if (kind == ButtonKind.Primary || kind == ButtonKind.Gold)
+            {
+                // Call-to-action buttons speak in the display font, like the logo.
+                label.font = TitleFont;
+                label.fontSharedMaterial = TitleFont.material;
+                label.fontStyle = FontStyles.Normal;
+            }
 
             var button = root.gameObject.AddComponent<Button>();
             button.targetGraphic = image;

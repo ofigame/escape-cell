@@ -9,7 +9,37 @@ namespace SquashBot.Data
     /// </summary>
     public static class City
     {
-        public const int Size = 8;
+        public const int MinSize = 6, MaxSize = 12;
+
+        /// <summary>
+        /// The plot grows with the game: 6x6 when the city opens, one more cell every 3 worlds, 12x12 on the last floors.
+        /// It never shrinks below what is already built. Updated by <see cref="RefreshSize"/> when the city opens.
+        /// </summary>
+        public static int Size { get; private set; } = MinSize;
+
+        public static int SizeAtWorld(int world) => Mathf.Min(MaxSize, MinSize + world / 3);
+
+        /// <summary>The next world (0-based) whose arrival makes the plot bigger, or -1 at full size.</summary>
+        public static int NextGrowthWorld
+        {
+            get
+            {
+                for (int w = ReachedWorld + 1; w < LevelCatalog.WorldCount; w++)
+                    if (SizeAtWorld(w) > SizeAtWorld(ReachedWorld)) return w;
+                return -1;
+            }
+        }
+
+        public static void RefreshSize()
+        {
+            int s = SizeAtWorld(ReachedWorld);
+            foreach (var p in Data.pieces)
+            {
+                var f = p.Piece.Size(p.rot);
+                s = Mathf.Max(s, Mathf.Max(p.x + f.x, p.y + f.y));
+            }
+            Size = Mathf.Min(s, MaxSize);
+        }
         public const int MaxPieces = 150;
         public const int UndoDepth = 10;
         public const int MineRate = 5;      // coins per hour

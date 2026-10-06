@@ -34,7 +34,7 @@ namespace SquashBot.UI
         private Button undoButton, repairAllButton;
         private RectTransform buildGroup, walkGroup, tray, trayContent, ghostBar, selBar;
         private ScrollRect trayScroll;
-        private TextMeshProUGUI ghostPrice, selName, selInfo, selSellLabel, selRepairLabel, interactLabel, tipText;
+        private TextMeshProUGUI plotText, ghostPrice, selName, selInfo, selSellLabel, selRepairLabel, interactLabel, tipText;
         private Button ghostConfirm, selRepair, interactButton;
         private RectTransform tipCard, wishesPanel, wishesList;
         private readonly Button[] tabs = new Button[3];
@@ -74,7 +74,7 @@ namespace SquashBot.UI
 
             var bar = UiFactory.Rect("TopBar", root, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -150f), Vector2.zero);
             UiFactory.MakeButton(bar, "<", Kind.Icon, new Vector2(0f, 0.5f), new Vector2(30f, 0f), new Vector2(116f, 116f), () => BackPressed?.Invoke(), 60f);
-            titleText = UiFactory.TextBox("Title", bar, new Vector2(0.5f, 0.5f), new Vector2(-90f, 0f), new Vector2(400f, 100f), Loc.T("city.title"), 54f, Palette.UiText, title: true);
+            titleText = UiFactory.TextBox("Title", bar, new Vector2(0.5f, 0.5f), new Vector2(-90f, 0f), new Vector2(400f, 100f), Loc.T("city.title"), 46f, Palette.UiText, title: true);
             titleText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var coins = UiFactory.Pill("Coins", bar, new Vector2(1f, 0.5f), new Vector2(-150f, 0f), new Vector2(230f, 96f), UiFactory.PillColor);
             UIController.CoinIcon(coins, new Vector2(52f, 0f));
@@ -108,6 +108,8 @@ namespace SquashBot.UI
             undoLabel = undoButton.GetComponentInChildren<TextMeshProUGUI>();
             repairAllButton = UiFactory.MakeButton(buildGroup, "", Kind.Gold, new Vector2(1f, 1f), new Vector2(-30f, -290f), new Vector2(430f, 90f), () => RepairAllPressed?.Invoke(), 28f);
             repairAllLabel = repairAllButton.GetComponentInChildren<TextMeshProUGUI>();
+            var plot = UiFactory.Pill("Plot", buildGroup, new Vector2(0f, 1f), new Vector2(30f, -395f), new Vector2(520f, 60f), UiFactory.PillColor);
+            plotText = UiFactory.Text(plot, "", 26f, Palette.UiCyan, style: FontStyles.Normal);
 
             // The tray.
             tray = UiFactory.Card("Tray", buildGroup, new Vector2(0.5f, 0f), new Vector2(0f, 20f), new Vector2(1040f, 470f));
@@ -320,6 +322,8 @@ namespace SquashBot.UI
             coinsText.text = SaveData.Coins.ToString();
             starsText.text = Progress.TotalStars(LevelCatalog.LevelCount).ToString();
             undoLabel.text = Loc.F("city.undo", City.UndoCount);
+            int grow = City.NextGrowthWorld;
+            plotText.text = grow >= 0 ? Loc.F("city.plot", City.Size, grow + 1) : Loc.F("city.plotMax", City.Size);
             undoButton.interactable = City.UndoCount > 0;
             int need = City.NeedingCare;
             repairAllButton.gameObject.SetActive(need > 0 && !Walking);

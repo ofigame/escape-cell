@@ -60,12 +60,13 @@ namespace SquashBot.UI
         private void Build(RectTransform root)
         {
             UiFactory.Dim(root, new Color(0.06f, 0.05f, 0.18f, 0.7f));
-            var bar = UiFactory.Rect("TopBar", root, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -170f), Vector2.zero);
-            UiFactory.MakeButton(bar, "<", Kind.Icon, new Vector2(0f, 0.5f), new Vector2(36f, 0f), new Vector2(120f, 120f), () => BackPressed?.Invoke(), 64f);
-            UiFactory.TextBox("Title", bar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(600f, 110f), Loc.T("guide.title"), 64f, Palette.UiText, title: true)
-                .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-
-            var card = UiFactory.Card("Card", root, new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(1000f, 1660f));
+            // The card fills the screen under the top bar whatever its height (tablets are much shorter than phones),
+            // so it never covers the back button.
+            var card = UiFactory.Card("Card", root, new Vector2(0.5f, 0f), Vector2.zero, Vector2.zero);
+            card.anchorMin = Vector2.zero;
+            card.anchorMax = Vector2.one;
+            card.offsetMin = new Vector2(40f, 40f);
+            card.offsetMax = new Vector2(-40f, -190f);
             var viewport = UiFactory.Rect("Viewport", card, Vector2.zero, Vector2.one, new Vector2(16f, 16f), new Vector2(-16f, -16f));
             viewport.gameObject.AddComponent<RectMask2D>();
             UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
@@ -79,6 +80,8 @@ namespace SquashBot.UI
             layout.childForceExpandWidth = true;
             layout.childForceExpandHeight = false;
             content.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            BuildBar(root);
             scroll = card.gameObject.AddComponent<ScrollRect>();
             scroll.viewport = viewport;
             scroll.content = content;
@@ -101,6 +104,25 @@ namespace SquashBot.UI
                 body.lineSpacing = 4f;
                 Spacer(14f);
             }
+        }
+
+        private void BuildBar(RectTransform root)
+        {
+            var bar = UiFactory.Rect("TopBar", root, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -170f), Vector2.zero);
+            UiFactory.Fill(bar, new Color(0.08f, 0.07f, 0.18f, 0.96f));
+            UiFactory.MakeButton(bar, "<", Kind.Icon, new Vector2(0f, 0.5f), new Vector2(36f, 0f), new Vector2(120f, 120f), () => BackPressed?.Invoke(), 64f);
+            UiFactory.TextBox("Title", bar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(600f, 110f), Loc.T("guide.title"), 64f, Palette.UiText, title: true)
+                .rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.MakeButton(bar, "X", Kind.Icon, new Vector2(1f, 0.5f), new Vector2(-36f, 0f), new Vector2(120f, 120f), () => BackPressed?.Invoke(), 56f);
+        }
+
+        private void Update()
+        {
+#if ENABLE_INPUT_SYSTEM
+            // The Android back button arrives as Escape.
+            var kb = UnityEngine.InputSystem.Keyboard.current;
+            if (screen.IsVisible && kb != null && kb.escapeKey.wasPressedThisFrame) BackPressed?.Invoke();
+#endif
         }
 
         /// <summary>Opens the guide, scrolled to <paramref name="topic"/> (null = the top).</summary>

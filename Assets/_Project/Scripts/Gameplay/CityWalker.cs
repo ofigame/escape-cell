@@ -85,7 +85,15 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>Turns the camera (dragging on the screen): degrees per screen pixel are applied by the caller.</summary>
-        public void Turn(float degrees) => yaw += degrees;
+        public void Turn(float degrees)
+        {
+            yaw += degrees;
+            lookAround = 1.2f;
+        }
+
+        // After the player turns the camera by hand, it waits a moment before swinging back behind the robot.
+        private float lookAround;
+        private const float FollowSpeed = 160f; // degrees per second
 
         /// <summary>The robot swings a wrench for a moment (repairing a building in person).</summary>
         public void PlayRepair()
@@ -135,14 +143,18 @@ namespace SquashBot.Gameplay
                 if (Free(next)) pos = next;
                 heading = Mathf.MoveTowardsAngle(heading, Mathf.Atan2(move.x, move.z) * Mathf.Rad2Deg, 720f * dt);
                 phase += dt * 9f * amount;
+                // The camera keeps swinging round behind the robot, so walking and turning always look forward.
+                // (Not while backing up: the camera would chase the robot round in circles.)
+                if (lookAround <= 0f && stick.y > -0.35f) yaw = Mathf.MoveTowardsAngle(yaw, heading, FollowSpeed * amount * dt);
             }
+            lookAround = Mathf.Max(0f, lookAround - dt);
             PoseRobot(amount, dt);
             UpdateCamera(dt);
         }
 
         private static bool Free(Vector3 p)
         {
-            const float min = -0.45f, max = City.Size - 0.55f;
+            float min = -0.45f, max = City.Size - 0.55f;
             if (p.x < min || p.z < min || p.x > max || p.z > max) return false;
             // Check the robot's footprint corners against the pieces standing there.
             for (int i = 0; i < 4; i++)

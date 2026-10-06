@@ -56,6 +56,9 @@ namespace SquashBot.Gameplay
 
         public bool Active { get; private set; }
 
+        /// <summary>The middle of the plot (it grows with the worlds reached).</summary>
+        private static float Mid => (City.Size - 1) * 0.5f;
+
         public void Init(Robot robotRef, GridView view, CameraRig rigRef, FxSystem fxRef)
         {
             robot = robotRef;
@@ -96,6 +99,7 @@ namespace SquashBot.Gameplay
         public void Open()
         {
             Active = true;
+            City.RefreshSize();
             // The plot uses the main game's cells.
             var grid = new GridModel(City.Size, City.Size);
             gridView.Build(grid, fx);
@@ -106,7 +110,7 @@ namespace SquashBot.Gameplay
             pan = Vector3.zero;
             zoom = 1f;
             ApplyView();
-            rig.FrameUpper(BuildLift, BuildZoom);
+            rig.FrameUpper(BuildLift, BuildZoom * Mathf.Lerp(1f, 0.8f, (City.Size - City.MinSize) / (float)(City.MaxSize - City.MinSize)));
 
             City.RefreshRequests();
             bool welcome = City.Visit();
@@ -149,13 +153,13 @@ namespace SquashBot.Gameplay
                 rig.SetStyle(CameraStyle.Still);
                 rig.PlayIntro();
                 ApplyView();
-                rig.FrameUpper(BuildLift, BuildZoom);
+                rig.FrameUpper(BuildLift, BuildZoom * Mathf.Lerp(1f, 0.8f, (City.Size - City.MinSize) / (float)(City.MaxSize - City.MinSize)));
                 ui.SetWalking(false);
             }
             else
             {
                 robot.gameObject.SetActive(true);
-                var start = new Vector3(Mathf.Clamp(pan.x + 3.5f, 0f, City.Size - 1), 0f, Mathf.Clamp(pan.z + 3.5f, 0f, City.Size - 1));
+                var start = new Vector3(Mathf.Clamp(pan.x + Mid, 0f, City.Size - 1), 0f, Mathf.Clamp(pan.z + Mid, 0f, City.Size - 1));
                 walker.Begin(start);
                 ui.SetWalking(true);
                 TipOnce("walk");
@@ -330,7 +334,7 @@ namespace SquashBot.Gameplay
             if (coins <= 0) return;
             scene.Dance(resident);
             if (bestFriend) scene.MakeBestFriend(resident);
-            var at = scene.ResidentHead(resident, out var head) ? head : new Vector3(3.5f, 1f, 3.5f);
+            var at = scene.ResidentHead(resident, out var head) ? head : new Vector3(Mid, 1f, Mid);
             for (int i = 0; i < 8; i++) CoinFlown?.Invoke(at);
             Floated?.Invoke(at, "+" + coins, Palette.UiGold);
             fx.Burst(at, Palette.Coin, Palette.CoinGlow, 30, 5f);
@@ -388,8 +392,8 @@ namespace SquashBot.Gameplay
                 else if (panning && pressMoved && ScreenToGround(lastPointer, out var a) && ScreenToGround(p0, out var b))
                 {
                     pan += a - b;
-                    pan.x = Mathf.Clamp(pan.x, -4f, 4f);
-                    pan.z = Mathf.Clamp(pan.z, -4f, 4f);
+                    pan.x = Mathf.Clamp(pan.x, -Mid, Mid);
+                    pan.z = Mathf.Clamp(pan.z, -Mid, Mid);
                     ApplyView();
                 }
                 lastPointer = p0;
@@ -445,17 +449,17 @@ namespace SquashBot.Gameplay
                 // Locked pieces can be made the goal shown on the result card.
                 Goal.Toggle(Goal.ForCity(p));
                 AudioManager.PlaySfx(Sfx.Click, 0.7f, Goal.Is(Goal.ForCity(p)) ? 1.3f : 0.9f);
-                Floated?.Invoke(new Vector3(3.5f, 1.5f, 3.5f) + pan, Goal.Is(Goal.ForCity(p)) ? Loc.T("city.goalSet") : Loc.T("city.goalOff"), Palette.UiGold);
+                Floated?.Invoke(new Vector3(Mid, 1.5f, Mid) + pan, Goal.Is(Goal.ForCity(p)) ? Loc.T("city.goalSet") : Loc.T("city.goalOff"), Palette.UiGold);
                 ui.Refresh();
                 return;
             }
-            if (City.Full) { Floated?.Invoke(new Vector3(3.5f, 1.5f, 3.5f), Loc.T("city.full"), Palette.UiRed); return; }
+            if (City.Full) { Floated?.Invoke(new Vector3(Mid, 1.5f, Mid), Loc.T("city.full"), Palette.UiRed); return; }
             // A tap drops the piece's ghost on the nearest free spot in the middle of the view.
             ghostPiece = p;
             ghostRot = 0;
             movingUid = 0;
             Deselect();
-            var mid = new Vector2Int(Mathf.RoundToInt(3.5f + pan.x - (p.w - 1) * 0.5f), Mathf.RoundToInt(3.5f + pan.z - (p.h - 1) * 0.5f));
+            var mid = new Vector2Int(Mathf.RoundToInt(Mid + pan.x - (p.w - 1) * 0.5f), Mathf.RoundToInt(Mid + pan.z - (p.h - 1) * 0.5f));
             ghostCell = City.FindSpot(p, 0, mid.x, mid.y, out var spot) ? spot : ClampCell(mid, p, 0);
             UpdateGhost();
             AudioManager.PlaySfx(Sfx.Hop, 0.6f, 1.2f);

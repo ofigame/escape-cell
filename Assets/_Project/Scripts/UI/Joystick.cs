@@ -12,6 +12,9 @@ namespace SquashBot.UI
     public class Joystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
     {
         private RectTransform pad, knob;
+
+        /// <summary>Test hooks steer the stick from code.</summary>
+        public static Vector2? Override;
         private float radius;
         private Vector2 touch;
         private bool held;
@@ -20,6 +23,7 @@ namespace SquashBot.UI
         {
             get
             {
+                if (Override.HasValue) return Override.Value;
                 var keys = Keys();
                 return keys != Vector2.zero ? keys : held ? touch : Vector2.zero;
             }
