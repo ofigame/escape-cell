@@ -14,7 +14,9 @@ namespace SquashBot.Data
         /// <summary>Step on every tile to paint the whole platform.</summary>
         Paint,
         /// <summary>Coins rain down: grab the target number before the clock runs out.</summary>
-        CoinRain
+        CoinRain,
+        /// <summary>Bonus treasure vault: grab as many coins as you can; nothing to lose.</summary>
+        Treasure
     }
 
     [Serializable]

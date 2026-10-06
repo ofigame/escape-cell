@@ -80,6 +80,12 @@ namespace SquashBot.Gameplay
         private GridPos keyPos;
         private int keysCollected;
         private readonly HashSet<GridPos> painted = new HashSet<GridPos>();
+        private bool bonusRun;
+        private StarRules.Goals starGoals;
+
+        // A rare surprise bonus round after beating a new level, on top of the ones stars unlock.
+        private const float SurpriseBonusChance = 0.07f;
+        private const int SurpriseFromLevel = 4;
 
         private int World => LevelCatalog.WorldOf(levelIndex);
         private bool RescueEnabled => World >= RescueFromWorld;
@@ -145,7 +151,12 @@ namespace SquashBot.Gameplay
             ui.PlayPressed += () => ShowMap();
             ui.LevelChosen += StartLevel;
             ui.RetryPressed += () => StartLevel(levelIndex);
-            ui.NextPressed += () => ShowMap(animateFrom: levelIndex);
+            ui.NextPressed += () =>
+            {
+                if (bonusRun) ShowMap();
+                else ShowMap(animateFrom: levelIndex);
+            };
+            ui.BonusPressed += StartBonus;
             ui.MapPressed += () => ShowMap();
             ui.MenuPressed += ShowMenu;
             ui.PausePressed += Pause;
@@ -238,11 +249,35 @@ namespace SquashBot.Gameplay
                 return;
             }
 
+            bonusRun = false;
+            levelIndex = Mathf.Clamp(index, 0, LevelCount - 1);
+            level = levelSet.levels[levelIndex].Clone();
+            bool assisted = ApplyAssist(level);
+            BeginRun();
+            ShowLevelIntro(assisted);
+            RefreshHud();
+        }
+
+        /// <summary>A bonus treasure vault: free (no life), nothing to lose, themed like the world the player is in.</summary>
+        private void StartBonus()
+        {
+            if (Progress.BonusTokens <= 0) return;
+            Progress.BonusTokens--;
+            bonusRun = true;
+            levelIndex = NextLevel;
+            level = LevelCatalog.Treasure(Random.Range(0, 100000));
+            BeginRun();
+            ui.ShowIntro(Loc.T("level.bonus"), MissionText(level, upper: true));
+            AudioManager.PlaySfx(Sfx.Win, 0.7f, 1.2f);
+            RefreshHud();
+        }
+
+        /// <summary>Builds the platform for <see cref="level"/> and starts play.</summary>
+        private void BeginRun()
+        {
             ResetRun();
             closeCalls = 0;
             jumpHintShown = false;
-            levelIndex = Mathf.Clamp(index, 0, LevelCount - 1);
-            level = levelSet.levels[levelIndex].Clone();
             coinsThisRun = 0;
             elapsed = 0f;
             armorsThisLevel = 0;
@@ -250,7 +285,6 @@ namespace SquashBot.Gameplay
             coinsTowardRescue = 0;
             hovering = false;
             hoverCooldown = 0f;
-            bool assisted = ApplyAssist(level);
             input.HoldEnabled = HoverEnabled;
 
             ApplyTheme(levelIndex);
@@ -267,10 +301,9 @@ namespace SquashBot.Gameplay
             coins.Begin(grid, level);
             powerUps.Begin(grid, level);
 
+            starGoals = StarRules.For(level, grid.FloorCount);
             State = GameState.Playing;
-            ui.ShowHud(levelIndex);
-            ShowLevelIntro(assisted);
-            RefreshHud();
+            ui.ShowHud(bonusRun ? -1 : levelIndex);
         }
 
         private void Pause()
@@ -582,7 +615,15 @@ namespace SquashBot.Gameplay
                     break;
                 case MissionType.CoinRain:
                     // The clock is the enemy here: miss the target and the round is lost.
-                    if (elapsed >= level.surviveSeconds) TimeUp();
+                    // Reaching the target early doesn't end the round: extra coins earn extra stars.
+                    if (elapsed >= level.surviveSeconds)
+                    {
+                        if (coinsThisRun >= level.coinTarget) Win();
+                        else TimeUp();
+                    }
+                    break;
+                case MissionType.Treasure:
+                    if (elapsed >= level.surviveSeconds) Win();
                     break;
                 case MissionType.Exit:
                     // A block, a hole or fire took the key's tile: it hops somewhere else.
@@ -695,8 +736,10 @@ namespace SquashBot.Gameplay
                 AudioManager.PlaySfx(Sfx.Shield, 0.6f, 1.2f);
             }
 
-            if ((level.mission == MissionType.CollectCoins || level.mission == MissionType.CoinRain) && coinsThisRun >= level.coinTarget)
+            if (level.mission == MissionType.CollectCoins && coinsThisRun >= level.coinTarget)
                 Win();
+            else if (level.mission == MissionType.CoinRain && coinsThisRun == level.coinTarget)
+                FloatAt(GridView.ToWorld(p) + Vector3.up * 0.5f, Loc.T("float.target"), Palette.UiCyan);
         }
 
         private void OnPowerUpCollected(PowerUpType type, GridPos p)
@@ -736,6 +779,11 @@ namespace SquashBot.Gameplay
             Haptics.Medium();
 
             SaveData.Coins += coinsThisRun;
+            if (bonusRun)
+            {
+                ShowBonusResult();
+                return;
+            }
             PlayerPrefs.DeleteKey(FailKey(levelIndex));
 
             // Only beating the newest level (unlocking the next one) refills lives; replays don't.
@@ -744,10 +792,60 @@ namespace SquashBot.Gameplay
             if (levelIndex + 1 > SaveData.UnlockedLevel && levelIndex + 1 < LevelCount)
                 SaveData.UnlockedLevel = levelIndex + 1;
 
+            // Stars: how well the level went. New stars fill the bonus meter.
+            int stars = StarRules.Evaluate(starGoals, coinsThisRun, elapsed);
+            int unlockedBonus = Progress.Award(levelIndex, stars, out _);
+            bool surprise = false;
+            if (unlockedBonus == 0 && unlockedNew && levelIndex + 1 >= SurpriseFromLevel && Progress.BonusTokens == 0 && Random.value < SurpriseBonusChance)
+            {
+                Progress.BonusTokens++;
+                surprise = true;
+            }
+
             bool hasNext = levelIndex + 1 < LevelCount;
             bool newWorld = unlockedNew && hasNext && (levelIndex + 1) % LevelCatalog.LevelsPerWorld == 0;
-            string subtitle = Loc.T(newWorld ? "result.newWorld" : hasNext ? "result.next" : "result.allDone");
-            StartCoroutine(ShowResultDelayed(true, subtitle, coinsThisRun, hasNext));
+            string note = surprise ? Loc.T("bonus.surprise")
+                : unlockedBonus > 0 ? Loc.T("bonus.ready")
+                : stars < 3 ? StarHint(stars)
+                : Loc.T("star.max");
+
+            StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
+            {
+                won = true,
+                hasNext = hasNext,
+                subtitle = Loc.T(newWorld ? "result.newWorld" : hasNext ? "result.next" : "result.allDone"),
+                note = note,
+                coins = coinsThisRun,
+                stars = stars,
+                bonusAvailable = Progress.BonusTokens > 0,
+                meter = unlockedBonus > 0 || surprise ? 1f : Progress.Meter / (float)Progress.StarsPerBonus,
+                meterText = Loc.F("bonus.meter", unlockedBonus > 0 || surprise ? Progress.StarsPerBonus : Progress.Meter, Progress.StarsPerBonus),
+            }));
+        }
+
+        /// <summary>What the next star asks for, e.g. "Next star: 14 coins".</summary>
+        private string StarHint(int stars)
+        {
+            float goal = stars >= 2 ? starGoals.three : starGoals.two;
+            return starGoals.timed
+                ? Loc.F("star.time", goal.ToString("0", CultureInfo.InvariantCulture))
+                : Loc.F("star.coins", goal.ToString("0", CultureInfo.InvariantCulture));
+        }
+
+        /// <summary>A bonus round always ends well: the coins are kept, nothing else changes.</summary>
+        private void ShowBonusResult()
+        {
+            StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
+            {
+                won = true,
+                bonusRound = true,
+                hasNext = true,
+                subtitle = Loc.T("result.bonusSub"),
+                coins = coinsThisRun,
+                bonusAvailable = Progress.BonusTokens > 0,
+                meter = Progress.Meter / (float)Progress.StarsPerBonus,
+                meterText = Loc.F("bonus.meter", Progress.Meter, Progress.StarsPerBonus),
+            }));
         }
 
         private void Lose(string reason)
@@ -756,25 +854,37 @@ namespace SquashBot.Gameplay
             hazards.Freeze();
             coins.Freeze();
             powerUps.Freeze();
-
-            PlayerPrefs.SetInt(FailKey(levelIndex), PlayerPrefs.GetInt(FailKey(levelIndex), 0) + 1);
             if (hovering) { hovering = false; ShowHoverMarker(false); }
 
             // Coins picked up are kept even on a loss, so every run feels worth it.
             SaveData.Coins += coinsThisRun;
-            StartCoroutine(ShowResultDelayed(false, reason + "\n" + Loc.F("lives.left", Lives.Count), coinsThisRun, false));
+            if (bonusRun)
+            {
+                ShowBonusResult();
+                return;
+            }
+
+            PlayerPrefs.SetInt(FailKey(levelIndex), PlayerPrefs.GetInt(FailKey(levelIndex), 0) + 1);
+            StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
+            {
+                won = false,
+                subtitle = reason + "\n" + Loc.F("lives.left", Lives.Count),
+                coins = coinsThisRun,
+                meter = Progress.Meter / (float)Progress.StarsPerBonus,
+                meterText = Loc.F("bonus.meter", Progress.Meter, Progress.StarsPerBonus),
+            }));
         }
 
-        private IEnumerator ShowResultDelayed(bool won, string subtitle, int earned, bool hasNext)
+        private IEnumerator ShowResultDelayed(UIController.ResultInfo info)
         {
             ui.SetWarning(false);
             ui.SetShield(0f, 1f);
-            yield return new WaitForSecondsRealtime(won ? 1.4f : 1.2f);
+            yield return new WaitForSecondsRealtime(info.won ? 1.4f : 1.2f);
             slowMoLeft = 0f;
             Time.timeScale = 1f;
-            if (!won) AudioManager.PlaySfx(Sfx.Lose, 0.8f);
+            if (!info.won) AudioManager.PlaySfx(Sfx.Lose, 0.8f);
             cameraRig.SetMenuFocus(true);
-            ui.ShowResult(won, subtitle, earned, hasNext);
+            ui.ShowResult(info);
         }
 
         // ---------- Mission ----------
@@ -914,6 +1024,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Exit: return Loc.T("mission.exit" + suffix);
                 case MissionType.Paint: return Loc.T("mission.paint" + suffix);
                 case MissionType.CoinRain: return Loc.F("mission.rain" + suffix, data.coinTarget);
+                case MissionType.Treasure: return Loc.T("mission.treasure" + suffix);
                 default: return Loc.F("mission.survive" + suffix, data.surviveSeconds.ToString("0", CultureInfo.InvariantCulture));
             }
         }
@@ -932,6 +1043,7 @@ namespace SquashBot.Gameplay
                     break;
                 case MissionType.Paint: text = Loc.F("hud.paint", painted.Count, grid.FloorCount); break;
                 case MissionType.CoinRain: text = Loc.F("hud.rain", coinsThisRun, level.coinTarget, Seconds(level.surviveSeconds - elapsed)); break;
+                case MissionType.Treasure: text = Loc.F("hud.treasure", coinsThisRun, Seconds(level.surviveSeconds - elapsed)); break;
                 default: text = Loc.F("hud.survive", Seconds(level.surviveSeconds - elapsed)); break;
             }
             ui.SetMission(text, MissionProgress(), coinsThisRun);

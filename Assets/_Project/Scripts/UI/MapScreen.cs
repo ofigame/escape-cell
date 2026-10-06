@@ -23,6 +23,7 @@ namespace SquashBot.UI
 
         public event Action<int> LevelChosen;
         public event Action BackPressed;
+        public event Action BonusPressed;
 
         private UiScreen screen;
         private ScrollRect scroll;
@@ -30,6 +31,9 @@ namespace SquashBot.UI
         private RectTransform marker;
         private TextMeshProUGUI coinsText;
         private TextMeshProUGUI livesText;
+        private Button bonusButton;
+        private TextMeshProUGUI bonusCount;
+        private int builtStars = -1;
         private readonly List<RectTransform> nodes = new List<RectTransform>();
         private readonly List<Texture2D> textures = new List<Texture2D>();
 
@@ -84,6 +88,15 @@ namespace SquashBot.UI
             livesText = UiFactory.TextBox("Value", lives, new Vector2(0f, 0.5f), new Vector2(104f, 0f), new Vector2(190f, 90f),
                 "", 44f, Palette.UiText, align: TextAlignmentOptions.Left);
 
+            // A gift button next to the back arrow whenever bonus rounds are waiting.
+            bonusButton = UiFactory.MakeButton(bar, "", Kind.Gold, new Vector2(0f, 0.5f), new Vector2(176f, 0f), new Vector2(124f, 124f), () => BonusPressed?.Invoke());
+            GiftIcon(bonusButton.transform.Find("Face"));
+            var badge = UiFactory.Box("Count", bonusButton.transform, new Vector2(1f, 1f), new Vector2(-6f, -6f), new Vector2(56f, 56f));
+            badge.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(badge, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
+            bonusCount = UiFactory.Text(badge, "1", 34f, Color.white);
+            bonusButton.gameObject.AddComponent<Pulse>();
+
             var coins = UiFactory.Pill("Coins", bar, new Vector2(1f, 0.5f), new Vector2(-36f, 0f), new Vector2(240f, 100f), UiFactory.PillColor);
             UIController.CoinIcon(coins, new Vector2(56f, 0f));
             coinsText = UiFactory.TextBox("Value", coins, new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Vector2(130f, 90f),
@@ -93,7 +106,12 @@ namespace SquashBot.UI
         /// <summary>(Re)builds the nodes for the current progress and scrolls to <paramref name="focusLevel"/>.</summary>
         public void Show(int unlockedLevel, int coins, int focusLevel, int animateFrom = -1)
         {
-            if (unlockedLevel != unlocked) Rebuild(unlockedLevel);
+            int stars = Progress.TotalStars(levelCount);
+            if (unlockedLevel != unlocked || stars != builtStars) Rebuild(unlockedLevel);
+            builtStars = stars;
+            int tokens = Progress.BonusTokens;
+            bonusButton.gameObject.SetActive(tokens > 0);
+            bonusCount.text = tokens.ToString();
             coinsText.text = coins.ToString();
             screen.Show();
 
@@ -221,6 +239,7 @@ namespace SquashBot.UI
             else
             {
                 UiFactory.Text(node, (level + 1).ToString(), current ? 72f : 60f, UiFactory.TextDark);
+                if (completed) NodeStars(node, Progress.Stars(level));
                 if (completed)
                 {
                     var badge = UiFactory.Box("Done", node, new Vector2(1f, 1f), new Vector2(6f, 6f), new Vector2(48f, 48f));
@@ -243,6 +262,34 @@ namespace SquashBot.UI
 
             if (current) node.gameObject.AddComponent<Pulse>();
             return node;
+        }
+
+        /// <summary>Three little stars under a finished level, the earned ones gold.</summary>
+        private static void NodeStars(RectTransform node, int stars)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                var star = UiFactory.Box("Star", node, new Vector2(0.5f, 0f), new Vector2((i - 1) * 46f, i == 1 ? -26f : -18f), new Vector2(50f, 50f));
+                star.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(star, i < stars ? Palette.UiGold : new Color(0.1f, 0.08f, 0.22f, 0.75f), UiSprites.Star).raycastTarget = false;
+            }
+        }
+
+        /// <summary>A gift box drawn from UI shapes.</summary>
+        private static void GiftIcon(Transform face)
+        {
+            var dark = UiFactory.TextDark;
+            var box = UiFactory.Box("Box", face, new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(62f, 44f));
+            UiFactory.Fill(box, dark, UiSprites.Rounded, 6f).raycastTarget = false;
+            var lid = UiFactory.Box("Lid", face, new Vector2(0.5f, 0.5f), new Vector2(0f, 18f), new Vector2(74f, 18f));
+            UiFactory.Fill(lid, dark, UiSprites.Rounded, 8f).raycastTarget = false;
+            var ribbon = UiFactory.Box("Ribbon", face, new Vector2(0.5f, 0.5f), new Vector2(0f, -2f), new Vector2(12f, 64f));
+            UiFactory.Fill(ribbon, Palette.UiGold, UiSprites.Rounded, 12f).raycastTarget = false;
+            foreach (float x in new[] { -14f, 14f })
+            {
+                var bow = UiFactory.Box("Bow", face, new Vector2(0.5f, 0.5f), new Vector2(x, 34f), new Vector2(24f, 18f));
+                UiFactory.Fill(bow, dark, UiSprites.Circle).raycastTarget = false;
+            }
         }
 
         /// <summary>A small padlock drawn from UI shapes.</summary>

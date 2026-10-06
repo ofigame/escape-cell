@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using SquashBot.Audio;
 using SquashBot.Data;
 using SquashBot.Monetization;
 using SquashBot.Visual;
@@ -37,6 +38,17 @@ namespace SquashBot.UI
         public event Action<SettingKind> SettingToggled;
         public event Action<int> LevelChosen;
         public event Action WatchAdPressed;
+        public event Action BonusPressed;
+
+        /// <summary>Everything the result card shows.</summary>
+        public struct ResultInfo
+        {
+            public bool won, bonusRound, hasNext, bonusAvailable;
+            public string subtitle, note;
+            public int coins, stars;
+            public float meter;
+            public string meterText;
+        }
 
         private static readonly Vector2 Top = new Vector2(0.5f, 1f);
         private static readonly Vector2 Bottom = new Vector2(0.5f, 0f);
@@ -93,7 +105,14 @@ namespace SquashBot.UI
         private UiScreen pause;
         private UiScreen result;
         private TextMeshProUGUI resultTitle, resultSub, resultReward;
-        private Button resultNext, resultRetry, resultMap, resultMenu;
+        private Button resultNext, resultRetry, resultMap, resultMenu, resultBonus;
+        private RectTransform resultStarRow;
+        private readonly Image[] resultStars = new Image[3];
+        private TextMeshProUGUI resultNote, resultMeterText;
+        private Image resultMeterFill;
+        private int starsEarned;
+        private float starTime = 99f;
+        private float meterShown, meterTarget;
 
         public MapScreen Map { get; private set; }
 
@@ -128,6 +147,7 @@ namespace SquashBot.UI
             Map = MapScreen.Create(root, levelCount);
             Map.LevelChosen += level => LevelChosen?.Invoke(level);
             Map.BackPressed += () => MenuPressed?.Invoke();
+            Map.BonusPressed += () => BonusPressed?.Invoke();
             BuildPause(root);
             BuildResult(root);
             BuildSettings(root);
@@ -391,7 +411,7 @@ namespace SquashBot.UI
             HideAll();
             hud.Show();
             SetBanner(false);
-            hudLevel.text = Loc.F("level", levelIndex + 1);
+            hudLevel.text = levelIndex < 0 ? Loc.T("level.bonus") : Loc.F("level", levelIndex + 1);
         }
 
         public void SetMission(string text, float progress, int coinsThisRun)
@@ -478,37 +498,107 @@ namespace SquashBot.UI
         {
             result = UiScreen.Create("Result", root, out var t);
             UiFactory.Dim(t, new Color(0.06f, 0.05f, 0.18f, 0.45f));
-            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1030f));
+            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1200f));
 
-            resultTitle = UiFactory.TextBox("Title", card, Top, new Vector2(0f, -60f), new Vector2(820f, 140f), "", 100f, Palette.UiCyan, title: true);
-            resultSub = UiFactory.TextBox("Subtitle", card, Top, new Vector2(0f, -190f), new Vector2(800f, 110f), "", 40f,
+            resultTitle = UiFactory.TextBox("Title", card, Top, new Vector2(0f, -50f), new Vector2(820f, 130f), "", 96f, Palette.UiCyan, title: true);
+            resultSub = UiFactory.TextBox("Subtitle", card, Top, new Vector2(0f, -175f), new Vector2(800f, 100f), "", 38f,
                 new Color(0.88f, 0.89f, 1f, 0.85f), FontStyles.Normal);
 
-            var reward = UiFactory.Pill("Reward", card, Top, new Vector2(0f, -320f), new Vector2(360f, 104f), new Color(0f, 0f, 0f, 0.22f));
+            // Three stars that pop in one after another (the middle one sits a little higher and bigger).
+            resultStarRow = UiFactory.Box("Stars", card, Top, new Vector2(0f, -285f), new Vector2(560f, 150f));
+            for (int i = 0; i < 3; i++)
+            {
+                float size = i == 1 ? 150f : 120f;
+                var star = UiFactory.Box("Star" + i, resultStarRow, Middle, new Vector2((i - 1) * 170f, i == 1 ? 14f : -6f), new Vector2(size, size));
+                star.pivot = new Vector2(0.5f, 0.5f);
+                resultStars[i] = UiFactory.Fill(star, Color.white, UiSprites.Star);
+                resultStars[i].raycastTarget = false;
+            }
+
+            var reward = UiFactory.Pill("Reward", card, Top, new Vector2(0f, -455f), new Vector2(360f, 100f), new Color(0f, 0f, 0f, 0.22f));
             CoinIcon(reward, new Vector2(70f, 0f));
             resultReward = UiFactory.TextBox("Value", reward, new Vector2(0f, 0.5f), new Vector2(120f, 0f), new Vector2(220f, 90f),
                 "", 54f, Palette.UiGold, align: TextAlignmentOptions.Left);
 
-            resultNext = UiFactory.MakeButton(card, Loc.T("btn.next"), Kind.Primary, Top, new Vector2(0f, -490f), new Vector2(620f, 160f), () => NextPressed?.Invoke(), 72f);
-            resultRetry = UiFactory.MakeButton(card, Loc.T("btn.retry"), Kind.Primary, Top, new Vector2(0f, -490f), new Vector2(620f, 160f), () => RetryPressed?.Invoke(), 72f);
-            resultMap = UiFactory.MakeButton(card, Loc.T("btn.map"), Kind.Secondary, Top, new Vector2(0f, -670f), new Vector2(620f, 150f), () => MapPressed?.Invoke(), 62f);
-            resultMenu = UiFactory.MakeButton(card, Loc.T("btn.menu"), Kind.Secondary, Top, new Vector2(0f, -840f), new Vector2(620f, 150f), () => MenuPressed?.Invoke(), 62f);
+            resultNote = UiFactory.TextBox("Note", card, Top, new Vector2(0f, -565f), new Vector2(800f, 56f), "", 36f, Palette.UiGold, FontStyles.Bold);
+
+            // Bonus meter: stars fill it, a full meter unlocks a bonus round.
+            UiFactory.Bar(card, Top, new Vector2(-60f, -640f), new Vector2(560f, 30f), Palette.UiGold, out resultMeterFill);
+            resultMeterText = UiFactory.TextBox("Meter", card, Top, new Vector2(335f, -628f), new Vector2(200f, 54f), "", 32f,
+                new Color(1f, 1f, 1f, 0.8f), FontStyles.Bold, align: TextAlignmentOptions.Left);
+
+            resultNext = UiFactory.MakeButton(card, Loc.T("btn.next"), Kind.Primary, Top, new Vector2(0f, -710f), new Vector2(620f, 150f), () => NextPressed?.Invoke(), 70f);
+            resultRetry = UiFactory.MakeButton(card, Loc.T("btn.retry"), Kind.Primary, Top, new Vector2(0f, -710f), new Vector2(620f, 150f), () => RetryPressed?.Invoke(), 70f);
+            resultBonus = UiFactory.MakeButton(card, Loc.T("btn.bonus"), Kind.Gold, Top, new Vector2(0f, -710f), new Vector2(620f, 150f), () => BonusPressed?.Invoke(), 76f);
+            resultBonus.gameObject.AddComponent<Pulse>();
+            resultMap = UiFactory.MakeButton(card, Loc.T("btn.map"), Kind.Secondary, Top, new Vector2(0f, -880f), new Vector2(620f, 135f), () => MapPressed?.Invoke(), 60f);
+            resultMenu = UiFactory.MakeButton(card, Loc.T("btn.menu"), Kind.Secondary, Top, new Vector2(0f, -1035f), new Vector2(620f, 135f), () => MenuPressed?.Invoke(), 60f);
         }
 
-        public void ShowResult(bool won, string subtitle, int coinsEarned, bool hasNext)
+        public void ShowResult(ResultInfo info)
         {
             pause.Hide(true);
             result.Show();
             SetBanner(true);
-            resultTitle.text = Loc.T(won ? "result.win" : "result.lose");
-            resultTitle.color = won ? Palette.UiCyan : Palette.UiRed;
-            resultSub.text = subtitle;
-            resultReward.text = $"+{coinsEarned}";
+            resultTitle.text = Loc.T(info.bonusRound ? "result.bonusDone" : info.won ? "result.win" : "result.lose");
+            resultTitle.color = info.bonusRound ? Palette.UiGold : info.won ? Palette.UiCyan : Palette.UiRed;
+            resultSub.text = info.subtitle;
+            resultReward.text = $"+{info.coins}";
+            resultNote.text = info.note ?? "";
 
-            // Win: NEXT (via the map), MAP, MENU.  Lose: RETRY, MAP, MENU.
-            bool next = won && hasNext;
+            bool showStars = info.won && !info.bonusRound;
+            resultStarRow.gameObject.SetActive(showStars);
+            starsEarned = showStars ? info.stars : 0;
+            starTime = showStars ? 0f : 99f;
+            for (int i = 0; i < 3; i++)
+            {
+                resultStars[i].color = new Color(1f, 1f, 1f, 0.14f);
+                resultStars[i].rectTransform.localScale = Vector3.one;
+            }
+
+            meterTarget = info.meter;
+            meterShown = Mathf.Min(meterShown, meterTarget);
+            UiFactory.SetBar(resultMeterFill, meterShown);
+            resultMeterText.text = info.meterText;
+
+            // Win: NEXT (via the map) or BONUS when one is waiting, MAP, MENU.  Lose: RETRY, MAP, MENU.
+            bool bonus = info.bonusAvailable && (info.won || info.bonusRound);
+            bool next = !bonus && (info.won || info.bonusRound) && info.hasNext;
+            resultBonus.gameObject.SetActive(bonus);
             resultNext.gameObject.SetActive(next);
-            resultRetry.gameObject.SetActive(!next);
+            resultRetry.gameObject.SetActive(!bonus && !next);
+        }
+
+        /// <summary>Stars pop in one by one with a chime; the bonus meter fills up behind them.</summary>
+        private void UpdateResultJuice(float dt)
+        {
+            if (!result.IsVisible) return;
+
+            if (starTime < 3f)
+            {
+                float before = starTime;
+                starTime += dt;
+                for (int i = 0; i < starsEarned; i++)
+                {
+                    float at = 0.35f + i * 0.32f;
+                    if (before < at && starTime >= at)
+                    {
+                        AudioManager.PlaySfx(Sfx.Coin, 0.9f, 1f + i * 0.18f);
+                        Haptics.Light();
+                    }
+                    float t = Mathf.Clamp01((starTime - at) / 0.3f);
+                    if (starTime < at) continue;
+                    resultStars[i].color = Color.Lerp(Color.white, Palette.UiGold, t);
+                    float pop = t < 1f ? 1f + Mathf.Sin(t * Mathf.PI) * 0.45f : 1f;
+                    resultStars[i].rectTransform.localScale = Vector3.one * pop;
+                }
+            }
+
+            if (meterShown < meterTarget && starTime > 0.35f + starsEarned * 0.32f)
+            {
+                meterShown = Mathf.MoveTowards(meterShown, meterTarget, dt * 0.8f);
+                UiFactory.SetBar(resultMeterFill, meterShown);
+            }
         }
 
         // ---------- Banner ----------
@@ -609,6 +699,7 @@ namespace SquashBot.UI
             float dt = Time.unscaledDeltaTime;
 
             UpdateJuice(dt);
+            UpdateResultJuice(dt);
 
             livesRefresh -= dt;
             if (livesRefresh <= 0f)

@@ -182,7 +182,9 @@ namespace SquashBot.UI
         {
             Primary,
             Secondary,
-            Icon
+            Icon,
+            /// <summary>Gold call to action (bonus rounds).</summary>
+            Gold
         }
 
         public static Button MakeButton(Transform parent, string text, ButtonKind kind, Vector2 anchor, Vector2 position, Vector2 size, Action onClick, float fontSize = 64f)
@@ -190,7 +192,7 @@ namespace SquashBot.UI
             var root = Box("Button " + text, parent, anchor, position, size);
 
             var shadow = Rect("Shadow", root, Vector2.zero, Vector2.one, new Vector2(-26f, -38f), new Vector2(26f, 14f));
-            Fill(shadow, new Color(0.05f, 0.03f, 0.15f, kind == ButtonKind.Primary ? 0.45f : 0.25f), UiSprites.Shadow, 0.8f).raycastTarget = false;
+            Fill(shadow, new Color(0.05f, 0.03f, 0.15f, kind == ButtonKind.Primary || kind == ButtonKind.Gold ? 0.45f : 0.25f), UiSprites.Shadow, 0.8f).raycastTarget = false;
 
             var face = Stretch("Face", root);
             Color fill, textColor;
@@ -198,6 +200,10 @@ namespace SquashBot.UI
             {
                 case ButtonKind.Primary:
                     fill = Palette.UiCyan;
+                    textColor = TextDark;
+                    break;
+                case ButtonKind.Gold:
+                    fill = Palette.UiGold;
                     textColor = TextDark;
                     break;
                 case ButtonKind.Icon:
@@ -211,7 +217,7 @@ namespace SquashBot.UI
             }
             var image = Fill(face, fill, UiSprites.Rounded, kind == ButtonKind.Icon ? 1.4f : 0.9f);
 
-            if (kind == ButtonKind.Primary)
+            if (kind == ButtonKind.Primary || kind == ButtonKind.Gold)
             {
                 // A soft highlight on the upper half reads as a glossy, pressable surface.
                 var gloss = Rect("Gloss", face, new Vector2(0f, 0.5f), Vector2.one, new Vector2(8f, 0f), new Vector2(-8f, -6f));
