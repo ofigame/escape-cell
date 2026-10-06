@@ -96,6 +96,17 @@ namespace SquashBot.Visual
                 "#1E4A4E", new Color(0.2f, 2.2f, 2.0f), "#0B2528", "#183C40", new Color(0.03f, 0.1f, 0.1f), new Color(0.2f, 2.2f, 2.0f), "#5CFFF0"),
             Make("world.galaxy", "#2A1450", "#120626", "#6A2FA0", "#C080FF", "#7A40B0", "#FFE8FF", "#D2C2EA",
                 "#DCCBF5", new Color(1.6f, 0.9f, 2.4f), "#4A2A80", "#F2E8FF", new Color(0.2f, 0.16f, 0.24f), new Color(1.6f, 0.9f, 2.4f), "#E0B0FF"),
+            // Floors 16-20 (the 200-level tower).
+            Make("world.crystal", "#2E5C6E", "#1A3448", "#4FB3BF", "#8FE3E8", "#6FC7D1", "#D8FBFF", "#BFE6EC",
+                "#CDEFF3", new Color(0.5f, 1.7f, 1.9f), "#3F7C8C", "#EAFBFD", new Color(0.14f, 0.2f, 0.22f), new Color(0.5f, 1.7f, 1.9f), "#7FF0E8"),
+            Make("world.festival", "#5B2C6F", "#331848", "#B05BC4", "#E79BF2", "#D58FE0", "#FBE2FF", "#E3C4EA",
+                "#F0D6F5", new Color(1.7f, 0.6f, 1.9f), "#7A3E8A", "#FBEAFE", new Color(0.22f, 0.15f, 0.24f), new Color(1.7f, 0.7f, 1.9f), "#FF9BF0"),
+            Make("world.factory", "#6E4A3A", "#3E281F", "#C4835B", "#F2B48F", "#E39A6C", "#FFE6D2", "#EED2C2",
+                "#F1DCCF", new Color(1.9f, 0.9f, 0.4f), "#8A5A44", "#FBEEE6", new Color(0.24f, 0.18f, 0.14f), new Color(1.9f, 1.0f, 0.45f), "#FFB36B"),
+            Make("world.funfair", "#6A2E4A", "#3A1830", "#D25A7A", "#FFC36B", "#FF8FA0", "#FFF0C4", "#F2CFD6",
+                "#F8DCE2", new Color(2.0f, 0.7f, 0.9f), "#8A3A5A", "#FFF0F3", new Color(0.24f, 0.16f, 0.18f), new Color(2.0f, 0.9f, 1.0f), "#FFD36B"),
+            Make("world.roof", "#3E4A8A", "#262C60", "#F2B66B", "#FFE0A0", "#FFD27A", "#FFF6DA", "#F5E2C8",
+                "#F7E6CF", new Color(2.0f, 1.4f, 0.5f), "#6A5A9A", "#FFF7EA", new Color(0.25f, 0.22f, 0.16f), new Color(2.0f, 1.5f, 0.6f), "#FFE07A"),
         };
 
         private static WorldTheme Make(string key, string bgTop, string bgBottom, string bgGlow, string bgLines, string bgPlanet,

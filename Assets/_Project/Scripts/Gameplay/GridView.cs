@@ -25,9 +25,28 @@ namespace SquashBot.Gameplay
             public float paintPop = 1f;
             public float bounce = 1f;
             public float bounceStrength = 1f;
+            public bool tinted;
+            public Color tint, tintGlow;
         }
 
         private TileView[,] tiles;
+
+        /// <summary>Dark floors: how lit each tile is (1 = normal, 0 = black). Warnings stay bright regardless.</summary>
+        public System.Func<GridPos, float> Light;
+
+        /// <summary>The tile's own transform (null for empty cells): floor rules hang their markings on it.</summary>
+        public Transform Surface(GridPos p) => tiles != null && InRange(p) && tiles[p.x, p.y] != null ? tiles[p.x, p.y].tile.transform : null;
+
+        private bool InRange(GridPos p) => p.x >= 0 && p.y >= 0 && p.x < tiles.GetLength(0) && p.y < tiles.GetLength(1);
+
+        /// <summary>Special tiles (ice, candy, glass, poison...) wear their own colour; null restores the normal look.</summary>
+        public void SetTint(GridPos p, Color? color, Color glow = default)
+        {
+            if (tiles == null || !InRange(p) || tiles[p.x, p.y] == null) return;
+            var t = tiles[p.x, p.y];
+            t.tinted = color.HasValue;
+            if (color.HasValue) { t.tint = color.Value; t.tintGlow = glow; }
+        }
         private FxSystem fx;
 
         public static Vector3 ToWorld(GridPos p) => new Vector3(p.x, 0f, p.y);
@@ -178,9 +197,12 @@ namespace SquashBot.Gameplay
         {
             if (tiles == null) return;
 
-            foreach (var t in tiles)
+            for (int gx = 0; gx < tiles.GetLength(0); gx++)
+            for (int gy = 0; gy < tiles.GetLength(1); gy++)
             {
+                var t = tiles[gx, gy];
                 if (t == null || !t.tile.activeSelf) continue;
+                float lit = Light == null ? 1f : Mathf.Clamp01(Light(new GridPos(gx, gy)));
 
                 if (t.fire != null && t.fire.activeSelf)
                 {
@@ -192,8 +214,8 @@ namespace SquashBot.Gameplay
                     continue;
                 }
 
-                var topColor = Palette.TileTop;
-                var topGlow = Palette.TileSelfLight;
+                var topColor = t.tinted ? t.tint : Palette.TileTop;
+                var topGlow = t.tinted ? t.tintGlow : Palette.TileSelfLight;
                 if (t.painted)
                 {
                     // Painted tiles glow in the accent color; a fresh coat flashes brighter for a moment.
@@ -204,12 +226,14 @@ namespace SquashBot.Gameplay
                     topColor = Paint(accent);
                     topGlow = Paint(accent) * (0.45f + flash * 1.4f);
                 }
+                // Darkness dims the tile itself; a warning still shows at full strength.
+                float dim = Mathf.Lerp(0.07f, 1f, lit);
                 MaterialFactory.SetColors(t.top,
-                    Color.Lerp(topColor, Palette.TileWarningTop, t.warning),
-                    Color.Lerp(topGlow, Color.black, t.warning));
+                    Color.Lerp(topColor * dim, Palette.TileWarningTop, t.warning),
+                    Color.Lerp(topGlow * dim, Color.black, t.warning));
                 MaterialFactory.SetColors(t.frame,
-                    Color.Lerp(Palette.TileTop, Palette.TileWarningTop, t.warning),
-                    Color.Lerp(Palette.TileGlow, Palette.TileWarningGlow, t.warning));
+                    Color.Lerp(Palette.TileTop * dim, Palette.TileWarningTop, t.warning),
+                    Color.Lerp(Palette.TileGlow * (dim * dim), Palette.TileWarningGlow * 1.3f, t.warning));
                 t.warning = 0f;
 
                 if (t.bounce < 1f)

@@ -15,7 +15,7 @@ namespace SquashBot.Data
     public static class LevelCatalog
     {
         public const int LevelsPerWorld = 10;
-        public const int WorldCount = 15;
+        public const int WorldCount = 20;
         public const int LevelCount = LevelsPerWorld * WorldCount;
 
         /// <summary>Shield pickups start appearing from this level (1-based) on.</summary>
@@ -72,8 +72,12 @@ namespace SquashBot.Data
             float d = Difficulty(index);
             // Shift the first eight missions per world so consecutive worlds don't open the same way.
             var mission = i >= 8 ? Rhythm[i] : Rhythm[(i + world) % 8];
+            var rules = Rules(world, index);
+            // Poison eats tiles for good, so a poisoned floor can never be fully painted.
+            if (mission == MissionType.Paint && (rules & FloorRule.Poison) != 0) mission = MissionType.CollectCoins;
 
             var level = Base(mission, d);
+            level.rules = rules;
             // Hazards only ever get added: holes from level 7, bombs from world 2, lines and fire from world 3.
             level.breakTiles = true;
             level.bombChance = Mathf.Lerp(0.08f, 0.28f, d);
@@ -98,6 +102,51 @@ namespace SquashBot.Data
                 Shape(level, index, d);
             }
             return level;
+        }
+
+        /// <summary>
+        /// Each floor from 8 on brings its own rule: currents, candy, poison, darkness, ice, wind, lasers and teleports,
+        /// trampolines, glass, blinking tiles, hunting blocks, barrels. The roof (floor 20) mixes two of them.
+        /// </summary>
+        private static readonly FloorRule[] Signature =
+        {
+            FloorRule.None, FloorRule.None, FloorRule.None, FloorRule.None, FloorRule.None, FloorRule.None, FloorRule.None,
+            FloorRule.Current, FloorRule.Sticky, FloorRule.Poison, FloorRule.Dark, FloorRule.Ice, FloorRule.Wind,
+            FloorRule.Laser | FloorRule.Teleport, FloorRule.Trampoline, FloorRule.Glass, FloorRule.Blink, FloorRule.Hunter,
+            FloorRule.Barrel, FloorRule.None,
+        };
+
+        public const int FirstRuleWorld = 7;
+
+        private static FloorRule Rules(int world, int index)
+        {
+            if (world < FirstRuleWorld) return FloorRule.None;
+            var rng = new System.Random(index * 131 + 7);
+
+            // Every single rule met so far.
+            var met = new List<FloorRule>();
+            for (int w = FirstRuleWorld; w <= Mathf.Min(world, Signature.Length - 2); w++)
+                foreach (FloorRule r in System.Enum.GetValues(typeof(FloorRule)))
+                    if (r != FloorRule.None && (Signature[w] & r) != 0 && !met.Contains(r)) met.Add(r);
+
+            if (world >= Signature.Length - 1)
+            {
+                // The roof: two different rules at once.
+                var a = met[rng.Next(met.Count)];
+                FloorRule b;
+                do b = met[rng.Next(met.Count)]; while (b == a);
+                return a | b;
+            }
+
+            var rules = Signature[world];
+            // A floor's first two levels show its rule alone; later ones sometimes bring back an earlier floor's rule.
+            int i = index % LevelsPerWorld;
+            if (i >= 2 && rng.NextDouble() < 0.35)
+            {
+                var earlier = met.FindAll(r => (Signature[world] & r) == 0);
+                if (earlier.Count > 0) rules |= earlier[rng.Next(earlier.Count)];
+            }
+            return rules;
         }
 
         /// <summary>A newly unlocked journey kind appears at the first chance; after that the kinds take turns.</summary>

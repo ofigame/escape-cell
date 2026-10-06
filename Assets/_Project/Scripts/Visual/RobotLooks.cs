@@ -16,7 +16,7 @@ namespace SquashBot.Visual
 
         public static Color BodyColor(int world)
         {
-            if (world % 15 == 14) return new Color(0.91f, 0.75f, 0.41f); // galaxy: golden robot
+            if (world % 15 == 14 || world == 19) return new Color(0.91f, 0.75f, 0.41f); // galaxy and the roof: golden robot
             return Color.Lerp(BaseBody, WorldTheme.ForWorld(world).accent, 0.3f);
         }
 

@@ -39,8 +39,13 @@ namespace SquashBot.Visual
         public static GameObject Block(int world)
         {
             var root = new GameObject("Block").transform;
-            switch (world % 15)
+            switch (world >= 15 ? world + 100 : world % 15)
             {
+                case 115: Crystal(root); break;
+                case 116: NeonCube(root); break;
+                case 117: Crate(root); break;
+                case 118: Gumdrop(root); break;
+                case 119: Meteor(root, Hex("#6A4A20"), new Color(1.6f, 1.1f, 0.3f)); break;
                 case 1: Crate(root); break;
                 case 2: IceCube(root); break;
                 case 3: NeonCube(root); break;

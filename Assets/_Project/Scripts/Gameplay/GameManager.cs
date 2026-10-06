@@ -55,6 +55,7 @@ namespace SquashBot.Gameplay
         private PowerUpSystem powerUps;
         private InputReader input;
         private DuctRunner runner;
+        private FloorRules floorRules;
 
         private GridModel grid;
         private LevelData level;
@@ -170,6 +171,10 @@ namespace SquashBot.Gameplay
             powerUps.Init(robot, hazards, fx);
             powerUps.Collected += OnPowerUpCollected;
 
+            floorRules = new GameObject("FloorRules").AddComponent<FloorRules>();
+            floorRules.Init(gridView, robot, hazards, fx, cameraRig);
+            floorRules.Hit += OnBlockImpact;
+
             runner = new GameObject("DuctRunner").AddComponent<DuctRunner>();
             runner.Init(robot, cameraRig, input, fx);
             runner.CoinCollected += OnTunnelCoin;
@@ -264,6 +269,8 @@ namespace SquashBot.Gameplay
             powerUps.Stop();
             runner.Stop();
             gridView.gameObject.SetActive(true);
+            floorRules.Stop();
+            hazards.Hunting = false;
         }
 
         /// <summary>The next level's platform idles behind the menu while the camera slowly orbits it.</summary>
@@ -486,6 +493,8 @@ namespace SquashBot.Gameplay
 
             SetupMission();
             hazards.Begin(grid, level, MissionProgress, LevelCatalog.WorldOf(levelIndex));
+            floorRules.Begin(grid, level, levelIndex, p => hazards.IsProtected != null && hazards.IsProtected(p));
+            hazards.Hunting = (level.rules & FloorRule.Hunter) != 0;
             coins.Begin(grid, level);
             powerUps.Begin(grid, level);
 
@@ -575,6 +584,7 @@ namespace SquashBot.Gameplay
             hazards.Resume();
             coins.Resume();
             powerUps.Resume();
+            floorRules.Resume();
             State = GameState.Playing;
             cameraRig.SetMenuFocus(false);
             cameraRig.SetStyle(CameraStyle.Gameplay);
@@ -639,6 +649,16 @@ namespace SquashBot.Gameplay
                 AudioManager.PlaySfx(Sfx.Squash, 0.8f, 1.3f);
                 Haptics.Death();
                 Lose(Loc.T("lose.fire"));
+                return;
+            }
+
+            if (grid.GetTile(p) == TileState.Poison)
+            {
+                robot.Squash();
+                fx.Burst(robot.transform.position + Vector3.up * 0.3f, new Color(0.5f, 1f, 0.4f), new Color(0.6f, 1.8f, 0.3f), 26, 4f);
+                AudioManager.PlaySfx(Sfx.Squash, 0.8f, 0.8f);
+                Haptics.Death();
+                Lose(Loc.T("lose.poison"));
                 return;
             }
 
@@ -784,9 +804,14 @@ namespace SquashBot.Gameplay
         private void ShowLevelIntro(bool assisted)
         {
             string feature = null;
+            // A floor rule met for the first time is introduced before anything else.
+            string ruleFeature = null;
+            foreach (FloorRule r in System.Enum.GetValues(typeof(FloorRule)))
+                if (r != FloorRule.None && (level.rules & r) != 0 && !Seen("rule." + r)) { ruleFeature = "feature.rule." + r; break; }
             string journey = level.chaseSpeed > 0f ? "chase" : level.collapseBehind ? "collapse" : level.lowWalls ? "maze"
                 : level.mission == MissionType.Exit && grid.KeySpots.Count > 0 ? "journey" : null;
-            if (journey != null && !Seen(journey)) feature = "feature." + journey;
+            if (ruleFeature != null) feature = ruleFeature;
+            else if (journey != null && !Seen(journey)) feature = "feature." + journey;
             else if (World >= HoverFromWorld && !Seen("hover")) feature = "feature.hover";
             else if (World >= FireFromWorld && !Seen("fire")) feature = "feature.fire";
             else if (World >= RescueFromWorld && !Seen("rescue")) feature = "feature.rescue";
@@ -927,6 +952,9 @@ namespace SquashBot.Gameplay
                 if (reached != null) CompleteObjective(reached);
                 else if (portal != null && portal.IsOpen && p == doorPos) Escape();
             }
+
+            // Floor rules last: ice, currents, trampolines and teleports may carry the robot on from here.
+            if (State == GameState.Playing) floorRules.OnArrived(p, robot.LastLeftTile);
         }
 
         /// <summary>Crumbling tiles and the chasing wave, ticking every frame of a journey level.</summary>
@@ -1105,6 +1133,7 @@ namespace SquashBot.Gameplay
             hazards.Freeze();
             coins.Freeze();
             powerUps.Freeze();
+            floorRules.Freeze();
             if (hovering) { hovering = false; ShowHoverMarker(false); }
             if (!escaped) robot.Cheer();
             cameraRig.SetStyle(CameraStyle.Victory);
@@ -1192,6 +1221,7 @@ namespace SquashBot.Gameplay
             hazards.Freeze();
             coins.Freeze();
             powerUps.Freeze();
+            floorRules.Freeze();
             if (hovering) { hovering = false; ShowHoverMarker(false); }
 
             // Coins picked up are kept even on a loss, so every run feels worth it.

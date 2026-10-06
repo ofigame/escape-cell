@@ -23,6 +23,26 @@ namespace SquashBot.Data
         Boss
     }
 
+    /// <summary>The signature rules of the upper floors (several can be combined).</summary>
+    [Flags]
+    public enum FloorRule
+    {
+        None = 0,
+        Current = 1,
+        Sticky = 2,
+        Poison = 4,
+        Dark = 8,
+        Ice = 16,
+        Wind = 32,
+        Laser = 64,
+        Teleport = 128,
+        Trampoline = 256,
+        Glass = 512,
+        Blink = 1024,
+        Hunter = 2048,
+        Barrel = 4096
+    }
+
     [Serializable]
     public class LevelData
     {
@@ -46,6 +66,8 @@ namespace SquashBot.Data
         public float chaseSpeed;
         [Tooltip("Obstacles are low hedges (mazes), so the robot never hides behind them.")]
         public bool lowWalls;
+        [Tooltip("Floor rules: currents, candy, poison, darkness, ice, wind, lasers, teleports, trampolines, glass, blinking tiles, hunting blocks, barrels.")]
+        public FloorRule rules;
 
         [Header("Blocks")]
         [Tooltip("Seconds between the red warning appearing and the block hitting the tile.")]

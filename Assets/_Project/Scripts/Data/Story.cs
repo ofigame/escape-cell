@@ -37,7 +37,12 @@ namespace SquashBot.Data
             new[] { W, R },
             new[] { W, R },
             new[] { W, R },
-            new[] { W, R },       // 14: the last floor
+            new[] { W, R },       // 14: trampolines
+            new[] { W, R },       // 15: glass
+            new[] { W, R },       // 16: blinking lights
+            new[] { W, R, W },    // 17: hunting blocks
+            new[] { W, R },       // 18: barrels
+            new[] { W, R },       // 19: everything at once
             new[] { N, R, W, N }, // ending: the roof
         };
 

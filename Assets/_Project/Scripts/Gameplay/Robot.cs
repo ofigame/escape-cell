@@ -303,6 +303,16 @@ namespace SquashBot.Gameplay
                 return;
             }
 
+            // Floor rules can hold the robot back (sticky candy needs a second swipe).
+            if (CanLeave != null && !CanLeave(dir))
+            {
+                var o = dir.ToOffset();
+                StartAnim(Anim.Bump, transform.position, transform.position + new Vector3(o.x, 0f, o.y) * 0.12f);
+                AudioManager.PlaySfx(Sfx.Bump, 0.4f, 0.7f);
+                Haptics.Light();
+                return;
+            }
+
             var offset = dir.ToOffset();
             var target = Position + offset;
             Facing = dir;
@@ -385,6 +395,27 @@ namespace SquashBot.Gameplay
             HopTo(landing, Mathf.Max(1, landing.Manhattan(Position)));
             AudioManager.PlaySfx(Sfx.Hop, 0.7f, 0.75f);
             Haptics.Medium();
+        }
+
+        /// <summary>Floor rules may veto a step (return false to keep the robot in place).</summary>
+        public Func<Direction, bool> CanLeave;
+
+        /// <summary>
+        /// Moves the robot without input: a slide on ice, a push by current or wind, a trampoline bounce.
+        /// The caller checks the destination; <see cref="Arrived"/> fires on landing as usual.
+        /// </summary>
+        public void Shove(Direction dir, int distance, float height = 1f, float speed = 1f, bool turn = false)
+        {
+            if (!IsAlive) return;
+            var o = dir.ToOffset();
+            if (turn)
+            {
+                Facing = dir;
+                targetFacing = Quaternion.LookRotation(new Vector3(o.x, 0f, o.y));
+            }
+            HopTo(new GridPos(Position.x + o.x * distance, Position.y + o.y * distance), distance);
+            hopHeight *= height;
+            hopDuration /= Mathf.Max(0.2f, speed);
         }
 
         private void HopTo(GridPos target, int distance)

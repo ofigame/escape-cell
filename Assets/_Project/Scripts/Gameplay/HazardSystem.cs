@@ -34,6 +34,9 @@ namespace SquashBot.Gameplay
             public readonly List<GameObject> markers = new List<GameObject>();
             public GameObject body;
             public bool shattered;
+            public float huntTimer = 0.9f, hopT = 1f;
+            public Vector3 hopFrom;
+            public bool hunter;
         }
 
         private class Repair
@@ -56,6 +59,12 @@ namespace SquashBot.Gameplay
 
         /// <summary>On big platforms, hazards only fall this close to the robot (0 = anywhere).</summary>
         public int FocusRadius;
+
+        /// <summary>Rust factory: landed blocks wake up and hop toward the robot until they crumble.</summary>
+        public bool Hunting;
+
+        private const float HuntStep = 0.85f;
+        private const float HuntLinger = 4.5f;
 
         private readonly List<Hazard> hazards = new List<Hazard>();
         private readonly List<Repair> repairs = new List<Repair>();
@@ -377,6 +386,7 @@ namespace SquashBot.Gameplay
                     if (h.shattered || h.kind == Kind.Bomb) return true;
                     h.lingerLeft -= dt;
                     var tr = h.body.transform;
+                    if (h.hunter && h.lingerLeft > 0.3f) Hunt(h, dt);
                     if (h.lingerLeft < 0.25f)
                     {
                         float s = Mathf.Clamp01(h.lingerLeft / 0.25f);
@@ -403,6 +413,12 @@ namespace SquashBot.Gameplay
         {
             h.phase = Phase.Landed;
             h.lingerLeft = level.blockLinger;
+            if (Hunting && h.kind == Kind.Block)
+            {
+                h.hunter = true;
+                h.lingerLeft = HuntLinger;
+                AddEyes(h.body.transform);
+            }
             foreach (var m in h.markers) m.SetActive(false);
             h.body.transform.position = at + Vector3.up * BlockRestY;
             h.body.transform.localScale = new Vector3(1.22f, 0.72f, 1.22f);
@@ -436,6 +452,51 @@ namespace SquashBot.Gameplay
 
             foreach (var p in h.area) Impact?.Invoke(p);
             TryBreakTile(h.pos);
+        }
+
+        /// <summary>A hunting block turns to face the robot and hops one tile closer every so often.</summary>
+        private void Hunt(Hazard h, float dt)
+        {
+            var tr = h.body.transform;
+            if (h.hopT < 1f)
+            {
+                h.hopT = Mathf.Min(1f, h.hopT + dt / 0.25f);
+                var to = GridView.ToWorld(h.pos) + Vector3.up * BlockRestY;
+                tr.position = Vector3.Lerp(h.hopFrom, to, h.hopT) + Vector3.up * Mathf.Sin(h.hopT * Mathf.PI) * 0.25f;
+            }
+            h.huntTimer -= dt;
+            if (h.huntTimer > 0f || !robot.IsAlive) return;
+            h.huntTimer = HuntStep;
+
+            var r = robot.Position;
+            int dx = Math.Sign(r.x - h.pos.x), dy = Math.Sign(r.y - h.pos.y);
+            bool xFirst = Mathf.Abs(r.x - h.pos.x) >= Mathf.Abs(r.y - h.pos.y);
+            foreach (var step in xFirst ? new[] { new GridPos(dx, 0), new GridPos(0, dy) } : new[] { new GridPos(0, dy), new GridPos(dx, 0) })
+            {
+                if (step.x == 0 && step.y == 0) continue;
+                var n = h.pos + step;
+                bool hitsRobot = n == r && !robot.IsHovering;
+                if (!hitsRobot && (!grid.IsStandable(n) || (IsProtected != null && IsProtected(n)) || IsThreatened(n))) continue;
+
+                grid.SetOccupied(h.pos, false);
+                h.hopFrom = tr.position;
+                h.pos = n;
+                h.area[0] = n;
+                h.hopT = 0f;
+                grid.SetOccupied(n, true);
+                tr.rotation = Quaternion.LookRotation(new Vector3(step.x, 0f, step.y));
+                AudioManager.PlaySfx(Sfx.Impact, 0.25f, 1.6f, 0.1f);
+                if (hitsRobot) Impact?.Invoke(n);
+                return;
+            }
+        }
+
+        /// <summary>Two angry glowing eyes on the block's front, so a hunting block is easy to spot.</summary>
+        private static void AddEyes(Transform body)
+        {
+            var glow = MaterialFactory.Create(new Color(1f, 0.95f, 0.6f), new Color(2.6f, 2f, 0.6f));
+            foreach (float x in new[] { -0.14f, 0.14f })
+                Shapes.Rounded("Eye", body, new Vector3(x, 0.1f, 0.44f), new Vector3(0.12f, 0.1f, 0.04f), 0.02f, glow);
         }
 
         private bool InFocus(GridPos p) =>

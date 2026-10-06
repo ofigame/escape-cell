@@ -7,7 +7,9 @@ namespace SquashBot.Core
         Solid,
         Broken,
         /// <summary>Burning for a few seconds, then solid again. Deadly to step on, can be jumped over.</summary>
-        Fire
+        Fire,
+        /// <summary>Poisoned for the rest of the level (toxic floors): deadly to step on, can be jumped over.</summary>
+        Poison
     }
 
     /// <summary>
