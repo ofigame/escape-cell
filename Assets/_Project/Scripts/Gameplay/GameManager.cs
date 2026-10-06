@@ -1496,7 +1496,8 @@ namespace SquashBot.Gameplay
             if (RoadAhead)
             {
                 pendingResult = info;
-                OpenRoad();
+                // Not right now: the win can come from inside the robot's own step (the last coin), which must finish first.
+                StartCoroutine(OpenRoadSoon());
                 return;
             }
             StartCoroutine(ShowResultDelayed(info));
@@ -1832,9 +1833,17 @@ namespace SquashBot.Gameplay
         /// <summary>A road follows every level except bonus rounds and the very last level.</summary>
         private bool RoadAhead => !bonusRun && levelIndex + 1 < LevelCount;
 
+        private IEnumerator OpenRoadSoon()
+        {
+            yield return new WaitForSeconds(0.5f);
+            OpenRoad();
+        }
+
         private void OpenRoad()
         {
             ClearDangers();
+            // The victory dance froze the robot; the player walks it to the exit now.
+            robot.Spawn(grid, robot.Position);
             roadExit = PickExit(out var outward);
             var origin = GridView.ToWorld(roadExit) + new Vector3(outward.x, 0f, outward.y);
             float heading = outward.y > 0 ? 0f : 90f;
@@ -1863,7 +1872,7 @@ namespace SquashBot.Gameplay
             cameraRig.SetMenuFocus(false);
             ui.ShowIntro(Loc.T("road.title"), Loc.T("road.go"));
             RefreshHud();
-            if (robot.Position == roadExit && !robot.IsHopping) TakeOverRoad();
+            // The player walks the robot there; the road only starts when it steps onto the exit.
         }
 
         /// <summary>Mission done: every block, hole, fire, poison and rule effect disappears from the floor.</summary>
@@ -1898,20 +1907,45 @@ namespace SquashBot.Gameplay
         /// </summary>
         private GridPos PickExit(out Vector2Int outward)
         {
+            // How many steps each tile is from the robot (walking, or leaping a one-tile gap like the robot does).
+            var steps = new Dictionary<GridPos, int> { [robot.Position] = 0 };
+            var queue = new Queue<GridPos>();
+            queue.Enqueue(robot.Position);
+            while (queue.Count > 0)
+            {
+                var p = queue.Dequeue();
+                foreach (var d in DirectionExtensions.All)
+                {
+                    var o = d.ToOffset();
+                    var n = p + o;
+                    if (!grid.IsFloor(n))
+                    {
+                        if (!grid.InBounds(n) || grid.IsWall(n)) continue;
+                        n = n + o; // a gap: the robot leaps it
+                    }
+                    if (!grid.IsFloor(n) || steps.ContainsKey(n)) continue;
+                    steps[n] = steps[p] + 1;
+                    queue.Enqueue(n);
+                }
+            }
+
+            // Candidates: reachable floor tiles on the far edges with nothing beyond them. The robot's own tile is
+            // never chosen while there is another, and a couple of steps away is preferred, so the player walks there.
             GridPos best = robot.Position;
             outward = new Vector2Int(0, 1);
-            int bestD = int.MaxValue;
-            foreach (var p in grid.AllPositions())
+            int bestScore = int.MaxValue;
+            foreach (var kv in steps)
             {
-                if (!grid.IsFloor(p)) continue;
+                var p = kv.Key;
                 foreach (var dir in new[] { new Vector2Int(0, 1), new Vector2Int(1, 0) })
                 {
                     bool clear = true;
                     for (var q = new GridPos(p.x + dir.x, p.y + dir.y); grid.InBounds(q); q = new GridPos(q.x + dir.x, q.y + dir.y))
                         if (grid.Exists(q)) { clear = false; break; }
                     if (!clear) continue;
-                    int d = p.Manhattan(robot.Position);
-                    if (d < bestD) { bestD = d; best = p; outward = dir; }
+                    int s = kv.Value;
+                    int score = s == 0 ? 1000 : s == 1 ? 100 + s : s;
+                    if (score < bestScore) { bestScore = score; best = p; outward = dir; }
                 }
             }
             return best;
