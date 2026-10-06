@@ -23,6 +23,9 @@ namespace SquashBot.Data
 
         public static int WorldOf(int levelIndex) => levelIndex / LevelsPerWorld;
 
+        /// <summary>The Loc key of a world's name ("world.ocean").</summary>
+        public static string WorldKey(int world) => Visual.WorldTheme.ForWorld(world).key;
+
         /// <summary>Localized "WORLD 2 · SUNSET CORAL" label for the world a level belongs to.</summary>
         public static string WorldName(int levelIndex)
         {

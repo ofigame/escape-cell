@@ -44,7 +44,8 @@ namespace SquashBot.UI
         public event Action ContinuePressed;
         public event Action DoublePressed;
         public event Action GaragePressed;
-        public event Action CampPressed;
+        public event Action CityPressed;
+        public event Action DailyBonusPressed;
         public event Action ShopPressed;
         public event Action DailyPressed;
         /// <summary>A HUD tool button was tapped (slot 0 = left, 1 = right).</summary>
@@ -76,7 +77,8 @@ namespace SquashBot.UI
         // Menu
         private UiScreen menu;
         private TextMeshProUGUI menuLevel, menuWorld, menuMission, menuCoins, menuLives, menuStars;
-        private Button menuDaily;
+        private Button menuDaily, menuBonus;
+        private TextMeshProUGUI menuBonusLabel;
 
         // Before-level card
         private UiScreen prelevel;
@@ -149,7 +151,9 @@ namespace SquashBot.UI
         public StoryScreen Story { get; private set; }
         public ShopScreen Shop { get; private set; }
         public GarageScreen Garage { get; private set; }
-        public CampScreen Camp { get; private set; }
+        public CityScreen City { get; private set; }
+        public GuideScreen Guide { get; private set; }
+        public DailyBonusScreen DailyBonus { get; private set; }
 
         private GameObject bannerPlaceholder;
 
@@ -192,8 +196,15 @@ namespace SquashBot.UI
             Story = StoryScreen.Create(root);
             Shop = ShopScreen.Create(root);
             Garage = GarageScreen.Create(root);
-            Camp = CampScreen.Create(root);
-            Camp.BackPressed += () => MenuPressed?.Invoke();
+            City = CityScreen.Create(root);
+            City.BackPressed += () => MenuPressed?.Invoke();
+            City.HelpPressed += () => Guide.Show("city");
+            DailyBonus = DailyBonusScreen.Create(root);
+            Guide = GuideScreen.Create(root);
+            Guide.BackPressed += Guide.Hide;
+            HelpButton(Shop.transform, "shop");
+            HelpButton(Garage.transform, "garage");
+            HelpButton(Map.transform, "map");
             Shop.BackPressed += () => MenuPressed?.Invoke();
             Garage.BackPressed += () => MenuPressed?.Invoke();
             BuildPrelevel(root);
@@ -241,11 +252,11 @@ namespace SquashBot.UI
 
             // Shortcuts.
             var row = UiFactory.Box("Shortcuts", t, Bottom, new Vector2(0f, Ads.BannerReserve + 540f), new Vector2(900f, 130f));
-            // Four shortcuts: garage, shop, camp, map.
+            // Four shortcuts: garage, shop, city, map.
             var shortcuts = new (string label, Action press)[]
             {
                 (Loc.T("btn.garage"), () => GaragePressed?.Invoke()), (Loc.T("btn.shop"), () => ShopPressed?.Invoke()),
-                (Loc.T("btn.camp"), () => CampPressed?.Invoke()), (Loc.T("btn.map"), () => PlayPressed?.Invoke()),
+                (Loc.T("btn.city"), () => CityPressed?.Invoke()), (Loc.T("btn.map"), () => PlayPressed?.Invoke()),
             };
             for (int i = 0; i < shortcuts.Length; i++)
             {
@@ -261,7 +272,36 @@ namespace SquashBot.UI
             menuMission = UiFactory.TextBox("Mission", card, Top, new Vector2(0f, -190f), new Vector2(820f, 56f), "", 38f,
                 new Color(0.85f, 0.86f, 1f, 0.8f), FontStyles.Normal);
 
-            UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(0f, 36f), new Vector2(620f, 160f), () => PlayPressed?.Invoke(), 84f);
+            UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(-130f, 36f), new Vector2(560f, 160f), () => PlayPressed?.Invoke(), 84f);
+            // The daily bonus games, next to PLAY: plays left today, glowing while there are some.
+            menuBonus = UiFactory.MakeButton(card, "", Kind.Gold, Bottom, new Vector2(300f, 36f), new Vector2(240f, 160f), () => DailyBonusPressed?.Invoke(), 34f);
+            menuBonusLabel = menuBonus.GetComponentInChildren<TextMeshProUGUI>();
+            menuBonus.gameObject.AddComponent<Pulse>();
+
+            // The guide, under the settings gear.
+            UiFactory.MakeButton(t, "?", Kind.Icon, TopRight, new Vector2(-40f, -170f), new Vector2(110f, 110f), () => Guide.Show(), 64f);
+        }
+
+        /// <summary>A "?" next to a screen's back button that opens the guide at that screen's topic.</summary>
+        private void HelpButton(Transform screenRoot, string topic)
+        {
+            var bar = screenRoot.Find("TopBar");
+            if (bar == null) return;
+            bool map = topic == "map";
+            UiFactory.MakeButton(bar, "?", Kind.Icon, map ? new Vector2(1f, 0.5f) : new Vector2(0f, 0.5f), map ? new Vector2(-300f, 0f) : new Vector2(176f, 0f),
+                map ? new Vector2(90f, 90f) : new Vector2(104f, 104f), () => Guide.Show(topic), 56f);
+        }
+
+        /// <summary>The menu's daily bonus button: "BONUS 2/3", dim once the day's plays are used.</summary>
+        public void RefreshDailyBonus()
+        {
+            if (menuBonus == null) return;
+            int left = Data.DailyBonus.Left;
+            menuBonusLabel.text = Loc.F("daily.menu", left, Data.DailyBonus.FreePlays);
+            var pulse = menuBonus.GetComponent<Pulse>();
+            if (pulse != null) pulse.enabled = left > 0 || Data.DailyBonus.CanWatchAd;
+            if (left == 0 && !Data.DailyBonus.CanWatchAd) menuBonus.transform.localScale = Vector3.one;
+            ((Image)menuBonus.targetGraphic).color = left > 0 || Data.DailyBonus.CanWatchAd ? Palette.UiGold : new Color(0.62f, 0.62f, 1f, 0.25f);
         }
 
         public void ShowMenu(int levelIndex, int coins, string world, string mission)
@@ -275,6 +315,7 @@ namespace SquashBot.UI
             menuCoins.text = coins.ToString();
             menuStars.text = Progress.TotalStars(levelCount).ToString();
             menuDaily.gameObject.SetActive(DailyChest.Ready);
+            RefreshDailyBonus();
             RefreshLives();
         }
 
@@ -292,11 +333,11 @@ namespace SquashBot.UI
             Shop.Show();
         }
 
-        public void ShowCamp()
+        /// <summary>Clears the other screens for the city (its own screen is shown by the city controller).</summary>
+        public void ShowCity()
         {
             HideAll();
-            SetBanner(true);
-            Camp.Show();
+            SetBanner(false);
         }
 
         public void ShowGarage(int worldReached)
@@ -993,7 +1034,9 @@ namespace SquashBot.UI
             Story.Hide();
             Shop.Hide();
             Garage.Hide();
-            Camp.Hide();
+            City.Hide();
+            DailyBonus.Hide();
+            Guide.Hide();
             prelevel.Hide(true);
             settings.Hide(true);
             noLives.Hide(true);

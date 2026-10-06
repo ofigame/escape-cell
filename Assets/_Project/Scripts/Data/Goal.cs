@@ -24,6 +24,7 @@ namespace SquashBot.Data
         public static string ForUpgrade(Upgrade u) => "up:" + u;
         public static string ForBoost(Boost b) => "boost:" + b;
         public static string ForCosmetic(Cosmetic c) => "cos:" + c.id;
+        public static string ForCity(CityPiece p) => "city:" + p.id;
 
         /// <summary>The goal's name and price right now, or false when there is none (or it is owned / maxed).</summary>
         public static bool TryGet(out string name, out int price)
@@ -52,6 +53,12 @@ namespace SquashBot.Data
                     if (!System.Enum.TryParse(value, out Tool t) || Tools.Owned(t)) return false;
                     name = Loc.T("tool." + t);
                     price = Tools.NextPrice(t);
+                    return true;
+                case "city":
+                    var piece = CityCatalog.Find(value);
+                    if (piece == null || City.Count(piece.id) > 0) return false;
+                    name = Loc.T("city." + piece.id);
+                    price = piece.price;
                     return true;
                 case "cos":
                     var c = Cosmetics.Find(value);

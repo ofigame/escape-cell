@@ -17,6 +17,8 @@ namespace SquashBot.Data
         {
             if (!Ready) return 0;
             int coins = UnityEngine.Random.Range(30, 81);
+            // The city's town square adds a fifth.
+            if (City.PerkActive(CityPerk.Square)) coins = UnityEngine.Mathf.RoundToInt(coins * 1.2f);
             PlayerPrefs.SetString(Key, Today);
             SaveData.Coins += coins;
             return coins;

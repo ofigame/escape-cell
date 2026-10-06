@@ -57,7 +57,11 @@ namespace SquashBot.Gameplay
         private DuctRunner runner;
         private FloorRules floorRules;
         private LevelEvents levelEvents;
-        private CampScene campScene;
+        private CityController city;
+        private bool dailyRun;      // a daily bonus game (not a level's bonus round)
+        private bool returnToCity;  // ...started at the training ground
+        private float toolCredit;   // the workshop's extra tool recharges
+        private const int CityWorld = 1; // the city by the sea wears the sunset colours
 
         private GridModel grid;
         private LevelData level;
@@ -176,7 +180,11 @@ namespace SquashBot.Gameplay
             floorRules.Init(gridView, robot, hazards, fx, cameraRig);
             floorRules.Hit += OnBlockImpact;
 
-            campScene = new GameObject("CampScene").AddComponent<CampScene>();
+            city = new GameObject("CityMode").AddComponent<CityController>();
+            city.Init(robot, gridView, cameraRig, fx);
+            city.Floated += (at, text, color) => FloatAt(at, text, color);
+            city.CoinFlown += at => ui.FlyCoin(cameraRig.Cam.WorldToScreenPoint(at));
+            city.TrainingPressed += () => ui.DailyBonus.Show();
 
             levelEvents = new GameObject("LevelEvents").AddComponent<LevelEvents>();
             levelEvents.Init(robot, coins, hazards, fx, cameraRig);
@@ -210,19 +218,18 @@ namespace SquashBot.Gameplay
             ui.GaragePressed += ShowGarage;
             ui.ShopPressed += ShowShop;
             ui.DailyPressed += ClaimDaily;
-            ui.CampPressed += ShowCamp;
-            ui.Camp.DecorBought += d => { campScene.Add(d); cameraRig.Punch(0.4f); };
-            ui.Camp.Harvested += coins =>
-            {
-                fx.Burst(robot.transform.position + Vector3.up * 0.8f, Palette.Coin, Palette.CoinGlow, 40, 6f);
-                FloatAt(robot.transform.position + Vector3.up * 0.4f, "+" + coins, Palette.UiGold);
-                robot.Cheer();
-            };
+            ui.CityPressed += ShowCity;
+            city.SetScreen(ui.City);
+            ui.DailyBonusPressed += () => ui.DailyBonus.Show();
+            ui.DailyBonus.PlayPressed += PlayDailyBonus;
+            ui.DailyBonus.AdPressed += WatchAdForDailyBonus;
             ui.Garage.PreviewChanged += outfit => robot.ApplyOutfit(outfit);
             ui.Garage.DancePreview += robot.Cheer;
             ui.NextPressed += () =>
             {
-                if (bonusRun) ShowMap();
+                if (dailyRun && returnToCity) ShowCity();
+                else if (dailyRun) ShowMenu();
+                else if (bonusRun) ShowMap();
                 else ShowMap(animateFrom: levelIndex);
             };
             ui.BonusPressed += StartBonus;
@@ -292,7 +299,7 @@ namespace SquashBot.Gameplay
             floorRules.Stop();
             hazards.Hunting = false;
             levelEvents.Stop();
-            campScene.Hide();
+            city.Close();
             cameraRig.FrameUpper(0f, 1f);
             HideTools();
         }
@@ -348,29 +355,57 @@ namespace SquashBot.Gameplay
             cameraRig.SetMenuFocus(false);
         }
 
-        /// <summary>The roof camp: the rescued friends hop around the decorations bought for them.</summary>
-        private void ShowCamp()
+        /// <summary>City mode: the neighbourhood the rescued robots live in, built and cared for with coins.</summary>
+        private void ShowCity()
         {
-            if (!Camp.Open)
+            if (!City.Open)
             {
-                ui.ShowIntro(Loc.T("camp.title"), Loc.T("camp.locked"));
+                ui.ShowIntro(Loc.T("city.title"), Loc.T("city.locked"));
                 return;
             }
             ResetRun();
             State = GameState.Menu;
-            ApplyTheme(LevelCount - 1); // the roof's colours
-            grid = new GridModel(Camp.Size, Camp.Size);
-            gridView.Build(grid, fx);
-            cameraRig.Frame(grid.Width, grid.Height);
-            cameraRig.SetStyle(CameraStyle.MenuOrbit);
-            cameraRig.SetMenuFocus(false);
-            cameraRig.Showcase(null, 0f);
-            var spot = new GridPos(2, 3);
-            robot.Spawn(grid, spot);
-            robot.ApplyOutfit(Cosmetics.Outfit());
-            campScene.Show(spot);
-            cameraRig.FrameUpper(0.42f, 0.9f);
-            ui.ShowCamp();
+            // The city by the sea wears its own colours; the robot keeps its current look.
+            WorldTheme.SetCurrent(CityWorld);
+            themeWorld = -1;
+            RenderSettings.ambientLight = Palette.Ambient * 0.8f;
+            cameraRig.RefreshTheme();
+            ui.ShowCity();
+            city.Open();
+        }
+
+        /// <summary>A daily bonus play: the chosen game (training ground) or the day's next one.</summary>
+        private void PlayDailyBonus(BonusGame? chosen)
+        {
+            var game = chosen ?? DailyBonus.NextGame();
+            if (!DailyBonus.Use())
+            {
+                ui.DailyBonus.Refresh();
+                return;
+            }
+            returnToCity = city.Active;
+            ui.DailyBonus.Hide();
+            bonusRun = true;
+            dailyRun = true;
+            levelIndex = NextLevel;
+            StartBonusGame(game);
+        }
+
+        /// <summary>Out of daily plays: one more for an ad, once a day. No ad, no harm: nothing is used up.</summary>
+        private void WatchAdForDailyBonus()
+        {
+            if (!DailyBonus.CanWatchAd) return;
+            if (!Ads.Rewarded.IsReady)
+            {
+                ui.ShowIntro(Loc.T("daily.bonusTitle"), Loc.T("ad.unavailable"));
+                return;
+            }
+            Ads.Rewarded.Show(rewarded =>
+            {
+                if (rewarded) DailyBonus.GrantAdPlay();
+                ui.DailyBonus.Refresh();
+                ui.RefreshDailyBonus();
+            });
         }
 
         private void ShowShop()
@@ -412,6 +447,7 @@ namespace SquashBot.Gameplay
             }
 
             bonusRun = false;
+            dailyRun = false;
             levelIndex = Mathf.Clamp(index, 0, LevelCount - 1);
             level = levelSet.levels[levelIndex].Clone();
             bool assisted = ApplyAssist(level);
@@ -443,10 +479,19 @@ namespace SquashBot.Gameplay
             if (Progress.BonusTokens <= 0) return;
             Progress.BonusTokens--;
             bonusRun = true;
+            dailyRun = false;
             levelIndex = NextLevel;
-            if (Random.value < TunnelChance)
+            var tunnels = new[] { BonusGame.Duct, BonusGame.Surf, BonusGame.Mine };
+            StartBonusGame(Random.value < TunnelChance ? tunnels[Random.Range(0, tunnels.Length)] : BonusGame.Treasure);
+        }
+
+        /// <summary>Starts one of the bonus games: a tunnel run or the treasure room.</summary>
+        private void StartBonusGame(BonusGame game)
+        {
+            DailyBonus.MarkSeen(game);
+            if (game != BonusGame.Treasure)
             {
-                StartTunnel();
+                StartTunnel((DuctRunner.Kind)(int)game);
                 return;
             }
             level = LevelCatalog.Treasure(Random.Range(0, 100000));
@@ -457,7 +502,7 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>The escape tunnel bonus: a third-person run down an air duct, themed like the current world.</summary>
-        private void StartTunnel()
+        private void StartTunnel(DuctRunner.Kind tunnel)
         {
             ResetRun();
             level = LevelCatalog.Treasure(0);
@@ -468,11 +513,7 @@ namespace SquashBot.Gameplay
             gridView.gameObject.SetActive(false);
             cameraRig.SetStyle(CameraStyle.Gameplay);
             cameraRig.SetMenuFocus(false);
-            // Which tunnel: the air duct, the surf channel, the mine, or (from floor 3) WARDEN's chase.
-            var kinds = new List<DuctRunner.Kind> { DuctRunner.Kind.Duct, DuctRunner.Kind.Surf, DuctRunner.Kind.Mine };
-            if (levelIndex >= 20) kinds.Add(DuctRunner.Kind.Chase);
-            var tunnel = kinds[Random.Range(0, kinds.Count)];
-            runner.Begin(Random.Range(0, 100000), tunnel, Camp.Companion);
+            runner.Begin(Random.Range(0, 100000), tunnel);
 
             State = GameState.Playing;
             ui.ShowHud(-1);
@@ -1252,6 +1293,17 @@ namespace SquashBot.Gameplay
         /// <summary>A close call or a combo tops up an empty tool (not trials).</summary>
         private void RechargeTool()
         {
+            RechargeOnce();
+            // The city's workshop: every tenth recharge brings an extra one.
+            if (!City.PerkActive(CityPerk.Workshop)) return;
+            toolCredit += 0.1f;
+            if (toolCredit < 1f) return;
+            toolCredit -= 1f;
+            RechargeOnce();
+        }
+
+        private void RechargeOnce()
+        {
             for (int s = 0; s < 2; s++)
             {
                 if (!toolSlot[s].HasValue || (trialSlot && s == 0)) continue;
@@ -1394,8 +1446,8 @@ namespace SquashBot.Gameplay
             int stars = StarRules.Evaluate(starGoals, coinsThisRun, elapsed);
             bool firstWin = Progress.Stars(levelIndex) == 0;
             int unlockedBonus = Progress.Award(levelIndex, stars, out _);
-            // Beating a floor's WARDEN for the first time frees a cellmate, who moves to the roof camp.
-            int freed = firstWin ? Camp.FriendFreedBy(levelIndex) : -1;
+            // Beating a floor's WARDEN for the first time frees a cellmate, who moves into the city.
+            int freed = firstWin ? Residents.FreedBy(levelIndex) : -1;
             bool surprise = false;
             if (unlockedBonus == 0 && unlockedNew && levelIndex + 1 >= SurpriseFromLevel && Progress.BonusTokens == 0 && Random.value < SurpriseBonusChance)
             {
@@ -1406,7 +1458,7 @@ namespace SquashBot.Gameplay
             pendingEnding = levelIndex == LevelCount - 1 && !Story.Seen(Story.Ending);
             bool hasNext = levelIndex + 1 < LevelCount;
             bool newWorld = unlockedNew && hasNext && (levelIndex + 1) % LevelCatalog.LevelsPerWorld == 0;
-            string note = freed >= 0 ? Loc.F("camp.freed", Camp.Friends[freed])
+            string note = freed >= 0 ? Loc.F("city.freed", Residents.Names[freed])
                 : surprise ? Loc.T("bonus.surprise")
                 : unlockedBonus > 0 ? Loc.T("bonus.ready")
                 : stars < 3 ? StarHint(stars)

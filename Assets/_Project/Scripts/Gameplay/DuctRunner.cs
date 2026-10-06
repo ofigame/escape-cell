@@ -38,27 +38,20 @@ namespace SquashBot.Gameplay
         public event Action RiskTaken;
 
         /// <summary>The flavours of bonus tunnel: same running and lanes, different world and rules.</summary>
-        public enum Kind { Duct, Surf, Mine, Chase }
+        public enum Kind { Duct, Surf, Mine }
 
         public const int SafeBonus = 10, RiskBonus = 30;
         private const int RiskLength = 34;
         private Kind kind;
         private bool risky;
-        private Transform ride, chaserRoot;
-        private WardenBoss chaser;
-        private float chaserGap = 3.2f, invulnerable, drainTimer;
+        private Transform ride;
         private readonly HashSet<(int, int)> ramps = new HashSet<(int, int)>();
-        private int companionIndex = -1;
-        private Robot buddy;
-        private float buddyX, buddyY, buddyPhase;
         private int GateRow => Mathf.CeilToInt(TrackLength);
 
         /// <summary>The tunnel owns the robot, camera and input (from Begin until Stop).</summary>
         public bool Active { get; private set; }
         public int Coins { get; private set; }
         public float Progress => Mathf.Clamp01(z / TrackLength);
-        /// <summary>The chase: how close WARDEN is (0 = right behind, 1 = far).</summary>
-        public float ChaserDistance => Mathf.Clamp01(chaserGap / 3.2f);
 
         private Robot robot;
         private CameraRig rig;
@@ -113,15 +106,12 @@ namespace SquashBot.Gameplay
 
         // ---------- Start / stop ----------
 
-        public void Begin(int seed, Kind tunnel = Kind.Duct, int companion = -1)
+        public void Begin(int seed, Kind tunnel = Kind.Duct)
         {
-            companionIndex = companion;
             Stop();
             Active = true;
             kind = tunnel;
             risky = false;
-            chaserGap = 3.2f;
-            invulnerable = 0f;
             Coins = 0;
             x = 0f; y = 0f; z = 0f; vy = 0f;
             lane = 1;
@@ -158,15 +148,6 @@ namespace SquashBot.Gameplay
             armR = visual.Find("ArmR");
 
             BuildRide();
-            if (companionIndex >= 0)
-            {
-                // A friend from the roof camp runs in the next lane and picks up the coins there.
-                buddy = Robot.Create(transform);
-                buddy.ApplyWorld(Data.Camp.FriendWorld(companionIndex));
-                buddy.enabled = false;
-                buddy.transform.localScale = Vector3.one * 0.8f;
-                buddyX = LaneX(BuddyLane);
-            }
             input.ScreenMode = true;
             camPos = new Vector3(0f, 2.6f, -4.6f);
             PoseRobot(0f);
@@ -185,11 +166,7 @@ namespace SquashBot.Gameplay
             coins.Clear();
             if (gate != null) Destroy(gate.gameObject);
             if (ride != null) Destroy(ride.gameObject);
-            if (buddy != null) Destroy(buddy.gameObject);
-            buddy = null;
-            if (chaserRoot != null) Destroy(chaserRoot.gameObject);
-            ride = chaserRoot = null;
-            chaser = null;
+            ride = null;
             ramps.Clear();
 
             foreach (var (t, pos, rot) in limbs)
@@ -242,11 +219,6 @@ namespace SquashBot.Gameplay
                     archMat = MaterialFactory.Create(new Color(0.55f, 0.38f, 0.22f), Color.black);
                     blockMat = MaterialFactory.Create(new Color(0.5f, 0.42f, 0.38f), new Color(0.15f, 0.08f, 0.05f));
                     railMat = MaterialFactory.Create(new Color(0.75f, 0.75f, 0.82f), new Color(0.2f, 0.2f, 0.25f));
-                    break;
-                case Kind.Chase:
-                    // WARDEN's red alert corridor.
-                    archMat = MaterialFactory.Create(new Color(1f, 0.35f, 0.4f), new Color(1.8f, 0.3f, 0.35f));
-                    wallGlowMat = MaterialFactory.Create(new Color(1f, 0.4f, 0.45f), new Color(2f, 0.3f, 0.35f));
                     break;
             }
             coinMat = MaterialFactory.Create(Palette.Coin, Palette.CoinGlow);
@@ -415,7 +387,8 @@ namespace SquashBot.Gameplay
                 }
             }
 
-            // Duct walls with a glowing strip, and a neon arch every few rows for a sense of speed.
+            // Duct walls with a glowing strip, and a glowing pylon on each side every few rows for a sense of speed.
+            // Nothing spans the track overhead: beams over the lanes passed between the camera and the robot.
             foreach (float side in new[] { -1f, 1f })
             {
                 Shapes.Rounded("Wall", root, new Vector3(side * WallX, 0.35f, 0f), new Vector3(0.32f, 1.3f, 1.03f), 0.06f, slabMat);
@@ -424,9 +397,10 @@ namespace SquashBot.Gameplay
             if (r % 6 == 0 && kind != Kind.Surf)
             {
                 foreach (float side in new[] { -1f, 1f })
-                    Shapes.Rounded("Post", root, new Vector3(side * WallX, 1.9f, 0f), new Vector3(0.2f, 2.0f, 0.2f), 0.05f, archMat);
-                Shapes.Rounded("Beam", root, new Vector3(0f, 2.95f, 0f), new Vector3(WallX * 2f + 0.2f, 0.18f, 0.2f), 0.05f, archMat);
-                if (kind == Kind.Mine) Shapes.Rounded("Lamp", root, new Vector3(0f, 2.78f, 0f), new Vector3(0.18f, 0.18f, 0.18f), 0.06f, wallGlowMat);
+                {
+                    Shapes.Rounded("Post", root, new Vector3(side * (WallX + 0.05f), 1.25f, 0f), new Vector3(0.2f, 0.9f, 0.2f), 0.05f, archMat);
+                    Shapes.Rounded("Cap", root, new Vector3(side * (WallX + 0.05f), 1.78f, 0f), new Vector3(0.26f, 0.16f, 0.26f), 0.07f, wallGlowMat);
+                }
             }
             else if (kind == Kind.Surf && r % 9 == 0)
             {
@@ -525,12 +499,12 @@ namespace SquashBot.Gameplay
         {
             var m = MaterialFactory.Create(color, glow);
             foreach (float side in new[] { -0.5f, 0.5f })
-                Shapes.Rounded("Post", parent, new Vector3(x + side * width, 1.1f, 0f), new Vector3(0.16f, 2.2f, 0.16f), 0.05f, m);
-            Shapes.Rounded("Top", parent, new Vector3(x, 2.25f, 0f), new Vector3(width + 0.16f, 0.2f, 0.16f), 0.05f, m);
-            Shapes.Rounded("Panel", parent, new Vector3(x, 1.9f, 0f), new Vector3(width * 0.6f, 0.36f, 0.06f), 0.05f, m);
+                Shapes.Rounded("Post", parent, new Vector3(x + side * width, 1.6f, 0f), new Vector3(0.16f, 3.2f, 0.16f), 0.05f, m);
+            Shapes.Rounded("Top", parent, new Vector3(x, 3.25f, 0f), new Vector3(width + 0.16f, 0.2f, 0.16f), 0.05f, m);
+            Shapes.Rounded("Panel", parent, new Vector3(x, 2.95f, 0f), new Vector3(width * 0.6f, 0.36f, 0.06f), 0.05f, m);
         }
 
-        /// <summary>What the robot rides: an orange-lit cell for surfing, a cart in the mine; and WARDEN on the chase.</summary>
+        /// <summary>What the robot rides: an orange-lit cell for surfing, a cart in the mine.</summary>
         private void BuildRide()
         {
             if (kind == Kind.Surf)
@@ -554,14 +528,6 @@ namespace SquashBot.Gameplay
                     Shapes.Primitive(PrimitiveType.Cylinder, "Wheel", ride, new Vector3(w.x, 0.07f, w.y), new Vector3(0.14f, 0.03f, 0.14f), metal)
                         .transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
             }
-            else if (kind == Kind.Chase)
-            {
-                chaserRoot = new GameObject("Chaser").transform;
-                chaserRoot.SetParent(transform, false);
-                chaser = WardenBoss.Create(new Vector3(0f, 1.8f, -3f), 3, robot.transform);
-                chaser.transform.SetParent(chaserRoot, true);
-                chaser.transform.localScale = Vector3.one * 0.9f;
-            }
         }
 
         // ---------- Play ----------
@@ -580,7 +546,6 @@ namespace SquashBot.Gameplay
             UpdateBlocks(dt);
             UpdateCoins();
             PoseRobot(dt);
-            if (buddy != null) UpdateBuddy(dt);
             UpdateCamera(dt);
 
             if (exitRing != null)
@@ -673,28 +638,14 @@ namespace SquashBot.Gameplay
 
             if (falling && !ended && y < FallDepth)
             {
-                if (kind == Kind.Chase)
-                {
-                    // No falling out of the chase: the robot scrambles back up, but WARDEN gains on it.
-                    falling = false;
-                    grounded = true;
-                    y = 0f;
-                    vy = 0f;
-                    z += 2.4f;
-                    Stumble();
-                }
-                else
-                {
-                    AudioManager.PlaySfx(Sfx.Fall);
-                    Haptics.Death();
-                    End(false, 0);
-                }
+                AudioManager.PlaySfx(Sfx.Fall);
+                Haptics.Death();
+                End(false, 0);
             }
 
             // Surf: waves launch the board over the whirlpools.
             if (grounded && !ended && ramps.Contains((under, row))) { Jump(); vy = JumpVelocity * 1.15f; }
 
-            if (kind == Kind.Chase && !ended) UpdateChaser(dt);
             if (falling && y < -8f) visual.gameObject.SetActive(false);
 
             // The gates: the left two lanes are the safe exit, the right lane takes the risky route.
@@ -728,40 +679,6 @@ namespace SquashBot.Gameplay
         {
             ended = true;
             Finished?.Invoke(reachedExit, bonus);
-        }
-
-        /// <summary>WARDEN chase: a hit costs coins and lets WARDEN close in; it falls back slowly over time.</summary>
-        private void Stumble()
-        {
-            if (invulnerable > 0f) return;
-            invulnerable = 1.2f;
-            int lost = Mathf.Min(3, Coins);
-            Coins -= lost;
-            chaserGap = Mathf.Max(0.4f, chaserGap - 1.1f);
-            fx.Burst(robot.transform.position + Vector3.up * 0.4f, Palette.Coin, Palette.CoinGlow, 6 + lost * 4, 4f);
-            AudioManager.PlaySfx(Sfx.Bump, 0.9f, 0.8f);
-            Haptics.Medium();
-            rig.Shake(0.7f);
-        }
-
-        private void UpdateChaser(float dt)
-        {
-            invulnerable = Mathf.Max(0f, invulnerable - dt);
-            visual.gameObject.SetActive(invulnerable <= 0f || Mathf.Repeat(time, 0.2f) > 0.08f);
-            chaserGap = Mathf.Min(3.2f, chaserGap + dt * 0.12f);
-            // Too close: WARDEN snatches a coin every second.
-            if (chaserGap < 1.2f && Coins > 0)
-            {
-                drainTimer += dt;
-                if (drainTimer >= 1f)
-                {
-                    drainTimer = 0f;
-                    Coins--;
-                    AudioManager.PlaySfx(Sfx.Coin, 0.5f, 0.6f);
-                }
-            }
-            // WARDEN hovers behind and to the side, closing in as the gap shrinks.
-            if (chaser != null) chaser.MoveTo(new Vector3(x * 0.3f + 1.7f, 2.3f, z - chaserGap * 0.6f - 0.3f));
         }
 
         private void UpdateRows()
@@ -816,15 +733,6 @@ namespace SquashBot.Gameplay
                 // Crash: the robot runs into a block (or one lands on it) without being high enough to clear it.
                 if (!ended && !crashed && Mathf.Abs(b.row - z) < 0.6f && Mathf.Abs(LaneX(b.lane) - x) < 0.62f && y < b.y + 0.85f && b.y < 0.9f)
                 {
-                    if (kind == Kind.Chase)
-                    {
-                        Stumble();
-                        fx.Burst(b.go.position, Palette.Block, Palette.BlockGlow, 14, 4f);
-                        Destroy(b.go.gameObject);
-                        Destroy(b.ring.gameObject);
-                        blocks.RemoveAt(i);
-                        continue;
-                    }
                     Crash();
                 }
             }
@@ -841,23 +749,6 @@ namespace SquashBot.Gameplay
             End(false, 0);
         }
 
-        /// <summary>The companion's lane: always beside the player.</summary>
-        private int BuddyLane => lane == 1 ? 2 : 1;
-
-        private void UpdateBuddy(float dt)
-        {
-            buddyX = Mathf.MoveTowards(buddyX, LaneX(BuddyLane), LaneSpeed * 0.8f * dt);
-            float speed = startTimer < StartDelay || ended ? 0f : 1f;
-            buddyPhase += dt * 9f * speed;
-            // It never falls: over holes it just takes a little hop.
-            int row = Mathf.RoundToInt(z);
-            int under = Mathf.Clamp(Mathf.RoundToInt(buddyX / LaneWidth) + 1, 0, Lanes - 1);
-            bool floor = row < 0 || row >= totalRows || floorPlan[row, under];
-            buddyY = Mathf.MoveTowards(buddyY, floor ? Mathf.Abs(Mathf.Sin(buddyPhase)) * 0.08f : 0.7f, dt * 6f);
-            buddy.transform.position = new Vector3(buddyX, buddyY, z - 0.4f);
-            buddy.transform.rotation = Quaternion.identity;
-        }
-
         private void UpdateCoins()
         {
             for (int i = coins.Count - 1; i >= 0; i--)
@@ -872,8 +763,7 @@ namespace SquashBot.Gameplay
                 c.go.localRotation = Quaternion.Euler(0f, time * 200f + c.z * 20f, 0f) * Quaternion.Euler(90f, 0f, 0f);
                 if (ended || crashed) continue;
                 bool mine = Mathf.Abs(c.z - z) < 0.6f && Mathf.Abs(LaneX(c.lane) - x) < 0.6f && Mathf.Abs(c.y - (y + 0.45f)) < 0.6f;
-                bool buddys = buddy != null && Mathf.Abs(c.z - (z - 0.4f)) < 0.6f && Mathf.Abs(LaneX(c.lane) - buddyX) < 0.6f && c.y < 1.3f;
-                if (mine || buddys)
+                if (mine)
                 {
                     Coins++;
                     var at = c.go.position;
@@ -939,14 +829,6 @@ namespace SquashBot.Gameplay
         private void UpdateCamera(float dt)
         {
             // Behind and above the robot, following the lane softly, looking down the duct.
-            // The chase looks down more steeply, so WARDEN shows behind the robot.
-            if (kind == Kind.Chase)
-            {
-                var high = new Vector3(x * 0.4f, 4.6f, z - 5.2f);
-                camPos = Vector3.Lerp(camPos, high, 1f - Mathf.Exp(-dt * 6f));
-                rig.Chase(camPos, Quaternion.LookRotation(new Vector3(x * 0.5f, 0.3f, z + 3f) - camPos), 64f);
-                return;
-            }
             var target = new Vector3(x * 0.55f, 2.1f + Mathf.Max(y, -1f) * 0.35f, z - 3.7f);
             if (falling) target.y = Mathf.Max(1.4f, target.y);
             camPos = Vector3.Lerp(camPos, target, 1f - Mathf.Exp(-dt * 8f));
