@@ -14,8 +14,10 @@ namespace SquashBot.Gameplay
     {
         private const float Speed = 2.4f;
         private const float Radius = 0.26f;
-        private const float CamDistance = 3.1f;
-        private const float CamHeight = 3.3f;
+        // The camera sits on a sphere round the robot: turn (yaw), tilt (pitch) and distance are all the player's to change.
+        private const float DefaultPitch = 47f, MinPitch = 12f, MaxPitch = 78f;
+        private const float DefaultDistance = 4.5f, MinDistance = 2.4f, MaxDistance = 8f;
+        private float pitch = DefaultPitch, distance = DefaultDistance;
         private const float BlendTime = 0.6f;
 
         private Robot robot;
@@ -85,11 +87,15 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>Turns the camera (dragging on the screen): degrees per screen pixel are applied by the caller.</summary>
-        public void Turn(float degrees)
+        public void Turn(float degrees, float tilt = 0f)
         {
             yaw += degrees;
+            pitch = Mathf.Clamp(pitch + tilt, MinPitch, MaxPitch);
             lookAround = 1.2f;
         }
+
+        /// <summary>Moves the camera in (<1) or out (>1).</summary>
+        public void Zoom(float factor) => distance = Mathf.Clamp(distance * factor, MinDistance, MaxDistance);
 
         // After the player turns the camera by hand, it waits a moment before swinging back behind the robot.
         private float lookAround;
@@ -201,8 +207,7 @@ namespace SquashBot.Gameplay
 
         private void UpdateCamera(float dt)
         {
-            var back = Quaternion.Euler(0f, yaw, 0f) * Vector3.back;
-            var camPos = pos + back * CamDistance + Vector3.up * CamHeight;
+            var camPos = pos + Vector3.up * 0.45f + Quaternion.Euler(pitch, yaw, 0f) * Vector3.back * distance;
             var look = Quaternion.LookRotation(pos + Vector3.up * 0.45f - camPos);
             // Glide from wherever the camera was (the building view) into the walking view.
             blend = Mathf.Min(1f, blend + dt / BlendTime);

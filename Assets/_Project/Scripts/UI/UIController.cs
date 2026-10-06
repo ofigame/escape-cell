@@ -131,7 +131,7 @@ namespace SquashBot.UI
         private RectTransform intro;
         private CanvasGroup introGroup;
         private TextMeshProUGUI introTitle, introText;
-        private float introTime = 99f;
+        private float introTime = 99f, introHold = 1.7f;
 
         // Pause & result
         private UiScreen pause;
@@ -581,6 +581,12 @@ namespace SquashBot.UI
             SetSetting(SettingKind.Sound, SaveData.Sound);
             SetSetting(SettingKind.Music, SaveData.Music);
             SetSetting(SettingKind.Vibration, SaveData.Vibration);
+            if (!Audio.Haptics.Available)
+            {
+                // Most tablets have no vibration motor: say so instead of a switch that seems to do nothing.
+                settingValues[SettingKind.Vibration].text = Loc.T("settings.noMotor");
+                settingValues[SettingKind.Vibration].color = new Color(1f, 1f, 1f, 0.5f);
+            }
             settingValues[SettingKind.Language].text = Loc.T("lang.name");
             settingValues[SettingKind.Camera].text = Loc.T(SaveData.PerspectiveView ? "view.3d" : "view.iso");
             SetSetting(SettingKind.TestMode, SaveData.TestMode);
@@ -762,12 +768,16 @@ namespace SquashBot.UI
 
         private void BuildIntro(Transform root)
         {
-            intro = UiFactory.Pill("Intro", root, Middle, new Vector2(0f, 430f), new Vector2(940f, 230f), UiFactory.PillColor);
+            intro = UiFactory.Pill("Intro", root, Middle, new Vector2(0f, 430f), new Vector2(960f, 250f), new Color(0.12f, 0.11f, 0.28f, 0.94f));
+            UiFactory.Fill(UiFactory.Stretch("Rim", intro), new Color(0.62f, 0.92f, 1f, 0.35f), UiSprites.Ring, 1.2f).raycastTarget = false;
             introGroup = intro.gameObject.AddComponent<CanvasGroup>();
             introGroup.blocksRaycasts = false;
             introTitle = UiFactory.TextBox("Title", intro, Top, new Vector2(0f, -22f), new Vector2(900f, 60f), "", 40f, Palette.UiCyan);
             introTitle.characterSpacing = 8f;
-            introText = UiFactory.TextBox("Text", intro, Bottom, new Vector2(0f, 30f), new Vector2(900f, 110f), "", 64f, Color.white, title: true);
+            introText = UiFactory.TextBox("Text", intro, Bottom, new Vector2(0f, 22f), new Vector2(910f, 150f), "", 60f, Color.white, title: true);
+            // Long messages wrap onto two lines instead of shrinking to an unreadable size.
+            introText.textWrappingMode = TextWrappingModes.Normal;
+            introText.fontSizeMin = 34f;
             intro.gameObject.SetActive(false);
         }
 
@@ -776,7 +786,11 @@ namespace SquashBot.UI
             introTitle.text = title;
             introText.text = text;
             introTime = 0f;
+            // Longer messages stay up longer.
+            introHold = Mathf.Clamp(1.7f + (text?.Length ?? 0) / 30f, 1.7f, 4f);
             intro.gameObject.SetActive(true);
+            // Always in front: menus built after the banner (the logo, the city card) must not cover it.
+            intro.SetAsLastSibling();
         }
 
         // ---------- Pause ----------
@@ -1079,11 +1093,11 @@ namespace SquashBot.UI
             if (intro.gameObject.activeSelf)
             {
                 introTime += dt;
-                float a = introTime < 0.25f ? introTime / 0.25f : introTime > 1.7f ? 1f - (introTime - 1.7f) / 0.3f : 1f;
+                float a = introTime < 0.25f ? introTime / 0.25f : introTime > introHold ? 1f - (introTime - introHold) / 0.3f : 1f;
                 introGroup.alpha = Mathf.Clamp01(a);
                 float s = introTime < 0.25f ? Mathf.Lerp(1.25f, 1f, introTime / 0.25f) : 1f;
                 intro.localScale = new Vector3(s, s, 1f);
-                if (introTime > 2f) intro.gameObject.SetActive(false);
+                if (introTime > introHold + 0.3f) intro.gameObject.SetActive(false);
             }
 
             float scale = canvas.scaleFactor;

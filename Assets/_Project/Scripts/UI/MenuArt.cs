@@ -92,6 +92,7 @@ namespace SquashBot.UI
             button.onClick.AddListener(() =>
             {
                 AudioManager.PlaySfx(Sfx.Click, 0.7f);
+                Haptics.Light();
                 onClick();
             });
             root.gameObject.AddComponent<ButtonPress>();

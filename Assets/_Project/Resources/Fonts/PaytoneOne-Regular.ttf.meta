@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 407ee4c2ecae81d41b611115e9b733cf
+guid: 4493d98fadf19044aa684778f490b178
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Lilita One
+  - Paytone One
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

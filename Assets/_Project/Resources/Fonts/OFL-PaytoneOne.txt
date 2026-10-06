@@ -1,5 +1,5 @@
-Copyright (c) 2011 Juan Montoreano (juan@remolacha.biz), 
-with Reserved Font Name Lilita
+Copyright 2011 The Paytone Project Authors (https://github.com/googlefonts/paytoneFont),
+with Reserved Font Names "Paytone" and "Paytone One".
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

@@ -360,7 +360,7 @@ namespace SquashBot.Gameplay
         {
             if (!City.Open)
             {
-                ui.ShowIntro(Loc.T("city.title"), Loc.T("city.locked"));
+                ui.ShowIntro(Loc.T("city.modeTitle"), Loc.T("city.locked"));
                 return;
             }
             ResetRun();

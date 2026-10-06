@@ -23,7 +23,7 @@ namespace SquashBot.UI
 
         /// <summary>
         /// Body text: Nunito (rounded and very readable; SemiBold for normal text, ExtraBold for bold). Titles and the logo:
-        /// Lilita One. Both are open-licence (OFL) fonts in Resources/Fonts, turned into dynamic SDF fonts at startup so every
+        /// Paytone One. Both are open-licence (OFL) fonts in Resources/Fonts, turned into dynamic SDF fonts at startup so every
         /// Turkish letter is drawn on demand; the old built-in font stays as the last fallback for rare symbols.
         /// </summary>
         public static TMP_FontAsset Font
@@ -52,7 +52,7 @@ namespace SquashBot.UI
             get
             {
                 if (titleFont != null) return titleFont;
-                titleFont = Dynamic("Fonts/LilitaOne-Regular");
+                titleFont = Dynamic("Fonts/PaytoneOne-Regular");
                 if (titleFont == null) return titleFont = Font;
                 AddFallback(titleFont, Font);
                 return titleFont;
@@ -297,6 +297,7 @@ namespace SquashBot.UI
             button.onClick.AddListener(() =>
             {
                 AudioManager.PlaySfx(Sfx.Click, 0.7f);
+                Haptics.Light();
                 onClick();
             });
             root.gameObject.AddComponent<ButtonPress>();

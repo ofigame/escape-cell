@@ -159,7 +159,7 @@ namespace SquashBot.UI
         private void BuildWalkGroup()
         {
             walkGroup = UiFactory.Stretch("Walk", root);
-            Stick = Joystick.Create(walkGroup, new Vector2(0f, 0f), new Vector2(30f, 40f), 440f);
+            Stick = Joystick.Create(walkGroup, 300f);
             interactButton = UiFactory.MakeButton(walkGroup, "", Kind.Gold, new Vector2(1f, 0f), new Vector2(-50f, 110f), new Vector2(300f, 220f), () => InteractPressed?.Invoke(), 46f);
             interactLabel = interactButton.GetComponentInChildren<TextMeshProUGUI>();
             interactButton.gameObject.AddComponent<Pulse>();

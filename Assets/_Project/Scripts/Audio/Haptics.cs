@@ -19,9 +19,10 @@ namespace SquashBot.Audio
 #endif
 
 #if UNITY_ANDROID && !UNITY_EDITOR
-        private static AndroidJavaObject vibrator;
+        private static AndroidJavaObject vibrator, gameAttributes;
         private static bool initialized;
-        private static bool hasAmplitude;
+        private static bool hasAmplitude, hasVibrator = true;
+        private static int sdk;
 
         private static void Init()
         {
@@ -33,7 +34,17 @@ namespace SquashBot.Audio
                 {
                     vibrator = activity.Call<AndroidJavaObject>("getSystemService", "vibrator");
                 }
-                hasAmplitude = vibrator != null && vibrator.Call<bool>("hasAmplitudeControl");
+                hasVibrator = vibrator != null && vibrator.Call<bool>("hasVibrator");
+                using (var version = new AndroidJavaClass("android.os.Build$VERSION")) sdk = version.GetStatic<int>("SDK_INT");
+                hasAmplitude = hasVibrator && sdk >= 26 && vibrator.Call<bool>("hasAmplitudeControl");
+                // Tagged as game feedback (USAGE_GAME), so system settings that mute "other" vibrations leave it alone.
+                if (sdk >= 26)
+                    using (var builder = new AndroidJavaObject("android.media.AudioAttributes$Builder"))
+                    {
+                        builder.Call<AndroidJavaObject>("setUsage", 14).Dispose();
+                        gameAttributes = builder.Call<AndroidJavaObject>("build");
+                    }
+                if (!hasVibrator) Debug.Log("[EscapeCell] This device has no vibration motor.");
             }
             catch (System.Exception e)
             {
@@ -45,34 +56,37 @@ namespace SquashBot.Audio
         private static void AndroidOneShot(int milliseconds, float strength)
         {
             if (!initialized) Init();
-            if (vibrator == null)
-            {
-                Handheld.Vibrate();
-                return;
-            }
+            if (vibrator == null) { Handheld.Vibrate(); return; }
+            if (!hasVibrator) return;
+            if (sdk < 26) { vibrator.Call("vibrate", (long)milliseconds); return; }
             try
             {
-                int amplitude = hasAmplitude ? Mathf.Clamp(Mathf.RoundToInt(strength * 255f), 1, 255) : -1; // -1 = device default
+                int amplitude = hasAmplitude ? Mathf.Clamp(Mathf.RoundToInt(Mathf.Lerp(110f, 255f, strength)), 1, 255) : -1; // -1 = device default
                 using (var effectClass = new AndroidJavaClass("android.os.VibrationEffect"))
                 using (var effect = effectClass.CallStatic<AndroidJavaObject>("createOneShot", (long)milliseconds, amplitude))
                 {
-                    vibrator.Call("vibrate", effect);
+                    Vibrate(effect);
                 }
             }
-            catch (System.Exception)
+            catch (System.Exception e)
             {
-                Handheld.Vibrate();
+                Debug.LogWarning("[EscapeCell] Vibration failed: " + e.Message);
+                vibrator.Call("vibrate", (long)milliseconds);
             }
+        }
+
+        private static void Vibrate(AndroidJavaObject effect)
+        {
+            if (gameAttributes != null) vibrator.Call("vibrate", effect, gameAttributes);
+            else vibrator.Call("vibrate", effect);
         }
 
         private static void AndroidPattern(long[] timings, int[] amplitudes)
         {
             if (!initialized) Init();
-            if (vibrator == null)
-            {
-                Handheld.Vibrate();
-                return;
-            }
+            if (vibrator == null) { Handheld.Vibrate(); return; }
+            if (!hasVibrator) return;
+            if (sdk < 26) { vibrator.Call("vibrate", timings, -1); return; }
             try
             {
                 if (!hasAmplitude)
@@ -80,15 +94,30 @@ namespace SquashBot.Audio
                 using (var effectClass = new AndroidJavaClass("android.os.VibrationEffect"))
                 using (var effect = effectClass.CallStatic<AndroidJavaObject>("createWaveform", timings, amplitudes, -1))
                 {
-                    vibrator.Call("vibrate", effect);
+                    Vibrate(effect);
                 }
             }
-            catch (System.Exception)
+            catch (System.Exception e)
             {
-                Handheld.Vibrate();
+                Debug.LogWarning("[EscapeCell] Vibration failed: " + e.Message);
+                vibrator.Call("vibrate", timings, -1);
             }
         }
 #endif
+
+        /// <summary>False on devices without a vibration motor (most tablets): the settings say so.</summary>
+        public static bool Available
+        {
+            get
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                if (!initialized) Init();
+                return hasVibrator;
+#else
+                return true;
+#endif
+            }
+        }
 
         /// <param name="milliseconds">Length of the pulse (Android).</param>
         /// <param name="strength">0..1: on Android the amplitude, on iPhone it picks the impact style and intensity.</param>
@@ -96,7 +125,7 @@ namespace SquashBot.Audio
         {
             if (!SaveData.Vibration) return;
 #if UNITY_ANDROID && !UNITY_EDITOR
-            AndroidOneShot(milliseconds, strength);
+            AndroidOneShot(Mathf.Max(25, milliseconds), strength);
 #elif UNITY_IOS && !UNITY_EDITOR
             int style = strength < 0.4f ? 0 : strength < 0.75f ? 1 : 2;
             EscapeCell_Impact(style, Mathf.Clamp01(0.5f + strength * 0.5f));
@@ -104,13 +133,14 @@ namespace SquashBot.Audio
         }
 
         /// <summary>A soft tick: every safe step.</summary>
-        public static void Light() => Pulse(14, 0.3f);
+        // Pulses shorter than ~25 ms barely spin up the small motors of many phones, so even the soft tick lasts 25 ms.
+        public static void Light() => Pulse(25, 0.3f);
 
         /// <summary>A firm knock: pickups, jumps, blocks landing nearby.</summary>
-        public static void Medium() => Pulse(28, 0.6f);
+        public static void Medium() => Pulse(45, 0.6f);
 
         /// <summary>A heavy hit.</summary>
-        public static void Heavy() => Pulse(60, 1f);
+        public static void Heavy() => Pulse(80, 1f);
 
         /// <summary>Squashed, burned or fallen: a strong double jolt you can't miss.</summary>
         public static void Death()

@@ -208,27 +208,7 @@ namespace SquashBot.Gameplay
 
         private void UpdateWalking(float dt)
         {
-            // Dragging anywhere off the controls turns the camera.
-            if (ReadPointers(out var p0, out _, out int count) && count >= 1)
-            {
-                if (!pressed)
-                {
-                    pressed = true;
-                    panning = !ui.IsOverUi(p0);
-                    lastPointer = p0;
-                }
-                else if (panning)
-                {
-                    walker.Turn((p0.x - lastPointer.x) * TurnSpeed);
-                    lastPointer = p0;
-                }
-            }
-            else
-            {
-                pressed = false;
-                panning = false;
-            }
-
+            UpdateWalkInput();
             walker.Tick(ui.Stick.Value, dt);
             scene.ClearView(rig.Cam.transform.position, walker.Position);
 
@@ -271,6 +251,90 @@ namespace SquashBot.Gameplay
                 int back = fee > 0 ? Mathf.Max(1, Mathf.RoundToInt(fee * 0.2f)) : 0;
                 ui.SetInteract(fee > 0 ? Loc.F("city.repairWalk", fee, back) : Loc.T("city.repairFree"));
             }
+        }
+
+        // Walking input: one finger anywhere (off the buttons) is a floating stick; two fingers (or the right mouse
+        // button) turn the camera round and up/down, and pinching (or the mouse wheel) moves it in and out.
+        private readonly Dictionary<int, bool> onPlot = new Dictionary<int, bool>();
+        private readonly List<(int id, Vector2 pos)> touches = new List<(int, Vector2)>();
+        private readonly List<(int id, Vector2 pos)> plotTouches = new List<(int, Vector2)>();
+        private int stickId = int.MinValue;
+        private Vector2 stickOrigin, lastMid;
+        private float lastSpread;
+        private bool camGesture;
+        private const float PitchSpeed = 0.2f;
+
+        private void UpdateWalkInput()
+        {
+            ReadAllPointers(touches);
+            foreach (var id in new List<int>(onPlot.Keys))
+                if (!touches.Exists(t => t.id == id)) onPlot.Remove(id);
+            plotTouches.Clear();
+            bool mouseLook = false;
+            foreach (var (id, p) in touches)
+            {
+                if (!onPlot.ContainsKey(id)) onPlot[id] = !ui.IsOverUi(p);
+                if (!onPlot[id]) continue;
+                if (id == RightMouse) mouseLook = true;
+                else plotTouches.Add((id, p));
+            }
+
+            float wheel = MouseScroll();
+            if (Mathf.Abs(wheel) > 0.01f) walker.Zoom(wheel > 0f ? 0.9f : 1.1f);
+
+            if (mouseLook || plotTouches.Count >= 2)
+            {
+                stickId = int.MinValue;
+                ui.Stick.Drive(null, default);
+                var mid = mouseLook ? touches.Find(t => t.id == RightMouse).pos : (plotTouches[0].pos + plotTouches[1].pos) * 0.5f;
+                float spread = mouseLook ? 0f : (plotTouches[0].pos - plotTouches[1].pos).magnitude;
+                if (camGesture)
+                {
+                    var d = mid - lastMid;
+                    walker.Turn(d.x * TurnSpeed, -d.y * PitchSpeed);
+                    if (spread > 1f && lastSpread > 1f) walker.Zoom(lastSpread / spread);
+                }
+                camGesture = true;
+                lastMid = mid;
+                lastSpread = spread;
+                return;
+            }
+            camGesture = false;
+            if (plotTouches.Count == 1)
+            {
+                var (id, p) = plotTouches[0];
+                if (stickId != id) { stickId = id; stickOrigin = p; }
+                ui.Stick.Drive(stickOrigin, p);
+            }
+            else
+            {
+                stickId = int.MinValue;
+                ui.Stick.Drive(null, default);
+            }
+        }
+
+        private const int LeftMouse = -1, RightMouse = -2;
+
+        /// <summary>Every finger on the screen (with its id), or the mouse buttons as ids -1 (left) and -2 (right).</summary>
+        private static void ReadAllPointers(List<(int id, Vector2 pos)> list)
+        {
+            list.Clear();
+#if ENABLE_INPUT_SYSTEM
+            var ts = Touchscreen.current;
+            if (ts != null)
+                foreach (var t in ts.touches)
+                    if (t.press.isPressed) list.Add((t.touchId.ReadValue(), t.position.ReadValue()));
+            if (list.Count > 0) return;
+            var mouse = Mouse.current;
+            if (mouse == null) return;
+            if (mouse.leftButton.isPressed) list.Add((LeftMouse, mouse.position.ReadValue()));
+            if (mouse.rightButton.isPressed) list.Add((RightMouse, mouse.position.ReadValue()));
+#else
+            for (int i = 0; i < Input.touchCount; i++) list.Add((Input.GetTouch(i).fingerId, Input.GetTouch(i).position));
+            if (list.Count > 0) return;
+            if (Input.GetMouseButton(0)) list.Add((LeftMouse, Input.mousePosition));
+            if (Input.GetMouseButton(1)) list.Add((RightMouse, Input.mousePosition));
+#endif
         }
 
         /// <summary>Distance from a point to a piece's footprint (0 inside it).</summary>
@@ -716,6 +780,12 @@ namespace SquashBot.Gameplay
             if (!walker.Active) ToggleMode();
             walker.Begin(at);
             walker.Turn(yaw - walker.CameraYaw);
+        }
+
+        public void TestLook(float yaw, float tilt, float zoom)
+        {
+            walker.Turn(yaw, tilt);
+            walker.Zoom(zoom);
         }
     }
 }
