@@ -196,6 +196,7 @@ namespace SquashBot.Gameplay
             runner.Init(robot, cameraRig, input, fx);
             runner.CoinCollected += OnTunnelCoin;
             runner.Finished += OnTunnelFinished;
+            runner.Arrived += OnRoadArrived;
             runner.RiskTaken += () => FloatAt(robot.transform.position + Vector3.up * 0.5f, Loc.T("float.risk"), Palette.UiRed);
             runner.Notice += (key, at) => FloatAt(at, Loc.T(key), Palette.UiCyan);
 
@@ -296,6 +297,8 @@ namespace SquashBot.Gameplay
             coins.Stop();
             powerUps.Stop();
             runner.Stop();
+            roadPhase = RoadPhase.None;
+            if (roadBeacon != null) Destroy(roadBeacon);
             gridView.gameObject.SetActive(true);
             floorRules.Stop();
             hazards.Hunting = false;
@@ -525,7 +528,7 @@ namespace SquashBot.Gameplay
 
         private void OnTunnelCoin(Vector3 at)
         {
-            coinsThisRun = runner.Coins;
+            if (roadPhase == RoadPhase.None) coinsThisRun = runner.Coins;
             ui.FlyCoin(cameraRig.Cam.WorldToScreenPoint(at));
         }
 
@@ -950,11 +953,17 @@ namespace SquashBot.Gameplay
 
             if (State != GameState.Playing) return;
 
+            if (roadPhase == RoadPhase.Walk)
+            {
+                UpdateRoadWalk();
+                return;
+            }
+
             if (runner.Active)
             {
                 // The tunnel runs itself (input, robot, camera); just keep the HUD current.
                 elapsed += Time.deltaTime;
-                coinsThisRun = runner.Coins;
+                if (roadPhase == RoadPhase.None) coinsThisRun = runner.Coins;
                 RefreshHud();
                 return;
             }
@@ -1019,6 +1028,11 @@ namespace SquashBot.Gameplay
         private void OnRobotArrived(GridPos p)
         {
             if (State != GameState.Playing) return;
+            if (roadPhase == RoadPhase.Walk)
+            {
+                if (p == roadExit) TakeOverRoad();
+                return;
+            }
 
             if (grid.IsGap(p) && !robot.IsShielded)
             {
@@ -1465,7 +1479,7 @@ namespace SquashBot.Gameplay
                 : stars < 3 ? StarHint(stars)
                 : Loc.T("star.max");
 
-            StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
+            var info = new UIController.ResultInfo
             {
                 won = true,
                 hasNext = hasNext,
@@ -1477,7 +1491,15 @@ namespace SquashBot.Gameplay
                 bonusAvailable = Progress.BonusTokens > 0,
                 meter = unlockedBonus > 0 || surprise ? 1f : Progress.Meter / (float)Progress.StarsPerBonus,
                 meterText = Loc.F("bonus.meter", unlockedBonus > 0 || surprise ? Progress.StarsPerBonus : Progress.Meter, Progress.StarsPerBonus),
-            }));
+            };
+            // Every level leads on to the next by a road: the result waits for the robot to arrive there.
+            if (RoadAhead)
+            {
+                pendingResult = info;
+                OpenRoad();
+                return;
+            }
+            StartCoroutine(ShowResultDelayed(info));
         }
 
         /// <summary>What the next star asks for, e.g. "Next star: 14 coins".</summary>
@@ -1745,7 +1767,7 @@ namespace SquashBot.Gameplay
 
         private void Escape()
         {
-            robot.EscapeInto();
+            if (!RoadAhead) robot.EscapeInto(); // with a road ahead the robot stays, to walk out to it
             fx.Burst(GridView.ToWorld(doorPos) + Vector3.up * 0.5f, Palette.UiCyan, Palette.ShieldPickupGlow, 30, 4f);
             FloatAt(GridView.ToWorld(doorPos), Loc.T("float.escaped"), Palette.UiCyan);
             Win(escaped: true);
@@ -1795,10 +1817,151 @@ namespace SquashBot.Gameplay
             }
         }
 
+        // ---------- Roads between levels ----------
+
+        // A beaten level opens a road to the next one: the floor is swept clean of every danger, a glowing exit
+        // appears on the platform's far edge with the road already running out from it, and stepping onto the exit
+        // hands the robot to the third-person runner without a cut. The road ends on the next floor's landing,
+        // where the result card (then the map) waits.
+        private enum RoadPhase { None, Walk, Run }
+        private RoadPhase roadPhase;
+        private GridPos roadExit;
+        private UIController.ResultInfo pendingResult;
+        private GameObject roadBeacon;
+
+        /// <summary>A road follows every level except bonus rounds and the very last level.</summary>
+        private bool RoadAhead => !bonusRun && levelIndex + 1 < LevelCount;
+
+        private void OpenRoad()
+        {
+            ClearDangers();
+            roadExit = PickExit(out var outward);
+            var origin = GridView.ToWorld(roadExit) + new Vector3(outward.x, 0f, outward.y);
+            float heading = outward.y > 0 ? 0f : 90f;
+            runner.PrepareRoad(levelIndex * 7919 + 13, origin, heading, levelIndex, LevelCatalog.WorldOf(levelIndex + 1));
+
+            roadBeacon = new GameObject("RoadExit");
+            roadBeacon.transform.position = GridView.ToWorld(roadExit) + Vector3.up * GridView.SurfaceY;
+            roadBeacon.transform.rotation = Quaternion.Euler(0f, heading, 0f);
+            var glow = MaterialFactory.CreateTransparent(new Color(0.5f, 1f, 0.7f, 0.5f), new Color(0.4f, 2f, 0.8f));
+            var solid = MaterialFactory.Create(new Color(0.5f, 1f, 0.7f), new Color(0.4f, 2f, 0.8f));
+            Shapes.Primitive(PrimitiveType.Cylinder, "Ring", roadBeacon.transform, new Vector3(0f, 0.03f, 0f), new Vector3(0.95f, 0.01f, 0.95f), glow);
+            for (int i = 0; i < 3; i++)
+                foreach (float s in new[] { -1f, 1f })
+                    Shapes.Rounded("Arrow", roadBeacon.transform, new Vector3(s * 0.12f, 0.08f, -0.25f + i * 0.25f), new Vector3(0.07f, 0.04f, 0.3f), 0.02f, solid)
+                        .transform.localRotation = Quaternion.Euler(0f, -s * 40f, 0f);
+
+            roadPhase = RoadPhase.Walk;
+            State = GameState.Playing;
+            input.HoldEnabled = false;
+            cameraRig.SetStyle(CameraStyle.Gameplay);
+            ui.SetWarning(false);
+            ui.SetHover(false, 0f);
+            ui.SetRescues(false, 0, 0f);
+            ui.SetShield(0f, 1f);
+            ui.SetCombo(1, 0f);
+            cameraRig.SetMenuFocus(false);
+            ui.ShowIntro(Loc.T("road.title"), Loc.T("road.go"));
+            RefreshHud();
+            if (robot.Position == roadExit && !robot.IsHopping) TakeOverRoad();
+        }
+
+        /// <summary>Mission done: every block, hole, fire, poison and rule effect disappears from the floor.</summary>
+        private void ClearDangers()
+        {
+            hazards.Stop();
+            floorRules.Stop();
+            levelEvents.Stop();
+            coins.Stop();
+            powerUps.Stop();
+            collapses.Clear();
+            foreach (var o in objectives) if (o.View != null) Destroy(o.View);
+            objectives.Clear();
+            foreach (var p in grid.AllPositions())
+            {
+                if (!grid.IsFloor(p)) continue;
+                var tile = grid.GetTile(p);
+                if (tile == TileState.Fire) gridView.Extinguish(p);
+                else if (tile != TileState.Solid) gridView.Repair(p);
+                grid.SetTile(p, TileState.Solid);
+                grid.SetOccupied(p, false);
+                gridView.SetTint(p, null);
+                gridView.SetWarning(p, 0f);
+            }
+            fx.Burst(robot.transform.position + Vector3.up * 0.5f, Palette.UiCyan, Palette.ShieldPickupGlow, 40, 7f);
+            AudioManager.PlaySfx(Sfx.Shield, 1f, 1.2f);
+        }
+
+        /// <summary>
+        /// The exit: a floor tile on the far edge (seen from the camera), with nothing beyond it, nearest the robot.
+        /// <paramref name="outward"/> is the way the road leaves the platform.
+        /// </summary>
+        private GridPos PickExit(out Vector2Int outward)
+        {
+            GridPos best = robot.Position;
+            outward = new Vector2Int(0, 1);
+            int bestD = int.MaxValue;
+            foreach (var p in grid.AllPositions())
+            {
+                if (!grid.IsFloor(p)) continue;
+                foreach (var dir in new[] { new Vector2Int(0, 1), new Vector2Int(1, 0) })
+                {
+                    bool clear = true;
+                    for (var q = new GridPos(p.x + dir.x, p.y + dir.y); grid.InBounds(q); q = new GridPos(q.x + dir.x, q.y + dir.y))
+                        if (grid.Exists(q)) { clear = false; break; }
+                    if (!clear) continue;
+                    int d = p.Manhattan(robot.Position);
+                    if (d < bestD) { bestD = d; best = p; outward = dir; }
+                }
+            }
+            return best;
+        }
+
+        private void TakeOverRoad()
+        {
+            if (roadPhase != RoadPhase.Walk) return;
+            roadPhase = RoadPhase.Run;
+            if (roadBeacon != null) Destroy(roadBeacon);
+            runner.TakeOver();
+            AudioManager.PlaySfx(Sfx.Hop, 0.8f, 1.2f);
+            ui.ShowIntro(Loc.F("level", levelIndex + 2), Loc.T("road.run"));
+        }
+
+        private void OnRoadArrived()
+        {
+            if (roadPhase != RoadPhase.Run) return;
+            roadPhase = RoadPhase.None;
+            State = GameState.Result;
+            SaveData.Coins += runner.Coins;
+            pendingResult.coins += runner.Coins;
+            pendingResult.subtitle = Loc.T("road.arrived");
+            ui.ShowIntro(Loc.T("road.doneTitle"), Loc.T("road.doneText"));
+            StartCoroutine(ShowResultDelayed(pendingResult));
+        }
+
+        private void UpdateRoadWalk()
+        {
+            var command = input.Poll(robot.transform.position);
+            if (command.jump) robot.TryJump();
+            else if (command.move.HasValue) robot.TryMove(command.move.Value);
+            if (roadBeacon != null)
+            {
+                float pulse = 1f + Mathf.Sin(Time.time * 6f) * 0.12f;
+                roadBeacon.transform.localScale = new Vector3(pulse, 1f, pulse);
+            }
+            RefreshHud();
+        }
+
         private void RefreshHud()
         {
             string Seconds(float s) => Mathf.Max(0f, s).ToString("0.0", CultureInfo.InvariantCulture);
             string text;
+            if (roadPhase != RoadPhase.None)
+            {
+                text = roadPhase == RoadPhase.Walk ? Loc.T("hud.roadWalk") : Loc.F("hud.road", Mathf.RoundToInt(runner.Progress * 100f));
+                ui.SetMission(text, roadPhase == RoadPhase.Walk ? 1f : runner.Progress, Earned + (roadPhase == RoadPhase.Run ? runner.Coins : 0));
+                return;
+            }
             switch (level.mission)
             {
                 case MissionType.CollectCoins: text = Loc.F("hud.coins", coinsThisRun, level.coinTarget); break;

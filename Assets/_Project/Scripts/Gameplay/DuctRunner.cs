@@ -59,14 +59,31 @@ namespace SquashBot.Gameplay
         private bool risky;
         private Transform ride, bubble;
         private readonly HashSet<(int, int)> ramps = new HashSet<(int, int)>();
-        private int GateRow => Mathf.CeilToInt(TrackLength);
+        private int GateRow => Mathf.CeilToInt(length);
+
+        // A road between two levels (instead of a bonus tunnel): it starts at the edge of the platform just beaten, gets
+        // longer and harder with the level, cannot be lost (a bump costs coins, a fall puts the robot back on the road)
+        // and ends on the next floor's landing.
+        private bool roadMode;
+        private float length = TrackLength, difficulty, invulnerable;
+        private int nextWorld;
+        private float speedStart = SpeedStart, speedEnd = SpeedEnd, startDelay = StartDelay;
+
+        /// <summary>The course is built (it can be seen) but the robot is not on it yet.</summary>
+        public bool Prepared { get; private set; }
+        /// <summary>The road was walked to the next floor's landing.</summary>
+        public event Action Arrived;
+
+        // Seamless hand-over from the platform view: the camera glides from where it was into the chase view.
+        private float blend = 1f, blendFov = 62f;
+        private Pose blendFrom;
 
         /// <summary>The tunnel owns the robot, camera and input (from Begin until Stop).</summary>
         public bool Active { get; private set; }
         public int Coins { get; private set; }
         /// <summary>Test hooks: nothing ends the run (screenshots of the whole course).</summary>
         public static bool TestInvulnerable;
-        public float Progress => Mathf.Clamp01(z / TrackLength);
+        public float Progress => Mathf.Clamp01(z / length);
 
         private Robot robot;
         private CameraRig rig;
@@ -148,16 +165,41 @@ namespace SquashBot.Gameplay
 
         public void Begin(int seed, Kind tunnel = Kind.Duct)
         {
+            Prepare(seed, tunnel, Vector3.zero, 0f);
+            TakeOver();
+        }
+
+        /// <summary>
+        /// Builds a road between two levels from the platform edge at <paramref name="origin"/> heading out at
+        /// <paramref name="heading"/> degrees: it is seen at once, and <see cref="TakeOver"/> puts the robot on it when
+        /// it steps onto the edge tile. <paramref name="level"/> (0-based) makes it longer and harder.
+        /// </summary>
+        public void PrepareRoad(int seed, Vector3 origin, float heading, int level, int toWorld)
+        {
+            float d = Mathf.Clamp01(level / 199f);
+            Prepare(seed, Kind.Duct, origin, heading, road: true, roadLength: Mathf.Round(Mathf.Lerp(46f, 230f, d)), roadDifficulty: d, toWorld: toWorld);
+        }
+
+        private void Prepare(int seed, Kind tunnel, Vector3 origin, float heading, bool road = false, float roadLength = TrackLength, float roadDifficulty = 1f, int toWorld = 0)
+        {
             Stop();
-            Active = true;
+            Prepared = true;
             kind = tunnel;
+            roadMode = road;
+            length = roadLength;
+            difficulty = roadDifficulty;
+            nextWorld = toWorld;
+            speedStart = road ? 4.6f : SpeedStart;
+            speedEnd = road ? Mathf.Lerp(6.6f, 9.2f, roadDifficulty) : SpeedEnd;
+            startDelay = road ? 0f : StartDelay;
+            transform.SetPositionAndRotation(origin, Quaternion.Euler(0f, heading, 0f));
             risky = false;
             Coins = 0;
-            x = 0f; y = 0f; z = 0f; vy = 0f;
+            x = 0f; y = 0f; z = road ? -1f : 0f; vy = 0f;
             lane = 1;
             grounded = true;
             falling = crashed = ended = escaped = shielded = false;
-            startTimer = endTimer = squash = time = holdTime = slideLeft = magnetLeft = 0f;
+            startTimer = endTimer = squash = time = holdTime = slideLeft = magnetLeft = invulnerable = 0f;
 
             CreateMaterials();
             var rng = new System.Random(seed);
@@ -165,7 +207,18 @@ namespace SquashBot.Gameplay
             BendCourse(rng);
             builtRow = 0;
             while (builtRow < Mathf.Min(totalRows, BuildAhead)) BuildRow(builtRow++);
-            BuildGate();
+            if (!roadMode) BuildGate();
+        }
+
+        /// <summary>The robot, camera and input belong to the course from now on; the camera glides into the chase view.</summary>
+        public void TakeOver()
+        {
+            Active = true;
+            var cam = rig.Cam;
+            blendFrom = rig.CurrentPose;
+            // A narrow perspective from where the flat (orthographic) camera stood frames the same picture, so the switch is invisible.
+            blendFov = cam.orthographic ? Mathf.Max(1f, 2f * Mathf.Atan(cam.orthographicSize / Mathf.Max(1f, (blendFrom.position - robot.transform.position).magnitude)) * Mathf.Rad2Deg) : cam.fieldOfView;
+            blend = roadMode ? 0f : 1f;
 
             // Take over the robot: its own grid animations pause while the tunnel poses it.
             robot.gameObject.SetActive(true);
@@ -196,8 +249,10 @@ namespace SquashBot.Gameplay
         /// <summary>Removes the tunnel and gives the robot, camera and input back to the platform game.</summary>
         public void Stop()
         {
-            if (!Active) return;
+            if (!Active && !Prepared) return;
+            bool hadRobot = Active;
             Active = false;
+            Prepared = false;
             while (rows.Count > 0) Destroy(rows.Dequeue().root.gameObject);
             foreach (var o in obstacles) { Destroy(o.go.gameObject); if (o.ring != null) Destroy(o.ring.gameObject); }
             foreach (var c in coins) Destroy(c.go.gameObject);
@@ -209,6 +264,7 @@ namespace SquashBot.Gameplay
             ride = bubble = null;
             ramps.Clear();
             curveRows.Clear();
+            if (!hadRobot) return;
 
             foreach (var (t, pos, rot) in limbs)
             {
@@ -285,7 +341,7 @@ namespace SquashBot.Gameplay
         /// </summary>
         private void Plan(System.Random rng)
         {
-            totalRows = GateRow + RiskLength + 30;
+            totalRows = roadMode ? Mathf.CeilToInt(length) + 14 : GateRow + RiskLength + 30;
             ramps.Clear();
             floorPlan = new bool[totalRows, Lanes];
             for (int r = 0; r < totalRows; r++)
@@ -297,11 +353,11 @@ namespace SquashBot.Gameplay
 
             CoinLine(1, 5, 6);
             int row = 16;
-            while (row < TrackLength - 14)
+            while (row < length - (roadMode ? 6 : 14))
             {
-                float p = row / TrackLength;
+                float p = row / length;
                 // Early on only the gentle patterns; the full set from a fifth of the way in.
-                int pattern = rng.Next(p < 0.1f ? 4 : p < 0.2f ? 7 : 10);
+                int pattern = rng.Next(Mathf.Min(p < 0.1f ? 4 : p < 0.2f ? 7 : 10, roadMode ? 4 + Mathf.RoundToInt(difficulty * 6f) : 10));
                 switch (pattern)
                 {
                     case 0: // a line of coins in one lane
@@ -392,8 +448,10 @@ namespace SquashBot.Gameplay
                         break;
                     }
                 }
-                row += Mathf.RoundToInt(Mathf.Lerp(7f, 4f, p)) + rng.Next(2);
+                row += Mathf.RoundToInt(roadMode ? Mathf.Lerp(9f, 4.5f, difficulty * 0.6f + p * 0.4f) : Mathf.Lerp(7f, 4f, p)) + rng.Next(2);
             }
+
+            if (roadMode) return; // a road ends on the next floor's landing, no gates
 
             // The risky route past the right-hand gate: short, dense and fast.
             int r2 = GateRow + 4;
@@ -443,8 +501,8 @@ namespace SquashBot.Gameplay
             int n = totalRows + 1;
             var turn = new float[n];
             var height = new float[n];
-            int straightFrom = GateRow - 16;
-            int r = 22;
+            int straightFrom = roadMode ? Mathf.CeilToInt(length) - 4 : GateRow - 16;
+            int r = roadMode ? 8 : 22;
             while (r < straightFrom)
             {
                 if (rng.Next(3) > 0)
@@ -510,7 +568,11 @@ namespace SquashBot.Gameplay
 
         // ---------- Track space to world ----------
 
-        private Vector3 Center(float zf)
+        // The course is laid out in the runner's own space; its transform puts it in the world (a road starts at a platform edge).
+        private Vector3 Center(float zf) => transform.TransformPoint(LocalCenter(zf));
+        private Quaternion Rotation(float zf) => transform.rotation * LocalRotation(zf);
+
+        private Vector3 LocalCenter(float zf)
         {
             if (zf <= 0f) return centers[0] + new Vector3(0f, 0f, zf);
             int last = centers.Length - 1;
@@ -519,7 +581,7 @@ namespace SquashBot.Gameplay
             return Vector3.Lerp(centers[r], centers[r + 1], zf - r);
         }
 
-        private Quaternion Rotation(float zf)
+        private Quaternion LocalRotation(float zf)
         {
             int last = headings.Length - 1;
             float c = Mathf.Clamp(zf, 0f, last);
@@ -537,6 +599,7 @@ namespace SquashBot.Gameplay
 
         private void BuildRow(int r)
         {
+            if (roadMode && r > length) { BuildLanding(r); return; }
             var root = new GameObject("Row " + r).transform;
             root.SetParent(transform, false);
             root.SetPositionAndRotation(Center(r), Rotation(r));
@@ -611,6 +674,36 @@ namespace SquashBot.Gameplay
                 if (orow == r) CreateObstacle(k, ol, orow);
             foreach (var (cl, cz, cy) in coinPlan)
                 if (Mathf.RoundToInt(cz) == r) CreateCoin(cl, cz, cy);
+        }
+
+        private Material landingFrame, landingTop, landingGlow;
+
+        /// <summary>The end of a road: a wide landing in the next floor's colours under a glowing arch.</summary>
+        private void BuildLanding(int r)
+        {
+            var theme = WorldTheme.ForWorld(nextWorld);
+            if (landingFrame == null)
+            {
+                landingFrame = MaterialFactory.Create(theme.tileTop, theme.tileGlow * 0.55f);
+                landingTop = MaterialFactory.Create(theme.tileTop * 0.95f, theme.tileSelfLight * 0.5f);
+                landingGlow = MaterialFactory.Create(theme.accent, theme.accent * 1.6f);
+            }
+            var root = new GameObject("Landing " + r).transform;
+            root.SetParent(transform, false);
+            root.SetPositionAndRotation(Center(r), Rotation(r));
+            for (int i = -3; i <= 3; i++)
+            {
+                Shapes.Rounded("Frame", root, new Vector3(i * 1.0f, -0.03f, 0f), new Vector3(0.94f, 0.1f, 0.94f), 0.045f, landingFrame);
+                Shapes.Rounded("Top", root, new Vector3(i * 1.0f, 0f, 0f), new Vector3(0.78f, 0.1f, 0.78f), 0.045f, landingTop);
+                Shapes.Rounded("Slab", root, new Vector3(i * 1.0f, -0.3f, 0f), new Vector3(1.02f, 0.5f, 1.02f), 0.05f, MaterialFactory.Create(theme.slab, Color.black));
+            }
+            if (r == Mathf.CeilToInt(length) + 2)
+            {
+                foreach (float side in new[] { -1f, 1f })
+                    Shapes.Rounded("Post", root, new Vector3(side * 2.6f, 1.7f, 0f), new Vector3(0.22f, 3.4f, 0.22f), 0.06f, landingGlow);
+                Shapes.Rounded("Top", root, new Vector3(0f, 3.45f, 0f), new Vector3(5.4f, 0.24f, 0.24f), 0.06f, landingGlow);
+            }
+            rows.Enqueue((r, root));
         }
 
         private void CreateObstacle(ObstacleKind k, int l, int r)
@@ -787,7 +880,7 @@ namespace SquashBot.Gameplay
         private void HandleInput()
         {
             var cmd = input.Poll(robot.transform.position);
-            if (startTimer < StartDelay) return;
+            if (startTimer < startDelay) return;
             if (cmd.jump) Jump();
             if (!cmd.move.HasValue) return;
             switch (cmd.move.Value)
@@ -838,7 +931,7 @@ namespace SquashBot.Gameplay
         private void Move(float dt)
         {
             startTimer += dt;
-            float speed = startTimer < StartDelay ? 0f : Mathf.Lerp(SpeedStart, SpeedEnd, Progress);
+            float speed = startTimer < startDelay ? 0f : Mathf.Lerp(speedStart, speedEnd, Progress);
             if (crashed) speed = 0f;
             if (ended && escaped) speed *= Mathf.Clamp01(1f - endTimer * 0.6f);
             if (falling) speed *= 0.6f;
@@ -885,6 +978,7 @@ namespace SquashBot.Gameplay
             if (falling && !ended && y < FallDepth)
             {
                 if (shielded || TestInvulnerable) SaveFromFall();
+                else if (roadMode) { Stumble(); SaveFromFall(); }
                 else
                 {
                     AudioManager.PlaySfx(Sfx.Fall);
@@ -898,8 +992,12 @@ namespace SquashBot.Gameplay
 
             if (falling && y < -8f) visual.gameObject.SetActive(false);
 
+            // A road ends on the next floor's landing.
+            if (roadMode && !ended && z >= length + 4f) Arrive();
+            invulnerable = Mathf.Max(0f, invulnerable - dt);
+
             // The gates: the left two lanes are the safe exit, the right lane takes the risky route.
-            if (!ended && !risky && z >= GateRow)
+            if (!roadMode && !ended && !risky && z >= GateRow)
             {
                 if (lane == 2)
                 {
@@ -910,7 +1008,7 @@ namespace SquashBot.Gameplay
                 }
                 else Escape(SafeBonus);
             }
-            if (!ended && risky && z >= GateRow + RiskLength) Escape(RiskBonus);
+            if (!roadMode && !ended && risky && z >= GateRow + RiskLength) Escape(RiskBonus);
             if (ended) endTimer += dt;
             squash = Mathf.MoveTowards(squash, 0f, dt * 2f);
             magnetLeft = Mathf.Max(0f, magnetLeft - dt);
@@ -938,6 +1036,31 @@ namespace SquashBot.Gameplay
             Haptics.Medium();
             rig.Shake(0.6f);
             Notice?.Invoke("float.shieldSaved", at);
+        }
+
+        /// <summary>A bump on a road: a few coins lost and a moment of blinking safety.</summary>
+        private void Stumble()
+        {
+            if (invulnerable > 0f) return;
+            invulnerable = 1.4f;
+            int lost = Mathf.Min(3, Coins);
+            Coins -= lost;
+            fx.Burst(robot.transform.position + Vector3.up * 0.4f, Palette.Coin, Palette.CoinGlow, 6 + lost * 4, 4f);
+            AudioManager.PlaySfx(Sfx.Bump, 0.9f, 0.8f);
+            Haptics.Medium();
+            rig.Shake(0.7f);
+        }
+
+        /// <summary>The robot steps onto the next floor's landing: a happy spin, then the game shows the result.</summary>
+        private void Arrive()
+        {
+            ended = true;
+            escaped = true;
+            fx.Burst(robot.transform.position + Vector3.up, WorldTheme.ForWorld(nextWorld).accent, Palette.ShieldPickupGlow, 40, 6f);
+            AudioManager.PlaySfx(Sfx.Win);
+            Haptics.Medium();
+            rig.Punch(0.8f);
+            Arrived?.Invoke();
         }
 
         private void Escape(int bonus)
@@ -1054,6 +1177,15 @@ namespace SquashBot.Gameplay
         private void Hit(Obstacle o)
         {
             if (TestInvulnerable) return;
+            if (roadMode)
+            {
+                // Roads cannot be lost: the block bursts, a few coins go flying, and the robot runs on.
+                if (invulnerable > 0f) return;
+                fx.Burst(o.go.position + Vector3.up * 0.4f, Palette.Block, Palette.BlockGlow, 16, 4f);
+                o.done = true;
+                Stumble();
+                return;
+            }
             if (shielded)
             {
                 UseShield();
@@ -1112,7 +1244,7 @@ namespace SquashBot.Gameplay
 
             // Lean into lane changes and forward while sprinting; squash on landing, stretch on take-off; low when sliding.
             float lean = (LaneX(lane) - x) * 18f;
-            float forward = startTimer < StartDelay ? 0f : 12f;
+            float forward = startTimer < startDelay ? 0f : 12f;
             bool sliding = slideLeft > 0f && grounded;
             visual.localRotation = Quaternion.Euler(sliding ? -25f : forward, lean * 0.6f, -lean);
             float s = 1f + squash;
@@ -1121,10 +1253,13 @@ namespace SquashBot.Gameplay
             var targetScale = new Vector3(sx * (sliding ? 1.15f : 1f), sy, sx);
             visual.localScale = dt >= 1f ? targetScale : Vector3.Lerp(visual.localScale, targetScale, Mathf.Clamp01(dt * 18f));
             if (ended && escaped) visual.localRotation = Quaternion.Euler(0f, endTimer * 540f, 0f);
+            // Blinking while a road bump's safety lasts.
+            if (invulnerable > 0f) visual.gameObject.SetActive(Mathf.Repeat(time, 0.2f) > 0.08f);
+            else if (!visual.gameObject.activeSelf && !falling) visual.gameObject.SetActive(true);
             if (bubble != null && bubble.gameObject.activeSelf) bubble.localScale = Vector3.one * (1.05f + Mathf.Sin(time * 6f) * 0.04f);
 
             // Run cycle: legs pump and arms swing (tucked while in the air, back while sliding).
-            bool running = grounded && startTimer >= StartDelay && !ended && !sliding;
+            bool running = grounded && startTimer >= startDelay && !ended && !sliding;
             float swing = running ? Mathf.Sin(runPhase * Mathf.PI) : 0f;
             if (legL != null)
             {
@@ -1161,6 +1296,15 @@ namespace SquashBot.Gameplay
             var look = World(x * 0.75f, 0.55f + Mathf.Max(y, -0.5f) * 0.3f, z + 4.5f);
             var rot = Quaternion.LookRotation(look - camPos);
             camRot = dt >= 1f ? rot : Quaternion.Slerp(camRot, rot, 1f - Mathf.Exp(-dt * 10f));
+            if (blend < 1f)
+            {
+                // The hand-over from the platform view: position, angle and lens glide together.
+                if (dt < 1f) blend = Mathf.Min(1f, blend + dt / 1.1f);
+                float k = blend * blend * (3f - 2f * blend);
+                float fov = Mathf.Exp(Mathf.Lerp(Mathf.Log(blendFov), Mathf.Log(62f), k));
+                rig.Chase(Vector3.Lerp(blendFrom.position, camPos, k), Quaternion.Slerp(blendFrom.rotation, camRot, k), fov);
+                return;
+            }
             rig.Chase(camPos, camRot, 62f);
         }
     }

@@ -864,6 +864,7 @@ namespace SquashBot.UI
         public void ShowResult(ResultInfo info)
         {
             pause.Hide(true);
+            intro.gameObject.SetActive(false); // the result card has its own title
             result.Show();
             SetBanner(true);
             resultTitle.text = Loc.T(info.bonusRound ? "result.bonusDone" : info.won ? "result.win" : "result.lose");
