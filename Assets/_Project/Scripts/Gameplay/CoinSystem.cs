@@ -141,7 +141,7 @@ namespace SquashBot.Gameplay
             if (!running) return;
             timer -= dt;
             if (timer > 0f) return;
-            timer = level.coinInterval;
+            timer = level.coinInterval / Mathf.Max(0.1f, SpawnBoost);
             if (coins.Count < level.maxCoins) SpawnCoin();
         }
 
@@ -151,6 +151,20 @@ namespace SquashBot.Gameplay
             const float c3 = c1 + 1f;
             return 1f + c3 * Mathf.Pow(x - 1f, 3f) + c1 * Mathf.Pow(x - 1f, 2f);
         }
+
+        /// <summary>Drops a coin on a tile right away (gold cart, supply crate), ignoring the usual limit.</summary>
+        public void Drop(GridPos p, float lifetime)
+        {
+            if (grid == null || !grid.IsStandable(p) || coins.Exists(c => c.pos == p)) return;
+            var go = new GameObject("Coin");
+            go.transform.SetParent(transform, false);
+            Shapes.Primitive(PrimitiveType.Cylinder, "Rim", go.transform, Vector3.zero, new Vector3(0.46f, 0.035f, 0.46f), rimMaterial);
+            Shapes.Primitive(PrimitiveType.Cylinder, "Face", go.transform, Vector3.zero, new Vector3(0.36f, 0.045f, 0.36f), coinMaterial);
+            coins.Add(new Coin { pos = p, lifeLeft = lifetime, go = go });
+        }
+
+        /// <summary>WARDEN alarm: coins come faster while it lasts.</summary>
+        public float SpawnBoost = 1f;
 
         private void SpawnCoin()
         {

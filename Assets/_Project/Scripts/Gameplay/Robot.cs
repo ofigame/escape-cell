@@ -549,6 +549,8 @@ namespace SquashBot.Gameplay
                     var pose = Quaternion.Euler(0f, 720f * ease, 0f);
                     if (dance == "dance.jump") { bounce = Mathf.Abs(Mathf.Sin(animTime * 5f)) * 0.8f * fade; pose = Quaternion.identity; }
                     else if (dance == "dance.wobble") pose = Quaternion.Euler(0f, Mathf.Sin(animTime * 9f) * 35f * fade, Mathf.Sin(animTime * 12f) * 20f * fade);
+                    else if (dance == "dance.swim") { bounce = 0.25f + Mathf.Sin(animTime * 4f) * 0.12f * fade; pose = Quaternion.Euler(Mathf.Sin(animTime * 8f) * 20f * fade, Mathf.Sin(animTime * 4f) * 40f * fade, 0f); }
+                    else if (dance == "dance.sugar") { bounce = Mathf.Abs(Mathf.Sin(animTime * 14f)) * 0.3f * fade; pose = Quaternion.Euler(0f, animTime * 540f, Mathf.Sin(animTime * 14f) * 12f * fade); }
                     else if (dance == "dance.flip") { bounce = Mathf.Sin(Mathf.Clamp01(animTime / 0.8f) * Mathf.PI) * 0.9f; pose = Quaternion.Euler(-360f * Mathf.Clamp01(animTime / 0.8f), 0f, 0f); }
                     transform.position = from + Vector3.up * bounce;
                     visual.localRotation = FacingCamera * pose;

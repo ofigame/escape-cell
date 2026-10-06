@@ -56,6 +56,7 @@ namespace SquashBot.Gameplay
         private InputReader input;
         private DuctRunner runner;
         private FloorRules floorRules;
+        private LevelEvents levelEvents;
 
         private GridModel grid;
         private LevelData level;
@@ -175,6 +176,12 @@ namespace SquashBot.Gameplay
             floorRules.Init(gridView, robot, hazards, fx, cameraRig);
             floorRules.Hit += OnBlockImpact;
 
+            levelEvents = new GameObject("LevelEvents").AddComponent<LevelEvents>();
+            levelEvents.Init(robot, coins, hazards, fx, cameraRig);
+            levelEvents.CrateOpened += OnCrateOpened;
+            levelEvents.AlarmChanged += on => ui.SetAlarm(on);
+            levelEvents.Started += e => ui.ShowIntro(Loc.T("event.title"), Loc.T("event." + e));
+
             runner = new GameObject("DuctRunner").AddComponent<DuctRunner>();
             runner.Init(robot, cameraRig, input, fx);
             runner.CoinCollected += OnTunnelCoin;
@@ -273,6 +280,7 @@ namespace SquashBot.Gameplay
             gridView.gameObject.SetActive(true);
             floorRules.Stop();
             hazards.Hunting = false;
+            levelEvents.Stop();
             HideTools();
         }
 
@@ -498,6 +506,7 @@ namespace SquashBot.Gameplay
             hazards.Begin(grid, level, MissionProgress, LevelCatalog.WorldOf(levelIndex));
             floorRules.Begin(grid, level, levelIndex, p => hazards.IsProtected != null && hazards.IsProtected(p));
             hazards.Hunting = (level.rules & FloorRule.Hunter) != 0;
+            levelEvents.Begin(grid, level, levelIndex);
             coins.Begin(grid, level);
             powerUps.Begin(grid, level);
 
@@ -589,6 +598,7 @@ namespace SquashBot.Gameplay
             coins.Resume();
             powerUps.Resume();
             floorRules.Resume();
+            levelEvents.Resume();
             State = GameState.Playing;
             cameraRig.SetMenuFocus(false);
             cameraRig.SetStyle(CameraStyle.Gameplay);
@@ -957,6 +967,7 @@ namespace SquashBot.Gameplay
                 else if (portal != null && portal.IsOpen && p == doorPos) Escape();
             }
 
+            levelEvents.OnArrived(p);
             // Floor rules last: ice, currents, trampolines and teleports may carry the robot on from here.
             if (State == GameState.Playing) floorRules.OnArrived(p, robot.LastLeftTile);
         }
@@ -1077,7 +1088,7 @@ namespace SquashBot.Gameplay
             if (comboTimer <= 0f) comboStreak = 0;
             comboStreak++;
             comboTimer = ComboWindow;
-            int multiplier = ComboMultiplier;
+            int multiplier = ComboMultiplier * (levelEvents.Alarm ? 2 : 1); // the WARDEN alarm doubles every coin
             comboBonus += multiplier - 1;
             FloatAt(GridView.ToWorld(p), "+" + multiplier, multiplier > 1 ? Palette.UiGold : Palette.UiGold);
             if (comboStreak == ComboStep || comboStreak == ComboStep * 2)
@@ -1102,6 +1113,31 @@ namespace SquashBot.Gameplay
                 Win();
             else if (level.mission == MissionType.CoinRain && coinsThisRun == level.coinTarget)
                 FloatAt(GridView.ToWorld(p) + Vector3.up * 0.5f, Loc.T("float.target"), Palette.UiCyan);
+        }
+
+        /// <summary>The supply crate: a tool charge, a handful of coins or a short shield.</summary>
+        private void OnCrateOpened(GridPos p)
+        {
+            AudioManager.PlaySfx(Sfx.Win, 0.7f, 1.4f);
+            Haptics.Medium();
+            int roll = Random.Range(0, 100);
+            bool hasTool = toolSlot[0].HasValue || toolSlot[1].HasValue;
+            if (roll < 40 && hasTool)
+            {
+                for (int s = 0; s < 2; s++)
+                    if (toolSlot[s].HasValue) { toolCharges[s]++; ui.PunchTool(s); break; }
+                FloatAt(GridView.ToWorld(p), Loc.T("float.crateTool"), Palette.UiGold);
+            }
+            else if (roll < 75)
+            {
+                comboBonus += 8;
+                FloatAt(GridView.ToWorld(p), "+8", Palette.UiGold);
+                ui.FlyCoin(cameraRig.Cam.WorldToScreenPoint(GridView.ToWorld(p) + Vector3.up * 0.4f));
+            }
+            else
+            {
+                GiveArmor(4f, p, Loc.T("float.shield"), Palette.UiCyan);
+            }
         }
 
         /// <summary>Taking a hit ends the coin streak.</summary>
@@ -1287,6 +1323,7 @@ namespace SquashBot.Gameplay
             coins.Freeze();
             powerUps.Freeze();
             floorRules.Freeze();
+            levelEvents.Freeze();
             HideTools();
             if (hovering) { hovering = false; ShowHoverMarker(false); }
             if (!escaped) robot.Cheer();
@@ -1376,6 +1413,7 @@ namespace SquashBot.Gameplay
             coins.Freeze();
             powerUps.Freeze();
             floorRules.Freeze();
+            levelEvents.Freeze();
             HideTools();
             if (hovering) { hovering = false; ShowHoverMarker(false); }
 

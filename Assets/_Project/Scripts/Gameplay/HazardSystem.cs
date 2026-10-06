@@ -151,7 +151,10 @@ namespace SquashBot.Gameplay
             return false;
         }
 
-        private float PaceMultiplier => 1f + level.rampUp * Mathf.Clamp01(progress());
+        /// <summary>WARDEN alarm: waves come this many times faster while it lasts.</summary>
+        public float PaceBoost = 1f;
+
+        private float PaceMultiplier => (1f + level.rampUp * Mathf.Clamp01(progress())) * PaceBoost;
         private float CurrentWarning => level.warningTime / (1f + (PaceMultiplier - 1f) * 0.5f);
 
         private void Update()

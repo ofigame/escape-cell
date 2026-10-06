@@ -43,6 +43,15 @@ namespace SquashBot.Data
         Barrel = 4096
     }
 
+    /// <summary>A surprise that happens once during a level.</summary>
+    public enum LevelEvent
+    {
+        None,
+        GoldCart,
+        Alarm,
+        SupplyCrate
+    }
+
     [Serializable]
     public class LevelData
     {
@@ -66,6 +75,8 @@ namespace SquashBot.Data
         public float chaseSpeed;
         [Tooltip("Obstacles are low hedges (mazes), so the robot never hides behind them.")]
         public bool lowWalls;
+        [Tooltip("A surprise during the level: a gold cart, a WARDEN alarm or a supply crate (at most one).")]
+        public LevelEvent levelEvent;
         [Tooltip("Floor rules: currents, candy, poison, darkness, ice, wind, lasers, teleports, trampolines, glass, blinking tiles, hunting blocks, barrels.")]
         public FloorRule rules;
 

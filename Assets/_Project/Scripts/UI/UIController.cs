@@ -104,6 +104,7 @@ namespace SquashBot.UI
         private RectTransform rescuePill, hoverPill;
         private RectTransform missionPill, bonusPill, comboPill;
         private readonly ToolButton[] toolButtons = new ToolButton[2];
+        private RectTransform alarmPill;
         private TextMeshProUGUI comboText;
         private Image comboFill;
         private int comboShown = 1;
@@ -586,6 +587,10 @@ namespace SquashBot.UI
             hoverText = UiFactory.Text(hoverPill, "", 42f, Palette.UiText);
             hoverPill.gameObject.SetActive(false);
 
+            alarmPill = UiFactory.Pill("Alarm", t, Top, new Vector2(0f, -310f), new Vector2(560f, 80f), new Color(0.75f, 0.12f, 0.2f, 0.9f));
+            UiFactory.Text(alarmPill, Loc.T("hud.alarm"), 38f, Color.white);
+            alarmPill.gameObject.SetActive(false);
+
             // Tool buttons in the bottom corners.
             toolButtons[0] = ToolButton.Create(t, new Vector2(0f, 0f), new Vector2(40f, 170f));
             toolButtons[1] = ToolButton.Create(t, new Vector2(1f, 0f), new Vector2(-40f, 170f));
@@ -630,6 +635,12 @@ namespace SquashBot.UI
             hudMission.text = text;
             UiFactory.SetBar(hudFill, progress);
             hudBonus.text = coinsThisRun.ToString();
+        }
+
+        /// <summary>WARDEN alarm: a pulsing red banner while waves come faster and coins count double.</summary>
+        public void SetAlarm(bool on)
+        {
+            if (alarmPill != null) alarmPill.gameObject.SetActive(on);
         }
 
         public void SetTool(int slot, Tool? tool, int charges, bool trial, float active) => toolButtons[slot].Set(tool, charges, trial, active);
@@ -927,6 +938,11 @@ namespace SquashBot.UI
 
             Punch(bonusPill, ref bonusPunch, dt, 0.25f);
             if (comboPill.localScale.x > 1f) comboPill.localScale = Vector3.Lerp(comboPill.localScale, Vector3.one, dt * 8f);
+            if (alarmPill != null && alarmPill.gameObject.activeSelf)
+            {
+                float a = 1f + Mathf.Sin(Time.unscaledTime * 10f) * 0.05f;
+                alarmPill.localScale = new Vector3(a, a, 1f);
+            }
             Punch(missionPill, ref missionPunch, dt, 0.18f);
         }
 

@@ -24,7 +24,12 @@ namespace SquashBot.Data
         /// <summary>Body / eye / trail colour, or the swatch colour shown in the garage.</summary>
         public Color color;
 
-        public bool IsDefault => price == 0;
+        public bool IsDefault => price == 0 && !reward;
+
+        /// <summary>The themed set this piece belongs to (null = none).</summary>
+        public string set;
+        /// <summary>The set's prize: not sold, it comes with the complete set.</summary>
+        public bool reward;
     }
 
     /// <summary>
@@ -73,16 +78,49 @@ namespace SquashBot.Data
             C("dance.jump", Slot.Dance, 300, 0, new Color(0.55f, 0.9f, 0.75f)),
             C("dance.wobble", Slot.Dance, 400, 1, new Color(1f, 0.7f, 0.4f)),
             C("dance.flip", Slot.Dance, 600, 2, new Color(0.62f, 0.45f, 0.95f)),
+
+            // Themed sets: three pieces each; owning all three unlocks the set's prize.
+            S("hat.diver", Slot.Hat, 900, 7, new Color(0.85f, 0.95f, 1f), "ocean"),
+            S("back.tank", Slot.Back, 700, 7, new Color(1f, 0.8f, 0.3f), "ocean"),
+            S("trail.bubbles", Slot.Trail, 500, 7, new Color(0.7f, 1.6f, 2.2f), "ocean"),
+            R("dance.swim", Slot.Dance, 7, new Color(0.4f, 0.75f, 1f), "ocean"),
+            S("hat.lollipop", Slot.Hat, 600, 8, new Color(1f, 0.45f, 0.75f), "candy"),
+            S("color.candy", Slot.Color, 500, 8, new Color(1f, 0.62f, 0.85f), "candy"),
+            S("trail.sprinkles", Slot.Trail, 500, 8, new Color(2.2f, 1.6f, 0.6f), "candy"),
+            R("dance.sugar", Slot.Dance, 8, new Color(1f, 0.7f, 0.9f), "candy"),
+            S("hat.visor", Slot.Hat, 900, 13, new Color(0.3f, 1f, 0.95f), "cyber"),
+            S("back.cyberwings", Slot.Back, 1300, 13, new Color(0.25f, 0.95f, 0.9f), "cyber"),
+            S("trail.neon", Slot.Trail, 700, 13, new Color(0.4f, 2.4f, 1.2f), "cyber"),
+            R("eyes.matrix", Slot.Eyes, 13, new Color(0.5f, 2.6f, 0.6f), "cyber"),
+            S("hat.astro", Slot.Hat, 1100, 14, new Color(0.95f, 0.95f, 1f), "galaxy"),
+            S("color.cosmic", Slot.Color, 900, 14, new Color(0.45f, 0.3f, 0.85f), "galaxy"),
+            S("trail.comet", Slot.Trail, 800, 14, new Color(1.6f, 0.9f, 2.4f), "galaxy"),
+            R("back.halo", Slot.Back, 14, new Color(1f, 0.9f, 0.5f), "galaxy"),
         };
 
         private static Cosmetic C(string id, Slot slot, int price, int world, Color color) =>
             new Cosmetic { id = id, slot = slot, price = price, world = world, color = color };
 
+        private static Cosmetic S(string id, Slot slot, int price, int world, Color color, string set) =>
+            new Cosmetic { id = id, slot = slot, price = price, world = world, color = color, set = set };
+
+        private static Cosmetic R(string id, Slot slot, int world, Color color, string set) =>
+            new Cosmetic { id = id, slot = slot, price = 0, world = world, color = color, set = set, reward = true };
+
+        public static readonly string[] Sets = { "ocean", "candy", "cyber", "galaxy" };
+
+        /// <summary>How many of the set's three pieces are owned.</summary>
+        public static int SetOwned(string set) => All.FindAll(c => c.set == set && !c.reward && PlayerPrefs.GetInt("sb_cos_" + c.id, 0) == 1).Count;
+
+        public static int SetSize(string set) => All.FindAll(c => c.set == set && !c.reward).Count;
+
+        public static bool SetComplete(string set) => SetOwned(set) >= SetSize(set);
+
         public static List<Cosmetic> InSlot(Slot slot) => All.FindAll(c => c.slot == slot);
 
         public static Cosmetic Find(string id) => All.Find(c => c.id == id);
 
-        public static bool Owns(Cosmetic c) => c.IsDefault || PlayerPrefs.GetInt("sb_cos_" + c.id, 0) == 1;
+        public static bool Owns(Cosmetic c) => c.reward ? SetComplete(c.set) : c.IsDefault || PlayerPrefs.GetInt("sb_cos_" + c.id, 0) == 1;
 
         public static Cosmetic Equipped(Slot slot)
         {
@@ -99,7 +137,7 @@ namespace SquashBot.Data
 
         public static bool TryBuy(Cosmetic c, int reachedWorld)
         {
-            if (Owns(c) || reachedWorld < c.world || !Shop.Spend(c.price)) return false;
+            if (c.reward || Owns(c) || reachedWorld < c.world || !Shop.Spend(c.price)) return false;
             PlayerPrefs.SetInt("sb_cos_" + c.id, 1);
             PlayerPrefs.Save();
             return true;

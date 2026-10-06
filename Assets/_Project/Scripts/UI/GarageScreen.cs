@@ -31,6 +31,7 @@ namespace SquashBot.UI
         private Slot slot = Slot.Color;
         private Cosmetic selected;
         private int reachedWorld;
+        private string setJustDone;
 
         public UiScreen Screen => screen;
 
@@ -104,23 +105,23 @@ namespace SquashBot.UI
         {
             for (int i = grid.childCount - 1; i >= 0; i--) Destroy(grid.GetChild(i).gameObject);
             var items = Cosmetics.InSlot(slot);
-            const int columns = 4;
-            const float cell = 220f, gap = 20f;
+            const int columns = 5;
+            const float cell = 172f, gap = 14f;
             for (int i = 0; i < items.Count; i++)
             {
                 var c = items[i];
                 int col = i % columns, row = i / columns;
                 var tile = UiFactory.Box(c.id, grid, new Vector2(0f, 1f), new Vector2(col * (cell + gap) + 10f, -row * (cell + gap)), new Vector2(cell, cell));
                 var bg = UiFactory.Fill(tile, new Color(0.12f, 0.1f, 0.26f, 0.9f), UiSprites.Rounded, 1.2f);
-                var swatch = UiFactory.Box("Swatch", tile, new Vector2(0.5f, 1f), new Vector2(0f, -20f), new Vector2(120f, 120f));
+                var swatch = UiFactory.Box("Swatch", tile, new Vector2(0.5f, 1f), new Vector2(0f, -16f), new Vector2(96f, 96f));
                 var sc = c.color;
                 float m = Mathf.Max(1f, Mathf.Max(sc.r, Mathf.Max(sc.g, sc.b)));
                 UiFactory.Fill(swatch, new Color(sc.r / m, sc.g / m, sc.b / m, 1f), slot == Slot.Color || slot == Slot.Eyes ? UiSprites.Circle : UiSprites.Rounded, 2f).raycastTarget = false;
 
                 bool owned = Cosmetics.Owns(c);
                 bool locked = reachedWorld < c.world;
-                string label = owned ? (Cosmetics.Equipped(slot) == c ? Loc.T("garage.on") : "") : locked ? Loc.F("garage.world", c.world + 1) : c.price.ToString();
-                UiFactory.TextBox("Price", tile, new Vector2(0.5f, 0f), new Vector2(0f, 14f), new Vector2(200f, 50f), label, 34f,
+                string label = owned ? (Cosmetics.Equipped(slot) == c ? Loc.T("garage.on") : "") : locked ? Loc.F("garage.world", c.world + 1) : c.reward ? Loc.T("garage.prize") : c.price.ToString();
+                UiFactory.TextBox("Price", tile, new Vector2(0.5f, 0f), new Vector2(0f, 10f), new Vector2(160f, 46f), label, 30f,
                     locked ? new Color(1f, 1f, 1f, 0.5f) : owned ? Palette.UiCyan : Palette.UiGold);
                 if (selected == c) UiFactory.Fill(UiFactory.Stretch("Selected", tile), Palette.UiGold, UiSprites.Ring, 1.2f).raycastTarget = false;
 
@@ -154,6 +155,7 @@ namespace SquashBot.UI
                 Cosmetics.Equip(selected);
                 AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
                 Haptics.Medium();
+                if (selected.set != null && Cosmetics.SetComplete(selected.set)) setJustDone = selected.set;
             }
             else
             {
@@ -163,20 +165,28 @@ namespace SquashBot.UI
             RebuildGrid();
             Refresh();
             PreviewChanged?.Invoke(Cosmetics.Outfit());
+            if (setJustDone != null)
+            {
+                // The set is complete: its prize is unlocked.
+                itemName.text = Loc.F("garage.setDone", Loc.T("set." + setJustDone));
+                AudioManager.PlaySfx(Sfx.Win, 0.9f, 1.2f);
+                setJustDone = null;
+            }
         }
 
         private void Refresh()
         {
             coinsText.text = SaveData.Coins.ToString();
             if (selected == null) return;
-            itemName.text = Loc.T("cos." + selected.id);
+            itemName.text = selected.set == null ? Loc.T("cos." + selected.id)
+                : Loc.T("cos." + selected.id) + "  ·  " + Loc.F("garage.set", Loc.T("set." + selected.set), Cosmetics.SetOwned(selected.set), Cosmetics.SetSize(selected.set));
             bool owned = Cosmetics.Owns(selected);
             bool equipped = owned && Cosmetics.Equipped(selected.slot) == selected;
             bool locked = reachedWorld < selected.world;
             actionLabel.text = equipped ? Loc.T("garage.equipped") : owned ? Loc.T("garage.equip")
-                : locked ? Loc.F("garage.world", selected.world + 1) : Loc.F("garage.buy", selected.price);
-            actionButton.interactable = !equipped && !locked && (owned || SaveData.Coins >= selected.price);
-            goalButton.gameObject.SetActive(!owned);
+                : locked ? Loc.F("garage.world", selected.world + 1) : selected.reward ? Loc.T("garage.completeSet") : Loc.F("garage.buy", selected.price);
+            actionButton.interactable = !equipped && !locked && (owned || (!selected.reward && SaveData.Coins >= selected.price));
+            goalButton.gameObject.SetActive(!owned && !selected.reward);
             bool isGoal = Goal.Is(Goal.ForCosmetic(selected));
             goalLabel.text = Loc.T(isGoal ? "goal.on" : "goal.set");
             goalLabel.color = isGoal ? Palette.UiGold : Palette.UiText;

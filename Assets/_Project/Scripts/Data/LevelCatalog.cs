@@ -84,6 +84,8 @@ namespace SquashBot.Data
             level.lineWaveChance = world >= 2 ? Mathf.Lerp(0.04f, 0.22f, d) : 0f;
             level.fireChance = world >= 2 ? Mathf.Lerp(0.35f, 0.55f, d) : 0f;
 
+            level.levelEvent = EventFor(index, mission);
+
             if (mission == MissionType.Boss)
             {
                 // WARDEN's arena: wide open, lines of blocks sweep it often, three buttons to hit.
@@ -147,6 +149,24 @@ namespace SquashBot.Data
                 if (earlier.Count > 0) rules |= earlier[rng.Next(earlier.Count)];
             }
             return rules;
+        }
+
+        /// <summary>
+        /// About a third of the levels get one surprise: gold carts from level 14, WARDEN alarms from 25,
+        /// supply crates from 35. Each one first shows up exactly where it unlocks.
+        /// </summary>
+        private static LevelEvent EventFor(int index, MissionType mission)
+        {
+            if (mission == MissionType.Boss || index < 13) return LevelEvent.None;
+            if (index == 13) return LevelEvent.GoldCart;
+            if (index == 24) return LevelEvent.Alarm;
+            if (index == 34) return LevelEvent.SupplyCrate;
+            var rng = new System.Random(index * 977 + 5);
+            if (rng.NextDouble() >= 0.35) return LevelEvent.None;
+            var pool = new List<LevelEvent> { LevelEvent.GoldCart };
+            if (index >= 24) pool.Add(LevelEvent.Alarm);
+            if (index >= 34) pool.Add(LevelEvent.SupplyCrate);
+            return pool[rng.Next(pool.Count)];
         }
 
         /// <summary>A newly unlocked journey kind appears at the first chance; after that the kinds take turns.</summary>
