@@ -1,0 +1,94 @@
+# Builds an unsigned iPhone app (.ipa) in the cloud, no Mac needed.
+#   1. Linux runner: Unity (GameCI Docker image) exports the iOS Xcode project.
+#   2. macOS runner: Xcode compiles it into an .ipa without code signing.
+# Install the .ipa with Sideloadly (free Apple ID, re-sign every 7 days) or switch to TestFlight later.
+#
+# Required repository secrets (Settings > Secrets and variables > Actions):
+#   UNITY_EMAIL, UNITY_PASSWORD  - the Unity account that owns the license
+#   UNITY_LICENSE                - contents of the Unity license file (Unity_lic.ulf)
+
+name: iOS build
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['ios-*']
+
+jobs:
+  unity:
+    name: Unity → Xcode project
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Free disk space (the Unity iOS image is large)
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          tool-cache: false
+
+      - uses: actions/checkout@v4
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-iOS-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-iOS-
+
+      - name: Export Xcode project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: iOS
+          unityVersion: 6000.6.4f1
+          buildName: SquashBot
+
+      # Tar keeps the execute bits on Unity's build scripts, which a plain artifact upload would drop.
+      - name: Pack Xcode project
+        run: sudo tar -czf xcode-project.tgz -C build/iOS/SquashBot .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xcode-project
+          path: xcode-project.tgz
+          retention-days: 2
+
+  xcode:
+    name: Xcode → unsigned .ipa
+    needs: unity
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: xcode-project
+
+      - name: Unpack
+        run: mkdir xcode && tar -xzf xcode-project.tgz -C xcode
+
+      - name: Compile without signing
+        working-directory: xcode
+        run: |
+          xcodebuild -project Unity-iPhone.xcodeproj -target Unity-iPhone -configuration Release \
+            -sdk iphoneos SYMROOT="$PWD/out" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build | tail -n 40
+
+      - name: Package .ipa
+        working-directory: xcode
+        run: |
+          mkdir Payload
+          cp -R out/Release-iphoneos/*.app Payload/
+          zip -qry ../SquashBot-unsigned.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SquashBot-unsigned-ipa
+          path: SquashBot-unsigned.ipa
+          retention-days: 14
