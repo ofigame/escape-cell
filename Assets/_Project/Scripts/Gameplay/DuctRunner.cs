@@ -66,7 +66,7 @@ namespace SquashBot.Gameplay
         // and ends on the next floor's landing.
         private bool roadMode;
         private float length = TrackLength, difficulty, invulnerable;
-        private int nextWorld;
+        private int nextWorld, roadLevel;
         private float speedStart = SpeedStart, speedEnd = SpeedEnd, startDelay = StartDelay;
 
         /// <summary>The course is built (it can be seen) but the robot is not on it yet.</summary>
@@ -176,8 +176,11 @@ namespace SquashBot.Gameplay
         /// </summary>
         public void PrepareRoad(int seed, Vector3 origin, float heading, int level, int toWorld)
         {
+            // Every level adds to the road: 40 rows after level 1, about 2 more each level (about 400 after level 200).
+            // Its difficulty follows the level just as closely: speed, spacing and the kinds of obstacles.
             float d = Mathf.Clamp01(level / 199f);
-            Prepare(seed, Kind.Duct, origin, heading, road: true, roadLength: Mathf.Round(Mathf.Lerp(46f, 230f, d)), roadDifficulty: d, toWorld: toWorld);
+            roadLevel = level;
+            Prepare(seed, Kind.Duct, origin, heading, road: true, roadLength: 40f + level * 1.8f, roadDifficulty: d, toWorld: toWorld);
         }
 
         private void Prepare(int seed, Kind tunnel, Vector3 origin, float heading, bool road = false, float roadLength = TrackLength, float roadDifficulty = 1f, int toWorld = 0)
@@ -189,8 +192,8 @@ namespace SquashBot.Gameplay
             length = roadLength;
             difficulty = roadDifficulty;
             nextWorld = toWorld;
-            speedStart = road ? 4.6f : SpeedStart;
-            speedEnd = road ? Mathf.Lerp(6.6f, 9.2f, roadDifficulty) : SpeedEnd;
+            speedStart = road ? Mathf.Lerp(4.4f, 6.2f, roadDifficulty) : SpeedStart;
+            speedEnd = road ? Mathf.Lerp(6.2f, 9.6f, roadDifficulty) : SpeedEnd;
             startDelay = road ? 0f : StartDelay;
             transform.SetPositionAndRotation(origin, Quaternion.Euler(0f, heading, 0f));
             risky = false;
@@ -357,7 +360,10 @@ namespace SquashBot.Gameplay
             {
                 float p = row / length;
                 // Early on only the gentle patterns; the full set from a fifth of the way in.
-                int pattern = rng.Next(Mathf.Min(p < 0.1f ? 4 : p < 0.2f ? 7 : 10, roadMode ? 4 + Mathf.RoundToInt(difficulty * 6f) : 10));
+                // On roads a new kind of obstacle joins every 3 levels: coins, holes and blocks first; hurdles from level 4,
+                // full gaps from 7, bars from 10, sliding blocks 13, zigzags 16, jump pads 19, pickups 22.
+                int kinds = roadMode ? Mathf.Clamp(3 + roadLevel / 3, 3, 10) : (p < 0.1f ? 4 : p < 0.2f ? 7 : 10);
+                int pattern = rng.Next(kinds);
                 switch (pattern)
                 {
                     case 0: // a line of coins in one lane
@@ -448,7 +454,7 @@ namespace SquashBot.Gameplay
                         break;
                     }
                 }
-                row += Mathf.RoundToInt(roadMode ? Mathf.Lerp(9f, 4.5f, difficulty * 0.6f + p * 0.4f) : Mathf.Lerp(7f, 4f, p)) + rng.Next(2);
+                row += Mathf.RoundToInt(roadMode ? Mathf.Lerp(9.5f, 4f, difficulty * 0.8f + p * 0.2f) : Mathf.Lerp(7f, 4f, p)) + rng.Next(2);
             }
 
             if (roadMode) return; // a road ends on the next floor's landing, no gates
