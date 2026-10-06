@@ -58,6 +58,56 @@ namespace SquashBot.Visual
             return tex;
         }
 
+        /// <summary>
+        /// A cheerful sunburst (alternating rays around a glowing centre) for icons and promo art.
+        /// <paramref name="center"/> is in 0..1 texture coordinates.
+        /// </summary>
+        public static Texture2D Sunburst(int size, Color inner, Color outer, Color rayA, Color rayB, int rays, Vector2 center)
+        {
+            var px = new Color[size * size];
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = x / (float)size - center.x, dy = y / (float)size - center.y;
+                    float r = Mathf.Sqrt(dx * dx + dy * dy);
+                    float angle = Mathf.Atan2(dy, dx) / (Mathf.PI * 2f) + 0.5f;
+                    // Soft-edged rays: a smooth square wave around the circle.
+                    float wave = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(Mathf.Sin(angle * rays * Mathf.PI * 2f) * 4f + 0.5f));
+                    var ray = Color.Lerp(rayA, rayB, wave);
+                    var c = Color.Lerp(ray, outer, Mathf.Clamp01(r / 0.75f) * 0.6f);
+                    float glow = Mathf.Clamp01(1f - r / 0.38f);
+                    px[y * size + x] = Color.Lerp(c, inner, glow * glow);
+                }
+
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, name = "Sunburst" };
+            tex.SetPixels(px);
+            tex.Apply(false, true);
+            return tex;
+        }
+
+        /// <summary>A smooth radial gradient with sparkles, for icons.</summary>
+        public static Texture2D Radial(int size, Color inner, Color outer, Vector2 center, int sparkles, Color sparkle)
+        {
+            var px = new Color[size * size];
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = x / (float)size - center.x, dy = y / (float)size - center.y;
+                    float r = Mathf.Clamp01(Mathf.Sqrt(dx * dx + dy * dy) / 0.8f);
+                    px[y * size + x] = Color.Lerp(inner, outer, r * r * (3f - 2f * r));
+                }
+
+            var rng = new System.Random(11);
+            for (int i = 0; i < sparkles; i++)
+                Sparkle(px, size, size, (float)rng.NextDouble() * size, (float)rng.NextDouble() * size,
+                    size * (0.012f + (float)rng.NextDouble() * 0.02f), sparkle);
+
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, name = "Radial" };
+            tex.SetPixels(px);
+            tex.Apply(false, true);
+            return tex;
+        }
+
         private static void Blend(Color[] px, int w, int h, int x, int y, Color c, float a)
         {
             if (x < 0 || y < 0 || x >= w || y >= h || a <= 0f) return;
