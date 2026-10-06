@@ -55,6 +55,7 @@ namespace SquashBot.Gameplay
         private CoinSystem coins;
         private PowerUpSystem powerUps;
         private InputReader input;
+        private DuctRunner runner;
 
         private GridModel grid;
         private LevelData level;
@@ -87,6 +88,8 @@ namespace SquashBot.Gameplay
         // A rare surprise bonus round after beating a new level, on top of the ones stars unlock.
         private const float SurpriseBonusChance = 0.07f;
         private const int SurpriseFromLevel = 4;
+        private const float TunnelChance = 0.7f;
+        private const int TunnelExitBonus = 10;
 
         private int World => LevelCatalog.WorldOf(levelIndex);
         private bool RescueEnabled => World >= RescueFromWorld;
@@ -139,6 +142,11 @@ namespace SquashBot.Gameplay
             powerUps = new GameObject("PowerUps").AddComponent<PowerUpSystem>();
             powerUps.Init(robot, hazards, fx);
             powerUps.Collected += OnPowerUpCollected;
+
+            runner = new GameObject("DuctRunner").AddComponent<DuctRunner>();
+            runner.Init(robot, cameraRig, input, fx);
+            runner.CoinCollected += OnTunnelCoin;
+            runner.Finished += OnTunnelFinished;
 
             CreateUi();
             ShowMenu();
@@ -210,6 +218,8 @@ namespace SquashBot.Gameplay
             hazards.Stop();
             coins.Stop();
             powerUps.Stop();
+            runner.Stop();
+            gridView.gameObject.SetActive(true);
         }
 
         /// <summary>The next level's platform idles behind the menu while the camera slowly orbits it.</summary>
@@ -285,11 +295,56 @@ namespace SquashBot.Gameplay
             Progress.BonusTokens--;
             bonusRun = true;
             levelIndex = NextLevel;
+            if (Random.value < TunnelChance)
+            {
+                StartTunnel();
+                return;
+            }
             level = LevelCatalog.Treasure(Random.Range(0, 100000));
             BeginRun();
             ui.ShowIntro(Loc.T("level.bonus"), MissionText(level, upper: true));
             AudioManager.PlaySfx(Sfx.Win, 0.7f, 1.2f);
             RefreshHud();
+        }
+
+        /// <summary>The escape tunnel bonus: a third-person run down an air duct, themed like the current world.</summary>
+        private void StartTunnel()
+        {
+            ResetRun();
+            level = LevelCatalog.Treasure(0);
+            level.mission = MissionType.Tunnel;
+            coinsThisRun = 0;
+            elapsed = 0f;
+            ApplyTheme(levelIndex);
+            gridView.gameObject.SetActive(false);
+            cameraRig.SetStyle(CameraStyle.Gameplay);
+            cameraRig.SetMenuFocus(false);
+            runner.Begin(Random.Range(0, 100000));
+
+            State = GameState.Playing;
+            ui.ShowHud(-1);
+            ui.ShowIntro(Loc.T("level.bonus"), MissionText(level, upper: true));
+            AudioManager.PlaySfx(Sfx.Win, 0.7f, 1.2f);
+            RefreshHud();
+        }
+
+        private void OnTunnelCoin(Vector3 at)
+        {
+            coinsThisRun++;
+            ui.FlyCoin(cameraRig.Cam.WorldToScreenPoint(at));
+        }
+
+        private void OnTunnelFinished(bool reachedExit)
+        {
+            if (State != GameState.Playing) return;
+            State = GameState.Result;
+            if (reachedExit)
+            {
+                coinsThisRun += TunnelExitBonus;
+                FloatAt(robot.transform.position, "+" + TunnelExitBonus, Palette.UiGold);
+            }
+            SaveData.Coins += coinsThisRun;
+            ShowBonusResult(Loc.T(reachedExit ? "result.tunnelOut" : "result.tunnelCrash"));
         }
 
         /// <summary>Builds the platform for <see cref="level"/> and starts play.</summary>
@@ -604,6 +659,14 @@ namespace SquashBot.Gameplay
 
             if (State != GameState.Playing) return;
 
+            if (runner.Active)
+            {
+                // The tunnel runs itself (input, robot, camera); just keep the HUD current.
+                elapsed += Time.deltaTime;
+                RefreshHud();
+                return;
+            }
+
             elapsed += Time.deltaTime;
 
             var command = input.Poll(robot.transform.position);
@@ -854,14 +917,14 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>A bonus round always ends well: the coins are kept, nothing else changes.</summary>
-        private void ShowBonusResult()
+        private void ShowBonusResult(string subtitle = null)
         {
             StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
             {
                 won = true,
                 bonusRound = true,
                 hasNext = true,
-                subtitle = Loc.T("result.bonusSub"),
+                subtitle = subtitle ?? Loc.T("result.bonusSub"),
                 coins = coinsThisRun,
                 bonusAvailable = Progress.BonusTokens > 0,
                 meter = Progress.Meter / (float)Progress.StarsPerBonus,
@@ -1039,6 +1102,7 @@ namespace SquashBot.Gameplay
             {
                 case MissionType.CollectCoins:
                 case MissionType.CoinRain: return (float)coinsThisRun / level.coinTarget;
+                case MissionType.Tunnel: return runner.Progress;
                 case MissionType.Exit: return portal != null && portal.IsOpen ? 1f : keysCollected / (level.keys + 1f);
                 case MissionType.Paint: return grid == null ? 0f : painted.Count / (float)grid.FloorCount;
                 default: return elapsed / level.surviveSeconds;
@@ -1055,6 +1119,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Paint: return Loc.T("mission.paint" + suffix);
                 case MissionType.CoinRain: return Loc.F("mission.rain" + suffix, data.coinTarget);
                 case MissionType.Treasure: return Loc.T("mission.treasure" + suffix);
+                case MissionType.Tunnel: return Loc.T("mission.tunnel" + suffix);
                 default: return Loc.F("mission.survive" + suffix, data.surviveSeconds.ToString("0", CultureInfo.InvariantCulture));
             }
         }
@@ -1074,6 +1139,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Paint: text = Loc.F("hud.paint", painted.Count, grid.FloorCount); break;
                 case MissionType.CoinRain: text = Loc.F("hud.rain", coinsThisRun, level.coinTarget, Seconds(level.surviveSeconds - elapsed)); break;
                 case MissionType.Treasure: text = Loc.F("hud.treasure", coinsThisRun, Seconds(level.surviveSeconds - elapsed)); break;
+                case MissionType.Tunnel: text = Loc.F("hud.tunnel", coinsThisRun, Mathf.RoundToInt(runner.Progress * 100f)); break;
                 default: text = Loc.F("hud.survive", Seconds(level.surviveSeconds - elapsed)); break;
             }
             ui.SetMission(text, MissionProgress(), coinsThisRun);

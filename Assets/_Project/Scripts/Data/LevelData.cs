@@ -16,7 +16,9 @@ namespace SquashBot.Data
         /// <summary>Coins rain down: grab the target number before the clock runs out.</summary>
         CoinRain,
         /// <summary>Bonus treasure vault: grab as many coins as you can; nothing to lose.</summary>
-        Treasure
+        Treasure,
+        /// <summary>Bonus escape tunnel: a third-person run down an air duct (see DuctRunner).</summary>
+        Tunnel
     }
 
     [Serializable]

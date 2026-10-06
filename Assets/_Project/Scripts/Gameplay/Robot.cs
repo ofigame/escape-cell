@@ -111,6 +111,9 @@ namespace SquashBot.Gameplay
             bubble.gameObject.SetActive(false);
         }
 
+        /// <summary>The animated model (scaled and rotated by animations); other modes may pose it directly.</summary>
+        public Transform Visual => visual;
+
         public void GiveShield(float seconds) => shieldLeft = Mathf.Max(shieldLeft, seconds);
 
         /// <summary>Dress the robot for a world: its colors and the gear it has earned so far.</summary>

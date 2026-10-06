@@ -57,6 +57,9 @@ namespace SquashBot.Visual
         private Transform background;
         private Material backgroundMaterial;
         private Volume menuVolume;
+        private bool chasing;
+        private Vector3 chasePosition;
+        private Quaternion chaseRotation;
         private float menuFocusTarget;
 
         public static CameraRig Create(ViewMode mode)
@@ -193,6 +196,26 @@ namespace SquashBot.Visual
             focusTime = duration;
         }
 
+        /// <summary>
+        /// Hand the camera to a chase view (the tunnel runner): a perspective camera at the given pose.
+        /// Shake and punch still apply. <see cref="EndChase"/> returns to the platform view.
+        /// </summary>
+        public void Chase(Vector3 position, Quaternion rotation, float fov)
+        {
+            chasing = true;
+            chasePosition = position;
+            chaseRotation = rotation;
+            Cam.orthographic = false;
+            Cam.fieldOfView = fov;
+        }
+
+        public void EndChase()
+        {
+            if (!chasing) return;
+            chasing = false;
+            Refit();
+        }
+
         /// <summary>Blur and darken the scene behind menus.</summary>
         public void SetMenuFocus(bool on) => menuFocusTarget = on ? 1f : 0f;
 
@@ -200,6 +223,7 @@ namespace SquashBot.Visual
 
         private void Refit()
         {
+            if (chasing) return; // the chase view owns the camera until EndChase
             bool aspectChanged = !Mathf.Approximately(lastAspect, Cam.aspect);
             lastAspect = Cam.aspect;
 
@@ -255,6 +279,14 @@ namespace SquashBot.Visual
             }
 
             menuVolume.weight = Mathf.MoveTowards(menuVolume.weight, menuFocusTarget, dt * 3f);
+            if (chasing)
+            {
+                var jitter = Random.insideUnitCircle * shake * 0.08f;
+                transform.rotation = chaseRotation;
+                transform.position = chasePosition + transform.right * jitter.x + transform.up * jitter.y - transform.forward * (punch * 0.25f);
+                FitBackground();
+                return;
+            }
             Apply();
         }
 

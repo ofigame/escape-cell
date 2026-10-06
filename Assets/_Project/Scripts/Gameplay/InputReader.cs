@@ -46,6 +46,12 @@ namespace SquashBot.Gameplay
         /// <summary>Long-press detection is only on where the hover escape is unlocked, so it never steals slow swipes elsewhere.</summary>
         public bool HoldEnabled { get; set; }
 
+        /// <summary>
+        /// Screen mode (the tunnel runner): swipes map to plain screen directions (right = PlusX, up = PlusY)
+        /// and a single tap is a jump.
+        /// </summary>
+        public bool ScreenMode { get; set; }
+
         public InputReader(Camera camera)
         {
             cam = camera;
@@ -55,7 +61,7 @@ namespace SquashBot.Gameplay
         {
             if (ReadJumpKey()) return new InputCommand { jump = true };
             var key = ReadKeyboard();
-            if (key.HasValue) return new InputCommand { move = Resolve(Rotate45(key.Value), robotWorld) };
+            if (key.HasValue) return new InputCommand { move = ScreenMode ? ScreenDirection(key.Value) : Resolve(Rotate45(key.Value), robotWorld) };
 
             bool hasPointer = ReadPointer(out bool pressed, out Vector2 pos);
             if (hasPointer && pressed) lastPos = pos;
@@ -116,6 +122,7 @@ namespace SquashBot.Gameplay
         {
             float now = Time.unscaledTime;
             if (now - pressTime > TapMaxDuration) return false;
+            if (ScreenMode) return true;
             lastTapTime = now; // the next touch-down within the window completes the double tap
             return false;
         }
@@ -128,8 +135,11 @@ namespace SquashBot.Gameplay
 
             consumed = true; // one move per swipe
             lastTapTime = -10f;
-            return Resolve(delta.normalized, robotWorld);
+            return ScreenMode ? ScreenDirection(delta) : Resolve(delta.normalized, robotWorld);
         }
+
+        private static Direction ScreenDirection(Vector2 v) =>
+            Mathf.Abs(v.x) >= Mathf.Abs(v.y) ? (v.x > 0f ? Direction.PlusX : Direction.MinusX) : (v.y > 0f ? Direction.PlusY : Direction.MinusY);
         /// <summary>Pick the grid direction whose on-screen projection best matches the screen vector.</summary>
         private Direction Resolve(Vector2 screenDir, Vector3 robotWorld)
         {
