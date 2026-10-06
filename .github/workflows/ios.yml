@@ -29,6 +29,18 @@ jobs:
           large-packages: false
           tool-cache: false
 
+      # The hosted runner's RAM is tight for Unity's iOS shader compilation; without extra swap the build can be
+      # killed by the OOM killer (exit code 137). Disk was freed above, so a big swap file is cheap.
+      - name: Add swap space
+        run: |
+          sudo swapoff -a || true
+          sudo rm -f /mnt/swapfile /swapfile
+          sudo fallocate -l 12G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
+
       - uses: actions/checkout@v4
 
       - name: Cache Unity Library
