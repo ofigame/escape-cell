@@ -117,6 +117,7 @@ namespace SquashBot.UI
         {
             var image = Fill(Stretch("Dim", parent), color);
             image.raycastTarget = true; // blocks clicks to whatever is behind
+            image.gameObject.AddComponent<IgnoreSafeArea>(); // dim the whole screen, notch included
             return image;
         }
 

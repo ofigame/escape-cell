@@ -402,7 +402,7 @@ namespace SquashBot.Gameplay
             fx.Burst(at + Vector3.up * 0.15f, Palette.Block, Palette.BlockGlow, 16, 4.5f);
             cameraRig.Shake(0.5f);
             AudioManager.PlaySfx(Sfx.Impact, 0.8f, 1f, 0.1f);
-            Haptics.Pulse(15, 0.35f);
+            if (h.pos.Manhattan(robot.Position) <= 1) Haptics.Pulse(22, 0.5f); // feel the near misses, not every distant block
             Impact?.Invoke(h.pos);
         }
 

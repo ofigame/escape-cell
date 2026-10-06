@@ -376,6 +376,20 @@ namespace SquashBot.EditorTools
             PlayerSettings.iOS.appleEnableAutomaticSigning = false; // the cloud build compiles unsigned; signing happens at install time
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             PlayerSettings.colorSpace = ColorSpace.Linear;
+
+            // Our own OFIGAME splash replaces Unity's; the native launch screen uses the same navy so there is no flash.
+            PlayerSettings.SplashScreen.show = false;
+            PlayerSettings.SplashScreen.backgroundColor = new Color32(0x1A, 0x23, 0x34, 0xFF);
+
+            var logo = AssetImporter.GetAtPath(ResourcesDir + "/OfigameLogo.png") as TextureImporter;
+            if (logo != null && logo.textureCompression != TextureImporterCompression.Uncompressed)
+            {
+                logo.textureType = TextureImporterType.Default;
+                logo.textureCompression = TextureImporterCompression.Uncompressed;
+                logo.alphaIsTransparency = true;
+                logo.mipmapEnabled = true;
+                logo.SaveAndReimport();
+            }
         }
     }
 }

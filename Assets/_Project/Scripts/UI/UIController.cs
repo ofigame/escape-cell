@@ -106,7 +106,10 @@ namespace SquashBot.UI
         {
             canvas = UiFactory.CreateCanvas("Canvas", out scaler);
             canvas.transform.SetParent(transform, false);
-            var root = canvas.transform;
+
+            // Everything sits inside the device safe area (clear of notches and the home indicator).
+            var root = UiFactory.Stretch("SafeArea", canvas.transform);
+            root.gameObject.AddComponent<SafeArea>();
 
             BuildHud(root);
             BuildIntro(root);

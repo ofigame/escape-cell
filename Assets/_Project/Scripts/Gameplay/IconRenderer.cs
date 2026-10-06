@@ -11,7 +11,7 @@ namespace SquashBot.Gameplay
 {
     /// <summary>
     /// Development tool: launched with "-renderIcon &lt;folder&gt;", the player renders the app icon with the real game
-    /// assets (the fully evolved robot on a neon platform, a falling block, a coin) and quits.
+    /// assets (the fully evolved robot, big, in front of a few neon tiles on a flat color) and quits.
     /// Writes icon.png (tight framing for iOS / legacy icons) and icon_adaptive.png (wider, for Android adaptive icons).
     /// </summary>
     public class IconRenderer : MonoBehaviour
@@ -52,33 +52,21 @@ namespace SquashBot.Gameplay
             robot.Spawn(grid, new GridPos(1, 1));
             robot.ApplyWorld(RobotWorld);
 
-            // A block plunging toward the back tile (with its red warning) and a coin up front.
-            var block = HazardVisuals.Block(0);
-            block.transform.position = new Vector3(0.95f, 1.2f, 1.3f);
-            block.transform.localScale = Vector3.one * 0.5f;
-            block.transform.rotation = Quaternion.Euler(8f, 20f, -6f);
-            var coinMat = MaterialFactory.Create(Palette.Coin, Palette.CoinGlow);
-            var rimMat = MaterialFactory.Create(Palette.CoinRim, Palette.CoinGlow * 0.4f);
-            var coin = new GameObject("Coin").transform;
-            coin.position = new Vector3(1.75f, 0.62f, 0.85f);
-            coin.localScale = Vector3.one * 0.75f;
-            Shapes.Primitive(PrimitiveType.Cylinder, "Rim", coin, Vector3.zero, new Vector3(0.46f, 0.035f, 0.46f), rimMat);
-            Shapes.Primitive(PrimitiveType.Cylinder, "Face", coin, Vector3.zero, new Vector3(0.36f, 0.045f, 0.36f), coinMat);
-
             var cam = CreateCamera(out var backdrop);
-            coin.rotation = Quaternion.FromToRotation(Vector3.up, -cam.transform.forward);
+
 
             // Let animations, the bloom history and the robot's idle settle.
             for (int f = 0; f < 30; f++)
             {
-                gridView.SetWarning(new GridPos(1, 2), 0.9f);
+                
                 yield return null;
             }
 
-            var focus = robot.transform.position + new Vector3(0f, 0.5f, 0f);
-            yield return Capture(cam, backdrop, focus, 0.92f, Path.Combine(folder, "icon.png"), gridView);
+            // A big robot up front, a couple of tiles behind it, and a single flat color beyond the platform.
+            var focus = robot.transform.position + new Vector3(0f, 0.42f, 0f);
+            yield return Capture(cam, backdrop, focus, 0.62f, Path.Combine(folder, "icon.png"), gridView);
             // Adaptive icons are masked to roughly the middle two thirds, so frame wider.
-            yield return Capture(cam, backdrop, focus, 1.4f, Path.Combine(folder, "icon_adaptive.png"), gridView);
+            yield return Capture(cam, backdrop, focus, 0.95f, Path.Combine(folder, "icon_adaptive.png"), gridView);
 
             Debug.Log("[EscapeCell] Icons written to " + folder);
             Application.Quit();
@@ -91,7 +79,7 @@ namespace SquashBot.Gameplay
             cam.nearClipPlane = 0.1f;
             cam.farClipPlane = 120f;
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = Palette.BgBottom;
+            cam.backgroundColor = Palette.BgTop; // one flat color behind the platform
             cam.allowMSAA = true;
             var data = cam.GetUniversalAdditionalCameraData();
             data.renderPostProcessing = true;
@@ -103,8 +91,7 @@ namespace SquashBot.Gameplay
             bloom.threshold.Override(1f);
             bloom.intensity.Override(1.2f);
             bloom.scatter.Override(0.6f);
-            var vignette = profile.Add<Vignette>(true);
-            vignette.intensity.Override(0.28f);
+
             var volume = new GameObject("PostFX").AddComponent<Volume>();
             volume.isGlobal = true;
             volume.sharedProfile = profile;
@@ -112,6 +99,7 @@ namespace SquashBot.Gameplay
             var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
             Destroy(quad.GetComponent<Collider>());
             quad.GetComponent<MeshRenderer>().sharedMaterial = MaterialFactory.CreateUnlit(BackgroundArt.Generate(Size, Size));
+            quad.SetActive(false); // flat color only
             backdrop = quad.transform;
             backdrop.SetParent(cam.transform, false);
             return cam;
@@ -123,7 +111,7 @@ namespace SquashBot.Gameplay
         /// </summary>
         private static IEnumerator Capture(Camera cam, Transform backdrop, Vector3 focus, float halfHeight, string path, GridView gridView)
         {
-            cam.transform.rotation = Quaternion.Euler(30f, 45f, 0f);
+            cam.transform.rotation = Quaternion.Euler(20f, 45f, 0f); // lower than gameplay, so the robot faces us
             cam.transform.position = focus - cam.transform.forward * 30f;
             cam.orthographicSize = halfHeight;
 
@@ -134,7 +122,7 @@ namespace SquashBot.Gameplay
 
             for (int f = 0; f < 20; f++)
             {
-                gridView.SetWarning(new GridPos(1, 2), 0.9f);
+                
                 yield return null;
             }
             yield return new WaitForEndOfFrame();

@@ -53,7 +53,7 @@ namespace SquashBot.UI
 
         private void BuildFrame(RectTransform root)
         {
-            UiFactory.Fill(UiFactory.Stretch("Backdrop", root), new Color(0.08f, 0.07f, 0.18f, 1f));
+            UiFactory.Fill(UiFactory.Stretch("Backdrop", root), new Color(0.08f, 0.07f, 0.18f, 1f)).gameObject.AddComponent<IgnoreSafeArea>();
 
             // Scrolling area
             // The scroll area sits between the top bar and the banner strip, so nothing shows through either.

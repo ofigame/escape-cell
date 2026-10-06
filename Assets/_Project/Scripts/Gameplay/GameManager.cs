@@ -128,6 +128,7 @@ namespace SquashBot.Gameplay
 
             CreateUi();
             ShowMenu();
+            SplashScreen.Show(); // OFIGAME studio logo over the menu, fading out
         }
 
         private void CreateUi()
@@ -349,14 +350,14 @@ namespace SquashBot.Gameplay
                 robot.Squash();
                 fx.Burst(robot.transform.position + Vector3.up * 0.3f, new Color(1f, 0.5f, 0.2f), new Color(2.4f, 0.8f, 0.1f), 26, 4f);
                 AudioManager.PlaySfx(Sfx.Squash, 0.8f, 1.3f);
-                Haptics.Heavy();
+                Haptics.Death();
                 Lose(Loc.T("lose.fire"));
                 return;
             }
 
             robot.FallIntoHole();
             AudioManager.PlaySfx(Sfx.Fall);
-            Haptics.Heavy();
+            Haptics.Death();
             Lose(Loc.T("lose.fall"));
         }
 
@@ -598,7 +599,7 @@ namespace SquashBot.Gameplay
                 cameraRig.Focus(robot.transform.position, 1.2f);
                 fx.Burst(robot.transform.position + Vector3.up * 0.3f, Palette.RobotBody, Palette.RobotEye, 24, 5f);
                 AudioManager.PlaySfx(Sfx.Squash);
-                Haptics.Heavy();
+                Haptics.Death();
                 Lose(Loc.T("lose.block"));
                 return;
             }
