@@ -25,6 +25,9 @@ namespace SquashBot.Gameplay
         public bool IsShielded => shieldLeft > 0f;
         public bool IsHopping => anim == Anim.Hop;
 
+        /// <summary>Lifted into the air by the hover escape: blocks pass beneath it.</summary>
+        public bool IsHovering => anim == Anim.Hover;
+
         /// <summary>Direction of the last move; a jump goes this way.</summary>
         public Direction Facing { get; private set; } = Direction.MinusY;
 
@@ -50,7 +53,7 @@ namespace SquashBot.Gameplay
         private float blinkTimer = 2f;
         private GridModel grid;
 
-        private enum Anim { Idle, Hop, Bump, Squash, Fall, Cheer }
+        private enum Anim { Idle, Hop, Bump, Squash, Fall, Cheer, Hover }
         private Anim anim;
         private float animTime;
         private Vector3 from, to;
@@ -174,9 +177,47 @@ namespace SquashBot.Gameplay
             gameObject.SetActive(true);
         }
 
+        private const float HoverHeight = 1.15f;
+
+        /// <summary>Hover escape: rise into the air and wait for a landing tile.</summary>
+        public void StartHover()
+        {
+            if (!IsAlive || anim == Anim.Hop || anim == Anim.Bump || anim == Anim.Hover) return;
+            bufferedMove = null;
+            bufferedJump = false;
+            targetFacing = FacingCamera;
+            StartAnim(Anim.Hover, GridView.ToWorld(Position), GridView.ToWorld(Position));
+        }
+
+        /// <summary>Glide down from the hover onto <paramref name="target"/>.</summary>
+        public void EndHover(GridPos target)
+        {
+            if (anim != Anim.Hover) return;
+            var offset = new Vector3(target.x - Position.x, 0f, target.y - Position.y);
+            if (offset.sqrMagnitude > 0.01f) targetFacing = Quaternion.LookRotation(offset);
+            LastLeftTile = Position;
+            LastLeftTime = Time.time;
+            Position = target;
+            hopDuration = 0.28f;
+            hopHeight = 0.25f;
+            StartAnim(Anim.Hop, transform.position, GridView.ToWorld(target));
+        }
+
+        /// <summary>A rescue charge pulled the robot out of a hole or fire: bounce back to a safe tile.</summary>
+        public void RescueTo(GridPos safe)
+        {
+            bufferedMove = null;
+            bufferedJump = false;
+            Position = safe;
+            visual.localScale = Vector3.one;
+            hopDuration = 0.4f;
+            hopHeight = 1.1f;
+            StartAnim(Anim.Hop, transform.position, GridView.ToWorld(safe));
+        }
+
         public void TryMove(Direction dir)
         {
-            if (!IsAlive) return;
+            if (!IsAlive || anim == Anim.Hover) return;
             if (anim == Anim.Hop || anim == Anim.Bump)
             {
                 bufferedMove = dir; // keeps fast swipes responsive
@@ -189,8 +230,8 @@ namespace SquashBot.Gameplay
             Facing = dir;
             targetFacing = Quaternion.LookRotation(new Vector3(offset.x, 0f, offset.y));
 
-            // Swiping toward a hole leaps over it automatically, so jumping stays in the flow of play.
-            if (grid.InBounds(target) && grid.GetTile(target) == TileState.Broken)
+            // Swiping toward a hole or fire leaps over it automatically, so jumping stays in the flow of play.
+            if (grid.IsGap(target))
             {
                 Jump(dir);
                 return;
@@ -219,7 +260,7 @@ namespace SquashBot.Gameplay
         /// </summary>
         public void TryJump()
         {
-            if (!IsAlive) return;
+            if (!IsAlive || anim == Anim.Hover) return;
             if (anim == Anim.Hop || anim == Anim.Bump)
             {
                 bufferedJump = true;
@@ -228,7 +269,7 @@ namespace SquashBot.Gameplay
             }
 
             var next = Position + Facing.ToOffset();
-            if (!grid.InBounds(next) || grid.GetTile(next) != TileState.Broken)
+            if (!grid.IsGap(next))
             {
                 TryMove(Facing);
                 return;
@@ -243,13 +284,13 @@ namespace SquashBot.Gameplay
 
             var landing = next;
             int holes = 0;
-            while (grid.InBounds(landing) && grid.GetTile(landing) == TileState.Broken && holes < MaxJumpHoles)
+            while (grid.IsGap(landing) && holes < MaxJumpHoles)
             {
                 landing += offset;
                 holes++;
             }
 
-            if (!grid.InBounds(landing) || grid.GetTile(landing) == TileState.Broken)
+            if (!grid.InBounds(landing) || grid.IsGap(landing))
             {
                 landing = next; // nothing to land on: fall short into the first hole
             }
@@ -330,6 +371,15 @@ namespace SquashBot.Gameplay
                         Arrived?.Invoke(Position);
                         ConsumeBuffer();
                     }
+                    break;
+                }
+                case Anim.Hover:
+                {
+                    // Rise quickly, then bob in the air with a little sway.
+                    float up = 1f - Mathf.Pow(1f - Mathf.Clamp01(animTime / 0.22f), 3f);
+                    float bob = Mathf.Sin(animTime * 6f) * 0.05f;
+                    transform.position = from + Vector3.up * (HoverHeight * up + bob);
+                    visual.localScale = Vector3.Lerp(visual.localScale, new Vector3(0.95f, 1.05f, 0.95f), Time.deltaTime * 10f);
                     break;
                 }
                 case Anim.Bump:

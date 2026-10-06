@@ -25,8 +25,11 @@ MonoBehaviour:
     aimAtPlayerChance: 0.5
     rampUp: 0
     lineWaveChance: 0
+    bombChance: 0
     breakTiles: 0
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -45,8 +48,11 @@ MonoBehaviour:
     aimAtPlayerChance: 0.5
     rampUp: 0.3
     lineWaveChance: 0
+    bombChance: 0
     breakTiles: 0
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -65,8 +71,11 @@ MonoBehaviour:
     aimAtPlayerChance: 0.5
     rampUp: 0
     lineWaveChance: 0
+    bombChance: 0
     breakTiles: 0
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -85,8 +94,11 @@ MonoBehaviour:
     aimAtPlayerChance: 0.5
     rampUp: 0.4
     lineWaveChance: 0
+    bombChance: 0
     breakTiles: 0
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -105,8 +117,11 @@ MonoBehaviour:
     aimAtPlayerChance: 0.5
     rampUp: 0
     lineWaveChance: 0
+    bombChance: 0
     breakTiles: 0
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -125,8 +140,11 @@ MonoBehaviour:
     aimAtPlayerChance: 0.5
     rampUp: 0.4
     lineWaveChance: 0
+    bombChance: 0
     breakTiles: 0
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -145,8 +163,11 @@ MonoBehaviour:
     aimAtPlayerChance: 0.5
     rampUp: 0
     lineWaveChance: 0
+    bombChance: 0
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -165,8 +186,11 @@ MonoBehaviour:
     aimAtPlayerChance: 0.5
     rampUp: 0.5
     lineWaveChance: 0
+    bombChance: 0
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -185,8 +209,11 @@ MonoBehaviour:
     aimAtPlayerChance: 0.5
     rampUp: 0
     lineWaveChance: 0
+    bombChance: 0
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -205,8 +232,57 @@ MonoBehaviour:
     aimAtPlayerChance: 0.5
     rampUp: 0.6
     lineWaveChance: 0
+    bombChance: 0
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 4
+    gridHeight: 4
+    mission: 0
+    coinTarget: 10
+    surviveSeconds: 30
+    warningTime: 1.1750001
+    spawnInterval: 1.875
+    blocksPerWave: 2
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0
+    bombChance: 0.120000005
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 4
+    gridHeight: 4
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 33
+    warningTime: 1.1583334
+    spawnInterval: 1.8416667
+    blocksPerWave: 2
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.375
+    lineWaveChance: 0
+    bombChance: 0.120000005
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -218,15 +294,18 @@ MonoBehaviour:
     mission: 0
     coinTarget: 11
     surviveSeconds: 30
-    warningTime: 1.115
-    spawnInterval: 1.77
+    warningTime: 1.1416668
+    spawnInterval: 1.8083334
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
     lineWaveChance: 0
+    bombChance: 0.120000005
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -237,16 +316,65 @@ MonoBehaviour:
     gridHeight: 4
     mission: 1
     coinTarget: 5
-    surviveSeconds: 40
-    warningTime: 1.0983334
-    spawnInterval: 1.7366667
+    surviveSeconds: 35
+    warningTime: 1.125
+    spawnInterval: 1.775
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.43
+    rampUp: 0.375
     lineWaveChance: 0
+    bombChance: 0.120000005
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 4
+    gridHeight: 4
+    mission: 0
+    coinTarget: 12
+    surviveSeconds: 30
+    warningTime: 1.1083333
+    spawnInterval: 1.7416667
+    blocksPerWave: 2
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0
+    bombChance: 0.120000005
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 4
+    gridHeight: 4
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 37
+    warningTime: 1.0916667
+    spawnInterval: 1.7083334
+    blocksPerWave: 2
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.375
+    lineWaveChance: 0
+    bombChance: 0.120000005
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -258,15 +386,18 @@ MonoBehaviour:
     mission: 0
     coinTarget: 13
     surviveSeconds: 30
-    warningTime: 1.0816667
-    spawnInterval: 1.7033334
+    warningTime: 1.075
+    spawnInterval: 1.6750001
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
     lineWaveChance: 0
+    bombChance: 0.120000005
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -277,16 +408,19 @@ MonoBehaviour:
     gridHeight: 4
     mission: 1
     coinTarget: 5
-    surviveSeconds: 44
-    warningTime: 1.065
-    spawnInterval: 1.67
+    surviveSeconds: 39
+    warningTime: 1.0583333
+    spawnInterval: 1.6416667
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.43
+    rampUp: 0.375
     lineWaveChance: 0
+    bombChance: 0.120000005
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -296,17 +430,20 @@ MonoBehaviour:
   - gridWidth: 4
     gridHeight: 4
     mission: 0
-    coinTarget: 15
+    coinTarget: 14
     surviveSeconds: 30
-    warningTime: 1.0483334
-    spawnInterval: 1.6366667
+    warningTime: 1.0416666
+    spawnInterval: 1.6083333
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
     lineWaveChance: 0
+    bombChance: 0.120000005
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -317,96 +454,65 @@ MonoBehaviour:
     gridHeight: 4
     mission: 1
     coinTarget: 5
-    surviveSeconds: 48
-    warningTime: 1.0316666
-    spawnInterval: 1.6033334
+    surviveSeconds: 41
+    warningTime: 1.025
+    spawnInterval: 1.575
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.43
+    rampUp: 0.375
     lineWaveChance: 0
+    bombChance: 0.120000005
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
+  - gridWidth: 5
+    gridHeight: 5
     mission: 0
-    coinTarget: 17
+    coinTarget: 11
     surviveSeconds: 30
-    warningTime: 1.015
-    spawnInterval: 1.57
+    warningTime: 1.1500001
+    spawnInterval: 1.85
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0
+    lineWaveChance: 0.06
+    bombChance: 0.14
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.41
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
+  - gridWidth: 5
+    gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 52
-    warningTime: 0.9983333
-    spawnInterval: 1.5366666
+    surviveSeconds: 35
+    warningTime: 1.1333334
+    spawnInterval: 1.8166667
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.43
-    lineWaveChance: 0
+    rampUp: 0.4
+    lineWaveChance: 0.06
+    bombChance: 0.14
     breakTiles: 1
     tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
-    mission: 0
-    coinTarget: 19
-    surviveSeconds: 30
-    warningTime: 0.9816666
-    spawnInterval: 1.5033333
-    blocksPerWave: 2
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 56
-    warningTime: 0.965
-    spawnInterval: 1.47
-    blocksPerWave: 2
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.43
-    lineWaveChance: 0
-    breakTiles: 1
-    tileRepairTime: 6
+    fireChance: 0.41
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -418,15 +524,18 @@ MonoBehaviour:
     mission: 0
     coinTarget: 12
     surviveSeconds: 30
-    warningTime: 1.0799999
-    spawnInterval: 1.74
+    warningTime: 1.1166668
+    spawnInterval: 1.7833334
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.08
+    lineWaveChance: 0.06
+    bombChance: 0.14
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.41
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -437,176 +546,19 @@ MonoBehaviour:
     gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 43
-    warningTime: 1.0633333
-    spawnInterval: 1.7066667
+    surviveSeconds: 37
+    warningTime: 1.1
+    spawnInterval: 1.75
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.46
-    lineWaveChance: 0.08
+    rampUp: 0.4
+    lineWaveChance: 0.06
+    bombChance: 0.14
     breakTiles: 1
     tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 14
-    surviveSeconds: 30
-    warningTime: 1.0466666
-    spawnInterval: 1.6733334
-    blocksPerWave: 2
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.08
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 47
-    warningTime: 1.03
-    spawnInterval: 1.64
-    blocksPerWave: 2
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.46
-    lineWaveChance: 0.08
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 16
-    surviveSeconds: 30
-    warningTime: 1.0133333
-    spawnInterval: 1.6066667
-    blocksPerWave: 2
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.08
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 51
-    warningTime: 0.9966666
-    spawnInterval: 1.5733334
-    blocksPerWave: 2
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.46
-    lineWaveChance: 0.08
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 18
-    surviveSeconds: 30
-    warningTime: 0.97999996
-    spawnInterval: 1.5400001
-    blocksPerWave: 2
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.08
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 55
-    warningTime: 0.9633333
-    spawnInterval: 1.5066667
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.46
-    lineWaveChance: 0.08
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 20
-    surviveSeconds: 30
-    warningTime: 0.94666666
-    spawnInterval: 1.4733334
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.08
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 59
-    warningTime: 0.93
-    spawnInterval: 1.44
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.46
-    lineWaveChance: 0.08
-    breakTiles: 1
-    tileRepairTime: 6
+    fireChance: 0.41
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -618,15 +570,18 @@ MonoBehaviour:
     mission: 0
     coinTarget: 13
     surviveSeconds: 30
-    warningTime: 1.045
-    spawnInterval: 1.7099999
-    blocksPerWave: 3
+    warningTime: 1.0833334
+    spawnInterval: 1.7166667
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.16
+    lineWaveChance: 0.06
+    bombChance: 0.14
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.41
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -637,176 +592,19 @@ MonoBehaviour:
     gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 46
-    warningTime: 1.0283333
-    spawnInterval: 1.6766666
-    blocksPerWave: 3
+    surviveSeconds: 39
+    warningTime: 1.0666667
+    spawnInterval: 1.6833334
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.49
-    lineWaveChance: 0.16
+    rampUp: 0.4
+    lineWaveChance: 0.06
+    bombChance: 0.14
     breakTiles: 1
     tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 15
-    surviveSeconds: 30
-    warningTime: 1.0116667
-    spawnInterval: 1.6433333
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.16
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 50
-    warningTime: 0.995
-    spawnInterval: 1.6099999
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.49
-    lineWaveChance: 0.16
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 17
-    surviveSeconds: 30
-    warningTime: 0.97833335
-    spawnInterval: 1.5766666
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.16
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 54
-    warningTime: 0.9616666
-    spawnInterval: 1.5433333
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.49
-    lineWaveChance: 0.16
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 19
-    surviveSeconds: 30
-    warningTime: 0.94499993
-    spawnInterval: 1.51
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.16
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 58
-    warningTime: 0.9283333
-    spawnInterval: 1.4766666
-    blocksPerWave: 4
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.49
-    lineWaveChance: 0.16
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 21
-    surviveSeconds: 30
-    warningTime: 0.91166663
-    spawnInterval: 1.4433333
-    blocksPerWave: 4
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.16
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 62
-    warningTime: 0.895
-    spawnInterval: 1.41
-    blocksPerWave: 4
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.49
-    lineWaveChance: 0.16
-    breakTiles: 1
-    tileRepairTime: 6
+    fireChance: 0.41
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -818,15 +616,18 @@ MonoBehaviour:
     mission: 0
     coinTarget: 14
     surviveSeconds: 30
-    warningTime: 1.01
-    spawnInterval: 1.68
-    blocksPerWave: 3
+    warningTime: 1.0500001
+    spawnInterval: 1.6500001
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.24
+    lineWaveChance: 0.06
+    bombChance: 0.14
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.41
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -837,176 +638,19 @@ MonoBehaviour:
     gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 49
-    warningTime: 0.99333334
-    spawnInterval: 1.6466666
-    blocksPerWave: 3
+    surviveSeconds: 41
+    warningTime: 1.0333333
+    spawnInterval: 1.6166667
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.52
-    lineWaveChance: 0.24
+    rampUp: 0.4
+    lineWaveChance: 0.06
+    bombChance: 0.14
     breakTiles: 1
     tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 16
-    surviveSeconds: 30
-    warningTime: 0.9766667
-    spawnInterval: 1.6133333
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.24
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 53
-    warningTime: 0.96000004
-    spawnInterval: 1.5799999
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.52
-    lineWaveChance: 0.24
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 18
-    surviveSeconds: 30
-    warningTime: 0.9433334
-    spawnInterval: 1.5466666
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.24
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 57
-    warningTime: 0.9266666
-    spawnInterval: 1.5133333
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.52
-    lineWaveChance: 0.24
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 20
-    surviveSeconds: 30
-    warningTime: 0.90999997
-    spawnInterval: 1.48
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.24
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 61
-    warningTime: 0.8933333
-    spawnInterval: 1.4466666
-    blocksPerWave: 4
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.52
-    lineWaveChance: 0.24
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 22
-    surviveSeconds: 30
-    warningTime: 0.87666667
-    spawnInterval: 1.4133333
-    blocksPerWave: 4
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.24
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 65
-    warningTime: 0.86
-    spawnInterval: 1.38
-    blocksPerWave: 4
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.52
-    lineWaveChance: 0.24
-    breakTiles: 1
-    tileRepairTime: 6
+    fireChance: 0.41
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -1018,55 +662,18 @@ MonoBehaviour:
     mission: 0
     coinTarget: 15
     surviveSeconds: 30
-    warningTime: 0.97499996
-    spawnInterval: 1.65
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.32
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 52
-    warningTime: 0.9583333
-    spawnInterval: 1.6166667
-    blocksPerWave: 3
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.55
-    lineWaveChance: 0.32
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 17
-    surviveSeconds: 30
-    warningTime: 0.94166666
+    warningTime: 1.0166667
     spawnInterval: 1.5833334
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.32
+    lineWaveChance: 0.06
+    bombChance: 0.14
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.41
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -1077,16 +684,19 @@ MonoBehaviour:
     gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 56
-    warningTime: 0.925
-    spawnInterval: 1.55
+    surviveSeconds: 43
+    warningTime: 0.99999994
+    spawnInterval: 1.5500001
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.55
-    lineWaveChance: 0.32
+    rampUp: 0.4
+    lineWaveChance: 0.06
+    bombChance: 0.14
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.41
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -1096,117 +706,411 @@ MonoBehaviour:
   - gridWidth: 5
     gridHeight: 5
     mission: 0
-    coinTarget: 19
+    coinTarget: 11
     surviveSeconds: 30
-    warningTime: 0.90833336
-    spawnInterval: 1.5166667
-    blocksPerWave: 3
+    warningTime: 1.125
+    spawnInterval: 1.8249999
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.32
+    lineWaveChance: 0.12
+    bombChance: 0.16
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.44
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 5
+    gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 60
-    warningTime: 0.8916666
-    spawnInterval: 1.4833333
-    blocksPerWave: 3
+    surviveSeconds: 37
+    warningTime: 1.1083333
+    spawnInterval: 1.7916666
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.55
-    lineWaveChance: 0.32
+    rampUp: 0.425
+    lineWaveChance: 0.12
+    bombChance: 0.16
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.44
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 5
+    gridHeight: 5
     mission: 0
-    coinTarget: 21
+    coinTarget: 12
     surviveSeconds: 30
-    warningTime: 0.87499994
-    spawnInterval: 1.45
-    blocksPerWave: 3
+    warningTime: 1.0916667
+    spawnInterval: 1.7583333
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.32
+    lineWaveChance: 0.12
+    bombChance: 0.16
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.44
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 5
+    gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 64
-    warningTime: 0.8583333
-    spawnInterval: 1.4166666
-    blocksPerWave: 4
+    surviveSeconds: 39
+    warningTime: 1.0749999
+    spawnInterval: 1.7249999
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.55
-    lineWaveChance: 0.32
+    rampUp: 0.425
+    lineWaveChance: 0.12
+    bombChance: 0.16
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.44
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 5
+    gridHeight: 5
     mission: 0
-    coinTarget: 23
+    coinTarget: 13
     surviveSeconds: 30
-    warningTime: 0.84166664
-    spawnInterval: 1.3833333
-    blocksPerWave: 4
+    warningTime: 1.0583333
+    spawnInterval: 1.6916666
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.32
+    lineWaveChance: 0.12
+    bombChance: 0.16
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.44
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 5
+    gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 68
-    warningTime: 0.825
-    spawnInterval: 1.35
-    blocksPerWave: 4
+    surviveSeconds: 41
+    warningTime: 1.0416666
+    spawnInterval: 1.6583333
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.55
-    lineWaveChance: 0.32
+    rampUp: 0.425
+    lineWaveChance: 0.12
+    bombChance: 0.16
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.44
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 0
+    coinTarget: 14
+    surviveSeconds: 30
+    warningTime: 1.025
+    spawnInterval: 1.625
+    blocksPerWave: 2
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.12
+    bombChance: 0.16
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.44
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 43
+    warningTime: 1.0083332
+    spawnInterval: 1.5916666
+    blocksPerWave: 2
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.425
+    lineWaveChance: 0.12
+    bombChance: 0.16
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.44
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 0
+    coinTarget: 15
+    surviveSeconds: 30
+    warningTime: 0.9916666
+    spawnInterval: 1.5583333
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.12
+    bombChance: 0.16
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.44
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 45
+    warningTime: 0.97499996
+    spawnInterval: 1.525
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.425
+    lineWaveChance: 0.12
+    bombChance: 0.16
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.44
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 0
+    coinTarget: 12
+    surviveSeconds: 30
+    warningTime: 1.1
+    spawnInterval: 1.8
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.17999999
+    bombChance: 0.18
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.47
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 39
+    warningTime: 1.0833334
+    spawnInterval: 1.7666667
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.45000002
+    lineWaveChance: 0.17999999
+    bombChance: 0.18
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.47
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 0
+    coinTarget: 13
+    surviveSeconds: 30
+    warningTime: 1.0666667
+    spawnInterval: 1.7333333
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.17999999
+    bombChance: 0.18
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.47
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 41
+    warningTime: 1.05
+    spawnInterval: 1.6999999
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.45000002
+    lineWaveChance: 0.17999999
+    bombChance: 0.18
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.47
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 0
+    coinTarget: 14
+    surviveSeconds: 30
+    warningTime: 1.0333333
+    spawnInterval: 1.6666666
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.17999999
+    bombChance: 0.18
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.47
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 43
+    warningTime: 1.0166667
+    spawnInterval: 1.6333333
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.45000002
+    lineWaveChance: 0.17999999
+    bombChance: 0.18
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.47
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 0
+    coinTarget: 15
+    surviveSeconds: 30
+    warningTime: 1
+    spawnInterval: 1.6
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.17999999
+    bombChance: 0.18
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.47
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 45
+    warningTime: 0.98333323
+    spawnInterval: 1.5666666
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.45000002
+    lineWaveChance: 0.17999999
+    bombChance: 0.18
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.47
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -1218,15 +1122,18 @@ MonoBehaviour:
     mission: 0
     coinTarget: 16
     surviveSeconds: 30
-    warningTime: 0.94
-    spawnInterval: 1.62
+    warningTime: 0.9666666
+    spawnInterval: 1.5333333
     blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.17999999
+    bombChance: 0.18
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.47
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -1237,16 +1144,19 @@ MonoBehaviour:
     gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 55
-    warningTime: 0.92333335
-    spawnInterval: 1.5866667
+    surviveSeconds: 47
+    warningTime: 0.9499999
+    spawnInterval: 1.5
     blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.58
-    lineWaveChance: 0.35
+    rampUp: 0.45000002
+    lineWaveChance: 0.17999999
+    bombChance: 0.18
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.47
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -1256,17 +1166,20 @@ MonoBehaviour:
   - gridWidth: 5
     gridHeight: 5
     mission: 0
-    coinTarget: 18
+    coinTarget: 12
     surviveSeconds: 30
-    warningTime: 0.9066667
-    spawnInterval: 1.5533334
-    blocksPerWave: 4
+    warningTime: 1.075
+    spawnInterval: 1.775
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.24
+    bombChance: 0.2
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.5
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -1277,16 +1190,19 @@ MonoBehaviour:
     gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 59
-    warningTime: 0.89000005
-    spawnInterval: 1.52
-    blocksPerWave: 4
+    surviveSeconds: 41
+    warningTime: 1.0583334
+    spawnInterval: 1.7416667
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.58
-    lineWaveChance: 0.35
+    rampUp: 0.47500002
+    lineWaveChance: 0.24
+    bombChance: 0.2
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.5
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -1296,117 +1212,43 @@ MonoBehaviour:
   - gridWidth: 5
     gridHeight: 5
     mission: 0
-    coinTarget: 20
+    coinTarget: 13
     surviveSeconds: 30
-    warningTime: 0.8733334
-    spawnInterval: 1.4866667
-    blocksPerWave: 4
+    warningTime: 1.0416667
+    spawnInterval: 1.7083334
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.24
+    bombChance: 0.2
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.5
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 5
+    gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 63
-    warningTime: 0.8566666
-    spawnInterval: 1.4533334
-    blocksPerWave: 4
+    surviveSeconds: 43
+    warningTime: 1.025
+    spawnInterval: 1.675
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.58
-    lineWaveChance: 0.35
+    rampUp: 0.47500002
+    lineWaveChance: 0.24
+    bombChance: 0.2
     breakTiles: 1
     tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 22
-    surviveSeconds: 30
-    warningTime: 0.84
-    spawnInterval: 1.4200001
-    blocksPerWave: 4
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 67
-    warningTime: 0.8233333
-    spawnInterval: 1.3866667
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.58
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 24
-    surviveSeconds: 30
-    warningTime: 0.8066667
-    spawnInterval: 1.3533334
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 71
-    warningTime: 0.79
-    spawnInterval: 1.32
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.58
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
+    fireChance: 0.5
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -1415,38 +1257,366 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    mission: 0
+    coinTarget: 14
+    surviveSeconds: 30
+    warningTime: 1.0083333
+    spawnInterval: 1.6416667
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.24
+    bombChance: 0.2
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.5
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 45
+    warningTime: 0.9916667
+    spawnInterval: 1.6083333
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.47500002
+    lineWaveChance: 0.24
+    bombChance: 0.2
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.5
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 15
+    surviveSeconds: 30
+    warningTime: 0.975
+    spawnInterval: 1.575
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.24
+    bombChance: 0.2
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.5
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 47
+    warningTime: 0.95833325
+    spawnInterval: 1.5416666
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.47500002
+    lineWaveChance: 0.24
+    bombChance: 0.2
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.5
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 16
+    surviveSeconds: 30
+    warningTime: 0.9416666
+    spawnInterval: 1.5083333
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.24
+    bombChance: 0.2
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.5
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 49
+    warningTime: 0.92499995
+    spawnInterval: 1.475
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.47500002
+    lineWaveChance: 0.24
+    bombChance: 0.2
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.5
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 0
+    coinTarget: 13
+    surviveSeconds: 30
+    warningTime: 1.0500001
+    spawnInterval: 1.75
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.22
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.53
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 43
+    warningTime: 1.0333334
+    spawnInterval: 1.7166667
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.5
+    lineWaveChance: 0.25
+    bombChance: 0.22
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.53
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 0
+    coinTarget: 14
+    surviveSeconds: 30
+    warningTime: 1.0166668
+    spawnInterval: 1.6833334
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.22
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.53
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 45
+    warningTime: 1
+    spawnInterval: 1.65
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.5
+    lineWaveChance: 0.25
+    bombChance: 0.22
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.53
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 0
+    coinTarget: 15
+    surviveSeconds: 30
+    warningTime: 0.98333335
+    spawnInterval: 1.6166667
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.22
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.53
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 47
+    warningTime: 0.9666667
+    spawnInterval: 1.5833334
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.5
+    lineWaveChance: 0.25
+    bombChance: 0.22
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.53
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 16
+    surviveSeconds: 30
+    warningTime: 0.95000005
+    spawnInterval: 1.5500001
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.22
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.53
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 49
+    warningTime: 0.9333333
+    spawnInterval: 1.5166667
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.5
+    lineWaveChance: 0.25
+    bombChance: 0.22
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.53
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
     mission: 0
     coinTarget: 17
     surviveSeconds: 30
-    warningTime: 0.905
-    spawnInterval: 1.5899999
+    warningTime: 0.9166666
+    spawnInterval: 1.4833333
     blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.22
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.53
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 6
+    gridHeight: 6
     mission: 1
     coinTarget: 5
-    surviveSeconds: 58
-    warningTime: 0.8883333
-    spawnInterval: 1.5566666
+    surviveSeconds: 51
+    warningTime: 0.9
+    spawnInterval: 1.45
     blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.61
-    lineWaveChance: 0.35
+    rampUp: 0.5
+    lineWaveChance: 0.25
+    bombChance: 0.22
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.53
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -1456,17 +1626,20 @@ MonoBehaviour:
   - gridWidth: 5
     gridHeight: 5
     mission: 0
-    coinTarget: 19
+    coinTarget: 13
     surviveSeconds: 30
-    warningTime: 0.87166667
-    spawnInterval: 1.5233333
-    blocksPerWave: 4
+    warningTime: 1.0250001
+    spawnInterval: 1.725
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.24
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.56
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -1477,16 +1650,19 @@ MonoBehaviour:
     gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 62
-    warningTime: 0.855
-    spawnInterval: 1.4899999
-    blocksPerWave: 4
+    surviveSeconds: 45
+    warningTime: 1.0083334
+    spawnInterval: 1.6916667
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.61
-    lineWaveChance: 0.35
+    rampUp: 0.52500004
+    lineWaveChance: 0.25
+    bombChance: 0.24
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.56
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -1496,117 +1672,43 @@ MonoBehaviour:
   - gridWidth: 5
     gridHeight: 5
     mission: 0
-    coinTarget: 21
+    coinTarget: 14
     surviveSeconds: 30
-    warningTime: 0.83833337
-    spawnInterval: 1.4566666
-    blocksPerWave: 4
+    warningTime: 0.99166673
+    spawnInterval: 1.6583334
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.24
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.56
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 5
+    gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 66
-    warningTime: 0.8216666
-    spawnInterval: 1.4233333
-    blocksPerWave: 4
+    surviveSeconds: 47
+    warningTime: 0.97499996
+    spawnInterval: 1.625
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.61
-    lineWaveChance: 0.35
+    rampUp: 0.52500004
+    lineWaveChance: 0.25
+    bombChance: 0.24
     breakTiles: 1
     tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 23
-    surviveSeconds: 30
-    warningTime: 0.80499995
-    spawnInterval: 1.39
-    blocksPerWave: 4
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 70
-    warningTime: 0.7883333
-    spawnInterval: 1.3566666
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.61
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 25
-    surviveSeconds: 30
-    warningTime: 0.77166665
-    spawnInterval: 1.3233333
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 74
-    warningTime: 0.755
-    spawnInterval: 1.29
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.61
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
+    fireChance: 0.56
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -1615,38 +1717,366 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    mission: 0
+    coinTarget: 15
+    surviveSeconds: 30
+    warningTime: 0.9583333
+    spawnInterval: 1.5916667
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.24
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.56
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 49
+    warningTime: 0.94166666
+    spawnInterval: 1.5583334
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.52500004
+    lineWaveChance: 0.25
+    bombChance: 0.24
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.56
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 16
+    surviveSeconds: 30
+    warningTime: 0.925
+    spawnInterval: 1.5250001
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.24
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.56
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 51
+    warningTime: 0.90833324
+    spawnInterval: 1.4916667
+    blocksPerWave: 3
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.52500004
+    lineWaveChance: 0.25
+    bombChance: 0.24
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.56
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 17
+    surviveSeconds: 30
+    warningTime: 0.8916666
+    spawnInterval: 1.4583334
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.24
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.56
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 53
+    warningTime: 0.87499994
+    spawnInterval: 1.4250001
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.52500004
+    lineWaveChance: 0.25
+    bombChance: 0.24
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.56
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 0
+    coinTarget: 14
+    surviveSeconds: 30
+    warningTime: 1
+    spawnInterval: 1.6999999
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.26
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.59
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 47
+    warningTime: 0.9833334
+    spawnInterval: 1.6666666
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.55
+    lineWaveChance: 0.25
+    bombChance: 0.26
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.59
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 0
+    coinTarget: 15
+    surviveSeconds: 30
+    warningTime: 0.96666676
+    spawnInterval: 1.6333333
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.26
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.59
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 49
+    warningTime: 0.95
+    spawnInterval: 1.5999999
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.55
+    lineWaveChance: 0.25
+    bombChance: 0.26
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.59
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 5
+    gridHeight: 5
+    mission: 0
+    coinTarget: 16
+    surviveSeconds: 30
+    warningTime: 0.93333334
+    spawnInterval: 1.5666666
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.26
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.59
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 51
+    warningTime: 0.9166667
+    spawnInterval: 1.5333333
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.55
+    lineWaveChance: 0.25
+    bombChance: 0.26
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.59
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 17
+    surviveSeconds: 30
+    warningTime: 0.90000004
+    spawnInterval: 1.5
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.26
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.59
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 53
+    warningTime: 0.88333327
+    spawnInterval: 1.4666666
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.55
+    lineWaveChance: 0.25
+    bombChance: 0.26
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.59
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
     mission: 0
     coinTarget: 18
     surviveSeconds: 30
-    warningTime: 0.87
-    spawnInterval: 1.56
+    warningTime: 0.8666666
+    spawnInterval: 1.4333333
     blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.26
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.59
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 6
+    gridHeight: 6
     mission: 1
     coinTarget: 5
-    surviveSeconds: 61
-    warningTime: 0.85333335
-    spawnInterval: 1.5266666
+    surviveSeconds: 55
+    warningTime: 0.84999996
+    spawnInterval: 1.4
     blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.64
-    lineWaveChance: 0.35
+    rampUp: 0.55
+    lineWaveChance: 0.25
+    bombChance: 0.26
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.59
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -1656,17 +2086,20 @@ MonoBehaviour:
   - gridWidth: 5
     gridHeight: 5
     mission: 0
-    coinTarget: 20
+    coinTarget: 14
     surviveSeconds: 30
-    warningTime: 0.8366667
-    spawnInterval: 1.4933333
+    warningTime: 0.975
+    spawnInterval: 1.675
     blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.28
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -1677,16 +2110,19 @@ MonoBehaviour:
     gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 65
-    warningTime: 0.82000005
-    spawnInterval: 1.4599999
+    surviveSeconds: 49
+    warningTime: 0.9583334
+    spawnInterval: 1.6416667
     blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.64
-    lineWaveChance: 0.35
+    rampUp: 0.575
+    lineWaveChance: 0.25
+    bombChance: 0.28
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -1696,117 +2132,43 @@ MonoBehaviour:
   - gridWidth: 5
     gridHeight: 5
     mission: 0
-    coinTarget: 22
+    coinTarget: 15
     surviveSeconds: 30
-    warningTime: 0.8033334
-    spawnInterval: 1.4266666
+    warningTime: 0.9416667
+    spawnInterval: 1.6083333
     blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.28
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 5
+    gridHeight: 5
     mission: 1
     coinTarget: 5
-    surviveSeconds: 69
-    warningTime: 0.78666663
-    spawnInterval: 1.3933333
+    surviveSeconds: 51
+    warningTime: 0.92499995
+    spawnInterval: 1.5749999
     blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.64
-    lineWaveChance: 0.35
+    rampUp: 0.575
+    lineWaveChance: 0.25
+    bombChance: 0.28
     breakTiles: 1
     tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 24
-    surviveSeconds: 30
-    warningTime: 0.77
-    spawnInterval: 1.36
-    blocksPerWave: 4
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 73
-    warningTime: 0.75333333
-    spawnInterval: 1.3266666
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.64
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 26
-    surviveSeconds: 30
-    warningTime: 0.7366667
-    spawnInterval: 1.2933333
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 77
-    warningTime: 0.72
-    spawnInterval: 1.26
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.64
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -1815,98 +2177,343 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    mission: 0
+    coinTarget: 16
+    surviveSeconds: 30
+    warningTime: 0.9083333
+    spawnInterval: 1.5416666
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.28
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 53
+    warningTime: 0.89166665
+    spawnInterval: 1.5083333
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.575
+    lineWaveChance: 0.25
+    bombChance: 0.28
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 17
+    surviveSeconds: 30
+    warningTime: 0.875
+    spawnInterval: 1.475
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.28
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 55
+    warningTime: 0.85833323
+    spawnInterval: 1.4416666
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.575
+    lineWaveChance: 0.25
+    bombChance: 0.28
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 18
+    surviveSeconds: 30
+    warningTime: 0.8416666
+    spawnInterval: 1.4083333
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.28
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 57
+    warningTime: 0.8249999
+    spawnInterval: 1.375
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.575
+    lineWaveChance: 0.25
+    bombChance: 0.28
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 15
+    surviveSeconds: 30
+    warningTime: 0.95000005
+    spawnInterval: 1.65
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 51
+    warningTime: 0.9333334
+    spawnInterval: 1.6166667
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 16
+    surviveSeconds: 30
+    warningTime: 0.91666675
+    spawnInterval: 1.5833334
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 53
+    warningTime: 0.9
+    spawnInterval: 1.55
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 17
+    surviveSeconds: 30
+    warningTime: 0.8833333
+    spawnInterval: 1.5166667
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 55
+    warningTime: 0.8666667
+    spawnInterval: 1.4833333
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 18
+    surviveSeconds: 30
+    warningTime: 0.85
+    spawnInterval: 1.45
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 57
+    warningTime: 0.83333325
+    spawnInterval: 1.4166666
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
     mission: 0
     coinTarget: 19
     surviveSeconds: 30
-    warningTime: 0.835
-    spawnInterval: 1.53
+    warningTime: 0.8166666
+    spawnInterval: 1.3833333
     blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 64
-    warningTime: 0.8183333
-    spawnInterval: 1.4966667
-    blocksPerWave: 4
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.67
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 21
-    surviveSeconds: 30
-    warningTime: 0.8016667
-    spawnInterval: 1.4633334
-    blocksPerWave: 4
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 68
-    warningTime: 0.785
-    spawnInterval: 1.43
-    blocksPerWave: 4
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.67
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
-    mission: 0
-    coinTarget: 23
-    surviveSeconds: 30
-    warningTime: 0.7683334
-    spawnInterval: 1.3966666
-    blocksPerWave: 4
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -1917,16 +2524,19 @@ MonoBehaviour:
     gridHeight: 6
     mission: 1
     coinTarget: 5
-    surviveSeconds: 72
-    warningTime: 0.7516666
-    spawnInterval: 1.3633333
-    blocksPerWave: 5
+    surviveSeconds: 59
+    warningTime: 0.8
+    spawnInterval: 1.35
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.67
-    lineWaveChance: 0.35
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -1936,17 +2546,20 @@ MonoBehaviour:
   - gridWidth: 6
     gridHeight: 6
     mission: 0
-    coinTarget: 25
+    coinTarget: 15
     surviveSeconds: 30
-    warningTime: 0.73499995
-    spawnInterval: 1.33
-    blocksPerWave: 5
+    warningTime: 0.95000005
+    spawnInterval: 1.65
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -1957,16 +2570,19 @@ MonoBehaviour:
     gridHeight: 6
     mission: 1
     coinTarget: 5
-    surviveSeconds: 76
-    warningTime: 0.7183333
-    spawnInterval: 1.2966666
-    blocksPerWave: 6
+    surviveSeconds: 51
+    warningTime: 0.9333334
+    spawnInterval: 1.6166667
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.67
-    lineWaveChance: 0.35
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -1976,17 +2592,20 @@ MonoBehaviour:
   - gridWidth: 6
     gridHeight: 6
     mission: 0
-    coinTarget: 27
+    coinTarget: 16
     surviveSeconds: 30
-    warningTime: 0.70166665
-    spawnInterval: 1.2633333
-    blocksPerWave: 6
+    warningTime: 0.91666675
+    spawnInterval: 1.5833334
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -1997,16 +2616,341 @@ MonoBehaviour:
     gridHeight: 6
     mission: 1
     coinTarget: 5
-    surviveSeconds: 80
-    warningTime: 0.685
-    spawnInterval: 1.23
-    blocksPerWave: 6
+    surviveSeconds: 53
+    warningTime: 0.9
+    spawnInterval: 1.55
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.67
-    lineWaveChance: 0.35
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 17
+    surviveSeconds: 30
+    warningTime: 0.8833333
+    spawnInterval: 1.5166667
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 55
+    warningTime: 0.8666667
+    spawnInterval: 1.4833333
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 18
+    surviveSeconds: 30
+    warningTime: 0.85
+    spawnInterval: 1.45
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 57
+    warningTime: 0.83333325
+    spawnInterval: 1.4166666
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 19
+    surviveSeconds: 30
+    warningTime: 0.8166666
+    spawnInterval: 1.3833333
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 59
+    warningTime: 0.8
+    spawnInterval: 1.35
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 16
+    surviveSeconds: 30
+    warningTime: 0.95000005
+    spawnInterval: 1.65
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 51
+    warningTime: 0.9333334
+    spawnInterval: 1.6166667
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 17
+    surviveSeconds: 30
+    warningTime: 0.91666675
+    spawnInterval: 1.5833334
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 53
+    warningTime: 0.9
+    spawnInterval: 1.55
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 18
+    surviveSeconds: 30
+    warningTime: 0.8833333
+    spawnInterval: 1.5166667
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 55
+    warningTime: 0.8666667
+    spawnInterval: 1.4833333
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 19
+    surviveSeconds: 30
+    warningTime: 0.85
+    spawnInterval: 1.45
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 57
+    warningTime: 0.83333325
+    spawnInterval: 1.4166666
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -2018,15 +2962,18 @@ MonoBehaviour:
     mission: 0
     coinTarget: 20
     surviveSeconds: 30
-    warningTime: 0.79999995
-    spawnInterval: 1.5
-    blocksPerWave: 5
+    warningTime: 0.8166666
+    spawnInterval: 1.3833333
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -2037,16 +2984,19 @@ MonoBehaviour:
     gridHeight: 6
     mission: 1
     coinTarget: 5
-    surviveSeconds: 67
-    warningTime: 0.7833333
-    spawnInterval: 1.4666667
-    blocksPerWave: 5
+    surviveSeconds: 59
+    warningTime: 0.8
+    spawnInterval: 1.35
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.7
-    lineWaveChance: 0.35
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -2056,17 +3006,20 @@ MonoBehaviour:
   - gridWidth: 6
     gridHeight: 6
     mission: 0
-    coinTarget: 22
+    coinTarget: 16
     surviveSeconds: 30
-    warningTime: 0.76666665
-    spawnInterval: 1.4333334
-    blocksPerWave: 5
+    warningTime: 0.95000005
+    spawnInterval: 1.65
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -2077,16 +3030,19 @@ MonoBehaviour:
     gridHeight: 6
     mission: 1
     coinTarget: 5
-    surviveSeconds: 71
-    warningTime: 0.75
-    spawnInterval: 1.4
-    blocksPerWave: 5
+    surviveSeconds: 51
+    warningTime: 0.9333334
+    spawnInterval: 1.6166667
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.7
-    lineWaveChance: 0.35
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -2096,17 +3052,20 @@ MonoBehaviour:
   - gridWidth: 6
     gridHeight: 6
     mission: 0
-    coinTarget: 24
+    coinTarget: 17
     surviveSeconds: 30
-    warningTime: 0.73333335
-    spawnInterval: 1.3666667
-    blocksPerWave: 5
+    warningTime: 0.91666675
+    spawnInterval: 1.5833334
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -2117,16 +3076,19 @@ MonoBehaviour:
     gridHeight: 6
     mission: 1
     coinTarget: 5
-    surviveSeconds: 75
-    warningTime: 0.7166666
-    spawnInterval: 1.3333334
-    blocksPerWave: 5
+    surviveSeconds: 53
+    warningTime: 0.9
+    spawnInterval: 1.55
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.7
-    lineWaveChance: 0.35
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -2136,17 +3098,20 @@ MonoBehaviour:
   - gridWidth: 6
     gridHeight: 6
     mission: 0
-    coinTarget: 26
+    coinTarget: 18
     surviveSeconds: 30
-    warningTime: 0.6999999
-    spawnInterval: 1.3000001
-    blocksPerWave: 5
+    warningTime: 0.8833333
+    spawnInterval: 1.5166667
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -2157,16 +3122,19 @@ MonoBehaviour:
     gridHeight: 6
     mission: 1
     coinTarget: 5
-    surviveSeconds: 79
-    warningTime: 0.6833333
-    spawnInterval: 1.2666667
-    blocksPerWave: 6
+    surviveSeconds: 55
+    warningTime: 0.8666667
+    spawnInterval: 1.4833333
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.7
-    lineWaveChance: 0.35
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -2176,17 +3144,20 @@ MonoBehaviour:
   - gridWidth: 6
     gridHeight: 6
     mission: 0
-    coinTarget: 28
+    coinTarget: 19
     surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.2333333
-    blocksPerWave: 6
+    warningTime: 0.85
+    spawnInterval: 1.45
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -2197,16 +3168,249 @@ MonoBehaviour:
     gridHeight: 6
     mission: 1
     coinTarget: 5
-    surviveSeconds: 83
-    warningTime: 0.68
-    spawnInterval: 1.2
-    blocksPerWave: 6
+    surviveSeconds: 57
+    warningTime: 0.83333325
+    spawnInterval: 1.4166666
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.7
-    lineWaveChance: 0.35
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 20
+    surviveSeconds: 30
+    warningTime: 0.8166666
+    spawnInterval: 1.3833333
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 59
+    warningTime: 0.8
+    spawnInterval: 1.35
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 17
+    surviveSeconds: 30
+    warningTime: 0.95000005
+    spawnInterval: 1.65
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 51
+    warningTime: 0.9333334
+    spawnInterval: 1.6166667
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 18
+    surviveSeconds: 30
+    warningTime: 0.91666675
+    spawnInterval: 1.5833334
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 53
+    warningTime: 0.9
+    spawnInterval: 1.55
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 19
+    surviveSeconds: 30
+    warningTime: 0.8833333
+    spawnInterval: 1.5166667
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 55
+    warningTime: 0.8666667
+    spawnInterval: 1.4833333
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 3
+    coinLifetime: 5
+    maxCoins: 1
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 0
+    coinTarget: 20
+    surviveSeconds: 30
+    warningTime: 0.85
+    spawnInterval: 1.45
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
+    coinInterval: 2.2
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 11
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 6
+    gridHeight: 6
+    mission: 1
+    coinTarget: 5
+    surviveSeconds: 57
+    warningTime: 0.83333325
+    spawnInterval: 1.4166666
+    blocksPerWave: 4
+    blockLinger: 1.5
+    aimAtPlayerChance: 0.5
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
+    breakTiles: 1
+    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
@@ -2218,15 +3422,18 @@ MonoBehaviour:
     mission: 0
     coinTarget: 21
     surviveSeconds: 30
-    warningTime: 0.765
-    spawnInterval: 1.4699999
-    blocksPerWave: 5
+    warningTime: 0.8166666
+    spawnInterval: 1.3833333
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
     rampUp: 0
-    lineWaveChance: 0.35
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
@@ -2237,776 +3444,19 @@ MonoBehaviour:
     gridHeight: 6
     mission: 1
     coinTarget: 5
-    surviveSeconds: 67
-    warningTime: 0.74833333
-    spawnInterval: 1.4366666
-    blocksPerWave: 5
+    surviveSeconds: 59
+    warningTime: 0.8
+    spawnInterval: 1.35
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.73
-    lineWaveChance: 0.35
+    rampUp: 0.6
+    lineWaveChance: 0.25
+    bombChance: 0.3
     breakTiles: 1
     tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 23
-    surviveSeconds: 30
-    warningTime: 0.7316667
-    spawnInterval: 1.4033333
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 71
-    warningTime: 0.71500003
-    spawnInterval: 1.3699999
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.73
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 25
-    surviveSeconds: 30
-    warningTime: 0.6983334
-    spawnInterval: 1.3366666
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 75
-    warningTime: 0.6816666
-    spawnInterval: 1.3033333
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.73
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 27
-    surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.27
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 79
-    warningTime: 0.68
-    spawnInterval: 1.2366666
-    blocksPerWave: 6
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.73
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 29
-    surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.2033333
-    blocksPerWave: 6
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 83
-    warningTime: 0.68
-    spawnInterval: 1.17
-    blocksPerWave: 6
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.73
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 22
-    surviveSeconds: 30
-    warningTime: 0.72999996
-    spawnInterval: 1.4399999
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 67
-    warningTime: 0.7133333
-    spawnInterval: 1.4066666
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.76
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 24
-    surviveSeconds: 30
-    warningTime: 0.69666666
-    spawnInterval: 1.3733333
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 71
-    warningTime: 0.68
-    spawnInterval: 1.3399999
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.76
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 26
-    surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.3066666
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 75
-    warningTime: 0.68
-    spawnInterval: 1.2733333
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.76
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 28
-    surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.24
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 79
-    warningTime: 0.68
-    spawnInterval: 1.2066666
-    blocksPerWave: 6
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.76
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 30
-    surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.1733333
-    blocksPerWave: 6
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 83
-    warningTime: 0.68
-    spawnInterval: 1.15
-    blocksPerWave: 6
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.76
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 23
-    surviveSeconds: 30
-    warningTime: 0.695
-    spawnInterval: 1.41
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 67
-    warningTime: 0.68
-    spawnInterval: 1.3766667
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.79
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 25
-    surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.3433334
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 71
-    warningTime: 0.68
-    spawnInterval: 1.31
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.79
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 27
-    surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.2766666
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 75
-    warningTime: 0.68
-    spawnInterval: 1.2433333
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.79
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 29
-    surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.21
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 79
-    warningTime: 0.68
-    spawnInterval: 1.1766666
-    blocksPerWave: 6
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.79
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 31
-    surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.15
-    blocksPerWave: 6
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 83
-    warningTime: 0.68
-    spawnInterval: 1.15
-    blocksPerWave: 6
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.79
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 24
-    surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.38
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 67
-    warningTime: 0.68
-    spawnInterval: 1.3466667
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.8
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 26
-    surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.3133334
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 71
-    warningTime: 0.68
-    spawnInterval: 1.28
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.8
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 28
-    surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.2466667
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 75
-    warningTime: 0.68
-    spawnInterval: 1.2133334
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.8
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 30
-    surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.1800001
-    blocksPerWave: 5
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 79
-    warningTime: 0.68
-    spawnInterval: 1.15
-    blocksPerWave: 6
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.8
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 3
-    coinLifetime: 5
-    maxCoins: 1
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 0
-    coinTarget: 32
-    surviveSeconds: 30
-    warningTime: 0.68
-    spawnInterval: 1.15
-    blocksPerWave: 6
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
-    coinInterval: 2.2
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 11
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
-    mission: 1
-    coinTarget: 5
-    surviveSeconds: 83
-    warningTime: 0.68
-    spawnInterval: 1.15
-    blocksPerWave: 6
-    blockLinger: 1.5
-    aimAtPlayerChance: 0.5
-    rampUp: 0.8
-    lineWaveChance: 0.35
-    breakTiles: 1
-    tileRepairTime: 6
+    fireChance: 0.6
+    fireDuration: 3.5
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1

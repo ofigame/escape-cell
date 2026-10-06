@@ -34,26 +34,28 @@ namespace SquashBot.Data
         }
 
         /// <summary>
-        /// Worlds 2-15. Each world raises the pressure a notch: bigger platforms, more simultaneous blocks,
-        /// shorter warnings, faster waves, bombs and (from world 3) whole-row/column waves. Within a world the
-        /// difficulty climbs from the first to the tenth level. The fairness check still guarantees an escape.
+        /// Worlds 2-15. The pressure rises gently and then levels off, so late worlds stay tough but fair:
+        /// warnings never drop below 0.8 s, at most 4 blocks fall at once, and bombs / row waves stay occasional.
+        /// Variety (fire, bombs, row waves) grows faster than raw speed, so progress feels new rather than just harder.
+        /// Within a world the difficulty still climbs from the first to the tenth level.
         /// </summary>
         private static LevelData Generated(int world, int i)
         {
             float t = i / (float)(LevelsPerWorld - 1);
+            float w = Mathf.Clamp01(world / 10f); // 0 → 1 over the first ten worlds, then flat
             int size = world == 1 ? 4 : world < 5 ? 5 : (i >= 5 || world >= 10 ? 6 : 5);
-            int maxBlocks = size * size / 6;
-            int blocks = Mathf.Min(maxBlocks, 2 + Mathf.Min(3, world / 3) + (i >= 7 ? 1 : 0));
-            float warning = Mathf.Max(0.68f, Mathf.Lerp(1.15f, 1.0f, t) - world * 0.035f);
-            float interval = Mathf.Max(1.15f, Mathf.Lerp(1.8f, 1.5f, t) - world * 0.03f);
-            float ramp = Mathf.Min(0.8f, 0.4f + world * 0.03f);
+            int blocks = Mathf.Min(4, Mathf.Min(size * size / 6, 2 + world / 4 + (i >= 8 ? 1 : 0)));
+            float warning = Mathf.Max(0.8f, Mathf.Lerp(1.2f, 1.05f, t) - w * 0.25f);
+            float interval = Mathf.Max(1.35f, Mathf.Lerp(1.9f, 1.6f, t) - w * 0.25f);
+            float ramp = Mathf.Lerp(0.35f, 0.6f, w);
 
             var level = i % 2 == 0
-                ? Collect(size, 10 + world + i, warning, interval, blocks, breakTiles: true)
-                : Survive(size, 35f + Mathf.Min(world * 3f, 30f) + i * 2f, warning, interval, blocks, ramp, breakTiles: true);
+                ? Collect(size, 10 + world / 2 + i / 2, warning, interval, blocks, breakTiles: true)
+                : Survive(size, 30f + Mathf.Min(world * 2f, 20f) + i, warning, interval, blocks, ramp, breakTiles: true);
             level.maxCoins = i % 2 == 0 ? 2 : 1;
-            level.lineWaveChance = world >= 2 ? Mathf.Min(0.35f, 0.08f * (world - 1)) : 0f;
-            level.bombChance = Mathf.Min(0.4f, 0.12f + 0.025f * world); // bombs from world 2 on
+            level.lineWaveChance = world >= 2 ? Mathf.Min(0.25f, 0.06f * (world - 1)) : 0f;
+            level.bombChance = Mathf.Min(0.3f, 0.1f + 0.02f * world); // bombs from world 2 on
+            level.fireChance = world >= 2 ? Mathf.Min(0.6f, 0.35f + 0.03f * world) : 0f; // fire from world 3 on
             return level;
         }
         private static List<LevelData> CreateBase()

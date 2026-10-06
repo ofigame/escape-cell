@@ -40,6 +40,7 @@ namespace SquashBot.Gameplay
         {
             public GridPos pos;
             public float timeLeft;
+            public bool fire;
         }
 
         /// <summary>Raised for every tile hit, the moment the hazard lands (once per tile of a bomb's blast).</summary>
@@ -428,11 +429,15 @@ namespace SquashBot.Gameplay
 
         private bool TryBreakTile(GridPos p)
         {
-            if (!level.breakTiles || !running || !CanBreakTile() || grid.GetTile(p) == TileState.Broken) return false;
-            grid.SetTile(p, TileState.Broken);
-            gridView.Break(p);
+            if (!level.breakTiles || !running || !CanBreakTile() || grid.GetTile(p) != TileState.Solid) return false;
+
+            // Some tiles catch fire for a few seconds instead of breaking into a hole.
+            bool fire = level.fireChance > 0f && UnityEngine.Random.value < level.fireChance;
+            grid.SetTile(p, fire ? TileState.Fire : TileState.Broken);
+            if (fire) gridView.Ignite(p);
+            else gridView.Break(p);
             TileBroken?.Invoke(p);
-            repairs.Add(new Repair { pos = p, timeLeft = level.tileRepairTime });
+            repairs.Add(new Repair { pos = p, timeLeft = fire ? level.fireDuration : level.tileRepairTime, fire = fire });
             return true;
         }
 
@@ -450,7 +455,8 @@ namespace SquashBot.Gameplay
                 if (repairs[i].timeLeft > 0f) continue;
 
                 grid.SetTile(repairs[i].pos, TileState.Solid);
-                gridView.Repair(repairs[i].pos);
+                if (repairs[i].fire) gridView.Extinguish(repairs[i].pos);
+                else gridView.Repair(repairs[i].pos);
                 repairs.RemoveAt(i);
             }
         }

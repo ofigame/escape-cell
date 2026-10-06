@@ -97,7 +97,7 @@ namespace SquashBot.Gameplay
             {
                 var p = pickups[i];
                 if (running) p.lifeLeft -= dt;
-                if (p.lifeLeft <= 0f || grid.GetTile(p.pos) == TileState.Broken)
+                if (p.lifeLeft <= 0f || grid.IsGap(p.pos))
                 {
                     Destroy(p.go);
                     pickups.RemoveAt(i);

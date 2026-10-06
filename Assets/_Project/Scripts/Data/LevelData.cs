@@ -41,6 +41,9 @@ namespace SquashBot.Data
         [Header("Breaking tiles")]
         public bool breakTiles;
         public float tileRepairTime = 6f;
+        [Tooltip("Chance that a breaking tile catches fire (temporary) instead of becoming a hole.")]
+        [Range(0f, 1f)] public float fireChance = 0f;
+        public float fireDuration = 3.5f;
 
         [Header("Coins")]
         public float coinInterval = 2.2f;

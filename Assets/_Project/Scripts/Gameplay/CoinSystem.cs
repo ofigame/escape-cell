@@ -94,7 +94,7 @@ namespace SquashBot.Gameplay
             {
                 var c = coins[i];
                 if (running) c.lifeLeft -= dt;
-                if (c.lifeLeft <= 0f || grid.GetTile(c.pos) == TileState.Broken)
+                if (c.lifeLeft <= 0f || grid.IsGap(c.pos))
                 {
                     Destroy(c.go);
                     coins.RemoveAt(i);

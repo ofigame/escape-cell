@@ -27,6 +27,18 @@ namespace SquashBot.Gameplay
         private const float SlowMoDuration = 0.45f; // real seconds
         private const int CloseCallsForArmor = 2;
         private const float ArmorDuration = 5f;
+        private const float SuperArmorDuration = 10f;
+        private const int ArmorsForSuper = 3;
+        private const int CoinsPerRescue = 5;
+        private const int MaxRescues = 3;
+        private const float HoverDuration = 2f;
+        private const float HoverCooldown = 8f;
+        private const int FailsForAssist = 3;
+
+        // Features unlock as the player progresses (world index, 0-based).
+        private const int RescueFromWorld = 1;
+        private const int FireFromWorld = 2;
+        private const int HoverFromWorld = 3;
 
         [SerializeField] private LevelSet levelSet;
 
@@ -53,6 +65,18 @@ namespace SquashBot.Gameplay
         private int closeCalls;
         private bool jumpHintShown;
         private int pendingLevel = -1; // the level the player tried to start without lives
+        private int armorsThisLevel;
+        private int rescues;
+        private int coinsTowardRescue;
+        private bool hovering;
+        private float hoverLeft;
+        private float hoverCooldown;
+        private GridPos hoverTarget;
+        private GameObject hoverMarker;
+
+        private int World => LevelCatalog.WorldOf(levelIndex);
+        private bool RescueEnabled => World >= RescueFromWorld;
+        private bool HoverEnabled => World >= HoverFromWorld;
 
         private int LevelCount => levelSet.levels.Count;
         private int NextLevel => Mathf.Clamp(SaveData.UnlockedLevel, 0, LevelCount - 1);
@@ -152,6 +176,8 @@ namespace SquashBot.Gameplay
         private void ResetRun()
         {
             StopAllCoroutines();
+            hovering = false;
+            if (hoverMarker != null) hoverMarker.SetActive(false);
             Time.timeScale = 1f;
             slowMoLeft = 0f;
             hazards.Stop();
@@ -205,6 +231,13 @@ namespace SquashBot.Gameplay
             level = levelSet.levels[levelIndex].Clone();
             coinsThisRun = 0;
             elapsed = 0f;
+            armorsThisLevel = 0;
+            rescues = 0;
+            coinsTowardRescue = 0;
+            hovering = false;
+            hoverCooldown = 0f;
+            bool assisted = ApplyAssist(level);
+            input.HoldEnabled = HoverEnabled;
 
             ApplyTheme(levelIndex);
             grid = new GridModel(level.gridWidth, level.gridHeight);
@@ -221,7 +254,7 @@ namespace SquashBot.Gameplay
 
             State = GameState.Playing;
             ui.ShowHud(levelIndex);
-            ui.ShowIntro(Loc.F("level", levelIndex + 1), MissionText(level, upper: true));
+            ShowLevelIntro(assisted);
             RefreshHud();
         }
 
@@ -306,12 +339,181 @@ namespace SquashBot.Gameplay
             return true;
         }
 
-        private void FallIntoHole()
+        /// <summary>The robot ended up on a hole or fire: a rescue charge saves it, otherwise it falls or burns.</summary>
+        private void StepIntoGap(GridPos p)
         {
+            if (TryRescue(p, crushed: false)) return;
+
+            if (grid.GetTile(p) == TileState.Fire)
+            {
+                robot.Squash();
+                fx.Burst(robot.transform.position + Vector3.up * 0.3f, new Color(1f, 0.5f, 0.2f), new Color(2.4f, 0.8f, 0.1f), 26, 4f);
+                AudioManager.PlaySfx(Sfx.Squash, 0.8f, 1.3f);
+                Haptics.Heavy();
+                Lose(Loc.T("lose.fire"));
+                return;
+            }
+
             robot.FallIntoHole();
             AudioManager.PlaySfx(Sfx.Fall);
             Haptics.Heavy();
             Lose(Loc.T("lose.fall"));
+        }
+
+        /// <summary>Spend a rescue charge instead of dying: smash the block, or bounce out of the hole/fire.</summary>
+        private bool TryRescue(GridPos p, bool crushed)
+        {
+            if (!RescueEnabled || rescues <= 0) return false;
+            rescues--;
+
+            if (crushed) hazards.Shatter(p);
+            else robot.RescueTo(SafeTileNear(robot.LastLeftTile, p));
+
+            robot.GiveShield(1.5f); // a moment to get out of trouble
+            cameraRig.Shake(0.8f);
+            cameraRig.Punch(0.8f);
+            fx.Burst(robot.transform.position + Vector3.up * 0.4f, Palette.UiCyan, Palette.ShieldPickupGlow, 24, 5f);
+            AudioManager.PlaySfx(Sfx.Blocked);
+            Haptics.Medium();
+            FloatAt(GridView.ToWorld(p), Loc.T("float.rescued"), Palette.UiCyan);
+            return true;
+        }
+
+        /// <summary>Armor from a pickup or two close calls; every third one in a level is a long "super" armor.</summary>
+        private void GiveArmor(float seconds, GridPos at, string label, Color color)
+        {
+            armorsThisLevel++;
+            bool super = armorsThisLevel % ArmorsForSuper == 0;
+            robot.GiveShield(super ? SuperArmorDuration : seconds);
+            FloatAt(GridView.ToWorld(at), super ? Loc.T("float.superArmor") : label, super ? Palette.UiGold : color);
+            AudioManager.PlaySfx(Sfx.Shield, 1f, super ? 0.85f : 1f);
+            Haptics.Medium();
+            if (super) cameraRig.Punch(1.2f);
+        }
+
+        /// <summary><paramref name="preferred"/> if it is safe, otherwise the standable tile closest to <paramref name="near"/>.</summary>
+        private GridPos SafeTileNear(GridPos preferred, GridPos near)
+        {
+            if (grid.InBounds(preferred) && grid.IsStandable(preferred) && !hazards.IsThreatened(preferred)) return preferred;
+            GridPos best = preferred;
+            int bestScore = int.MaxValue;
+            foreach (var t in grid.AllPositions())
+            {
+                if (!grid.IsStandable(t)) continue;
+                int score = t.Manhattan(near) * 10 + (hazards.IsThreatened(t) ? 100 : 0);
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    best = t;
+                }
+            }
+            return best;
+        }
+
+        // ---------- Hover escape ----------
+
+        private void UpdateHover(InputCommand command)
+        {
+            if (hoverCooldown > 0f && !hovering) hoverCooldown -= Time.deltaTime;
+
+            if (!hovering)
+            {
+                if (command.holdStart && HoverEnabled && hoverCooldown <= 0f && robot.IsAlive && !robot.IsHopping)
+                {
+                    hovering = true;
+                    hoverLeft = HoverDuration;
+                    hoverTarget = robot.Position;
+                    robot.StartHover();
+                    ShowHoverMarker(true);
+                    AudioManager.PlaySfx(Sfx.Shield, 0.7f, 1.4f);
+                    Haptics.Medium();
+                }
+                return;
+            }
+
+            if (!robot.IsAlive) { EndHover(); return; }
+            if (command.holdPosition.HasValue && TryScreenToGrid(command.holdPosition.Value, out var cell)) hoverTarget = cell;
+
+            hoverLeft -= Time.deltaTime;
+            hoverMarker.transform.position = GridView.ToWorld(hoverTarget) + Vector3.up * (GridView.SurfaceY + 0.03f);
+            float pulse = 1f + Mathf.Sin(Time.time * 10f) * 0.06f;
+            hoverMarker.transform.localScale = new Vector3(pulse, 1f, pulse);
+
+            if (command.holdEnd || hoverLeft <= 0f) EndHover();
+        }
+
+        private void EndHover()
+        {
+            hovering = false;
+            hoverCooldown = HoverCooldown;
+            ShowHoverMarker(false);
+            if (!robot.IsAlive) return;
+            var target = grid.IsStandable(hoverTarget) ? hoverTarget : SafeTileNear(robot.Position, hoverTarget);
+            robot.EndHover(target);
+            AudioManager.PlaySfx(Sfx.Hop, 0.7f, 0.8f);
+        }
+
+        private bool TryScreenToGrid(Vector2 screen, out GridPos cell)
+        {
+            var ray = cameraRig.Cam.ScreenPointToRay(screen);
+            var plane = new Plane(Vector3.up, new Vector3(0f, GridView.SurfaceY, 0f));
+            cell = default;
+            if (!plane.Raycast(ray, out float distance)) return false;
+            var hit = ray.GetPoint(distance);
+            cell = new GridPos(Mathf.Clamp(Mathf.RoundToInt(hit.x), 0, grid.Width - 1), Mathf.Clamp(Mathf.RoundToInt(hit.z), 0, grid.Height - 1));
+            return true;
+        }
+
+        private void ShowHoverMarker(bool on)
+        {
+            if (hoverMarker == null)
+            {
+                hoverMarker = Shapes.Rounded("HoverTarget", null, Vector3.zero, new Vector3(0.9f, 0.03f, 0.9f), 0.015f,
+                    MaterialFactory.CreateTransparent(new Color(0.6f, 0.95f, 1f, 0.45f), new Color(0.4f, 1.6f, 2f)));
+            }
+            hoverMarker.SetActive(on);
+        }
+
+        // ---------- Difficulty help ----------
+
+        private static string FailKey(int index) => "sb_fails_" + index;
+
+        /// <summary>After several failed attempts in a row, the level eases off a little so nobody gets stuck.</summary>
+        private bool ApplyAssist(LevelData data)
+        {
+            if (PlayerPrefs.GetInt(FailKey(levelIndex), 0) < FailsForAssist) return false;
+            data.warningTime *= 1.15f;
+            data.spawnInterval *= 1.12f;
+            data.blocksPerWave = Mathf.Max(1, data.blocksPerWave - 1);
+            data.bombChance *= 0.5f;
+            data.lineWaveChance *= 0.5f;
+            data.rampUp *= 0.6f;
+            return true;
+        }
+
+        /// <summary>Level banner: a newly unlocked feature gets introduced once, otherwise the mission.</summary>
+        private void ShowLevelIntro(bool assisted)
+        {
+            string feature = null;
+            if (World >= HoverFromWorld && !Seen("hover")) feature = "feature.hover";
+            else if (World >= FireFromWorld && !Seen("fire")) feature = "feature.fire";
+            else if (World >= RescueFromWorld && !Seen("rescue")) feature = "feature.rescue";
+
+            if (feature != null)
+            {
+                PlayerPrefs.SetInt("sb_seen_" + feature, 1);
+                ui.ShowIntro(Loc.T("feature.new"), Loc.T(feature));
+            }
+            else if (assisted)
+            {
+                ui.ShowIntro(Loc.T("assist.title"), MissionText(level, upper: true));
+            }
+            else
+            {
+                ui.ShowIntro(Loc.F("level", levelIndex + 1), MissionText(level, upper: true));
+            }
+
+            bool Seen(string key) => PlayerPrefs.GetInt("sb_seen_feature." + key, 0) == 1;
         }
 
         private void Update()
@@ -329,16 +531,23 @@ namespace SquashBot.Gameplay
             elapsed += Time.deltaTime;
 
             var command = input.Poll(robot.transform.position);
-            if (command.jump) robot.TryJump();
-            else if (command.move.HasValue) robot.TryMove(command.move.Value);
+            UpdateHover(command);
+            if (!hovering)
+            {
+                if (command.jump) robot.TryJump();
+                else if (command.move.HasValue) robot.TryMove(command.move.Value);
+            }
 
             ui.SetWarning(hazards.AnyWarningActive);
             ui.SetShield(robot.ShieldLeft, Mathf.Max(level.shieldDuration, ArmorDuration));
 
-            // Armor lets the robot hover over a hole; once it wears off, gravity wins.
-            if (robot.IsAlive && !robot.IsHopping && !robot.IsShielded && grid.GetTile(robot.Position) == TileState.Broken)
+            ui.SetRescues(RescueEnabled, rescues, coinsTowardRescue / (float)CoinsPerRescue);
+            ui.SetHover(HoverEnabled, hoverCooldown);
+
+            // Armor lets the robot stand over a hole or fire; once it wears off, gravity (or heat) wins.
+            if (robot.IsAlive && !robot.IsHopping && !robot.IsHovering && !robot.IsShielded && grid.IsGap(robot.Position))
             {
-                FallIntoHole();
+                StepIntoGap(robot.Position);
                 return;
             }
             RefreshHud();
@@ -353,9 +562,9 @@ namespace SquashBot.Gameplay
         {
             if (State != GameState.Playing) return;
 
-            if (grid.GetTile(p) == TileState.Broken && !robot.IsShielded)
+            if (grid.IsGap(p) && !robot.IsShielded)
             {
-                FallIntoHole();
+                StepIntoGap(p);
                 return;
             }
 
@@ -370,7 +579,7 @@ namespace SquashBot.Gameplay
             if (State != GameState.Playing) return;
             cameraRig.Punch(0.5f);
 
-            if (robot.IsAlive && robot.Position == p)
+            if (robot.IsAlive && !robot.IsHovering && robot.Position == p)
             {
                 if (robot.IsShielded)
                 {
@@ -381,6 +590,8 @@ namespace SquashBot.Gameplay
                     FloatAt(GridView.ToWorld(p), Loc.T("float.blocked"), Palette.UiCyan);
                     return;
                 }
+
+                if (TryRescue(p, crushed: true)) return;
 
                 robot.Squash();
                 cameraRig.Shake(1.2f);
@@ -400,11 +611,7 @@ namespace SquashBot.Gameplay
                 {
                     // Two narrow escapes earn a few seconds of armor.
                     closeCalls = 0;
-            jumpHintShown = false;
-                    robot.GiveShield(ArmorDuration);
-                    FloatAt(GridView.ToWorld(robot.Position), Loc.T("float.armor"), Palette.UiGold);
-                    AudioManager.PlaySfx(Sfx.Shield);
-                    Haptics.Medium();
+                    GiveArmor(ArmorDuration, robot.Position, Loc.T("float.armor"), Palette.UiGold);
                 }
                 else
                 {
@@ -430,6 +637,15 @@ namespace SquashBot.Gameplay
             coinsThisRun++;
             FloatAt(GridView.ToWorld(p), "+1", Palette.UiGold);
 
+            // Every few coins bank a rescue charge.
+            if (RescueEnabled && rescues < MaxRescues && ++coinsTowardRescue >= CoinsPerRescue)
+            {
+                coinsTowardRescue = 0;
+                rescues++;
+                FloatAt(GridView.ToWorld(p) + Vector3.up * 0.5f, Loc.T("float.rescueGain"), Palette.UiCyan);
+                AudioManager.PlaySfx(Sfx.Shield, 0.6f, 1.2f);
+            }
+
             if (level.mission == MissionType.CollectCoins && coinsThisRun >= level.coinTarget)
                 Win();
         }
@@ -439,11 +655,8 @@ namespace SquashBot.Gameplay
             switch (type)
             {
                 case PowerUpType.Shield:
-                    robot.GiveShield(level.shieldDuration);
-                    FloatAt(GridView.ToWorld(p), Loc.T("float.shield"), Palette.UiCyan);
+                    GiveArmor(level.shieldDuration, p, Loc.T("float.shield"), Palette.UiCyan);
                     cameraRig.Punch(1f);
-                    AudioManager.PlaySfx(Sfx.Shield);
-                    Haptics.Medium();
                     break;
             }
         }
@@ -463,6 +676,7 @@ namespace SquashBot.Gameplay
             hazards.Freeze();
             coins.Freeze();
             powerUps.Freeze();
+            if (hovering) { hovering = false; ShowHoverMarker(false); }
             robot.Cheer();
             cameraRig.SetStyle(CameraStyle.Victory);
             fx.Burst(robot.transform.position + Vector3.up * 0.6f, Palette.ShieldPickup, Palette.ShieldPickupGlow, 30, 6f);
@@ -471,6 +685,7 @@ namespace SquashBot.Gameplay
             Haptics.Medium();
 
             SaveData.Coins += coinsThisRun;
+            PlayerPrefs.DeleteKey(FailKey(levelIndex));
 
             // Only beating the newest level (unlocking the next one) refills lives; replays don't.
             bool unlockedNew = levelIndex >= SaveData.UnlockedLevel;
@@ -490,6 +705,9 @@ namespace SquashBot.Gameplay
             hazards.Freeze();
             coins.Freeze();
             powerUps.Freeze();
+
+            PlayerPrefs.SetInt(FailKey(levelIndex), PlayerPrefs.GetInt(FailKey(levelIndex), 0) + 1);
+            if (hovering) { hovering = false; ShowHoverMarker(false); }
 
             // Coins picked up are kept even on a loss, so every run feels worth it.
             SaveData.Coins += coinsThisRun;

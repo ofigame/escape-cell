@@ -12,7 +12,14 @@ namespace SquashBot.Gameplay
         public Direction? move;
         public bool jump;
 
-        public bool IsEmpty => !move.HasValue && !jump;
+        /// <summary>A press held still long enough (hover escape): fires once.</summary>
+        public bool holdStart;
+        /// <summary>Finger position while holding (screen pixels).</summary>
+        public Vector2? holdPosition;
+        /// <summary>The held finger was lifted.</summary>
+        public bool holdEnd;
+
+        public bool IsEmpty => !move.HasValue && !jump && !holdStart && !holdPosition.HasValue && !holdEnd;
     }
 
     /// <summary>
@@ -25,6 +32,7 @@ namespace SquashBot.Gameplay
         private const float SwipeThresholdInches = 0.11f; // small, so a short flick registers on the first frames of the drag
         private const float TapMaxDuration = 0.25f;
         private const float DoubleTapWindow = 0.35f;
+        private const float HoldTime = 0.3f;
 
         private readonly Camera cam;
         private bool tracking;
@@ -33,6 +41,10 @@ namespace SquashBot.Gameplay
         private Vector2 lastPos;
         private float pressTime;
         private float lastTapTime = -10f;
+        private bool holding;
+
+        /// <summary>Long-press detection is only on where the hover escape is unlocked, so it never steals slow swipes elsewhere.</summary>
+        public bool HoldEnabled { get; set; }
 
         public InputReader(Camera camera)
         {
@@ -66,6 +78,24 @@ namespace SquashBot.Gameplay
             }
 
             if (!tracking) return default;
+
+            if (holding)
+            {
+                if (pressed) return new InputCommand { holdPosition = pos };
+                holding = false;
+                tracking = false;
+                return new InputCommand { holdEnd = true, holdPosition = hasPointer ? pos : lastPos };
+            }
+
+            // Held still long enough: start a hover instead of a swipe or tap.
+            if (HoldEnabled && pressed && !consumed && Time.unscaledTime - pressTime >= HoldTime
+                && (pos - startPos).magnitude < SwipeThresholdInches * (Screen.dpi > 0 ? Screen.dpi : 160f))
+            {
+                holding = true;
+                consumed = true;
+                lastTapTime = -10f;
+                return new InputCommand { holdStart = true, holdPosition = pos };
+            }
 
             if (!pressed)
             {

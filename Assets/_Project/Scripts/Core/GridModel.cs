@@ -5,7 +5,9 @@ namespace SquashBot.Core
     public enum TileState
     {
         Solid,
-        Broken
+        Broken,
+        /// <summary>Burning for a few seconds, then solid again. Deadly to step on, can be jumped over.</summary>
+        Fire
     }
 
     /// <summary>
@@ -39,6 +41,9 @@ namespace SquashBot.Core
 
         /// <summary>A tile the robot can stand on right now: inside the grid, not broken, no block sitting on it.</summary>
         public bool IsStandable(GridPos p) => InBounds(p) && tiles[p.x, p.y] == TileState.Solid && !occupied[p.x, p.y];
+
+        /// <summary>A hole or a fire: deadly to land on, but the robot can leap over it.</summary>
+        public bool IsGap(GridPos p) => InBounds(p) && tiles[p.x, p.y] != TileState.Solid;
 
         public IEnumerable<GridPos> AllPositions()
         {

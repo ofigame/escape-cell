@@ -66,6 +66,9 @@ namespace SquashBot.UI
         private TextMeshProUGUI hudLevel, hudMission, hudBonus, shieldText;
         private Image hudFill, shieldFill;
         private RectTransform shieldPill;
+        private RectTransform rescuePill, hoverPill;
+        private TextMeshProUGUI rescueText, hoverText;
+        private Image rescueFill, hoverFace;
         private Image warnLeft, warnRight;
         private bool warningActive;
 
@@ -331,6 +334,22 @@ namespace SquashBot.UI
             UiFactory.Bar(shieldPill, Bottom, new Vector2(0f, 12f), new Vector2(360f, 12f), Palette.UiCyan, out shieldFill);
             shieldPill.gameObject.SetActive(false);
 
+            // Rescue charges (under the pause button): a life-ring icon, the count, and progress to the next one.
+            rescuePill = UiFactory.Pill("Rescue", t, TopLeft, new Vector2(36f, -176f), new Vector2(200f, 92f), UiFactory.PillColor);
+            var ring = UiFactory.Box("Ring", rescuePill, new Vector2(0f, 0.5f), new Vector2(18f, 6f), new Vector2(54f, 54f));
+            UiFactory.Fill(ring, Palette.UiCyan, UiSprites.Ring, 0.25f).raycastTarget = false;
+            var core = UiFactory.Box("Core", ring, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(20f, 20f));
+            UiFactory.Fill(core, Palette.UiCyan, UiSprites.Circle).raycastTarget = false;
+            rescueText = UiFactory.TextBox("Count", rescuePill, new Vector2(0f, 0.5f), new Vector2(84f, 6f), new Vector2(100f, 60f), "", 44f, Palette.UiText, align: TextAlignmentOptions.Left);
+            UiFactory.Bar(rescuePill, new Vector2(0.5f, 0f), new Vector2(0f, 10f), new Vector2(160f, 8f), Palette.UiGold, out rescueFill);
+            rescuePill.gameObject.SetActive(false);
+
+            // Hover escape status (bottom centre).
+            hoverPill = UiFactory.Pill("Hover", t, Bottom, new Vector2(0f, 60f), new Vector2(480f, 96f), UiFactory.PillColor);
+            hoverFace = hoverPill.GetComponent<Image>();
+            hoverText = UiFactory.Text(hoverPill, "", 42f, Palette.UiText);
+            hoverPill.gameObject.SetActive(false);
+
             warnLeft = WarningBar(t, new Vector2(0f, 0.5f), new Vector2(12f, 0f));
             warnRight = WarningBar(t, new Vector2(1f, 0.5f), new Vector2(-12f, 0f));
         }
@@ -377,6 +396,26 @@ namespace SquashBot.UI
         }
 
         public void SetWarning(bool active) => warningActive = active;
+
+        /// <summary>Rescue charges; hidden in worlds where they are not unlocked yet.</summary>
+        public void SetRescues(bool enabled, int count, float progress)
+        {
+            if (rescuePill.gameObject.activeSelf != enabled) rescuePill.gameObject.SetActive(enabled);
+            if (!enabled) return;
+            rescueText.text = "x" + count;
+            UiFactory.SetBar(rescueFill, progress);
+        }
+
+        /// <summary>Hover escape status: ready (bright) or cooling down (dim with a countdown).</summary>
+        public void SetHover(bool enabled, float cooldown)
+        {
+            if (hoverPill.gameObject.activeSelf != enabled) hoverPill.gameObject.SetActive(enabled);
+            if (!enabled) return;
+            bool ready = cooldown <= 0f;
+            hoverText.text = ready ? Loc.T("hud.hoverReady") : Loc.F("hud.hoverCooldown", Mathf.CeilToInt(cooldown));
+            hoverText.color = ready ? Palette.UiCyan : new Color(1f, 1f, 1f, 0.45f);
+            hoverFace.color = ready ? new Color(0.14f, 0.3f, 0.45f, 0.85f) : UiFactory.PillColor;
+        }
 
         // ---------- Intro banner ----------
 

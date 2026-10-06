@@ -20,6 +20,7 @@ namespace SquashBot.Gameplay
             public Material frame;
             public float warning;
             public float pop = 1f;
+            public GameObject fire;
         }
 
         private TileView[,] tiles;
@@ -104,6 +105,23 @@ namespace SquashBot.Gameplay
             t.pop = 0f;
         }
 
+        /// <summary>The tile catches fire: glowing embers and rising flames until <see cref="Extinguish"/>.</summary>
+        public void Ignite(GridPos p)
+        {
+            var t = tiles[p.x, p.y];
+            if (t.fire == null) t.fire = Flames.Create(t.tile.transform.parent);
+            t.fire.SetActive(true);
+            fx.Burst(t.tile.transform.position + Vector3.up * 0.2f, new Color(1f, 0.55f, 0.2f), new Color(2.4f, 0.9f, 0.15f), 12, 3f);
+        }
+
+        public void Extinguish(GridPos p)
+        {
+            var t = tiles[p.x, p.y];
+            if (t.fire != null) t.fire.SetActive(false);
+            fx.Burst(t.tile.transform.position + Vector3.up * 0.2f, new Color(0.6f, 0.6f, 0.65f), Color.black, 8, 1.5f);
+            t.pop = 0.4f;
+        }
+
         private void LateUpdate()
         {
             if (tiles == null) return;
@@ -111,6 +129,16 @@ namespace SquashBot.Gameplay
             foreach (var t in tiles)
             {
                 if (!t.tile.activeSelf) continue;
+
+                if (t.fire != null && t.fire.activeSelf)
+                {
+                    // Glowing embers that breathe with the flames.
+                    float heat = 0.75f + 0.25f * Mathf.Sin(Time.time * 9f);
+                    MaterialFactory.SetColors(t.top, new Color(1f, 0.45f, 0.18f), new Color(1.8f, 0.55f, 0.08f) * heat);
+                    MaterialFactory.SetColors(t.frame, new Color(1f, 0.6f, 0.2f), new Color(2.4f, 0.9f, 0.15f) * heat);
+                    t.warning = 0f;
+                    continue;
+                }
 
                 MaterialFactory.SetColors(t.top,
                     Color.Lerp(Palette.TileTop, Palette.TileWarningTop, t.warning),
