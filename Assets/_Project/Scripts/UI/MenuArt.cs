@@ -9,11 +9,11 @@ namespace SquashBot.UI
 {
     /// <summary>
     /// The main menu's showpieces: the chunky 3D logo, the bright shortcut tiles (garage, shop, map) with little
-    /// drawn icons, and the city mode card that stands on its own.
+    /// drawn icons.
     /// </summary>
     public static class MenuArt
     {
-        public enum Icon { Garage, Shop, Map, City }
+        public enum Icon { Garage, Shop, Map }
 
         /// <summary>"ESCAPE CELL" in the display font: a dark extruded back, a bright gradient face with a thick outline.</summary>
         public static void Logo(Transform parent, Vector2 anchor, Vector2 position)
@@ -139,18 +139,6 @@ namespace SquashBot.UI
                     Part(box, c, new Vector2(0f, s * 0.02f), new Vector2(s * 0.34f, s * 0.34f), Color.white, UiSprites.Rounded, 45f);
                     Part(box, c, new Vector2(0f, s * 0.2f), new Vector2(s * 0.56f, s * 0.56f), Color.white, UiSprites.Circle);
                     Part(box, c, new Vector2(0f, s * 0.2f), new Vector2(s * 0.24f, s * 0.24f), dark, UiSprites.Circle);
-                    break;
-                case Icon.City:
-                    // A little skyline with lit windows.
-                    float[] heights = { 0.5f, 0.86f, 0.64f, 0.98f, 0.56f };
-                    for (int i = 0; i < heights.Length; i++)
-                    {
-                        float x = (i - 2) * s * 0.19f, h = heights[i] * s * 0.9f;
-                        Part(box, new Vector2(0.5f, 0f), new Vector2(x, h * 0.5f), new Vector2(s * 0.17f, h), Color.white, UiSprites.Rounded);
-                        for (int w = 0; w < (int)(h / (s * 0.17f)); w++)
-                            Part(box, new Vector2(0.5f, 0f), new Vector2(x, s * 0.1f + w * s * 0.16f), new Vector2(s * 0.07f, s * 0.07f), (i + w) % 3 == 0 ? Palette.UiGold : dark, UiSprites.Rounded);
-                    }
-                    Part(box, new Vector2(0.5f, 0f), new Vector2(0f, s * 0.02f), new Vector2(s * 1.04f, s * 0.06f), Color.white, UiSprites.Rounded);
                     break;
             }
         }

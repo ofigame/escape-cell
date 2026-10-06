@@ -17,7 +17,7 @@ namespace SquashBot.Data
         /// <summary>Starts a new day when the date moved forward. A clock turned back gets no new plays.</summary>
         private static void Roll()
         {
-            string today = CityClock.Today;
+            string today = GameClock.Today;
             string day = PlayerPrefs.GetString(DayKey, "");
             if (string.CompareOrdinal(today, day) <= 0) return;
             PlayerPrefs.SetString(DayKey, today);
@@ -80,7 +80,7 @@ namespace SquashBot.Data
         public static BonusGame[] TodaysGames()
         {
             var pool = SeenGames();
-            var rng = new System.Random(int.Parse(CityClock.Today));
+            var rng = new System.Random(int.Parse(GameClock.Today));
             for (int i = pool.Count - 1; i > 0; i--)
             {
                 int j = rng.Next(i + 1);

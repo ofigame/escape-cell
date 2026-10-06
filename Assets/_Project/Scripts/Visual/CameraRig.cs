@@ -17,9 +17,7 @@ namespace SquashBot.Visual
         /// <summary>Slow continuous orbit behind the menus.</summary>
         MenuOrbit,
         /// <summary>A celebratory sweep around the platform.</summary>
-        Victory,
-        /// <summary>No sway at all (building in the city: the cell under the finger must stay put).</summary>
-        Still
+        Victory
     }
 
     /// <summary>
@@ -69,8 +67,6 @@ namespace SquashBot.Visual
         private Vector3 chasePosition;
         private Quaternion chaseRotation;
         private float menuFocusTarget;
-        private Vector3 userPan;
-        private float userZoom = 1f;
 
         public static CameraRig Create(ViewMode mode)
         {
@@ -182,16 +178,7 @@ namespace SquashBot.Visual
             gridWidth = width;
             gridHeight = height;
             followTarget = null;
-            userPan = Vector3.zero;
-            userZoom = 1f;
             Refit();
-        }
-
-        /// <summary>Player-controlled panning (world units on the ground) and zoom (<1 = closer), reset by <see cref="Frame"/>.</summary>
-        public void SetUserView(Vector3 pan, float zoom)
-        {
-            userPan = new Vector3(pan.x, 0f, pan.z);
-            userZoom = zoom;
         }
 
         /// <summary>The camera's current pose (for blending into a chase view).</summary>
@@ -372,7 +359,7 @@ namespace SquashBot.Visual
         private void Apply()
         {
             float intro = 1f - EaseOutCubic(introT);
-            float sway = style == CameraStyle.Gameplay ? 1f : style == CameraStyle.Still ? 0f : 0.4f;
+            float sway = style == CameraStyle.Gameplay ? 1f : 0.4f;
 
             float yaw = BaseYaw + orbitYaw + intro * 70f + Mathf.Sin(time * 0.35f) * 6f * sway;
             float pitch = BasePitch + intro * 25f + Mathf.Sin(time * 0.27f) * 1.5f * sway;
@@ -381,8 +368,7 @@ namespace SquashBot.Visual
             // Zoom: >1 shows more. Intro starts wide, punches and focus lean in.
             float focus = focusDuration > 0f ? Mathf.Sin(Mathf.Clamp01(focusTime / focusDuration) * Mathf.PI) : 0f;
             float zoom = (1f + intro * 0.7f) * (1f - punch * 0.06f) * (1f - focus * 0.12f);
-            var target = Vector3.Lerp(center + userPan, focusPoint, focus * 0.25f);
-            zoom *= userZoom;
+            var target = Vector3.Lerp(center, focusPoint, focus * 0.25f);
             float ease = showcase * showcase * (3f - 2f * showcase);
             if (ease > 0.001f && showcaseSubject != null)
             {

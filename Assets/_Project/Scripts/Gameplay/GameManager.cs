@@ -57,11 +57,7 @@ namespace SquashBot.Gameplay
         private DuctRunner runner;
         private FloorRules floorRules;
         private LevelEvents levelEvents;
-        private CityController city;
         private bool dailyRun;      // a daily bonus game (not a level's bonus round)
-        private bool returnToCity;  // ...started at the training ground
-        private float toolCredit;   // the workshop's extra tool recharges
-        private const int CityWorld = 1; // the city by the sea wears the sunset colours
 
         private GridModel grid;
         private LevelData level;
@@ -180,12 +176,6 @@ namespace SquashBot.Gameplay
             floorRules.Init(gridView, robot, hazards, fx, cameraRig);
             floorRules.Hit += OnBlockImpact;
 
-            city = new GameObject("CityMode").AddComponent<CityController>();
-            city.Init(robot, gridView, cameraRig, fx);
-            city.Floated += (at, text, color) => FloatAt(at, text, color);
-            city.CoinFlown += at => ui.FlyCoin(cameraRig.Cam.WorldToScreenPoint(at));
-            city.TrainingPressed += () => ui.DailyBonus.Show();
-
             levelEvents = new GameObject("LevelEvents").AddComponent<LevelEvents>();
             levelEvents.Init(robot, coins, hazards, fx, cameraRig);
             levelEvents.CrateOpened += OnCrateOpened;
@@ -220,8 +210,6 @@ namespace SquashBot.Gameplay
             ui.GaragePressed += ShowGarage;
             ui.ShopPressed += ShowShop;
             ui.DailyPressed += ClaimDaily;
-            ui.CityPressed += ShowCity;
-            city.SetScreen(ui.City);
             ui.DailyBonusPressed += () => ui.DailyBonus.Show();
             ui.DailyBonus.PlayPressed += PlayDailyBonus;
             ui.DailyBonus.AdPressed += WatchAdForDailyBonus;
@@ -229,8 +217,7 @@ namespace SquashBot.Gameplay
             ui.Garage.DancePreview += robot.Cheer;
             ui.NextPressed += () =>
             {
-                if (dailyRun && returnToCity) ShowCity();
-                else if (dailyRun) ShowMenu();
+                if (dailyRun) ShowMenu();
                 else if (bonusRun) ShowMap();
                 else ShowMap(animateFrom: levelIndex);
             };
@@ -303,7 +290,6 @@ namespace SquashBot.Gameplay
             floorRules.Stop();
             hazards.Hunting = false;
             levelEvents.Stop();
-            city.Close();
             cameraRig.FrameUpper(0f, 1f);
             HideTools();
         }
@@ -359,26 +345,7 @@ namespace SquashBot.Gameplay
             cameraRig.SetMenuFocus(false);
         }
 
-        /// <summary>City mode: the neighbourhood the rescued robots live in, built and cared for with coins.</summary>
-        private void ShowCity()
-        {
-            if (!City.Open)
-            {
-                ui.ShowIntro(Loc.T("city.modeTitle"), Loc.T("city.locked"));
-                return;
-            }
-            ResetRun();
-            State = GameState.Menu;
-            // The city by the sea wears its own colours; the robot keeps its current look.
-            WorldTheme.SetCurrent(CityWorld);
-            themeWorld = -1;
-            RenderSettings.ambientLight = Palette.Ambient * 0.8f;
-            cameraRig.RefreshTheme();
-            ui.ShowCity();
-            city.Open();
-        }
-
-        /// <summary>A daily bonus play: the chosen game (training ground) or the day's next one.</summary>
+        /// <summary>A daily bonus play: the day's next game (or a given one).</summary>
         private void PlayDailyBonus(BonusGame? chosen)
         {
             var game = chosen ?? DailyBonus.NextGame();
@@ -387,7 +354,6 @@ namespace SquashBot.Gameplay
                 ui.DailyBonus.Refresh();
                 return;
             }
-            returnToCity = city.Active;
             ui.DailyBonus.Hide();
             bonusRun = true;
             dailyRun = true;
@@ -1308,17 +1274,6 @@ namespace SquashBot.Gameplay
         /// <summary>A close call or a combo tops up an empty tool (not trials).</summary>
         private void RechargeTool()
         {
-            RechargeOnce();
-            // The city's workshop: every tenth recharge brings an extra one.
-            if (!City.PerkActive(CityPerk.Workshop)) return;
-            toolCredit += 0.1f;
-            if (toolCredit < 1f) return;
-            toolCredit -= 1f;
-            RechargeOnce();
-        }
-
-        private void RechargeOnce()
-        {
             for (int s = 0; s < 2; s++)
             {
                 if (!toolSlot[s].HasValue || (trialSlot && s == 0)) continue;
@@ -1459,10 +1414,7 @@ namespace SquashBot.Gameplay
 
             // Stars: how well the level went. New stars fill the bonus meter.
             int stars = StarRules.Evaluate(starGoals, coinsThisRun, elapsed);
-            bool firstWin = Progress.Stars(levelIndex) == 0;
             int unlockedBonus = Progress.Award(levelIndex, stars, out _);
-            // Beating a floor's WARDEN for the first time frees a cellmate, who moves into the city.
-            int freed = firstWin ? Residents.FreedBy(levelIndex) : -1;
             bool surprise = false;
             if (unlockedBonus == 0 && unlockedNew && levelIndex + 1 >= SurpriseFromLevel && Progress.BonusTokens == 0 && Random.value < SurpriseBonusChance)
             {
@@ -1473,8 +1425,7 @@ namespace SquashBot.Gameplay
             pendingEnding = levelIndex == LevelCount - 1 && !Story.Seen(Story.Ending);
             bool hasNext = levelIndex + 1 < LevelCount;
             bool newWorld = unlockedNew && hasNext && (levelIndex + 1) % LevelCatalog.LevelsPerWorld == 0;
-            string note = freed >= 0 ? Loc.F("city.freed", Residents.Names[freed])
-                : surprise ? Loc.T("bonus.surprise")
+            string note = surprise ? Loc.T("bonus.surprise")
                 : unlockedBonus > 0 ? Loc.T("bonus.ready")
                 : stars < 3 ? StarHint(stars)
                 : Loc.T("star.max");

@@ -11,7 +11,7 @@ namespace SquashBot.UI
 {
     /// <summary>
     /// The guide: every feature of the game explained in a sentence or two, grouped by topic. Opens from the menu's "?"
-    /// button, and from the "?" on the shop, garage, map and city screens straight at their own topic.
+    /// button, and from the "?" on the shop, garage and map screens straight at their own topic.
     /// Texts are Loc keys "guide.&lt;topic&gt;.t" (title) and "guide.&lt;topic&gt;.b" (body).
     /// </summary>
     public class GuideScreen : MonoBehaviour
@@ -23,7 +23,6 @@ namespace SquashBot.UI
             "#floors", "rules", "boss", "events", "tools",
             "#bonus", "bonus", "tunnels", "daily", "chest",
             "#shop", "shop", "goal", "garage", "map",
-            "#city", "city", "cityBuild", "cityWalk", "cityCare", "cityWishes", "cityPerks",
         };
 
         public event Action BackPressed;

@@ -44,7 +44,6 @@ namespace SquashBot.UI
         public event Action ContinuePressed;
         public event Action DoublePressed;
         public event Action GaragePressed;
-        public event Action CityPressed;
         public event Action DailyBonusPressed;
         public event Action ShopPressed;
         public event Action DailyPressed;
@@ -77,8 +76,7 @@ namespace SquashBot.UI
         // Menu
         private UiScreen menu;
         private TextMeshProUGUI menuLevel, menuWorld, menuMission, menuCoins, menuLives, menuStars;
-        private Button menuDaily, menuBonus, menuCity;
-        private TextMeshProUGUI menuCityLock;
+        private Button menuDaily, menuBonus;
         private TextMeshProUGUI menuBonusLabel;
 
         // Before-level card
@@ -152,7 +150,6 @@ namespace SquashBot.UI
         public StoryScreen Story { get; private set; }
         public ShopScreen Shop { get; private set; }
         public GarageScreen Garage { get; private set; }
-        public CityScreen City { get; private set; }
         public GuideScreen Guide { get; private set; }
         public DailyBonusScreen DailyBonus { get; private set; }
 
@@ -197,9 +194,6 @@ namespace SquashBot.UI
             Story = StoryScreen.Create(root);
             Shop = ShopScreen.Create(root);
             Garage = GarageScreen.Create(root);
-            City = CityScreen.Create(root);
-            City.BackPressed += () => MenuPressed?.Invoke();
-            City.HelpPressed += () => Guide.Show("city");
             DailyBonus = DailyBonusScreen.Create(root);
             Guide = GuideScreen.Create(root);
             Guide.BackPressed += Guide.Hide;
@@ -254,13 +248,6 @@ namespace SquashBot.UI
                 .transform.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
             MenuArt.Tile(row, Loc.T("btn.map"), MenuArt.Icon.Map, new Color(0.42f, 0.36f, 0.88f), new Vector2(1f, 0.5f), Vector2.zero, new Vector2(288f, 200f), () => PlayPressed?.Invoke());
 
-            // City mode stands on its own, beside the robot.
-            menuCity = MenuArt.Tile(t, Loc.T("btn.cityMode"), MenuArt.Icon.City, new Color(0.96f, 0.36f, 0.42f), new Vector2(1f, 0f), new Vector2(-40f, Ads.BannerReserve + 910f), new Vector2(250f, 300f), () => CityPressed?.Invoke(), 38f);
-            menuCity.gameObject.AddComponent<Pulse>();
-            var lockPill = UiFactory.Pill("Lock", menuCity.transform, new Vector2(0.5f, 0f), new Vector2(0f, -54f), new Vector2(250f, 50f), UiFactory.PillColor);
-            lockPill.pivot = new Vector2(0.5f, 0f);
-            menuCityLock = UiFactory.Text(lockPill, Loc.T("city.lockShort"), 24f, Palette.UiText);
-
             // Level card with the big PLAY button.
             var card = UiFactory.Card("LevelCard", t, Bottom, new Vector2(0f, Ads.BannerReserve + 50f), new Vector2(900f, 460f));
             menuWorld = UiFactory.TextBox("World", card, Top, new Vector2(0f, -30f), new Vector2(820f, 56f), "", 32f, Palette.UiCyan);
@@ -312,10 +299,6 @@ namespace SquashBot.UI
             menuCoins.text = coins.ToString();
             menuStars.text = Progress.TotalStars(levelCount).ToString();
             menuDaily.gameObject.SetActive(DailyChest.Ready);
-            bool cityOpen = Data.City.Open;
-            menuCityLock.transform.parent.gameObject.SetActive(!cityOpen);
-            menuCity.GetComponent<Pulse>().enabled = cityOpen;
-            if (!cityOpen) menuCity.transform.localScale = Vector3.one;
             RefreshDailyBonus();
             RefreshLives();
         }
@@ -332,13 +315,6 @@ namespace SquashBot.UI
             HideAll();
             SetBanner(true);
             Shop.Show();
-        }
-
-        /// <summary>Clears the other screens for the city (its own screen is shown by the city controller).</summary>
-        public void ShowCity()
-        {
-            HideAll();
-            SetBanner(false);
         }
 
         public void ShowGarage(int worldReached)
@@ -789,7 +765,7 @@ namespace SquashBot.UI
             // Longer messages stay up longer.
             introHold = Mathf.Clamp(1.7f + (text?.Length ?? 0) / 30f, 1.7f, 4f);
             intro.gameObject.SetActive(true);
-            // Always in front: menus built after the banner (the logo, the city card) must not cover it.
+            // Always in front: menus built after the banner (the logo) must not cover it.
             intro.SetAsLastSibling();
         }
 
@@ -1050,7 +1026,6 @@ namespace SquashBot.UI
             Story.Hide();
             Shop.Hide();
             Garage.Hide();
-            City.Hide();
             DailyBonus.Hide();
             Guide.Hide();
             prelevel.Hide(true);

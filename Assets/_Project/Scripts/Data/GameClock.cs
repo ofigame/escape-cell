@@ -4,10 +4,10 @@ using UnityEngine;
 namespace SquashBot.Data
 {
     /// <summary>
-    /// Wall-clock time for the city and the daily bonus, guarded against the simplest cheat: when the device clock
+    /// Wall-clock time for the daily bonus, guarded against the simplest cheat: when the device clock
     /// goes backwards, time stands still at the latest moment seen instead of running again.
     /// </summary>
-    public static class CityClock
+    public static class GameClock
     {
         private const string Key = "sb_clock_max";
         private static long max = -1;
@@ -33,17 +33,5 @@ namespace SquashBot.Data
 
         /// <summary>Seconds until local midnight.</summary>
         public static int SecondsToMidnight => (int)(DateTime.Today.AddDays(1) - DateTime.Now).TotalSeconds;
-
-        /// <summary>Evening and night (19:00-07:00, device time): lamps and signs light up.</summary>
-        public static bool IsNight
-        {
-            get
-            {
-                int force = PlayerPrefs.GetInt("sb_force_night", -1);
-                if (force >= 0) return force == 1;
-                int h = DateTime.Now.Hour;
-                return h >= 19 || h < 7;
-            }
-        }
     }
 }

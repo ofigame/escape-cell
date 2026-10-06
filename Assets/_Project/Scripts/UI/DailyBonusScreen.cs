@@ -11,12 +11,11 @@ namespace SquashBot.UI
 {
     /// <summary>
     /// The daily bonus card: today's three games (ticked off as they are played), the PLAY button with the plays left,
-    /// the once-a-day ad for one more, and a countdown to tomorrow's plays. With a training ground in the city
-    /// the player picks the game type instead.
+    /// the once-a-day ad for one more, and a countdown to tomorrow's plays.
     /// </summary>
     public class DailyBonusScreen : MonoBehaviour
     {
-        /// <summary>Play: the chosen game (training ground) or null for the day's next one.</summary>
+        /// <summary>Play: null for the day's next game.</summary>
         public event Action<BonusGame?> PlayPressed;
         public event Action AdPressed;
 
@@ -24,7 +23,6 @@ namespace SquashBot.UI
         private TextMeshProUGUI subtitle, countdown, playLabel;
         private Button play, ad;
         private readonly TextMeshProUGUI[] rows = new TextMeshProUGUI[DailyBonus.FreePlays];
-        private RectTransform choices;
         private float tick;
 
         public static DailyBonusScreen Create(Transform canvasRoot)
@@ -53,8 +51,6 @@ namespace SquashBot.UI
                 rows[i] = UiFactory.TextBox("Text", row, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(740f, 90f), "", 38f, Palette.UiText);
                 rows[i].rectTransform.pivot = new Vector2(0.5f, 0.5f);
             }
-            choices = UiFactory.Box("Choices", card, new Vector2(0.5f, 1f), new Vector2(0f, -640f), new Vector2(820f, 110f));
-            UiFactory.TextBox("Label", choices, new Vector2(0.5f, 1f), new Vector2(0f, 40f), new Vector2(820f, 44f), Loc.T("daily.pick"), 28f, Palette.UiCyan, FontStyles.Normal);
 
             play = UiFactory.MakeButton(card, "", Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 250f), new Vector2(620f, 150f), () => PlayPressed?.Invoke(null), 60f);
             playLabel = play.GetComponentInChildren<TextMeshProUGUI>();
@@ -85,25 +81,10 @@ namespace SquashBot.UI
                 rows[i].color = done ? new Color(1f, 1f, 1f, 0.4f) : Palette.UiText;
             }
             int left = DailyBonus.Left;
-            bool training = City.PerkActive(CityPerk.Training);
-            subtitle.text = Loc.F("daily.left", left, DailyBonus.FreePlays) + (training ? "\n" + Loc.T("daily.trainingOn") : "");
+            subtitle.text = Loc.F("daily.left", left, DailyBonus.FreePlays);
             play.gameObject.SetActive(left > 0);
             playLabel.text = Loc.F("daily.play", left);
             ad.gameObject.SetActive(left == 0 && DailyBonus.CanWatchAd);
-
-            // Training ground: one button per game type met so far.
-            for (int i = choices.childCount - 1; i >= 1; i--) Destroy(choices.GetChild(i).gameObject);
-            choices.gameObject.SetActive(training && left > 0);
-            if (training && left > 0)
-            {
-                var seen = DailyBonus.SeenGames();
-                float w = 820f / seen.Count;
-                for (int i = 0; i < seen.Count; i++)
-                {
-                    var g = seen[i];
-                    UiFactory.MakeButton(choices, Loc.T("bonusGame." + g), Kind.Secondary, new Vector2(0f, 0.5f), new Vector2(i * w, 0f), new Vector2(w - 12f, 100f), () => PlayPressed?.Invoke(g), 28f);
-                }
-            }
             UpdateCountdown();
         }
 
@@ -111,7 +92,7 @@ namespace SquashBot.UI
         {
             int left = DailyBonus.Left;
             if (left > 0) { countdown.text = ""; return; }
-            var t = TimeSpan.FromSeconds(CityClock.SecondsToMidnight);
+            var t = TimeSpan.FromSeconds(GameClock.SecondsToMidnight);
             countdown.text = Loc.F("daily.tomorrow", t.Hours.ToString("00") + ":" + t.Minutes.ToString("00") + ":" + t.Seconds.ToString("00"));
         }
 
