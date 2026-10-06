@@ -374,6 +374,9 @@ namespace SquashBot.EditorTools
             PlayerSettings.iOS.targetOSVersionString = "15.0";
             PlayerSettings.iOS.buildNumber = "1";
             PlayerSettings.iOS.appleEnableAutomaticSigning = false; // the cloud build compiles unsigned; signing happens at install time
+            // Less code for IL2CPP to convert: keeps the cloud runner's memory in check (exit code 137 = out of memory).
+            PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.iOS, ManagedStrippingLevel.Medium);
+            PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.iOS, Il2CppCodeGeneration.OptimizeSize);
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             PlayerSettings.colorSpace = ColorSpace.Linear;
 

@@ -147,7 +147,7 @@ namespace SquashBot.Gameplay
                 case "neon": // a last-second dodge as a block slams down beside the robot
                     return new Design
                     {
-                        theme = 3, robotWorld = 3, pitch = 22f, halfHeight = 0.58f, focusOffset = new Vector3(0.18f, 0.66f, -0.22f),
+                        theme = 3, robotWorld = 13, pitch = 22f, halfHeight = 0.58f, focusOffset = new Vector3(0.18f, 0.66f, -0.22f),
                         background = BackgroundArt.Radial(Size, Hex("#5B3FD0"), Hex("#120A35"), new Vector2(0.5f, 0.5f), 60, Hex("#FFB8F5")),
                         burst = true,
                         dress = (robot, props) =>
@@ -165,20 +165,16 @@ namespace SquashBot.Gameplay
 
         // ---------- Robot styling ----------
 
-        /// <summary>Rosy cheeks, a little smile and bigger eyes: friendlier for kids.</summary>
+        /// <summary>A wide, confident grin and big eyes: friendly and lively without looking cutesy.</summary>
         private static void CuteFace(Robot robot)
         {
             var visual = robot.transform.Find("Lift/Visual");
-            var blush = MaterialFactory.Create(Hex("#FF8FB1"), new Color(0.9f, 0.25f, 0.4f));
-            var mouth = MaterialFactory.Create(Hex("#2A2F48"), Color.black);
-            foreach (float x in new[] { -0.155f, 0.155f })
-                Shapes.Primitive(PrimitiveType.Sphere, "Cheek", visual, new Vector3(x, 0.355f, 0.222f), new Vector3(0.08f, 0.045f, 0.02f), blush);
-
-            Shapes.Rounded("Smile", visual, new Vector3(0f, 0.335f, 0.226f), new Vector3(0.07f, 0.02f, 0.012f), 0.008f, mouth);
-            Shapes.Rounded("SmileL", visual, new Vector3(-0.045f, 0.345f, 0.226f), new Vector3(0.035f, 0.02f, 0.012f), 0.008f, mouth)
-                .transform.localRotation = Quaternion.Euler(0f, 0f, -35f);
-            Shapes.Rounded("SmileR", visual, new Vector3(0.045f, 0.345f, 0.226f), new Vector3(0.035f, 0.02f, 0.012f), 0.008f, mouth)
-                .transform.localRotation = Quaternion.Euler(0f, 0f, 35f);
+            var mouth = MaterialFactory.Create(Hex("#232842"), Color.black);
+            Shapes.Rounded("Grin", visual, new Vector3(0f, 0.33f, 0.226f), new Vector3(0.12f, 0.026f, 0.012f), 0.01f, mouth);
+            Shapes.Rounded("GrinL", visual, new Vector3(-0.072f, 0.344f, 0.226f), new Vector3(0.045f, 0.026f, 0.012f), 0.01f, mouth)
+                .transform.localRotation = Quaternion.Euler(0f, 0f, -38f);
+            Shapes.Rounded("GrinR", visual, new Vector3(0.072f, 0.344f, 0.226f), new Vector3(0.045f, 0.026f, 0.012f), 0.01f, mouth)
+                .transform.localRotation = Quaternion.Euler(0f, 0f, 38f);
 
             foreach (var eye in new[] { "EyeL", "EyeR" })
             {
