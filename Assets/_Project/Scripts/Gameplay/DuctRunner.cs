@@ -8,27 +8,38 @@ using UnityEngine;
 namespace SquashBot.Gameplay
 {
     /// <summary>
-    /// Bonus mode "escape tunnel": the robot sprints down an air duct seen from behind (third person).
-    /// Swipe left / right to change lanes, tap or swipe up to jump over holes, dodge the blocks that drop
-    /// ahead, grab coins, and reach the exit vent at the end. Built from code like the rest of the game:
-    /// the whole course is planned up front (seeded), and rows are built a little ahead and removed behind.
+    /// Bonus mode "escape tunnel": the robot sprints down a winding course seen from behind (third person).
+    /// Swipe left / right to change lanes; tap to hop, swipe up and keep holding to jump higher and further;
+    /// swipe down to slide under bars. Dodge dropping and lane-switching blocks, clear hurdles, ride jump pads,
+    /// grab coins, magnets and shields, and reach the exit at the end.
+    ///
+    /// The course is planned in "track space" (lane offset x, height y, distance z along the course) and bent onto
+    /// a curve with turns and hills only when it is drawn, so all the running rules stay simple. Rows are built
+    /// a little ahead and removed behind.
     /// </summary>
     public class DuctRunner : MonoBehaviour
     {
-        public const float TrackLength = 190f;
+        public const float TrackLength = 320f;
         private const int Lanes = 3;
         private const float LaneWidth = 1.1f;
-        private const float SpeedStart = 5.2f;
-        private const float SpeedEnd = 8.2f;
-        private const float JumpVelocity = 6.2f;
+        private const float SpeedStart = 5.4f;
+        private const float SpeedEnd = 9.2f;
+        // Jumping: a tap is a hop that clears a two-row hole or a hurdle; holding the finger down after a swipe up
+        // (or holding space) softens gravity for a moment, so the jump goes higher and further.
+        private const float JumpVelocity = 5.8f;
         private const float Gravity = 17f;
+        private const float HoldGravity = 0.36f;
+        private const float MaxHold = 0.34f;
+        private const float PadVelocity = 10.5f;
+        private const float SlideTime = 0.75f;
         private const float LaneSpeed = 10f;
-        private const int BuildAhead = 42;
+        private const int BuildAhead = 46;
         private const float StartDelay = 1.3f;
-        private const float BlockDropDistance = 9f;
+        private const float BlockDropDistance = 10f;
         private const float CoyoteDepth = -0.3f;
         private const float FallDepth = -0.6f;
         private const float WallX = 1.5f * LaneWidth + 0.3f;
+        private const float MagnetTime = 8f;
 
         /// <summary>A coin was grabbed at this world position.</summary>
         public event Action<Vector3> CoinCollected;
@@ -36,21 +47,25 @@ namespace SquashBot.Gameplay
         public event Action<bool, int> Finished;
         /// <summary>The robot took the risky gate (for a heads-up).</summary>
         public event Action RiskTaken;
+        /// <summary>Something worth a floating word happened (Loc key, world position): magnet, shield, saved by the shield.</summary>
+        public event Action<string, Vector3> Notice;
 
         /// <summary>The flavours of bonus tunnel: same running and lanes, different world and rules.</summary>
         public enum Kind { Duct, Surf, Mine }
 
         public const int SafeBonus = 10, RiskBonus = 30;
-        private const int RiskLength = 34;
+        private const int RiskLength = 40;
         private Kind kind;
         private bool risky;
-        private Transform ride;
+        private Transform ride, bubble;
         private readonly HashSet<(int, int)> ramps = new HashSet<(int, int)>();
         private int GateRow => Mathf.CeilToInt(TrackLength);
 
         /// <summary>The tunnel owns the robot, camera and input (from Begin until Stop).</summary>
         public bool Active { get; private set; }
         public int Coins { get; private set; }
+        /// <summary>Test hooks: nothing ends the run (screenshots of the whole course).</summary>
+        public static bool TestInvulnerable;
         public float Progress => Mathf.Clamp01(z / TrackLength);
 
         private Robot robot;
@@ -61,13 +76,31 @@ namespace SquashBot.Gameplay
         private readonly List<(Transform t, Vector3 pos, Quaternion rot)> limbs = new List<(Transform, Vector3, Quaternion)>();
         private Transform legL, legR, armL, armR;
 
-        private class Block
+        private enum ObstacleKind
         {
+            /// <summary>A block that drops into its lane (a buoy on the surf channel, floating from the start).</summary>
+            Drop,
+            /// <summary>A low barrier across every lane: jump it.</summary>
+            Hurdle,
+            /// <summary>A bar across every lane at head height: slide under it.</summary>
+            Bar,
+            /// <summary>A block sliding from lane to lane.</summary>
+            Mover,
+            /// <summary>A pad in one lane that throws the robot high over a wide gap.</summary>
+            Pad,
+            Magnet,
+            Shield
+        }
+
+        private class Obstacle
+        {
+            public ObstacleKind kind;
             public int lane, row;
-            public float y = 7f, vy;
-            public bool landed;
+            public float y, vy, phase;
+            public bool landed, done;
             public Transform go, ring;
             public Material ringMaterial;
+            public float X(float time) => kind == ObstacleKind.Mover ? Mathf.Sin(time * 1.6f + phase) * LaneWidth : LaneX(lane);
         }
 
         private class Coin
@@ -79,22 +112,29 @@ namespace SquashBot.Gameplay
 
         private bool[,] floorPlan;
         private int totalRows;
-        private readonly List<(int lane, int row)> blockPlan = new List<(int, int)>();
+        private readonly List<(ObstacleKind kind, int lane, int row)> obstaclePlan = new List<(ObstacleKind, int, int)>();
         private readonly List<(int lane, float z, float y)> coinPlan = new List<(int, float, float)>();
         private readonly Queue<(int row, Transform root)> rows = new Queue<(int, Transform)>();
-        private readonly List<Block> blocks = new List<Block>();
+        private readonly List<Obstacle> obstacles = new List<Obstacle>();
         private readonly List<Coin> coins = new List<Coin>();
         private int builtRow;
-        private Transform gate;
+        private Transform gate, exitRing;
 
-        private Material frameMat, topMat, slabMat, wallGlowMat, archMat, blockMat, coinMat, rimMat;
+        // The bent course: per row, its centre in the world, its heading and its slope.
+        private Vector3[] centers;
+        private float[] headings, slopes;
+        private readonly HashSet<int> curveRows = new HashSet<int>();
 
-        // Robot state
+        private Material frameMat, topMat, slabMat, wallGlowMat, archMat, blockMat, coinMat, rimMat, railMat, foamMat, poolMat;
+        private Material hurdleMat, stripeMat, barMat, padMat, magnetMat, shieldMat, chevronMat;
+
+        // Robot state (track space)
         private float x, y, z, vy;
         private int lane = 1;
-        private bool grounded, falling, crashed, ended, escaped;
-        private float startTimer, runPhase, time, endTimer, squash;
+        private bool grounded, falling, crashed, ended, escaped, shielded;
+        private float startTimer, runPhase, time, endTimer, squash, holdTime, slideLeft, magnetLeft;
         private Vector3 camPos;
+        private Quaternion camRot;
 
         public void Init(Robot robotRef, CameraRig rigRef, InputReader inputRef, FxSystem fxRef)
         {
@@ -116,14 +156,13 @@ namespace SquashBot.Gameplay
             x = 0f; y = 0f; z = 0f; vy = 0f;
             lane = 1;
             grounded = true;
-            falling = crashed = ended = escaped = false;
-            startTimer = 0f;
-            endTimer = 0f;
-            squash = 0f;
-            time = 0f;
+            falling = crashed = ended = escaped = shielded = false;
+            startTimer = endTimer = squash = time = holdTime = slideLeft = magnetLeft = 0f;
 
             CreateMaterials();
-            Plan(new System.Random(seed));
+            var rng = new System.Random(seed);
+            Plan(rng);
+            BendCourse(rng);
             builtRow = 0;
             while (builtRow < Mathf.Min(totalRows, BuildAhead)) BuildRow(builtRow++);
             BuildGate();
@@ -149,7 +188,7 @@ namespace SquashBot.Gameplay
 
             BuildRide();
             input.ScreenMode = true;
-            camPos = new Vector3(0f, 2.6f, -4.6f);
+            camPos = World(0f, 2.6f, -4.6f);
             PoseRobot(0f);
             UpdateCamera(1f);
         }
@@ -160,14 +199,16 @@ namespace SquashBot.Gameplay
             if (!Active) return;
             Active = false;
             while (rows.Count > 0) Destroy(rows.Dequeue().root.gameObject);
-            foreach (var b in blocks) Destroy(b.go.gameObject);
+            foreach (var o in obstacles) { Destroy(o.go.gameObject); if (o.ring != null) Destroy(o.ring.gameObject); }
             foreach (var c in coins) Destroy(c.go.gameObject);
-            blocks.Clear();
+            obstacles.Clear();
             coins.Clear();
             if (gate != null) Destroy(gate.gameObject);
             if (ride != null) Destroy(ride.gameObject);
-            ride = null;
+            if (bubble != null) Destroy(bubble.gameObject);
+            ride = bubble = null;
             ramps.Clear();
+            curveRows.Clear();
 
             foreach (var (t, pos, rot) in limbs)
             {
@@ -180,13 +221,13 @@ namespace SquashBot.Gameplay
                 visual.gameObject.SetActive(true);
                 visual.localScale = Vector3.one;
                 visual.localPosition = Vector3.zero;
+                visual.localRotation = Quaternion.identity;
             }
+            robot.transform.rotation = Quaternion.identity;
             robot.enabled = true;
             rig.EndChase();
             input.ScreenMode = false;
         }
-
-        private Material railMat, foamMat, poolMat;
 
         private void CreateMaterials()
         {
@@ -197,27 +238,37 @@ namespace SquashBot.Gameplay
             var accent = WorldTheme.Current.accent;
             archMat = MaterialFactory.Create(accent, accent * 0.9f);
             blockMat = MaterialFactory.Create(Palette.Block, Palette.BlockGlow * 0.6f);
+            hurdleMat = MaterialFactory.Create(new Color(1f, 0.85f, 0.3f), new Color(0.9f, 0.6f, 0.1f));
+            stripeMat = MaterialFactory.Create(new Color(0.18f, 0.16f, 0.3f), Color.black);
+            barMat = MaterialFactory.Create(new Color(1f, 0.35f, 0.4f), new Color(2f, 0.35f, 0.4f));
+            padMat = MaterialFactory.Create(new Color(0.4f, 1f, 0.6f), new Color(0.4f, 2.2f, 0.8f));
+            magnetMat = MaterialFactory.Create(new Color(1f, 0.3f, 0.35f), new Color(1.2f, 0.2f, 0.25f));
+            shieldMat = MaterialFactory.Create(Palette.ShieldPickup, Palette.ShieldPickupGlow);
+            chevronMat = MaterialFactory.Create(new Color(1f, 0.6f, 0.2f), new Color(2.2f, 1f, 0.2f));
             switch (kind)
             {
                 case Kind.Surf:
-                    // A water channel between sandy banks; buoys instead of blocks.
+                    // A water channel between sandy banks; buoys instead of blocks, driftwood hurdles.
                     frameMat = MaterialFactory.Create(new Color(0.35f, 0.75f, 0.95f), new Color(0.2f, 0.7f, 1.1f));
                     topMat = MaterialFactory.Create(new Color(0.3f, 0.65f, 0.95f), new Color(0.05f, 0.25f, 0.45f));
                     slabMat = MaterialFactory.Create(new Color(0.95f, 0.85f, 0.62f), Color.black);
                     wallGlowMat = MaterialFactory.Create(new Color(0.4f, 0.8f, 0.5f), new Color(0.2f, 0.6f, 0.3f));
                     archMat = MaterialFactory.Create(new Color(1f, 0.6f, 0.3f), new Color(0.9f, 0.4f, 0.1f));
                     blockMat = MaterialFactory.Create(new Color(1f, 0.3f, 0.3f), new Color(0.6f, 0.1f, 0.1f));
+                    hurdleMat = MaterialFactory.Create(new Color(0.65f, 0.45f, 0.28f), Color.black);
                     foamMat = MaterialFactory.Create(Color.white, new Color(0.8f, 1f, 1.1f));
                     poolMat = MaterialFactory.Create(new Color(0.08f, 0.2f, 0.4f), new Color(0.05f, 0.25f, 0.6f));
                     break;
                 case Kind.Mine:
-                    // Plank tracks with rails, rock walls, timber beams with lamps, falling rocks.
+                    // Plank tracks with rails, rock walls, lamps on timber posts, falling rocks, low timber beams.
                     frameMat = MaterialFactory.Create(new Color(0.45f, 0.3f, 0.2f), Color.black);
                     topMat = MaterialFactory.Create(new Color(0.62f, 0.44f, 0.28f), new Color(0.08f, 0.05f, 0.02f));
                     slabMat = MaterialFactory.Create(new Color(0.42f, 0.36f, 0.34f), Color.black);
                     wallGlowMat = MaterialFactory.Create(new Color(1f, 0.7f, 0.3f), new Color(1.8f, 0.9f, 0.3f));
                     archMat = MaterialFactory.Create(new Color(0.55f, 0.38f, 0.22f), Color.black);
                     blockMat = MaterialFactory.Create(new Color(0.5f, 0.42f, 0.38f), new Color(0.15f, 0.08f, 0.05f));
+                    hurdleMat = MaterialFactory.Create(new Color(0.55f, 0.38f, 0.22f), Color.black);
+                    barMat = MaterialFactory.Create(new Color(0.6f, 0.42f, 0.25f), new Color(0.3f, 0.12f, 0.02f));
                     railMat = MaterialFactory.Create(new Color(0.75f, 0.75f, 0.82f), new Color(0.2f, 0.2f, 0.25f));
                     break;
             }
@@ -228,8 +279,9 @@ namespace SquashBot.Gameplay
         // ---------- Course planning ----------
 
         /// <summary>
-        /// Lays out the whole course: calm stretches between patterns (coin lines, holes in some lanes,
-        /// full-width gaps, dropping blocks, zigzags). Every pattern leaves a way through.
+        /// Lays out the whole course: calm stretches between patterns (coin lines, holes, full-width gaps, dropping
+        /// and sliding blocks, hurdles, bars, jump pads, pickups). Every pattern leaves a way through, and later
+        /// patterns come closer together and include the harder ones.
         /// </summary>
         private void Plan(System.Random rng)
         {
@@ -239,15 +291,17 @@ namespace SquashBot.Gameplay
             for (int r = 0; r < totalRows; r++)
                 for (int l = 0; l < Lanes; l++)
                     floorPlan[r, l] = true;
-            blockPlan.Clear();
+            obstaclePlan.Clear();
             coinPlan.Clear();
+            int magnets = 0, shields = 0;
 
             CoinLine(1, 5, 6);
-            int row = 14;
-            while (row < TrackLength - 12)
+            int row = 16;
+            while (row < TrackLength - 14)
             {
                 float p = row / TrackLength;
-                int pattern = rng.Next(p < 0.12f ? 3 : 5);
+                // Early on only the gentle patterns; the full set from a fifth of the way in.
+                int pattern = rng.Next(p < 0.1f ? 4 : p < 0.2f ? 7 : 10);
                 switch (pattern)
                 {
                     case 0: // a line of coins in one lane
@@ -259,13 +313,11 @@ namespace SquashBot.Gameplay
                     {
                         int holes = p > 0.3f && rng.Next(2) == 0 ? 2 : 1;
                         int keep = rng.Next(Lanes);
-                        int filled = 0;
-                        for (int l = 0; l < Lanes && filled < holes; l++)
+                        for (int l = 0; l < holes; l++)
                         {
                             int hl = (keep + 1 + l) % Lanes;
                             Hole(hl, row, 2);
-                            filled++;
-                            if (filled == 1) CoinArc(hl, row);
+                            if (l == 0) CoinArc(hl, row, 1.25f);
                         }
                         row += 2;
                         break;
@@ -275,60 +327,165 @@ namespace SquashBot.Gameplay
                     {
                         int free = rng.Next(Lanes);
                         int count = p > 0.25f && rng.Next(2) == 0 ? 2 : 1;
-                        int placed = 0;
-                        for (int l = 0; l < Lanes && placed < count; l++)
-                        {
-                            int bl = (free + 1 + l) % Lanes;
-                            blockPlan.Add((bl, row));
-                            placed++;
-                        }
+                        for (int l = 0; l < count; l++) obstaclePlan.Add((ObstacleKind.Drop, (free + 1 + l) % Lanes, row));
                         CoinLine(free, row - 2, 5);
                         row += 3;
                         break;
                     }
 
-                    case 3: // the floor drops away across all lanes: jump!
-                        for (int l = 0; l < Lanes; l++) Hole(l, row, 2);
-                        if (this.kind == Kind.Surf) for (int l = 0; l < Lanes; l++) ramps.Add((l, row - 1)); // a wave launches the board over
-                        CoinArc(rng.Next(Lanes), row);
+                    case 3: // a hurdle across every lane, coins floating over it: jump!
+                        obstaclePlan.Add((ObstacleKind.Hurdle, 1, row));
+                        CoinArc(rng.Next(Lanes), row, 1.3f);
                         row += 2;
                         break;
 
-                    default: // zigzag: blocks in alternating lanes
+                    case 4: // the floor drops away across all lanes: jump (surf: a wave throws the board over)
+                        for (int l = 0; l < Lanes; l++) Hole(l, row, 2);
+                        if (kind == Kind.Surf) for (int l = 0; l < Lanes; l++) ramps.Add((l, row - 1));
+                        CoinArc(rng.Next(Lanes), row, 1.25f);
+                        row += 2;
+                        break;
+
+                    case 5: // a bar at head height across the course: slide under, coins low beneath it
+                        obstaclePlan.Add((ObstacleKind.Bar, 1, row));
+                        for (int i = -1; i <= 1; i++) coinPlan.Add((rng.Next(Lanes), row + i * 0.6f, 0.3f));
+                        row += 2;
+                        break;
+
+                    case 6: // a block sliding from lane to lane
+                        obstaclePlan.Add((ObstacleKind.Mover, 1, row));
+                        CoinLine(rng.Next(Lanes), row + 3, 4);
+                        row += 6;
+                        break;
+
+                    case 7: // zigzag: blocks in alternating lanes
                     {
                         int a = rng.Next(Lanes);
                         int b = (a + 1 + rng.Next(Lanes - 1)) % Lanes;
-                        blockPlan.Add((a, row));
-                        blockPlan.Add((b, row + 5));
+                        obstaclePlan.Add((ObstacleKind.Drop, a, row));
+                        obstaclePlan.Add((ObstacleKind.Drop, b, row + 5));
                         row += 6;
                         break;
                     }
+
+                    case 8: // a jump pad before a wide gap: a big flight through a high arc of coins
+                    {
+                        int pl = rng.Next(Lanes);
+                        obstaclePlan.Add((ObstacleKind.Pad, pl, row));
+                        for (int l = 0; l < Lanes; l++) Hole(l, row + 2, 4);
+                        for (int i = 0; i < 6; i++)
+                        {
+                            float t = i / 5f;
+                            coinPlan.Add((pl, row + 1f + t * 5f, 0.8f + Mathf.Sin(t * Mathf.PI) * 2.2f));
+                        }
+                        row += 6;
+                        break;
+                    }
+
+                    default: // a pickup: magnet or shield (a couple of each per run), else a coin line
+                    {
+                        int pl = rng.Next(Lanes);
+                        if (magnets < 2 && rng.Next(2) == 0) { obstaclePlan.Add((ObstacleKind.Magnet, pl, row)); magnets++; }
+                        else if (shields < 2) { obstaclePlan.Add((ObstacleKind.Shield, pl, row)); shields++; }
+                        else CoinLine(pl, row, 5);
+                        row += 3;
+                        break;
+                    }
                 }
-                row += Mathf.RoundToInt(Mathf.Lerp(7f, 4.5f, p)) + rng.Next(2);
+                row += Mathf.RoundToInt(Mathf.Lerp(7f, 4f, p)) + rng.Next(2);
             }
 
             // The risky route past the right-hand gate: short, dense and fast.
             int r2 = GateRow + 4;
             while (r2 < GateRow + RiskLength - 4)
             {
-                if (rng.Next(2) == 0)
+                switch (rng.Next(4))
                 {
-                    int a = rng.Next(Lanes);
-                    blockPlan.Add((a, r2));
-                    blockPlan.Add(((a + 1 + rng.Next(Lanes - 1)) % Lanes, r2 + 3));
-                    r2 += 4;
-                }
-                else
-                {
-                    int keep = rng.Next(Lanes);
-                    for (int l = 0; l < Lanes; l++) if (l != keep) Hole(l, r2, 2);
-                    CoinLine(keep, r2 - 1, 4);
-                    r2 += 3;
+                    case 0:
+                    {
+                        int a = rng.Next(Lanes);
+                        obstaclePlan.Add((ObstacleKind.Drop, a, r2));
+                        obstaclePlan.Add((ObstacleKind.Drop, (a + 1 + rng.Next(Lanes - 1)) % Lanes, r2 + 3));
+                        r2 += 4;
+                        break;
+                    }
+                    case 1:
+                    {
+                        int keep = rng.Next(Lanes);
+                        for (int l = 0; l < Lanes; l++) if (l != keep) Hole(l, r2, 2);
+                        CoinLine(keep, r2 - 1, 4);
+                        r2 += 3;
+                        break;
+                    }
+                    case 2:
+                        obstaclePlan.Add((ObstacleKind.Hurdle, 1, r2));
+                        CoinArc(1, r2, 1.3f);
+                        r2 += 2;
+                        break;
+                    default:
+                        obstaclePlan.Add((ObstacleKind.Bar, 1, r2));
+                        CoinLine(rng.Next(Lanes), r2 - 1, 3);
+                        r2 += 2;
+                        break;
                 }
                 r2 += 3;
             }
-            // The right-hand lane leads into the risky route; a wall splits it from the safe gate.
-            blockPlan.Add((1, GateRow + 1));
+            // The right-hand lane leads into the risky route; a block splits it from the safe gate.
+            obstaclePlan.Add((ObstacleKind.Drop, 1, GateRow + 1));
+        }
+
+        /// <summary>
+        /// Bends the straight plan into a course: straight runs, sweeping left and right turns and gentle hills.
+        /// The start and the gates stay straight and level.
+        /// </summary>
+        private void BendCourse(System.Random rng)
+        {
+            int n = totalRows + 1;
+            var turn = new float[n];
+            var height = new float[n];
+            int straightFrom = GateRow - 16;
+            int r = 22;
+            while (r < straightFrom)
+            {
+                if (rng.Next(3) > 0)
+                {
+                    // A turn: the turning rate eases in and out, total 40-100 degrees.
+                    int len = 16 + rng.Next(14);
+                    float total = (40f + rng.Next(60)) * (rng.Next(2) == 0 ? -1f : 1f) * Mathf.Deg2Rad;
+                    for (int i = 0; i < len && r + i < straightFrom; i++)
+                    {
+                        float s = Mathf.Sin((i + 0.5f) / len * Mathf.PI);
+                        turn[r + i] = total * s * (Mathf.PI / 2f) / len;
+                        curveRows.Add(r + i);
+                    }
+                    r += len;
+                }
+                if (rng.Next(2) == 0)
+                {
+                    // A hill (up then down) under whatever comes next.
+                    int len = 18 + rng.Next(16);
+                    float amp = 0.6f + (float)rng.NextDouble() * 1.4f;
+                    for (int i = 0; i < len && r + i < straightFrom; i++)
+                        height[r + i] = amp * (1f - Mathf.Cos(i / (float)len * Mathf.PI * 2f)) * 0.5f;
+                }
+                r += 8 + rng.Next(16);
+            }
+
+            centers = new Vector3[n];
+            headings = new float[n];
+            slopes = new float[n];
+            for (int i = 1; i < n; i++)
+            {
+                headings[i] = headings[i - 1] + turn[i - 1];
+                float mid = (headings[i] + headings[i - 1]) * 0.5f;
+                centers[i] = centers[i - 1] + new Vector3(Mathf.Sin(mid), 0f, Mathf.Cos(mid));
+                centers[i].y = height[i];
+            }
+            for (int i = 0; i < n; i++)
+            {
+                float dy = (i + 1 < n ? centers[i + 1].y : centers[i].y) - (i > 0 ? centers[i - 1].y : centers[i].y);
+                slopes[i] = Mathf.Atan2(dy, 2f) * Mathf.Rad2Deg;
+            }
         }
 
         private void Hole(int l, int row, int length)
@@ -341,15 +498,40 @@ namespace SquashBot.Gameplay
             for (int i = 0; i < count; i++) coinPlan.Add((l, row + i, 0.45f));
         }
 
-        /// <summary>Coins following the jump over a two-row hole: only a jump collects them.</summary>
-        private void CoinArc(int l, int row)
+        /// <summary>Coins following a jump: only a jump collects them.</summary>
+        private void CoinArc(int l, int row, float top)
         {
-            coinPlan.Add((l, row - 0.7f, 0.95f));
-            coinPlan.Add((l, row + 0.5f, 1.25f));
-            coinPlan.Add((l, row + 1.7f, 0.95f));
+            coinPlan.Add((l, row - 0.7f, top - 0.3f));
+            coinPlan.Add((l, row + 0.5f, top));
+            coinPlan.Add((l, row + 1.7f, top - 0.3f));
         }
 
         private static float LaneX(int l) => (l - 1) * LaneWidth;
+
+        // ---------- Track space to world ----------
+
+        private Vector3 Center(float zf)
+        {
+            if (zf <= 0f) return centers[0] + new Vector3(0f, 0f, zf);
+            int last = centers.Length - 1;
+            if (zf >= last) return centers[last] + Quaternion.Euler(0f, headings[last] * Mathf.Rad2Deg, 0f) * Vector3.forward * (zf - last);
+            int r = (int)zf;
+            return Vector3.Lerp(centers[r], centers[r + 1], zf - r);
+        }
+
+        private Quaternion Rotation(float zf)
+        {
+            int last = headings.Length - 1;
+            float c = Mathf.Clamp(zf, 0f, last);
+            int r = Mathf.Min((int)c, last - 1);
+            float t = c - r;
+            float heading = Mathf.Lerp(headings[r], headings[r + 1], t) * Mathf.Rad2Deg;
+            float slope = Mathf.Lerp(slopes[r], slopes[r + 1], t);
+            return Quaternion.Euler(-slope, heading, 0f);
+        }
+
+        /// <summary>A point in track space (lane offset, height, distance) on the bent course.</summary>
+        private Vector3 World(float lx, float ly, float zf) => Center(zf) + Rotation(zf) * new Vector3(lx, ly, 0f);
 
         // ---------- Building ----------
 
@@ -357,7 +539,7 @@ namespace SquashBot.Gameplay
         {
             var root = new GameObject("Row " + r).transform;
             root.SetParent(transform, false);
-            root.localPosition = new Vector3(0f, 0f, r);
+            root.SetPositionAndRotation(Center(r), Rotation(r));
 
             for (int l = 0; l < Lanes; l++)
             {
@@ -372,12 +554,12 @@ namespace SquashBot.Gameplay
                     }
                     continue;
                 }
-                Shapes.Rounded("Frame", root, new Vector3(lx, -0.03f, 0f), new Vector3(LaneWidth * 0.93f, 0.1f, 0.95f), 0.045f, frameMat);
+                Shapes.Rounded("Frame", root, new Vector3(lx, -0.03f, 0f), new Vector3(LaneWidth * 0.93f, 0.1f, 1.0f), 0.045f, frameMat);
                 Shapes.Rounded("Top", root, new Vector3(lx, 0f, 0f), new Vector3(LaneWidth * 0.78f, 0.1f, 0.8f), 0.045f, topMat);
-                Shapes.Rounded("Slab", root, new Vector3(lx, -0.24f, 0f), new Vector3(LaneWidth * 1.02f, 0.36f, 1.02f), 0.05f, slabMat);
+                Shapes.Rounded("Slab", root, new Vector3(lx, -0.24f, 0f), new Vector3(LaneWidth * 1.02f, 0.36f, 1.12f), 0.05f, slabMat);
                 if (kind == Kind.Mine)
                     foreach (float rx in new[] { -0.28f, 0.28f })
-                        Shapes.Rounded("Rail", root, new Vector3(lx + rx, 0.07f, 0f), new Vector3(0.05f, 0.04f, 1.02f), 0.012f, railMat);
+                        Shapes.Rounded("Rail", root, new Vector3(lx + rx, 0.07f, 0f), new Vector3(0.05f, 0.04f, 1.08f), 0.012f, railMat);
                 if (kind == Kind.Surf && (r + l) % 4 == 0)
                     Shapes.Rounded("Foam", root, new Vector3(lx - 0.15f, 0.06f, 0.1f), new Vector3(0.36f, 0.01f, 0.05f), 0.01f, foamMat);
                 if (ramps.Contains((l, r)))
@@ -387,14 +569,23 @@ namespace SquashBot.Gameplay
                 }
             }
 
-            // Duct walls with a glowing strip, and a glowing pylon on each side every few rows for a sense of speed.
-            // Nothing spans the track overhead: beams over the lanes passed between the camera and the robot.
+            // Walls with a glowing strip; a glowing pylon on each side every few rows for a sense of speed.
+            // Nothing spans the course overhead except the bars you slide under, which stay below the camera.
             foreach (float side in new[] { -1f, 1f })
             {
-                Shapes.Rounded("Wall", root, new Vector3(side * WallX, 0.35f, 0f), new Vector3(0.32f, 1.3f, 1.03f), 0.06f, slabMat);
-                Shapes.Rounded("Strip", root, new Vector3(side * (WallX - 0.17f), 0.1f, 0f), new Vector3(0.04f, 0.07f, 1.04f), 0.015f, wallGlowMat);
+                Shapes.Rounded("Wall", root, new Vector3(side * WallX, 0.35f, 0f), new Vector3(0.32f, 1.3f, 1.18f), 0.06f, slabMat);
+                Shapes.Rounded("Strip", root, new Vector3(side * (WallX - 0.17f), 0.1f, 0f), new Vector3(0.04f, 0.07f, 1.18f), 0.015f, wallGlowMat);
             }
-            if (r % 6 == 0 && kind != Kind.Surf)
+            if (curveRows.Contains(r) && r % 3 == 0)
+            {
+                // Chevrons on the outside of a bend point the way round.
+                float dir = Mathf.Sign(headings[Mathf.Min(r + 1, headings.Length - 1)] - headings[r]);
+                Shapes.Rounded("Chevron", root, new Vector3(-dir * (WallX + 0.05f), 1.15f, 0f), new Vector3(0.08f, 0.5f, 0.6f), 0.04f, chevronMat);
+                foreach (float s in new[] { -1f, 1f })
+                    Shapes.Rounded("Arrow", root, new Vector3(-dir * (WallX - 0.02f), 1.15f + s * 0.1f, 0f), new Vector3(0.04f, 0.06f, 0.36f), 0.02f, stripeMat)
+                        .transform.localRotation = Quaternion.Euler(0f, -dir * s * 35f, 0f);
+            }
+            else if (r % 6 == 0 && kind != Kind.Surf)
             {
                 foreach (float side in new[] { -1f, 1f })
                 {
@@ -416,52 +607,93 @@ namespace SquashBot.Gameplay
             }
             rows.Enqueue((r, root));
 
-            foreach (var (bl, br) in blockPlan)
-                if (br == r) CreateBlock(bl, br);
+            foreach (var (k, ol, orow) in obstaclePlan)
+                if (orow == r) CreateObstacle(k, ol, orow);
             foreach (var (cl, cz, cy) in coinPlan)
                 if (Mathf.RoundToInt(cz) == r) CreateCoin(cl, cz, cy);
         }
 
-        private void CreateBlock(int l, int r)
+        private void CreateObstacle(ObstacleKind k, int l, int r)
         {
-            var go = new GameObject("Block").transform;
+            var go = new GameObject(k.ToString()).transform;
             go.SetParent(transform, false);
-            if (kind == Kind.Surf)
+            var o = new Obstacle { kind = k, lane = l, row = r, go = go, phase = r * 0.7f, landed = true };
+            float w = LaneWidth * Lanes;
+            switch (k)
             {
-                // A bobbing buoy, floating in the lane from the start.
-                Shapes.Primitive(PrimitiveType.Sphere, "Buoy", go, Vector3.zero, new Vector3(0.75f, 0.7f, 0.75f), blockMat);
-                Shapes.Primitive(PrimitiveType.Cylinder, "Stripe", go, Vector3.zero, new Vector3(0.78f, 0.08f, 0.78f), foamMat);
+                case ObstacleKind.Drop:
+                    if (kind == Kind.Surf)
+                    {
+                        // A bobbing buoy, floating in the lane from the start.
+                        Shapes.Primitive(PrimitiveType.Sphere, "Buoy", go, Vector3.zero, new Vector3(0.75f, 0.7f, 0.75f), blockMat);
+                        Shapes.Primitive(PrimitiveType.Cylinder, "Stripe", go, Vector3.zero, new Vector3(0.78f, 0.08f, 0.78f), foamMat);
+                        break;
+                    }
+                    if (kind == Kind.Mine) Shapes.Rounded("Rock", go, Vector3.zero, new Vector3(0.88f, 0.8f, 0.86f), 0.3f, blockMat).transform.localRotation = Quaternion.Euler(12f, 30f, 8f);
+                    else Shapes.Rounded("Cube", go, Vector3.zero, new Vector3(0.9f, 0.9f, 0.9f), 0.12f, blockMat);
+                    o.y = 7f;
+                    o.landed = false;
+                    o.ringMaterial = MaterialFactory.CreateTransparent(new Color(1f, 0.3f, 0.35f, 0.5f), Palette.TileWarningGlow * 0.5f);
+                    o.ring = Shapes.Primitive(PrimitiveType.Cylinder, "Warning", transform, Vector3.zero, new Vector3(0.85f, 0.004f, 0.85f), o.ringMaterial).transform;
+                    o.ring.SetPositionAndRotation(World(LaneX(l), 0.07f, r), Rotation(r));
+                    go.gameObject.SetActive(false); // appears only when it starts to drop; until then only the warning shows
+                    break;
+                case ObstacleKind.Hurdle:
+                    // Low striped boards on short legs across every lane.
+                    for (int i = 0; i < 6; i++)
+                        Shapes.Rounded("Board", go, new Vector3(-w * 0.5f + (i + 0.5f) * w / 6f, 0.32f, 0f), new Vector3(w / 6f - 0.02f, 0.18f, 0.12f), 0.04f, i % 2 == 0 ? hurdleMat : stripeMat);
+                    foreach (float s in new[] { -1f, 0f, 1f })
+                        Shapes.Rounded("Leg", go, new Vector3(s * LaneWidth, 0.12f, 0f), new Vector3(0.08f, 0.24f, 0.08f), 0.03f, stripeMat);
+                    break;
+                case ObstacleKind.Bar:
+                    // A glowing bar at head height between two posts: only a slide gets under it.
+                    Shapes.Rounded("Bar", go, new Vector3(0f, 1.05f, 0f), new Vector3(w + 0.3f, 0.7f, 0.16f), 0.06f, barMat);
+                    for (int i = 0; i < 5; i++)
+                        Shapes.Rounded("Stripe", go, new Vector3(-w * 0.4f + i * w * 0.2f, 1.05f, -0.09f), new Vector3(0.14f, 0.5f, 0.02f), 0.02f, stripeMat).transform.localRotation = Quaternion.Euler(0f, 0f, 30f);
+                    foreach (float s in new[] { -1f, 1f })
+                        Shapes.Rounded("Post", go, new Vector3(s * (w * 0.5f + 0.2f), 0.7f, 0f), new Vector3(0.14f, 1.4f, 0.14f), 0.04f, stripeMat);
+                    break;
+                case ObstacleKind.Mover:
+                    Shapes.Rounded("Cube", go, new Vector3(0f, 0.45f, 0f), new Vector3(0.9f, 0.9f, 0.9f), 0.12f, blockMat);
+                    foreach (float s in new[] { -1f, 1f })
+                        Shapes.Rounded("Arrow", go, new Vector3(s * 0.5f, 0.45f, 0f), new Vector3(0.12f, 0.3f, 0.3f), 0.05f, barMat);
+                    break;
+                case ObstacleKind.Pad:
+                    Shapes.Rounded("Pad", go, new Vector3(0f, 0.05f, 0f), new Vector3(LaneWidth * 0.8f, 0.1f, 0.8f), 0.04f, padMat);
+                    for (int i = 0; i < 3; i++)
+                        Shapes.Rounded("Chevron", go, new Vector3(0f, 0.12f, -0.25f + i * 0.25f), new Vector3(0.5f, 0.03f, 0.08f), 0.015f, stripeMat);
+                    break;
+                case ObstacleKind.Magnet:
+                    foreach (float s in new[] { -1f, 1f })
+                    {
+                        Shapes.Rounded("Arm", go, new Vector3(s * 0.15f, 0.55f, 0f), new Vector3(0.12f, 0.36f, 0.12f), 0.05f, magnetMat);
+                        Shapes.Rounded("Tip", go, new Vector3(s * 0.15f, 0.36f, 0f), new Vector3(0.13f, 0.1f, 0.13f), 0.04f, MaterialFactory.Create(Color.white, new Color(0.8f, 0.8f, 0.9f)));
+                    }
+                    Shapes.Rounded("Bow", go, new Vector3(0f, 0.74f, 0f), new Vector3(0.42f, 0.12f, 0.12f), 0.05f, magnetMat);
+                    break;
+                case ObstacleKind.Shield:
+                    Shapes.Primitive(PrimitiveType.Sphere, "Orb", go, new Vector3(0f, 0.55f, 0f), Vector3.one * 0.45f, shieldMat);
+                    break;
             }
-            else if (kind == Kind.Mine)
-            {
-                Shapes.Rounded("Rock", go, Vector3.zero, new Vector3(0.88f, 0.8f, 0.86f), 0.3f, blockMat).transform.localRotation = Quaternion.Euler(12f, 30f, 8f);
-            }
-            else
-            {
-                Shapes.Rounded("Cube", go, Vector3.zero, new Vector3(0.9f, 0.9f, 0.9f), 0.12f, blockMat);
-            }
-            var ringMaterial = MaterialFactory.CreateTransparent(new Color(1f, 0.3f, 0.35f, 0.5f), Palette.TileWarningGlow * 0.5f);
-            var ring = Shapes.Primitive(PrimitiveType.Cylinder, "Warning", transform, new Vector3(LaneX(l), 0.07f, r),
-                new Vector3(0.85f, 0.004f, 0.85f), ringMaterial).transform;
-            var block = new Block { lane = l, row = r, go = go, ring = ring, ringMaterial = ringMaterial };
-            go.localPosition = new Vector3(LaneX(l), 0.5f + block.y, r);
-            go.gameObject.SetActive(false); // appears only when it starts to drop; until then only the warning shows
-            blocks.Add(block);
-            if (kind == Kind.Surf)
-            {
-                block.y = 0f;
-                block.landed = true;
-                ring.gameObject.SetActive(false);
-                go.gameObject.SetActive(true);
-                go.localPosition = new Vector3(LaneX(l), 0.4f, r);
-            }
+            obstacles.Add(o);
+            PlaceObstacle(o);
+        }
+
+        private void PlaceObstacle(Obstacle o)
+        {
+            float ox = o.kind == ObstacleKind.Hurdle || o.kind == ObstacleKind.Bar ? 0f : o.X(time);
+            float oy = 0f;
+            if (o.kind == ObstacleKind.Drop) oy = kind == Kind.Surf ? 0.4f + Mathf.Sin(time * 2f + o.phase) * 0.05f : 0.5f + o.y;
+            if (o.kind == ObstacleKind.Magnet || o.kind == ObstacleKind.Shield) oy = Mathf.Sin(time * 3f + o.phase) * 0.08f;
+            o.go.SetPositionAndRotation(World(ox, oy, o.row), Rotation(o.row));
+            if (o.kind == ObstacleKind.Magnet || o.kind == ObstacleKind.Shield) o.go.Rotate(0f, time * 120f, 0f, Space.Self);
         }
 
         private void CreateCoin(int l, float cz, float cy)
         {
             var go = new GameObject("Coin").transform;
             go.SetParent(transform, false);
-            go.localPosition = new Vector3(LaneX(l), cy, cz);
+            go.position = World(LaneX(l), cy, cz);
             Shapes.Primitive(PrimitiveType.Cylinder, "Rim", go, Vector3.zero, new Vector3(0.42f, 0.03f, 0.42f), rimMat);
             Shapes.Primitive(PrimitiveType.Cylinder, "Face", go, Vector3.zero, new Vector3(0.33f, 0.04f, 0.33f), coinMat);
             coins.Add(new Coin { lane = l, z = cz, y = cy, go = go });
@@ -475,7 +707,7 @@ namespace SquashBot.Gameplay
         {
             gate = new GameObject("Gates").transform;
             gate.SetParent(transform, false);
-            gate.localPosition = new Vector3(0f, 0f, GateRow);
+            gate.SetPositionAndRotation(Center(GateRow), Rotation(GateRow));
             Arch(gate, (LaneX(0) + LaneX(1)) * 0.5f, LaneWidth * 2.1f, new Color(0.4f, 1f, 0.6f), new Color(0.4f, 2f, 0.7f));
             Arch(gate, LaneX(2), LaneWidth * 1.05f, new Color(1f, 0.4f, 0.45f), new Color(2.2f, 0.35f, 0.4f));
 
@@ -493,8 +725,6 @@ namespace SquashBot.Gameplay
             exitRing = ring;
         }
 
-        private Transform exitRing;
-
         private static void Arch(Transform parent, float x, float width, Color color, Color glow)
         {
             var m = MaterialFactory.Create(color, glow);
@@ -504,7 +734,7 @@ namespace SquashBot.Gameplay
             Shapes.Rounded("Panel", parent, new Vector3(x, 2.95f, 0f), new Vector3(width * 0.6f, 0.36f, 0.06f), 0.05f, m);
         }
 
-        /// <summary>What the robot rides: an orange-lit cell for surfing, a cart in the mine.</summary>
+        /// <summary>What the robot rides: an orange-lit cell for surfing, a cart in the mine; plus its shield bubble.</summary>
         private void BuildRide()
         {
             if (kind == Kind.Surf)
@@ -528,6 +758,9 @@ namespace SquashBot.Gameplay
                     Shapes.Primitive(PrimitiveType.Cylinder, "Wheel", ride, new Vector3(w.x, 0.07f, w.y), new Vector3(0.14f, 0.03f, 0.14f), metal)
                         .transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
             }
+            bubble = Shapes.Primitive(PrimitiveType.Sphere, "ShieldBubble", robot.transform, new Vector3(0f, 0.42f, 0f), Vector3.one * 1.05f,
+                MaterialFactory.CreateTransparent(Palette.ShieldBubble, Palette.ShieldGlow)).transform;
+            bubble.gameObject.SetActive(false);
         }
 
         // ---------- Play ----------
@@ -543,13 +776,12 @@ namespace SquashBot.Gameplay
             if (!ended && !crashed && (!falling || y > CoyoteDepth)) HandleInput();
             Move(dt);
             UpdateRows();
-            UpdateBlocks(dt);
+            UpdateObstacles(dt);
             UpdateCoins();
             PoseRobot(dt);
             UpdateCamera(dt);
 
-            if (exitRing != null)
-                exitRing.localRotation = Quaternion.Euler(0f, 0f, time * 40f);
+            if (exitRing != null) exitRing.localRotation = Quaternion.Euler(0f, 0f, time * 40f);
         }
 
         private void HandleInput()
@@ -564,7 +796,9 @@ namespace SquashBot.Gameplay
                 case Direction.MinusX: ChangeLane(-1); break;
                 case Direction.PlusY: Jump(); break;
                 case Direction.MinusY:
-                    if (!grounded) vy = Mathf.Min(vy, -9f); // slam down
+                    if (!grounded) vy = Mathf.Min(vy, -9f); // slam down, then slide on landing
+                    slideLeft = SlideTime;
+                    if (grounded) AudioManager.PlaySfx(Sfx.Hop, 0.5f, 0.6f);
                     break;
             }
         }
@@ -585,13 +819,20 @@ namespace SquashBot.Gameplay
         private void Jump()
         {
             if (!grounded && !(falling && y > CoyoteDepth)) return;
-            grounded = false;
-            falling = false;
-            y = Mathf.Max(y, 0f);
-            vy = JumpVelocity;
-            squash = -0.25f;
+            Launch(JumpVelocity);
             AudioManager.PlaySfx(Sfx.Hop, 0.7f, 0.8f);
             Haptics.Light();
+        }
+
+        private void Launch(float velocity)
+        {
+            grounded = false;
+            falling = false;
+            slideLeft = 0f;
+            holdTime = 0f;
+            y = Mathf.Max(y, 0f);
+            vy = velocity;
+            squash = -0.25f;
         }
 
         private void Move(float dt)
@@ -601,9 +842,14 @@ namespace SquashBot.Gameplay
             if (crashed) speed = 0f;
             if (ended && escaped) speed *= Mathf.Clamp01(1f - endTimer * 0.6f);
             if (falling) speed *= 0.6f;
+
+            // Holding on after the jump: lighter gravity for a moment, and a little extra push forward.
+            bool held = !grounded && !falling && vy > 0f && holdTime < MaxHold && InputReader.PointerHeld;
+            if (held) speed *= 1.1f;
             z += speed * dt;
             runPhase += speed * dt * 2.2f;
             x = Mathf.MoveTowards(x, LaneX(lane), LaneSpeed * dt);
+            if (grounded) slideLeft = Mathf.Max(0f, slideLeft - dt);
 
             int row = Mathf.RoundToInt(z);
             int under = Mathf.Clamp(Mathf.RoundToInt(x / LaneWidth) + 1, 0, Lanes - 1);
@@ -617,7 +863,10 @@ namespace SquashBot.Gameplay
             }
             if (!grounded)
             {
-                vy -= Gravity * dt;
+                float g = Gravity;
+                if (held) { g *= HoldGravity; holdTime += dt; }
+                else if (vy > 0f) holdTime = MaxHold; // let go: no second boost in the same jump
+                vy -= g * dt;
                 y += vy * dt;
                 if (y <= 0f && !falling)
                 {
@@ -627,24 +876,25 @@ namespace SquashBot.Gameplay
                         vy = 0f;
                         grounded = true;
                         squash = 0.3f;
-                        fx.Dust(new Vector3(x, 0.08f, z), Palette.TileTop, 6, 1.2f);
+                        fx.Dust(World(x, 0.08f, z), Palette.TileTop, 6, 1.2f);
                     }
-                    else
-                    {
-                        falling = true;
-                    }
+                    else falling = true;
                 }
             }
 
             if (falling && !ended && y < FallDepth)
             {
-                AudioManager.PlaySfx(Sfx.Fall);
-                Haptics.Death();
-                End(false, 0);
+                if (shielded || TestInvulnerable) SaveFromFall();
+                else
+                {
+                    AudioManager.PlaySfx(Sfx.Fall);
+                    Haptics.Death();
+                    End(false, 0);
+                }
             }
 
             // Surf: waves launch the board over the whirlpools.
-            if (grounded && !ended && ramps.Contains((under, row))) { Jump(); vy = JumpVelocity * 1.15f; }
+            if (grounded && !ended && ramps.Contains((under, row))) { Launch(JumpVelocity * 1.2f); AudioManager.PlaySfx(Sfx.Hop, 0.7f, 1.1f); }
 
             if (falling && y < -8f) visual.gameObject.SetActive(false);
 
@@ -663,12 +913,37 @@ namespace SquashBot.Gameplay
             if (!ended && risky && z >= GateRow + RiskLength) Escape(RiskBonus);
             if (ended) endTimer += dt;
             squash = Mathf.MoveTowards(squash, 0f, dt * 2f);
+            magnetLeft = Mathf.Max(0f, magnetLeft - dt);
+        }
+
+        /// <summary>The shield pops instead of the robot falling: it bounces back up and over the gap.</summary>
+        private void SaveFromFall()
+        {
+            UseShield();
+            int laneUnder = Mathf.Clamp(Mathf.RoundToInt(x / LaneWidth) + 1, 0, Lanes - 1);
+            while (z < totalRows - 1 && !floorPlan[Mathf.Clamp(Mathf.RoundToInt(z), 0, totalRows - 1), laneUnder]) z += 1f;
+            y = 0f;
+            Launch(JumpVelocity);
+            visual.gameObject.SetActive(true);
+        }
+
+        private void UseShield()
+        {
+            if (!shielded) return;
+            shielded = false;
+            bubble.gameObject.SetActive(false);
+            var at = robot.transform.position + Vector3.up * 0.4f;
+            fx.Burst(at, Palette.ShieldPickup, Palette.ShieldPickupGlow, 30, 5f);
+            AudioManager.PlaySfx(Sfx.Shield, 1f, 0.9f);
+            Haptics.Medium();
+            rig.Shake(0.6f);
+            Notice?.Invoke("float.shieldSaved", at);
         }
 
         private void Escape(int bonus)
         {
             escaped = true;
-            fx.Burst(new Vector3(x, 1f, z + 0.5f), Palette.UiCyan, Palette.ShieldPickupGlow, 40, 6f);
+            fx.Burst(robot.transform.position + Vector3.up, Palette.UiCyan, Palette.ShieldPickupGlow, 40, 6f);
             AudioManager.PlaySfx(Sfx.Win);
             Haptics.Medium();
             rig.Punch(1f);
@@ -684,62 +959,108 @@ namespace SquashBot.Gameplay
         private void UpdateRows()
         {
             while (builtRow < Mathf.Min(totalRows, z + BuildAhead)) BuildRow(builtRow++);
-            while (rows.Count > 0 && rows.Peek().row < z - 6f) Destroy(rows.Dequeue().root.gameObject);
+            while (rows.Count > 0 && rows.Peek().row < z - 8f) Destroy(rows.Dequeue().root.gameObject);
 
-            // The far rows rise into place, so the duct seems to assemble itself ahead of the robot.
+            // The far rows rise into place, so the course seems to assemble itself ahead of the robot.
             float riseStart = z + BuildAhead - 10f;
             foreach (var (r, root) in rows)
             {
                 float k = Mathf.Clamp01((r - riseStart) / 10f);
-                root.localPosition = new Vector3(0f, -k * k * 4f, r);
+                root.position = Center(r) + Vector3.down * (k * k * 4f);
             }
         }
 
-        private void UpdateBlocks(float dt)
+        private void UpdateObstacles(float dt)
         {
-            for (int i = blocks.Count - 1; i >= 0; i--)
+            bool sliding = slideLeft > 0f && grounded;
+            float robotTop = y + (sliding ? 0.42f : 0.8f);
+            for (int i = obstacles.Count - 1; i >= 0; i--)
             {
-                var b = blocks[i];
-                if (b.row < z - 6f)
+                var o = obstacles[i];
+                if (o.row < z - 8f || o.done)
                 {
-                    Destroy(b.go.gameObject);
-                    Destroy(b.ring.gameObject);
-                    blocks.RemoveAt(i);
+                    Destroy(o.go.gameObject);
+                    if (o.ring != null) Destroy(o.ring.gameObject);
+                    obstacles.RemoveAt(i);
                     continue;
                 }
 
-                if (!b.landed && b.row - z < BlockDropDistance)
+                if (o.kind == ObstacleKind.Drop && !o.landed && o.row - z < BlockDropDistance)
                 {
-                    b.go.gameObject.SetActive(true);
-                    b.vy += 30f * dt;
-                    b.y -= b.vy * dt;
-                    if (b.y <= 0f)
+                    o.go.gameObject.SetActive(true);
+                    o.vy += 30f * dt;
+                    o.y -= o.vy * dt;
+                    if (o.y <= 0f)
                     {
-                        b.y = 0f;
-                        b.landed = true;
-                        b.ring.gameObject.SetActive(false);
-                        fx.Dust(new Vector3(LaneX(b.lane), 0.1f, b.row), Palette.Block, 10, 2f);
+                        o.y = 0f;
+                        o.landed = true;
+                        o.ring.gameObject.SetActive(false);
+                        fx.Dust(World(LaneX(o.lane), 0.1f, o.row), Palette.Block, 10, 2f);
                         AudioManager.PlaySfx(Sfx.Impact, 0.5f);
                         rig.Shake(0.25f);
                     }
                 }
-                b.go.localPosition = new Vector3(LaneX(b.lane), 0.5f + b.y, b.row);
-                if (!b.landed)
+                if (o.kind == ObstacleKind.Drop && !o.landed)
                 {
                     float a = 0.35f + 0.25f * Mathf.Sin(time * 12f);
-                    MaterialFactory.SetColors(b.ringMaterial, new Color(1f, 0.3f, 0.35f, a), Palette.TileWarningGlow * a);
+                    MaterialFactory.SetColors(o.ringMaterial, new Color(1f, 0.3f, 0.35f, a), Palette.TileWarningGlow * a);
                 }
+                PlaceObstacle(o);
 
-                // Crash: the robot runs into a block (or one lands on it) without being high enough to clear it.
-                if (!ended && !crashed && Mathf.Abs(b.row - z) < 0.6f && Mathf.Abs(LaneX(b.lane) - x) < 0.62f && y < b.y + 0.85f && b.y < 0.9f)
+                if (ended || crashed) continue;
+                float dz = Mathf.Abs(o.row - z);
+                float dx = Mathf.Abs(o.X(time) - x);
+                switch (o.kind)
                 {
-                    Crash();
+                    case ObstacleKind.Drop:
+                    case ObstacleKind.Mover:
+                        if (dz < 0.6f && dx < 0.62f && y < o.y + 0.85f && o.y < 0.9f) Hit(o);
+                        break;
+                    case ObstacleKind.Hurdle:
+                        if (dz < 0.4f && y < 0.48f) Hit(o);
+                        break;
+                    case ObstacleKind.Bar:
+                        if (dz < 0.4f && robotTop > 0.7f && y < 1.4f) Hit(o);
+                        break;
+                    case ObstacleKind.Pad:
+                        if (dz < 0.5f && dx < 0.55f && y < 0.2f && vy <= 0.01f)
+                        {
+                            Launch(PadVelocity);
+                            holdTime = MaxHold;
+                            fx.Burst(World(o.X(time), 0.2f, o.row), new Color(0.4f, 1f, 0.6f), new Color(0.4f, 2.2f, 0.8f), 24, 5f);
+                            AudioManager.PlaySfx(Sfx.Shield, 0.9f, 1.4f);
+                            Haptics.Medium();
+                            rig.Punch(0.5f);
+                        }
+                        break;
+                    case ObstacleKind.Magnet:
+                    case ObstacleKind.Shield:
+                        if (dz < 0.7f && dx < 0.7f && y < 1.3f)
+                        {
+                            var at = o.go.position + Vector3.up * 0.5f;
+                            fx.Burst(at, o.kind == ObstacleKind.Magnet ? new Color(1f, 0.4f, 0.45f) : Palette.ShieldPickup, Palette.ShieldPickupGlow, 20, 4f);
+                            AudioManager.PlaySfx(Sfx.Shield, 0.9f, 1.2f);
+                            Haptics.Medium();
+                            if (o.kind == ObstacleKind.Magnet) { magnetLeft = MagnetTime; Notice?.Invoke("float.magnet", at); }
+                            else { shielded = true; bubble.gameObject.SetActive(true); Notice?.Invoke("float.shield", at); }
+                            o.done = true;
+                        }
+                        break;
                 }
             }
         }
 
-        private void Crash()
+        /// <summary>The robot ran into something: the shield takes it (the obstacle bursts), otherwise the run ends.</summary>
+        private void Hit(Obstacle o)
         {
+            if (TestInvulnerable) return;
+            if (shielded)
+            {
+                UseShield();
+                fx.Burst(o.go.position + Vector3.up * 0.4f, Palette.Block, Palette.BlockGlow, 16, 4f);
+                o.done = true;
+                return;
+            }
             crashed = true;
             squash = 0f;
             fx.Burst(robot.transform.position + Vector3.up * 0.3f, Palette.RobotBody, Palette.RobotEye, 24, 5f);
@@ -754,26 +1075,26 @@ namespace SquashBot.Gameplay
             for (int i = coins.Count - 1; i >= 0; i--)
             {
                 var c = coins[i];
-                if (c.z < z - 6f)
+                if (c.z < z - 8f)
                 {
                     Destroy(c.go.gameObject);
                     coins.RemoveAt(i);
                     continue;
                 }
-                c.go.localRotation = Quaternion.Euler(0f, time * 200f + c.z * 20f, 0f) * Quaternion.Euler(90f, 0f, 0f);
+                c.go.rotation = Rotation(c.z) * Quaternion.Euler(0f, time * 200f + c.z * 20f, 0f) * Quaternion.Euler(90f, 0f, 0f);
                 if (ended || crashed) continue;
                 bool mine = Mathf.Abs(c.z - z) < 0.6f && Mathf.Abs(LaneX(c.lane) - x) < 0.6f && Mathf.Abs(c.y - (y + 0.45f)) < 0.6f;
-                if (mine)
-                {
-                    Coins++;
-                    var at = c.go.position;
-                    fx.Burst(at, Palette.Coin, Palette.CoinGlow, 8, 3f);
-                    AudioManager.PlaySfx(Sfx.Coin, 0.7f, 1f, 0.04f);
-                    Haptics.Pulse(18, 0.4f);
-                    CoinCollected?.Invoke(at);
-                    Destroy(c.go.gameObject);
-                    coins.RemoveAt(i);
-                }
+                // The magnet pulls in every coin just ahead, whatever its lane or height.
+                bool pulled = magnetLeft > 0f && c.z - z < 2.5f && c.z - z > -0.5f;
+                if (!mine && !pulled) continue;
+                Coins++;
+                var at = c.go.position;
+                fx.Burst(at, Palette.Coin, Palette.CoinGlow, 8, 3f);
+                AudioManager.PlaySfx(Sfx.Coin, 0.7f, 1f, 0.04f);
+                Haptics.Pulse(18, 0.4f);
+                CoinCollected?.Invoke(at);
+                Destroy(c.go.gameObject);
+                coins.RemoveAt(i);
             }
         }
 
@@ -781,8 +1102,7 @@ namespace SquashBot.Gameplay
 
         private void PoseRobot(float dt)
         {
-            robot.transform.position = new Vector3(x, y, z);
-            robot.transform.rotation = Quaternion.identity;
+            robot.transform.SetPositionAndRotation(World(x, y, z), Rotation(z));
 
             if (crashed)
             {
@@ -790,16 +1110,21 @@ namespace SquashBot.Gameplay
                 return;
             }
 
-            // Lean into lane changes and forward while sprinting; squash on landing, stretch on take-off.
+            // Lean into lane changes and forward while sprinting; squash on landing, stretch on take-off; low when sliding.
             float lean = (LaneX(lane) - x) * 18f;
             float forward = startTimer < StartDelay ? 0f : 12f;
-            visual.localRotation = Quaternion.Euler(forward, lean * 0.6f, -lean);
+            bool sliding = slideLeft > 0f && grounded;
+            visual.localRotation = Quaternion.Euler(sliding ? -25f : forward, lean * 0.6f, -lean);
             float s = 1f + squash;
-            visual.localScale = new Vector3(1f / Mathf.Sqrt(Mathf.Max(0.3f, s)), Mathf.Max(0.3f, 1f - squash * 0.6f), 1f / Mathf.Sqrt(Mathf.Max(0.3f, s)));
+            float sx = 1f / Mathf.Sqrt(Mathf.Max(0.3f, s));
+            float sy = Mathf.Max(0.3f, 1f - squash * 0.6f) * (sliding ? 0.5f : 1f);
+            var targetScale = new Vector3(sx * (sliding ? 1.15f : 1f), sy, sx);
+            visual.localScale = dt >= 1f ? targetScale : Vector3.Lerp(visual.localScale, targetScale, Mathf.Clamp01(dt * 18f));
             if (ended && escaped) visual.localRotation = Quaternion.Euler(0f, endTimer * 540f, 0f);
+            if (bubble != null && bubble.gameObject.activeSelf) bubble.localScale = Vector3.one * (1.05f + Mathf.Sin(time * 6f) * 0.04f);
 
-            // Run cycle: legs pump and arms swing (tucked while in the air).
-            bool running = grounded && startTimer >= StartDelay && !ended;
+            // Run cycle: legs pump and arms swing (tucked while in the air, back while sliding).
+            bool running = grounded && startTimer >= StartDelay && !ended && !sliding;
             float swing = running ? Mathf.Sin(runPhase * Mathf.PI) : 0f;
             if (legL != null)
             {
@@ -808,7 +1133,7 @@ namespace SquashBot.Gameplay
             }
             if (armL != null)
             {
-                float air = grounded ? 0f : -70f;
+                float air = grounded ? (sliding ? 60f : 0f) : -70f;
                 armL.localRotation = Quaternion.Euler(-swing * 45f + air, 0f, 0f);
                 armR.localRotation = Quaternion.Euler(swing * 45f + air, 0f, 0f);
             }
@@ -820,7 +1145,7 @@ namespace SquashBot.Gameplay
                 int under = Mathf.Clamp(Mathf.RoundToInt(x / LaneWidth) + 1, 0, Lanes - 1);
                 bool floor = row < 0 || row >= totalRows || floorPlan[row, under];
                 shadow.gameObject.SetActive(floor && !falling);
-                shadow.position = new Vector3(x, GridView.SurfaceY + 0.004f, z);
+                shadow.SetPositionAndRotation(World(x, GridView.SurfaceY + 0.004f, z), Rotation(z));
                 float k = 0.48f * (1f - Mathf.Clamp01(y) * 0.4f);
                 shadow.localScale = new Vector3(k, 0.004f, k);
             }
@@ -828,12 +1153,15 @@ namespace SquashBot.Gameplay
 
         private void UpdateCamera(float dt)
         {
-            // Behind and above the robot, following the lane softly, looking down the duct.
-            var target = new Vector3(x * 0.55f, 2.1f + Mathf.Max(y, -1f) * 0.35f, z - 3.7f);
-            if (falling) target.y = Mathf.Max(1.4f, target.y);
-            camPos = Vector3.Lerp(camPos, target, 1f - Mathf.Exp(-dt * 8f));
-            var look = new Vector3(x * 0.75f, 0.55f + Mathf.Max(y, -0.5f) * 0.3f, z + 4.5f);
-            rig.Chase(camPos, Quaternion.LookRotation(look - camPos), 62f);
+            // Behind and above the robot along the course, so the camera swings round the bends with it.
+            float lift = 2.1f + Mathf.Max(y, -1f) * 0.35f;
+            if (falling) lift = Mathf.Max(1.4f, lift);
+            var target = World(x * 0.55f, lift, z - 3.7f);
+            camPos = dt >= 1f ? target : Vector3.Lerp(camPos, target, 1f - Mathf.Exp(-dt * 8f));
+            var look = World(x * 0.75f, 0.55f + Mathf.Max(y, -0.5f) * 0.3f, z + 4.5f);
+            var rot = Quaternion.LookRotation(look - camPos);
+            camRot = dt >= 1f ? rot : Quaternion.Slerp(camRot, rot, 1f - Mathf.Exp(-dt * 10f));
+            rig.Chase(camPos, camRot, 62f);
         }
     }
 }

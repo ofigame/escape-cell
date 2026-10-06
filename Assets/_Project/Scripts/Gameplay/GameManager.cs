@@ -197,6 +197,7 @@ namespace SquashBot.Gameplay
             runner.CoinCollected += OnTunnelCoin;
             runner.Finished += OnTunnelFinished;
             runner.RiskTaken += () => FloatAt(robot.transform.position + Vector3.up * 0.5f, Loc.T("float.risk"), Palette.UiRed);
+            runner.Notice += (key, at) => FloatAt(at, Loc.T(key), Palette.UiCyan);
 
             CreateUi();
             ShowMenu();

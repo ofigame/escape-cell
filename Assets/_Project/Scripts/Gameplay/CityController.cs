@@ -253,15 +253,19 @@ namespace SquashBot.Gameplay
             }
         }
 
-        // Walking input: one finger anywhere (off the buttons) is a floating stick; two fingers (or the right mouse
-        // button) turn the camera round and up/down, and pinching (or the mouse wheel) moves it in and out.
+        // Walking input, like shooter games on phones: the first finger anywhere (off the buttons) is a floating stick,
+        // and while it walks a second finger drags the camera round and up/down at the same time. Two fingers put down
+        // together (or the right mouse button) look around without walking; pinching (or the mouse wheel) zooms.
         private readonly Dictionary<int, bool> onPlot = new Dictionary<int, bool>();
         private readonly List<(int id, Vector2 pos)> touches = new List<(int, Vector2)>();
         private readonly List<(int id, Vector2 pos)> plotTouches = new List<(int, Vector2)>();
         private int stickId = int.MinValue;
         private Vector2 stickOrigin, lastMid;
         private float lastSpread;
-        private bool camGesture;
+        private bool camGesture, pinchMode;
+        private float stickTime;
+        private int lastLookId = int.MinValue, lastLookCount;
+        private readonly List<(int id, Vector2 pos)> lookTouches = new List<(int, Vector2)>();
         private const float PitchSpeed = 0.2f;
 
         private void UpdateWalkInput()
@@ -282,35 +286,44 @@ namespace SquashBot.Gameplay
             float wheel = MouseScroll();
             if (Mathf.Abs(wheel) > 0.01f) walker.Zoom(wheel > 0f ? 0.9f : 1.1f);
 
-            if (mouseLook || plotTouches.Count >= 2)
+            // The stick finger: the first one down, unless two arrived together (a camera gesture).
+            if (stickId != int.MinValue && !plotTouches.Exists(t => t.id == stickId)) stickId = int.MinValue;
+            if (stickId == int.MinValue && plotTouches.Count == 1 && !pinchMode)
             {
-                stickId = int.MinValue;
-                ui.Stick.Drive(null, default);
-                var mid = mouseLook ? touches.Find(t => t.id == RightMouse).pos : (plotTouches[0].pos + plotTouches[1].pos) * 0.5f;
-                float spread = mouseLook ? 0f : (plotTouches[0].pos - plotTouches[1].pos).magnitude;
-                if (camGesture)
-                {
-                    var d = mid - lastMid;
-                    walker.Turn(d.x * TurnSpeed, -d.y * PitchSpeed);
-                    if (spread > 1f && lastSpread > 1f) walker.Zoom(lastSpread / spread);
-                }
-                camGesture = true;
-                lastMid = mid;
-                lastSpread = spread;
-                return;
+                stickId = plotTouches[0].id;
+                stickOrigin = plotTouches[0].pos;
+                stickTime = Time.unscaledTime;
             }
-            camGesture = false;
-            if (plotTouches.Count == 1)
+            if (plotTouches.Count >= 2 && stickId != int.MinValue && Time.unscaledTime - stickTime < 0.18f
+                && (plotTouches.Find(t => t.id == stickId).pos - stickOrigin).magnitude < 20f)
             {
-                var (id, p) = plotTouches[0];
-                if (stickId != id) { stickId = id; stickOrigin = p; }
-                ui.Stick.Drive(stickOrigin, p);
+                stickId = int.MinValue; // both fingers came down at once: look around instead of walking
+                pinchMode = true;
             }
-            else
+            if (plotTouches.Count == 0) pinchMode = false;
+
+            if (stickId != int.MinValue) ui.Stick.Drive(stickOrigin, plotTouches.Find(t => t.id == stickId).pos);
+            else ui.Stick.Drive(null, default);
+
+            // Look fingers: every other finger (or the right mouse button).
+            lookTouches.Clear();
+            foreach (var t in plotTouches) if (t.id != stickId) lookTouches.Add(t);
+            if (mouseLook) lookTouches.Add(touches.Find(t => t.id == RightMouse));
+            if (lookTouches.Count == 0) { camGesture = false; return; }
+            var mid = lookTouches.Count >= 2 ? (lookTouches[0].pos + lookTouches[1].pos) * 0.5f : lookTouches[0].pos;
+            float spread = lookTouches.Count >= 2 ? (lookTouches[0].pos - lookTouches[1].pos).magnitude : 0f;
+            int lookId = lookTouches[0].id;
+            if (camGesture && lookId == lastLookId && lookTouches.Count == lastLookCount)
             {
-                stickId = int.MinValue;
-                ui.Stick.Drive(null, default);
+                var d = mid - lastMid;
+                walker.Turn(d.x * TurnSpeed, -d.y * PitchSpeed);
+                if (spread > 1f && lastSpread > 1f) walker.Zoom(lastSpread / spread);
             }
+            camGesture = true;
+            lastLookId = lookId;
+            lastLookCount = lookTouches.Count;
+            lastMid = mid;
+            lastSpread = spread;
         }
 
         private const int LeftMouse = -1, RightMouse = -2;

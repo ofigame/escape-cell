@@ -55,6 +55,24 @@ namespace SquashBot.Gameplay
         /// <summary>Presses that start on these screen points (on-screen tool buttons) are left to the UI.</summary>
         public System.Func<Vector2, bool> Ignore { get; set; }
 
+        /// <summary>A finger (or the mouse button, or the space bar) is held down right now: the tunnel's jump goes higher while it is.</summary>
+        public static bool PointerHeld
+        {
+            get
+            {
+#if ENABLE_INPUT_SYSTEM
+                var ts = Touchscreen.current;
+                if (ts != null && ts.primaryTouch.press.isPressed) return true;
+                var mouse = Mouse.current;
+                if (mouse != null && mouse.leftButton.isPressed) return true;
+                var kb = Keyboard.current;
+                return kb != null && (kb.spaceKey.isPressed || kb.upArrowKey.isPressed || kb.wKey.isPressed);
+#else
+                return Input.touchCount > 0 || Input.GetMouseButton(0) || Input.GetKey(KeyCode.Space);
+#endif
+            }
+        }
+
         public InputReader(Camera camera)
         {
             cam = camera;
