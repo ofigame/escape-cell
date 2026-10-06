@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SquashBot.Core;
 using UnityEngine;
 
 namespace SquashBot.Data
@@ -38,6 +39,9 @@ namespace SquashBot.Data
 
             for (int i = FirstPowerUpLevel - 1; i < levels.Count; i++)
                 if (levels[i].mission != MissionType.CoinRain) levels[i].powerUpInterval = 11f;
+
+            for (int i = LevelsPerWorld; i < levels.Count; i++)
+                Shape(levels[i], i);
             return levels;
         }
 
@@ -82,6 +86,24 @@ namespace SquashBot.Data
             return level;
         }
 
+        /// <summary>
+        /// Gives a generated level its platform outline and stone pillars. Seeded by the level index, so a level
+        /// always looks the same. More outlines unlock and pillars multiply as the campaign goes on.
+        /// </summary>
+        private static void Shape(LevelData level, int index)
+        {
+            int world = WorldOf(index);
+            float d = Difficulty(world, index % LevelsPerWorld);
+            var rng = new System.Random(index * 7919 + 17);
+
+            var pool = world < 3
+                ? new[] { PlatformShape.Square, PlatformShape.L, PlatformShape.Step, PlatformShape.T, PlatformShape.U }
+                : new[] { PlatformShape.Square, PlatformShape.L, PlatformShape.Step, PlatformShape.T, PlatformShape.U, PlatformShape.Plus, PlatformShape.Ring };
+            var shape = pool[rng.Next(pool.Length)];
+            int pillars = level.mission == MissionType.CoinRain ? 1 : Mathf.Clamp(Mathf.RoundToInt(d * 3f + 0.6f), 1, 3);
+            level.layout = Layouts.Generate(level.gridWidth, shape, pillars, index);
+        }
+
         /// <summary>All the numbers that follow from a difficulty value (0 = gentle, 1 = the hardest late levels).</summary>
         private static LevelData Base(MissionType mission, float d)
         {
@@ -97,20 +119,21 @@ namespace SquashBot.Data
                 rampUp = Mathf.Lerp(0.2f, 0.5f, d),
                 coinTarget = 6 + Mathf.RoundToInt(d * 6f),
                 surviveSeconds = Mathf.Round(25f + d * 10f),
-                exitDelay = Mathf.Round(7f + d * 7f),
+                keys = 1 + Mathf.RoundToInt(d * 2f),
             };
 
             if (mission == MissionType.CoinRain)
             {
                 // A relaxed bonus: coins everywhere, a single slow block now and then.
-                level.surviveSeconds = 18f;
+                level.surviveSeconds = 20f;
+                level.coinTarget = 10 + Mathf.RoundToInt(d * 8f);
                 level.blocksPerWave = 1;
                 level.spawnInterval = 2.6f;
                 level.warningTime = 1.4f;
                 level.rampUp = 0f;
                 level.coinInterval = 0.45f;
                 level.coinLifetime = 3.2f;
-                level.maxCoins = 6;
+                level.maxCoins = 5;
             }
             else if (mission == MissionType.Survive)
             {
@@ -150,12 +173,23 @@ namespace SquashBot.Data
             levels[0].coinTarget = 5;
             levels[1].surviveSeconds = 20f;
             levels[3].coinTarget = 6;
-            levels[4].exitDelay = 6f;
+            levels[8].coinTarget = 10;
             levels[5].surviveSeconds = 25f;
             levels[6].breakTiles = true;
             levels[6].coinTarget = 7;
             levels[9].breakTiles = true;
-            levels[9].exitDelay = 8f;
+            levels[9].keys = 2;
+
+            // Shapes arrive gently: two plain squares, then a new outline every level or two, the first pillars late.
+            var shapes = new[]
+            {
+                PlatformShape.Square, PlatformShape.Square, PlatformShape.L, PlatformShape.Square, PlatformShape.T,
+                PlatformShape.L, PlatformShape.Step, PlatformShape.Square, PlatformShape.Square, PlatformShape.T,
+            };
+            int[] pillars = { 0, 0, 0, 0, 0, 1, 0, 1, 0, 1 };
+            for (int i = 0; i < levels.Count; i++)
+                if (shapes[i] != PlatformShape.Square || pillars[i] > 0)
+                    levels[i].layout = Layouts.Generate(levels[i].gridWidth, shapes[i], pillars[i], 1000 + i);
             return levels;
         }
     }

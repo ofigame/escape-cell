@@ -9,11 +9,11 @@ namespace SquashBot.Data
         CollectCoins,
         /// <summary>Stay alive for a number of seconds.</summary>
         Survive,
-        /// <summary>An exit door opens after a while; reach it to escape.</summary>
+        /// <summary>Collect the keys that appear far from the robot; then the door unlocks; reach it to escape.</summary>
         Exit,
         /// <summary>Step on every tile to paint the whole platform.</summary>
         Paint,
-        /// <summary>Bonus round: coins rain down, few hazards, the clock always wins.</summary>
+        /// <summary>Coins rain down: grab the target number before the clock runs out.</summary>
         CoinRain
     }
 
@@ -23,13 +23,15 @@ namespace SquashBot.Data
         [Header("Platform")]
         [Range(3, 6)] public int gridWidth = 3;
         [Range(3, 6)] public int gridHeight = 3;
+        [Tooltip("Optional shape: one row per line (row 0 = far edge), '#' floor, '.' no tile, 'X' obstacle. Empty = full rectangle.")]
+        public string[] layout;
 
         [Header("Mission")]
         public MissionType mission = MissionType.CollectCoins;
         public int coinTarget = 5;
         public float surviveSeconds = 30f;
-        [Tooltip("Exit missions: seconds until the door opens.")]
-        public float exitDelay = 8f;
+        [Tooltip("Exit missions: keys to collect (one at a time) before the door unlocks.")]
+        public int keys = 1;
 
         [Header("Blocks")]
         [Tooltip("Seconds between the red warning appearing and the block hitting the tile.")]
@@ -66,6 +68,11 @@ namespace SquashBot.Data
         public float powerUpLifetime = 5f;
         public float shieldDuration = 5f;
 
-        public LevelData Clone() => (LevelData)MemberwiseClone();
+        public LevelData Clone()
+        {
+            var copy = (LevelData)MemberwiseClone();
+            copy.layout = layout == null ? null : (string[])layout.Clone();
+            return copy;
+        }
     }
 }

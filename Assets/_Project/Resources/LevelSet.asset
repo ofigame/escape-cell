@@ -15,10 +15,11 @@ MonoBehaviour:
   levels:
   - gridWidth: 3
     gridHeight: 3
+    layout: []
     mission: 0
     coinTarget: 5
     surviveSeconds: 25
-    exitDelay: 7
+    keys: 1
     warningTime: 1.5
     spawnInterval: 2.2
     blocksPerWave: 1
@@ -39,10 +40,11 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 3
     gridHeight: 3
+    layout: []
     mission: 1
     coinTarget: 6
     surviveSeconds: 20
-    exitDelay: 7
+    keys: 1
     warningTime: 1.45
     spawnInterval: 2
     blocksPerWave: 1
@@ -63,10 +65,14 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 3
     gridHeight: 3
+    layout:
+    - .##
+    - '###'
+    - '###'
     mission: 3
     coinTarget: 6
     surviveSeconds: 25
-    exitDelay: 7
+    keys: 1
     warningTime: 1.45
     spawnInterval: 2.1
     blocksPerWave: 1
@@ -87,10 +93,11 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout: []
     mission: 0
     coinTarget: 6
     surviveSeconds: 25
-    exitDelay: 7
+    keys: 1
     warningTime: 1.4
     spawnInterval: 2
     blocksPerWave: 1
@@ -111,10 +118,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '##..'
+    - '####'
+    - '####'
+    - '##..'
     mission: 2
     coinTarget: 6
     surviveSeconds: 25
-    exitDelay: 6
+    keys: 1
     warningTime: 1.4
     spawnInterval: 2
     blocksPerWave: 1
@@ -135,10 +147,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - X###
+    - '####'
+    - '##..'
+    - '##..'
     mission: 1
     coinTarget: 6
     surviveSeconds: 25
-    exitDelay: 7
+    keys: 1
     warningTime: 1.45
     spawnInterval: 2.3
     blocksPerWave: 2
@@ -159,10 +176,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '###.'
+    - '####'
+    - '####'
+    - ..##
     mission: 0
     coinTarget: 7
     surviveSeconds: 25
-    exitDelay: 7
+    keys: 1
     warningTime: 1.35
     spawnInterval: 1.9
     blocksPerWave: 1
@@ -183,10 +205,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '#X##'
+    - '####'
+    - '####'
+    - '####'
     mission: 3
     coinTarget: 6
     surviveSeconds: 25
-    exitDelay: 7
+    keys: 1
     warningTime: 1.4
     spawnInterval: 2.2
     blocksPerWave: 2
@@ -207,10 +234,11 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout: []
     mission: 4
-    coinTarget: 6
-    surviveSeconds: 18
-    exitDelay: 7
+    coinTarget: 10
+    surviveSeconds: 20
+    keys: 1
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -225,16 +253,21 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - .##.
+    - .##.
+    - '####'
+    - '###X'
     mission: 2
     coinTarget: 6
     surviveSeconds: 25
-    exitDelay: 8
+    keys: 2
     warningTime: 1.35
     spawnInterval: 2
     blocksPerWave: 2
@@ -255,10 +288,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '###.'
+    - '###.'
+    - '#X##'
+    - .###
     mission: 2
     coinTarget: 6
     surviveSeconds: 25
-    exitDelay: 7
+    keys: 1
     warningTime: 1.3363802
     spawnInterval: 1.9822943
     blocksPerWave: 1
@@ -279,10 +317,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - .###
+    - '####'
+    - X##.
+    - '###.'
     mission: 1
     coinTarget: 6
     surviveSeconds: 26
-    exitDelay: 7
+    keys: 1
     warningTime: 1.3226303
     spawnInterval: 1.9644192
     blocksPerWave: 1
@@ -303,10 +346,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - ..##
+    - X###
+    - '####'
+    - ..##
     mission: 3
     coinTarget: 6
     surviveSeconds: 26
-    exitDelay: 8
+    keys: 1
     warningTime: 1.3088802
     spawnInterval: 1.9465443
     blocksPerWave: 1
@@ -327,10 +375,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '####'
+    - '####'
+    - .##.
+    - .X#.
     mission: 0
     coinTarget: 7
     surviveSeconds: 26
-    exitDelay: 8
+    keys: 1
     warningTime: 1.2951303
     spawnInterval: 1.9286693
     blocksPerWave: 1
@@ -351,10 +404,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '#..#'
+    - '#..#'
+    - '####'
+    - '###X'
     mission: 2
     coinTarget: 7
     surviveSeconds: 26
-    exitDelay: 8
+    keys: 1
     warningTime: 1.2813803
     spawnInterval: 1.9107943
     blocksPerWave: 1
@@ -375,10 +433,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '#..X'
+    - '#..#'
+    - '####'
+    - '####'
     mission: 3
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 8
+    keys: 1
     warningTime: 1.2676302
     spawnInterval: 1.8929193
     blocksPerWave: 1
@@ -399,10 +462,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '#..#'
+    - '#..#'
+    - '####'
+    - '##X#'
     mission: 1
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 8
+    keys: 1
     warningTime: 1.2538803
     spawnInterval: 1.8750443
     blocksPerWave: 2
@@ -423,10 +491,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - X###
+    - '####'
+    - '####'
+    - '####'
     mission: 0
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 9
+    keys: 1
     warningTime: 1.2401303
     spawnInterval: 1.8571693
     blocksPerWave: 2
@@ -447,10 +520,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '####'
+    - '####'
+    - X###
+    - '####'
     mission: 4
-    coinTarget: 7
-    surviveSeconds: 18
-    exitDelay: 9
+    coinTarget: 12
+    surviveSeconds: 20
+    keys: 1
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -465,16 +543,21 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '####'
+    - '####'
+    - ..#X
+    - ..##
     mission: 2
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 9
+    keys: 1
     warningTime: 1.1763803
     spawnInterval: 1.8392943
     blocksPerWave: 3
@@ -495,10 +578,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - ..##
+    - ..##
+    - '####'
+    - '###X'
     mission: 1
     coinTarget: 6
     surviveSeconds: 26
-    exitDelay: 7
+    keys: 1
     warningTime: 1.3152816
     spawnInterval: 1.954866
     blocksPerWave: 1
@@ -519,10 +607,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '###.'
+    - '####'
+    - .##X
+    - .###
     mission: 3
     coinTarget: 7
     surviveSeconds: 26
-    exitDelay: 8
+    keys: 1
     warningTime: 1.3015316
     spawnInterval: 1.936991
     blocksPerWave: 1
@@ -543,10 +636,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - .###
+    - .###
+    - '####'
+    - '#X#.'
     mission: 0
     coinTarget: 7
     surviveSeconds: 26
-    exitDelay: 8
+    keys: 1
     warningTime: 1.2877816
     spawnInterval: 1.919116
     blocksPerWave: 1
@@ -567,10 +665,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '###.'
+    - '####'
+    - .###
+    - .#X#
     mission: 2
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 8
+    keys: 1
     warningTime: 1.2740315
     spawnInterval: 1.9012411
     blocksPerWave: 1
@@ -591,10 +694,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - .##.
+    - .##.
+    - '####'
+    - '##X#'
     mission: 3
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 8
+    keys: 1
     warningTime: 1.2602816
     spawnInterval: 1.883366
     blocksPerWave: 2
@@ -615,10 +723,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - .##.
+    - .##.
+    - '####'
+    - X###
     mission: 1
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 8
+    keys: 1
     warningTime: 1.2465316
     spawnInterval: 1.865491
     blocksPerWave: 2
@@ -639,10 +752,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '#X##'
+    - '####'
+    - '#..#'
+    - '#..#'
     mission: 0
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 9
+    keys: 1
     warningTime: 1.2327815
     spawnInterval: 1.8476161
     blocksPerWave: 2
@@ -663,10 +781,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#####'
+    - '###X#'
+    - '#####'
+    - '#...#'
+    - '#...#'
     mission: 2
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.2190316
     spawnInterval: 1.829741
     blocksPerWave: 2
@@ -687,10 +811,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#####'
+    - '#####'
+    - '#####'
+    - X####
+    - '#####'
     mission: 4
-    coinTarget: 8
-    surviveSeconds: 18
-    exitDelay: 9
+    coinTarget: 12
+    surviveSeconds: 20
+    keys: 2
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -705,16 +835,22 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#X###'
     mission: 2
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.1552817
     spawnInterval: 1.811866
     blocksPerWave: 3
@@ -735,10 +871,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '###X'
+    - '####'
+    - '##..'
+    - '##..'
     mission: 3
     coinTarget: 7
     surviveSeconds: 26
-    exitDelay: 8
+    keys: 1
     warningTime: 1.2899817
     spawnInterval: 1.9219762
     blocksPerWave: 1
@@ -759,10 +900,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '##..'
+    - '##..'
+    - '###X'
+    - '####'
     mission: 0
     coinTarget: 7
     surviveSeconds: 26
-    exitDelay: 8
+    keys: 1
     warningTime: 1.2762318
     spawnInterval: 1.9041013
     blocksPerWave: 1
@@ -783,10 +929,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - .###
+    - '####'
+    - '###.'
+    - X##.
     mission: 2
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 8
+    keys: 1
     warningTime: 1.2624817
     spawnInterval: 1.8862262
     blocksPerWave: 2
@@ -807,10 +958,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - ..##
+    - '####'
+    - '####'
+    - ..X#
     mission: 3
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 8
+    keys: 1
     warningTime: 1.2487317
     spawnInterval: 1.8683512
     blocksPerWave: 2
@@ -831,10 +987,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - ..##
+    - '####'
+    - '###X'
+    - ..##
     mission: 1
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 9
+    keys: 1
     warningTime: 1.2349818
     spawnInterval: 1.8504763
     blocksPerWave: 2
@@ -855,10 +1016,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#...#'
+    - '#...#'
+    - '#####'
+    - X####
+    - '#####'
     mission: 0
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.2212317
     spawnInterval: 1.8326012
     blocksPerWave: 2
@@ -879,10 +1046,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#...#'
+    - '#...#'
+    - '#####'
+    - '#####'
+    - X####
     mission: 2
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.2074817
     spawnInterval: 1.8147262
     blocksPerWave: 2
@@ -903,10 +1076,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .###.
+    - '###X#'
+    - X####
+    - '#####'
+    - .###.
     mission: 1
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.1937318
     spawnInterval: 1.7968513
     blocksPerWave: 2
@@ -927,10 +1106,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#####'
+    - '#####'
+    - '##.##'
+    - '####X'
+    - '#####'
     mission: 4
-    coinTarget: 8
-    surviveSeconds: 18
-    exitDelay: 9
+    coinTarget: 13
+    surviveSeconds: 20
+    keys: 2
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -945,16 +1130,22 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '####X'
+    - '#####'
+    - '##.##'
+    - '#####'
+    - '#X###'
     mission: 2
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.1299818
     spawnInterval: 1.7789762
     blocksPerWave: 3
@@ -975,10 +1166,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '####'
+    - '####'
+    - X###
+    - '####'
     mission: 0
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 8
+    keys: 1
     warningTime: 1.2614985
     spawnInterval: 1.884948
     blocksPerWave: 2
@@ -999,10 +1195,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '####'
+    - '####'
+    - '###X'
+    - '####'
     mission: 2
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 8
+    keys: 1
     warningTime: 1.2477485
     spawnInterval: 1.8670729
     blocksPerWave: 2
@@ -1023,10 +1224,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - '####'
+    - '####'
+    - ..##
+    - ..X#
     mission: 3
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 9
+    keys: 1
     warningTime: 1.2339984
     spawnInterval: 1.849198
     blocksPerWave: 2
@@ -1047,10 +1253,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .#X##
+    - .####
+    - '#####'
+    - '#####'
+    - '####.'
     mission: 1
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.2202485
     spawnInterval: 1.831323
     blocksPerWave: 2
@@ -1071,10 +1283,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '####.'
+    - '#####'
+    - '#####'
+    - .####
+    - .###X
     mission: 0
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.2064985
     spawnInterval: 1.813448
     blocksPerWave: 2
@@ -1095,10 +1313,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '###..'
+    - '#####'
+    - '####X'
+    - X####
+    - '###..'
     mission: 2
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.1927484
     spawnInterval: 1.795573
     blocksPerWave: 2
@@ -1119,10 +1343,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .X##.
+    - .###.
+    - '#####'
+    - '#####'
+    - '#X###'
     mission: 1
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.1789985
     spawnInterval: 1.777698
     blocksPerWave: 2
@@ -1143,10 +1373,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#####'
+    - X##X#
+    - '#####'
+    - '#...#'
+    - '#...#'
     mission: 3
     coinTarget: 8
     surviveSeconds: 29
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1652485
     spawnInterval: 1.759823
     blocksPerWave: 2
@@ -1167,10 +1403,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .###.
+    - '#####'
+    - '#####'
+    - '####X'
+    - .###.
     mission: 4
-    coinTarget: 8
-    surviveSeconds: 18
-    exitDelay: 10
+    coinTarget: 13
+    surviveSeconds: 20
+    keys: 2
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -1185,16 +1427,22 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .X##.
+    - '#####'
+    - '#####'
+    - X####
+    - .###.
     mission: 2
     coinTarget: 8
     surviveSeconds: 29
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1014985
     spawnInterval: 1.741948
     blocksPerWave: 3
@@ -1215,10 +1463,15 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 4
     gridHeight: 4
+    layout:
+    - X###
+    - '#..#'
+    - '#..#'
+    - '####'
     mission: 2
     coinTarget: 7
     surviveSeconds: 27
-    exitDelay: 9
+    keys: 1
     warningTime: 1.2303867
     spawnInterval: 1.8445027
     blocksPerWave: 2
@@ -1239,10 +1492,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#####'
+    - X####
+    - '##.##'
+    - '#####'
+    - '#####'
     mission: 3
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.2166368
     spawnInterval: 1.8266277
     blocksPerWave: 2
@@ -1263,10 +1522,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - X####
     mission: 1
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.2028867
     spawnInterval: 1.8087528
     blocksPerWave: 2
@@ -1287,10 +1552,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#X###'
+    - '####X'
+    - '#####'
+    - '###..'
+    - '###..'
     mission: 0
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.1891367
     spawnInterval: 1.7908777
     blocksPerWave: 2
@@ -1311,10 +1582,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '###..'
+    - '###..'
+    - X####
+    - '#####'
+    - '###X#'
     mission: 2
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.1753868
     spawnInterval: 1.7730027
     blocksPerWave: 2
@@ -1335,10 +1612,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .####
+    - X####
+    - '#####'
+    - '####.'
+    - '#X##.'
     mission: 1
     coinTarget: 8
     surviveSeconds: 29
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1616367
     spawnInterval: 1.7551278
     blocksPerWave: 2
@@ -1359,10 +1642,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#X##.'
+    - '####.'
+    - '####X'
+    - '#####'
+    - .####
     mission: 3
     coinTarget: 8
     surviveSeconds: 29
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1478868
     spawnInterval: 1.7372527
     blocksPerWave: 2
@@ -1383,10 +1672,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '###X#'
+    - '#####'
+    - '#####'
+    - .X##.
+    - .###.
     mission: 0
     coinTarget: 9
     surviveSeconds: 29
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1341367
     spawnInterval: 1.7193778
     blocksPerWave: 2
@@ -1407,10 +1702,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#...#'
+    - '#...#'
+    - '#####'
+    - '####X'
+    - '#####'
     mission: 4
-    coinTarget: 9
-    surviveSeconds: 18
-    exitDelay: 10
+    coinTarget: 14
+    surviveSeconds: 20
+    keys: 2
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -1425,16 +1726,22 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - X...#
+    - '#...#'
+    - '#####'
+    - '#####'
+    - X####
     mission: 2
     coinTarget: 9
     surviveSeconds: 30
-    exitDelay: 10
+    keys: 2
     warningTime: 1.0703868
     spawnInterval: 1.7015027
     blocksPerWave: 3
@@ -1455,10 +1762,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .###.
+    - '####X'
+    - '#####'
+    - '#X###'
+    - .###.
     mission: 3
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.1970061
     spawnInterval: 1.801108
     blocksPerWave: 2
@@ -1479,10 +1792,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#####'
+    - '#####'
+    - X#.##
+    - '####X'
+    - '#####'
     mission: 1
     coinTarget: 8
     surviveSeconds: 28
-    exitDelay: 9
+    keys: 2
     warningTime: 1.1832561
     spawnInterval: 1.7832329
     blocksPerWave: 2
@@ -1503,10 +1822,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#####'
+    - '#####'
+    - '##.##'
+    - '#####'
+    - X##X#
     mission: 0
     coinTarget: 8
     surviveSeconds: 29
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1695061
     spawnInterval: 1.765358
     blocksPerWave: 2
@@ -1527,10 +1852,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#X###'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '###X#'
     mission: 2
     coinTarget: 8
     surviveSeconds: 29
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1557561
     spawnInterval: 1.7474829
     blocksPerWave: 2
@@ -1551,10 +1882,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '##X##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#X###'
     mission: 1
     coinTarget: 8
     surviveSeconds: 29
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1420062
     spawnInterval: 1.7296079
     blocksPerWave: 2
@@ -1575,10 +1912,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '###X#'
+    - '#####'
+    - '#####'
+    - ..##X
+    - ..###
     mission: 3
     coinTarget: 9
     surviveSeconds: 29
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1282561
     spawnInterval: 1.711733
     blocksPerWave: 2
@@ -1599,10 +1942,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .##X#
+    - .####
+    - '#####'
+    - '#####'
+    - '###X.'
     mission: 0
     coinTarget: 9
     surviveSeconds: 30
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1145061
     spawnInterval: 1.6938579
     blocksPerWave: 2
@@ -1623,10 +1972,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - X###.
+    - '#####'
+    - '####X'
+    - .####
+    - .####
     mission: 2
     coinTarget: 9
     surviveSeconds: 30
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1007562
     spawnInterval: 1.675983
     blocksPerWave: 2
@@ -1647,10 +2002,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .###.
+    - .###.
+    - '#####'
+    - '###X#'
+    - '#####'
     mission: 4
-    coinTarget: 9
-    surviveSeconds: 18
-    exitDelay: 11
+    coinTarget: 14
+    surviveSeconds: 20
+    keys: 2
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -1665,16 +2026,22 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .###.
+    - .###.
+    - '#####'
+    - '#X###'
+    - '###X#'
     mission: 2
     coinTarget: 9
     surviveSeconds: 30
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0370061
     spawnInterval: 1.658108
     blocksPerWave: 4
@@ -1695,10 +2062,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '####X'
+    - '#X###'
+    - '#####'
+    - '#...#'
+    - '#...#'
     mission: 1
     coinTarget: 8
     surviveSeconds: 29
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1616125
     spawnInterval: 1.7550962
     blocksPerWave: 2
@@ -1719,10 +2092,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .###.
+    - '###X#'
+    - '#####'
+    - '###X#'
+    - .###.
     mission: 0
     coinTarget: 8
     surviveSeconds: 29
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1478624
     spawnInterval: 1.7372211
     blocksPerWave: 2
@@ -1743,10 +2122,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .###.
+    - '####X'
+    - '#####'
+    - '#####'
+    - .#X#.
     mission: 2
     coinTarget: 9
     surviveSeconds: 29
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1341125
     spawnInterval: 1.7193462
     blocksPerWave: 2
@@ -1767,10 +2152,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#####'
+    - '#X###'
+    - '##.##'
+    - '#####'
+    - X####
     mission: 1
     coinTarget: 9
     surviveSeconds: 30
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1203625
     spawnInterval: 1.7014712
     blocksPerWave: 2
@@ -1791,10 +2182,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#####'
+    - '#X###'
+    - '##.##'
+    - '#####'
+    - '#X###'
     mission: 3
     coinTarget: 9
     surviveSeconds: 30
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1066124
     spawnInterval: 1.6835961
     blocksPerWave: 2
@@ -1815,10 +2212,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##X#X'
     mission: 0
     coinTarget: 9
     surviveSeconds: 30
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0928625
     spawnInterval: 1.6657212
     blocksPerWave: 3
@@ -1839,10 +2242,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - X###X
+    - '#####'
+    - '#####'
+    - '###..'
+    - '###..'
     mission: 2
     coinTarget: 9
     surviveSeconds: 30
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0791125
     spawnInterval: 1.6478462
     blocksPerWave: 3
@@ -1863,10 +2272,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '###..'
+    - '###..'
+    - X###X
+    - '#####'
+    - '#####'
     mission: 3
     coinTarget: 9
     surviveSeconds: 31
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0653625
     spawnInterval: 1.6299711
     blocksPerWave: 3
@@ -1887,10 +2302,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .####
+    - '#####'
+    - '#####'
+    - '###X.'
+    - '####.'
     mission: 4
-    coinTarget: 10
-    surviveSeconds: 18
-    exitDelay: 11
+    coinTarget: 15
+    surviveSeconds: 20
+    keys: 2
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -1905,16 +2326,22 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '##X#.'
+    - X###.
+    - '#####'
+    - '#####'
+    - .####
     mission: 2
     coinTarget: 10
     surviveSeconds: 31
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0016125
     spawnInterval: 1.6120962
     blocksPerWave: 4
@@ -1935,10 +2362,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#####'
+    - '#X###'
+    - '#####'
+    - .##X.
+    - .###.
     mission: 0
     coinTarget: 9
     surviveSeconds: 30
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1243988
     spawnInterval: 1.7067184
     blocksPerWave: 2
@@ -1959,10 +2392,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - X...#
+    - '#...#'
+    - '#####'
+    - '#####'
+    - '#X###'
     mission: 2
     coinTarget: 9
     surviveSeconds: 30
-    exitDelay: 10
+    keys: 2
     warningTime: 1.1106489
     spawnInterval: 1.6888435
     blocksPerWave: 2
@@ -1983,10 +2422,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#...#'
+    - '#...#'
+    - '#####'
+    - X####
+    - '####X'
     mission: 1
     coinTarget: 9
     surviveSeconds: 30
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0968988
     spawnInterval: 1.6709684
     blocksPerWave: 3
@@ -2007,10 +2452,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .###.
+    - X####
+    - '#####'
+    - X####
+    - .###.
     mission: 3
     coinTarget: 9
     surviveSeconds: 30
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0831488
     spawnInterval: 1.6530935
     blocksPerWave: 3
@@ -2031,10 +2482,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .###.
+    - '#####'
+    - '####X'
+    - '#####'
+    - .#X#.
     mission: 0
     coinTarget: 9
     surviveSeconds: 31
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0693989
     spawnInterval: 1.6352185
     blocksPerWave: 3
@@ -2055,10 +2512,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '####X'
+    - '#####'
+    - '##.##'
+    - '#####'
+    - '###X#'
     mission: 2
     coinTarget: 10
     surviveSeconds: 31
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0556488
     spawnInterval: 1.6173434
     blocksPerWave: 3
@@ -2079,10 +2542,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - X####
+    - '#####'
+    - '#####'
+    - '#####'
+    - '####X'
     mission: 3
     coinTarget: 10
     surviveSeconds: 31
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0418988
     spawnInterval: 1.5994685
     blocksPerWave: 3
@@ -2103,10 +2572,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '##X##'
+    - '#####'
+    - X####
+    - '#####'
+    - '####X'
     mission: 1
     coinTarget: 10
     surviveSeconds: 31
-    exitDelay: 12
+    keys: 2
     warningTime: 1.0281489
     spawnInterval: 1.5815935
     blocksPerWave: 3
@@ -2127,10 +2602,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '######'
+    - '######'
+    - '######'
+    - ...###
+    - ...X##
+    - ...###
     mission: 4
-    coinTarget: 10
-    surviveSeconds: 18
-    exitDelay: 12
+    coinTarget: 15
+    surviveSeconds: 20
+    keys: 2
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -2145,16 +2627,23 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ...##X
+    - ...###
+    - ...###
+    - '######'
+    - '####X#'
+    - '#X####'
     mission: 2
     coinTarget: 10
     surviveSeconds: 32
-    exitDelay: 12
+    keys: 2
     warningTime: 0.9643988
     spawnInterval: 1.5637184
     blocksPerWave: 4
@@ -2175,10 +2664,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '###X.'
+    - '#X###'
+    - '#####'
+    - .####
+    - .####
     mission: 2
     coinTarget: 9
     surviveSeconds: 30
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0855173
     spawnInterval: 1.6561725
     blocksPerWave: 3
@@ -2199,10 +2694,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .###.
+    - .###.
+    - '#####'
+    - X###X
+    - '#####'
     mission: 1
     coinTarget: 9
     surviveSeconds: 31
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0717673
     spawnInterval: 1.6382974
     blocksPerWave: 3
@@ -2223,10 +2724,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .###.
+    - .###.
+    - '#####'
+    - '#####'
+    - X###X
     mission: 3
     coinTarget: 10
     surviveSeconds: 31
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0580173
     spawnInterval: 1.6204225
     blocksPerWave: 3
@@ -2247,10 +2754,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '##X##'
+    - X####
+    - '#####'
+    - '#...#'
+    - '#...#'
     mission: 0
     coinTarget: 10
     surviveSeconds: 31
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0442673
     spawnInterval: 1.6025475
     blocksPerWave: 3
@@ -2271,10 +2784,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '#####'
+    - '#X#X#'
+    - '#####'
+    - '#...#'
+    - X...#
     mission: 2
     coinTarget: 10
     surviveSeconds: 31
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0305173
     spawnInterval: 1.5846725
     blocksPerWave: 3
@@ -2295,10 +2814,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ..##..
+    - ..##..
+    - '######'
+    - '######'
+    - ..##..
+    - ..##..
     mission: 3
     coinTarget: 10
     surviveSeconds: 32
-    exitDelay: 12
+    keys: 2
     warningTime: 1.0167673
     spawnInterval: 1.5667975
     blocksPerWave: 3
@@ -2319,10 +2845,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '##X##X'
+    - '######'
+    - X#..##
+    - '##..##'
+    - '######'
+    - '######'
     mission: 1
     coinTarget: 10
     surviveSeconds: 32
-    exitDelay: 12
+    keys: 2
     warningTime: 1.0030173
     spawnInterval: 1.5489225
     blocksPerWave: 3
@@ -2343,10 +2876,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - X#####
+    - '######'
+    - '#X..##'
+    - '##..##'
+    - '######'
+    - '#X####'
     mission: 0
     coinTarget: 10
     surviveSeconds: 32
-    exitDelay: 12
+    keys: 2
     warningTime: 0.98926735
     spawnInterval: 1.5310475
     blocksPerWave: 3
@@ -2367,10 +2907,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '######'
+    - '######'
+    - '######'
+    - '######'
+    - '###X##'
+    - '######'
     mission: 4
-    coinTarget: 10
-    surviveSeconds: 18
-    exitDelay: 12
+    coinTarget: 16
+    surviveSeconds: 20
+    keys: 2
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -2385,16 +2932,23 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '#####X'
+    - '######'
+    - '######'
+    - '######'
+    - X###X#
+    - '######'
     mission: 2
     coinTarget: 10
     surviveSeconds: 32
-    exitDelay: 12
+    keys: 2
     warningTime: 0.92551726
     spawnInterval: 1.5131725
     blocksPerWave: 4
@@ -2415,10 +2969,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - '###..'
+    - X##..
+    - '#####'
+    - '####X'
+    - '#####'
     mission: 1
     coinTarget: 10
     surviveSeconds: 31
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0450913
     spawnInterval: 1.6036186
     blocksPerWave: 3
@@ -2439,10 +2999,16 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 5
     gridHeight: 5
+    layout:
+    - .####
+    - '#####'
+    - X####
+    - '####.'
+    - '#X#X.'
     mission: 3
     coinTarget: 10
     surviveSeconds: 31
-    exitDelay: 11
+    keys: 2
     warningTime: 1.0313413
     spawnInterval: 1.5857437
     blocksPerWave: 3
@@ -2463,10 +3029,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '###...'
+    - X##...
+    - '######'
+    - '#####X'
+    - ..####
+    - ..##X#
     mission: 0
     coinTarget: 10
     surviveSeconds: 32
-    exitDelay: 12
+    keys: 2
     warningTime: 1.0175912
     spawnInterval: 1.5678686
     blocksPerWave: 3
@@ -2487,10 +3060,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '###X##'
+    - X#####
+    - '######'
+    - ..##..
+    - ..##..
+    - ..#X..
     mission: 2
     coinTarget: 10
     surviveSeconds: 32
-    exitDelay: 12
+    keys: 2
     warningTime: 1.0038413
     spawnInterval: 1.5499936
     blocksPerWave: 3
@@ -2511,10 +3091,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '###X##'
+    - '######'
+    - '#####X'
+    - ..##..
+    - ..##..
+    - ..#X..
     mission: 3
     coinTarget: 10
     surviveSeconds: 32
-    exitDelay: 12
+    keys: 2
     warningTime: 0.9900913
     spawnInterval: 1.5321187
     blocksPerWave: 3
@@ -2535,10 +3122,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '#X..##'
+    - '##..##'
+    - '##..#X'
+    - '######'
+    - '######'
+    - '###X##'
     mission: 1
     coinTarget: 10
     surviveSeconds: 32
-    exitDelay: 12
+    keys: 2
     warningTime: 0.97634125
     spawnInterval: 1.5142436
     blocksPerWave: 3
@@ -2559,10 +3153,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ..##..
+    - ..##..
+    - '######'
+    - '######'
+    - ..##..
+    - ..##..
     mission: 0
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 12
+    keys: 3
     warningTime: 0.9625913
     spawnInterval: 1.4963686
     blocksPerWave: 3
@@ -2583,10 +3184,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ..##..
+    - ..##..
+    - '######'
+    - '######'
+    - ..##..
+    - ..##..
     mission: 2
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 13
+    keys: 3
     warningTime: 0.9488413
     spawnInterval: 1.4784937
     blocksPerWave: 3
@@ -2607,10 +3215,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '######'
+    - '######'
+    - '##..##'
+    - '##..##'
+    - '###X##'
+    - '######'
     mission: 4
-    coinTarget: 11
-    surviveSeconds: 18
-    exitDelay: 13
+    coinTarget: 17
+    surviveSeconds: 20
+    keys: 3
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -2625,16 +3240,23 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '####X#'
+    - '######'
+    - '##..##'
+    - X#..X#
+    - '######'
+    - '######'
     mission: 2
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 13
+    keys: 3
     warningTime: 0.88509125
     spawnInterval: 1.4606186
     blocksPerWave: 4
@@ -2655,10 +3277,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - X#####
+    - '######'
+    - X#####
+    - '######'
+    - '####X#'
+    - '######'
     mission: 3
     coinTarget: 10
     surviveSeconds: 32
-    exitDelay: 12
+    keys: 2
     warningTime: 1.0032232
     spawnInterval: 1.5491902
     blocksPerWave: 3
@@ -2679,10 +3308,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '######'
+    - X###X#
+    - '######'
+    - ...##X
+    - ...###
+    - ...###
     mission: 0
     coinTarget: 10
     surviveSeconds: 32
-    exitDelay: 12
+    keys: 2
     warningTime: 0.9894732
     spawnInterval: 1.5313151
     blocksPerWave: 3
@@ -2703,10 +3339,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ...X##
+    - ...###
+    - ...###
+    - '######'
+    - '######'
+    - '##X#X#'
     mission: 2
     coinTarget: 10
     surviveSeconds: 32
-    exitDelay: 12
+    keys: 2
     warningTime: 0.9757232
     spawnInterval: 1.5134401
     blocksPerWave: 3
@@ -2727,10 +3370,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ..####
+    - ..###X
+    - '#X####'
+    - '######'
+    - '###...'
+    - '#X#...'
     mission: 3
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 12
+    keys: 3
     warningTime: 0.9619732
     spawnInterval: 1.4955652
     blocksPerWave: 3
@@ -2751,10 +3401,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '#X##..'
+    - '####..'
+    - '######'
+    - '#X####'
+    - ...###
+    - ...X##
     mission: 1
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 13
+    keys: 3
     warningTime: 0.94822323
     spawnInterval: 1.4776901
     blocksPerWave: 3
@@ -2775,10 +3432,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ..##..
+    - ..##..
+    - ..##..
+    - X#####
+    - '######'
+    - X##X##
     mission: 0
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 13
+    keys: 3
     warningTime: 0.9344732
     spawnInterval: 1.4598151
     blocksPerWave: 3
@@ -2799,10 +3463,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '#####X'
+    - '######'
+    - '#X####'
+    - '##..##'
+    - '##..X#'
+    - '##..##'
     mission: 2
     coinTarget: 11
     surviveSeconds: 34
-    exitDelay: 13
+    keys: 3
     warningTime: 0.9207232
     spawnInterval: 1.4419402
     blocksPerWave: 4
@@ -2823,10 +3494,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '##X###'
+    - '######'
+    - X#####
+    - '##..##'
+    - '##..X#'
+    - '##..##'
     mission: 1
     coinTarget: 11
     surviveSeconds: 34
-    exitDelay: 13
+    keys: 3
     warningTime: 0.90697324
     spawnInterval: 1.4240651
     blocksPerWave: 4
@@ -2847,10 +3525,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ..##..
+    - ..##..
+    - '######'
+    - '######'
+    - ..##..
+    - ..##..
     mission: 4
-    coinTarget: 11
-    surviveSeconds: 18
-    exitDelay: 13
+    coinTarget: 17
+    surviveSeconds: 20
+    keys: 3
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -2865,16 +3550,23 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ..##..
+    - ..##..
+    - '######'
+    - '######'
+    - ..##..
+    - ..##..
     mission: 2
     coinTarget: 11
     surviveSeconds: 34
-    exitDelay: 13
+    keys: 3
     warningTime: 0.85
     spawnInterval: 1.4061902
     blocksPerWave: 4
@@ -2895,10 +3587,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '######'
+    - '##X###'
+    - X#..##
+    - '##..##'
+    - '######'
+    - X#####
     mission: 0
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 12
+    keys: 3
     warningTime: 0.96000004
     spawnInterval: 1.493
     blocksPerWave: 3
@@ -2919,10 +3618,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '##X###'
+    - '######'
+    - '######'
+    - '#X####'
+    - '######'
+    - '#X####'
     mission: 2
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 13
+    keys: 3
     warningTime: 0.9462501
     spawnInterval: 1.4751251
     blocksPerWave: 3
@@ -2943,10 +3649,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '######'
+    - '######'
+    - '#X####'
+    - '######'
+    - '#X####'
+    - '###X##'
     mission: 3
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 13
+    keys: 3
     warningTime: 0.9325
     spawnInterval: 1.45725
     blocksPerWave: 4
@@ -2967,10 +3680,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '###...'
+    - '###...'
+    - '###...'
+    - '######'
+    - '##X###'
+    - X####X
     mission: 1
     coinTarget: 11
     surviveSeconds: 34
-    exitDelay: 13
+    keys: 3
     warningTime: 0.91875005
     spawnInterval: 1.439375
     blocksPerWave: 4
@@ -2991,10 +3711,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ...###
+    - ...###
+    - ...###
+    - '#X###X'
+    - '###X##'
+    - '######'
     mission: 0
     coinTarget: 11
     surviveSeconds: 34
-    exitDelay: 13
+    keys: 3
     warningTime: 0.90500003
     spawnInterval: 1.4215001
     blocksPerWave: 4
@@ -3015,10 +3742,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '###...'
+    - '###...'
+    - '#X####'
+    - '####X#'
+    - ..####
+    - ..X###
     mission: 2
     coinTarget: 12
     surviveSeconds: 34
-    exitDelay: 13
+    keys: 3
     warningTime: 0.89125
     spawnInterval: 1.403625
     blocksPerWave: 4
@@ -3039,10 +3773,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '####X#'
+    - '######'
+    - X#####
+    - ..##..
+    - ..##..
+    - ..X#..
     mission: 1
     coinTarget: 12
     surviveSeconds: 34
-    exitDelay: 14
+    keys: 3
     warningTime: 0.87750006
     spawnInterval: 1.38575
     blocksPerWave: 4
@@ -3063,10 +3804,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - X##X##
+    - '######'
+    - X#####
+    - ..##..
+    - ..##..
+    - ..##..
     mission: 3
     coinTarget: 12
     surviveSeconds: 35
-    exitDelay: 14
+    keys: 3
     warningTime: 0.86375004
     spawnInterval: 1.3678751
     blocksPerWave: 4
@@ -3087,10 +3835,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '##..##'
+    - '##..##'
+    - '##..##'
+    - '######'
+    - '##X###'
+    - '######'
     mission: 4
-    coinTarget: 12
-    surviveSeconds: 18
-    exitDelay: 14
+    coinTarget: 18
+    surviveSeconds: 20
+    keys: 3
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -3105,16 +3860,23 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '##..X#'
+    - '#X..##'
+    - '##..##'
+    - X#####
+    - '######'
+    - '######'
     mission: 2
     coinTarget: 12
     surviveSeconds: 35
-    exitDelay: 14
+    keys: 3
     warningTime: 0.85
     spawnInterval: 1.35
     blocksPerWave: 4
@@ -3135,10 +3897,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ..##..
+    - ..##..
+    - '######'
+    - '######'
+    - ..##..
+    - ..##..
     mission: 2
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 12
+    keys: 3
     warningTime: 0.96000004
     spawnInterval: 1.493
     blocksPerWave: 3
@@ -3159,10 +3928,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '######'
+    - '####X#'
+    - '##..##'
+    - '#X..##'
+    - '######'
+    - '#####X'
     mission: 3
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 13
+    keys: 3
     warningTime: 0.9462501
     spawnInterval: 1.4751251
     blocksPerWave: 3
@@ -3183,10 +3959,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '######'
+    - '####X#'
+    - '##..##'
+    - '##..##'
+    - '######'
+    - '###X#X'
     mission: 1
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 13
+    keys: 3
     warningTime: 0.9325
     spawnInterval: 1.45725
     blocksPerWave: 4
@@ -3207,10 +3990,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '######'
+    - '#####X'
+    - '######'
+    - X#####
+    - '#####X'
+    - '######'
     mission: 0
     coinTarget: 11
     surviveSeconds: 34
-    exitDelay: 13
+    keys: 3
     warningTime: 0.91875005
     spawnInterval: 1.439375
     blocksPerWave: 4
@@ -3231,10 +4021,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '###X##'
+    - X#####
+    - '######'
+    - X#####
+    - '######'
+    - '######'
     mission: 2
     coinTarget: 11
     surviveSeconds: 34
-    exitDelay: 13
+    keys: 3
     warningTime: 0.90500003
     spawnInterval: 1.4215001
     blocksPerWave: 4
@@ -3255,10 +4052,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '######'
+    - '#X###X'
+    - '######'
+    - ...##X
+    - ...###
+    - ...###
     mission: 1
     coinTarget: 12
     surviveSeconds: 34
-    exitDelay: 13
+    keys: 3
     warningTime: 0.89125
     spawnInterval: 1.403625
     blocksPerWave: 4
@@ -3279,10 +4083,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ..X###
+    - ..##X#
+    - '######'
+    - '##X###'
+    - '###...'
+    - '###...'
     mission: 3
     coinTarget: 12
     surviveSeconds: 34
-    exitDelay: 14
+    keys: 3
     warningTime: 0.87750006
     spawnInterval: 1.38575
     blocksPerWave: 4
@@ -3303,10 +4114,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '#X##..'
+    - '####..'
+    - X#####
+    - '######'
+    - ...###
+    - ...#X#
     mission: 0
     coinTarget: 12
     surviveSeconds: 35
-    exitDelay: 14
+    keys: 3
     warningTime: 0.86375004
     spawnInterval: 1.3678751
     blocksPerWave: 4
@@ -3327,10 +4145,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ..##..
+    - ..##..
+    - ..##..
+    - '######'
+    - '#X####'
+    - '######'
     mission: 4
-    coinTarget: 12
-    surviveSeconds: 18
-    exitDelay: 14
+    coinTarget: 18
+    surviveSeconds: 20
+    keys: 3
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -3345,16 +4170,23 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ..#X..
+    - ..##..
+    - ..##..
+    - '######'
+    - X####X
+    - '######'
     mission: 2
     coinTarget: 12
     surviveSeconds: 35
-    exitDelay: 14
+    keys: 3
     warningTime: 0.85
     spawnInterval: 1.35
     blocksPerWave: 4
@@ -3375,10 +4207,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '####X#'
+    - '######'
+    - '#####X'
+    - '##..##'
+    - '##..X#'
+    - '##..##'
     mission: 3
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 12
+    keys: 3
     warningTime: 0.96000004
     spawnInterval: 1.493
     blocksPerWave: 3
@@ -3399,10 +4238,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ..##..
+    - ..##..
+    - '######'
+    - '######'
+    - ..##..
+    - ..##..
     mission: 1
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 13
+    keys: 3
     warningTime: 0.9462501
     spawnInterval: 1.4751251
     blocksPerWave: 3
@@ -3423,10 +4269,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ..##..
+    - ..##..
+    - '######'
+    - '######'
+    - ..##..
+    - ..##..
     mission: 0
     coinTarget: 11
     surviveSeconds: 33
-    exitDelay: 13
+    keys: 3
     warningTime: 0.9325
     spawnInterval: 1.45725
     blocksPerWave: 4
@@ -3447,10 +4300,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '######'
+    - X###X#
+    - '##..##'
+    - '##..##'
+    - '######'
+    - '#####X'
     mission: 2
     coinTarget: 11
     surviveSeconds: 34
-    exitDelay: 13
+    keys: 3
     warningTime: 0.91875005
     spawnInterval: 1.439375
     blocksPerWave: 4
@@ -3471,10 +4331,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '######'
+    - '####X#'
+    - '######'
+    - X#X###
+    - '######'
+    - '######'
     mission: 1
     coinTarget: 11
     surviveSeconds: 34
-    exitDelay: 13
+    keys: 3
     warningTime: 0.90500003
     spawnInterval: 1.4215001
     blocksPerWave: 4
@@ -3495,10 +4362,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '#X####'
+    - '######'
+    - '######'
+    - '######'
+    - '######'
+    - '##X#X#'
     mission: 3
     coinTarget: 12
     surviveSeconds: 34
-    exitDelay: 13
+    keys: 3
     warningTime: 0.89125
     spawnInterval: 1.403625
     blocksPerWave: 4
@@ -3519,10 +4393,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - X##...
+    - '###...'
+    - '###...'
+    - '######'
+    - X#####
+    - '####X#'
     mission: 0
     coinTarget: 12
     surviveSeconds: 34
-    exitDelay: 14
+    keys: 3
     warningTime: 0.87750006
     spawnInterval: 1.38575
     blocksPerWave: 4
@@ -3543,10 +4424,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - ...##X
+    - ...###
+    - ...##X
+    - '######'
+    - '######'
+    - '#X####'
     mission: 2
     coinTarget: 12
     surviveSeconds: 35
-    exitDelay: 14
+    keys: 3
     warningTime: 0.86375004
     spawnInterval: 1.3678751
     blocksPerWave: 4
@@ -3567,10 +4455,17 @@ MonoBehaviour:
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '###...'
+    - '###...'
+    - '######'
+    - '######'
+    - ..###X
+    - ..####
     mission: 4
-    coinTarget: 12
-    surviveSeconds: 18
-    exitDelay: 14
+    coinTarget: 18
+    surviveSeconds: 20
+    keys: 3
     warningTime: 1.4
     spawnInterval: 2.6
     blocksPerWave: 1
@@ -3585,16 +4480,23 @@ MonoBehaviour:
     fireDuration: 3.5
     coinInterval: 0.45
     coinLifetime: 3.2
-    maxCoins: 4
+    maxCoins: 5
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
     gridHeight: 6
+    layout:
+    - '###X##'
+    - '######'
+    - X#####
+    - ..X#..
+    - ..##..
+    - ..##..
     mission: 2
     coinTarget: 12
     surviveSeconds: 35
-    exitDelay: 14
+    keys: 3
     warningTime: 0.85
     spawnInterval: 1.35
     blocksPerWave: 4

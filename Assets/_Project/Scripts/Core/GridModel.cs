@@ -12,38 +12,68 @@ namespace SquashBot.Core
 
     /// <summary>
     /// Pure game-state for the platform. No Unity objects, so it can be reasoned about and tested in isolation.
+    /// The platform is a rectangle of cells, but a level layout can leave cells out (shaping the platform into
+    /// an L, a T, a ring...) and put fixed obstacles (walls) on others.
+    /// Layout rows use '#' for a floor tile, '.' for no tile and 'X' for a tile with an obstacle; row 0 is the far edge.
     /// </summary>
     public class GridModel
     {
         public int Width { get; }
         public int Height { get; }
         public int TileCount => Width * Height;
-        public GridPos Center => new GridPos(Width / 2, Height / 2);
+
+        /// <summary>Cells the robot can ever stand on (part of the platform, not an obstacle).</summary>
+        public int FloorCount { get; }
 
         private readonly TileState[,] tiles;
         private readonly bool[,] occupied;
+        private readonly bool[,] exists;
+        private readonly bool[,] wall;
 
-        public GridModel(int width, int height)
+        public GridModel(int width, int height, string[] layout = null)
         {
             Width = width;
             Height = height;
             tiles = new TileState[width, height];
             occupied = new bool[width, height];
+            exists = new bool[width, height];
+            wall = new bool[width, height];
+
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    char c = '#';
+                    if (layout != null && layout.Length == height && layout[height - 1 - y].Length == width)
+                        c = layout[height - 1 - y][x];
+                    exists[x, y] = c != '.';
+                    wall[x, y] = c == 'X';
+                    if (exists[x, y] && !wall[x, y]) FloorCount++;
+                }
         }
 
         public bool InBounds(GridPos p) => p.x >= 0 && p.y >= 0 && p.x < Width && p.y < Height;
 
+        /// <summary>The cell is part of the platform (it may still hold an obstacle).</summary>
+        public bool Exists(GridPos p) => InBounds(p) && exists[p.x, p.y];
+
+        /// <summary>A fixed obstacle sits here for the whole level.</summary>
+        public bool IsWall(GridPos p) => InBounds(p) && wall[p.x, p.y];
+
+        /// <summary>A floor tile: on the platform and not an obstacle (whatever its current state).</summary>
+        public bool IsFloor(GridPos p) => Exists(p) && !wall[p.x, p.y];
+
         public TileState GetTile(GridPos p) => tiles[p.x, p.y];
         public void SetTile(GridPos p, TileState state) => tiles[p.x, p.y] = state;
 
-        public bool IsOccupied(GridPos p) => occupied[p.x, p.y];
+        /// <summary>Something blocks the tile: a landed block or a fixed obstacle.</summary>
+        public bool IsOccupied(GridPos p) => occupied[p.x, p.y] || wall[p.x, p.y];
         public void SetOccupied(GridPos p, bool value) => occupied[p.x, p.y] = value;
 
-        /// <summary>A tile the robot can stand on right now: inside the grid, not broken, no block sitting on it.</summary>
-        public bool IsStandable(GridPos p) => InBounds(p) && tiles[p.x, p.y] == TileState.Solid && !occupied[p.x, p.y];
+        /// <summary>A tile the robot can stand on right now: a solid floor tile with nothing on it.</summary>
+        public bool IsStandable(GridPos p) => IsFloor(p) && tiles[p.x, p.y] == TileState.Solid && !occupied[p.x, p.y];
 
-        /// <summary>A hole or a fire: deadly to land on, but the robot can leap over it.</summary>
-        public bool IsGap(GridPos p) => InBounds(p) && tiles[p.x, p.y] != TileState.Solid;
+        /// <summary>A hole, a fire or empty space beside the platform: deadly to land on, but the robot can leap over it.</summary>
+        public bool IsGap(GridPos p) => InBounds(p) && (!exists[p.x, p.y] || (!wall[p.x, p.y] && tiles[p.x, p.y] != TileState.Solid));
 
         public IEnumerable<GridPos> AllPositions()
         {
@@ -52,12 +82,32 @@ namespace SquashBot.Core
                     yield return new GridPos(x, y);
         }
 
+        /// <summary>Floor tiles that are currently solid (not broken, not burning).</summary>
         public int SolidCount()
         {
             int count = 0;
             foreach (var p in AllPositions())
-                if (GetTile(p) == TileState.Solid) count++;
+                if (IsFloor(p) && GetTile(p) == TileState.Solid) count++;
             return count;
+        }
+
+        /// <summary>The floor tile closest to the middle of the platform (where the robot starts).</summary>
+        public GridPos CenterFloor()
+        {
+            var center = new GridPos(Width / 2, Height / 2);
+            GridPos best = center;
+            int bestDistance = int.MaxValue;
+            foreach (var p in AllPositions())
+            {
+                if (!IsFloor(p)) continue;
+                int d = p.Manhattan(center);
+                if (d < bestDistance)
+                {
+                    bestDistance = d;
+                    best = p;
+                }
+            }
+            return best;
         }
     }
 }

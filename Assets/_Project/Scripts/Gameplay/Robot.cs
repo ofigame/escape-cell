@@ -293,13 +293,14 @@ namespace SquashBot.Gameplay
                 holes++;
             }
 
-            if (!grid.InBounds(landing) || grid.IsGap(landing))
+            bool noLanding = !grid.InBounds(landing) || grid.IsGap(landing);
+            if (noLanding && grid.Exists(next))
             {
                 landing = next; // nothing to land on: fall short into the first hole
             }
-            else if (grid.IsOccupied(landing) && !(IsShielded && BlockSmasher != null && BlockSmasher(landing)))
+            else if (noLanding || (grid.IsOccupied(landing) && !(IsShielded && BlockSmasher != null && BlockSmasher(landing))))
             {
-                // A block sits where we'd land: refuse the jump.
+                // A block or obstacle sits where we'd land, or it is the platform's edge: refuse the jump.
                 StartAnim(Anim.Bump, transform.position, transform.position + new Vector3(offset.x, 0f, offset.y) * 0.25f);
                 AudioManager.PlaySfx(Sfx.Bump, 0.6f);
                 Haptics.Light();

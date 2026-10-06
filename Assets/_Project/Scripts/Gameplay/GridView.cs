@@ -5,7 +5,7 @@ using UnityEngine;
 namespace SquashBot.Gameplay
 {
     /// <summary>
-    /// Visual platform: a thick pastel slab with a glowing edge band and a pillar underneath,
+    /// Visual platform (any shape the layout gives): a thick pastel slab with a glowing edge band and a pillar underneath,
     /// topped by tiles that each have a soft cyan inner frame. The walkable surface is at y = 0.05.
     /// </summary>
     public class GridView : MonoBehaviour
@@ -36,12 +36,17 @@ namespace SquashBot.Gameplay
         {
             fx = fxSystem;
             Clear();
-            BuildPlatform(grid.Width, grid.Height);
+            BuildPlatform(grid);
 
             var holeMaterial = MaterialFactory.Create(Palette.BgBottom * 0.75f, Color.black);
+            var obstacleBody = MaterialFactory.Create(Color.Lerp(Palette.Pillar, new Color(0.12f, 0.1f, 0.2f), 0.45f), Color.black);
+            var obstacleCap = MaterialFactory.Create(WorldTheme.Current.accent, WorldTheme.Current.accent * 1.2f);
+
             tiles = new TileView[grid.Width, grid.Height];
             foreach (var p in grid.AllPositions())
             {
+                if (!grid.Exists(p)) continue; // shaped platforms leave some cells empty
+
                 var root = new GameObject($"Tile {p}");
                 root.transform.SetParent(transform, false);
                 root.transform.localPosition = ToWorld(p);
@@ -54,6 +59,14 @@ namespace SquashBot.Gameplay
                 Shapes.Rounded("Frame", tile.transform, new Vector3(0f, -0.03f, 0f), new Vector3(0.93f, 0.1f, 0.93f), 0.045f, frame);
                 Shapes.Rounded("Top", tile.transform, new Vector3(0f, 0f, 0f), new Vector3(0.78f, 0.1f, 0.78f), 0.045f, top);
 
+                if (grid.IsWall(p))
+                {
+                    // A fixed obstacle: a chunky stone pillar with a glowing cap.
+                    Shapes.Rounded("Obstacle", tile.transform, new Vector3(0f, 0.47f, 0f), new Vector3(0.78f, 0.84f, 0.78f), 0.12f, obstacleBody);
+                    Shapes.Rounded("Cap", tile.transform, new Vector3(0f, 0.9f, 0f), new Vector3(0.56f, 0.06f, 0.56f), 0.025f, obstacleCap);
+                    Shapes.Rounded("Band", tile.transform, new Vector3(0f, 0.3f, 0f), new Vector3(0.82f, 0.06f, 0.82f), 0.025f, obstacleCap);
+                }
+
                 var hole = Shapes.Rounded("Hole", root.transform, new Vector3(0f, -0.035f, 0f), new Vector3(0.94f, 0.02f, 0.94f), 0.01f, holeMaterial);
                 hole.SetActive(false);
 
@@ -61,23 +74,27 @@ namespace SquashBot.Gameplay
             }
         }
 
-        private void BuildPlatform(int w, int h)
+        /// <summary>The slab, glowing edge band and pillar, built cell by cell so they follow the platform's shape.</summary>
+        private void BuildPlatform(GridModel grid)
         {
             var root = new GameObject("Platform").transform;
             root.SetParent(transform, false);
-            root.localPosition = new Vector3((w - 1) * 0.5f, 0f, (h - 1) * 0.5f);
 
             var slab = MaterialFactory.Create(Palette.Slab, Color.black);
             var glow = MaterialFactory.Create(Palette.Slab, Palette.SlabEdgeGlow);
             var pillar = MaterialFactory.Create(Palette.Pillar, Color.black);
 
-            // Upper slab: its top shows through the grooves between tiles.
-            Shapes.Rounded("SlabTop", root, new Vector3(0f, -0.19f, 0f), new Vector3(w + 0.4f, 0.3f, h + 0.4f), 0.1f, slab);
-            Shapes.Rounded("EdgeGlow", root, new Vector3(0f, -0.36f, 0f), new Vector3(w + 0.46f, 0.05f, h + 0.46f), 0.025f, glow);
-            Shapes.Rounded("SlabBottom", root, new Vector3(0f, -0.5f, 0f), new Vector3(w + 0.42f, 0.24f, h + 0.42f), 0.1f, slab);
-            Shapes.Rounded("Pillar", root, new Vector3(0f, -4.6f, 0f), new Vector3(w - 0.2f, 8f, h - 0.2f), 0.18f, pillar);
+            foreach (var p in grid.AllPositions())
+            {
+                if (!grid.Exists(p)) continue;
+                var at = ToWorld(p);
+                // Slightly oversized pieces overlap their neighbours, so only the outer outline shows.
+                Shapes.Rounded("SlabTop", root, at + new Vector3(0f, -0.19f, 0f), new Vector3(1.16f, 0.3f, 1.16f), 0.06f, slab);
+                Shapes.Rounded("EdgeGlow", root, at + new Vector3(0f, -0.36f, 0f), new Vector3(1.2f, 0.05f, 1.2f), 0.025f, glow);
+                Shapes.Rounded("SlabBottom", root, at + new Vector3(0f, -0.5f, 0f), new Vector3(1.17f, 0.24f, 1.17f), 0.06f, slab);
+                Shapes.Rounded("Pillar", root, at + new Vector3(0f, -4.6f, 0f), new Vector3(1.0f, 8f, 1.0f), 0.04f, pillar);
+            }
         }
-
         public void Clear()
         {
             for (int i = transform.childCount - 1; i >= 0; i--)
@@ -88,7 +105,7 @@ namespace SquashBot.Gameplay
         /// <summary>Called every frame by hazards; 0 = calm, 1 = full red.</summary>
         public void SetWarning(GridPos p, float amount)
         {
-            if (tiles == null) return;
+            if (tiles == null || tiles[p.x, p.y] == null) return;
             var t = tiles[p.x, p.y];
             t.warning = Mathf.Max(t.warning, amount);
         }
@@ -96,6 +113,7 @@ namespace SquashBot.Gameplay
         public void Break(GridPos p)
         {
             var t = tiles[p.x, p.y];
+            if (t == null) return;
             fx.Burst(t.tile.transform.position, Palette.TileTop, Palette.TileGlow, 14, 3f);
             t.tile.SetActive(false);
             t.hole.SetActive(true);
@@ -104,6 +122,7 @@ namespace SquashBot.Gameplay
         public void Repair(GridPos p)
         {
             var t = tiles[p.x, p.y];
+            if (t == null) return;
             t.tile.SetActive(true);
             t.hole.SetActive(false);
             t.pop = 0f;
@@ -112,7 +131,7 @@ namespace SquashBot.Gameplay
         /// <summary>The robot lands (or a block slams down): the tile dips and springs back.</summary>
         public void Bounce(GridPos p, float strength = 1f)
         {
-            if (tiles == null) return;
+            if (tiles == null || tiles[p.x, p.y] == null) return;
             var t = tiles[p.x, p.y];
             t.bounce = 0f;
             t.bounceStrength = strength;
@@ -121,7 +140,7 @@ namespace SquashBot.Gameplay
         /// <summary>Paint missions: the tile floods with the world's accent color in a little splash.</summary>
         public void Paint(GridPos p)
         {
-            if (tiles == null) return;
+            if (tiles == null || tiles[p.x, p.y] == null) return;
             var t = tiles[p.x, p.y];
             if (t.painted) return;
             t.painted = true;
@@ -134,6 +153,7 @@ namespace SquashBot.Gameplay
         public void Ignite(GridPos p)
         {
             var t = tiles[p.x, p.y];
+            if (t == null) return;
             if (t.fire == null) t.fire = Flames.Create(t.tile.transform.parent);
             t.fire.SetActive(true);
             fx.Burst(t.tile.transform.position + Vector3.up * 0.2f, new Color(1f, 0.55f, 0.2f), new Color(2.4f, 0.9f, 0.15f), 12, 3f);
@@ -142,6 +162,7 @@ namespace SquashBot.Gameplay
         public void Extinguish(GridPos p)
         {
             var t = tiles[p.x, p.y];
+            if (t == null) return;
             if (t.fire != null) t.fire.SetActive(false);
             fx.Burst(t.tile.transform.position + Vector3.up * 0.2f, new Color(0.6f, 0.6f, 0.65f), Color.black, 8, 1.5f);
             t.pop = 0.4f;
@@ -153,7 +174,7 @@ namespace SquashBot.Gameplay
 
             foreach (var t in tiles)
             {
-                if (!t.tile.activeSelf) continue;
+                if (t == null || !t.tile.activeSelf) continue;
 
                 if (t.fire != null && t.fire.activeSelf)
                 {

@@ -247,7 +247,7 @@ namespace SquashBot.Gameplay
                 foreach (var d in DirectionExtensions.All)
                 {
                     var n = center + d.ToOffset();
-                    if (grid.InBounds(n) && grid.GetTile(n) == TileState.Solid && !taken.Contains(n) && (IsProtected == null || !IsProtected(n))) area.Add(n);
+                    if (grid.IsFloor(n) && grid.GetTile(n) == TileState.Solid && !taken.Contains(n) && (IsProtected == null || !IsProtected(n))) area.Add(n);
                 }
 
                 var danger = new HashSet<GridPos>(pending);
@@ -448,7 +448,7 @@ namespace SquashBot.Gameplay
 
         private bool CanBreakTile()
         {
-            int minSolid = Mathf.CeilToInt(grid.TileCount * MinSolidFraction);
+            int minSolid = Mathf.CeilToInt(grid.FloorCount * MinSolidFraction);
             return grid.SolidCount() > minSolid;
         }
 

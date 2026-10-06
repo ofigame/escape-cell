@@ -76,6 +76,9 @@ namespace SquashBot.Gameplay
         private GameObject hoverMarker;
         private ExitPortal portal;
         private GridPos doorPos;
+        private KeyPickup keyPickup;
+        private GridPos keyPos;
+        private int keysCollected;
         private readonly HashSet<GridPos> painted = new HashSet<GridPos>();
 
         private int World => LevelCatalog.WorldOf(levelIndex);
@@ -185,6 +188,9 @@ namespace SquashBot.Gameplay
             if (hoverMarker != null) hoverMarker.SetActive(false);
             if (portal != null) Destroy(portal.gameObject);
             portal = null;
+            if (keyPickup != null) Destroy(keyPickup.gameObject);
+            keyPickup = null;
+            keysCollected = 0;
             painted.Clear();
             Time.timeScale = 1f;
             slowMoLeft = 0f;
@@ -198,12 +204,12 @@ namespace SquashBot.Gameplay
         {
             ApplyTheme(levelIdx);
             var preview = levelSet.levels[levelIdx];
-            grid = new GridModel(preview.gridWidth, preview.gridHeight);
+            grid = new GridModel(preview.gridWidth, preview.gridHeight, preview.layout);
             gridView.Build(grid, fx);
             cameraRig.Frame(grid.Width, grid.Height);
             cameraRig.SetStyle(CameraStyle.MenuOrbit);
             cameraRig.SetMenuFocus(true);
-            robot.Spawn(grid, grid.Center);
+            robot.Spawn(grid, grid.CenterFloor());
         }
 
         private void ShowMenu()
@@ -248,13 +254,13 @@ namespace SquashBot.Gameplay
             input.HoldEnabled = HoverEnabled;
 
             ApplyTheme(levelIndex);
-            grid = new GridModel(level.gridWidth, level.gridHeight);
+            grid = new GridModel(level.gridWidth, level.gridHeight, level.layout);
             gridView.Build(grid, fx);
             cameraRig.Frame(grid.Width, grid.Height);
             cameraRig.SetStyle(CameraStyle.Gameplay);
             cameraRig.SetMenuFocus(false);
             cameraRig.PlayIntro();
-            robot.Spawn(grid, grid.Center);
+            robot.Spawn(grid, grid.CenterFloor());
 
             SetupMission();
             hazards.Begin(grid, level, MissionProgress, LevelCatalog.WorldOf(levelIndex));
@@ -572,11 +578,15 @@ namespace SquashBot.Gameplay
             switch (level.mission)
             {
                 case MissionType.Survive:
-                case MissionType.CoinRain:
                     if (elapsed >= level.surviveSeconds) Win();
                     break;
+                case MissionType.CoinRain:
+                    // The clock is the enemy here: miss the target and the round is lost.
+                    if (elapsed >= level.surviveSeconds) TimeUp();
+                    break;
                 case MissionType.Exit:
-                    if (!portal.IsOpen && elapsed >= level.exitDelay) OpenDoor();
+                    // A block, a hole or fire took the key's tile: it hops somewhere else.
+                    if (keyPickup != null && !grid.IsStandable(keyPos)) PlaceKey(relocate: true);
                     break;
             }
         }
@@ -601,7 +611,11 @@ namespace SquashBot.Gameplay
             powerUps.TryCollect(p);
 
             if (level.mission == MissionType.Paint) PaintTile(p);
-            else if (level.mission == MissionType.Exit && portal.IsOpen && p == doorPos) Escape();
+            else if (level.mission == MissionType.Exit)
+            {
+                if (keyPickup != null && p == keyPos) CollectKey();
+                else if (portal.IsOpen && p == doorPos) Escape();
+            }
         }
 
         private void OnBlockImpact(GridPos p)
@@ -681,7 +695,7 @@ namespace SquashBot.Gameplay
                 AudioManager.PlaySfx(Sfx.Shield, 0.6f, 1.2f);
             }
 
-            if (level.mission == MissionType.CollectCoins && coinsThisRun >= level.coinTarget)
+            if ((level.mission == MissionType.CollectCoins || level.mission == MissionType.CoinRain) && coinsThisRun >= level.coinTarget)
                 Win();
         }
 
@@ -776,6 +790,7 @@ namespace SquashBot.Gameplay
                 var options = new List<GridPos>();
                 foreach (var t in grid.AllPositions())
                 {
+                    if (!grid.IsStandable(t)) continue;
                     int d = t.Manhattan(robot.Position);
                     if (d > best) { best = d; options.Clear(); }
                     if (d == best) options.Add(t);
@@ -783,11 +798,67 @@ namespace SquashBot.Gameplay
                 doorPos = options[Random.Range(0, options.Count)];
                 portal = ExitPortal.Create(GridView.ToWorld(doorPos) + Vector3.up * GridView.SurfaceY);
                 hazards.IsProtected = p => p == doorPos;
+                PlaceKey(relocate: false);
             }
             else if (level.mission == MissionType.Paint)
             {
                 PaintTile(robot.Position);
             }
+        }
+
+        /// <summary>
+        /// Puts the current key on a free tile far from the robot (and never on the door), so every key is a trip
+        /// across the platform. With relocate, the existing key hops to a new tile instead.
+        /// </summary>
+        private void PlaceKey(bool relocate)
+        {
+            int best = -1;
+            var scored = new List<(GridPos pos, int d)>();
+            foreach (var t in grid.AllPositions())
+            {
+                if (!grid.IsStandable(t) || t == doorPos || t == robot.Position || hazards.IsThreatened(t)) continue;
+                int d = t.Manhattan(robot.Position);
+                scored.Add((t, d));
+                best = Mathf.Max(best, d);
+            }
+            if (scored.Count == 0) return; // try again next frame
+
+            var options = scored.FindAll(s => s.d >= best - 1);
+            keyPos = options[Random.Range(0, options.Count)].pos;
+            var at = GridView.ToWorld(keyPos) + Vector3.up * GridView.SurfaceY;
+            if (keyPickup == null) keyPickup = KeyPickup.Create(at);
+            else keyPickup.MoveTo(at);
+            if (relocate) fx.Dust(at + Vector3.up * 0.1f, Palette.UiCyan, 8, 1.5f);
+        }
+
+        private void CollectKey()
+        {
+            keysCollected++;
+            var at = GridView.ToWorld(keyPos);
+            fx.Burst(at + Vector3.up * 0.5f, Palette.UiCyan, Palette.ShieldPickupGlow, 18, 4f);
+            AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.3f);
+            Haptics.Medium();
+            cameraRig.Punch(0.5f);
+
+            if (keysCollected >= level.keys)
+            {
+                Destroy(keyPickup.gameObject);
+                keyPickup = null;
+                FloatAt(at, Loc.T("float.key"), Palette.UiCyan);
+                OpenDoor();
+            }
+            else
+            {
+                FloatAt(at, Loc.F("float.keyLeft", level.keys - keysCollected), Palette.UiCyan);
+                PlaceKey(relocate: false);
+            }
+        }
+
+        private void TimeUp()
+        {
+            AudioManager.PlaySfx(Sfx.Bump);
+            Haptics.Death();
+            Lose(Loc.T("lose.time"));
         }
 
         private void OpenDoor()
@@ -815,10 +886,10 @@ namespace SquashBot.Gameplay
             if (State == GameState.Playing)
             {
                 // Each new tile sings a little higher as the platform fills up.
-                AudioManager.PlaySfx(Sfx.Click, 0.8f, 0.9f + painted.Count / (float)grid.TileCount * 0.8f);
+                AudioManager.PlaySfx(Sfx.Click, 0.8f, 0.9f + painted.Count / (float)grid.FloorCount * 0.8f);
                 Haptics.Light();
             }
-            if (painted.Count >= grid.TileCount && State == GameState.Playing) Win();
+            if (painted.Count >= grid.FloorCount && State == GameState.Playing) Win();
         }
 
         private float MissionProgress()
@@ -826,9 +897,10 @@ namespace SquashBot.Gameplay
             if (level == null) return 0f;
             switch (level.mission)
             {
-                case MissionType.CollectCoins: return (float)coinsThisRun / level.coinTarget;
-                case MissionType.Exit: return portal != null && portal.IsOpen ? 1f : elapsed / level.exitDelay;
-                case MissionType.Paint: return grid == null ? 0f : painted.Count / (float)grid.TileCount;
+                case MissionType.CollectCoins:
+                case MissionType.CoinRain: return (float)coinsThisRun / level.coinTarget;
+                case MissionType.Exit: return portal != null && portal.IsOpen ? 1f : keysCollected / (level.keys + 1f);
+                case MissionType.Paint: return grid == null ? 0f : painted.Count / (float)grid.FloorCount;
                 default: return elapsed / level.surviveSeconds;
             }
         }
@@ -841,7 +913,7 @@ namespace SquashBot.Gameplay
                 case MissionType.CollectCoins: return Loc.F("mission.collect" + suffix, data.coinTarget);
                 case MissionType.Exit: return Loc.T("mission.exit" + suffix);
                 case MissionType.Paint: return Loc.T("mission.paint" + suffix);
-                case MissionType.CoinRain: return Loc.T("mission.rain" + suffix);
+                case MissionType.CoinRain: return Loc.F("mission.rain" + suffix, data.coinTarget);
                 default: return Loc.F("mission.survive" + suffix, data.surviveSeconds.ToString("0", CultureInfo.InvariantCulture));
             }
         }
@@ -856,10 +928,10 @@ namespace SquashBot.Gameplay
                 case MissionType.Exit:
                     text = portal != null && portal.IsOpen
                         ? Loc.T("hud.exitOpen")
-                        : Loc.F("hud.exitWait", Mathf.Max(1, Mathf.CeilToInt(level.exitDelay - elapsed)));
+                        : Loc.F("hud.exitWait", keysCollected, level.keys);
                     break;
-                case MissionType.Paint: text = Loc.F("hud.paint", painted.Count, grid.TileCount); break;
-                case MissionType.CoinRain: text = Loc.F("hud.rain", Seconds(level.surviveSeconds - elapsed)); break;
+                case MissionType.Paint: text = Loc.F("hud.paint", painted.Count, grid.FloorCount); break;
+                case MissionType.CoinRain: text = Loc.F("hud.rain", coinsThisRun, level.coinTarget, Seconds(level.surviveSeconds - elapsed)); break;
                 default: text = Loc.F("hud.survive", Seconds(level.surviveSeconds - elapsed)); break;
             }
             ui.SetMission(text, MissionProgress(), coinsThisRun);
