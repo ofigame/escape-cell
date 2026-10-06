@@ -44,6 +44,7 @@ namespace SquashBot.UI
         public event Action ContinuePressed;
         public event Action DoublePressed;
         public event Action GaragePressed;
+        public event Action CampPressed;
         public event Action ShopPressed;
         public event Action DailyPressed;
         /// <summary>A HUD tool button was tapped (slot 0 = left, 1 = right).</summary>
@@ -148,6 +149,7 @@ namespace SquashBot.UI
         public StoryScreen Story { get; private set; }
         public ShopScreen Shop { get; private set; }
         public GarageScreen Garage { get; private set; }
+        public CampScreen Camp { get; private set; }
 
         private GameObject bannerPlaceholder;
 
@@ -190,6 +192,8 @@ namespace SquashBot.UI
             Story = StoryScreen.Create(root);
             Shop = ShopScreen.Create(root);
             Garage = GarageScreen.Create(root);
+            Camp = CampScreen.Create(root);
+            Camp.BackPressed += () => MenuPressed?.Invoke();
             Shop.BackPressed += () => MenuPressed?.Invoke();
             Garage.BackPressed += () => MenuPressed?.Invoke();
             BuildPrelevel(root);
@@ -237,10 +241,17 @@ namespace SquashBot.UI
 
             // Shortcuts.
             var row = UiFactory.Box("Shortcuts", t, Bottom, new Vector2(0f, Ads.BannerReserve + 540f), new Vector2(900f, 130f));
-            UiFactory.MakeButton(row, Loc.T("btn.garage"), Kind.Secondary, new Vector2(0f, 0.5f), new Vector2(0f, 0f), new Vector2(285f, 130f), () => GaragePressed?.Invoke(), 46f);
-            UiFactory.MakeButton(row, Loc.T("btn.shop"), Kind.Secondary, new Vector2(0.5f, 0.5f), new Vector2(0f, 0f), new Vector2(285f, 130f), () => ShopPressed?.Invoke(), 46f)
-                .transform.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.MakeButton(row, Loc.T("btn.map"), Kind.Secondary, new Vector2(1f, 0.5f), new Vector2(0f, 0f), new Vector2(285f, 130f), () => PlayPressed?.Invoke(), 46f);
+            // Four shortcuts: garage, shop, camp, map.
+            var shortcuts = new (string label, Action press)[]
+            {
+                (Loc.T("btn.garage"), () => GaragePressed?.Invoke()), (Loc.T("btn.shop"), () => ShopPressed?.Invoke()),
+                (Loc.T("btn.camp"), () => CampPressed?.Invoke()), (Loc.T("btn.map"), () => PlayPressed?.Invoke()),
+            };
+            for (int i = 0; i < shortcuts.Length; i++)
+            {
+                var (label, press) = shortcuts[i];
+                UiFactory.MakeButton(row, label, Kind.Secondary, new Vector2(0f, 0.5f), new Vector2(i * 228f, 0f), new Vector2(216f, 130f), () => press(), 38f);
+            }
 
             // Level card with the big PLAY button.
             var card = UiFactory.Card("LevelCard", t, Bottom, new Vector2(0f, Ads.BannerReserve + 50f), new Vector2(900f, 460f));
@@ -279,6 +290,13 @@ namespace SquashBot.UI
             HideAll();
             SetBanner(true);
             Shop.Show();
+        }
+
+        public void ShowCamp()
+        {
+            HideAll();
+            SetBanner(true);
+            Camp.Show();
         }
 
         public void ShowGarage(int worldReached)
@@ -975,6 +993,7 @@ namespace SquashBot.UI
             Story.Hide();
             Shop.Hide();
             Garage.Hide();
+            Camp.Hide();
             prelevel.Hide(true);
             settings.Hide(true);
             noLives.Hide(true);

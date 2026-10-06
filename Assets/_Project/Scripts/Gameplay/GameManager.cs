@@ -57,6 +57,7 @@ namespace SquashBot.Gameplay
         private DuctRunner runner;
         private FloorRules floorRules;
         private LevelEvents levelEvents;
+        private CampScene campScene;
 
         private GridModel grid;
         private LevelData level;
@@ -175,6 +176,8 @@ namespace SquashBot.Gameplay
             floorRules.Init(gridView, robot, hazards, fx, cameraRig);
             floorRules.Hit += OnBlockImpact;
 
+            campScene = new GameObject("CampScene").AddComponent<CampScene>();
+
             levelEvents = new GameObject("LevelEvents").AddComponent<LevelEvents>();
             levelEvents.Init(robot, coins, hazards, fx, cameraRig);
             levelEvents.CrateOpened += OnCrateOpened;
@@ -207,6 +210,14 @@ namespace SquashBot.Gameplay
             ui.GaragePressed += ShowGarage;
             ui.ShopPressed += ShowShop;
             ui.DailyPressed += ClaimDaily;
+            ui.CampPressed += ShowCamp;
+            ui.Camp.DecorBought += d => { campScene.Add(d); cameraRig.Punch(0.4f); };
+            ui.Camp.Harvested += coins =>
+            {
+                fx.Burst(robot.transform.position + Vector3.up * 0.8f, Palette.Coin, Palette.CoinGlow, 40, 6f);
+                FloatAt(robot.transform.position + Vector3.up * 0.4f, "+" + coins, Palette.UiGold);
+                robot.Cheer();
+            };
             ui.Garage.PreviewChanged += outfit => robot.ApplyOutfit(outfit);
             ui.Garage.DancePreview += robot.Cheer;
             ui.NextPressed += () =>
@@ -281,6 +292,8 @@ namespace SquashBot.Gameplay
             floorRules.Stop();
             hazards.Hunting = false;
             levelEvents.Stop();
+            campScene.Hide();
+            cameraRig.FrameUpper(0f, 1f);
             HideTools();
         }
 
@@ -333,6 +346,31 @@ namespace SquashBot.Gameplay
             ui.ShowGarage(LevelCatalog.WorldOf(SaveData.UnlockedLevel));
             cameraRig.Showcase(robot.transform, 1f);
             cameraRig.SetMenuFocus(false);
+        }
+
+        /// <summary>The roof camp: the rescued friends hop around the decorations bought for them.</summary>
+        private void ShowCamp()
+        {
+            if (!Camp.Open)
+            {
+                ui.ShowIntro(Loc.T("camp.title"), Loc.T("camp.locked"));
+                return;
+            }
+            ResetRun();
+            State = GameState.Menu;
+            ApplyTheme(LevelCount - 1); // the roof's colours
+            grid = new GridModel(Camp.Size, Camp.Size);
+            gridView.Build(grid, fx);
+            cameraRig.Frame(grid.Width, grid.Height);
+            cameraRig.SetStyle(CameraStyle.MenuOrbit);
+            cameraRig.SetMenuFocus(false);
+            cameraRig.Showcase(null, 0f);
+            var spot = new GridPos(2, 3);
+            robot.Spawn(grid, spot);
+            robot.ApplyOutfit(Cosmetics.Outfit());
+            campScene.Show(spot);
+            cameraRig.FrameUpper(0.42f, 0.9f);
+            ui.ShowCamp();
         }
 
         private void ShowShop()
@@ -434,7 +472,7 @@ namespace SquashBot.Gameplay
             var kinds = new List<DuctRunner.Kind> { DuctRunner.Kind.Duct, DuctRunner.Kind.Surf, DuctRunner.Kind.Mine };
             if (levelIndex >= 20) kinds.Add(DuctRunner.Kind.Chase);
             var tunnel = kinds[Random.Range(0, kinds.Count)];
-            runner.Begin(Random.Range(0, 100000), tunnel);
+            runner.Begin(Random.Range(0, 100000), tunnel, Camp.Companion);
 
             State = GameState.Playing;
             ui.ShowHud(-1);
@@ -1354,7 +1392,10 @@ namespace SquashBot.Gameplay
 
             // Stars: how well the level went. New stars fill the bonus meter.
             int stars = StarRules.Evaluate(starGoals, coinsThisRun, elapsed);
+            bool firstWin = Progress.Stars(levelIndex) == 0;
             int unlockedBonus = Progress.Award(levelIndex, stars, out _);
+            // Beating a floor's WARDEN for the first time frees a cellmate, who moves to the roof camp.
+            int freed = firstWin ? Camp.FriendFreedBy(levelIndex) : -1;
             bool surprise = false;
             if (unlockedBonus == 0 && unlockedNew && levelIndex + 1 >= SurpriseFromLevel && Progress.BonusTokens == 0 && Random.value < SurpriseBonusChance)
             {
@@ -1365,7 +1406,8 @@ namespace SquashBot.Gameplay
             pendingEnding = levelIndex == LevelCount - 1 && !Story.Seen(Story.Ending);
             bool hasNext = levelIndex + 1 < LevelCount;
             bool newWorld = unlockedNew && hasNext && (levelIndex + 1) % LevelCatalog.LevelsPerWorld == 0;
-            string note = surprise ? Loc.T("bonus.surprise")
+            string note = freed >= 0 ? Loc.F("camp.freed", Camp.Friends[freed])
+                : surprise ? Loc.T("bonus.surprise")
                 : unlockedBonus > 0 ? Loc.T("bonus.ready")
                 : stars < 3 ? StarHint(stars)
                 : Loc.T("star.max");

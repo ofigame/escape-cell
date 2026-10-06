@@ -59,6 +59,7 @@ namespace SquashBot.Visual
         private Volume menuVolume;
         private bool chasing;
         private float showcase, showcaseTarget;
+        private float frameLift, frameLiftTarget, frameZoom = 1f, frameZoomTarget = 1f;
         private Transform showcaseSubject;
         private Transform followTarget;
         private int windowW, windowH;
@@ -250,6 +251,16 @@ namespace SquashBot.Visual
         /// Lean in on <paramref name="subject"/> (the robot in the menu and garage) and lift it into the upper part of
         /// the screen, above the cards. <paramref name="amount"/> 0 = normal view, 1 = close-up.
         /// </summary>
+        /// <summary>
+        /// Raises the platform into the upper part of the screen (0 = centred) and zooms (1 = normal), for screens whose
+        /// panel covers the lower half (the roof camp).
+        /// </summary>
+        public void FrameUpper(float lift, float zoom)
+        {
+            frameLiftTarget = lift;
+            frameZoomTarget = zoom;
+        }
+
         public void Showcase(Transform subject, float amount)
         {
             if (subject != null) showcaseSubject = subject;
@@ -324,6 +335,8 @@ namespace SquashBot.Visual
 
             menuVolume.weight = Mathf.MoveTowards(menuVolume.weight, menuFocusTarget, dt * 3f);
             showcase = Mathf.MoveTowards(showcase, showcaseTarget, dt * 2.5f);
+            frameLift = Mathf.MoveTowards(frameLift, frameLiftTarget, dt * 1.5f);
+            frameZoom = Mathf.MoveTowards(frameZoom, frameZoomTarget, dt * 1.5f);
             if (followTarget != null)
             {
                 followPoint = Vector3.Lerp(followPoint, FollowGoal(), 1f - Mathf.Exp(-Time.deltaTime * 4f));
@@ -362,7 +375,8 @@ namespace SquashBot.Visual
             }
 
             var jitter = Random.insideUnitCircle * shake * 0.12f;
-            var lift = transform.up * (viewHalfHeight * zoom * (0.06f - 0.42f * ease));
+            zoom *= frameZoom;
+            var lift = transform.up * (viewHalfHeight * zoom * (0.06f - 0.42f * ease - frameLift));
             var offset = transform.right * jitter.x + transform.up * jitter.y;
 
             if (Cam.orthographic)

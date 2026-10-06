@@ -48,6 +48,9 @@ namespace SquashBot.Gameplay
         private WardenBoss chaser;
         private float chaserGap = 3.2f, invulnerable, drainTimer;
         private readonly HashSet<(int, int)> ramps = new HashSet<(int, int)>();
+        private int companionIndex = -1;
+        private Robot buddy;
+        private float buddyX, buddyY, buddyPhase;
         private int GateRow => Mathf.CeilToInt(TrackLength);
 
         /// <summary>The tunnel owns the robot, camera and input (from Begin until Stop).</summary>
@@ -110,8 +113,9 @@ namespace SquashBot.Gameplay
 
         // ---------- Start / stop ----------
 
-        public void Begin(int seed, Kind tunnel = Kind.Duct)
+        public void Begin(int seed, Kind tunnel = Kind.Duct, int companion = -1)
         {
+            companionIndex = companion;
             Stop();
             Active = true;
             kind = tunnel;
@@ -154,6 +158,15 @@ namespace SquashBot.Gameplay
             armR = visual.Find("ArmR");
 
             BuildRide();
+            if (companionIndex >= 0)
+            {
+                // A friend from the roof camp runs in the next lane and picks up the coins there.
+                buddy = Robot.Create(transform);
+                buddy.ApplyWorld(Data.Camp.FriendWorld(companionIndex));
+                buddy.enabled = false;
+                buddy.transform.localScale = Vector3.one * 0.8f;
+                buddyX = LaneX(BuddyLane);
+            }
             input.ScreenMode = true;
             camPos = new Vector3(0f, 2.6f, -4.6f);
             PoseRobot(0f);
@@ -172,6 +185,8 @@ namespace SquashBot.Gameplay
             coins.Clear();
             if (gate != null) Destroy(gate.gameObject);
             if (ride != null) Destroy(ride.gameObject);
+            if (buddy != null) Destroy(buddy.gameObject);
+            buddy = null;
             if (chaserRoot != null) Destroy(chaserRoot.gameObject);
             ride = chaserRoot = null;
             chaser = null;
@@ -565,6 +580,7 @@ namespace SquashBot.Gameplay
             UpdateBlocks(dt);
             UpdateCoins();
             PoseRobot(dt);
+            if (buddy != null) UpdateBuddy(dt);
             UpdateCamera(dt);
 
             if (exitRing != null)
@@ -825,6 +841,23 @@ namespace SquashBot.Gameplay
             End(false, 0);
         }
 
+        /// <summary>The companion's lane: always beside the player.</summary>
+        private int BuddyLane => lane == 1 ? 2 : 1;
+
+        private void UpdateBuddy(float dt)
+        {
+            buddyX = Mathf.MoveTowards(buddyX, LaneX(BuddyLane), LaneSpeed * 0.8f * dt);
+            float speed = startTimer < StartDelay || ended ? 0f : 1f;
+            buddyPhase += dt * 9f * speed;
+            // It never falls: over holes it just takes a little hop.
+            int row = Mathf.RoundToInt(z);
+            int under = Mathf.Clamp(Mathf.RoundToInt(buddyX / LaneWidth) + 1, 0, Lanes - 1);
+            bool floor = row < 0 || row >= totalRows || floorPlan[row, under];
+            buddyY = Mathf.MoveTowards(buddyY, floor ? Mathf.Abs(Mathf.Sin(buddyPhase)) * 0.08f : 0.7f, dt * 6f);
+            buddy.transform.position = new Vector3(buddyX, buddyY, z - 0.4f);
+            buddy.transform.rotation = Quaternion.identity;
+        }
+
         private void UpdateCoins()
         {
             for (int i = coins.Count - 1; i >= 0; i--)
@@ -838,7 +871,9 @@ namespace SquashBot.Gameplay
                 }
                 c.go.localRotation = Quaternion.Euler(0f, time * 200f + c.z * 20f, 0f) * Quaternion.Euler(90f, 0f, 0f);
                 if (ended || crashed) continue;
-                if (Mathf.Abs(c.z - z) < 0.6f && Mathf.Abs(LaneX(c.lane) - x) < 0.6f && Mathf.Abs(c.y - (y + 0.45f)) < 0.6f)
+                bool mine = Mathf.Abs(c.z - z) < 0.6f && Mathf.Abs(LaneX(c.lane) - x) < 0.6f && Mathf.Abs(c.y - (y + 0.45f)) < 0.6f;
+                bool buddys = buddy != null && Mathf.Abs(c.z - (z - 0.4f)) < 0.6f && Mathf.Abs(LaneX(c.lane) - buddyX) < 0.6f && c.y < 1.3f;
+                if (mine || buddys)
                 {
                     Coins++;
                     var at = c.go.position;
