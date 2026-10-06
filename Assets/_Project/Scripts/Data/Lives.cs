@@ -53,6 +53,7 @@ namespace SquashBot.Data
         /// <summary>Spend a life to start a level. False when there are none left.</summary>
         public static bool TryConsume()
         {
+            if (SaveData.TestMode) return true; // testing: lives are never spent
             int count = Count;
             if (count <= 0) return false;
             if (count >= Max) Since = DateTime.UtcNow; // the regen clock starts with the first missing life

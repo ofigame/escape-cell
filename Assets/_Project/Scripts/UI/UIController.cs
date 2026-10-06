@@ -18,7 +18,8 @@ namespace SquashBot.UI
         Music,
         Vibration,
         Language,
-        Camera
+        Camera,
+        TestMode
     }
 
     /// <summary>
@@ -53,7 +54,8 @@ namespace SquashBot.UI
         public struct ResultInfo
         {
             public bool won, bonusRound, hasNext, bonusAvailable, canContinue, canDouble;
-            public string subtitle, note;
+            public string subtitle, note, goalText;
+            public float goalProgress;
             public int coins, stars;
             public float meter;
             public string meterText;
@@ -98,7 +100,10 @@ namespace SquashBot.UI
         private Image hudFill, shieldFill;
         private RectTransform shieldPill;
         private RectTransform rescuePill, hoverPill;
-        private RectTransform missionPill, bonusPill;
+        private RectTransform missionPill, bonusPill, comboPill;
+        private TextMeshProUGUI comboText;
+        private Image comboFill;
+        private int comboShown = 1;
         private float missionPunch = 1f, bonusPunch = 1f;
         private float lastProgress;
 
@@ -127,7 +132,9 @@ namespace SquashBot.UI
         private Button resultNext, resultRetry, resultMap, resultMenu, resultBonus, resultContinue, resultDouble;
         private RectTransform resultStarRow;
         private readonly Image[] resultStars = new Image[3];
-        private TextMeshProUGUI resultNote, resultMeterText;
+        private TextMeshProUGUI resultNote, resultMeterText, resultGoal;
+        private GameObject resultGoalBar;
+        private Image resultGoalFill;
         private Image resultMeterFill;
         private int starsEarned;
         private float starTime = 99f;
@@ -477,7 +484,7 @@ namespace SquashBot.UI
         {
             settings = UiScreen.Create("Settings", root, out var t);
             UiFactory.Dim(t, new Color(0.06f, 0.05f, 0.18f, 0.5f));
-            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1170f));
+            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1310f));
             UiFactory.TextBox("Title", card, Top, new Vector2(0f, -50f), new Vector2(800f, 120f), Loc.T("settings.title"), 90f, Palette.UiText, title: true);
 
             var rows = new[]
@@ -487,6 +494,7 @@ namespace SquashBot.UI
                 (SettingKind.Vibration, "settings.vibration"),
                 (SettingKind.Language, "settings.language"),
                 (SettingKind.Camera, "settings.camera"),
+                (SettingKind.TestMode, "settings.test"),
             };
             for (int i = 0; i < rows.Length; i++)
             {
@@ -511,6 +519,7 @@ namespace SquashBot.UI
             SetSetting(SettingKind.Vibration, SaveData.Vibration);
             settingValues[SettingKind.Language].text = Loc.T("lang.name");
             settingValues[SettingKind.Camera].text = Loc.T(SaveData.PerspectiveView ? "view.3d" : "view.iso");
+            SetSetting(SettingKind.TestMode, SaveData.TestMode);
         }
 
         private void SetSetting(SettingKind kind, bool on)
@@ -546,6 +555,12 @@ namespace SquashBot.UI
             CoinIcon(bonus, new Vector2(56f, 0f));
             hudBonus = UiFactory.TextBox("Value", bonus, new Vector2(0f, 0.5f), new Vector2(98f, 0f), new Vector2(110f, 80f),
                 "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
+
+            // Combo (under the coin counter): streak multiplier with a draining timer.
+            comboPill = UiFactory.Pill("Combo", t, TopRight, new Vector2(-36f, -176f), new Vector2(220f, 86f), new Color(0.55f, 0.32f, 0.05f, 0.85f));
+            comboText = UiFactory.TextBox("Text", comboPill, Top, new Vector2(0f, -6f), new Vector2(200f, 50f), "", 38f, Palette.UiGold);
+            UiFactory.Bar(comboPill, Bottom, new Vector2(0f, 10f), new Vector2(170f, 10f), Palette.UiGold, out comboFill);
+            comboPill.gameObject.SetActive(false);
 
             shieldPill = UiFactory.Pill("Shield", t, Top, new Vector2(0f, -212f), new Vector2(420f, 86f), new Color(0.2f, 0.55f, 0.75f, 0.75f));
             shieldText = UiFactory.TextBox("Text", shieldPill, Top, new Vector2(0f, -8f), new Vector2(400f, 48f), "", 36f, Color.white);
@@ -606,6 +621,18 @@ namespace SquashBot.UI
             hudMission.text = text;
             UiFactory.SetBar(hudFill, progress);
             hudBonus.text = coinsThisRun.ToString();
+        }
+
+        /// <summary>Combo multiplier (hidden at x1) and how much of its time window is left.</summary>
+        public void SetCombo(int multiplier, float timeLeft)
+        {
+            bool on = multiplier > 1;
+            if (comboPill.gameObject.activeSelf != on) comboPill.gameObject.SetActive(on);
+            if (!on) { comboShown = 1; return; }
+            if (multiplier != comboShown) comboPill.localScale = Vector3.one * 1.35f;
+            comboShown = multiplier;
+            comboText.text = Loc.F("hud.combo", multiplier);
+            UiFactory.SetBar(comboFill, timeLeft);
         }
 
         public void SetShield(float left, float max)
@@ -682,7 +709,7 @@ namespace SquashBot.UI
         {
             result = UiScreen.Create("Result", root, out var t);
             UiFactory.Dim(t, new Color(0.06f, 0.05f, 0.18f, 0.45f));
-            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1200f));
+            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1290f));
 
             resultTitle = UiFactory.TextBox("Title", card, Top, new Vector2(0f, -50f), new Vector2(820f, 130f), "", 96f, Palette.UiCyan, title: true);
             resultSub = UiFactory.TextBox("Subtitle", card, Top, new Vector2(0f, -175f), new Vector2(800f, 100f), "", 38f,
@@ -713,15 +740,19 @@ namespace SquashBot.UI
             resultMeterText = UiFactory.TextBox("Meter", card, Top, new Vector2(335f, -628f), new Vector2(200f, 54f), "", 32f,
                 new Color(1f, 1f, 1f, 0.8f), FontStyles.Bold, align: TextAlignmentOptions.Left);
 
-            resultNext = UiFactory.MakeButton(card, Loc.T("btn.next"), Kind.Primary, Top, new Vector2(0f, -710f), new Vector2(620f, 150f), () => NextPressed?.Invoke(), 70f);
-            resultRetry = UiFactory.MakeButton(card, Loc.T("btn.retry"), Kind.Primary, Top, new Vector2(0f, -710f), new Vector2(620f, 150f), () => RetryPressed?.Invoke(), 70f);
-            resultBonus = UiFactory.MakeButton(card, Loc.T("btn.bonus"), Kind.Gold, Top, new Vector2(0f, -710f), new Vector2(620f, 150f), () => BonusPressed?.Invoke(), 76f);
+            // The coin goal picked in the shop or garage: how far the coins still have to go.
+            resultGoal = UiFactory.TextBox("Goal", card, Top, new Vector2(0f, -682f), new Vector2(760f, 48f), "", 32f, Palette.UiText, FontStyles.Bold);
+            resultGoalBar = UiFactory.Bar(card, Top, new Vector2(0f, -738f), new Vector2(560f, 22f), new Color(0.36f, 0.85f, 0.6f), out resultGoalFill).gameObject;
+
+            resultNext = UiFactory.MakeButton(card, Loc.T("btn.next"), Kind.Primary, Top, new Vector2(0f, -795f), new Vector2(620f, 150f), () => NextPressed?.Invoke(), 70f);
+            resultRetry = UiFactory.MakeButton(card, Loc.T("btn.retry"), Kind.Primary, Top, new Vector2(0f, -795f), new Vector2(620f, 150f), () => RetryPressed?.Invoke(), 70f);
+            resultBonus = UiFactory.MakeButton(card, Loc.T("btn.bonus"), Kind.Gold, Top, new Vector2(0f, -795f), new Vector2(620f, 150f), () => BonusPressed?.Invoke(), 76f);
             resultBonus.gameObject.AddComponent<Pulse>();
-            resultContinue = UiFactory.MakeButton(card, Loc.T("btn.continue"), Kind.Gold, Top, new Vector2(0f, -710f), new Vector2(620f, 150f), () => ContinuePressed?.Invoke(), 50f);
+            resultContinue = UiFactory.MakeButton(card, Loc.T("btn.continue"), Kind.Gold, Top, new Vector2(0f, -795f), new Vector2(620f, 150f), () => ContinuePressed?.Invoke(), 50f);
             resultContinue.gameObject.AddComponent<Pulse>();
-            resultDouble = UiFactory.MakeButton(card, Loc.T("btn.double"), Kind.Gold, Top, new Vector2(0f, -880f), new Vector2(620f, 135f), () => DoublePressed?.Invoke(), 54f);
-            resultMap = UiFactory.MakeButton(card, Loc.T("btn.map"), Kind.Secondary, Top, new Vector2(-160f, -1035f), new Vector2(300f, 125f), () => MapPressed?.Invoke(), 54f);
-            resultMenu = UiFactory.MakeButton(card, Loc.T("btn.menu"), Kind.Secondary, Top, new Vector2(160f, -1035f), new Vector2(300f, 125f), () => MenuPressed?.Invoke(), 54f);
+            resultDouble = UiFactory.MakeButton(card, Loc.T("btn.double"), Kind.Gold, Top, new Vector2(0f, -965f), new Vector2(620f, 135f), () => DoublePressed?.Invoke(), 54f);
+            resultMap = UiFactory.MakeButton(card, Loc.T("btn.map"), Kind.Secondary, Top, new Vector2(-160f, -1120f), new Vector2(300f, 125f), () => MapPressed?.Invoke(), 54f);
+            resultMenu = UiFactory.MakeButton(card, Loc.T("btn.menu"), Kind.Secondary, Top, new Vector2(160f, -1120f), new Vector2(300f, 125f), () => MenuPressed?.Invoke(), 54f);
         }
 
         public void ShowResult(ResultInfo info)
@@ -734,6 +765,15 @@ namespace SquashBot.UI
             resultSub.text = info.subtitle;
             resultReward.text = $"+{info.coins}";
             resultNote.text = info.note ?? "";
+            bool goal = !string.IsNullOrEmpty(info.goalText);
+            resultGoal.gameObject.SetActive(goal);
+            resultGoalBar.SetActive(goal);
+            if (goal)
+            {
+                resultGoal.text = info.goalText;
+                resultGoal.color = info.goalProgress >= 1f ? Palette.UiGold : Palette.UiText;
+                UiFactory.SetBar(resultGoalFill, info.goalProgress);
+            }
             resultNote.color = info.won ? Palette.UiGold : new Color(1f, 0.6f, 0.65f);
 
             bool showStars = info.won && !info.bonusRound;
@@ -762,7 +802,7 @@ namespace SquashBot.UI
             resultNext.gameObject.SetActive(next);
             resultContinue.gameObject.SetActive(cont);
             resultRetry.gameObject.SetActive(retryTop || cont);
-            ((RectTransform)resultRetry.transform).anchoredPosition = new Vector2(0f, retryTop ? -710f : -880f);
+            ((RectTransform)resultRetry.transform).anchoredPosition = new Vector2(0f, retryTop ? -795f : -965f);
             resultDouble.gameObject.SetActive(ended && info.canDouble && info.coins > 0);
             resultReward.transform.parent.localScale = Vector3.one;
         }
@@ -865,6 +905,7 @@ namespace SquashBot.UI
             }
 
             Punch(bonusPill, ref bonusPunch, dt, 0.25f);
+            if (comboPill.localScale.x > 1f) comboPill.localScale = Vector3.Lerp(comboPill.localScale, Vector3.one, dt * 8f);
             Punch(missionPill, ref missionPunch, dt, 0.18f);
         }
 

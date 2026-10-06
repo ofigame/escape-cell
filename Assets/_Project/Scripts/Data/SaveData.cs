@@ -11,6 +11,10 @@ namespace SquashBot.Data
         private const string MusicKey = "sb_music";
         private const string VibrationKey = "sb_vibration";
         private const string LanguageKey = "sb_language";
+        private const string TestModeKey = "sb_test_mode";
+
+        /// <summary>Test builds open every level and never run out of lives. SET TO false BEFORE RELEASE.</summary>
+        private const bool TestModeDefault = true;
 
         /// <summary>Highest level index (0-based) the player may start. Lower levels count as completed.</summary>
         public static int UnlockedLevel
@@ -47,6 +51,13 @@ namespace SquashBot.Data
         {
             get => GetBool(VibrationKey, true);
             set => SetBool(VibrationKey, value);
+        }
+
+        /// <summary>Testing: every level is playable and lives are never spent.</summary>
+        public static bool TestMode
+        {
+            get => GetBool(TestModeKey, TestModeDefault);
+            set => SetBool(TestModeKey, value);
         }
 
         public static Language Language

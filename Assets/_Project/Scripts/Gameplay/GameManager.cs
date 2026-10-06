@@ -60,6 +60,13 @@ namespace SquashBot.Gameplay
         private LevelData level;
         private int levelIndex;
         private int coinsThisRun;
+        private int comboBonus;  // extra coins from combos (missions and stars count pickups, not these)
+        private int comboStreak;
+        private float comboTimer;
+        private const float ComboWindow = 6f;
+        private const int ComboStep = 5;
+        private int ComboMultiplier => comboStreak >= ComboStep * 2 ? 3 : comboStreak >= ComboStep ? 2 : 1;
+        private int Earned => coinsThisRun + comboBonus;
         private float elapsed;
         private float slowMoLeft;
         private int themeWorld = -1;
@@ -450,6 +457,9 @@ namespace SquashBot.Gameplay
             closeCalls = 0;
             jumpHintShown = false;
             coinsThisRun = 0;
+            comboBonus = 0;
+            comboStreak = 0;
+            comboTimer = 0f;
             elapsed = 0f;
             armorsThisLevel = 0;
             rescues = 0;
@@ -523,6 +533,9 @@ namespace SquashBot.Gameplay
                     SaveData.Vibration = !SaveData.Vibration;
                     Haptics.Medium(); // feel it right away when turned on
                     break;
+                case SettingKind.TestMode:
+                    SaveData.TestMode = !SaveData.TestMode;
+                    break;
                 case SettingKind.Camera:
                     SaveData.PerspectiveView = !SaveData.PerspectiveView;
                     cameraRig.SetMode(SaveData.PerspectiveView ? ViewMode.Perspective : ViewMode.Isometric);
@@ -553,7 +566,7 @@ namespace SquashBot.Gameplay
             continued = true;
             StopAllCoroutines();
             // The loss already banked the coins and counted a fail; this run goes on instead.
-            SaveData.Coins -= coinsThisRun;
+            SaveData.Coins -= Earned;
             PlayerPrefs.SetInt(FailKey(levelIndex), Mathf.Max(0, PlayerPrefs.GetInt(FailKey(levelIndex), 0) - 1));
 
             var at = SafeTileNear(robot.Position, robot.Position);
@@ -577,7 +590,7 @@ namespace SquashBot.Gameplay
         private void WatchAdToDouble()
         {
             if (doubled || State != GameState.Result || !Ads.Rewarded.IsReady) return;
-            int earned = coinsThisRun;
+            int earned = Earned;
             Ads.Rewarded.Show(rewarded =>
             {
                 if (!rewarded || doubled) return;
@@ -640,6 +653,7 @@ namespace SquashBot.Gameplay
         {
             if (!RescueEnabled || rescues <= 0) return false;
             rescues--;
+            BreakCombo();
 
             if (crushed) hazards.Shatter(p);
             else robot.RescueTo(SafeTileNear(robot.LastLeftTile, p));
@@ -838,6 +852,8 @@ namespace SquashBot.Gameplay
             ui.SetRescues(RescueEnabled, rescues, coinsTowardRescue / (float)CoinsPerRescue);
             ui.SetHover(HoverEnabled, hoverCooldown);
             UpdateJourney(Time.deltaTime);
+            comboTimer -= Time.deltaTime;
+            ui.SetCombo(comboTimer > 0f ? ComboMultiplier : 1, comboTimer / ComboWindow);
 
             // Armor lets the robot stand over a hole or fire; once it wears off, gravity (or heat) wins.
             if (robot.IsAlive && !robot.IsHopping && !robot.IsHovering && !robot.IsShielded && grid.IsGap(robot.Position))
@@ -967,6 +983,7 @@ namespace SquashBot.Gameplay
                 {
                     // The shield takes the hit; upgraded shields crack and hold until their last hit.
                     bool broke = robot.AbsorbHit();
+                    BreakCombo();
                     hazards.Shatter(p);
                     cameraRig.Shake(0.9f);
                     AudioManager.PlaySfx(Sfx.Blocked, 1f, broke ? 0.8f : 1.2f);
@@ -1022,7 +1039,20 @@ namespace SquashBot.Gameplay
         private void OnCoinCollected(GridPos p)
         {
             coinsThisRun++;
-            FloatAt(GridView.ToWorld(p), "+1", Palette.UiGold);
+
+            // Combo: coins picked up one after another (without taking a hit) count double, then triple.
+            if (comboTimer <= 0f) comboStreak = 0;
+            comboStreak++;
+            comboTimer = ComboWindow;
+            int multiplier = ComboMultiplier;
+            comboBonus += multiplier - 1;
+            FloatAt(GridView.ToWorld(p), "+" + multiplier, multiplier > 1 ? Palette.UiGold : Palette.UiGold);
+            if (comboStreak == ComboStep || comboStreak == ComboStep * 2)
+            {
+                FloatAt(GridView.ToWorld(p) + Vector3.up * 0.5f, Loc.F("float.combo", multiplier), Palette.UiGold);
+                AudioManager.PlaySfx(Sfx.Coin, 1f, 1.5f);
+                cameraRig.Punch(0.4f);
+            }
             ui.FlyCoin(cameraRig.Cam.WorldToScreenPoint(GridView.ToWorld(p) + Vector3.up * 0.45f));
 
             // Every few coins bank a rescue charge.
@@ -1038,6 +1068,13 @@ namespace SquashBot.Gameplay
                 Win();
             else if (level.mission == MissionType.CoinRain && coinsThisRun == level.coinTarget)
                 FloatAt(GridView.ToWorld(p) + Vector3.up * 0.5f, Loc.T("float.target"), Palette.UiCyan);
+        }
+
+        /// <summary>Taking a hit ends the coin streak.</summary>
+        private void BreakCombo()
+        {
+            comboStreak = 0;
+            comboTimer = 0f;
         }
 
         private void OnPowerUpCollected(PowerUpType type, GridPos p)
@@ -1076,7 +1113,7 @@ namespace SquashBot.Gameplay
             AudioManager.PlaySfx(Sfx.Win);
             Haptics.Medium();
 
-            SaveData.Coins += coinsThisRun;
+            SaveData.Coins += Earned;
             if (bonusRun)
             {
                 ShowBonusResult();
@@ -1115,7 +1152,7 @@ namespace SquashBot.Gameplay
                 canDouble = true,
                 subtitle = Loc.T(newWorld ? "result.newWorld" : hasNext ? "result.next" : "result.allDone"),
                 note = note,
-                coins = coinsThisRun,
+                coins = Earned,
                 stars = stars,
                 bonusAvailable = Progress.BonusTokens > 0,
                 meter = unlockedBonus > 0 || surprise ? 1f : Progress.Meter / (float)Progress.StarsPerBonus,
@@ -1142,7 +1179,7 @@ namespace SquashBot.Gameplay
                 canDouble = true,
                 hasNext = true,
                 subtitle = subtitle ?? Loc.T("result.bonusSub"),
-                coins = coinsThisRun,
+                coins = Earned,
                 bonusAvailable = Progress.BonusTokens > 0,
                 meter = Progress.Meter / (float)Progress.StarsPerBonus,
                 meterText = Loc.F("bonus.meter", Progress.Meter, Progress.StarsPerBonus),
@@ -1158,7 +1195,7 @@ namespace SquashBot.Gameplay
             if (hovering) { hovering = false; ShowHoverMarker(false); }
 
             // Coins picked up are kept even on a loss, so every run feels worth it.
-            SaveData.Coins += coinsThisRun;
+            SaveData.Coins += Earned;
             if (bonusRun)
             {
                 ShowBonusResult();
@@ -1172,7 +1209,7 @@ namespace SquashBot.Gameplay
                 note = Story.LoseQuip(),
                 canContinue = !continued && Ads.Rewarded.IsReady,
                 subtitle = reason + "\n" + Loc.F("lives.left", Lives.Count),
-                coins = coinsThisRun,
+                coins = Earned,
                 meter = Progress.Meter / (float)Progress.StarsPerBonus,
                 meterText = Loc.F("bonus.meter", Progress.Meter, Progress.StarsPerBonus),
             }));
@@ -1180,6 +1217,13 @@ namespace SquashBot.Gameplay
 
         private IEnumerator ShowResultDelayed(UIController.ResultInfo info)
         {
+            // The coin goal picked in the shop or garage, measured against the coins after this run.
+            if (Goal.TryGet(out string goalName, out int goalPrice) && goalPrice > 0)
+            {
+                int coinsNow = SaveData.Coins;
+                info.goalProgress = Mathf.Clamp01(coinsNow / (float)goalPrice);
+                info.goalText = coinsNow >= goalPrice ? Loc.F("goal.ready", goalName) : Loc.F("goal.left", goalPrice - coinsNow, goalName);
+            }
             doubled = false;
             ui.SetWarning(false);
             ui.SetShield(0f, 1f);
@@ -1447,7 +1491,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Boss: text = Loc.F("hud.boss", objectivesDone, objectivesTotal); break;
                 default: text = Loc.F("hud.survive", Seconds(level.surviveSeconds - elapsed)); break;
             }
-            ui.SetMission(text, MissionProgress(), coinsThisRun);
+            ui.SetMission(text, MissionProgress(), Earned);
         }
     }
 }

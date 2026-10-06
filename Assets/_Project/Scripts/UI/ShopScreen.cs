@@ -80,8 +80,8 @@ namespace SquashBot.UI
             DrawIcon(icon, item);
 
             string key = "shop." + item;
-            UiFactory.TextBox("Name", row, new Vector2(0f, 1f), new Vector2(156f, -22f), new Vector2(500f, 56f), Loc.T(key), 42f, Palette.UiText, align: TextAlignmentOptions.Left);
-            var desc = UiFactory.TextBox("Desc", row, new Vector2(0f, 1f), new Vector2(156f, -68f), new Vector2(500f, 40f), Loc.T(key + ".desc"), 30f,
+            UiFactory.TextBox("Name", row, new Vector2(0f, 1f), new Vector2(156f, -22f), new Vector2(380f, 56f), Loc.T(key), 42f, Palette.UiText, align: TextAlignmentOptions.Left);
+            var desc = UiFactory.TextBox("Desc", row, new Vector2(0f, 1f), new Vector2(156f, -68f), new Vector2(380f, 40f), Loc.T(key + ".desc"), 30f,
                 new Color(0.85f, 0.86f, 1f, 0.75f), FontStyles.Normal, align: TextAlignmentOptions.Left);
 
             // Level pips (upgrades) or the owned count (items).
@@ -102,6 +102,22 @@ namespace SquashBot.UI
                 owned = UiFactory.TextBox("Owned", row, new Vector2(0f, 0f), new Vector2(156f, 6f), new Vector2(300f, 32f), "", 26f, Palette.UiCyan, align: TextAlignmentOptions.Left);
             }
 
+            // Mark as the goal to save up for (shown on every result card).
+            string goalId = IsUpgrade(item) ? Goal.ForUpgrade(ToUpgrade(item)) : item == Item.StartShield ? Goal.ForBoost(Boost.StartShield) : item == Item.ExtraRescue ? Goal.ForBoost(Boost.ExtraRescue) : null;
+            TextMeshProUGUI goalLabel = null;
+            GameObject goalButton = null;
+            if (goalId != null)
+            {
+                var gb = UiFactory.MakeButton(row, "", Kind.Secondary, new Vector2(0f, 0.5f), new Vector2(548f, 0f), new Vector2(150f, 64f), () =>
+                {
+                    Goal.Toggle(goalId);
+                    AudioManager.PlaySfx(Sfx.Click, 0.7f, 1.2f);
+                    Refresh();
+                }, 26f);
+                goalLabel = gb.GetComponentInChildren<TextMeshProUGUI>();
+                goalButton = gb.gameObject;
+            }
+
             var buy = UiFactory.MakeButton(row, "", Kind.Gold, new Vector2(1f, 0.5f), new Vector2(-24f, 0f), new Vector2(250f, 110f), () => Buy(item, row), 46f);
             var label = buy.GetComponentInChildren<TextMeshProUGUI>();
 
@@ -119,6 +135,12 @@ namespace SquashBot.UI
                 }
                 if (owned != null) owned.text = Loc.F("shop.owned", Shop.Owned(item == Item.StartShield ? Boost.StartShield : Boost.ExtraRescue));
                 desc.text = Describe(item);
+                if (goalLabel != null)
+                {
+                    goalButton.SetActive(!maxed);
+                    goalLabel.text = Loc.T(Goal.Is(goalId) ? "goal.on" : "goal.set");
+                    goalLabel.color = Goal.Is(goalId) ? Palette.UiGold : Palette.UiText;
+                }
             });
         }
 

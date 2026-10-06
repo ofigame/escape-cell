@@ -35,6 +35,7 @@ namespace SquashBot.UI
         private Button bonusButton;
         private TextMeshProUGUI bonusCount;
         private int builtStars = -1;
+        private bool openAll, builtOpenAll;
         private readonly List<RectTransform> nodes = new List<RectTransform>();
         private readonly List<Texture2D> textures = new List<Texture2D>();
 
@@ -108,7 +109,9 @@ namespace SquashBot.UI
         public void Show(int unlockedLevel, int coins, int focusLevel, int animateFrom = -1)
         {
             int stars = Progress.TotalStars(levelCount);
-            if (unlockedLevel != unlocked || stars != builtStars) Rebuild(unlockedLevel);
+            openAll = SaveData.TestMode;
+            if (unlockedLevel != unlocked || stars != builtStars || openAll != builtOpenAll) Rebuild(unlockedLevel);
+            builtOpenAll = openAll;
             builtStars = stars;
             int tokens = Progress.BonusTokens;
             bonusButton.gameObject.SetActive(tokens > 0);
@@ -164,7 +167,7 @@ namespace SquashBot.UI
             raw.texture = art;
             raw.raycastTarget = false;
 
-            bool locked = world * LevelCatalog.LevelsPerWorld > unlocked;
+            bool locked = world * LevelCatalog.LevelsPerWorld > unlocked && !openAll;
             if (locked)
             {
                 var shade = UiFactory.Fill(UiFactory.Stretch("Locked", section), new Color(0.05f, 0.04f, 0.12f, 0.4f));
@@ -234,7 +237,7 @@ namespace SquashBot.UI
             var theme = WorldTheme.ForWorld(level / LevelCatalog.LevelsPerWorld);
             bool completed = level < unlocked;
             bool current = level == unlocked;
-            bool locked = level > unlocked;
+            bool locked = level > unlocked && !openAll;
             float size = current ? 180f : 150f;
 
             var node = UiFactory.Box($"Level {level + 1}", content, new Vector2(0.5f, 0f), NodePos(level), new Vector2(size, size));

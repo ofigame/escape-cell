@@ -24,7 +24,8 @@ namespace SquashBot.UI
 
         private UiScreen screen;
         private TextMeshProUGUI coinsText, itemName, actionLabel;
-        private Button actionButton;
+        private Button actionButton, goalButton;
+        private TextMeshProUGUI goalLabel;
         private RectTransform grid;
         private readonly List<(Slot slot, Image bg)> tabs = new List<(Slot, Image)>();
         private Slot slot = Slot.Color;
@@ -67,7 +68,15 @@ namespace SquashBot.UI
 
             grid = UiFactory.Box("Grid", panel, new Vector2(0.5f, 1f), new Vector2(0f, -240f), new Vector2(940f, 560f));
 
-            actionButton = UiFactory.MakeButton(panel, "", Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(560f, 140f), Act, 60f);
+            actionButton = UiFactory.MakeButton(panel, "", Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(500f, 140f), Act, 60f);
+            goalButton = UiFactory.MakeButton(panel, "", Kind.Secondary, new Vector2(0f, 0f), new Vector2(30f, 55f), new Vector2(200f, 110f), () =>
+            {
+                if (selected == null) return;
+                Goal.Toggle(Goal.ForCosmetic(selected));
+                AudioManager.PlaySfx(Sfx.Click, 0.7f, 1.2f);
+                Refresh();
+            }, 30f);
+            goalLabel = goalButton.GetComponentInChildren<TextMeshProUGUI>();
             actionLabel = actionButton.GetComponentInChildren<TextMeshProUGUI>();
         }
 
@@ -167,6 +176,10 @@ namespace SquashBot.UI
             actionLabel.text = equipped ? Loc.T("garage.equipped") : owned ? Loc.T("garage.equip")
                 : locked ? Loc.F("garage.world", selected.world + 1) : Loc.F("garage.buy", selected.price);
             actionButton.interactable = !equipped && !locked && (owned || SaveData.Coins >= selected.price);
+            goalButton.gameObject.SetActive(!owned);
+            bool isGoal = Goal.Is(Goal.ForCosmetic(selected));
+            goalLabel.text = Loc.T(isGoal ? "goal.on" : "goal.set");
+            goalLabel.color = isGoal ? Palette.UiGold : Palette.UiText;
         }
     }
 }
