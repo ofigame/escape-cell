@@ -15,6 +15,7 @@ namespace SquashBot.Gameplay
         {
             public GridPos pos;
             public float lifeLeft;
+            public float age;
             public GameObject go;
         }
 
@@ -102,11 +103,16 @@ namespace SquashBot.Gameplay
                 }
 
                 var tr = c.go.transform;
+                // Pop in with a little overshoot when the coin appears.
+                c.age += dt;
+                float pop = c.age < 0.32f ? EaseOutBack(c.age / 0.32f) : 1f;
+                tr.localScale = Vector3.one * pop;
                 // Face the camera (cylinder axis toward the viewer) and wobble gently, so the coin always reads as a coin.
                 var cam = Camera.main;
                 var facing = cam != null ? Quaternion.FromToRotation(Vector3.up, -cam.transform.forward) : Quaternion.Euler(90f, 0f, 0f);
                 tr.rotation = Quaternion.AngleAxis(Mathf.Sin(Time.time * 3f + c.pos.y) * 25f, Vector3.up) * facing;
-                tr.position = GridView.ToWorld(c.pos) + Vector3.up * (0.4f + Mathf.Sin(Time.time * 4f + c.pos.x) * 0.06f);
+                float drop = Mathf.Pow(1f - Mathf.Clamp01(c.age / 0.25f), 2f) * 1.4f; // falls into place
+                tr.position = GridView.ToWorld(c.pos) + Vector3.up * (0.4f + drop + Mathf.Sin(Time.time * 4f + c.pos.x) * 0.06f);
                 // blink when about to vanish
                 c.go.SetActive(c.lifeLeft > 1.5f || Mathf.Repeat(c.lifeLeft, 0.25f) > 0.1f);
             }
@@ -116,6 +122,13 @@ namespace SquashBot.Gameplay
             if (timer > 0f) return;
             timer = level.coinInterval;
             if (coins.Count < level.maxCoins) SpawnCoin();
+        }
+
+        private static float EaseOutBack(float x)
+        {
+            const float c1 = 2.2f;
+            const float c3 = c1 + 1f;
+            return 1f + c3 * Mathf.Pow(x - 1f, 3f) + c1 * Mathf.Pow(x - 1f, 2f);
         }
 
         private void SpawnCoin()

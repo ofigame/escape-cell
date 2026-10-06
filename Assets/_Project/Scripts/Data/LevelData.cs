@@ -5,8 +5,16 @@ namespace SquashBot.Data
 {
     public enum MissionType
     {
+        /// <summary>Pick up a number of coins.</summary>
         CollectCoins,
-        Survive
+        /// <summary>Stay alive for a number of seconds.</summary>
+        Survive,
+        /// <summary>An exit door opens after a while; reach it to escape.</summary>
+        Exit,
+        /// <summary>Step on every tile to paint the whole platform.</summary>
+        Paint,
+        /// <summary>Bonus round: coins rain down, few hazards, the clock always wins.</summary>
+        CoinRain
     }
 
     [Serializable]
@@ -20,6 +28,8 @@ namespace SquashBot.Data
         public MissionType mission = MissionType.CollectCoins;
         public int coinTarget = 5;
         public float surviveSeconds = 30f;
+        [Tooltip("Exit missions: seconds until the door opens.")]
+        public float exitDelay = 8f;
 
         [Header("Blocks")]
         [Tooltip("Seconds between the red warning appearing and the block hitting the tile.")]

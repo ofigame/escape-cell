@@ -67,6 +67,17 @@ namespace SquashBot.UI
         private Image hudFill, shieldFill;
         private RectTransform shieldPill;
         private RectTransform rescuePill, hoverPill;
+        private RectTransform missionPill, bonusPill;
+        private float missionPunch = 1f, bonusPunch = 1f;
+        private float lastProgress;
+
+        private class FlyingCoin
+        {
+            public RectTransform rect;
+            public Vector3 start;
+            public float t;
+        }
+        private readonly List<FlyingCoin> flyingCoins = new List<FlyingCoin>();
         private TextMeshProUGUI rescueText, hoverText;
         private Image rescueFill, hoverFace;
         private Image warnLeft, warnRight;
@@ -321,13 +332,13 @@ namespace SquashBot.UI
 
             UiFactory.MakeButton(t, "II", Kind.Icon, TopLeft, new Vector2(36f, -36f), new Vector2(124f, 124f), () => PausePressed?.Invoke(), 52f);
 
-            var mission = UiFactory.Pill("Mission", t, Top, new Vector2(0f, -36f), new Vector2(500f, 124f), UiFactory.PillColor);
+            var mission = missionPill = UiFactory.Pill("Mission", t, Top, new Vector2(0f, -36f), new Vector2(500f, 124f), UiFactory.PillColor);
             hudLevel = UiFactory.TextBox("Level", mission, Top, new Vector2(0f, -10f), new Vector2(480f, 40f), "", 30f, Palette.UiCyan);
             hudLevel.characterSpacing = 6f;
             hudMission = UiFactory.TextBox("Text", mission, Bottom, new Vector2(0f, 12f), new Vector2(480f, 64f), "", 44f, Palette.UiText);
             UiFactory.Bar(t, Top, new Vector2(0f, -176f), new Vector2(460f, 16f), Palette.UiCyan, out hudFill);
 
-            var bonus = UiFactory.Pill("Bonus", t, TopRight, new Vector2(-36f, -36f), new Vector2(220f, 124f), UiFactory.PillColor);
+            var bonus = bonusPill = UiFactory.Pill("Bonus", t, TopRight, new Vector2(-36f, -36f), new Vector2(220f, 124f), UiFactory.PillColor);
             CoinIcon(bonus, new Vector2(56f, 0f));
             hudBonus = UiFactory.TextBox("Value", bonus, new Vector2(0f, 0.5f), new Vector2(98f, 0f), new Vector2(110f, 80f),
                 "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
@@ -376,6 +387,7 @@ namespace SquashBot.UI
 
         public void ShowHud(int levelIndex)
         {
+            lastProgress = 0f;
             HideAll();
             hud.Show();
             SetBanner(false);
@@ -384,6 +396,9 @@ namespace SquashBot.UI
 
         public void SetMission(string text, float progress, int coinsThisRun)
         {
+            // A step of progress (not just the clock ticking) makes the mission pill jump.
+            if (progress > lastProgress + 0.001f && hud.IsVisible && Mathf.Abs(progress - lastProgress) > 0.02f) missionPunch = 0f;
+            lastProgress = progress;
             hudMission.text = text;
             UiFactory.SetBar(hudFill, progress);
             hudBonus.text = coinsThisRun.ToString();
@@ -518,6 +533,50 @@ namespace SquashBot.UI
             bannerPlaceholder.transform.SetAsLastSibling();
         }
 
+        /// <summary>A collected coin flies from the playfield into the coin counter, which bumps when it lands.</summary>
+        public void FlyCoin(Vector3 screenPos)
+        {
+            var rect = UiFactory.Box("FlyingCoin", canvas.transform, Middle, Vector2.zero, new Vector2(64f, 64f));
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(rect, Palette.UiGold, UiSprites.Circle).raycastTarget = false;
+            var inner = UiFactory.Box("Inner", rect, Middle, Vector2.zero, new Vector2(40f, 40f));
+            UiFactory.Fill(inner, new Color(1f, 0.92f, 0.6f), UiSprites.Circle).raycastTarget = false;
+            rect.position = screenPos;
+            flyingCoins.Add(new FlyingCoin { rect = rect, start = screenPos });
+        }
+
+        private void UpdateJuice(float dt)
+        {
+            for (int i = flyingCoins.Count - 1; i >= 0; i--)
+            {
+                var c = flyingCoins[i];
+                c.t += dt / 0.5f;
+                var target = bonusPill.position;
+                float t = Mathf.Clamp01(c.t);
+                float ease = t * t * (3f - 2f * t);
+                // Arc upward on the way to the counter.
+                var p = Vector3.Lerp(c.start, target, ease) + Vector3.up * (Mathf.Sin(t * Mathf.PI) * 120f * canvas.scaleFactor);
+                c.rect.position = p;
+                float s = Mathf.Lerp(1.3f, 0.6f, t);
+                c.rect.localScale = new Vector3(s, s, 1f);
+                if (c.t < 1f) continue;
+                Destroy(c.rect.gameObject);
+                flyingCoins.RemoveAt(i);
+                bonusPunch = 0f;
+            }
+
+            Punch(bonusPill, ref bonusPunch, dt, 0.25f);
+            Punch(missionPill, ref missionPunch, dt, 0.18f);
+        }
+
+        private static void Punch(RectTransform rect, ref float t, float dt, float amount)
+        {
+            if (t >= 1f) return;
+            t = Mathf.Min(1f, t + dt / 0.3f);
+            float s = 1f + Mathf.Sin(t * Mathf.PI) * amount * (1f - t * 0.5f);
+            rect.localScale = new Vector3(s, s, 1f);
+        }
+
         // ---------- Floating text ----------
 
         public void Float(Vector3 screenPos, string text, Color color, float size = 64f)
@@ -548,6 +607,8 @@ namespace SquashBot.UI
         private void Update()
         {
             float dt = Time.unscaledDeltaTime;
+
+            UpdateJuice(dt);
 
             livesRefresh -= dt;
             if (livesRefresh <= 0f)

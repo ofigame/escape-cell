@@ -12,7 +12,7 @@ namespace SquashBot.Gameplay
     /// </summary>
     public class Robot : MonoBehaviour
     {
-        private const float HopDuration = 0.13f;
+        private const float HopDuration = 0.115f; // snappy: the hop must feel instant
         private const float HopHeight = 0.35f;
         private const int MaxJumpHoles = 2;
         private static readonly Quaternion FacingCamera = Quaternion.LookRotation(new Vector3(-1f, 0f, -1f));
@@ -53,7 +53,7 @@ namespace SquashBot.Gameplay
         private float blinkTimer = 2f;
         private GridModel grid;
 
-        private enum Anim { Idle, Hop, Bump, Squash, Fall, Cheer, Hover }
+        private enum Anim { Idle, Hop, Bump, Squash, Fall, Cheer, Hover, Escape }
         private Anim anim;
         private float animTime;
         private Vector3 from, to;
@@ -61,6 +61,8 @@ namespace SquashBot.Gameplay
         private bool bufferedJump;
         private float hopDuration = HopDuration;
         private float hopHeight = HopHeight;
+        private float flinchT = 1f;
+        private Vector3 flinchDir;
         private Quaternion targetFacing = Quaternion.identity;
 
         public static Robot Create(Transform parent)
@@ -169,6 +171,7 @@ namespace SquashBot.Gameplay
             Facing = Direction.MinusY;
             LastLeftTime = -10f;
             anim = Anim.Idle;
+            flinchT = 1f;
             transform.position = GridView.ToWorld(start);
             visual.localScale = Vector3.one;
             visual.localPosition = Vector3.zero;
@@ -330,6 +333,24 @@ namespace SquashBot.Gameplay
             StartAnim(Anim.Fall, transform.position, transform.position + Vector3.down * 12f);
         }
 
+        /// <summary>A block slammed down next to us: lean away and squish for a moment.</summary>
+        public void Flinch(Vector3 from)
+        {
+            if (!IsAlive || anim != Anim.Idle) return;
+            var away = transform.position - from;
+            away.y = 0f;
+            flinchDir = away.sqrMagnitude > 0.001f ? away.normalized : Vector3.zero;
+            flinchT = 0f;
+        }
+
+        /// <summary>Exit missions: spin, shrink and rise into the portal.</summary>
+        public void EscapeInto()
+        {
+            IsAlive = false; // freezes input
+            targetFacing = FacingCamera;
+            StartAnim(Anim.Escape, transform.position, transform.position + Vector3.up * 1.2f);
+        }
+
         public void Cheer()
         {
             IsAlive = false; // freezes input
@@ -410,12 +431,34 @@ namespace SquashBot.Gameplay
                 }
                 case Anim.Cheer:
                 {
-                    float bounce = Mathf.Abs(Mathf.Sin(animTime * 9f)) * 0.4f * Mathf.Clamp01(1.5f - animTime);
+                    // Victory dance: two happy hops with a full spin, then a proud little bounce.
+                    float bounce = Mathf.Abs(Mathf.Sin(animTime * 7.5f)) * 0.45f * Mathf.Clamp01(1.6f - animTime);
                     transform.position = from + Vector3.up * bounce;
+                    float spin = 720f * (1f - Mathf.Pow(1f - Mathf.Clamp01(animTime / 1.1f), 3f));
+                    visual.localRotation = FacingCamera * Quaternion.Euler(0f, spin, 0f);
+                    float stretch = 1f + Mathf.Sin(animTime * 15f) * 0.08f * Mathf.Clamp01(1.6f - animTime);
+                    visual.localScale = new Vector3(1f / stretch, stretch, 1f / stretch);
+                    break;
+                }
+                case Anim.Escape:
+                {
+                    float t = Mathf.Clamp01(animTime / 0.65f);
+                    transform.position = Vector3.Lerp(from, to, t * t);
+                    visual.localRotation = FacingCamera * Quaternion.Euler(0f, 900f * t * t, 0f);
+                    float s = t < 0.2f ? 1f + t * 1.5f : Mathf.Lerp(1.3f, 0f, (t - 0.2f) / 0.8f);
+                    visual.localScale = new Vector3(s, s * (1f + t * 0.5f), s);
                     break;
                 }
             }
 
+            if (flinchT < 1f)
+            {
+                flinchT = Mathf.Min(1f, flinchT + Time.deltaTime / 0.28f);
+                float k = Mathf.Sin(flinchT * Mathf.PI);
+                visual.localPosition = flinchDir * (0.09f * k);
+                visual.localScale = Vector3.Scale(visual.localScale, new Vector3(1f + 0.12f * k, 1f - 0.15f * k, 1f + 0.12f * k));
+                if (flinchT >= 1f) visual.localPosition = Vector3.zero;
+            }
         }
 
         private void ConsumeBuffer()

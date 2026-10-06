@@ -21,6 +21,10 @@ namespace SquashBot.Gameplay
             public float warning;
             public float pop = 1f;
             public GameObject fire;
+            public bool painted;
+            public float paintPop = 1f;
+            public float bounce = 1f;
+            public float bounceStrength = 1f;
         }
 
         private TileView[,] tiles;
@@ -105,6 +109,27 @@ namespace SquashBot.Gameplay
             t.pop = 0f;
         }
 
+        /// <summary>The robot lands (or a block slams down): the tile dips and springs back.</summary>
+        public void Bounce(GridPos p, float strength = 1f)
+        {
+            if (tiles == null) return;
+            var t = tiles[p.x, p.y];
+            t.bounce = 0f;
+            t.bounceStrength = strength;
+        }
+
+        /// <summary>Paint missions: the tile floods with the world's accent color in a little splash.</summary>
+        public void Paint(GridPos p)
+        {
+            if (tiles == null) return;
+            var t = tiles[p.x, p.y];
+            if (t.painted) return;
+            t.painted = true;
+            t.paintPop = 0f;
+            var accent = WorldTheme.Current.accent;
+            fx.Burst(t.tile.transform.position + Vector3.up * 0.1f, accent, accent * 1.6f, 10, 2.2f);
+        }
+
         /// <summary>The tile catches fire: glowing embers and rising flames until <see cref="Extinguish"/>.</summary>
         public void Ignite(GridPos p)
         {
@@ -140,13 +165,39 @@ namespace SquashBot.Gameplay
                     continue;
                 }
 
+                var topColor = Palette.TileTop;
+                var topGlow = Palette.TileSelfLight;
+                if (t.painted)
+                {
+                    // Painted tiles glow in the accent color; a fresh coat flashes brighter for a moment.
+                    if (t.paintPop < 1f) t.paintPop = Mathf.Min(1f, t.paintPop + Time.deltaTime * 3f);
+                    var accent = WorldTheme.Current.accent;
+                    float flash = 1f - t.paintPop;
+                    // A saturated, glowing coat that reads clearly on light and dark worlds alike.
+                    topColor = Paint(accent);
+                    topGlow = Paint(accent) * (0.45f + flash * 1.4f);
+                }
                 MaterialFactory.SetColors(t.top,
-                    Color.Lerp(Palette.TileTop, Palette.TileWarningTop, t.warning),
-                    Palette.TileSelfLight);
+                    Color.Lerp(topColor, Palette.TileWarningTop, t.warning),
+                    Color.Lerp(topGlow, Color.black, t.warning));
                 MaterialFactory.SetColors(t.frame,
                     Color.Lerp(Palette.TileTop, Palette.TileWarningTop, t.warning),
                     Color.Lerp(Palette.TileGlow, Palette.TileWarningGlow, t.warning));
                 t.warning = 0f;
+
+                if (t.bounce < 1f)
+                {
+                    // A quick dip and a springy rebound.
+                    t.bounce = Mathf.Min(1f, t.bounce + Time.deltaTime / 0.32f);
+                    float dip = Mathf.Sin(t.bounce * Mathf.PI * 2.2f) * (1f - t.bounce) * 0.07f * t.bounceStrength;
+                    t.tile.transform.localPosition = new Vector3(0f, -dip, 0f);
+                }
+
+                if (t.paintPop < 1f && t.painted)
+                {
+                    float s = 1f + Mathf.Sin(t.paintPop * Mathf.PI) * 0.08f;
+                    t.tile.transform.localScale = new Vector3(s, 1f, s);
+                }
 
                 if (t.pop < 1f)
                 {
@@ -155,6 +206,13 @@ namespace SquashBot.Gameplay
                     t.tile.transform.localScale = new Vector3(s, 1f, s);
                 }
             }
+        }
+
+        /// <summary>The world accent pushed to a vivid paint color.</summary>
+        private static Color Paint(Color accent)
+        {
+            Color.RGBToHSV(accent, out float h, out float s, out float v);
+            return Color.HSVToRGB(h, Mathf.Max(0.75f, s), Mathf.Clamp01(v * 0.95f));
         }
 
         private static float EaseOutBack(float x)

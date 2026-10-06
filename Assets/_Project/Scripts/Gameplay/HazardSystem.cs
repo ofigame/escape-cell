@@ -51,6 +51,9 @@ namespace SquashBot.Gameplay
 
         public bool AnyWarningActive { get; private set; }
 
+        /// <summary>Tiles nothing may fall on or break (the exit door).</summary>
+        public Func<GridPos, bool> IsProtected;
+
         private readonly List<Hazard> hazards = new List<Hazard>();
         private readonly List<Repair> repairs = new List<Repair>();
 
@@ -171,7 +174,7 @@ namespace SquashBot.Gameplay
 
             var candidates = new List<GridPos>();
             foreach (var p in grid.AllPositions())
-                if (grid.IsStandable(p) && !taken.Contains(p))
+                if (grid.IsStandable(p) && !taken.Contains(p) && (IsProtected == null || !IsProtected(p)))
                     candidates.Add(p);
 
             float warning = CurrentWarning;
@@ -244,7 +247,7 @@ namespace SquashBot.Gameplay
                 foreach (var d in DirectionExtensions.All)
                 {
                     var n = center + d.ToOffset();
-                    if (grid.InBounds(n) && grid.GetTile(n) == TileState.Solid && !taken.Contains(n)) area.Add(n);
+                    if (grid.InBounds(n) && grid.GetTile(n) == TileState.Solid && !taken.Contains(n) && (IsProtected == null || !IsProtected(n))) area.Add(n);
                 }
 
                 var danger = new HashSet<GridPos>(pending);
@@ -403,6 +406,8 @@ namespace SquashBot.Gameplay
             cameraRig.Shake(0.5f);
             AudioManager.PlaySfx(Sfx.Impact, 0.8f, 1f, 0.1f);
             if (h.pos.Manhattan(robot.Position) <= 1) Haptics.Pulse(22, 0.5f); // feel the near misses, not every distant block
+            gridView.Bounce(h.pos, 1.6f);
+            fx.Dust(at + Vector3.up * 0.06f, Palette.TileTop, 10, 2.2f);
             Impact?.Invoke(h.pos);
         }
 
@@ -429,7 +434,7 @@ namespace SquashBot.Gameplay
 
         private bool TryBreakTile(GridPos p)
         {
-            if (!level.breakTiles || !running || !CanBreakTile() || grid.GetTile(p) != TileState.Solid) return false;
+            if (!level.breakTiles || !running || !CanBreakTile() || grid.GetTile(p) != TileState.Solid || (IsProtected != null && IsProtected(p))) return false;
 
             // Some tiles catch fire for a few seconds instead of breaking into a hole.
             bool fire = level.fireChance > 0f && UnityEngine.Random.value < level.fireChance;

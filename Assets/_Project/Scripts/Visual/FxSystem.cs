@@ -40,6 +40,27 @@ namespace SquashBot.Visual
             }
         }
 
+        /// <summary>A low, outward ring of puffs: footsteps, landings, blocks hitting the floor.</summary>
+        public void Dust(Vector3 position, Color color, int count, float speed = 1.6f)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                var shard = pool.Count > 0 ? pool.Pop() : CreateShard();
+                shard.transform.gameObject.SetActive(true);
+                float a = (i + Random.value * 0.5f) * Mathf.PI * 2f / count;
+                var dir = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                shard.transform.position = position + dir * 0.18f;
+                shard.transform.rotation = Random.rotation;
+                MaterialFactory.SetColors(shard.material, color, color * 0.4f);
+
+                shard.velocity = dir * speed * Random.Range(0.7f, 1.1f) + Vector3.up * Random.Range(0.8f, 1.6f);
+                shard.spin = Random.insideUnitSphere * 360f;
+                shard.maxLife = shard.life = Random.Range(0.25f, 0.4f);
+                shard.size = Random.Range(0.05f, 0.09f);
+                active.Add(shard);
+            }
+        }
+
         private Shard CreateShard()
         {
             var go = Shapes.Cube("Shard", transform, Vector3.zero, Vector3.one * 0.1f, null);
