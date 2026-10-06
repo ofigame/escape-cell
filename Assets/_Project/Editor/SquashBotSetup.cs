@@ -336,6 +336,26 @@ namespace SquashBot.EditorTools
             string unlitPath = ResourcesDir + "/SquashBot_BaseUnlit.mat";
             if (AssetDatabase.LoadAssetAtPath<Material>(unlitPath) == null)
                 AssetDatabase.CreateAsset(new Material(Shader.Find("Universal Render Pipeline/Unlit")), unlitPath);
+
+            // Particle materials (weather, speed lines, sparks): additive glow and soft alpha, kept in Resources so the
+            // particle shader and these variants ship in builds.
+            CreateParticleMaterial(ResourcesDir + "/SquashBot_ParticleAdd.mat", additive: true);
+            CreateParticleMaterial(ResourcesDir + "/SquashBot_ParticleAlpha.mat", additive: false);
+        }
+
+        private static void CreateParticleMaterial(string path, bool additive)
+        {
+            if (AssetDatabase.LoadAssetAtPath<Material>(path) != null) return;
+            var m = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
+            m.SetFloat("_Surface", 1f);
+            m.SetFloat("_Blend", additive ? 2f : 0f);
+            m.SetFloat("_SrcBlend", (float)(additive ? UnityEngine.Rendering.BlendMode.One : UnityEngine.Rendering.BlendMode.SrcAlpha));
+            m.SetFloat("_DstBlend", (float)(additive ? UnityEngine.Rendering.BlendMode.One : UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha));
+            m.SetFloat("_ZWrite", 0f);
+            m.SetOverrideTag("RenderType", "Transparent");
+            m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            m.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+            AssetDatabase.CreateAsset(m, path);
         }
 
         private static LevelSet CreateLevelSet()

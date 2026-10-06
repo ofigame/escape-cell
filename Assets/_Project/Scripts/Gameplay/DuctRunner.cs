@@ -17,7 +17,7 @@ namespace SquashBot.Gameplay
     /// a curve with turns and hills only when it is drawn, so all the running rules stay simple. Rows are built
     /// a little ahead and removed behind.
     /// </summary>
-    public class DuctRunner : MonoBehaviour
+    public partial class DuctRunner : MonoBehaviour
     {
         public const float TrackLength = 320f;
         private const int Lanes = 3;
@@ -51,7 +51,7 @@ namespace SquashBot.Gameplay
         public event Action<string, Vector3> Notice;
 
         /// <summary>The flavours of bonus tunnel: same running and lanes, different world and rules.</summary>
-        public enum Kind { Duct, Surf, Mine }
+        public enum Kind { Duct, Surf, Mine, Neon, Laser, Crystal, Void }
 
         public const int SafeBonus = 10, RiskBonus = 30;
         private const int RiskLength = 40;
@@ -180,7 +180,7 @@ namespace SquashBot.Gameplay
             // Its difficulty follows the level just as closely: speed, spacing and the kinds of obstacles.
             float d = Mathf.Clamp01(level / 199f);
             roadLevel = level;
-            Prepare(seed, Kind.Duct, origin, heading, road: true, roadLength: 40f + level * 1.8f, roadDifficulty: d, toWorld: toWorld);
+            Prepare(seed, RoadTheme(level), origin, heading, road: true, roadLength: 40f + level * 1.8f, roadDifficulty: d, toWorld: toWorld);
         }
 
         private void Prepare(int seed, Kind tunnel, Vector3 origin, float heading, bool road = false, float roadLength = TrackLength, float roadDifficulty = 1f, int toWorld = 0)
@@ -243,6 +243,7 @@ namespace SquashBot.Gameplay
             armR = visual.Find("ArmR");
 
             BuildRide();
+            StartThemeFx();
             input.ScreenMode = true;
             camPos = World(0f, 2.6f, -4.6f);
             PoseRobot(0f);
@@ -265,6 +266,7 @@ namespace SquashBot.Gameplay
             if (ride != null) Destroy(ride.gameObject);
             if (bubble != null) Destroy(bubble.gameObject);
             ride = bubble = null;
+            StopThemeFx();
             ramps.Clear();
             curveRows.Clear();
             if (!hadRobot) return;
@@ -333,6 +335,7 @@ namespace SquashBot.Gameplay
             }
             coinMat = MaterialFactory.Create(Palette.Coin, Palette.CoinGlow);
             rimMat = MaterialFactory.Create(Palette.CoinRim, Palette.CoinGlow * 0.4f);
+            ThemeMaterials();
         }
 
         // ---------- Course planning ----------
@@ -638,6 +641,9 @@ namespace SquashBot.Gameplay
                 }
             }
 
+            if (IsThemed) BuildThemeRow(root, r);
+            else
+            {
             // Walls with a glowing strip; a glowing pylon on each side every few rows for a sense of speed.
             // Nothing spans the course overhead except the bars you slide under, which stay below the camera.
             foreach (float side in new[] { -1f, 1f })
@@ -673,6 +679,7 @@ namespace SquashBot.Gameplay
                         Shapes.Rounded("Leaf", root, new Vector3(side * (WallX + 0.15f), 2.1f, 0f), new Vector3(0.7f, 0.05f, 0.2f), 0.03f, wallGlowMat)
                             .transform.localRotation = Quaternion.Euler(0f, k * 45f, side * 15f - 10f);
                 }
+            }
             }
             rows.Enqueue((r, root));
 
@@ -718,6 +725,12 @@ namespace SquashBot.Gameplay
             go.SetParent(transform, false);
             var o = new Obstacle { kind = k, lane = l, row = r, go = go, phase = r * 0.7f, landed = true };
             float w = LaneWidth * Lanes;
+            if (IsThemed && ThemedObstacle(o, go, k, l, r, w))
+            {
+                obstacles.Add(o);
+                PlaceObstacle(o);
+                return;
+            }
             switch (k)
             {
                 case ObstacleKind.Drop:
@@ -881,6 +894,7 @@ namespace SquashBot.Gameplay
             UpdateCamera(dt);
 
             if (exitRing != null) exitRing.localRotation = Quaternion.Euler(0f, 0f, time * 40f);
+            UpdateThemeFx(dt);
         }
 
         private void HandleInput()
@@ -947,7 +961,7 @@ namespace SquashBot.Gameplay
             if (held) speed *= 1.1f;
             z += speed * dt;
             runPhase += speed * dt * 2.2f;
-            x = Mathf.MoveTowards(x, LaneX(lane), LaneSpeed * dt);
+            x = Mathf.MoveTowards(x, LaneX(lane), LaneSpeed * LaneScale * dt);
             if (grounded) slideLeft = Mathf.Max(0f, slideLeft - dt);
 
             int row = Mathf.RoundToInt(z);
@@ -962,7 +976,7 @@ namespace SquashBot.Gameplay
             }
             if (!grounded)
             {
-                float g = Gravity;
+                float g = Gravity * GravityScale;
                 if (held) { g *= HoldGravity; holdTime += dt; }
                 else if (vy > 0f) holdTime = MaxHold; // let go: no second boost in the same jump
                 vy -= g * dt;
@@ -1155,6 +1169,7 @@ namespace SquashBot.Gameplay
                         if (dz < 0.5f && dx < 0.55f && y < 0.2f && vy <= 0.01f)
                         {
                             Launch(PadVelocity);
+                            fovKick = 1f;
                             holdTime = MaxHold;
                             fx.Burst(World(o.X(time), 0.2f, o.row), new Color(0.4f, 1f, 0.6f), new Color(0.4f, 2.2f, 0.8f), 24, 5f);
                             AudioManager.PlaySfx(Sfx.Shield, 0.9f, 1.4f);
@@ -1307,11 +1322,11 @@ namespace SquashBot.Gameplay
                 // The hand-over from the platform view: position, angle and lens glide together.
                 if (dt < 1f) blend = Mathf.Min(1f, blend + dt / 1.1f);
                 float k = blend * blend * (3f - 2f * blend);
-                float fov = Mathf.Exp(Mathf.Lerp(Mathf.Log(blendFov), Mathf.Log(62f), k));
+                float fov = Mathf.Exp(Mathf.Lerp(Mathf.Log(blendFov), Mathf.Log(CameraFov), k));
                 rig.Chase(Vector3.Lerp(blendFrom.position, camPos, k), Quaternion.Slerp(blendFrom.rotation, camRot, k), fov);
                 return;
             }
-            rig.Chase(camPos, camRot, 62f);
+            rig.Chase(camPos, camRot, CameraFov);
         }
     }
 }

@@ -57,6 +57,7 @@ namespace SquashBot.Gameplay
         private DuctRunner runner;
         private FloorRules floorRules;
         private LevelEvents levelEvents;
+        private Weather weather;
         private bool dailyRun;      // a daily bonus game (not a level's bonus round)
 
         private GridModel grid;
@@ -107,7 +108,10 @@ namespace SquashBot.Gameplay
         private const float CollapseDelay = 0.7f;
         private const float CollapseRepair = 7f;
         private const float ChaseGraceRows = 3f;
-        private const int FollowWindow = 6;
+        // The window the camera keeps around the robot on big floors (fitted to the screen width, so on a tall phone
+        // it shows more rows than columns). Floors bigger than FollowFrom get the close follow camera.
+        private const int FollowWindow = 5;
+        private const int FollowFrom = 6;
         private readonly HashSet<GridPos> painted = new HashSet<GridPos>();
         private bool bonusRun;
         private bool pendingEnding;
@@ -154,6 +158,7 @@ namespace SquashBot.Gameplay
             EnsureLight();
 
             fx = new GameObject("FX").AddComponent<FxSystem>();
+            weather = Weather.Create(fx);
             gridView = new GameObject("Grid").AddComponent<GridView>();
             robot = Robot.Create(null);
             robot.Arrived += OnRobotArrived;
@@ -259,6 +264,7 @@ namespace SquashBot.Gameplay
             robot.ApplyOutfit(Cosmetics.Outfit());
             RenderSettings.ambientLight = Palette.Ambient * 0.8f;
             cameraRig.RefreshTheme();
+            weather.Apply(world);
         }
 
         // ---------- Flow ----------
@@ -285,12 +291,15 @@ namespace SquashBot.Gameplay
             powerUps.Stop();
             runner.Stop();
             roadPhase = RoadPhase.None;
+            weather.SetVisible(true);
+            weather.SetIntensity(0.45f);
             if (roadBeacon != null) Destroy(roadBeacon);
             gridView.gameObject.SetActive(true);
             floorRules.Stop();
             hazards.Hunting = false;
             levelEvents.Stop();
             cameraRig.FrameUpper(0f, 1f);
+            cameraRig.Showcase(null, 0f); // the menu's close-up on the robot must never leak into a level
             HideTools();
         }
 
@@ -549,9 +558,9 @@ namespace SquashBot.Gameplay
             robot.Spawn(grid, grid.StartSpot ?? grid.CenterFloor());
 
             // Long journeys don't fit the screen: the camera rides along and hazards and pickups stay near the robot.
-            bool big = grid.Width > FollowWindow || grid.Height > FollowWindow;
+            bool big = grid.Width > FollowFrom || grid.Height > FollowFrom;
             if (big) cameraRig.Follow(robot.transform, FollowWindow, FollowWindow);
-            hazards.FocusRadius = big ? 3 : 0;
+            hazards.FocusRadius = big ? 4 : 0;
             coins.FocusRadius = big ? 4 : 0;
             powerUps.FocusRadius = big ? 4 : 0;
 
@@ -928,12 +937,15 @@ namespace SquashBot.Gameplay
             if (runner.Active)
             {
                 // The tunnel runs itself (input, robot, camera); just keep the HUD current.
+                weather.SetVisible(false);
                 elapsed += Time.deltaTime;
                 if (roadPhase == RoadPhase.None) coinsThisRun = runner.Coins;
                 RefreshHud();
                 return;
             }
 
+            // The sky builds from calm to storm as the mission nears its end.
+            weather.SetIntensity(Mathf.Lerp(0.3f, 1f, Mathf.Clamp01(MissionProgress())));
             elapsed += Time.deltaTime;
 
             var command = input.Poll(robot.transform.position);

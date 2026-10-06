@@ -92,11 +92,11 @@ namespace SquashBot.Data
             if (mission == MissionType.Boss)
             {
                 // WARDEN's arena: wide open, lines of blocks sweep it often, three buttons to hit.
-                level.layout = Journeys.Arena(6, world >= 6 ? 3 : 2, index);
+                level.layout = Journeys.Arena(Mathf.RoundToInt(Mathf.Lerp(7f, 12f, d)), world >= 6 ? 3 : 2, index);
                 level.keys = 3;
                 level.lineWaveChance = Mathf.Lerp(0.3f, 0.45f, d);
                 level.bombChance = Mathf.Max(level.bombChance, 0.2f);
-                level.blocksPerWave = Mathf.Min(4, level.blocksPerWave + 1);
+                level.blocksPerWave = Mathf.Min(6, level.blocksPerWave + 1);
             }
             else if (mission == MissionType.Exit)
             {
@@ -234,33 +234,38 @@ namespace SquashBot.Data
                 ? new[] { PlatformShape.Square, PlatformShape.L, PlatformShape.Step, PlatformShape.T, PlatformShape.U }
                 : new[] { PlatformShape.Square, PlatformShape.L, PlatformShape.Step, PlatformShape.T, PlatformShape.U, PlatformShape.Plus, PlatformShape.Ring };
             var shape = pool[rng.Next(pool.Length)];
-            int pillars = Mathf.Clamp(Mathf.RoundToInt(d * 3f + 0.6f), 1, 3);
+            int pillars = Mathf.Clamp(Mathf.RoundToInt(level.gridWidth * level.gridWidth * 0.025f + d * 2f), 1, 8);
             level.layout = Layouts.Generate(level.gridWidth, shape, pillars, index);
         }
 
         /// <summary>All the numbers that follow from a difficulty value (0 = gentle, 1 = the hardest late levels).</summary>
         private static LevelData Base(MissionType mission, float d)
         {
-            int size = d < 0.15f ? 4 : d < 0.45f ? 5 : 6;
+            // Floors grow with the campaign (5x5 to 14x14); the camera follows the robot closely on the big ones and the
+            // blocks gather around it, so the pressure is about the same per screen while the floor gives room to run.
+            int size = Mathf.RoundToInt(Mathf.Lerp(5f, 14f, d));
+            float nearArea = Mathf.Min(size * size, 81f);
             var level = new LevelData
             {
                 gridWidth = size,
                 gridHeight = size,
                 mission = mission,
-                warningTime = Mathf.Lerp(1.38f, 0.8f, d),
-                spawnInterval = Mathf.Lerp(1.85f, 1.25f, d),
-                blocksPerWave = Mathf.Clamp(1 + Mathf.RoundToInt(d * 3f), 1, 4),
-                rampUp = Mathf.Lerp(0.2f, 0.5f, d),
-                coinTarget = 6 + Mathf.RoundToInt(d * 6f),
-                surviveSeconds = Mathf.Round(25f + d * 10f),
-                keys = 1 + Mathf.RoundToInt(d * 2f),
+                // Never less than a second of warning: hard, but always readable.
+                warningTime = Mathf.Lerp(1.4f, 1.0f, d),
+                spawnInterval = Mathf.Lerp(1.9f, 1.45f, d),
+                blocksPerWave = Mathf.Clamp(Mathf.RoundToInt(nearArea * Mathf.Lerp(0.035f, 0.06f, d)), 1, 6),
+                rampUp = Mathf.Lerp(0.2f, 0.4f, d),
+                // The challenge grows in what the mission asks: more coins, longer to hold out, more keys to find.
+                coinTarget = 6 + Mathf.RoundToInt(d * 14f),
+                surviveSeconds = Mathf.Round(30f + d * 30f),
+                keys = 1 + Mathf.RoundToInt(d * 3f),
             };
 
             if (mission == MissionType.CoinRain)
             {
                 // Coins everywhere, the usual hazards for this point of the campaign, and a target to beat the clock.
-                level.surviveSeconds = 20f;
-                level.coinTarget = 10 + Mathf.RoundToInt(d * 8f);
+                level.surviveSeconds = Mathf.Round(22f + d * 18f);
+                level.coinTarget = 10 + Mathf.RoundToInt(d * 16f);
                 level.coinInterval = 0.45f;
                 level.coinLifetime = 3.2f;
                 level.maxCoins = 5;

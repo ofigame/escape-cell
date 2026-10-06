@@ -18,7 +18,7 @@ MonoBehaviour:
     layout: []
     mission: 0
     coinTarget: 5
-    surviveSeconds: 25
+    surviveSeconds: 30
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
@@ -81,7 +81,7 @@ MonoBehaviour:
     - '###'
     mission: 3
     coinTarget: 6
-    surviveSeconds: 25
+    surviveSeconds: 30
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
@@ -111,7 +111,7 @@ MonoBehaviour:
     layout: []
     mission: 0
     coinTarget: 6
-    surviveSeconds: 25
+    surviveSeconds: 30
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
@@ -145,7 +145,7 @@ MonoBehaviour:
     - '##..'
     mission: 2
     coinTarget: 6
-    surviveSeconds: 25
+    surviveSeconds: 30
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
@@ -213,7 +213,7 @@ MonoBehaviour:
     - ..##
     mission: 0
     coinTarget: 6
-    surviveSeconds: 25
+    surviveSeconds: 30
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
@@ -247,7 +247,7 @@ MonoBehaviour:
     - '####'
     mission: 3
     coinTarget: 6
-    surviveSeconds: 25
+    surviveSeconds: 30
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
@@ -281,7 +281,7 @@ MonoBehaviour:
     - '####'
     mission: 4
     coinTarget: 10
-    surviveSeconds: 20
+    surviveSeconds: 22
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
@@ -321,7 +321,7 @@ MonoBehaviour:
     - '#S#'
     mission: 2
     coinTarget: 6
-    surviveSeconds: 25
+    surviveSeconds: 30
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
@@ -361,20 +361,20 @@ MonoBehaviour:
     - '#K#'
     - '#S#'
     mission: 2
-    coinTarget: 6
-    surviveSeconds: 26
+    coinTarget: 7
+    surviveSeconds: 32
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.334354
-    spawnInterval: 1.80278
+    warningTime: 1.36852
+    spawnInterval: 1.8645849
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.22361001
+    rampUp: 0.21574001
     lineWaveChance: 0
     bombChance: 0.095740005
     breakTiles: 1
@@ -387,28 +387,30 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
+  - gridWidth: 6
+    gridHeight: 6
     layout:
-    - .###
-    - '####'
-    - X##.
-    - '###.'
+    - ..####
+    - ..####
+    - '######'
+    - X###..
+    - '####..'
+    - '####..'
     mission: 1
     coinTarget: 7
-    surviveSeconds: 26
+    surviveSeconds: 33
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.3305022
-    spawnInterval: 1.7987953
+    warningTime: 1.3658636
+    spawnInterval: 1.8615965
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.22560236
+    rampUp: 0.21706824
     lineWaveChance: 0
     bombChance: 0.097068235
     breakTiles: 1
@@ -437,19 +439,19 @@ MonoBehaviour:
     - '#S#'
     mission: 2
     coinTarget: 7
-    surviveSeconds: 26
+    surviveSeconds: 33
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.3267025
-    spawnInterval: 1.7948647
+    warningTime: 1.3632431
+    spawnInterval: 1.8586484
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.22756767
+    rampUp: 0.21837845
     lineWaveChance: 0
     bombChance: 0.09837845
     breakTiles: 1
@@ -462,28 +464,30 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
+  - gridWidth: 6
+    gridHeight: 6
     layout:
-    - '####'
-    - '####'
-    - .##.
-    - .X#.
+    - '###X##'
+    - '######'
+    - '######'
+    - ..##..
+    - ..##..
+    - ..##..
     mission: 3
     coinTarget: 7
-    surviveSeconds: 26
+    surviveSeconds: 33
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 0
-    warningTime: 1.3229501
-    spawnInterval: 1.790983
+    warningTime: 1.3606552
+    spawnInterval: 1.8557372
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.22950856
+    rampUp: 0.21967237
     lineWaveChance: 0
     bombChance: 0.09967237
     breakTiles: 1
@@ -496,28 +500,30 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
+  - gridWidth: 6
+    gridHeight: 6
     layout:
-    - '#..#'
-    - '#..#'
-    - '####'
-    - '###X'
+    - '##..##'
+    - '##..##'
+    - '##..#X'
+    - '######'
+    - '######'
+    - '######'
     mission: 2
     coinTarget: 7
-    surviveSeconds: 26
+    surviveSeconds: 33
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 0
-    warningTime: 1.3192408
-    spawnInterval: 1.7871457
+    warningTime: 1.3580971
+    spawnInterval: 1.8528593
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.23142715
+    rampUp: 0.22095144
     lineWaveChance: 0
     bombChance: 0.100951426
     breakTiles: 1
@@ -530,28 +536,30 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
+  - gridWidth: 6
+    gridHeight: 6
     layout:
-    - '#..X'
-    - '#..#'
-    - '####'
-    - '####'
+    - '##..##'
+    - '##..##'
+    - '##..##'
+    - '######'
+    - '#X####'
+    - '######'
     mission: 0
-    coinTarget: 7
-    surviveSeconds: 26
+    coinTarget: 8
+    surviveSeconds: 33
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.3155712
-    spawnInterval: 1.7833495
+    warningTime: 1.3555663
+    spawnInterval: 1.8500121
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.23332527
+    rampUp: 0.22221684
     lineWaveChance: 0
     bombChance: 0.10221685
     breakTiles: 1
@@ -580,20 +588,20 @@ MonoBehaviour:
     - '#K#'
     - '#S#'
     mission: 2
-    coinTarget: 7
-    surviveSeconds: 26
+    coinTarget: 8
+    surviveSeconds: 34
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.3119379
-    spawnInterval: 1.7795911
+    warningTime: 1.3530606
+    spawnInterval: 1.8471932
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.2352045
+    rampUp: 0.22346966
     lineWaveChance: 0
     bombChance: 0.10346966
     breakTiles: 1
@@ -606,28 +614,30 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
+  - gridWidth: 6
+    gridHeight: 6
     layout:
-    - X###
-    - '####'
-    - '####'
-    - '####'
+    - '#X####'
+    - '######'
+    - '######'
+    - '######'
+    - '######'
+    - '######'
     mission: 0
-    coinTarget: 7
-    surviveSeconds: 26
+    coinTarget: 8
+    surviveSeconds: 34
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 0
-    warningTime: 1.3083388
-    spawnInterval: 1.7758677
+    warningTime: 1.3505784
+    spawnInterval: 1.8444008
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.23706616
+    rampUp: 0.22471078
     lineWaveChance: 0
     bombChance: 0.10471078
     breakTiles: 1
@@ -640,28 +650,30 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
+  - gridWidth: 6
+    gridHeight: 6
     layout:
-    - '####'
-    - '####'
-    - X###
-    - '####'
+    - '######'
+    - '######'
+    - '######'
+    - X#####
+    - '######'
+    - '######'
     mission: 4
-    coinTarget: 11
-    surviveSeconds: 20
+    coinTarget: 12
+    surviveSeconds: 24
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.3047712
-    spawnInterval: 1.7721771
+    warningTime: 1.348118
+    spawnInterval: 1.8416327
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.23891148
+    rampUp: 0.22594099
     lineWaveChance: 0
     bombChance: 0.10594098
     breakTiles: 1
@@ -674,30 +686,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
+  - gridWidth: 6
+    gridHeight: 6
     layout:
-    - '######'
-    - '######'
-    - X##X##
-    - '######'
-    - '######'
-    - '###S##'
+    - '########'
+    - '########'
+    - X#######
+    - '########'
+    - '#####X##'
+    - '########'
+    - '########'
+    - '####S###'
     mission: 7
-    coinTarget: 7
-    surviveSeconds: 26
+    coinTarget: 8
+    surviveSeconds: 34
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.3012332
-    spawnInterval: 1.7685171
+    warningTime: 1.345678
+    spawnInterval: 1.8388878
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.24074148
+    rampUp: 0.22716098
     lineWaveChance: 0.32037073
     bombChance: 0.2
     breakTiles: 1
@@ -710,28 +724,30 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
+  - gridWidth: 6
+    gridHeight: 6
     layout:
-    - ..##
-    - ..##
-    - '####'
-    - '###X'
+    - ...###
+    - ...#X#
+    - ...###
+    - '######'
+    - '######'
+    - '######'
     mission: 1
-    coinTarget: 7
-    surviveSeconds: 26
+    coinTarget: 8
+    surviveSeconds: 34
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.297723
-    spawnInterval: 1.7648859
+    warningTime: 1.3432572
+    spawnInterval: 1.8361644
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.24255706
+    rampUp: 0.22837138
     lineWaveChance: 0.065534234
     bombChance: 0.10837137
     breakTiles: 1
@@ -744,28 +760,30 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
+  - gridWidth: 6
+    gridHeight: 6
     layout:
-    - '###.'
-    - '####'
-    - .##X
-    - .###
+    - '####..'
+    - '####..'
+    - '######'
+    - ..###X
+    - ..####
+    - ..####
     mission: 2
-    coinTarget: 7
-    surviveSeconds: 26
+    coinTarget: 8
+    surviveSeconds: 34
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2942392
-    spawnInterval: 1.7612818
+    warningTime: 1.3408545
+    spawnInterval: 1.8334614
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.24435908
+    rampUp: 0.22957273
     lineWaveChance: 0.06661545
     bombChance: 0.109572716
     breakTiles: 1
@@ -778,29 +796,30 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 6
+    gridHeight: 6
     layout:
-    - .####
-    - .####
-    - '#####'
-    - '#####'
-    - '#X##.'
+    - ..####
+    - ..####
+    - ..####
+    - '######'
+    - '####..'
+    - '#X##..'
     mission: 3
-    coinTarget: 7
-    surviveSeconds: 27
+    coinTarget: 8
+    surviveSeconds: 35
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 0
-    warningTime: 1.2907801
-    spawnInterval: 1.7577034
+    warningTime: 1.3384689
+    spawnInterval: 1.8307775
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.24614827
+    rampUp: 0.23076552
     lineWaveChance: 0.06768896
     bombChance: 0.11076551
     breakTiles: 1
@@ -830,20 +849,20 @@ MonoBehaviour:
     - ..###
     - ..#S#
     mission: 2
-    coinTarget: 7
-    surviveSeconds: 27
+    coinTarget: 8
+    surviveSeconds: 35
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2873445
-    spawnInterval: 1.7541494
+    warningTime: 1.3360996
+    spawnInterval: 1.828112
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.2479253
+    rampUp: 0.2319502
     lineWaveChance: 0.06875518
     bombChance: 0.1119502
     breakTiles: 1
@@ -856,29 +875,30 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 6
+    gridHeight: 6
     layout:
-    - .###.
-    - .###.
-    - '####X'
-    - '#####'
-    - '#####'
+    - ..##..
+    - ..##..
+    - ..##..
+    - '######'
+    - '######'
+    - '####X#'
     mission: 0
-    coinTarget: 7
-    surviveSeconds: 27
+    coinTarget: 8
+    surviveSeconds: 35
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 0
-    warningTime: 1.2839311
-    spawnInterval: 1.7506185
+    warningTime: 1.3337456
+    spawnInterval: 1.8254639
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.24969077
+    rampUp: 0.23312718
     lineWaveChance: 0.06981446
     bombChance: 0.11312717
     breakTiles: 1
@@ -891,29 +911,31 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - .###.
-    - .###.
-    - '#####'
-    - X####
-    - '#####'
+    - ..###..
+    - ..###..
+    - ..###..
+    - '######X'
+    - '#######'
+    - '#X#####'
+    - '#######'
     mission: 2
-    coinTarget: 7
-    surviveSeconds: 27
-    keys: 1
+    coinTarget: 8
+    surviveSeconds: 35
+    keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2805392
-    spawnInterval: 1.7471095
+    warningTime: 1.3314064
+    spawnInterval: 1.8228321
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.25144523
+    rampUp: 0.23429683
     lineWaveChance: 0.070867136
     bombChance: 0.114296824
     breakTiles: 1
@@ -926,29 +948,31 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '##X##'
-    - '#####'
-    - '#####'
-    - '#...#'
-    - '#...#'
+    - X##X###
+    - '#######'
+    - '#######'
+    - '#######'
+    - '##...##'
+    - '##...##'
+    - '##...##'
     mission: 0
-    coinTarget: 7
-    surviveSeconds: 27
-    keys: 1
+    coinTarget: 8
+    surviveSeconds: 35
+    keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2771676
-    spawnInterval: 1.7436216
+    warningTime: 1.329081
+    spawnInterval: 1.8202162
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.2531892
+    rampUp: 0.23545946
     lineWaveChance: 0.07191352
     bombChance: 0.115459464
     breakTiles: 1
@@ -978,20 +1002,20 @@ MonoBehaviour:
     - '#K#'
     - '#S#'
     mission: 2
-    coinTarget: 7
-    surviveSeconds: 27
+    coinTarget: 9
+    surviveSeconds: 35
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2738153
-    spawnInterval: 1.7401538
+    warningTime: 1.3267691
+    spawnInterval: 1.8176153
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.25492314
+    rampUp: 0.23661543
     lineWaveChance: 0.07295388
     bombChance: 0.11661542
     breakTiles: 1
@@ -1004,29 +1028,31 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '#####'
-    - '#####'
-    - '#####'
-    - X####
-    - '#####'
+    - '#######'
+    - '###X###'
+    - '#######'
+    - '#######'
+    - X######
+    - '#######'
+    - '#######'
     mission: 4
-    coinTarget: 12
-    surviveSeconds: 20
-    keys: 1
+    coinTarget: 13
+    surviveSeconds: 25
+    keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2704816
-    spawnInterval: 1.7367051
+    warningTime: 1.32447
+    spawnInterval: 1.8150288
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.25664747
+    rampUp: 0.23776497
     lineWaveChance: 0.073988475
     bombChance: 0.11776497
     breakTiles: 1
@@ -1039,30 +1065,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - X#####
-    - '######'
-    - '#####X'
-    - '######'
-    - '###S##'
+    - '########'
+    - '########'
+    - X#######
+    - '########'
+    - '#######X'
+    - '########'
+    - '########'
+    - '####S###'
     mission: 7
-    coinTarget: 7
-    surviveSeconds: 27
+    coinTarget: 9
+    surviveSeconds: 36
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2671657
-    spawnInterval: 1.7332748
+    warningTime: 1.3221833
+    spawnInterval: 1.8124561
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.2583626
+    rampUp: 0.23890838
     lineWaveChance: 0.32918128
     bombChance: 0.2
     breakTiles: 1
@@ -1092,20 +1120,20 @@ MonoBehaviour:
     - '###..'
     - '#S#..'
     mission: 2
-    coinTarget: 7
-    surviveSeconds: 27
+    coinTarget: 9
+    surviveSeconds: 36
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2638669
-    spawnInterval: 1.7298623
+    warningTime: 1.3199083
+    spawnInterval: 1.8098967
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.26006883
+    rampUp: 0.24004589
     lineWaveChance: 0.076041296
     bombChance: 0.120045885
     breakTiles: 1
@@ -1118,29 +1146,31 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '###..'
-    - '###..'
-    - '####X'
-    - '#####'
-    - '#####'
+    - '####...'
+    - '####...'
+    - '####...'
+    - '######X'
+    - '#######'
+    - '#X#####'
+    - '#######'
     mission: 3
-    coinTarget: 7
-    surviveSeconds: 27
-    keys: 1
+    coinTarget: 9
+    surviveSeconds: 36
+    keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 0
-    warningTime: 1.2605846
-    spawnInterval: 1.7264669
+    warningTime: 1.3176445
+    spawnInterval: 1.8073502
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.26176658
+    rampUp: 0.24117772
     lineWaveChance: 0.07705995
     bombChance: 0.12117772
     breakTiles: 1
@@ -1153,29 +1183,31 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - .####
-    - '#####'
-    - '#####'
-    - '####.'
-    - '#X##.'
+    - ..#####
+    - ..#####
+    - '##X####'
+    - '#######'
+    - '#####..'
+    - '#####..'
+    - '#X###..'
     mission: 2
-    coinTarget: 7
-    surviveSeconds: 27
-    keys: 1
+    coinTarget: 9
+    surviveSeconds: 36
+    keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2573181
-    spawnInterval: 1.7230878
+    warningTime: 1.3153918
+    spawnInterval: 1.8048158
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.26345614
+    rampUp: 0.24230409
     lineWaveChance: 0.07807368
     bombChance: 0.12230409
     breakTiles: 1
@@ -1188,29 +1220,31 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - ..X##
-    - '#####'
-    - '#####'
-    - '#####'
-    - ..###
+    - ...####
+    - ...X###
+    - '#######'
+    - '#######'
+    - '#######'
+    - ...####
+    - ...#X##
     mission: 0
-    coinTarget: 7
-    surviveSeconds: 27
-    keys: 1
+    coinTarget: 9
+    surviveSeconds: 37
+    keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.254067
-    spawnInterval: 1.7197244
+    warningTime: 1.3131496
+    spawnInterval: 1.8022933
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.2651378
+    rampUp: 0.24342519
     lineWaveChance: 0.07908267
     bombChance: 0.123425186
     breakTiles: 1
@@ -1240,20 +1274,20 @@ MonoBehaviour:
     - '#K#'
     - '#S#'
     mission: 2
-    coinTarget: 7
-    surviveSeconds: 27
+    coinTarget: 9
+    surviveSeconds: 37
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 0
-    warningTime: 1.2508305
-    spawnInterval: 1.7163764
+    warningTime: 1.3109176
+    spawnInterval: 1.7997823
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.26681182
+    rampUp: 0.24454121
     lineWaveChance: 0.08008708
     bombChance: 0.1245412
     breakTiles: 1
@@ -1266,29 +1300,31 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '#...#'
-    - '#...#'
-    - '#####'
-    - X####
-    - '#####'
+    - '##...##'
+    - '##...##'
+    - '#X...##'
+    - '#######'
+    - '#######'
+    - X######
+    - '#######'
     mission: 0
-    coinTarget: 7
-    surviveSeconds: 27
-    keys: 1
+    coinTarget: 9
+    surviveSeconds: 37
+    keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2476083
-    spawnInterval: 1.7130431
+    warningTime: 1.3086953
+    spawnInterval: 1.7972823
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.26847845
+    rampUp: 0.2456523
     lineWaveChance: 0.081087075
     bombChance: 0.1256523
     breakTiles: 1
@@ -1318,20 +1354,20 @@ MonoBehaviour:
     - ..###
     - ..#S#
     mission: 2
-    coinTarget: 7
-    surviveSeconds: 27
+    coinTarget: 9
+    surviveSeconds: 37
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 0
-    warningTime: 1.2443999
-    spawnInterval: 1.7097241
+    warningTime: 1.3064827
+    spawnInterval: 1.794793
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.27013797
+    rampUp: 0.24675865
     lineWaveChance: 0.082082786
     bombChance: 0.12675865
     breakTiles: 1
@@ -1344,29 +1380,31 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - .###.
-    - '###X#'
-    - '#####'
-    - '#####'
-    - .###.
+    - ..#X#..
+    - ..###..
+    - '####X##'
+    - '#######'
+    - '#######'
+    - ..###..
+    - ..###..
     mission: 1
-    coinTarget: 7
-    surviveSeconds: 27
-    keys: 1
+    coinTarget: 9
+    surviveSeconds: 37
+    keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2412049
-    spawnInterval: 1.7064189
+    warningTime: 1.3042792
+    spawnInterval: 1.792314
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.2717906
+    rampUp: 0.2478604
     lineWaveChance: 0.08307436
     bombChance: 0.1278604
     breakTiles: 1
@@ -1379,29 +1417,31 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '#####'
-    - '#####'
-    - '##.##'
-    - '####X'
-    - '#####'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '###.###'
+    - '####X#X'
+    - '#######'
+    - '#######'
     mission: 4
-    coinTarget: 12
-    surviveSeconds: 20
-    keys: 1
+    coinTarget: 14
+    surviveSeconds: 26
+    keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2380227
-    spawnInterval: 1.7031269
+    warningTime: 1.3020846
+    spawnInterval: 1.7898452
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.27343655
+    rampUp: 0.2489577
     lineWaveChance: 0.08406192
     bombChance: 0.12895769
     breakTiles: 1
@@ -1414,30 +1454,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - X#####
-    - '######'
-    - X#####
-    - '######'
-    - '###S##'
+    - '########'
+    - X#######
+    - '########'
+    - '########'
+    - X#######
+    - '########'
+    - '########'
+    - '####S###'
     mission: 7
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 10
+    surviveSeconds: 38
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2348531
-    spawnInterval: 1.699848
+    warningTime: 1.2998986
+    spawnInterval: 1.7873861
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.275076
+    rampUp: 0.25005066
     lineWaveChance: 0.337538
     bombChance: 0.2
     breakTiles: 1
@@ -1450,29 +1492,31 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '#####'
-    - '#####'
-    - '#####'
-    - X####
-    - '#####'
+    - '#######'
+    - '###X###'
+    - '#######'
+    - '#######'
+    - '#######'
+    - X######
+    - '#######'
     mission: 3
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 10
+    surviveSeconds: 38
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2316957
-    spawnInterval: 1.6965817
+    warningTime: 1.2977211
+    spawnInterval: 1.7849363
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.27670914
+    rampUp: 0.25113943
     lineWaveChance: 0.086025484
     bombChance: 0.13113943
     breakTiles: 1
@@ -1506,20 +1550,20 @@ MonoBehaviour:
     - ..####
     - ..SK..
     mission: 2
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 10
+    surviveSeconds: 38
     keys: 1
     collapseBehind: 1
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 0
-    warningTime: 1.2285501
-    spawnInterval: 1.6933277
+    warningTime: 1.2955518
+    spawnInterval: 1.7824957
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.27833617
+    rampUp: 0.25222412
     lineWaveChance: 0.0870017
     bombChance: 0.13222411
     breakTiles: 1
@@ -1532,29 +1576,31 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '#####'
-    - '#####'
-    - '#####'
-    - ..###
-    - ..X##
+    - '#######'
+    - '#X#####'
+    - '#######'
+    - '#######'
+    - ...####
+    - ...X###
+    - ...####
     mission: 0
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 10
+    surviveSeconds: 38
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.225416
-    spawnInterval: 1.6900854
+    warningTime: 1.2933903
+    spawnInterval: 1.7800641
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.2799573
+    rampUp: 0.25330487
     lineWaveChance: 0.08797437
     bombChance: 0.13330485
     breakTiles: 1
@@ -1585,20 +1631,20 @@ MonoBehaviour:
     - '#K#'
     - '#S#'
     mission: 2
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 10
+    surviveSeconds: 38
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.222293
-    spawnInterval: 1.6868548
+    warningTime: 1.2912365
+    spawnInterval: 1.777641
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.2815726
+    rampUp: 0.25438175
     lineWaveChance: 0.08894356
     bombChance: 0.13438173
     breakTiles: 1
@@ -1611,29 +1657,31 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '####.'
-    - '#####'
-    - '#####'
-    - .####
-    - .###X
+    - '#####..'
+    - '#####..'
+    - '#######'
+    - '#####X#'
+    - ..#####
+    - ..#####
+    - ..####X
     mission: 0
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 10
+    surviveSeconds: 38
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.219181
-    spawnInterval: 1.6836355
+    warningTime: 1.2890903
+    spawnInterval: 1.7752266
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.2831823
+    rampUp: 0.25545487
     lineWaveChance: 0.089909375
     bombChance: 0.13545486
     breakTiles: 1
@@ -1663,20 +1711,20 @@ MonoBehaviour:
     - '###..'
     - '#S#..'
     mission: 2
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 10
+    surviveSeconds: 38
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2160794
-    spawnInterval: 1.680427
-    blocksPerWave: 2
+    warningTime: 1.2869513
+    spawnInterval: 1.7728202
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.28478652
+    rampUp: 0.25652435
     lineWaveChance: 0.09087191
     bombChance: 0.13652433
     breakTiles: 1
@@ -1689,29 +1737,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - .X##.
-    - .###.
-    - '#####'
-    - '#####'
-    - '#####'
+    - ..X###..
+    - ..####..
+    - ..####..
+    - ..####..
+    - '########'
+    - '########'
+    - '#X######'
+    - '########'
     mission: 1
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 10
+    surviveSeconds: 39
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 0
-    warningTime: 1.2129883
-    spawnInterval: 1.6772293
-    blocksPerWave: 2
+    warningTime: 1.2848195
+    spawnInterval: 1.7704219
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.2863854
+    rampUp: 0.25759026
     lineWaveChance: 0.09183123
     bombChance: 0.13759026
     breakTiles: 1
@@ -1745,20 +1796,20 @@ MonoBehaviour:
     - ..####
     - ..SK..
     mission: 2
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 10
+    surviveSeconds: 39
     keys: 1
     collapseBehind: 1
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2099072
-    spawnInterval: 1.6740419
-    blocksPerWave: 2
+    warningTime: 1.2826946
+    spawnInterval: 1.7680314
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.28797907
+    rampUp: 0.25865272
     lineWaveChance: 0.09278744
     bombChance: 0.1386527
     breakTiles: 1
@@ -1771,29 +1822,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - .###.
-    - '#####'
-    - '#####'
-    - '####X'
-    - .###.
+    - ..##X#..
+    - ..####..
+    - '########'
+    - '########'
+    - '########'
+    - '#######X'
+    - ..####..
+    - ..####..
     mission: 4
-    coinTarget: 12
-    surviveSeconds: 20
+    coinTarget: 15
+    surviveSeconds: 27
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2068359
-    spawnInterval: 1.6708647
-    blocksPerWave: 2
+    warningTime: 1.2805765
+    spawnInterval: 1.7656485
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.28956765
+    rampUp: 0.25971177
     lineWaveChance: 0.09374059
     bombChance: 0.13971177
     breakTiles: 1
@@ -1806,30 +1860,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '#X###X'
-    - '######'
-    - '###S##'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '##X######'
+    - X########
+    - '#########'
+    - '####S####'
     mission: 7
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 10
+    surviveSeconds: 39
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2037742
-    spawnInterval: 1.6676974
-    blocksPerWave: 3
+    warningTime: 1.2784649
+    spawnInterval: 1.7632731
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.2911513
+    rampUp: 0.26076752
     lineWaveChance: 0.34557566
     bombChance: 0.2
     breakTiles: 1
@@ -1842,29 +1899,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - '#####'
-    - '#X###'
-    - '##.##'
-    - '#X###'
-    - '#####'
+    - '########'
+    - '#X######'
+    - '###X####'
+    - '###..###'
+    - '###..###'
+    - '########'
+    - '########'
+    - '########'
     mission: 2
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 10
+    surviveSeconds: 39
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.2007219
-    spawnInterval: 1.6645398
-    blocksPerWave: 2
+    warningTime: 1.2763599
+    spawnInterval: 1.7609049
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.2927301
+    rampUp: 0.26182005
     lineWaveChance: 0.095638044
     bombChance: 0.14182006
     breakTiles: 1
@@ -1877,29 +1937,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - '#####'
-    - X####
-    - '##.##'
-    - X####
-    - '#####'
+    - '########'
+    - '########'
+    - '########'
+    - '###..###'
+    - '###..#X#'
+    - '########'
+    - '###X####'
+    - '########'
     mission: 0
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 10
+    surviveSeconds: 39
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 0
-    warningTime: 1.1976787
-    spawnInterval: 1.6613917
-    blocksPerWave: 2
+    warningTime: 1.2742611
+    spawnInterval: 1.7585437
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.29430413
+    rampUp: 0.26286945
     lineWaveChance: 0.09658249
     bombChance: 0.14286943
     breakTiles: 1
@@ -1930,20 +1993,20 @@ MonoBehaviour:
     - '#K#'
     - '#S#'
     mission: 2
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 10
+    surviveSeconds: 40
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.1946445
-    spawnInterval: 1.6582528
-    blocksPerWave: 2
+    warningTime: 1.2721685
+    spawnInterval: 1.7561896
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.29587358
+    rampUp: 0.26391572
     lineWaveChance: 0.09752415
     bombChance: 0.14391573
     breakTiles: 1
@@ -1956,29 +2019,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - '#X###'
-    - '####X'
-    - '#####'
-    - '###..'
-    - '###..'
+    - '########'
+    - '##X#####'
+    - '#######X'
+    - '########'
+    - '####....'
+    - '####....'
+    - '####....'
+    - '####....'
     mission: 0
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 11
+    surviveSeconds: 40
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 0
-    warningTime: 1.1916189
-    spawnInterval: 1.655123
-    blocksPerWave: 2
+    warningTime: 1.270082
+    spawnInterval: 1.7538422
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.2974385
+    rampUp: 0.264959
     lineWaveChance: 0.0984631
     bombChance: 0.144959
     breakTiles: 1
@@ -2006,20 +2072,20 @@ MonoBehaviour:
     - '#X#X#X#'
     - SXKX###
     mission: 2
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 11
+    surviveSeconds: 40
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 0
     rules: 0
-    warningTime: 1.188602
-    spawnInterval: 1.652002
-    blocksPerWave: 2
+    warningTime: 1.2680013
+    spawnInterval: 1.7515014
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.298999
+    rampUp: 0.26599935
     lineWaveChance: 0.0993994
     bombChance: 0.14599933
     breakTiles: 1
@@ -2032,29 +2098,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - .####
-    - X####
-    - '#####'
-    - '####.'
-    - '#X##.'
+    - ..######
+    - ..##X###
+    - '########'
+    - '########'
+    - '######..'
+    - '######..'
+    - '######..'
+    - '##X###..'
     mission: 1
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 11
+    surviveSeconds: 40
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.1855934
-    spawnInterval: 1.6488897
-    blocksPerWave: 2
+    warningTime: 1.2659264
+    spawnInterval: 1.7491672
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.30055517
+    rampUp: 0.2670368
     lineWaveChance: 0.1003331
     bombChance: 0.14703678
     breakTiles: 1
@@ -2082,20 +2151,20 @@ MonoBehaviour:
     - '#X#XXX#'
     - SX#####
     mission: 2
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 11
+    surviveSeconds: 40
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 3
     rules: 0
-    warningTime: 1.182593
-    spawnInterval: 1.6457858
-    blocksPerWave: 2
+    warningTime: 1.2638571
+    spawnInterval: 1.7468394
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3021071
+    rampUp: 0.2680714
     lineWaveChance: 0.10126426
     bombChance: 0.1480714
     breakTiles: 1
@@ -2108,29 +2177,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - '###X#'
-    - '#####'
-    - '#####'
-    - .X##.
-    - .###.
+    - '#####X##'
+    - '########'
+    - '########'
+    - '########'
+    - ..X###..
+    - ..####..
+    - ..####..
+    - ..####..
     mission: 3
-    coinTarget: 8
-    surviveSeconds: 28
+    coinTarget: 11
+    surviveSeconds: 40
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.1796006
-    spawnInterval: 1.6426903
-    blocksPerWave: 2
+    warningTime: 1.2617935
+    spawnInterval: 1.7445177
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.30365488
+    rampUp: 0.26910326
     lineWaveChance: 0.10219292
     bombChance: 0.14910325
     breakTiles: 1
@@ -2143,29 +2215,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - '#...#'
-    - '#...#'
-    - '#####'
-    - '####X'
-    - '##X##'
+    - '#X....##'
+    - '##....##'
+    - '##....##'
+    - '##....##'
+    - '########'
+    - '######X#'
+    - '########'
+    - '########'
     mission: 4
-    coinTarget: 13
-    surviveSeconds: 20
+    coinTarget: 16
+    surviveSeconds: 28
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 0
-    warningTime: 1.1766161
-    spawnInterval: 1.6396028
-    blocksPerWave: 2
+    warningTime: 1.2597352
+    spawnInterval: 1.7422022
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.30519858
+    rampUp: 0.2701324
     lineWaveChance: 0.10311915
     bombChance: 0.15013239
     breakTiles: 1
@@ -2178,30 +2253,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - X##X##
-    - '######'
-    - '###S##'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - X###X####
+    - '#########'
+    - '####S####'
     mission: 7
-    coinTarget: 8
-    surviveSeconds: 29
+    coinTarget: 11
+    surviveSeconds: 41
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.1736393
-    spawnInterval: 1.6365234
-    blocksPerWave: 3
+    warningTime: 1.2576822
+    spawnInterval: 1.7398925
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.30673832
+    rampUp: 0.27115887
     lineWaveChance: 0.35336915
     bombChance: 0.2
     breakTiles: 1
@@ -2214,29 +2292,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - .###.
-    - '####X'
-    - '#####'
-    - '#X###'
-    - .###.
+    - ..####..
+    - ..####..
+    - '###X####'
+    - '########'
+    - '########'
+    - '##X#####'
+    - ..####..
+    - ..####..
     mission: 0
-    coinTarget: 8
-    surviveSeconds: 29
+    coinTarget: 11
+    surviveSeconds: 41
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.17067
-    spawnInterval: 1.6334518
-    blocksPerWave: 2
+    warningTime: 1.2556344
+    spawnInterval: 1.7375888
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.30827412
+    rampUp: 0.27218276
     lineWaveChance: 0.10496447
     bombChance: 0.15218274
     breakTiles: 1
@@ -2249,29 +2330,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - '#####'
-    - '#####'
-    - X#.##
-    - '####X'
-    - '#####'
+    - '########'
+    - '########'
+    - '########'
+    - '###..###'
+    - '###..X##'
+    - '########'
+    - '######X#'
+    - '########'
     mission: 2
-    coinTarget: 8
-    surviveSeconds: 29
+    coinTarget: 11
+    surviveSeconds: 41
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 0
-    warningTime: 1.1677082
-    spawnInterval: 1.6303878
-    blocksPerWave: 2
+    warningTime: 1.2535919
+    spawnInterval: 1.7352909
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3098061
+    rampUp: 0.2732041
     lineWaveChance: 0.105883665
     bombChance: 0.15320407
     breakTiles: 1
@@ -2284,29 +2368,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - '#####'
-    - '#####'
-    - '##.##'
-    - '#####'
-    - X##X#
+    - '########'
+    - '########'
+    - '########'
+    - '###..###'
+    - '###..###'
+    - '########'
+    - '######X#'
+    - X#######
     mission: 0
-    coinTarget: 8
-    surviveSeconds: 29
+    coinTarget: 11
+    surviveSeconds: 41
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.1647537
-    spawnInterval: 1.6273314
-    blocksPerWave: 2
+    warningTime: 1.2515543
+    spawnInterval: 1.7329985
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3113343
+    rampUp: 0.27422288
     lineWaveChance: 0.10680059
     bombChance: 0.15422288
     breakTiles: 1
@@ -2338,20 +2425,20 @@ MonoBehaviour:
     - '#K#'
     - '#S#'
     mission: 2
-    coinTarget: 8
-    surviveSeconds: 29
+    coinTarget: 11
+    surviveSeconds: 41
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 0
-    warningTime: 1.1618062
-    spawnInterval: 1.6242824
-    blocksPerWave: 2
+    warningTime: 1.2495215
+    spawnInterval: 1.7307117
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.31285885
+    rampUp: 0.27523923
     lineWaveChance: 0.10771531
     bombChance: 0.15523922
     breakTiles: 1
@@ -2364,29 +2451,32 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - '##X##'
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#X###'
+    - '####X###'
+    - '########'
+    - '########'
+    - '########'
+    - '########'
+    - '########'
+    - '########'
+    - '#X######'
     mission: 1
-    coinTarget: 8
-    surviveSeconds: 29
+    coinTarget: 11
+    surviveSeconds: 41
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.1588658
-    spawnInterval: 1.6212405
-    blocksPerWave: 2
+    warningTime: 1.2474936
+    spawnInterval: 1.7284304
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.31437975
+    rampUp: 0.27625316
     lineWaveChance: 0.10862784
     bombChance: 0.15625316
     breakTiles: 1
@@ -2416,20 +2506,20 @@ MonoBehaviour:
     - ..###
     - ..#S#
     mission: 2
-    coinTarget: 8
-    surviveSeconds: 29
+    coinTarget: 11
+    surviveSeconds: 42
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.1559323
-    spawnInterval: 1.6182059
-    blocksPerWave: 2
+    warningTime: 1.2454705
+    spawnInterval: 1.7261544
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.31589708
+    rampUp: 0.2772647
     lineWaveChance: 0.10953824
     bombChance: 0.15726471
     breakTiles: 1
@@ -2442,29 +2532,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - .##X#
-    - .####
-    - '#####'
-    - '#####'
-    - '###X.'
+    - ...##X###
+    - ...######
+    - ...######
+    - ...######
+    - '##X######'
+    - '#########'
+    - '######...'
+    - '######...'
+    - '#####X...'
     mission: 3
-    coinTarget: 8
-    surviveSeconds: 29
+    coinTarget: 11
+    surviveSeconds: 42
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.1530056
-    spawnInterval: 1.6151782
-    blocksPerWave: 2
+    warningTime: 1.2434521
+    spawnInterval: 1.7238836
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.31741092
+    rampUp: 0.27827394
     lineWaveChance: 0.11044655
     bombChance: 0.15827395
     breakTiles: 1
@@ -2499,20 +2593,20 @@ MonoBehaviour:
     - ..##..
     - ..SK..
     mission: 2
-    coinTarget: 8
-    surviveSeconds: 29
+    coinTarget: 12
+    surviveSeconds: 42
     keys: 1
     collapseBehind: 1
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.1500854
-    spawnInterval: 1.6121573
-    blocksPerWave: 2
+    warningTime: 1.2414383
+    spawnInterval: 1.721618
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.31892133
+    rampUp: 0.27928087
     lineWaveChance: 0.11135279
     bombChance: 0.15928088
     breakTiles: 1
@@ -2525,29 +2619,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - .###.
-    - .###.
-    - '#####'
-    - '#X#X#'
-    - '#####'
+    - ...###...
+    - ...###...
+    - ...###...
+    - ...###...
+    - '#########'
+    - '###X####X'
+    - '######X##'
+    - '#########'
+    - '#########'
     mission: 4
-    coinTarget: 13
-    surviveSeconds: 20
+    coinTarget: 16
+    surviveSeconds: 29
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 0
-    warningTime: 1.1471719
-    spawnInterval: 1.6091434
-    blocksPerWave: 2
+    warningTime: 1.2394289
+    spawnInterval: 1.7193575
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.32042834
+    rampUp: 0.28028557
     lineWaveChance: 0.112257004
     bombChance: 0.16028556
     breakTiles: 1
@@ -2560,30 +2658,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '######'
-    - '##X###'
-    - X#####
-    - '####X#'
-    - '######'
-    - '###S##'
+    - '#########'
+    - '###X#####'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '########X'
+    - '######X##'
+    - '#########'
+    - '####S####'
     mission: 7
-    coinTarget: 8
-    surviveSeconds: 29
+    coinTarget: 12
+    surviveSeconds: 42
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    warningTime: 1.1442647
-    spawnInterval: 1.606136
-    blocksPerWave: 3
+    warningTime: 1.2374239
+    spawnInterval: 1.7171019
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.32193205
+    rampUp: 0.28128803
     lineWaveChance: 0.36096603
     bombChance: 0.2
     breakTiles: 1
@@ -2619,20 +2720,20 @@ MonoBehaviour:
     - '#K#'
     - '#S#'
     mission: 2
-    coinTarget: 8
-    surviveSeconds: 29
+    coinTarget: 12
+    surviveSeconds: 42
     keys: 1
     collapseBehind: 0
     chaseSpeed: 1.146865
     lowWalls: 0
     levelEvent: 1
     rules: 1
-    warningTime: 1.1413639
-    spawnInterval: 1.603135
-    blocksPerWave: 2
+    warningTime: 1.2354233
+    spawnInterval: 1.7148513
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.32343248
+    rampUp: 0.28228834
     lineWaveChance: 0.11405949
     bombChance: 0.16228832
     breakTiles: 1
@@ -2645,29 +2746,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - .###.
-    - '###X#'
-    - '#####'
-    - '###X#'
-    - .###.
+    - ...###...
+    - ...###...
+    - ...###...
+    - '#########'
+    - '#########'
+    - '#########'
+    - ...###...
+    - ...###...
+    - ...###...
     mission: 0
-    coinTarget: 8
-    surviveSeconds: 29
+    coinTarget: 12
+    surviveSeconds: 42
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1
-    warningTime: 1.1384692
-    spawnInterval: 1.6001406
-    blocksPerWave: 2
+    warningTime: 1.233427
+    spawnInterval: 1.7126055
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3249297
+    rampUp: 0.28328648
     lineWaveChance: 0.114957824
     bombChance: 0.16328648
     breakTiles: 1
@@ -2700,20 +2805,20 @@ MonoBehaviour:
     - '#K#'
     - '#S#'
     mission: 2
-    coinTarget: 9
-    surviveSeconds: 29
+    coinTarget: 12
+    surviveSeconds: 43
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1
-    warningTime: 1.1355807
-    spawnInterval: 1.5971525
-    blocksPerWave: 2
+    warningTime: 1.231435
+    spawnInterval: 1.7103643
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.32642376
+    rampUp: 0.28428254
     lineWaveChance: 0.11585426
     bombChance: 0.16428252
     breakTiles: 1
@@ -2726,29 +2831,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '#####'
-    - '#X###'
-    - '##.##'
-    - '#####'
-    - X####
+    - '#########'
+    - '##X######'
+    - '#########'
+    - '###X#####'
+    - '####.####'
+    - '#########'
+    - '#########'
+    - '#X#######'
+    - '#########'
     mission: 1
-    coinTarget: 9
-    surviveSeconds: 29
+    coinTarget: 12
+    surviveSeconds: 43
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 1
-    warningTime: 1.1326982
-    spawnInterval: 1.5941706
-    blocksPerWave: 2
+    warningTime: 1.229447
+    spawnInterval: 1.708128
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3279147
+    rampUp: 0.2852765
     lineWaveChance: 0.11674883
     bombChance: 0.16527648
     breakTiles: 1
@@ -2778,20 +2887,20 @@ MonoBehaviour:
     - '###..'
     - '#S#..'
     mission: 2
-    coinTarget: 9
-    surviveSeconds: 29
+    coinTarget: 12
+    surviveSeconds: 43
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1
-    warningTime: 1.1298217
-    spawnInterval: 1.5911947
-    blocksPerWave: 2
+    warningTime: 1.2274631
+    spawnInterval: 1.705896
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.32940263
+    rampUp: 0.2862684
     lineWaveChance: 0.11764157
     bombChance: 0.16626841
     breakTiles: 1
@@ -2804,29 +2913,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
-    - '##X#X'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - X########
+    - '#########'
+    - '#########'
+    - '#######X#'
+    - '#####X###'
     mission: 3
-    coinTarget: 9
-    surviveSeconds: 29
+    coinTarget: 12
+    surviveSeconds: 43
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 1
-    warningTime: 1.1269509
-    spawnInterval: 1.588225
-    blocksPerWave: 2
+    warningTime: 1.2254833
+    spawnInterval: 1.7036687
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3308875
+    rampUp: 0.28725836
     lineWaveChance: 0.1185325
     bombChance: 0.16725834
     breakTiles: 1
@@ -2861,20 +2974,20 @@ MonoBehaviour:
     - '####..'
     - ..SK..
     mission: 2
-    coinTarget: 9
-    surviveSeconds: 29
+    coinTarget: 12
+    surviveSeconds: 43
     keys: 1
     collapseBehind: 1
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1
-    warningTime: 1.1240858
-    spawnInterval: 1.5852611
-    blocksPerWave: 2
+    warningTime: 1.2235074
+    spawnInterval: 1.7014458
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.33236942
+    rampUp: 0.2882463
     lineWaveChance: 0.11942165
     bombChance: 0.16824628
     breakTiles: 1
@@ -2887,29 +3000,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '###..'
-    - '###..'
-    - X###X
-    - '#####'
-    - '#####'
+    - '#####....'
+    - '#####....'
+    - '#####....'
+    - '###X#....'
+    - X########
+    - '#######X#'
+    - '#########'
+    - '#########'
+    - '#########'
     mission: 0
-    coinTarget: 9
-    surviveSeconds: 29
+    coinTarget: 12
+    surviveSeconds: 43
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1
-    warningTime: 1.1212264
-    spawnInterval: 1.5823032
-    blocksPerWave: 2
+    warningTime: 1.2215354
+    spawnInterval: 1.6992273
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.33384842
+    rampUp: 0.28923228
     lineWaveChance: 0.12030905
     bombChance: 0.16923228
     breakTiles: 1
@@ -2922,30 +3039,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - ..##X#
-    - ..####
-    - '######'
-    - '#X##..'
-    - '####..'
-    - '####..'
+    - ...######
+    - ...###X##
+    - ...######
+    - '#####X###'
+    - '#########'
+    - '#X####...'
+    - '######...'
+    - '######...'
+    - '######...'
     mission: 4
-    coinTarget: 14
-    surviveSeconds: 20
+    coinTarget: 17
+    surviveSeconds: 30
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 1
-    warningTime: 1.1183726
-    spawnInterval: 1.579351
-    blocksPerWave: 2
+    warningTime: 1.2195673
+    spawnInterval: 1.6970133
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.33532453
+    rampUp: 0.29021636
     lineWaveChance: 0.12119472
     bombChance: 0.17021635
     breakTiles: 1
@@ -2958,30 +3078,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '######'
-    - X####X
-    - '######'
-    - '#X####'
-    - '######'
-    - '###S##'
+    - '#########'
+    - '########X'
+    - '#########'
+    - '#########'
+    - '########X'
+    - '#########'
+    - '##X######'
+    - '#########'
+    - '####S####'
     mission: 7
-    coinTarget: 9
-    surviveSeconds: 30
+    coinTarget: 12
+    surviveSeconds: 44
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1
-    warningTime: 1.1155242
-    spawnInterval: 1.5764043
-    blocksPerWave: 3
+    warningTime: 1.2176028
+    spawnInterval: 1.6948032
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.33679783
+    rampUp: 0.29119855
     lineWaveChance: 0.3683989
     bombChance: 0.2
     breakTiles: 1
@@ -2994,30 +3117,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '######'
-    - '#X####'
-    - '######'
-    - ..##..
-    - ..#X..
-    - ..##..
+    - '#########'
+    - '#########'
+    - '##X#X####'
+    - '#########'
+    - '#########'
+    - ...###...
+    - ...##X...
+    - ...###...
+    - ...###...
     mission: 0
-    coinTarget: 9
-    surviveSeconds: 30
+    coinTarget: 12
+    surviveSeconds: 44
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 2
-    warningTime: 1.1126813
-    spawnInterval: 1.5734634
-    blocksPerWave: 2
+    warningTime: 1.2156422
+    spawnInterval: 1.6925975
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3382683
+    rampUp: 0.29217887
     lineWaveChance: 0.122960985
     bombChance: 0.17217886
     breakTiles: 1
@@ -3045,20 +3171,20 @@ MonoBehaviour:
     - XX#X#X#
     - S######
     mission: 2
-    coinTarget: 9
-    surviveSeconds: 30
+    coinTarget: 13
+    surviveSeconds: 44
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 0
     rules: 2
-    warningTime: 1.1098437
-    spawnInterval: 1.5705279
-    blocksPerWave: 2
+    warningTime: 1.2136853
+    spawnInterval: 1.690396
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.339736
+    rampUp: 0.29315737
     lineWaveChance: 0.12384161
     bombChance: 0.17315735
     breakTiles: 1
@@ -3071,30 +3197,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '##..##'
-    - '##..##'
-    - '##..##'
-    - '######'
-    - X#####
-    - '#####X'
+    - '###...###'
+    - '###...###'
+    - '###...###'
+    - '#X#...###'
+    - '#########'
+    - '#########'
+    - X########
+    - '#########'
+    - '#######X#'
     mission: 1
-    coinTarget: 9
-    surviveSeconds: 30
+    coinTarget: 13
+    surviveSeconds: 44
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 3
-    warningTime: 1.1070113
-    spawnInterval: 1.567598
-    blocksPerWave: 2
+    warningTime: 1.2117319
+    spawnInterval: 1.6881984
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.34120104
+    rampUp: 0.29413402
     lineWaveChance: 0.124720626
     bombChance: 0.17413403
     breakTiles: 1
@@ -3131,20 +3260,20 @@ MonoBehaviour:
     - '#K#'
     - '#S#'
     mission: 2
-    coinTarget: 9
-    surviveSeconds: 30
+    coinTarget: 13
+    surviveSeconds: 44
     keys: 1
     collapseBehind: 0
     chaseSpeed: 1.1853267
     lowWalls: 0
     levelEvent: 3
     rules: 2
-    warningTime: 1.1041842
-    spawnInterval: 1.5646733
-    blocksPerWave: 2
+    warningTime: 1.2097821
+    spawnInterval: 1.686005
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.34266338
+    rampUp: 0.2951089
     lineWaveChance: 0.12559803
     bombChance: 0.17510892
     breakTiles: 1
@@ -3157,30 +3286,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - ..##..
-    - ..##..
-    - '######'
-    - '######'
-    - ..##..
-    - ..##..
+    - ...###...
+    - ...###...
+    - ...###...
+    - '#########'
+    - '#########'
+    - '#########'
+    - ...###...
+    - ...###...
+    - ...###...
     mission: 3
-    coinTarget: 9
-    surviveSeconds: 30
+    coinTarget: 13
+    surviveSeconds: 44
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 3
-    warningTime: 1.1013621
-    spawnInterval: 1.5617539
-    blocksPerWave: 2
+    warningTime: 1.2078359
+    spawnInterval: 1.6838154
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.34412307
+    rampUp: 0.29608205
     lineWaveChance: 0.12647384
     bombChance: 0.17608204
     breakTiles: 1
@@ -3193,30 +3325,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '#####X'
-    - '######'
-    - '##..##'
-    - '##..##'
-    - '####X#'
-    - '######'
+    - '#######X#'
+    - '#########'
+    - '#########'
+    - '######X##'
+    - '####.####'
+    - '#########'
+    - '#########'
+    - '######X##'
+    - '#########'
     mission: 2
-    coinTarget: 9
-    surviveSeconds: 30
+    coinTarget: 13
+    surviveSeconds: 45
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 2
-    warningTime: 1.098545
-    spawnInterval: 1.5588397
-    blocksPerWave: 2
+    warningTime: 1.205893
+    spawnInterval: 1.6816298
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.34558016
+    rampUp: 0.29705346
     lineWaveChance: 0.1273481
     bombChance: 0.17705344
     breakTiles: 1
@@ -3229,30 +3364,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - X#####
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '#####X'
+    - '#########'
+    - X########
+    - '#########'
+    - '#########'
+    - '#########'
+    - '######X##'
+    - '#########'
+    - '#########'
+    - '########X'
     mission: 0
-    coinTarget: 9
-    surviveSeconds: 30
+    coinTarget: 13
+    surviveSeconds: 45
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 3
-    warningTime: 1.0957329
-    spawnInterval: 1.5559306
-    blocksPerWave: 2
+    warningTime: 1.2039537
+    spawnInterval: 1.679448
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3470347
+    rampUp: 0.29802313
     lineWaveChance: 0.12822081
     bombChance: 0.17802313
     breakTiles: 1
@@ -3286,20 +3424,20 @@ MonoBehaviour:
     - '#K#'
     - '#S#'
     mission: 2
-    coinTarget: 9
-    surviveSeconds: 30
+    coinTarget: 13
+    surviveSeconds: 45
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 2
-    warningTime: 1.0929258
-    spawnInterval: 1.5530267
-    blocksPerWave: 2
+    warningTime: 1.2020178
+    spawnInterval: 1.6772699
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3484867
+    rampUp: 0.2989911
     lineWaveChance: 0.12909201
     bombChance: 0.17899112
     breakTiles: 1
@@ -3312,30 +3450,33 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '##X###'
-    - '######'
-    - '######'
-    - ...###
-    - ...X##
-    - ...###
+    - '###X#####'
+    - '#####X###'
+    - '#########'
+    - '#########'
+    - '#########'
+    - ....#####
+    - ....#X###
+    - ....#####
+    - ....#####
     mission: 4
-    coinTarget: 14
-    surviveSeconds: 20
+    coinTarget: 18
+    surviveSeconds: 31
     keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 2
-    warningTime: 1.0901234
-    spawnInterval: 1.5501276
-    blocksPerWave: 2
+    warningTime: 1.200085
+    spawnInterval: 1.6750958
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3499362
+    rampUp: 0.29995745
     lineWaveChance: 0.1299617
     bombChance: 0.17995745
     breakTiles: 1
@@ -3348,30 +3489,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '######'
-    - '#X####'
-    - '#####X'
-    - '#X####'
-    - '######'
-    - '###S##'
+    - '##########'
+    - '##X#######'
+    - '##########'
+    - '##########'
+    - '#########X'
+    - '###X######'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#####S####'
     mission: 7
-    coinTarget: 9
-    surviveSeconds: 30
+    coinTarget: 13
+    surviveSeconds: 45
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 3
-    warningTime: 1.0873258
-    spawnInterval: 1.5472337
-    blocksPerWave: 4
+    warningTime: 1.1981558
+    spawnInterval: 1.6729252
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.35138318
+    rampUp: 0.30092213
     lineWaveChance: 0.3756916
     bombChance: 0.2
     breakTiles: 1
@@ -3406,20 +3551,20 @@ MonoBehaviour:
     - ..###
     - ..#S#
     mission: 2
-    coinTarget: 9
-    surviveSeconds: 30
+    coinTarget: 13
+    surviveSeconds: 45
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 4
-    warningTime: 1.084533
-    spawnInterval: 1.5443444
-    blocksPerWave: 3
+    warningTime: 1.1962297
+    spawnInterval: 1.6707584
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.35282776
+    rampUp: 0.3018852
     lineWaveChance: 0.13169666
     bombChance: 0.18188518
     breakTiles: 1
@@ -3432,30 +3577,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - ..##..
-    - ..##..
-    - ..##..
-    - '######'
-    - X####X
-    - '######'
+    - ...####...
+    - ...####...
+    - ...####...
+    - ...####...
+    - ...####...
+    - '##########'
+    - '#####X####'
+    - X########X
+    - '#####X####'
+    - '##########'
     mission: 1
-    coinTarget: 9
-    surviveSeconds: 30
-    keys: 2
+    coinTarget: 13
+    surviveSeconds: 45
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 4
-    warningTime: 1.0817448
-    spawnInterval: 1.5414602
-    blocksPerWave: 3
+    warningTime: 1.1943067
+    spawnInterval: 1.6685951
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.35426992
+    rampUp: 0.30284664
     lineWaveChance: 0.13256195
     bombChance: 0.18284662
     breakTiles: 1
@@ -3491,20 +3640,20 @@ MonoBehaviour:
     - ..##..
     - ..SK..
     mission: 2
-    coinTarget: 9
-    surviveSeconds: 30
+    coinTarget: 13
+    surviveSeconds: 46
     keys: 1
     collapseBehind: 1
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 4
-    warningTime: 1.0789611
-    spawnInterval: 1.5385805
-    blocksPerWave: 3
+    warningTime: 1.192387
+    spawnInterval: 1.6664354
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.35570973
+    rampUp: 0.3038065
     lineWaveChance: 0.13342585
     bombChance: 0.1838065
     breakTiles: 1
@@ -3517,30 +3666,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '######'
-    - X#####
-    - '######'
-    - X#..##
-    - '##..##'
-    - '##..##'
+    - '##########'
+    - '#####X####'
+    - '#X########'
+    - '##########'
+    - '########X#'
+    - X##....###
+    - '###....###'
+    - '###....###'
+    - '###....###'
+    - '###....###'
     mission: 0
-    coinTarget: 9
-    surviveSeconds: 30
-    keys: 2
+    coinTarget: 13
+    surviveSeconds: 46
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 6
-    warningTime: 1.0761821
-    spawnInterval: 1.5357056
-    blocksPerWave: 3
+    warningTime: 1.1904705
+    spawnInterval: 1.6642792
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3571472
+    rampUp: 0.3047648
     lineWaveChance: 0.13428831
     bombChance: 0.1847648
     breakTiles: 1
@@ -3568,20 +3721,20 @@ MonoBehaviour:
     - '#XXXXX#'
     - SXK####
     mission: 2
-    coinTarget: 9
-    surviveSeconds: 30
+    coinTarget: 13
+    surviveSeconds: 46
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 0
     rules: 4
-    warningTime: 1.0734075
-    spawnInterval: 1.5328354
-    blocksPerWave: 3
+    warningTime: 1.1885569
+    spawnInterval: 1.6621265
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.35858235
+    rampUp: 0.30572155
     lineWaveChance: 0.1351494
     bombChance: 0.18572156
     breakTiles: 1
@@ -3594,30 +3747,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - ..##..
-    - ..##..
-    - '######'
-    - '######'
-    - ..##..
-    - ..##..
+    - ...###X...
+    - ...####...
+    - ...####...
+    - '##########'
+    - '##########'
+    - '########X#'
+    - '##########'
+    - ...X###...
+    - ...###X...
+    - ...####...
     mission: 0
-    coinTarget: 9
-    surviveSeconds: 30
-    keys: 2
+    coinTarget: 13
+    surviveSeconds: 46
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 4
-    warningTime: 1.0706373
-    spawnInterval: 1.5299696
-    blocksPerWave: 3
+    warningTime: 1.1866465
+    spawnInterval: 1.6599772
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.36001518
+    rampUp: 0.3066768
     lineWaveChance: 0.13600911
     bombChance: 0.1866768
     breakTiles: 1
@@ -3654,20 +3811,20 @@ MonoBehaviour:
     - '#K#'
     - '#S#'
     mission: 2
-    coinTarget: 9
-    surviveSeconds: 30
+    coinTarget: 14
+    surviveSeconds: 46
     keys: 1
     collapseBehind: 0
     chaseSpeed: 1.2228916
     lowWalls: 0
     levelEvent: 0
     rules: 4
-    warningTime: 1.0678715
-    spawnInterval: 1.5271084
-    blocksPerWave: 3
+    warningTime: 1.184739
+    spawnInterval: 1.6578313
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.36144578
+    rampUp: 0.3076305
     lineWaveChance: 0.13686746
     bombChance: 0.18763052
     breakTiles: 1
@@ -3680,30 +3837,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '######'
-    - '######'
-    - '#X..##'
-    - '##..##'
-    - '######'
-    - '#X####'
+    - '#X########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##X#..####'
+    - '####..####'
+    - '###X######'
+    - '##########'
+    - '##########'
+    - '##X#######'
     mission: 0
-    coinTarget: 9
-    surviveSeconds: 30
-    keys: 2
+    coinTarget: 14
+    surviveSeconds: 46
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 4
-    warningTime: 1.06511
-    spawnInterval: 1.5242517
-    blocksPerWave: 3
+    warningTime: 1.1828345
+    spawnInterval: 1.6556888
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.36287415
+    rampUp: 0.30858275
     lineWaveChance: 0.13772449
     bombChance: 0.18858276
     breakTiles: 1
@@ -3716,30 +3877,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '######'
-    - '#X####'
-    - '######'
-    - '######'
-    - '###X##'
-    - '######'
+    - '##########'
+    - '##X#######'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '####X#####'
+    - '##########'
+    - '#####X####'
+    - '##########'
+    - '#########X'
     mission: 4
-    coinTarget: 14
-    surviveSeconds: 20
-    keys: 2
+    coinTarget: 19
+    surviveSeconds: 32
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 6
-    warningTime: 1.0623528
-    spawnInterval: 1.5213995
-    blocksPerWave: 3
+    warningTime: 1.180933
+    spawnInterval: 1.6535497
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.36430028
+    rampUp: 0.3095335
     lineWaveChance: 0.13858016
     bombChance: 0.18953352
     breakTiles: 1
@@ -3752,30 +3917,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '######'
-    - '##X##X'
-    - '######'
-    - '#####X'
-    - '######'
-    - '###S##'
+    - '##########'
+    - '####X#####'
+    - '##########'
+    - '#########X'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#########X'
+    - '##########'
+    - '#####S####'
     mission: 7
-    coinTarget: 9
-    surviveSeconds: 31
+    coinTarget: 14
+    surviveSeconds: 47
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 4
-    warningTime: 1.0595998
-    spawnInterval: 1.5185516
-    blocksPerWave: 4
+    warningTime: 1.1790344
+    spawnInterval: 1.6514137
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.36572424
+    rampUp: 0.31048283
     lineWaveChance: 0.38286212
     bombChance: 0.2
     breakTiles: 1
@@ -3788,30 +3957,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '###...'
-    - X##...
-    - '###...'
-    - '#####X'
-    - '######'
-    - '######'
+    - '#X###.....'
+    - '#####.....'
+    - '#####.....'
+    - '#X###.....'
+    - '#####.....'
+    - '##########'
+    - '######X##X'
+    - '##########'
+    - '##########'
+    - '##########'
     mission: 1
-    coinTarget: 9
-    surviveSeconds: 31
-    keys: 2
+    coinTarget: 14
+    surviveSeconds: 47
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 8
-    warningTime: 1.0568509
-    spawnInterval: 1.5157079
-    blocksPerWave: 3
+    warningTime: 1.1771386
+    spawnInterval: 1.6492809
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.36714604
+    rampUp: 0.31143072
     lineWaveChance: 0.14028764
     bombChance: 0.1914307
     breakTiles: 1
@@ -3824,30 +3997,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - ..####
-    - ..####
-    - '######'
-    - X#X#..
-    - '####..'
-    - '####..'
+    - ...#######
+    - ...#######
+    - ...##X####
+    - '##########'
+    - '##########'
+    - '#X#####...'
+    - '####X##...'
+    - '#######...'
+    - '#######...'
+    - '###X###...'
     mission: 2
-    coinTarget: 9
-    surviveSeconds: 31
-    keys: 2
+    coinTarget: 14
+    surviveSeconds: 47
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 8
-    warningTime: 1.0541062
-    spawnInterval: 1.5128685
-    blocksPerWave: 3
+    warningTime: 1.1752456
+    spawnInterval: 1.6471515
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.36856574
+    rampUp: 0.31237715
     lineWaveChance: 0.14113943
     bombChance: 0.19237715
     breakTiles: 1
@@ -3860,30 +4037,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '###...'
-    - '###...'
-    - '######'
-    - '#####X'
-    - ..####
-    - ..##X#
+    - '#####.....'
+    - '#####.....'
+    - '#####.....'
+    - '######X###'
+    - '##########'
+    - '########X#'
+    - '##########'
+    - ...X######
+    - ...#######
+    - ...####X##
     mission: 3
-    coinTarget: 9
-    surviveSeconds: 31
-    keys: 2
+    coinTarget: 14
+    surviveSeconds: 47
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 10
-    warningTime: 1.0513656
-    spawnInterval: 1.5100334
-    blocksPerWave: 3
+    warningTime: 1.1733556
+    spawnInterval: 1.645025
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.36998332
+    rampUp: 0.31332222
     lineWaveChance: 0.14198999
     bombChance: 0.19332221
     breakTiles: 1
@@ -3918,20 +4099,20 @@ MonoBehaviour:
     - '##K#'
     - '##S#'
     mission: 2
-    coinTarget: 9
-    surviveSeconds: 31
+    coinTarget: 14
+    surviveSeconds: 47
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 8
-    warningTime: 1.0486289
-    spawnInterval: 1.5072024
-    blocksPerWave: 3
+    warningTime: 1.1714683
+    spawnInterval: 1.6429018
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3713988
+    rampUp: 0.31426588
     lineWaveChance: 0.14283928
     bombChance: 0.19426587
     breakTiles: 1
@@ -3944,30 +4125,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '###X##'
-    - '######'
-    - '######'
-    - ..##..
-    - ..##..
-    - ..#X..
+    - '##########'
+    - '######X###'
+    - '##########'
+    - '##########'
+    - '#########X'
+    - ...X###...
+    - ...####...
+    - ...####...
+    - ...###X...
+    - ...####...
     mission: 0
-    coinTarget: 9
-    surviveSeconds: 31
-    keys: 2
+    coinTarget: 14
+    surviveSeconds: 47
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 8
-    warningTime: 1.0458964
-    spawnInterval: 1.5043756
-    blocksPerWave: 3
+    warningTime: 1.1695837
+    spawnInterval: 1.6407816
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3728122
+    rampUp: 0.31520817
     lineWaveChance: 0.14368734
     bombChance: 0.19520815
     breakTiles: 1
@@ -4002,20 +4187,20 @@ MonoBehaviour:
     - ..###
     - ..#S#
     mission: 2
-    coinTarget: 9
-    surviveSeconds: 31
+    coinTarget: 14
+    surviveSeconds: 47
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 12
-    warningTime: 1.0431677
-    spawnInterval: 1.5015528
-    blocksPerWave: 3
+    warningTime: 1.1677018
+    spawnInterval: 1.6386646
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.37422362
+    rampUp: 0.3161491
     lineWaveChance: 0.14453417
     bombChance: 0.19614908
     breakTiles: 1
@@ -4028,30 +4213,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - ..##..
-    - ..##..
-    - '######'
-    - '######'
-    - ..##..
-    - ..##..
+    - ...####...
+    - ...####...
+    - ...####...
+    - '##########'
+    - '#######X##'
+    - '#X########'
+    - '###X######'
+    - ...####...
+    - ...####...
+    - ...###X...
     mission: 0
-    coinTarget: 10
-    surviveSeconds: 31
-    keys: 2
+    coinTarget: 14
+    surviveSeconds: 48
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 8
-    warningTime: 1.0404428
-    spawnInterval: 1.498734
-    blocksPerWave: 3
+    warningTime: 1.1658226
+    spawnInterval: 1.6365505
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.375633
+    rampUp: 0.3170887
     lineWaveChance: 0.14537981
     bombChance: 0.19708867
     breakTiles: 1
@@ -4088,20 +4277,20 @@ MonoBehaviour:
     - ..##..
     - ..SK..
     mission: 2
-    coinTarget: 10
-    surviveSeconds: 31
+    coinTarget: 14
+    surviveSeconds: 48
     keys: 1
     collapseBehind: 1
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 12
-    warningTime: 1.0377219
-    spawnInterval: 1.4959192
-    blocksPerWave: 3
+    warningTime: 1.1639462
+    spawnInterval: 1.6344395
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3770404
+    rampUp: 0.31802693
     lineWaveChance: 0.14622423
     bombChance: 0.19802693
     breakTiles: 1
@@ -4114,30 +4303,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '###X##'
-    - '######'
-    - '##..##'
-    - '##..##'
-    - '###X##'
-    - '######'
+    - '######X###'
+    - X#########
+    - '##########'
+    - '##########'
+    - '####..####'
+    - '####..####'
+    - '##########'
+    - '#####X###X'
+    - '##########'
+    - '##########'
     mission: 4
-    coinTarget: 15
-    surviveSeconds: 20
-    keys: 2
+    coinTarget: 20
+    surviveSeconds: 33
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 8
-    warningTime: 1.0350047
-    spawnInterval: 1.4931084
-    blocksPerWave: 3
+    warningTime: 1.1620723
+    spawnInterval: 1.6323313
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3784458
+    rampUp: 0.3189639
     lineWaveChance: 0.14706749
     bombChance: 0.19896388
     breakTiles: 1
@@ -4150,30 +4343,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '######'
-    - '##X#X#'
-    - '######'
-    - '####X#'
-    - '######'
-    - '###S##'
+    - '##########'
+    - '##########'
+    - '####X#X##X'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#####S####'
     mission: 7
-    coinTarget: 10
-    surviveSeconds: 31
+    coinTarget: 14
+    surviveSeconds: 48
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 10
-    warningTime: 1.0322914
-    spawnInterval: 1.4903015
-    blocksPerWave: 4
+    warningTime: 1.160201
+    spawnInterval: 1.6302261
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.37984926
+    rampUp: 0.3198995
     lineWaveChance: 0.38992462
     bombChance: 0.2
     breakTiles: 1
@@ -4201,20 +4398,20 @@ MonoBehaviour:
     - XXXX#X#X#
     - S########
     mission: 2
-    coinTarget: 10
-    surviveSeconds: 31
+    coinTarget: 14
+    surviveSeconds: 48
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 0
     rules: 16
-    warningTime: 1.0295818
-    spawnInterval: 1.4874984
-    blocksPerWave: 3
+    warningTime: 1.1583322
+    spawnInterval: 1.6281239
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3812508
+    rampUp: 0.32083386
     lineWaveChance: 0.14875047
     bombChance: 0.20083386
     breakTiles: 1
@@ -4227,30 +4424,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '######'
-    - X###X#
-    - '######'
-    - ...###
-    - ...###
-    - ...###
+    - '#X########'
+    - '##########'
+    - '#X########'
+    - '########X#'
+    - '###X######'
+    - .....#####
+    - .....#####
+    - .....#####
+    - .....#####
+    - .....#####
     mission: 3
-    coinTarget: 10
-    surviveSeconds: 31
-    keys: 2
+    coinTarget: 15
+    surviveSeconds: 48
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 16
-    warningTime: 1.0268759
-    spawnInterval: 1.4846991
-    blocksPerWave: 3
+    warningTime: 1.1564661
+    spawnInterval: 1.6260244
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.38265043
+    rampUp: 0.32176694
     lineWaveChance: 0.14959025
     bombChance: 0.20176695
     breakTiles: 1
@@ -4288,20 +4489,20 @@ MonoBehaviour:
     - '##K#'
     - '##S#'
     mission: 2
-    coinTarget: 10
-    surviveSeconds: 31
+    coinTarget: 15
+    surviveSeconds: 48
     keys: 1
     collapseBehind: 0
     chaseSpeed: 1.2680963
     lowWalls: 0
     levelEvent: 1
     rules: 16
-    warningTime: 1.0241736
-    spawnInterval: 1.4819037
-    blocksPerWave: 3
+    warningTime: 1.1546025
+    spawnInterval: 1.6239278
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.38404813
+    rampUp: 0.32269877
     lineWaveChance: 0.15042888
     bombChance: 0.20269877
     breakTiles: 1
@@ -4314,30 +4515,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - ..####
-    - ..###X
-    - '#X####'
-    - '######'
-    - '###...'
-    - '###...'
+    - ...########
+    - ...########
+    - ...#######X
+    - '###########'
+    - '###########'
+    - '###X######X'
+    - '###########'
+    - '#######X###'
+    - '######.....'
+    - '######.....'
+    - '######.....'
     mission: 0
-    coinTarget: 10
-    surviveSeconds: 31
-    keys: 2
+    coinTarget: 15
+    surviveSeconds: 49
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 16
-    warningTime: 1.021475
-    spawnInterval: 1.479112
-    blocksPerWave: 3
+    warningTime: 1.1527413
+    spawnInterval: 1.621834
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.38544402
+    rampUp: 0.32362935
     lineWaveChance: 0.15126641
     bombChance: 0.20362934
     breakTiles: 1
@@ -4350,30 +4556,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#X##..'
-    - '####..'
-    - '######'
-    - '#X####'
-    - ...###
-    - ...###
+    - '##X#####...'
+    - '########...'
+    - '########...'
+    - '#########X#'
+    - '###########'
+    - '###########'
+    - '##X########'
+    - '###########'
+    - .....######
+    - .....######
+    - .....#X####
     mission: 2
-    coinTarget: 10
-    surviveSeconds: 31
-    keys: 2
+    coinTarget: 15
+    surviveSeconds: 49
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 24
-    warningTime: 1.0187799
-    spawnInterval: 1.476324
-    blocksPerWave: 3
+    warningTime: 1.1508826
+    spawnInterval: 1.619743
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.38683802
+    rampUp: 0.32455868
     lineWaveChance: 0.15210281
     bombChance: 0.20455867
     breakTiles: 1
@@ -4386,30 +4597,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - ..##..
-    - ..##..
-    - ..##..
-    - '######'
-    - '######'
-    - X##X##
+    - ...#####...
+    - ...#####...
+    - ...#####...
+    - ...#####...
+    - ...#####...
+    - '###X#######'
+    - X##########
+    - '###########'
+    - '###########'
+    - '#X####X####'
+    - '###########'
     mission: 0
-    coinTarget: 10
-    surviveSeconds: 31
-    keys: 2
+    coinTarget: 15
+    surviveSeconds: 49
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 16
-    warningTime: 1.0160882
-    spawnInterval: 1.4735396
-    blocksPerWave: 3
+    warningTime: 1.1490264
+    spawnInterval: 1.6176547
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3882302
+    rampUp: 0.3254868
     lineWaveChance: 0.15293813
     bombChance: 0.2054868
     breakTiles: 1
@@ -4445,20 +4661,20 @@ MonoBehaviour:
     - '##K#'
     - '##S#'
     mission: 2
-    coinTarget: 10
-    surviveSeconds: 31
+    coinTarget: 15
+    surviveSeconds: 49
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 20
-    warningTime: 1.0134002
-    spawnInterval: 1.4707589
-    blocksPerWave: 3
+    warningTime: 1.1471726
+    spawnInterval: 1.6155691
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.38962057
+    rampUp: 0.32641372
     lineWaveChance: 0.15377234
     bombChance: 0.20641372
     breakTiles: 1
@@ -4471,30 +4687,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '##X###'
-    - '######'
-    - X#####
-    - '##..##'
-    - '##..X#'
-    - '##..##'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#X#########'
+    - '###########'
+    - '#X#.....###'
+    - '###.....X##'
+    - '###.....###'
+    - '###.....###'
+    - '###.....X##'
     mission: 1
-    coinTarget: 10
-    surviveSeconds: 31
-    keys: 2
+    coinTarget: 15
+    surviveSeconds: 49
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 16
-    warningTime: 1.0107157
-    spawnInterval: 1.4679818
-    blocksPerWave: 3
+    warningTime: 1.1453211
+    spawnInterval: 1.6134863
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.39100912
+    rampUp: 0.3273394
     lineWaveChance: 0.15460546
     bombChance: 0.2073394
     breakTiles: 1
@@ -4507,30 +4728,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - ..##..
-    - ..##..
-    - '######'
-    - '######'
-    - ..##..
-    - ..##..
+    - ...#####...
+    - ...#####...
+    - ...####X...
+    - '###########'
+    - '###########'
+    - X#######X##
+    - '###########'
+    - '###########'
+    - ...#X###...
+    - ...#####...
+    - ...#####...
     mission: 4
-    coinTarget: 15
-    surviveSeconds: 20
-    keys: 2
+    coinTarget: 20
+    surviveSeconds: 34
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 20
-    warningTime: 1.0080346
-    spawnInterval: 1.4652082
-    blocksPerWave: 3
+    warningTime: 1.1434721
+    spawnInterval: 1.6114062
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.3923959
+    rampUp: 0.32826394
     lineWaveChance: 0.15543754
     bombChance: 0.20826393
     breakTiles: 1
@@ -4543,30 +4769,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '######'
-    - '#####X'
-    - '######'
-    - '#X##X#'
-    - '######'
-    - '###S##'
+    - '##########'
+    - '##########'
+    - '########X#'
+    - '##########'
+    - '#########X'
+    - '##########'
+    - '##########'
+    - '##X#######'
+    - '##########'
+    - '#####S####'
     mission: 7
-    coinTarget: 10
-    surviveSeconds: 31
+    coinTarget: 15
+    surviveSeconds: 49
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 16
-    warningTime: 1.0053568
-    spawnInterval: 1.4624381
-    blocksPerWave: 4
+    warningTime: 1.1416254
+    spawnInterval: 1.6093286
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.39378095
+    rampUp: 0.3291873
     lineWaveChance: 0.39689046
     bombChance: 0.2091873
     breakTiles: 1
@@ -4579,30 +4809,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '######'
-    - '##X###'
-    - X#..##
-    - '##..##'
-    - '######'
-    - X#####
+    - '###########'
+    - '#######X###'
+    - '###########'
+    - X###X######
+    - '###########'
+    - '#####.#####'
+    - '#X#########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
     mission: 3
-    coinTarget: 10
-    surviveSeconds: 32
-    keys: 2
+    coinTarget: 15
+    surviveSeconds: 50
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 32
-    warningTime: 1.0026826
-    spawnInterval: 1.4596716
-    blocksPerWave: 3
+    warningTime: 1.139781
+    spawnInterval: 1.6072537
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.39516422
+    rampUp: 0.33010948
     lineWaveChance: 0.15709853
     bombChance: 0.21010947
     breakTiles: 1
@@ -4641,20 +4876,20 @@ MonoBehaviour:
     - ...####
     - ...##S#
     mission: 2
-    coinTarget: 10
-    surviveSeconds: 32
+    coinTarget: 15
+    surviveSeconds: 50
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 32
-    warningTime: 1.0000116
-    spawnInterval: 1.4569085
-    blocksPerWave: 3
+    warningTime: 1.137939
+    spawnInterval: 1.6051813
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.39654577
+    rampUp: 0.33103052
     lineWaveChance: 0.15792745
     bombChance: 0.21103051
     breakTiles: 1
@@ -4667,30 +4902,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '######'
-    - '######'
-    - '#X####'
-    - '######'
-    - '#X####'
-    - '###X##'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#X#########'
+    - '###########'
+    - '###########'
+    - '######X####'
+    - '###########'
+    - '##X########'
+    - '######X####'
     mission: 0
-    coinTarget: 10
-    surviveSeconds: 32
-    keys: 2
+    coinTarget: 15
+    surviveSeconds: 50
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 32
-    warningTime: 0.99734384
-    spawnInterval: 1.4541488
-    blocksPerWave: 3
+    warningTime: 1.1360992
+    spawnInterval: 1.6031116
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.39792562
+    rampUp: 0.3319504
     lineWaveChance: 0.15875536
     bombChance: 0.2119504
     breakTiles: 1
@@ -4728,20 +4968,20 @@ MonoBehaviour:
     - ..##..
     - ..SK..
     mission: 2
-    coinTarget: 10
-    surviveSeconds: 32
+    coinTarget: 15
+    surviveSeconds: 50
     keys: 1
     collapseBehind: 1
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 40
-    warningTime: 0.9946794
-    spawnInterval: 1.4513925
-    blocksPerWave: 3
+    warningTime: 1.1342616
+    spawnInterval: 1.6010444
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.39930376
+    rampUp: 0.33286917
     lineWaveChance: 0.15958226
     bombChance: 0.21286917
     breakTiles: 1
@@ -4754,30 +4994,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - ...###
-    - ...###
-    - ...###
-    - '#X###X'
-    - '###X##'
-    - '######'
+    - .....######
+    - .....######
+    - .....######
+    - .....######
+    - .....######
+    - '##########X'
+    - '##X########'
+    - '#######X###'
+    - X##########
+    - '###########'
+    - '###########'
     mission: 0
-    coinTarget: 10
-    surviveSeconds: 32
-    keys: 2
+    coinTarget: 15
+    surviveSeconds: 50
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 32
-    warningTime: 0.9920182
-    spawnInterval: 1.4486395
-    blocksPerWave: 3
+    warningTime: 1.1324264
+    spawnInterval: 1.5989797
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.40068024
+    rampUp: 0.33378682
     lineWaveChance: 0.16040814
     bombChance: 0.21378683
     breakTiles: 1
@@ -4805,20 +5050,20 @@ MonoBehaviour:
     - XXXXXXXX#
     - S########
     mission: 2
-    coinTarget: 10
-    surviveSeconds: 32
+    coinTarget: 15
+    surviveSeconds: 50
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 0
     rules: 40
-    warningTime: 0.9893603
-    spawnInterval: 1.44589
-    blocksPerWave: 3
+    warningTime: 1.1305933
+    spawnInterval: 1.5969175
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.40205503
+    rampUp: 0.33470336
     lineWaveChance: 0.16123301
     bombChance: 0.21470335
     breakTiles: 1
@@ -4831,30 +5076,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '####X#'
-    - '######'
-    - X#####
-    - ..##..
-    - ..##..
-    - ..X#..
+    - '###########'
+    - '########X##'
+    - '###########'
+    - '###########'
+    - '#######X###'
+    - '###########'
+    - ...#####...
+    - ...####X...
+    - ...#####...
+    - ...#X###...
+    - ...#####...
     mission: 1
-    coinTarget: 10
-    surviveSeconds: 32
-    keys: 2
+    coinTarget: 15
+    surviveSeconds: 50
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 32
-    warningTime: 0.98670554
-    spawnInterval: 1.4431436
-    blocksPerWave: 3
+    warningTime: 1.1287625
+    spawnInterval: 1.5948578
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.40342817
+    rampUp: 0.3356188
     lineWaveChance: 0.16205691
     bombChance: 0.21561879
     breakTiles: 1
@@ -4892,20 +5142,20 @@ MonoBehaviour:
     - '##K#'
     - '##S#'
     mission: 2
-    coinTarget: 10
-    surviveSeconds: 32
+    coinTarget: 16
+    surviveSeconds: 50
     keys: 1
     collapseBehind: 0
     chaseSpeed: 1.3095994
     lowWalls: 0
     levelEvent: 2
     rules: 32
-    warningTime: 0.98405397
-    spawnInterval: 1.4404006
-    blocksPerWave: 3
+    warningTime: 1.1269338
+    spawnInterval: 1.5928005
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.40479967
+    rampUp: 0.33653313
     lineWaveChance: 0.16287981
     bombChance: 0.21653312
     breakTiles: 1
@@ -4918,30 +5168,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '##..#X'
-    - '##..##'
-    - X#..##
-    - '######'
-    - '##X###'
-    - '######'
+    - '###.....#X#'
+    - '###.....###'
+    - '###.....###'
+    - '###.....##X'
+    - X##.....###
+    - '###########'
+    - '###########'
+    - '###########'
+    - '####X######'
+    - '###########'
+    - '###########'
     mission: 4
-    coinTarget: 15
-    surviveSeconds: 20
-    keys: 2
+    coinTarget: 21
+    surviveSeconds: 34
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 32
-    warningTime: 0.9814055
-    spawnInterval: 1.4376608
-    blocksPerWave: 3
+    warningTime: 1.1251072
+    spawnInterval: 1.5907457
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4061696
+    rampUp: 0.3374464
     lineWaveChance: 0.16370176
     bombChance: 0.21744639
     breakTiles: 1
@@ -4954,30 +5209,34 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '######'
-    - X#####
-    - '######'
-    - '##X##X'
-    - '######'
-    - '###S##'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#X########'
+    - '##########'
+    - '####X#####'
+    - '##########'
+    - '#########X'
+    - '##########'
+    - '#####S####'
     mission: 7
-    coinTarget: 10
-    surviveSeconds: 32
+    coinTarget: 16
+    surviveSeconds: 51
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 32
-    warningTime: 0.97876006
-    spawnInterval: 1.4349242
-    blocksPerWave: 4
+    warningTime: 1.1232828
+    spawnInterval: 1.5886931
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.40753788
+    rampUp: 0.3383586
     lineWaveChance: 0.40376893
     bombChance: 0.21835859
     breakTiles: 1
@@ -4990,30 +5249,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - ..##..
-    - ..##..
-    - '######'
-    - '######'
-    - ..##..
-    - ..##..
+    - ...#####...
+    - ...X####...
+    - ...#####...
+    - '##########X'
+    - '###########'
+    - '##X########'
+    - '###########'
+    - '###########'
+    - ...#####...
+    - ...#####...
+    - ...####X...
     mission: 2
-    coinTarget: 10
-    surviveSeconds: 32
-    keys: 2
+    coinTarget: 16
+    surviveSeconds: 51
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 192
-    warningTime: 0.9761178
-    spawnInterval: 1.4321909
-    blocksPerWave: 3
+    warningTime: 1.1214606
+    spawnInterval: 1.5866431
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.40890458
+    rampUp: 0.33926973
     lineWaveChance: 0.16534275
     bombChance: 0.21926972
     breakTiles: 1
@@ -5026,30 +5290,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '######'
-    - '####X#'
-    - '##..##'
-    - '#X..##'
-    - '######'
-    - '#####X'
+    - '###########'
+    - '###########'
+    - '######X####'
+    - '###########'
+    - X##########
+    - '#####.#####'
+    - '###########'
+    - '##X##X#####'
+    - '###########'
+    - '###########'
+    - '###########'
     mission: 0
-    coinTarget: 10
-    surviveSeconds: 32
-    keys: 2
+    coinTarget: 16
+    surviveSeconds: 51
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 192
-    warningTime: 0.97347856
-    spawnInterval: 1.4294605
-    blocksPerWave: 3
+    warningTime: 1.1196404
+    spawnInterval: 1.5845954
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4102697
+    rampUp: 0.34017983
     lineWaveChance: 0.16616184
     bombChance: 0.22017981
     breakTiles: 1
@@ -5086,20 +5355,20 @@ MonoBehaviour:
     - '##K#'
     - '##S#'
     mission: 2
-    coinTarget: 10
-    surviveSeconds: 32
+    coinTarget: 16
+    surviveSeconds: 51
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 200
-    warningTime: 0.9708423
-    spawnInterval: 1.4267334
-    blocksPerWave: 3
+    warningTime: 1.1178223
+    spawnInterval: 1.58255
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4116333
+    rampUp: 0.34108886
     lineWaveChance: 0.16697998
     bombChance: 0.22108887
     breakTiles: 1
@@ -5112,30 +5381,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '######'
-    - '#####X'
-    - '######'
-    - X#####
-    - '#####X'
-    - '######'
+    - '###########'
+    - '###########'
+    - '#########X#'
+    - '###########'
+    - '###########'
+    - '########X##'
+    - '#X#########'
+    - '###########'
+    - '##########X'
+    - '###########'
+    - '###########'
     mission: 0
-    coinTarget: 10
-    surviveSeconds: 32
-    keys: 2
+    coinTarget: 16
+    surviveSeconds: 51
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 192
-    warningTime: 0.9682091
-    spawnInterval: 1.4240094
-    blocksPerWave: 3
+    warningTime: 1.1160063
+    spawnInterval: 1.580507
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4129953
+    rampUp: 0.34199688
     lineWaveChance: 0.16779718
     bombChance: 0.22199687
     breakTiles: 1
@@ -5174,20 +5448,20 @@ MonoBehaviour:
     - ...####
     - ...##S#
     mission: 2
-    coinTarget: 10
-    surviveSeconds: 32
+    coinTarget: 16
+    surviveSeconds: 51
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 200
-    warningTime: 0.9655788
-    spawnInterval: 1.4212884
-    blocksPerWave: 3
+    warningTime: 1.1141922
+    spawnInterval: 1.5784663
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.41435578
+    rampUp: 0.34290388
     lineWaveChance: 0.16861348
     bombChance: 0.22290386
     breakTiles: 1
@@ -5200,30 +5474,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '######'
-    - '#X###X'
-    - '######'
-    - ...##X
-    - ...###
-    - ...###
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#X#########'
+    - '###X#######'
+    - '#######X###'
+    - .....####X#
+    - .....######
+    - .....######
+    - .....######
+    - .....######
     mission: 1
-    coinTarget: 10
-    surviveSeconds: 32
-    keys: 2
+    coinTarget: 16
+    surviveSeconds: 52
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 192
-    warningTime: 0.9629515
-    spawnInterval: 1.4185705
-    blocksPerWave: 3
+    warningTime: 1.1123804
+    spawnInterval: 1.5764279
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.41571474
+    rampUp: 0.34380984
     lineWaveChance: 0.16942884
     bombChance: 0.22380984
     breakTiles: 1
@@ -5261,20 +5540,20 @@ MonoBehaviour:
     - ..##..
     - ..SK..
     mission: 2
-    coinTarget: 10
-    surviveSeconds: 32
+    coinTarget: 16
+    surviveSeconds: 52
     keys: 1
     collapseBehind: 1
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 192
-    warningTime: 0.9603271
-    spawnInterval: 1.4158556
-    blocksPerWave: 3
+    warningTime: 1.1105704
+    spawnInterval: 1.5743917
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4170722
+    rampUp: 0.3447148
     lineWaveChance: 0.17024332
     bombChance: 0.2247148
     breakTiles: 1
@@ -5287,30 +5566,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '#X##..'
-    - '####..'
-    - X#####
-    - '######'
-    - ...###
-    - ...#X#
+    - '##X#####....'
+    - '########....'
+    - '#####X##....'
+    - '########....'
+    - '############'
+    - X###########
+    - '############'
+    - '############'
+    - ......######
+    - ......###X##
+    - ......######
+    - ......###X##
     mission: 3
-    coinTarget: 10
-    surviveSeconds: 32
-    keys: 2
+    coinTarget: 16
+    surviveSeconds: 52
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 192
-    warningTime: 0.95770556
-    spawnInterval: 1.4131436
-    blocksPerWave: 3
+    warningTime: 1.1087625
+    spawnInterval: 1.5723578
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.41842815
+    rampUp: 0.34561878
     lineWaveChance: 0.1710569
     bombChance: 0.22561878
     breakTiles: 1
@@ -5323,30 +5608,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - ..##..
-    - ..X#..
-    - ..##..
-    - '######'
-    - '#X####'
-    - '####X#'
+    - ....####....
+    - ....####....
+    - ....#X##....
+    - ....####....
+    - ....####....
+    - ....####....
+    - '############'
+    - '######X#####'
+    - '########X###'
+    - '###X########'
+    - '############'
+    - '########X###'
     mission: 4
-    coinTarget: 16
-    surviveSeconds: 20
-    keys: 2
+    coinTarget: 22
+    surviveSeconds: 35
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 192
-    warningTime: 0.95508695
-    spawnInterval: 1.4104347
-    blocksPerWave: 3
+    warningTime: 1.1069565
+    spawnInterval: 1.5703261
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4197826
+    rampUp: 0.34652176
     lineWaveChance: 0.17186958
     bombChance: 0.22652175
     breakTiles: 1
@@ -5359,30 +5650,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '######'
-    - '####X#'
-    - '##X###'
-    - '#####X'
-    - '######'
-    - '###S##'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###X#######'
+    - '###########'
+    - '###########'
+    - '##X#######X'
+    - '###########'
+    - '###########'
+    - '#####S#####'
     mission: 7
-    coinTarget: 10
-    surviveSeconds: 32
+    coinTarget: 16
+    surviveSeconds: 52
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 208
-    warningTime: 0.95247114
-    spawnInterval: 1.4077288
-    blocksPerWave: 4
+    warningTime: 1.1051525
+    spawnInterval: 1.5682966
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.42113563
+    rampUp: 0.34742376
     lineWaveChance: 0.41056782
     bombChance: 0.22742376
     breakTiles: 1
@@ -5395,30 +5691,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '####X#'
-    - '######'
-    - '#####X'
-    - '##..##'
-    - '##..X#'
-    - '##..##'
+    - '###X########'
+    - '#########X##'
+    - '############'
+    - '############'
+    - '##########X#'
+    - '############'
+    - '####....##X#'
+    - '####....####'
+    - '####....X###'
+    - '####....####'
+    - '####....####'
+    - '####....####'
     mission: 0
-    coinTarget: 10
-    surviveSeconds: 32
-    keys: 2
+    coinTarget: 16
+    surviveSeconds: 52
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 256
-    warningTime: 0.9498581
-    spawnInterval: 1.4050256
-    blocksPerWave: 3
+    warningTime: 1.1033504
+    spawnInterval: 1.5662693
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.42248717
+    rampUp: 0.3483248
     lineWaveChance: 0.17349231
     bombChance: 0.22832479
     breakTiles: 1
@@ -5446,20 +5748,20 @@ MonoBehaviour:
     - XXXXXX#X#
     - S######XK
     mission: 2
-    coinTarget: 10
-    surviveSeconds: 32
+    coinTarget: 16
+    surviveSeconds: 52
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 3
     rules: 256
-    warningTime: 0.947248
-    spawnInterval: 1.4023255
-    blocksPerWave: 3
+    warningTime: 1.1015503
+    spawnInterval: 1.5642442
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.42383727
+    rampUp: 0.34922484
     lineWaveChance: 0.17430235
     bombChance: 0.22922485
     breakTiles: 1
@@ -5472,30 +5774,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - ..##..
-    - ..##..
-    - '######'
-    - '######'
-    - ..##..
-    - ..##..
+    - ....####....
+    - ....####....
+    - ....####....
+    - ....####....
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - ....####....
+    - ....####....
+    - ....####....
+    - ....####....
     mission: 0
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 53
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 256
-    warningTime: 0.9446405
-    spawnInterval: 1.3996282
-    blocksPerWave: 3
+    warningTime: 1.0997521
+    spawnInterval: 1.5622212
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.42518592
+    rampUp: 0.35012397
     lineWaveChance: 0.17511156
     bombChance: 0.23012395
     breakTiles: 1
@@ -5534,20 +5842,20 @@ MonoBehaviour:
     - '##K#'
     - '##S#'
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 53
     keys: 1
     collapseBehind: 0
     chaseSpeed: 1.3530663
     lowWalls: 0
     levelEvent: 0
     rules: 256
-    warningTime: 0.9420359
-    spawnInterval: 1.3969337
-    blocksPerWave: 3
+    warningTime: 1.0979558
+    spawnInterval: 1.5602003
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.42653316
+    rampUp: 0.3510221
     lineWaveChance: 0.17591989
     bombChance: 0.2310221
     breakTiles: 1
@@ -5560,30 +5868,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '######'
-    - '####X#'
-    - '######'
-    - X#X###
-    - '######'
-    - '######'
+    - '############'
+    - '############'
+    - '########X###'
+    - '############'
+    - '##########X#'
+    - '############'
+    - X###X#######
+    - '############'
+    - '############'
+    - '###X########'
+    - '############'
+    - '############'
     mission: 1
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 53
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 256
-    warningTime: 0.939434
-    spawnInterval: 1.394242
-    blocksPerWave: 3
+    warningTime: 1.0961614
+    spawnInterval: 1.5581815
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.42787898
+    rampUp: 0.35191932
     lineWaveChance: 0.17672738
     bombChance: 0.23191932
     breakTiles: 1
@@ -5596,30 +5910,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '#X####'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '##X#X#'
+    - '############'
+    - '###X########'
+    - '############'
+    - '######X#####'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '########X###'
+    - '############'
+    - '####X###X###'
+    - '############'
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 53
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 256
-    warningTime: 0.93683475
-    spawnInterval: 1.3915532
-    blocksPerWave: 3
+    warningTime: 1.0943688
+    spawnInterval: 1.556165
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.42922342
+    rampUp: 0.3528156
     lineWaveChance: 0.17753404
     bombChance: 0.23281561
     breakTiles: 1
@@ -5632,30 +5952,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - X##...
-    - '###...'
-    - '###...'
-    - '######'
-    - X#####
-    - '####X#'
+    - '######......'
+    - '#X####......'
+    - '######......'
+    - '######......'
+    - '######......'
+    - '######......'
+    - '############'
+    - '############'
+    - '#X##########'
+    - '#####X######'
+    - '########X###'
+    - '#####X######'
     mission: 3
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 53
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 320
-    warningTime: 0.93423826
-    spawnInterval: 1.3888671
-    blocksPerWave: 3
+    warningTime: 1.092578
+    spawnInterval: 1.5541503
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.43056643
+    rampUp: 0.35371095
     lineWaveChance: 0.17833985
     bombChance: 0.23371094
     breakTiles: 1
@@ -5693,20 +6019,20 @@ MonoBehaviour:
     - '##K#'
     - '##S#'
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 53
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 256
-    warningTime: 0.9316444
-    spawnInterval: 1.3861839
-    blocksPerWave: 3
+    warningTime: 1.0907892
+    spawnInterval: 1.5521379
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.43190807
+    rampUp: 0.3546054
     lineWaveChance: 0.17914484
     bombChance: 0.23460539
     breakTiles: 1
@@ -5719,30 +6045,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '###...'
-    - '###...'
-    - '######'
-    - X#####
-    - ..###X
-    - ..X###
+    - '######......'
+    - '######......'
+    - '######......'
+    - '######......'
+    - '############'
+    - '############'
+    - '#######X####'
+    - X###########
+    - ....####X###
+    - ....######X#
+    - ....########
+    - ....#X######
     mission: 4
-    coinTarget: 16
-    surviveSeconds: 20
+    coinTarget: 22
+    surviveSeconds: 36
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 288
-    warningTime: 0.9290532
-    spawnInterval: 1.3835033
-    blocksPerWave: 3
+    warningTime: 1.0890023
+    spawnInterval: 1.5501275
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.43324834
+    rampUp: 0.3554989
     lineWaveChance: 0.179949
     bombChance: 0.2354989
     breakTiles: 1
@@ -5755,30 +6087,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '######'
-    - X#####
-    - '###X#X'
-    - '######'
-    - '######'
-    - '###S##'
+    - '###########'
+    - '###########'
+    - '#####X#####'
+    - '###########'
+    - '######X####'
+    - '###########'
+    - '##########X'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#####S#####'
     mission: 7
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 53
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 256
-    warningTime: 0.92646456
-    spawnInterval: 1.3808254
-    blocksPerWave: 4
+    warningTime: 1.087217
+    spawnInterval: 1.5481191
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4345873
+    rampUp: 0.35639152
     lineWaveChance: 0.41729364
     bombChance: 0.23639153
     breakTiles: 1
@@ -5817,20 +6154,20 @@ MonoBehaviour:
     - '####...'
     - '##S#...'
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 54
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 512
-    warningTime: 0.9238786
-    spawnInterval: 1.3781502
-    blocksPerWave: 3
+    warningTime: 1.0854335
+    spawnInterval: 1.5461128
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.43592486
+    rampUp: 0.35728326
     lineWaveChance: 0.18155491
     bombChance: 0.23728324
     breakTiles: 1
@@ -5843,30 +6180,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '##..##'
-    - '##..##'
-    - '#X..##'
-    - '####X#'
-    - X#####
-    - '######'
+    - '####....####'
+    - '####....####'
+    - '####....####'
+    - '####....####'
+    - '##X#....####'
+    - '####....###X'
+    - '####X#######'
+    - '#########X##'
+    - '#X##########'
+    - '############'
+    - '############'
+    - '############'
     mission: 0
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 54
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 512
-    warningTime: 0.9212952
-    spawnInterval: 1.3754778
-    blocksPerWave: 3
+    warningTime: 1.0836519
+    spawnInterval: 1.5441084
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4372611
+    rampUp: 0.35817406
     lineWaveChance: 0.18235666
     bombChance: 0.23817407
     breakTiles: 1
@@ -5905,20 +6248,20 @@ MonoBehaviour:
     - '####..'
     - ..SK..
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 54
     keys: 1
     collapseBehind: 1
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 512
-    warningTime: 0.9187144
-    spawnInterval: 1.372808
-    blocksPerWave: 3
+    warningTime: 1.081872
+    spawnInterval: 1.542106
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.438596
+    rampUp: 0.359064
     lineWaveChance: 0.18315761
     bombChance: 0.23906401
     breakTiles: 1
@@ -5931,30 +6274,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - ..##..
-    - ..##..
-    - '######'
-    - '######'
-    - ..##..
-    - ..##..
+    - ....####....
+    - ....####....
+    - ....####....
+    - ....####....
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - ....####....
+    - ....####....
+    - ....####....
+    - ....####....
     mission: 1
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 54
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 512
-    warningTime: 0.9161361
-    spawnInterval: 1.3701408
-    blocksPerWave: 3
+    warningTime: 1.0800939
+    spawnInterval: 1.5401056
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.43992963
+    rampUp: 0.35995308
     lineWaveChance: 0.18395777
     bombChance: 0.23995309
     breakTiles: 1
@@ -5984,20 +6333,20 @@ MonoBehaviour:
     - XXXXXXXX#
     - S########
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 54
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 0
     rules: 512
-    warningTime: 0.91356033
-    spawnInterval: 1.3674762
-    blocksPerWave: 3
+    warningTime: 1.0783175
+    spawnInterval: 1.5381072
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4412619
+    rampUp: 0.36084127
     lineWaveChance: 0.18475713
     bombChance: 0.24084127
     breakTiles: 1
@@ -6010,30 +6359,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '######'
-    - '######'
-    - '##..##'
-    - X#..##
-    - '###X##'
-    - '#X####'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '#####..#####'
+    - '#####..#####'
+    - X###########
+    - '############'
+    - '#####X#X####'
+    - '###X########'
+    - '#########X##'
     mission: 3
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 54
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 576
-    warningTime: 0.9109871
-    spawnInterval: 1.3648142
-    blocksPerWave: 3
+    warningTime: 1.0765429
+    spawnInterval: 1.5361106
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4425929
+    rampUp: 0.3617286
     lineWaveChance: 0.18555574
     bombChance: 0.2417286
     breakTiles: 1
@@ -6073,20 +6428,20 @@ MonoBehaviour:
     - '##K#'
     - '##S#'
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 54
     keys: 1
     collapseBehind: 0
     chaseSpeed: 1.3878452
     lowWalls: 0
     levelEvent: 3
     rules: 512
-    warningTime: 0.90841633
-    spawnInterval: 1.3621548
-    blocksPerWave: 3
+    warningTime: 1.0747699
+    spawnInterval: 1.5341161
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.44392258
+    rampUp: 0.36261508
     lineWaveChance: 0.18635355
     bombChance: 0.24261506
     breakTiles: 1
@@ -6099,30 +6454,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '######'
-    - '######'
-    - '#####X'
-    - '######'
-    - '####X#'
-    - X#####
+    - '##X#########'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '##########X#'
+    - '############'
+    - '##X#########'
+    - '#########X##'
+    - '############'
+    - X###########
+    - '############'
     mission: 0
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 17
+    surviveSeconds: 55
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 544
-    warningTime: 0.905848
-    spawnInterval: 1.3594979
-    blocksPerWave: 3
+    warningTime: 1.0729986
+    spawnInterval: 1.5321234
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.44525105
+    rampUp: 0.36350068
     lineWaveChance: 0.18715063
     bombChance: 0.2435007
     breakTiles: 1
@@ -6135,30 +6496,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '#####X'
-    - '######'
-    - '#X####'
-    - ...###
-    - ...#X#
-    - ...###
+    - '###########X'
+    - '############'
+    - '############'
+    - '#######X####'
+    - '############'
+    - '###X####X###'
+    - ......######
+    - ......######
+    - ......######
+    - ......###X##
+    - ......######
+    - ......######
     mission: 4
-    coinTarget: 17
-    surviveSeconds: 20
+    coinTarget: 23
+    surviveSeconds: 37
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 512
-    warningTime: 0.90328217
-    spawnInterval: 1.3568436
-    blocksPerWave: 3
+    warningTime: 1.0712291
+    spawnInterval: 1.5301328
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4465782
+    rampUp: 0.36438546
     lineWaveChance: 0.18794692
     bombChance: 0.24438547
     breakTiles: 1
@@ -6171,30 +6538,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '######'
-    - '######'
-    - '##X#X#'
-    - X#####
-    - '######'
-    - '###S##'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '##########X'
+    - '########X##'
+    - '###########'
+    - '#X#########'
+    - '###########'
+    - '###########'
+    - '#####S#####'
     mission: 7
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 18
+    surviveSeconds: 55
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 512
-    warningTime: 0.9007188
-    spawnInterval: 1.3541919
-    blocksPerWave: 4
+    warningTime: 1.0694612
+    spawnInterval: 1.5281439
+    blocksPerWave: 6
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.44790408
+    rampUp: 0.3652694
     lineWaveChance: 0.42395204
     bombChance: 0.24526939
     breakTiles: 1
@@ -6207,30 +6579,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '####..'
-    - '####..'
-    - '######'
-    - '##X#X#'
-    - ...###
-    - ...##X
+    - '########....'
+    - '########....'
+    - '########....'
+    - '########....'
+    - '####X####X##'
+    - '############'
+    - '########X###'
+    - '###########X'
+    - ......######
+    - ......######
+    - ......#####X
+    - ......######
     mission: 0
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 18
+    surviveSeconds: 55
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1024
-    warningTime: 0.8981578
-    spawnInterval: 1.3515426
-    blocksPerWave: 3
+    warningTime: 1.067695
+    spawnInterval: 1.5261569
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.44922873
+    rampUp: 0.3661525
     lineWaveChance: 0.18953724
     bombChance: 0.24615249
     breakTiles: 1
@@ -6243,30 +6621,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - ..#X..
-    - ..##..
-    - ..##..
-    - '######'
-    - X#####
-    - '####X#'
+    - ....#####....
+    - ....####X....
+    - ....#####....
+    - ....#####....
+    - ....#####....
+    - ....###X#....
+    - '#############'
+    - '#############'
+    - '##X##########'
+    - X############
+    - '#############'
+    - '#############'
+    - '###X######X##'
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 33
-    keys: 3
+    coinTarget: 18
+    surviveSeconds: 55
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 1024
-    warningTime: 0.8955992
-    spawnInterval: 1.3488957
-    blocksPerWave: 4
+    warningTime: 1.0659305
+    spawnInterval: 1.5241718
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.45055217
+    rampUp: 0.36703476
     lineWaveChance: 0.1903313
     bombChance: 0.24703477
     breakTiles: 1
@@ -6279,30 +6664,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - ..##..
-    - ..##..
-    - ..##..
-    - X#####
-    - '######'
-    - '##X#X#'
+    - ....#####....
+    - ....#####....
+    - ....#####....
+    - ....#####....
+    - ....#####....
+    - ....#####....
+    - '#X###########'
+    - '#############'
+    - '#X#####X#X###'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '####X####X###'
     mission: 1
-    coinTarget: 11
-    surviveSeconds: 33
-    keys: 3
+    coinTarget: 18
+    surviveSeconds: 55
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1280
-    warningTime: 0.893043
-    spawnInterval: 1.3462514
-    blocksPerWave: 4
+    warningTime: 1.0641676
+    spawnInterval: 1.5221885
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.45187432
+    rampUp: 0.36791623
     lineWaveChance: 0.19112459
     bombChance: 0.24791622
     breakTiles: 1
@@ -6341,20 +6733,20 @@ MonoBehaviour:
     - '##K#'
     - '##S#'
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 33
+    coinTarget: 18
+    surviveSeconds: 55
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 1024
-    warningTime: 0.89048916
-    spawnInterval: 1.3436095
-    blocksPerWave: 4
+    warningTime: 1.0624063
+    spawnInterval: 1.5202072
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.45319527
+    rampUp: 0.36879686
     lineWaveChance: 0.19191717
     bombChance: 0.24879685
     breakTiles: 1
@@ -6367,30 +6759,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - ..##..
-    - ..##..
-    - '######'
-    - '######'
-    - ..##..
-    - ..##..
+    - ....#####....
+    - ....#####....
+    - ....#X###....
+    - ....#####....
+    - '#############'
+    - '##########X##'
+    - '#############'
+    - '#X##########X'
+    - '#############'
+    - ....###X#....
+    - ....#####....
+    - ....####X....
+    - ....#####....
     mission: 3
-    coinTarget: 11
-    surviveSeconds: 33
-    keys: 3
+    coinTarget: 18
+    surviveSeconds: 55
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1088
-    warningTime: 0.88793766
-    spawnInterval: 1.34097
-    blocksPerWave: 4
+    warningTime: 1.0606467
+    spawnInterval: 1.5182276
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.454515
+    rampUp: 0.36967668
     lineWaveChance: 0.192709
     bombChance: 0.24967667
     breakTiles: 1
@@ -6429,20 +6828,20 @@ MonoBehaviour:
     - ...####
     - ...##S#
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 34
+    coinTarget: 18
+    surviveSeconds: 56
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1024
-    warningTime: 0.8853885
-    spawnInterval: 1.3383329
-    blocksPerWave: 4
+    warningTime: 1.0588886
+    spawnInterval: 1.5162497
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.45583355
+    rampUp: 0.3705557
     lineWaveChance: 0.19350013
     bombChance: 0.2505557
     breakTiles: 1
@@ -6455,30 +6854,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '######'
-    - X#####
-    - '##..##'
-    - '##..##'
-    - '###X##'
-    - '#####X'
+    - '#############'
+    - '#############'
+    - '######X######'
+    - X############
+    - '#############'
+    - '#############'
+    - '######.##X###'
+    - '#############'
+    - '#############'
+    - '########X####'
+    - '##########X##'
+    - '############X'
+    - '#############'
     mission: 0
-    coinTarget: 11
-    surviveSeconds: 34
-    keys: 3
+    coinTarget: 18
+    surviveSeconds: 56
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 1056
-    warningTime: 0.88284165
-    spawnInterval: 1.3356982
-    blocksPerWave: 4
+    warningTime: 1.0571321
+    spawnInterval: 1.5142738
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.45715088
+    rampUp: 0.37143394
     lineWaveChance: 0.19429053
     bombChance: 0.25143394
     breakTiles: 1
@@ -6518,20 +6924,20 @@ MonoBehaviour:
     - ..##..
     - ..SK..
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 34
+    coinTarget: 18
+    surviveSeconds: 56
     keys: 1
     collapseBehind: 1
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1024
-    warningTime: 0.8802971
-    spawnInterval: 1.333066
-    blocksPerWave: 4
+    warningTime: 1.0553774
+    spawnInterval: 1.5122995
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.458467
+    rampUp: 0.37231135
     lineWaveChance: 0.1950802
     bombChance: 0.25231135
     breakTiles: 1
@@ -6544,30 +6950,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '######'
-    - '####X#'
-    - '######'
-    - '######'
-    - X#####
-    - '##X###'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#########X###'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#X##X########'
+    - '########X####'
+    - '##X##X#######'
     mission: 4
-    coinTarget: 17
-    surviveSeconds: 20
-    keys: 3
+    coinTarget: 24
+    surviveSeconds: 38
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 1024
-    warningTime: 0.8777548
-    spawnInterval: 1.330436
-    blocksPerWave: 4
+    warningTime: 1.053624
+    spawnInterval: 1.5103271
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.459782
+    rampUp: 0.373188
     lineWaveChance: 0.19586919
     bombChance: 0.25318798
     breakTiles: 1
@@ -6580,30 +6993,35 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '######'
-    - '######'
-    - X####X
-    - '###X##'
-    - '######'
-    - '###S##'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#########X#'
+    - '###########'
+    - X##########
+    - '###########'
+    - '#####X#####'
+    - '###########'
+    - '###########'
+    - '#####S#####'
     mission: 7
-    coinTarget: 11
-    surviveSeconds: 34
+    coinTarget: 18
+    surviveSeconds: 56
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1024
-    warningTime: 0.8752149
-    spawnInterval: 1.3278085
-    blocksPerWave: 4
+    warningTime: 1.0518724
+    spawnInterval: 1.5083565
+    blocksPerWave: 6
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.46109575
+    rampUp: 0.37406385
     lineWaveChance: 0.43054786
     bombChance: 0.25406384
     breakTiles: 1
@@ -6633,20 +7051,20 @@ MonoBehaviour:
     - '#X#XXXXX#'
     - S########
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 34
+    coinTarget: 18
+    surviveSeconds: 56
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 0
     rules: 2048
-    warningTime: 0.8726771
-    spawnInterval: 1.3251833
-    blocksPerWave: 4
+    warningTime: 1.0501221
+    spawnInterval: 1.5063875
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4624084
+    rampUp: 0.37493894
     lineWaveChance: 0.19744503
     bombChance: 0.25493893
     breakTiles: 1
@@ -6659,30 +7077,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '###...'
-    - '###...'
-    - '#####X'
-    - X#####
-    - ..###X
-    - ..####
+    - '#######......'
+    - '#######......'
+    - '#######......'
+    - '#######......'
+    - '#####X#######'
+    - '#############'
+    - '############X'
+    - X#########X##
+    - '#############'
+    - ....X#######X
+    - ....#########
+    - ....#########
+    - ....#########
     mission: 1
-    coinTarget: 11
-    surviveSeconds: 34
-    keys: 3
+    coinTarget: 18
+    surviveSeconds: 56
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 2048
-    warningTime: 0.8701416
-    spawnInterval: 1.3225603
-    blocksPerWave: 4
+    warningTime: 1.0483735
+    spawnInterval: 1.5044203
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.46371987
+    rampUp: 0.37581325
     lineWaveChance: 0.19823192
     bombChance: 0.25581324
     breakTiles: 1
@@ -6722,20 +7147,20 @@ MonoBehaviour:
     - '##K#'
     - '##S#'
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 34
+    coinTarget: 18
+    surviveSeconds: 57
     keys: 1
     collapseBehind: 0
     chaseSpeed: 1.4300603
     lowWalls: 0
     levelEvent: 0
     rules: 2048
-    warningTime: 0.86760837
-    spawnInterval: 1.3199397
-    blocksPerWave: 4
+    warningTime: 1.0466264
+    spawnInterval: 1.5024548
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.46503016
+    rampUp: 0.37668678
     lineWaveChance: 0.19901809
     bombChance: 0.25668678
     breakTiles: 1
@@ -6748,30 +7173,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '######'
-    - X###X#
-    - '######'
-    - ..##..
-    - ..X#..
-    - ..##..
+    - '#############'
+    - '#############'
+    - '###X#########'
+    - X######X#####
+    - '#############'
+    - X############
+    - '#############'
+    - ....#####....
+    - ....##X##....
+    - ....#####....
+    - ....#####....
+    - ....##X##....
+    - ....#####....
     mission: 3
-    coinTarget: 11
-    surviveSeconds: 34
-    keys: 3
+    coinTarget: 18
+    surviveSeconds: 57
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 2112
-    warningTime: 0.86507726
-    spawnInterval: 1.3173213
-    blocksPerWave: 4
+    warningTime: 1.0448809
+    spawnInterval: 1.500491
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.46633935
+    rampUp: 0.37755957
     lineWaveChance: 0.1998036
     bombChance: 0.25755957
     breakTiles: 1
@@ -6784,30 +7216,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '######'
-    - '####X#'
-    - ...###
-    - ...##X
-    - '#X####'
-    - '######'
+    - '#############'
+    - '########X####'
+    - '############X'
+    - '#########X###'
+    - ......#######
+    - ......#######
+    - ......###X###
+    - ......#####X#
+    - ......#######
+    - '####X########'
+    - '#############'
+    - '#############'
+    - '#############'
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 34
-    keys: 3
+    coinTarget: 18
+    surviveSeconds: 57
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 2048
-    warningTime: 0.8625484
-    spawnInterval: 1.3147053
-    blocksPerWave: 4
+    warningTime: 1.0431368
+    spawnInterval: 1.498529
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4676474
+    rampUp: 0.3784316
     lineWaveChance: 0.20058843
     bombChance: 0.25843158
     breakTiles: 1
@@ -6820,30 +7259,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '######'
-    - '######'
-    - ...###
-    - ...###
-    - '##X##X'
-    - X#####
+    - '#X###########'
+    - '#############'
+    - '#############'
+    - '#############'
+    - ......#######
+    - ......####X##
+    - ......#######
+    - ......#######
+    - ......X######
+    - '#############'
+    - '###########X#'
+    - '##X##########'
+    - X############
     mission: 0
-    coinTarget: 11
-    surviveSeconds: 34
-    keys: 3
+    coinTarget: 19
+    surviveSeconds: 57
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 2048
-    warningTime: 0.8600217
-    spawnInterval: 1.3120915
-    blocksPerWave: 4
+    warningTime: 1.0413942
+    spawnInterval: 1.4965686
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4689543
+    rampUp: 0.37930286
     lineWaveChance: 0.20137258
     bombChance: 0.25930285
     breakTiles: 1
@@ -6883,20 +7329,20 @@ MonoBehaviour:
     - '##K#'
     - '##S#'
     mission: 2
-    coinTarget: 11
-    surviveSeconds: 34
+    coinTarget: 19
+    surviveSeconds: 57
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 2048
-    warningTime: 0.8574972
-    spawnInterval: 1.3094798
-    blocksPerWave: 4
+    warningTime: 1.0396532
+    spawnInterval: 1.49461
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.47026008
+    rampUp: 0.3801734
     lineWaveChance: 0.20215605
     bombChance: 0.26017338
     breakTiles: 1
@@ -6909,30 +7355,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - ..##..
-    - ..##..
-    - '######'
-    - '######'
-    - ..##..
-    - ..##..
+    - ....#####....
+    - ....###X#....
+    - ....#####....
+    - ....###X#....
+    - '#############'
+    - '#############'
+    - '#########X###'
+    - '#############'
+    - '########X##X#'
+    - ....#####....
+    - ....#####....
+    - ....X####....
+    - ....#####....
     mission: 0
-    coinTarget: 11
-    surviveSeconds: 34
-    keys: 3
+    coinTarget: 19
+    surviveSeconds: 57
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 2048
-    warningTime: 0.8549748
-    spawnInterval: 1.3068705
-    blocksPerWave: 4
+    warningTime: 1.0379137
+    spawnInterval: 1.4926529
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.47156477
+    rampUp: 0.38104317
     lineWaveChance: 0.20293885
     bombChance: 0.26104316
     breakTiles: 1
@@ -6945,30 +7398,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '####X#'
-    - '######'
-    - X#..##
-    - '##..##'
-    - X#####
-    - '######'
+    - '#####X###X###'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#X###########'
+    - '#######X#####'
+    - '######.######'
+    - '###########X#'
+    - '#############'
+    - '#############'
+    - X############
+    - '#############'
+    - '#############'
     mission: 4
-    coinTarget: 17
-    surviveSeconds: 20
-    keys: 3
+    coinTarget: 25
+    surviveSeconds: 38
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 2304
-    warningTime: 0.8524546
-    spawnInterval: 1.3042634
-    blocksPerWave: 4
+    warningTime: 1.0361756
+    spawnInterval: 1.4906975
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.47286832
+    rampUp: 0.38191223
     lineWaveChance: 0.203721
     bombChance: 0.26191223
     breakTiles: 1
@@ -6981,30 +7441,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '######'
-    - '#####X'
-    - '#X#X##'
-    - '######'
-    - '######'
-    - '###S##'
+    - '############'
+    - X###########
+    - '############'
+    - '##########X#'
+    - '############'
+    - '############'
+    - '##X#########'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '######S#####'
     mission: 7
-    coinTarget: 11
-    surviveSeconds: 34
+    coinTarget: 19
+    surviveSeconds: 57
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 2048
-    warningTime: 0.8499364
-    spawnInterval: 1.3016584
-    blocksPerWave: 4
+    warningTime: 1.034439
+    spawnInterval: 1.4887438
+    blocksPerWave: 6
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4741708
+    rampUp: 0.38278055
     lineWaveChance: 0.4370854
     bombChance: 0.26278055
     breakTiles: 1
@@ -7017,30 +7483,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - X##X##
-    - '######'
-    - '######'
-    - '#####X'
-    - '######'
-    - '######'
+    - '#X###########'
+    - '########X####'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '########X####'
+    - '############X'
+    - '#############'
+    - '############X'
+    - '#########X###'
+    - '#############'
+    - '#############'
+    - '#############'
     mission: 1
-    coinTarget: 12
-    surviveSeconds: 34
-    keys: 3
+    coinTarget: 19
+    surviveSeconds: 58
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 4096
-    warningTime: 0.84742045
-    spawnInterval: 1.2990557
-    blocksPerWave: 4
+    warningTime: 1.0327038
+    spawnInterval: 1.4867917
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.47547218
+    rampUp: 0.38364813
     lineWaveChance: 0.20528331
     bombChance: 0.26364812
     breakTiles: 1
@@ -7079,20 +7552,20 @@ MonoBehaviour:
     - '####...'
     - '##S#...'
     mission: 2
-    coinTarget: 12
-    surviveSeconds: 34
+    coinTarget: 19
+    surviveSeconds: 58
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 4096
-    warningTime: 0.8449065
-    spawnInterval: 1.296455
-    blocksPerWave: 4
+    warningTime: 1.03097
+    spawnInterval: 1.4848413
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4767725
+    rampUp: 0.38451502
     lineWaveChance: 0.2060635
     bombChance: 0.264515
     breakTiles: 1
@@ -7105,30 +7578,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '#X####'
-    - '######'
-    - '######'
-    - X#X...
-    - '###...'
-    - '###...'
+    - '##X#######X##'
+    - '#############'
+    - '#############'
+    - '#######X#####'
+    - '#############'
+    - '#############'
+    - '#########X###'
+    - '#######......'
+    - '##X##X#......'
+    - '#######......'
+    - '#######......'
+    - '#######......'
+    - '#######......'
     mission: 3
-    coinTarget: 12
-    surviveSeconds: 34
-    keys: 3
+    coinTarget: 19
+    surviveSeconds: 58
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 4160
-    warningTime: 0.8423947
-    spawnInterval: 1.2938566
-    blocksPerWave: 4
+    warningTime: 1.0292377
+    spawnInterval: 1.4828925
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.47807172
+    rampUp: 0.38538113
     lineWaveChance: 0.20684302
     bombChance: 0.26538113
     breakTiles: 1
@@ -7168,20 +7648,20 @@ MonoBehaviour:
     - ..####
     - ..SK..
     mission: 2
-    coinTarget: 12
-    surviveSeconds: 34
+    coinTarget: 19
+    surviveSeconds: 58
     keys: 1
     collapseBehind: 1
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 4096
-    warningTime: 0.83988494
-    spawnInterval: 1.2912602
-    blocksPerWave: 4
+    warningTime: 1.0275068
+    spawnInterval: 1.4809452
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.47936985
+    rampUp: 0.3862466
     lineWaveChance: 0.20762192
     bombChance: 0.2662466
     breakTiles: 1
@@ -7194,30 +7674,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - ..##..
-    - ..##..
-    - ..##..
-    - '##X#X#'
-    - '######'
-    - X#####
+    - ....#####....
+    - ....#####....
+    - ....#####....
+    - ....X####....
+    - ....#####....
+    - ....#####....
+    - '#############'
+    - '#############'
+    - '####X#####X##'
+    - '#######X#####'
+    - '############X'
+    - '#X###########'
+    - '#############'
     mission: 0
-    coinTarget: 12
-    surviveSeconds: 34
-    keys: 3
+    coinTarget: 19
+    surviveSeconds: 58
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 4096
-    warningTime: 0.83737725
-    spawnInterval: 1.2886661
-    blocksPerWave: 4
+    warningTime: 1.0257773
+    spawnInterval: 1.4789996
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.48066697
+    rampUp: 0.3871113
     lineWaveChance: 0.20840017
     bombChance: 0.2671113
     breakTiles: 1
@@ -7247,20 +7734,20 @@ MonoBehaviour:
     - '#X#XXX#X#'
     - S########
     mission: 2
-    coinTarget: 12
-    surviveSeconds: 34
+    coinTarget: 19
+    surviveSeconds: 58
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 1
     rules: 4096
-    warningTime: 0.8348716
-    spawnInterval: 1.286074
-    blocksPerWave: 4
+    warningTime: 1.0240494
+    spawnInterval: 1.4770555
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.48196298
+    rampUp: 0.38797534
     lineWaveChance: 0.20917779
     bombChance: 0.26797533
     breakTiles: 1
@@ -7273,30 +7760,37 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '####X#'
-    - '##X###'
-    - '###...'
-    - '###...'
-    - '#X####'
-    - '######'
+    - '#########X###'
+    - '#############'
+    - '#####X#######'
+    - '#############'
+    - '#######......'
+    - '#######......'
+    - '####X##......'
+    - '#######......'
+    - '#######......'
+    - '#X###########'
+    - '###X#########'
+    - '#############'
+    - '##X##########'
     mission: 0
-    coinTarget: 12
-    surviveSeconds: 34
-    keys: 3
+    coinTarget: 19
+    surviveSeconds: 58
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 4096
-    warningTime: 0.83236796
-    spawnInterval: 1.2834841
-    blocksPerWave: 4
+    warningTime: 1.0223227
+    spawnInterval: 1.475113
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.48325798
+    rampUp: 0.38883865
     lineWaveChance: 0.20995478
     bombChance: 0.26883864
     breakTiles: 1
@@ -7337,20 +7831,20 @@ MonoBehaviour:
     - '##K#'
     - '##S#'
     mission: 2
-    coinTarget: 12
-    surviveSeconds: 34
+    coinTarget: 19
+    surviveSeconds: 58
     keys: 1
     collapseBehind: 0
     chaseSpeed: 1.4691038
     lowWalls: 0
     levelEvent: 0
     rules: 4352
-    warningTime: 0.8298663
-    spawnInterval: 1.2808962
-    blocksPerWave: 4
+    warningTime: 1.0205975
+    spawnInterval: 1.4731722
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.48455194
+    rampUp: 0.38970128
     lineWaveChance: 0.21073115
     bombChance: 0.26970127
     breakTiles: 1
@@ -7363,30 +7857,38 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - ..##..
-    - ..##..
-    - '######'
-    - '######'
-    - ..##..
-    - ..##..
+    - ....######....
+    - ....##X###....
+    - ....####X#....
+    - ....######....
+    - '##############'
+    - '###X##X#######'
+    - '##############'
+    - '##X###########'
+    - '##############'
+    - '#########X####'
+    - ....######....
+    - ....######....
+    - ....#####X....
+    - ....######....
     mission: 4
-    coinTarget: 18
-    surviveSeconds: 20
-    keys: 3
+    coinTarget: 25
+    surviveSeconds: 39
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 4096
-    warningTime: 0.8273667
-    spawnInterval: 1.2783104
-    blocksPerWave: 4
+    warningTime: 1.0188736
+    spawnInterval: 1.4712329
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4858448
+    rampUp: 0.39056322
     lineWaveChance: 0.21150687
     bombChance: 0.27056322
     breakTiles: 1
@@ -7399,30 +7901,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - '######'
-    - '###X#X'
-    - '######'
-    - '##X###'
-    - '######'
-    - '###S##'
+    - '############'
+    - '##########X#'
+    - '############'
+    - '######X#####'
+    - '############'
+    - '############'
+    - '############'
+    - '#####X######'
+    - '############'
+    - '############'
+    - '############'
+    - '######S#####'
     mission: 7
-    coinTarget: 12
-    surviveSeconds: 35
+    coinTarget: 19
+    surviveSeconds: 59
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 4224
-    warningTime: 0.8248691
-    spawnInterval: 1.2757267
-    blocksPerWave: 4
+    warningTime: 1.0171511
+    spawnInterval: 1.469295
+    blocksPerWave: 6
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4871367
+    rampUp: 0.39142445
     lineWaveChance: 0.44356832
     bombChance: 0.27142444
     breakTiles: 1
@@ -7435,30 +7943,38 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - X#####
-    - '######'
-    - '##..##'
-    - '##..X#'
-    - '######'
-    - '###X##'
+    - '#X##X#########'
+    - '##############'
+    - '##############'
+    - '#########X####'
+    - '##############'
+    - '##############'
+    - '######..######'
+    - '######..##X###'
+    - '##############'
+    - '##############'
+    - '####X######X##'
+    - '##############'
+    - '##############'
+    - '########X#####'
     mission: 2
-    coinTarget: 12
-    surviveSeconds: 35
-    keys: 3
+    coinTarget: 19
+    surviveSeconds: 59
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 129
-    warningTime: 0.82237345
-    spawnInterval: 1.273145
-    blocksPerWave: 4
+    warningTime: 1.01543
+    spawnInterval: 1.4673587
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.48842752
+    rampUp: 0.39228502
     lineWaveChance: 0.2130565
     bombChance: 0.272285
     breakTiles: 1
@@ -7471,30 +7987,38 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - '###X##'
-    - '######'
-    - '######'
-    - '#X####'
-    - '#####X'
-    - '######'
+    - '########X#####'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '###########X##'
+    - '###X##########'
+    - '##############'
+    - '####X#X#######'
+    - '##############'
+    - '##############'
+    - '############X#'
+    - '##############'
+    - '##############'
+    - '#########X####'
     mission: 3
-    coinTarget: 12
-    surviveSeconds: 35
-    keys: 3
+    coinTarget: 20
+    surviveSeconds: 59
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 4160
-    warningTime: 0.81987983
-    spawnInterval: 1.2705653
-    blocksPerWave: 4
+    warningTime: 1.0137103
+    spawnInterval: 1.4654241
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.48971733
+    rampUp: 0.3931449
     lineWaveChance: 0.2138304
     bombChance: 0.2731449
     breakTiles: 1
@@ -7535,20 +8059,20 @@ MonoBehaviour:
     - '##K#'
     - '##S#'
     mission: 2
-    coinTarget: 12
-    surviveSeconds: 35
+    coinTarget: 20
+    surviveSeconds: 59
     keys: 1
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 4128
-    warningTime: 0.8173881
-    spawnInterval: 1.2679877
-    blocksPerWave: 4
+    warningTime: 1.0119917
+    spawnInterval: 1.4634908
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.49100617
+    rampUp: 0.3940041
     lineWaveChance: 0.21460369
     bombChance: 0.2740041
     breakTiles: 1
@@ -7561,30 +8085,38 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - ...###
-    - ...###
-    - ...###
-    - '#X##X#'
-    - '######'
-    - '#####X'
+    - .......X######
+    - .......##X####
+    - .......#######
+    - .......#######
+    - .......#######
+    - .......#######
+    - .......#######
+    - X#####X#######
+    - '###X##########'
+    - '##########X###'
+    - '##############'
+    - '##############'
+    - '############X#'
+    - '##############'
     mission: 0
-    coinTarget: 12
-    surviveSeconds: 35
-    keys: 3
+    coinTarget: 20
+    surviveSeconds: 59
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 2064
-    warningTime: 0.8148984
-    spawnInterval: 1.2654121
-    blocksPerWave: 4
+    warningTime: 1.0102748
+    spawnInterval: 1.461559
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.49229395
+    rampUp: 0.39486265
     lineWaveChance: 0.21537638
     bombChance: 0.27486265
     breakTiles: 1
@@ -7623,20 +8155,20 @@ MonoBehaviour:
     - '####...'
     - '##S#...'
     mission: 2
-    coinTarget: 12
-    surviveSeconds: 35
+    coinTarget: 20
+    surviveSeconds: 59
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1032
-    warningTime: 0.81241053
-    spawnInterval: 1.2628385
-    blocksPerWave: 4
+    warningTime: 1.008559
+    spawnInterval: 1.4596289
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4935808
+    rampUp: 0.3957205
     lineWaveChance: 0.21614847
     bombChance: 0.2757205
     breakTiles: 1
@@ -7649,30 +8181,38 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - ...###
-    - ...#X#
-    - '######'
-    - '#####X'
-    - '####..'
-    - X###..
+    - .......#####X#
+    - .......#######
+    - .......####X##
+    - .......#######
+    - '#########X####'
+    - '##############'
+    - '##############'
+    - '############X#'
+    - '##############'
+    - '##############'
+    - '##X#######....'
+    - '##########....'
+    - '###X######....'
+    - X#########....
     mission: 0
-    coinTarget: 12
-    surviveSeconds: 35
-    keys: 3
+    coinTarget: 20
+    surviveSeconds: 59
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 520
-    warningTime: 0.8099246
-    spawnInterval: 1.2602668
-    blocksPerWave: 4
+    warningTime: 1.0068445
+    spawnInterval: 1.4577001
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.49486658
+    rampUp: 0.39657775
     lineWaveChance: 0.21691996
     bombChance: 0.27657774
     breakTiles: 1
@@ -7713,20 +8253,20 @@ MonoBehaviour:
     - '####..'
     - ..SK..
     mission: 2
-    coinTarget: 12
-    surviveSeconds: 35
+    coinTarget: 20
+    surviveSeconds: 60
     keys: 1
     collapseBehind: 1
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 260
-    warningTime: 0.80744064
-    spawnInterval: 1.2576972
-    blocksPerWave: 4
+    warningTime: 1.0051315
+    spawnInterval: 1.455773
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.49615142
+    rampUp: 0.39743426
     lineWaveChance: 0.21769084
     bombChance: 0.27743426
     breakTiles: 1
@@ -7739,30 +8279,38 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - '###...'
-    - '###...'
-    - '######'
-    - '#X###X'
-    - '###...'
-    - '#X#...'
+    - '#######.......'
+    - '#######.......'
+    - '#######.......'
+    - '#######.......'
+    - X#############
+    - '##############'
+    - '####X#########'
+    - '########X#####'
+    - '############X#'
+    - '###X##########'
+    - '#######.......'
+    - '#######.......'
+    - '#######.......'
+    - '#X#X###.......'
     mission: 1
-    coinTarget: 12
-    surviveSeconds: 35
-    keys: 3
+    coinTarget: 20
+    surviveSeconds: 60
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 130
-    warningTime: 0.8049585
-    spawnInterval: 1.2551295
-    blocksPerWave: 4
+    warningTime: 1.0034196
+    spawnInterval: 1.4538472
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.49743524
+    rampUp: 0.3982902
     lineWaveChance: 0.21846116
     bombChance: 0.27829018
     breakTiles: 1
@@ -7775,30 +8323,38 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - '######'
-    - X#####
-    - ...###
-    - ...###
-    - '#####X'
-    - '#X####'
+    - '##############'
+    - '##############'
+    - '##############'
+    - X#############
+    - .......#######
+    - .......#X##X##
+    - .......#######
+    - .......###X###
+    - .......#######
+    - .......#######
+    - '##############'
+    - '####X#######X#'
+    - '#########X####'
+    - '##############'
     mission: 4
-    coinTarget: 18
-    surviveSeconds: 20
-    keys: 3
+    coinTarget: 26
+    surviveSeconds: 40
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 129
-    warningTime: 0.8024784
-    spawnInterval: 1.2525638
-    blocksPerWave: 4
+    warningTime: 1.0017092
+    spawnInterval: 1.4519229
+    blocksPerWave: 5
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.4987181
+    rampUp: 0.3991454
     lineWaveChance: 0.21923086
     bombChance: 0.2791454
     breakTiles: 1
@@ -7811,30 +8367,36 @@ MonoBehaviour:
     powerUpInterval: 11
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - '######'
-    - '#####X'
-    - X#####
-    - '####X#'
-    - '######'
-    - '###S##'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - X###########
+    - '############'
+    - '############'
+    - '########X###'
+    - '##########X#'
+    - '############'
+    - '######S#####'
     mission: 7
-    coinTarget: 12
-    surviveSeconds: 35
+    coinTarget: 20
+    surviveSeconds: 60
     keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 65
-    warningTime: 0.8
-    spawnInterval: 1.25
-    blocksPerWave: 4
+    warningTime: 1
+    spawnInterval: 1.45
+    blocksPerWave: 6
     blockLinger: 1.5
     aimAtPlayerChance: 0.5
-    rampUp: 0.5
+    rampUp: 0.4
     lineWaveChance: 0.45
     bombChance: 0.28
     breakTiles: 1
