@@ -47,11 +47,11 @@ jobs:
         with:
           targetPlatform: iOS
           unityVersion: 6000.6.4f1
-          buildName: SquashBot
+          buildName: EscapeCell
 
       # Tar keeps the execute bits on Unity's build scripts, which a plain artifact upload would drop.
       - name: Pack Xcode project
-        run: sudo tar -czf xcode-project.tgz -C build/iOS/SquashBot .
+        run: sudo tar -czf xcode-project.tgz -C build/iOS/EscapeCell .
 
       - uses: actions/upload-artifact@v4
         with:
@@ -85,10 +85,10 @@ jobs:
         run: |
           mkdir Payload
           cp -R out/Release-iphoneos/*.app Payload/
-          zip -qry ../SquashBot-unsigned.ipa Payload
+          zip -qry ../EscapeCell-unsigned.ipa Payload
 
       - uses: actions/upload-artifact@v4
         with:
-          name: SquashBot-unsigned-ipa
-          path: SquashBot-unsigned.ipa
+          name: EscapeCell-unsigned-ipa
+          path: EscapeCell-unsigned.ipa
           retention-days: 14

@@ -173,7 +173,7 @@ namespace SquashBot.Visual
                     break;
                 case 14: // Galaxy: star crown and a tiny orbiting planet
                 {
-                    var gold = M("gold", Hex("#FFD27A"), new Color(1.6f, 1.1f, 0.3f));
+                    var gold = M("gold", Hex("#FFC94A"), new Color(2.4f, 1.6f, 0.35f));
                     for (int i = 0; i < 5; i++)
                     {
                         float a = i * Mathf.PI * 2f / 5f;

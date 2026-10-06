@@ -140,7 +140,7 @@ namespace SquashBot.UI
             SettingsIcon(gear.transform);
 
             // Logo
-            var logo = UiFactory.TextBox("Logo", t, Top, new Vector2(0f, -190f), new Vector2(1000f, 420f), "SQUASH\nBOT", 200f, Color.white, title: true);
+            var logo = UiFactory.TextBox("Logo", t, Top, new Vector2(0f, -190f), new Vector2(1000f, 420f), "ESCAPE\nCELL", 200f, Color.white, title: true);
             logo.lineSpacing = -22f;
             logo.enableVertexGradient = true;
             logo.colorGradient = new VertexGradient(Color.white, Color.white, Palette.UiCyan, Palette.UiCyan);

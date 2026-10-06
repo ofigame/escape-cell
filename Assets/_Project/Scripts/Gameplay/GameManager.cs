@@ -67,6 +67,12 @@ namespace SquashBot.Gameplay
 
         private void Awake()
         {
+            if (IconRenderer.TryRun())
+            {
+                enabled = false; // icon rendering mode: no game, just the icon scene
+                return;
+            }
+
             Application.targetFrameRate = 60;
             QualitySettings.vSyncCount = 0;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;

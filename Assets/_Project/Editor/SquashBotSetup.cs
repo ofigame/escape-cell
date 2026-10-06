@@ -58,7 +58,7 @@ namespace SquashBot.EditorTools
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
                 scenes = new[] { ScenePath },
-                locationPathName = "Builds/Windows/SquashBot.exe",
+                locationPathName = "Builds/Windows/EscapeCell.exe",
                 target = BuildTarget.StandaloneWindows64,
                 options = BuildOptions.Development,
             });
@@ -94,7 +94,7 @@ namespace SquashBot.EditorTools
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
                 scenes = new[] { ScenePath },
-                locationPathName = "Builds/Android/SquashBot.apk",
+                locationPathName = "Builds/Android/EscapeCell.apk",
                 target = BuildTarget.Android,
                 options = BuildOptions.None,
             });
@@ -150,6 +150,77 @@ namespace SquashBot.EditorTools
             Set("jdkRootPath", jdk);
             // Unity requires exactly NDK r27c; it is kept next to the project as well.
             Set("ndkRootPath", Path.GetFullPath(Path.Combine("..", "Tools", "android-ndk-r27c")));
+        }
+
+        private const string IconDir = Root + "/Icon";
+
+        /// <summary>
+        /// Imports the icons rendered by the player ("-renderIcon Builds/Icon") and assigns them:
+        /// a default icon for every platform (iOS scales it) and Android legacy, round and adaptive icons.
+        /// </summary>
+        [MenuItem("Squash Bot/Apply App Icon")]
+        public static void ApplyIcons()
+        {
+            Directory.CreateDirectory(IconDir);
+            File.Copy("Builds/Icon/icon.png", IconDir + "/AppIcon.png", true);
+            File.Copy("Builds/Icon/icon_adaptive.png", IconDir + "/AppIconAdaptiveBackground.png", true);
+
+            // Adaptive icons need a foreground layer; ours is baked into the background, so it stays empty.
+            var clear = new Texture2D(432, 432, TextureFormat.RGBA32, false);
+            clear.SetPixels32(new Color32[432 * 432]);
+            File.WriteAllBytes(IconDir + "/AppIconAdaptiveForeground.png", clear.EncodeToPNG());
+            UnityEngine.Object.DestroyImmediate(clear);
+            AssetDatabase.Refresh();
+
+            Texture2D Import(string name)
+            {
+                string path = IconDir + "/" + name;
+                var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+                importer.textureType = TextureImporterType.Default;
+                importer.mipmapEnabled = false;
+                importer.npotScale = TextureImporterNPOTScale.None;
+                importer.textureCompression = TextureImporterCompression.Uncompressed;
+                importer.alphaIsTransparency = name.Contains("Foreground");
+                importer.maxTextureSize = 1024;
+                importer.SaveAndReimport();
+                return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            }
+
+            var icon = Import("AppIcon.png");
+            var background = Import("AppIconAdaptiveBackground.png");
+            var foreground = Import("AppIconAdaptiveForeground.png");
+
+            PlayerSettings.SetIcons(NamedBuildTarget.Unknown, new[] { icon }, IconKind.Any);
+
+            // Android icon kinds live in the Android module; look them up by name so this compiles without it.
+            foreach (var kind in PlayerSettings.GetSupportedIconKinds(NamedBuildTarget.Android))
+            {
+                var icons = PlayerSettings.GetPlatformIcons(NamedBuildTarget.Android, kind);
+                bool adaptive = kind.ToString().Contains("Adaptive");
+                foreach (var platformIcon in icons)
+                {
+                    if (adaptive) platformIcon.SetTextures(background, foreground);
+                    else platformIcon.SetTexture(icon);
+                }
+                PlayerSettings.SetPlatformIcons(NamedBuildTarget.Android, kind, icons);
+            }
+
+            AssetDatabase.SaveAssets();
+            Debug.Log("[EscapeCell] App icon applied.");
+        }
+
+        public static void ApplyIconsBatch()
+        {
+            try
+            {
+                ApplyIcons();
+                EditorApplication.Exit(0);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                EditorApplication.Exit(1);
+            }
         }
 
         [MenuItem("Squash Bot/Reset Levels To Default")]
@@ -297,9 +368,9 @@ namespace SquashBot.EditorTools
         private static void ConfigurePlayer()
         {
             PlayerSettings.companyName = "OFIGAME";
-            PlayerSettings.productName = "Squash Bot";
-            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.ofigame.squashbot");
-            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.iOS, "com.ofigame.squashbot");
+            PlayerSettings.productName = "Escape Cell";
+            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.ofigame.escapecell");
+            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.iOS, "com.ofigame.escapecell");
             PlayerSettings.iOS.targetOSVersionString = "15.0";
             PlayerSettings.iOS.buildNumber = "1";
             PlayerSettings.iOS.appleEnableAutomaticSigning = false; // the cloud build compiles unsigned; signing happens at install time
