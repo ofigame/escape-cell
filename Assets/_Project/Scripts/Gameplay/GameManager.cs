@@ -217,6 +217,8 @@ namespace SquashBot.Gameplay
             ui.ResumePressed += Resume;
             ui.SettingToggled += OnSettingToggled;
             ui.WatchAdPressed += WatchAdForLife;
+            ui.ToolPressed += OnToolPressed;
+            input.Ignore = p => ui != null && ui.IsOverTool(p);
         }
 
         private static void EnsureLight()
@@ -271,6 +273,7 @@ namespace SquashBot.Gameplay
             gridView.gameObject.SetActive(true);
             floorRules.Stop();
             hazards.Hunting = false;
+            HideTools();
         }
 
         /// <summary>The next level's platform idles behind the menu while the camera slowly orbits it.</summary>
@@ -499,6 +502,7 @@ namespace SquashBot.Gameplay
             powerUps.Begin(grid, level);
 
             starGoals = StarRules.For(level, grid.FloorCount);
+            SetupTools();
             State = GameState.Playing;
             ui.ShowHud(bonusRun ? -1 : levelIndex);
         }
@@ -810,7 +814,8 @@ namespace SquashBot.Gameplay
                 if (r != FloorRule.None && (level.rules & r) != 0 && !Seen("rule." + r)) { ruleFeature = "feature.rule." + r; break; }
             string journey = level.chaseSpeed > 0f ? "chase" : level.collapseBehind ? "collapse" : level.lowWalls ? "maze"
                 : level.mission == MissionType.Exit && grid.KeySpots.Count > 0 ? "journey" : null;
-            if (ruleFeature != null) feature = ruleFeature;
+            if (trialSlot && !Seen("tools")) feature = "feature.tools";
+            else if (ruleFeature != null) feature = ruleFeature;
             else if (journey != null && !Seen(journey)) feature = "feature." + journey;
             else if (World >= HoverFromWorld && !Seen("hover")) feature = "feature.hover";
             else if (World >= FireFromWorld && !Seen("fire")) feature = "feature.fire";
@@ -845,11 +850,9 @@ namespace SquashBot.Gameplay
         {
             if (State == GameState.Paused) return;
 
-            if (slowMoLeft > 0f)
-            {
-                slowMoLeft -= Time.unscaledDeltaTime;
-                Time.timeScale = slowMoLeft > 0f ? SlowMoScale : 1f;
-            }
+            // Close-call slow motion and the slow-motion tool both bend time; the slower one wins.
+            if (slowMoLeft > 0f) slowMoLeft -= Time.unscaledDeltaTime;
+            Time.timeScale = Mathf.Min(slowMoLeft > 0f ? SlowMoScale : 1f, toolSlowLeft > 0f && State == GameState.Playing ? Tools.SlowScale : 1f);
 
             if (State != GameState.Playing) return;
 
@@ -879,6 +882,7 @@ namespace SquashBot.Gameplay
             UpdateJourney(Time.deltaTime);
             comboTimer -= Time.deltaTime;
             ui.SetCombo(comboTimer > 0f ? ComboMultiplier : 1, comboTimer / ComboWindow);
+            UpdateTools();
 
             // Armor lets the robot stand over a hole or fire; once it wears off, gravity (or heat) wins.
             if (robot.IsAlive && !robot.IsHopping && !robot.IsHovering && !robot.IsShielded && grid.IsGap(robot.Position))
@@ -1050,6 +1054,7 @@ namespace SquashBot.Gameplay
                     FloatAt(GridView.ToWorld(p), Loc.F("float.closeCount", Mathf.Min(closeCalls, CloseCallsForArmor), CloseCallsForArmor), Palette.UiCyan);
                 }
                 slowMoLeft = SlowMoDuration;
+                RechargeTool();
                 cameraRig.Focus(GridView.ToWorld(p), SlowMoDuration + 0.2f);
             }
         }
@@ -1077,6 +1082,7 @@ namespace SquashBot.Gameplay
             FloatAt(GridView.ToWorld(p), "+" + multiplier, multiplier > 1 ? Palette.UiGold : Palette.UiGold);
             if (comboStreak == ComboStep || comboStreak == ComboStep * 2)
             {
+                RechargeTool();
                 FloatAt(GridView.ToWorld(p) + Vector3.up * 0.5f, Loc.F("float.combo", multiplier), Palette.UiGold);
                 AudioManager.PlaySfx(Sfx.Coin, 1f, 1.5f);
                 cameraRig.Punch(0.4f);
@@ -1121,6 +1127,153 @@ namespace SquashBot.Gameplay
             ui.Float(cameraRig.Cam.WorldToScreenPoint(world + Vector3.up * 0.9f), text, color);
         }
 
+        // ---------- Tools ----------
+
+        private readonly Tool?[] toolSlot = new Tool?[2];
+        private readonly int[] toolCharges = new int[2];
+        private readonly int[] toolLevel = new int[2];
+        private bool trialSlot;           // slot 0 holds a free trial of a tool not bought yet
+        private float toolSlowLeft, toolSlowTotal;
+        private float bridgeLeft, bridgeTotal;
+
+        /// <summary>Fills the bag for a new run: the equipped tools, or a one-off free trial in an empty bag.</summary>
+        private void SetupTools()
+        {
+            trialSlot = false;
+            toolSlowLeft = bridgeLeft = 0f;
+            for (int s = 0; s < 2; s++)
+            {
+                toolSlot[s] = null;
+                toolCharges[s] = 0;
+            }
+            if (bonusRun || levelIndex < Tools.FromLevel) return;
+
+            for (int s = 0; s < 2; s++)
+            {
+                var t = Tools.Equipped(s);
+                if (!t.HasValue) continue;
+                toolSlot[s] = t;
+                toolLevel[s] = Tools.Level(t.Value);
+                toolCharges[s] = Tools.Charges(toolLevel[s]);
+            }
+
+            if (!toolSlot[0].HasValue && !toolSlot[1].HasValue)
+            {
+                var trial = Tools.NextTrial();
+                if (trial.HasValue)
+                {
+                    toolSlot[0] = trial;
+                    toolLevel[0] = 1;
+                    toolCharges[0] = 1;
+                    trialSlot = true;
+                }
+            }
+        }
+
+        /// <summary>A close call or a combo tops up an empty tool (not trials).</summary>
+        private void RechargeTool()
+        {
+            for (int s = 0; s < 2; s++)
+            {
+                if (!toolSlot[s].HasValue || (trialSlot && s == 0)) continue;
+                if (toolCharges[s] >= Tools.Charges(toolLevel[s])) continue;
+                toolCharges[s]++;
+                ui.PunchTool(s);
+                FloatAt(robot.transform.position + Vector3.up * 0.4f, Loc.T("float.toolCharge"), Palette.UiGold);
+                return;
+            }
+        }
+
+        private void OnToolPressed(int slot)
+        {
+            if (State != GameState.Playing || runner.Active || !toolSlot[slot].HasValue) return;
+            if (toolCharges[slot] <= 0)
+            {
+                AudioManager.PlaySfx(Sfx.Bump, 0.5f);
+                return;
+            }
+            var tool = toolSlot[slot].Value;
+            int lvl = toolLevel[slot];
+            toolCharges[slot]--;
+            ui.PunchTool(slot);
+            Haptics.Medium();
+
+            switch (tool)
+            {
+                case Tool.SlowMo:
+                    toolSlowLeft = toolSlowTotal = Tools.SlowSeconds(lvl);
+                    robot.TimeBoost = 1f / Tools.SlowScale;
+                    AudioManager.PlaySfx(Sfx.Shield, 0.9f, 0.6f);
+                    FloatAt(robot.transform.position, Loc.T("float.slow"), Palette.UiCyan);
+                    break;
+
+                case Tool.Bridge:
+                {
+                    // Mend every hole and fire nearby and keep those tiles whole for a while; poison is covered too.
+                    float seconds = Tools.BridgeSeconds(lvl);
+                    int radius = Tools.BridgeRadius(lvl);
+                    foreach (var p in grid.AllPositions())
+                    {
+                        if (!grid.IsFloor(p) || p.Manhattan(robot.Position) > radius) continue;
+                        if (grid.GetTile(p) == TileState.Poison) floorRules.Cover(p, seconds);
+                        hazards.Shelter(p, seconds);
+                        gridView.Bounce(p, 0.8f);
+                    }
+                    bridgeLeft = bridgeTotal = seconds;
+                    fx.Burst(robot.transform.position + Vector3.up * 0.2f, Palette.UiCyan, Palette.ShieldPickupGlow, 30, 4f);
+                    AudioManager.PlaySfx(Sfx.Shield, 1f, 1.3f);
+                    FloatAt(robot.transform.position, Loc.T("float.bridge"), Palette.UiCyan);
+                    break;
+                }
+
+                default:
+                {
+                    int hit = hazards.Emp();
+                    if (Tools.EmpClearsRules(lvl)) floorRules.ClearActive();
+                    cameraRig.Shake(1f);
+                    cameraRig.Punch(1f);
+                    fx.Burst(robot.transform.position + Vector3.up * 0.5f, Palette.ShieldPickup, Palette.ShieldPickupGlow, 50, 8f);
+                    AudioManager.PlaySfx(Sfx.Impact, 1f, 0.6f);
+                    AudioManager.PlaySfx(Sfx.Blocked, 0.8f, 1.4f);
+                    FloatAt(robot.transform.position, Loc.F("float.emp", hit), Palette.UiCyan);
+                    break;
+                }
+            }
+
+            if (trialSlot && slot == 0)
+            {
+                // The free trial is spent: from now on the tool is bought in the shop.
+                Tools.MarkTrial(tool);
+                FloatAt(robot.transform.position + Vector3.up * 0.6f, Loc.T("float.trialDone"), Palette.UiGold);
+            }
+        }
+
+        /// <summary>Keeps the slow-motion tool and the HUD buttons up to date (real time, so slow motion can end).</summary>
+        private void UpdateTools()
+        {
+            float dt = Time.unscaledDeltaTime;
+            if (toolSlowLeft > 0f)
+            {
+                toolSlowLeft -= dt;
+                if (toolSlowLeft <= 0f) robot.TimeBoost = 1f;
+            }
+            if (bridgeLeft > 0f) bridgeLeft -= Time.deltaTime;
+            for (int s = 0; s < 2; s++)
+            {
+                float active = 0f;
+                if (toolSlot[s] == Tool.SlowMo && toolSlowLeft > 0f) active = toolSlowLeft / toolSlowTotal;
+                else if (toolSlot[s] == Tool.Bridge && bridgeLeft > 0f) active = bridgeLeft / bridgeTotal;
+                ui.SetTool(s, toolSlot[s], toolCharges[s], trialSlot && s == 0, active);
+            }
+        }
+
+        private void HideTools()
+        {
+            toolSlowLeft = 0f;
+            robot.TimeBoost = 1f;
+            for (int s = 0; s < 2; s++) ui.SetTool(s, null, 0, false, 0f);
+        }
+
         // ---------- Win / lose ----------
 
         private void Win() => Win(escaped: false);
@@ -1134,6 +1287,7 @@ namespace SquashBot.Gameplay
             coins.Freeze();
             powerUps.Freeze();
             floorRules.Freeze();
+            HideTools();
             if (hovering) { hovering = false; ShowHoverMarker(false); }
             if (!escaped) robot.Cheer();
             cameraRig.SetStyle(CameraStyle.Victory);
@@ -1222,6 +1376,7 @@ namespace SquashBot.Gameplay
             coins.Freeze();
             powerUps.Freeze();
             floorRules.Freeze();
+            HideTools();
             if (hovering) { hovering = false; ShowHoverMarker(false); }
 
             // Coins picked up are kept even on a loss, so every run feels worth it.

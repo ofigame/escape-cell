@@ -48,6 +48,11 @@ namespace SquashBot.Data
                     name = Loc.T("shop." + b);
                     price = Shop.Price(b);
                     return true;
+                case "tool":
+                    if (!System.Enum.TryParse(value, out Tool t) || Tools.Owned(t)) return false;
+                    name = Loc.T("tool." + t);
+                    price = Tools.NextPrice(t);
+                    return true;
                 case "cos":
                     var c = Cosmetics.Find(value);
                     if (c == null || Cosmetics.Owns(c)) return false;

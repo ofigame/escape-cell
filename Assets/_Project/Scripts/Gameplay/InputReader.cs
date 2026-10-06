@@ -52,6 +52,9 @@ namespace SquashBot.Gameplay
         /// </summary>
         public bool ScreenMode { get; set; }
 
+        /// <summary>Presses that start on these screen points (on-screen tool buttons) are left to the UI.</summary>
+        public System.Func<Vector2, bool> Ignore { get; set; }
+
         public InputReader(Camera camera)
         {
             cam = camera;
@@ -72,6 +75,11 @@ namespace SquashBot.Gameplay
                 consumed = false;
                 startPos = pos;
                 pressTime = Time.unscaledTime;
+                if (Ignore != null && Ignore(pos))
+                {
+                    consumed = true; // a button press: no swipe, tap or hover from it
+                    return default;
+                }
 
                 // The second tap of a double tap fires on touch-down, without waiting for the finger to lift.
                 if (pressTime - lastTapTime <= DoubleTapWindow)

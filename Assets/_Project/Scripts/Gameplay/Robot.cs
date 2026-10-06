@@ -195,24 +195,24 @@ namespace SquashBot.Gameplay
 
         private void UpdateShieldAndBlink()
         {
-            if (shieldLeft > 0f && IsAlive) shieldLeft -= Time.deltaTime;
+            if (shieldLeft > 0f && IsAlive) shieldLeft -= Dt;
             bool show = shieldLeft > 0f && (shieldLeft > 1.2f || Mathf.Repeat(shieldLeft, 0.2f) > 0.08f);
             bubble.gameObject.SetActive(show);
             if (show)
             {
                 // Full shield: cyan. Each hit taken shifts it toward amber, then red; a hit makes it wobble.
-                crackT = Mathf.Min(1f, crackT + Time.deltaTime * 3f);
+                crackT = Mathf.Min(1f, crackT + Dt * 3f);
                 float health = shieldMaxHits <= 1 ? 1f : (shieldHits - 1f) / (shieldMaxHits - 1f);
                 var tint = health >= 1f ? Palette.ShieldBubble : Color.Lerp(new Color(1f, 0.35f, 0.35f, 0.45f), new Color(1f, 0.8f, 0.3f, 0.45f), health);
                 var glow = health >= 1f ? Palette.ShieldGlow : Color.Lerp(new Color(2f, 0.3f, 0.3f), new Color(2f, 1.3f, 0.3f), health);
                 MaterialFactory.SetColors(bubbleMaterial, tint, glow);
                 float wobble = Mathf.Sin(crackT * Mathf.PI * 3f) * (1f - crackT) * 0.18f;
                 bubble.localScale = Vector3.one * (0.95f + Mathf.Sin(Time.time * 6f) * 0.03f + wobble);
-                bubble.Rotate(0f, 60f * Time.deltaTime, 0f);
+                bubble.Rotate(0f, 60f * Dt, 0f);
             }
 
             // Occasional eye blink keeps the robot feeling alive.
-            blinkTimer -= Time.deltaTime;
+            blinkTimer -= Dt;
             float eyeY = blinkTimer < 0.12f ? 0.15f : 1f;
             if (blinkTimer < 0f) blinkTimer = UnityEngine.Random.Range(2f, 4.5f);
             eyeL.localScale = eyeR.localScale = new Vector3(1f, eyeY, 1f);
@@ -400,6 +400,10 @@ namespace SquashBot.Gameplay
         /// <summary>Floor rules may veto a step (return false to keep the robot in place).</summary>
         public Func<Direction, bool> CanLeave;
 
+        /// <summary>Speeds the robot up against a slowed world (the slow-motion tool keeps the robot at full speed).</summary>
+        public float TimeBoost = 1f;
+        private float Dt => Time.deltaTime * TimeBoost;
+
         /// <summary>
         /// Moves the robot without input: a slide on ice, a push by current or wind, a trampoline bounce.
         /// The caller checks the destination; <see cref="Arrived"/> fires on landing as usual.
@@ -475,15 +479,15 @@ namespace SquashBot.Gameplay
 
         private void Update()
         {
-            animTime += Time.deltaTime;
-            visual.localRotation = Quaternion.Slerp(visual.localRotation, targetFacing, Time.deltaTime * 20f);
+            animTime += Dt;
+            visual.localRotation = Quaternion.Slerp(visual.localRotation, targetFacing, Dt * 20f);
 
             switch (anim)
             {
                 case Anim.Idle:
                 {
                     float breathe = 1f + Mathf.Sin(Time.time * 4f) * 0.025f;
-                    visual.localScale = Vector3.Lerp(visual.localScale, new Vector3(1f, breathe, 1f), Time.deltaTime * 12f);
+                    visual.localScale = Vector3.Lerp(visual.localScale, new Vector3(1f, breathe, 1f), Dt * 12f);
                     break;
                 }
                 case Anim.Hop:
@@ -507,7 +511,7 @@ namespace SquashBot.Gameplay
                     float up = 1f - Mathf.Pow(1f - Mathf.Clamp01(animTime / 0.22f), 3f);
                     float bob = Mathf.Sin(animTime * 6f) * 0.05f;
                     transform.position = from + Vector3.up * (HoverHeight * up + bob);
-                    visual.localScale = Vector3.Lerp(visual.localScale, new Vector3(0.95f, 1.05f, 0.95f), Time.deltaTime * 10f);
+                    visual.localScale = Vector3.Lerp(visual.localScale, new Vector3(0.95f, 1.05f, 0.95f), Dt * 10f);
                     break;
                 }
                 case Anim.Bump:
@@ -533,7 +537,7 @@ namespace SquashBot.Gameplay
                     float t = Mathf.Clamp01(animTime / 0.7f);
                     transform.position = Vector3.Lerp(from, to, t * t);
                     visual.localScale = Vector3.one * (1f - t * 0.6f);
-                    visual.Rotate(0f, 0f, 400f * Time.deltaTime);
+                    visual.Rotate(0f, 0f, 400f * Dt);
                     break;
                 }
                 case Anim.Cheer:
@@ -565,7 +569,7 @@ namespace SquashBot.Gameplay
 
             if (flinchT < 1f)
             {
-                flinchT = Mathf.Min(1f, flinchT + Time.deltaTime / 0.28f);
+                flinchT = Mathf.Min(1f, flinchT + Dt / 0.28f);
                 float k = Mathf.Sin(flinchT * Mathf.PI);
                 visual.localPosition = flinchDir * (0.09f * k);
                 visual.localScale = Vector3.Scale(visual.localScale, new Vector3(1f + 0.12f * k, 1f - 0.15f * k, 1f + 0.12f * k));

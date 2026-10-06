@@ -110,12 +110,55 @@ namespace SquashBot.Gameplay
             pads.Clear();
             cracked.Clear();
             poisoned.Clear();
+            covered.Clear();
             poisonNext = null;
             blinkOff = -1;
             windWarning = false;
             if (view != null) view.Light = null;
             if (robot != null) robot.CanLeave = null;
             rules = FloorRule.None;
+        }
+
+        // ---------- Tools ----------
+
+        private readonly List<(GridPos pos, float left)> covered = new List<(GridPos, float)>();
+
+        /// <summary>Bridge tool over poison: the tile is safe for a while, then the poison seeps back.</summary>
+        public void Cover(GridPos p, float seconds)
+        {
+            if (!poisoned.Contains(p)) return;
+            poisoned.Remove(p);
+            grid.SetTile(p, TileState.Solid);
+            view.SetTint(p, new Color(0.6f, 0.95f, 1f), new Color(0.3f, 1.2f, 1.6f));
+            covered.Add((p, seconds));
+        }
+
+        /// <summary>EMP: lasers about to fire and rolling barrels are switched off.</summary>
+        public void ClearActive()
+        {
+            foreach (var b in beams) if (b.bar != null) Destroy(b.bar.gameObject);
+            beams.Clear();
+            foreach (var r in rolls)
+            {
+                if (r.body != null) { fx.Burst(r.body.position, new Color(0.75f, 0.45f, 0.25f), Color.black, 12, 3f); Destroy(r.body.gameObject); }
+                if (r.arrow != null) Destroy(r.arrow.gameObject);
+            }
+            rolls.Clear();
+            laserTimer = Mathf.Max(laserTimer, 2f);
+            barrelTimer = Mathf.Max(barrelTimer, 2f);
+        }
+
+        private void UpdateCovered(float dt)
+        {
+            for (int i = covered.Count - 1; i >= 0; i--)
+            {
+                var (p, left) = covered[i];
+                left -= dt;
+                if (left > 0f) { covered[i] = (p, left); continue; }
+                covered.RemoveAt(i);
+                if (robot.Position != p || !robot.IsAlive) Poison(p);
+                else covered.Add((p, 0.5f)); // wait until the robot steps off
+            }
         }
 
         // ---------- Placing special tiles ----------
@@ -350,6 +393,7 @@ namespace SquashBot.Gameplay
             float dt = Time.deltaTime;
             time += dt;
 
+            if (covered.Count > 0) UpdateCovered(dt);
             if (Has(FloorRule.Poison)) UpdatePoison(dt);
             if (Has(FloorRule.Wind)) UpdateWind(dt);
             if (Has(FloorRule.Laser)) UpdateLasers(dt);

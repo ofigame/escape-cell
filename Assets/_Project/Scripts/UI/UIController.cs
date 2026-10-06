@@ -46,6 +46,8 @@ namespace SquashBot.UI
         public event Action GaragePressed;
         public event Action ShopPressed;
         public event Action DailyPressed;
+        /// <summary>A HUD tool button was tapped (slot 0 = left, 1 = right).</summary>
+        public event Action<int> ToolPressed;
         /// <summary>PLAY on the before-level card: level, start with a shield, take an extra rescue.</summary>
         public event Action<int, bool, bool> PrelevelPlay;
         public event Action PrelevelClosed;
@@ -101,6 +103,7 @@ namespace SquashBot.UI
         private RectTransform shieldPill;
         private RectTransform rescuePill, hoverPill;
         private RectTransform missionPill, bonusPill, comboPill;
+        private readonly ToolButton[] toolButtons = new ToolButton[2];
         private TextMeshProUGUI comboText;
         private Image comboFill;
         private int comboShown = 1;
@@ -583,6 +586,12 @@ namespace SquashBot.UI
             hoverText = UiFactory.Text(hoverPill, "", 42f, Palette.UiText);
             hoverPill.gameObject.SetActive(false);
 
+            // Tool buttons in the bottom corners.
+            toolButtons[0] = ToolButton.Create(t, new Vector2(0f, 0f), new Vector2(40f, 170f));
+            toolButtons[1] = ToolButton.Create(t, new Vector2(1f, 0f), new Vector2(-40f, 170f));
+            toolButtons[0].Pressed += () => ToolPressed?.Invoke(0);
+            toolButtons[1].Pressed += () => ToolPressed?.Invoke(1);
+
             warnLeft = WarningBar(t, new Vector2(0f, 0.5f), new Vector2(12f, 0f));
             warnRight = WarningBar(t, new Vector2(1f, 0.5f), new Vector2(-12f, 0f));
         }
@@ -621,6 +630,18 @@ namespace SquashBot.UI
             hudMission.text = text;
             UiFactory.SetBar(hudFill, progress);
             hudBonus.text = coinsThisRun.ToString();
+        }
+
+        public void SetTool(int slot, Tool? tool, int charges, bool trial, float active) => toolButtons[slot].Set(tool, charges, trial, active);
+
+        public void PunchTool(int slot) => toolButtons[slot].Punch();
+
+        /// <summary>True when a screen point is on a visible tool button (input leaves those presses to the UI).</summary>
+        public bool IsOverTool(Vector2 screen)
+        {
+            foreach (var b in toolButtons)
+                if (b != null && b.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(b.Rect, screen, null)) return true;
+            return false;
         }
 
         /// <summary>Combo multiplier (hidden at x1) and how much of its time window is left.</summary>

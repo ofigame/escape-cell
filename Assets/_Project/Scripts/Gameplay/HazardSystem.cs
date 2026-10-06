@@ -123,6 +123,7 @@ namespace SquashBot.Gameplay
             hazards.Clear();
             repairs.Clear();
             AnyWarningActive = false;
+            sheltered.Clear();
         }
 
         /// <summary>Smash the landed block on <paramref name="p"/> (armored robot hit by it, or hopping into it).</summary>
@@ -167,6 +168,7 @@ namespace SquashBot.Gameplay
                     spawnTimer = level.spawnInterval / PaceMultiplier;
                 }
                 UpdateRepairs(dt);
+                UpdateShelters(dt);
             }
 
             AnyWarningActive = false;
@@ -499,6 +501,64 @@ namespace SquashBot.Gameplay
                 Shapes.Rounded("Eye", body, new Vector3(x, 0.1f, 0.44f), new Vector3(0.12f, 0.1f, 0.04f), 0.02f, glow);
         }
 
+        // ---------- Tools ----------
+
+        private readonly Dictionary<GridPos, float> sheltered = new Dictionary<GridPos, float>();
+
+        /// <summary>EMP: every block and bomb in the air vanishes, landed blocks shatter. Returns how many were hit.</summary>
+        public int Emp()
+        {
+            int count = 0;
+            for (int i = hazards.Count - 1; i >= 0; i--)
+            {
+                var h = hazards[i];
+                var at = GridView.ToWorld(h.pos) + Vector3.up * 0.6f;
+                if (h.phase == Phase.Landed)
+                {
+                    if (h.kind != Kind.Block || h.shattered) continue;
+                    Shatter(h.pos);
+                }
+                else
+                {
+                    fx.Burst(h.body.activeSelf ? h.body.transform.position : at, Palette.ShieldPickup, Palette.ShieldPickupGlow, 10, 3f);
+                    DestroyVisuals(h);
+                    hazards.RemoveAt(i);
+                }
+                count++;
+            }
+            spawnTimer = Mathf.Max(spawnTimer, 1.2f); // a short breather after the blast
+            return count;
+        }
+
+        /// <summary>Bridge: mends a hole or fire right away and keeps the tile from breaking for a while.</summary>
+        public void Shelter(GridPos p, float seconds)
+        {
+            if (!grid.IsFloor(p)) return;
+            var state = grid.GetTile(p);
+            if (state == TileState.Broken || state == TileState.Fire)
+            {
+                repairs.RemoveAll(r => r.pos == p);
+                grid.SetTile(p, TileState.Solid);
+                if (state == TileState.Fire) gridView.Extinguish(p);
+                else gridView.Repair(p);
+            }
+            sheltered[p] = seconds;
+        }
+
+        public bool IsSheltered(GridPos p) => sheltered.ContainsKey(p);
+
+        private void UpdateShelters(float dt)
+        {
+            if (sheltered.Count == 0) return;
+            var keys = new List<GridPos>(sheltered.Keys);
+            foreach (var k in keys)
+            {
+                float left = sheltered[k] - dt;
+                if (left <= 0f) sheltered.Remove(k);
+                else sheltered[k] = left;
+            }
+        }
+
         private bool InFocus(GridPos p) =>
             FocusRadius <= 0 || (Mathf.Abs(p.x - robot.Position.x) <= FocusRadius && Mathf.Abs(p.y - robot.Position.y) <= FocusRadius);
 
@@ -508,6 +568,7 @@ namespace SquashBot.Gameplay
         /// </summary>
         public void Collapse(GridPos p, float repairAfter)
         {
+            if (sheltered.ContainsKey(p)) return;
             if (!grid.IsFloor(p) || grid.GetTile(p) != TileState.Solid || (IsProtected != null && IsProtected(p))) return;
             grid.SetTile(p, TileState.Broken);
             gridView.Break(p);
@@ -517,6 +578,7 @@ namespace SquashBot.Gameplay
 
         private bool TryBreakTile(GridPos p)
         {
+            if (sheltered.ContainsKey(p)) return false;
             if (!level.breakTiles || !running || !CanBreakTile() || grid.GetTile(p) != TileState.Solid || (IsProtected != null && IsProtected(p))) return false;
 
             // Some tiles catch fire for a few seconds instead of breaking into a hole.

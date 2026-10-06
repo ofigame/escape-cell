@@ -22,6 +22,7 @@ namespace SquashBot.UI
 
         private UiScreen screen;
         private TextMeshProUGUI coinsText;
+        private RectTransform content;
         private readonly List<Action> refreshers = new List<Action>();
 
         public UiScreen Screen => screen;
@@ -49,18 +50,37 @@ namespace SquashBot.UI
             UIController.CoinIcon(coins, new Vector2(56f, 0f));
             coinsText = UiFactory.TextBox("Value", coins, new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Vector2(150f, 90f), "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
 
-            float y = -220f;
-            Header(root, Loc.T("shop.upgrades"), ref y);
-            Row(root, Item.Shield, ref y);
-            Row(root, Item.Magnet, ref y);
-            Row(root, Item.Hover, ref y);
-            Row(root, Item.Lives, ref y);
+            // Everything below the top bar scrolls.
+            var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(0f, Monetization.Ads.BannerReserve), new Vector2(0f, -190f));
+            viewport.gameObject.AddComponent<RectMask2D>();
+            UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
+            content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
+            content.pivot = new Vector2(0.5f, 1f);
+            var scroll = root.gameObject.AddComponent<ScrollRect>();
+            scroll.viewport = viewport;
+            scroll.content = content;
+            scroll.horizontal = false;
+            scroll.movementType = ScrollRect.MovementType.Elastic;
+            scroll.decelerationRate = 0.12f;
+            scroll.scrollSensitivity = 60f;
+
+            float y = -24f;
+            Header(content, Loc.T("shop.tools"), ref y);
+            SlotsRow(content, ref y);
+            foreach (var t in Tools.All) ToolRow(content, t, ref y);
             y -= 20f;
-            Header(root, Loc.T("shop.boosts"), ref y);
-            Row(root, Item.StartShield, ref y);
-            Row(root, Item.ExtraRescue, ref y);
-            Row(root, Item.Life, ref y);
-            Row(root, Item.Tunnel, ref y);
+            Header(content, Loc.T("shop.upgrades"), ref y);
+            Row(content, Item.Shield, ref y);
+            Row(content, Item.Magnet, ref y);
+            Row(content, Item.Hover, ref y);
+            Row(content, Item.Lives, ref y);
+            y -= 20f;
+            Header(content, Loc.T("shop.boosts"), ref y);
+            Row(content, Item.StartShield, ref y);
+            Row(content, Item.ExtraRescue, ref y);
+            Row(content, Item.Life, ref y);
+            Row(content, Item.Tunnel, ref y);
+            content.sizeDelta = new Vector2(0f, -y + 40f);
         }
 
         private static void Header(Transform root, string text, ref float y)
@@ -140,6 +160,134 @@ namespace SquashBot.UI
                     goalButton.SetActive(!maxed);
                     goalLabel.text = Loc.T(Goal.Is(goalId) ? "goal.on" : "goal.set");
                     goalLabel.color = Goal.Is(goalId) ? Palette.UiGold : Palette.UiText;
+                }
+            });
+        }
+
+        /// <summary>The bag itself: two slots showing the tools that ride along; the second slot is bought once.</summary>
+        private void SlotsRow(Transform parent, ref float y)
+        {
+            var row = UiFactory.Pill("Bag", parent, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.24f, 0.18f, 0.42f, 0.95f));
+            y -= 166f;
+            UiFactory.TextBox("Label", row, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(240f, 60f), Loc.T("shop.bag"), 36f, Palette.UiText, align: TextAlignmentOptions.Left);
+
+            for (int s = 0; s < 2; s++)
+            {
+                int slot = s;
+                var box = UiFactory.Box("Slot" + s, row, new Vector2(0f, 0.5f), new Vector2(270f + s * 350f, 0f), new Vector2(330f, 120f));
+                box.pivot = new Vector2(0f, 0.5f);
+                UiFactory.Fill(box, new Color(0.1f, 0.08f, 0.22f, 0.9f), UiSprites.Rounded, 1.4f);
+                var icon = UiFactory.Box("Icon", box, new Vector2(0f, 0.5f), new Vector2(14f, 0f), new Vector2(92f, 92f));
+                icon.pivot = new Vector2(0f, 0.5f);
+                var iconFill = UiFactory.Fill(icon, Palette.UiGold, UiSprites.Rounded, 2f);
+                iconFill.raycastTarget = false;
+                var label = UiFactory.TextBox("Name", box, new Vector2(0f, 0.5f), new Vector2(118f, 0f), new Vector2(200f, 90f), "", 30f, Palette.UiText, align: TextAlignmentOptions.Left);
+                label.textWrappingMode = TextWrappingModes.Normal;
+
+                Button buySlot = null;
+                if (s == 1)
+                {
+                    buySlot = UiFactory.MakeButton(box, Tools.SecondSlotPrice.ToString(), Kind.Gold, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300f, 100f), () =>
+                    {
+                        if (Tools.TryBuySecondSlot()) { AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f); Purchased?.Invoke(); }
+                        else AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                        Refresh();
+                    }, 40f);
+                    ((RectTransform)buySlot.transform).pivot = new Vector2(0.5f, 0.5f);
+                }
+
+                Tool? drawn = null;
+                bool drawnEmpty = false;
+                refreshers.Add(() =>
+                {
+                    bool locked = slot >= Tools.Slots;
+                    if (buySlot != null)
+                    {
+                        buySlot.gameObject.SetActive(locked);
+                        buySlot.interactable = SaveData.Coins >= Tools.SecondSlotPrice;
+                    }
+                    icon.gameObject.SetActive(!locked);
+                    label.gameObject.SetActive(!locked);
+                    if (locked) return;
+                    var t = Tools.Equipped(slot);
+                    label.text = t.HasValue ? Loc.T("tool." + t.Value) : Loc.T("shop.bagEmpty");
+                    iconFill.color = t.HasValue ? Palette.UiGold : new Color(1f, 1f, 1f, 0.12f);
+                    if (drawn != t || drawnEmpty != !t.HasValue)
+                    {
+                        for (int i = icon.childCount - 1; i >= 0; i--) Destroy(icon.GetChild(i).gameObject);
+                        if (t.HasValue) ToolButton.DrawIcon(icon, t.Value);
+                        drawn = t;
+                        drawnEmpty = !t.HasValue;
+                    }
+                });
+            }
+        }
+
+        /// <summary>A tool: unlock, upgrade (three levels), put in or take out of the bag, or mark as the goal.</summary>
+        private void ToolRow(Transform parent, Tool tool, ref float y)
+        {
+            var row = UiFactory.Pill(tool.ToString(), parent, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.16f, 0.15f, 0.33f, 0.9f));
+            y -= 166f;
+
+            var icon = UiFactory.Box("Icon", row, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(110f, 110f));
+            UiFactory.Fill(icon, Palette.UiGold, UiSprites.Rounded, 2f).raycastTarget = false;
+            ToolButton.DrawIcon(icon, tool);
+
+            UiFactory.TextBox("Name", row, new Vector2(0f, 1f), new Vector2(156f, -22f), new Vector2(380f, 56f), Loc.T("tool." + tool), 42f, Palette.UiText, align: TextAlignmentOptions.Left);
+            var desc = UiFactory.TextBox("Desc", row, new Vector2(0f, 1f), new Vector2(156f, -68f), new Vector2(380f, 40f), "", 28f,
+                new Color(0.85f, 0.86f, 1f, 0.75f), FontStyles.Normal, align: TextAlignmentOptions.Left);
+            var pips = new List<Image>();
+            for (int i = 0; i < Tools.MaxLevel; i++)
+            {
+                var pip = UiFactory.Box("Pip", row, new Vector2(0f, 0f), new Vector2(156f + i * 44f, 14f), new Vector2(34f, 12f));
+                pips.Add(UiFactory.Fill(pip, Color.white, UiSprites.Rounded, 8f));
+                pips[i].raycastTarget = false;
+            }
+
+            // Middle button: WEAR / TAKE OFF once owned, GOAL before.
+            var mid = UiFactory.MakeButton(row, "", Kind.Secondary, new Vector2(0f, 0.5f), new Vector2(548f, 0f), new Vector2(150f, 64f), () =>
+            {
+                if (Tools.Owned(tool)) Tools.ToggleEquip(tool);
+                else Goal.Toggle("tool:" + tool);
+                AudioManager.PlaySfx(Sfx.Click, 0.7f, 1.2f);
+                Refresh();
+            }, 26f);
+            var midLabel = mid.GetComponentInChildren<TextMeshProUGUI>();
+
+            var buy = UiFactory.MakeButton(row, "", Kind.Gold, new Vector2(1f, 0.5f), new Vector2(-24f, 0f), new Vector2(250f, 110f), () =>
+            {
+                if (Tools.TryBuy(tool))
+                {
+                    AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
+                    Haptics.Medium();
+                    row.localScale = Vector3.one * 1.05f;
+                    Purchased?.Invoke();
+                }
+                else AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                Refresh();
+            }, 46f);
+            var buyLabel = buy.GetComponentInChildren<TextMeshProUGUI>();
+
+            refreshers.Add(() =>
+            {
+                int level = Tools.Level(tool);
+                for (int i = 0; i < pips.Count; i++) pips[i].color = i < level ? new Color(0.36f, 0.85f, 0.6f) : new Color(1f, 1f, 1f, 0.18f);
+                bool maxed = Tools.IsMaxed(tool);
+                int price = Tools.NextPrice(tool);
+                buyLabel.text = maxed ? Loc.T("shop.max") : price.ToString();
+                buy.interactable = !maxed && SaveData.Coins >= price;
+                desc.text = Loc.T(level == 0 ? "tool." + tool + ".desc" : level < Tools.MaxLevel ? "tool." + tool + ".next" : "tool.maxed");
+                if (Tools.Owned(tool))
+                {
+                    bool on = Tools.IsEquipped(tool);
+                    midLabel.text = Loc.T(on ? "tool.off" : "tool.on");
+                    midLabel.color = on ? Palette.UiCyan : Palette.UiText;
+                }
+                else
+                {
+                    bool goal = Goal.Is("tool:" + tool);
+                    midLabel.text = Loc.T(goal ? "goal.on" : "goal.set");
+                    midLabel.color = goal ? Palette.UiGold : Palette.UiText;
                 }
             });
         }
@@ -226,7 +374,7 @@ namespace SquashBot.UI
         private void Update()
         {
             if (!screen.IsVisible) return;
-            foreach (Transform child in transform)
+            foreach (Transform child in content)
                 if (child.localScale.x > 1f) child.localScale = Vector3.Lerp(child.localScale, Vector3.one, Time.unscaledDeltaTime * 10f);
         }
 
