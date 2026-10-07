@@ -130,7 +130,6 @@ namespace SquashBot.UI
         }
 
         public void Hide() => screen.Hide(true);
-        public void TestNext() { shownAt = -10f; Next(); } // TEMP-TEST
 
         private void Update()
         {

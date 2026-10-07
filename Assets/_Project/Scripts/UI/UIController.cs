@@ -240,37 +240,55 @@ namespace SquashBot.UI
             var gear = UiFactory.MakeButton(t, "", Kind.Icon, TopRight, new Vector2(-40f, -40f), new Vector2(110f, 110f), ShowSettings);
             SettingsIcon(gear.transform);
 
-            // Logo up top; the robot itself stands in the middle of the screen, on its platform.
+            // Logo up top; the robot stands on its lit pedestal in the middle (the lobby stage behind the menu).
             MenuArt.Logo(t, Top, new Vector2(0f, -150f));
 
-            // Daily chest banner (only while unclaimed today).
-            menuDaily = UiFactory.MakeButton(t, Loc.T("daily.ready"), Kind.Gold, Bottom, new Vector2(0f, Ads.BannerReserve + 770f), new Vector2(820f, 100f),
-                () => DailyPressed?.Invoke(), 36f);
+            // Today's chest: a glowing chest button under the coins, only while it is waiting.
+            menuDaily = MenuArt.DockButton(t, Loc.T("daily.chest"), MenuArt.Icon.Chest, Palette.UiGold, TopLeft, new Vector2(110f, -230f), 120f, () => DailyPressed?.Invoke());
+            ((RectTransform)menuDaily.transform).pivot = new Vector2(0.5f, 0.5f);
+            var ping = UiFactory.Box("Ping", menuDaily.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(44f, 44f));
+            ping.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(ping, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
+            UiFactory.Text(ping, "!", 32f, Color.white);
             menuDaily.gameObject.AddComponent<Pulse>();
 
-            // Shortcuts: three bright tiles.
-            var row = UiFactory.Box("Shortcuts", t, Bottom, new Vector2(0f, Ads.BannerReserve + 540f), new Vector2(900f, 200f));
-            MenuArt.Tile(row, Loc.T("btn.garage"), MenuArt.Icon.Garage, new Color(0.12f, 0.71f, 0.64f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(288f, 200f), () => GaragePressed?.Invoke());
-            MenuArt.Tile(row, Loc.T("btn.shop"), MenuArt.Icon.Shop, new Color(0.94f, 0.54f, 0.16f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(288f, 200f), () => ShopPressed?.Invoke())
-                .transform.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
-            MenuArt.Tile(row, Loc.T("btn.map"), MenuArt.Icon.Map, new Color(0.42f, 0.36f, 0.88f), new Vector2(1f, 0.5f), Vector2.zero, new Vector2(288f, 200f), () => PlayPressed?.Invoke());
-
-            // Level card with the big PLAY button.
-            var card = UiFactory.Card("LevelCard", t, Bottom, new Vector2(0f, Ads.BannerReserve + 50f), new Vector2(900f, 460f));
-            menuWorld = UiFactory.TextBox("World", card, Top, new Vector2(0f, -30f), new Vector2(820f, 56f), "", 32f, Palette.UiCyan);
-            menuWorld.characterSpacing = 4f;
-            menuLevel = UiFactory.TextBox("Level", card, Top, new Vector2(0f, -78f), new Vector2(820f, 110f), "", 80f, Palette.UiText, title: true);
-            menuMission = UiFactory.TextBox("Mission", card, Top, new Vector2(0f, -190f), new Vector2(820f, 56f), "", 38f,
+            // The level card: a frosted glass panel with the world, the level, its mission and the big PLAY button.
+            var card = UiFactory.Box("LevelCard", t, Bottom, new Vector2(0f, Ads.BannerReserve + 236f), new Vector2(940f, 420f));
+            UiFactory.Fill(UiFactory.Rect("Shadow", card, Vector2.zero, Vector2.one, new Vector2(-30f, -44f), new Vector2(30f, 16f)),
+                new Color(0.03f, 0.02f, 0.1f, 0.55f), UiSprites.Shadow, 0.6f).raycastTarget = false;
+            UiFactory.Fill(card, new Color(0.11f, 0.1f, 0.26f, 0.78f), UiSprites.Rounded, 0.8f);
+            var sheen = UiFactory.Rect("Sheen", card, new Vector2(0f, 0.6f), Vector2.one, new Vector2(12f, 0f), new Vector2(-12f, -10f));
+            UiFactory.Fill(sheen, new Color(1f, 1f, 1f, 0.06f), UiSprites.Rounded, 1f).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Stretch("Rim", card), new Color(0.75f, 0.85f, 1f, 0.35f), UiSprites.Ring, 0.8f).raycastTarget = false;
+            menuWorld = UiFactory.TextBox("World", card, Top, new Vector2(0f, -26f), new Vector2(860f, 50f), "", 30f, Palette.UiCyan);
+            menuWorld.characterSpacing = 5f;
+            menuLevel = UiFactory.TextBox("Level", card, Top, new Vector2(0f, -68f), new Vector2(860f, 100f), "", 76f, Palette.UiText, title: true);
+            menuMission = UiFactory.TextBox("Mission", card, Top, new Vector2(0f, -170f), new Vector2(860f, 52f), "", 34f,
                 new Color(0.85f, 0.86f, 1f, 0.8f), FontStyles.Normal);
 
-            UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(-130f, 36f), new Vector2(560f, 160f), () => PlayPressed?.Invoke(), 84f);
+            var play = UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(-130f, 30f), new Vector2(580f, 150f), () => PlayPressed?.Invoke(), 84f);
+            play.gameObject.AddComponent<Pulse>();
             // The daily bonus games, next to PLAY: plays left today, glowing while there are some.
-            menuBonus = UiFactory.MakeButton(card, "", Kind.Gold, Bottom, new Vector2(300f, 36f), new Vector2(240f, 160f), () => DailyBonusPressed?.Invoke(), 34f);
+            menuBonus = UiFactory.MakeButton(card, "", Kind.Gold, Bottom, new Vector2(320f, 30f), new Vector2(240f, 150f), () => DailyBonusPressed?.Invoke(), 34f);
             menuBonusLabel = menuBonus.GetComponentInChildren<TextMeshProUGUI>();
             menuBonus.gameObject.AddComponent<Pulse>();
 
-            // The guide, under the settings gear.
-            UiFactory.MakeButton(t, "?", Kind.Icon, TopRight, new Vector2(-40f, -170f), new Vector2(110f, 110f), () => Guide.Show(), 64f);
+            // The dock: garage, shop, map and the guide, as glossy orbs on a glass bar.
+            var dock = UiFactory.Box("Dock", t, Bottom, new Vector2(0f, Ads.BannerReserve + 14f), new Vector2(1000f, 206f));
+            UiFactory.Fill(dock, new Color(0.08f, 0.07f, 0.2f, 0.72f), UiSprites.Rounded, 0.7f);
+            UiFactory.Fill(UiFactory.Stretch("Rim", dock), new Color(0.75f, 0.85f, 1f, 0.25f), UiSprites.Ring, 0.7f).raycastTarget = false;
+            var items = new (string label, MenuArt.Icon icon, Color color, Action click)[]
+            {
+                (Loc.T("btn.garage"), MenuArt.Icon.Garage, new Color(0.12f, 0.71f, 0.64f), () => GaragePressed?.Invoke()),
+                (Loc.T("btn.shop"), MenuArt.Icon.Shop, new Color(0.94f, 0.54f, 0.16f), () => ShopPressed?.Invoke()),
+                (Loc.T("btn.map"), MenuArt.Icon.Map, new Color(0.42f, 0.36f, 0.88f), () => PlayPressed?.Invoke()),
+                (Loc.T("btn.guide"), MenuArt.Icon.Guide, new Color(0.85f, 0.35f, 0.6f), () => Guide.Show()),
+            };
+            for (int i = 0; i < items.Length; i++)
+            {
+                var it = items[i];
+                MenuArt.DockButton(dock, it.label, it.icon, it.color, new Vector2(0.5f, 0.5f), new Vector2((i - 1.5f) * 240f, 0f), 120f, it.click);
+            }
         }
 
         /// <summary>A "?" next to a screen's back button that opens the guide at that screen's topic.</summary>
@@ -294,6 +312,9 @@ namespace SquashBot.UI
             if (left == 0 && !Data.DailyBonus.CanWatchAd) menuBonus.transform.localScale = Vector3.one;
             ((Image)menuBonus.targetGraphic).color = left > 0 || Data.DailyBonus.CanWatchAd ? Palette.UiGold : new Color(0.62f, 0.62f, 1f, 0.25f);
         }
+
+        /// <summary>True while the main menu is up (its 3D lobby is showing).</summary>
+        public bool MenuVisible => menu.IsVisible;
 
         public void ShowMenu(int levelIndex, int coins, string world, string mission)
         {

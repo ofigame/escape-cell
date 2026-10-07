@@ -11,42 +11,37 @@ using Kind = SquashBot.UI.UiFactory.ButtonKind;
 namespace SquashBot.UI
 {
     /// <summary>
-    /// The level map: the prison tower in its utopian city, one floor per world, with the level path climbing its face (level 1 at the bottom).
-    /// Completed levels are filled, the next level pulses with the robot marker on it, the rest are locked.
+    /// The level map. The place itself is 3D (<see cref="MapWorld"/>): floating stepping stones winding up into the sky,
+    /// a themed island at each world's start and the robot on the next level. This screen lays a thin layer on top:
+    /// each visible stone gets its number, stars, goal badges or padlock and a button, following the stone on screen
+    /// as the map is dragged; each island gets its world's sign (tap it to replay the world's story).
     /// </summary>
     public class MapScreen : MonoBehaviour
     {
-        private const float NodeSpacing = 200f;
-        private const float SectionPadding = 330f;
-        private const float SectionHeight = SectionPadding + LevelCatalog.LevelsPerWorld * NodeSpacing;
-        private const float PathAmplitude = 180f; // keeps the path on the tower's face
-
         public event Action<int> LevelChosen;
         public event Action BackPressed;
         public event Action BonusPressed;
         public event Action<int> StoryPressed;
 
+        /// <summary>The level data behind a node (for the special-goal badges), set by the game.</summary>
+        public Func<int, LevelData> LevelOf;
+        /// <summary>Builds the robot's look under a transform (the map's robot wears the player's outfit).</summary>
+        public Func<Transform, GameObject> RobotLook;
+
         private UiScreen screen;
-        private ScrollRect scroll;
-        private RectTransform content;
-        private RectTransform marker;
+        private RectTransform overlay;
         private TextMeshProUGUI coinsText;
         private TextMeshProUGUI livesText;
         private Button bonusButton;
         private TextMeshProUGUI bonusCount;
+        private MapWorld world;
         private int builtStars = -1;
         private bool openAll, builtOpenAll;
         private readonly List<RectTransform> nodes = new List<RectTransform>();
-
-        /// <summary>The level data behind a node (for the special-goal badges), set by the game.</summary>
-        public System.Func<int, LevelData> LevelOf;
-        private readonly List<Texture2D> textures = new List<Texture2D>();
+        private readonly List<RectTransform> banners = new List<RectTransform>();
 
         private int levelCount;
         private int unlocked = -1;
-        private int markerFrom, markerTo;
-        private float markerT = 1f;
-        private float scrollTarget = -1f;
 
         public UiScreen Screen => screen;
 
@@ -62,29 +57,16 @@ namespace SquashBot.UI
 
         private void BuildFrame(RectTransform root)
         {
-            UiFactory.Fill(UiFactory.Stretch("Backdrop", root), new Color(0.08f, 0.07f, 0.18f, 1f)).gameObject.AddComponent<IgnoreSafeArea>();
-
-            // Scrolling area
-            // The scroll area sits between the top bar and the banner strip, so nothing shows through either.
-            var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(0f, Monetization.Ads.BannerReserve), new Vector2(0f, -190f));
-            viewport.gameObject.AddComponent<RectMask2D>();
-            UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f)); // catches drags
-
-            content = UiFactory.Rect("Content", viewport, Vector2.zero, new Vector2(1f, 0f));
-            content.pivot = new Vector2(0.5f, 0f);
-
-            scroll = root.gameObject.AddComponent<ScrollRect>();
-            scroll.viewport = viewport;
-            scroll.content = content;
-            scroll.horizontal = false;
-            scroll.vertical = true;
-            scroll.movementType = ScrollRect.MovementType.Elastic;
-            scroll.decelerationRate = 0.12f;
-            scroll.scrollSensitivity = 60f;
+            // The map's 3D camera draws the background; this layer only catches drags and holds the buttons.
+            overlay = UiFactory.Rect("Overlay", root, Vector2.zero, Vector2.one, new Vector2(0f, Monetization.Ads.BannerReserve), new Vector2(0f, -190f));
+            UiFactory.Fill(overlay, new Color(0f, 0f, 0f, 0.001f));
+            var drag = overlay.gameObject.AddComponent<MapDragArea>();
+            drag.Dragged += px => world?.Drag(px);
+            drag.Released += () => world?.EndDrag();
 
             // Fixed top bar over the map
             var bar = UiFactory.Rect("TopBar", root, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -190f), Vector2.zero);
-            UiFactory.Fill(bar, new Color(0.08f, 0.07f, 0.18f, 0.97f)).raycastTarget = false;
+            UiFactory.Fill(bar, new Color(0.08f, 0.07f, 0.18f, 0.88f)).raycastTarget = false;
             UiFactory.MakeButton(bar, "<", Kind.Icon, new Vector2(0f, 0.5f), new Vector2(36f, 0f), new Vector2(124f, 124f), () => BackPressed?.Invoke(), 64f);
             var lives = UiFactory.Pill("Lives", bar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300f, 100f), UiFactory.PillColor);
             lives.pivot = new Vector2(0.5f, 0.5f);
@@ -108,9 +90,10 @@ namespace SquashBot.UI
                 "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
         }
 
-        /// <summary>(Re)builds the nodes for the current progress and scrolls to <paramref name="focusLevel"/>.</summary>
+        /// <summary>(Re)builds the map for the current progress and shows it around <paramref name="focusLevel"/>.</summary>
         public void Show(int unlockedLevel, int coins, int focusLevel, int animateFrom = -1)
         {
+            if (world == null) world = MapWorld.Create(levelCount, RobotLook);
             int stars = Progress.TotalStars(levelCount);
             openAll = SaveData.TestMode;
             if (unlockedLevel != unlocked || stars != builtStars || openAll != builtOpenAll) Rebuild(unlockedLevel);
@@ -121,80 +104,55 @@ namespace SquashBot.UI
             bonusCount.text = tokens.ToString();
             coinsText.text = coins.ToString();
             screen.Show();
-
-            markerTo = Mathf.Clamp(unlockedLevel, 0, levelCount - 1);
-            markerFrom = animateFrom >= 0 ? animateFrom : markerTo;
-            markerT = animateFrom >= 0 ? -0.35f : 1f; // short pause before the hop
-            PlaceMarker(markerFrom < markerTo ? 0f : 1f);
-            scrollTarget = NodeY(Mathf.Clamp(focusLevel, 0, levelCount - 1));
-            Canvas.ForceUpdateCanvases();
-            JumpScrollTo(scrollTarget);
+            world.Open(focusLevel, animateFrom);
+            LateUpdate();
         }
 
-        public void Hide() => screen.Hide();
+        public void Hide()
+        {
+            screen.Hide();
+            if (world != null) world.Close();
+        }
+
+        /// <summary>True while the 3D map is on screen (the game's own camera can rest).</summary>
+        public bool IsOpen => screen.IsVisible;
 
         public void SetLives(string text) => livesText.text = text;
 
         private void Rebuild(int unlockedLevel)
         {
             unlocked = unlockedLevel;
-            for (int i = content.childCount - 1; i >= 0; i--) Destroy(content.GetChild(i).gameObject);
-            foreach (var t in textures) Destroy(t);
-            textures.Clear();
+            foreach (var n in nodes) Destroy(n.gameObject);
+            foreach (var b in banners) Destroy(b.gameObject);
             nodes.Clear();
-
+            banners.Clear();
+            world.Build(unlockedLevel, openAll);
             int worlds = Mathf.CeilToInt(levelCount / (float)LevelCatalog.LevelsPerWorld);
-            content.sizeDelta = new Vector2(0f, worlds * SectionHeight + 120f);
-
-            for (int w = 0; w < worlds; w++) BuildSection(w);
-            BuildPathDots();
+            for (int w = 0; w < worlds; w++) banners.Add(BuildBanner(w));
             for (int i = 0; i < levelCount; i++) nodes.Add(BuildNode(i));
-
-            marker = BuildMarker();
         }
 
-        // ---------- Sections ----------
-
-        private void BuildSection(int world)
+        /// <summary>A world's sign on its island: name and level range (or the stars it takes), tap to replay its story.</summary>
+        private RectTransform BuildBanner(int w)
         {
-            var theme = WorldTheme.ForWorld(world);
-            var section = UiFactory.Rect($"World {world + 1}", content, Vector2.zero, new Vector2(1f, 0f));
-            section.pivot = new Vector2(0.5f, 0f);
-            section.anchoredPosition = new Vector2(0f, world * SectionHeight);
-            section.sizeDelta = new Vector2(0f, SectionHeight);
-
-            // This floor of the prison tower, rising out of the utopian city (cached, shared by every rebuild).
-            int worldCount = Mathf.CeilToInt(levelCount / (float)LevelCatalog.LevelsPerWorld);
-            var art = UtopiaArt.Floor(world, worldCount, 360, Mathf.RoundToInt(360 * SectionHeight / 1080f));
-            var raw = UiFactory.Stretch("Art", section).gameObject.AddComponent<RawImage>();
-            raw.texture = art;
-            raw.raycastTarget = false;
-
-            bool locked = world * LevelCatalog.LevelsPerWorld > unlocked && !openAll;
-            if (locked)
-            {
-                var shade = UiFactory.Fill(UiFactory.Stretch("Locked", section), new Color(0.05f, 0.04f, 0.12f, 0.4f));
-                shade.raycastTarget = false;
-            }
-
-            // Banner at the start of the world.
-            var banner = UiFactory.Pill("Banner", section, new Vector2(0.5f, 0f), new Vector2(0f, 70f), new Vector2(820f, 150f),
-                new Color(0.1f, 0.08f, 0.22f, 0.8f));
-            var title = UiFactory.TextBox("Name", banner, new Vector2(0.5f, 1f), new Vector2(0f, -18f), new Vector2(780f, 70f),
-                Loc.F("world", world + 1, Loc.T(theme.key)), 46f, theme.accent);
-            title.characterSpacing = 4f;
-            string sub = locked ? Loc.F("map.locked", world) : $"{world * LevelCatalog.LevelsPerWorld + 1} - {(world + 1) * LevelCatalog.LevelsPerWorld}";
-            UiFactory.TextBox("Sub", banner, new Vector2(0.5f, 0f), new Vector2(0f, 16f), new Vector2(780f, 56f), sub, 34f,
+            var theme = WorldTheme.ForWorld(w);
+            bool locked = w * LevelCatalog.LevelsPerWorld > unlocked && !openAll;
+            var banner = UiFactory.Pill("Banner " + (w + 1), overlay, new Vector2(0f, 0f), Vector2.zero, new Vector2(680f, 130f), new Color(0.08f, 0.06f, 0.2f, 0.82f));
+            banner.pivot = new Vector2(0.5f, 0.5f);
+            var title = UiFactory.TextBox("Name", banner, new Vector2(0.5f, 1f), new Vector2(0f, -14f), new Vector2(640f, 64f),
+                Loc.F("world", w + 1, Loc.T(theme.key)), 42f, theme.accent, title: true);
+            title.characterSpacing = 3f;
+            string sub = locked ? Loc.F("map.locked", w) : $"{w * LevelCatalog.LevelsPerWorld + 1} - {(w + 1) * LevelCatalog.LevelsPerWorld}";
+            UiFactory.TextBox("Sub", banner, new Vector2(0.5f, 0f), new Vector2(0f, 12f), new Vector2(640f, 48f), sub, 30f,
                 new Color(1f, 1f, 1f, 0.75f), FontStyles.Normal);
-            if (locked) Lock(banner, new Vector2(0f, 0.5f), new Vector2(60f, 0f), 0.8f);
+            if (locked) Lock(banner, new Vector2(0f, 0.5f), new Vector2(54f, 0f), 0.7f);
             else
             {
-                // Tapping an open world's banner replays its story scene.
-                var bannerImage = banner.GetComponent<Image>();
-                bannerImage.raycastTarget = true;
+                var image = banner.GetComponent<Image>();
+                image.raycastTarget = true;
                 var replay = banner.gameObject.AddComponent<Button>();
-                replay.targetGraphic = bannerImage;
-                int captured = world;
+                replay.targetGraphic = image;
+                int captured = w;
                 replay.onClick.AddListener(() =>
                 {
                     AudioManager.PlaySfx(Sfx.Click, 0.7f);
@@ -202,81 +160,47 @@ namespace SquashBot.UI
                 });
                 banner.gameObject.AddComponent<ButtonPress>();
             }
+            return banner;
         }
 
-        // ---------- Path ----------
-
-        private static float NodeY(int level)
-        {
-            int world = level / LevelCatalog.LevelsPerWorld;
-            int i = level % LevelCatalog.LevelsPerWorld;
-            return world * SectionHeight + SectionPadding + i * NodeSpacing;
-        }
-
-        private static float NodeX(int level) => Mathf.Sin(level * 0.85f) * PathAmplitude;
-
-        private static Vector2 NodePos(int level) => new Vector2(NodeX(level), NodeY(level));
-
-        private void BuildPathDots()
-        {
-            for (int i = 0; i < levelCount - 1; i++)
-            {
-                var a = NodePos(i);
-                var b = NodePos(i + 1);
-                int dots = Mathf.Max(2, Mathf.RoundToInt(Vector2.Distance(a, b) / 40f));
-                bool done = i + 1 <= unlocked;
-                for (int d = 1; d < dots; d++)
-                {
-                    var p = Vector2.Lerp(a, b, d / (float)dots);
-                    var dot = UiFactory.Box("Dot", content, new Vector2(0.5f, 0f), p - new Vector2(0f, 9f), new Vector2(18f, 18f));
-                    dot.pivot = new Vector2(0.5f, 0f);
-                    UiFactory.Fill(dot, done ? new Color(1f, 1f, 1f, 0.85f) : new Color(1f, 1f, 1f, 0.25f), UiSprites.Circle).raycastTarget = false;
-                }
-            }
-        }
-
+        /// <summary>The layer over one stone: its number (or padlock), stars, goal badges and a button.</summary>
         private RectTransform BuildNode(int level)
         {
-            var theme = WorldTheme.ForWorld(level / LevelCatalog.LevelsPerWorld);
             bool completed = level < unlocked;
             bool current = level == unlocked;
             bool locked = level > unlocked && !openAll;
-            float size = current ? 180f : 150f;
-
-            var node = UiFactory.Box($"Level {level + 1}", content, new Vector2(0.5f, 0f), NodePos(level), new Vector2(size, size));
+            var node = UiFactory.Box($"Level {level + 1}", overlay, new Vector2(0f, 0f), Vector2.zero, new Vector2(180f, 150f));
             node.pivot = new Vector2(0.5f, 0.5f);
-
-            var shadow = UiFactory.Box("Shadow", node, new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(size + 30f, size + 30f));
-            UiFactory.Fill(shadow, new Color(0.03f, 0.02f, 0.1f, 0.4f), UiSprites.Shadow, 0.5f).raycastTarget = false;
-
-            Color fill = locked ? new Color(0.12f, 0.1f, 0.25f, 0.85f) : current ? Color.white : theme.accent;
-            var face = UiFactory.Fill(node, fill, UiSprites.Circle);
-            var rim = UiFactory.Fill(UiFactory.Stretch("Rim", node), locked ? new Color(1f, 1f, 1f, 0.25f) : new Color(1f, 1f, 1f, 0.9f), UiSprites.Ring, 0.5f);
-            rim.raycastTarget = false;
+            var hit = UiFactory.Fill(node, new Color(1f, 1f, 1f, 0.001f), UiSprites.Circle);
 
             if (locked)
             {
-                Lock(node, new Vector2(0.5f, 0.5f), Vector2.zero, 1f);
+                Lock(node, new Vector2(0.5f, 0.5f), new Vector2(0f, 6f), 0.75f);
             }
             else
             {
-                UiFactory.Text(node, (level + 1).ToString(), current ? 72f : 60f, UiFactory.TextDark);
-                if (completed) NodeStars(node, Progress.Stars(level));
-                // Special goals (princess, monster, WARDEN, quest pieces) show as badges over the node.
-                var (iconA, iconB) = MissionIcons.For(LevelOf?.Invoke(level));
-                MissionIcons.Badge(node, iconA, new Vector2(0f, 1f), new Vector2(4f, -4f), 76f);
-                MissionIcons.Badge(node, iconB, new Vector2(0f, 1f), new Vector2(-58f, -38f), 66f);
-                if (completed)
+                if (current)
                 {
-                    var badge = UiFactory.Box("Done", node, new Vector2(1f, 1f), new Vector2(6f, 6f), new Vector2(48f, 48f));
-                    badge.pivot = new Vector2(0.5f, 0.5f);
-                    UiFactory.Fill(badge, Palette.UiGold, UiSprites.Circle).raycastTarget = false;
-                    var inner = UiFactory.Box("Inner", badge, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(26f, 26f));
-                    UiFactory.Fill(inner, new Color(1f, 0.95f, 0.7f), UiSprites.Circle).raycastTarget = false;
+                    // The robot stands on it: the number rides above in a bright tag.
+                    var tag = UiFactory.Pill("Tag", node, new Vector2(0.5f, 1f), new Vector2(0f, 150f), new Vector2(150f, 74f), Color.white);
+                    tag.pivot = new Vector2(0.5f, 0.5f);
+                    UiFactory.Text(tag, (level + 1).ToString(), 50f, UiFactory.TextDark);
+                    tag.gameObject.AddComponent<Pulse>();
                 }
+                else
+                {
+                    var num = UiFactory.Text(node, (level + 1).ToString(), 58f, UiFactory.TextDark);
+                    num.rectTransform.anchoredPosition = new Vector2(0f, 6f);
+                }
+                if (completed) NodeStars(node, Progress.Stars(level), -26f);
+                // Special goals (princess, monster, WARDEN, quest pieces, thief, Bip) show as badges by the stone.
+                var (iconA, iconB) = MissionIcons.For(LevelOf?.Invoke(level));
+                MissionIcons.Badge(node, iconA, new Vector2(0f, 1f), new Vector2(-6f, 10f), 70f);
+                MissionIcons.Badge(node, iconB, new Vector2(0f, 1f), new Vector2(-62f, -22f), 60f);
 
                 var button = node.gameObject.AddComponent<Button>();
-                button.targetGraphic = face;
+                button.targetGraphic = hit;
+                button.transition = Selectable.Transition.None;
                 int captured = level;
                 button.onClick.AddListener(() =>
                 {
@@ -285,17 +209,35 @@ namespace SquashBot.UI
                 });
                 node.gameObject.AddComponent<ButtonPress>();
             }
-
-            if (current) node.gameObject.AddComponent<Pulse>();
             return node;
         }
 
+        /// <summary>Keeps every label on its stone (and hides the ones off screen).</summary>
+        private void LateUpdate()
+        {
+            if (world == null || !screen.IsVisible) return;
+            for (int i = 0; i < nodes.Count; i++) Follow(nodes[i], world.ScreenPoint(i), 13f);
+            for (int w = 0; w < banners.Count; w++) Follow(banners[w], world.IslandScreenPoint(w), 15f);
+        }
+
+        private void Follow(RectTransform rt, Vector3 sp, float refDistance)
+        {
+            bool on = sp.z > 0.5f && sp.y > -250f && sp.y < UnityEngine.Screen.height + 250f;
+            if (rt.gameObject.activeSelf != on) rt.gameObject.SetActive(on);
+            if (!on) return;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(overlay, sp, null, out var local);
+            // Overlay children are anchored at its bottom-left corner.
+            rt.anchoredPosition = local + overlay.rect.size * overlay.pivot;
+            float s = Mathf.Clamp(refDistance / sp.z, 0.6f, 1.4f);
+            rt.localScale = new Vector3(s, s, 1f);
+        }
+
         /// <summary>Three little stars under a finished level, the earned ones gold.</summary>
-        private static void NodeStars(RectTransform node, int stars)
+        private static void NodeStars(RectTransform node, int stars, float y = -18f)
         {
             for (int i = 0; i < 3; i++)
             {
-                var star = UiFactory.Box("Star", node, new Vector2(0.5f, 0f), new Vector2((i - 1) * 46f, i == 1 ? -26f : -18f), new Vector2(50f, 50f));
+                var star = UiFactory.Box("Star", node, new Vector2(0.5f, 0f), new Vector2((i - 1) * 46f, i == 1 ? y - 8f : y), new Vector2(50f, 50f));
                 star.pivot = new Vector2(0.5f, 0.5f);
                 UiFactory.Fill(star, i < stars ? Palette.UiGold : new Color(0.1f, 0.08f, 0.22f, 0.75f), UiSprites.Star).raycastTarget = false;
             }
@@ -333,77 +275,6 @@ namespace SquashBot.UI
             UiFactory.Fill(hole, new Color(0.15f, 0.12f, 0.3f, 0.9f), UiSprites.Rounded, 6f).raycastTarget = false;
         }
 
-        // ---------- Robot marker ----------
-
-        private RectTransform BuildMarker()
-        {
-            var root = UiFactory.Box("Robot", content, new Vector2(0.5f, 0f), Vector2.zero, new Vector2(110f, 110f));
-            root.pivot = new Vector2(0.5f, 0f);
-
-            var head = UiFactory.Box("Head", root, new Vector2(0.5f, 0f), new Vector2(0f, 24f), new Vector2(96f, 84f));
-            head.pivot = new Vector2(0.5f, 0f);
-            // The marker wears the color of the world the robot is currently in.
-            int markerWorld = Mathf.Clamp(unlocked, 0, levelCount - 1) / LevelCatalog.LevelsPerWorld;
-            UiFactory.Fill(head, RobotLooks.BodyColor(markerWorld) * 1.12f, UiSprites.Rounded, 3f).raycastTarget = false;
-            var visor = UiFactory.Box("Visor", head, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(72f, 44f));
-            UiFactory.Fill(visor, new Color(0.24f, 0.27f, 0.4f), UiSprites.Rounded, 4f).raycastTarget = false;
-            foreach (float x in new[] { -16f, 16f })
-            {
-                var eye = UiFactory.Box("Eye", visor, new Vector2(0.5f, 0.5f), new Vector2(x, 0f), new Vector2(14f, 16f));
-                UiFactory.Fill(eye, Palette.UiCyan, UiSprites.Rounded, 12f).raycastTarget = false;
-            }
-            foreach (float x in new[] { -18f, 18f })
-            {
-                var leg = UiFactory.Box("Leg", root, new Vector2(0.5f, 0f), new Vector2(x, 4f), new Vector2(18f, 26f));
-                leg.pivot = new Vector2(0.5f, 0f);
-                UiFactory.Fill(leg, new Color(0.62f, 0.67f, 0.82f), UiSprites.Rounded, 10f).raycastTarget = false;
-            }
-            return root;
-        }
-
-        private void PlaceMarker(float t)
-        {
-            if (marker == null) return;
-            var a = NodePos(markerFrom);
-            var b = NodePos(markerTo);
-            var p = Vector2.Lerp(a, b, t);
-            float hop = Mathf.Sin(t * Mathf.PI) * 120f;
-            float sizeOffset = 90f; // stand on top of the node circle
-            marker.anchoredPosition = p + new Vector2(0f, sizeOffset + hop);
-            marker.SetAsLastSibling();
-        }
-
-        // ---------- Scrolling ----------
-
-        private void JumpScrollTo(float y)
-        {
-            float viewport = ((RectTransform)scroll.viewport).rect.height;
-            float range = content.sizeDelta.y - viewport;
-            if (range <= 0f) return;
-            scroll.verticalNormalizedPosition = Mathf.Clamp01((y - viewport * 0.45f) / range);
-            scroll.velocity = Vector2.zero;
-        }
-
-        private void Update()
-        {
-            if (markerT < 1f)
-            {
-                markerT += Time.unscaledDeltaTime / 0.7f;
-                float t = Mathf.Clamp01(markerT);
-                PlaceMarker(t * t * (3f - 2f * t));
-            }
-            else if (marker != null)
-            {
-                // Idle bob on the current node.
-                PlaceMarker(1f);
-                marker.anchoredPosition += new Vector2(0f, Mathf.Abs(Mathf.Sin(Time.unscaledTime * 3f)) * 14f);
-            }
-        }
-
-        private void OnDestroy()
-        {
-            foreach (var t in textures) Destroy(t);
-        }
     }
 
     /// <summary>Gentle breathing scale for the "play me next" node.</summary>

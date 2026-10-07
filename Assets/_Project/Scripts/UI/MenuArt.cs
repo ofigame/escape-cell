@@ -13,7 +13,7 @@ namespace SquashBot.UI
     /// </summary>
     public static class MenuArt
     {
-        public enum Icon { Garage, Shop, Map }
+        public enum Icon { Garage, Shop, Map, Guide, Chest }
 
         /// <summary>"ESCAPE CELL" in the display font: a dark extruded back, a bright gradient face with a thick outline.</summary>
         public static void Logo(Transform parent, Vector2 anchor, Vector2 position)
@@ -99,6 +99,43 @@ namespace SquashBot.UI
             return button;
         }
 
+        /// <summary>
+        /// A dock button: a glossy coloured orb with its icon and a small label under it, for the menu's bottom bar.
+        /// </summary>
+        public static Button DockButton(Transform parent, string label, Icon icon, Color color, Vector2 anchor, Vector2 position, float size, Action onClick)
+        {
+            var root = UiFactory.Box("Dock " + label, parent, anchor, position, new Vector2(size * 1.5f, size + 56f));
+            root.pivot = new Vector2(0.5f, 0.5f);
+            var hit = UiFactory.Fill(root, new Color(1f, 1f, 1f, 0.001f));
+            var orb = UiFactory.Box("Orb", root, new Vector2(0.5f, 1f), new Vector2(0f, 0f), new Vector2(size, size));
+            orb.pivot = new Vector2(0.5f, 1f);
+            var glow = UiFactory.Box("Glow", orb, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(size * 1.35f, size * 1.35f));
+            glow.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(glow, new Color(color.r, color.g, color.b, 0.25f), UiSprites.Shadow, 0.5f).raycastTarget = false;
+            UiFactory.Fill(orb, color, UiSprites.Circle).raycastTarget = false;
+            var gloss = UiFactory.Box("Gloss", orb, new Vector2(0.5f, 1f), new Vector2(0f, -size * 0.08f), new Vector2(size * 0.7f, size * 0.36f));
+            gloss.pivot = new Vector2(0.5f, 1f);
+            UiFactory.Fill(gloss, new Color(1f, 1f, 1f, 0.22f), UiSprites.Circle).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Stretch("Rim", orb), new Color(1f, 1f, 1f, 0.55f), UiSprites.Ring, 0.6f).raycastTarget = false;
+            var iconBox = UiFactory.Box("Icon", orb, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(size * 0.56f, size * 0.56f));
+            iconBox.pivot = new Vector2(0.5f, 0.5f);
+            DrawIcon(iconBox, icon, color);
+            var text = UiFactory.TextBox("Label", root, new Vector2(0.5f, 0f), new Vector2(0f, 2f), new Vector2(size * 1.5f, 50f), label, 32f, Color.white, title: true);
+            Outline(text, new Color(0.05f, 0.03f, 0.15f, 0.8f), 0.2f);
+
+            var button = root.gameObject.AddComponent<Button>();
+            button.targetGraphic = hit;
+            button.transition = Selectable.Transition.None;
+            button.onClick.AddListener(() =>
+            {
+                AudioManager.PlaySfx(Sfx.Click, 0.7f);
+                Haptics.Light();
+                onClick();
+            });
+            root.gameObject.AddComponent<ButtonPress>();
+            return button;
+        }
+
         // ---------- Icons, drawn from the UI's rounded shapes ----------
 
         private static Image Part(RectTransform parent, Vector2 anchor, Vector2 pos, Vector2 size, Color c, Sprite sprite, float rot = 0f)
@@ -139,6 +176,23 @@ namespace SquashBot.UI
                     Part(box, c, new Vector2(0f, s * 0.02f), new Vector2(s * 0.34f, s * 0.34f), Color.white, UiSprites.Rounded, 45f);
                     Part(box, c, new Vector2(0f, s * 0.2f), new Vector2(s * 0.56f, s * 0.56f), Color.white, UiSprites.Circle);
                     Part(box, c, new Vector2(0f, s * 0.2f), new Vector2(s * 0.24f, s * 0.24f), dark, UiSprites.Circle);
+                    break;
+                case Icon.Guide:
+                    // An open book with a question mark.
+                    Part(box, c, new Vector2(-s * 0.21f, -s * 0.04f), new Vector2(s * 0.42f, s * 0.6f), Color.white, UiSprites.Rounded, 6f);
+                    Part(box, c, new Vector2(s * 0.21f, -s * 0.04f), new Vector2(s * 0.42f, s * 0.6f), Color.white, UiSprites.Rounded, -6f);
+                    Part(box, c, new Vector2(0f, -s * 0.04f), new Vector2(s * 0.05f, s * 0.6f), dark, UiSprites.Rounded);
+                    Part(box, c, new Vector2(-s * 0.21f, s * 0.08f), new Vector2(s * 0.24f, s * 0.05f), dark, UiSprites.Rounded);
+                    Part(box, c, new Vector2(-s * 0.21f, -s * 0.06f), new Vector2(s * 0.24f, s * 0.05f), dark, UiSprites.Rounded);
+                    Part(box, c, new Vector2(s * 0.21f, s * 0.08f), new Vector2(s * 0.24f, s * 0.05f), dark, UiSprites.Rounded);
+                    Part(box, c, new Vector2(s * 0.21f, -s * 0.06f), new Vector2(s * 0.24f, s * 0.05f), dark, UiSprites.Rounded);
+                    break;
+                case Icon.Chest:
+                    // A treasure chest with a gold lock.
+                    Part(box, c, new Vector2(0f, -s * 0.12f), new Vector2(s * 0.84f, s * 0.48f), new Color(0.72f, 0.42f, 0.22f), UiSprites.Rounded);
+                    Part(box, c, new Vector2(0f, s * 0.18f), new Vector2(s * 0.84f, s * 0.26f), new Color(0.85f, 0.52f, 0.28f), UiSprites.Rounded);
+                    Part(box, c, new Vector2(0f, s * 0.04f), new Vector2(s * 0.86f, s * 0.07f), Palette.UiGold, UiSprites.Rounded);
+                    Part(box, c, new Vector2(0f, -s * 0.02f), new Vector2(s * 0.18f, s * 0.22f), Palette.UiGold, UiSprites.Rounded);
                     break;
             }
         }

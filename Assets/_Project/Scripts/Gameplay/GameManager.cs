@@ -217,6 +217,7 @@ namespace SquashBot.Gameplay
                 StartLevel(index, boosts);
             };
             ui.Map.LevelOf = i => i >= 0 && i < LevelCount ? levelSet.levels[i] : null;
+            ui.Map.RobotLook = t => robot.BuildLookalike(t);
             ui.GaragePressed += ShowGarage;
             ui.ShopPressed += ShowShop;
             ui.DailyPressed += ClaimDaily;
@@ -340,9 +341,22 @@ namespace SquashBot.Gameplay
             State = GameState.Menu;
             ShowBackdrop(NextLevel);
             ui.ShowMenu(NextLevel, SaveData.Coins, LevelCatalog.WorldName(NextLevel), MissionText(levelSet.levels[NextLevel]));
+            if (lobby == null) lobby = LobbyStage.Create(t => robot.BuildLookalike(t));
+            lobby.Open(WorldTheme.ForWorld(LevelCatalog.WorldOf(NextLevel)));
             // The robot is the star of the menu: crisp, close and in the middle of the screen.
             cameraRig.SetMenuFocus(false);
             cameraRig.Showcase(robot.transform, 0.7f);
+        }
+
+        // The menu's showroom and the 3D map have their own cameras; the game's camera only draws when neither is up.
+        private LobbyStage lobby;
+
+        private void LateUpdate()
+        {
+            if (ui == null) return;
+            if (lobby != null && lobby.IsOpen && !ui.MenuVisible) lobby.Close();
+            bool covered = (lobby != null && lobby.IsOpen) || ui.Map.IsOpen;
+            if (cameraRig.Cam.enabled == covered) cameraRig.Cam.enabled = !covered;
         }
 
         private void ShowMap(int animateFrom = -1)
@@ -353,7 +367,7 @@ namespace SquashBot.Gameplay
             ResetRun();
             State = GameState.Map;
             ui.ShowMap(SaveData.UnlockedLevel, SaveData.Coins, NextLevel, animateFrom);
-            cameraRig.SetMenuFocus(true);
+            cameraRig.SetMenuFocus(false); // the 3D map has its own camera; the blur is for the menus over the floor
             cameraRig.Showcase(null, 0f);
         }
 
