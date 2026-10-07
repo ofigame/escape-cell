@@ -163,6 +163,7 @@ namespace SquashBot.Gameplay
             gridView = new GameObject("Grid").AddComponent<GridView>();
             robot = Robot.Create(null);
             robot.Arrived += OnRobotArrived;
+            robot.BumpedInto += OnRobotBumped;
             robot.BlockSmasher = SmashBlock;
 
             hazards = new GameObject("Hazards").AddComponent<HazardSystem>();
@@ -282,6 +283,7 @@ namespace SquashBot.Gameplay
             objectives.Clear();
             objectivesDone = objectivesTotal = 0;
             ClearQuest();
+            ClearMonster();
             if (warden != null) Destroy(warden.gameObject);
             warden = null;
             collapses.Clear();
@@ -1001,6 +1003,9 @@ namespace SquashBot.Gameplay
                 case MissionType.Quest:
                     UpdateObjectives();
                     break;
+                case MissionType.Monster:
+                    UpdateMonster(Time.deltaTime);
+                    break;
             }
         }
 
@@ -1040,6 +1045,10 @@ namespace SquashBot.Gameplay
                 collapses.Add((left, CollapseDelay));
 
             if (level.mission == MissionType.Paint) PaintTile(p);
+            else if (level.mission == MissionType.Monster)
+            {
+                if (orb != null && p == orbPos) PickUpOrb();
+            }
             else if (level.mission == MissionType.Quest)
             {
                 var piece = objectives.Find(o => o.pos == p);
@@ -1602,6 +1611,10 @@ namespace SquashBot.Gameplay
             {
                 SetupQuest();
             }
+            else if (level.mission == MissionType.Monster)
+            {
+                SetupMonster();
+            }
             else if (level.mission == MissionType.Paint)
             {
                 PaintTile(robot.Position);
@@ -1788,6 +1801,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Exit: return portal != null && portal.IsOpen ? 1f : objectivesDone / (objectivesTotal + 1f);
                 case MissionType.Boss: return objectivesDone / (float)Mathf.Max(1, objectivesTotal);
                 case MissionType.Quest: return questReady ? 1f : objectivesDone / (objectivesTotal + 1f);
+                case MissionType.Monster: return objectivesDone / (float)Mathf.Max(1, objectivesTotal);
                 case MissionType.Paint: return grid == null ? 0f : painted.Count / (float)grid.FloorCount;
                 default: return elapsed / level.surviveSeconds;
             }
@@ -1806,6 +1820,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Tunnel: return Loc.T("mission.tunnel" + suffix);
                 case MissionType.Boss: return Loc.T("mission.boss" + suffix);
                 case MissionType.Quest: return Loc.F("quest.intro." + data.quest, data.keys);
+                case MissionType.Monster: return Loc.F("mission.monster" + suffix, data.keys);
                 default: return Loc.F("mission.survive" + suffix, data.surviveSeconds.ToString("0", CultureInfo.InvariantCulture));
             }
         }
@@ -2066,6 +2081,169 @@ namespace SquashBot.Gameplay
             questLeftovers.Clear();
         }
 
+        // ---------- Monster fights ----------
+
+        // A monster holds one tile with a health bar over its head. Bumping into it bare-handed does nothing; a magic orb
+        // lies somewhere else on the floor. Pick it up (the robot glows), run into the monster: one hit, the magic is
+        // spent, and a new orb drops on another tile. Now and then the monster stomps: the tiles around it flash, and a
+        // robot still standing there is knocked back a couple of tiles. Never a death, always a chase.
+        private Monster monster;
+        private GridPos monsterPos, orbPos;
+        private MagicOrb orb;
+        private GameObject aura;
+        private bool charged;
+        private int monsterHp;
+        private float stompTimer, stompWindup = -1f;
+
+        private void SetupMonster()
+        {
+            var centre = new GridPos(grid.Width / 2, grid.Height / 2);
+            monsterPos = robot.Position;
+            int best = int.MaxValue;
+            foreach (var t in grid.AllPositions())
+            {
+                if (!grid.IsStandable(t) || t.Manhattan(robot.Position) < 3) continue;
+                int d = t.Manhattan(centre);
+                if (d < best) { best = d; monsterPos = t; }
+            }
+            grid.SetOccupied(monsterPos, true);
+            monsterHp = objectivesTotal = Mathf.Max(2, level.keys);
+            objectivesDone = 0;
+            var kind = (Monster.Kind)(World % 4);
+            var tint = Color.Lerp(WorldTheme.Current.accent, new Color(0.55f, 0.85f, 0.4f), kind == Monster.Kind.Slime ? 0.5f : 0.15f);
+            monster = Monster.Create(kind, GridView.ToWorld(monsterPos) + Vector3.up * GridView.SurfaceY, monsterHp, tint, robot.transform);
+            charged = false;
+            stompTimer = 5f;
+            SpawnOrb();
+            hazards.IsProtected = p => p == monsterPos || p == orbPos;
+        }
+
+        /// <summary>A new orb lands on a free tile away from the robot and the monster, so every hit needs a run.</summary>
+        private void SpawnOrb()
+        {
+            var options = new List<(GridPos p, int d)>();
+            foreach (var t in grid.AllPositions())
+            {
+                if (!grid.IsStandable(t) || t == monsterPos || t == robot.Position || hazards.IsThreatened(t)) continue;
+                if (t.Manhattan(monsterPos) < 2) continue;
+                options.Add((t, t.Manhattan(robot.Position)));
+            }
+            if (options.Count == 0) return;
+            options.Sort((a, b) => b.d.CompareTo(a.d));
+            orbPos = options[Random.Range(0, Mathf.Max(1, options.Count / 3))].p;
+            if (orb != null) Destroy(orb.gameObject);
+            orb = MagicOrb.Create(GridView.ToWorld(orbPos) + Vector3.up * GridView.SurfaceY);
+            fx.Burst(GridView.ToWorld(orbPos) + Vector3.up * 0.6f, new Color(0.75f, 0.45f, 1f), new Color(1.8f, 0.9f, 2.8f), 16, 3f);
+        }
+
+        private void PickUpOrb()
+        {
+            if (orb != null) Destroy(orb.gameObject);
+            orb = null;
+            orbPos = new GridPos(-99, -99);
+            charged = true;
+            if (aura == null) aura = MagicOrb.CreateAura(robot.transform);
+            fx.Burst(robot.transform.position + Vector3.up * 0.5f, new Color(0.75f, 0.45f, 1f), new Color(1.8f, 0.9f, 2.8f), 26, 4f);
+            AudioManager.PlaySfx(Sfx.Shield, 0.9f, 1.4f);
+            Haptics.Medium();
+            FloatAt(robot.transform.position, Loc.T("float.magic"), new Color(0.85f, 0.6f, 1f));
+        }
+
+        private void OnRobotBumped(GridPos target)
+        {
+            if (State != GameState.Playing || level == null || level.mission != MissionType.Monster || monster == null || target != monsterPos) return;
+            if (!charged)
+            {
+                FloatAt(GridView.ToWorld(monsterPos) + Vector3.up, Loc.T("float.needMagic"), Palette.UiCyan);
+                return;
+            }
+            // A magic hit.
+            charged = false;
+            if (aura != null) Destroy(aura);
+            aura = null;
+            monsterHp--;
+            objectivesDone++;
+            var at = GridView.ToWorld(monsterPos) + Vector3.up * 0.8f;
+            fx.Burst(at, new Color(0.75f, 0.45f, 1f), new Color(2.4f, 1.2f, 3.2f), 40, 6f);
+            AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.7f);
+            cameraRig.Shake(0.8f);
+            cameraRig.Punch(0.8f);
+            Haptics.Medium();
+            if (monsterHp <= 0)
+            {
+                monster.Defeat();
+                grid.SetOccupied(monsterPos, false);
+                FloatAt(at, Loc.T("float.monsterDown"), Palette.UiGold);
+                AudioManager.PlaySfx(Sfx.Squash, 1f, 0.5f);
+                Win();
+                return;
+            }
+            monster.Hit(monsterHp);
+            FloatAt(at, Loc.F("float.monsterHit", monsterHp), Palette.UiGold);
+            SpawnOrb();
+        }
+
+        private void UpdateMonster(float dt)
+        {
+            if (monster == null || monster.Dead) return;
+            if (orb != null && (!grid.IsStandable(orbPos) || hazards.IsThreatened(orbPos))) SpawnOrb();
+            if (orb == null && !charged) SpawnOrb();
+
+            if (stompWindup >= 0f)
+            {
+                // The tiles around the monster flash while it winds up.
+                stompWindup -= dt;
+                float pulse = 0.55f + 0.45f * Mathf.Sin(Time.time * 24f);
+                for (int x = -1; x <= 1; x++)
+                    for (int y = -1; y <= 1; y++)
+                    {
+                        var p = new GridPos(monsterPos.x + x, monsterPos.y + y);
+                        if (grid.InBounds(p) && p != monsterPos) gridView.SetWarning(p, pulse);
+                    }
+                if (stompWindup < 0f) Slam();
+                return;
+            }
+            stompTimer -= dt;
+            if (stompTimer > 0f) return;
+            stompTimer = Mathf.Lerp(6.5f, 3.5f, LevelCatalog.Difficulty(levelIndex)) + Random.Range(0f, 1.5f);
+            stompWindup = 0.75f;
+            monster.Stomp();
+        }
+
+        /// <summary>The stomp lands: dust and a shake, and a robot next to the monster is knocked back (never hurt).</summary>
+        private void Slam()
+        {
+            fx.Dust(GridView.ToWorld(monsterPos) + Vector3.up * 0.1f, Palette.TileTop, 24, 4f);
+            cameraRig.Shake(0.6f);
+            AudioManager.PlaySfx(Sfx.Impact, 0.8f, 0.6f);
+            var r = robot.Position;
+            if (Mathf.Abs(r.x - monsterPos.x) > 1 || Mathf.Abs(r.y - monsterPos.y) > 1 || robot.IsHopping || !robot.IsAlive) return;
+            int dx = r.x - monsterPos.x, dy = r.y - monsterPos.y;
+            Direction dir = Mathf.Abs(dx) >= Mathf.Abs(dy) ? (dx >= 0 ? Direction.PlusX : Direction.MinusX) : (dy >= 0 ? Direction.PlusY : Direction.MinusY);
+            var o = dir.ToOffset();
+            for (int dist = 2; dist >= 1; dist--)
+            {
+                var landing = new GridPos(r.x + o.x * dist, r.y + o.y * dist);
+                if (!grid.InBounds(landing) || !grid.IsStandable(landing) || hazards.IsThreatened(landing)) continue;
+                robot.Shove(dir, dist, 1.3f);
+                FloatAt(robot.transform.position, Loc.T("float.knocked"), Palette.UiCyan);
+                Haptics.Medium();
+                return;
+            }
+        }
+
+        private void ClearMonster()
+        {
+            if (monster != null) Destroy(monster.gameObject);
+            if (orb != null) Destroy(orb.gameObject);
+            if (aura != null) Destroy(aura);
+            monster = null;
+            orb = null;
+            aura = null;
+            charged = false;
+            stompWindup = -1f;
+        }
+
         private void RefreshHud()
         {
             string Seconds(float s) => Mathf.Max(0f, s).ToString("0.0", CultureInfo.InvariantCulture);
@@ -2090,6 +2268,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Tunnel: text = Loc.F("hud.tunnel", coinsThisRun, Mathf.RoundToInt(runner.Progress * 100f)); break;
                 case MissionType.Boss: text = Loc.F("hud.boss", objectivesDone, objectivesTotal); break;
                 case MissionType.Quest: text = questReady ? Loc.T("quest.hudGo." + level.quest) : Loc.F("quest.hud." + level.quest, objectivesDone, objectivesTotal); break;
+                case MissionType.Monster: text = charged ? Loc.T("hud.monsterHit") : Loc.F("hud.monster", monsterHp, objectivesTotal); break;
                 default: text = Loc.F("hud.survive", Seconds(level.surviveSeconds - elapsed)); break;
             }
             ui.SetMission(text, MissionProgress(), Earned);

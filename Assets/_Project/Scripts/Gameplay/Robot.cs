@@ -37,6 +37,8 @@ namespace SquashBot.Gameplay
 
         /// <summary>Raised when a hop lands on its target tile.</summary>
         public event Action<GridPos> Arrived;
+        /// <summary>The robot ran into something standing on this tile (a block, a pillar, a monster) and bounced off.</summary>
+        public event Action<GridPos> BumpedInto;
 
         private Transform visual;
         private Material eyeMaterial;
@@ -329,6 +331,7 @@ namespace SquashBot.Gameplay
             bool blocked = grid.InBounds(target) && grid.IsOccupied(target) && !(IsShielded && BlockSmasher != null && BlockSmasher(target));
             if (!grid.InBounds(target) || blocked)
             {
+                if (blocked) BumpedInto?.Invoke(target);
                 StartAnim(Anim.Bump, transform.position, transform.position + new Vector3(offset.x, 0f, offset.y) * 0.25f);
                 AudioManager.PlaySfx(Sfx.Bump, 0.6f);
                 Haptics.Light();

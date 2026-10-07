@@ -52,12 +52,12 @@ namespace SquashBot.Data
         /// </summary>
         public static float Difficulty(int index) => Mathf.Pow(Mathf.Clamp01(index / (float)(LevelCount - 1)), 0.85f);
 
-        // Mission rhythm inside a world: three story quests on big floors, two journeys to an exit, arenas in between,
-        // coin rain, then the boss.
+        // Mission rhythm inside a world: three story quests on big floors, two journeys to an exit, a monster fight,
+        // arenas in between, coin rain, then the boss.
         private static readonly MissionType[] Rhythm =
         {
             MissionType.Quest, MissionType.Exit, MissionType.CollectCoins, MissionType.Quest,
-            MissionType.Paint, MissionType.Exit, MissionType.Quest, MissionType.Survive,
+            MissionType.Paint, MissionType.Exit, MissionType.Quest, MissionType.Monster,
             MissionType.CoinRain, MissionType.Boss,
         };
 
@@ -98,6 +98,15 @@ namespace SquashBot.Data
                 level.lineWaveChance = Mathf.Lerp(0.3f, 0.45f, d);
                 level.bombChance = Mathf.Max(level.bombChance, 0.2f);
                 level.blocksPerWave = Mathf.Min(5, level.blocksPerWave + 1);
+            }
+            else if (mission == MissionType.Monster)
+            {
+                // A monster to bring down with magic orbs: more hits on later floors, a roomy floor to run around on.
+                level.keys = 3 + Mathf.RoundToInt(d * 4f);
+                level.gridWidth = level.gridHeight = Mathf.Min(14, level.gridWidth + 1);
+                level.blocksPerWave = Mathf.Max(1, level.blocksPerWave - 1);
+                level.aimAtPlayerChance = 0.15f;
+                Shape(level, index, d);
             }
             else if (mission == MissionType.Quest)
             {
@@ -273,9 +282,9 @@ namespace SquashBot.Data
                 // Blocks fall around the robot, only sometimes right on it: pressure to move, not a trap.
                 aimAtPlayerChance = Mathf.Lerp(0.3f, 0.2f, d),
                 // The challenge grows in what the mission asks: more coins, longer to hold out, more keys to find.
-                coinTarget = 6 + Mathf.RoundToInt(d * 14f),
+                coinTarget = 8 + Mathf.RoundToInt(d * 16f),
                 surviveSeconds = Mathf.Round(30f + d * 30f),
-                keys = 1 + Mathf.RoundToInt(d * 3f),
+                keys = 2 + Mathf.RoundToInt(d * 3f),
             };
 
             if (mission == MissionType.CoinRain)

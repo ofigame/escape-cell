@@ -57,7 +57,10 @@ namespace SquashBot.Gameplay
             Clear();
             BuildPlatform(grid);
 
-            var holeMaterial = MaterialFactory.Create(Palette.BgBottom * 0.75f, Color.black);
+            // A hole is a black pit with a glowing hazard-orange rim: unmistakable on light and dark floors alike.
+            var holeMaterial = MaterialFactory.Create(new Color(0.02f, 0.02f, 0.04f), Color.black);
+            var holeRim = MaterialFactory.Create(new Color(1f, 0.4f, 0.2f), new Color(2.6f, 0.75f, 0.2f));
+            paintColor = PaintFor(WorldTheme.Current);
             var obstacleBody = MaterialFactory.Create(Color.Lerp(Palette.Pillar, new Color(0.12f, 0.1f, 0.2f), 0.45f), Color.black);
             var obstacleCap = MaterialFactory.Create(WorldTheme.Current.accent, WorldTheme.Current.accent * 1.2f);
 
@@ -92,7 +95,10 @@ namespace SquashBot.Gameplay
                     Shapes.Rounded("Band", tile.transform, new Vector3(0f, 0.3f, 0f), new Vector3(0.82f, 0.06f, 0.82f), 0.025f, obstacleCap);
                 }
 
-                var hole = Shapes.Rounded("Hole", root.transform, new Vector3(0f, -0.035f, 0f), new Vector3(0.94f, 0.02f, 0.94f), 0.01f, holeMaterial);
+                var hole = Shapes.Rounded("Hole", root.transform, new Vector3(0f, -0.27f, 0f), new Vector3(0.9f, 0.5f, 0.9f), 0.02f, holeMaterial);
+                foreach (var (o, s) in new[] { (new Vector3(0f, 0.27f, 0.44f), new Vector3(0.94f, 0.05f, 0.06f)), (new Vector3(0f, 0.27f, -0.44f), new Vector3(0.94f, 0.05f, 0.06f)),
+                    (new Vector3(0.44f, 0.27f, 0f), new Vector3(0.06f, 0.05f, 0.94f)), (new Vector3(-0.44f, 0.27f, 0f), new Vector3(0.06f, 0.05f, 0.94f)) })
+                    Shapes.Rounded("Rim", hole.transform, o, s, 0.01f, holeRim);
                 hole.SetActive(false);
 
                 tiles[p.x, p.y] = new TileView { tile = tile, hole = hole, top = top, frame = frame };
@@ -220,20 +226,21 @@ namespace SquashBot.Gameplay
                 {
                     // Painted tiles glow in the accent color; a fresh coat flashes brighter for a moment.
                     if (t.paintPop < 1f) t.paintPop = Mathf.Min(1f, t.paintPop + Time.deltaTime * 3f);
-                    var accent = WorldTheme.Current.accent;
                     float flash = 1f - t.paintPop;
-                    // A saturated, glowing coat that reads clearly on light and dark worlds alike.
-                    topColor = Paint(accent);
-                    topGlow = Paint(accent) * (0.45f + flash * 1.4f);
+                    // A vivid coat in a colour picked to stand apart from this world's tiles, glowing on light and dark floors alike.
+                    topColor = paintColor;
+                    topGlow = paintColor * (0.7f + flash * 1.4f);
                 }
                 // Darkness dims the tile itself; a warning still shows at full strength.
                 float dim = Mathf.Lerp(0.07f, 1f, lit);
                 MaterialFactory.SetColors(t.top,
                     Color.Lerp(topColor * dim, Palette.TileWarningTop, t.warning),
                     Color.Lerp(topGlow * dim, Color.black, t.warning));
+                var frameColor = t.painted ? paintColor : Palette.TileTop * dim;
+                var frameGlow = t.painted ? paintColor * 1.6f : Palette.TileGlow * (dim * dim);
                 MaterialFactory.SetColors(t.frame,
-                    Color.Lerp(Palette.TileTop * dim, Palette.TileWarningTop, t.warning),
-                    Color.Lerp(Palette.TileGlow * (dim * dim), Palette.TileWarningGlow * 1.3f, t.warning));
+                    Color.Lerp(frameColor, Palette.TileWarningTop, t.warning),
+                    Color.Lerp(frameGlow, Palette.TileWarningGlow * 1.3f, t.warning));
                 t.warning = 0f;
 
                 if (t.bounce < 1f)
@@ -259,11 +266,29 @@ namespace SquashBot.Gameplay
             }
         }
 
-        /// <summary>The world accent pushed to a vivid paint color.</summary>
-        private static Color Paint(Color accent)
+        private Color paintColor = Color.magenta;
+
+        /// <summary>
+        /// The paint for a world: of a few vivid colours, the one whose hue is furthest from the tiles and their glow, so a
+        /// painted tile never looks like a plain one.
+        /// </summary>
+        private static Color PaintFor(WorldTheme theme)
         {
-            Color.RGBToHSV(accent, out float h, out float s, out float v);
-            return Color.HSVToRGB(h, Mathf.Max(0.75f, s), Mathf.Clamp01(v * 0.95f));
+            var options = new[] { new Color(0.45f, 1f, 0.3f), new Color(1f, 0.3f, 0.85f), new Color(1f, 0.78f, 0.2f), new Color(0.25f, 0.9f, 1f), new Color(1f, 0.45f, 0.3f) };
+            Color.RGBToHSV(theme.tileTop, out float h1, out float s1, out _);
+            Color.RGBToHSV(theme.tileGlow, out float h2, out _, out _);
+            Color.RGBToHSV(theme.accent, out float h3, out _, out _);
+            float HueGap(float a, float b) { float d = Mathf.Abs(a - b); return Mathf.Min(d, 1f - d); }
+            Color best = options[0];
+            float bestScore = -1f;
+            foreach (var c in options)
+            {
+                Color.RGBToHSV(c, out float h, out _, out _);
+                // Pale tiles have little hue of their own, so mostly avoid the glow and accent colours there.
+                float score = Mathf.Min(HueGap(h, h2), HueGap(h, h3)) + (s1 > 0.15f ? HueGap(h, h1) : 0.25f);
+                if (score > bestScore) { bestScore = score; best = c; }
+            }
+            return best;
         }
 
         private static float EaseOutBack(float x)

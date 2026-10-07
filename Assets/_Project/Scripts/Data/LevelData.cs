@@ -22,7 +22,9 @@ namespace SquashBot.Data
         /// <summary>World finale: dodge WARDEN's attacks and hit the buttons that light up, three times.</summary>
         Boss,
         /// <summary>A little story on a big floor: find every piece (keys, cores, cages, lanterns, gems), then reach the goal.</summary>
-        Quest
+        Quest,
+        /// <summary>A monster on a fixed tile: pick up the magic orb, run into it, repeat until its health bar is empty.</summary>
+        Monster
     }
 
     /// <summary>The signature rules of the upper floors (several can be combined).</summary>
