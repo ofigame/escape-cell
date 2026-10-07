@@ -185,6 +185,17 @@ namespace SquashBot.Gameplay
             fx.Burst(t.tile.transform.position + Vector3.up * 0.1f, accent, accent * 1.6f, 10, 2.2f);
         }
 
+        /// <summary>A Silgi-bot rolled over the tile: the paint is gone, back to grey.</summary>
+        public void Unpaint(GridPos p)
+        {
+            if (tiles == null || tiles[p.x, p.y] == null) return;
+            var t = tiles[p.x, p.y];
+            if (!t.painted) return;
+            t.painted = false;
+            t.paintPop = 1f;
+            fx.Dust(t.tile.transform.position + Vector3.up * 0.1f, new Color(0.6f, 0.6f, 0.65f), 8, 1.5f);
+        }
+
         /// <summary>The tile catches fire: glowing embers and rising flames until <see cref="Extinguish"/>.</summary>
         public void Ignite(GridPos p)
         {

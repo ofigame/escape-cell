@@ -20,6 +20,8 @@ namespace SquashBot.Gameplay
             public float lifeLeft;
             public float age;
             public GameObject go;
+            /// <summary>Coin rain: the gold ring on the tile where the coin is about to land.</summary>
+            public GameObject ring;
         }
 
         public event Action<GridPos> Collected;
@@ -61,7 +63,7 @@ namespace SquashBot.Gameplay
         public void Stop()
         {
             running = false;
-            foreach (var c in coins) Destroy(c.go);
+            foreach (var c in coins) DestroyCoin(c);
             coins.Clear();
         }
 
@@ -71,7 +73,7 @@ namespace SquashBot.Gameplay
             {
                 if (coins[i].pos != p) continue;
                 fx.Burst(coins[i].go.transform.position, Palette.Coin, Palette.CoinGlow, 10, 3f);
-                Destroy(coins[i].go);
+                DestroyCoin(coins[i]);
                 coins.RemoveAt(i);
                 AudioManager.PlaySfx(Sfx.Coin, 0.8f, 1f, 0.04f);
                 Haptics.Pulse(18, 0.4f);
@@ -89,7 +91,7 @@ namespace SquashBot.Gameplay
                 if (coins[i].pos == p || coins[i].pos.Manhattan(p) > range) continue;
                 var c = coins[i];
                 fx.Burst(c.go.transform.position, Palette.Coin, Palette.CoinGlow, 8, 2.5f);
-                Destroy(c.go);
+                DestroyCoin(c);
                 coins.RemoveAt(i);
                 AudioManager.PlaySfx(Sfx.Coin, 0.6f, 1.15f, 0.04f);
                 Collected?.Invoke(c.pos);
@@ -110,7 +112,7 @@ namespace SquashBot.Gameplay
             {
                 if (coins[i].pos != p) continue;
                 fx.Burst(coins[i].go.transform.position, Palette.Coin, Palette.CoinGlow, 10, 3f);
-                Destroy(coins[i].go);
+                DestroyCoin(coins[i]);
                 coins.RemoveAt(i);
                 return true;
             }
@@ -122,7 +124,7 @@ namespace SquashBot.Gameplay
             for (int i = coins.Count - 1; i >= 0; i--)
             {
                 if (coins[i].pos != p) continue;
-                Destroy(coins[i].go);
+                DestroyCoin(coins[i]);
                 coins.RemoveAt(i);
             }
         }
@@ -138,7 +140,7 @@ namespace SquashBot.Gameplay
                 if (running) c.lifeLeft -= dt;
                 if (c.lifeLeft <= 0f || grid.IsGap(c.pos))
                 {
-                    Destroy(c.go);
+                    DestroyCoin(c);
                     coins.RemoveAt(i);
                     continue;
                 }
@@ -152,7 +154,11 @@ namespace SquashBot.Gameplay
                 var cam = Camera.main;
                 var facing = cam != null ? Quaternion.FromToRotation(Vector3.up, -cam.transform.forward) : Quaternion.Euler(90f, 0f, 0f);
                 tr.rotation = Quaternion.AngleAxis(Mathf.Sin(Time.time * 3f + c.pos.y) * 25f, Vector3.up) * facing;
-                float drop = Mathf.Pow(1f - Mathf.Clamp01(c.age / 0.25f), 2f) * 1.4f; // falls into place
+                // Falls into place; in a coin rain from high up, its landing tile ringed in gold first.
+                bool rain = level.mission == MissionType.CoinRain;
+                float fall = rain ? RainFall : 0.25f;
+                float drop = Mathf.Pow(1f - Mathf.Clamp01(c.age / fall), 2f) * (rain ? 4.5f : 1.4f);
+                if (c.ring != null && c.age >= fall) { Destroy(c.ring); c.ring = null; }
                 tr.position = GridView.ToWorld(c.pos) + Vector3.up * (0.4f + drop + Mathf.Sin(Time.time * 4f + c.pos.x) * 0.06f);
                 // blink when about to vanish
                 c.go.SetActive(c.lifeLeft > 1.5f || Mathf.Repeat(c.lifeLeft, 0.25f) > 0.1f);
@@ -186,6 +192,16 @@ namespace SquashBot.Gameplay
         /// <summary>WARDEN alarm: coins come faster while it lasts.</summary>
         public float SpawnBoost = 1f;
 
+        /// <summary>Coin rain: how long a coin takes to fall (its landing ring shows meanwhile).</summary>
+        private const float RainFall = 0.6f;
+
+        private void DestroyCoin(Coin c)
+        {
+            if (c.ring != null) Destroy(c.ring);
+            Destroy(c.go);
+        }
+        private Material ringMaterial;
+
         private void SpawnCoin()
         {
             var options = new List<GridPos>();
@@ -203,7 +219,13 @@ namespace SquashBot.Gameplay
             go.transform.SetParent(transform, false);
             Shapes.Primitive(PrimitiveType.Cylinder, "Rim", go.transform, Vector3.zero, new Vector3(0.46f, 0.035f, 0.46f), rimMaterial);
             Shapes.Primitive(PrimitiveType.Cylinder, "Face", go.transform, Vector3.zero, new Vector3(0.36f, 0.045f, 0.36f), coinMaterial);
-            coins.Add(new Coin { pos = pos, lifeLeft = level.coinLifetime, go = go });
+            GameObject ring = null;
+            if (level.mission == MissionType.CoinRain)
+            {
+                ring = Shapes.Primitive(PrimitiveType.Cylinder, "LandingRing", transform, GridView.ToWorld(pos) + Vector3.up * (GridView.SurfaceY + 0.03f),
+                    new Vector3(0.7f, 0.01f, 0.7f), ringMaterial ?? (ringMaterial = MaterialFactory.CreateTransparent(new Color(1f, 0.85f, 0.3f, 0.6f), new Color(2f, 1.5f, 0.3f))));
+            }
+            coins.Add(new Coin { pos = pos, lifeLeft = level.coinLifetime + (ring != null ? RainFall : 0f), go = go, ring = ring });
         }
     }
 }

@@ -14,7 +14,7 @@ namespace SquashBot.Gameplay
     /// cracking glass, blinking tiles and rolling barrels. (Hunting blocks live in the hazard system.)
     /// Special tiles are picked from the platform with a seeded random, so a level always looks the same.
     /// </summary>
-    public class FloorRules : MonoBehaviour
+    public partial class FloorRules : MonoBehaviour
     {
         /// <summary>Something rule-made (a laser, a barrel) hit this tile; the game treats it like a block impact.</summary>
         public event Action<GridPos> Hit;
@@ -91,6 +91,7 @@ namespace SquashBot.Gameplay
             if (Has(FloorRule.Teleport)) PlacePads();
             if (Has(FloorRule.Dark)) view.Light = Lit;
 
+            BeginWorldRules();
             poisonTimer = Mathf.Lerp(3.6f, 2.2f, d);
             windTimer = 3f;
             laserTimer = 2.5f;
@@ -462,7 +463,8 @@ namespace SquashBot.Gameplay
             if (Has(FloorRule.Poison)) UpdatePoison(dt);
             if (Has(FloorRule.Wind)) UpdateWind(dt);
             if (Has(FloorRule.Laser)) UpdateLasers(dt);
-            if (Has(FloorRule.Barrel)) UpdateBarrels(dt);
+            if (Has(FloorRule.Barrel) || Has(FloorRule.Jellyfish)) UpdateBarrels(dt);
+            UpdateWorldRules(dt);
             if (Has(FloorRule.Blink)) UpdateBlink(dt);
         }
 
@@ -780,7 +782,7 @@ namespace SquashBot.Gameplay
                 var danger = line.FindAll(p => grid.IsFloor(p));
                 if (danger.Count == 0 || !SafetyChecker.HasEscape(grid, robot.Position, danger, 3)) continue;
 
-                bool jelly = WorldTheme.Current.key == "world.ocean";
+                bool jelly = Has(FloorRule.Jellyfish) && (!Has(FloorRule.Barrel) || rng.Next(2) == 0);
                 var o = dir.ToOffset();
                 var body = jelly ? MakeJellyfish() : MakeBarrel(o);
                 body.position = new Vector3(line[0].x - o.x, 0.3f, line[0].y - o.y);

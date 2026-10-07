@@ -17,6 +17,9 @@ namespace SquashBot.Visual
         private int health;
         private Transform target;
 
+        /// <summary>The screen's body (for the props of vanG's avatars).</summary>
+        public Transform Body => body;
+
         private static readonly Color EyeColor = new Color(1f, 0.25f, 0.3f);
         private static readonly Color EyeGlow = new Color(2.6f, 0.3f, 0.35f);
 

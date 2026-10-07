@@ -52,5 +52,16 @@ namespace SquashBot.Core
                 default: return new GridPos(0, -1);
             }
         }
+
+        public static Direction Opposite(this Direction d)
+        {
+            switch (d)
+            {
+                case Direction.PlusX: return Direction.MinusX;
+                case Direction.MinusX: return Direction.PlusX;
+                case Direction.PlusY: return Direction.MinusY;
+                default: return Direction.PlusY;
+            }
+        }
     }
 }

@@ -320,6 +320,13 @@ namespace SquashBot.Gameplay
             AudioManager.PlaySfx(Sfx.Warning, 0.45f, 1f, 0.05f);
         }
 
+        /// <summary>A block called down on <paramref name="p"/> by something else (a scout drone that spotted the robot).</summary>
+        public void DropAt(GridPos p)
+        {
+            if (grid == null || !grid.IsStandable(p) || IsThreatened(p) || (IsProtected != null && IsProtected(p))) return;
+            CreateBlock(p, CurrentWarning);
+        }
+
         private void CreateBlock(GridPos p, float warning)
         {
             PlayWarningBeep();

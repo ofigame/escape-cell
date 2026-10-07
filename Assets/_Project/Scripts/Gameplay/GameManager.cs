@@ -57,6 +57,7 @@ namespace SquashBot.Gameplay
         private InputReader input;
         private DuctRunner runner;
         private FloorRules floorRules;
+        private EnemySystem enemies;
         private LevelEvents levelEvents;
         private Weather weather;
         private bool dailyRun;      // a daily bonus game (not a level's bonus round)
@@ -185,6 +186,10 @@ namespace SquashBot.Gameplay
             powerUps.Init(robot, hazards, fx);
             powerUps.Collected += OnPowerUpCollected;
 
+            enemies = new GameObject("Enemies").AddComponent<EnemySystem>();
+            enemies.Init(gridView, robot, hazards, fx);
+            enemies.Hit += OnBlockImpact;
+            enemies.Shove += dir => { if (State == GameState.Playing && robot.IsAlive && !robot.IsHopping) robot.Shove(dir, 1, 0.3f, 1.2f); };
             floorRules = new GameObject("FloorRules").AddComponent<FloorRules>();
             floorRules.Init(gridView, robot, hazards, fx, cameraRig);
             floorRules.Hit += OnBlockImpact;
@@ -341,6 +346,7 @@ namespace SquashBot.Gameplay
             if (roadBeacon != null) Destroy(roadBeacon);
             gridView.gameObject.SetActive(true);
             floorRules.Stop();
+            enemies.Stop();
             hazards.Hunting = false;
             levelEvents.Stop();
             cameraRig.FrameUpper(0f, 1f);
@@ -662,6 +668,8 @@ namespace SquashBot.Gameplay
             SetupMission();
             hazards.Begin(grid, level, MissionProgress);
             floorRules.Begin(grid, level, levelIndex, p => hazards.IsProtected != null && hazards.IsProtected(p));
+            enemies.Begin(grid, level, levelIndex, p => hazards.IsProtected != null && hazards.IsProtected(p),
+                p => level.mission == MissionType.Paint && painted.Contains(p), Unpaint);
             hazards.Hunting = (level.rules & FloorRule.Hunter) != 0;
             levelEvents.Begin(grid, level, levelIndex);
             coins.Begin(grid, level);
@@ -786,6 +794,7 @@ namespace SquashBot.Gameplay
             coins.Resume();
             powerUps.Resume();
             floorRules.Resume();
+            enemies.Resume();
             levelEvents.Resume();
             State = GameState.Playing;
             cameraRig.SetMenuFocus(false);
@@ -1239,6 +1248,7 @@ namespace SquashBot.Gameplay
                 else if (portal != null && portal.IsOpen && p == doorPos) Escape();
             }
 
+            enemies.OnRobotArrived(p);
             levelEvents.OnArrived(p);
             // Floor rules last: ice, currents, trampolines and teleports may carry the robot on from here.
             if (State == GameState.Playing) floorRules.OnArrived(p, robot.LastLeftTile);
@@ -1451,6 +1461,7 @@ namespace SquashBot.Gameplay
                     skillFreezeLeft = 4f;
                     hazards.Freeze();
                     floorRules.Freeze();
+            enemies.Freeze();
                     FloatAt(GridView.ToWorld(p), Loc.T("float.skillFreeze"), new Color(0.55f, 0.85f, 1f));
                     ui.ShowIntro(Loc.T("skill.title"), Loc.T("skill.freeze"));
                     AudioManager.PlaySfx(Sfx.Shield, 0.9f, 0.7f);
@@ -1489,6 +1500,7 @@ namespace SquashBot.Gameplay
                 {
                     hazards.Resume();
                     floorRules.Resume();
+                    enemies.Resume();
                 }
             }
             if (skillMagnetLeft > 0f)
@@ -1663,6 +1675,7 @@ namespace SquashBot.Gameplay
             coins.Freeze();
             powerUps.Freeze();
             floorRules.Freeze();
+            enemies.Freeze();
             levelEvents.Freeze();
             HideTools();
             if (hovering) { hovering = false; ShowHoverMarker(false); }
@@ -1778,6 +1791,7 @@ namespace SquashBot.Gameplay
             coins.Freeze();
             powerUps.Freeze();
             floorRules.Freeze();
+            enemies.Freeze();
             levelEvents.Freeze();
             HideTools();
             if (hovering) { hovering = false; ShowHoverMarker(false); }
@@ -1874,6 +1888,7 @@ namespace SquashBot.Gameplay
                 objectivesTotal = Mathf.Max(1, level.keys);
                 var corner = GridView.ToWorld(new GridPos(grid.Width - 1, grid.Height - 1));
                 warden = WardenBoss.Create(corner + new Vector3(0.9f, 2.3f, 0.9f), objectivesTotal, robot.transform);
+                GuardianLooks.DressAvatar(warden.Body, World); // vanG's avatar for this floor (Pres Kolu, Orman Biçici...)
                 AddFarObjective();
             }
             else if (level.mission == MissionType.Quest)
@@ -2063,6 +2078,12 @@ namespace SquashBot.Gameplay
         /// <summary>Tiles to paint: the card's number, or every tile of the floor.</summary>
         private int PaintGoal => level.paintTarget > 0 ? Mathf.Min(level.paintTarget, grid.FloorCount) : grid.FloorCount;
 
+        /// <summary>A Silgi-bot rolled over a painted tile: it has to be painted again.</summary>
+        private void Unpaint(GridPos p)
+        {
+            if (painted.Remove(p)) gridView.Unpaint(p);
+        }
+
         private void PaintTile(GridPos p)
         {
             if (!grid.InBounds(p) || grid.GetTile(p) != TileState.Solid || !painted.Add(p)) return;
@@ -2246,6 +2267,7 @@ namespace SquashBot.Gameplay
         {
             hazards.Stop();
             floorRules.Stop();
+            enemies.Stop();
             levelEvents.Stop();
             coins.Stop();
             powerUps.Stop();
@@ -2527,6 +2549,7 @@ namespace SquashBot.Gameplay
         /// <summary>This world's monster: its kind and colour (the briefing shows the same one).</summary>
         private void MonsterLook(out Monster.Kind kind, out Color tint)
         {
+            if (GuardianLooks.Guardian(World, out kind, out tint)) return;
             kind = (Monster.Kind)(World % 4);
             tint = Color.Lerp(WorldTheme.Current.accent, new Color(0.55f, 0.85f, 0.4f), kind == Monster.Kind.Slime ? 0.5f : 0.15f);
         }
@@ -2562,6 +2585,7 @@ namespace SquashBot.Gameplay
             objectivesDone = 0;
             MonsterLook(out var kind, out var tint);
             monster = Monster.Create(kind, GridView.ToWorld(monsterPos) + Vector3.up * GridView.SurfaceY, monsterHp, tint, robot.transform);
+            GuardianLooks.DressGuardian(monster.Body, World); // the floor's named guardian (Kütükbaş, Penguen Kral...)
             princessPos = new GridPos(-99, -99);
             if (level.guardsPrincess)
             {
@@ -2907,6 +2931,7 @@ namespace SquashBot.Gameplay
             hazards.Freeze();
             powerUps.Freeze();
             floorRules.Freeze();
+            enemies.Freeze();
             levelEvents.Freeze();
             coins.Freeze();
         }
@@ -2918,6 +2943,7 @@ namespace SquashBot.Gameplay
                 hazards.Resume();
                 powerUps.Resume();
                 floorRules.Resume();
+                enemies.Resume();
                 levelEvents.Resume();
                 coins.Resume();
             }

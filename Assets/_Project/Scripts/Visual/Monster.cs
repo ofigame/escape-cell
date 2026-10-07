@@ -22,6 +22,9 @@ namespace SquashBot.Visual
 
         public bool Dead => deadT >= 0f;
 
+        /// <summary>The model's body (for the named guardians' props).</summary>
+        public Transform Body => body;
+
         // Big enough to read as the boss of its floor, while still standing on a single tile.
         private const float Size = 1.45f;
 
