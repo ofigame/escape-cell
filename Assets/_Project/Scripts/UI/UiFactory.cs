@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 using SquashBot.Audio;
 using SquashBot.Visual;
@@ -41,6 +42,8 @@ namespace SquashBot.UI
                     if (font.fontWeightTable != null && font.fontWeightTable.Length > 7) font.fontWeightTable[7].regularTypeface = bold;
                     AddFallback(bold, builtIn);
                 }
+                // Scripts Nunito doesn't draw (Korean, Arabic) come from open-licence Noto fonts, when they are in Resources/Fonts.
+                foreach (var extra in ScriptFonts) AddFallback(font, extra);
                 AddFallback(font, builtIn);
                 return font;
             }
@@ -55,7 +58,26 @@ namespace SquashBot.UI
                 titleFont = Dynamic("Fonts/PaytoneOne-Regular");
                 if (titleFont == null) return titleFont = Font;
                 AddFallback(titleFont, Font);
+                foreach (var extra in ScriptFonts) AddFallback(titleFont, extra);
                 return titleFont;
+            }
+        }
+
+        private static List<TMP_FontAsset> scriptFonts;
+
+        /// <summary>Fallback fonts for other scripts: Korean (Noto Sans KR) and Arabic (Noto Sans Arabic), if present.</summary>
+        private static List<TMP_FontAsset> ScriptFonts
+        {
+            get
+            {
+                if (scriptFonts != null) return scriptFonts;
+                scriptFonts = new List<TMP_FontAsset>();
+                foreach (var path in new[] { "Fonts/NotoSansKR-Bold", "Fonts/NotoSansArabic-Bold" })
+                {
+                    var asset = Dynamic(path);
+                    if (asset != null) scriptFonts.Add(asset);
+                }
+                return scriptFonts;
             }
         }
 
@@ -212,6 +234,13 @@ namespace SquashBot.UI
             label.enableAutoSizing = true;
             label.fontSizeMax = size;
             label.fontSizeMin = size * 0.4f;
+            // Arabic is shaped and laid out right to left on the fly; other text passes through untouched.
+            label.textPreprocessor = new RtlTextPreprocessor(label);
+            if (Data.Loc.IsRightToLeft)
+            {
+                if (align == TextAlignmentOptions.Left) label.alignment = TextAlignmentOptions.Right;
+                else if (align == TextAlignmentOptions.TopLeft) label.alignment = TextAlignmentOptions.TopRight;
+            }
             label.raycastTarget = false;
             return label;
         }

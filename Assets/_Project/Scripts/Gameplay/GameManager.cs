@@ -110,10 +110,12 @@ namespace SquashBot.Gameplay
         private const float CollapseDelay = 0.7f;
         private const float CollapseRepair = 7f;
         private const float ChaseGraceRows = 3f;
-        // The window the camera keeps around the robot on big floors (fitted to the screen width, so on a tall phone
-        // it shows more rows than columns). Floors bigger than FollowFrom get the close follow camera.
-        private const int FollowWindow = 4;
-        private const int FollowFrom = 6;
+        // The window the camera keeps around the robot (fitted to the screen width, so on a tall phone it shows more rows
+        // than columns). Every floor bigger than the first one gets the same close view as level 1, gliding with the robot;
+        // dangers and pickups then stay within FocusRange of it, so nothing falls where the player can't see.
+        private const int FollowWindow = 3;
+        private const int FollowFrom = 3;
+        private const int FocusRange = 3;
         private readonly HashSet<GridPos> painted = new HashSet<GridPos>();
         private bool bonusRun;
         private bool pendingEnding;
@@ -618,9 +620,9 @@ namespace SquashBot.Gameplay
             // Long journeys don't fit the screen: the camera rides along and hazards and pickups stay near the robot.
             bool big = grid.Width > FollowFrom || grid.Height > FollowFrom;
             if (big) cameraRig.Follow(robot.transform, FollowWindow, FollowWindow);
-            hazards.FocusRadius = big ? 4 : 0;
-            coins.FocusRadius = big ? 4 : 0;
-            powerUps.FocusRadius = big ? 4 : 0;
+            hazards.FocusRadius = big ? FocusRange : 0;
+            coins.FocusRadius = big ? FocusRange : 0;
+            powerUps.FocusRadius = big ? FocusRange : 0;
 
             SetupMission();
             hazards.Begin(grid, level, MissionProgress, LevelCatalog.WorldOf(levelIndex));
@@ -688,7 +690,7 @@ namespace SquashBot.Gameplay
                     cameraRig.SetMode(SaveData.PerspectiveView ? ViewMode.Perspective : ViewMode.Isometric);
                     break;
                 case SettingKind.Language:
-                    Loc.Set(Loc.Current == Language.Turkish ? Language.English : Language.Turkish);
+                    Loc.Set(Loc.NextLanguage());
                     // Every label is baked at build time, so rebuild the UI in the new language.
                     CreateUi();
                     ShowMenu();
@@ -721,6 +723,8 @@ namespace SquashBot.Gameplay
             });
         }
 
+        private const int ReviveSeconds = 15;
+
         private void Revive()
         {
             continued = true;
@@ -728,6 +732,10 @@ namespace SquashBot.Gameplay
             // The loss already banked the coins and counted a fail; this run goes on instead.
             SaveData.Coins -= Earned;
             PlayerPrefs.SetInt(FailKey(levelIndex), Mathf.Max(0, PlayerPrefs.GetInt(FailKey(levelIndex), 0) - 1));
+
+            // A run lost to the clock gets time back, or it would end again at once.
+            bool timed = level.mission == MissionType.CoinRain;
+            if (timed) elapsed = Mathf.Min(elapsed, level.surviveSeconds - ReviveSeconds);
 
             var at = SafeTileNear(robot.Position, robot.Position);
             robot.Spawn(grid, at);
@@ -743,6 +751,7 @@ namespace SquashBot.Gameplay
             ui.ShowHud(levelIndex);
             fx.Burst(GridView.ToWorld(at) + Vector3.up * 0.5f, Palette.ShieldPickup, Palette.ShieldPickupGlow, 30, 5f);
             FloatAt(GridView.ToWorld(at), Loc.T("float.revive"), Palette.UiCyan);
+            if (timed) FloatAt(GridView.ToWorld(at) + Vector3.up * 0.6f, Loc.F("float.moreTime", ReviveSeconds), Palette.UiGold);
             AudioManager.PlaySfx(Sfx.Shield, 1f, 1.1f);
             Haptics.Medium();
             RefreshHud();

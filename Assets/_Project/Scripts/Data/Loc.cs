@@ -6,11 +6,21 @@ namespace SquashBot.Data
     public enum Language
     {
         English,
-        Turkish
+        Turkish,
+        Arabic,
+        Spanish,
+        German,
+        Korean,
+        Italian,
+        Azerbaijani
     }
 
-    /// <summary>Tiny localization table (English / Turkish). Missing keys fall back to English, then to the key.</summary>
-    public static class Loc
+    /// <summary>
+    /// The game's text in eight languages (English and Turkish here, the others in their own Loc*.cs files). Missing
+    /// keys fall back to English, then to the key. Arabic is shaped and laid out right to left by the UI
+    /// (<see cref="SquashBot.UI.RtlTextPreprocessor"/>).
+    /// </summary>
+    public static partial class Loc
     {
         private static Language? current;
 
@@ -25,15 +35,59 @@ namespace SquashBot.Data
 
         public static string T(string key)
         {
-            var table = Current == Language.Turkish ? Turkish : English;
+            var table = Table(Current);
             if (table.TryGetValue(key, out var value)) return value;
             return English.TryGetValue(key, out value) ? value : key;
         }
 
         public static string F(string key, params object[] args) => string.Format(T(key), args);
 
-        /// <summary>Default for first launch: Turkish on Turkish devices, English elsewhere.</summary>
-        public static Language SystemDefault => Application.systemLanguage == SystemLanguage.Turkish ? Language.Turkish : Language.English;
+        /// <summary>The order the settings button cycles through.</summary>
+        public static readonly Language[] Order =
+        {
+            Language.Turkish, Language.English, Language.Arabic, Language.Spanish, Language.German, Language.Korean, Language.Italian, Language.Azerbaijani
+        };
+
+        public static Language NextLanguage()
+        {
+            int i = System.Array.IndexOf(Order, Current);
+            return Order[(i + 1) % Order.Length];
+        }
+
+        public static bool IsRightToLeft => Current == Language.Arabic;
+
+        private static Dictionary<string, string> Table(Language language)
+        {
+            switch (language)
+            {
+                case Language.Turkish: return Turkish;
+                case Language.Arabic: return Arabic;
+                case Language.Spanish: return Spanish;
+                case Language.German: return German;
+                case Language.Korean: return Korean;
+                case Language.Italian: return Italian;
+                case Language.Azerbaijani: return Azerbaijani;
+                default: return English;
+            }
+        }
+
+        /// <summary>Default for first launch: the device's language when the game speaks it, English otherwise.</summary>
+        public static Language SystemDefault
+        {
+            get
+            {
+                switch (Application.systemLanguage)
+                {
+                    case SystemLanguage.Turkish: return Language.Turkish;
+                    case SystemLanguage.Arabic: return Language.Arabic;
+                    case SystemLanguage.Spanish: return Language.Spanish;
+                    case SystemLanguage.German: return Language.German;
+                    case SystemLanguage.Korean: return Language.Korean;
+                    case SystemLanguage.Italian: return Language.Italian;
+                    default: return Language.English;
+                }
+            }
+        }
 
         private static readonly Dictionary<string, string> English = new Dictionary<string, string>
         {
@@ -101,6 +155,7 @@ namespace SquashBot.Data
             ["btn.map"] = "MAP",
             ["btn.close"] = "CLOSE",
             ["result.win"] = "LEVEL CLEAR!",
+            ["float.moreTime"] = "+{0} SECONDS!",
             ["btn.guide"] = "GUIDE",
             ["daily.chest"] = "Chest",
             ["mission.thief"] = "A thief stole the coins! Catch it {0} times",
@@ -650,6 +705,7 @@ namespace SquashBot.Data
             ["btn.map"] = "HARİTA",
             ["btn.close"] = "KAPAT",
             ["result.win"] = "BÖLÜM TAMAM!",
+            ["float.moreTime"] = "+{0} SANİYE!",
             ["btn.guide"] = "REHBER",
             ["daily.chest"] = "Sandık",
             ["mission.thief"] = "Bir hırsız altınları çaldı! Onu {0} kez yakala",
