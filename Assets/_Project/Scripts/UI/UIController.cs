@@ -19,6 +19,7 @@ namespace SquashBot.UI
         Vibration,
         Language,
         Camera,
+        Graphics,
         TestMode
     }
 
@@ -525,7 +526,7 @@ namespace SquashBot.UI
         {
             settings = UiScreen.Create("Settings", root, out var t);
             UiFactory.Dim(t, new Color(0.06f, 0.05f, 0.18f, 0.5f));
-            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1310f));
+            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1450f));
             UiFactory.TextBox("Title", card, Top, new Vector2(0f, -50f), new Vector2(800f, 120f), Loc.T("settings.title"), 90f, Palette.UiText, title: true);
 
             var rows = new[]
@@ -535,17 +536,26 @@ namespace SquashBot.UI
                 (SettingKind.Vibration, "settings.vibration"),
                 (SettingKind.Language, "settings.language"),
                 (SettingKind.Camera, "settings.camera"),
+                (SettingKind.Graphics, "settings.graphics"),
                 (SettingKind.TestMode, "settings.test"),
             };
             for (int i = 0; i < rows.Length; i++)
             {
                 var (kind, label) = rows[i];
                 float y = -210f - i * 140f;
-                UiFactory.TextBox("Label", card, TopLeft, new Vector2(70f, y), new Vector2(400f, 110f), Loc.T(label), 52f,
+                var labelText = UiFactory.TextBox("Label", card, TopLeft, new Vector2(70f, y), new Vector2(380f, 110f), Loc.T(label), 52f,
                     Palette.UiText, FontStyles.Normal, align: TextAlignmentOptions.Left);
+                // Long labels and values (the "auto" graphics tier) shrink to fit instead of running into the button.
+                labelText.enableAutoSizing = true;
+                labelText.fontSizeMin = 30f;
+                labelText.fontSizeMax = 52f;
                 var button = UiFactory.MakeButton(card, "", Kind.Secondary, TopRight, new Vector2(-60f, y), new Vector2(330f, 110f),
                     () => SettingToggled?.Invoke(kind), 46f);
                 settingValues[kind] = button.GetComponentInChildren<TextMeshProUGUI>();
+                settingValues[kind].enableAutoSizing = true;
+                settingValues[kind].fontSizeMin = 26f;
+                settingValues[kind].fontSizeMax = 46f;
+                settingValues[kind].margin = new Vector4(18f, 0f, 18f, 0f);
                 settingFaces[kind] = button.transform.Find("Face").GetComponent<Image>();
             }
 
@@ -566,6 +576,9 @@ namespace SquashBot.UI
             }
             settingValues[SettingKind.Language].text = Loc.T("lang.name");
             settingValues[SettingKind.Camera].text = Loc.T(SaveData.PerspectiveView ? "view.3d" : "view.iso");
+            var gfx = Loc.T("gfx." + GraphicsQuality.Current);
+            settingValues[SettingKind.Graphics].text = GraphicsQuality.Choice.HasValue ? gfx : Loc.F("gfx.auto", gfx);
+            settingValues[SettingKind.Graphics].color = Palette.UiCyan;
             SetSetting(SettingKind.TestMode, SaveData.TestMode);
         }
 

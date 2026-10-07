@@ -314,10 +314,13 @@ namespace SquashBot.Visual
             main.startColor = new ParticleSystem.MinMaxGradient(g) { mode = ParticleSystemGradientMode.RandomColor };
         }
 
+        /// <summary>Particle amount for the graphics tier (1 = full, Low phones get half).</summary>
+        public static float Density = 1f;
+
         private void ApplyIntensity(float k)
         {
             // A calm sky still has a little going on; the storm at full strength has about three times as much.
-            float m = Mathf.Lerp(0.35f, 1.25f, k);
+            float m = Mathf.Lerp(0.35f, 1.25f, k) * Density;
             if (a != null) { var e = a.emission; e.rateOverTime = rateA * m; }
             if (b != null) { var e = b.emission; e.rateOverTime = rateB * m; }
         }

@@ -150,7 +150,6 @@ namespace SquashBot.Gameplay
 
             Application.targetFrameRate = 60;
             QualitySettings.vSyncCount = 0;
-            FrameGovernor.Install(); // phones: scene resolution follows the frame rate
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
             if (levelSet == null || levelSet.levels.Count == 0) levelSet = LevelSet.LoadOrDefault();
 
@@ -200,6 +199,7 @@ namespace SquashBot.Gameplay
 
             CreateUi();
             ShowMenu();
+            FrameGovernor.Install(); // picture quality for this device (after the camera's post-processing exists)
             SplashScreen.Show(); // OFIGAME studio logo over the menu, fading out
         }
 
@@ -629,6 +629,9 @@ namespace SquashBot.Gameplay
                     break;
                 case SettingKind.TestMode:
                     SaveData.TestMode = !SaveData.TestMode;
+                    break;
+                case SettingKind.Graphics:
+                    GraphicsQuality.Next();
                     break;
                 case SettingKind.Camera:
                     SaveData.PerspectiveView = !SaveData.PerspectiveView;
