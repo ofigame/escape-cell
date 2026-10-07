@@ -12,7 +12,7 @@ namespace SquashBot.Gameplay
     /// </summary>
     public class Robot : MonoBehaviour
     {
-        private const float HopDuration = 0.115f; // snappy: the hop must feel instant
+        private const float HopDuration = 0.14f; // snappy, but slow enough to see and follow each step
         private const float HopHeight = 0.35f;
         private const int MaxJumpHoles = 2;
         private static readonly Quaternion FacingCamera = Quaternion.LookRotation(new Vector3(-1f, 0f, -1f));
@@ -62,6 +62,8 @@ namespace SquashBot.Gameplay
         private float animTime;
         private Vector3 from, to;
         private Direction? bufferedMove;
+        private float bufferedAt;
+        private const float BufferLife = 0.25f; // an older swipe is dropped instead of surprising the player later
         private bool bufferedJump;
         private float hopDuration = HopDuration;
         private float hopHeight = HopHeight;
@@ -295,12 +297,25 @@ namespace SquashBot.Gameplay
             StartAnim(Anim.Hop, transform.position, GridView.ToWorld(safe));
         }
 
+        /// <summary>A still copy of the robot's look (body and outfit, no behaviour), for the mission briefing's stage.</summary>
+        public GameObject BuildLookalike(Transform parent)
+        {
+            var copy = Instantiate(visual.gameObject, parent, false);
+            copy.name = "RobotLook";
+            copy.transform.localPosition = Vector3.zero;
+            copy.transform.localRotation = Quaternion.identity;
+            copy.transform.localScale = Vector3.one;
+            foreach (var b in copy.GetComponentsInChildren<MonoBehaviour>()) Destroy(b);
+            return copy;
+        }
+
         public void TryMove(Direction dir)
         {
             if (!IsAlive || anim == Anim.Hover) return;
             if (anim == Anim.Hop || anim == Anim.Bump)
             {
                 bufferedMove = dir; // keeps fast swipes responsive
+                bufferedAt = Time.time;
                 bufferedJump = false;
                 return;
             }
@@ -593,6 +608,7 @@ namespace SquashBot.Gameplay
             if (bufferedMove == null) return;
             var dir = bufferedMove.Value;
             bufferedMove = null;
+            if (Time.time - bufferedAt > BufferLife) return;
             TryMove(dir);
         }
     }

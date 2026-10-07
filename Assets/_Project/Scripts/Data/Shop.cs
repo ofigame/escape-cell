@@ -19,7 +19,11 @@ namespace SquashBot.Data
     public enum Boost
     {
         StartShield,
-        ExtraRescue
+        ExtraRescue,
+        /// <summary>A monster level starts with the Thunder Hammer already in hand.</summary>
+        StartHammer,
+        /// <summary>Every coin of the level counts twice.</summary>
+        DoubleCoins
     }
 
     /// <summary>
@@ -39,7 +43,7 @@ namespace SquashBot.Data
             new[] { 1200, 2500 },          // Lives: 6, 7
         };
 
-        private static readonly int[] BoostPrices = { 80, 120 };
+        private static readonly int[] BoostPrices = { 80, 120, 90, 150 };
 
         public static int Level(Upgrade u) => PlayerPrefs.GetInt("sb_up_" + u, 0);
         public static int MaxLevel(Upgrade u) => UpgradePrices[(int)u].Length;

@@ -25,8 +25,10 @@ namespace SquashBot.Data
         public static string ForBoost(Boost b) => "boost:" + b;
         public static string ForCosmetic(Cosmetic c) => "cos:" + c.id;
 
-        /// <summary>The goal's name and price right now, or false when there is none (or it is owned / maxed).</summary>
-        public static bool TryGet(out string name, out int price)
+        /// <summary>The goal's name and price right now: the one picked, else the next thing within reach (false when nothing is left).</summary>
+        public static bool TryGet(out string name, out int price) => Picked(out name, out price) || Auto(out name, out price);
+
+        private static bool Picked(out string name, out int price)
         {
             name = null;
             price = 0;
@@ -60,6 +62,30 @@ namespace SquashBot.Data
                     price = c.price;
                     return true;
             }
+            return false;
+        }
+
+        /// <summary>
+        /// No goal picked (or it is done): the next thing within reach is the goal by itself, the cheapest upgrade or tool
+        /// the coins can't buy yet, so the result card always says what the next few levels are saving up for.
+        /// </summary>
+        private static bool Auto(out string name, out int price)
+        {
+            name = null;
+            price = int.MaxValue;
+            int coins = SaveData.Coins;
+            foreach (Upgrade u in System.Enum.GetValues(typeof(Upgrade)))
+            {
+                int p = Shop.NextPrice(u);
+                if (!Shop.IsMaxed(u) && p > coins && p < price) { price = p; name = Loc.T("shop." + u); }
+            }
+            foreach (var t in Tools.All)
+            {
+                int p = Tools.NextPrice(t);
+                if (!Tools.IsMaxed(t) && p > coins && p < price) { price = p; name = Loc.T("tool." + t); }
+            }
+            if (name != null) return true;
+            price = 0;
             return false;
         }
     }

@@ -25,11 +25,17 @@ namespace SquashBot.Gameplay
     /// <summary>
     /// Turns swipes (touch or mouse drag) and keyboard presses into grid directions, and a double tap
     /// (or the space bar) into a forward jump. Swipes are matched against where each grid axis actually
-    /// points on screen, so the isometric view always moves the robot the way the finger went.
+    /// points on screen, so the isometric view always moves the robot the way the finger went. A swipe that falls
+    /// between two axes waits for a little more of the finger's path before choosing, and a slow drag that keeps going
+    /// takes another step every half inch or so, so the robot walks along with the finger.
     /// </summary>
     public class InputReader
     {
-        private const float SwipeThresholdInches = 0.11f; // small, so a short flick registers on the first frames of the drag
+        private const float SwipeThresholdInches = 0.13f; // small, so a short flick registers on the first frames of the drag
+        private const float DecideInches = 0.3f;         // an ambiguous swipe waits until the finger has gone this far
+        private const float AmbiguousMargin = 0.18f;     // how clearly one direction must win to fire before that
+        private const float ChainInches = 0.45f;         // a slow drag that keeps going takes another step every this far
+        private const float ChainMinGap = 0.16f;         // ...but not from the tail of a quick flick
         private const float TapMaxDuration = 0.25f;
         private const float DoubleTapWindow = 0.35f;
         private const float HoldTime = 0.3f;
@@ -37,6 +43,8 @@ namespace SquashBot.Gameplay
         private readonly Camera cam;
         private bool tracking;
         private bool consumed;
+        private bool chained;
+        private float lastMoveTime;
         private Vector2 startPos;
         private Vector2 lastPos;
         private float pressTime;
@@ -51,6 +59,9 @@ namespace SquashBot.Gameplay
         /// and a single tap is a jump.
         /// </summary>
         public bool ScreenMode { get; set; }
+
+        /// <summary>A slow drag keeps stepping the robot along with the finger (the grid only; tunnels take one move per swipe).</summary>
+        private bool ChainEnabled => !ScreenMode;
 
         /// <summary>Presses that start on these screen points (on-screen tool buttons) are left to the UI.</summary>
         public System.Func<Vector2, bool> Ignore { get; set; }
@@ -91,6 +102,7 @@ namespace SquashBot.Gameplay
             {
                 tracking = true;
                 consumed = false;
+                chained = false;
                 startPos = pos;
                 pressTime = Time.unscaledTime;
                 if (Ignore != null && Ignore(pos))
@@ -120,7 +132,7 @@ namespace SquashBot.Gameplay
             }
 
             // Held still long enough: start a hover instead of a swipe or tap.
-            if (HoldEnabled && pressed && !consumed && Time.unscaledTime - pressTime >= HoldTime
+            if (HoldEnabled && pressed && !consumed && !chained && Time.unscaledTime - pressTime >= HoldTime
                 && (pos - startPos).magnitude < SwipeThresholdInches * (Screen.dpi > 0 ? Screen.dpi : 160f))
             {
                 holding = true;
@@ -134,8 +146,9 @@ namespace SquashBot.Gameplay
                 // A quick flick can be released before any mid-drag frame saw it move, so judge it on release too.
                 tracking = false;
                 if (consumed) return default;
-                var move = CheckSwipe(hasPointer ? pos : lastPos, robotWorld);
+                var move = CheckSwipe(hasPointer ? pos : lastPos, robotWorld, released: true);
                 if (move.HasValue) return new InputCommand { move = move };
+                if (chained) return default; // the end of a drag, not a tap
                 return new InputCommand { jump = RegisterTap() };
             }
 
@@ -153,25 +166,47 @@ namespace SquashBot.Gameplay
             return false;
         }
 
-        private Direction? CheckSwipe(Vector2 pos, Vector3 robotWorld)
+        private Direction? CheckSwipe(Vector2 pos, Vector3 robotWorld, bool released = false)
         {
             float dpi = Screen.dpi > 0 ? Screen.dpi : 160f;
             var delta = pos - startPos;
-            if (delta.magnitude < SwipeThresholdInches * dpi) return null;
+            float travelled = delta.magnitude / dpi;
+            if (travelled < (chained ? ChainInches : SwipeThresholdInches)) return null;
+            // A further step of a slow drag needs the finger to have moved on deliberately, not the tail of a flick.
+            if (chained && Time.unscaledTime - lastMoveTime < ChainMinGap) return null;
 
-            consumed = true; // one move per swipe
+            Direction dir;
+            if (ScreenMode) dir = ScreenDirection(delta);
+            else
+            {
+                // A swipe right between two grid axes (straight up on the isometric view) is ambiguous: wait for a bit
+                // more of the finger's path, which almost always leans one way, instead of guessing from the first pixels.
+                dir = Resolve(delta.normalized, robotWorld, out float margin);
+                if (!released && margin < AmbiguousMargin && travelled < DecideInches) return null;
+            }
+
+            consumed = !ChainEnabled;
+            chained = true;
+            startPos = pos; // the next step of a drag is measured from here
+            lastMoveTime = Time.unscaledTime;
             lastTapTime = -10f;
-            return ScreenMode ? ScreenDirection(delta) : Resolve(delta.normalized, robotWorld);
+            return dir;
         }
 
         private static Direction ScreenDirection(Vector2 v) =>
             Mathf.Abs(v.x) >= Mathf.Abs(v.y) ? (v.x > 0f ? Direction.PlusX : Direction.MinusX) : (v.y > 0f ? Direction.PlusY : Direction.MinusY);
-        /// <summary>Pick the grid direction whose on-screen projection best matches the screen vector.</summary>
-        private Direction Resolve(Vector2 screenDir, Vector3 robotWorld)
+
+        private Direction Resolve(Vector2 screenDir, Vector3 robotWorld) => Resolve(screenDir, robotWorld, out _);
+
+        /// <summary>
+        /// Pick the grid direction whose on-screen projection best matches the screen vector; <paramref name="margin"/>
+        /// is how clearly it won over the runner-up (0 = a tie).
+        /// </summary>
+        private Direction Resolve(Vector2 screenDir, Vector3 robotWorld, out float margin)
         {
             var origin = (Vector2)cam.WorldToScreenPoint(robotWorld);
             var best = Direction.PlusX;
-            float bestDot = float.MinValue;
+            float bestDot = float.MinValue, secondDot = float.MinValue;
             foreach (var d in DirectionExtensions.All)
             {
                 var o = d.ToOffset();
@@ -179,10 +214,13 @@ namespace SquashBot.Gameplay
                 float dot = Vector2.Dot(axis, screenDir);
                 if (dot > bestDot)
                 {
+                    secondDot = bestDot;
                     bestDot = dot;
                     best = d;
                 }
+                else if (dot > secondDot) secondDot = dot;
             }
+            margin = bestDot - secondDot;
             return best;
         }
 

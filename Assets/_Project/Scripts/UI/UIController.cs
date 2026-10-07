@@ -43,6 +43,7 @@ namespace SquashBot.UI
         public event Action BonusPressed;
         public event Action<int> StoryPressed;
         public event Action ContinuePressed;
+        public event Action ContinueCoinsPressed;
         public event Action DoublePressed;
         public event Action GaragePressed;
         public event Action DailyBonusPressed;
@@ -51,13 +52,14 @@ namespace SquashBot.UI
         /// <summary>A HUD tool button was tapped (slot 0 = left, 1 = right).</summary>
         public event Action<int> ToolPressed;
         /// <summary>PLAY on the before-level card: level, start with a shield, take an extra rescue.</summary>
-        public event Action<int, bool, bool> PrelevelPlay;
+        public event Action<int, List<Boost>> PrelevelPlay;
         public event Action PrelevelClosed;
 
         /// <summary>Everything the result card shows.</summary>
         public struct ResultInfo
         {
-            public bool won, bonusRound, hasNext, bonusAvailable, canContinue, canDouble;
+            public bool won, bonusRound, hasNext, bonusAvailable, canContinue, canBuyContinue, canDouble;
+            public int continuePrice;
             public string subtitle, note, goalText;
             public float goalProgress;
             public int coins, stars;
@@ -84,8 +86,7 @@ namespace SquashBot.UI
         private UiScreen prelevel;
         private TextMeshProUGUI preWorld, preTitle, preMission;
         private readonly Image[] preStars = new Image[3];
-        private BoostView preShield, preRescue;
-        private bool preShieldOn, preRescueOn;
+        private readonly List<BoostView> preBoosts = new List<BoostView>();
         private int preLevel;
         private int levelCount;
 
@@ -136,7 +137,8 @@ namespace SquashBot.UI
         private UiScreen pause;
         private UiScreen result;
         private TextMeshProUGUI resultTitle, resultSub, resultReward;
-        private Button resultNext, resultRetry, resultMap, resultMenu, resultBonus, resultContinue, resultDouble;
+        private Button resultNext, resultRetry, resultMap, resultMenu, resultBonus, resultContinue, resultContinueCoins, resultDouble;
+        private TextMeshProUGUI resultContinueCoinsLabel;
         private RectTransform resultStarRow;
         private readonly Image[] resultStars = new Image[3];
         private TextMeshProUGUI resultNote, resultMeterText, resultGoal;
@@ -152,6 +154,8 @@ namespace SquashBot.UI
         public ShopScreen Shop { get; private set; }
         public GarageScreen Garage { get; private set; }
         public GuideScreen Guide { get; private set; }
+        public BriefingScreen Briefing { get; private set; }
+        public SkillBadges Skills { get; private set; }
         public DailyBonusScreen DailyBonus { get; private set; }
 
         private GameObject bannerPlaceholder;
@@ -198,6 +202,7 @@ namespace SquashBot.UI
             Garage = GarageScreen.Create(root);
             DailyBonus = DailyBonusScreen.Create(root);
             Guide = GuideScreen.Create(root);
+            Briefing = BriefingScreen.Create(root);
             Guide.BackPressed += Guide.Hide;
             HelpButton(Shop.transform, "shop");
             HelpButton(Garage.transform, "garage");
@@ -353,21 +358,30 @@ namespace SquashBot.UI
             }
 
             UiFactory.TextBox("Boosts", card, Top, new Vector2(0f, -420f), new Vector2(780f, 56f), Loc.T("pre.boosts"), 36f, Palette.UiText);
-            preShield = BoostTile(card, new Vector2(-195f, -490f), Boost.StartShield);
-            preRescue = BoostTile(card, new Vector2(195f, -490f), Boost.ExtraRescue);
+            foreach (var b in new[] { Boost.StartShield, Boost.StartHammer, Boost.DoubleCoins }) preBoosts.Add(BoostTile(card, new Vector2(0f, -500f), b));
 
             UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(0f, 46f), new Vector2(620f, 160f),
-                () => PrelevelPlay?.Invoke(preLevel, preShieldOn, preRescueOn), 84f);
+                () => PrelevelPlay?.Invoke(preLevel, preBoosts.FindAll(v => v.on).ConvertAll(v => v.boost)), 84f);
         }
 
         private BoostView BoostTile(Transform card, Vector2 position, Boost boost)
         {
-            var tile = UiFactory.Box(boost.ToString(), card, Top, position, new Vector2(360f, 200f));
+            var tile = UiFactory.Box(boost.ToString(), card, Top, position, new Vector2(250f, 220f));
+            tile.pivot = new Vector2(0.5f, 1f);
             var view = new BoostView { boost = boost, bg = UiFactory.Fill(tile, new Color(0.12f, 0.1f, 0.26f, 0.9f), UiSprites.Rounded, 1.2f) };
             view.ring = UiFactory.Fill(UiFactory.Stretch("Ring", tile), Palette.UiGold, UiSprites.Ring, 1.2f);
             view.ring.raycastTarget = false;
-            UiFactory.TextBox("Name", tile, Top, new Vector2(0f, -24f), new Vector2(330f, 60f), Loc.T("shop." + boost), 34f, Palette.UiText);
-            view.info = UiFactory.TextBox("Info", tile, Bottom, new Vector2(0f, 24f), new Vector2(330f, 70f), "", 38f, Palette.UiGold);
+            var name = UiFactory.TextBox("Name", tile, Top, new Vector2(0f, -22f), new Vector2(230f, 110f), Loc.T("shop." + boost), 32f, Palette.UiText);
+            name.textWrappingMode = TextWrappingModes.Normal;
+            name.enableAutoSizing = true;
+            name.fontSizeMin = 22f;
+            name.fontSizeMax = 32f;
+            view.info = UiFactory.TextBox("Info", tile, Bottom, new Vector2(0f, 20f), new Vector2(230f, 60f), "", 36f, Palette.UiGold);
+            // "Suggested" ribbon over the tile that fits this level best.
+            var tag = UiFactory.Pill("Tag", tile, Top, new Vector2(0f, 26f), new Vector2(210f, 50f), Palette.UiGold);
+            UiFactory.TextBox("Text", tag, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(200f, 46f), Loc.T("pre.suggested"), 24f, UiFactory.TextDark)
+                .rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            view.tag = tag.gameObject;
             var button = tile.gameObject.AddComponent<Button>();
             button.targetGraphic = view.bg;
             button.onClick.AddListener(() => ToggleBoost(view));
@@ -378,7 +392,7 @@ namespace SquashBot.UI
 
         private void ToggleBoost(BoostView view)
         {
-            bool on = view.boost == Boost.StartShield ? preShieldOn : preRescueOn;
+            bool on = view.on;
             if (!on && Data.Shop.Owned(view.boost) <= 0)
             {
                 if (!Data.Shop.TryBuy(view.boost))
@@ -392,34 +406,43 @@ namespace SquashBot.UI
             {
                 AudioManager.PlaySfx(Sfx.Click, 0.7f, on ? 0.9f : 1.2f);
             }
-            if (view.boost == Boost.StartShield) preShieldOn = !on;
-            else preRescueOn = !on;
+            view.on = !on;
             RefreshBoosts();
         }
 
         private void RefreshBoosts()
         {
-            foreach (var v in new[] { preShield, preRescue })
+            foreach (var v in preBoosts)
             {
-                bool on = v.boost == Boost.StartShield ? preShieldOn : preRescueOn;
                 int owned = Data.Shop.Owned(v.boost);
-                v.ring.gameObject.SetActive(on);
-                v.info.text = owned > 0 || on ? Loc.F("shop.owned", owned) : Data.Shop.Price(v.boost).ToString();
-                v.info.color = owned > 0 || on ? Palette.UiCyan : Palette.UiGold;
+                v.ring.gameObject.SetActive(v.on);
+                v.info.text = owned > 0 || v.on ? Loc.F("shop.owned", owned) : Data.Shop.Price(v.boost).ToString();
+                v.info.color = owned > 0 || v.on ? Palette.UiCyan : Palette.UiGold;
             }
         }
 
-        /// <summary>The card before a level: mission, best stars and boosts to take along.</summary>
-        public void ShowPrelevel(int levelIndex, string world, string mission, int bestStars, bool rescueAllowed)
+        /// <summary>
+        /// The card before a level: mission, best stars and boosts to take along. The hammer only shows on monster levels,
+        /// and the boost that suits the level best wears a "suggested" ribbon.
+        /// </summary>
+        public void ShowPrelevel(int levelIndex, string world, string mission, int bestStars, bool monsterLevel, Boost suggested)
         {
             preLevel = levelIndex;
-            preShieldOn = preRescueOn = false;
             preTitle.text = Loc.F("level", levelIndex + 1);
             preWorld.text = world;
             preMission.text = mission;
             for (int i = 0; i < 3; i++) preStars[i].color = i < bestStars ? Palette.UiGold : new Color(1f, 1f, 1f, 0.15f);
-            preRescue.root.SetActive(rescueAllowed);
-            ((RectTransform)preShield.root.transform).anchoredPosition = new Vector2(rescueAllowed ? -195f : 0f, -490f);
+            var shown = new List<BoostView>();
+            foreach (var v in preBoosts)
+            {
+                v.on = false;
+                bool show = v.boost != Boost.StartHammer || monsterLevel;
+                v.root.SetActive(show);
+                v.tag.SetActive(v.boost == suggested);
+                if (show) shown.Add(v);
+            }
+            for (int i = 0; i < shown.Count; i++)
+                ((RectTransform)shown[i].root.transform).anchoredPosition = new Vector2((i - (shown.Count - 1) * 0.5f) * 270f, -500f);
             RefreshBoosts();
             prelevel.Show();
             prelevel.transform.SetAsLastSibling();
@@ -430,7 +453,8 @@ namespace SquashBot.UI
         private class BoostView
         {
             public Boost boost;
-            public GameObject root;
+            public bool on;
+            public GameObject root, tag;
             public Image bg, ring;
             public TextMeshProUGUI info;
         }
@@ -602,6 +626,7 @@ namespace SquashBot.UI
         private void BuildHud(Transform root)
         {
             hud = UiScreen.Create("HUD", root, out var t);
+            Skills = SkillBadges.Create(t);
 
             UiFactory.MakeButton(t, "II", Kind.Icon, TopLeft, new Vector2(36f, -36f), new Vector2(124f, 124f), () => PausePressed?.Invoke(), 52f);
 
@@ -678,6 +703,7 @@ namespace SquashBot.UI
         {
             lastProgress = 0f;
             HideAll();
+            Skills.HideAll();
             hud.Show();
             SetBanner(false);
             hudLevel.text = levelIndex < 0 ? Loc.T("level.bonus") : Loc.F("level", levelIndex + 1);
@@ -893,6 +919,16 @@ namespace SquashBot.UI
             resultBonus.gameObject.AddComponent<Pulse>();
             resultContinue = UiFactory.MakeButton(card, Loc.T("btn.continue"), Kind.Gold, Top, new Vector2(0f, -795f), new Vector2(620f, 150f), () => ContinuePressed?.Invoke(), 50f);
             resultContinue.gameObject.AddComponent<Pulse>();
+            // Or carry on for coins, no ad needed: the coins saved up finally pay off when a run goes wrong.
+            resultContinueCoins = UiFactory.MakeButton(card, "", Kind.Gold, Top, new Vector2(0f, -795f), new Vector2(300f, 150f), () => ContinueCoinsPressed?.Invoke(), 40f);
+            resultContinueCoinsLabel = resultContinueCoins.GetComponentInChildren<TextMeshProUGUI>();
+            foreach (var l in new[] { resultContinueCoinsLabel, resultContinue.GetComponentInChildren<TextMeshProUGUI>() })
+            {
+                l.enableAutoSizing = true;
+                l.fontSizeMin = 28f;
+                l.fontSizeMax = 50f;
+                l.margin = new Vector4(16f, 0f, 16f, 0f);
+            }
             resultDouble = UiFactory.MakeButton(card, Loc.T("btn.double"), Kind.Gold, Top, new Vector2(0f, -965f), new Vector2(620f, 135f), () => DoublePressed?.Invoke(), 54f);
             resultMap = UiFactory.MakeButton(card, Loc.T("btn.map"), Kind.Secondary, Top, new Vector2(-160f, -1120f), new Vector2(300f, 125f), () => MapPressed?.Invoke(), 54f);
             resultMenu = UiFactory.MakeButton(card, Loc.T("btn.menu"), Kind.Secondary, Top, new Vector2(160f, -1120f), new Vector2(300f, 125f), () => MenuPressed?.Invoke(), 54f);
@@ -940,11 +976,21 @@ namespace SquashBot.UI
             bool ended = info.won || info.bonusRound;
             bool bonus = info.bonusAvailable && ended;
             bool next = !bonus && ended && info.hasNext;
-            bool cont = !ended && info.canContinue;
+            bool contAd = !ended && info.canContinue;
+            bool contCoins = !ended && info.canBuyContinue;
+            bool cont = contAd || contCoins;
             bool retryTop = !bonus && !next && !cont;
             resultBonus.gameObject.SetActive(bonus);
             resultNext.gameObject.SetActive(next);
-            resultContinue.gameObject.SetActive(cont);
+            resultContinue.gameObject.SetActive(contAd);
+            resultContinueCoins.gameObject.SetActive(contCoins);
+            // Both ways to continue share the top slot side by side; one alone takes all of it.
+            ((RectTransform)resultContinue.transform).sizeDelta = new Vector2(contCoins ? 300f : 620f, 150f);
+            ((RectTransform)resultContinue.transform).anchoredPosition = new Vector2(contCoins ? -160f : 0f, -795f);
+            ((RectTransform)resultContinueCoins.transform).sizeDelta = new Vector2(contAd ? 300f : 620f, 150f);
+            ((RectTransform)resultContinueCoins.transform).anchoredPosition = new Vector2(contAd ? 160f : 0f, -795f);
+            resultContinueCoinsLabel.text = Loc.F("btn.continueCoins", info.continuePrice);
+            resultContinue.GetComponentInChildren<TextMeshProUGUI>().text = Loc.T(contCoins ? "btn.continueAdShort" : "btn.continue");
             resultRetry.gameObject.SetActive(retryTop || cont);
             ((RectTransform)resultRetry.transform).anchoredPosition = new Vector2(0f, retryTop ? -795f : -965f);
             resultDouble.gameObject.SetActive(ended && info.canDouble && info.coins > 0);
@@ -1089,6 +1135,7 @@ namespace SquashBot.UI
             Garage.Hide();
             DailyBonus.Hide();
             Guide.Hide();
+            Briefing.Hide();
             prelevel.Hide(true);
             settings.Hide(true);
             noLives.Hide(true);

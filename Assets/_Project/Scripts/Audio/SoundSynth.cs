@@ -78,55 +78,6 @@ namespace SquashBot.Audio
         public static AudioClip Click() => Build("click", 0.04f, (b) =>
             Tone(b, 0f, 0.035f, 1600f, 1400f, Wave.Sine, 0.25f, 0.001f));
 
-        // ---------- Music ----------
-
-        /// <summary>A calm 16-second loop: soft pad chords (Am F C G) with a gentle arpeggio on top.</summary>
-        public static AudioClip MusicLoop()
-        {
-            const float bpm = 120f;
-            float beat = 60f / bpm;
-            float bar = beat * 4f;
-            float length = bar * 8f;
-            var b = new float[Mathf.CeilToInt(length * Rate)];
-
-            float[][] chords =
-            {
-                new[] { 220f, 261.6f, 329.6f },  // Am
-                new[] { 174.6f, 220f, 261.6f },  // F
-                new[] { 261.6f, 329.6f, 392f },  // C
-                new[] { 196f, 246.9f, 293.7f },  // G
-            };
-
-            for (int barIndex = 0; barIndex < 8; barIndex++)
-            {
-                var chord = chords[barIndex % 4];
-                float start = barIndex * bar;
-
-                // Pad: two slightly detuned voices per note, slow attack, overlapping release.
-                foreach (float f in chord)
-                {
-                    Pad(b, start, bar + 0.4f, f, 0.05f);
-                    Pad(b, start, bar + 0.4f, f * 1.004f, 0.04f);
-                }
-
-                // Arpeggio: eighth notes cycling up through the chord an octave higher.
-                for (int step = 0; step < 8; step++)
-                {
-                    float f = chord[step % 3] * 2f * (step >= 6 ? 2f : 1f);
-                    Tone(b, start + step * beat * 0.5f, beat * 0.45f, f, f, Wave.Sine, 0.07f, 0.004f, harmonic: 0.15f);
-                }
-
-                // Soft bass on the root.
-                Tone(b, start, beat * 1.8f, chord[0] * 0.5f, chord[0] * 0.5f, Wave.Sine, 0.16f, 0.01f);
-                Tone(b, start + beat * 2f, beat * 1.8f, chord[0] * 0.5f, chord[0] * 0.5f, Wave.Sine, 0.12f, 0.01f);
-            }
-
-            Normalize(b, 0.55f);
-            var clip = AudioClip.Create("music", b.Length, 1, Rate, false);
-            clip.SetData(b, 0);
-            return clip;
-        }
-
         // ---------- Building blocks ----------
 
         private delegate void Writer(float[] buffer);
@@ -178,23 +129,6 @@ namespace SquashBot.Audio
                 // Envelope: quick attack, exponential-ish decay.
                 float env = t < attack ? t / attack : Mathf.Pow(1f - u, 2.2f);
                 b[s0 + i] += v * env * volume;
-            }
-        }
-
-        private static void Pad(float[] b, float start, float duration, float f, float volume)
-        {
-            int s0 = Mathf.FloorToInt(start * Rate);
-            int count = Mathf.FloorToInt(duration * Rate);
-            float phase = 0f, lp = 0f;
-            for (int i = 0; i < count; i++)
-            {
-                int idx = (s0 + i) % b.Length; // tails wrap around for a seamless loop
-                float u = i / (float)count;
-                phase += f / Rate;
-                float saw = Mathf.Repeat(phase, 1f) * 2f - 1f;
-                lp += (saw - lp) * 0.035f;
-                float env = Mathf.Clamp01(u / 0.25f) * Mathf.Clamp01((1f - u) / 0.3f);
-                b[idx] += lp * env * volume;
             }
         }
 
