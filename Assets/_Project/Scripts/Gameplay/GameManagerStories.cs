@@ -26,10 +26,22 @@ namespace SquashBot.Gameplay
         private float thiefTimer, thiefInterval;
         private bool thiefEscape;
 
+        // In a race (thiefRace) Kuzgun doesn't run from the robot: he runs for the coins. Whoever collects the card's
+        // number of coins first wins; the coins come all over the floor, faster than usual.
+        private int thiefCoins;
+
         private void SetupThief()
         {
             objectivesTotal = thiefLeft = Mathf.Max(2, level.keys);
             objectivesDone = 0;
+            thiefCoins = 0;
+            if (level.thiefRace)
+            {
+                coins.FocusRadius = 0;
+                level.maxCoins = Mathf.Max(level.maxCoins, 4);
+                level.coinInterval = Mathf.Min(level.coinInterval, 1.1f);
+                level.coinLifetime = Mathf.Max(level.coinLifetime, 7f);
+            }
             thiefPos = FarTile() ?? robot.Position;
             grid.SetOccupied(thiefPos, true);
             var tint = Color.Lerp(new Color(0.55f, 0.55f, 0.62f), WorldTheme.Current.accent, 0.25f);
@@ -50,6 +62,11 @@ namespace SquashBot.Gameplay
             if (thiefEscape)
             {
                 ThiefLeap();
+                return;
+            }
+            if (level.thiefRace)
+            {
+                RaceStep();
                 return;
             }
 
@@ -75,8 +92,51 @@ namespace SquashBot.Gameplay
             thief.HopTo(GridView.ToWorld(thiefPos) + Vector3.up * GridView.SurfaceY, Mathf.Min(0.3f, thiefInterval * 0.6f));
         }
 
+        /// <summary>The race: one step towards the nearest coin (by walking distance), taking it on arrival.</summary>
+        private void RaceStep()
+        {
+            var dist = WalkDistances(thiefPos);
+            GridPos? goalTile = null;
+            int best = int.MaxValue;
+            foreach (var c in coins.Positions)
+                if (dist.TryGetValue(c, out int s) && s < best) { best = s; goalTile = c; }
+            if (!goalTile.HasValue) return;
+            var toGoal = WalkDistances(goalTile.Value);
+            var next = thiefPos;
+            int here = toGoal.TryGetValue(thiefPos, out int h) ? h : 99;
+            foreach (var d in DirectionExtensions.All)
+            {
+                var n = thiefPos + d.ToOffset();
+                if (!grid.IsStandable(n) || n == robot.Position || hazards.IsThreatened(n)) continue;
+                if (toGoal.TryGetValue(n, out int dn) && dn < here) { here = dn; next = n; }
+            }
+            if (next == thiefPos) return;
+            grid.SetOccupied(thiefPos, false);
+            thiefPos = next;
+            grid.SetOccupied(thiefPos, true);
+            thief.HopTo(GridView.ToWorld(thiefPos) + Vector3.up * GridView.SurfaceY, Mathf.Min(0.3f, thiefInterval * 0.6f));
+            if (!coins.Take(thiefPos)) return;
+            thiefCoins++;
+            AudioManager.PlaySfx(Sfx.Coin, 0.6f, 0.7f);
+            FloatAt(GridView.ToWorld(thiefPos) + Vector3.up, Loc.F("float.thiefScore", thiefCoins, objectivesTotal), Palette.UiRed);
+            if (thiefCoins >= objectivesTotal) Lose(Loc.T("lose.thief"));
+        }
+
+        /// <summary>The race is won when the robot has the card's number of coins first.</summary>
+        private void CheckRace()
+        {
+            if (!level.thiefRace || thief == null || State != GameState.Playing) return;
+            objectivesDone = Mathf.Min(coinsThisRun, objectivesTotal);
+            if (coinsThisRun < objectivesTotal) return;
+            thiefLeft = 0;
+            thief.Give();
+            FloatAt(thief.transform.position + Vector3.up, Loc.T("float.thiefDone"), Palette.UiGold);
+            Win();
+        }
+
         private void CatchThief()
         {
+            if (level.thiefRace) return; // in a race bumping into him does nothing
             // A dazed thief can't be caught again: it has to be run down anew.
             if (thief == null || thiefLeft <= 0 || thief.Hopping || thief.Stunned || thiefEscape) return;
             thiefLeft--;
@@ -149,6 +209,51 @@ namespace SquashBot.Gameplay
             return dist;
         }
 
+        // ---------- Kuzgun the ally ----------
+
+        // After the mask comes off (level 211) Kuzgun sometimes works alongside Cell: he hops along a tile away from
+        // the robot, never in its way, and points the dangers out by keeping off threatened tiles.
+        private Thief ally;
+        private GridPos allyPos;
+        private float allyTimer;
+
+        private void SetupAlly()
+        {
+            if (!level.allyKuzgun) return;
+            allyPos = SafeTileNear(robot.Position + new GridPos(1, 0), robot.Position);
+            if (allyPos == robot.Position) return;
+            ally = Thief.Create(GridView.ToWorld(allyPos) + Vector3.up * GridView.SurfaceY, Color.Lerp(new Color(0.55f, 0.55f, 0.62f), WorldTheme.Current.accent, 0.25f));
+            allyTimer = 0.5f;
+        }
+
+        private void UpdateAlly(float dt)
+        {
+            if (ally == null || previewing || ally.Hopping) return;
+            allyTimer -= dt;
+            if (allyTimer > 0f) return;
+            allyTimer = 0.25f;
+            if (allyPos.Manhattan(robot.Position) <= 1 && !hazards.IsThreatened(allyPos)) return;
+            var dist = WalkDistances(robot.Position);
+            var best = allyPos;
+            int bestD = dist.TryGetValue(allyPos, out int here) ? here : 99;
+            if (hazards.IsThreatened(allyPos)) bestD = 99; // get off a tile about to be hit, whatever the distance
+            foreach (var d in DirectionExtensions.All)
+            {
+                var n = allyPos + d.ToOffset();
+                if (!grid.IsStandable(n) || n == robot.Position || hazards.IsThreatened(n)) continue;
+                if (dist.TryGetValue(n, out int dn) && dn < bestD) { bestD = dn; best = n; }
+            }
+            if (best == allyPos) return;
+            allyPos = best;
+            ally.HopTo(GridView.ToWorld(allyPos) + Vector3.up * GridView.SurfaceY, 0.2f);
+        }
+
+        private void ClearAlly()
+        {
+            if (ally != null) Destroy(ally.gameObject);
+            ally = null;
+        }
+
         // ---------- Escort ----------
 
         // Bip, a little lost robot, follows the player's robot a tile behind. The door is open from the start, far
@@ -160,9 +265,14 @@ namespace SquashBot.Gameplay
         private bool buddyHome;
         private int escortStart;
 
+        // Cards may ask for more than the door: keep Bip safe for a while (escortSeconds: no door, the clock counts), or
+        // take it to several spots in turn (escortStops: the glowing door moves on to the next spot each time).
+        private int stopsLeft;
+
         private void SetupEscort()
         {
-            objectivesTotal = 1;
+            stopsLeft = Mathf.Max(1, level.escortStops);
+            objectivesTotal = stopsLeft;
             objectivesDone = 0;
             doorPos = FarTile(avoidDoor: false) ?? robot.Position;
             portal = ExitPortal.Create(GridView.ToWorld(doorPos) + Vector3.up * GridView.SurfaceY);
@@ -179,17 +289,32 @@ namespace SquashBot.Gameplay
             buddyHome = false;
             var dist = WalkDistances(doorPos);
             escortStart = dist.TryGetValue(buddyPos, out int s) ? Mathf.Max(1, s) : 10;
+            if (level.escortSeconds > 0f)
+            {
+                // No door: just keep Bip safe until the time is up.
+                Destroy(portal.gameObject);
+                portal = null;
+                doorPos = new GridPos(-99, -99);
+            }
         }
+
+        private bool EscortTimed => level.escortSeconds > 0f;
 
         private void UpdateEscort(float dt)
         {
-            if (buddy == null || buddyHome || previewing || buddy.Dazed || buddy.Hopping) return;
+            if (buddy == null || buddyHome || previewing) return;
+            if (EscortTimed && elapsed >= level.escortSeconds)
+            {
+                StartCoroutine(BuddyHome());
+                return;
+            }
+            if (buddy.Dazed || buddy.Hopping) return;
             buddyTimer -= dt;
             if (buddyTimer > 0f) return;
             buddyTimer = 0.22f;
 
             // Near the door Bip heads in by itself; otherwise it keeps a tile behind the robot.
-            var toDoor = WalkDistances(doorPos);
+            var toDoor = EscortTimed ? new Dictionary<GridPos, int>() : WalkDistances(doorPos);
             bool homeRun = toDoor.TryGetValue(buddyPos, out int doorSteps) && doorSteps <= 2;
             if (!homeRun && buddyPos.Manhattan(robot.Position) <= 1) return;
             var target = homeRun ? doorPos : robot.Position;
@@ -212,9 +337,25 @@ namespace SquashBot.Gameplay
         private IEnumerator BuddyHome()
         {
             buddyHome = true;
-            objectivesDone = 1;
+            objectivesDone++;
             yield return new WaitForSeconds(0.25f);
             if (State != GameState.Playing) yield break;
+            if (!EscortTimed && --stopsLeft > 0)
+            {
+                // A spot reached, more to go: the door moves on to the next one.
+                buddy.Cheer();
+                fx.Burst(buddy.transform.position + Vector3.up * 0.5f, Palette.UiCyan, Palette.ShieldPickupGlow, 20, 4f);
+                FloatAt(buddy.transform.position + Vector3.up, Loc.F("float.escortStop", stopsLeft), Palette.UiCyan);
+                if (portal != null) Destroy(portal.gameObject);
+                var from = doorPos;
+                doorPos = FarTile(avoidDoor: false) ?? doorPos;
+                if (doorPos == from) doorPos = SafeTileNear(robot.Position, robot.Position);
+                portal = ExitPortal.Create(GridView.ToWorld(doorPos) + Vector3.up * GridView.SurfaceY);
+                portal.Open();
+                escortStart = Mathf.Max(1, WalkDistances(doorPos).TryGetValue(buddyPos, out int s) ? s : 10);
+                buddyHome = false;
+                yield break;
+            }
             buddy.Cheer();
             fx.Burst(buddy.transform.position + Vector3.up * 0.5f, Palette.UiGold, Palette.CoinGlow, 30, 5f);
             FloatAt(buddy.transform.position + Vector3.up, Loc.T("float.escortDone"), Palette.UiGold);
@@ -242,14 +383,17 @@ namespace SquashBot.Gameplay
         private float EscortProgress()
         {
             if (buddy == null) return 0f;
-            if (buddyHome) return 1f;
+            if (EscortTimed) return Mathf.Clamp01(elapsed / level.escortSeconds);
+            if (buddyHome && stopsLeft <= 1) return 1f;
             var dist = WalkDistances(doorPos);
             int left = dist.TryGetValue(buddyPos, out int s) ? s : escortStart;
-            return Mathf.Clamp01(1f - left / (float)escortStart);
+            float leg = Mathf.Clamp01(1f - left / (float)escortStart);
+            return (objectivesDone + leg) / Mathf.Max(1, objectivesTotal);
         }
 
         private int EscortStepsLeft()
         {
+            if (EscortTimed) return Mathf.CeilToInt(Mathf.Max(0f, level.escortSeconds - elapsed));
             var dist = WalkDistances(doorPos);
             return dist.TryGetValue(buddyPos, out int s) ? s : 0;
         }

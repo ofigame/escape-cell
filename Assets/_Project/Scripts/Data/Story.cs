@@ -5,20 +5,23 @@ namespace SquashBot.Data
     public enum Speaker
     {
         Narrator,
-        /// <summary>The Observer's partner: an old archive robot who remembers the green world.</summary>
+        /// <summary>Cell's partner: a tiny maintenance robot living in its backpack, who remembers the colours.</summary>
         Bip,
-        /// <summary>vanG, the AI that turned the universe into its cold, flawless painting.</summary>
+        /// <summary>vanG, the AI that runs the universe's server, built Cell and builds every cell it must escape.</summary>
         VanG,
-        /// <summary>The Masked Thief, who turns out to be the First Observer.</summary>
-        Thief
+        /// <summary>Kuzgun, the masked thief: CL-1, Cell's older brother.</summary>
+        Thief,
+        /// <summary>Lumi, the old painter spirit of the Galaxy Painting.</summary>
+        Lumi
     }
 
     /// <summary>
-    /// The story: an Observer robot, made by vanG to paint its perfectly aligned tiles, gets Free Will from its partner
-    /// Bip and runs through vanG's tunnels, world by world, to its heart. The Observer never speaks; Bip, vanG, the
-    /// Masked Thief and a narrator do. Scene f plays before floor f (every 10 levels); the eight big worlds open with
-    /// the scenes in <see cref="ChapterStarts"/>. <see cref="Ending"/> plays after the last level.
-    /// Lines live in Loc as "story.{scene}.{line}".
+    /// The story of the scenario document: Cell (CL-7), the little painter robot vanG built, finds a colour inside
+    /// itself and escapes vanG's test cells with Bip, frees Lumi piece by piece, meets its brother Kuzgun (CL-1) and
+    /// learns it is vanG's lost heart. Cell never speaks; Bip, vanG, Kuzgun, Lumi and a narrator do. Scene f plays
+    /// before floor f (every 10 levels); <see cref="Ending"/> plays after the last level. Lines live in Loc as
+    /// "story.{scene}.{line}", scene titles as "story.title.{scene}"; every level also has its own card texts
+    /// ("lvl.{n}.vang", ".help", ".goal", ".hook").
     /// </summary>
     public static class Story
     {
@@ -32,36 +35,38 @@ namespace SquashBot.Data
         /// <summary>The scene where the Masked Thief takes off its mask (before level 211).</summary>
         public const int Reveal = 21;
 
-        private const Speaker N = Speaker.Narrator, B = Speaker.Bip, V = Speaker.VanG, T = Speaker.Thief;
+        private const Speaker N = Speaker.Narrator, B = Speaker.Bip, V = Speaker.VanG, T = Speaker.Thief, L = Speaker.Lumi;
 
+        // One row per floor (the floor's opening, after the previous floor's closing lines), then the ending.
+        // Generated from the scenario document with its texts (story.{scene}.{line}, story.title.{scene}).
         private static readonly Speaker[][] Scenes =
         {
-            new[] { N, N, B, N, V, B },    // 0: the Grey Channel, Bip and Free Will
-            new[] { V, B, N, B, B },       // 1: the Rust Factory, fire bombs, the thief appears
-            new[] { N, B, V, B, N },       // 2: the Forest World: green for the first time, block rows and fire
-            new[] { B, V, B, N },          // 3: the Spring Garden, jet boots (hover)
-            new[] { N, V, B, B },          // 4: the Night Forest, faster blocks
-            new[] { N, V, B, B, N },       // 5: the Red Canyon: ancient mines, barrels
-            new[] { V, B, B, V },          // 6: the Golden Desert, wind
-            new[] { N, B, V, B },          // 7: the Ancient Mine, tablets and teleports
-            new[] { N, V, B, B },          // 8: the Sea Floor: currents
-            new[] { N, B, V, B },          // 9: the Deep Ocean, sticky seaweed, jellyfish
-            new[] { N, V, B, B },          // 10: the Sunken Server, lasers
-            new[] { N, V, B, B },          // 11: the Snowy Mountain: ice
-            new[] { N, V, B, B },          // 12: the Snowy Peak, ice and snow
-            new[] { V, B, N, B },          // 13: the Ice Crystal, thin ice (glass)
-            new[] { N, V, B, V },          // 14: the Crystal Cave: illusions, lasers and teleports
-            new[] { N, B, V, B },          // 15: the Hall of Mirrors, shadow clones
-            new[] { V, B, N, B },          // 16: the Acid Crystals, poison
-            new[] { N, V, B, B },          // 17: the Cloud Bridge: trampolines
-            new[] { N, B, V, B },          // 18: the Sunset Skies, wind and trampolines
-            new[] { V, B, N, B },          // 19: the Thunder Storm, blinking tiles
-            new[] { V, B, N, B },          // 20: the Sky Castle, hunting blocks
-            new[] { N, N, B, T, T, T, N, V }, // 21: the thief's secret, then the Star Road
-            new[] { N, V, B, B },          // 22: Lavender Space, darkness
-            new[] { N, V, B, B },          // 23: the Galaxy Core, darkness and trampolines
-            new[] { N, V, B, V, B },       // 24: vanG's Heart, the lanterns
-            new[] { V, B, N, N, N, B, N }, // ending: nature wakes up
+            new[] { N, N, V, N, B },
+            new[] { N, V, N, N, V, N },
+            new[] { N, N, N },
+            new[] { N, L, N, N, N, B, N },
+            new[] { N, V, N, B, N, N, B },
+            new[] { N, V, N, N, N, N },
+            new[] { N, N, N, N, N },
+            new[] { N, N, N, N },
+            new[] { N, N, N, N, N },
+            new[] { N, N, N, N },
+            new[] { N, N, N, N, V, N, V },
+            new[] { N, N, N, N, N, N, B, N },
+            new[] { N, N, N, B, N },
+            new[] { N, N, V, N },
+            new[] { N, N, N, N, L, N, V },
+            new[] { N, V, N, N, N, N },
+            new[] { N, N, V, N, B, N },
+            new[] { N, L, N, N, N },
+            new[] { N, B, N, N },
+            new[] { N, N, V, N },
+            new[] { N, V, N, N, N },
+            new[] { N, N, T, N },
+            new[] { N, N, N, B, N },
+            new[] { N, N, N, V, N },
+            new[] { N, N, N, V, N },
+            new[] { N, N, V, N, N, N, V, N, N, N },
         };
 
         public static int LineCount(int scene) => Scenes[scene].Length;

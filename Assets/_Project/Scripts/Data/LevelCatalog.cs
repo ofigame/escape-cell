@@ -12,7 +12,7 @@ namespace SquashBot.Data
     ///   * Difficulty is slow and never goes down: every level is at least as hard as the one before it.
     ///     Breathers live outside the campaign, in the bonus rounds that stars unlock.
     /// </summary>
-    public static class LevelCatalog
+    public static partial class LevelCatalog
     {
         public const int LevelsPerWorld = 10;
         public const int WorldCount = 25;
@@ -35,11 +35,9 @@ namespace SquashBot.Data
 
         public static List<LevelData> CreateDefault()
         {
-            var levels = FirstWorld();
-            var used = new HashSet<Journey>();
-            int exits = 0;
-            for (int index = LevelsPerWorld; index < LevelCount; index++)
-                levels.Add(Generated(index, used, ref exits));
+            // Every level comes from its card in the scenario document (see LevelCatalogScript).
+            var levels = new List<LevelData>();
+            foreach (var card in LevelScript.Cards) levels.Add(FromCard(card));
 
             for (int i = FirstPowerUpLevel - 1; i < levels.Count; i++)
                 levels[i].powerUpInterval = Mathf.Lerp(11f, 5.5f, Difficulty(i)); // more skills on harder floors

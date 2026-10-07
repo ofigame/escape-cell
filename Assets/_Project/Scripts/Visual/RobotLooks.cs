@@ -14,8 +14,8 @@ namespace SquashBot.Visual
         private static readonly Color BaseLight = new Color(0.76f, 0.8f, 0.9f);
         private static readonly Dictionary<string, Material> Materials = new Dictionary<string, Material>();
 
-        /// <summary>The floor from which the Observer glows gold: the First Observer gave it all its energy (the Star Road).</summary>
-        public const int GoldenFrom = 21;
+        /// <summary>The floor from which the robot glows gold (none in the current story: Cell keeps the colour the player picks).</summary>
+        public const int GoldenFrom = Data.LevelCatalog.WorldCount;
 
         public static Color BodyColor(int world)
         {

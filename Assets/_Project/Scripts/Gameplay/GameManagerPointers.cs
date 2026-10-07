@@ -41,7 +41,7 @@ namespace SquashBot.Gameplay
                     foreach (var (pos, _) in cores) goals.Add((At(pos), Palette.UiCyan));
                     break;
                 case MissionType.Escort:
-                    goals.Add((At(doorPos), Palette.UiCyan));
+                    if (!EscortTimed) goals.Add((At(doorPos), Palette.UiCyan));
                     if (buddy != null && buddyPos.Manhattan(robot.Position) > 3) goals.Add((At(buddyPos), new Color(1f, 0.72f, 0.35f)));
                     break;
                 case MissionType.Paint:

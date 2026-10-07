@@ -77,6 +77,18 @@ namespace SquashBot.EditorTools
                 Bool(sb, "final", l.final);
                 Num(sb, "coinInterval", l.coinInterval);
                 Num(sb, "powerUps", l.powerUpInterval);
+                Num(sb, "score", l.score);
+                Str(sb, "helper", l.helper.ToString());
+                Num(sb, "timeLimit", l.timeLimit);
+                Num(sb, "paintTarget", l.paintTarget);
+                Bool(sb, "thiefRace", l.thiefRace);
+                Num(sb, "escortSeconds", l.escortSeconds);
+                Num(sb, "escortStops", l.escortStops);
+                Num(sb, "cloneKnockouts", l.cloneKnockouts);
+                Num(sb, "stages", l.stages);
+                Num(sb, "hitsPerStage", l.hitsPerStage);
+                Bool(sb, "allyKuzgun", l.allyKuzgun);
+                Str(sb, "enemies", $"sw{l.sweepers} er{l.erasers} dr{l.drones} wo{l.sandworms} cr{l.crabs} tu{l.turrets} pe{l.penguins} sp{l.springbots}");
                 Str(sb, "road", i < LevelCatalog.LevelCount - 1 || l.final ? DuctRunner.RoadTheme(i).ToString() : "");
                 Num(sb, "roadLength", l.final ? 260f : 90f + i * 3f);
                 Num(sb, "roadPatterns", Mathf.Clamp(3 + i / 3, 3, 18));

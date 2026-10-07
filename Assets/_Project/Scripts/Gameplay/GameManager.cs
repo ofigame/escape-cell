@@ -318,6 +318,7 @@ namespace SquashBot.Gameplay
             ClearEscort();
             ClearClones();
             DropBip();
+            ClearAlly();
             ClearMarathon();
             ClearMonsterShield();
             skillFreezeLeft = skillMagnetLeft = 0f;
@@ -672,6 +673,17 @@ namespace SquashBot.Gameplay
             AudioManager.PlayMusic(LevelMusic());
             ui.ShowHud(bonusRun ? -1 : levelIndex);
             StartMissionPreview();
+            if (!bonusRun) StartCoroutine(HelperTip());
+        }
+
+        /// <summary>Once the level is on: the helper's tip for this cell, in the little speech bubble.</summary>
+        private IEnumerator HelperTip()
+        {
+            while (previewing) yield return null;
+            yield return new WaitForSeconds(0.8f);
+            if (State != GameState.Playing || !Loc.Has(CardKey("help"))) yield break;
+            bipLast = Time.time;
+            ui.Bip.Say(Loc.T(CardKey("help")), HelperName, HelperColor);
         }
 
         private void Pause()
@@ -1086,6 +1098,7 @@ namespace SquashBot.Gameplay
             }
 
             UpdateBip(Time.deltaTime);
+            UpdateAlly(Time.deltaTime);
             AudioManager.SetTension(Tension());
             // The sky builds from calm to storm as the mission nears its end.
             weather.SetIntensity(Mathf.Lerp(0.3f, 1f, Mathf.Clamp01(MissionProgress())));
@@ -1121,6 +1134,12 @@ namespace SquashBot.Gameplay
             if (robot.IsAlive && !robot.IsHopping && !robot.IsHovering && !robot.IsShielded && grid.IsGap(robot.Position))
             {
                 StepIntoGap(robot.Position);
+                return;
+            }
+            // A goal against the clock (coin hunts, roads, paint): out of time is out.
+            if (level.timeLimit > 0f && elapsed >= level.timeLimit && level.mission != MissionType.CoinRain)
+            {
+                TimeUp();
                 return;
             }
             RefreshHud();
@@ -1375,6 +1394,7 @@ namespace SquashBot.Gameplay
                 AudioManager.PlaySfx(Sfx.Shield, 0.6f, 1.2f);
             }
 
+            if (level.mission == MissionType.Thief) CheckRace();
             if (level.mission == MissionType.CollectCoins && coinsThisRun >= level.coinTarget)
                 Win();
             else if (level.mission == MissionType.CoinRain && coinsThisRun == level.coinTarget)
@@ -1700,7 +1720,9 @@ namespace SquashBot.Gameplay
             pendingEnding = levelIndex == LevelCount - 1 && !Story.Seen(Story.Ending);
             bool hasNext = levelIndex + 1 < LevelCount;
             bool newWorld = unlockedNew && hasNext && (levelIndex + 1) % LevelCatalog.LevelsPerWorld == 0;
-            string note = surprise ? Loc.T("bonus.surprise")
+            // The card's hook (a teaser for the next cell) comes first; otherwise the bonus or star news.
+            string note = Loc.Has(CardKey("hook")) ? Loc.T(CardKey("hook"))
+                : surprise ? Loc.T("bonus.surprise")
                 : unlockedBonus > 0 ? Loc.T("bonus.ready")
                 : stars < 3 ? StarHint(stars)
                 : Loc.T("star.max");
@@ -1750,6 +1772,7 @@ namespace SquashBot.Gameplay
         private void Lose(string reason)
         {
             if (roadPhase != RoadPhase.None) return; // already won, on the way to the next floor
+            if (MarathonRespawn()) return; // a marathon past its checkpoint goes on from there
             State = GameState.Result;
             hazards.Freeze();
             coins.Freeze();
@@ -1877,6 +1900,7 @@ namespace SquashBot.Gameplay
             {
                 PaintTile(robot.Position);
             }
+            SetupAlly();
             if (level.marathon) SetupMarathon();
         }
 
@@ -2036,6 +2060,9 @@ namespace SquashBot.Gameplay
             Win(escaped: true);
         }
 
+        /// <summary>Tiles to paint: the card's number, or every tile of the floor.</summary>
+        private int PaintGoal => level.paintTarget > 0 ? Mathf.Min(level.paintTarget, grid.FloorCount) : grid.FloorCount;
+
         private void PaintTile(GridPos p)
         {
             if (!grid.InBounds(p) || grid.GetTile(p) != TileState.Solid || !painted.Add(p)) return;
@@ -2046,7 +2073,7 @@ namespace SquashBot.Gameplay
                 AudioManager.PlaySfx(Sfx.Click, 0.8f, 0.9f + painted.Count / (float)grid.FloorCount * 0.8f);
                 Haptics.Light();
             }
-            if (painted.Count >= grid.FloorCount && State == GameState.Playing) Win();
+            if (painted.Count >= PaintGoal && State == GameState.Playing) Win();
         }
 
         private float MissionProgress()
@@ -2064,7 +2091,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Escort: return EscortProgress();
                 case MissionType.Clone: return objectivesDone / (float)Mathf.Max(1, objectivesTotal);
                 case MissionType.Monster: return objectivesDone / (float)Mathf.Max(1, objectivesTotal);
-                case MissionType.Paint: return grid == null ? 0f : painted.Count / (float)grid.FloorCount;
+                case MissionType.Paint: return grid == null ? 0f : painted.Count / (float)PaintGoal;
                 default: return elapsed / level.surviveSeconds;
             }
         }
@@ -2072,6 +2099,9 @@ namespace SquashBot.Gameplay
         private static string MissionText(LevelData data, bool upper = false)
         {
             string suffix = upper ? ".up" : "";
+            // Scenario levels say their goal in the card's own words.
+            string card = "lvl." + data.number + ".goal";
+            if (data.number > 0 && Loc.Has(card)) return upper ? Loc.T(card).ToUpper(Loc.Culture) : Loc.T(card);
             switch (data.mission)
             {
                 case MissionType.CollectCoins: return Loc.F("mission.collect" + suffix, data.coinTarget);
@@ -2314,7 +2344,9 @@ namespace SquashBot.Gameplay
             if (State != GameState.Playing || roadPhase != RoadPhase.Run) return;
             bool paid = Lives.TryConsume();
             runner.RestartRoad();
-            ui.ShowIntro(Loc.T("road.failTitle"), paid ? Loc.T("road.failLife") + "\n" + Loc.F("lives.left", Lives.Count) : Loc.T("road.failFree"));
+            // Long roads start again from the last checkpoint passed.
+            string again = Loc.T(runner.ResumeRow > 0 ? "road.failCheckpoint" : "road.failFree");
+            ui.ShowIntro(Loc.T("road.failTitle"), paid ? Loc.T("road.lifeLost") + " · " + again + "\n" + Loc.F("lives.left", Lives.Count) : again);
         }
 
         private void OnRoadArrived()
@@ -2764,6 +2796,8 @@ namespace SquashBot.Gameplay
         private List<(BriefShot shot, string text)> BriefSteps()
         {
             var steps = new List<(BriefShot, string)>();
+            // The card opens with vanG: the threat and why it built this cell.
+            if (Loc.Has(CardKey("vang"))) steps.Add((BriefShot.Warden, Loc.T("story.warden") + ": " + Loc.T(CardKey("vang"))));
             switch (level.mission)
             {
                 case MissionType.Monster:
@@ -2774,16 +2808,22 @@ namespace SquashBot.Gameplay
                     if (level.phased) steps.Add((BriefShot.HammerHit, Loc.T("brief.phased")));
                     break;
                 case MissionType.Thief:
-                    steps.Add((BriefShot.Thief, Loc.F("brief.thief", objectivesTotal)));
-                    steps.Add((BriefShot.Coins, Loc.T("brief.thiefCoins")));
+                    if (level.thiefRace) steps.Add((BriefShot.Thief, Loc.F("brief.thiefRace", objectivesTotal)));
+                    else
+                    {
+                        steps.Add((BriefShot.Thief, Loc.F("brief.thief", objectivesTotal)));
+                        steps.Add((BriefShot.Coins, Loc.T("brief.thiefCoins")));
+                    }
                     break;
                 case MissionType.Escort:
-                    steps.Add((BriefShot.Escort, Loc.T("brief.escort")));
+                    steps.Add((BriefShot.Escort, level.escortSeconds > 0f ? Loc.F("brief.escortTime", (int)level.escortSeconds)
+                        : level.escortStops > 1 ? Loc.F("brief.escortStops", level.escortStops) : Loc.T("brief.escort")));
                     steps.Add((BriefShot.Block, Loc.T("brief.escortSafe")));
                     break;
                 case MissionType.Clone:
                     steps.Add((BriefShot.Clone, Loc.T("brief.clone")));
-                    steps.Add((BriefShot.QuestItem, Loc.F("brief.cloneCores", objectivesTotal)));
+                    if (level.cloneKnockouts > 0) steps.Add((BriefShot.Block, Loc.F("brief.cloneKo", level.cloneKnockouts)));
+                    else steps.Add((BriefShot.QuestItem, Loc.F("brief.cloneCores", objectivesTotal)));
                     steps.Add((BriefShot.Block, Loc.T("brief.cloneBlock")));
                     break;
                 case MissionType.Quest:
@@ -2814,11 +2854,20 @@ namespace SquashBot.Gameplay
                     steps.Add((BriefShot.Robot, MissionText(level)));
                     break;
             }
-            if (level.marathon) steps.Add((BriefShot.Super, Loc.F("brief.super", (int)HeliEvery, (int)SuperSeconds)));
+            if (level.marathon) steps.Add((BriefShot.Super, Loc.F("brief.marathon", (int)(level.surviveSeconds * 0.5f), (int)SuperSeconds)));
             // The first floors also remind what the danger is.
             if (levelIndex < 3) steps.Add((BriefShot.Block, Loc.T("brief.dodge")));
+            // And it closes with the helper's tip: how to beat this cell.
+            if (Loc.Has(CardKey("help"))) steps.Add((BriefShot.Robot, HelperName + ": " + Loc.T(CardKey("help"))));
             return steps;
         }
+
+        /// <summary>The Loc key of one of this level's card texts ("vang", "help", "goal", "hook", "title").</summary>
+        private string CardKey(string part) => "lvl." + (level != null ? level.number : 0) + "." + part;
+
+        private string HelperName => Loc.T(level.helper == Helper.Lumi ? "story.lumi" : level.helper == Helper.Kuzgun ? "story.kuzgun" : "story.bip");
+
+        private Color HelperColor => level.helper == Helper.Lumi ? new Color(1f, 0.8f, 0.95f) : level.helper == Helper.Kuzgun ? Palette.UiGold : new Color(0.55f, 1f, 0.6f);
 
         private IEnumerator Briefing()
         {
@@ -2949,7 +2998,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Paint:
                     text = level.final
                         ? Loc.F("hud.final", Mathf.RoundToInt(100f * painted.Count / Mathf.Max(1, grid.FloorCount)))
-                        : Loc.F("hud.paint", painted.Count, grid.FloorCount);
+                        : Loc.F("hud.paint", painted.Count, PaintGoal);
                     break;
                 case MissionType.CoinRain: text = Loc.F("hud.rain", coinsThisRun, level.coinTarget, Seconds(level.surviveSeconds - elapsed)); break;
                 case MissionType.Treasure: text = Loc.F("hud.treasure", coinsThisRun, Seconds(level.surviveSeconds - elapsed)); break;
@@ -2957,11 +3006,18 @@ namespace SquashBot.Gameplay
                 case MissionType.Boss: text = Loc.F("hud.boss", objectivesDone, objectivesTotal); break;
                 case MissionType.Quest: text = questReady ? Loc.T("quest.hudGo." + level.quest) : Loc.F("quest.hud." + level.quest, objectivesDone, objectivesTotal); break;
                 case MissionType.Monster: text = charged ? Loc.T("hud.monsterHit") : Loc.F("hud.monster", monsterHp, objectivesTotal); break;
-                case MissionType.Thief: text = Loc.F("hud.thief", objectivesDone, objectivesTotal); break;
-                case MissionType.Escort: text = Loc.F("hud.escort", EscortStepsLeft()); break;
-                case MissionType.Clone: text = Loc.F("hud.clone", objectivesDone, objectivesTotal); break;
+                case MissionType.Thief:
+                    text = level.thiefRace ? Loc.F("hud.thiefRace", coinsThisRun, thiefCoins, objectivesTotal) : Loc.F("hud.thief", objectivesDone, objectivesTotal);
+                    break;
+                case MissionType.Escort:
+                    text = EscortTimed ? Loc.F("hud.escortTime", EscortStepsLeft())
+                        : level.escortStops > 1 ? Loc.F("hud.escortStops", objectivesDone, objectivesTotal, EscortStepsLeft())
+                        : Loc.F("hud.escort", EscortStepsLeft());
+                    break;
+                case MissionType.Clone: text = Loc.F(level.cloneKnockouts > 0 ? "hud.cloneKo" : "hud.clone", objectivesDone, objectivesTotal); break;
                 default: text = Loc.F("hud.survive", Seconds(level.surviveSeconds - elapsed)); break;
             }
+            if (level.timeLimit > 0f && level.mission != MissionType.CoinRain) text += "  ·  " + Loc.F("hud.timeLeft", Seconds(level.timeLimit - elapsed));
             ui.SetMission(text, MissionProgress(), Earned);
         }
     }

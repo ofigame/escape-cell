@@ -8,15 +8,16 @@ using UnityEngine;
 namespace SquashBot.Gameplay
 {
     /// <summary>
-    /// The long hauls (two to three minutes): every 30 seconds a helicopter flies in and drops a super-power crate a few
-    /// tiles from the robot. It waits 10 seconds; grabbing it makes the robot untouchable for 20 seconds, smashing
-    /// every block it meets. The pace builds up over the level, and every 20-28 seconds a short attack of a different
+    /// The marathons of the scenario (seven of them, 60-130 seconds): halfway through the checkpoint flag goes up and a
+    /// helicopter drops a super-power crate a few tiles from the robot. It waits 10 seconds; grabbing it makes the
+    /// robot untouchable for 20 seconds, smashing every block it meets. After the flag a crash costs a life and play
+    /// goes on from the flag (<see cref="MarathonRespawn"/>). The pace builds up over the level, and every 20-28 seconds a short attack of a different
     /// kind comes (a block storm, sweeping lines, bombs or hunting blocks); the blocks still warn a little longer than
     /// elsewhere, so there is always time to see them coming.
     /// </summary>
     public partial class GameManager
     {
-        private const float HeliEvery = 30f, CrateStay = 10f, SuperSeconds = 20f, WaveSeconds = 7f;
+        private const float CrateStay = 10f, SuperSeconds = 20f, WaveSeconds = 7f;
 
         /// <summary>The kinds of heavy attack, taken in turn (shuffled per level).</summary>
         private enum Wave { Storm, Lines, Bombs, Hunters }
@@ -28,11 +29,14 @@ namespace SquashBot.Gameplay
         private SuperCrate crate;
         private GridPos crateTile = new GridPos(-99, -99);
         private bool heliOnWay;
+        private bool checkpointReached;
         private GameObject superAura;
 
         private void SetupMarathon()
         {
-            heliTimer = HeliEvery - 6f; // the first one comes a little early
+            // The scenario's marathons have one helicopter: it brings the crate with the checkpoint flag, halfway through.
+            heliTimer = level.surviveSeconds * 0.5f - 4f;
+            checkpointReached = false;
             waveTimer = Random.Range(16f, 20f);
             waveLeft = 0f;
             superLeft = 0f;
@@ -54,6 +58,15 @@ namespace SquashBot.Gameplay
         {
             if (previewing) return;
 
+            // Halfway: the checkpoint flag. From now on a crash costs a life and play goes on from here.
+            if (!checkpointReached && elapsed >= level.surviveSeconds * 0.5f)
+            {
+                checkpointReached = true;
+                ui.ShowIntro(Loc.T("road.checkpoint"), Loc.T("marathon.checkpoint"));
+                AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.5f);
+                fx.Burst(robot.transform.position + Vector3.up, new Color(0.5f, 1f, 0.7f), new Color(0.5f, 2.2f, 1f), 30, 5f);
+            }
+
             // The helicopter.
             if (!heliOnWay && crate == null)
             {
@@ -70,7 +83,7 @@ namespace SquashBot.Gameplay
                 {
                     FloatAt(crate.transform.position + Vector3.up, Loc.T("float.superMissed"), Palette.UiCyan);
                     ClearCrate();
-                    heliTimer = HeliEvery;
+                    heliTimer = 9999f; // one crate per marathon
                 }
             }
 
@@ -175,7 +188,7 @@ namespace SquashBot.Gameplay
             if (crate == null) return;
             var at = crate.transform.position;
             ClearCrate();
-            heliTimer = HeliEvery;
+            heliTimer = 9999f;
             superLeft = SuperSeconds;
             // Untouchable: a shield that never breaks smashes falling blocks and the blocks the robot hops into,
             // and carries it over holes.
@@ -195,6 +208,26 @@ namespace SquashBot.Gameplay
             superLeft = 0f;
             if (superAura != null) Destroy(superAura);
             superAura = null;
+        }
+
+        /// <summary>
+        /// A crash after the checkpoint: if a life is left, it is spent and the haul goes on from the flag (the clock back
+        /// at halfway, the floor cleared around a safe tile, a moment of shield). False: no checkpoint or no life, a real loss.
+        /// </summary>
+        private bool MarathonRespawn()
+        {
+            if (level == null || !level.marathon || !checkpointReached || bonusRun || !Lives.TryConsume()) return false;
+            elapsed = level.surviveSeconds * 0.5f;
+            hazards.Stop();
+            hazards.Begin(grid, level, MissionProgress);
+            if (waveLeft > 0f) EndWave();
+            var safe = SafeTileNear(grid.CenterFloor(), grid.CenterFloor());
+            robot.Spawn(grid, safe);
+            robot.GiveShield(3f);
+            cameraRig.Shake(0.6f);
+            fx.Burst(robot.transform.position + Vector3.up * 0.5f, new Color(0.5f, 1f, 0.7f), new Color(0.5f, 2.2f, 1f), 30, 5f);
+            ui.ShowIntro(Loc.T("road.checkpoint"), Loc.T("road.lifeLost") + " · " + Loc.F("lives.left", Lives.Count));
+            return true;
         }
 
         private void ClearCrate()

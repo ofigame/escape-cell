@@ -21,7 +21,8 @@ namespace SquashBot.UI
         private UiScreen screen;
         private TextMeshProUGUI chapter, speakerName, line, tapHint;
         private RectTransform bubble, robotAvatar, wardenAvatar, wardenMouth, bipAvatar, thiefAvatar, thiefMask;
-        private CanvasGroup robotGroup, wardenGroup, bipGroup, thiefGroup;
+        private CanvasGroup robotGroup, wardenGroup, bipGroup, thiefGroup, lumiGroup;
+        private RectTransform lumiAvatar;
         private Image bubbleRim, robotFace, wardenEye;
         private Image[] robotEyes;
         private Image dim;
@@ -78,6 +79,9 @@ namespace SquashBot.UI
             bipAvatar = BuildBip(root);
             wardenAvatar = BuildWarden(root);
             thiefAvatar = BuildThief(root);
+            lumiAvatar = BuildLumi(root);
+            lumiGroup = lumiAvatar.gameObject.AddComponent<CanvasGroup>();
+            lumiGroup.blocksRaycasts = false;
             robotAvatar = BuildRobot(root);
             robotGroup = robotAvatar.gameObject.AddComponent<CanvasGroup>();
             wardenGroup = wardenAvatar.gameObject.AddComponent<CanvasGroup>();
@@ -189,6 +193,25 @@ namespace SquashBot.UI
             return avatar;
         }
 
+        /// <summary>Lumi: the painter spirit, a soft glow in rings of light with a golden brush stroke across it.</summary>
+        private RectTransform BuildLumi(Transform root)
+        {
+            var avatar = UiFactory.Box("Lumi", root, new Vector2(0.5f, 0.5f), new Vector2(-260f, -420f), new Vector2(280f, 280f));
+            avatar.pivot = new Vector2(0.5f, 0.5f);
+            foreach (var (size, alpha) in new[] { (260f, 0.18f), (190f, 0.35f), (120f, 0.9f) })
+            {
+                var ring = UiFactory.Box("Glow", avatar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(size, size));
+                ring.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(ring, new Color(1f, 0.82f, 0.95f, alpha), UiSprites.Circle).raycastTarget = false;
+            }
+            var stroke = UiFactory.Box("Brush", avatar, new Vector2(0.5f, 0.5f), new Vector2(0f, -6f), new Vector2(170f, 18f));
+            stroke.pivot = new Vector2(0.5f, 0.5f);
+            stroke.localRotation = Quaternion.Euler(0f, 0f, 18f);
+            UiFactory.Fill(stroke, Palette.UiGold, UiSprites.Rounded, 12f).raycastTarget = false;
+            avatar.gameObject.SetActive(false);
+            return avatar;
+        }
+
         /// <summary>The Masked Thief: an old, scratched Observer head with a dark mask across its eyes.</summary>
         private RectTransform BuildThief(Transform root)
         {
@@ -232,13 +255,9 @@ namespace SquashBot.UI
             scene = sceneIndex;
             done = onDone;
             robotFace.color = RobotLooks.BodyColor(Mathf.Min(world, LevelCatalog.WorldCount - 1)) * 1.12f;
-            if (scene == Story.Ending) chapter.text = Loc.T("story.end");
-            else if (Story.OpensChapter(scene))
-            {
-                int c = Story.ChapterOf(scene);
-                chapter.text = Loc.T("chapter." + c) + "  ·  " + Loc.T("chapter." + c + ".sub");
-            }
-            else chapter.text = Loc.F("story.chapter", scene * LevelCatalog.LevelsPerWorld + 1, Loc.T(LevelCatalog.WorldKey(scene)));
+            // "GRİ KANAL · Test Hücresi": the floor and the scene's own title from the scenario.
+            chapter.text = scene == Story.Ending ? Loc.T("story.end")
+                : Loc.T(LevelCatalog.WorldKey(scene)) + "  ·  " + Loc.T("story.title." + scene);
             // The ending plays over its own scene (nature waking up), so the shade over it is light.
             dim.color = new Color(0.05f, 0.04f, 0.14f, scene == Story.Ending ? 0.12f : 0.55f);
             lastThiefLine = -1;
@@ -267,25 +286,26 @@ namespace SquashBot.UI
             Color accent = who == Speaker.VanG ? new Color(1f, 0.45f, 0.5f)
                 : who == Speaker.Bip ? new Color(0.55f, 1f, 0.6f)
                 : who == Speaker.Thief ? Palette.UiGold
+                : who == Speaker.Lumi ? new Color(1f, 0.8f, 0.95f)
                 : Palette.UiCyan;
             speakerName.text = who == Speaker.VanG ? Loc.T("story.warden")
                 : who == Speaker.Bip ? Loc.T("story.bip")
-                : who == Speaker.Thief ? Loc.T("story.firstObserver")
+                : who == Speaker.Thief ? Loc.T(scene >= Story.Reveal ? "story.firstObserver" : "story.kuzgun")
+                : who == Speaker.Lumi ? Loc.T("story.lumi")
                 : "";
             speakerName.transform.parent.gameObject.SetActive(who != Speaker.Narrator);
             speakerName.color = accent;
             bubbleRim.color = accent;
             tapHint.gameObject.SetActive(false);
 
-            // The reveal: the mask comes off after the first line; the Observer's eyes turn gold with the gift of energy,
-            // and green at the very end, when the world has its colours back.
-            thiefMask.gameObject.SetActive(i == 0);
+            // Kuzgun wears his mask until the floor where he takes it off (its first line still shows it). Lumi speaks from
+            // Bip's place.
+            thiefMask.gameObject.SetActive(scene < Story.Reveal || (scene == Story.Reveal && i == 0));
             wardenAvatar.gameObject.SetActive(!ThiefOnStage);
             thiefAvatar.gameObject.SetActive(ThiefOnStage);
-            bool golden = scene > Story.Reveal || (scene == Story.Reveal && i >= Story.LineCount(scene) - 2);
-            bool green = scene == Story.Ending && i == Story.LineCount(scene) - 1;
-            var eyeColor = green ? new Color(0.5f, 1f, 0.55f) : golden ? Palette.UiGold : Palette.UiCyan;
-            foreach (var eye in robotEyes) eye.color = eyeColor;
+            bipAvatar.gameObject.SetActive(who != Speaker.Lumi);
+            lumiAvatar.gameObject.SetActive(who == Speaker.Lumi);
+            foreach (var eye in robotEyes) eye.color = Palette.UiCyan;
             Story.NotifyLine(scene, i);
         }
 
@@ -329,7 +349,7 @@ namespace SquashBot.UI
                 if (who != Speaker.Narrator && shown / 3 > lastBlip)
                 {
                     lastBlip = shown / 3;
-                    float pitch = who == Speaker.Bip ? 1.7f : who == Speaker.Thief ? 1.0f : 0.6f;
+                    float pitch = who == Speaker.Bip ? 1.7f : who == Speaker.Lumi ? 1.3f : who == Speaker.Thief ? 1.0f : 0.6f;
                     AudioManager.PlaySfx(Sfx.Click, 0.22f, pitch, 0.1f);
                 }
             }
@@ -340,6 +360,7 @@ namespace SquashBot.UI
 
             // The speaker steps forward and bounces while talking; the others wait in the shade. The Observer only listens.
             Pose(bipAvatar, bipGroup, who == Speaker.Bip, talking, -260f, -420f, 1f);
+            Pose(lumiAvatar, lumiGroup, who == Speaker.Lumi, talking, -260f, -420f, 1f);
             Pose(wardenAvatar, wardenGroup, who == Speaker.VanG, talking, 250f, -420f, 1f);
             Pose(thiefAvatar, thiefGroup, who == Speaker.Thief, talking, 250f, -420f, 1f);
             Pose(robotAvatar, robotGroup, who == Speaker.Narrator, false, 0f, -470f, 0.62f);

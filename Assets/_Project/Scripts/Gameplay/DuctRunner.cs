@@ -206,6 +206,7 @@ namespace SquashBot.Gameplay
         {
             // Every level adds to the road: 90 rows after level 1, 3 more each level (about 840 at the end).
             // Its difficulty follows the level just as closely: speed, spacing and the kinds of obstacles.
+            if (!restarting) resumeRow = resumeCoins = 0; // a new road starts at its beginning
             float d = Mathf.Clamp01(level / (float)(Data.LevelCatalog.LevelCount - 1));
             roadLevel = level;
             lastRoad = (seed, origin, heading, level, toWorld);
@@ -215,12 +216,13 @@ namespace SquashBot.Gameplay
             if (finale) BuildCore();
         }
 
-        /// <summary>The road from the top again after a crash: same course, robot back at the start, no camera glide.</summary>
+        /// <summary>The road again after a crash: same course, from the last checkpoint passed (or the start), no camera glide.</summary>
         public void RestartRoad()
         {
             var r = lastRoad;
             restarting = true;
             PrepareRoad(r.seed, r.origin, r.heading, r.level, r.toWorld);
+            JumpToResume();
             TakeOver();
             restarting = false;
         }
@@ -252,6 +254,7 @@ namespace SquashBot.Gameplay
             Plan(rng);
             BendCourse(rng);
             ClearBehindTall();
+            PlanCheckpoints();
             builtRow = 0;
             while (builtRow < Mathf.Min(totalRows, BuildAhead)) BuildRow(builtRow++);
             if (!roadMode) BuildGate();
@@ -834,6 +837,7 @@ namespace SquashBot.Gameplay
             }
             }
             rows.Enqueue((r, root));
+            if (IsCheckpointRow(r)) BuildCheckpointArch(root);
 
             foreach (var (k, ol, orow) in obstaclePlan)
                 if (orow == r) CreateObstacle(k, ol, orow);
@@ -1109,6 +1113,7 @@ namespace SquashBot.Gameplay
             // A short grace moment after stepping off the edge still allows the jump (coyote time).
             if (!ended && !crashed && (!falling || y > CoyoteDepth)) HandleInput();
             Move(dt);
+            UpdateCheckpoints();
             UpdateRows();
             UpdateObstacles(dt);
             UpdateCoins();

@@ -50,7 +50,23 @@ namespace SquashBot.Data
         Glass = 512,
         Blink = 1024,
         Hunter = 2048,
-        Barrel = 4096
+        Barrel = 4096,
+        /// <summary>Electric jellyfish drifting along a row or column (the barrel rule, at sea).</summary>
+        Jellyfish = 8192,
+        /// <summary>A blizzard: the view closes in around the robot, the warnings still glow.</summary>
+        Blizzard = 16384,
+        /// <summary>Lasers bounced off crystals, their path drawn first.</summary>
+        MirrorLaser = 32768,
+        /// <summary>Cloud platforms that slide a tile every few seconds, carrying the robot.</summary>
+        MovingCloud = 65536,
+        /// <summary>Lightning: a yellow ring on a tile, then a strike.</summary>
+        Lightning = 131072,
+        /// <summary>Glitch tiles: two tiles pixelate, then swap places (with whatever stands on them).</summary>
+        Glitch = 262144,
+        /// <summary>Gravity wells pulling the robot a tile towards their centre now and then.</summary>
+        GravityWell = 524288,
+        /// <summary>A black hole in the middle of the floor that grows and shrinks.</summary>
+        BlackHole = 1048576
     }
 
     /// <summary>A surprise that happens once during a level.</summary>
@@ -103,6 +119,33 @@ namespace SquashBot.Data
         public bool marathon;
         [Tooltip("The very last level: vanG's heart, painted gold; then the last road, chasing vanG's core.")]
         public bool final;
+
+        [Header("Scenario card")]
+        [Tooltip("The level's number in the scenario (1-based); its texts are \"lvl.{number}.*\" in Loc.")]
+        public int number;
+        [Tooltip("Difficulty score of the level card (1-100).")]
+        public int score;
+        [Tooltip("Who gives the tip at the start of the level.")]
+        public Helper helper;
+        [Tooltip("Seconds to finish the goal in (0 = no limit): coin hunts, roads, paint.")]
+        public float timeLimit;
+        [Tooltip("Paint levels: tiles to paint (0 = every tile).")]
+        public int paintTarget;
+        [Tooltip("Coin thief levels: race Kuzgun to the coins instead of catching him.")]
+        public bool thiefRace;
+        [Tooltip("Guard Bip: keep it safe for this many seconds (0 = lead it to the door).")]
+        public float escortSeconds;
+        [Tooltip("Guard Bip: lead it to this many spots in turn (0 = to the door).")]
+        public int escortStops;
+        [Tooltip("Shadow Clones: knock them out this many times (0 = collect the cores).")]
+        public int cloneKnockouts;
+        [Tooltip("Boss and monster fights: stages, each with hitsPerStage hits.")]
+        public int stages;
+        public int hitsPerStage;
+        [Tooltip("Kuzgun runs alongside the robot as an ally.")]
+        public bool allyKuzgun;
+        [Tooltip("Moving enemies on the floor (counts).")]
+        public int sweepers, erasers, drones, sandworms, crabs, turrets, penguins, springbots;
 
         [Header("Blocks")]
         [Tooltip("Seconds between the red warning appearing and the block hitting the tile.")]

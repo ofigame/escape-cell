@@ -32,13 +32,20 @@ namespace SquashBot.Gameplay
 
         private void SetupClones()
         {
-            objectivesTotal = Mathf.Max(3, level.keys);
             objectivesDone = 0;
             cloneLastTile = robot.Position;
             doorPos = robot.Position; // the pieces spread away from the start
-            foreach (var p in SpreadTiles(objectivesTotal))
-                cores.Add((p, QuestItem.Create(QuestKind.Cores, GridView.ToWorld(p) + Vector3.up * GridView.SurfaceY)));
-            objectivesTotal = cores.Count;
+            if (level.cloneKnockouts > 0)
+            {
+                // This card asks to knock the clones out (lure them under blocks), not to collect cores.
+                objectivesTotal = level.cloneKnockouts;
+            }
+            else
+            {
+                foreach (var p in SpreadTiles(Mathf.Max(3, level.keys)))
+                    cores.Add((p, QuestItem.Create(QuestKind.Cores, GridView.ToWorld(p) + Vector3.up * GridView.SurfaceY)));
+                objectivesTotal = cores.Count;
+            }
 
             // Each clone starts at the robot's mirror image across the floor (or the nearest free tile to it).
             var r = robot.Position;
@@ -135,20 +142,28 @@ namespace SquashBot.Gameplay
         /// <summary>A block landed on <paramref name="p"/>: any clone there is knocked flat for a while.</summary>
         private void KnockClonesAt(GridPos p)
         {
-            foreach (var c in clones)
-                if (c.pos == p && c.down <= 0f)
+            foreach (var c in clones.ToArray())
+                if (c.pos == p && c.down <= 0f && clones.Contains(c))
                 {
-                    KnockClone(c);
+                    KnockClone(c, counts: true);
                     FloatAt(GridView.ToWorld(p), Loc.T("float.cloneDown"), Palette.UiCyan);
                 }
         }
 
-        private void KnockClone(Clone c)
+        /// <summary>A clone knocked flat; <paramref name="counts"/>: it counts towards a knock-out goal (a block did it).</summary>
+        private void KnockClone(Clone c, bool counts = false)
         {
             c.down = CloneDownSeconds;
             c.view.SetDown(true);
             fx.Burst(GridView.ToWorld(c.pos) + Vector3.up * 0.3f, new Color(0.3f, 0.2f, 0.5f), new Color(1.2f, 0.4f, 2f), 16, 4f);
             AudioManager.PlaySfx(Sfx.Blocked, 0.8f, 0.7f);
+            if (!counts || level.cloneKnockouts <= 0 || State != GameState.Playing) return;
+            objectivesDone++;
+            if (objectivesDone < objectivesTotal) return;
+            FloatAt(c.view.transform.position + Vector3.up, Loc.T("float.clonesGone"), Palette.UiGold);
+            foreach (var o in clones) fx.Burst(o.view.transform.position + Vector3.up * 0.4f, new Color(0.3f, 0.2f, 0.5f), new Color(1.2f, 0.4f, 2f), 20, 4f);
+            ClearClones();
+            Win();
         }
 
         private void TakeCore(int index)

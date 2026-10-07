@@ -15,7 +15,8 @@ namespace SquashBot.UI
         private const float ShowSeconds = 2.8f;
 
         private RectTransform root;
-        private TextMeshProUGUI line;
+        private TextMeshProUGUI line, speaker;
+        private Image rim;
         private CanvasGroup group;
         private float left, time;
 
@@ -36,7 +37,8 @@ namespace SquashBot.UI
         {
             var bubble = UiFactory.Box("Bubble", root, new Vector2(0f, 0.5f), new Vector2(118f, 0f), new Vector2(520f, 120f));
             UiFactory.Fill(bubble, new Color(0.08f, 0.16f, 0.13f, 0.88f), UiSprites.Rounded, 0.8f).raycastTarget = false;
-            UiFactory.Fill(UiFactory.Stretch("Rim", bubble), new Color(0.55f, 1f, 0.6f, 0.9f), UiSprites.Ring, 0.8f).raycastTarget = false;
+            rim = UiFactory.Fill(UiFactory.Stretch("Rim", bubble), new Color(0.55f, 1f, 0.6f, 0.9f), UiSprites.Ring, 0.8f);
+            rim.raycastTarget = false;
             line = UiFactory.TextBox("Line", bubble, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(480f, 104f), "", 36f, Color.white,
                 FontStyles.Bold, align: TextAlignmentOptions.MidlineLeft);
             line.enableAutoSizing = true;
@@ -60,16 +62,20 @@ namespace SquashBot.UI
             crack.pivot = new Vector2(0.5f, 0.5f);
             crack.localRotation = Quaternion.Euler(0f, 0f, -50f);
             UiFactory.Fill(crack, new Color(0.75f, 0.9f, 0.85f, 0.7f), UiSprites.Rounded, 20f).raycastTarget = false;
-            var name = UiFactory.TextBox("Name", face, new Vector2(0.5f, 0f), new Vector2(0f, -30f), new Vector2(124f, 34f), Loc.T("story.bip"), 26f,
+            speaker = UiFactory.TextBox("Name", face, new Vector2(0.5f, 0f), new Vector2(0f, -30f), new Vector2(124f, 34f), Loc.T("story.bip"), 26f,
                 new Color(0.55f, 1f, 0.6f));
-            name.raycastTarget = false;
+            speaker.raycastTarget = false;
         }
 
-        /// <summary>Bip says <paramref name="text"/> for a few seconds.</summary>
-        public void Say(string text)
+        /// <summary>Bip (or whoever <paramref name="who"/> names, in <paramref name="color"/>) says <paramref name="text"/> for a few seconds.</summary>
+        public void Say(string text, string who = null, Color? color = null)
         {
             line.text = text;
-            left = ShowSeconds;
+            speaker.text = who ?? Loc.T("story.bip");
+            var c = color ?? new Color(0.55f, 1f, 0.6f);
+            speaker.color = c;
+            rim.color = new Color(c.r, c.g, c.b, 0.9f);
+            left = Mathf.Max(ShowSeconds, text.Length / 22f);
             AudioManager.PlaySfx(Sfx.Click, 0.35f, 1.7f, 0.1f);
         }
 

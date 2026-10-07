@@ -97,6 +97,26 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>A block landed here: any coin on the tile is lost.</summary>
+        /// <summary>Where coins lie right now.</summary>
+        public IEnumerable<GridPos> Positions
+        {
+            get { foreach (var c in coins) yield return c.pos; }
+        }
+
+        /// <summary>Someone else (Kuzgun) takes the coin on <paramref name="p"/>: it vanishes with a sparkle. True if there was one.</summary>
+        public bool Take(GridPos p)
+        {
+            for (int i = coins.Count - 1; i >= 0; i--)
+            {
+                if (coins[i].pos != p) continue;
+                fx.Burst(coins[i].go.transform.position, Palette.Coin, Palette.CoinGlow, 10, 3f);
+                Destroy(coins[i].go);
+                coins.RemoveAt(i);
+                return true;
+            }
+            return false;
+        }
+
         public void Smash(GridPos p)
         {
             for (int i = coins.Count - 1; i >= 0; i--)
