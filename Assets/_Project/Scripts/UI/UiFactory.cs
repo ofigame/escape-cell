@@ -65,14 +65,14 @@ namespace SquashBot.UI
 
         private static List<TMP_FontAsset> scriptFonts;
 
-        /// <summary>Fallback fonts for other scripts: Korean (Noto Sans KR) and Arabic (Noto Sans Arabic), if present.</summary>
+        /// <summary>Fallback fonts for other scripts: Korean (Noto Sans KR Bold) and Arabic (Noto Sans Arabic), if present.</summary>
         private static List<TMP_FontAsset> ScriptFonts
         {
             get
             {
                 if (scriptFonts != null) return scriptFonts;
                 scriptFonts = new List<TMP_FontAsset>();
-                foreach (var path in new[] { "Fonts/NotoSansKR-Bold", "Fonts/NotoSansArabic-Bold" })
+                foreach (var path in new[] { "Fonts/NotoSansKR", "Fonts/NotoSansArabic" })
                 {
                     var asset = Dynamic(path);
                     if (asset != null) scriptFonts.Add(asset);
@@ -221,7 +221,9 @@ namespace SquashBot.UI
             if (title)
             {
                 label.fontSharedMaterial = TitleMaterial;
-                style &= ~FontStyles.Bold; // the display font is heavy already; faux bold would blur it
+                // The display font is heavy already; faux bold would blur it. Arabic comes from the lighter Noto
+                // fallback, which does need the extra weight on titles and buttons (Korean ships as Noto Sans KR Bold).
+                if (Data.Loc.Current != Data.Language.Arabic) style &= ~FontStyles.Bold;
             }
             label.text = text;
             label.fontSize = size;
@@ -311,7 +313,7 @@ namespace SquashBot.UI
                 // Call-to-action buttons speak in the display font, like the logo.
                 label.font = TitleFont;
                 label.fontSharedMaterial = TitleFont.material;
-                label.fontStyle = FontStyles.Normal;
+                label.fontStyle = Data.Loc.Current == Data.Language.Arabic ? FontStyles.Bold : FontStyles.Normal;
             }
 
             var button = root.gameObject.AddComponent<Button>();
