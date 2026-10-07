@@ -5,19 +5,21 @@ using UnityEngine.Rendering.Universal;
 namespace SquashBot.Visual
 {
     /// <summary>
-    /// Keeps phones smooth. The 3D scene is drawn below the screen's native resolution (the UI stays sharp), and when the
-    /// frame rate still drops — a big late floor on a slower phone — the scene resolution steps down a bit more, then MSAA
-    /// goes; when frames are fast again for a while, it steps back up. Desktop builds are left alone.
+    /// Keeps phones smooth without blurring the picture. The scene is drawn at the screen's own resolution (only very
+    /// tall screens, over 2400 px, are drawn a little smaller). When the frame rate drops, the cheap-looking savings come
+    /// first: the glow (bloom) is computed at a quarter of the size instead of half, which looks the same. Only then does
+    /// the scene resolution step down, never below 85%, upscaled with AMD FSR and sharpened so edges stay crisp. When
+    /// frames are fast again for a while, everything steps back up. Desktop builds are left alone.
     /// </summary>
     public class FrameGovernor : MonoBehaviour
     {
-        private const float TargetPixels = 1700f; // the long screen side the scene is drawn at, at most
-        private const float MinScale = 0.55f, Step = 0.08f;
+        private const float MaxPixels = 2400f; // the long screen side the scene is drawn at, at most
+        private const float MinScale = 0.85f, Step = 0.075f;
         private const float Window = 2f;
 
         private UniversalRenderPipelineAsset urp;
         private float maxScale, scale;
-        private int originalMsaa;
+        private bool lightBloom;
         private float time;
         private int frames;
         private float calm;
@@ -38,8 +40,11 @@ namespace SquashBot.Visual
                 enabled = false;
                 return;
             }
-            originalMsaa = urp.msaaSampleCount;
-            maxScale = Mathf.Clamp(TargetPixels / Mathf.Max(Screen.width, Screen.height, 1), MinScale, 1f);
+            // FSR only kicks in below 100%; its sharpening keeps the upscaled picture as crisp as native.
+            urp.upscalingFilter = UpscalingFilterSelection.FSR;
+            urp.fsrOverrideSharpness = true;
+            urp.fsrSharpness = 0.9f;
+            maxScale = Mathf.Clamp(MaxPixels / Mathf.Max(Screen.width, Screen.height, 1), MinScale, 1f);
             scale = maxScale;
             urp.renderScale = scale;
         }
@@ -59,20 +64,28 @@ namespace SquashBot.Visual
             if (fps < target * 0.8f)
             {
                 calm = 0f;
-                if (scale > MinScale + 0.001f) scale = Mathf.Max(MinScale, scale - Step);
-                else if (urp.msaaSampleCount > 1) urp.msaaSampleCount = 1;
+                if (!lightBloom) SetLightBloom(true);
+                else if (scale > MinScale + 0.001f) scale = Mathf.Max(MinScale, scale - Step);
                 urp.renderScale = scale;
             }
             else if (fps > target * 0.95f)
             {
                 // Climb back slowly, so it doesn't flip back and forth.
                 calm += Window;
-                if (calm < 10f) return;
+                if (calm < 8f) return;
                 calm = 0f;
-                if (urp.msaaSampleCount < originalMsaa) urp.msaaSampleCount = originalMsaa;
-                else if (scale < maxScale - 0.001f) scale = Mathf.Min(maxScale, scale + Step);
+                if (scale < maxScale - 0.001f) scale = Mathf.Min(maxScale, scale + Step);
+                else if (lightBloom) SetLightBloom(false);
                 urp.renderScale = scale;
             }
+        }
+
+        private void SetLightBloom(bool on)
+        {
+            lightBloom = on;
+            foreach (var volume in FindObjectsByType<Volume>(FindObjectsSortMode.None))
+                if (volume.sharedProfile != null && volume.sharedProfile.TryGet<Bloom>(out var bloom))
+                    bloom.downscale.Override(on ? BloomDownscaleMode.Quarter : BloomDownscaleMode.Half);
         }
     }
 }
