@@ -76,6 +76,9 @@ namespace SquashBot.Data
             float d = Difficulty(index);
             // Shift the first eight missions per world so consecutive worlds don't open the same way.
             var mission = i >= 8 ? Rhythm[i] : Rhythm[(i + world) % 8];
+            // From the second world on, the middle quest of the world is a new kind of story: the coin thief on odd worlds,
+            // leading Bip to the door on even ones (the other two quests stay classic stories).
+            if (world >= 1 && i < 8 && (i + world) % 8 == 3) mission = world % 2 == 1 ? MissionType.Thief : MissionType.Escort;
             var rules = Rules(world, index);
             // Poison eats tiles for good, so a poisoned floor can never be fully painted.
             if (mission == MissionType.Paint && (rules & FloorRule.Poison) != 0) mission = MissionType.CollectCoins;
@@ -108,6 +111,25 @@ namespace SquashBot.Data
                 level.aimAtPlayerChance = 0.15f;
                 // On every other floor the monster keeps Princess Lumi prisoner next to it.
                 level.guardsPrincess = world % 2 == 1;
+                // From world 5 the monsters that don't guard the princess shield themselves and leap after each hit.
+                level.phased = world >= 4 && !level.guardsPrincess;
+                Shape(level, index, d);
+            }
+            else if (mission == MissionType.Thief)
+            {
+                // A roomy floor for the chase, gentle blocks: the thief is the challenge.
+                level.keys = 3 + Mathf.RoundToInt(d * 3f);
+                level.gridWidth = level.gridHeight = Mathf.Min(16, level.gridWidth + 1);
+                level.blocksPerWave = Mathf.Max(1, level.blocksPerWave - 1);
+                level.aimAtPlayerChance = 0.1f;
+                Shape(level, index, d);
+            }
+            else if (mission == MissionType.Escort)
+            {
+                // A long way to lead Bip: the regular floor, a little calmer, the door on the far side.
+                level.blocksPerWave = Mathf.Max(1, level.blocksPerWave - 1);
+                level.spawnInterval *= 1.1f;
+                level.aimAtPlayerChance = 0.1f;
                 Shape(level, index, d);
             }
             else if (mission == MissionType.Quest)

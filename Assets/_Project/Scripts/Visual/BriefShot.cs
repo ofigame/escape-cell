@@ -15,6 +15,8 @@ namespace SquashBot.Visual
         Coins,
         Paint,
         Warden,
-        Block
+        Block,
+        Thief,
+        Escort
     }
 }

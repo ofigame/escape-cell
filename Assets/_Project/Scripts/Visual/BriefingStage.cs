@@ -31,6 +31,8 @@ namespace SquashBot.Visual
         private int step;
         private Transform robot, held;
         private Transform block;
+        private Thief thiefProp;
+        private Buddy buddyProp;
         private Monster monster;
         private QuestGoal goal;
         private ExitPortal door;
@@ -185,6 +187,19 @@ namespace SquashBot.Visual
                         MaterialFactory.Create(Palette.Block, Palette.BlockGlow * 0.5f)).transform;
                     block.gameObject.SetActive(false);
                     break;
+                case BriefShot.Thief:
+                    robot = MakeRobot(-Right * 1.3f, 2.2f);
+                    thiefProp = MakeThief(Right * 0.7f);
+                    break;
+                case BriefShot.Escort:
+                    door = ExitPortal.Create(Origin + Right * 1.3f);
+                    door.transform.SetParent(props, true);
+                    door.Open();
+                    robot = MakeRobot(-Right * 0.3f, 2.2f);
+                    buddyProp = Buddy.Create(Origin - Right * 1.6f);
+                    buddyProp.transform.SetParent(props, true);
+                    buddyProp.transform.localScale = Vector3.one * 1.9f;
+                    break;
                 case BriefShot.Warden:
                     var warden = WardenBoss.Create(Origin + Vector3.up * 0.6f, 3, cam.transform);
                     warden.transform.SetParent(props, true);
@@ -203,6 +218,15 @@ namespace SquashBot.Visual
             // Facing the right-hand side of the stage (where the monster or the door stands), a little towards the viewer.
             holder.rotation = Quaternion.LookRotation(Right + new Vector3(ViewDir.x, 0f, ViewDir.z) * 0.9f);
             return holder;
+        }
+
+        private Thief MakeThief(Vector3 at)
+        {
+            var t = Thief.Create(Origin + at, new Color(0.6f, 0.6f, 0.68f));
+            t.transform.SetParent(props, true);
+            t.transform.localScale = Vector3.one * 1.6f;
+            t.transform.rotation = Quaternion.LookRotation(new Vector3(ViewDir.x, 0f, ViewDir.z));
+            return t;
         }
 
         private Monster MakeMonster(Vector3 at)
@@ -233,6 +257,8 @@ namespace SquashBot.Visual
             tileMats.Clear();
             robot = held = null;
             block = null;
+            thiefProp = null;
+            buddyProp = null;
             monster = null;
             goal = null;
             door = null;
@@ -282,6 +308,12 @@ namespace SquashBot.Visual
                     break;
                 case BriefShot.Block:
                     UpdateBlock();
+                    break;
+                case BriefShot.Thief:
+                    UpdateThiefShot();
+                    break;
+                case BriefShot.Escort:
+                    UpdateEscortShot();
                     break;
             }
         }
@@ -429,6 +461,62 @@ namespace SquashBot.Visual
                 fx?.Dust(block.position, Palette.Block, 14, 3f);
             }
             if (loopT >= Cycle) { loopT = 0f; step = 0; }
+        }
+
+        /// <summary>The thief hops away, the robot corners it and bumps into it: dizzy stars, a coin pops out.</summary>
+        private void UpdateThiefShot()
+        {
+            const float Cycle = 3.4f;
+            float k = loopT;
+            var tStart = Right * 0.7f;
+            var tEnd = Right * 1.45f;
+            if (step == 0) // first frame of the loop: off it goes
+            {
+                step = 1;
+                thiefProp.HopTo(Origin + tEnd, 0.3f);
+            }
+            // The robot hops after it in three steps.
+            float chase = Mathf.Clamp01((k - 0.5f) / 1.1f);
+            var home = -Right * 1.3f;
+            var near = Right * 0.6f;
+            robot.localPosition = Vector3.Lerp(home, near, chase) + Vector3.up * Mathf.Abs(Mathf.Sin(chase * Mathf.PI * 3f)) * 0.15f;
+            if (k >= 1.65f && step == 1)
+            {
+                step = 2;
+                thiefProp.Catch(1.4f);
+                fx?.Burst(thiefProp.transform.position + Vector3.up * 0.6f, Palette.UiGold, Palette.CoinGlow, 24, 4f);
+            }
+            if (loopT >= Cycle)
+            {
+                loopT = 0f;
+                step = 0;
+                robot.localPosition = home;
+                Destroy(thiefProp.gameObject);
+                thiefProp = MakeThief(tStart);
+            }
+        }
+
+        /// <summary>The robot walks to the open door with Bip hopping a tile behind; Bip goes in and cheers.</summary>
+        private void UpdateEscortShot()
+        {
+            const float Cycle = 3.6f;
+            float k = Mathf.Clamp01(loopT / 2.4f);
+            // The robot leads, then steps aside (away from the viewer) to let Bip through the door.
+            var away = -new Vector3(ViewDir.x, 0f, ViewDir.z).normalized;
+            var rFrom = -Right * 0.3f;
+            var rTo = Right * 0.7f + away * 0.9f;
+            robot.localPosition = Vector3.Lerp(rFrom, rTo, k) + Vector3.up * Mathf.Abs(Mathf.Sin(k * Mathf.PI * 4f)) * 0.08f;
+            var bFrom = -Right * 1.6f;
+            var bTo = Right * 1.3f;
+            float kb = Mathf.Clamp01((loopT - 0.3f) / 2.6f);
+            if (!buddyProp.Hopping) buddyProp.Place(Origin + Vector3.Lerp(bFrom, bTo, kb) + Vector3.up * Mathf.Abs(Mathf.Sin(kb * Mathf.PI * 5f)) * 0.12f);
+            if (kb >= 1f && step == 0)
+            {
+                step = 1;
+                buddyProp.Cheer();
+                fx?.Burst(buddyProp.transform.position + Vector3.up * 0.5f, Palette.UiGold, Palette.CoinGlow, 20, 4f);
+            }
+            if (loopT >= Cycle) Show(BriefShot.Escort);
         }
 
         private void OnDestroy()

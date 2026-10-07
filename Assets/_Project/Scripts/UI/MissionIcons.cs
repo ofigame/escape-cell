@@ -12,7 +12,7 @@ namespace SquashBot.UI
     /// </summary>
     public static class MissionIcons
     {
-        public enum Icon { None, Princess, Monster, Boss, Cores, Cages, Lanterns, Treasure }
+        public enum Icon { None, Princess, Monster, Boss, Cores, Cages, Lanterns, Treasure, Thief, Escort }
 
         /// <summary>The badges a level gets (at most two).</summary>
         public static (Icon a, Icon b) For(LevelData level)
@@ -22,6 +22,8 @@ namespace SquashBot.UI
             {
                 case MissionType.Boss: return (Icon.Boss, Icon.None);
                 case MissionType.Monster: return (Icon.Monster, level.guardsPrincess ? Icon.Princess : Icon.None);
+                case MissionType.Thief: return (Icon.Thief, Icon.None);
+                case MissionType.Escort: return (Icon.Escort, Icon.None);
                 case MissionType.Quest:
                     switch (level.quest)
                     {
@@ -100,6 +102,21 @@ namespace SquashBot.UI
                     Part(box, new Vector2(0f, -s * 0.05f), new Vector2(s * 0.34f, s * 0.42f), new Color(1f, 0.85f, 0.45f), UiSprites.Rounded);
                     Part(box, new Vector2(0f, -s * 0.05f), new Vector2(s * 0.14f, s * 0.2f), new Color(1f, 0.5f, 0.2f), UiSprites.Circle);
                     Part(box, new Vector2(0f, s * 0.22f), new Vector2(s * 0.42f, s * 0.08f), dark, UiSprites.Rounded);
+                    break;
+                case Icon.Thief:
+                    // A masked face with a coin.
+                    Part(box, new Vector2(-s * 0.06f, 0f), new Vector2(s * 0.6f, s * 0.52f), new Color(0.62f, 0.62f, 0.7f), UiSprites.Circle);
+                    Part(box, new Vector2(-s * 0.06f, s * 0.04f), new Vector2(s * 0.58f, s * 0.14f), dark, UiSprites.Rounded);
+                    foreach (float x in new[] { -0.17f, 0.05f }) Part(box, new Vector2(s * x, s * 0.04f), new Vector2(s * 0.08f, s * 0.08f), Color.white, UiSprites.Circle);
+                    Part(box, new Vector2(s * 0.28f, -s * 0.24f), new Vector2(s * 0.26f, s * 0.26f), gold, UiSprites.Circle);
+                    break;
+                case Icon.Escort:
+                    // Bip: a little orange bot with one big eye and an antenna.
+                    Part(box, new Vector2(0f, -s * 0.06f), new Vector2(s * 0.56f, s * 0.52f), new Color(1f, 0.72f, 0.35f), UiSprites.Circle);
+                    Part(box, new Vector2(0f, -s * 0.04f), new Vector2(s * 0.34f, s * 0.2f), dark, UiSprites.Rounded);
+                    Part(box, new Vector2(0f, -s * 0.04f), new Vector2(s * 0.12f, s * 0.12f), new Color(0.5f, 1f, 0.95f), UiSprites.Circle);
+                    Part(box, new Vector2(0f, s * 0.28f), new Vector2(s * 0.04f, s * 0.16f), dark, UiSprites.Rounded);
+                    Part(box, new Vector2(0f, s * 0.38f), new Vector2(s * 0.1f, s * 0.1f), new Color(0.5f, 1f, 0.95f), UiSprites.Circle);
                     break;
                 case Icon.Treasure:
                     Part(box, Vector2.zero, new Vector2(s * 0.42f, s * 0.42f), new Color(1f, 0.45f, 0.85f), UiSprites.Rounded, 45f);

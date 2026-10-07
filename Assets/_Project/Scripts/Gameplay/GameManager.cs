@@ -21,7 +21,7 @@ namespace SquashBot.Gameplay
     }
 
     /// <summary>Entry point: builds the world from code and runs the menu → map → level → result loop.</summary>
-    public class GameManager : MonoBehaviour
+    public partial class GameManager : MonoBehaviour
     {
         private const float CloseCallWindow = 0.3f;
         private const float SlowMoScale = 0.35f;
@@ -288,6 +288,9 @@ namespace SquashBot.Gameplay
             objectivesDone = objectivesTotal = 0;
             ClearQuest();
             ClearMonster();
+            ClearThief();
+            ClearEscort();
+            ClearMonsterShield();
             skillFreezeLeft = skillMagnetLeft = 0f;
             doubleCoins = false;
             previewing = false;
@@ -369,6 +372,7 @@ namespace SquashBot.Gameplay
             switch (data.mission)
             {
                 case MissionType.Monster: return Boost.StartHammer;
+                case MissionType.Thief:
                 case MissionType.CollectCoins:
                 case MissionType.CoinRain: return Boost.DoubleCoins;
                 default: return Boost.StartShield;
@@ -1088,6 +1092,13 @@ namespace SquashBot.Gameplay
                     break;
                 case MissionType.Monster:
                     UpdateMonster(Time.deltaTime);
+                    UpdateMonsterShield(Time.deltaTime);
+                    break;
+                case MissionType.Thief:
+                    UpdateThief(Time.deltaTime);
+                    break;
+                case MissionType.Escort:
+                    UpdateEscort(Time.deltaTime);
                     break;
             }
         }
@@ -1196,6 +1207,7 @@ namespace SquashBot.Gameplay
             coins.Smash(p);
             powerUps.Smash(p);
             if (State != GameState.Playing) return;
+            if (level.mission == MissionType.Escort && p == buddyPos) DazeBuddy(p);
             cameraRig.Punch(0.5f);
 
             if (robot.IsAlive && !robot.IsHovering && robot.Position == p)
@@ -1251,6 +1263,7 @@ namespace SquashBot.Gameplay
         /// <summary>The first holes of a level teach the jump (for the player's first few levels with holes).</summary>
         private void OnTileBroken(GridPos p)
         {
+            if (State == GameState.Playing && level != null && level.mission == MissionType.Escort && p == buddyPos) DazeBuddy(p);
             const string key = "sb_jump_hints";
             if (jumpHintShown || State != GameState.Playing || PlayerPrefs.GetInt(key, 0) >= 3) return;
             jumpHintShown = true;
@@ -1754,6 +1767,14 @@ namespace SquashBot.Gameplay
             {
                 SetupMonster();
             }
+            else if (level.mission == MissionType.Thief)
+            {
+                SetupThief();
+            }
+            else if (level.mission == MissionType.Escort)
+            {
+                SetupEscort();
+            }
             else if (level.mission == MissionType.Paint)
             {
                 PaintTile(robot.Position);
@@ -1940,6 +1961,8 @@ namespace SquashBot.Gameplay
                 case MissionType.Exit: return portal != null && portal.IsOpen ? 1f : objectivesDone / (objectivesTotal + 1f);
                 case MissionType.Boss: return objectivesDone / (float)Mathf.Max(1, objectivesTotal);
                 case MissionType.Quest: return questReady ? 1f : objectivesDone / (objectivesTotal + 1f);
+                case MissionType.Thief: return objectivesDone / (float)Mathf.Max(1, objectivesTotal);
+                case MissionType.Escort: return EscortProgress();
                 case MissionType.Monster: return objectivesDone / (float)Mathf.Max(1, objectivesTotal);
                 case MissionType.Paint: return grid == null ? 0f : painted.Count / (float)grid.FloorCount;
                 default: return elapsed / level.surviveSeconds;
@@ -1960,6 +1983,8 @@ namespace SquashBot.Gameplay
                 case MissionType.Boss: return Loc.T("mission.boss" + suffix);
                 case MissionType.Quest: return Loc.F("quest.intro." + data.quest, data.keys);
                 case MissionType.Monster: return Loc.F((data.guardsPrincess ? "mission.monsterPrincess" : "mission.monster") + suffix, data.keys);
+                case MissionType.Thief: return Loc.F("mission.thief" + suffix, data.keys);
+                case MissionType.Escort: return Loc.T("mission.escort" + suffix);
                 default: return Loc.F("mission.survive" + suffix, data.surviveSeconds.ToString("0", CultureInfo.InvariantCulture));
             }
         }
@@ -2415,7 +2440,18 @@ namespace SquashBot.Gameplay
 
         private void OnRobotBumped(GridPos target)
         {
+            if (State == GameState.Playing && level != null && level.mission == MissionType.Thief)
+            {
+                if (target == thiefPos) CatchThief();
+                return;
+            }
             if (State != GameState.Playing || level == null || level.mission != MissionType.Monster || monster == null || target != monsterPos) return;
+            if (MonsterShielded)
+            {
+                FloatAt(GridView.ToWorld(monsterPos) + Vector3.up, Loc.T("float.monsterShield"), Palette.UiCyan);
+                AudioManager.PlaySfx(Sfx.Blocked, 0.8f, 1.4f);
+                return;
+            }
             if (!charged)
             {
                 FloatAt(GridView.ToWorld(monsterPos) + Vector3.up, Loc.T("float.needMagic"), Palette.UiCyan);
@@ -2451,6 +2487,7 @@ namespace SquashBot.Gameplay
             }
             monster.Hit(monsterHp);
             FloatAt(at, Loc.F("float.monsterHit", monsterHp), Palette.UiGold);
+            if (level.phased) MonsterPhase();
             SpawnOrb();
         }
 
@@ -2573,6 +2610,15 @@ namespace SquashBot.Gameplay
                     steps.Add((BriefShot.HammerHit, Loc.F("brief.hit", objectivesTotal)));
                     steps.Add((BriefShot.Stomp, Loc.T("brief.stomp")));
                     if (level.guardsPrincess) steps.Add((BriefShot.Princess, Loc.T("brief.princessFreed")));
+                    if (level.phased) steps.Add((BriefShot.HammerHit, Loc.T("brief.phased")));
+                    break;
+                case MissionType.Thief:
+                    steps.Add((BriefShot.Thief, Loc.F("brief.thief", objectivesTotal)));
+                    steps.Add((BriefShot.Coins, Loc.T("brief.thiefCoins")));
+                    break;
+                case MissionType.Escort:
+                    steps.Add((BriefShot.Escort, Loc.T("brief.escort")));
+                    steps.Add((BriefShot.Block, Loc.T("brief.escortSafe")));
                     break;
                 case MissionType.Quest:
                     steps.Add((BriefShot.QuestItem, MissionText(level)));
@@ -2678,6 +2724,14 @@ namespace SquashBot.Gameplay
                     if (warden != null) target = warden.transform;
                     text = Loc.T("callout.boss");
                     break;
+                case MissionType.Thief:
+                    if (thief != null) target = thief.transform;
+                    text = Loc.T("callout.thief");
+                    break;
+                case MissionType.Escort:
+                    if (buddy != null) target = buddy.transform;
+                    text = Loc.T("callout.escort");
+                    break;
             }
             if (target == null) return false;
             StartCoroutine(MissionPreview(target, text, seconds));
@@ -2723,6 +2777,8 @@ namespace SquashBot.Gameplay
                 case MissionType.Boss: text = Loc.F("hud.boss", objectivesDone, objectivesTotal); break;
                 case MissionType.Quest: text = questReady ? Loc.T("quest.hudGo." + level.quest) : Loc.F("quest.hud." + level.quest, objectivesDone, objectivesTotal); break;
                 case MissionType.Monster: text = charged ? Loc.T("hud.monsterHit") : Loc.F("hud.monster", monsterHp, objectivesTotal); break;
+                case MissionType.Thief: text = Loc.F("hud.thief", objectivesDone, objectivesTotal); break;
+                case MissionType.Escort: text = Loc.F("hud.escort", EscortStepsLeft()); break;
                 default: text = Loc.F("hud.survive", Seconds(level.surviveSeconds - elapsed)); break;
             }
             ui.SetMission(text, MissionProgress(), Earned);

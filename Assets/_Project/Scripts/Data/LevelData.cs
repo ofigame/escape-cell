@@ -23,8 +23,12 @@ namespace SquashBot.Data
         Boss,
         /// <summary>A little story on a big floor: find every piece (keys, cores, cages, lanterns, gems), then reach the goal.</summary>
         Quest,
-        /// <summary>A monster on a fixed tile: pick up the magic orb, run into it, repeat until its health bar is empty.</summary>
-        Monster
+        /// <summary>A monster on a fixed tile: pick up the Thunder Hammer, run into it, repeat until its health bar is empty.</summary>
+        Monster,
+        /// <summary>A coin thief runs from the robot: corner it and bump into it a number of times.</summary>
+        Thief,
+        /// <summary>Lead Bip, a little lost robot that follows a tile behind, through the open door.</summary>
+        Escort
     }
 
     /// <summary>The signature rules of the upper floors (several can be combined).</summary>
@@ -89,6 +93,8 @@ namespace SquashBot.Data
 
         /// <summary>Monster levels: the monster guards Princess Lumi, who is freed when it falls.</summary>
         public bool guardsPrincess;
+        [Tooltip("Monster levels: after each hit the monster shields itself and leaps to another tile.")]
+        public bool phased;
 
         [Header("Blocks")]
         [Tooltip("Seconds between the red warning appearing and the block hitting the tile.")]

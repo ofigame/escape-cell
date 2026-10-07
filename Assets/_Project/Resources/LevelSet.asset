@@ -27,6 +27,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.5
     spawnInterval: 2.2
     blocksPerWave: 1
@@ -59,6 +60,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.49
     spawnInterval: 2.15
     blocksPerWave: 1
@@ -94,6 +96,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.48
     spawnInterval: 2.1
     blocksPerWave: 1
@@ -126,6 +129,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.46
     spawnInterval: 2.05
     blocksPerWave: 1
@@ -162,6 +166,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.45
     spawnInterval: 2
     blocksPerWave: 1
@@ -198,6 +203,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.43
     spawnInterval: 1.97
     blocksPerWave: 1
@@ -235,6 +241,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.42
     spawnInterval: 1.94
     blocksPerWave: 1
@@ -271,6 +278,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.41
     spawnInterval: 1.91
     blocksPerWave: 1
@@ -307,6 +315,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4
     spawnInterval: 1.88
     blocksPerWave: 1
@@ -349,6 +358,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.39
     spawnInterval: 1.86
     blocksPerWave: 1
@@ -392,6 +402,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.472455
     spawnInterval: 2.0606499
     blocksPerWave: 1
@@ -430,6 +441,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4701306
     spawnInterval: 2.0573294
     blocksPerWave: 1
@@ -448,36 +460,36 @@ MonoBehaviour:
     powerUpInterval: 10.530623
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - ....####
-    - ....####
-    - '########'
-    - X#######
-    - '########'
-    - X#######
-    - ....####
-    - ....####
-    mission: 8
+    - ...####
+    - ...####
+    - X######
+    - '#######'
+    - '#######'
+    - ...####
+    - ...####
+    mission: 10
     coinTarget: 9
     surviveSeconds: 33
-    keys: 4
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    quest: 4
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4678377
-    spawnInterval: 2.3621619
+    spawnInterval: 2.0540538
     blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.16378385
     lineWaveChance: 0
-    bombChance: 0.03606489
+    bombChance: 0.060108148
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -508,6 +520,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4655733
     spawnInterval: 2.050819
     blocksPerWave: 1
@@ -551,6 +564,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.463335
     spawnInterval: 2.0476213
     blocksPerWave: 1
@@ -592,6 +606,7 @@ MonoBehaviour:
     rules: 0
     quest: 2
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4611205
     spawnInterval: 2.3511264
     blocksPerWave: 1
@@ -632,6 +647,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 1
+    phased: 0
     warningTime: 1.4589281
     spawnInterval: 2.0413258
     blocksPerWave: 1
@@ -673,6 +689,7 @@ MonoBehaviour:
     rules: 0
     quest: 4
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4567561
     spawnInterval: 2.3439565
     blocksPerWave: 1
@@ -712,6 +729,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4546033
     spawnInterval: 2.0351474
     blocksPerWave: 1
@@ -752,6 +770,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4524683
     spawnInterval: 2.0320976
     blocksPerWave: 2
@@ -791,6 +810,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.45035
     spawnInterval: 2.0290716
     blocksPerWave: 1
@@ -809,22 +829,20 @@ MonoBehaviour:
     powerUpInterval: 10.219788
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######...'
-    - '######...'
-    - X#####...
-    - '#########'
-    - '########X'
-    - ...######
-    - ...######
-    - ...######
-    - ...######
-    mission: 8
+    - '#####..'
+    - '#####..'
+    - X######
+    - '######X'
+    - ..#####
+    - ..#####
+    - ..#####
+    mission: 11
     coinTarget: 10
     surviveSeconds: 34
-    keys: 4
+    keys: 2
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -832,14 +850,15 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4482478
-    spawnInterval: 2.3299785
+    spawnInterval: 2.2286751
     blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.17217955
-    lineWaveChance: 0.02165386
-    bombChance: 0.039759
+    lineWaveChance: 0.04330772
+    bombChance: 0.066264994
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.27217954
@@ -871,6 +890,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4461603
     spawnInterval: 2.023086
     blocksPerWave: 1
@@ -916,6 +936,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4440871
     spawnInterval: 2.0201244
     blocksPerWave: 1
@@ -957,6 +978,7 @@ MonoBehaviour:
     rules: 0
     quest: 3
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4420274
     spawnInterval: 2.3197591
     blocksPerWave: 1
@@ -998,6 +1020,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4399805
     spawnInterval: 2.014258
     blocksPerWave: 1
@@ -1040,6 +1063,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.437946
     spawnInterval: 2.313054
     blocksPerWave: 1
@@ -1080,6 +1104,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.435923
     spawnInterval: 2.0084615
     blocksPerWave: 2
@@ -1120,6 +1145,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4339113
     spawnInterval: 2.0055876
     blocksPerWave: 2
@@ -1160,6 +1186,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4319103
     spawnInterval: 2.002729
     blocksPerWave: 3
@@ -1178,20 +1205,19 @@ MonoBehaviour:
     powerUpInterval: 9.930019
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '##########'
-    - '##########'
-    - '######X##X'
-    - '####X#####'
-    - '##########'
-    - '#####.....'
-    - '#####.....'
-    - '#####.....'
-    - '#####.....'
-    - '#####.....'
-    mission: 8
+    - '#########'
+    - '#########'
+    - '#####X##X'
+    - '#########'
+    - '#########'
+    - '#####....'
+    - '#####....'
+    - '#####....'
+    - '#####....'
+    mission: 10
     coinTarget: 11
     surviveSeconds: 36
     keys: 4
@@ -1200,16 +1226,17 @@ MonoBehaviour:
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    quest: 1
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4299197
-    spawnInterval: 2.2998679
+    spawnInterval: 1.9998852
     blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.18003443
-    lineWaveChance: 0.024010325
-    bombChance: 0.043215144
+    lineWaveChance: 0.04802065
+    bombChance: 0.07202524
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.28003442
@@ -1242,6 +1269,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4279389
     spawnInterval: 1.9970556
     blocksPerWave: 2
@@ -1287,6 +1315,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4259678
     spawnInterval: 1.9942397
     blocksPerWave: 2
@@ -1329,6 +1358,7 @@ MonoBehaviour:
     rules: 0
     quest: 4
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4240059
     spawnInterval: 2.2901525
     blocksPerWave: 1
@@ -1370,6 +1400,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 1
+    phased: 0
     warningTime: 1.4220529
     spawnInterval: 1.9886469
     blocksPerWave: 1
@@ -1412,6 +1443,7 @@ MonoBehaviour:
     rules: 0
     quest: 1
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4201084
     spawnInterval: 2.2837496
     blocksPerWave: 1
@@ -1457,6 +1489,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4181724
     spawnInterval: 1.9831033
     blocksPerWave: 2
@@ -1498,6 +1531,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4162443
     spawnInterval: 1.980349
     blocksPerWave: 2
@@ -1539,6 +1573,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.414324
     spawnInterval: 1.9776057
     blocksPerWave: 2
@@ -1580,6 +1615,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4124113
     spawnInterval: 1.9748733
     blocksPerWave: 3
@@ -1621,6 +1657,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.410506
     spawnInterval: 1.9721514
     blocksPerWave: 2
@@ -1670,6 +1707,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4086078
     spawnInterval: 1.9694396
     blocksPerWave: 2
@@ -1713,6 +1751,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4067165
     spawnInterval: 2.2617483
     blocksPerWave: 1
@@ -1755,6 +1794,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 1
     warningTime: 1.404832
     spawnInterval: 1.9640456
     blocksPerWave: 1
@@ -1798,6 +1838,7 @@ MonoBehaviour:
     rules: 0
     quest: 2
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.402954
     spawnInterval: 2.2555673
     blocksPerWave: 1
@@ -1847,6 +1888,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.4010824
     spawnInterval: 1.9586891
     blocksPerWave: 2
@@ -1888,6 +1930,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.399217
     spawnInterval: 1.9560243
     blocksPerWave: 2
@@ -1906,24 +1949,22 @@ MonoBehaviour:
     powerUpInterval: 9.416268
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '#X####X####'
-    - '###########'
-    - X##########
-    - '###########'
-    - '######X####'
-    - '###########'
-    - '###.....###'
-    - '###.....###'
-    - '###.....###'
-    - '###.....###'
-    - '###.....###'
-    mission: 8
+    - '#####X###'
+    - X########
+    - '#########'
+    - '#####X###'
+    - '#########'
+    - '###...###'
+    - '###...###'
+    - '###...###'
+    - '###...###'
+    mission: 11
     coinTarget: 13
     surviveSeconds: 39
-    keys: 5
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -1931,14 +1972,15 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3973577
-    spawnInterval: 2.2463734
+    spawnInterval: 2.148705
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.19398953
-    lineWaveChance: 0.028196858
-    bombChance: 0.04935539
+    lineWaveChance: 0.056393716
+    bombChance: 0.082258984
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.29398954
@@ -1972,6 +2014,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3955044
     spawnInterval: 1.9507205
     blocksPerWave: 3
@@ -2013,6 +2056,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3936568
     spawnInterval: 1.9480811
     blocksPerWave: 4
@@ -2055,6 +2099,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.391815
     spawnInterval: 1.9454498
     blocksPerWave: 3
@@ -2099,6 +2144,7 @@ MonoBehaviour:
     rules: 0
     quest: 1
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3899785
     spawnInterval: 2.2342503
     blocksPerWave: 2
@@ -2142,6 +2188,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 1
+    phased: 0
     warningTime: 1.3881475
     spawnInterval: 1.9402106
     blocksPerWave: 2
@@ -2186,6 +2233,7 @@ MonoBehaviour:
     rules: 0
     quest: 3
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3863218
     spawnInterval: 2.2282426
     blocksPerWave: 2
@@ -2229,6 +2277,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3845011
     spawnInterval: 1.9350016
     blocksPerWave: 3
@@ -2271,6 +2320,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3826857
     spawnInterval: 1.932408
     blocksPerWave: 3
@@ -2289,40 +2339,40 @@ MonoBehaviour:
     powerUpInterval: 9.156488
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#####X##....'
-    - '##X#####....'
-    - '########....'
-    - '########....'
-    - '########....'
-    - '########....'
-    - '############'
-    - X###########
-    - ....########
-    - ....###X####
-    - ....########
-    - ....########
-    mission: 8
+    - '##X##X##...'
+    - '########...'
+    - '########...'
+    - '########...'
+    - '########...'
+    - '###########'
+    - X##########
+    - '###########'
+    - ...########
+    - ...###X####
+    - ...########
+    mission: 10
     coinTarget: 13
     surviveSeconds: 40
-    keys: 5
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 0
-    quest: 1
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.380875
-    spawnInterval: 2.2192948
+    spawnInterval: 1.9298215
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.20105356
-    lineWaveChance: 0.030316064
-    bombChance: 0.052463565
+    lineWaveChance: 0.06063213
+    bombChance: 0.08743927
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.30105355
@@ -2357,6 +2407,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3790693
     spawnInterval: 1.9272418
     blocksPerWave: 3
@@ -2399,6 +2450,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3772683
     spawnInterval: 1.9246689
     blocksPerWave: 3
@@ -2440,6 +2492,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.375472
     spawnInterval: 1.9221028
     blocksPerWave: 4
@@ -2484,6 +2537,7 @@ MonoBehaviour:
     rules: 0
     quest: 2
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3736802
     spawnInterval: 2.2074745
     blocksPerWave: 2
@@ -2527,6 +2581,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 1
     warningTime: 1.3718928
     spawnInterval: 1.9169898
     blocksPerWave: 2
@@ -2572,6 +2627,7 @@ MonoBehaviour:
     rules: 0
     quest: 4
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3701099
     spawnInterval: 2.2016091
     blocksPerWave: 2
@@ -2615,6 +2671,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3683313
     spawnInterval: 1.9119018
     blocksPerWave: 3
@@ -2658,6 +2715,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.366557
     spawnInterval: 1.9093671
     blocksPerWave: 3
@@ -2676,41 +2734,40 @@ MonoBehaviour:
     powerUpInterval: 8.903038
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '##########X##'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#####X#######'
-    - '###X#########'
-    - ......#######
-    - ......#######
-    - ......#######
-    - ......##X##X#
-    - ......#######
-    - ......#######
-    mission: 8
+    - '########X##'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '####X######'
+    - '###########'
+    - .....######
+    - .....######
+    - .....#X##X#
+    - .....######
+    - .....######
+    mission: 11
     coinTarget: 14
     surviveSeconds: 42
-    keys: 6
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
-    quest: 2
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3647867
-    spawnInterval: 2.192864
+    spawnInterval: 2.097522
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.20794855
-    lineWaveChance: 0.03238456
-    bombChance: 0.055497356
+    lineWaveChance: 0.06476912
+    bombChance: 0.09249559
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.30794853
@@ -2745,6 +2802,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3630205
     spawnInterval: 1.9043151
     blocksPerWave: 3
@@ -2793,6 +2851,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3612585
     spawnInterval: 1.9017978
     blocksPerWave: 3
@@ -2836,6 +2895,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3595003
     spawnInterval: 1.899286
     blocksPerWave: 3
@@ -2878,6 +2938,7 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3577459
     spawnInterval: 1.8967799
     blocksPerWave: 4
@@ -2922,6 +2983,7 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 1
+    phased: 0
     warningTime: 1.3559954
     spawnInterval: 1.8942791
     blocksPerWave: 2
@@ -2967,6 +3029,7 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3542486
     spawnInterval: 2.1755512
     blocksPerWave: 2
@@ -3018,6 +3081,7 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3525056
     spawnInterval: 1.8892937
     blocksPerWave: 3
@@ -3061,6 +3125,7 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3507662
     spawnInterval: 1.8868088
     blocksPerWave: 3
@@ -3079,41 +3144,41 @@ MonoBehaviour:
     powerUpInterval: 8.654897
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '#############'
-    - '#############'
-    - '#######X#####'
-    - '#############'
-    - '####X########'
-    - '#############'
-    - '###X##.######'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#######X#####'
-    - '##X##########'
-    mission: 8
+    - '############'
+    - '############'
+    - '######X#####'
+    - '############'
+    - '####X#######'
+    - '#####..#####'
+    - '#####..#####'
+    - '############'
+    - '############'
+    - '############'
+    - '######X#####'
+    - '##X#########'
+    mission: 10
     coinTarget: 15
     surviveSeconds: 43
-    keys: 6
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1
-    quest: 3
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3490303
-    spawnInterval: 2.1669784
+    spawnInterval: 1.884329
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.21470132
-    lineWaveChance: 0.03441039
-    bombChance: 0.058468577
+    lineWaveChance: 0.06882078
+    bombChance: 0.09744763
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.31470132
@@ -3148,6 +3213,7 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3472979
     spawnInterval: 1.881854
     blocksPerWave: 3
@@ -3196,6 +3262,7 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.345569
     spawnInterval: 1.8793843
     blocksPerWave: 3
@@ -3242,6 +3309,7 @@ MonoBehaviour:
     rules: 1
     quest: 1
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3438435
     spawnInterval: 2.158457
     blocksPerWave: 2
@@ -3286,6 +3354,7 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3421214
     spawnInterval: 1.874459
     blocksPerWave: 3
@@ -3328,6 +3397,7 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3404025
     spawnInterval: 1.8720036
     blocksPerWave: 4
@@ -3374,6 +3444,7 @@ MonoBehaviour:
     rules: 2
     quest: 1
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.338687
     spawnInterval: 2.1499856
     blocksPerWave: 2
@@ -3424,6 +3495,7 @@ MonoBehaviour:
     rules: 2
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3369746
     spawnInterval: 1.8671066
     blocksPerWave: 3
@@ -3468,6 +3540,7 @@ MonoBehaviour:
     rules: 3
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3352654
     spawnInterval: 1.8646649
     blocksPerWave: 3
@@ -3486,42 +3559,41 @@ MonoBehaviour:
     powerUpInterval: 8.411314
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - ....######....
-    - ....##X###....
-    - ....######....
-    - ....######....
-    - '###X##########'
-    - '##############'
-    - '##############'
-    - '#X##########X#'
-    - '##############'
-    - '############X#'
-    - ....######....
-    - ....######....
-    - ....#####X....
-    - ....######....
-    mission: 8
+    - ....####....
+    - ....####....
+    - ....####....
+    - ....####....
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - ....####....
+    - ....####....
+    - ....####....
+    - ....####....
+    mission: 11
     coinTarget: 16
     surviveSeconds: 44
-    keys: 6
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 2
-    quest: 4
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3335594
-    spawnInterval: 2.1415617
+    spawnInterval: 2.0484505
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.2213317
-    lineWaveChance: 0.036399506
-    bombChance: 0.061385944
+    lineWaveChance: 0.07279901
+    bombChance: 0.102309905
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.32133168
@@ -3556,6 +3628,7 @@ MonoBehaviour:
     rules: 3
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3318564
     spawnInterval: 1.8597949
     blocksPerWave: 3
@@ -3607,6 +3680,7 @@ MonoBehaviour:
     rules: 2
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3301564
     spawnInterval: 1.8573663
     blocksPerWave: 3
@@ -3653,6 +3727,7 @@ MonoBehaviour:
     rules: 3
     quest: 2
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3284595
     spawnInterval: 2.1331832
     blocksPerWave: 2
@@ -3698,6 +3773,7 @@ MonoBehaviour:
     rules: 2
     quest: 0
     guardsPrincess: 0
+    phased: 1
     warningTime: 1.3267655
     spawnInterval: 1.8525221
     blocksPerWave: 2
@@ -3742,6 +3818,7 @@ MonoBehaviour:
     rules: 2
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3250744
     spawnInterval: 1.8501064
     blocksPerWave: 3
@@ -3785,6 +3862,7 @@ MonoBehaviour:
     rules: 3
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3233863
     spawnInterval: 1.8476946
     blocksPerWave: 4
@@ -3828,6 +3906,7 @@ MonoBehaviour:
     rules: 4
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3217009
     spawnInterval: 1.8452871
     blocksPerWave: 3
@@ -3873,6 +3952,7 @@ MonoBehaviour:
     rules: 4
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3200184
     spawnInterval: 1.8428835
     blocksPerWave: 3
@@ -3891,28 +3971,27 @@ MonoBehaviour:
     powerUpInterval: 8.171718
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 15
-    gridHeight: 15
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - .....#####.....
-    - .....#####.....
-    - .....#####.....
-    - .....#####.....
-    - .....#####.....
-    - .....#####.....
-    - .....#X###.....
-    - '###############'
-    - '###############'
-    - '####X###X######'
-    - '###############'
-    - '###############'
-    - X##############
-    - '##X#########X#X'
-    - '###############'
-    mission: 8
+    - ....######....
+    - ....X#####....
+    - ....######....
+    - ....######....
+    - ....######....
+    - ....######....
+    - ....######....
+    - '##############'
+    - '####X###X#####'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '###########X#X'
+    - '##X###########'
+    mission: 10
     coinTarget: 16
     surviveSeconds: 46
-    keys: 7
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -3920,14 +3999,15 @@ MonoBehaviour:
     rules: 4
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3183386
-    spawnInterval: 2.1165564
+    spawnInterval: 1.8404838
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.22785488
-    lineWaveChance: 0.03835646
-    bombChance: 0.06425615
+    lineWaveChance: 0.07671292
+    bombChance: 0.10709357
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.32785487
@@ -3965,6 +4045,7 @@ MonoBehaviour:
     rules: 6
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3166616
     spawnInterval: 1.838088
     blocksPerWave: 3
@@ -4017,6 +4098,7 @@ MonoBehaviour:
     rules: 4
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3149873
     spawnInterval: 1.8356961
     blocksPerWave: 3
@@ -4064,6 +4146,7 @@ MonoBehaviour:
     rules: 4
     quest: 3
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3133156
     spawnInterval: 2.108304
     blocksPerWave: 2
@@ -4110,6 +4193,7 @@ MonoBehaviour:
     rules: 4
     quest: 0
     guardsPrincess: 1
+    phased: 0
     warningTime: 1.3116466
     spawnInterval: 1.8309237
     blocksPerWave: 2
@@ -4157,6 +4241,7 @@ MonoBehaviour:
     rules: 4
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3099802
     spawnInterval: 2.1028244
     blocksPerWave: 2
@@ -4201,6 +4286,7 @@ MonoBehaviour:
     rules: 6
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3083163
     spawnInterval: 1.8261662
     blocksPerWave: 3
@@ -4244,6 +4330,7 @@ MonoBehaviour:
     rules: 4
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.306655
     spawnInterval: 1.8237929
     blocksPerWave: 4
@@ -4289,6 +4376,7 @@ MonoBehaviour:
     rules: 8
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3049963
     spawnInterval: 1.8214232
     blocksPerWave: 3
@@ -4307,43 +4395,42 @@ MonoBehaviour:
     powerUpInterval: 7.9356556
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 15
-    gridHeight: 15
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - .....##########
-    - .....##########
-    - .....##########
-    - .....##########
-    - .....##X#######
-    - '###############'
-    - '###############'
-    - '#X#############'
-    - '#########X.....'
-    - '######X###.....'
-    - '#X########.....'
-    - '######X###.....'
-    - '##########.....'
-    - '##########.....'
-    - '####X#####.....'
-    mission: 8
+    - ....#########
+    - ....#########
+    - ....#########
+    - ....##X######
+    - X############
+    - '#############'
+    - '#X###########'
+    - '#########....'
+    - '#####X###....'
+    - '#########....'
+    - '#########....'
+    - '#########....'
+    - '####X####....'
+    mission: 11
     coinTarget: 17
     surviveSeconds: 47
-    keys: 7
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 8
-    quest: 1
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.30334
-    spawnInterval: 2.0919156
+    spawnInterval: 2.000963
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.23428288
-    lineWaveChance: 0.040284857
-    bombChance: 0.06708446
+    lineWaveChance: 0.080569714
+    bombChance: 0.111807436
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.33428288
@@ -4378,6 +4465,7 @@ MonoBehaviour:
     rules: 10
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3016862
     spawnInterval: 1.8166945
     blocksPerWave: 3
@@ -4424,6 +4512,7 @@ MonoBehaviour:
     rules: 8
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.3000348
     spawnInterval: 1.8143353
     blocksPerWave: 3
@@ -4472,6 +4561,7 @@ MonoBehaviour:
     rules: 8
     quest: 4
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2983857
     spawnInterval: 2.0837765
     blocksPerWave: 2
@@ -4519,6 +4609,7 @@ MonoBehaviour:
     rules: 12
     quest: 0
     guardsPrincess: 0
+    phased: 1
     warningTime: 1.2967391
     spawnInterval: 1.8096273
     blocksPerWave: 2
@@ -4567,6 +4658,7 @@ MonoBehaviour:
     rules: 8
     quest: 1
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2950948
     spawnInterval: 2.0783699
     blocksPerWave: 2
@@ -4617,6 +4709,7 @@ MonoBehaviour:
     rules: 12
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2934529
     spawnInterval: 1.8049327
     blocksPerWave: 3
@@ -4661,6 +4754,7 @@ MonoBehaviour:
     rules: 8
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2918133
     spawnInterval: 1.8025903
     blocksPerWave: 3
@@ -4704,6 +4798,7 @@ MonoBehaviour:
     rules: 10
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2901759
     spawnInterval: 1.8002512
     blocksPerWave: 4
@@ -4722,44 +4817,44 @@ MonoBehaviour:
     powerUpInterval: 7.7027636
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 16
-    gridHeight: 16
+  - gridWidth: 15
+    gridHeight: 15
     layout:
-    - '###########X####'
-    - '################'
-    - X###############
-    - '################'
-    - '################'
-    - '#X##############'
-    - '##########X#####'
-    - '################'
-    - '################'
-    - '################'
-    - '#############X##'
-    - '#####X##########'
-    - '###########X####'
-    - '################'
-    - '###########X####'
-    - '################'
-    mission: 8
+    - '##########X####'
+    - X##############
+    - '###############'
+    - '###############'
+    - '###############'
+    - '#X#############'
+    - '#########X#####'
+    - '###############'
+    - '###############'
+    - '###############'
+    - '############X##'
+    - '#####X#########'
+    - '##########X####'
+    - '###############'
+    - '###############'
+    mission: 10
     coinTarget: 18
     surviveSeconds: 48
-    keys: 7
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 16
-    quest: 2
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2885407
-    spawnInterval: 2.0676026
+    spawnInterval: 1.7979153
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.24062541
-    lineWaveChance: 0.042187616
-    bombChance: 0.06987518
+    lineWaveChance: 0.08437523
+    bombChance: 0.116458625
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.3406254
@@ -4794,6 +4889,7 @@ MonoBehaviour:
     rules: 16
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2869078
     spawnInterval: 1.7955827
     blocksPerWave: 3
@@ -4848,6 +4944,7 @@ MonoBehaviour:
     rules: 16
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2852771
     spawnInterval: 1.7932531
     blocksPerWave: 3
@@ -4896,6 +4993,7 @@ MonoBehaviour:
     rules: 16
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2836486
     spawnInterval: 2.0595655
     blocksPerWave: 2
@@ -4943,6 +5041,7 @@ MonoBehaviour:
     rules: 24
     quest: 0
     guardsPrincess: 1
+    phased: 0
     warningTime: 1.2820224
     spawnInterval: 1.7886033
     blocksPerWave: 2
@@ -4991,6 +5090,7 @@ MonoBehaviour:
     rules: 16
     quest: 2
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2803981
     spawnInterval: 2.0542254
     blocksPerWave: 2
@@ -5043,6 +5143,7 @@ MonoBehaviour:
     rules: 20
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2787759
     spawnInterval: 1.7839657
     blocksPerWave: 3
@@ -5090,6 +5191,7 @@ MonoBehaviour:
     rules: 16
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.277156
     spawnInterval: 1.7816515
     blocksPerWave: 3
@@ -5134,6 +5236,7 @@ MonoBehaviour:
     rules: 20
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2755381
     spawnInterval: 1.7793401
     blocksPerWave: 3
@@ -5178,6 +5281,7 @@ MonoBehaviour:
     rules: 16
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2739222
     spawnInterval: 1.7770318
     blocksPerWave: 4
@@ -5220,6 +5324,7 @@ MonoBehaviour:
     rules: 32
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2723083
     spawnInterval: 1.7747263
     blocksPerWave: 3
@@ -5263,6 +5368,7 @@ MonoBehaviour:
     rules: 32
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2706966
     spawnInterval: 1.7724237
     blocksPerWave: 3
@@ -5312,6 +5418,7 @@ MonoBehaviour:
     rules: 32
     quest: 1
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2690868
     spawnInterval: 2.0356426
     blocksPerWave: 2
@@ -5360,6 +5467,7 @@ MonoBehaviour:
     rules: 40
     quest: 0
     guardsPrincess: 0
+    phased: 1
     warningTime: 1.267479
     spawnInterval: 1.767827
     blocksPerWave: 2
@@ -5409,6 +5517,7 @@ MonoBehaviour:
     rules: 32
     quest: 3
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2658731
     spawnInterval: 2.0303628
     blocksPerWave: 2
@@ -5462,6 +5571,7 @@ MonoBehaviour:
     rules: 40
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2642691
     spawnInterval: 1.7632416
     blocksPerWave: 3
@@ -5509,6 +5619,7 @@ MonoBehaviour:
     rules: 32
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2626671
     spawnInterval: 1.7609531
     blocksPerWave: 3
@@ -5527,45 +5638,44 @@ MonoBehaviour:
     powerUpInterval: 7.2704835
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 17
-    gridHeight: 17
+  - gridWidth: 15
+    gridHeight: 15
     layout:
-    - '#################'
-    - '##########X######'
-    - '#X###############'
-    - '#########X#######'
-    - '#################'
-    - '##X#####X########'
-    - '#################'
-    - '#X#########X#####'
-    - '#################'
-    - .....#######.....
-    - .....#######.....
-    - .....#######.....
-    - .....X######.....
-    - .....#######.....
-    - .....#######.....
-    - .....#######.....
-    - .....#######.....
-    mission: 8
+    - '#########X#####'
+    - '###############'
+    - '#X######X######'
+    - '###############'
+    - '##X############'
+    - '###############'
+    - '#X#######X#####'
+    - '###############'
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - .....X####.....
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    mission: 11
     coinTarget: 19
     surviveSeconds: 50
-    keys: 8
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 32
-    quest: 1
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.261067
-    spawnInterval: 2.0224674
+    spawnInterval: 1.934534
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.25239986
-    lineWaveChance: 0.04571995
-    bombChance: 0.07505593
+    lineWaveChance: 0.0914399
+    bombChance: 0.1250932
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.35239986
@@ -5602,6 +5712,7 @@ MonoBehaviour:
     rules: 32
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2594688
     spawnInterval: 1.756384
     blocksPerWave: 3
@@ -5646,6 +5757,7 @@ MonoBehaviour:
     rules: 32
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2578725
     spawnInterval: 1.7541035
     blocksPerWave: 4
@@ -5693,6 +5805,7 @@ MonoBehaviour:
     rules: 192
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2562779
     spawnInterval: 1.7518257
     blocksPerWave: 3
@@ -5743,6 +5856,7 @@ MonoBehaviour:
     rules: 192
     quest: 2
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2546853
     spawnInterval: 2.011983
     blocksPerWave: 2
@@ -5792,6 +5906,7 @@ MonoBehaviour:
     rules: 200
     quest: 0
     guardsPrincess: 1
+    phased: 0
     warningTime: 1.2530944
     spawnInterval: 1.7472779
     blocksPerWave: 2
@@ -5842,6 +5957,7 @@ MonoBehaviour:
     rules: 192
     quest: 4
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2515055
     spawnInterval: 2.006759
     blocksPerWave: 2
@@ -5894,6 +6010,7 @@ MonoBehaviour:
     rules: 200
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2499182
     spawnInterval: 1.7427403
     blocksPerWave: 3
@@ -5942,6 +6059,7 @@ MonoBehaviour:
     rules: 192
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2483327
     spawnInterval: 1.7404754
     blocksPerWave: 3
@@ -5960,46 +6078,45 @@ MonoBehaviour:
     powerUpInterval: 7.0452294
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 18
-    gridHeight: 18
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - ......############
-    - ......############
-    - ......#X#########X
-    - ......#######X####
-    - ......############
-    - ......############
-    - '##################'
-    - '##########X#######'
-    - '##################'
-    - '#######X##########'
-    - '##########X#######'
-    - '#####X############'
-    - '#########.........'
-    - '#########.........'
-    - '####X####.........'
-    - '#########.........'
-    - '#########.........'
-    - '#########.........'
-    mission: 8
+    - .....###########
+    - .....##########X
+    - .....#X####X####
+    - .....###########
+    - .....###########
+    - '################'
+    - '#########X######'
+    - '################'
+    - '######X#########'
+    - '#########X######'
+    - '#####X##########'
+    - '########........'
+    - '########........'
+    - '###X####........'
+    - '########........'
+    - '########........'
+    mission: 10
     coinTarget: 20
     surviveSeconds: 52
-    keys: 8
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 192
-    quest: 2
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.246749
-    spawnInterval: 1.9989449
+    spawnInterval: 1.738213
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.2585361
-    lineWaveChance: 0.04756083
-    bombChance: 0.07775588
+    lineWaveChance: 0.09512166
+    bombChance: 0.12959313
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.3585361
@@ -6034,6 +6151,7 @@ MonoBehaviour:
     rules: 192
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2451671
     spawnInterval: 1.7359531
     blocksPerWave: 3
@@ -6078,6 +6196,7 @@ MonoBehaviour:
     rules: 192
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2435869
     spawnInterval: 1.7336956
     blocksPerWave: 3
@@ -6122,6 +6241,7 @@ MonoBehaviour:
     rules: 208
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2420084
     spawnInterval: 1.7314405
     blocksPerWave: 4
@@ -6172,6 +6292,7 @@ MonoBehaviour:
     rules: 256
     quest: 3
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2404315
     spawnInterval: 1.9885662
     blocksPerWave: 2
@@ -6221,6 +6342,7 @@ MonoBehaviour:
     rules: 256
     quest: 0
     guardsPrincess: 0
+    phased: 1
     warningTime: 1.2388566
     spawnInterval: 1.7269379
     blocksPerWave: 2
@@ -6271,6 +6393,7 @@ MonoBehaviour:
     rules: 256
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2372831
     spawnInterval: 1.9833935
     blocksPerWave: 2
@@ -6325,6 +6448,7 @@ MonoBehaviour:
     rules: 256
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2357113
     spawnInterval: 1.7224448
     blocksPerWave: 3
@@ -6373,6 +6497,7 @@ MonoBehaviour:
     rules: 256
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2341412
     spawnInterval: 1.7202017
     blocksPerWave: 3
@@ -6391,46 +6516,45 @@ MonoBehaviour:
     powerUpInterval: 6.822219
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 18
-    gridHeight: 18
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - '##################'
-    - '##################'
-    - '####X#############'
-    - '##########X#######'
-    - '##################'
-    - '#########X########'
-    - '##################'
-    - '################X#'
-    - '##################'
-    - '################X#'
-    - '##################'
-    - '##################'
-    - '############X#####'
-    - '##################'
-    - '##################'
-    - '######X######X####'
-    - '##################'
-    - '##################'
-    mission: 8
+    - '################'
+    - '##X#############'
+    - '####X####X######'
+    - '################'
+    - '################'
+    - '########X#######'
+    - '################'
+    - '################'
+    - '##############X#'
+    - '################'
+    - '##########X#####'
+    - '################'
+    - '################'
+    - '################'
+    - '#####X#####X####'
+    - '################'
+    mission: 11
     coinTarget: 20
     surviveSeconds: 53
-    keys: 8
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 256
-    quest: 3
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2325727
-    spawnInterval: 1.9756551
+    spawnInterval: 1.889757
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.26461172
-    lineWaveChance: 0.04938351
-    bombChance: 0.08042915
+    lineWaveChance: 0.09876702
+    bombChance: 0.13404858
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.36461172
@@ -6465,6 +6589,7 @@ MonoBehaviour:
     rules: 320
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2310058
     spawnInterval: 1.7157227
     blocksPerWave: 3
@@ -6519,6 +6644,7 @@ MonoBehaviour:
     rules: 256
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2294406
     spawnInterval: 1.7134866
     blocksPerWave: 3
@@ -6563,6 +6689,7 @@ MonoBehaviour:
     rules: 288
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2278769
     spawnInterval: 1.7112528
     blocksPerWave: 3
@@ -6607,6 +6734,7 @@ MonoBehaviour:
     rules: 256
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2263148
     spawnInterval: 1.7090212
     blocksPerWave: 4
@@ -6657,6 +6785,7 @@ MonoBehaviour:
     rules: 512
     quest: 0
     guardsPrincess: 1
+    phased: 0
     warningTime: 1.2247543
     spawnInterval: 1.7067919
     blocksPerWave: 2
@@ -6708,6 +6837,7 @@ MonoBehaviour:
     rules: 512
     quest: 1
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2231953
     spawnInterval: 1.9602495
     blocksPerWave: 2
@@ -6753,6 +6883,7 @@ MonoBehaviour:
     rules: 512
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.221638
     spawnInterval: 1.70234
     blocksPerWave: 3
@@ -6802,6 +6933,7 @@ MonoBehaviour:
     rules: 512
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.220082
     spawnInterval: 1.7001173
     blocksPerWave: 3
@@ -6820,47 +6952,45 @@ MonoBehaviour:
     powerUpInterval: 6.60129
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 19
-    gridHeight: 19
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - '###################'
-    - '##X################'
-    - '###################'
-    - '###################'
-    - '#X#########X#######'
-    - '########X##########'
-    - '###################'
-    - '###X###############'
-    - '###################'
-    - '#########.###X#####'
-    - '###################'
-    - X##################
-    - '###################'
-    - '###################'
-    - '###################'
-    - '###################'
-    - '###################'
-    - '###################'
-    - '#############X#####'
-    mission: 8
+    - '################'
+    - '##X#############'
+    - '################'
+    - '#########X######'
+    - X#####X#########
+    - '################'
+    - '###X############'
+    - '#######..##X####'
+    - '#######..#######'
+    - X###############
+    - '################'
+    - '################'
+    - '################'
+    - '################'
+    - '################'
+    - '###########X####'
+    mission: 10
     coinTarget: 21
     surviveSeconds: 54
-    keys: 9
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 512
-    quest: 4
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2185278
-    spawnInterval: 1.9525813
+    spawnInterval: 1.6978968
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.27063096
-    lineWaveChance: 0.05118928
-    bombChance: 0.08307762
+    lineWaveChance: 0.10237856
+    bombChance: 0.13846269
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.37063095
@@ -6895,6 +7025,7 @@ MonoBehaviour:
     rules: 576
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.216975
     spawnInterval: 1.6956785
     blocksPerWave: 3
@@ -6950,6 +7081,7 @@ MonoBehaviour:
     rules: 512
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2154236
     spawnInterval: 1.6934624
     blocksPerWave: 3
@@ -7001,6 +7133,7 @@ MonoBehaviour:
     rules: 544
     quest: 2
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2138737
     spawnInterval: 1.9449356
     blocksPerWave: 2
@@ -7045,6 +7178,7 @@ MonoBehaviour:
     rules: 512
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2123255
     spawnInterval: 1.6890364
     blocksPerWave: 3
@@ -7090,6 +7224,7 @@ MonoBehaviour:
     rules: 512
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2107786
     spawnInterval: 1.6868266
     blocksPerWave: 4
@@ -7141,6 +7276,7 @@ MonoBehaviour:
     rules: 1024
     quest: 2
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2092332
     spawnInterval: 1.9373116
     blocksPerWave: 2
@@ -7191,6 +7327,7 @@ MonoBehaviour:
     rules: 1024
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2076892
     spawnInterval: 1.6824131
     blocksPerWave: 3
@@ -7241,6 +7378,7 @@ MonoBehaviour:
     rules: 1280
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2061466
     spawnInterval: 1.6802095
     blocksPerWave: 3
@@ -7259,33 +7397,31 @@ MonoBehaviour:
     powerUpInterval: 6.382304
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 20
-    gridHeight: 20
+  - gridWidth: 18
+    gridHeight: 18
     layout:
-    - '####################'
-    - X###################
-    - '####################'
-    - '####################'
-    - '######X#############'
-    - '############X#######'
-    - '##########..........'
-    - '##########..........'
-    - '##########..........'
-    - '##########..........'
-    - '########X#..........'
-    - '##########..........'
-    - '#######X##..........'
-    - '##########..........'
-    - '####################'
-    - '####################'
-    - '####################'
-    - '####X###############'
-    - '#X#####X############'
-    - '####################'
-    mission: 8
+    - '##################'
+    - X#################
+    - '##################'
+    - '######X###########'
+    - '##################'
+    - '###########X#X####'
+    - '#########.........'
+    - '#########.........'
+    - '#########.........'
+    - '#######X#.........'
+    - '#########.........'
+    - '######X##.........'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '###X##############'
+    - X#################
+    - '##################'
+    mission: 11
     coinTarget: 22
     surviveSeconds: 55
-    keys: 9
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -7293,14 +7429,15 @@ MonoBehaviour:
     rules: 1024
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2046055
-    spawnInterval: 1.929709
+    spawnInterval: 1.8458086
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.27659765
-    lineWaveChance: 0.05297929
-    bombChance: 0.08570296
+    lineWaveChance: 0.10595858
+    bombChance: 0.14283827
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.37659764
@@ -7335,6 +7472,7 @@ MonoBehaviour:
     rules: 1088
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2030658
     spawnInterval: 1.6758083
     blocksPerWave: 3
@@ -7389,6 +7527,7 @@ MonoBehaviour:
     rules: 1024
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.2015275
     spawnInterval: 1.6736108
     blocksPerWave: 3
@@ -7441,6 +7580,7 @@ MonoBehaviour:
     rules: 1056
     quest: 3
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1999906
     spawnInterval: 1.9221275
     blocksPerWave: 2
@@ -7492,6 +7632,7 @@ MonoBehaviour:
     rules: 1024
     quest: 0
     guardsPrincess: 0
+    phased: 1
     warningTime: 1.1984551
     spawnInterval: 1.6692216
     blocksPerWave: 2
@@ -7536,6 +7677,7 @@ MonoBehaviour:
     rules: 1024
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.196921
     spawnInterval: 1.66703
     blocksPerWave: 3
@@ -7581,6 +7723,7 @@ MonoBehaviour:
     rules: 1024
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1953883
     spawnInterval: 1.6648405
     blocksPerWave: 4
@@ -7635,6 +7778,7 @@ MonoBehaviour:
     rules: 2048
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1938568
     spawnInterval: 1.6626527
     blocksPerWave: 3
@@ -7685,6 +7829,7 @@ MonoBehaviour:
     rules: 2048
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1923268
     spawnInterval: 1.6604669
     blocksPerWave: 3
@@ -7703,48 +7848,45 @@ MonoBehaviour:
     powerUpInterval: 6.165136
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 20
-    gridHeight: 20
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - ..........#######X##
-    - ..........##########
-    - ..........#####X####
-    - ..........##########
-    - ..........##########
-    - ..........##########
-    - '##################X#'
-    - '####################'
-    - '####################'
-    - '####################'
-    - '####################'
-    - '####################'
-    - '###################X'
-    - '############X#######'
-    - '##############......'
-    - '##############......'
-    - '########X#####......'
-    - '##############......'
-    - X#############......
-    - '#############X......'
-    mission: 8
+    - ........#####X##
+    - ........########
+    - ........####X###
+    - ........########
+    - ........########
+    - '##############X#'
+    - '################'
+    - '#X##############'
+    - '################'
+    - '###############X'
+    - '##########X#####'
+    - '###########.....'
+    - '###########.....'
+    - '#######X###.....'
+    - '###########.....'
+    - X##########.....
+    mission: 10
     coinTarget: 22
     surviveSeconds: 57
-    keys: 9
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 2048
-    quest: 1
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1907982
-    spawnInterval: 1.9070256
+    spawnInterval: 1.6582831
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.28251508
-    lineWaveChance: 0.05475452
-    bombChance: 0.088306636
+    lineWaveChance: 0.10950904
+    bombChance: 0.14717773
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.38251507
@@ -7779,6 +7921,7 @@ MonoBehaviour:
     rules: 2112
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1892707
     spawnInterval: 1.6561011
     blocksPerWave: 3
@@ -7834,6 +7977,7 @@ MonoBehaviour:
     rules: 2048
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1877447
     spawnInterval: 1.653921
     blocksPerWave: 3
@@ -7886,6 +8030,7 @@ MonoBehaviour:
     rules: 2048
     quest: 4
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1862199
     spawnInterval: 1.8995042
     blocksPerWave: 2
@@ -7938,6 +8083,7 @@ MonoBehaviour:
     rules: 2048
     quest: 0
     guardsPrincess: 1
+    phased: 0
     warningTime: 1.1846966
     spawnInterval: 1.6495665
     blocksPerWave: 2
@@ -7991,6 +8137,7 @@ MonoBehaviour:
     rules: 2048
     quest: 1
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1831744
     spawnInterval: 1.8945009
     blocksPerWave: 2
@@ -8035,6 +8182,7 @@ MonoBehaviour:
     rules: 2304
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1816536
     spawnInterval: 1.6452194
     blocksPerWave: 3
@@ -8080,6 +8228,7 @@ MonoBehaviour:
     rules: 2048
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.180134
     spawnInterval: 1.6430486
     blocksPerWave: 5
@@ -8131,6 +8280,7 @@ MonoBehaviour:
     rules: 4096
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1786158
     spawnInterval: 1.6408798
     blocksPerWave: 4
@@ -8149,49 +8299,48 @@ MonoBehaviour:
     powerUpInterval: 5.9496765
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 21
-    gridHeight: 21
+  - gridWidth: 19
+    gridHeight: 19
     layout:
-    - '#####################'
-    - '#X##X################'
-    - '########X############'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#############X#######'
-    - X####################
-    - '####X################'
-    - '#####################'
-    - '#####################'
-    - ..........###########
-    - ..........###########
-    - ..........###########
-    - ..........###########
-    - ..........#########X#
-    - ..........###########
-    - ..........###########
-    - ..........###########
-    - ..........###########
-    - ..........#####X#####
-    mission: 8
+    - '###################'
+    - '#X#X###############'
+    - '#######X###########'
+    - '###################'
+    - '###################'
+    - '###################'
+    - X###########X######
+    - '###################'
+    - '####X##############'
+    - '###################'
+    - .........##########
+    - .........##########
+    - .........##########
+    - .........########X#
+    - .........##########
+    - .........##########
+    - .........##########
+    - .........##########
+    - .........####X#####
+    mission: 11
     coinTarget: 23
     surviveSeconds: 58
-    keys: 9
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 4096
-    quest: 2
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1770988
-    spawnInterval: 1.8845193
+    spawnInterval: 1.8025838
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.28838626
-    lineWaveChance: 0.056515872
-    bombChance: 0.09088995
+    lineWaveChance: 0.113031745
+    bombChance: 0.15148325
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.38838625
@@ -8226,6 +8375,7 @@ MonoBehaviour:
     rules: 4160
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.175583
     spawnInterval: 1.6365472
     blocksPerWave: 4
@@ -8271,6 +8421,7 @@ MonoBehaviour:
     rules: 4096
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1740685
     spawnInterval: 1.6343836
     blocksPerWave: 4
@@ -8324,6 +8475,7 @@ MonoBehaviour:
     rules: 4096
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1725552
     spawnInterval: 1.8770549
     blocksPerWave: 3
@@ -8376,6 +8528,7 @@ MonoBehaviour:
     rules: 4096
     quest: 0
     guardsPrincess: 0
+    phased: 1
     warningTime: 1.1710432
     spawnInterval: 1.6300617
     blocksPerWave: 3
@@ -8429,6 +8582,7 @@ MonoBehaviour:
     rules: 4096
     quest: 2
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1695323
     spawnInterval: 1.8720888
     blocksPerWave: 3
@@ -8485,6 +8639,7 @@ MonoBehaviour:
     rules: 4352
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1680228
     spawnInterval: 1.6257468
     blocksPerWave: 4
@@ -8529,6 +8684,7 @@ MonoBehaviour:
     rules: 4096
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1665144
     spawnInterval: 1.623592
     blocksPerWave: 4
@@ -8575,6 +8731,7 @@ MonoBehaviour:
     rules: 4224
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1650072
     spawnInterval: 1.6214389
     blocksPerWave: 5
@@ -8593,49 +8750,45 @@ MonoBehaviour:
     powerUpInterval: 5.7358274
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 21
-    gridHeight: 21
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - '##X###X##############'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '##############X######'
-    - '#####################'
-    - '#####################'
-    - '###########X#########'
-    - '#####################'
-    - '##########.#####X####'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#######X########X####'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '############X########'
-    mission: 8
+    - '#X###X##########'
+    - '################'
+    - '################'
+    - '################'
+    - '###########X####'
+    - '################'
+    - '#########X######'
+    - '#######..#######'
+    - '#######..###X###'
+    - '################'
+    - '################'
+    - '#####X##########'
+    - '############X###'
+    - '################'
+    - '################'
+    - '#########X######'
+    mission: 10
     coinTarget: 23
     surviveSeconds: 59
-    keys: 10
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 129
-    quest: 3
+    quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1635013
-    spawnInterval: 1.8621806
+    spawnInterval: 1.6192875
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12
+    aimAtPlayerChance: 0.1
     rampUp: 0.29421377
-    lineWaveChance: 0.058264125
-    bombChance: 0.093454055
+    lineWaveChance: 0.11652825
+    bombChance: 0.15575676
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.39421377
@@ -8670,6 +8823,7 @@ MonoBehaviour:
     rules: 4160
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1619964
     spawnInterval: 1.6171378
     blocksPerWave: 4
@@ -8722,6 +8876,7 @@ MonoBehaviour:
     rules: 4128
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1604928
     spawnInterval: 1.6149898
     blocksPerWave: 4
@@ -8776,6 +8931,7 @@ MonoBehaviour:
     rules: 2064
     quest: 1
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1589904
     spawnInterval: 1.8547698
     blocksPerWave: 3
@@ -8829,6 +8985,7 @@ MonoBehaviour:
     rules: 1032
     quest: 0
     guardsPrincess: 1
+    phased: 0
     warningTime: 1.1574891
     spawnInterval: 1.6106987
     blocksPerWave: 3
@@ -8883,6 +9040,7 @@ MonoBehaviour:
     rules: 520
     quest: 3
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1559889
     spawnInterval: 1.849839
     blocksPerWave: 3
@@ -8939,6 +9097,7 @@ MonoBehaviour:
     rules: 260
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.15449
     spawnInterval: 1.6064143
     blocksPerWave: 4
@@ -8991,6 +9150,7 @@ MonoBehaviour:
     rules: 130
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1529921
     spawnInterval: 1.6042746
     blocksPerWave: 4
@@ -9035,6 +9195,7 @@ MonoBehaviour:
     rules: 129
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.1514956
     spawnInterval: 1.6021365
     blocksPerWave: 4
@@ -9081,6 +9242,7 @@ MonoBehaviour:
     rules: 65
     quest: 0
     guardsPrincess: 0
+    phased: 0
     warningTime: 1.15
     spawnInterval: 1.6
     blocksPerWave: 5
