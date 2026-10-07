@@ -111,6 +111,8 @@ namespace SquashBot.Gameplay
             progress = missionProgress;
             spawnTimer = 1.0f; // short breather before the first wave
             running = true;
+            calm = false;
+            stormLeft = UnityEngine.Random.Range(StormMin, StormMax);
         }
 
         /// <summary>Stops spawning; hazards already in the air finish their fall.</summary>
@@ -154,6 +156,33 @@ namespace SquashBot.Gameplay
             return false;
         }
 
+        // ---------- Rhythm: storms and breathers ----------
+
+        private const float StormMin = 14f, StormMax = 20f, CalmSeconds = 4.5f;
+        /// <summary>Waves come this much faster while a storm rages.</summary>
+        private const float StormPace = 1.18f;
+        private float stormLeft;
+        private bool calm;
+
+        /// <summary>A breather: no new waves for a few seconds.</summary>
+        public bool Calm => calm;
+
+        /// <summary>Raised when a breather starts (true) or the next storm begins (false).</summary>
+        public event Action<bool> CalmChanged;
+
+        private bool HasRhythm => level != null && level.spawnInterval < 50f && !level.marathon;
+
+        private void UpdateRhythm(float dt)
+        {
+            if (!HasRhythm) return;
+            stormLeft -= dt;
+            if (stormLeft > 0f) return;
+            calm = !calm;
+            stormLeft = calm ? CalmSeconds : UnityEngine.Random.Range(StormMin, StormMax);
+            if (!calm) spawnTimer = 0.6f; // the storm comes back with a wave
+            CalmChanged?.Invoke(calm);
+        }
+
         /// <summary>WARDEN alarm: waves come this many times faster while it lasts.</summary>
         public float PaceBoost = 1f;
 
@@ -167,11 +196,12 @@ namespace SquashBot.Gameplay
 
             if (running)
             {
-                spawnTimer -= dt;
+                UpdateRhythm(dt);
+                if (!calm) spawnTimer -= dt;
                 if (spawnTimer <= 0f)
                 {
                     SpawnWave();
-                    spawnTimer = level.spawnInterval / PaceMultiplier;
+                    spawnTimer = level.spawnInterval / (PaceMultiplier * (HasRhythm ? StormPace : 1f));
                 }
                 UpdateRepairs(dt);
                 UpdateShelters(dt);

@@ -106,6 +106,10 @@ namespace SquashBot.UI
         private Image hudFill, shieldFill;
         private RectTransform shieldPill;
         private RectTransform rescuePill, hoverPill;
+        private RectTransform healthPill;
+        private Image healthFill;
+        private TextMeshProUGUI healthText;
+        private float healthShown = 1f;
         private RectTransform missionPill, bonusPill, comboPill;
         private readonly ToolButton[] toolButtons = new ToolButton[2];
         private RectTransform alarmPill;
@@ -683,6 +687,15 @@ namespace SquashBot.UI
             UiFactory.Bar(shieldPill, Bottom, new Vector2(0f, 12f), new Vector2(360f, 12f), Palette.UiCyan, out shieldFill);
             shieldPill.gameObject.SetActive(false);
 
+            // Health (from level 21): a heart, a bar that drains by percent, and the armor share as a steel rim.
+            healthPill = UiFactory.Pill("Health", t, TopLeft, new Vector2(36f, -282f), new Vector2(340f, 70f), UiFactory.PillColor);
+            HeartIcon(healthPill, new Vector2(40f, 0f), 46f);
+            UiFactory.Bar(healthPill, new Vector2(0f, 0.5f), new Vector2(76f, 0f), new Vector2(170f, 22f), new Color(0.4f, 0.95f, 0.5f), out healthFill);
+            ((RectTransform)healthFill.transform.parent).pivot = new Vector2(0f, 0.5f);
+            healthText = UiFactory.TextBox("Value", healthPill, new Vector2(1f, 0.5f), new Vector2(-12f, 0f), new Vector2(84f, 56f), "", 32f, Palette.UiText, align: TextAlignmentOptions.Right);
+            healthText.rectTransform.pivot = new Vector2(1f, 0.5f);
+            healthPill.gameObject.SetActive(false);
+
             // Rescue charges (under the pause button): a life-ring icon, the count, and progress to the next one.
             rescuePill = UiFactory.Pill("Rescue", t, TopLeft, new Vector2(36f, -176f), new Vector2(200f, 92f), UiFactory.PillColor);
             var ring = UiFactory.Box("Ring", rescuePill, new Vector2(0f, 0.5f), new Vector2(18f, 6f), new Vector2(54f, 54f));
@@ -794,6 +807,18 @@ namespace SquashBot.UI
         public void SetWarning(bool active) => warningActive = active;
 
         /// <summary>Rescue charges; hidden in worlds where they are not unlocked yet.</summary>
+        /// <summary>The health bar: <paramref name="value"/> 0-1, colour from green to red; armor shown in the label.</summary>
+        public void SetHealth(bool enabled, float value, float armor)
+        {
+            if (healthPill.gameObject.activeSelf != enabled) healthPill.gameObject.SetActive(enabled);
+            if (!enabled) return;
+            if (value < healthShown - 0.001f) healthPill.localScale = Vector3.one * 1.12f;
+            healthShown = value;
+            UiFactory.SetBar(healthFill, value);
+            healthFill.color = value > 0.6f ? new Color(0.4f, 0.95f, 0.5f) : value > 0.3f ? new Color(1f, 0.82f, 0.3f) : new Color(1f, 0.38f, 0.38f);
+            healthText.text = "%" + Mathf.CeilToInt(value * 100f);
+        }
+
         public void SetRescues(bool enabled, int count, float progress)
         {
             if (rescuePill.gameObject.activeSelf != enabled) rescuePill.gameObject.SetActive(enabled);
@@ -1185,6 +1210,7 @@ namespace SquashBot.UI
             float dt = Time.unscaledDeltaTime;
 
             UpdateJuice(dt);
+            if (healthPill != null && healthPill.localScale.x > 1f) healthPill.localScale = Vector3.MoveTowards(healthPill.localScale, Vector3.one, dt * 0.8f);
             UpdateCallout(dt);
             UpdateResultJuice(dt);
 

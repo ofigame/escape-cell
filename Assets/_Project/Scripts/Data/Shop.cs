@@ -14,7 +14,9 @@ namespace SquashBot.Data
         /// <summary>A bigger life tank.</summary>
         Lives,
         /// <summary>Kurtarma hakkı: more rescue charges can be banked in a level (the spare battery, from level 11).</summary>
-        Rescue
+        Rescue,
+        /// <summary>Zırh: every hit takes a smaller share of the health bar (from level 21).</summary>
+        Armor
     }
 
     /// <summary>One-use items from Bip's daily counter: bought ahead, picked before a level.</summary>
@@ -47,11 +49,12 @@ namespace SquashBot.Data
 
         private static readonly int[][] UpgradePrices =
         {
-            new[] { 150, 450, 1200 },      // Shield: 2 hits +1 s, 3 hits +2 s, 3 hits +3 s
-            new[] { 150, 450, 1200 },      // Magnet: range 2, 3, 4
+            new[] { 300, 700, 1500 },      // Shield: 2 hits +0.5 s, 3 hits +1 s, 3 hits +1.5 s
+            new[] { 300, 700, 1500 },      // Magnet: range 2, 3, 4
             new[] { 300, 600, 1000 },      // Hover: +0.5 s each
             new[] { 1200, 2500 },          // Lives: 6, 7
-            new[] { 150, 450, 1200 },      // Rescue: 4, 5, 6 charges
+            new[] { 400, 1000 },           // Rescue: 4, 5 charges
+            new[] { 400, 900, 1600, 2600 }, // Armor: 10%, 20%, 30%, 40% off every hit
         };
 
         private static readonly int[] BoostPrices = { 60, 80, 100, 120, 70, 90 };
@@ -62,7 +65,7 @@ namespace SquashBot.Data
         public static int NextPrice(Upgrade u) => IsMaxed(u) ? 0 : UpgradePrices[(int)u][Level(u)];
 
         /// <summary>The level (0-based index) from which the story unlocks the upgrade.</summary>
-        public static int UnlockLevel(Upgrade u) => u == Upgrade.Magnet ? 90 : u == Upgrade.Rescue ? Tools.FromLevel : 0;
+        public static int UnlockLevel(Upgrade u) => u == Upgrade.Magnet ? 90 : u == Upgrade.Rescue ? Tools.FromLevel : u == Upgrade.Armor ? 20 : 0;
 
         public static bool Unlocked(Upgrade u) => Level(u) > 0 || SaveData.UnlockedLevel >= UnlockLevel(u);
 
@@ -121,8 +124,8 @@ namespace SquashBot.Data
         /// <summary>Blocks a shield can take before it breaks.</summary>
         public static int ShieldHits => 1 + Mathf.Min(2, Level(Upgrade.Shield));
 
-        /// <summary>Extra seconds on every shield (one more per level).</summary>
-        public static float ShieldBonusSeconds => Level(Upgrade.Shield);
+        /// <summary>Extra seconds on every shield (half a second per level).</summary>
+        public static float ShieldBonusSeconds => Level(Upgrade.Shield) * 0.5f;
 
         /// <summary>Coins this many tiles away (or closer) are pulled in on every step.</summary>
         public static int MagnetRange => Level(Upgrade.Magnet) > 0 ? Level(Upgrade.Magnet) + 1 : 0;
@@ -133,5 +136,8 @@ namespace SquashBot.Data
 
         /// <summary>Rescue charges a level can bank at once.</summary>
         public static int MaxRescues => 3 + Level(Upgrade.Rescue);
+
+        /// <summary>The share of every hit the armor takes off (0.1 per level).</summary>
+        public static float ArmorShare => 0.1f * Level(Upgrade.Armor);
     }
 }

@@ -175,6 +175,13 @@ namespace SquashBot.Gameplay
             hazards = new GameObject("Hazards").AddComponent<HazardSystem>();
             hazards.Init(gridView, robot, fx, cameraRig);
             hazards.Impact += OnBlockImpact;
+            hazards.CalmChanged += calm =>
+            {
+                // The rhythm is felt: a breather is announced, and so is the next storm.
+                if (State != GameState.Playing || roadPhase != RoadPhase.None) return;
+                FloatAt(robot.transform.position + Vector3.up * 0.9f, Loc.T(calm ? "float.calm" : "float.storm"), calm ? new Color(0.55f, 1f, 0.75f) : Palette.UiRed);
+                if (!calm) cameraRig.Shake(0.4f);
+            };
             hazards.TileBroken += OnTileBroken;
             hazards.Dodged += OnDodged;
 
@@ -185,6 +192,7 @@ namespace SquashBot.Gameplay
             powerUps = new GameObject("PowerUps").AddComponent<PowerUpSystem>();
             powerUps.Init(robot, hazards, fx);
             powerUps.Collected += OnPowerUpCollected;
+            powerUps.WantsHeart = WantsHeart;
 
             enemies = new GameObject("Enemies").AddComponent<EnemySystem>();
             enemies.Init(gridView, robot, hazards, fx);
@@ -211,9 +219,8 @@ namespace SquashBot.Gameplay
 
             CreateUi();
             ShowMenu();
-            // Closed on a road last time: straight back onto it (behind the splash).
+            // Closed on a road last time: the menu comes first, PLAY goes back onto the road.
             if (PendingRoad >= LevelCount) PlayerPrefs.DeleteKey(RoadLevelKey);
-            else if (PendingRoad >= 0) ResumeRoad(PendingRoad);
             FrameGovernor.Install(); // picture quality for this device (after the camera's post-processing exists)
             SplashScreen.Show(); // OFIGAME studio logo over the menu, fading out
         }
@@ -375,7 +382,8 @@ namespace SquashBot.Gameplay
             ResetRun();
             State = GameState.Menu;
             ShowBackdrop(NextLevel);
-            ui.ShowMenu(NextLevel, SaveData.Coins, LevelCatalog.WorldName(NextLevel), MissionText(levelSet.levels[NextLevel]));
+            ui.ShowMenu(NextLevel, SaveData.Coins, LevelCatalog.WorldName(NextLevel),
+                PendingRoad >= 0 ? Loc.T("menu.roadPending") : MissionText(levelSet.levels[NextLevel]));
             if (lobby == null) lobby = LobbyStage.Create(t => robot.BuildLookalike(t));
             lobby.Open(WorldTheme.ForWorld(LevelCatalog.WorldOf(NextLevel)));
             // The robot is the star of the menu: crisp, close and in the middle of the screen.
@@ -689,6 +697,7 @@ namespace SquashBot.Gameplay
 
             starGoals = StarRules.For(level, grid.FloorCount);
             SetupTools();
+            SetupHealth();
             State = GameState.Playing;
             AudioManager.PlayMusic(LevelMusic());
             ui.ShowHud(bonusRun ? -1 : levelIndex);
@@ -898,6 +907,7 @@ namespace SquashBot.Gameplay
         /// </summary>
         private bool TryRescue(GridPos p, bool crushed)
         {
+            if (TryTakeHealthHit(p, crushed, crushed ? 1f : 0.75f)) return true;
             bool bought = false;
             if (RescueEnabled && rescues > 0) rescues--;
             else if (Shop.TryUse(Boost.ExtraRescue)) bought = true;
@@ -1054,6 +1064,7 @@ namespace SquashBot.Gameplay
             string journey = level.chaseSpeed > 0f ? "chase" : level.collapseBehind ? "collapse" : level.lowWalls ? "maze"
                 : level.mission == MissionType.Exit && grid.KeySpots.Count > 0 ? "journey" : null;
             if (trialSlot && !Seen("tools")) feature = "feature.tools";
+            else if (HealthEnabled && !Seen("health")) feature = "feature.health";
             else if (ruleFeature != null) feature = ruleFeature;
             else if (journey != null && !Seen(journey)) feature = "feature." + journey;
             else if (World >= HoverFromWorld && !Seen("hover")) feature = "feature.hover";
@@ -1152,6 +1163,7 @@ namespace SquashBot.Gameplay
             ui.SetHover(HoverEnabled, hoverCooldown);
             UpdateJourney(Time.deltaTime);
             UpdateSkills(Time.deltaTime);
+            UpdateHealth(Time.deltaTime);
             if (level.marathon) UpdateMarathon(Time.deltaTime);
             ui.Arrows.Set(cameraRig.Cam, Goals());
             comboTimer -= Time.deltaTime;
@@ -1499,6 +1511,9 @@ namespace SquashBot.Gameplay
                     FloatAt(GridView.ToWorld(p), Loc.T("float.skillBlast"), new Color(1f, 0.6f, 0.3f));
                     AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.7f);
                     break;
+                case PowerUpType.Heart:
+                    Heal(p);
+                    break;
                 case PowerUpType.Magnet:
                     skillMagnetLeft = Mathf.Max(skillMagnetLeft, 8f);
                     FloatAt(GridView.ToWorld(p), Loc.T("float.skillMagnet"), new Color(1f, 0.4f, 0.45f));
@@ -1708,6 +1723,7 @@ namespace SquashBot.Gameplay
 
         private void HideTools()
         {
+            ui.SetHealth(false, 0f, 0f);
             toolSlowLeft = 0f;
             robot.TimeBoost = 1f;
             for (int s = 0; s < 2; s++) ui.SetTool(s, null, 0, false, 0f);

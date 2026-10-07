@@ -20,12 +20,12 @@ namespace SquashBot.Data
 
         // The document's difficulty table: score → warning time, wave interval, blocks per wave, aiming, lines, bombs.
         private static readonly float[] ScoreKeys = { 5, 15, 25, 40, 55, 70, 85, 100 };
-        private static readonly float[] WarnKeys = { 1.67f, 1.62f, 1.56f, 1.48f, 1.40f, 1.31f, 1.23f, 1.15f };
-        private static readonly float[] IntervalKeys = { 2.36f, 2.27f, 2.19f, 2.06f, 1.93f, 1.80f, 1.68f, 1.55f };
-        private static readonly float[] PerWaveKeys = { 1, 1, 1, 2, 2, 3, 3, 4 };
-        private static readonly float[] AimKeys = { 0.13f, 0.15f, 0.16f, 0.19f, 0.22f, 0.25f, 0.27f, 0.30f };
-        private static readonly float[] LineKeys = { 0f, 0f, 0.04f, 0.10f, 0.16f, 0.22f, 0.28f, 0.34f };
-        private static readonly float[] BombKeys = { 0f, 0.01f, 0.03f, 0.07f, 0.10f, 0.13f, 0.17f, 0.20f };
+        private static readonly float[] WarnKeys = { 1.62f, 1.54f, 1.46f, 1.37f, 1.28f, 1.19f, 1.11f, 1.03f };
+        private static readonly float[] IntervalKeys = { 2.1f, 1.96f, 1.82f, 1.66f, 1.52f, 1.39f, 1.27f, 1.16f };
+        private static readonly float[] PerWaveKeys = { 1, 1, 2, 2, 3, 3, 4, 4 };
+        private static readonly float[] AimKeys = { 0.18f, 0.22f, 0.25f, 0.28f, 0.31f, 0.34f, 0.37f, 0.4f };
+        private static readonly float[] LineKeys = { 0f, 0.02f, 0.06f, 0.12f, 0.18f, 0.24f, 0.3f, 0.35f };
+        private static readonly float[] BombKeys = { 0f, 0.03f, 0.06f, 0.09f, 0.12f, 0.15f, 0.18f, 0.22f };
 
         private static float Table(float[] values, float score)
         {
@@ -110,10 +110,17 @@ namespace SquashBot.Data
             level.fireChance = Has(hazards, "ateş") ? Mathf.Lerp(0.25f, 0.4f, d) : 0f;
             level.bombChance = bomb ? (blocks || line ? Mathf.Max(bombs, 0.12f) : 1f) : 0f;
             level.lineWaveChance = line ? (blocks || bomb ? Mathf.Max(lines, 0.15f) : 1f) : 0f;
-            if (!blocks)
+            if (!blocks && card.n <= 3)
             {
+                // The very first levels teach one thing at a time.
                 level.blocksPerWave = 0;
                 if (!bomb && !line) level.spawnInterval = 999f;
+            }
+            else if (!blocks)
+            {
+                // Every other level has at least a light rain of blocks under whatever its card adds.
+                level.blocksPerWave = Mathf.Max(1, level.blocksPerWave - 1);
+                level.spawnInterval *= 1.2f;
             }
             if (Has(hazards, "çok seyrek")) level.spawnInterval *= 2.2f;
             else if (Has(hazards, "seyrek")) level.spawnInterval *= 1.5f;
@@ -121,6 +128,12 @@ namespace SquashBot.Data
             if (Has(hazards, "yavaş")) level.warningTime *= 1.15f;
             int together = Num(hazards, @"aynı anda (?:en fazla )?(\d+)", 0);
             if (together > 0 && blocks) level.blocksPerWave = together;
+            // From the middle of the table on, bombs and sweeping lines mix into the rain even when the card is quiet.
+            if (score >= 35f && level.blocksPerWave > 0)
+            {
+                level.bombChance = Mathf.Max(level.bombChance, bombs * 0.6f);
+                level.lineWaveChance = Mathf.Max(level.lineWaveChance, lines * 0.6f);
+            }
             if (mission == MissionType.CoinRain) { level.lineWaveChance = 0f; level.bombChance = 0f; }
 
             // ---- Floor rules ----
@@ -157,14 +170,16 @@ namespace SquashBot.Data
             if (mission == MissionType.Paint && (rules & FloorRule.Poison) != 0 && !Has(goal, "boya")) mission = level.mission = MissionType.CollectCoins;
 
             // ---- Moving enemies ----
+            // Harder levels bring more of the same enemy (one more from score 55, two more from 80).
+            int Extra = score >= 80f ? 2 : score >= 55f ? 1 : 0;
             int Count(string word)
             {
                 if (!hazards.Contains(word)) return 0;
                 var m = Regex.Match(hazards, Regex.Escape(word) + @"[^|·;+]*?(?:×\s*(\d+)|\((\d+)(?: adet)?\)|(\d+) adet)");
                 if (m.Success)
                     for (int g = 1; g <= 3; g++)
-                        if (m.Groups[g].Success && int.TryParse(m.Groups[g].Value, out int v)) return v;
-                return 1;
+                        if (m.Groups[g].Success && int.TryParse(m.Groups[g].Value, out int v)) return v + Extra;
+                return 1 + Extra;
             }
             level.sweepers = Count("süpürgeç");
             level.erasers = Count("silgi");

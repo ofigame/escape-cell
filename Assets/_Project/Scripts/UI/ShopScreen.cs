@@ -31,7 +31,7 @@ namespace SquashBot.UI
 
         public UiScreen Screen => screen;
 
-        private enum Item { Shield, Magnet, Hover, Lives, Rescue, StartShield, ExtraRescue, StartHammer, DoubleCoins, CoinMagnet, TunnelBoost, Life, Tunnel }
+        private enum Item { Shield, Magnet, Hover, Lives, Rescue, Armor, StartShield, ExtraRescue, StartHammer, DoubleCoins, CoinMagnet, TunnelBoost, Life, Tunnel }
 
         public static ShopScreen Create(Transform canvasRoot)
         {
@@ -86,6 +86,7 @@ namespace SquashBot.UI
             SlotsRow(content, ref y);
             foreach (var t in Tools.All) ToolRow(content, t, ref y);
             Row(content, Item.Shield, ref y);
+            Row(content, Item.Armor, ref y);
             Row(content, Item.Rescue, ref y);
             Row(content, Item.Magnet, ref y);
             Row(content, Item.Hover, ref y);
@@ -334,7 +335,7 @@ namespace SquashBot.UI
             });
         }
 
-        private static bool IsUpgrade(Item item) => item <= Item.Rescue;
+        private static bool IsUpgrade(Item item) => item <= Item.Armor;
         private static bool IsBoost(Item item) => item >= Item.StartShield && item <= Item.TunnelBoost;
         private static Boost ToBoost(Item item) => (Boost)(item - Item.StartShield);
         private static Upgrade ToUpgrade(Item item) => (Upgrade)(int)item;
@@ -368,6 +369,8 @@ namespace SquashBot.UI
                     return Loc.F("shop.Hover.now", Shop.HoverSeconds.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture));
                 case Item.Lives:
                     return Loc.F("shop.Lives.now", Shop.MaxLives);
+                case Item.Armor:
+                    return Shop.Level(Upgrade.Armor) > 0 ? Loc.F("shop.Armor.now", Mathf.RoundToInt(Shop.ArmorShare * 100f)) : Loc.T("shop.Armor.desc");
                 case Item.Rescue:
                     return Shop.Level(Upgrade.Rescue) > 0 ? Loc.F("shop.Rescue.now", Shop.MaxRescues) : Loc.T("shop.Rescue.desc");
                 default:
@@ -449,6 +452,7 @@ namespace SquashBot.UI
             {
                 case Item.Shield:
                 case Item.StartShield: return new Color(0.45f, 0.75f, 1f);
+                case Item.Armor: return new Color(0.75f, 0.8f, 0.9f);
                 case Item.Magnet:
                 case Item.CoinMagnet: return new Color(1f, 0.55f, 0.55f);
                 case Item.Hover: return new Color(0.55f, 0.9f, 0.75f);
@@ -469,6 +473,7 @@ namespace SquashBot.UI
             {
                 case Item.Shield:
                 case Item.StartShield:
+                case Item.Armor:
                 {
                     var ring = UiFactory.Box("Ring", icon, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(70f, 70f));
                     ring.pivot = new Vector2(0.5f, 0.5f);

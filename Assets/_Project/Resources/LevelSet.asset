@@ -54,11 +54,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.67
+    warningTime: 1.62
     spawnInterval: 999
     blocksPerWave: 0
     blockLinger: 1.5
-    aimAtPlayerChance: 0.13
+    aimAtPlayerChance: 0.18
     rampUp: 0.15300001
     lineWaveChance: 0
     bombChance: 0
@@ -114,11 +114,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.9204999
-    spawnInterval: 2.36
+    warningTime: 1.8629999
+    spawnInterval: 2.1
     blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.13
+    aimAtPlayerChance: 0.18
     rampUp: 0.15750001
     lineWaveChance: 0
     bombChance: 0
@@ -174,11 +174,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.66
-    spawnInterval: 3.513
+    warningTime: 1.604
+    spawnInterval: 3.108
     blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.134
+    aimAtPlayerChance: 0.18800001
     rampUp: 0.1605
     lineWaveChance: 0
     bombChance: 0
@@ -235,11 +235,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.67
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.62
+    spawnInterval: 2.52
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.065
+    aimAtPlayerChance: 0.09
     rampUp: 0.15300001
     lineWaveChance: 0
     bombChance: 0
@@ -296,11 +296,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.645
-    spawnInterval: 2.315
+    warningTime: 1.5799999
+    spawnInterval: 2.03
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.14
+    aimAtPlayerChance: 0.2
     rampUp: 0.165
     lineWaveChance: 0
     bombChance: 0
@@ -357,11 +357,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.635
-    spawnInterval: 2.5267
+    warningTime: 1.564
+    spawnInterval: 2.2022002
     blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.14400001
+    aimAtPlayerChance: 0.208
     rampUp: 0.16800001
     lineWaveChance: 0
     bombChance: 0
@@ -418,11 +418,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.43
-    spawnInterval: 2.279
+    warningTime: 1.36224
+    spawnInterval: 1.974
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.148
+    aimAtPlayerChance: 0.216
     rampUp: 0.171
     lineWaveChance: 0
     bombChance: 0
@@ -490,11 +490,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.65
-    spawnInterval: 2.324
+    warningTime: 1.5879999
+    spawnInterval: 2.044
     blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.138
+    aimAtPlayerChance: 0.19600001
     rampUp: 0.16350001
     lineWaveChance: 0
     bombChance: 0
@@ -551,11 +551,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.608
-    spawnInterval: 2.254
+    warningTime: 1.5239999
+    spawnInterval: 1.932
     blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.15200001
+    aimAtPlayerChance: 0.226
     rampUp: 0.1755
     lineWaveChance: 0
     bombChance: 0
@@ -621,11 +621,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.584
-    spawnInterval: 2.2220001
-    blocksPerWave: 1
+    warningTime: 1.492
+    spawnInterval: 1.876
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.156
+    aimAtPlayerChance: 0.238
     rampUp: 0.1815
     lineWaveChance: 0
     bombChance: 0
@@ -681,11 +681,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.66
-    spawnInterval: 2.342
-    blocksPerWave: 0
+    warningTime: 1.604
+    spawnInterval: 2.4864001
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.134
+    aimAtPlayerChance: 0.18800001
     rampUp: 0.1605
     lineWaveChance: 0
     bombChance: 1
@@ -742,11 +742,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.645
-    spawnInterval: 2.315
-    blocksPerWave: 0
+    warningTime: 1.5799999
+    spawnInterval: 2.436
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.14
+    aimAtPlayerChance: 0.2
     rampUp: 0.165
     lineWaveChance: 0
     bombChance: 1
@@ -803,11 +803,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.635
-    spawnInterval: 2.297
-    blocksPerWave: 0
+    warningTime: 1.564
+    spawnInterval: 2.4024003
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.14400001
+    aimAtPlayerChance: 0.208
     rampUp: 0.16800001
     lineWaveChance: 0
     bombChance: 1
@@ -879,11 +879,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.665
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.612
+    spawnInterval: 2.5032
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.066
+    aimAtPlayerChance: 0.092
     rampUp: 0.15900001
     lineWaveChance: 0
     bombChance: 0
@@ -941,11 +941,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.625
-    spawnInterval: 3.9312751
-    blocksPerWave: 0
+    warningTime: 1.548
+    spawnInterval: 4.0861797
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.074
+    aimAtPlayerChance: 0.108
     rampUp: 0.171
     lineWaveChance: 0
     bombChance: 1
@@ -1003,11 +1003,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.8492
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.7525998
+    spawnInterval: 2.55024
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.15200001
+    aimAtPlayerChance: 0.226
     rampUp: 0.1755
     lineWaveChance: 0
     bombChance: 0
@@ -1065,11 +1065,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.602
-    spawnInterval: 2.246
-    blocksPerWave: 0
+    warningTime: 1.516
+    spawnInterval: 2.3016
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.153
+    aimAtPlayerChance: 0.229
     rampUp: 0.177
     lineWaveChance: 1
     bombChance: 0
@@ -1137,11 +1137,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.625
-    spawnInterval: 2.279
-    blocksPerWave: 0
+    warningTime: 1.548
+    spawnInterval: 2.3688002
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.148
+    aimAtPlayerChance: 0.216
     rampUp: 0.171
     lineWaveChance: 0
     bombChance: 1
@@ -1199,11 +1199,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.584
-    spawnInterval: 2.2220001
-    blocksPerWave: 0
+    warningTime: 1.492
+    spawnInterval: 2.2512002
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.156
+    aimAtPlayerChance: 0.238
     rampUp: 0.1815
     lineWaveChance: 0.15
     bombChance: 0.12
@@ -1262,11 +1262,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.56
-    spawnInterval: 2.5185
-    blocksPerWave: 1
+    warningTime: 1.46
+    spawnInterval: 2.093
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.08
+    aimAtPlayerChance: 0.125
     rampUp: 0.1875
     lineWaveChance: 0.15
     bombChance: 0.12
@@ -1323,11 +1323,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.635
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.564
+    spawnInterval: 2.4024003
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.14400001
+    aimAtPlayerChance: 0.208
     rampUp: 0.16800001
     lineWaveChance: 0
     bombChance: 0
@@ -1384,11 +1384,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.625
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.548
+    spawnInterval: 2.3688002
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.148
+    aimAtPlayerChance: 0.216
     rampUp: 0.171
     lineWaveChance: 0
     bombChance: 0
@@ -1446,11 +1446,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.608
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.5239999
+    spawnInterval: 2.3184001
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.15200001
+    aimAtPlayerChance: 0.226
     rampUp: 0.1755
     lineWaveChance: 0
     bombChance: 0
@@ -1507,11 +1507,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.645
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.5799999
+    spawnInterval: 2.436
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.07
+    aimAtPlayerChance: 0.1
     rampUp: 0.165
     lineWaveChance: 0
     bombChance: 0
@@ -1569,11 +1569,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.602
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.516
+    spawnInterval: 2.3016
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.153
+    aimAtPlayerChance: 0.229
     rampUp: 0.177
     lineWaveChance: 0
     bombChance: 0
@@ -1632,11 +1632,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.584
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.492
+    spawnInterval: 2.4763203
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.156
+    aimAtPlayerChance: 0.238
     rampUp: 0.1815
     lineWaveChance: 0
     bombChance: 0
@@ -1695,11 +1695,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.578
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.484
+    spawnInterval: 2.2344003
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.157
+    aimAtPlayerChance: 0.241
     rampUp: 0.18300001
     lineWaveChance: 0
     bombChance: 0
@@ -1769,11 +1769,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.602
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.516
+    spawnInterval: 2.3016
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.153
+    aimAtPlayerChance: 0.229
     rampUp: 0.177
     lineWaveChance: 0
     bombChance: 0
@@ -1832,11 +1832,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.56
-    spawnInterval: 2.19
-    blocksPerWave: 0
+    warningTime: 1.46
+    spawnInterval: 2.1840003
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.16
+    aimAtPlayerChance: 0.25
     rampUp: 0.1875
     lineWaveChance: 0
     bombChance: 1
@@ -1896,11 +1896,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5333333
-    spawnInterval: 2.4686668
-    blocksPerWave: 1
+    warningTime: 1.4300001
+    spawnInterval: 2.0316665
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.085
+    aimAtPlayerChance: 0.13
     rampUp: 0.19500001
     lineWaveChance: 0
     bombChance: 0
@@ -1957,11 +1957,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.614
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.532
+    spawnInterval: 2.3352
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.15100001
+    aimAtPlayerChance: 0.223
     rampUp: 0.17400001
     lineWaveChance: 0
     bombChance: 0
@@ -2019,11 +2019,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.602
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.516
+    spawnInterval: 2.3016
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.153
+    aimAtPlayerChance: 0.229
     rampUp: 0.177
     lineWaveChance: 0
     bombChance: 0
@@ -2081,11 +2081,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.584
-    spawnInterval: 2.5553
-    blocksPerWave: 1
+    warningTime: 1.492
+    spawnInterval: 2.1574
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.078
+    aimAtPlayerChance: 0.119
     rampUp: 0.1815
     lineWaveChance: 0
     bombChance: 0
@@ -2143,11 +2143,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.625
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.548
+    spawnInterval: 2.3688002
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.074
+    aimAtPlayerChance: 0.108
     rampUp: 0.171
     lineWaveChance: 0
     bombChance: 0
@@ -2206,11 +2206,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.578
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.484
+    spawnInterval: 2.56956
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.0785
+    aimAtPlayerChance: 0.1205
     rampUp: 0.18300001
     lineWaveChance: 0
     bombChance: 0
@@ -2269,11 +2269,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.56
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.46
+    spawnInterval: 2.4024003
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.16
+    aimAtPlayerChance: 0.25
     rampUp: 0.1875
     lineWaveChance: 0
     bombChance: 0
@@ -2333,11 +2333,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5546666
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.454
+    spawnInterval: 2.1712
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.162
+    aimAtPlayerChance: 0.252
     rampUp: 0.18900001
     lineWaveChance: 0
     bombChance: 0
@@ -2415,11 +2415,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.578
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.484
+    spawnInterval: 2.2344003
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.157
+    aimAtPlayerChance: 0.241
     rampUp: 0.18300001
     lineWaveChance: 0
     bombChance: 0
@@ -2479,11 +2479,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5386666
-    spawnInterval: 2.1553333
-    blocksPerWave: 1
+    warningTime: 1.436
+    spawnInterval: 1.7773334
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.168
+    aimAtPlayerChance: 0.258
     rampUp: 0.4
     lineWaveChance: 0
     bombChance: 0.12
@@ -2557,11 +2557,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5173333
-    spawnInterval: 2.4387667
-    blocksPerWave: 0
+    warningTime: 1.4120001
+    spawnInterval: 2.39384
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.088
+    aimAtPlayerChance: 0.133
     rampUp: 0.19950001
     lineWaveChance: 0
     bombChance: 1
@@ -2619,11 +2619,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5899999
-    spawnInterval: 3.345
-    blocksPerWave: 1
+    warningTime: 1.5
+    spawnInterval: 2.835
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.155
+    aimAtPlayerChance: 0.235
     rampUp: 0.18
     lineWaveChance: 0
     bombChance: 0
@@ -2682,11 +2682,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.578
-    spawnInterval: 2.214
-    blocksPerWave: 1
+    warningTime: 1.484
+    spawnInterval: 1.8620001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.157
+    aimAtPlayerChance: 0.241
     rampUp: 0.18300001
     lineWaveChance: 0
     bombChance: 0
@@ -2745,11 +2745,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.56
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.46
+    spawnInterval: 2.1840003
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.16
+    aimAtPlayerChance: 0.25
     rampUp: 0.1875
     lineWaveChance: 0
     bombChance: 0
@@ -2807,11 +2807,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.602
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.516
+    spawnInterval: 2.3016
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.0765
+    aimAtPlayerChance: 0.1145
     rampUp: 0.177
     lineWaveChance: 0
     bombChance: 0
@@ -2870,11 +2870,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5546666
-    spawnInterval: 2.5085332
-    blocksPerWave: 1
+    warningTime: 1.454
+    spawnInterval: 2.0807333
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.081
+    aimAtPlayerChance: 0.126
     rampUp: 0.18900001
     lineWaveChance: 0
     bombChance: 0
@@ -2933,11 +2933,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5386666
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.436
+    spawnInterval: 2.3460803
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.168
+    aimAtPlayerChance: 0.258
     rampUp: 0.19350001
     lineWaveChance: 0
     bombChance: 0
@@ -2997,11 +2997,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5333333
-    spawnInterval: 2.1466668
-    blocksPerWave: 0
+    warningTime: 1.4300001
+    spawnInterval: 2.1200001
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.17
+    aimAtPlayerChance: 0.26
     rampUp: 0.19500001
     lineWaveChance: 0
     bombChance: 1
@@ -3073,11 +3073,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.56
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.46
+    spawnInterval: 2.1840003
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.16
+    aimAtPlayerChance: 0.25
     rampUp: 0.1875
     lineWaveChance: 0
     bombChance: 0
@@ -3137,11 +3137,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5173333
-    spawnInterval: 2.1206667
-    blocksPerWave: 0
+    warningTime: 1.4120001
+    spawnInterval: 2.0816002
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.176
+    aimAtPlayerChance: 0.266
     rampUp: 0.19950001
     lineWaveChance: 0.15
     bombChance: 0.12
@@ -3202,13 +3202,13 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.496
-    spawnInterval: 2.3988998
-    blocksPerWave: 0
+    warningTime: 1.388
+    spawnInterval: 2.33496
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.092
+    aimAtPlayerChance: 0.137
     rampUp: 0.2055
-    lineWaveChance: 0
+    lineWaveChance: 0.0648
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -3264,11 +3264,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5719999
-    spawnInterval: 3.309
-    blocksPerWave: 1
+    warningTime: 1.4760001
+    spawnInterval: 2.772
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.15799999
+    aimAtPlayerChance: 0.244
     rampUp: 0.18450001
     lineWaveChance: 0
     bombChance: 0
@@ -3327,11 +3327,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5546666
-    spawnInterval: 2.1813333
-    blocksPerWave: 1
+    warningTime: 1.454
+    spawnInterval: 1.8093333
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.162
+    aimAtPlayerChance: 0.252
     rampUp: 0.18900001
     lineWaveChance: 0
     bombChance: 0
@@ -3390,11 +3390,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5439999
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.442
+    spawnInterval: 2.1456
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.166
+    aimAtPlayerChance: 0.256
     rampUp: 0.192
     lineWaveChance: 0
     bombChance: 0
@@ -3452,11 +3452,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.578
-    spawnInterval: 4.8708
-    blocksPerWave: 1
+    warningTime: 1.484
+    spawnInterval: 4.0964003
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.0785
+    aimAtPlayerChance: 0.1205
     rampUp: 0.18300001
     lineWaveChance: 0
     bombChance: 0
@@ -3514,11 +3514,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5333333
-    spawnInterval: 3.2200003
-    blocksPerWave: 1
+    warningTime: 1.4300001
+    spawnInterval: 2.65
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.17
+    aimAtPlayerChance: 0.26
     rampUp: 0.19500001
     lineWaveChance: 0
     bombChance: 0
@@ -3578,11 +3578,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5226667
-    spawnInterval: 2.3422666
-    blocksPerWave: 1
+    warningTime: 1.418
+    spawnInterval: 1.9198667
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.174
+    aimAtPlayerChance: 0.264
     rampUp: 0.19800001
     lineWaveChance: 0
     bombChance: 0
@@ -3642,11 +3642,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.512
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.406
+    spawnInterval: 2.0688
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.178
+    aimAtPlayerChance: 0.268
     rampUp: 0.201
     lineWaveChance: 0
     bombChance: 0
@@ -3713,11 +3713,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5386666
-    spawnInterval: 2.1553333
-    blocksPerWave: 1
+    warningTime: 1.436
+    spawnInterval: 1.7773334
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.168
+    aimAtPlayerChance: 0.258
     rampUp: 0.19350001
     lineWaveChance: 0
     bombChance: 0
@@ -3777,13 +3777,13 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5013334
-    spawnInterval: 2.0946667
-    blocksPerWave: 0
+    warningTime: 1.394
+    spawnInterval: 2.0432
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.182
+    aimAtPlayerChance: 0.272
     rampUp: 0.20400001
-    lineWaveChance: 0
+    lineWaveChance: 0.062400002
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -3843,14 +3843,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4746667
-    spawnInterval: 2.359033
+    warningTime: 1.364
+    spawnInterval: 1.8982666
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.096
+    aimAtPlayerChance: 0.141
     rampUp: 0.2115
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.0744
+    bombChance: 0.055200003
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -3905,11 +3905,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5493333
-    spawnInterval: 3.2590003
-    blocksPerWave: 1
+    warningTime: 1.4480001
+    spawnInterval: 2.698
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.16399999
+    aimAtPlayerChance: 0.254
     rampUp: 0.1905
     lineWaveChance: 0
     bombChance: 0
@@ -3968,11 +3968,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5386666
-    spawnInterval: 2.1553333
-    blocksPerWave: 1
+    warningTime: 1.436
+    spawnInterval: 1.7773334
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.168
+    aimAtPlayerChance: 0.258
     rampUp: 0.19350001
     lineWaveChance: 0
     bombChance: 0
@@ -4031,11 +4031,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5226667
-    spawnInterval: 2.1293333
-    blocksPerWave: 1
+    warningTime: 1.418
+    spawnInterval: 1.7453333
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.174
+    aimAtPlayerChance: 0.264
     rampUp: 0.19800001
     lineWaveChance: 0
     bombChance: 0
@@ -4093,11 +4093,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.56
-    spawnInterval: 4.8180003
-    blocksPerWave: 1
+    warningTime: 1.46
+    spawnInterval: 4.004
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.08
+    aimAtPlayerChance: 0.125
     rampUp: 0.1875
     lineWaveChance: 0
     bombChance: 0
@@ -4156,11 +4156,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5173333
-    spawnInterval: 2.4387667
+    warningTime: 1.4120001
+    spawnInterval: 1.9948667
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.088
+    aimAtPlayerChance: 0.133
     rampUp: 0.19950001
     lineWaveChance: 0
     bombChance: 0
@@ -4221,14 +4221,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5013334
-    spawnInterval: 2.3041334
+    warningTime: 1.394
+    spawnInterval: 1.8729334
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.182
+    aimAtPlayerChance: 0.272
     rampUp: 0.20400001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.062400002
+    bombChance: 0.049200002
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -4286,13 +4286,13 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.496
-    spawnInterval: 2.086
-    blocksPerWave: 0
+    warningTime: 1.388
+    spawnInterval: 2.0304
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.184
+    aimAtPlayerChance: 0.274
     rampUp: 0.2055
-    lineWaveChance: 0
+    lineWaveChance: 0.0648
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -4362,11 +4362,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5173333
-    spawnInterval: 2.1206667
+    warningTime: 1.4120001
+    spawnInterval: 1.7346667
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.176
+    aimAtPlayerChance: 0.266
     rampUp: 0.19950001
     lineWaveChance: 0
     bombChance: 0
@@ -4427,14 +4427,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.48
-    spawnInterval: 2.06
+    warningTime: 1.37
+    spawnInterval: 1.66
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.19
+    aimAtPlayerChance: 0.28
     rampUp: 0.4
     lineWaveChance: 0.15
-    bombChance: 0
+    bombChance: 0.054000005
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -4493,14 +4493,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4586667
-    spawnInterval: 2.329133
+    warningTime: 1.346
+    spawnInterval: 1.8660666
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.099
+    aimAtPlayerChance: 0.144
     rampUp: 0.216
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.08160001
+    bombChance: 0.058800004
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -4555,11 +4555,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.528
-    spawnInterval: 3.207
-    blocksPerWave: 1
+    warningTime: 1.424
+    spawnInterval: 2.634
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.17199999
+    aimAtPlayerChance: 0.262
     rampUp: 0.1965
     lineWaveChance: 0
     bombChance: 0
@@ -4618,11 +4618,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5173333
-    spawnInterval: 2.1206667
+    warningTime: 1.4120001
+    spawnInterval: 1.7346667
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.176
+    aimAtPlayerChance: 0.266
     rampUp: 0.19950001
     lineWaveChance: 0
     bombChance: 0
@@ -4682,14 +4682,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5066667
-    spawnInterval: 2.1033332
+    warningTime: 1.4
+    spawnInterval: 1.7133334
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.17999999
+    aimAtPlayerChance: 0.27
     rampUp: 0.2025
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.060000002
+    bombChance: 0.048000004
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -4754,11 +4754,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5386666
-    spawnInterval: 4.7417336
-    blocksPerWave: 1
+    warningTime: 1.436
+    spawnInterval: 3.9101336
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.084
+    aimAtPlayerChance: 0.129
     rampUp: 0.19350001
     lineWaveChance: 0
     bombChance: 0
@@ -4818,14 +4818,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.496
-    spawnInterval: 2.3988998
+    warningTime: 1.388
+    spawnInterval: 1.9458
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.092
+    aimAtPlayerChance: 0.137
     rampUp: 0.2055
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.0648
+    bombChance: 0.050400008
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -4883,13 +4883,13 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4853333
-    spawnInterval: 2.2755334
+    warningTime: 1.376
+    spawnInterval: 1.8377334
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.188
+    aimAtPlayerChance: 0.278
     rampUp: 0.20850001
-    lineWaveChance: 0
+    lineWaveChance: 0.0696
     bombChance: 0.12
     breakTiles: 1
     tileRepairTime: 6
@@ -4948,13 +4948,13 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4746667
-    spawnInterval: 2.0513332
-    blocksPerWave: 0
+    warningTime: 1.364
+    spawnInterval: 1.9808
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.192
+    aimAtPlayerChance: 0.282
     rampUp: 0.2115
-    lineWaveChance: 0
+    lineWaveChance: 0.0744
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -5026,14 +5026,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5013334
-    spawnInterval: 3.1420002
+    warningTime: 1.394
+    spawnInterval: 2.554
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.182
+    aimAtPlayerChance: 0.272
     rampUp: 0.20400001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.062400002
+    bombChance: 0.049200002
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -5091,14 +5091,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.464
-    spawnInterval: 2.034
+    warningTime: 1.352
+    spawnInterval: 1.632
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.196
+    aimAtPlayerChance: 0.286
     rampUp: 0.21450001
     lineWaveChance: 0.15
-    bombChance: 0
+    bombChance: 0.057600003
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -5158,14 +5158,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4373333
-    spawnInterval: 2.2892666
-    blocksPerWave: 2
+    warningTime: 1.322
+    spawnInterval: 1.8231333
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.103
+    aimAtPlayerChance: 0.148
     rampUp: 0.222
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.09120001
+    bombChance: 0.0636
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -5220,11 +5220,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.512
-    spawnInterval: 3.168
+    warningTime: 1.406
+    spawnInterval: 2.586
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.178
+    aimAtPlayerChance: 0.268
     rampUp: 0.201
     lineWaveChance: 0
     bombChance: 0
@@ -5283,14 +5283,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5013334
-    spawnInterval: 2.0946667
+    warningTime: 1.394
+    spawnInterval: 1.7026666
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.182
+    aimAtPlayerChance: 0.272
     rampUp: 0.20400001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.062400002
+    bombChance: 0.049200002
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -5346,14 +5346,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4853333
-    spawnInterval: 3.1030002
+    warningTime: 1.376
+    spawnInterval: 2.506
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.188
+    aimAtPlayerChance: 0.278
     rampUp: 0.20850001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.0696
+    bombChance: 0.052800007
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -5409,11 +5409,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5226667
-    spawnInterval: 4.684533
-    blocksPerWave: 1
+    warningTime: 1.418
+    spawnInterval: 3.8397334
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.087
+    aimAtPlayerChance: 0.132
     rampUp: 0.19800001
     lineWaveChance: 0
     bombChance: 0
@@ -5473,14 +5473,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.48
-    spawnInterval: 2.369
+    warningTime: 1.37
+    spawnInterval: 1.9089999
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.095
+    aimAtPlayerChance: 0.14
     rampUp: 0.21000001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.072000004
+    bombChance: 0.054000005
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -5539,13 +5539,13 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.464
-    spawnInterval: 2.2374
-    blocksPerWave: 0
+    warningTime: 1.352
+    spawnInterval: 2.1542401
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.196
+    aimAtPlayerChance: 0.286
     rampUp: 0.21450001
-    lineWaveChance: 0
+    lineWaveChance: 0.0792
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -5605,14 +5605,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4586667
-    spawnInterval: 2.0253332
-    blocksPerWave: 0
+    warningTime: 1.346
+    spawnInterval: 1.9472
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.198
+    aimAtPlayerChance: 0.288
     rampUp: 0.216
     lineWaveChance: 1
-    bombChance: 0
+    bombChance: 0.058800004
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -5683,14 +5683,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4853333
-    spawnInterval: 2.0686667
+    warningTime: 1.376
+    spawnInterval: 1.6706667
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.188
+    aimAtPlayerChance: 0.278
     rampUp: 0.20850001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.0696
+    bombChance: 0.052800007
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -5748,13 +5748,13 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4426666
-    spawnInterval: 1.9993333
-    blocksPerWave: 0
+    warningTime: 1.328
+    spawnInterval: 1.9136
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.204
+    aimAtPlayerChance: 0.294
     rampUp: 0.2205
-    lineWaveChance: 0
+    lineWaveChance: 0.088800006
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -5815,14 +5815,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4213333
-    spawnInterval: 2.2593665
-    blocksPerWave: 2
+    warningTime: 1.304
+    spawnInterval: 1.7909334
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.106
+    aimAtPlayerChance: 0.15100001
     rampUp: 0.2265
-    lineWaveChance: 0.15
-    bombChance: 0
+    lineWaveChance: 0.164
+    bombChance: 0.0672
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -5878,14 +5878,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.496
-    spawnInterval: 3.129
+    warningTime: 1.388
+    spawnInterval: 2.538
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.184
+    aimAtPlayerChance: 0.274
     rampUp: 0.2055
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.0648
+    bombChance: 0.050400008
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -5942,14 +5942,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.48
-    spawnInterval: 2.06
+    warningTime: 1.37
+    spawnInterval: 1.66
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.19
+    aimAtPlayerChance: 0.28
     rampUp: 0.21000001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.072000004
+    bombChance: 0.054000005
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -6007,14 +6007,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4693333
-    spawnInterval: 2.0426667
+    warningTime: 1.358
+    spawnInterval: 1.6413333
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.19399999
+    aimAtPlayerChance: 0.284
     rampUp: 0.213
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.0768
+    bombChance: 0.056400005
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -6071,11 +6071,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.5066667
-    spawnInterval: 4.627333
+    warningTime: 1.4
+    spawnInterval: 3.7693336
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.089999996
+    aimAtPlayerChance: 0.135
     rampUp: 0.2025
     lineWaveChance: 0
     bombChance: 0
@@ -6136,14 +6136,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4586667
-    spawnInterval: 2.329133
+    warningTime: 1.346
+    spawnInterval: 1.8660666
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.099
+    aimAtPlayerChance: 0.144
     rampUp: 0.216
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.08160001
+    bombChance: 0.058800004
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -6202,14 +6202,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.448
-    spawnInterval: 2.2087998
+    warningTime: 1.334
+    spawnInterval: 1.7644
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.20199999
+    aimAtPlayerChance: 0.292
     rampUp: 0.21900001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.08640001
+    bombChance: 0.0612
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -6268,13 +6268,13 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4426666
-    spawnInterval: 1.9993333
-    blocksPerWave: 0
+    warningTime: 1.328
+    spawnInterval: 1.9136
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.204
+    aimAtPlayerChance: 0.294
     rampUp: 0.2205
-    lineWaveChance: 0
+    lineWaveChance: 0.088800006
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -6348,14 +6348,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.464
-    spawnInterval: 2.034
+    warningTime: 1.352
+    spawnInterval: 1.632
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.196
+    aimAtPlayerChance: 0.286
     rampUp: 0.21450001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.0792
+    bombChance: 0.057600003
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -6415,14 +6415,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4266666
-    spawnInterval: 1.9733332
-    blocksPerWave: 2
+    warningTime: 1.31
+    spawnInterval: 1.5666666
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.21
+    aimAtPlayerChance: 0.3
     rampUp: 0.4
-    lineWaveChance: 0.15
-    bombChance: 0
+    lineWaveChance: 0.16000001
+    bombChance: 0.066
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -6482,14 +6482,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4053333
-    spawnInterval: 2.2294664
-    blocksPerWave: 2
+    warningTime: 1.286
+    spawnInterval: 1.7587333
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.109
+    aimAtPlayerChance: 0.154
     rampUp: 0.231
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.105600014
+    bombChance: 0.07080001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -6545,14 +6545,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4746667
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.364
+    spawnInterval: 1.9808
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.192
+    aimAtPlayerChance: 0.282
     rampUp: 0.2115
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.0744
+    bombChance: 0.055200003
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -6608,14 +6608,14 @@ MonoBehaviour:
     turrets: 2
     penguins: 0
     springbots: 0
-    warningTime: 1.464
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.352
+    spawnInterval: 1.9584
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.196
+    aimAtPlayerChance: 0.286
     rampUp: 0.21450001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.0792
+    bombChance: 0.057600003
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -6673,14 +6673,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4533334
-    spawnInterval: 2.0166667
+    warningTime: 1.34
+    spawnInterval: 1.6133333
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.2
+    aimAtPlayerChance: 0.29
     rampUp: 0.2175
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.08400001
+    bombChance: 0.060000002
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -6736,11 +6736,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4853333
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.376
+    spawnInterval: 2.0048
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.094
+    aimAtPlayerChance: 0.139
     rampUp: 0.20850001
     lineWaveChance: 0
     bombChance: 0
@@ -6801,14 +6801,14 @@ MonoBehaviour:
     turrets: 3
     penguins: 0
     springbots: 0
-    warningTime: 1.4426666
-    spawnInterval: 2.2992332
+    warningTime: 1.328
+    spawnInterval: 1.8338666
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.102
+    aimAtPlayerChance: 0.147
     rampUp: 0.2205
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.088800006
+    bombChance: 0.062400002
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -6867,14 +6867,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.432
-    spawnInterval: 2.1802
-    blocksPerWave: 2
+    warningTime: 1.316
+    spawnInterval: 1.7336
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.208
+    aimAtPlayerChance: 0.298
     rampUp: 0.22350001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.093600005
+    bombChance: 0.0648
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -6934,13 +6934,13 @@ MonoBehaviour:
     turrets: 1
     penguins: 0
     springbots: 0
-    warningTime: 1.4213333
-    spawnInterval: 1.9646666
-    blocksPerWave: 0
+    warningTime: 1.304
+    spawnInterval: 1.8688
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.212
+    aimAtPlayerChance: 0.30200002
     rampUp: 0.2265
-    lineWaveChance: 0
+    lineWaveChance: 0.098400004
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -7012,14 +7012,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.448
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.334
+    spawnInterval: 1.9248
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.20199999
+    aimAtPlayerChance: 0.292
     rampUp: 0.21900001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.08640001
+    bombChance: 0.0612
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -7078,14 +7078,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4106667
-    spawnInterval: 1.9473333
-    blocksPerWave: 0
+    warningTime: 1.2919999
+    spawnInterval: 1.8464
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.216
+    aimAtPlayerChance: 0.306
     rampUp: 0.22950001
     lineWaveChance: 1
-    bombChance: 0
+    bombChance: 0.0696
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -7142,17 +7142,17 @@ MonoBehaviour:
     drones: 0
     sandworms: 0
     crabs: 0
-    turrets: 1
+    turrets: 2
     penguins: 0
     springbots: 0
-    warningTime: 1.382
-    spawnInterval: 2.1895998
-    blocksPerWave: 2
+    warningTime: 1.262
+    spawnInterval: 1.7181
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.113
+    aimAtPlayerChance: 0.158
     rampUp: 0.237
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.115200005
+    bombChance: 0.075600006
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -7208,14 +7208,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4586667
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.346
+    spawnInterval: 1.9472
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.198
+    aimAtPlayerChance: 0.288
     rampUp: 0.216
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.08160001
+    bombChance: 0.058800004
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -7272,14 +7272,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 2
     springbots: 0
-    warningTime: 1.448
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.334
+    spawnInterval: 1.9248
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.20199999
+    aimAtPlayerChance: 0.292
     rampUp: 0.21900001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.08640001
+    bombChance: 0.0612
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -7337,14 +7337,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.432
-    spawnInterval: 1.982
-    blocksPerWave: 2
+    warningTime: 1.316
+    spawnInterval: 1.576
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.208
+    aimAtPlayerChance: 0.298
     rampUp: 0.22350001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.093600005
+    bombChance: 0.0648
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -7401,11 +7401,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4693333
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.358
+    spawnInterval: 1.9696001
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.096999995
+    aimAtPlayerChance: 0.142
     rampUp: 0.213
     lineWaveChance: 0
     bombChance: 0
@@ -7467,14 +7467,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4266666
-    spawnInterval: 2.2693331
-    blocksPerWave: 2
+    warningTime: 1.31
+    spawnInterval: 1.8016665
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.105
+    aimAtPlayerChance: 0.15
     rampUp: 0.22500001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.09600001
+    bombChance: 0.066
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -7534,14 +7534,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 1
     springbots: 0
-    warningTime: 1.4106667
-    spawnInterval: 2.1420667
-    blocksPerWave: 2
+    warningTime: 1.2919999
+    spawnInterval: 1.6925333
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.216
+    aimAtPlayerChance: 0.306
     rampUp: 0.22950001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.10320001
+    bombChance: 0.0696
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -7601,14 +7601,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 1
     springbots: 0
-    warningTime: 1.4053333
-    spawnInterval: 1.9386666
-    blocksPerWave: 2
+    warningTime: 1.286
+    spawnInterval: 1.5293334
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.218
+    aimAtPlayerChance: 0.308
     rampUp: 0.231
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.105600014
+    bombChance: 0.07080001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -7679,14 +7679,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.432
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.316
+    spawnInterval: 1.8912001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.208
+    aimAtPlayerChance: 0.298
     rampUp: 0.22350001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.093600005
+    bombChance: 0.0648
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -7743,15 +7743,15 @@ MonoBehaviour:
     sandworms: 0
     crabs: 0
     turrets: 0
-    penguins: 1
+    penguins: 2
     springbots: 0
-    warningTime: 1.388
-    spawnInterval: 1.9126666
-    blocksPerWave: 0
+    warningTime: 1.268
+    spawnInterval: 1.8032
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.22399999
+    aimAtPlayerChance: 0.314
     rampUp: 0.23550001
-    lineWaveChance: 0
+    lineWaveChance: 0.11280001
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -7810,16 +7810,16 @@ MonoBehaviour:
     sandworms: 0
     crabs: 0
     turrets: 0
-    penguins: 1
+    penguins: 2
     springbots: 0
-    warningTime: 1.364
-    spawnInterval: 2.1597
-    blocksPerWave: 2
+    warningTime: 1.244
+    spawnInterval: 1.6881999
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.116
+    aimAtPlayerChance: 0.161
     rampUp: 0.2415
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1224
+    bombChance: 0.0792
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -7875,14 +7875,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4426666
-    spawnInterval: 1.9993333
+    warningTime: 1.328
+    spawnInterval: 1.5946666
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.204
+    aimAtPlayerChance: 0.294
     rampUp: 0.2205
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.088800006
+    bombChance: 0.062400002
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -7939,14 +7939,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.432
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.316
+    spawnInterval: 1.8912001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.208
+    aimAtPlayerChance: 0.298
     rampUp: 0.22350001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.093600005
+    bombChance: 0.0648
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -8004,14 +8004,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.416
-    spawnInterval: 1.956
-    blocksPerWave: 2
+    warningTime: 1.298
+    spawnInterval: 1.548
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.214
+    aimAtPlayerChance: 0.304
     rampUp: 0.228
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.100800015
+    bombChance: 0.0684
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -8068,11 +8068,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4533334
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.34
+    spawnInterval: 1.9360001
+    blocksPerWave: 1
     blockLinger: 1.5
-    aimAtPlayerChance: 0.1
+    aimAtPlayerChance: 0.145
     rampUp: 0.2175
     lineWaveChance: 0
     bombChance: 0
@@ -8133,14 +8133,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4106667
-    spawnInterval: 2.2394333
-    blocksPerWave: 2
+    warningTime: 1.2919999
+    spawnInterval: 1.7694665
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.108
+    aimAtPlayerChance: 0.153
     rampUp: 0.22950001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.10320001
+    bombChance: 0.0696
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -8200,14 +8200,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3939999
-    spawnInterval: 2.1134667
-    blocksPerWave: 2
+    warningTime: 1.2739999
+    spawnInterval: 1.6624668
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.222
+    aimAtPlayerChance: 0.312
     rampUp: 0.23400001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.110400006
+    bombChance: 0.0732
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -8260,21 +8260,21 @@ MonoBehaviour:
     hitsPerStage: 0
     allyKuzgun: 0
     sweepers: 0
-    erasers: 2
+    erasers: 3
     drones: 0
     sandworms: 0
     crabs: 0
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.388
-    spawnInterval: 1.9126666
-    blocksPerWave: 2
+    warningTime: 1.268
+    spawnInterval: 1.5026666
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.22399999
+    aimAtPlayerChance: 0.314
     rampUp: 0.23550001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.11280001
+    bombChance: 0.0744
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -8347,14 +8347,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.416
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.298
+    spawnInterval: 1.8576001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.214
+    aimAtPlayerChance: 0.304
     rampUp: 0.228
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.100800015
+    bombChance: 0.0684
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -8414,14 +8414,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.37
-    spawnInterval: 1.8866667
-    blocksPerWave: 2
+    warningTime: 1.25
+    spawnInterval: 1.4766667
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.23
+    aimAtPlayerChance: 0.32
     rampUp: 0.4
-    lineWaveChance: 0
-    bombChance: 0.12
+    lineWaveChance: 0.120000005
+    bombChance: 0.13
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -8482,14 +8482,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.346
-    spawnInterval: 2.1297998
+    warningTime: 1.2260001
+    spawnInterval: 1.6583
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.119
+    aimAtPlayerChance: 0.164
     rampUp: 0.246
-    lineWaveChance: 0.196
-    bombChance: 0.12
+    lineWaveChance: 0.216
+    bombChance: 0.138
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -8545,14 +8545,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4266666
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.31
+    spawnInterval: 1.88
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.21
+    aimAtPlayerChance: 0.3
     rampUp: 0.22500001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.09600001
+    bombChance: 0.066
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -8609,14 +8609,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4106667
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.2919999
+    spawnInterval: 1.8464
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.216
+    aimAtPlayerChance: 0.306
     rampUp: 0.22950001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.10320001
+    bombChance: 0.0696
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -8674,14 +8674,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4
-    spawnInterval: 1.93
-    blocksPerWave: 2
+    warningTime: 1.28
+    spawnInterval: 1.52
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.22
+    aimAtPlayerChance: 0.31
     rampUp: 0.23250002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.10800001
+    bombChance: 0.072000004
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -8738,11 +8738,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4373333
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.322
+    spawnInterval: 1.9024001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.103
+    aimAtPlayerChance: 0.148
     rampUp: 0.222
     lineWaveChance: 0
     bombChance: 0
@@ -8804,14 +8804,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.388
-    spawnInterval: 2.1995666
-    blocksPerWave: 2
+    warningTime: 1.268
+    spawnInterval: 1.7280666
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.111999996
+    aimAtPlayerChance: 0.157
     rampUp: 0.23550001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.11280001
+    bombChance: 0.0744
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -8871,14 +8871,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3759999
-    spawnInterval: 2.0848668
-    blocksPerWave: 2
+    warningTime: 1.256
+    spawnInterval: 1.6338667
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.228
+    aimAtPlayerChance: 0.318
     rampUp: 0.2385
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.11760001
+    bombChance: 0.0768
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -8938,13 +8938,13 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.37
-    spawnInterval: 1.8866667
-    blocksPerWave: 0
+    warningTime: 1.25
+    spawnInterval: 1.7720001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.23
+    aimAtPlayerChance: 0.32
     rampUp: 0.24000001
-    lineWaveChance: 0
+    lineWaveChance: 0.120000005
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -9005,14 +9005,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3939999
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.2739999
+    spawnInterval: 1.8136001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.222
+    aimAtPlayerChance: 0.312
     rampUp: 0.23400001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.110400006
+    bombChance: 0.0732
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -9072,14 +9072,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.352
-    spawnInterval: 1.8606666
-    blocksPerWave: 0
+    warningTime: 1.232
+    spawnInterval: 1.7408
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.236
+    aimAtPlayerChance: 0.326
     rampUp: 0.24450001
     lineWaveChance: 1
-    bombChance: 0
+    bombChance: 0.08160001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.3445
@@ -9140,14 +9140,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.328
-    spawnInterval: 2.0999
+    warningTime: 1.2080001
+    spawnInterval: 1.6284
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.122
+    aimAtPlayerChance: 0.167
     rampUp: 0.25050002
-    lineWaveChance: 0.208
-    bombChance: 0
+    lineWaveChance: 0.228
+    bombChance: 0.08640001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -9204,14 +9204,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4106667
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.2919999
+    spawnInterval: 1.8464
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.216
+    aimAtPlayerChance: 0.306
     rampUp: 0.22950001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.10320001
+    bombChance: 0.0696
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -9269,14 +9269,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3939999
-    spawnInterval: 1.9213333
-    blocksPerWave: 2
+    warningTime: 1.2739999
+    spawnInterval: 1.5113333
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.222
+    aimAtPlayerChance: 0.312
     rampUp: 0.23400001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.110400006
+    bombChance: 0.0732
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -9335,14 +9335,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.382
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.262
+    spawnInterval: 1.7928001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.226
+    aimAtPlayerChance: 0.316
     rampUp: 0.237
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.115200005
+    bombChance: 0.075600006
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -9399,11 +9399,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4213333
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.304
+    spawnInterval: 1.8688
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.106
+    aimAtPlayerChance: 0.15100001
     rampUp: 0.2265
     lineWaveChance: 0
     bombChance: 0
@@ -9464,14 +9464,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.37
-    spawnInterval: 2.1696665
-    blocksPerWave: 2
+    warningTime: 1.25
+    spawnInterval: 1.6981666
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.115
+    aimAtPlayerChance: 0.16
     rampUp: 0.24000001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.120000005
+    bombChance: 0.078
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -9532,14 +9532,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3579999
-    spawnInterval: 2.0562665
-    blocksPerWave: 2
+    warningTime: 1.238
+    spawnInterval: 1.6052667
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.234
+    aimAtPlayerChance: 0.324
     rampUp: 0.24300002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.124800004
+    bombChance: 0.080400005
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -9600,14 +9600,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.352
-    spawnInterval: 1.8606666
+    warningTime: 1.232
+    spawnInterval: 1.4506667
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.236
+    aimAtPlayerChance: 0.326
     rampUp: 0.24450001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1272
+    bombChance: 0.08160001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -9680,14 +9680,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3759999
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.256
+    spawnInterval: 1.7824
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.228
+    aimAtPlayerChance: 0.318
     rampUp: 0.2385
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.11760001
+    bombChance: 0.0768
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -9747,13 +9747,13 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.334
-    spawnInterval: 1.8346666
-    blocksPerWave: 0
+    warningTime: 1.214
+    spawnInterval: 1.7096001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.242
+    aimAtPlayerChance: 0.33200002
     rampUp: 0.24900001
-    lineWaveChance: 0
+    lineWaveChance: 0.1344
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -9816,14 +9816,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.31
-    spawnInterval: 2.07
+    warningTime: 1.19
+    spawnInterval: 1.5984999
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.125
+    aimAtPlayerChance: 0.17
     rampUp: 0.255
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.14400001
+    bombChance: 0.09
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -9879,14 +9879,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.388
-    spawnInterval: 1.9126666
-    blocksPerWave: 2
+    warningTime: 1.268
+    spawnInterval: 1.5026666
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.22399999
+    aimAtPlayerChance: 0.314
     rampUp: 0.23550001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.11280001
+    bombChance: 0.0744
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -9943,14 +9943,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3759999
-    spawnInterval: 1.8953333
-    blocksPerWave: 2
+    warningTime: 1.256
+    spawnInterval: 1.4853333
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.228
+    aimAtPlayerChance: 0.318
     rampUp: 0.2385
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.11760001
+    bombChance: 0.0768
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -10008,14 +10008,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.364
-    spawnInterval: 1.8779999
-    blocksPerWave: 2
+    warningTime: 1.244
+    spawnInterval: 1.4679999
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.232
+    aimAtPlayerChance: 0.322
     rampUp: 0.2415
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1224
+    bombChance: 0.0792
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -10071,11 +10071,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4
-    spawnInterval: 2.895
-    blocksPerWave: 2
+    warningTime: 1.28
+    spawnInterval: 2.28
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.11
+    aimAtPlayerChance: 0.155
     rampUp: 0.23250002
     lineWaveChance: 0
     bombChance: 0
@@ -10136,13 +10136,13 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.352
-    spawnInterval: 2.1397667
-    blocksPerWave: 0
+    warningTime: 1.232
+    spawnInterval: 2.00192
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.118
+    aimAtPlayerChance: 0.163
     rampUp: 0.24450001
-    lineWaveChance: 0
+    lineWaveChance: 0.1272
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -10203,14 +10203,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3399999
-    spawnInterval: 2.0276666
+    warningTime: 1.22
+    spawnInterval: 1.5766666
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.24
+    aimAtPlayerChance: 0.33
     rampUp: 0.2475
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.132
+    bombChance: 0.08400001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -10270,14 +10270,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.334
-    spawnInterval: 1.8346666
+    warningTime: 1.214
+    spawnInterval: 1.4246666
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.242
+    aimAtPlayerChance: 0.33200002
     rampUp: 0.24900001
-    lineWaveChance: 0.204
-    bombChance: 0
+    lineWaveChance: 0.22399999
+    bombChance: 0.085200004
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -10346,14 +10346,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3579999
-    spawnInterval: 1.8693333
-    blocksPerWave: 2
+    warningTime: 1.238
+    spawnInterval: 1.4593333
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.234
+    aimAtPlayerChance: 0.324
     rampUp: 0.24300002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.124800004
+    bombChance: 0.080400005
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -10414,14 +10414,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.316
-    spawnInterval: 1.8086666
+    warningTime: 1.1960001
+    spawnInterval: 1.3986666
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.248
+    aimAtPlayerChance: 0.338
     rampUp: 0.4
-    lineWaveChance: 0
-    bombChance: 0.12799999
+    lineWaveChance: 0.14160001
+    bombChance: 0.148
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -10482,14 +10482,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2939999
-    spawnInterval: 2.0424
+    warningTime: 1.174
+    spawnInterval: 1.5708998
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.127
+    aimAtPlayerChance: 0.17300001
     rampUp: 0.25950003
-    lineWaveChance: 0.232
-    bombChance: 0.138
+    lineWaveChance: 0.252
+    bombChance: 0.156
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -10546,14 +10546,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.37
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.25
+    spawnInterval: 1.7720001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.23
+    aimAtPlayerChance: 0.32
     rampUp: 0.24000001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.120000005
+    bombChance: 0.078
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -10611,14 +10611,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3579999
-    spawnInterval: 1.8693333
-    blocksPerWave: 2
+    warningTime: 1.238
+    spawnInterval: 1.4593333
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.234
+    aimAtPlayerChance: 0.324
     rampUp: 0.24300002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.124800004
+    bombChance: 0.080400005
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -10677,14 +10677,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.346
-    spawnInterval: 1.852
+    warningTime: 1.2260001
+    spawnInterval: 1.442
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.238
+    aimAtPlayerChance: 0.328
     rampUp: 0.246
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1296
+    bombChance: 0.0828
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -10741,11 +10741,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.382
-    spawnInterval: 2.856
-    blocksPerWave: 2
+    warningTime: 1.262
+    spawnInterval: 2.241
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.113
+    aimAtPlayerChance: 0.158
     rampUp: 0.237
     lineWaveChance: 0
     bombChance: 0
@@ -10807,14 +10807,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.334
-    spawnInterval: 2.1098666
+    warningTime: 1.214
+    spawnInterval: 1.6383666
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.121
+    aimAtPlayerChance: 0.16600001
     rampUp: 0.24900001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1344
+    bombChance: 0.085200004
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -10874,14 +10874,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3219999
-    spawnInterval: 1.9990667
+    warningTime: 1.202
+    spawnInterval: 1.5480667
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.246
+    aimAtPlayerChance: 0.336
     rampUp: 0.252
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1392
+    bombChance: 0.0876
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -10942,13 +10942,13 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.31
-    spawnInterval: 1.8
-    blocksPerWave: 0
+    warningTime: 1.19
+    spawnInterval: 1.6680001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25
+    aimAtPlayerChance: 0.34
     rampUp: 0.255
-    lineWaveChance: 0
+    lineWaveChance: 0.14400001
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -11020,14 +11020,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3399999
-    spawnInterval: 1.8433332
+    warningTime: 1.22
+    spawnInterval: 1.4333333
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.24
+    aimAtPlayerChance: 0.33
     rampUp: 0.2475
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.132
+    bombChance: 0.08400001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -11085,17 +11085,17 @@ MonoBehaviour:
     drones: 0
     sandworms: 0
     crabs: 0
-    turrets: 2
+    turrets: 3
     penguins: 0
     springbots: 0
-    warningTime: 1.2993333
-    spawnInterval: 1.7839999
-    blocksPerWave: 0
+    warningTime: 1.1793333
+    spawnInterval: 1.6488
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25266668
+    aimAtPlayerChance: 0.344
     rampUp: 0.25800002
     lineWaveChance: 1
-    bombChance: 0
+    bombChance: 0.0924
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -11157,14 +11157,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.278
-    spawnInterval: 2.0147998
+    warningTime: 1.158
+    spawnInterval: 1.5433
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12900001
+    aimAtPlayerChance: 0.176
     rampUp: 0.264
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1584
+    bombChance: 0.097200006
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -11222,14 +11222,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.352
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.232
+    spawnInterval: 1.7408
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.236
+    aimAtPlayerChance: 0.326
     rampUp: 0.24450001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1272
+    bombChance: 0.08160001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -11286,15 +11286,15 @@ MonoBehaviour:
     crabs: 0
     turrets: 0
     penguins: 0
-    springbots: 1
-    warningTime: 1.3399999
-    spawnInterval: 999
-    blocksPerWave: 0
+    springbots: 2
+    warningTime: 1.22
+    spawnInterval: 1.72
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.24
+    aimAtPlayerChance: 0.33
     rampUp: 0.2475
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.132
+    bombChance: 0.08400001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -11353,14 +11353,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.328
-    spawnInterval: 1.826
+    warningTime: 1.2080001
+    spawnInterval: 1.416
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.244
+    aimAtPlayerChance: 0.334
     rampUp: 0.25050002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1368
+    bombChance: 0.08640001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -11418,11 +11418,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.364
-    spawnInterval: 2.817
-    blocksPerWave: 2
+    warningTime: 1.244
+    spawnInterval: 2.202
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.116
+    aimAtPlayerChance: 0.161
     rampUp: 0.2415
     lineWaveChance: 0
     bombChance: 0
@@ -11484,14 +11484,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.316
-    spawnInterval: 2.0799665
+    warningTime: 1.1960001
+    spawnInterval: 1.6084666
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.124
+    aimAtPlayerChance: 0.169
     rampUp: 0.2535
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.14160001
+    bombChance: 0.088800006
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -11550,15 +11550,15 @@ MonoBehaviour:
     crabs: 0
     turrets: 0
     penguins: 0
-    springbots: 2
-    warningTime: 1.3046666
-    spawnInterval: 999
-    blocksPerWave: 0
+    springbots: 3
+    warningTime: 1.1846668
+    spawnInterval: 1.8242401
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25133333
+    aimAtPlayerChance: 0.342
     rampUp: 0.2565
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1464
+    bombChance: 0.09120001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -11618,15 +11618,15 @@ MonoBehaviour:
     crabs: 0
     turrets: 0
     penguins: 0
-    springbots: 2
-    warningTime: 1.2939999
-    spawnInterval: 1.7759999
+    springbots: 3
+    warningTime: 1.174
+    spawnInterval: 1.3659999
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.254
+    aimAtPlayerChance: 0.34600002
     rampUp: 0.25950003
-    lineWaveChance: 0
-    bombChance: 0.138
+    lineWaveChance: 0.15120001
+    bombChance: 0.156
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -11697,14 +11697,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3219999
-    spawnInterval: 1.8173333
+    warningTime: 1.202
+    spawnInterval: 1.4073334
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.246
+    aimAtPlayerChance: 0.336
     rampUp: 0.252
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1392
+    bombChance: 0.0876
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -11764,14 +11764,14 @@ MonoBehaviour:
     crabs: 0
     turrets: 0
     penguins: 0
-    springbots: 2
-    warningTime: 1.2833333
-    spawnInterval: 1.76
-    blocksPerWave: 0
+    springbots: 3
+    warningTime: 1.1633334
+    spawnInterval: 1.6200001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25666666
+    aimAtPlayerChance: 0.35
     rampUp: 0.26250002
-    lineWaveChance: 0
+    lineWaveChance: 0.156
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -11834,14 +11834,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.262
-    spawnInterval: 1.9871999
-    blocksPerWave: 3
+    warningTime: 1.1420001
+    spawnInterval: 1.5156999
+    blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.131
+    aimAtPlayerChance: 0.179
     rampUp: 0.2685
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1656
+    bombChance: 0.100800015
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -11899,14 +11899,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.334
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.214
+    spawnInterval: 1.7096001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.242
+    aimAtPlayerChance: 0.33200002
     rampUp: 0.24900001
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1344
+    bombChance: 0.085200004
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -11958,21 +11958,21 @@ MonoBehaviour:
     hitsPerStage: 0
     allyKuzgun: 0
     sweepers: 0
-    erasers: 1
+    erasers: 2
     drones: 0
     sandworms: 0
     crabs: 0
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3219999
-    spawnInterval: 1.8173333
+    warningTime: 1.202
+    spawnInterval: 1.4073334
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.246
+    aimAtPlayerChance: 0.336
     rampUp: 0.252
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1392
+    bombChance: 0.0876
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -12031,14 +12031,14 @@ MonoBehaviour:
     crabs: 0
     turrets: 0
     penguins: 0
-    springbots: 2
-    warningTime: 1.31
-    spawnInterval: 1.8
-    blocksPerWave: 0
+    springbots: 3
+    warningTime: 1.19
+    spawnInterval: 1.6680001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25
+    aimAtPlayerChance: 0.34
     rampUp: 0.255
-    lineWaveChance: 0
+    lineWaveChance: 0.14400001
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -12097,11 +12097,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.346
-    spawnInterval: 2.7779999
+    warningTime: 1.2260001
+    spawnInterval: 2.163
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.119
+    aimAtPlayerChance: 0.164
     rampUp: 0.246
     lineWaveChance: 0
     bombChance: 0
@@ -12158,20 +12158,20 @@ MonoBehaviour:
     allyKuzgun: 0
     sweepers: 0
     erasers: 0
-    drones: 1
+    drones: 2
     sandworms: 0
     crabs: 0
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2993333
-    spawnInterval: 2.0516
+    warningTime: 1.1793333
+    spawnInterval: 1.5800999
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12633334
+    aimAtPlayerChance: 0.172
     rampUp: 0.25800002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1488
+    bombChance: 0.0924
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -12232,14 +12232,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2886666
-    spawnInterval: 1.9448
+    warningTime: 1.1686667
+    spawnInterval: 1.4938
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25533333
+    aimAtPlayerChance: 0.348
     rampUp: 0.261
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1536
+    bombChance: 0.09480001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -12300,14 +12300,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.278
-    spawnInterval: 1.752
+    warningTime: 1.158
+    spawnInterval: 1.342
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25800002
+    aimAtPlayerChance: 0.352
     rampUp: 0.264
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1584
+    bombChance: 0.097200006
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -12367,14 +12367,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3046666
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1846668
+    spawnInterval: 1.6584
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25133333
+    aimAtPlayerChance: 0.342
     rampUp: 0.2565
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1464
+    bombChance: 0.09120001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -12435,15 +12435,15 @@ MonoBehaviour:
     crabs: 0
     turrets: 0
     penguins: 0
-    springbots: 2
-    warningTime: 1.2673333
-    spawnInterval: 1.736
-    blocksPerWave: 3
+    springbots: 3
+    warningTime: 1.1473334
+    spawnInterval: 1.326
+    blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26066667
+    aimAtPlayerChance: 0.356
     rampUp: 0.4
-    lineWaveChance: 0
-    bombChance: 0.15133333
+    lineWaveChance: 0.16320002
+    bombChance: 0.16600001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -12506,14 +12506,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.246
-    spawnInterval: 1.9596
-    blocksPerWave: 3
+    warningTime: 1.126
+    spawnInterval: 1.4881
+    blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.133
+    aimAtPlayerChance: 0.182
     rampUp: 0.273
-    lineWaveChance: 0
-    bombChance: 0.162
+    lineWaveChance: 0.17280002
+    bombChance: 0.17400001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -12571,14 +12571,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.316
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1960001
+    spawnInterval: 1.6784
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.248
+    aimAtPlayerChance: 0.338
     rampUp: 0.2535
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.14160001
+    bombChance: 0.088800006
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -12637,14 +12637,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.3046666
-    spawnInterval: 1.7919999
+    warningTime: 1.1846668
+    spawnInterval: 1.382
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25133333
+    aimAtPlayerChance: 0.342
     rampUp: 0.2565
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1464
+    bombChance: 0.09120001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -12704,14 +12704,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2939999
-    spawnInterval: 1.7759999
-    blocksPerWave: 0
+    warningTime: 1.174
+    spawnInterval: 1.6392
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.254
+    aimAtPlayerChance: 0.34600002
     rampUp: 0.25950003
     lineWaveChance: 1
-    bombChance: 0
+    bombChance: 0.093600005
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -12769,11 +12769,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.328
-    spawnInterval: 1498.5
-    blocksPerWave: 0
+    warningTime: 1.2080001
+    spawnInterval: 2.5488
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.122
+    aimAtPlayerChance: 0.167
     rampUp: 0.25050002
     lineWaveChance: 0
     bombChance: 0
@@ -12836,14 +12836,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2833333
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1633334
+    spawnInterval: 1.863
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12833333
+    aimAtPlayerChance: 0.175
     rampUp: 0.26250002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.156
+    bombChance: 0.09600001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -12904,14 +12904,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2726667
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1526667
+    spawnInterval: 1.7608801
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25933334
+    aimAtPlayerChance: 0.354
     rampUp: 0.2655
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.16080001
+    bombChance: 0.098400004
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -12972,14 +12972,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.262
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1420001
+    spawnInterval: 1.5816001
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.262
+    aimAtPlayerChance: 0.358
     rampUp: 0.2685
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1656
+    bombChance: 0.100800015
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -13052,14 +13052,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2886666
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1686667
+    spawnInterval: 1.6296002
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25533333
+    aimAtPlayerChance: 0.348
     rampUp: 0.261
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1536
+    bombChance: 0.09480001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -13120,14 +13120,14 @@ MonoBehaviour:
     crabs: 0
     turrets: 0
     penguins: 0
-    springbots: 2
-    warningTime: 1.2513334
-    spawnInterval: 1.7119999
-    blocksPerWave: 0
+    springbots: 4
+    warningTime: 1.1313334
+    spawnInterval: 1.5624
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26466668
+    aimAtPlayerChance: 0.36200002
     rampUp: 0.27150002
-    lineWaveChance: 0
+    lineWaveChance: 0.17040001
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -13191,13 +13191,13 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.23
-    spawnInterval: 1.9319999
-    blocksPerWave: 0
+    warningTime: 1.11
+    spawnInterval: 1.7526001
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.135
+    aimAtPlayerChance: 0.185
     rampUp: 0.2775
-    lineWaveChance: 0
+    lineWaveChance: 0.18
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -13256,14 +13256,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2993333
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1793333
+    spawnInterval: 1.6488
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25266668
+    aimAtPlayerChance: 0.344
     rampUp: 0.25800002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1488
+    bombChance: 0.0924
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -13322,14 +13322,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2886666
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1686667
+    spawnInterval: 1.6296002
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25533333
+    aimAtPlayerChance: 0.348
     rampUp: 0.261
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1536
+    bombChance: 0.09480001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -13388,14 +13388,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.278
-    spawnInterval: 1.752
+    warningTime: 1.158
+    spawnInterval: 1.342
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25800002
+    aimAtPlayerChance: 0.352
     rampUp: 0.264
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1584
+    bombChance: 0.097200006
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -13453,11 +13453,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.31
-    spawnInterval: 2.6999998
+    warningTime: 1.19
+    spawnInterval: 2.085
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.125
+    aimAtPlayerChance: 0.17
     rampUp: 0.255
     lineWaveChance: 0
     bombChance: 0
@@ -13520,13 +13520,13 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2673333
-    spawnInterval: 1.9963999
-    blocksPerWave: 0
+    warningTime: 1.1473334
+    spawnInterval: 1.82988
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.13033333
+    aimAtPlayerChance: 0.178
     rampUp: 0.26700002
-    lineWaveChance: 0
+    lineWaveChance: 0.16320002
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -13588,14 +13588,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2566667
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1366667
+    spawnInterval: 1.7292
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26333335
+    aimAtPlayerChance: 0.36
     rampUp: 0.27
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.16800001
+    bombChance: 0.102000006
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -13649,21 +13649,21 @@ MonoBehaviour:
     hitsPerStage: 0
     allyKuzgun: 0
     sweepers: 0
-    erasers: 1
+    erasers: 3
     drones: 0
     sandworms: 0
     crabs: 0
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2513334
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1313334
+    spawnInterval: 1.5624
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26466668
+    aimAtPlayerChance: 0.36200002
     rampUp: 0.27150002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.17040001
+    bombChance: 0.10320001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -13734,14 +13734,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2726667
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1526667
+    spawnInterval: 1.6008
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25933334
+    aimAtPlayerChance: 0.354
     rampUp: 0.2655
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.16080001
+    bombChance: 0.098400004
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -13796,19 +13796,19 @@ MonoBehaviour:
     allyKuzgun: 0
     sweepers: 0
     erasers: 0
-    drones: 1
+    drones: 3
     sandworms: 0
     crabs: 0
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2353333
-    spawnInterval: 1.688
-    blocksPerWave: 0
+    warningTime: 1.1153333
+    spawnInterval: 1.5336001
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26866668
+    aimAtPlayerChance: 0.368
     rampUp: 0.276
-    lineWaveChance: 0
+    lineWaveChance: 0.17760001
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -13871,14 +13871,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.214
-    spawnInterval: 1.9020998
-    blocksPerWave: 3
+    warningTime: 1.094
+    spawnInterval: 1.4352
+    blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.13800001
+    aimAtPlayerChance: 0.18800001
     rampUp: 0.282
-    lineWaveChance: 0.292
-    bombChance: 0
+    lineWaveChance: 0.31
+    bombChance: 0.11280001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -13936,14 +13936,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2833333
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1633334
+    spawnInterval: 1.6200001
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25666666
+    aimAtPlayerChance: 0.35
     rampUp: 0.26250002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.156
+    bombChance: 0.09600001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -14002,14 +14002,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2726667
-    spawnInterval: 1.744
+    warningTime: 1.1526667
+    spawnInterval: 1.334
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.25933334
+    aimAtPlayerChance: 0.354
     rampUp: 0.2655
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.16080001
+    bombChance: 0.098400004
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -14066,17 +14066,17 @@ MonoBehaviour:
     drones: 0
     sandworms: 0
     crabs: 0
-    turrets: 1
+    turrets: 2
     penguins: 0
     springbots: 0
-    warningTime: 1.262
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1420001
+    spawnInterval: 1.5816001
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.262
+    aimAtPlayerChance: 0.358
     rampUp: 0.2685
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1656
+    bombChance: 0.100800015
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -14134,11 +14134,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4880998
-    spawnInterval: 1498.5
-    blocksPerWave: 0
+    warningTime: 1.3501
+    spawnInterval: 2.4587998
+    blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.127
+    aimAtPlayerChance: 0.17300001
     rampUp: 0.25950003
     lineWaveChance: 0
     bombChance: 0
@@ -14195,20 +14195,20 @@ MonoBehaviour:
     allyKuzgun: 1
     sweepers: 0
     erasers: 0
-    drones: 1
+    drones: 3
     sandworms: 0
     crabs: 0
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2513334
-    spawnInterval: 1.8831999
-    blocksPerWave: 3
+    warningTime: 1.1313334
+    spawnInterval: 1.4322
+    blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26466668
+    aimAtPlayerChance: 0.36200002
     rampUp: 0.27150002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.17040001
+    bombChance: 0.10320001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -14269,14 +14269,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2406666
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1206667
+    spawnInterval: 1.6975201
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26733333
+    aimAtPlayerChance: 0.366
     rampUp: 0.2745
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1752
+    bombChance: 0.105600014
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -14330,21 +14330,21 @@ MonoBehaviour:
     hitsPerStage: 0
     allyKuzgun: 0
     sweepers: 0
-    erasers: 1
+    erasers: 3
     drones: 0
     sandworms: 0
     crabs: 0
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2353333
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1153333
+    spawnInterval: 1.5336001
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26866668
+    aimAtPlayerChance: 0.368
     rampUp: 0.276
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.17760001
+    bombChance: 0.106800005
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -14415,14 +14415,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2566667
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1366667
+    spawnInterval: 1.572
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26333335
+    aimAtPlayerChance: 0.36
     rampUp: 0.27
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.16800001
+    bombChance: 0.102000006
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -14481,17 +14481,17 @@ MonoBehaviour:
     drones: 0
     sandworms: 0
     crabs: 0
-    turrets: 1
+    turrets: 3
     penguins: 0
     springbots: 0
-    warningTime: 1.2193333
-    spawnInterval: 1.6626666
-    blocksPerWave: 0
+    warningTime: 1.0993333
+    spawnInterval: 1.5064
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.27400002
+    aimAtPlayerChance: 0.374
     rampUp: 0.4
     lineWaveChance: 1
-    bombChance: 0
+    bombChance: 0.11120001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -14554,14 +14554,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.198
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.078
+    spawnInterval: 1.69188
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.141
+    aimAtPlayerChance: 0.191
     rampUp: 0.2865
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.192
+    bombChance: 0.11760001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -14619,14 +14619,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2673333
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1473334
+    spawnInterval: 1.5912
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26066667
+    aimAtPlayerChance: 0.356
     rampUp: 0.26700002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.16320002
+    bombChance: 0.09960001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -14685,14 +14685,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2566667
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1366667
+    spawnInterval: 1.572
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26333335
+    aimAtPlayerChance: 0.36
     rampUp: 0.27
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.16800001
+    bombChance: 0.102000006
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -14752,14 +14752,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.246
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.126
+    spawnInterval: 1.5528
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.266
+    aimAtPlayerChance: 0.364
     rampUp: 0.273
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.17280002
+    bombChance: 0.10440001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -14824,11 +14824,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2833333
-    spawnInterval: 3.872
+    warningTime: 1.1633334
+    spawnInterval: 2.97
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.12833333
+    aimAtPlayerChance: 0.175
     rampUp: 0.26250002
     lineWaveChance: 0
     bombChance: 0
@@ -14891,14 +14891,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2353333
-    spawnInterval: 1.9411999
-    blocksPerWave: 3
+    warningTime: 1.1153333
+    spawnInterval: 1.4697
+    blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.13433334
+    aimAtPlayerChance: 0.184
     rampUp: 0.276
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.17760001
+    bombChance: 0.106800005
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -14959,14 +14959,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2246667
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1046667
+    spawnInterval: 1.6667202
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.272
+    aimAtPlayerChance: 0.372
     rampUp: 0.279
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.18200001
+    bombChance: 0.10960001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -15020,21 +15020,21 @@ MonoBehaviour:
     hitsPerStage: 0
     allyKuzgun: 0
     sweepers: 0
-    erasers: 1
+    erasers: 3
     drones: 0
     sandworms: 0
     crabs: 0
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2193333
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.0993333
+    spawnInterval: 1.5064
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.27400002
+    aimAtPlayerChance: 0.374
     rampUp: 0.28050002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.18400002
+    bombChance: 0.11120001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -15105,14 +15105,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2406666
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1206667
+    spawnInterval: 1.5432001
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26733333
+    aimAtPlayerChance: 0.366
     rampUp: 0.2745
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1752
+    bombChance: 0.105600014
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -15172,14 +15172,14 @@ MonoBehaviour:
     crabs: 0
     turrets: 0
     penguins: 0
-    springbots: 1
-    warningTime: 1.2033334
-    spawnInterval: 1.6366667
-    blocksPerWave: 0
+    springbots: 3
+    warningTime: 1.0833334
+    spawnInterval: 1.48
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.28
+    aimAtPlayerChance: 0.38
     rampUp: 0.285
-    lineWaveChance: 0
+    lineWaveChance: 0.19000001
     bombChance: 1
     breakTiles: 1
     tileRepairTime: 6
@@ -15243,14 +15243,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.182
-    spawnInterval: 1.8422999
+    warningTime: 1.062
+    spawnInterval: 1.3845999
     blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.14400001
+    aimAtPlayerChance: 0.194
     rampUp: 0.291
-    lineWaveChance: 0.316
-    bombChance: 0
+    lineWaveChance: 0.33
+    bombChance: 0.1224
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -15310,14 +15310,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.4390333
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.3010334
+    spawnInterval: 1.5624
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26466668
+    aimAtPlayerChance: 0.36200002
     rampUp: 0.27150002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.17040001
+    bombChance: 0.10320001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -15377,14 +15377,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2406666
-    spawnInterval: 1.696
-    blocksPerWave: 3
+    warningTime: 1.1206667
+    spawnInterval: 1.286
+    blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26733333
+    aimAtPlayerChance: 0.366
     rampUp: 0.2745
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.1752
+    bombChance: 0.105600014
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -15445,14 +15445,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.23
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.11
+    spawnInterval: 1.524
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.27
+    aimAtPlayerChance: 0.37
     rampUp: 0.2775
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.18
+    bombChance: 0.10800001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -15511,11 +15511,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2673333
-    spawnInterval: 2.6039999
-    blocksPerWave: 3
+    warningTime: 1.1473334
+    spawnInterval: 1.989
+    blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.13033333
+    aimAtPlayerChance: 0.178
     rampUp: 0.26700002
     lineWaveChance: 0
     bombChance: 0
@@ -15573,20 +15573,20 @@ MonoBehaviour:
     allyKuzgun: 0
     sweepers: 0
     erasers: 0
-    drones: 1
+    drones: 3
     sandworms: 0
     crabs: 0
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2193333
-    spawnInterval: 1.9120665
-    blocksPerWave: 3
+    warningTime: 1.0993333
+    spawnInterval: 1.4436333
+    blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.13700001
+    aimAtPlayerChance: 0.187
     rampUp: 0.28050002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.18400002
+    bombChance: 0.11120001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -15648,14 +15648,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2086667
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.0886667
+    spawnInterval: 1.63768
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.278
+    aimAtPlayerChance: 0.378
     rampUp: 0.28350002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.18800001
+    bombChance: 0.11440001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -15710,21 +15710,21 @@ MonoBehaviour:
     hitsPerStage: 0
     allyKuzgun: 0
     sweepers: 0
-    erasers: 1
+    erasers: 3
     drones: 0
     sandworms: 0
     crabs: 0
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2033334
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.0833334
+    spawnInterval: 1.48
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.28
+    aimAtPlayerChance: 0.38
     rampUp: 0.285
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.19000001
+    bombChance: 0.11600001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -15797,14 +15797,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2246667
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1046667
+    spawnInterval: 1.5152001
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.272
+    aimAtPlayerChance: 0.372
     rampUp: 0.279
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.18200001
+    bombChance: 0.10960001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -15866,14 +15866,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.1873333
-    spawnInterval: 1.6106666
-    blocksPerWave: 0
+    warningTime: 1.0673333
+    spawnInterval: 1.4535999
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.286
+    aimAtPlayerChance: 0.386
     rampUp: 0.2895
     lineWaveChance: 1
-    bombChance: 0
+    bombChance: 0.12080001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -15937,14 +15937,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.166
-    spawnInterval: 1.8124
+    warningTime: 1.046
+    spawnInterval: 1.3592999
     blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.147
+    aimAtPlayerChance: 0.197
     rampUp: 0.2955
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.20400001
+    bombChance: 0.1272
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -15995,7 +15995,7 @@ MonoBehaviour:
     stages: 0
     hitsPerStage: 0
     allyKuzgun: 0
-    sweepers: 1
+    sweepers: 3
     erasers: 0
     drones: 0
     sandworms: 0
@@ -16003,14 +16003,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2406666
-    spawnInterval: 1.696
-    blocksPerWave: 3
+    warningTime: 1.1206667
+    spawnInterval: 1.286
+    blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.26733333
+    aimAtPlayerChance: 0.366
     rampUp: 0.2745
-    lineWaveChance: 0
-    bombChance: 0.16466667
+    lineWaveChance: 0.1752
+    bombChance: 0.17600001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -16063,21 +16063,21 @@ MonoBehaviour:
     hitsPerStage: 0
     allyKuzgun: 0
     sweepers: 0
-    erasers: 1
+    erasers: 3
     drones: 0
     sandworms: 0
     crabs: 0
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2246667
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1046667
+    spawnInterval: 1.5152001
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.272
+    aimAtPlayerChance: 0.372
     rampUp: 0.279
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.18200001
+    bombChance: 0.10960001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0.379
@@ -16133,19 +16133,19 @@ MonoBehaviour:
     sweepers: 0
     erasers: 0
     drones: 0
-    sandworms: 1
+    sandworms: 3
     crabs: 0
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.214
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.094
+    spawnInterval: 1.4976001
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.27600002
+    aimAtPlayerChance: 0.37600002
     rampUp: 0.282
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.186
+    bombChance: 0.11280001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -16204,11 +16204,11 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.2513334
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.1313334
+    spawnInterval: 1.5624
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.13233334
+    aimAtPlayerChance: 0.18100001
     rampUp: 0.27150002
     lineWaveChance: 0
     bombChance: 0
@@ -16270,16 +16270,16 @@ MonoBehaviour:
     sandworms: 0
     crabs: 0
     turrets: 0
-    penguins: 1
+    penguins: 3
     springbots: 0
-    warningTime: 1.2033334
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.0833334
+    spawnInterval: 1.6280001
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.28
+    aimAtPlayerChance: 0.38
     rampUp: 0.285
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.19000001
+    bombChance: 0.11600001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -16341,14 +16341,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.1926666
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.0726666
+    spawnInterval: 1.6086401
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.284
+    aimAtPlayerChance: 0.384
     rampUp: 0.28800002
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.194
+    bombChance: 0.11920001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -16409,15 +16409,15 @@ MonoBehaviour:
     crabs: 0
     turrets: 0
     penguins: 0
-    springbots: 1
-    warningTime: 1.1873333
-    spawnInterval: 999
-    blocksPerWave: 0
+    springbots: 3
+    warningTime: 1.0673333
+    spawnInterval: 1.4535999
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.286
+    aimAtPlayerChance: 0.386
     rampUp: 0.2895
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.19600002
+    bombChance: 0.12080001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -16490,14 +16490,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.214
-    spawnInterval: 999
-    blocksPerWave: 0
+    warningTime: 1.094
+    spawnInterval: 1.4976001
+    blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.27600002
+    aimAtPlayerChance: 0.37600002
     rampUp: 0.282
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.186
+    bombChance: 0.11280001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -16561,14 +16561,14 @@ MonoBehaviour:
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.1713333
-    spawnInterval: 1.8223666
+    warningTime: 1.0513333
+    spawnInterval: 1.3677332
     blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.14600001
+    aimAtPlayerChance: 0.19600001
     rampUp: 0.294
-    lineWaveChance: 0.324
-    bombChance: 0
+    lineWaveChance: 0.33666667
+    bombChance: 0.12560001
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0
@@ -16625,21 +16625,21 @@ MonoBehaviour:
     hitsPerStage: 0
     allyKuzgun: 0
     sweepers: 0
-    erasers: 1
+    erasers: 3
     drones: 0
     sandworms: 0
     crabs: 0
     turrets: 0
     penguins: 0
     springbots: 0
-    warningTime: 1.15
-    spawnInterval: 1.55
+    warningTime: 1.03
+    spawnInterval: 1.16
     blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.3
+    aimAtPlayerChance: 0.4
     rampUp: 0.3
-    lineWaveChance: 0
-    bombChance: 0
+    lineWaveChance: 0.21000001
+    bombChance: 0.132
     breakTiles: 1
     tileRepairTime: 6
     fireChance: 0

@@ -31,7 +31,7 @@ namespace SquashBot.Data
         public const int FromLevel = 10;
 
         /// <summary>Workshop prices for levels 1, 2 and 3 (the same for every tool).</summary>
-        private static readonly int[] Prices = { 150, 450, 1200 };
+        private static readonly int[] Prices = { 300, 700, 1500 };
 
         /// <summary>The level (0-based index) from which the story has handed the tool over.</summary>
         public static int UnlockLevel(Tool t) => t == Tool.Freeze ? 30 : t == Tool.Blast ? 60 : FromLevel;
