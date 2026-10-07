@@ -52,11 +52,12 @@ namespace SquashBot.Data
         /// </summary>
         public static float Difficulty(int index) => Mathf.Pow(Mathf.Clamp01(index / (float)(LevelCount - 1)), 0.85f);
 
-        // Mission rhythm inside a world: four journeys to an exit, arenas in between, coin rain, then the boss.
+        // Mission rhythm inside a world: three story quests on big floors, two journeys to an exit, arenas in between,
+        // coin rain, then the boss.
         private static readonly MissionType[] Rhythm =
         {
-            MissionType.CollectCoins, MissionType.Exit, MissionType.Survive, MissionType.Exit,
-            MissionType.Paint, MissionType.Exit, MissionType.CollectCoins, MissionType.Exit,
+            MissionType.Quest, MissionType.Exit, MissionType.CollectCoins, MissionType.Quest,
+            MissionType.Paint, MissionType.Exit, MissionType.Quest, MissionType.Survive,
             MissionType.CoinRain, MissionType.Boss,
         };
 
@@ -83,9 +84,9 @@ namespace SquashBot.Data
             level.rules = rules;
             // Hazards only ever get added: holes from level 7, bombs from world 2, lines and fire from world 3.
             level.breakTiles = true;
-            level.bombChance = Mathf.Lerp(0.08f, 0.28f, d);
-            level.lineWaveChance = world >= 2 ? Mathf.Lerp(0.04f, 0.22f, d) : 0f;
-            level.fireChance = world >= 2 ? Mathf.Lerp(0.35f, 0.55f, d) : 0f;
+            level.bombChance = Mathf.Lerp(0.05f, 0.16f, d);
+            level.lineWaveChance = world >= 2 ? Mathf.Lerp(0.03f, 0.12f, d) : 0f;
+            level.fireChance = world >= 2 ? Mathf.Lerp(0.25f, 0.4f, d) : 0f;
 
             level.levelEvent = EventFor(index, mission);
 
@@ -96,7 +97,21 @@ namespace SquashBot.Data
                 level.keys = 3;
                 level.lineWaveChance = Mathf.Lerp(0.3f, 0.45f, d);
                 level.bombChance = Mathf.Max(level.bombChance, 0.2f);
-                level.blocksPerWave = Mathf.Min(6, level.blocksPerWave + 1);
+                level.blocksPerWave = Mathf.Min(5, level.blocksPerWave + 1);
+            }
+            else if (mission == MissionType.Quest)
+            {
+                // A story on a bigger floor than usual: room to explore, pieces to find, and gentler blocks, because
+                // the challenge is the search, not surviving a storm of blocks.
+                level.quest = (QuestKind)((world * 2 + i) % 5);
+                level.gridWidth = level.gridHeight = Mathf.Min(14, level.gridWidth + 2);
+                level.keys = 3 + Mathf.RoundToInt(d * 5f);
+                level.blocksPerWave = Mathf.Max(1, level.blocksPerWave - 1);
+                level.spawnInterval *= 1.15f;
+                level.bombChance *= 0.6f;
+                level.aimAtPlayerChance = 0.12f;
+                level.lineWaveChance *= 0.5f;
+                Shape(level, index, d);
             }
             else if (mission == MissionType.Exit)
             {
@@ -251,10 +266,12 @@ namespace SquashBot.Data
                 gridHeight = size,
                 mission = mission,
                 // Never less than a second of warning: hard, but always readable.
-                warningTime = Mathf.Lerp(1.4f, 1.0f, d),
-                spawnInterval = Mathf.Lerp(1.9f, 1.45f, d),
-                blocksPerWave = Mathf.Clamp(Mathf.RoundToInt(nearArea * Mathf.Lerp(0.035f, 0.06f, d)), 1, 6),
-                rampUp = Mathf.Lerp(0.2f, 0.4f, d),
+                warningTime = Mathf.Lerp(1.5f, 1.15f, d),
+                spawnInterval = Mathf.Lerp(2.1f, 1.6f, d),
+                blocksPerWave = Mathf.Clamp(Mathf.RoundToInt(nearArea * Mathf.Lerp(0.025f, 0.045f, d)), 1, 4),
+                rampUp = Mathf.Lerp(0.15f, 0.3f, d),
+                // Blocks fall around the robot, only sometimes right on it: pressure to move, not a trap.
+                aimAtPlayerChance = Mathf.Lerp(0.3f, 0.2f, d),
                 // The challenge grows in what the mission asks: more coins, longer to hold out, more keys to find.
                 coinTarget = 6 + Mathf.RoundToInt(d * 14f),
                 surviveSeconds = Mathf.Round(30f + d * 30f),
@@ -310,7 +327,11 @@ namespace SquashBot.Data
             levels[1].surviveSeconds = 20f;
             levels[3].coinTarget = 6;
             levels[5].surviveSeconds = 25f;
-            levels[6].coinTarget = 6;
+            // Level 7 introduces the story quests: three keys to free Princess Lumi from the ice.
+            levels[6].mission = MissionType.Quest;
+            levels[6].quest = QuestKind.Princess;
+            levels[6].keys = 3;
+            levels[6].gridWidth = levels[6].gridHeight = 5;
             for (int i = 6; i < levels.Count; i++) levels[i].breakTiles = true;
 
             // Shapes arrive gently: two plain squares, then a new outline every level or two, the first pillars late.

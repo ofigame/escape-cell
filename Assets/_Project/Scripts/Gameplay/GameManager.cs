@@ -92,8 +92,9 @@ namespace SquashBot.Gameplay
         {
             public GridPos pos, home;
             public KeyPickup key;
+            public QuestItem item;
             public BossButton button;
-            public GameObject View => key != null ? key.gameObject : button != null ? button.gameObject : null;
+            public GameObject View => key != null ? key.gameObject : button != null ? button.gameObject : item != null ? item.gameObject : null;
         }
 
         private readonly List<Objective> objectives = new List<Objective>();
@@ -280,6 +281,7 @@ namespace SquashBot.Gameplay
                 if (o.View != null) Destroy(o.View);
             objectives.Clear();
             objectivesDone = objectivesTotal = 0;
+            ClearQuest();
             if (warden != null) Destroy(warden.gameObject);
             warden = null;
             collapses.Clear();
@@ -996,6 +998,7 @@ namespace SquashBot.Gameplay
                     UpdateObjectives();
                     break;
                 case MissionType.Boss:
+                case MissionType.Quest:
                     UpdateObjectives();
                     break;
             }
@@ -1037,6 +1040,12 @@ namespace SquashBot.Gameplay
                 collapses.Add((left, CollapseDelay));
 
             if (level.mission == MissionType.Paint) PaintTile(p);
+            else if (level.mission == MissionType.Quest)
+            {
+                var piece = objectives.Find(o => o.pos == p);
+                if (piece != null) CompleteObjective(piece);
+                else if (questReady && p == doorPos) FinishQuest();
+            }
             else if (level.mission == MissionType.Exit || level.mission == MissionType.Boss)
             {
                 var reached = objectives.Find(o => o.pos == p);
@@ -1589,6 +1598,10 @@ namespace SquashBot.Gameplay
                 warden = WardenBoss.Create(corner + new Vector3(0.9f, 2.3f, 0.9f), objectivesTotal, robot.transform);
                 AddFarObjective();
             }
+            else if (level.mission == MissionType.Quest)
+            {
+                SetupQuest();
+            }
             else if (level.mission == MissionType.Paint)
             {
                 PaintTile(robot.Position);
@@ -1646,6 +1659,7 @@ namespace SquashBot.Gameplay
         private void MakeView(Objective o, Vector3 at)
         {
             if (level.mission == MissionType.Boss) o.button = BossButton.Create(at);
+            else if (level.mission == MissionType.Quest) o.item = QuestItem.Create(level.quest, at);
             else o.key = KeyPickup.Create(at);
         }
 
@@ -1661,6 +1675,7 @@ namespace SquashBot.Gameplay
                 var at = GridView.ToWorld(o.pos) + Vector3.up * GridView.SurfaceY;
                 if (o.View == null) MakeView(o, at);
                 else if (o.key != null) o.key.MoveTo(at);
+                else if (o.item != null) o.item.MoveTo(at);
                 else o.button.MoveTo(at);
                 fx.Dust(at + Vector3.up * 0.1f, Palette.UiCyan, 8, 1.5f);
             }
@@ -1669,11 +1684,23 @@ namespace SquashBot.Gameplay
         private void CompleteObjective(Objective o)
         {
             objectives.Remove(o);
-            if (o.View != null) Destroy(o.View);
+            if (o.item != null && o.item.StaysWhenCollected)
+            {
+                // Lanterns stay lit where they stand.
+                o.item.Light();
+                questLeftovers.Add(o.item.gameObject);
+            }
+            else if (o.View != null) Destroy(o.View);
             objectivesDone++;
             var at = GridView.ToWorld(o.pos);
             cameraRig.Punch(0.5f);
             Haptics.Medium();
+
+            if (level.mission == MissionType.Quest)
+            {
+                QuestPieceFound(o.pos);
+                return;
+            }
 
             if (level.mission == MissionType.Boss)
             {
@@ -1760,6 +1787,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Tunnel: return runner.Progress;
                 case MissionType.Exit: return portal != null && portal.IsOpen ? 1f : objectivesDone / (objectivesTotal + 1f);
                 case MissionType.Boss: return objectivesDone / (float)Mathf.Max(1, objectivesTotal);
+                case MissionType.Quest: return questReady ? 1f : objectivesDone / (objectivesTotal + 1f);
                 case MissionType.Paint: return grid == null ? 0f : painted.Count / (float)grid.FloorCount;
                 default: return elapsed / level.surviveSeconds;
             }
@@ -1777,6 +1805,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Treasure: return Loc.T("mission.treasure" + suffix);
                 case MissionType.Tunnel: return Loc.T("mission.tunnel" + suffix);
                 case MissionType.Boss: return Loc.T("mission.boss" + suffix);
+                case MissionType.Quest: return Loc.F("quest.intro." + data.quest, data.keys);
                 default: return Loc.F("mission.survive" + suffix, data.surviveSeconds.ToString("0", CultureInfo.InvariantCulture));
             }
         }
@@ -1949,6 +1978,94 @@ namespace SquashBot.Gameplay
             RefreshHud();
         }
 
+        // ---------- Quests ----------
+
+        // A quest level tells a little story on a big floor: every piece (keys, cores, cages, lanterns, gems) lies out
+        // at once, spread far apart, and the goal waits on the far side. Find them all in any order, then reach the goal
+        // for the happy ending. The blocks keep the player moving; the challenge is the search.
+        private QuestGoal questGoal;
+        private bool questReady;
+        private readonly List<GameObject> questLeftovers = new List<GameObject>();
+
+        private void SetupQuest()
+        {
+            spotKeys = true; // pieces that get hit hop to a tile nearby, not across the map
+            doorPos = FarTile(avoidDoor: false) ?? robot.Position;
+            questGoal = QuestGoal.Create(level.quest, GridView.ToWorld(doorPos) + Vector3.up * GridView.SurfaceY, fx);
+            questReady = false;
+            objectivesTotal = Mathf.Max(1, level.keys);
+            foreach (var p in SpreadTiles(objectivesTotal)) AddObjective(p);
+            objectivesTotal = objectives.Count;
+            hazards.IsProtected = p => p == doorPos || objectives.Exists(o => o.pos == p);
+        }
+
+        /// <summary>Tiles far from the robot, the goal and each other, so the pieces send the player all over the floor.</summary>
+        private List<GridPos> SpreadTiles(int count)
+        {
+            var chosen = new List<GridPos>();
+            var anchors = new List<GridPos> { robot.Position, doorPos };
+            var free = new List<GridPos>();
+            foreach (var t in grid.AllPositions())
+                if (grid.IsStandable(t) && t != robot.Position && t != doorPos) free.Add(t);
+            for (int n = 0; n < count && free.Count > 0; n++)
+            {
+                // Score = distance to the nearest piece or anchor; pick among the best few for variety.
+                var scored = new List<(GridPos p, int d)>();
+                foreach (var t in free)
+                {
+                    int d = int.MaxValue;
+                    foreach (var a in anchors) d = Mathf.Min(d, t.Manhattan(a));
+                    scored.Add((t, d));
+                }
+                scored.Sort((x, y) => y.d.CompareTo(x.d));
+                var pick = scored[Random.Range(0, Mathf.Min(3, scored.Count))].p;
+                chosen.Add(pick);
+                anchors.Add(pick);
+                free.Remove(pick);
+            }
+            return chosen;
+        }
+
+        private void QuestPieceFound(GridPos at)
+        {
+            int left = objectivesTotal - objectivesDone;
+            string kind = level.quest.ToString();
+            fx.Burst(GridView.ToWorld(at) + Vector3.up * 0.5f, Palette.UiGold, Palette.CoinGlow, 22, 4f);
+            AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.3f);
+            if (left > 0)
+            {
+                FloatAt(GridView.ToWorld(at), Loc.F("quest.left." + kind, left), Palette.UiCyan);
+                return;
+            }
+            // Every piece found: the goal wakes up and points the way.
+            questReady = true;
+            questGoal.Ready();
+            AudioManager.PlaySfx(Sfx.Win, 0.7f, 1.3f);
+            ui.ShowIntro(Loc.T("quest.title." + kind), Loc.T("quest.go." + kind));
+            cameraRig.Punch(0.8f);
+            if (robot.Position == doorPos && !robot.IsHopping) FinishQuest();
+        }
+
+        private void FinishQuest()
+        {
+            if (!questReady || State != GameState.Playing) return;
+            questReady = false;
+            questGoal.Complete();
+            cameraRig.Shake(0.6f);
+            Haptics.Medium();
+            FloatAt(GridView.ToWorld(doorPos) + Vector3.up * 0.5f, Loc.T("quest.done." + level.quest), Palette.UiGold);
+            Win();
+        }
+
+        private void ClearQuest()
+        {
+            if (questGoal != null) Destroy(questGoal.gameObject);
+            questGoal = null;
+            questReady = false;
+            foreach (var go in questLeftovers) if (go != null) Destroy(go);
+            questLeftovers.Clear();
+        }
+
         private void RefreshHud()
         {
             string Seconds(float s) => Mathf.Max(0f, s).ToString("0.0", CultureInfo.InvariantCulture);
@@ -1972,6 +2089,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Treasure: text = Loc.F("hud.treasure", coinsThisRun, Seconds(level.surviveSeconds - elapsed)); break;
                 case MissionType.Tunnel: text = Loc.F("hud.tunnel", coinsThisRun, Mathf.RoundToInt(runner.Progress * 100f)); break;
                 case MissionType.Boss: text = Loc.F("hud.boss", objectivesDone, objectivesTotal); break;
+                case MissionType.Quest: text = questReady ? Loc.T("quest.hudGo." + level.quest) : Loc.F("quest.hud." + level.quest, objectivesDone, objectivesTotal); break;
                 default: text = Loc.F("hud.survive", Seconds(level.surviveSeconds - elapsed)); break;
             }
             ui.SetMission(text, MissionProgress(), Earned);

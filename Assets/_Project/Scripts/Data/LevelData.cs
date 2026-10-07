@@ -20,7 +20,9 @@ namespace SquashBot.Data
         /// <summary>Bonus escape tunnel: a third-person run down an air duct (see DuctRunner).</summary>
         Tunnel,
         /// <summary>World finale: dodge WARDEN's attacks and hit the buttons that light up, three times.</summary>
-        Boss
+        Boss,
+        /// <summary>A little story on a big floor: find every piece (keys, cores, cages, lanterns, gems), then reach the goal.</summary>
+        Quest
     }
 
     /// <summary>The signature rules of the upper floors (several can be combined).</summary>
@@ -79,6 +81,9 @@ namespace SquashBot.Data
         public LevelEvent levelEvent;
         [Tooltip("Floor rules: currents, candy, poison, darkness, ice, wind, lasers, teleports, trampolines, glass, blinking tiles, hunting blocks, barrels.")]
         public FloorRule rules;
+
+        /// <summary>Quest levels: which story (and so which pieces and which goal).</summary>
+        public QuestKind quest;
 
         [Header("Blocks")]
         [Tooltip("Seconds between the red warning appearing and the block hitting the tile.")]

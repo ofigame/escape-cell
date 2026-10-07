@@ -12,6 +12,8 @@ namespace SquashBot.Gameplay
     /// </summary>
     public partial class DuctRunner
     {
+        private bool openTop;
+
         private bool IsThemed => kind == Kind.Neon || kind == Kind.Laser || kind == Kind.Crystal || kind == Kind.Void;
 
         /// <summary>The theme a road uses for a level (0-based): a new one every 50 levels.</summary>
@@ -86,6 +88,9 @@ namespace SquashBot.Gameplay
 
         private void BuildThemeRow(Transform root, int r)
         {
+            // A road leaving a platform starts as an open bridge: while the robot still walks to the exit, the camera looks
+            // down on it from above, and a roof or tall walls right at the edge would cover the floor.
+            openTop = roadMode && r < 8;
             switch (kind)
             {
                 case Kind.Neon: NeonRow(root, r); break;
@@ -105,6 +110,7 @@ namespace SquashBot.Gameplay
             {
                 float angle = 30f + i * 60f;
                 if (Mathf.Approximately(angle, 270f)) continue; // the floor is the running lanes
+                if (openTop && angle < 180f) continue;
                 var dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad), 0f);
                 var panel = Shapes.Rounded("Panel", root, centre + dir * apothem, new Vector3(radius, 0.12f, 1.04f), 0.04f, panelMat).transform;
                 panel.localRotation = Quaternion.Euler(0f, 0f, angle - 90f);
@@ -113,7 +119,7 @@ namespace SquashBot.Gameplay
                 var at = centre + new Vector3(Mathf.Cos(corner), Mathf.Sin(corner), 0f) * (radius - 0.08f);
                 Shapes.Rounded("Strip", root, at, new Vector3(0.07f, 0.07f, 1.06f), 0.02f, i % 2 == 0 ? neonA : neonB);
             }
-            if (r % 4 == 0)
+            if (r % 4 == 0 && !openTop)
             {
                 // A ring of light around the whole tube.
                 for (int i = 0; i < 6; i++)
@@ -129,6 +135,7 @@ namespace SquashBot.Gameplay
         /// <summary>A steel corridor with red light strips, vents and warning stripes.</summary>
         private void LaserRow(Transform root, int r)
         {
+            if (openTop) return;
             // A low steel ceiling, high above the camera: it closes the corridor in without ever hiding the robot.
             Shapes.Rounded("Ceiling", root, new Vector3(0f, 3.3f, 0f), new Vector3(WallX * 2f + 0.8f, 0.2f, 1.06f), 0.04f, panelMat);
             if (r % 3 == 0)
@@ -171,7 +178,7 @@ namespace SquashBot.Gameplay
                     }
                 }
             }
-            if (r % 5 == 0)
+            if (r % 5 == 0 && !openTop)
             {
                 // Crystals hanging from the cave roof, well above the camera's line of sight.
                 for (int i = 0; i < 3; i++)

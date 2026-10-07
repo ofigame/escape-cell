@@ -81,6 +81,7 @@ namespace SquashBot.Data
                     return Coins(Mathf.Max(2f, Mathf.Round(possible * 0.35f)), Mathf.Max(3f, Mathf.Round(possible * 0.6f)));
                 }
                 case MissionType.Exit:
+                case MissionType.Quest:
                     return Coins(1 + level.keys, 2 + level.keys * 2);
                 case MissionType.Boss:
                     return Coins(2, 5);
