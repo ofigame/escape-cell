@@ -181,6 +181,7 @@ namespace SquashBot.UI
 
             BuildHud(root);
             BuildIntro(root);
+            BuildCallout(root);
             BuildMenu(root);
             Map = MapScreen.Create(root, levelCount);
             Map.LevelChosen += level => LevelChosen?.Invoke(level);
@@ -757,6 +758,53 @@ namespace SquashBot.UI
             intro.gameObject.SetActive(false);
         }
 
+        // ---------- Goal callout ----------
+
+        // A speech bubble pinned over the level's goal (the princess, the monster, WARDEN) while the camera shows it.
+        private RectTransform callout;
+        private TextMeshProUGUI calloutText;
+        private Vector3 calloutWorld;
+        private Camera calloutCam;
+        private float calloutLeft, calloutAge;
+
+        private void BuildCallout(Transform root)
+        {
+            callout = UiFactory.Pill("Callout", root, Middle, Vector2.zero, new Vector2(600f, 120f), new Color(0.1f, 0.08f, 0.22f, 0.95f));
+            callout.pivot = new Vector2(0.5f, 0f);
+            UiFactory.Fill(UiFactory.Stretch("Rim", callout), Palette.UiGold, UiSprites.Ring, 1.2f).raycastTarget = false;
+            var tail = UiFactory.Box("Tail", callout, new Vector2(0.5f, 0f), new Vector2(0f, -14f), new Vector2(34f, 34f));
+            tail.pivot = new Vector2(0.5f, 0.5f);
+            tail.localRotation = Quaternion.Euler(0f, 0f, 45f);
+            UiFactory.Fill(tail, Palette.UiGold).raycastTarget = false;
+            calloutText = UiFactory.Text(callout, "", 52f, Palette.UiGold, title: true);
+            callout.gameObject.SetActive(false);
+        }
+
+        public void ShowCallout(string text, Vector3 world, Camera cam, float seconds)
+        {
+            calloutText.text = text;
+            calloutWorld = world;
+            calloutCam = cam;
+            calloutLeft = seconds;
+            calloutAge = 0f;
+            callout.gameObject.SetActive(true);
+            callout.SetAsLastSibling();
+        }
+
+        private void UpdateCallout(float dt)
+        {
+            if (!callout.gameObject.activeSelf || calloutCam == null) return;
+            calloutLeft -= dt;
+            calloutAge += dt;
+            if (calloutLeft <= 0f) { callout.gameObject.SetActive(false); return; }
+            var sp = calloutCam.WorldToScreenPoint(calloutWorld);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)callout.parent, sp, null, out var local);
+            callout.anchoredPosition = local;
+            float pop = calloutAge < 0.25f ? Mathf.Lerp(0.4f, 1f, calloutAge / 0.25f) + Mathf.Sin(calloutAge / 0.25f * Mathf.PI) * 0.15f : 1f;
+            float fade = Mathf.Clamp01(calloutLeft / 0.3f);
+            callout.localScale = Vector3.one * pop * (0.9f + 0.1f * fade);
+        }
+
         public void ShowIntro(string title, string text)
         {
             introTitle.text = title;
@@ -1036,6 +1084,7 @@ namespace SquashBot.UI
             result.Hide(true);
             intro.gameObject.SetActive(false);
             warningActive = false;
+            if (callout != null) callout.gameObject.SetActive(false);
         }
 
         private void Update()
@@ -1043,6 +1092,7 @@ namespace SquashBot.UI
             float dt = Time.unscaledDeltaTime;
 
             UpdateJuice(dt);
+            UpdateCallout(dt);
             UpdateResultJuice(dt);
 
             livesRefresh -= dt;

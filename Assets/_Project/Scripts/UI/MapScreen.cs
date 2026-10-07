@@ -37,6 +37,9 @@ namespace SquashBot.UI
         private int builtStars = -1;
         private bool openAll, builtOpenAll;
         private readonly List<RectTransform> nodes = new List<RectTransform>();
+
+        /// <summary>The level data behind a node (for the special-goal badges), set by the game.</summary>
+        public System.Func<int, LevelData> LevelOf;
         private readonly List<Texture2D> textures = new List<Texture2D>();
 
         private int levelCount;
@@ -259,6 +262,10 @@ namespace SquashBot.UI
             {
                 UiFactory.Text(node, (level + 1).ToString(), current ? 72f : 60f, UiFactory.TextDark);
                 if (completed) NodeStars(node, Progress.Stars(level));
+                // Special goals (princess, monster, WARDEN, quest pieces) show as badges over the node.
+                var (iconA, iconB) = MissionIcons.For(LevelOf?.Invoke(level));
+                MissionIcons.Badge(node, iconA, new Vector2(0f, 1f), new Vector2(4f, -4f), 76f);
+                MissionIcons.Badge(node, iconB, new Vector2(0f, 1f), new Vector2(-58f, -38f), 66f);
                 if (completed)
                 {
                     var badge = UiFactory.Box("Done", node, new Vector2(1f, 1f), new Vector2(6f, 6f), new Vector2(48f, 48f));

@@ -42,7 +42,7 @@ namespace SquashBot.Data
                 levels.Add(Generated(index, used, ref exits));
 
             for (int i = FirstPowerUpLevel - 1; i < levels.Count; i++)
-                levels[i].powerUpInterval = 11f;
+                levels[i].powerUpInterval = Mathf.Lerp(11f, 5.5f, Difficulty(i)); // more skills on harder floors
             return levels;
         }
 
@@ -93,7 +93,7 @@ namespace SquashBot.Data
             if (mission == MissionType.Boss)
             {
                 // WARDEN's arena: wide open, lines of blocks sweep it often, three buttons to hit.
-                level.layout = Journeys.Arena(Mathf.RoundToInt(Mathf.Lerp(7f, 12f, d)), world >= 6 ? 3 : 2, index);
+                level.layout = Journeys.Arena(Mathf.RoundToInt(Mathf.Lerp(7f, 14f, d)), world >= 6 ? 3 : 2, index);
                 level.keys = 3;
                 level.lineWaveChance = Mathf.Lerp(0.3f, 0.45f, d);
                 level.bombChance = Mathf.Max(level.bombChance, 0.2f);
@@ -102,10 +102,12 @@ namespace SquashBot.Data
             else if (mission == MissionType.Monster)
             {
                 // A monster to bring down with magic orbs: more hits on later floors, a roomy floor to run around on.
-                level.keys = 3 + Mathf.RoundToInt(d * 4f);
-                level.gridWidth = level.gridHeight = Mathf.Min(14, level.gridWidth + 1);
+                level.keys = 3 + Mathf.RoundToInt(d * 5f);
+                level.gridWidth = level.gridHeight = Mathf.Min(21, level.gridWidth + 1);
                 level.blocksPerWave = Mathf.Max(1, level.blocksPerWave - 1);
                 level.aimAtPlayerChance = 0.15f;
+                // On every other floor the monster keeps Princess Lumi prisoner next to it.
+                level.guardsPrincess = world % 2 == 1;
                 Shape(level, index, d);
             }
             else if (mission == MissionType.Quest)
@@ -113,8 +115,8 @@ namespace SquashBot.Data
                 // A story on a bigger floor than usual: room to explore, pieces to find, and gentler blocks, because
                 // the challenge is the search, not surviving a storm of blocks.
                 level.quest = (QuestKind)((world * 2 + i) % 5);
-                level.gridWidth = level.gridHeight = Mathf.Min(14, level.gridWidth + 2);
-                level.keys = 3 + Mathf.RoundToInt(d * 5f);
+                level.gridWidth = level.gridHeight = Mathf.Min(22, level.gridWidth + 2);
+                level.keys = 3 + Mathf.RoundToInt(d * 7f);
                 level.blocksPerWave = Mathf.Max(1, level.blocksPerWave - 1);
                 level.spawnInterval *= 1.15f;
                 level.bombChance *= 0.6f;
@@ -267,7 +269,10 @@ namespace SquashBot.Data
         {
             // Floors grow with the campaign (5x5 to 14x14); the camera follows the robot closely on the big ones and the
             // blocks gather around it, so the pressure is about the same per screen while the floor gives room to run.
-            int size = Mathf.RoundToInt(Mathf.Lerp(5f, 14f, d));
+            int size = Mathf.RoundToInt(Mathf.Lerp(5f, 20f, d));
+            // Missions that ask for every tile or a race against the clock stay on manageable floors.
+            if (mission == MissionType.Paint) size = Mathf.Min(size, 10);
+            if (mission == MissionType.CoinRain) size = Mathf.Min(size, 12);
             float nearArea = Mathf.Min(size * size, 81f);
             var level = new LevelData
             {

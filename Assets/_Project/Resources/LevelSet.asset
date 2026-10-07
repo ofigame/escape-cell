@@ -26,6 +26,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.5
     spawnInterval: 2.2
     blocksPerWave: 1
@@ -57,6 +58,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.49
     spawnInterval: 2.15
     blocksPerWave: 1
@@ -91,6 +93,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.48
     spawnInterval: 2.1
     blocksPerWave: 1
@@ -122,6 +125,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.46
     spawnInterval: 2.05
     blocksPerWave: 1
@@ -137,7 +141,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.844442
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 4
@@ -157,6 +161,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.45
     spawnInterval: 2
     blocksPerWave: 1
@@ -172,7 +177,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.80135
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 4
@@ -192,6 +197,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.43
     spawnInterval: 1.97
     blocksPerWave: 1
@@ -207,7 +213,7 @@ MonoBehaviour:
     coinInterval: 3
     coinLifetime: 5
     maxCoins: 1
-    powerUpInterval: 11
+    powerUpInterval: 10.759861
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 5
@@ -228,6 +234,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.42
     spawnInterval: 1.94
     blocksPerWave: 1
@@ -243,7 +250,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.719607
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 4
@@ -263,6 +270,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.41
     spawnInterval: 1.91
     blocksPerWave: 1
@@ -278,7 +286,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.680353
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 4
@@ -298,6 +306,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4
     spawnInterval: 1.88
     blocksPerWave: 1
@@ -313,7 +322,7 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 10.641933
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 3
@@ -339,6 +348,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.39
     spawnInterval: 1.86
     blocksPerWave: 1
@@ -354,7 +364,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.604229
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 3
@@ -381,6 +391,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.472455
     spawnInterval: 2.0606499
     blocksPerWave: 1
@@ -396,7 +407,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.56715
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
@@ -418,6 +429,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4701306
     spawnInterval: 2.0573294
     blocksPerWave: 1
@@ -433,7 +445,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.530623
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 8
@@ -450,13 +462,14 @@ MonoBehaviour:
     mission: 8
     coinTarget: 9
     surviveSeconds: 33
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
     quest: 4
+    guardsPrincess: 0
     warningTime: 1.4678377
     spawnInterval: 2.3621619
     blocksPerWave: 1
@@ -472,7 +485,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.494593
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
@@ -494,6 +507,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4655733
     spawnInterval: 2.050819
     blocksPerWave: 1
@@ -509,7 +523,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.45901
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 3
@@ -536,6 +550,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.463335
     spawnInterval: 2.0476213
     blocksPerWave: 1
@@ -551,20 +566,21 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.423836
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '##....X#'
-    - '##....##'
-    - '##....##'
-    - '##....##'
-    - '########'
-    - '#X######'
-    - '########'
-    - '########'
+    - '###...X##'
+    - '###...###'
+    - '###...###'
+    - '###...###'
+    - '#########'
+    - '#########'
+    - '#X#######'
+    - '#########'
+    - '#########'
     mission: 8
     coinTarget: 10
     surviveSeconds: 33
@@ -575,6 +591,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 2
+    guardsPrincess: 0
     warningTime: 1.4611205
     spawnInterval: 2.3511264
     blocksPerWave: 1
@@ -590,29 +607,31 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.389037
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - '##...##'
-    - '##...##'
-    - '##...##'
-    - '######X'
-    - '#######'
-    - '#######'
-    - '#######'
+    - '##....##'
+    - '##....##'
+    - '##....##'
+    - '##....##'
+    - '#######X'
+    - '########'
+    - '########'
+    - '####X###'
     mission: 9
     coinTarget: 10
     surviveSeconds: 34
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 1
     warningTime: 1.4589281
     spawnInterval: 2.0413258
     blocksPerWave: 1
@@ -628,20 +647,21 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.354585
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '#X######'
-    - '########'
-    - '######X#'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
+    - '#########'
+    - '#X#######'
+    - '#########'
+    - '#######X#'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
     mission: 8
     coinTarget: 10
     surviveSeconds: 34
@@ -652,6 +672,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 0
     quest: 4
+    guardsPrincess: 0
     warningTime: 1.4567561
     spawnInterval: 2.3439565
     blocksPerWave: 1
@@ -667,18 +688,19 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.320454
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - X#####
-    - '######'
-    - '######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - X######
+    - '#######'
+    - '#######'
     mission: 4
     coinTarget: 12
     surviveSeconds: 24
@@ -689,6 +711,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4546033
     spawnInterval: 2.0351474
     blocksPerWave: 1
@@ -704,11 +727,11 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 10.286623
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
     - '########'
     - '########'
@@ -728,6 +751,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4524683
     spawnInterval: 2.0320976
     blocksPerWave: 2
@@ -743,18 +767,19 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.253073
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - ...###
-    - ...#X#
-    - ...###
-    - '######'
-    - '######'
-    - '######'
+    - ...####
+    - ...#X##
+    - ...####
+    - '#######'
+    - '#######'
+    - '#####X#'
+    - '#######'
     mission: 0
     coinTarget: 10
     surviveSeconds: 34
@@ -765,6 +790,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.45035
     spawnInterval: 2.0290716
     blocksPerWave: 1
@@ -780,20 +806,21 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.219788
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '######..'
-    - '######..'
-    - X#######
-    - '########'
-    - ..#####X
-    - ..######
-    - ..######
-    - ..######
+    - '######...'
+    - '######...'
+    - X#####...
+    - '#########'
+    - '########X'
+    - ...######
+    - ...######
+    - ...######
+    - ...######
     mission: 8
     coinTarget: 10
     surviveSeconds: 34
@@ -804,6 +831,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4482478
     spawnInterval: 2.3299785
     blocksPerWave: 1
@@ -819,18 +847,19 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.18675
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - ..####
-    - ..####
-    - ..####
-    - '######'
-    - '####..'
-    - '#X##..'
+    - ..#####
+    - ..###X#
+    - ..#####
+    - '#######'
+    - '#######'
+    - '#X###..'
+    - '#####..'
     mission: 3
     coinTarget: 10
     surviveSeconds: 35
@@ -841,6 +870,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4461603
     spawnInterval: 2.023086
     blocksPerWave: 1
@@ -856,7 +886,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.153949
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 5
@@ -885,6 +915,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4440871
     spawnInterval: 2.0201244
     blocksPerWave: 1
@@ -900,20 +931,21 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.121369
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - ..#X##..
-    - ..####..
-    - ..####..
-    - ..####..
-    - '########'
-    - '########'
-    - '########'
-    - '#####X##'
+    - ...###...
+    - ...###...
+    - ...###...
+    - ...###...
+    - '#######X#'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '######X##'
     mission: 8
     coinTarget: 11
     surviveSeconds: 35
@@ -924,6 +956,7 @@ MonoBehaviour:
     levelEvent: 2
     rules: 0
     quest: 3
+    guardsPrincess: 0
     warningTime: 1.4420274
     spawnInterval: 2.3197591
     blocksPerWave: 1
@@ -939,20 +972,21 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.089003
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - ..####..
-    - ..####..
-    - ..####..
-    - ..####..
-    - '#######X'
-    - '########'
-    - '#X######'
-    - '########'
+    - ...###...
+    - ...###...
+    - ...###...
+    - ...###...
+    - '########X'
+    - '#########'
+    - '#X#######'
+    - '#########'
+    - '#########'
     mission: 9
     coinTarget: 11
     surviveSeconds: 35
@@ -963,6 +997,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4399805
     spawnInterval: 2.014258
     blocksPerWave: 1
@@ -978,21 +1013,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.056837
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - X###X####
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '###...###'
-    - '###...###'
-    - '###...###'
-    - '###...###'
+    - '#X##X#####'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##X#######'
+    - '###....###'
+    - '###....###'
+    - '###....###'
+    - '###....###'
+    - '###....###'
     mission: 8
     coinTarget: 11
     surviveSeconds: 35
@@ -1003,6 +1039,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.437946
     spawnInterval: 2.313054
     blocksPerWave: 1
@@ -1018,19 +1055,20 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 10.024865
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - '#######'
-    - '#######'
-    - '#####X#'
-    - '#######'
-    - '##...##'
-    - '##...##'
-    - '#X...##'
+    - '########'
+    - '########'
+    - '#####X##'
+    - '########'
+    - '##....##'
+    - '##....##'
+    - '##....##'
+    - '#X....##'
     mission: 2
     coinTarget: 11
     surviveSeconds: 35
@@ -1041,9 +1079,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.435923
     spawnInterval: 2.0084615
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.2816923
     rampUp: 0.17746158
@@ -1056,19 +1095,20 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.993075
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - '#######'
-    - '###X###'
-    - '#######'
-    - '#######'
-    - X######
-    - '#######'
-    - '#######'
+    - '########'
+    - '####X###'
+    - '########'
+    - '########'
+    - '########'
+    - X#######
+    - '########'
+    - '########'
     mission: 4
     coinTarget: 13
     surviveSeconds: 25
@@ -1079,9 +1119,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4339113
     spawnInterval: 2.0055876
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.28111753
     rampUp: 0.17832373
@@ -1094,11 +1135,11 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 9.961463
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 8
+    gridHeight: 8
     layout:
     - '########'
     - '########'
@@ -1118,9 +1159,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4319103
     spawnInterval: 2.002729
-    blocksPerWave: 2
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.28054583
     rampUp: 0.1791813
@@ -1133,21 +1175,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.930019
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#########'
-    - '#########'
-    - '#####X##X'
-    - '#########'
-    - '#########'
-    - '#####....'
-    - '#####....'
-    - '#####....'
-    - '#####....'
+    - '##########'
+    - '##########'
+    - '######X##X'
+    - '####X#####'
+    - '##########'
+    - '#####.....'
+    - '#####.....'
+    - '#####.....'
+    - '#####.....'
+    - '#####.....'
     mission: 8
     coinTarget: 11
     surviveSeconds: 36
@@ -1158,6 +1201,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 1
+    guardsPrincess: 0
     warningTime: 1.4299197
     spawnInterval: 2.2998679
     blocksPerWave: 1
@@ -1173,19 +1217,20 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.898738
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 8
+    gridHeight: 8
     layout:
-    - '####...'
-    - '####...'
-    - '####...'
-    - '######X'
-    - '#######'
-    - '#X#####'
-    - '#######'
+    - '####....'
+    - '####....'
+    - '####....'
+    - '####....'
+    - '#######X'
+    - '########'
+    - '#X######'
+    - '########'
     mission: 3
     coinTarget: 11
     surviveSeconds: 36
@@ -1196,9 +1241,10 @@ MonoBehaviour:
     levelEvent: 1
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4279389
     spawnInterval: 1.9970556
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.27941114
     rampUp: 0.1808833
@@ -1211,7 +1257,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.867613
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 3
@@ -1240,9 +1286,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4259678
     spawnInterval: 1.9942397
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.27884796
     rampUp: 0.18172808
@@ -1255,31 +1302,33 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.8366375
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - ....#####
-    - ....X####
-    - ....#####
-    - '#########'
-    - '#########'
-    - '#########'
-    - ....#####
-    - ....#####
-    - ....#X###
+    - .....#####
+    - .....X####
+    - .....#####
+    - '###X######'
+    - '##########'
+    - '##########'
+    - '##########'
+    - .....#####
+    - .....#X###
+    - .....#####
     mission: 8
     coinTarget: 11
     surviveSeconds: 37
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
     quest: 4
+    guardsPrincess: 0
     warningTime: 1.4240059
     spawnInterval: 2.2901525
     blocksPerWave: 1
@@ -1295,20 +1344,21 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.805807
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - ....####
-    - ....####
-    - '########'
-    - '######X#'
-    - '########'
-    - '######X#'
-    - ....####
-    - ....####
+    - ....#####
+    - ....#####
+    - ....#####
+    - '#########'
+    - '#######X#'
+    - '#########'
+    - ....#####
+    - ....X####
+    - ....#####
     mission: 9
     coinTarget: 12
     surviveSeconds: 37
@@ -1319,6 +1369,7 @@ MonoBehaviour:
     levelEvent: 3
     rules: 0
     quest: 0
+    guardsPrincess: 1
     warningTime: 1.4220529
     spawnInterval: 1.9886469
     blocksPerWave: 1
@@ -1334,31 +1385,33 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.775117
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '###...###'
-    - '###...###'
-    - '###...###'
-    - '###...###'
-    - '#########'
-    - '#########'
-    - X########
-    - '#########'
-    - X########
+    - '###....###'
+    - '###....###'
+    - '###....###'
+    - '###....###'
+    - '#X#....###'
+    - '##########'
+    - '##########'
+    - X#########
+    - '##########'
+    - X#########
     mission: 8
     coinTarget: 12
     surviveSeconds: 37
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
     quest: 1
+    guardsPrincess: 0
     warningTime: 1.4201084
     spawnInterval: 2.2837496
     blocksPerWave: 1
@@ -1374,7 +1427,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.744561
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 5
@@ -1403,9 +1456,10 @@ MonoBehaviour:
     levelEvent: 2
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4181724
     spawnInterval: 1.9831033
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.2766207
     rampUp: 0.185069
@@ -1418,19 +1472,21 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.714137
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - ..#X#..
-    - ..###..
-    - '####X##'
-    - '#######'
-    - '#######'
-    - ..###..
-    - ..###..
+    - ...###...
+    - ...###...
+    - ...###...
+    - '#########'
+    - '#########'
+    - '#########'
+    - ...###...
+    - ...###...
+    - ...###...
     mission: 0
     coinTarget: 12
     surviveSeconds: 37
@@ -1441,9 +1497,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4162443
     spawnInterval: 1.980349
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.27606982
     rampUp: 0.18589531
@@ -1456,19 +1513,21 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.683839
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '#######'
-    - '#######'
-    - '#######'
-    - '###.###'
-    - '####X#X'
-    - '#######'
-    - '#######'
+    - '######X##'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '####.####'
+    - '######X##'
+    - '########X'
+    - '#########'
+    - '#########'
     mission: 4
     coinTarget: 14
     surviveSeconds: 26
@@ -1479,9 +1538,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.414324
     spawnInterval: 1.9776057
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.27552116
     rampUp: 0.18671827
@@ -1494,20 +1554,21 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 9.653664
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '########'
-    - X#######
-    - '########'
-    - '########'
-    - X#######
-    - '########'
-    - '########'
-    - '####S###'
+    - '#########'
+    - X########
+    - '#########'
+    - '#########'
+    - '#########'
+    - X########
+    - '#########'
+    - '#########'
+    - '####S####'
     mission: 7
     coinTarget: 12
     surviveSeconds: 38
@@ -1518,9 +1579,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4124113
     spawnInterval: 1.9748733
-    blocksPerWave: 2
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.27497467
     rampUp: 0.187538
@@ -1533,19 +1595,21 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.623607
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '#######'
-    - '###X###'
-    - '#######'
-    - '#######'
-    - '#######'
-    - X######
-    - '#######'
+    - '####X####'
+    - '#########'
+    - '####X####'
+    - '#########'
+    - '#########'
+    - '#########'
+    - X########
+    - '#########'
+    - '#########'
     mission: 3
     coinTarget: 12
     surviveSeconds: 38
@@ -1556,9 +1620,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.410506
     spawnInterval: 1.9721514
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.2744303
     rampUp: 0.18835458
@@ -1571,7 +1636,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.593666
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
@@ -1604,9 +1669,10 @@ MonoBehaviour:
     levelEvent: 3
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4086078
     spawnInterval: 1.9694396
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.27388796
     rampUp: 0.1891681
@@ -1619,31 +1685,34 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.563837
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########'
-    - '#########'
-    - '##X######'
-    - '#########'
-    - '#########'
-    - ....#####
-    - ....##X##
-    - ....X####
-    - ....#####
+    - '###########'
+    - '###########'
+    - '###########'
+    - '##X########'
+    - '###########'
+    - '##X########'
+    - .....######
+    - .....######
+    - .....###X##
+    - .....X#####
+    - .....######
     mission: 8
     coinTarget: 12
     surviveSeconds: 38
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4067165
     spawnInterval: 2.2617483
     blocksPerWave: 1
@@ -1659,20 +1728,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.534117
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - ..######
-    - ..#X####
-    - ..######
-    - ..######
-    - '########'
-    - '########'
-    - '#X####..'
-    - '######..'
+    - ...#######
+    - ...#X#####
+    - ...#######
+    - ...####X##
+    - ...#######
+    - '##########'
+    - '##########'
+    - '#######...'
+    - '#X#####...'
+    - '#######...'
     mission: 9
     coinTarget: 12
     surviveSeconds: 38
@@ -1683,6 +1754,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.404832
     spawnInterval: 1.9640456
     blocksPerWave: 1
@@ -1698,31 +1770,34 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.504502
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '######...'
-    - '######...'
-    - '######...'
-    - X########
-    - '######X##'
-    - ...######
-    - ...######
-    - ...######
-    - ...#####X
+    - '########...'
+    - '########...'
+    - '########...'
+    - '#####X#####'
+    - X##########
+    - '########X##'
+    - ...########
+    - ...########
+    - ...########
+    - ...########
+    - ...#######X
     mission: 8
     coinTarget: 12
     surviveSeconds: 38
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
     quest: 2
+    guardsPrincess: 0
     warningTime: 1.402954
     spawnInterval: 2.2555673
     blocksPerWave: 1
@@ -1738,7 +1813,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.474991
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
@@ -1771,6 +1846,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.4010824
     spawnInterval: 1.9586891
     blocksPerWave: 2
@@ -1786,20 +1862,21 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.4455805
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - ..X###..
-    - ..####..
-    - ..####..
-    - ..####..
-    - '########'
-    - '########'
-    - '#X######'
-    - '########'
+    - ...X##...
+    - ...###...
+    - ...#X#...
+    - ...###...
+    - '######X##'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
     mission: 0
     coinTarget: 13
     surviveSeconds: 39
@@ -1810,6 +1887,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.399217
     spawnInterval: 1.9560243
     blocksPerWave: 2
@@ -1825,35 +1903,37 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.416268
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '######X###'
-    - '##########'
-    - X#########
-    - '######X###'
-    - '##########'
-    - '###....###'
-    - '###....###'
-    - '###....###'
-    - '###....###'
-    - '###....###'
+    - '#X####X####'
+    - '###########'
+    - X##########
+    - '###########'
+    - '######X####'
+    - '###########'
+    - '###.....###'
+    - '###.....###'
+    - '###.....###'
+    - '###.....###'
+    - '###.....###'
     mission: 8
     coinTarget: 13
     surviveSeconds: 39
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3973577
     spawnInterval: 2.2463734
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.12
     rampUp: 0.19398953
@@ -1866,20 +1946,21 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.387051
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - ..##X#..
-    - ..####..
-    - '########'
-    - '########'
-    - '########'
-    - '#######X'
-    - ..####..
-    - ..####..
+    - ...###...
+    - ...###...
+    - ...###...
+    - '#########'
+    - '#########'
+    - '#########'
+    - ...###...
+    - ...###...
+    - ...###...
     mission: 4
     coinTarget: 15
     surviveSeconds: 27
@@ -1890,9 +1971,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3955044
     spawnInterval: 1.9507205
-    blocksPerWave: 2
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.27014413
     rampUp: 0.19478384
@@ -1905,11 +1987,11 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 9.357926
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
     - '#########'
     - '#########'
@@ -1930,9 +2012,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3936568
     spawnInterval: 1.9480811
-    blocksPerWave: 3
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.26961625
     rampUp: 0.19557565
@@ -1945,20 +2028,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.328893
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '########'
-    - '#X######'
-    - '###X####'
-    - '###..###'
-    - '###..###'
-    - '########'
-    - '########'
-    - '########'
+    - '##########'
+    - '##########'
+    - '##X#X#####'
+    - '##########'
+    - '####..####'
+    - '####..####'
+    - '##X#######'
+    - '##########'
+    - '##########'
+    - '##########'
     mission: 2
     coinTarget: 13
     surviveSeconds: 39
@@ -1969,9 +2054,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.391815
     spawnInterval: 1.9454498
-    blocksPerWave: 2
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.26909
     rampUp: 0.19636504
@@ -1984,22 +2070,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.299949
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '##########'
-    - '##########'
-    - '#X########'
-    - '##########'
-    - '####..####'
-    - '####..#X##'
-    - '##########'
-    - '####X#####'
-    - '##########'
-    - '##########'
+    - '############'
+    - '############'
+    - '#X##########'
+    - '############'
+    - '############'
+    - '#####..#####'
+    - '#####..#####'
+    - '#########X##'
+    - X###########
+    - '#####X######'
+    - '############'
+    - '############'
     mission: 8
     coinTarget: 13
     surviveSeconds: 39
@@ -2010,9 +2098,10 @@ MonoBehaviour:
     levelEvent: 2
     rules: 0
     quest: 1
+    guardsPrincess: 0
     warningTime: 1.3899785
     spawnInterval: 2.2342503
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.12
     rampUp: 0.19715208
@@ -2025,34 +2114,37 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.2710905
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########'
-    - '#########'
-    - '#####X###'
-    - '#########'
-    - '#########'
-    - X########
-    - '#########'
-    - X########
-    - '#########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#######X###'
+    - '####X######'
+    - '###########'
+    - X##########
+    - '###########'
+    - '###########'
+    - X##########
+    - '###########'
     mission: 9
     coinTarget: 13
     surviveSeconds: 40
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 1
     warningTime: 1.3881475
     spawnInterval: 1.9402106
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.15
     rampUp: 0.1979368
@@ -2065,22 +2157,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.242317
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '##########'
-    - '###X######'
-    - '##########'
-    - '########X#'
-    - X#########
-    - '#####.....'
-    - '#####.....'
-    - '#####.....'
-    - '#####.....'
-    - '#####.....'
+    - '############'
+    - '############'
+    - '####X#######'
+    - '############'
+    - '##########X#'
+    - X###########
+    - '######......'
+    - '######......'
+    - '######......'
+    - '######......'
+    - '######......'
+    - X#####......
     mission: 8
     coinTarget: 13
     surviveSeconds: 40
@@ -2091,9 +2185,10 @@ MonoBehaviour:
     levelEvent: 3
     rules: 0
     quest: 3
+    guardsPrincess: 0
     warningTime: 1.3863218
     spawnInterval: 2.2282426
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.12
     rampUp: 0.19871926
@@ -2106,7 +2201,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.213627
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 7
@@ -2133,9 +2228,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3845011
     spawnInterval: 1.9350016
-    blocksPerWave: 2
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.26700035
     rampUp: 0.1994995
@@ -2148,20 +2244,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.185019
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - ..######
-    - ..##X###
-    - '########'
-    - '########'
-    - '######..'
-    - '######..'
-    - '######..'
-    - '##X###..'
+    - ...#######
+    - ...##X####
+    - ...#######
+    - '##########'
+    - '##########'
+    - '####X##...'
+    - '#######...'
+    - '#######...'
+    - '#######...'
+    - '##X####...'
     mission: 0
     coinTarget: 13
     surviveSeconds: 40
@@ -2172,9 +2270,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3826857
     spawnInterval: 1.932408
-    blocksPerWave: 2
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.2664816
     rampUp: 0.2002776
@@ -2187,22 +2286,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.156488
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '##X#X##...'
-    - '#######...'
-    - '#######...'
-    - '#######...'
-    - '#######...'
-    - '##########'
-    - '##########'
-    - ...#######
-    - ...###X###
-    - ...#######
+    - '#####X##....'
+    - '##X#####....'
+    - '########....'
+    - '########....'
+    - '########....'
+    - '########....'
+    - '############'
+    - X###########
+    - ....########
+    - ....###X####
+    - ....########
+    - ....########
     mission: 8
     coinTarget: 13
     surviveSeconds: 40
@@ -2213,9 +2314,10 @@ MonoBehaviour:
     levelEvent: 3
     rules: 0
     quest: 1
+    guardsPrincess: 0
     warningTime: 1.380875
     spawnInterval: 2.2192948
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.12
     rampUp: 0.20105356
@@ -2228,20 +2330,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.1280365
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#####X##'
-    - '########'
-    - '########'
-    - '########'
-    - ..X###..
-    - ..####..
-    - ..####..
-    - ..####..
+    - '#######X##'
+    - '#########X'
+    - '##########'
+    - '##########'
+    - '##########'
+    - ...X###...
+    - ...####...
+    - ...####...
+    - ...####...
+    - ...####...
     mission: 3
     coinTarget: 14
     surviveSeconds: 40
@@ -2252,9 +2356,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3790693
     spawnInterval: 1.9272418
-    blocksPerWave: 2
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.2654484
     rampUp: 0.20182745
@@ -2267,20 +2372,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.099661
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#X....##'
-    - '##....##'
-    - '##....##'
-    - '##....##'
-    - '########'
-    - '######X#'
-    - '########'
-    - '########'
+    - '###....###'
+    - '##X....###'
+    - '###....###'
+    - '###....###'
+    - '###....###'
+    - '##########'
+    - '########X#'
+    - '##########'
+    - '#####X####'
+    - '##########'
     mission: 4
     coinTarget: 16
     surviveSeconds: 28
@@ -2291,9 +2398,10 @@ MonoBehaviour:
     levelEvent: 1
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3772683
     spawnInterval: 1.9246689
-    blocksPerWave: 2
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.26493382
     rampUp: 0.2025993
@@ -2306,11 +2414,11 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 9.07136
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
     - '#########'
     - '#########'
@@ -2331,9 +2439,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.375472
     spawnInterval: 1.9221028
-    blocksPerWave: 3
+    blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.26442057
     rampUp: 0.20336917
@@ -2346,35 +2455,38 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.043131
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - ...####...
-    - ...####...
-    - ...#X##...
-    - '##########'
-    - '##########'
-    - '###X######'
-    - '##########'
-    - ...X###...
-    - ...####...
-    - ...####...
+    - ....####....
+    - ....####....
+    - ....####....
+    - ....####....
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - ....####....
+    - ....####....
+    - ....####....
+    - ....####....
     mission: 8
     coinTarget: 14
     surviveSeconds: 41
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
     quest: 2
+    guardsPrincess: 0
     warningTime: 1.3736802
     spawnInterval: 2.2074745
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.12
     rampUp: 0.20413707
@@ -2387,34 +2499,37 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 9.014975
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########'
-    - '#########'
-    - '#####X###'
-    - '#########'
-    - X###.####
-    - '######X##'
-    - '#########'
-    - '#########'
-    - '#########'
+    - '###########'
+    - '###########'
+    - '######X####'
+    - '###########'
+    - '###########'
+    - X####.#####
+    - '#######X###'
+    - '###########'
+    - '#########X#'
+    - '###########'
+    - '###########'
     mission: 9
     coinTarget: 14
     surviveSeconds: 41
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3718928
     spawnInterval: 1.9169898
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.15
     rampUp: 0.20490307
@@ -2427,35 +2542,39 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.986888
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '##########'
-    - '##########'
-    - '##########'
-    - '#######X##'
-    - '####..####'
-    - '####..####'
-    - '##########'
-    - '##########'
-    - X######X##
-    - '##########'
+    - '#X###########'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#######X#X###'
+    - '#############'
+    - '######.######'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '##########X##'
+    - X############
+    - '#############'
     mission: 8
     coinTarget: 14
     surviveSeconds: 41
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
     quest: 4
+    guardsPrincess: 0
     warningTime: 1.3701099
     spawnInterval: 2.2016091
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.12
     rampUp: 0.20566717
@@ -2468,20 +2587,23 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.958871
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '########'
-    - '##X#####'
-    - X#######
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
+    - '###########'
+    - '###########'
+    - '###X#######'
+    - X####X#####
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '######X####'
+    - '###########'
     mission: 2
     coinTarget: 14
     surviveSeconds: 41
@@ -2492,9 +2614,10 @@ MonoBehaviour:
     levelEvent: 2
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3683313
     spawnInterval: 1.9119018
-    blocksPerWave: 2
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.2623804
     rampUp: 0.20642944
@@ -2507,20 +2630,23 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.930922
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '####X###'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '#X######'
+    - '###########'
+    - '######X####'
+    - '###########'
+    - '###########'
+    - '####X######'
+    - '###########'
+    - '#########X#'
+    - '###########'
+    - '###########'
+    - '##X########'
+    - '###########'
     mission: 0
     coinTarget: 14
     surviveSeconds: 41
@@ -2531,9 +2657,10 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.366557
     spawnInterval: 1.9093671
-    blocksPerWave: 2
+    blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.26187342
     rampUp: 0.20718987
@@ -2546,35 +2673,39 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.903038
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '#######X##'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - .....#####
-    - .....#####
-    - .....###X#
-    - .....#X###
-    - .....#####
+    - '##########X##'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#####X#######'
+    - '###X#########'
+    - ......#######
+    - ......#######
+    - ......#######
+    - ......##X##X#
+    - ......#######
+    - ......#######
     mission: 8
     coinTarget: 14
     surviveSeconds: 42
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
     quest: 2
+    guardsPrincess: 0
     warningTime: 1.3647867
     spawnInterval: 2.192864
-    blocksPerWave: 1
+    blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.12
     rampUp: 0.20794855
@@ -2587,21 +2718,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.87522
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - ...##X###
-    - ...######
-    - ...######
-    - ...######
-    - '##X######'
-    - '#########'
-    - '######...'
-    - '######...'
-    - '#####X...'
+    - ...###X###
+    - ...#######
+    - ...#######
+    - ...#######
+    - ...#######
+    - '##X#######'
+    - '##########'
+    - '#######...'
+    - '#######...'
+    - '######X...'
     mission: 3
     coinTarget: 14
     surviveSeconds: 42
@@ -2612,6 +2744,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3630205
     spawnInterval: 1.9043151
     blocksPerWave: 3
@@ -2627,7 +2760,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.847466
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 3
@@ -2659,6 +2792,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3612585
     spawnInterval: 1.9017978
     blocksPerWave: 3
@@ -2674,21 +2808,23 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.819776
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - ...###...
-    - ...###...
-    - ...###...
-    - ...###...
-    - '#########'
-    - '###X####X'
-    - '######X##'
-    - '#########'
-    - '#########'
+    - ...#####...
+    - ...#####...
+    - ...#####...
+    - ...#####...
+    - ...#####...
+    - '###########'
+    - '###X##X###X'
+    - '########X##'
+    - '###########'
+    - '###########'
+    - '###########'
     mission: 4
     coinTarget: 16
     surviveSeconds: 29
@@ -2699,6 +2835,7 @@ MonoBehaviour:
     levelEvent: 3
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3595003
     spawnInterval: 1.899286
     blocksPerWave: 3
@@ -2714,21 +2851,22 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 8.792147
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########'
-    - '###X#####'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '########X'
-    - '######X##'
-    - '#########'
-    - '####S####'
+    - '##########'
+    - '###X######'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#########X'
+    - '##########'
+    - '#######X##'
+    - '##########'
+    - '#####S####'
     mission: 7
     coinTarget: 15
     surviveSeconds: 42
@@ -2739,6 +2877,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 0
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3577459
     spawnInterval: 1.8967799
     blocksPerWave: 4
@@ -2754,22 +2893,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.764579
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '##########'
-    - '####X#####'
-    - '##########'
-    - '###X######'
-    - '##########'
-    - '###....###'
-    - '###....###'
-    - '###....X##'
-    - '###....###'
-    - '###....###'
+    - '##########X#'
+    - '#X##########'
+    - '############'
+    - '####X#######'
+    - '############'
+    - '############'
+    - '####....####'
+    - '####....####'
+    - '####....X###'
+    - '####....####'
+    - '####....####'
+    - '####....####'
     mission: 9
     coinTarget: 15
     surviveSeconds: 42
@@ -2780,6 +2921,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 1
     quest: 0
+    guardsPrincess: 1
     warningTime: 1.3559954
     spawnInterval: 1.8942791
     blocksPerWave: 2
@@ -2795,33 +2937,36 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.737071
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - ...#####...
-    - ...#####...
-    - ...#####...
-    - '######X####'
-    - '###########'
-    - '###########'
-    - '#######X#X#'
-    - '###########'
-    - ...####X...
-    - ...#####...
-    - ...#####...
+    - ....#####....
+    - ....#####....
+    - ....#####....
+    - ....X##X#....
+    - '#############'
+    - '#####X#######'
+    - '#############'
+    - '########X##X#'
+    - '#############'
+    - ....#####....
+    - ....#####....
+    - ....#####....
+    - ....#####....
     mission: 8
     coinTarget: 15
     surviveSeconds: 42
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3542486
     spawnInterval: 2.1755512
     blocksPerWave: 2
@@ -2837,7 +2982,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.709621
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 3
@@ -2872,6 +3017,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 1
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3525056
     spawnInterval: 1.8892937
     blocksPerWave: 3
@@ -2887,21 +3033,23 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.682231
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########'
-    - '##X######'
-    - '#########'
-    - '###X#####'
-    - '####.####'
-    - '#########'
-    - '#########'
-    - '#X#######'
-    - '#########'
+    - '###########'
+    - '###########'
+    - '##X##X#####'
+    - '###########'
+    - '###X#######'
+    - '#####.#####'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#X#########'
+    - '###########'
     mission: 0
     coinTarget: 15
     surviveSeconds: 43
@@ -2912,6 +3060,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 1
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3507662
     spawnInterval: 1.8868088
     blocksPerWave: 3
@@ -2927,33 +3076,36 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.654897
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '###########'
-    - '###########'
-    - '######X####'
-    - '###########'
-    - '###X#######'
-    - '#####.#####'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '######X####'
-    - '##X########'
+    - '#############'
+    - '#############'
+    - '#######X#####'
+    - '#############'
+    - '####X########'
+    - '#############'
+    - '###X##.######'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#######X#####'
+    - '##X##########'
     mission: 8
     coinTarget: 15
     surviveSeconds: 43
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1
     quest: 3
+    guardsPrincess: 0
     warningTime: 1.3490303
     spawnInterval: 2.1669784
     blocksPerWave: 2
@@ -2969,21 +3121,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.627619
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - X########
-    - '#########'
-    - '#########'
-    - '#######X#'
-    - '#####X###'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#X########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '########X#'
+    - '#####X####'
     mission: 3
     coinTarget: 15
     surviveSeconds: 43
@@ -2994,6 +3147,7 @@ MonoBehaviour:
     levelEvent: 2
     rules: 1
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3472979
     spawnInterval: 1.881854
     blocksPerWave: 3
@@ -3009,7 +3163,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.600395
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 3
@@ -3041,6 +3195,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 1
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.345569
     spawnInterval: 1.8793843
     blocksPerWave: 3
@@ -3056,33 +3211,37 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.573227
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - '######.....'
-    - '######.....'
-    - '######.....'
-    - '######.....'
-    - '####X#.....'
-    - X##########
-    - '#########X#'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '#######X###'
+    - '#######.......'
+    - '#######.......'
+    - '#######.......'
+    - '#######.......'
+    - '#######.......'
+    - '#####X#.......'
+    - '#X#####.......'
+    - '##############'
+    - '###########X##'
+    - '##############'
+    - '#X############'
+    - '##############'
+    - '##############'
+    - '#X#######X####'
     mission: 8
     coinTarget: 15
     surviveSeconds: 43
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1
     quest: 1
+    guardsPrincess: 0
     warningTime: 1.3438435
     spawnInterval: 2.158457
     blocksPerWave: 2
@@ -3098,21 +3257,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.546112
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - ...######
-    - ...###X##
-    - ...######
-    - '#####X###'
-    - '#########'
-    - '#X####...'
-    - '######...'
-    - '######...'
-    - '######...'
+    - ....########
+    - ....####X###
+    - ....########
+    - ....########
+    - '########X###'
+    - X###########
+    - '##X#####....'
+    - '########....'
+    - '####X###....'
+    - '########....'
+    - '########....'
+    - '########....'
     mission: 4
     coinTarget: 17
     surviveSeconds: 30
@@ -3123,6 +3285,7 @@ MonoBehaviour:
     levelEvent: 2
     rules: 1
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3421214
     spawnInterval: 1.874459
     blocksPerWave: 3
@@ -3138,21 +3301,22 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 8.519051
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '#########'
-    - '########X'
-    - '#########'
-    - '#########'
-    - '########X'
-    - '#########'
-    - '##X######'
-    - '#########'
-    - '####S####'
+    - '##########'
+    - '#########X'
+    - '##########'
+    - '########X#'
+    - '##########'
+    - '#########X'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#####S####'
     mission: 7
     coinTarget: 15
     surviveSeconds: 44
@@ -3163,6 +3327,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 1
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3404025
     spawnInterval: 1.8720036
     blocksPerWave: 4
@@ -3178,33 +3343,37 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.49204
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - '###########'
-    - '###########'
-    - '#####X#####'
-    - '###X#######'
-    - '##########X'
-    - '###########'
-    - ...#####...
-    - ...###X#...
-    - ...#####...
-    - ...#####...
-    - ...#####...
+    - '#X############'
+    - '########X#####'
+    - '##############'
+    - '######X#######'
+    - '####X#########'
+    - '############X#'
+    - '##############'
+    - ....######....
+    - ....######....
+    - ....####X#....
+    - ....######....
+    - ....######....
+    - ....######....
+    - ....######....
     mission: 8
     coinTarget: 15
     surviveSeconds: 44
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 2
     quest: 1
+    guardsPrincess: 0
     warningTime: 1.338687
     spawnInterval: 2.1499856
     blocksPerWave: 2
@@ -3220,7 +3389,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.465081
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 5
@@ -3254,6 +3423,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 2
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3369746
     spawnInterval: 1.8671066
     blocksPerWave: 3
@@ -3269,21 +3439,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.438173
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '###...###'
-    - '###...###'
-    - '###...###'
-    - '#X#...###'
-    - '#########'
-    - '#########'
-    - X########
-    - '#########'
-    - '#######X#'
+    - '####....####'
+    - '####....####'
+    - '####....####'
+    - '####....####'
+    - '##X#....####'
+    - '####....####'
+    - '############'
+    - '#X##########'
+    - '############'
+    - X###########
+    - '######X###X#'
+    - '############'
     mission: 0
     coinTarget: 16
     surviveSeconds: 44
@@ -3294,6 +3467,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 3
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3352654
     spawnInterval: 1.8646649
     blocksPerWave: 3
@@ -3309,33 +3483,37 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.411314
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - ...##X##...
-    - ...#####...
-    - ...#####...
-    - '###X#######'
-    - '###########'
-    - '###########'
-    - '#########X#'
-    - '###########'
-    - ...#####...
-    - ...#####...
-    - ...####X...
+    - ....######....
+    - ....##X###....
+    - ....######....
+    - ....######....
+    - '###X##########'
+    - '##############'
+    - '##############'
+    - '#X##########X#'
+    - '##############'
+    - '############X#'
+    - ....######....
+    - ....######....
+    - ....#####X....
+    - ....######....
     mission: 8
     coinTarget: 16
     surviveSeconds: 44
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 2
     quest: 4
+    guardsPrincess: 0
     warningTime: 1.3335594
     spawnInterval: 2.1415617
     blocksPerWave: 2
@@ -3351,21 +3529,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.384504
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - ...###...
-    - ...###...
-    - ...###...
-    - '#########'
-    - '#########'
-    - '#########'
-    - ...###...
-    - ...###...
-    - ...###...
+    - ...####...
+    - ...####...
+    - ...####...
+    - '##########'
+    - '#########X'
+    - '####X#####'
+    - '##########'
+    - ...####...
+    - ...#X##...
+    - ...####...
     mission: 3
     coinTarget: 16
     surviveSeconds: 44
@@ -3376,6 +3555,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 3
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3318564
     spawnInterval: 1.8597949
     blocksPerWave: 3
@@ -3391,7 +3571,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.357743
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
@@ -3426,6 +3606,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 2
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3301564
     spawnInterval: 1.8573663
     blocksPerWave: 3
@@ -3441,33 +3622,37 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.33103
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - '###########'
-    - X##########
-    - '###########'
-    - '###########'
-    - '######X####'
-    - '###########'
-    - '#######X###'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '##########X'
+    - '##############'
+    - X#############
+    - '##############'
+    - '########X#####'
+    - '#############X'
+    - '########X#####'
+    - '##############'
+    - '#########X####'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '############X#'
     mission: 8
     coinTarget: 16
     surviveSeconds: 45
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 3
     quest: 2
+    guardsPrincess: 0
     warningTime: 1.3284595
     spawnInterval: 2.1331832
     blocksPerWave: 2
@@ -3483,22 +3668,25 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.304364
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '##########'
-    - '#####X####'
-    - '##########'
-    - '##########'
-    - '###X######'
-    - '#X########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
+    - '#############'
+    - '#######X#####'
+    - '#############'
+    - '#X###########'
+    - '#############'
+    - '####X########'
+    - '#X###########'
+    - '####X########'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
     mission: 9
     coinTarget: 16
     surviveSeconds: 45
@@ -3509,6 +3697,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 2
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3267655
     spawnInterval: 1.8525221
     blocksPerWave: 2
@@ -3524,21 +3713,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.277744
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '###X#####'
-    - '#####X###'
-    - '#########'
-    - '#########'
-    - '#########'
-    - ....#####
-    - ....#X###
-    - ....#####
-    - ....#####
+    - '####X#######'
+    - '#######X####'
+    - '############'
+    - '############'
+    - '############'
+    - '###X########'
+    - ......######
+    - ......######
+    - ......#X####
+    - ......######
+    - ......##X###
+    - ......######
     mission: 4
     coinTarget: 18
     surviveSeconds: 31
@@ -3549,6 +3741,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 2
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3250744
     spawnInterval: 1.8501064
     blocksPerWave: 3
@@ -3564,22 +3757,23 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 8.25117
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '##########'
-    - '##X#######'
-    - '##########'
-    - '##########'
-    - '#########X'
-    - '###X######'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '#####S####'
+    - '###########'
+    - '##X########'
+    - '###########'
+    - '###########'
+    - '##########X'
+    - '###########'
+    - '####X######'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#####S#####'
     mission: 7
     coinTarget: 16
     surviveSeconds: 45
@@ -3590,6 +3784,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 3
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3233863
     spawnInterval: 1.8476946
     blocksPerWave: 4
@@ -3605,7 +3800,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.224642
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 7
@@ -3632,6 +3827,7 @@ MonoBehaviour:
     levelEvent: 2
     rules: 4
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3217009
     spawnInterval: 1.8452871
     blocksPerWave: 3
@@ -3647,22 +3843,25 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.198157
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - ...####...
-    - ...####...
-    - ...####...
-    - ...####...
-    - ...####...
-    - '##########'
-    - '#####X####'
-    - X########X
-    - '#####X####'
-    - '##########'
+    - ....#####....
+    - ....#####....
+    - ....#####....
+    - ....#####....
+    - ....#####....
+    - ....#####....
+    - '#############'
+    - '#############'
+    - '######X###X##'
+    - '#X##########X'
+    - '######X######'
+    - '#############'
+    - '#############'
     mission: 0
     coinTarget: 16
     surviveSeconds: 45
@@ -3673,6 +3872,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 4
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3200184
     spawnInterval: 1.8428835
     blocksPerWave: 3
@@ -3688,34 +3888,38 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.171718
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 15
+    gridHeight: 15
     layout:
-    - ....####....
-    - ....####....
-    - ....####....
-    - ....####....
-    - ....####....
-    - ....####....
-    - '############'
-    - '###X###X####'
-    - '############'
-    - '############'
-    - '###########X'
-    - '##X######X##'
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - .....#X###.....
+    - '###############'
+    - '###############'
+    - '####X###X######'
+    - '###############'
+    - '###############'
+    - X##############
+    - '##X#########X#X'
+    - '###############'
     mission: 8
     coinTarget: 16
     surviveSeconds: 46
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 4
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3183386
     spawnInterval: 2.1165564
     blocksPerWave: 2
@@ -3731,22 +3935,25 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.145321
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '##########'
-    - '#####X####'
-    - '#X########'
-    - '##########'
-    - '########X#'
-    - X##....###
-    - '###....###'
-    - '###....###'
-    - '###....###'
-    - '###....###'
+    - '#############'
+    - '#############'
+    - '#X#####X#####'
+    - '#############'
+    - '#############'
+    - '##########X##'
+    - '#X###########'
+    - '####.....####'
+    - '####.....####'
+    - '####.....####'
+    - '####.....####'
+    - '####.....##X#'
+    - '####.....####'
     mission: 0
     coinTarget: 16
     surviveSeconds: 46
@@ -3757,6 +3964,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 6
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3166616
     spawnInterval: 1.838088
     blocksPerWave: 3
@@ -3772,7 +3980,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.118968
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 3
@@ -3808,6 +4016,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 4
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3149873
     spawnInterval: 1.8356961
     blocksPerWave: 3
@@ -3823,34 +4032,38 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.092657
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 15
+    gridHeight: 15
     layout:
-    - ....####....
-    - ....####....
-    - ....####....
-    - ....####....
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - ....####....
-    - ....####....
-    - ....####....
-    - ....####....
+    - .....####X.....
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - '###############'
+    - '###############'
+    - '###############'
+    - '###############'
+    - '###############'
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
     mission: 8
     coinTarget: 17
     surviveSeconds: 46
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 4
     quest: 3
+    guardsPrincess: 0
     warningTime: 1.3133156
     spawnInterval: 2.108304
     blocksPerWave: 2
@@ -3866,33 +4079,37 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.066388
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - '####X######'
-    - '######X###X'
-    - '###########'
-    - '###########'
-    - X##########
-    - '#####.#####'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
+    - '##############'
+    - '######X######X'
+    - '########X#####'
+    - '##############'
+    - '##############'
+    - '#####X########'
+    - X#####..######
+    - '######..######'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '#########X####'
     mission: 9
     coinTarget: 17
     surviveSeconds: 46
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 4
     quest: 0
+    guardsPrincess: 1
     warningTime: 1.3116466
     spawnInterval: 1.8309237
     blocksPerWave: 2
@@ -3908,34 +4125,38 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.040161
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 15
+    gridHeight: 15
     layout:
-    - '#X##########'
-    - '############'
-    - X###########
-    - '############'
-    - '############'
-    - '###X#..#####'
-    - '#####..#####'
-    - '###X########'
-    - '############'
-    - '############'
-    - '############'
-    - '###X########'
+    - '#X#############'
+    - '##############X'
+    - '###############'
+    - X##############
+    - '###############'
+    - '###############'
+    - '####X##########'
+    - '#######.#######'
+    - '###############'
+    - '####X##########'
+    - '##X############'
+    - '###############'
+    - '###############'
+    - '###############'
+    - '###X###########'
     mission: 8
     coinTarget: 17
     surviveSeconds: 46
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 4
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3099802
     spawnInterval: 2.1028244
     blocksPerWave: 2
@@ -3951,22 +4172,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 8.013974
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '##########'
-    - '##X#######'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '####X#####'
-    - '##########'
-    - '#####X####'
-    - '##########'
-    - '#########X'
+    - '############'
+    - '############'
+    - '##X#########'
+    - '############'
+    - '############'
+    - '############'
+    - '#####X######'
+    - '############'
+    - '######X#####'
+    - '############'
+    - '#######X####'
+    - '###########X'
     mission: 4
     coinTarget: 19
     surviveSeconds: 32
@@ -3977,6 +4200,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 6
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3083163
     spawnInterval: 1.8261662
     blocksPerWave: 3
@@ -3992,22 +4216,23 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 7.9878283
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '##########'
-    - '####X#####'
-    - '##########'
-    - '#########X'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '#########X'
-    - '##########'
-    - '#####S####'
+    - '###########'
+    - '###########'
+    - '####X######'
+    - '##########X'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#########X#'
+    - '###########'
+    - '#####S#####'
     mission: 7
     coinTarget: 17
     surviveSeconds: 47
@@ -4018,6 +4243,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 4
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.306655
     spawnInterval: 1.8237929
     blocksPerWave: 4
@@ -4033,22 +4259,25 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.9617224
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 13
+    gridHeight: 13
     layout:
-    - '#X###.....'
-    - '#####.....'
-    - '#####.....'
-    - '#X###.....'
-    - '#####.....'
-    - '##########'
-    - '######X##X'
-    - '##########'
-    - '##########'
-    - '##########'
+    - '#X####X......'
+    - '#######......'
+    - '#######......'
+    - '#######......'
+    - '##X####......'
+    - '#######......'
+    - '#############'
+    - '#############'
+    - '#######X###X#'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
     mission: 0
     coinTarget: 17
     surviveSeconds: 47
@@ -4059,6 +4288,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 8
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3049963
     spawnInterval: 1.8214232
     blocksPerWave: 3
@@ -4074,34 +4304,38 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.9356556
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 15
+    gridHeight: 15
     layout:
-    - ....########
-    - ....########
-    - ....########
-    - ....##X#####
-    - '############'
-    - '############'
-    - '#X######....'
-    - '#####X##....'
-    - '#X######....'
-    - '########....'
-    - '########....'
-    - '###X####....'
+    - .....##########
+    - .....##########
+    - .....##########
+    - .....##########
+    - .....##X#######
+    - '###############'
+    - '###############'
+    - '#X#############'
+    - '#########X.....'
+    - '######X###.....'
+    - '#X########.....'
+    - '######X###.....'
+    - '##########.....'
+    - '##########.....'
+    - '####X#####.....'
     mission: 8
     coinTarget: 17
     surviveSeconds: 47
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 8
     quest: 1
+    guardsPrincess: 0
     warningTime: 1.30334
     spawnInterval: 2.0919156
     blocksPerWave: 2
@@ -4117,7 +4351,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.9096284
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 10
@@ -4143,6 +4377,7 @@ MonoBehaviour:
     levelEvent: 2
     rules: 10
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3016862
     spawnInterval: 1.8166945
     blocksPerWave: 3
@@ -4158,22 +4393,26 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.8836393
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - '##########'
-    - '##########'
-    - X####X####
-    - '##########'
-    - '##########'
-    - ...####...
-    - ...####...
-    - ...####...
-    - ...X###...
-    - ...##X#...
+    - '#######X######'
+    - '##############'
+    - '##############'
+    - X#############
+    - '#######X######'
+    - '##############'
+    - '##X###########'
+    - ....######....
+    - ....######....
+    - ....######....
+    - ....######....
+    - ....X#####....
+    - ....######....
+    - ....###X##....
     mission: 2
     coinTarget: 17
     surviveSeconds: 47
@@ -4184,6 +4423,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 8
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.3000348
     spawnInterval: 1.8143353
     blocksPerWave: 3
@@ -4199,34 +4439,39 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.8576884
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - '############'
-    - '#######X####'
-    - '############'
-    - '############'
-    - '#######X####'
-    - '###########X'
-    - ....#X##....
-    - ....####....
-    - ....####....
-    - ....####....
-    - ....###X....
-    - ....####....
+    - '################'
+    - '#####X##########'
+    - '#########X######'
+    - '################'
+    - '################'
+    - '#########X######'
+    - '#####X#########X'
+    - '################'
+    - .....X#X###.....
+    - .....######.....
+    - .....######.....
+    - .....######.....
+    - .....######.....
+    - .....#####X.....
+    - .....######.....
+    - .....######.....
     mission: 8
     coinTarget: 17
     surviveSeconds: 47
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 8
     quest: 4
+    guardsPrincess: 0
     warningTime: 1.2983857
     spawnInterval: 2.0837765
     blocksPerWave: 2
@@ -4242,33 +4487,38 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.8317757
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 15
+    gridHeight: 15
     layout:
-    - '#X#.....###'
-    - '###.....###'
-    - '###.....###'
-    - '###.....###'
-    - '###.....##X'
-    - '#X#########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '######X####'
-    - '###########'
+    - '#X##X.....#####'
+    - '#####.....#####'
+    - '#####.....#####'
+    - '#####.....####X'
+    - '#####.....#####'
+    - '#####.....####X'
+    - '#####.....#####'
+    - '#X#############'
+    - '###############'
+    - '###############'
+    - '###############'
+    - '###############'
+    - '#########X#####'
+    - '###############'
+    - '#########X#####'
     mission: 9
     coinTarget: 17
     surviveSeconds: 47
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 12
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2967391
     spawnInterval: 1.8096273
     blocksPerWave: 2
@@ -4284,34 +4534,39 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.8059
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - ....####....
-    - ....####....
-    - ....####....
-    - ....####....
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - ....####....
-    - ....####....
-    - ....####....
-    - ....####....
+    - .....######.....
+    - .....X#####.....
+    - .....######.....
+    - .....######.....
+    - .....######.....
+    - '##########X#####'
+    - '################'
+    - '###X#######X####'
+    - '################'
+    - '###X#X##########'
+    - '#######X########'
+    - .....######.....
+    - .....######.....
+    - .....######.....
+    - .....####X#.....
+    - .....######.....
     mission: 8
     coinTarget: 17
     surviveSeconds: 48
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 8
     quest: 1
+    guardsPrincess: 0
     warningTime: 1.2950948
     spawnInterval: 2.0783699
     blocksPerWave: 2
@@ -4327,7 +4582,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.7800612
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 4
@@ -4361,6 +4616,7 @@ MonoBehaviour:
     levelEvent: 3
     rules: 12
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2934529
     spawnInterval: 1.8049327
     blocksPerWave: 3
@@ -4376,22 +4632,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.7542596
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '######X###'
-    - X#########
-    - '##########'
-    - '##########'
-    - '####..####'
-    - '####..####'
-    - '##########'
-    - '#####X###X'
-    - '##########'
-    - '##########'
+    - '#######X####'
+    - '#X#######X##'
+    - '############'
+    - '############'
+    - '############'
+    - '#####..#####'
+    - '#####..#####'
+    - '############'
+    - '######X####X'
+    - '############'
+    - '############'
+    - '############'
     mission: 4
     coinTarget: 20
     surviveSeconds: 33
@@ -4402,6 +4660,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 8
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2918133
     spawnInterval: 1.8025903
     blocksPerWave: 3
@@ -4417,22 +4676,23 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 7.7284937
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - '##########'
-    - '##########'
-    - '####X#X##X'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '#####S####'
+    - '###########'
+    - '###########'
+    - '####X##X##X'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#####S#####'
     mission: 7
     coinTarget: 18
     surviveSeconds: 48
@@ -4443,6 +4703,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 10
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2901759
     spawnInterval: 1.8002512
     blocksPerWave: 4
@@ -4458,34 +4719,39 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.7027636
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - '############'
-    - X###########
-    - '############'
-    - '############'
-    - '#X#####X####'
-    - '############'
-    - '############'
-    - '############'
-    - '##########X#'
-    - '########X###'
-    - '############'
-    - '############'
+    - '###########X####'
+    - '################'
+    - X###############
+    - '################'
+    - '################'
+    - '#X##############'
+    - '##########X#####'
+    - '################'
+    - '################'
+    - '################'
+    - '#############X##'
+    - '#####X##########'
+    - '###########X####'
+    - '################'
+    - '###########X####'
+    - '################'
     mission: 8
     coinTarget: 18
     surviveSeconds: 48
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 16
     quest: 2
+    guardsPrincess: 0
     warningTime: 1.2885407
     spawnInterval: 2.0676026
     blocksPerWave: 2
@@ -4501,7 +4767,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.6770687
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 10
@@ -4527,6 +4793,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 16
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2869078
     spawnInterval: 1.7955827
     blocksPerWave: 3
@@ -4542,7 +4809,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.651409
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 7
@@ -4580,6 +4847,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 16
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2852771
     spawnInterval: 1.7932531
     blocksPerWave: 3
@@ -4595,35 +4863,39 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.625784
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - ....#########
-    - ....#########
-    - ....#########
-    - ....########X
-    - '#############'
-    - '############X'
-    - '####X########'
-    - '#############'
-    - '########X####'
-    - '#######......'
-    - '#######......'
-    - '###X###......'
-    - '#######......'
+    - .....###########
+    - .....###########
+    - .....###########
+    - .....###X##X###X
+    - .....###########
+    - '################'
+    - '################'
+    - '####X##########X'
+    - '################'
+    - '################'
+    - '#########X#X####'
+    - '########........'
+    - '########........'
+    - '########........'
+    - '####X###........'
+    - '########........'
     mission: 8
     coinTarget: 18
     surviveSeconds: 49
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 16
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2836486
     spawnInterval: 2.0595655
     blocksPerWave: 2
@@ -4639,34 +4911,38 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.600193
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 15
+    gridHeight: 15
     layout:
-    - '##X##X##....'
-    - '########....'
-    - '##X#####....'
-    - '########....'
-    - '############'
-    - '############'
-    - '###X########'
-    - '############'
-    - ......######
-    - ......######
-    - ......######
-    - ......#X####
+    - '##X###X###.....'
+    - '##########.....'
+    - '##########.....'
+    - '###X######.....'
+    - '##########.....'
+    - '###############'
+    - '###############'
+    - '###############'
+    - '####X##########'
+    - '###############'
+    - .......########
+    - .......#####X##
+    - .......########
+    - .......##X#####
+    - .......X#######
     mission: 9
     coinTarget: 18
     surviveSeconds: 49
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 24
     quest: 0
+    guardsPrincess: 1
     warningTime: 1.2820224
     spawnInterval: 1.7886033
     blocksPerWave: 2
@@ -4682,35 +4958,39 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.5746365
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - ....#####....
-    - ....#####....
-    - ....#####....
-    - ....#####....
-    - ....#####....
-    - ....#####....
-    - '###X#########'
-    - X############
-    - '#############'
-    - '#############'
-    - '###########X#'
-    - '#X#####X#####'
-    - '#############'
+    - .....######.....
+    - .....######.....
+    - .....######.....
+    - .....##X###.....
+    - .....######.....
+    - .....######.....
+    - .....######.....
+    - .....######.....
+    - '####X###########'
+    - X###############
+    - '################'
+    - '################'
+    - '#############X##'
+    - '#X######X#######'
+    - '#############X##'
+    - '##########X#####'
     mission: 8
     coinTarget: 18
     surviveSeconds: 49
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 16
     quest: 2
+    guardsPrincess: 0
     warningTime: 1.2803981
     spawnInterval: 2.0542254
     blocksPerWave: 2
@@ -4726,7 +5006,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.549113
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
@@ -4762,6 +5042,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 20
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2787759
     spawnInterval: 1.7839657
     blocksPerWave: 3
@@ -4777,23 +5058,27 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.523623
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 15
+    gridHeight: 15
     layout:
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '#X#########'
-    - '###########'
-    - '#X#.....###'
-    - '###.....X##'
-    - '###.....###'
-    - '###.....###'
-    - '###.....X##'
+    - '###############'
+    - '#####X#########'
+    - '########X######'
+    - '###############'
+    - '###############'
+    - '###############'
+    - '##X############'
+    - '###############'
+    - '##X##.....#####'
+    - '#####.....#####'
+    - '#####.....##X##'
+    - '#####.....#####'
+    - '#####.....#####'
+    - '#####.....#####'
+    - '#X###.....##X##'
     mission: 0
     coinTarget: 18
     surviveSeconds: 49
@@ -4804,6 +5089,7 @@ MonoBehaviour:
     levelEvent: 3
     rules: 16
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.277156
     spawnInterval: 1.7816515
     blocksPerWave: 3
@@ -4819,23 +5105,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.498166
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - ...#####...
-    - ...#####...
-    - ...####X...
-    - '###########'
-    - '###########'
-    - X#######X##
-    - '###########'
-    - '###########'
-    - ...#X###...
-    - ...#####...
-    - ...#####...
+    - ....####....
+    - ....####....
+    - ....####....
+    - ....####....
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - ....####....
+    - ....####....
+    - ....####....
+    - ....####....
     mission: 4
     coinTarget: 20
     surviveSeconds: 34
@@ -4846,6 +5133,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 20
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2755381
     spawnInterval: 1.7793401
     blocksPerWave: 3
@@ -4861,22 +5149,24 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 7.4727416
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 15
+    gridHeight: 15
     layout:
-    - '##########'
-    - '##########'
-    - '########X#'
-    - '##########'
-    - '#########X'
-    - '##########'
-    - '##########'
-    - '##X#######'
-    - '##########'
-    - '#####S####'
+    - '############'
+    - '###########X'
+    - '############'
+    - '##########X#'
+    - '############'
+    - '###########X'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '######S#####'
     mission: 7
     coinTarget: 18
     surviveSeconds: 49
@@ -4887,6 +5177,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 16
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2739222
     spawnInterval: 1.7770318
     blocksPerWave: 4
@@ -4902,23 +5193,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.4473495
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '###########'
-    - '#######X###'
-    - '###########'
-    - X###X######
-    - '###########'
-    - '#####.#####'
-    - '#X#########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
+    - '##########'
+    - '######X###'
+    - '##########'
+    - X###X#####
+    - '####..####'
+    - '####..####'
+    - '#X########'
+    - '##########'
+    - '##########'
+    - '##########'
     mission: 3
     coinTarget: 18
     surviveSeconds: 50
@@ -4929,6 +5219,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 32
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2723083
     spawnInterval: 1.7747263
     blocksPerWave: 3
@@ -4944,7 +5235,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.4219894
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 9
@@ -4971,6 +5262,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 32
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2706966
     spawnInterval: 1.7724237
     blocksPerWave: 3
@@ -4986,35 +5278,40 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.396661
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 17
+    gridHeight: 17
     layout:
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '##X##########'
-    - '#########X###'
-    - '#############'
-    - '############X'
-    - '#######X#####'
-    - '###X#########'
-    - '#############'
-    - '#######X#####'
+    - '##########X######'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#############X###'
+    - '##X##############'
+    - '############X####'
+    - '#################'
+    - '###############X#'
+    - '#################'
+    - '##########X######'
+    - '#################'
+    - '####X############'
+    - '#################'
+    - '##########X######'
     mission: 8
     coinTarget: 19
     surviveSeconds: 50
-    keys: 6
+    keys: 8
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 32
     quest: 1
+    guardsPrincess: 0
     warningTime: 1.2690868
     spawnInterval: 2.0356426
     blocksPerWave: 2
@@ -5030,24 +5327,28 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.371364
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - '######......'
-    - '######......'
-    - '######......'
-    - '######......'
-    - '######......'
-    - '######......'
-    - '############'
-    - '############'
-    - '############'
-    - '#X###X######'
-    - '############'
-    - X##X#X######
+    - '########........'
+    - '########........'
+    - '########........'
+    - X#######........
+    - '########........'
+    - '########........'
+    - '##X#####........'
+    - '########........'
+    - '################'
+    - '################'
+    - '################'
+    - '################'
+    - '##X####X########'
+    - '###############X'
+    - '#######X########'
+    - X###X###########
     mission: 9
     coinTarget: 19
     surviveSeconds: 50
@@ -5058,6 +5359,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 40
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.267479
     spawnInterval: 1.767827
     blocksPerWave: 2
@@ -5073,35 +5375,40 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.346098
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 17
+    gridHeight: 17
     layout:
-    - ......#######
-    - ......#######
-    - ......######X
-    - ......#######
-    - ......######X
-    - ......#######
-    - '###########X#'
-    - '##X##########'
-    - '########X####'
-    - '#############'
-    - X############
-    - '#############'
-    - '#############'
+    - ........X########
+    - ........#########
+    - ........#########
+    - ........########X
+    - ........#########
+    - ........#########
+    - ........########X
+    - ........#########
+    - '#################'
+    - '###X###########X#'
+    - '#################'
+    - '###########X#####'
+    - '#################'
+    - X################
+    - '#################'
+    - '#################'
+    - '##############X##'
     mission: 8
     coinTarget: 19
     surviveSeconds: 50
-    keys: 6
+    keys: 8
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 32
     quest: 3
+    guardsPrincess: 0
     warningTime: 1.2658731
     spawnInterval: 2.0303628
     blocksPerWave: 2
@@ -5117,7 +5424,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.3208623
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 4
@@ -5154,6 +5461,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 40
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2642691
     spawnInterval: 1.7632416
     blocksPerWave: 3
@@ -5169,23 +5477,27 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.295658
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 15
+    gridHeight: 15
     layout:
-    - '###########'
-    - '########X##'
-    - '###########'
-    - '###########'
-    - '#######X###'
-    - '###########'
-    - ...#####...
-    - ...####X...
-    - ...#####...
-    - ...#X###...
-    - ...#####...
+    - '#########X#####'
+    - '###############'
+    - '###########X###'
+    - '###############'
+    - '########X######'
+    - '###############'
+    - '#X#######X#####'
+    - '###############'
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - .....###X#.....
+    - .....#####.....
+    - .....#X###.....
+    - .....#####.....
     mission: 0
     coinTarget: 19
     surviveSeconds: 50
@@ -5196,6 +5508,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 32
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2626671
     spawnInterval: 1.7609531
     blocksPerWave: 3
@@ -5211,35 +5524,40 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.2704835
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 17
+    gridHeight: 17
     layout:
-    - '########X####'
-    - '#X###########'
-    - '#######X#####'
-    - '#############'
-    - '#############'
-    - '#X######X####'
-    - '#############'
-    - ....#####....
-    - ....#####....
-    - ....X####....
-    - ....#####....
-    - ....#####....
-    - ....#####....
+    - '#################'
+    - '##########X######'
+    - '#X###############'
+    - '#########X#######'
+    - '#################'
+    - '##X#####X########'
+    - '#################'
+    - '#X#########X#####'
+    - '#################'
+    - .....#######.....
+    - .....#######.....
+    - .....#######.....
+    - .....X######.....
+    - .....#######.....
+    - .....#######.....
+    - .....#######.....
+    - .....#######.....
     mission: 8
     coinTarget: 19
     surviveSeconds: 50
-    keys: 6
+    keys: 8
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 32
     quest: 1
+    guardsPrincess: 0
     warningTime: 1.261067
     spawnInterval: 2.0224674
     blocksPerWave: 2
@@ -5255,23 +5573,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.2453394
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '###.....#X#'
-    - '###.....###'
-    - '###.....###'
-    - '###.....##X'
-    - X##.....###
-    - '###########'
-    - '###########'
-    - '###########'
-    - '####X######'
-    - '###########'
-    - '###########'
+    - '####....##X#'
+    - '####....####'
+    - '####....####'
+    - '####....###X'
+    - '###X....####'
+    - X###....####
+    - '############'
+    - '############'
+    - '############'
+    - '####X#######'
+    - '############'
+    - '############'
     mission: 4
     coinTarget: 21
     surviveSeconds: 34
@@ -5282,6 +5601,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 32
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2594688
     spawnInterval: 1.756384
     blocksPerWave: 3
@@ -5297,22 +5617,24 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 7.2202244
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 15
+    gridHeight: 15
     layout:
-    - '##########'
-    - '##########'
-    - '##########'
-    - '#X########'
-    - '##########'
-    - '####X#####'
-    - '##########'
-    - '#########X'
-    - '##########'
-    - '#####S####'
+    - '############'
+    - '############'
+    - '############'
+    - '#X##########'
+    - '############'
+    - '############'
+    - '############'
+    - '#####X######'
+    - '############'
+    - '###########X'
+    - '############'
+    - '######S#####'
     mission: 7
     coinTarget: 19
     surviveSeconds: 51
@@ -5323,6 +5645,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 32
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2578725
     spawnInterval: 1.7541035
     blocksPerWave: 4
@@ -5338,23 +5661,27 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.195139
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 15
+    gridHeight: 15
     layout:
-    - ...#####...
-    - ...X####...
-    - ...#####...
-    - '##########X'
-    - '###########'
-    - '##X########'
-    - '###########'
-    - '###########'
-    - ...#####...
-    - ...#####...
-    - ...####X...
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - '##############X'
+    - '###############'
+    - '###############'
+    - '###############'
+    - '###############'
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
+    - .....#####.....
     mission: 2
     coinTarget: 19
     surviveSeconds: 51
@@ -5365,6 +5692,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 192
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2562779
     spawnInterval: 1.7518257
     blocksPerWave: 3
@@ -5380,35 +5708,41 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.1700826
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 18
+    gridHeight: 18
     layout:
-    - '#############'
-    - '#############'
-    - '#######X#####'
-    - '#############'
-    - '#########X###'
-    - X############
-    - '######.######'
-    - '#############'
-    - '###X##X######'
-    - '#############'
-    - '##X##########'
-    - '#############'
-    - '#############'
+    - '##################'
+    - '###############X##'
+    - '##################'
+    - '##########X#######'
+    - '##################'
+    - '###########X#X####'
+    - '##################'
+    - X#################
+    - '########..########'
+    - '########..########'
+    - '##################'
+    - '####X####X########'
+    - '##################'
+    - '##################'
+    - '##X###############'
+    - '##################'
+    - '##################'
+    - '##################'
     mission: 8
     coinTarget: 19
     surviveSeconds: 51
-    keys: 7
+    keys: 8
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 192
     quest: 2
+    guardsPrincess: 0
     warningTime: 1.2546853
     spawnInterval: 2.011983
     blocksPerWave: 2
@@ -5424,34 +5758,40 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.1450553
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 17
+    gridHeight: 17
     layout:
-    - '############'
-    - '############'
-    - '########X###'
-    - '############'
-    - '############'
-    - '#####..####X'
-    - '#####..#####'
-    - '############'
-    - '#######X####'
-    - '############'
-    - '############'
-    - '######X###X#'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '############X####'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '################X'
+    - '########.########'
+    - '#################'
+    - '##X#####X########'
+    - '###########X#####'
+    - '##############X##'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#########X#####X#'
     mission: 9
     coinTarget: 19
     surviveSeconds: 51
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 200
     quest: 0
+    guardsPrincess: 1
     warningTime: 1.2530944
     spawnInterval: 1.7472779
     blocksPerWave: 2
@@ -5467,35 +5807,41 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.120056
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 18
+    gridHeight: 18
     layout:
-    - '#############'
-    - '#############'
-    - '#############'
-    - '##########X##'
-    - '#############'
-    - '#############'
-    - '##########X##'
-    - '##X##########'
-    - '#############'
-    - '####X#######X'
-    - '#############'
-    - '#############'
-    - '###X#########'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '#X#############X##'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##############X###'
+    - '##X###############'
+    - '##################'
+    - '##################'
+    - '#####X###########X'
+    - '##################'
+    - '##################'
+    - '#####X#####X######'
+    - '##################'
     mission: 8
     coinTarget: 19
     surviveSeconds: 51
-    keys: 7
+    keys: 8
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 192
     quest: 4
+    guardsPrincess: 0
     warningTime: 1.2515055
     spawnInterval: 2.006759
     blocksPerWave: 2
@@ -5511,7 +5857,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.095086
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 4
@@ -5547,6 +5893,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 200
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2499182
     spawnInterval: 1.7427403
     blocksPerWave: 3
@@ -5562,23 +5909,28 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.0701437
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - '###########'
-    - '###########'
-    - '###########'
-    - '#X#########'
-    - '###X#######'
-    - '#######X###'
-    - .....####X#
-    - .....######
-    - .....######
-    - .....######
-    - .....######
+    - '################'
+    - '################'
+    - '################'
+    - X########X######
+    - '################'
+    - '##X#############'
+    - '#####X##########'
+    - '################'
+    - ........###X#X##
+    - ........X#######
+    - ........###X####
+    - ........########
+    - ........########
+    - ........########
+    - ........########
+    - ........########
     mission: 0
     coinTarget: 20
     surviveSeconds: 52
@@ -5589,6 +5941,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 192
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2483327
     spawnInterval: 1.7404754
     blocksPerWave: 3
@@ -5604,36 +5957,41 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.0452294
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 18
+    gridHeight: 18
     layout:
-    - ....##########
-    - ....#########X
-    - ....#X####X###
-    - ....##########
-    - '##############'
-    - '########X#####'
-    - '##############'
-    - '#####X########'
-    - '##############'
-    - '##############'
-    - '#######.......'
-    - '###X###.......'
-    - '#######.......'
-    - '#######.......'
+    - ......############
+    - ......############
+    - ......#X#########X
+    - ......#######X####
+    - ......############
+    - ......############
+    - '##################'
+    - '##########X#######'
+    - '##################'
+    - '#######X##########'
+    - '##########X#######'
+    - '#####X############'
+    - '#########.........'
+    - '#########.........'
+    - '####X####.........'
+    - '#########.........'
+    - '#########.........'
+    - '#########.........'
     mission: 8
     coinTarget: 20
     surviveSeconds: 52
-    keys: 7
+    keys: 8
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 192
     quest: 2
+    guardsPrincess: 0
     warningTime: 1.246749
     spawnInterval: 1.9989449
     blocksPerWave: 2
@@ -5649,24 +6007,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 7.0203433
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '##X#####....'
-    - '########....'
-    - '#####X##....'
-    - '########....'
-    - '############'
-    - X###########
-    - '############'
-    - '############'
-    - ......######
-    - ......###X##
-    - ......######
-    - ......###X##
+    - '#X#####...'
+    - '#######...'
+    - '#######...'
+    - '##########'
+    - X#########
+    - '##########'
+    - '##########'
+    - .....##X##
+    - .....#####
+    - .....##X##
     mission: 3
     coinTarget: 20
     surviveSeconds: 52
@@ -5677,6 +6033,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 192
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2451671
     spawnInterval: 1.7359531
     blocksPerWave: 3
@@ -5692,7 +6049,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.995484
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 12
@@ -5720,6 +6077,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 192
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2435869
     spawnInterval: 1.7336956
     blocksPerWave: 3
@@ -5735,23 +6093,24 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 6.970652
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###X#######'
-    - '###########'
-    - '###########'
-    - '##X#######X'
-    - '###########'
-    - '###########'
-    - '#####S#####'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '####X#######'
+    - '############'
+    - '############'
+    - '###########X'
+    - '############'
+    - '###########X'
+    - '############'
+    - '######S#####'
     mission: 7
     coinTarget: 20
     surviveSeconds: 52
@@ -5762,6 +6121,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 208
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2420084
     spawnInterval: 1.7314405
     blocksPerWave: 4
@@ -5777,36 +6137,41 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.9458466
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 18
+    gridHeight: 18
     layout:
-    - '####X#########'
-    - '##########X###'
-    - '##############'
-    - '##############'
-    - '##X###X#######'
-    - '############X#'
-    - '##############'
-    - '####......##X#'
-    - '####......####'
-    - '####......####'
-    - '####......####'
-    - '####......####'
-    - '####......####'
-    - '####......####'
+    - '#####X############'
+    - '##################'
+    - '#############X####'
+    - '##################'
+    - '##################'
+    - '########X#########'
+    - '###X############X#'
+    - '##################'
+    - '##################'
+    - '######......##X###'
+    - '######......####X#'
+    - '######......######'
+    - '######......X#####'
+    - '######......######'
+    - '######......######'
+    - '######......######'
+    - '######......######'
+    - '######......######'
     mission: 8
     coinTarget: 20
     surviveSeconds: 52
-    keys: 7
+    keys: 8
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 256
     quest: 3
+    guardsPrincess: 0
     warningTime: 1.2404315
     spawnInterval: 1.9885662
     blocksPerWave: 2
@@ -5822,35 +6187,40 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.921068
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 17
+    gridHeight: 17
     layout:
-    - ....#####....
-    - ....####X....
-    - ....#X###....
-    - ....#####....
-    - '##########X##'
-    - '#######X#####'
-    - '###X#########'
-    - '#############'
-    - '##X##########'
-    - ....#####....
-    - ....#####....
-    - ....#####....
-    - ....#####....
+    - .....#######.....
+    - .....#######.....
+    - .....######X.....
+    - .....##X####.....
+    - .....#######.....
+    - '##############X##'
+    - '#################'
+    - '#########X#####X#'
+    - X################
+    - '###X#############'
+    - '#################'
+    - '###X#############'
+    - .....#######.....
+    - .....#######.....
+    - .....#######.....
+    - .....#######.....
+    - .....#######.....
     mission: 9
     coinTarget: 20
     surviveSeconds: 52
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 256
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2388566
     spawnInterval: 1.7269379
     blocksPerWave: 2
@@ -5866,36 +6236,41 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.896317
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 18
+    gridHeight: 18
     layout:
-    - ....######....
-    - ....####X#....
-    - ....######....
-    - ....######....
-    - '##############'
-    - '##############'
-    - '#########X####'
-    - '##############'
-    - '####X#########'
-    - '############X#'
-    - ....X#####....
-    - ....######....
-    - ....######....
-    - ....##X###....
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......##X###......
     mission: 8
     coinTarget: 20
     surviveSeconds: 53
-    keys: 7
+    keys: 8
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 256
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2372831
     spawnInterval: 1.9833935
     blocksPerWave: 2
@@ -5911,7 +6286,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.871591
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 7
@@ -5949,6 +6324,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 256
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2357113
     spawnInterval: 1.7224448
     blocksPerWave: 3
@@ -5964,24 +6340,28 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.8468924
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - '############'
-    - '############'
-    - '########X###'
-    - '############'
-    - '##########X#'
-    - '############'
-    - X###X#######
-    - '############'
-    - '############'
-    - '###X########'
-    - '############'
-    - '############'
+    - '################'
+    - '################'
+    - '################'
+    - '######X###X#####'
+    - '################'
+    - '##############X#'
+    - '####X###########'
+    - '################'
+    - '################'
+    - '#X####X########X'
+    - '################'
+    - '################'
+    - '####X###########'
+    - '################'
+    - '################'
+    - '################'
     mission: 0
     coinTarget: 20
     surviveSeconds: 53
@@ -5992,6 +6372,7 @@ MonoBehaviour:
     levelEvent: 3
     rules: 256
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2341412
     spawnInterval: 1.7202017
     blocksPerWave: 3
@@ -6007,36 +6388,41 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.822219
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 18
+    gridHeight: 18
     layout:
-    - '##############'
-    - '###X##########'
-    - '##############'
-    - '##############'
-    - '#######X######'
-    - '##############'
-    - '##############'
-    - '############X#'
-    - '##############'
-    - '#########X####'
-    - '##############'
-    - '##############'
-    - '#####X####X###'
-    - '##############'
+    - '##################'
+    - '##################'
+    - '####X#############'
+    - '##########X#######'
+    - '##################'
+    - '#########X########'
+    - '##################'
+    - '################X#'
+    - '##################'
+    - '################X#'
+    - '##################'
+    - '##################'
+    - '############X#####'
+    - '##################'
+    - '##################'
+    - '######X######X####'
+    - '##################'
+    - '##################'
     mission: 8
     coinTarget: 20
     surviveSeconds: 53
-    keys: 7
+    keys: 8
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 256
     quest: 3
+    guardsPrincess: 0
     warningTime: 1.2325727
     spawnInterval: 1.9756551
     blocksPerWave: 2
@@ -6052,24 +6438,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.7975707
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '######......'
-    - '#X####......'
-    - '######......'
-    - '######......'
-    - '######......'
-    - '######......'
-    - '############'
-    - '############'
-    - '#X##########'
-    - '#####X######'
-    - '########X###'
-    - '#####X######'
+    - '#####.....'
+    - '#X###.....'
+    - '#####.....'
+    - '#####.....'
+    - '#####.....'
+    - '##########'
+    - '#X########'
+    - '##########'
+    - '#######X##'
+    - '####X#####'
     mission: 3
     coinTarget: 20
     surviveSeconds: 53
@@ -6080,6 +6464,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 320
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2310058
     spawnInterval: 1.7157227
     blocksPerWave: 3
@@ -6095,7 +6480,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.7729487
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
@@ -6133,6 +6518,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 256
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2294406
     spawnInterval: 1.7134866
     blocksPerWave: 3
@@ -6148,7 +6534,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.748352
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 12
@@ -6176,6 +6562,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 288
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2278769
     spawnInterval: 1.7112528
     blocksPerWave: 3
@@ -6191,23 +6578,24 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 6.72378
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 17
+    gridHeight: 17
     layout:
-    - '###########'
-    - '###########'
-    - '#####X#####'
-    - '###########'
-    - '######X####'
-    - '###########'
-    - '##########X'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '#####S#####'
+    - '############'
+    - '############'
+    - '############'
+    - '#####X######'
+    - '############'
+    - '######X#####'
+    - '###########X'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '######S#####'
     mission: 7
     coinTarget: 21
     surviveSeconds: 53
@@ -6218,6 +6606,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 256
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2263148
     spawnInterval: 1.7090212
     blocksPerWave: 4
@@ -6233,35 +6622,41 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.699233
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 18
+    gridHeight: 18
     layout:
-    - '#######X#####'
-    - '#########X###'
-    - '#######X#####'
-    - '#############'
-    - '##########X##'
-    - '#############'
-    - '#########X###'
-    - ....#####....
-    - ....#####....
-    - ....#####....
-    - ....#####....
-    - ....####X....
-    - ....#####....
+    - '##################'
+    - '##########X#X#####'
+    - '##################'
+    - '##########X#######'
+    - '#######X#########X'
+    - '##################'
+    - '##############X###'
+    - '##################'
+    - '############X#####'
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......#####X......
+    - ......######......
+    - ......######......
     mission: 9
     coinTarget: 21
     surviveSeconds: 54
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 512
     quest: 0
+    guardsPrincess: 1
     warningTime: 1.2247543
     spawnInterval: 1.7067919
     blocksPerWave: 2
@@ -6277,36 +6672,42 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.6747108
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 19
+    gridHeight: 19
     layout:
-    - '####......####'
-    - '####......####'
-    - '####......####'
-    - '####......####'
-    - X#X#......####
-    - '####......####'
-    - '####......###X'
-    - '####X#########'
-    - '###########X##'
-    - '#X############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
+    - '######.......######'
+    - '######.......######'
+    - '######.......#X####'
+    - '######.......######'
+    - '######.......######'
+    - '######.......######'
+    - X##X##.......######
+    - '######.......######'
+    - '######.......#####X'
+    - '###################'
+    - '######X############'
+    - '##############X####'
+    - '######X############'
+    - '##X################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
     mission: 8
     coinTarget: 21
     surviveSeconds: 54
-    keys: 7
+    keys: 9
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 512
     quest: 1
+    guardsPrincess: 0
     warningTime: 1.2231953
     spawnInterval: 1.9602495
     blocksPerWave: 2
@@ -6322,7 +6723,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.6502132
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 9
@@ -6351,6 +6752,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 512
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.221638
     spawnInterval: 1.70234
     blocksPerWave: 3
@@ -6366,24 +6768,29 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.62574
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 17
+    gridHeight: 17
     layout:
-    - ....####....
-    - ....####....
-    - ....####....
-    - ....####....
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - ....####....
-    - ....####....
-    - ....####....
-    - ....####....
+    - .....#######.....
+    - .....#######.....
+    - .....#X#####.....
+    - .....###X###.....
+    - .....#######.....
+    - '#####X##X########'
+    - '#################'
+    - '#################'
+    - '###############X#'
+    - '####X############'
+    - '#################'
+    - '#################'
+    - .....#######.....
+    - .....####X##.....
+    - .....#######.....
+    - .....#######.....
+    - .....######X.....
     mission: 0
     coinTarget: 21
     surviveSeconds: 54
@@ -6394,6 +6801,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 512
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.220082
     spawnInterval: 1.7001173
     blocksPerWave: 3
@@ -6409,36 +6817,42 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.60129
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 19
+    gridHeight: 19
     layout:
-    - '##############'
-    - '#X############'
-    - '##############'
-    - X####X##X#####
-    - '##############'
-    - '##############'
-    - '######..#X####'
-    - '######..######'
-    - X#############
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '#########X####'
+    - '###################'
+    - '##X################'
+    - '###################'
+    - '###################'
+    - '#X#########X#######'
+    - '########X##########'
+    - '###################'
+    - '###X###############'
+    - '###################'
+    - '#########.###X#####'
+    - '###################'
+    - X##################
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '#############X#####'
     mission: 8
     coinTarget: 21
     surviveSeconds: 54
-    keys: 7
+    keys: 9
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 512
     quest: 4
+    guardsPrincess: 0
     warningTime: 1.2185278
     spawnInterval: 1.9525813
     blocksPerWave: 2
@@ -6454,24 +6868,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.576865
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '#####..#####'
-    - '#####..#####'
-    - X###########
-    - '############'
-    - '#####X#X####'
-    - '###X########'
-    - '#########X##'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '####..####'
+    - '####..####'
+    - X#########
+    - '##########'
+    - '##X#X#X###'
+    - '##########'
     mission: 3
     coinTarget: 21
     surviveSeconds: 54
@@ -6482,6 +6894,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 576
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.216975
     spawnInterval: 1.6956785
     blocksPerWave: 3
@@ -6497,7 +6910,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.5524635
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 4
@@ -6536,6 +6949,7 @@ MonoBehaviour:
     levelEvent: 3
     rules: 512
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2154236
     spawnInterval: 1.6934624
     blocksPerWave: 3
@@ -6551,36 +6965,42 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.5280857
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 19
+    gridHeight: 19
     layout:
-    - '##X###########'
-    - '####X#########'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - X###########X#
-    - '##############'
-    - '##X###########'
-    - '##############'
-    - '##########X###'
-    - '##############'
-    - X#############
-    - '##############'
+    - '###X###############'
+    - '######X############'
+    - '##X################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - X##################
+    - '################X##'
+    - '###################'
+    - '###X###############'
+    - '###################'
+    - '###################'
+    - '##############X####'
+    - '###################'
+    - '###################'
+    - '#X#################'
+    - '###################'
     mission: 8
     coinTarget: 21
     surviveSeconds: 55
-    keys: 7
+    keys: 9
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 544
     quest: 2
+    guardsPrincess: 0
     warningTime: 1.2138737
     spawnInterval: 1.9449356
     blocksPerWave: 2
@@ -6596,7 +7016,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.503731
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 12
@@ -6624,6 +7044,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 512
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2123255
     spawnInterval: 1.6890364
     blocksPerWave: 3
@@ -6639,23 +7060,25 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 6.4793997
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 17
+    gridHeight: 17
     layout:
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '##########X'
-    - '########X##'
-    - '###########'
-    - '#X#########'
-    - '###########'
-    - '###########'
-    - '#####S#####'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '############X'
+    - '##########X##'
+    - '#############'
+    - '#X###########'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '######S######'
     mission: 7
     coinTarget: 21
     surviveSeconds: 55
@@ -6666,6 +7089,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 512
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2107786
     spawnInterval: 1.6868266
     blocksPerWave: 4
@@ -6681,36 +7105,42 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.455092
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 19
+    gridHeight: 19
     layout:
-    - '#########X....'
-    - '##########....'
-    - '##########....'
-    - '#########X....'
-    - '##############'
-    - '#####X####X###'
-    - '##############'
-    - '#########X####'
-    - '############X#'
-    - '##############'
-    - .......#######
-    - .......#######
-    - .......######X
-    - .......#######
+    - '#############......'
+    - '#############......'
+    - '#############......'
+    - '#############......'
+    - '#############......'
+    - '#############......'
+    - '###########X#######'
+    - '#######X######X####'
+    - '###################'
+    - '##################X'
+    - '#############X#####'
+    - '#################X#'
+    - '###################'
+    - .........##########
+    - .........########X#
+    - .........##########
+    - .........#########X
+    - .........##########
+    - .........##########
     mission: 8
     coinTarget: 21
     surviveSeconds: 55
-    keys: 7
+    keys: 9
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1024
     quest: 2
+    guardsPrincess: 0
     warningTime: 1.2092332
     spawnInterval: 1.9373116
     blocksPerWave: 2
@@ -6726,25 +7156,30 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.4308066
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 18
+    gridHeight: 18
     layout:
-    - ....#####....
-    - ....####X....
-    - ....#####....
-    - ....#####....
-    - ....#####....
-    - ....###X#....
-    - '#############'
-    - '#############'
-    - '##X##########'
-    - X############
-    - '#############'
-    - '#############'
-    - '###X######X##'
+    - ......######......
+    - ......#####X......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - '####X#############'
+    - '##################'
+    - '##################'
+    - '#X################'
+    - '##################'
+    - '######X####X######'
+    - '##################'
+    - '##################'
+    - '####X###X#####X###'
     mission: 2
     coinTarget: 21
     surviveSeconds: 55
@@ -6755,6 +7190,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 1024
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2076892
     spawnInterval: 1.6824131
     blocksPerWave: 3
@@ -6770,25 +7206,30 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.4065437
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 18
+    gridHeight: 18
     layout:
-    - ....#####....
-    - ....#####....
-    - ....#####....
-    - ....#####....
-    - ....#####....
-    - ....#####....
-    - '#X###########'
-    - '#############'
-    - '#X#####X#X###'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '####X####X###'
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......######......
+    - ......#####X......
+    - ......######......
+    - '##X###############'
+    - '##################'
+    - X#X#######X##X####
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '######X#####X#####'
     mission: 0
     coinTarget: 21
     surviveSeconds: 55
@@ -6799,6 +7240,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 1280
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2061466
     spawnInterval: 1.6802095
     blocksPerWave: 3
@@ -6814,36 +7256,43 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.382304
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 20
+    gridHeight: 20
     layout:
-    - X#############
-    - '##############'
-    - '####X#########'
-    - '##############'
-    - '#######.......'
-    - '#######.......'
-    - '#X#####.......'
-    - '#######.......'
-    - '#####X#.......'
-    - '#######.......'
-    - '##############'
-    - '###X##########'
-    - X####X########
-    - '##############'
+    - '####################'
+    - X###################
+    - '####################'
+    - '####################'
+    - '######X#############'
+    - '############X#######'
+    - '##########..........'
+    - '##########..........'
+    - '##########..........'
+    - '##########..........'
+    - '########X#..........'
+    - '##########..........'
+    - '#######X##..........'
+    - '##########..........'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '####X###############'
+    - '#X#####X############'
+    - '####################'
     mission: 8
     coinTarget: 22
     surviveSeconds: 55
-    keys: 7
+    keys: 9
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 1024
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2046055
     spawnInterval: 1.929709
     blocksPerWave: 2
@@ -6859,25 +7308,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.3580866
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - ....#####....
-    - ....#####....
-    - ....#X###....
-    - ....#####....
-    - '#############'
-    - '##########X##'
-    - '#############'
-    - '#X##########X'
-    - '#############'
-    - ....###X#....
-    - ....#####....
-    - ....####X....
-    - ....#####....
+    - ...####...
+    - ...#X##...
+    - ...####...
+    - '########X#'
+    - '##########'
+    - '#########X'
+    - '##########'
+    - ...##X#...
+    - ...####...
+    - ...####...
     mission: 3
     coinTarget: 22
     surviveSeconds: 55
@@ -6888,6 +7334,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 1088
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2030658
     spawnInterval: 1.6758083
     blocksPerWave: 3
@@ -6903,7 +7350,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.3338914
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 4
@@ -6941,6 +7388,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 1024
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.2015275
     spawnInterval: 1.6736108
     blocksPerWave: 3
@@ -6956,36 +7404,43 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.309718
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 20
+    gridHeight: 20
     layout:
-    - '##############'
-    - '##############'
-    - '#######X######'
-    - X#############
-    - '##############'
-    - '######X#######'
-    - '######..##X###'
-    - '######..######'
-    - '##############'
-    - '##############'
-    - '########X#####'
-    - '###########X#X'
-    - '##############'
-    - '##############'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '##########X#########'
+    - '####################'
+    - '#X##################'
+    - '####################'
+    - '##############X#####'
+    - '#########X##########'
+    - '#########..###X#####'
+    - '#########..#########'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '############X#######'
+    - '####################'
+    - '################X##X'
+    - '####################'
+    - '####################'
+    - '####################'
     mission: 8
     coinTarget: 22
     surviveSeconds: 56
-    keys: 7
+    keys: 9
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 1056
     quest: 3
+    guardsPrincess: 0
     warningTime: 1.1999906
     spawnInterval: 1.9221275
     blocksPerWave: 2
@@ -7001,36 +7456,42 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.2855673
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 19
+    gridHeight: 19
     layout:
-    - '##############'
-    - '####X#########'
-    - '##############'
-    - '######X#######'
-    - '##############'
-    - '##X###########'
-    - '######..######'
-    - '######..###X##'
-    - '##############'
-    - '###########X##'
-    - '##############'
-    - '#######X######'
-    - '##############'
-    - '####X#########'
+    - '###################'
+    - '###################'
+    - '######X############'
+    - '###################'
+    - '###################'
+    - '#########X#########'
+    - '###################'
+    - '###X###############'
+    - '###################'
+    - '#########.#####X###'
+    - '###################'
+    - '###################'
+    - '################X##'
+    - '###################'
+    - '###################'
+    - '##########X########'
+    - '###################'
+    - '######X############'
+    - '##################X'
     mission: 9
     coinTarget: 22
     surviveSeconds: 56
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1024
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1984551
     spawnInterval: 1.6692216
     blocksPerWave: 2
@@ -7046,25 +7507,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.261438
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#########X###'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#X##X########'
-    - '########X####'
-    - '##X##X#######'
+    - '############'
+    - '############'
+    - '########X###'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '#X##X#######'
+    - '############'
+    - '##X#X#######'
     mission: 4
     coinTarget: 24
     surviveSeconds: 38
@@ -7075,6 +7535,7 @@ MonoBehaviour:
     levelEvent: 3
     rules: 1024
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.196921
     spawnInterval: 1.66703
     blocksPerWave: 3
@@ -7090,23 +7551,25 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 6.23733
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 18
+    gridHeight: 18
     layout:
-    - '###########'
-    - '###########'
-    - '###########'
-    - '#########X#'
-    - '###########'
-    - X##########
-    - '###########'
-    - '#####X#####'
-    - '###########'
-    - '###########'
-    - '#####S#####'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '###########X#'
+    - '#############'
+    - X############
+    - '#############'
+    - '######X######'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '######S######'
     mission: 7
     coinTarget: 22
     surviveSeconds: 56
@@ -7117,6 +7580,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 1024
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1953883
     spawnInterval: 1.6648405
     blocksPerWave: 4
@@ -7132,7 +7596,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.2132444
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 7
@@ -7170,6 +7634,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 2048
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1938568
     spawnInterval: 1.6626527
     blocksPerWave: 3
@@ -7185,25 +7650,30 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.1891794
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 18
+    gridHeight: 18
     layout:
-    - '#######......'
-    - '#######......'
-    - '#######......'
-    - '#######......'
-    - '#####X#######'
-    - '#############'
-    - '############X'
-    - X#########X##
-    - '#############'
-    - ....X#######X
-    - ....#########
-    - ....#########
-    - ....#########
+    - '#########.........'
+    - '#########.........'
+    - '#########.........'
+    - '#########.........'
+    - '#########.........'
+    - '#######X#.........'
+    - '##################'
+    - '##################'
+    - '#################X'
+    - '#############X####'
+    - '#X################'
+    - '##################'
+    - ......########X##X
+    - ......############
+    - ......###########X
+    - ......############
+    - ......##X#########
+    - ......############
     mission: 0
     coinTarget: 22
     surviveSeconds: 56
@@ -7214,6 +7684,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 2048
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1923268
     spawnInterval: 1.6604669
     blocksPerWave: 3
@@ -7229,36 +7700,43 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.165136
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 20
+    gridHeight: 20
     layout:
-    - .......#####X#
-    - .......###X###
-    - .......#######
-    - .......#######
-    - '############X#'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '#############X'
-    - '########X#####'
-    - '##########....'
-    - '######X###....'
-    - '##########....'
-    - '#########X....'
+    - ..........#######X##
+    - ..........##########
+    - ..........#####X####
+    - ..........##########
+    - ..........##########
+    - ..........##########
+    - '##################X#'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '###################X'
+    - '############X#######'
+    - '##############......'
+    - '##############......'
+    - '########X#####......'
+    - '##############......'
+    - X#############......
+    - '#############X......'
     mission: 8
     coinTarget: 22
     surviveSeconds: 57
-    keys: 7
+    keys: 9
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 2048
     quest: 1
+    guardsPrincess: 0
     warningTime: 1.1907982
     spawnInterval: 1.9070256
     blocksPerWave: 2
@@ -7274,25 +7752,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.1411138
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#############'
-    - '#############'
-    - '###X#########'
-    - X######X#####
-    - '#############'
-    - X############
-    - '#############'
-    - ....#####....
-    - ....##X##....
-    - ....#####....
-    - ....#####....
-    - ....##X##....
-    - ....#####....
+    - '##########'
+    - '##########'
+    - X#########
+    - '##########'
+    - X#########
+    - ...####...
+    - ...#X##...
+    - ...####...
+    - ...####...
+    - ...#X##...
     mission: 3
     coinTarget: 22
     surviveSeconds: 57
@@ -7303,6 +7778,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 2112
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1892707
     spawnInterval: 1.6561011
     blocksPerWave: 3
@@ -7318,7 +7794,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.117112
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 6
@@ -7357,6 +7833,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 2048
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1877447
     spawnInterval: 1.653921
     blocksPerWave: 3
@@ -7372,36 +7849,43 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.093131
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 20
+    gridHeight: 20
     layout:
-    - '#X############'
-    - '##############'
-    - X#X###########
-    - '##############'
-    - .......X######
-    - .......#######
-    - .......###X###
-    - .......#######
-    - .......#######
-    - .......#######
-    - '############X#'
-    - '##############'
-    - '##X###########'
-    - '##############'
+    - '####################'
+    - '#X##################'
+    - '###X################'
+    - '####################'
+    - X###################
+    - '####################'
+    - ..........##########
+    - ..........##########
+    - ..........#####X####
+    - ..........##########
+    - ..........##########
+    - ..........##########
+    - ..........##########
+    - ..........##########
+    - '####################'
+    - '################X#X#'
+    - '####################'
+    - '####################'
+    - '#X#X################'
+    - '####################'
     mission: 8
     coinTarget: 22
     surviveSeconds: 57
-    keys: 7
+    keys: 9
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 2048
     quest: 4
+    guardsPrincess: 0
     warningTime: 1.1862199
     spawnInterval: 1.8995042
     blocksPerWave: 2
@@ -7417,36 +7901,43 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.0691714
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 20
+    gridHeight: 20
     layout:
-    - ....###X##....
-    - ....######....
-    - ....##X###....
-    - ....######....
-    - '#X############'
-    - '############X#'
-    - '##############'
-    - '#X##X#########'
-    - '##############'
-    - '##############'
-    - ....######....
-    - ....##X###....
-    - ....######....
-    - ....######....
+    - ......########......
+    - ......####X###......
+    - ......########......
+    - ......########......
+    - ......#X#X####......
+    - ......########......
+    - '##X#################'
+    - '#################X##'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '##X#################'
+    - '####################'
+    - '####################'
+    - ......########......
+    - ......###X####......
+    - ......########......
+    - ......########......
+    - ......##X#####......
+    - ......########......
     mission: 9
     coinTarget: 22
     surviveSeconds: 57
-    keys: 7
+    keys: 8
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 2048
     quest: 0
+    guardsPrincess: 1
     warningTime: 1.1846966
     spawnInterval: 1.6495665
     blocksPerWave: 2
@@ -7462,36 +7953,44 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.045232
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 21
+    gridHeight: 21
     layout:
-    - ....######....
-    - ....###X##....
-    - ....######....
-    - ....######....
-    - '#######X######'
-    - '##############'
-    - '##############'
-    - '##########X###'
-    - '##############'
-    - '#########X#X##'
-    - ....###X##....
-    - ....######....
-    - ....X#####....
-    - ....######....
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '###############X#####'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - .......X######.......
+    - .......#######.......
+    - .......#######.......
     mission: 8
     coinTarget: 22
     surviveSeconds: 57
-    keys: 8
+    keys: 9
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 2048
     quest: 1
+    guardsPrincess: 0
     warningTime: 1.1831744
     spawnInterval: 1.8945009
     blocksPerWave: 2
@@ -7507,25 +8006,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 6.0213127
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '#####X###X###'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#X###########'
-    - '#######X#####'
-    - '######.######'
-    - '###########X#'
-    - '#############'
-    - '#############'
-    - X############
-    - '#############'
-    - '#############'
+    - '#####X##X###'
+    - '############'
+    - '############'
+    - '############'
+    - '#X##########'
+    - '#####..#####'
+    - '#####..###X#'
+    - '############'
+    - '############'
+    - X###########
+    - '############'
+    - '############'
     mission: 4
     coinTarget: 25
     surviveSeconds: 38
@@ -7536,6 +8034,7 @@ MonoBehaviour:
     levelEvent: 2
     rules: 2304
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1816536
     spawnInterval: 1.6452194
     blocksPerWave: 3
@@ -7551,24 +8050,25 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 5.997414
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 19
+    gridHeight: 19
     layout:
-    - '############'
-    - X###########
-    - '############'
-    - '##########X#'
-    - '############'
-    - '############'
-    - '##X#########'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '######S#####'
+    - '#############'
+    - X############
+    - '#############'
+    - '###########X#'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '###X#########'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '######S######'
     mission: 7
     coinTarget: 23
     surviveSeconds: 57
@@ -7579,6 +8079,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 2048
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.180134
     spawnInterval: 1.6430486
     blocksPerWave: 5
@@ -7594,25 +8095,31 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.973535
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 19
+    gridHeight: 19
     layout:
-    - '#X###########'
-    - '########X####'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '########X####'
-    - '############X'
-    - '#############'
-    - '############X'
-    - '#########X###'
-    - '#############'
-    - '#############'
-    - '#############'
+    - '##X################'
+    - '############X######'
+    - '###################'
+    - '###################'
+    - '###################'
+    - X##################
+    - '###################'
+    - '############X######'
+    - '########X#######X##'
+    - '###################'
+    - '##################X'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '##############X####'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
     mission: 0
     coinTarget: 23
     surviveSeconds: 58
@@ -7623,6 +8130,7 @@ MonoBehaviour:
     levelEvent: 3
     rules: 4096
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1786158
     spawnInterval: 1.6408798
     blocksPerWave: 4
@@ -7638,36 +8146,44 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.9496765
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 21
+    gridHeight: 21
     layout:
-    - X#############
-    - '##X###########'
-    - '##############'
-    - '##############'
-    - '########X#####'
-    - X##X##########
-    - '##############'
-    - .......#######
-    - .......#######
-    - .......#######
-    - .......#####X#
-    - .......#######
-    - .......#######
-    - .......###X###
+    - '#####################'
+    - '#X##X################'
+    - '########X############'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '#############X#######'
+    - X####################
+    - '####X################'
+    - '#####################'
+    - '#####################'
+    - ..........###########
+    - ..........###########
+    - ..........###########
+    - ..........###########
+    - ..........#########X#
+    - ..........###########
+    - ..........###########
+    - ..........###########
+    - ..........###########
+    - ..........#####X#####
     mission: 8
     coinTarget: 23
     surviveSeconds: 58
-    keys: 8
+    keys: 9
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 4096
     quest: 2
+    guardsPrincess: 0
     warningTime: 1.1770988
     spawnInterval: 1.8845193
     blocksPerWave: 3
@@ -7683,25 +8199,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.9258375
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '##X#######X##'
-    - '#############'
-    - '#############'
-    - '#######X#####'
-    - '#############'
-    - '#############'
-    - '#########X###'
-    - '#######......'
-    - '##X##X#......'
-    - '#######......'
-    - '#######......'
-    - '#######......'
-    - '#######......'
+    - '##X#######'
+    - '##########'
+    - '#####X####'
+    - '##########'
+    - '##########'
+    - '#####.....'
+    - '#X##X.....'
+    - '#####.....'
+    - '#####.....'
+    - '#####.....'
     mission: 3
     coinTarget: 23
     surviveSeconds: 58
@@ -7712,6 +8225,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 4160
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.175583
     spawnInterval: 1.6365472
     blocksPerWave: 4
@@ -7727,7 +8241,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.9020185
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 9
@@ -7756,6 +8270,7 @@ MonoBehaviour:
     levelEvent: 3
     rules: 4096
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1740685
     spawnInterval: 1.6343836
     blocksPerWave: 4
@@ -7771,36 +8286,44 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.878219
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 21
+    gridHeight: 21
     layout:
-    - ....######....
-    - ....######....
-    - ....######....
-    - ....X#####....
-    - ....######....
-    - ....######....
-    - ....######....
-    - '##############'
-    - '###########X##'
-    - '####X#########'
-    - '#######X###X##'
-    - '#############X'
-    - '#X############'
-    - '##############'
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - .......#######.......
+    - '#####################'
+    - '#####################'
+    - '################X####'
+    - '#######X#############'
+    - '#####################'
+    - '###########X#####X###'
+    - '###################X#'
+    - '#####################'
+    - '##X###############X##'
+    - '####################X'
+    - '#####################'
     mission: 8
     coinTarget: 23
     surviveSeconds: 58
-    keys: 8
+    keys: 10
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 4096
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1725552
     spawnInterval: 1.8770549
     blocksPerWave: 3
@@ -7816,36 +8339,43 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.8544393
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 20
+    gridHeight: 20
     layout:
-    - ....######....
-    - ....######....
-    - ....#####X....
-    - ....######....
-    - ....#####X....
-    - ....##X###....
-    - ....######....
-    - '##########X###'
-    - '#############X'
-    - '##############'
-    - '###X##########'
-    - '##############'
-    - '#X############'
-    - '##############'
+    - ......########......
+    - ......########......
+    - ......########......
+    - ......#######X......
+    - ......########......
+    - ......########......
+    - ......#######X......
+    - ......#####X##......
+    - ......###X####......
+    - ......########......
+    - '##############X#####'
+    - '####################'
+    - '##################X#'
+    - '####################'
+    - '####X###############'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '#X##################'
+    - '####################'
     mission: 9
     coinTarget: 23
     surviveSeconds: 58
-    keys: 7
+    keys: 8
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
     rules: 4096
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1710432
     spawnInterval: 1.6300617
     blocksPerWave: 3
@@ -7861,36 +8391,44 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.8306785
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 21
+    gridHeight: 21
     layout:
-    - '##########X###'
-    - '##############'
-    - '##############'
-    - '#####X########'
-    - '#######.......'
-    - '#######.......'
-    - '####X##.......'
-    - '#######.......'
-    - '######X.......'
-    - '#######.......'
-    - '#X############'
-    - '###X##########'
-    - '##############'
-    - '##X###########'
+    - '###############X#####'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '########X############'
+    - '#####################'
+    - '######X##############'
+    - '###########..........'
+    - '###########..........'
+    - '#######X###..........'
+    - '###########..........'
+    - '###########..........'
+    - '###########..........'
+    - '###########..........'
+    - '##################X##'
+    - '##X##################'
+    - '#####################'
+    - '#####X###############'
+    - '#####################'
+    - '####X################'
+    - '#####################'
     mission: 8
     coinTarget: 23
     surviveSeconds: 58
-    keys: 8
+    keys: 10
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 4096
     quest: 2
+    guardsPrincess: 0
     warningTime: 1.1695323
     spawnInterval: 1.8720888
     blocksPerWave: 3
@@ -7906,7 +8444,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.806937
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 4
@@ -7946,6 +8484,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 4352
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1680228
     spawnInterval: 1.6257468
     blocksPerWave: 4
@@ -7961,26 +8500,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.7832146
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - ....######....
-    - ....##X###....
-    - ....####X#....
-    - ....######....
-    - '##############'
-    - '###X##X#######'
-    - '##############'
-    - '##X###########'
-    - '##############'
-    - '#########X####'
-    - ....######....
-    - ....######....
-    - ....#####X....
-    - ....######....
+    - ....####....
+    - ....####....
+    - ....####....
+    - ....####....
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - ....####....
+    - ....####....
+    - ....####....
+    - ....####....
     mission: 4
     coinTarget: 25
     surviveSeconds: 39
@@ -7991,6 +8528,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 4096
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1665144
     spawnInterval: 1.623592
     blocksPerWave: 4
@@ -8006,24 +8544,26 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 5.759512
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 19
+    gridHeight: 19
     layout:
-    - '############'
-    - '##########X#'
-    - '############'
-    - '######X#####'
-    - '############'
-    - '############'
-    - '############'
-    - '#####X######'
-    - '############'
-    - '############'
-    - '############'
-    - '######S#####'
+    - '##############'
+    - '##############'
+    - '############X#'
+    - '##############'
+    - '#######X######'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '######X#######'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '#######S######'
     mission: 7
     coinTarget: 23
     surviveSeconds: 59
@@ -8034,6 +8574,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 4224
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1650072
     spawnInterval: 1.6214389
     blocksPerWave: 5
@@ -8049,36 +8590,44 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.7358274
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 21
+    gridHeight: 21
     layout:
-    - '#X##X#########'
-    - '##############'
-    - '##############'
-    - '#########X####'
-    - '##############'
-    - '##############'
-    - '######..######'
-    - '######..##X###'
-    - '##############'
-    - '##############'
-    - '####X######X##'
-    - '##############'
-    - '##############'
-    - '########X#####'
+    - '##X###X##############'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '##############X######'
+    - '#####################'
+    - '#####################'
+    - '###########X#########'
+    - '#####################'
+    - '##########.#####X####'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '#######X########X####'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '############X########'
     mission: 8
     coinTarget: 23
     surviveSeconds: 59
-    keys: 8
+    keys: 10
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
     rules: 129
     quest: 3
+    guardsPrincess: 0
     warningTime: 1.1635013
     spawnInterval: 1.8621806
     blocksPerWave: 3
@@ -8094,26 +8643,22 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.712162
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '########X#####'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '###########X##'
-    - '###X##########'
-    - '##############'
-    - '####X#X#######'
-    - '##############'
-    - '##############'
-    - '############X#'
-    - '##############'
-    - '##############'
-    - '#########X####'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##X#######'
+    - '##########'
+    - '###X######'
+    - '##########'
+    - '########X#'
+    - '##########'
+    - '#######X##'
     mission: 3
     coinTarget: 23
     surviveSeconds: 59
@@ -8124,6 +8669,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 4160
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1619964
     spawnInterval: 1.6171378
     blocksPerWave: 4
@@ -8139,26 +8685,32 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.6885157
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 20
+    gridHeight: 20
     layout:
-    - '##X#X#########'
-    - '#######X######'
-    - '##############'
-    - '#X########X###'
-    - '##############'
-    - '#####X########'
-    - '##############'
-    - '##############'
-    - '#####X########'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
+    - '###X################'
+    - '######X#############'
+    - '##########X#########'
+    - '####################'
+    - '####################'
+    - '#X#############X####'
+    - '####################'
+    - '#######X############'
+    - '##################X#'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '#######X############'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '####################'
     mission: 2
     coinTarget: 24
     surviveSeconds: 59
@@ -8169,6 +8721,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 4128
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1604928
     spawnInterval: 1.6149898
     blocksPerWave: 4
@@ -8184,36 +8737,45 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.664887
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 22
+    gridHeight: 22
     layout:
-    - .......X######
-    - .......##X####
-    - .......#######
-    - .......#######
-    - .......#######
-    - .......#######
-    - .......#######
-    - X#####X#######
-    - '###X##########'
-    - '##########X###'
-    - '##############'
-    - '##############'
-    - '############X#'
-    - '##############'
+    - ...........#X#########
+    - ...........###########
+    - ...........###X#######
+    - ...........###########
+    - ...........###########
+    - ...........###########
+    - ...........###########
+    - ...........###########
+    - ...........###########
+    - ...........###########
+    - ...........###########
+    - X########X############
+    - '######################'
+    - '####X#################'
+    - '################X#####'
+    - '###X##################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '###################X##'
+    - '######################'
     mission: 8
     coinTarget: 24
     surviveSeconds: 59
-    keys: 8
+    keys: 10
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 2064
     quest: 1
+    guardsPrincess: 0
     warningTime: 1.1589904
     spawnInterval: 1.8547698
     blocksPerWave: 3
@@ -8229,36 +8791,44 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.6412773
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 21
+    gridHeight: 21
     layout:
-    - '###X###.......'
-    - '#######.......'
-    - '#X#####.......'
-    - '#####X#.......'
-    - '##############'
-    - '######X#######'
-    - '##############'
-    - '##############'
-    - '##X#######X###'
-    - '##############'
-    - ....#######X##
-    - ....##########
-    - ....##########
-    - ....##########
+    - '###########..........'
+    - '#####X#####..........'
+    - '###########..........'
+    - '#X#########..........'
+    - '########X##..........'
+    - '######X####..........'
+    - '###########..........'
+    - '#####################'
+    - '#########X###########'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '###X#################'
+    - '###############X#####'
+    - .......##############
+    - .......##############
+    - .......##########X###
+    - .......##############
+    - .......##############
+    - .......##############
+    - .......##############
     mission: 9
     coinTarget: 24
     surviveSeconds: 59
-    keys: 7
+    keys: 8
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 1032
     quest: 0
+    guardsPrincess: 1
     warningTime: 1.1574891
     spawnInterval: 1.6106987
     blocksPerWave: 3
@@ -8274,36 +8844,45 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.617686
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 22
+    gridHeight: 22
     layout:
-    - .......#####X#
-    - .......#######
-    - .......####X##
-    - .......#######
-    - '#########X####'
-    - '##############'
-    - '##############'
-    - '############X#'
-    - '##############'
-    - '##############'
-    - '##X#######....'
-    - '##########....'
-    - '###X######....'
-    - X#########....
+    - ...........########X##
+    - ...........###########
+    - ...........###########
+    - ...........######X####
+    - ...........###########
+    - ...........###########
+    - ...........####X##X###
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '####################X#'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '###############.......'
+    - '###X###########.......'
+    - '###############.......'
+    - '###############.......'
+    - '#####X#########.......'
+    - X##############.......
+    - '###############.......'
     mission: 8
     coinTarget: 24
     surviveSeconds: 59
-    keys: 8
+    keys: 10
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
     rules: 520
     quest: 3
+    guardsPrincess: 0
     warningTime: 1.1559889
     spawnInterval: 1.849839
     blocksPerWave: 3
@@ -8319,7 +8898,7 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.5941124
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 4
@@ -8359,6 +8938,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 260
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.15449
     spawnInterval: 1.6064143
     blocksPerWave: 4
@@ -8374,26 +8954,32 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.5705576
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 20
+    gridHeight: 20
     layout:
-    - '#######.......'
-    - '#######.......'
-    - '#######.......'
-    - '#######.......'
-    - X#############
-    - '##############'
-    - '####X#########'
-    - '########X#####'
-    - '############X#'
-    - '###X##########'
-    - '#######.......'
-    - '#######.......'
-    - '#######.......'
-    - '#X#X###.......'
+    - '##########..........'
+    - '##########..........'
+    - '##########..........'
+    - '##########..........'
+    - '##########..........'
+    - '##########..........'
+    - '#X##################'
+    - '####################'
+    - '####################'
+    - '######X#############'
+    - '############X#######'
+    - '##################X#'
+    - '####################'
+    - '#####X##############'
+    - '###X######..........'
+    - '##########..........'
+    - '##########..........'
+    - '##########..........'
+    - '#####X####..........'
+    - '##X#######..........'
     mission: 0
     coinTarget: 24
     surviveSeconds: 60
@@ -8404,6 +8990,7 @@ MonoBehaviour:
     levelEvent: 1
     rules: 130
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1529921
     spawnInterval: 1.6042746
     blocksPerWave: 4
@@ -8419,26 +9006,24 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.5470204
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '##############'
-    - '##############'
-    - '##############'
-    - X#############
-    - .......#######
-    - .......#X##X##
-    - .......#######
-    - .......###X###
-    - .......#######
-    - .......#######
-    - '##############'
-    - '####X#######X#'
-    - '#########X####'
-    - '##############'
+    - '############'
+    - '############'
+    - '############'
+    - X###########
+    - ......#X#X##
+    - ......######
+    - ......###X##
+    - ......######
+    - '############'
+    - '##########X#'
+    - '###X########'
+    - '############'
     mission: 4
     coinTarget: 26
     surviveSeconds: 40
@@ -8449,6 +9034,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 129
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.1514956
     spawnInterval: 1.6021365
     blocksPerWave: 4
@@ -8464,24 +9050,26 @@ MonoBehaviour:
     coinInterval: 0.45
     coinLifetime: 3.2
     maxCoins: 5
-    powerUpInterval: 11
+    powerUpInterval: 5.5235014
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 20
+    gridHeight: 20
     layout:
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - X###########
-    - '############'
-    - '############'
-    - '########X###'
-    - '##########X#'
-    - '############'
-    - '######S#####'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - X#############
+    - '##############'
+    - '##############'
+    - '#########X####'
+    - '##############'
+    - '############X#'
+    - '##############'
+    - '#######S######'
     mission: 7
     coinTarget: 24
     surviveSeconds: 60
@@ -8492,6 +9080,7 @@ MonoBehaviour:
     levelEvent: 0
     rules: 65
     quest: 0
+    guardsPrincess: 0
     warningTime: 1.15
     spawnInterval: 1.6
     blocksPerWave: 5
@@ -8507,6 +9096,6 @@ MonoBehaviour:
     coinInterval: 2.2
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 11
+    powerUpInterval: 5.5
     powerUpLifetime: 5
     shieldDuration: 5

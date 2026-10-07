@@ -27,6 +27,9 @@ namespace SquashBot.Gameplay
             public float bounceStrength = 1f;
             public bool tinted;
             public Color tint, tintGlow;
+            // The colours last sent to the materials: a tile is only re-coloured when something changed.
+            public Color shownTop, shownTopGlow, shownFrame, shownFrameGlow;
+            public bool shown;
         }
 
         private TileView[,] tiles;
@@ -125,6 +128,8 @@ namespace SquashBot.Gameplay
                 Shapes.Rounded("SlabBottom", root, at + new Vector3(0f, -0.5f, 0f), new Vector3(1.17f, 0.24f, 1.17f), 0.06f, slab);
                 Shapes.Rounded("Pillar", root, at + new Vector3(0f, -4.6f, 0f), new Vector3(1.0f, 8f, 1.0f), 0.04f, pillar);
             }
+            // The platform never moves: merge it into a few big meshes, so a 20x20 floor costs a handful of draw calls.
+            StaticBatchingUtility.Combine(root.gameObject);
         }
         public void Clear()
         {
@@ -217,6 +222,7 @@ namespace SquashBot.Gameplay
                     MaterialFactory.SetColors(t.top, new Color(1f, 0.45f, 0.18f), new Color(1.8f, 0.55f, 0.08f) * heat);
                     MaterialFactory.SetColors(t.frame, new Color(1f, 0.6f, 0.2f), new Color(2.4f, 0.9f, 0.15f) * heat);
                     t.warning = 0f;
+                    t.shown = false;
                     continue;
                 }
 
@@ -233,14 +239,20 @@ namespace SquashBot.Gameplay
                 }
                 // Darkness dims the tile itself; a warning still shows at full strength.
                 float dim = Mathf.Lerp(0.07f, 1f, lit);
-                MaterialFactory.SetColors(t.top,
-                    Color.Lerp(topColor * dim, Palette.TileWarningTop, t.warning),
-                    Color.Lerp(topGlow * dim, Color.black, t.warning));
+                var newTop = Color.Lerp(topColor * dim, Palette.TileWarningTop, t.warning);
+                var newTopGlow = Color.Lerp(topGlow * dim, Color.black, t.warning);
                 var frameColor = t.painted ? paintColor : Palette.TileTop * dim;
                 var frameGlow = t.painted ? paintColor * 1.6f : Palette.TileGlow * (dim * dim);
-                MaterialFactory.SetColors(t.frame,
-                    Color.Lerp(frameColor, Palette.TileWarningTop, t.warning),
-                    Color.Lerp(frameGlow, Palette.TileWarningGlow * 1.3f, t.warning));
+                var newFrame = Color.Lerp(frameColor, Palette.TileWarningTop, t.warning);
+                var newFrameGlow = Color.Lerp(frameGlow, Palette.TileWarningGlow * 1.3f, t.warning);
+                // Big floors have hundreds of tiles: only touch the materials of the ones whose colour changed.
+                if (!t.shown || newTop != t.shownTop || newTopGlow != t.shownTopGlow || newFrame != t.shownFrame || newFrameGlow != t.shownFrameGlow)
+                {
+                    MaterialFactory.SetColors(t.top, newTop, newTopGlow);
+                    MaterialFactory.SetColors(t.frame, newFrame, newFrameGlow);
+                    t.shownTop = newTop; t.shownTopGlow = newTopGlow; t.shownFrame = newFrame; t.shownFrameGlow = newFrameGlow;
+                    t.shown = true;
+                }
                 t.warning = 0f;
 
                 if (t.bounce < 1f)

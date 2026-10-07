@@ -87,6 +87,9 @@ namespace SquashBot.Data
         /// <summary>Quest levels: which story (and so which pieces and which goal).</summary>
         public QuestKind quest;
 
+        /// <summary>Monster levels: the monster guards Princess Lumi, who is freed when it falls.</summary>
+        public bool guardsPrincess;
+
         [Header("Blocks")]
         [Tooltip("Seconds between the red warning appearing and the block hitting the tile.")]
         public float warningTime = 1.4f;

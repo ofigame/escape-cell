@@ -111,7 +111,7 @@ namespace SquashBot.Gameplay
         private const float ChaseGraceRows = 3f;
         // The window the camera keeps around the robot on big floors (fitted to the screen width, so on a tall phone
         // it shows more rows than columns). Floors bigger than FollowFrom get the close follow camera.
-        private const int FollowWindow = 5;
+        private const int FollowWindow = 4;
         private const int FollowFrom = 6;
         private readonly HashSet<GridPos> painted = new HashSet<GridPos>();
         private bool bonusRun;
@@ -214,6 +214,7 @@ namespace SquashBot.Gameplay
                 ui.HidePrelevel();
                 StartLevel(index, shield, rescue);
             };
+            ui.Map.LevelOf = i => i >= 0 && i < LevelCount ? levelSet.levels[i] : null;
             ui.GaragePressed += ShowGarage;
             ui.ShopPressed += ShowShop;
             ui.DailyPressed += ClaimDaily;
@@ -284,6 +285,9 @@ namespace SquashBot.Gameplay
             objectivesDone = objectivesTotal = 0;
             ClearQuest();
             ClearMonster();
+            skillFreezeLeft = skillMagnetLeft = 0f;
+            previewing = false;
+            pendingIntro = null;
             if (warden != null) Destroy(warden.gameObject);
             warden = null;
             collapses.Clear();
@@ -574,12 +578,13 @@ namespace SquashBot.Gameplay
             hazards.Hunting = (level.rules & FloorRule.Hunter) != 0;
             levelEvents.Begin(grid, level, levelIndex);
             coins.Begin(grid, level);
-            powerUps.Begin(grid, level);
+            powerUps.Begin(grid, level, LevelCatalog.WorldOf(levelIndex));
 
             starGoals = StarRules.For(level, grid.FloorCount);
             SetupTools();
             State = GameState.Playing;
             ui.ShowHud(bonusRun ? -1 : levelIndex);
+            StartMissionPreview();
         }
 
         private void Pause()
@@ -883,6 +888,12 @@ namespace SquashBot.Gameplay
         /// <summary>Level banner: a newly unlocked feature gets introduced once, otherwise the mission.</summary>
         private void ShowLevelIntro(bool assisted)
         {
+            // While the camera shows the goal, its bubble speaks; the level banner follows right after.
+            if (previewing)
+            {
+                pendingIntro = assisted;
+                return;
+            }
             string feature = null;
             // A floor rule met for the first time is introduced before anything else.
             string ruleFeature = null;
@@ -948,6 +959,12 @@ namespace SquashBot.Gameplay
                 return;
             }
 
+            if (previewing)
+            {
+                RefreshHud();
+                return;
+            }
+
             // The sky builds from calm to storm as the mission nears its end.
             weather.SetIntensity(Mathf.Lerp(0.3f, 1f, Mathf.Clamp01(MissionProgress())));
             elapsed += Time.deltaTime;
@@ -966,6 +983,7 @@ namespace SquashBot.Gameplay
             ui.SetRescues(RescueEnabled, rescues, coinsTowardRescue / (float)CoinsPerRescue);
             ui.SetHover(HoverEnabled, hoverCooldown);
             UpdateJourney(Time.deltaTime);
+            UpdateSkills(Time.deltaTime);
             comboTimer -= Time.deltaTime;
             ui.SetCombo(comboTimer > 0f ? ComboMultiplier : 1, comboTimer / ComboWindow);
             UpdateTools();
@@ -1250,6 +1268,60 @@ namespace SquashBot.Gameplay
                     GiveArmor(level.shieldDuration, p, Loc.T("float.shield"), Palette.UiCyan);
                     cameraRig.Punch(1f);
                     break;
+                case PowerUpType.Rescue:
+                    rescues = Mathf.Min(MaxRescues, rescues + 1);
+                    FloatAt(GridView.ToWorld(p), Loc.T("float.skillRescue"), new Color(0.4f, 1f, 0.6f));
+                    AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.3f);
+                    break;
+                case PowerUpType.Freeze:
+                    // Every block, warning and floor rule stops for a few seconds.
+                    skillFreezeLeft = 4f;
+                    hazards.Freeze();
+                    floorRules.Freeze();
+                    FloatAt(GridView.ToWorld(p), Loc.T("float.skillFreeze"), new Color(0.55f, 0.85f, 1f));
+                    ui.ShowIntro(Loc.T("skill.title"), Loc.T("skill.freeze"));
+                    AudioManager.PlaySfx(Sfx.Shield, 0.9f, 0.7f);
+                    break;
+                case PowerUpType.Blast:
+                    // Blocks around the robot burst.
+                    for (int x = -2; x <= 2; x++)
+                        for (int y = -2; y <= 2; y++)
+                        {
+                            var t = new GridPos(p.x + x, p.y + y);
+                            if (grid.InBounds(t)) hazards.Shatter(t);
+                        }
+                    fx.Burst(GridView.ToWorld(p) + Vector3.up * 0.5f, new Color(1f, 0.5f, 0.3f), new Color(3f, 1.2f, 0.3f), 50, 8f);
+                    cameraRig.Shake(0.8f);
+                    FloatAt(GridView.ToWorld(p), Loc.T("float.skillBlast"), new Color(1f, 0.6f, 0.3f));
+                    AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.7f);
+                    break;
+                case PowerUpType.Magnet:
+                    skillMagnetLeft = 8f;
+                    FloatAt(GridView.ToWorld(p), Loc.T("float.skillMagnet"), new Color(1f, 0.4f, 0.45f));
+                    AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.5f);
+                    break;
+            }
+            Haptics.Medium();
+        }
+
+        private float skillFreezeLeft, skillMagnetLeft;
+
+        /// <summary>Skills that last a while: the time freeze runs out, the magnet pulls coins in.</summary>
+        private void UpdateSkills(float dt)
+        {
+            if (skillFreezeLeft > 0f)
+            {
+                skillFreezeLeft -= dt;
+                if (skillFreezeLeft <= 0f && State == GameState.Playing)
+                {
+                    hazards.Resume();
+                    floorRules.Resume();
+                }
+            }
+            if (skillMagnetLeft > 0f)
+            {
+                skillMagnetLeft -= dt;
+                coins.CollectNear(robot.Position, 2);
             }
         }
 
@@ -1820,7 +1892,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Tunnel: return Loc.T("mission.tunnel" + suffix);
                 case MissionType.Boss: return Loc.T("mission.boss" + suffix);
                 case MissionType.Quest: return Loc.F("quest.intro." + data.quest, data.keys);
-                case MissionType.Monster: return Loc.F("mission.monster" + suffix, data.keys);
+                case MissionType.Monster: return Loc.F((data.guardsPrincess ? "mission.monsterPrincess" : "mission.monster") + suffix, data.keys);
                 default: return Loc.F("mission.survive" + suffix, data.surviveSeconds.ToString("0", CultureInfo.InvariantCulture));
             }
         }
@@ -2093,6 +2165,7 @@ namespace SquashBot.Gameplay
         private GameObject aura;
         private bool charged;
         private int monsterHp;
+        private GridPos princessPos;
         private float stompTimer, stompWindup = -1f;
 
         private void SetupMonster()
@@ -2112,6 +2185,23 @@ namespace SquashBot.Gameplay
             var kind = (Monster.Kind)(World % 4);
             var tint = Color.Lerp(WorldTheme.Current.accent, new Color(0.55f, 0.85f, 0.4f), kind == Monster.Kind.Slime ? 0.5f : 0.15f);
             monster = Monster.Create(kind, GridView.ToWorld(monsterPos) + Vector3.up * GridView.SurfaceY, monsterHp, tint, robot.transform);
+            princessPos = new GridPos(-99, -99);
+            if (level.guardsPrincess)
+            {
+                // Princess Lumi, frozen in ice right next to the monster: she is freed when it falls.
+                foreach (var d in DirectionExtensions.All)
+                {
+                    var n = monsterPos + d.ToOffset();
+                    if (!grid.IsStandable(n) || n == robot.Position) continue;
+                    princessPos = n;
+                    break;
+                }
+                if (grid.InBounds(princessPos))
+                {
+                    grid.SetOccupied(princessPos, true);
+                    questGoal = QuestGoal.Create(QuestKind.Princess, GridView.ToWorld(princessPos) + Vector3.up * GridView.SurfaceY, fx);
+                }
+            }
             charged = false;
             stompTimer = 5f;
             SpawnOrb();
@@ -2173,6 +2263,12 @@ namespace SquashBot.Gameplay
             {
                 monster.Defeat();
                 grid.SetOccupied(monsterPos, false);
+                if (questGoal != null)
+                {
+                    questGoal.Complete();
+                    grid.SetOccupied(princessPos, false);
+                    FloatAt(GridView.ToWorld(princessPos) + Vector3.up, Loc.T("quest.done.Princess"), Palette.UiGold);
+                }
                 FloatAt(at, Loc.T("float.monsterDown"), Palette.UiGold);
                 AudioManager.PlaySfx(Sfx.Squash, 1f, 0.5f);
                 Win();
@@ -2242,6 +2338,65 @@ namespace SquashBot.Gameplay
             aura = null;
             charged = false;
             stompWindup = -1f;
+        }
+
+        // ---------- Goal preview ----------
+
+        // Levels with a special goal open on it: the camera looks at the princess, the monster, WARDEN or the exit
+        // door for a moment, a bubble says what to do ("Defeat the monster!"), and only then does the level start.
+        private bool previewing;
+        private bool? pendingIntro;
+        private const float PreviewSeconds = 2.3f;
+
+        private void StartMissionPreview()
+        {
+            Transform target = null;
+            string text = null;
+            switch (level.mission)
+            {
+                case MissionType.Monster:
+                    if (monster != null) target = monster.transform;
+                    text = Loc.T(level.guardsPrincess ? "callout.monsterPrincess" : "callout.monster");
+                    break;
+                case MissionType.Quest:
+                    if (questGoal != null) target = questGoal.transform;
+                    text = Loc.T("callout." + level.quest);
+                    break;
+                case MissionType.Boss:
+                    if (warden != null) target = warden.transform;
+                    text = Loc.T("callout.boss");
+                    break;
+            }
+            if (target == null) return;
+            StartCoroutine(MissionPreview(target, text));
+        }
+
+        private IEnumerator MissionPreview(Transform target, string text)
+        {
+            previewing = true;
+            hazards.Freeze();
+            powerUps.Freeze();
+            floorRules.Freeze();
+            levelEvents.Freeze();
+            coins.Freeze();
+            bool big = grid.Width > FollowFrom || grid.Height > FollowFrom;
+            if (big) cameraRig.Follow(target, FollowWindow, FollowWindow);
+            else cameraRig.Focus(target.position, PreviewSeconds);
+            float lift = level.mission == MissionType.Boss ? 1.2f : 2.6f;
+            ui.ShowCallout(text, target.position + Vector3.up * lift, cameraRig.Cam, PreviewSeconds);
+            yield return new WaitForSeconds(PreviewSeconds);
+            if (big) cameraRig.Follow(robot.transform, FollowWindow, FollowWindow);
+            if (State == GameState.Playing)
+            {
+                hazards.Resume();
+                powerUps.Resume();
+                floorRules.Resume();
+                levelEvents.Resume();
+                coins.Resume();
+            }
+            previewing = false;
+            if (pendingIntro.HasValue && State == GameState.Playing) ShowLevelIntro(pendingIntro.Value);
+            pendingIntro = null;
         }
 
         private void RefreshHud()
