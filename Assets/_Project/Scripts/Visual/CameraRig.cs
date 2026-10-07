@@ -264,11 +264,16 @@ namespace SquashBot.Visual
             frameZoomTarget = zoom;
         }
 
-        public void Showcase(Transform subject, float amount)
+        public void Showcase(Transform subject, float amount, float view = 1.25f, float raise = 0.42f)
         {
             if (subject != null) showcaseSubject = subject;
             showcaseTarget = amount;
+            showcaseView = view;
+            showcaseRaise = raise;
         }
+
+        /// <summary>Close-up half-height in world units, and how far up the screen the subject sits.</summary>
+        private float showcaseView = 1.25f, showcaseRaise = 0.42f;
 
         /// <summary>Blur and darken the scene behind menus.</summary>
         public void SetMenuFocus(bool on) => menuFocusTarget = on ? 1f : 0f;
@@ -374,12 +379,12 @@ namespace SquashBot.Visual
             {
                 target = Vector3.Lerp(target, showcaseSubject.position + Vector3.up * 0.35f, ease);
                 // Close-up framing is absolute (about the robot plus a little floor), whatever the platform size.
-                zoom = Mathf.Lerp(zoom, 1.25f / Mathf.Max(0.5f, viewHalfHeight), ease);
+                zoom = Mathf.Lerp(zoom, showcaseView / Mathf.Max(0.5f, viewHalfHeight), ease);
             }
 
             var jitter = Random.insideUnitCircle * shake * 0.12f;
             zoom *= frameZoom;
-            var lift = transform.up * (viewHalfHeight * zoom * (0.06f - 0.42f * ease - frameLift));
+            var lift = transform.up * (viewHalfHeight * zoom * (0.06f - showcaseRaise * ease - frameLift));
             var offset = transform.right * jitter.x + transform.up * jitter.y;
 
             if (Cam.orthographic)

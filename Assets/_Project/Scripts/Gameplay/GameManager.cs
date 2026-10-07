@@ -32,7 +32,7 @@ namespace SquashBot.Gameplay
         private const float SuperArmorDuration = 10f;
         private const int ArmorsForSuper = 3;
         private const int CoinsPerRescue = 8;
-        private const int MaxRescues = 3;
+        private static int MaxRescues => Shop.MaxRescues;
         private const float HoverCooldown = 8f;
         private const int FailsForAssist = 5;
 
@@ -398,6 +398,12 @@ namespace SquashBot.Gameplay
 
         private void ShowMap(int animateFrom = -1)
         {
+            // Out of the test cell (level 10): Bip opens the backpack workshop for the first time.
+            if (WorkshopTalk.IntroDue && PendingRoad < 0)
+            {
+                ShowShop();
+                return;
+            }
             AudioManager.PlayMusic(MusicTheme.Menu);
             AudioManager.SetTension(0f);
             if (State != GameState.Menu) ShowBackdrop(NextLevel);
@@ -419,7 +425,7 @@ namespace SquashBot.Gameplay
             }
             // Bought rescues need no slot here: they wait in reserve and step in by themselves (see TryRescue).
             var data = levelSet.levels[index];
-            ui.ShowPrelevel(index, LevelCatalog.WorldName(index), MissionText(data), Progress.Stars(index), data.mission == MissionType.Monster, SuggestedBoost(data));
+            ui.ShowPrelevel(index, LevelCatalog.WorldName(index), MissionText(data), Progress.Stars(index), data.mission == MissionType.Monster, SuggestedBoost(data), Shop.BoostsAllowed(data));
         }
 
         /// <summary>The boost that helps most on this level: the hammer for a monster, double coins for coin hunts, else a shield.</summary>
@@ -439,7 +445,8 @@ namespace SquashBot.Gameplay
         {
             if (State != GameState.Menu) ShowMenu();
             ui.ShowGarage(LevelCatalog.WorldOf(SaveData.UnlockedLevel));
-            cameraRig.Showcase(robot.transform, 1f);
+            cameraRig.Showcase(robot.transform, 1f, 1.9f, 0.55f); // the whole robot, above the paint panel
+            robot.FaceCamera();
             cameraRig.SetMenuFocus(false);
         }
 
@@ -522,8 +529,8 @@ namespace SquashBot.Gameplay
             bool assisted = ApplyAssist(level);
             BeginRun();
 
-            // Boosts picked on the before-level card are spent now.
-            if (boosts != null)
+            // Boosts picked on the before-level card are spent now (never on boss or marathon levels).
+            if (boosts != null && Shop.BoostsAllowed(level))
             {
                 if (boosts.Contains(Boost.StartShield) && Shop.TryUse(Boost.StartShield))
                     GiveArmor(ArmorDuration, robot.Position, Loc.T("float.shield"), Palette.UiCyan);
@@ -533,6 +540,11 @@ namespace SquashBot.Gameplay
                 {
                     doubleCoins = true;
                     FloatAt(robot.transform.position + Vector3.up * 0.6f, Loc.T("float.doubleCoins"), Palette.UiGold);
+                }
+                if (boosts.Contains(Boost.CoinMagnet) && Shop.TryUse(Boost.CoinMagnet))
+                {
+                    skillMagnetLeft = 99999f; // the whole level
+                    FloatAt(robot.transform.position + Vector3.up * 0.9f, Loc.T("float.skillMagnet"), new Color(1f, 0.4f, 0.45f));
                 }
             }
 
@@ -1032,6 +1044,13 @@ namespace SquashBot.Gameplay
             string ruleFeature = null;
             foreach (FloorRule r in System.Enum.GetValues(typeof(FloorRule)))
                 if (r != FloorRule.None && (level.rules & r) != 0 && !Seen("rule." + r)) { ruleFeature = "feature.rule." + r; break; }
+            // So is a moving enemy met for the first time.
+            if (ruleFeature == null)
+            {
+                int[] counts = { level.sweepers, level.erasers, level.drones, level.sandworms, level.crabs, level.turrets, level.penguins, level.springbots };
+                for (int i = 0; i < counts.Length; i++)
+                    if (counts[i] > 0 && !Seen("enemy." + (EnemyKind)i)) { ruleFeature = "feature.enemy." + (EnemyKind)i; break; }
+            }
             string journey = level.chaseSpeed > 0f ? "chase" : level.collapseBehind ? "collapse" : level.lowWalls ? "maze"
                 : level.mission == MissionType.Exit && grid.KeySpots.Count > 0 ? "journey" : null;
             if (trialSlot && !Seen("tools")) feature = "feature.tools";
@@ -1219,6 +1238,7 @@ namespace SquashBot.Gameplay
                 var trail = robot.TrailColor.Value;
                 fx.Burst(GridView.ToWorld(p) + Vector3.up * 0.2f, trail * 0.45f, trail, 7, 1.8f);
             }
+            if (robot.StepId != null) StepMark.Leave(GridView.ToWorld(p) + Vector3.up * GridView.SurfaceY, robot.StepId, robot.StepColor);
 
             coins.TryCollect(p);
             if (Shop.MagnetRange > 0) coins.CollectNear(p, Shop.MagnetRange);
@@ -1480,7 +1500,7 @@ namespace SquashBot.Gameplay
                     AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.7f);
                     break;
                 case PowerUpType.Magnet:
-                    skillMagnetLeft = 8f;
+                    skillMagnetLeft = Mathf.Max(skillMagnetLeft, 8f);
                     FloatAt(GridView.ToWorld(p), Loc.T("float.skillMagnet"), new Color(1f, 0.4f, 0.45f));
                     AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.5f);
                     break;
@@ -1614,6 +1634,36 @@ namespace SquashBot.Gameplay
                     break;
                 }
 
+                case Tool.Freeze:
+                {
+                    // Bip's tinkered gardener coolant: every block, warning and floor rule holds still for a moment.
+                    skillFreezeLeft = Mathf.Max(skillFreezeLeft, Tools.FreezeSeconds(lvl));
+                    hazards.Freeze();
+                    floorRules.Freeze();
+                    enemies.Freeze();
+                    fx.Burst(robot.transform.position + Vector3.up * 0.5f, new Color(0.7f, 0.9f, 1f), new Color(0.8f, 1.6f, 2.4f), 40, 6f);
+                    AudioManager.PlaySfx(Sfx.Shield, 0.9f, 0.7f);
+                    FloatAt(robot.transform.position, Loc.T("float.skillFreeze"), new Color(0.55f, 0.85f, 1f));
+                    break;
+                }
+
+                case Tool.Blast:
+                {
+                    // The colour miners' powder: blocks around the robot burst (a plus, a square, a big square).
+                    var at = robot.Position;
+                    for (int x = -2; x <= 2; x++)
+                        for (int y = -2; y <= 2; y++)
+                        {
+                            var t = new GridPos(at.x + x, at.y + y);
+                            if (Tools.BlastHits(lvl, x, y) && grid.InBounds(t)) hazards.Shatter(t);
+                        }
+                    fx.Burst(robot.transform.position + Vector3.up * 0.5f, new Color(1f, 0.5f, 0.3f), new Color(3f, 1.2f, 0.3f), 50, 8f);
+                    cameraRig.Shake(0.8f);
+                    AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.7f);
+                    FloatAt(robot.transform.position, Loc.T("float.skillBlast"), new Color(1f, 0.6f, 0.3f));
+                    break;
+                }
+
                 default:
                 {
                     int hit = hazards.Emp();
@@ -1651,6 +1701,7 @@ namespace SquashBot.Gameplay
                 float active = 0f;
                 if (toolSlot[s] == Tool.SlowMo && toolSlowLeft > 0f) active = toolSlowLeft / toolSlowTotal;
                 else if (toolSlot[s] == Tool.Bridge && bridgeLeft > 0f) active = bridgeLeft / bridgeTotal;
+                else if (toolSlot[s] == Tool.Freeze && skillFreezeLeft > 0f) active = Mathf.Clamp01(skillFreezeLeft / Tools.FreezeSeconds(toolLevel[s]));
                 ui.SetTool(s, toolSlot[s], toolCharges[s], trialSlot && s == 0, active);
             }
         }
@@ -2364,10 +2415,13 @@ namespace SquashBot.Gameplay
         private void OnRoadFailed()
         {
             if (State != GameState.Playing || roadPhase != RoadPhase.Run) return;
-            bool paid = Lives.TryConsume();
+            // A tunnel boost from Bip's counter takes the first crash instead of a life.
+            bool boosted = Shop.TryUse(Boost.TunnelBoost);
+            bool paid = !boosted && Lives.TryConsume();
             runner.RestartRoad();
             // Long roads start again from the last checkpoint passed.
             string again = Loc.T(runner.ResumeRow > 0 ? "road.failCheckpoint" : "road.failFree");
+            if (boosted) again = Loc.T("road.boostSaved") + " · " + again;
             ui.ShowIntro(Loc.T("road.failTitle"), paid ? Loc.T("road.lifeLost") + " · " + again + "\n" + Loc.F("lives.left", Lives.Count) : again);
         }
 

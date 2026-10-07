@@ -123,6 +123,7 @@ namespace SquashBot.UI
         }
         private readonly List<FlyingCoin> flyingCoins = new List<FlyingCoin>();
         private TextMeshProUGUI rescueText, hoverText;
+        private TextMeshProUGUI preBoostsLabel;
         private Image rescueFill, hoverFace;
         private Image warnLeft, warnRight;
         private bool warningActive;
@@ -212,6 +213,7 @@ namespace SquashBot.UI
             HelpButton(Garage.transform, "garage");
             HelpButton(Map.transform, "map");
             Shop.BackPressed += () => MenuPressed?.Invoke();
+            Shop.PaintPressed += () => GaragePressed?.Invoke();
             Garage.BackPressed += () => MenuPressed?.Invoke();
             BuildPrelevel(root);
             BuildBanner(root);
@@ -382,8 +384,8 @@ namespace SquashBot.UI
                 preStars[i].raycastTarget = false;
             }
 
-            UiFactory.TextBox("Boosts", card, Top, new Vector2(0f, -420f), new Vector2(780f, 56f), Loc.T("pre.boosts"), 36f, Palette.UiText);
-            foreach (var b in new[] { Boost.StartShield, Boost.StartHammer, Boost.DoubleCoins }) preBoosts.Add(BoostTile(card, new Vector2(0f, -500f), b));
+            preBoostsLabel = UiFactory.TextBox("Boosts", card, Top, new Vector2(0f, -420f), new Vector2(780f, 56f), Loc.T("pre.boosts"), 36f, Palette.UiText);
+            foreach (var b in new[] { Boost.StartShield, Boost.StartHammer, Boost.CoinMagnet, Boost.DoubleCoins }) preBoosts.Add(BoostTile(card, new Vector2(0f, -500f), b));
 
             UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(0f, 46f), new Vector2(620f, 160f),
                 () => PrelevelPlay?.Invoke(preLevel, preBoosts.FindAll(v => v.on).ConvertAll(v => v.boost)), 84f);
@@ -450,7 +452,7 @@ namespace SquashBot.UI
         /// The card before a level: mission, best stars and boosts to take along. The hammer only shows on monster levels,
         /// and the boost that suits the level best wears a "suggested" ribbon.
         /// </summary>
-        public void ShowPrelevel(int levelIndex, string world, string mission, int bestStars, bool monsterLevel, Boost suggested)
+        public void ShowPrelevel(int levelIndex, string world, string mission, int bestStars, bool monsterLevel, Boost suggested, bool boostsAllowed = true)
         {
             preLevel = levelIndex;
             preTitle.text = Loc.F("level", levelIndex + 1);
@@ -461,11 +463,13 @@ namespace SquashBot.UI
             foreach (var v in preBoosts)
             {
                 v.on = false;
-                bool show = v.boost != Boost.StartHammer || monsterLevel;
+                // Three tiles: the hammer stands in for double coins on monster levels; none at all on boss and marathon levels.
+                bool show = boostsAllowed && (v.boost == Boost.StartHammer ? monsterLevel : v.boost != Boost.DoubleCoins || !monsterLevel);
                 v.root.SetActive(show);
                 v.tag.SetActive(v.boost == suggested);
                 if (show) shown.Add(v);
             }
+            preBoostsLabel.text = Loc.T(boostsAllowed ? "pre.boosts" : "pre.noBoosts");
             for (int i = 0; i < shown.Count; i++)
                 ((RectTransform)shown[i].root.transform).anchoredPosition = new Vector2((i - (shown.Count - 1) * 0.5f) * 270f, -500f);
             RefreshBoosts();

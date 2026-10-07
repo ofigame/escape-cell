@@ -118,6 +118,23 @@ namespace SquashBot.UI
                         UiFactory.Fill(rail, dark, UiSprites.Rounded, 8f).raycastTarget = false;
                     }
                     break;
+                case Tool.Freeze:
+                    // A snowflake: three crossed bars.
+                    for (int k = 0; k < 3; k++)
+                    {
+                        var bar = UiFactory.Box("Flake", parent, c, Vector2.zero, new Vector2(14f, 96f));
+                        bar.pivot = c;
+                        bar.localRotation = Quaternion.Euler(0f, 0f, k * 60f);
+                        UiFactory.Fill(bar, dark, UiSprites.Rounded, 8f).raycastTarget = false;
+                    }
+                    break;
+                case Tool.Blast:
+                {
+                    var star = UiFactory.Box("Burst", parent, c, Vector2.zero, new Vector2(100f, 100f));
+                    star.pivot = c;
+                    UiFactory.Fill(star, dark, UiSprites.Star).raycastTarget = false;
+                    break;
+                }
                 default:
                 {
                     foreach (float size in new[] { 104f, 64f })

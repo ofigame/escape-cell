@@ -19,6 +19,10 @@ namespace SquashBot.UI
         private Image rim;
         private CanvasGroup group;
         private float left, time;
+        private readonly System.Collections.Generic.Queue<(string text, string who, Color? color)> queued = new System.Collections.Generic.Queue<(string, string, Color?)>();
+
+        /// <summary>How high above the bottom edge the bubble sits.</summary>
+        public float BaseY = 330f;
 
         public static BipTip Create(Transform parent)
         {
@@ -41,6 +45,7 @@ namespace SquashBot.UI
             rim.raycastTarget = false;
             line = UiFactory.TextBox("Line", bubble, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(480f, 104f), "", 36f, Color.white,
                 FontStyles.Bold, align: TextAlignmentOptions.MidlineLeft);
+            line.textWrappingMode = TextWrappingModes.Normal;
             line.enableAutoSizing = true;
             line.fontSizeMin = 24f;
             line.fontSizeMax = 36f;
@@ -79,17 +84,33 @@ namespace SquashBot.UI
             AudioManager.PlaySfx(Sfx.Click, 0.35f, 1.7f, 0.1f);
         }
 
-        public void Hide() => left = 0f;
+        /// <summary>Says the line after the ones already waiting (straight away when nothing is being said).</summary>
+        public void Queue(string text, string who = null, Color? color = null)
+        {
+            if (left > 0.4f) queued.Enqueue((text, who, color));
+            else Say(text, who, color);
+        }
+
+        public void Hide()
+        {
+            left = 0f;
+            queued.Clear();
+        }
 
         private void Update()
         {
             float dt = Time.unscaledDeltaTime;
             time += dt;
             left -= dt;
+            if (left <= 0f && queued.Count > 0)
+            {
+                var next = queued.Dequeue();
+                Say(next.text, next.who, next.color);
+            }
             bool on = left > 0f;
             group.alpha = Mathf.MoveTowards(group.alpha, on ? 1f : 0f, dt * 6f);
             float slide = (1f - group.alpha) * -120f;
-            root.anchoredPosition = new Vector2(24f + slide, 330f + (on ? Mathf.Sin(time * 5f) * 3f : 0f));
+            root.anchoredPosition = new Vector2(24f + slide, BaseY + (on ? Mathf.Sin(time * 5f) * 3f : 0f));
         }
     }
 }

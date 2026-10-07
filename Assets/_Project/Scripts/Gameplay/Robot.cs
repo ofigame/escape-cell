@@ -192,9 +192,41 @@ namespace SquashBot.Gameplay
             if (!back.IsDefault) CosmeticModels.Back(cosmetics, back.id, back.color);
             accessories.gameObject.SetActive(hat.IsDefault && back.IsDefault);
 
+            // Arm and leg pieces replace the plain ones; shaped eyes replace the plain eye blocks.
+            var arms = outfit[Data.Slot.Arms];
+            var legs = outfit[Data.Slot.Legs];
+            if (!arms.IsDefault) CosmeticModels.Arms(cosmetics, arms.id, arms.color);
+            if (!legs.IsDefault) CosmeticModels.Legs(cosmetics, legs.id, legs.color);
+            foreach (var part in new[] { "ArmL", "ArmR" }) SetPartShown(part, arms.IsDefault);
+            foreach (var part in new[] { "LegL", "LegR", "FootL", "FootR" }) SetPartShown(part, legs.IsDefault);
+            var badge = outfit[Data.Slot.Badge];
+            if (!badge.IsDefault) CosmeticModels.Badge(cosmetics, badge.id, badge.color);
+
+            bool shaped = Data.Cosmetics.ShapedEyes(eyes.id);
+            foreach (var e in new[] { eyeL, eyeR })
+            {
+                var old = e.Find("Shape");
+                if (old != null) Destroy(old.gameObject);
+                e.GetComponent<MeshRenderer>().enabled = !shaped;
+                if (shaped) CosmeticModels.EyeShape(e, eyes.id, eyeMaterial);
+            }
+
+            var step = outfit[Data.Slot.Step];
+            StepId = step.IsDefault ? null : step.id;
+            StepColor = step.color;
             var trail = outfit[Data.Slot.Trail];
             TrailColor = trail.IsDefault ? (Color?)null : trail.color;
             dance = outfit[Data.Slot.Dance].id;
+        }
+
+        /// <summary>Step mark from the paint workshop (null = none) and its colour.</summary>
+        public string StepId { get; private set; }
+        public Color StepColor { get; private set; }
+
+        private void SetPartShown(string name, bool shown)
+        {
+            var part = visual.Find(name);
+            if (part != null) part.gameObject.SetActive(shown);
         }
 
         private void UpdateShieldAndBlink()
@@ -257,6 +289,18 @@ namespace SquashBot.Gameplay
             targetFacing = FacingCamera;
             visual.localRotation = targetFacing;
             gameObject.SetActive(true);
+        }
+
+        /// <summary>Turn to look straight at the camera (the garage shows the robot off from the front).</summary>
+        public void FaceCamera()
+        {
+            var cam = Camera.main;
+            if (cam == null) return;
+            var back = -cam.transform.forward;
+            back.y = 0f;
+            if (back.sqrMagnitude < 0.01f) return;
+            targetFacing = Quaternion.LookRotation(back);
+            visual.localRotation = targetFacing;
         }
 
         private const float HoverHeight = 1.15f;

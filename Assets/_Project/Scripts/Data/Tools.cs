@@ -10,11 +10,16 @@ namespace SquashBot.Data
         /// <summary>Mends the holes and fire around the robot and keeps those tiles from breaking for a while.</summary>
         Bridge,
         /// <summary>Wipes every block in the air and on the ground (and, upgraded, lasers and barrels too).</summary>
-        Emp
+        Emp,
+        /// <summary>Freezes the falling blocks (and everything else that moves) in mid-air for a few seconds.</summary>
+        Freeze,
+        /// <summary>Blasts the blocks around the robot: a plus, then a square, then a big square.</summary>
+        Blast
     }
 
     /// <summary>
-    /// The tool bag: tools are unlocked and upgraded with coins (level 1-3), and up to two ride along in the bag.
+    /// Bip's tool bag: the story unlocks each tool (from level 11, the freeze from 31, the blast from 61), coins upgrade
+    /// it (level 1-3), and up to two ride along in the bag.
     /// Each level starts with one charge per tool (two at level 3); close calls and combos refill them.
     /// Every tool can be tried once for free before buying it.
     /// </summary>
@@ -25,8 +30,14 @@ namespace SquashBot.Data
         /// <summary>Tools (and trials) show up from this level (0-based index) on.</summary>
         public const int FromLevel = 10;
 
-        private static readonly int[] UnlockPrices = { 600, 800, 1200 };
-        private static readonly int[] UpgradePrices = { 400, 800 };
+        /// <summary>Workshop prices for levels 1, 2 and 3 (the same for every tool).</summary>
+        private static readonly int[] Prices = { 150, 450, 1200 };
+
+        /// <summary>The level (0-based index) from which the story has handed the tool over.</summary>
+        public static int UnlockLevel(Tool t) => t == Tool.Freeze ? 30 : t == Tool.Blast ? 60 : FromLevel;
+
+        /// <summary>The story has reached the tool (or it was bought before the story locks came in).</summary>
+        public static bool Unlocked(Tool t) => Owned(t) || SaveData.UnlockedLevel >= UnlockLevel(t);
 
         public static Tool[] All => (Tool[])System.Enum.GetValues(typeof(Tool));
 
@@ -37,13 +48,12 @@ namespace SquashBot.Data
         public static int NextPrice(Tool t)
         {
             int level = Level(t);
-            if (level == 0) return UnlockPrices[(int)t];
-            return level >= MaxLevel ? 0 : UpgradePrices[level - 1];
+            return level >= MaxLevel ? 0 : Prices[level];
         }
 
         public static bool TryBuy(Tool t)
         {
-            if (IsMaxed(t) || !Shop.Spend(NextPrice(t))) return false;
+            if (IsMaxed(t) || !Unlocked(t) || !Shop.Spend(NextPrice(t))) return false;
             bool first = !Owned(t);
             PlayerPrefs.SetInt("sb_tool_" + t, Level(t) + 1);
             if (first && Equipped(0) == null) SetSlot(0, t); // a first tool goes straight into the bag
@@ -103,7 +113,7 @@ namespace SquashBot.Data
         public static Tool? NextTrial()
         {
             foreach (var t in All)
-                if (!Owned(t) && !TrialUsed(t)) return t;
+                if (!Owned(t) && !TrialUsed(t) && Unlocked(t)) return t;
             return null;
         }
 
@@ -111,7 +121,7 @@ namespace SquashBot.Data
 
         public static int Charges(int level) => level >= 3 ? 2 : 1;
 
-        public static float SlowSeconds(int level) => level >= 2 ? 4.5f : 3f;
+        public static float SlowSeconds(int level) => 2f + level; // 3, 4, 5 s
         public const float SlowScale = 0.45f;
 
         public static float BridgeSeconds(int level) => level >= 2 ? 8f : 5f;
@@ -119,5 +129,16 @@ namespace SquashBot.Data
 
         /// <summary>Upgraded EMP also switches off lasers and barrels.</summary>
         public static bool EmpClearsRules(int level) => level >= 2;
+
+        public static float FreezeSeconds(int level) => 1f + level; // 2, 3, 4 s
+
+        /// <summary>Blast shape: 1 = a plus, 2 = a 3x3 square, 3 = a 5x5 square.</summary>
+        public static bool BlastHits(int level, int dx, int dy)
+        {
+            int ax = System.Math.Abs(dx), ay = System.Math.Abs(dy);
+            if (level <= 1) return ax + ay <= 1;
+            int r = level >= 3 ? 2 : 1;
+            return ax <= r && ay <= r;
+        }
     }
 }

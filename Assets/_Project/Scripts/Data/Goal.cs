@@ -77,12 +77,12 @@ namespace SquashBot.Data
             foreach (Upgrade u in System.Enum.GetValues(typeof(Upgrade)))
             {
                 int p = Shop.NextPrice(u);
-                if (!Shop.IsMaxed(u) && p > coins && p < price) { price = p; name = Loc.T("shop." + u); }
+                if (!Shop.IsMaxed(u) && Shop.Unlocked(u) && p > coins && p < price) { price = p; name = Loc.T("shop." + u); }
             }
             foreach (var t in Tools.All)
             {
                 int p = Tools.NextPrice(t);
-                if (!Tools.IsMaxed(t) && p > coins && p < price) { price = p; name = Loc.T("tool." + t); }
+                if (!Tools.IsMaxed(t) && Tools.Unlocked(t) && p > coins && p < price) { price = p; name = Loc.T("tool." + t); }
             }
             if (name != null) return true;
             price = 0;

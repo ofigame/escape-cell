@@ -19,15 +19,19 @@ namespace SquashBot.UI
         public event Action BackPressed;
         /// <summary>Raised after any purchase (the caller refreshes coins, lives and bonus rounds).</summary>
         public event Action Purchased;
+        /// <summary>The paint workshop (the garage) was asked for.</summary>
+        public event Action PaintPressed;
 
         private UiScreen screen;
         private TextMeshProUGUI coinsText;
         private RectTransform content;
         private readonly List<Action> refreshers = new List<Action>();
+        private BipTip bip;
+        private int builtDay = -1;
 
         public UiScreen Screen => screen;
 
-        private enum Item { Shield, Magnet, Hover, Lives, StartShield, ExtraRescue, StartHammer, DoubleCoins, Life, Tunnel }
+        private enum Item { Shield, Magnet, Hover, Lives, Rescue, StartShield, ExtraRescue, StartHammer, DoubleCoins, CoinMagnet, TunnelBoost, Life, Tunnel }
 
         public static ShopScreen Create(Transform canvasRoot)
         {
@@ -44,7 +48,7 @@ namespace SquashBot.UI
 
             var bar = UiFactory.Rect("TopBar", root, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -190f), Vector2.zero);
             UiFactory.MakeButton(bar, "<", Kind.Icon, new Vector2(0f, 0.5f), new Vector2(36f, 0f), new Vector2(124f, 124f), () => BackPressed?.Invoke(), 64f);
-            UiFactory.TextBox("Title", bar, new Vector2(0.5f, 0.5f), new Vector2(0f, 0f), new Vector2(520f, 110f), Loc.T("shop.title"), 64f, Palette.UiText, title: true)
+            UiFactory.TextBox("Title", bar, new Vector2(0.5f, 0.5f), new Vector2(0f, 0f), new Vector2(520f, 110f), Loc.T("ws.title"), 56f, Palette.UiText, title: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var coins = UiFactory.Pill("Coins", bar, new Vector2(1f, 0.5f), new Vector2(-36f, 0f), new Vector2(260f, 100f), UiFactory.PillColor);
             UIController.CoinIcon(coins, new Vector2(56f, 0f));
@@ -64,25 +68,56 @@ namespace SquashBot.UI
             scroll.decelerationRate = 0.12f;
             scroll.scrollSensitivity = 60f;
 
+            bip = BipTip.Create(root);
+        }
+
+        /// <summary>
+        /// Fills the three shelves: the tool bag (story-locked skills, upgraded with coins), the paint workshop (the garage)
+        /// and the daily counter (a different few one-use items every day). Rebuilt when the day changes.
+        /// </summary>
+        private void Populate()
+        {
+            builtDay = System.DateTime.Today.DayOfYear;
+            for (int i = content.childCount - 1; i >= 0; i--) Destroy(content.GetChild(i).gameObject);
+            refreshers.Clear();
+
             float y = -24f;
-            Header(content, Loc.T("shop.tools"), ref y);
+            Header(content, Loc.T("ws.tools"), ref y);
             SlotsRow(content, ref y);
             foreach (var t in Tools.All) ToolRow(content, t, ref y);
-            y -= 20f;
-            Header(content, Loc.T("shop.upgrades"), ref y);
             Row(content, Item.Shield, ref y);
+            Row(content, Item.Rescue, ref y);
             Row(content, Item.Magnet, ref y);
             Row(content, Item.Hover, ref y);
             Row(content, Item.Lives, ref y);
             y -= 20f;
-            Header(content, Loc.T("shop.boosts"), ref y);
-            Row(content, Item.StartShield, ref y);
-            Row(content, Item.ExtraRescue, ref y);
-            Row(content, Item.StartHammer, ref y);
-            Row(content, Item.DoubleCoins, ref y);
+            Header(content, Loc.T("ws.paint"), ref y);
+            PaintRow(content, ref y);
+            y -= 20f;
+            Header(content, Loc.T("ws.counter"), ref y);
+            foreach (var b in Shop.Counter()) Row(content, (Item)((int)Item.StartShield + (int)b), ref y);
             Row(content, Item.Life, ref y);
             Row(content, Item.Tunnel, ref y);
             content.sizeDelta = new Vector2(0f, -y + 40f);
+        }
+
+        /// <summary>The paint shelf: a door into the garage, where the robot gets its colours back.</summary>
+        private void PaintRow(Transform parent, ref float y)
+        {
+            var row = UiFactory.Pill("Paint", parent, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.24f, 0.18f, 0.42f, 0.95f));
+            y -= 166f;
+            var icon = UiFactory.Box("Icon", row, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(110f, 110f));
+            UiFactory.Fill(icon, new Color(1f, 0.6f, 0.75f), UiSprites.Rounded, 2f).raycastTarget = false;
+            foreach (var (pos, c) in new[] { (new Vector2(-20f, 14f), new Color(0.45f, 0.85f, 0.7f)), (new Vector2(20f, 14f), new Color(1f, 0.8f, 0.35f)), (new Vector2(0f, -18f), new Color(0.35f, 0.6f, 1f)) })
+            {
+                var drop = UiFactory.Box("Drop", icon, new Vector2(0.5f, 0.5f), pos, new Vector2(40f, 40f));
+                drop.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(drop, c, UiSprites.Circle).raycastTarget = false;
+            }
+            UiFactory.TextBox("Name", row, new Vector2(0f, 1f), new Vector2(156f, -22f), new Vector2(440f, 56f), Loc.T("ws.paintName"), 42f, Palette.UiText, align: TextAlignmentOptions.Left);
+            UiFactory.TextBox("Desc", row, new Vector2(0f, 1f), new Vector2(156f, -68f), new Vector2(440f, 70f), Loc.T("ws.paintDesc"), 28f,
+                new Color(0.85f, 0.86f, 1f, 0.75f), FontStyles.Normal, align: TextAlignmentOptions.TopLeft).textWrappingMode = TextWrappingModes.Normal;
+            UiFactory.MakeButton(row, Loc.T("ws.paintOpen"), Kind.Primary, new Vector2(1f, 0.5f), new Vector2(-24f, 0f), new Vector2(250f, 110f), () => PaintPressed?.Invoke(), 40f);
         }
 
         private static void Header(Transform root, string text, ref float y)
@@ -135,17 +170,19 @@ namespace SquashBot.UI
             {
                 int price = PriceOf(item);
                 bool maxed = IsUpgrade(item) && Shop.IsMaxed(ToUpgrade(item));
-                bool full = item == Item.Life && Lives.IsFull;
-                label.text = maxed ? Loc.T("shop.max") : full ? Loc.T("shop.full") : price.ToString();
-                buy.interactable = !maxed && !full && SaveData.Coins >= price;
+                bool locked = IsUpgrade(item) && !Shop.Unlocked(ToUpgrade(item));
+                bool full = item == Item.Life && Lives.IsFull || IsBoost(item) && Shop.Full(ToBoost(item));
+                label.text = locked ? Loc.F("ws.lockedAt", Shop.UnlockLevel(ToUpgrade(item)) + 1) : maxed ? Loc.T("shop.max") : full ? Loc.T("shop.full") : price.ToString();
+                buy.interactable = !locked && !maxed && !full;
+                buy.targetGraphic.color = !locked && !maxed && !full && SaveData.Coins >= price ? Color.white : new Color(1f, 1f, 1f, 0.5f);
                 if (IsUpgrade(item))
                 {
                     int level = Shop.Level(ToUpgrade(item));
                     for (int i = 0; i < pips.Count; i++) pips[i].color = i < level ? new Color(0.36f, 0.85f, 0.6f) : new Color(1f, 1f, 1f, 0.18f);
                 }
                 if (owned != null) owned.text = Loc.F("shop.owned", Shop.Owned(ToBoost(item)));
-                desc.text = Describe(item);
-                bool saving = !maxed && !full && SaveData.Coins < price;
+                desc.text = locked ? Loc.T("ws.src." + ToUpgrade(item)) : Describe(item);
+                bool saving = !locked && !maxed && !full && SaveData.Coins < price;
                 need.gameObject.SetActive(saving);
                 needBar.gameObject.SetActive(saving);
                 if (saving)
@@ -249,14 +286,20 @@ namespace SquashBot.UI
 
             var buy = UiFactory.MakeButton(row, "", Kind.Gold, new Vector2(1f, 0.5f), new Vector2(-24f, 0f), new Vector2(250f, 110f), () =>
             {
+                bool first = !Tools.Owned(tool);
                 if (Tools.TryBuy(tool))
                 {
                     AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
                     Haptics.Medium();
                     row.localScale = Vector3.one * 1.05f;
+                    WorkshopTalk.ToolBought(bip, tool, first);
                     Purchased?.Invoke();
                 }
-                else AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                else
+                {
+                    AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                    if (Tools.Unlocked(tool) && !Tools.IsMaxed(tool)) WorkshopTalk.Poor(bip);
+                }
                 Refresh();
             }, 46f);
             var buyLabel = buy.GetComponentInChildren<TextMeshProUGUI>();
@@ -267,9 +310,11 @@ namespace SquashBot.UI
                 for (int i = 0; i < pips.Count; i++) pips[i].color = i < level ? new Color(0.36f, 0.85f, 0.6f) : new Color(1f, 1f, 1f, 0.18f);
                 bool maxed = Tools.IsMaxed(tool);
                 int price = Tools.NextPrice(tool);
-                buyLabel.text = maxed ? Loc.T("shop.max") : price.ToString();
-                buy.interactable = !maxed && SaveData.Coins >= price;
-                desc.text = Loc.T(level == 0 ? "tool." + tool + ".desc" : level < Tools.MaxLevel ? "tool." + tool + ".next" : "tool.maxed");
+                bool locked = !Tools.Unlocked(tool);
+                buyLabel.text = locked ? Loc.F("ws.lockedAt", Tools.UnlockLevel(tool) + 1) : maxed ? Loc.T("shop.max") : price.ToString();
+                buy.interactable = !locked && !maxed;
+                buy.targetGraphic.color = !locked && !maxed && SaveData.Coins >= price ? Color.white : new Color(1f, 1f, 1f, 0.5f);
+                desc.text = locked ? Loc.T("ws.src." + tool) : Loc.T(level == 0 ? "tool." + tool + ".desc" : level < Tools.MaxLevel ? "tool." + tool + ".next" : "tool.maxed");
                 bool ownedTool = Tools.Owned(tool);
                 mid.gameObject.SetActive(ownedTool);
                 if (ownedTool)
@@ -278,7 +323,7 @@ namespace SquashBot.UI
                     midLabel.text = Loc.T(on ? "tool.off" : "tool.on");
                     midLabel.color = on ? Palette.UiCyan : Palette.UiText;
                 }
-                bool saving = !ownedTool && SaveData.Coins < price;
+                bool saving = !locked && !ownedTool && SaveData.Coins < price;
                 need.gameObject.SetActive(saving);
                 needBar.gameObject.SetActive(saving);
                 if (saving)
@@ -289,8 +334,8 @@ namespace SquashBot.UI
             });
         }
 
-        private static bool IsUpgrade(Item item) => item <= Item.Lives;
-        private static bool IsBoost(Item item) => item >= Item.StartShield && item <= Item.DoubleCoins;
+        private static bool IsUpgrade(Item item) => item <= Item.Rescue;
+        private static bool IsBoost(Item item) => item >= Item.StartShield && item <= Item.TunnelBoost;
         private static Boost ToBoost(Item item) => (Boost)(item - Item.StartShield);
         private static Upgrade ToUpgrade(Item item) => (Upgrade)(int)item;
 
@@ -301,7 +346,9 @@ namespace SquashBot.UI
                 case Item.StartShield:
                 case Item.ExtraRescue:
                 case Item.StartHammer:
-                case Item.DoubleCoins: return Shop.Price(ToBoost(item));
+                case Item.DoubleCoins:
+                case Item.CoinMagnet:
+                case Item.TunnelBoost: return Shop.Price(ToBoost(item));
                 case Item.Life: return Shop.LifePrice;
                 case Item.Tunnel: return Shop.TunnelPrice;
                 default: return Shop.NextPrice(ToUpgrade(item));
@@ -321,6 +368,8 @@ namespace SquashBot.UI
                     return Loc.F("shop.Hover.now", Shop.HoverSeconds.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture));
                 case Item.Lives:
                     return Loc.F("shop.Lives.now", Shop.MaxLives);
+                case Item.Rescue:
+                    return Shop.Level(Upgrade.Rescue) > 0 ? Loc.F("shop.Rescue.now", Shop.MaxRescues) : Loc.T("shop.Rescue.desc");
                 default:
                     return Loc.T("shop." + item + ".desc");
             }
@@ -334,7 +383,9 @@ namespace SquashBot.UI
                 case Item.StartShield:
                 case Item.ExtraRescue:
                 case Item.StartHammer:
-                case Item.DoubleCoins: ok = Shop.TryBuy(ToBoost(item)); break;
+                case Item.DoubleCoins:
+                case Item.CoinMagnet:
+                case Item.TunnelBoost: ok = Shop.TryBuy(ToBoost(item)); break;
                 case Item.Life:
                     ok = !Lives.IsFull && Shop.Spend(Shop.LifePrice);
                     if (ok) Lives.Add(1);
@@ -351,22 +402,31 @@ namespace SquashBot.UI
                 AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
                 Haptics.Medium();
                 row.localScale = Vector3.one * 1.05f;
+                if (IsUpgrade(item)) WorkshopTalk.UpgradeBought(bip, ToUpgrade(item));
+                else if (IsBoost(item)) WorkshopTalk.CounterBought(bip);
                 Purchased?.Invoke();
             }
             else
             {
                 AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                if (SaveData.Coins < PriceOf(item)) WorkshopTalk.Poor(bip);
             }
             Refresh();
         }
 
         public void Show()
         {
+            if (builtDay != System.DateTime.Today.DayOfYear) Populate();
             Refresh();
             screen.Show();
+            if (WorkshopTalk.IntroDue) WorkshopTalk.Welcome(bip);
         }
 
-        public void Hide() => screen.Hide(true);
+        public void Hide()
+        {
+            bip.Hide();
+            screen.Hide(true);
+        }
 
         private void Refresh()
         {
@@ -389,11 +449,14 @@ namespace SquashBot.UI
             {
                 case Item.Shield:
                 case Item.StartShield: return new Color(0.45f, 0.75f, 1f);
-                case Item.Magnet: return new Color(1f, 0.55f, 0.55f);
+                case Item.Magnet:
+                case Item.CoinMagnet: return new Color(1f, 0.55f, 0.55f);
                 case Item.Hover: return new Color(0.55f, 0.9f, 0.75f);
                 case Item.Lives:
                 case Item.Life: return new Color(1f, 0.55f, 0.65f);
+                case Item.Rescue:
                 case Item.ExtraRescue: return new Color(0.75f, 0.65f, 1f);
+                case Item.TunnelBoost: return new Color(0.55f, 0.9f, 0.75f);
                 case Item.StartHammer: return ThunderHammer.Electric;
                 default: return Palette.UiGold;
             }
@@ -416,6 +479,7 @@ namespace SquashBot.UI
                     break;
                 }
                 case Item.Magnet:
+                case Item.CoinMagnet:
                     foreach (float x in new[] { -18f, 18f })
                     {
                         var leg = UiFactory.Box("Leg", icon, new Vector2(0.5f, 0.5f), new Vector2(x, 6f), new Vector2(18f, 50f));
@@ -439,6 +503,7 @@ namespace SquashBot.UI
                 case Item.Life:
                     UIController.HeartIcon(icon, new Vector2(55f, 0f), 62f);
                     break;
+                case Item.Rescue:
                 case Item.ExtraRescue:
                     foreach (bool vertical in new[] { true, false })
                     {
