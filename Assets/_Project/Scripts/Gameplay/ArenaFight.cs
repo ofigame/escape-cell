@@ -44,6 +44,8 @@ namespace SquashBot.Gameplay
         public Func<int> Ammo;
         /// <summary>False while the game is paused or over: no input, no blows.</summary>
         public Func<bool> CanAct;
+        /// <summary>Movement speed factor (the super skill makes the robot faster).</summary>
+        public float SpeedBoost = 1f;
         public Action SpendAmmo;
 
         public bool Active { get; private set; }
@@ -68,7 +70,7 @@ namespace SquashBot.Gameplay
         private CameraRig rig;
         private FxSystem fx;
         private Func<bool> targetGone;
-        private Action windup;
+        private Action<int> windup;
         private Vector3 centre;
         private float radius, difficulty;
         private int hammerLevel;
@@ -93,6 +95,11 @@ namespace SquashBot.Gameplay
         private enum Gesture { None, Strafe, Down }
         private Gesture gesture;
         private float strafeInput;
+        private Vector2 lastPos;
+        private bool ignoring;
+
+        /// <summary>Screen points that belong to on-screen buttons (no strike, no dodge from them).</summary>
+        public Func<Vector2, bool> Ignore;
 
         private Material redMat, redFillMat;
 
@@ -116,7 +123,7 @@ namespace SquashBot.Gameplay
         /// Starts a fight: the robot is at its current spot inside the ring (radius <paramref name="ringRadius"/>
         /// around <paramref name="arenaCentre"/>); <paramref name="hardness"/> 0-1 speeds the monster up.
         /// </summary>
-        public void Begin(Func<bool> gone, Action windUp, Vector3 arenaCentre, float ringRadius, float hardness, int hammer, LineRenderer arenaRing)
+        public void Begin(Func<bool> gone, Action<int> windUp, Vector3 arenaCentre, float ringRadius, float hardness, int hammer, LineRenderer arenaRing)
         {
             targetGone = gone;
             windup = windUp;
@@ -213,6 +220,12 @@ namespace SquashBot.Gameplay
             }
 #endif
             InputReader.ReadPointer(out bool pressed, out Vector2 pos);
+            // When the finger lifts, phones report no position any more: the last one held is the release point.
+            if (pressed) lastPos = pos;
+            else pos = lastPos;
+            // Presses on the on-screen buttons (tools, skills, pause) belong to the UI.
+            if (pressed && !tracking && Ignore != null && Ignore(pos)) { ignoring = true; return; }
+            if (ignoring) { if (!pressed) ignoring = false; return; }
             if (pressed && !tracking)
             {
                 tracking = true;
@@ -307,7 +320,7 @@ namespace SquashBot.Gameplay
                     {
                         // Sidestep around the monster: along the robot's right, then back onto the same circle.
                         var right = Vector3.Cross(Vector3.up, -outward);
-                        var p = Flat(RobotPos - centre) + right * strafeInput * StrafeSpeed * dt;
+                        var p = Flat(RobotPos - centre) + right * strafeInput * StrafeSpeed * SpeedBoost * dt;
                         p = p.normalized * Mathf.Clamp(d, MeleeDistance + 0.3f, radius - 0.2f);
                         robot.ArenaPlace(Ground(centre + p), -p);
                         robot.ArenaBob(Mathf.Abs(strafeInput));
@@ -353,7 +366,7 @@ namespace SquashBot.Gameplay
                 case State.Flee:
                 {
                     // Back turned on the monster, running out; the camera swings behind.
-                    float nd = d + RunSpeed * dt;
+                    float nd = d + RunSpeed * SpeedBoost * dt;
                     robot.ArenaPlace(Ground(centre + outward * nd), outward);
                     robot.ArenaBob(1f);
                     if (nd >= radius + 0.3f)
@@ -386,9 +399,10 @@ namespace SquashBot.Gameplay
                 if (a.fill != null) a.fill.localScale = new Vector3(k, 1f, k);
                 MaterialFactory.SetColors(a.mat, new Color(1f, 0.25f, 0.2f, 0.22f + 0.18f * Mathf.Sin(a.t * 18f)), new Color(1.2f, 0.2f, 0.15f));
                 if (k < 1f) continue;
-                Resolve(a);
-                Destroy(a.root);
+                // Off the list first: the blow may end the fight (and clear the list).
                 attacks.RemoveAt(i);
+                Destroy(a.root);
+                Resolve(a);
                 if (!Active) return;
             }
         }
@@ -405,6 +419,8 @@ namespace SquashBot.Gameplay
                 root = new GameObject("Attack " + kind),
                 mat = MaterialFactory.CreateTransparent(new Color(1f, 0.25f, 0.2f, 0.3f), new Color(1.2f, 0.2f, 0.15f))
             };
+            attacks.Add(a);
+            windup?.Invoke((int)kind); // 0 slam, 1 swipe, 2 throw
             var y = centre.y + 0.02f;
             switch (kind)
             {
@@ -413,7 +429,6 @@ namespace SquashBot.Gameplay
                     a.point = centre;
                     float rr = 1.75f;
                     Disc(a, new Vector3(centre.x, y, centre.z), rr);
-                    windup?.Invoke();
                     break;
                 }
                 case AttackKind.Wedge:
@@ -438,6 +453,7 @@ namespace SquashBot.Gameplay
                     var right = Vector3.Cross(Vector3.up, -lead.normalized);
                     a.point = Ground(RobotPos + right * strafeInput * 0.6f);
                     Disc(a, new Vector3(a.point.x, y, a.point.z), 0.62f);
+                    ThrownRock.Create(centre + Vector3.up * 1.7f, a.point, a.duration, new Color(0.6f, 0.5f, 0.4f));
                     break;
                 }
             }
@@ -462,6 +478,7 @@ namespace SquashBot.Gameplay
             {
                 case AttackKind.Slam:
                     hit = Dist < 1.75f;
+                    Shockwave.Create(centre, 1.9f, new Color(1f, 0.55f, 0.3f));
                     fx.Dust(centre + Vector3.up * 0.1f, new Color(0.9f, 0.85f, 0.8f), 30, 5f);
                     rig.Shake(0.8f);
                     AudioManager.PlaySfx(Sfx.Impact, 0.9f, 0.6f);
@@ -471,6 +488,7 @@ namespace SquashBot.Gameplay
                     var to = Flat(RobotPos - centre);
                     float ang = Mathf.Atan2(to.x, to.z) * Mathf.Rad2Deg;
                     hit = Mathf.Abs(Mathf.DeltaAngle(ang, a.angle)) < 25f && to.magnitude < radius + 0.4f;
+                    TravelWave.Create(centre, Quaternion.Euler(0f, a.angle, 0f) * Vector3.forward, radius + 0.6f, new Color(1f, 0.4f, 0.25f), fx);
                     fx.Burst(centre + Quaternion.Euler(0f, a.angle, 0f) * Vector3.forward * 1.5f + Vector3.up * 0.3f, new Color(1f, 0.5f, 0.3f), new Color(2.4f, 0.8f, 0.3f), 26, 6f);
                     rig.Shake(0.6f);
                     AudioManager.PlaySfx(Sfx.Blocked, 0.9f, 0.6f);
@@ -478,6 +496,7 @@ namespace SquashBot.Gameplay
                 }
                 default:
                     hit = Flat(RobotPos - a.point).magnitude < 0.68f;
+                    Shockwave.Create(a.point, 0.75f, new Color(0.85f, 0.7f, 0.5f));
                     fx.Burst(a.point + Vector3.up * 0.2f, new Color(0.6f, 0.5f, 0.45f), new Color(0.8f, 0.6f, 0.4f), 22, 4f);
                     rig.Shake(0.5f);
                     AudioManager.PlaySfx(Sfx.Impact, 0.7f, 0.9f);

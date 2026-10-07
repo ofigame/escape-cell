@@ -20,7 +20,9 @@ namespace SquashBot.Gameplay
         Blast,
         Magnet,
         /// <summary>A heart: heals part of the health bar (health levels only).</summary>
-        Heart
+        Heart,
+        /// <summary>Super: a few seconds untouchable and fast (the hardest floors only, rare).</summary>
+        Super
     }
 
     /// <summary>Spawns rare power-up pickups on free tiles (from the levels that enable them).</summary>
@@ -61,7 +63,7 @@ namespace SquashBot.Gameplay
             fx = fxSystem;
             coreMaterial = MaterialFactory.Create(Palette.ShieldPickup, Palette.ShieldPickupGlow);
             haloMaterial = MaterialFactory.CreateTransparent(Palette.ShieldBubble, Palette.ShieldGlow * 0.6f);
-            var colors = new[] { Palette.ShieldPickup, new Color(0.4f, 1f, 0.6f), new Color(0.55f, 0.85f, 1f), new Color(1f, 0.5f, 0.3f), new Color(1f, 0.35f, 0.4f), new Color(1f, 0.42f, 0.58f) };
+            var colors = new[] { Palette.ShieldPickup, new Color(0.4f, 1f, 0.6f), new Color(0.55f, 0.85f, 1f), new Color(1f, 0.5f, 0.3f), new Color(1f, 0.35f, 0.4f), new Color(1f, 0.42f, 0.58f), new Color(1f, 0.82f, 0.3f) };
             typeCore = new Material[colors.Length];
             typeHalo = new Material[colors.Length];
             for (int i = 0; i < colors.Length; i++)
@@ -172,6 +174,10 @@ namespace SquashBot.Gameplay
                     for (int i = 0; i < 3; i++)
                         Shapes.Rounded("Arm", icon, Vector3.zero, new Vector3(0.05f, 0.3f, 0.04f), 0.02f, white).transform.localRotation = Quaternion.Euler(0f, 0f, i * 60f);
                     break;
+                case PowerUpType.Super:
+                    for (int i = 0; i < 5; i++)
+                        Shapes.Rounded("Ray", icon, Vector3.zero, new Vector3(0.07f, 0.34f, 0.05f), 0.03f, white).transform.localRotation = Quaternion.Euler(0f, 0f, i * 36f);
+                    break;
                 case PowerUpType.Heart:
                     foreach (float s in new[] { -1f, 1f })
                         Shapes.Rounded("Lobe", icon, new Vector3(s * 0.06f, 0.02f, 0f), new Vector3(0.13f, 0.22f, 0.05f), 0.05f, white).transform.localRotation = Quaternion.Euler(0f, 0f, s * 40f);
@@ -210,6 +216,8 @@ namespace SquashBot.Gameplay
             if (world >= 9) pool.Add(PowerUpType.Magnet);
             if (pool.Count == 0) pool.Add(PowerUpType.Freeze);
             if (WantsHeart != null && WantsHeart()) { pool.Add(PowerUpType.Heart); pool.Add(PowerUpType.Heart); }
+            // The super skill: only on the hardest floors, and only now and then.
+            if (level.score >= 70 && UnityEngine.Random.value < 0.18f) return PowerUpType.Super;
             foreach (var p in pickups) if (pool.Count > 1) pool.Remove(p.type);
             return pool[UnityEngine.Random.Range(0, pool.Count)];
         }

@@ -156,6 +156,12 @@ namespace SquashBot.Gameplay
         }
 
         private bool[,] floorPlan;
+        /// <summary>Rows of a water slide: no obstacles, a chute, and a rush of speed (later roads).</summary>
+        private readonly HashSet<int> slideRows = new HashSet<int>();
+        private Material chuteMat, waterMat;
+        private const float SlideBoost = 1.55f;
+        /// <summary>Roads have water slides from this level on (0-based).</summary>
+        private const int SlideFromLevel = 25;
         private int totalRows;
         private readonly List<(ObstacleKind kind, int lane, int row)> obstaclePlan = new List<(ObstacleKind, int, int)>();
         private readonly List<(int lane, float z, float y)> coinPlan = new List<(int, float, float)>();
@@ -236,8 +242,8 @@ namespace SquashBot.Gameplay
             length = roadLength;
             difficulty = roadDifficulty;
             nextWorld = toWorld;
-            speedStart = road ? Mathf.Lerp(4.4f, 6.2f, roadDifficulty) : SpeedStart;
-            speedEnd = road ? Mathf.Lerp(6.2f, 9.6f, roadDifficulty) : SpeedEnd;
+            speedStart = road ? Mathf.Lerp(6.1f, 7.2f, roadDifficulty) : SpeedStart; // brisk from the very first road
+            speedEnd = road ? Mathf.Lerp(7.8f, 10.4f, roadDifficulty) : SpeedEnd;
             startDelay = road ? 0f : StartDelay;
             transform.SetPositionAndRotation(origin, Quaternion.Euler(0f, heading, 0f));
             risky = false;
@@ -405,6 +411,9 @@ namespace SquashBot.Gameplay
             obstaclePlan.Clear();
             coinPlan.Clear();
             int magnets = 0, shields = 0;
+            slideRows.Clear();
+            int slides = roadMode && roadLevel >= SlideFromLevel ? (roadLevel >= 90 ? 2 : 1) : 0;
+            float nextSlide = 0.3f;
 
             CoinLine(1, 5, 6);
             int row = 16;
@@ -412,6 +421,17 @@ namespace SquashBot.Gameplay
             while (row < length - (roadMode ? 6 : 14))
             {
                 float p = row / length;
+                if (slides > 0 && p >= nextSlide && row + 30 < length - 8)
+                {
+                    // A water slide: a long chute with coins weaving from lane to lane.
+                    int n = 24;
+                    for (int s = 0; s < n; s++) slideRows.Add(row + s);
+                    for (int s = 0; s < n; s += 6) CoinLine((s / 6) % Lanes, row + s, 5);
+                    row += n + 5;
+                    slides--;
+                    nextSlide += 0.35f;
+                    continue;
+                }
                 // Early on only the gentle patterns; the full set from a third of the way in.
                 // On roads a new kind of obstacle joins every 3 levels: coins, holes and blocks first; hurdles from level 4,
                 // full gaps from 7, bars 10, sliding blocks 13, zigzags 16, jump pads 19, pickups 22, rollers 25, walls 28,
@@ -761,6 +781,31 @@ namespace SquashBot.Gameplay
 
         // ---------- Building ----------
 
+        /// <summary>The robot is on a water-slide row right now.</summary>
+        private bool OnSlide => slideRows.Count > 0 && slideRows.Contains(Mathf.FloorToInt(z + 0.5f));
+
+        /// <summary>A water-slide row: glossy blue water over the lanes, curved walls on both sides, a chevron now and then.</summary>
+        private void BuildChute(Transform root, int r)
+        {
+            if (chuteMat == null)
+            {
+                chuteMat = MaterialFactory.Create(new Color(0.95f, 0.98f, 1f), new Color(0.1f, 0.12f, 0.16f));
+                waterMat = MaterialFactory.CreateTransparent(new Color(0.35f, 0.75f, 1f, 0.55f), new Color(0.3f, 0.8f, 1.4f));
+            }
+            float half = Lanes * LaneWidth * 0.5f;
+            Shapes.Rounded("Water", root, new Vector3(0f, 0.065f, 0f), new Vector3(Lanes * LaneWidth, 0.02f, 1.02f), 0.01f, waterMat);
+            foreach (float side in new[] { -1f, 1f })
+            {
+                var wall = Shapes.Rounded("Chute", root, new Vector3(side * (half + 0.12f), 0.32f, 0f), new Vector3(0.12f, 0.7f, 1.04f), 0.05f, chuteMat);
+                wall.transform.localRotation = Quaternion.Euler(0f, 0f, side * -25f);
+                Shapes.Rounded("Lip", root, new Vector3(side * (half + 0.27f), 0.66f, 0f), new Vector3(0.14f, 0.08f, 1.04f), 0.03f, waterMat);
+            }
+            if (r % 3 == 0)
+                foreach (float side in new[] { -1f, 1f })
+                    Shapes.Rounded("Chevron", root, new Vector3(side * 0.16f, 0.08f, 0f), new Vector3(0.4f, 0.01f, 0.08f), 0.01f, chuteMat)
+                        .transform.localRotation = Quaternion.Euler(0f, side * 35f, 0f);
+        }
+
         private void BuildRow(int r)
         {
             if (roadMode && r > length) { BuildLanding(r); return; }
@@ -796,6 +841,7 @@ namespace SquashBot.Gameplay
                 }
             }
 
+            if (slideRows.Contains(r)) BuildChute(root, r);
             if (IsThemed) BuildThemeRow(root, r);
             else
             {
@@ -1189,6 +1235,12 @@ namespace SquashBot.Gameplay
         {
             startTimer += dt;
             float speed = startTimer < startDelay ? 0f : Mathf.Lerp(speedStart, speedEnd, Progress);
+            // On a water slide the robot shoots down the chute, low and fast.
+            if (OnSlide)
+            {
+                speed *= SlideBoost;
+                if (grounded) slideLeft = Mathf.Max(slideLeft, 0.15f);
+            }
             if (crashed) speed = 0f;
             if (ended && escaped) speed *= Mathf.Clamp01(1f - endTimer * 0.6f);
             if (falling) speed *= 0.6f;

@@ -251,6 +251,7 @@ namespace SquashBot.Gameplay
             ui.DailyBonus.AdPressed += WatchAdForDailyBonus;
             ui.Garage.PreviewChanged += outfit => robot.ApplyOutfit(outfit);
             ui.Garage.DancePreview += robot.Cheer;
+            ui.SkillBar.Pressed += OnSkillPressed;
             ui.NextPressed += () =>
             {
                 if (dailyRun) ShowMenu();
@@ -558,6 +559,7 @@ namespace SquashBot.Gameplay
 
             ShowLevelIntro(assisted);
             RefreshHud();
+            ui.SkillBar.Refresh(!bonusRun);
         }
 
         /// <summary>A story scene over the level's blurred platform, then <paramref name="done"/>.</summary>
@@ -1166,6 +1168,7 @@ namespace SquashBot.Gameplay
             UpdateJourney(Time.deltaTime);
             UpdateSkills(Time.deltaTime);
             UpdateHealth(Time.deltaTime);
+            UpdateSuperSkill(Time.deltaTime);
             if (level.marathon) UpdateMarathon(Time.deltaTime);
             ui.Arrows.Set(cameraRig.Cam, Goals());
             comboTimer -= Time.deltaTime;
@@ -1481,14 +1484,9 @@ namespace SquashBot.Gameplay
             comboTimer = 0f;
         }
 
-        private void OnPowerUpCollected(PowerUpType type, GridPos p)
+        /// <summary>A skill fires: from the bag (the skill bar) or straight from the floor (rescues).</summary>
+        private void ApplySkill(PowerUpType type, GridPos p)
         {
-            // The first time a skill is picked up, a banner says what it does.
-            if (PlayerPrefs.GetInt("sb_seen_skill." + type, 0) == 0 && type != PowerUpType.Freeze)
-            {
-                PlayerPrefs.SetInt("sb_seen_skill." + type, 1);
-                ui.ShowIntro(Loc.T("skill.title"), Loc.T("skillIntro." + type));
-            }
             switch (type)
             {
                 case PowerUpType.Shield:
@@ -1507,7 +1505,6 @@ namespace SquashBot.Gameplay
                     floorRules.Freeze();
             enemies.Freeze();
                     FloatAt(GridView.ToWorld(p), Loc.T("float.skillFreeze"), new Color(0.55f, 0.85f, 1f));
-                    ui.ShowIntro(Loc.T("skill.title"), Loc.T("skill.freeze"));
                     AudioManager.PlaySfx(Sfx.Shield, 0.9f, 0.7f);
                     break;
                 case PowerUpType.Blast:
@@ -1525,6 +1522,9 @@ namespace SquashBot.Gameplay
                     break;
                 case PowerUpType.Heart:
                     Heal(p);
+                    break;
+                case PowerUpType.Super:
+                    StartSuperSkill();
                     break;
                 case PowerUpType.Magnet:
                     skillMagnetLeft = Mathf.Max(skillMagnetLeft, 8f);
@@ -1741,6 +1741,8 @@ namespace SquashBot.Gameplay
 
         private void HideTools()
         {
+            ui.SkillBar.Refresh(false);
+            EndSuperSkill();
             ui.SetHealth(false, 0f, 0f);
             toolSlowLeft = 0f;
             robot.TimeBoost = 1f;
@@ -2974,7 +2976,7 @@ namespace SquashBot.Gameplay
             {
                 case MissionType.Monster:
                     if (monster != null) target = monster.transform;
-                    text = Loc.T(level.guardsPrincess ? "callout.monsterPrincess" : "callout.monster");
+                    text = Loc.T(level.cage ? "callout.cage" : level.guardsPrincess ? "callout.monsterPrincess" : "callout.monster");
                     break;
                 case MissionType.Quest:
                     if (questGoal != null) target = questGoal.transform;

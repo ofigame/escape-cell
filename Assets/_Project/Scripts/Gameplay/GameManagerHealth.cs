@@ -67,6 +67,7 @@ namespace SquashBot.Gameplay
             }
             health -= damage;
             hurtCooldown = HurtGrace;
+            ui.Flash(new Color(1f, 0.15f, 0.15f), 0.3f);
             BreakCombo();
 
             if (crushed) hazards.Shatter(p);

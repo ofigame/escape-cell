@@ -1998,7 +1998,7 @@ MonoBehaviour:
     quest: 0
     guardsPrincess: 0
     cage: 0
-    cardGoal: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -4049,7 +4049,7 @@ MonoBehaviour:
     quest: 0
     guardsPrincess: 0
     cage: 0
-    cardGoal: 1
+    cardGoal: 0
     phased: 1
     marathon: 0
     final: 0
@@ -4729,7 +4729,7 @@ MonoBehaviour:
     quest: 0
     guardsPrincess: 0
     cage: 0
-    cardGoal: 1
+    cardGoal: 0
     phased: 1
     marathon: 0
     final: 0
@@ -6109,7 +6109,7 @@ MonoBehaviour:
     quest: 0
     guardsPrincess: 0
     cage: 0
-    cardGoal: 1
+    cardGoal: 0
     phased: 1
     marathon: 0
     final: 0
@@ -8182,7 +8182,7 @@ MonoBehaviour:
     quest: 0
     guardsPrincess: 0
     cage: 0
-    cardGoal: 1
+    cardGoal: 0
     phased: 1
     marathon: 0
     final: 0
@@ -8875,7 +8875,7 @@ MonoBehaviour:
     quest: 0
     guardsPrincess: 0
     cage: 0
-    cardGoal: 1
+    cardGoal: 0
     phased: 1
     marathon: 0
     final: 0
@@ -11648,7 +11648,7 @@ MonoBehaviour:
     quest: 0
     guardsPrincess: 0
     cage: 0
-    cardGoal: 1
+    cardGoal: 0
     phased: 1
     marathon: 0
     final: 0
@@ -12347,7 +12347,7 @@ MonoBehaviour:
     quest: 0
     guardsPrincess: 0
     cage: 0
-    cardGoal: 1
+    cardGoal: 0
     phased: 1
     marathon: 0
     final: 0
@@ -13035,7 +13035,7 @@ MonoBehaviour:
     quest: 0
     guardsPrincess: 0
     cage: 0
-    cardGoal: 1
+    cardGoal: 0
     phased: 1
     marathon: 0
     final: 0
@@ -15144,7 +15144,7 @@ MonoBehaviour:
     quest: 0
     guardsPrincess: 0
     cage: 0
-    cardGoal: 1
+    cardGoal: 0
     phased: 1
     marathon: 0
     final: 0
@@ -15852,7 +15852,7 @@ MonoBehaviour:
     quest: 0
     guardsPrincess: 0
     cage: 0
-    cardGoal: 1
+    cardGoal: 0
     phased: 1
     marathon: 0
     final: 0

@@ -18,12 +18,14 @@ namespace SquashBot.Gameplay
         /// <summary>Monster health per "hit" on the level card; the hammer deals 10-32 per blow.</summary>
         private const int MonsterPointsPerHit = 10;
         /// <summary>The fight ring's radius (world units around the monster's tile).</summary>
-        private const float ArenaRadius = 2.55f;
-        /// <summary>Tiles this close (squared distance) to the monster belong to its arena.</summary>
-        private const float ArenaZoneSq = 5.3f;
+        private const float ArenaRadius = 2.8f;
 
         private ArenaFight arena;
-        private LineRenderer arenaRing;
+        private GameObject arenaZone;
+        private Material zoneMat;
+        private GridPos zoneCentre;
+        /// <summary>The arena is every tile this many steps (or fewer) from the monster, diagonals included.</summary>
+        private const int ZoneReach = 2;
         private float arenaCooldown, needAmmoShown;
         private bool arenaTaught;
 
@@ -34,8 +36,7 @@ namespace SquashBot.Gameplay
         private bool InArenaZone(GridPos t)
         {
             if (monster == null || monster.Dead) return false;
-            int dx = t.x - monsterPos.x, dy = t.y - monsterPos.y;
-            return dx * dx + dy * dy <= ArenaZoneSq;
+            return Mathf.Abs(t.x - monsterPos.x) <= ZoneReach && Mathf.Abs(t.y - monsterPos.y) <= ZoneReach;
         }
 
         private void EnsureArena()
@@ -45,6 +46,7 @@ namespace SquashBot.Gameplay
             arena.Ammo = () => duel ? 99 : hammerAmmo;
             arena.SpendAmmo = () => { if (!duel) hammerAmmo = Mathf.Max(0, hammerAmmo - 1); RefreshHud(); };
             arena.CanAct = () => State == GameState.Playing;
+            arena.Ignore = p => ui != null && ui.IsOverTool(p);
             arena.Struck += dmg => { if (duel) OnDuelStruck(); else OnArenaStruck(dmg); };
             arena.Hurt += weight => { if (duel) OnDuelHurt(weight); else OnArenaHurt(weight); };
             arena.Exited += at => { if (duel) DuelEscape(); else EndArenaFight(true); };
@@ -55,42 +57,57 @@ namespace SquashBot.Gameplay
             };
         }
 
-        /// <summary>The ring on the floor around the monster (it follows the monster when it leaps).</summary>
+        /// <summary>The arena: the two rows of tiles around the monster glow (and follow it when it leaps).</summary>
         private void SetupArenaRing()
         {
             EnsureArena();
-            if (arenaRing == null)
-            {
-                var go = new GameObject("ArenaRing");
-                arenaRing = go.AddComponent<LineRenderer>();
-                arenaRing.sharedMaterial = MaterialFactory.Create(new Color(1f, 0.5f, 0.3f), new Color(2.4f, 0.8f, 0.4f));
-                arenaRing.loop = true;
-                arenaRing.useWorldSpace = false;
-                arenaRing.widthMultiplier = 0.16f;
-                arenaRing.alignment = LineAlignment.TransformZ;
-                go.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
-                arenaRing.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                const int n = 72;
-                arenaRing.positionCount = n;
-                for (int i = 0; i < n; i++)
-                {
-                    float a = i * Mathf.PI * 2f / n;
-                    arenaRing.SetPosition(i, new Vector3(Mathf.Cos(a) * ArenaRadius, Mathf.Sin(a) * ArenaRadius, -0.03f)); // local XY = the floor (turned flat)
-                }
-            }
-            arenaRing.gameObject.SetActive(true);
             arenaCooldown = 0f;
-            UpdateArenaRing();
+            BuildZone(monsterPos);
+        }
+
+        /// <summary>Lights the tiles within two steps of <paramref name="centre"/> (the fight starts on any of them).</summary>
+        private void BuildZone(GridPos centre)
+        {
+            if (arenaZone == null)
+            {
+                arenaZone = new GameObject("ArenaZone");
+                zoneMat = MaterialFactory.Create(new Color(1f, 0.62f, 0.3f), new Color(1.2f, 0.5f, 0.2f));
+            }
+            for (int i = arenaZone.transform.childCount - 1; i >= 0; i--) Destroy(arenaZone.transform.GetChild(i).gameObject);
+            zoneCentre = centre;
+            for (int dx = -ZoneReach; dx <= ZoneReach; dx++)
+                for (int dy = -ZoneReach; dy <= ZoneReach; dy++)
+                {
+                    var t = new GridPos(centre.x + dx, centre.y + dy);
+                    if ((dx == 0 && dy == 0) || !grid.InBounds(t) || !grid.IsFloor(t)) continue;
+                    Shapes.Rounded("Zone", arenaZone.transform, GridView.ToWorld(t) + Vector3.up * (GridView.SurfaceY + 0.015f), new Vector3(0.8f, 0.03f, 0.8f), 0.04f, zoneMat);
+                }
+            arenaZone.SetActive(true);
+        }
+
+        private void ShowZone(bool on)
+        {
+            if (arenaZone != null) arenaZone.SetActive(on);
         }
 
         private void UpdateArenaRing()
         {
-            if (arenaRing == null || (monster == null && !duel)) return;
-            arenaRing.transform.position = duel && thief != null ? thief.transform.position : monster.transform.position;
-            // Calm orange while the bag is empty, a hot red pulse when blows are ready: go in!
-            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * (charged ? 6f : 2f));
-            var c = charged ? new Color(1f, 0.35f, 0.25f) : new Color(1f, 0.7f, 0.35f);
-            MaterialFactory.SetColors(arenaRing.sharedMaterial, c, c * (1f + 1.4f * pulse));
+            if (arenaZone == null || !arenaZone.activeSelf) return;
+            if (!duel && monster != null && monsterPos != zoneCentre) BuildZone(monsterPos); // the monster leapt
+            // A soft glow while the bag is empty, a hot pulse when blows are ready: go in!
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * (charged || duel ? 6f : 2f));
+            var c = charged || duel ? new Color(1f, 0.4f, 0.25f) : new Color(1f, 0.75f, 0.4f);
+            MaterialFactory.SetColors(zoneMat, c, c * (0.5f + 1.1f * pulse));
+        }
+
+        /// <summary>The monster's pose for an attack: 0 a slam, 1 a swipe, 2 a throw.</summary>
+        private void MonsterPose(int kind)
+        {
+            if (monster == null) return;
+            if (kind == 0) monster.Stomp();
+            else if (kind == 1) monster.Swipe();
+            else monster.Throw();
+            AudioManager.PlaySfx(Sfx.Warning, 0.5f, kind == 0 ? 0.6f : 0.9f);
         }
 
         /// <summary>Called whenever the robot lands on a tile: a tile of the ring starts the fight.</summary>
@@ -127,7 +144,7 @@ namespace SquashBot.Gameplay
             enemies.Freeze();
             powerUps.Freeze();
             if (aura != null) aura.SetActive(false);
-            arena.Begin(() => monster == null || monster.Dead, () => monster.Stomp(), MonsterCentre, ArenaRadius, LevelCatalog.Difficulty(levelIndex), Weapons.Level, arenaRing);
+            arena.Begin(() => monster == null || monster.Dead, MonsterPose, MonsterCentre, ArenaRadius, LevelCatalog.Difficulty(levelIndex), Weapons.Level, null);
             AudioManager.PlaySfx(Sfx.Warning, 0.8f, 0.8f);
             if (!arenaTaught)
             {
@@ -190,8 +207,46 @@ namespace SquashBot.Gameplay
 
             if (monsterHp <= 0)
             {
+                cameraRig.StartCoroutine(FinalBlow(at));
+                return;
+            }
+            cameraRig.StartCoroutine(HitStop(0.07f));
+            monster.Hit(monsterHp);
+            RefreshHud();
+            // Upper floors: the monster shields up and leaps away now and then, ending the round.
+            if (level.phased && Random.value < 0.35f)
+            {
+                EndArenaFight(true);
+                MonsterPhase();
+            }
+        }
+
+        /// <summary>A heavy blow lands: the world stops for a blink.</summary>
+        private System.Collections.IEnumerator HitStop(float seconds)
+        {
+            if (Time.timeScale < 0.99f) yield break;
+            Time.timeScale = 0.05f;
+            yield return new WaitForSecondsRealtime(seconds);
+            if (State == GameState.Playing && Time.timeScale < 0.1f) Time.timeScale = 1f;
+        }
+
+        /// <summary>The last blow: a white flash, slow motion over the shoulder while the monster falls, then the win.</summary>
+        private System.Collections.IEnumerator FinalBlow(Vector3 at)
+        {
+            robot.GiveShield(3f, 999);
+            monster.Defeat();
+            ui.Flash(Color.white, 0.7f);
+            Shockwave.Create(MonsterCentre, 3f, new Color(1f, 0.9f, 0.6f));
+            fx.Burst(at, Palette.UiGold, Palette.CoinGlow * 1.5f, 70, 9f);
+            cameraRig.Shake(1.2f);
+            Haptics.Medium();
+            Time.timeScale = 0.3f;
+            yield return new WaitForSecondsRealtime(0.9f);
+            while (State == GameState.Paused) yield return null;
+            Time.timeScale = 1f;
+            if (State != GameState.Playing) yield break;
+            {
                 EndArenaFight(false);
-                monster.Defeat();
                 grid.SetOccupied(monsterPos, false);
                 if (questGoal != null)
                 {
@@ -199,7 +254,7 @@ namespace SquashBot.Gameplay
                     grid.SetOccupied(princessPos, false);
                     FloatAt(GridView.ToWorld(princessPos) + Vector3.up, Loc.T("quest.done.Princess"), Palette.UiGold);
                 }
-                if (arenaRing != null) arenaRing.gameObject.SetActive(false);
+                ShowZone(false);
                 if (level.cage)
                 {
                     // The cage bursts open and Princess Mira is free.
@@ -211,15 +266,6 @@ namespace SquashBot.Gameplay
                 else FloatAt(at, Loc.T("float.monsterDown"), Palette.UiGold);
                 AudioManager.PlaySfx(Sfx.Squash, 1f, 0.5f);
                 Win();
-                return;
-            }
-            monster.Hit(monsterHp);
-            RefreshHud();
-            // Upper floors: the monster shields up and leaps away now and then, ending the round.
-            if (level.phased && Random.value < 0.35f)
-            {
-                EndArenaFight(true);
-                MonsterPhase();
             }
         }
 
@@ -239,6 +285,63 @@ namespace SquashBot.Gameplay
         {
             if (arenaCooldown > 0f) arenaCooldown -= dt;
             UpdateArenaRing();
+            UpdateMonsterThrows(dt);
+            if (arena != null) arena.SpeedBoost = superSkillLeft > 0f ? 1.5f : 1f;
+            // Nothing stands between the robot and the monster during the fight.
+            if (ArenaActive && !duel)
+                foreach (var t in grid.AllPositions())
+                    if (InArenaZone(t)) hazards.Shatter(t);
+        }
+
+        // ---------- The monster attacks from afar ----------
+
+        // Outside the ring the monster isn't idle either: now and then it hurls a boulder (the cage, an electric ball)
+        // at the robot's tile. The tile flashes while it flies; whoever still stands there is hit.
+        private readonly System.Collections.Generic.List<(GridPos tile, float left)> throws = new System.Collections.Generic.List<(GridPos, float)>();
+        private float throwTimer = 3f;
+
+        private void UpdateMonsterThrows(float dt)
+        {
+            if (level.mission != MissionType.Monster || monster == null || monster.Dead || previewing || ArenaActive)
+            {
+                throws.Clear();
+                return;
+            }
+            float d = LevelCatalog.Difficulty(levelIndex);
+            throwTimer -= dt;
+            if (throwTimer <= 0f)
+            {
+                throwTimer = Mathf.Lerp(5.5f, 2.6f, d) + Random.Range(0f, 1.2f);
+                var target = robot.Position;
+                if (target.Manhattan(monsterPos) <= 8 && !InArenaZone(target) && grid.IsStandable(target))
+                {
+                    float flight = Mathf.Lerp(1.3f, 0.95f, d);
+                    throws.Add((target, flight));
+                    monster.Throw();
+                    var tint = level.cage ? new Color(0.5f, 0.85f, 1f) : new Color(0.6f, 0.5f, 0.4f);
+                    ThrownRock.Create(MonsterCentre + Vector3.up * 1.7f, GridView.ToWorld(target) + Vector3.up * (GridView.SurfaceY + 0.2f), flight, tint);
+                    AudioManager.PlaySfx(Sfx.Warning, 0.6f, 0.8f);
+                }
+            }
+            for (int i = throws.Count - 1; i >= 0; i--)
+            {
+                var (tile, left) = throws[i];
+                left -= dt;
+                gridView.SetWarning(tile, 0.55f + 0.45f * Mathf.Sin(Time.time * 24f));
+                if (left > 0f)
+                {
+                    throws[i] = (tile, left);
+                    continue;
+                }
+                throws.RemoveAt(i);
+                var at = GridView.ToWorld(tile) + Vector3.up * GridView.SurfaceY;
+                Shockwave.Create(at, 0.8f, level.cage ? new Color(0.5f, 0.85f, 1f) : new Color(0.85f, 0.7f, 0.5f));
+                fx.Burst(at + Vector3.up * 0.2f, new Color(0.6f, 0.5f, 0.45f), new Color(0.8f, 0.6f, 0.4f), 18, 4f);
+                cameraRig.Shake(0.4f);
+                AudioManager.PlaySfx(Sfx.Impact, 0.7f, 0.9f);
+                if (robot.Position == tile && !robot.IsHopping && !robot.IsShielded && !robot.IsHovering) OnBlockImpact(tile);
+                if (State != GameState.Playing) return;
+            }
         }
 
         /// <summary>The robot's hammer over its shoulder while it carries blows (the hammer of its level).</summary>
@@ -265,7 +368,7 @@ namespace SquashBot.Gameplay
         {
             duel = false;
             if (ArenaActive) arena.End();
-            if (arenaRing != null) arenaRing.gameObject.SetActive(false);
+            ShowZone(false);
         }
 
         // ---------- The thief duel ----------
@@ -281,8 +384,7 @@ namespace SquashBot.Gameplay
         private void StartDuel()
         {
             EnsureArena();
-            if (arenaRing == null) SetupArenaRing();
-            arenaRing.gameObject.SetActive(true);
+            BuildZone(thiefPos);
             duel = true;
             duelStrikes = duelHurts = 0;
             var centre = GridView.ToWorld(thiefPos) + Vector3.up * GridView.SurfaceY;
@@ -292,7 +394,7 @@ namespace SquashBot.Gameplay
             floorRules.Freeze();
             enemies.Freeze();
             powerUps.Freeze();
-            arena.Begin(() => thief == null, null, centre, DuelRadius, Mathf.Clamp01(LevelCatalog.Difficulty(levelIndex) + 0.2f), Weapons.Level, arenaRing);
+            arena.Begin(() => thief == null, null, centre, DuelRadius, Mathf.Clamp01(LevelCatalog.Difficulty(levelIndex) + 0.2f), Weapons.Level, null);
             FloatAt(centre + Vector3.up * 1.2f, Loc.T("float.duel"), Palette.UiGold);
             AudioManager.PlaySfx(Sfx.Warning, 0.8f, 1.1f);
             BipSay("duel");
@@ -337,7 +439,7 @@ namespace SquashBot.Gameplay
             if (!duel) return;
             EndArenaFight(true);
             duel = false;
-            if (arenaRing != null) arenaRing.gameObject.SetActive(false);
+            ShowZone(false);
         }
 
         /// <summary>
@@ -347,6 +449,7 @@ namespace SquashBot.Gameplay
         private bool ArenaDamage(float weight, bool knockOut)
         {
             BreakCombo();
+            ui.Flash(new Color(1f, 0.15f, 0.15f), 0.35f);
             cameraRig.Shake(1f);
             Haptics.Medium();
             fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(1f, 0.35f, 0.35f), new Color(2.4f, 0.5f, 0.4f), 22, 5f);

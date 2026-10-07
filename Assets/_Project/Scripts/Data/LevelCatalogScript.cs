@@ -229,6 +229,7 @@ namespace SquashBot.Data
                 level.phased = !cage && d > 0.35f && index % 3 == 0;
             }
             level.cage = cage;
+            level.cardGoal = false; // arena fights are explained by the game, not by the old card text
             level.guardsPrincess = false;
             level.timeLimit = 0f;
             level.collapseBehind = false;

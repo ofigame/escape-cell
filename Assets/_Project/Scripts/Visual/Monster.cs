@@ -146,6 +146,16 @@ namespace SquashBot.Visual
         /// <summary>Winds up and slams the ground (the game handles the knock-back).</summary>
         public void Stomp() => stompT = 0f;
 
+        /// <summary>Rears back and sweeps forward (a swipe that sends a wave along the floor).</summary>
+        public void Swipe() => swipeT = 0f;
+
+        /// <summary>Rises up with a boulder and hurls it.</summary>
+        public void Throw() => throwT = 0f;
+
+        private float swipeT = -1f, throwT = -1f;
+        private Quaternion facing = Quaternion.identity;
+        private bool facingSet;
+
         public void Defeat()
         {
             health = 0;
@@ -164,8 +174,24 @@ namespace SquashBot.Visual
             {
                 var d = target.position - transform.position;
                 d.y = 0f;
+                if (!facingSet) { facing = body.rotation; facingSet = true; }
                 if (d.sqrMagnitude > 0.01f)
-                    body.rotation = Quaternion.Slerp(body.rotation, Quaternion.LookRotation(d), Time.deltaTime * 4f);
+                    facing = Quaternion.Slerp(facing, Quaternion.LookRotation(d), Time.deltaTime * 4f);
+                // Attack poses lean the body: back then forward for a swipe, up and over for a throw.
+                float lean = 0f;
+                if (swipeT >= 0f)
+                {
+                    swipeT += Time.deltaTime;
+                    lean = swipeT < 0.25f ? -20f * (swipeT / 0.25f) : Mathf.Lerp(30f, 0f, (swipeT - 0.25f) / 0.3f);
+                    if (swipeT > 0.55f) swipeT = -1f;
+                }
+                if (throwT >= 0f)
+                {
+                    throwT += Time.deltaTime;
+                    lean = throwT < 0.35f ? -25f * (throwT / 0.35f) : Mathf.Lerp(20f, 0f, (throwT - 0.35f) / 0.3f);
+                    if (throwT > 0.65f) throwT = -1f;
+                }
+                body.rotation = facing * Quaternion.Euler(lean, 0f, 0f);
             }
 
             float breathe = 1f + Mathf.Sin(time * (kind == Kind.Slime ? 4f : 2f)) * (kind == Kind.Slime ? 0.06f : 0.025f);

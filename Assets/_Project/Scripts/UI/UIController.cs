@@ -164,6 +164,21 @@ namespace SquashBot.UI
         public SkillBadges Skills { get; private set; }
         public ObjectiveArrows Arrows { get; private set; }
         public BipTip Bip { get; private set; }
+        /// <summary>The skill bag's buttons on the play screen.</summary>
+        public SkillBar SkillBar { get; private set; }
+
+        private Image flash;
+        private float flashLeft, flashStrength;
+
+        /// <summary>Flashes the whole screen in <paramref name="color"/> for a moment.</summary>
+        public void Flash(Color color, float strength = 0.45f)
+        {
+            if (flash == null) return;
+            flash.color = new Color(color.r, color.g, color.b, 0f);
+            flashStrength = strength;
+            flashLeft = 1f;
+            flash.transform.SetAsLastSibling();
+        }
         public DailyBonusScreen DailyBonus { get; private set; }
 
         private GameObject bannerPlaceholder;
@@ -662,6 +677,11 @@ namespace SquashBot.UI
             Skills = SkillBadges.Create(t);
             Arrows = ObjectiveArrows.Create(t);
             Bip = BipTip.Create(t);
+            SkillBar = SkillBar.Create(t);
+            // A full-screen flash for big moments (a hit taken: red; a monster down: white).
+            flash = UiFactory.Fill(UiFactory.Stretch("Flash", t), new Color(1f, 1f, 1f, 0f));
+            flash.raycastTarget = false;
+            flash.gameObject.AddComponent<IgnoreSafeArea>();
 
             UiFactory.MakeButton(t, "II", Kind.Icon, TopLeft, new Vector2(36f, -36f), new Vector2(124f, 124f), () => PausePressed?.Invoke(), 52f);
 
@@ -778,6 +798,7 @@ namespace SquashBot.UI
         /// <summary>True when a screen point is on a visible tool button (input leaves those presses to the UI).</summary>
         public bool IsOverTool(Vector2 screen)
         {
+            if (SkillBar != null && SkillBar.IsOver(screen)) return true;
             foreach (var b in toolButtons)
                 if (b != null && b.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(b.Rect, screen, null)) return true;
             return false;
@@ -1210,6 +1231,12 @@ namespace SquashBot.UI
             float dt = Time.unscaledDeltaTime;
 
             UpdateJuice(dt);
+            if (flash != null && flashLeft > 0f)
+            {
+                flashLeft = Mathf.Max(0f, flashLeft - dt * 3.2f);
+                var fc = flash.color;
+                flash.color = new Color(fc.r, fc.g, fc.b, flashStrength * flashLeft * flashLeft);
+            }
             if (healthPill != null && healthPill.localScale.x > 1f) healthPill.localScale = Vector3.MoveTowards(healthPill.localScale, Vector3.one, dt * 0.8f);
             UpdateCallout(dt);
             UpdateResultJuice(dt);
@@ -1224,9 +1251,10 @@ namespace SquashBot.UI
             // Portrait: fit the width; landscape: fit the height. Fixed-size cards then work in both.
             scaler.matchWidthOrHeight = Screen.width < Screen.height ? 0f : 1f;
 
-            float flash = warningActive ? 0.45f + 0.35f * Mathf.Sin(Time.unscaledTime * 16f) : 0f;
+            // The red edge bars are off: with rain everywhere they framed every level in red; the tiles warn by themselves.
+            float warnPulse = 0f;
             var c = Palette.UiRed;
-            c.a = Mathf.MoveTowards(warnLeft.color.a, flash, dt * 6f);
+            c.a = Mathf.MoveTowards(warnLeft.color.a, warnPulse, dt * 6f);
             warnLeft.color = warnRight.color = c;
             bool showWarn = c.a > 0.01f;
             if (warnLeft.gameObject.activeSelf != showWarn)
