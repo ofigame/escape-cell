@@ -500,10 +500,10 @@ namespace SquashBot.Gameplay
             gridView.gameObject.SetActive(false);
             cameraRig.SetStyle(CameraStyle.Gameplay);
             cameraRig.SetMenuFocus(false);
+            ui.ShowHud(-1); // the result card or map goes first, whatever the run setup does
             runner.Begin(Random.Range(0, 100000), tunnel);
 
             State = GameState.Playing;
-            ui.ShowHud(-1);
             ui.ShowIntro(Loc.T("level.bonus"), Loc.T("tunnel." + tunnel));
             AudioManager.PlaySfx(Sfx.Win, 0.7f, 1.2f);
             RefreshHud();

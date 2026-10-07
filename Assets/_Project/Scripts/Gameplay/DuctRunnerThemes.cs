@@ -304,7 +304,11 @@ namespace SquashBot.Gameplay
 
             // A glowing trail behind the robot: the garage's trail colour, or the theme's light.
             var trailColor = robot.TrailColor ?? (kind == Kind.Laser ? new Color(1f, 0.3f, 0.3f) : kind == Kind.Crystal ? new Color(0.9f, 0.5f, 1f) : new Color(0.3f, 0.9f, 1f));
-            trail = robot.gameObject.AddComponent<TrailRenderer>();
+            // Reuse the trail when the last run's one is still waiting for its deferred Destroy (a road run straight into a tunnel).
+            trail = robot.GetComponent<TrailRenderer>();
+            if (trail == null) trail = robot.gameObject.AddComponent<TrailRenderer>();
+            trail.Clear();
+            trail.enabled = true;
             trail.sharedMaterial = Weather.AddMaterial;
             trail.time = 0.35f;
             trail.minVertexDistance = 0.08f;
@@ -432,7 +436,7 @@ namespace SquashBot.Gameplay
             if (speedLines != null) Destroy(speedLines.gameObject);
             if (themeDust != null) Destroy(themeDust.gameObject);
             if (sky != null) Destroy(sky.gameObject);
-            if (trail != null) Destroy(trail);
+            if (trail != null) DestroyImmediate(trail);
             speedLines = themeDust = null;
             sky = null;
             trail = null;
