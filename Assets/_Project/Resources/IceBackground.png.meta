@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 347d834682fab0249b02368ba3633b09
+guid: 64874f1904df4a442a390d0e3d47b0e9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 9102182583359120060
-    second: OfigameLogo_0
+      213: 2202373608013804665
+    second: IceBackground_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -128,13 +128,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: OfigameLogo_0
+      name: IceBackground_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1200
-        height: 733
+        width: 1080
+        height: 1920
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,8 +143,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cb22ed985d2715e70800000000000000
-      internalID: 9102182583359120060
+      spriteID: 974bb58b027609e10800000000000000
+      internalID: 2202373608013804665
       vertices: []
       indices: 
       edges: []

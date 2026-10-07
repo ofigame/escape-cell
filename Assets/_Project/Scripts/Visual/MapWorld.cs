@@ -17,7 +17,7 @@ namespace SquashBot.Visual
     {
         private static readonly Vector3 Origin = new Vector3(-6000f, 0f, 0f);
         private const float Step = 1.7f;        // height per level
-        private const float WorldGap = 3.2f;    // extra height for each world's island
+        private const float WorldGap = 4.4f;    // extra height for each world's island
         private const float ViewDistance = 12.5f;
 
         public Camera Cam { get; private set; }
@@ -61,7 +61,8 @@ namespace SquashBot.Visual
         private static Vector3 IslandPosition(int world)
         {
             var first = NodePosition(world * LevelCatalog.LevelsPerWorld);
-            return new Vector3(Origin.x, first.y - WorldGap * 0.75f, Origin.z + 0.6f);
+            // Set back behind the path (the camera looks from -z), so it never hides the stones in front of it.
+            return new Vector3(Origin.x, first.y - WorldGap * 0.6f, Origin.z + 3.6f);
         }
 
         // ---------- Building ----------
@@ -195,9 +196,9 @@ namespace SquashBot.Visual
             var light = MaterialFactory.Create(theme.slab, Color.black);
 
             Shapes.Rounded("Ground", island, new Vector3(0f, 0f, 0f), new Vector3(7.5f, 0.6f, 4.2f), 0.3f, grass);
-            Shapes.Primitive(PrimitiveType.Sphere, "Underside", island, new Vector3(0f, -1.1f, 0f), new Vector3(7f, 2.6f, 3.9f), rock);
-            Shapes.Primitive(PrimitiveType.Sphere, "Drip", island, new Vector3(-1.2f, -2.4f, 0.3f), new Vector3(2.2f, 2f, 1.8f), rock);
-            Shapes.Primitive(PrimitiveType.Sphere, "Drip", island, new Vector3(1.6f, -2.1f, -0.2f), new Vector3(1.6f, 1.6f, 1.4f), rock);
+            Shapes.Primitive(PrimitiveType.Sphere, "Underside", island, new Vector3(0f, -0.9f, 0f), new Vector3(7f, 2f, 3.9f), rock);
+            Shapes.Primitive(PrimitiveType.Sphere, "Drip", island, new Vector3(-1.2f, -1.8f, 0.3f), new Vector3(2f, 1.6f, 1.6f), rock);
+            Shapes.Primitive(PrimitiveType.Sphere, "Drip", island, new Vector3(1.6f, -1.6f, -0.2f), new Vector3(1.4f, 1.3f, 1.2f), rock);
 
             // Landmarks, a different mix on every world: crystals, lamp posts, a little tower.
             for (int k = 0; k < 4; k++)
@@ -255,7 +256,7 @@ namespace SquashBot.Visual
         public Vector3 ScreenPoint(int i) => Cam.WorldToScreenPoint(NodePosition(i));
 
         /// <summary>Screen point of a world's island sign.</summary>
-        public Vector3 IslandScreenPoint(int world) => Cam.WorldToScreenPoint(IslandPosition(world) + new Vector3(0f, 0.2f, -2.3f));
+        public Vector3 IslandScreenPoint(int world) => Cam.WorldToScreenPoint(IslandPosition(world) + new Vector3(0f, 0.3f, -2.4f));
 
         private void Update()
         {

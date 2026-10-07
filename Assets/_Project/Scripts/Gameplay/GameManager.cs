@@ -354,6 +354,8 @@ namespace SquashBot.Gameplay
         private void LateUpdate()
         {
             if (ui == null) return;
+            // The splash waits for the menu to stand (a few frames in, when the lobby has drawn).
+            if (!SplashScreen.Ready && Time.frameCount > 5) SplashScreen.Ready = true;
             if (lobby != null && lobby.IsOpen && !ui.MenuVisible) lobby.Close();
             bool covered = (lobby != null && lobby.IsOpen) || ui.Map.IsOpen;
             if (cameraRig.Cam.enabled == covered) cameraRig.Cam.enabled = !covered;

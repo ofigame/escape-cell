@@ -189,8 +189,13 @@ namespace SquashBot.UI
                 }
                 else
                 {
-                    var num = UiFactory.Text(node, (level + 1).ToString(), 58f, UiFactory.TextDark);
-                    num.rectTransform.anchoredPosition = new Vector2(0f, 6f);
+                    // Big glossy numbers: white fading to gold, a dark outline and a soft shadow, readable on any stone.
+                    var num = UiFactory.Text(node, (level + 1).ToString(), 66f, Color.white, title: true);
+                    num.rectTransform.anchoredPosition = new Vector2(0f, 8f);
+                    num.fontSharedMaterial = NumberMaterial;
+                    num.enableVertexGradient = true;
+                    var gold = new Color(1f, 0.86f, 0.45f);
+                    num.colorGradient = new VertexGradient(Color.white, Color.white, gold, gold);
                 }
                 if (completed) NodeStars(node, Progress.Stars(level), -26f);
                 // Special goals (princess, monster, WARDEN, quest pieces, thief, Bip) show as badges by the stone.
@@ -210,6 +215,28 @@ namespace SquashBot.UI
                 node.gameObject.AddComponent<ButtonPress>();
             }
             return node;
+        }
+
+        private static Material numberMaterial;
+
+        /// <summary>The title font with a thick dark outline and a drop shadow, shared by every number on the map.</summary>
+        private static Material NumberMaterial
+        {
+            get
+            {
+                if (numberMaterial != null) return numberMaterial;
+                numberMaterial = new Material(UiFactory.TitleFont.material) { name = "Map Numbers" };
+                numberMaterial.EnableKeyword("OUTLINE_ON");
+                numberMaterial.SetFloat(ShaderUtilities.ID_OutlineWidth, 0.3f);
+                numberMaterial.SetColor(ShaderUtilities.ID_OutlineColor, new Color(0.14f, 0.08f, 0.3f));
+                numberMaterial.EnableKeyword("UNDERLAY_ON");
+                numberMaterial.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0.05f, 0.02f, 0.12f, 0.7f));
+                numberMaterial.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0.5f);
+                numberMaterial.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, -0.8f);
+                numberMaterial.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.3f);
+                numberMaterial.SetFloat(ShaderUtilities.ID_FaceDilate, 0.1f);
+                return numberMaterial;
+            }
         }
 
         /// <summary>Keeps every label on its stone (and hides the ones off screen).</summary>

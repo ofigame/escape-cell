@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using SquashBot.Visual;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -5,25 +7,30 @@ using UnityEngine.UI;
 namespace SquashBot.UI
 {
     /// <summary>
-    /// Studio splash on launch: the OFIGAME logo fades in on its navy backdrop, holds, then fades out to the menu.
-    /// A tap skips it.
+    /// The studio splash: the OFIGAME logo on white, frosted ice, carrying on seamlessly from the native launch screen
+    /// (which shows the same logo and ice). Ice crystals twinkle around the logo, and the whole thing
+    /// stays until the menu is ready (and at least a moment), then fades into the menu. A tap skips the wait.
     /// </summary>
     public class SplashScreen : MonoBehaviour, IPointerClickHandler
     {
-        private const float FadeIn = 0.45f;
-        private const float Hold = 1.6f;
-        private const float FadeOut = 0.45f;
-        private static readonly Color Backdrop = new Color32(0x1A, 0x23, 0x34, 0xFF);
+        private const float MinHold = 1.4f;
+        private const float FadeOut = 0.5f;
 
         private CanvasGroup group;
         private RectTransform logo;
-        private float t;
+        private RawImage logoImage;
+        private readonly List<(RectTransform rt, Image img, float phase, float speed)> sparkles = new List<(RectTransform, Image, float, float)>();
+        private float t, outT = -1f;
         private bool skipping;
+
+        /// <summary>Set by the game once the menu stands; the splash then fades out (after its minimum time).</summary>
+        public static bool Ready;
 
         public static void Show()
         {
             var texture = Resources.Load<Texture2D>("OfigameLogo");
             if (texture == null) return;
+            var ice = Resources.Load<Texture2D>("IceBackground");
 
             var canvas = UiFactory.CreateCanvas("Splash", out var scaler);
             canvas.sortingOrder = 200;
@@ -32,16 +39,39 @@ namespace SquashBot.UI
             var splash = canvas.gameObject.AddComponent<SplashScreen>();
             splash.group = canvas.gameObject.AddComponent<CanvasGroup>();
 
-            var bg = UiFactory.Fill(UiFactory.Stretch("Backdrop", canvas.transform), Backdrop);
-            bg.raycastTarget = true;
+            // White ice, filling the screen (cropped, never stretched).
+            var bgRect = UiFactory.Stretch("Ice", canvas.transform);
+            if (ice != null)
+            {
+                var bg = bgRect.gameObject.AddComponent<RawImage>();
+                bg.texture = ice;
+                var fitter = bgRect.gameObject.AddComponent<AspectRatioFitter>();
+                fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+                fitter.aspectRatio = ice.width / (float)ice.height;
+            }
+            else UiFactory.Fill(bgRect, new Color(0.93f, 0.96f, 0.99f));
+            UiFactory.Fill(UiFactory.Stretch("Tap", canvas.transform), new Color(1f, 1f, 1f, 0.001f)); // catches the skip tap
 
-            // Wide logo: 85% of the reference width, keeping its aspect.
-            float width = 920f;
+            // Twinkling ice crystals scattered over the frost.
+            var rng = new System.Random(5);
+            for (int i = 0; i < 34; i++)
+            {
+                float size = 10f + (float)rng.NextDouble() * 26f;
+                var rt = UiFactory.Box("Sparkle", canvas.transform, new Vector2((float)rng.NextDouble(), (float)rng.NextDouble()), Vector2.zero, new Vector2(size, size));
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                rt.localRotation = Quaternion.Euler(0f, 0f, 45f);
+                var img = UiFactory.Fill(rt, new Color(1f, 1f, 1f, 0f), UiSprites.Rounded, 6f);
+                img.raycastTarget = false;
+                splash.sparkles.Add((rt, img, (float)rng.NextDouble() * 6f, 1.5f + (float)rng.NextDouble() * 2.5f));
+            }
+
+            float width = 860f;
             float height = width * texture.height / texture.width;
-            splash.logo = UiFactory.Box("Logo", canvas.transform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(width, height));
-            var raw = splash.logo.gameObject.AddComponent<RawImage>();
-            raw.texture = texture;
-            raw.raycastTarget = false;
+            splash.logo = UiFactory.Box("Logo", canvas.transform, new Vector2(0.5f, 0.55f), Vector2.zero, new Vector2(width, height));
+            splash.logo.pivot = new Vector2(0.5f, 0.5f);
+            splash.logoImage = splash.logo.gameObject.AddComponent<RawImage>();
+            splash.logoImage.texture = texture;
+            splash.logoImage.raycastTarget = false;
         }
 
         public void OnPointerClick(PointerEventData eventData)
@@ -51,17 +81,24 @@ namespace SquashBot.UI
 
         private void Update()
         {
-            // Clamp: the first frames after loading can report a huge delta that would skip the logo.
-            t += Mathf.Min(Time.unscaledDeltaTime, 1f / 30f);
-            if (skipping && t < FadeIn + Hold) t = FadeIn + Hold;
+            // Clamp: the first frames after loading can report a huge delta.
+            float dt = Mathf.Min(Time.unscaledDeltaTime, 1f / 30f);
+            t += dt;
 
-            float logoAlpha = t < FadeIn ? t / FadeIn : 1f;
-            float scale = Mathf.Lerp(0.94f, 1f, 1f - Mathf.Pow(1f - Mathf.Clamp01(t / (FadeIn + Hold)), 3f));
+            // The logo settles in with a tiny ease (it already sits there from the launch screen).
+            float scale = Mathf.Lerp(0.97f, 1f, 1f - Mathf.Pow(1f - Mathf.Clamp01(t / 1.2f), 3f));
             logo.localScale = new Vector3(scale, scale, 1f);
-            logo.GetComponent<RawImage>().color = new Color(1f, 1f, 1f, logoAlpha);
+            foreach (var s in sparkles)
+            {
+                float a = Mathf.Pow(Mathf.Max(0f, Mathf.Sin(t * s.speed + s.phase)), 6f);
+                s.img.color = new Color(1f, 1f, 1f, a * 0.9f);
+                s.rt.localScale = Vector3.one * (0.6f + a * 0.6f);
+            }
 
-            float outT = t - FadeIn - Hold;
-            group.alpha = outT > 0f ? 1f - Mathf.Clamp01(outT / FadeOut) : 1f;
+            if (outT < 0f && (skipping || (Ready && t >= MinHold))) outT = 0f;
+            if (outT < 0f) return;
+            outT += dt;
+            group.alpha = 1f - Mathf.Clamp01(outT / FadeOut);
             if (outT >= FadeOut) Destroy(gameObject);
         }
     }

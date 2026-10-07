@@ -400,19 +400,40 @@ namespace SquashBot.EditorTools
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             PlayerSettings.colorSpace = ColorSpace.Linear;
 
-            // Our own OFIGAME splash replaces Unity's; the native launch screen uses the same navy so there is no flash.
-            PlayerSettings.SplashScreen.show = false;
-            PlayerSettings.SplashScreen.backgroundColor = new Color32(0x1A, 0x23, 0x34, 0xFF);
+            // The OFIGAME logo on white ice from the very first frame: the native launch screen (no Unity logo) shows the
+            // same logo and ice as the game's own splash, which then stays until the menu is ready.
+            var logoSprite = SplashSprite(ResourcesDir + "/OfigameLogo.png");
+            var iceSprite = SplashSprite(ResourcesDir + "/IceBackground.png");
+            PlayerSettings.SplashScreen.show = logoSprite != null;
+            PlayerSettings.SplashScreen.showUnityLogo = false;
+            PlayerSettings.SplashScreen.drawMode = PlayerSettings.SplashScreen.DrawMode.AllSequential;
+            PlayerSettings.SplashScreen.animationMode = PlayerSettings.SplashScreen.AnimationMode.Static;
+            PlayerSettings.SplashScreen.overlayOpacity = 0f;
+            PlayerSettings.SplashScreen.blurBackgroundImage = false;
+            PlayerSettings.SplashScreen.unityLogoStyle = PlayerSettings.SplashScreen.UnityLogoStyle.DarkOnLight;
+            PlayerSettings.SplashScreen.backgroundColor = new Color32(0xEC, 0xF5, 0xFC, 0xFF);
+            PlayerSettings.SplashScreen.background = iceSprite;
+            PlayerSettings.SplashScreen.backgroundPortrait = iceSprite;
+            if (logoSprite != null) PlayerSettings.SplashScreen.logos = new[] { PlayerSettings.SplashScreenLogo.Create(2f, logoSprite) };
+        }
 
-            var logo = AssetImporter.GetAtPath(ResourcesDir + "/OfigameLogo.png") as TextureImporter;
-            if (logo != null && logo.textureCompression != TextureImporterCompression.Uncompressed)
+        /// <summary>Imports a texture as an uncompressed single sprite (the splash logo and background) and returns it.</summary>
+        private static Sprite SplashSprite(string path)
+        {
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+            var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer == null) return null;
+            if (importer.textureType != TextureImporterType.Sprite || importer.textureCompression != TextureImporterCompression.Uncompressed)
             {
-                logo.textureType = TextureImporterType.Default;
-                logo.textureCompression = TextureImporterCompression.Uncompressed;
-                logo.alphaIsTransparency = true;
-                logo.mipmapEnabled = true;
-                logo.SaveAndReimport();
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.textureCompression = TextureImporterCompression.Uncompressed;
+                importer.alphaIsTransparency = true;
+                importer.mipmapEnabled = false;
+                importer.maxTextureSize = 2048;
+                importer.SaveAndReimport();
             }
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
     }
 }

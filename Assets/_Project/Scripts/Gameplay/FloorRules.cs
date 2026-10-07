@@ -36,6 +36,8 @@ namespace SquashBot.Gameplay
         private enum Special { None, Current, Sticky, Ice, Trampoline, Glass, BlinkA, BlinkB, Teleport }
         private Special[,] special;
         private Direction[,] flow;
+        private readonly Dictionary<GridPos, Transform> currentArrows = new Dictionary<GridPos, Transform>();
+        private int pushChain; // currents in a row without the player moving: a safety stop
         private bool stuck;
         private Direction? slide;                 // the direction the robot is travelling (ice keeps it going)
         private GridPos? teleportLock;            // the pad the robot just arrived on through a teleport
@@ -80,6 +82,7 @@ namespace SquashBot.Gameplay
 
             float d = difficulty = LevelCatalog.Difficulty(Mathf.Clamp(seed, 0, LevelCatalog.LevelCount - 1));
             if (Has(FloorRule.Current)) Mark(Special.Current, 0.22f);
+            if (Has(FloorRule.Current)) FixCurrentLoops();
             if (Has(FloorRule.Sticky)) Mark(Special.Sticky, 0.22f);
             if (Has(FloorRule.Ice)) Mark(Special.Ice, 0.34f);
             if (Has(FloorRule.Trampoline)) Mark(Special.Trampoline, 0.14f);
@@ -104,6 +107,7 @@ namespace SquashBot.Gameplay
             running = false;
             foreach (var go in spawned) if (go != null) Destroy(go);
             spawned.Clear();
+            currentArrows.Clear();
             streaks.Clear();
             beams.Clear();
             rolls.Clear();
@@ -164,6 +168,59 @@ namespace SquashBot.Gameplay
         // ---------- Placing special tiles ----------
 
         /// <summary>Marks a share of the free floor tiles (never the start, keys, door or other specials).</summary>
+        /// <summary>
+        /// Currents must never trap the robot: following the arrows from any current has to end somewhere. Where a
+        /// chain of currents comes back on itself (two facing each other, or a ring), one of them is turned to point
+        /// off the chain, onto a plain tile.
+        /// </summary>
+        private void FixCurrentLoops()
+        {
+            for (int x = 0; x < grid.Width; x++)
+                for (int y = 0; y < grid.Height; y++)
+                {
+                    if (special[x, y] != Special.Current) continue;
+                    var seen = new HashSet<GridPos>();
+                    var q = new GridPos(x, y);
+                    while (grid.InBounds(q) && special[q.x, q.y] == Special.Current)
+                    {
+                        if (!seen.Add(q))
+                        {
+                            Redirect(q);
+                            break;
+                        }
+                        q += flow[q.x, q.y].ToOffset();
+                    }
+                }
+        }
+
+        private void Redirect(GridPos p)
+        {
+            Direction? best = null;
+            foreach (var d in DirectionExtensions.All)
+            {
+                var n = p + d.ToOffset();
+                if (!grid.InBounds(n) || !grid.IsFloor(n)) continue;
+                if (special[n.x, n.y] == Special.Current) continue;
+                best = d;
+                if (grid.IsStandable(n)) break;
+            }
+            if (!best.HasValue)
+            {
+                // Hemmed in by currents: this one becomes a plain tile.
+                special[p.x, p.y] = Special.None;
+                if (currentArrows.TryGetValue(p, out var gone) && gone != null) Destroy(gone.gameObject);
+                currentArrows.Remove(p);
+                view.SetTint(p, null);
+                return;
+            }
+            flow[p.x, p.y] = best.Value;
+            if (currentArrows.TryGetValue(p, out var arrow) && arrow != null)
+            {
+                var o = best.Value.ToOffset();
+                arrow.localRotation = Quaternion.LookRotation(new Vector3(o.x, 0f, o.y));
+            }
+        }
+
         private void Mark(Special kind, float share)
         {
             var free = FreeTiles();
@@ -226,6 +283,7 @@ namespace SquashBot.Gameplay
                     view.SetTint(p, new Color(0.55f, 0.85f, 0.95f), new Color(0.1f, 0.35f, 0.45f));
                     var arrow = new GameObject("Current").transform;
                     arrow.SetParent(surface, false);
+                    currentArrows[p] = arrow;
                     arrow.localPosition = new Vector3(0f, 0.06f, 0f);
                     var o = dir.ToOffset();
                     arrow.localRotation = Quaternion.LookRotation(new Vector3(o.x, 0f, o.y));
@@ -320,6 +378,7 @@ namespace SquashBot.Gameplay
             }
 
             var kind = grid.InBounds(p) ? special[p.x, p.y] : Special.None;
+            if (kind != Special.Current) pushChain = 0;
             var travel = slide ?? robot.Facing;
             slide = null;
             if (teleportLock.HasValue && teleportLock.Value != p) teleportLock = null;
@@ -342,6 +401,12 @@ namespace SquashBot.Gameplay
                     return false;
 
                 case Special.Current:
+                    // Never an endless ping-pong between currents: after a few pushes in a row the robot is let go.
+                    if (++pushChain > 6)
+                    {
+                        pushChain = 0;
+                        return false;
+                    }
                     return Push(flow[p.x, p.y], 1, 0.3f, 1.4f, Sfx.Hop);
 
                 case Special.Ice:
