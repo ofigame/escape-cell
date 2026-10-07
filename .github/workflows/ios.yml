@@ -26,20 +26,26 @@ jobs:
           android: true
           dotnet: true
           haskell: true
-          large-packages: false
-          tool-cache: false
+          large-packages: true
+          tool-cache: true
+          docker-images: true
+          swap-storage: true
 
       # The hosted runner's RAM is tight for Unity's iOS shader compilation; without extra swap the build can be
-      # killed by the OOM killer (exit code 137). Disk was freed above, so a big swap file is cheap.
+      # killed by the OOM killer (exit code 137). It goes on /mnt: on the root disk a 20 GB swap left no room for the ~15 GB Unity image.
       - name: Add swap space
         run: |
           sudo swapoff -a || true
           sudo rm -f /mnt/swapfile /swapfile
-          sudo fallocate -l 20G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
+          # On /mnt (the runner's separate scratch disk) when it has room, so the swap doesn't eat the root disk.
+          SWAP=/mnt/swapfile
+          [ "$(df --output=avail -BG /mnt | tail -1 | tr -dc 0-9)" -gt 20 ] || SWAP=/swapfile
+          sudo fallocate -l 12G $SWAP
+          sudo chmod 600 $SWAP
+          sudo mkswap $SWAP
+          sudo swapon $SWAP
           free -h
+          df -h / /mnt
 
       - uses: actions/checkout@v4
 
