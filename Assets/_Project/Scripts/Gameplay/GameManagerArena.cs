@@ -42,12 +42,12 @@ namespace SquashBot.Gameplay
         {
             if (arena != null) return;
             arena = ArenaFight.Create(robot, cameraRig, fx);
-            arena.Ammo = () => hammerAmmo;
-            arena.SpendAmmo = () => { hammerAmmo = Mathf.Max(0, hammerAmmo - 1); RefreshHud(); };
+            arena.Ammo = () => duel ? 99 : hammerAmmo;
+            arena.SpendAmmo = () => { if (!duel) hammerAmmo = Mathf.Max(0, hammerAmmo - 1); RefreshHud(); };
             arena.CanAct = () => State == GameState.Playing;
-            arena.Struck += OnArenaStruck;
-            arena.Hurt += OnArenaHurt;
-            arena.Exited += at => EndArenaFight(true);
+            arena.Struck += dmg => { if (duel) OnDuelStruck(); else OnArenaStruck(dmg); };
+            arena.Hurt += weight => { if (duel) OnDuelHurt(weight); else OnArenaHurt(weight); };
+            arena.Exited += at => { if (duel) DuelEscape(); else EndArenaFight(true); };
             arena.OutOfAmmo += () =>
             {
                 FloatAt(robot.transform.position + Vector3.up * 0.8f, Loc.T("float.noAmmo"), Palette.UiRed);
@@ -85,8 +85,8 @@ namespace SquashBot.Gameplay
 
         private void UpdateArenaRing()
         {
-            if (arenaRing == null || monster == null) return;
-            arenaRing.transform.position = monster.transform.position;
+            if (arenaRing == null || (monster == null && !duel)) return;
+            arenaRing.transform.position = duel && thief != null ? thief.transform.position : monster.transform.position;
             // Calm orange while the bag is empty, a hot red pulse when blows are ready: go in!
             float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * (charged ? 6f : 2f));
             var c = charged ? new Color(1f, 0.35f, 0.25f) : new Color(1f, 0.7f, 0.35f);
@@ -127,7 +127,7 @@ namespace SquashBot.Gameplay
             enemies.Freeze();
             powerUps.Freeze();
             if (aura != null) aura.SetActive(false);
-            arena.Begin(monster, MonsterCentre, ArenaRadius, LevelCatalog.Difficulty(levelIndex), Weapons.Level, arenaRing);
+            arena.Begin(() => monster == null || monster.Dead, () => monster.Stomp(), MonsterCentre, ArenaRadius, LevelCatalog.Difficulty(levelIndex), Weapons.Level, arenaRing);
             AudioManager.PlaySfx(Sfx.Warning, 0.8f, 0.8f);
             if (!arenaTaught)
             {
@@ -200,7 +200,15 @@ namespace SquashBot.Gameplay
                     FloatAt(GridView.ToWorld(princessPos) + Vector3.up, Loc.T("quest.done.Princess"), Palette.UiGold);
                 }
                 if (arenaRing != null) arenaRing.gameObject.SetActive(false);
-                FloatAt(at, Loc.T("float.monsterDown"), Palette.UiGold);
+                if (level.cage)
+                {
+                    // The cage bursts open and Princess Mira is free.
+                    FreedMira.Create(MonsterCentre, robot.transform.position);
+                    fx.Burst(at, PrincessMira.Light, new Color(2.4f, 1.8f, 2.4f), 50, 6f);
+                    FloatAt(at, Loc.T("float.miraFree"), PrincessMira.Light);
+                    ui.Bip.Say(Loc.T("mira.thanks"), Loc.T("story.mira"), PrincessMira.Light);
+                }
+                else FloatAt(at, Loc.T("float.monsterDown"), Palette.UiGold);
                 AudioManager.PlaySfx(Sfx.Squash, 1f, 0.5f);
                 Win();
                 return;
@@ -218,50 +226,12 @@ namespace SquashBot.Gameplay
         /// <summary>The monster's blow landed on the robot.</summary>
         private void OnArenaHurt(float weight)
         {
-            BreakCombo();
-            cameraRig.Shake(1f);
-            Haptics.Medium();
-            fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(1f, 0.35f, 0.35f), new Color(2.4f, 0.5f, 0.4f), 22, 5f);
-
             if (!HealthEnabled)
             {
                 // One-hit floors: the blow throws the robot out of the ring and knocks a hammer blow out of the bag.
                 hammerAmmo = Mathf.Max(0, hammerAmmo - 1);
-                FloatAt(robot.transform.position + Vector3.up * 0.6f, Loc.T("float.knockedOut"), Palette.UiRed);
-                AudioManager.PlaySfx(Sfx.Squash, 0.7f, 1.3f);
-                EndArenaFight(true);
-                return;
             }
-
-            float damage = HitShare(levelIndex) * weight * (1f - Shop.ArmorShare);
-            if (health - damage > 0.001f)
-            {
-                health -= damage;
-                AudioManager.PlaySfx(Sfx.Squash, 0.7f, 1.4f);
-                FloatAt(robot.transform.position + Vector3.up * 0.5f, "-" + Mathf.RoundToInt(damage * 100f) + "%", Palette.UiRed);
-                if (health < 0.35f) BipSay("lowHealth");
-                RefreshHealthBar();
-                return;
-            }
-
-            // The last of the health: a rescue charge keeps the robot in the fight with a sliver of health.
-            if ((RescueEnabled && rescues > 0) || Shop.TryUse(Boost.ExtraRescue))
-            {
-                if (RescueEnabled && rescues > 0) rescues--;
-                health = 0.2f;
-                robot.GiveShield(1.5f);
-                FloatAt(robot.transform.position + Vector3.up * 0.5f, Loc.T("float.rescued"), Palette.UiCyan);
-                RefreshHealthBar();
-                return;
-            }
-
-            health = 0f;
-            RefreshHealthBar();
-            EndArenaFight(false);
-            robot.Squash();
-            AudioManager.PlaySfx(Sfx.Squash);
-            Haptics.Death();
-            Lose(Loc.T("lose.monster"));
+            ArenaDamage(weight, knockOut: true);
         }
 
         /// <summary>Every playing frame of a monster level.</summary>
@@ -293,15 +263,136 @@ namespace SquashBot.Gameplay
 
         private void ClearArena()
         {
+            duel = false;
             if (ArenaActive) arena.End();
             if (arenaRing != null) arenaRing.gameObject.SetActive(false);
+        }
+
+        // ---------- The thief duel ----------
+
+        // Catching Kuzgun starts a short duel in a small ring around him: two hammer blows crack his mask and the
+        // catch counts; two of his blows (or running out of the ring) and he slips away to be chased again. Blows
+        // don't run out in a duel.
+        private const int DuelStrikes = 2, DuelHurts = 2;
+        private const float DuelRadius = 2.3f;
+        private bool duel;
+        private int duelStrikes, duelHurts;
+
+        private void StartDuel()
+        {
+            EnsureArena();
+            if (arenaRing == null) SetupArenaRing();
+            arenaRing.gameObject.SetActive(true);
+            duel = true;
+            duelStrikes = duelHurts = 0;
+            var centre = GridView.ToWorld(thiefPos) + Vector3.up * GridView.SurfaceY;
+            foreach (var t in grid.AllPositions())
+                if (Mathf.Abs(t.x - thiefPos.x) <= 2 && Mathf.Abs(t.y - thiefPos.y) <= 2) hazards.Shatter(t);
+            hazards.Freeze();
+            floorRules.Freeze();
+            enemies.Freeze();
+            powerUps.Freeze();
+            arena.Begin(() => thief == null, null, centre, DuelRadius, Mathf.Clamp01(LevelCatalog.Difficulty(levelIndex) + 0.2f), Weapons.Level, arenaRing);
+            FloatAt(centre + Vector3.up * 1.2f, Loc.T("float.duel"), Palette.UiGold);
+            AudioManager.PlaySfx(Sfx.Warning, 0.8f, 1.1f);
+            BipSay("duel");
+        }
+
+        private void OnDuelStruck()
+        {
+            if (thief == null) return;
+            duelStrikes++;
+            var at = thief.transform.position + Vector3.up * 0.8f;
+            fx.Burst(at, Palette.UiGold, Palette.CoinGlow, 26, 5f);
+            AudioManager.PlaySfx(Sfx.Blocked, 1f, 1.1f);
+            cameraRig.Punch(0.6f);
+            Haptics.Medium();
+            if (duelStrikes < DuelStrikes)
+            {
+                FloatAt(at, Loc.T("float.maskCrack"), Palette.UiGold);
+                return;
+            }
+            EndDuel();
+            ThiefCaught();
+        }
+
+        private void OnDuelHurt(float weight)
+        {
+            if (!ArenaDamage(weight, knockOut: false)) return; // the robot lost the level
+            if (++duelHurts >= DuelHurts) DuelEscape();
+        }
+
+        /// <summary>Kuzgun got away this time: the duel ends and he leaps off.</summary>
+        private void DuelEscape()
+        {
+            EndDuel();
+            if (thief == null) return;
+            FloatAt(thief.transform.position + Vector3.up, Loc.T("float.thiefSlipped"), Palette.UiRed);
+            thiefEscape = true;
+            thiefTimer = 0.05f;
+        }
+
+        private void EndDuel()
+        {
+            if (!duel) return;
+            EndArenaFight(true);
+            duel = false;
+            if (arenaRing != null) arenaRing.gameObject.SetActive(false);
+        }
+
+        /// <summary>
+        /// A blow on the robot during a fight: health takes it (a rescue charge saves the last sliver). On one-hit floors
+        /// the robot is only thrown out (<paramref name="knockOut"/>). False when the level is lost.
+        /// </summary>
+        private bool ArenaDamage(float weight, bool knockOut)
+        {
+            BreakCombo();
+            cameraRig.Shake(1f);
+            Haptics.Medium();
+            fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(1f, 0.35f, 0.35f), new Color(2.4f, 0.5f, 0.4f), 22, 5f);
+            if (!HealthEnabled)
+            {
+                AudioManager.PlaySfx(Sfx.Squash, 0.7f, 1.3f);
+                FloatAt(robot.transform.position + Vector3.up * 0.6f, Loc.T("float.knockedOut"), Palette.UiRed);
+                if (knockOut) EndArenaFight(true);
+                return true;
+            }
+            float damage = HitShare(levelIndex) * weight * (1f - Shop.ArmorShare);
+            if (health - damage > 0.001f)
+            {
+                health -= damage;
+                AudioManager.PlaySfx(Sfx.Squash, 0.7f, 1.4f);
+                FloatAt(robot.transform.position + Vector3.up * 0.5f, "-" + Mathf.RoundToInt(damage * 100f) + "%", Palette.UiRed);
+                if (health < 0.35f) BipSay("lowHealth");
+                RefreshHealthBar();
+                return true;
+            }
+            if ((RescueEnabled && rescues > 0) || Shop.TryUse(Boost.ExtraRescue))
+            {
+                if (RescueEnabled && rescues > 0) rescues--;
+                health = 0.2f;
+                robot.GiveShield(1.5f);
+                FloatAt(robot.transform.position + Vector3.up * 0.5f, Loc.T("float.rescued"), Palette.UiCyan);
+                RefreshHealthBar();
+                return true;
+            }
+            health = 0f;
+            RefreshHealthBar();
+            EndArenaFight(false);
+            duel = false;
+            robot.Squash();
+            AudioManager.PlaySfx(Sfx.Squash);
+            Haptics.Death();
+            Lose(Loc.T(level.mission == MissionType.Thief ? "lose.thiefDuel" : level.cage ? "lose.cage" : "lose.monster"));
+            return false;
         }
 
         /// <summary>The HUD line of a monster level.</summary>
         private string ArenaHud()
         {
             int percent = Mathf.CeilToInt(monsterHp * 100f / Mathf.Max(1, objectivesTotal));
-            return ArenaActive ? Loc.F("hud.arenaFight", hammerAmmo, percent) : Loc.F("hud.arenaAmmo", hammerAmmo, Weapons.MaxAmmo, percent);
+            string kind = level.cage ? "hud.cage" : "hud.arena";
+            return ArenaActive ? Loc.F(kind + "Fight", hammerAmmo, percent) : Loc.F(kind + "Ammo", hammerAmmo, Weapons.MaxAmmo, percent);
         }
     }
 }

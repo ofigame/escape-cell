@@ -13,12 +13,16 @@ MonoBehaviour:
   m_Name: LevelSet
   m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Data.LevelSet
   levels:
-  - gridWidth: 3
-    gridHeight: 3
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '###'
-    - '###'
-    - '###'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 0
     coinTarget: 3
@@ -31,6 +35,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -72,13 +78,16 @@ MonoBehaviour:
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '####'
-    - '####'
-    - '####'
-    - '####'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 0
     coinTarget: 5
@@ -91,6 +100,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -132,13 +143,16 @@ MonoBehaviour:
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '####'
-    - '####'
-    - '####'
-    - '#X##'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '##X####'
+    - '#######'
     shapeName: Square
     mission: 3
     coinTarget: 9
@@ -151,6 +165,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -192,14 +208,16 @@ MonoBehaviour:
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '###X#'
-    - '#####'
-    - X####
-    - '####X'
-    - '#####'
+    - '####X##'
+    - '#######'
+    - '#######'
+    - '#X#####'
+    - '#######'
+    - '#X#####'
+    - '#######'
     shapeName: Square
     mission: 4
     coinTarget: 10
@@ -212,6 +230,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -253,14 +273,16 @@ MonoBehaviour:
     powerUpInterval: 10.8714285
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 3
     coinTarget: 10
@@ -273,6 +295,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -314,19 +338,23 @@ MonoBehaviour:
     powerUpInterval: 10.835811
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
-    shapeName: Square
-    mission: 8
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '##X######'
+    - '#########'
+    - '#########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 10
     surviveSeconds: 34
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -334,6 +362,8 @@ MonoBehaviour:
     rules: 0
     quest: 1
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -375,14 +405,16 @@ MonoBehaviour:
     powerUpInterval: 10.801519
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '##X#X'
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
+    - '####X##'
+    - '#######'
+    - '#####X#'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 0
     coinTarget: 8
@@ -395,6 +427,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -436,8 +470,8 @@ MonoBehaviour:
     powerUpInterval: 10.768249
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 3
-    gridHeight: 4
+  - gridWidth: 7
+    gridHeight: 7
     layout:
     - '##D#...'
     - '####...'
@@ -467,6 +501,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -508,14 +544,16 @@ MonoBehaviour:
     powerUpInterval: 10.735804
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 1
     coinTarget: 11
@@ -528,6 +566,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -569,23 +609,23 @@ MonoBehaviour:
     powerUpInterval: 10.704049
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 3
+  - gridWidth: 7
     gridHeight: 14
     layout:
-    - '#D#'
-    - '###'
-    - '###'
-    - '##X'
-    - '###'
-    - '###'
-    - '###'
-    - '#X#'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '#K#'
-    - '#S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - X#X##
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 2
     coinTarget: 11
@@ -598,6 +638,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -639,18 +681,23 @@ MonoBehaviour:
     powerUpInterval: 10.672886
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 4
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    shapeName: Square
-    mission: 0
+    - '#########'
+    - '#########'
+    - '######X##'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 5
     surviveSeconds: 32
-    keys: 2
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -658,6 +705,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -699,19 +748,23 @@ MonoBehaviour:
     powerUpInterval: 10.642239
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
-    shapeName: Square
-    mission: 3
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - X########
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 10
     surviveSeconds: 33
-    keys: 2
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -719,6 +772,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -760,19 +815,23 @@ MonoBehaviour:
     powerUpInterval: 10.612049
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '#####'
-    - X####
-    - '#####'
-    - '#####'
-    - '#X###'
-    shapeName: Square
-    mission: 0
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '###X#####'
+    - '#########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 7
     surviveSeconds: 34
-    keys: 2
+    keys: 3
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -780,6 +839,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -821,29 +882,29 @@ MonoBehaviour:
     powerUpInterval: 10.582269
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 3
+  - gridWidth: 7
     gridHeight: 20
     layout:
-    - '#D#'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '#X#'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '#K#'
-    - '#S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##X##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 4
     coinTarget: 20
@@ -856,6 +917,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -897,15 +960,16 @@ MonoBehaviour:
     powerUpInterval: 10.552858
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 10
     coinTarget: 10
@@ -918,6 +982,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -959,17 +1025,21 @@ MonoBehaviour:
     powerUpInterval: 10.523787
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    shapeName: Square
-    mission: 8
+    - '#######X##'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##X#######'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 11
     surviveSeconds: 35
     keys: 4
@@ -980,6 +1050,8 @@ MonoBehaviour:
     rules: 0
     quest: 1
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -1021,20 +1093,24 @@ MonoBehaviour:
     powerUpInterval: 10.495024
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    shapeName: Square
-    mission: 0
+    - '#####X####'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#########X'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 6
     surviveSeconds: 35
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -1042,6 +1118,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -1083,25 +1161,25 @@ MonoBehaviour:
     powerUpInterval: 10.466548
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 3
+  - gridWidth: 7
     gridHeight: 16
     layout:
-    - '#D#'
-    - '###'
-    - '###'
-    - '###'
-    - '#X#'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '#X#'
-    - '###'
-    - '###'
-    - '#K#'
-    - '#S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '###X#'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '###X#'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 2
     coinTarget: 10
@@ -1114,6 +1192,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -1155,15 +1235,16 @@ MonoBehaviour:
     powerUpInterval: 10.438338
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 1
     coinTarget: 11
@@ -1176,6 +1257,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -1239,6 +1322,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -1280,14 +1365,16 @@ MonoBehaviour:
     powerUpInterval: 10.382647
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 0
     coinTarget: 6
@@ -1300,6 +1387,8 @@ MonoBehaviour:
     rules: 2
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -1341,19 +1430,23 @@ MonoBehaviour:
     powerUpInterval: 10.355135
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
-    shapeName: Square
-    mission: 0
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '########X'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 6
     surviveSeconds: 34
-    keys: 2
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -1361,6 +1454,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -1402,20 +1497,24 @@ MonoBehaviour:
     powerUpInterval: 10.327829
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - '##########'
+    - '#######X##'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##X#######'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 8
     surviveSeconds: 35
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -1423,6 +1522,8 @@ MonoBehaviour:
     rules: 2
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -1464,14 +1565,16 @@ MonoBehaviour:
     powerUpInterval: 10.300717
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 4
     coinTarget: 15
@@ -1484,6 +1587,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -1525,15 +1630,16 @@ MonoBehaviour:
     powerUpInterval: 10.27379
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 3
     coinTarget: 11
@@ -1546,6 +1652,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -1587,18 +1695,21 @@ MonoBehaviour:
     powerUpInterval: 10.247039
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    shapeName: Square
-    mission: 8
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '########X#'
+    - '##########'
+    - '#X########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 11
     surviveSeconds: 36
     keys: 4
@@ -1609,6 +1720,8 @@ MonoBehaviour:
     rules: 2
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -1650,21 +1763,24 @@ MonoBehaviour:
     powerUpInterval: 10.220453
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - X##X###
-    - '#######'
-    - '#######'
-    - '#X#####'
-    - '#######'
-    - '#######'
-    - '#######'
-    shapeName: Square
-    mission: 3
+    - '#X##X#####'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 12
     surviveSeconds: 37
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -1672,13 +1788,15 @@ MonoBehaviour:
     rules: 2
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
     number: 27
     score: 22
     helper: 0
-    timeLimit: 45
+    timeLimit: 0
     paintTarget: 40
     thiefRace: 0
     escortSeconds: 0
@@ -1713,27 +1831,27 @@ MonoBehaviour:
     powerUpInterval: 10.194027
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 18
     layout:
-    - '##D#'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '###X'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '##X#'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '##K#'
-    - '##S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '####X'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '###X#'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 2
     coinTarget: 11
@@ -1746,6 +1864,8 @@ MonoBehaviour:
     rules: 2
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -1809,6 +1929,8 @@ MonoBehaviour:
     rules: 2
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -1850,18 +1972,20 @@ MonoBehaviour:
     powerUpInterval: 10.141624
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    shapeName: Square
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#######X##'
+    - '##########'
+    - '###X######'
+    shapeName: Arena
     mission: 9
     coinTarget: 13
     surviveSeconds: 39
@@ -1873,6 +1997,8 @@ MonoBehaviour:
     rules: 2
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -1914,19 +2040,23 @@ MonoBehaviour:
     powerUpInterval: 10.115635
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
-    gridHeight: 5
+  - gridWidth: 9
+    gridHeight: 9
     layout:
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
-    - '#####'
-    shapeName: Square
-    mission: 0
+    - '#########'
+    - '#########'
+    - '#####X###'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 5
     surviveSeconds: 35
-    keys: 2
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -1934,6 +2064,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -1975,20 +2107,24 @@ MonoBehaviour:
     powerUpInterval: 10.08978
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#########X'
+    - '##########'
+    - '#X########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 8
     surviveSeconds: 35
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -1996,6 +2132,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -2037,15 +2175,16 @@ MonoBehaviour:
     powerUpInterval: 10.0640545
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 11
     coinTarget: 11
@@ -2058,6 +2197,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -2099,15 +2240,16 @@ MonoBehaviour:
     powerUpInterval: 10.038452
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 4
     coinTarget: 18
@@ -2120,6 +2262,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -2183,6 +2327,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -2224,21 +2370,24 @@ MonoBehaviour:
     powerUpInterval: 9.987604
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '###X###'
-    - '#######'
-    - '#X###X#'
-    - '#######'
-    - '####X##'
-    - X#X####
-    - '#######'
-    shapeName: Square
-    mission: 8
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - X#########
+    - '##########'
+    - X#########
+    shapeName: Arena
+    mission: 9
     coinTarget: 12
     surviveSeconds: 38
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -2246,6 +2395,8 @@ MonoBehaviour:
     rules: 0
     quest: 1
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -2287,22 +2438,24 @@ MonoBehaviour:
     powerUpInterval: 9.96235
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '###X####'
-    - '########'
-    - '##X#####'
-    - '########'
-    - '#X######'
-    - '########'
-    - '########'
-    - X#######
-    shapeName: Square
-    mission: 3
+    - '###X######'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##X#######'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 12
     surviveSeconds: 38
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -2310,6 +2463,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -2351,8 +2506,8 @@ MonoBehaviour:
     powerUpInterval: 9.937203
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
-    gridHeight: 5
+  - gridWidth: 7
+    gridHeight: 7
     layout:
     - ....##D##
     - ....#####
@@ -2392,6 +2547,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -2456,6 +2613,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 1
     final: 0
@@ -2497,31 +2656,31 @@ MonoBehaviour:
     powerUpInterval: 9.88722
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 22
     layout:
-    - '##D#'
-    - '####'
-    - '####'
-    - '####'
-    - X###
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - X###
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '##K#'
-    - '##S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - X####
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - X####
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 10
     coinTarget: 13
@@ -2534,6 +2693,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -2575,15 +2736,16 @@ MonoBehaviour:
     powerUpInterval: 9.862377
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 0
     coinTarget: 6
@@ -2596,6 +2758,8 @@ MonoBehaviour:
     rules: 8
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -2637,21 +2801,24 @@ MonoBehaviour:
     powerUpInterval: 9.83763
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#######'
-    - '##X####'
-    - '#####X#'
-    - '#######'
-    - '#####X#'
-    - '##X####'
-    - X######
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - '##########'
+    - '###X######'
+    - '##########'
+    - '##########'
+    - '########X#'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 8
     surviveSeconds: 37
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -2659,6 +2826,8 @@ MonoBehaviour:
     rules: 8
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -2700,21 +2869,24 @@ MonoBehaviour:
     powerUpInterval: 9.812976
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    shapeName: Square
-    mission: 3
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#X###X####'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 12
     surviveSeconds: 38
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -2722,6 +2894,8 @@ MonoBehaviour:
     rules: 8
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -2763,15 +2937,16 @@ MonoBehaviour:
     powerUpInterval: 9.788411
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 4
     coinTarget: 18
@@ -2784,6 +2959,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -2847,6 +3024,8 @@ MonoBehaviour:
     rules: 8
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -2888,28 +3067,33 @@ MonoBehaviour:
     powerUpInterval: 9.739543
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    shapeName: Square
-    mission: 8
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#X########'
+    - '##########'
+    - '##########'
+    - X#########
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 13
     surviveSeconds: 39
-    keys: 3
-    collapseBehind: 1
+    keys: 4
+    collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -2951,22 +3135,24 @@ MonoBehaviour:
     powerUpInterval: 9.715235
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    shapeName: Square
-    mission: 0
+    - '###X######'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#######X##'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 10
     surviveSeconds: 39
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -2974,6 +3160,8 @@ MonoBehaviour:
     rules: 8
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -3015,7 +3203,7 @@ MonoBehaviour:
     powerUpInterval: 9.691007
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 20
     layout:
     - D#....
@@ -3050,6 +3238,8 @@ MonoBehaviour:
     rules: 8
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -3114,6 +3304,8 @@ MonoBehaviour:
     rules: 8
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -3179,6 +3371,8 @@ MonoBehaviour:
     rules: 8
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -3220,20 +3414,24 @@ MonoBehaviour:
     powerUpInterval: 9.61879
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - '##########'
+    - '##X#X#####'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 8
     surviveSeconds: 37
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -3241,6 +3439,8 @@ MonoBehaviour:
     rules: 4096
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -3282,21 +3482,24 @@ MonoBehaviour:
     powerUpInterval: 9.594866
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#####X#'
-    - '###X###'
-    - '#######'
-    shapeName: Square
-    mission: 3
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#######X##'
+    - '##########'
+    - '####X#####'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 12
     surviveSeconds: 38
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -3304,6 +3507,8 @@ MonoBehaviour:
     rules: 4096
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -3345,21 +3550,24 @@ MonoBehaviour:
     powerUpInterval: 9.571014
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - '##########'
+    - '##########'
+    - '######X###'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - X#########
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 10
     surviveSeconds: 38
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -3367,6 +3575,8 @@ MonoBehaviour:
     rules: 4096
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -3408,15 +3618,16 @@ MonoBehaviour:
     powerUpInterval: 9.547233
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 4
     coinTarget: 20
@@ -3429,6 +3640,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -3470,15 +3683,16 @@ MonoBehaviour:
     powerUpInterval: 9.5235195
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - '######'
-    - X#####
-    - '######'
-    - '######'
-    - '######'
+    - '#######'
+    - '#######'
+    - X######
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 1
     coinTarget: 13
@@ -3491,6 +3705,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -3532,22 +3748,24 @@ MonoBehaviour:
     powerUpInterval: 9.499873
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    shapeName: Square
-    mission: 8
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#########X'
+    - '##########'
+    - '##X#######'
+    shapeName: Arena
+    mission: 9
     coinTarget: 13
     surviveSeconds: 40
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -3555,6 +3773,8 @@ MonoBehaviour:
     rules: 4096
     quest: 3
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -3596,22 +3816,24 @@ MonoBehaviour:
     powerUpInterval: 9.476293
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#X#X####'
-    - '########'
-    - '########'
-    - '#######X'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    shapeName: Square
-    mission: 3
+    - '##X#X#####'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 13
     surviveSeconds: 40
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -3619,6 +3841,8 @@ MonoBehaviour:
     rules: 4096
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -3660,24 +3884,24 @@ MonoBehaviour:
     powerUpInterval: 9.452777
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 5
+  - gridWidth: 7
     gridHeight: 15
     layout:
-    - '#####'
-    - '#XXX#'
-    - DX###
-    - XX#X#
-    - '##K##'
-    - '#X#X#'
-    - '#X#X#'
-    - '#X#X#'
-    - '###X#'
-    - '#X#X#'
-    - '#X###'
-    - '#X#X#'
-    - '#####'
-    - '#X#X#'
-    - SX###
+    - '######D'
+    - '#X#XXX#'
+    - '#######'
+    - XX#XXX#
+    - '###X###'
+    - '#XXX#X#'
+    - '#####X#'
+    - '#X#XXX#'
+    - '#######'
+    - '#X#XXXX'
+    - '#X#XK##'
+    - '#X#XXX#'
+    - '#X#####'
+    - '#X#XXX#'
+    - S######
     shapeName: Maze
     mission: 2
     coinTarget: 13
@@ -3690,6 +3914,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -3754,6 +3980,8 @@ MonoBehaviour:
     rules: 4096
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -3804,11 +4032,11 @@ MonoBehaviour:
     - '##########'
     - '##########'
     - '##########'
-    - '#X########'
     - '##########'
-    - '#####X####'
+    - '##########'
+    - '##########'
     - '#X########'
-    shapeName: Square
+    shapeName: Arena
     mission: 9
     coinTarget: 15
     surviveSeconds: 42
@@ -3820,6 +4048,8 @@ MonoBehaviour:
     rules: 4096
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 1
     marathon: 0
     final: 0
@@ -3861,15 +4091,16 @@ MonoBehaviour:
     powerUpInterval: 9.3826
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - '##X###'
-    - '######'
-    - '######'
-    - '##X###'
-    - '######'
+    - '#######'
+    - '#######'
+    - '##X####'
+    - '#######'
+    - '##X####'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 0
     coinTarget: 8
@@ -3882,6 +4113,8 @@ MonoBehaviour:
     rules: 32
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -3923,21 +4156,24 @@ MonoBehaviour:
     powerUpInterval: 9.359328
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#######'
-    - '####X##'
-    - '#######'
-    - X######
-    - '#####X#'
-    - '#######'
-    - '#######'
-    shapeName: Square
-    mission: 3
+    - '##########'
+    - '##########'
+    - '#####X####'
+    - '##########'
+    - '##########'
+    - '#######X##'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 13
     surviveSeconds: 39
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -3945,6 +4181,8 @@ MonoBehaviour:
     rules: 32
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -3986,21 +4224,24 @@ MonoBehaviour:
     powerUpInterval: 9.336114
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#####X#'
-    - X######
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - X######X##
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 12
     surviveSeconds: 40
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -4008,6 +4249,8 @@ MonoBehaviour:
     rules: 4128
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -4049,15 +4292,16 @@ MonoBehaviour:
     powerUpInterval: 9.312957
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 4
     coinTarget: 25
@@ -4070,6 +4314,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -4133,6 +4379,8 @@ MonoBehaviour:
     rules: 32
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -4174,23 +4422,24 @@ MonoBehaviour:
     powerUpInterval: 9.266809
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    shapeName: Square
-    mission: 8
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '########X#'
+    - '##########'
+    - '###X######'
+    shapeName: Arena
+    mission: 9
     coinTarget: 14
     surviveSeconds: 41
-    keys: 3
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -4198,6 +4447,8 @@ MonoBehaviour:
     rules: 32
     quest: 3
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -4239,23 +4490,24 @@ MonoBehaviour:
     powerUpInterval: 9.243817
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#X###X###'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '##X######'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#####X###'
-    shapeName: Square
-    mission: 0
+    - '#X########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '######X###'
+    shapeName: Arena
+    mission: 9
     coinTarget: 15
     surviveSeconds: 41
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -4263,13 +4515,15 @@ MonoBehaviour:
     rules: 4128
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
     number: 67
     score: 37
     helper: 0
-    timeLimit: 55
+    timeLimit: 0
     paintTarget: 0
     thiefRace: 0
     escortSeconds: 0
@@ -4304,29 +4558,29 @@ MonoBehaviour:
     powerUpInterval: 9.220879
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 20
     layout:
-    - '##D#'
-    - '####'
-    - '####'
-    - '####'
-    - '##X#'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '##X#'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '##K#'
-    - '##S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '###X#'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '###X#'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 2
     coinTarget: 13
@@ -4339,6 +4593,8 @@ MonoBehaviour:
     rules: 32
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -4404,6 +4660,8 @@ MonoBehaviour:
     rules: 32
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 1
     final: 0
@@ -4449,16 +4707,16 @@ MonoBehaviour:
     gridHeight: 10
     layout:
     - X#########
-    - '########X#'
     - '##########'
     - '##########'
-    - X#########
+    - '##########'
+    - '##########'
     - '##########'
     - '##X#######'
     - '##########'
     - '##########'
     - '##########'
-    shapeName: Square
+    shapeName: Arena
     mission: 9
     coinTarget: 15
     surviveSeconds: 43
@@ -4470,6 +4728,8 @@ MonoBehaviour:
     rules: 32
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 1
     marathon: 0
     final: 0
@@ -4511,20 +4771,24 @@ MonoBehaviour:
     powerUpInterval: 9.15237
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - '####X#####'
+    - '##########'
+    - '###X######'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 8
     surviveSeconds: 39
-    keys: 3
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -4532,6 +4796,8 @@ MonoBehaviour:
     rules: 128
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -4573,21 +4839,24 @@ MonoBehaviour:
     powerUpInterval: 9.129634
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    shapeName: Square
-    mission: 3
+    - '##########'
+    - '##########'
+    - '######X###'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '######X###'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 13
     surviveSeconds: 40
-    keys: 3
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -4595,6 +4864,8 @@ MonoBehaviour:
     rules: 128
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -4636,22 +4907,24 @@ MonoBehaviour:
     powerUpInterval: 9.106947
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - '##########'
+    - '#########X'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#########X'
+    shapeName: Arena
+    mission: 9
     coinTarget: 12
     surviveSeconds: 40
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -4659,6 +4932,8 @@ MonoBehaviour:
     rules: 4224
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -4700,25 +4975,25 @@ MonoBehaviour:
     powerUpInterval: 9.084308
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 16
     layout:
-    - '##D#'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - X###
-    - '###X'
-    - '####'
-    - '####'
-    - '####'
-    - '##K#'
-    - '##S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - X####
+    - '####X'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 4
     coinTarget: 30
@@ -4731,6 +5006,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -4795,6 +5072,8 @@ MonoBehaviour:
     rules: 4224
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -4836,23 +5115,24 @@ MonoBehaviour:
     powerUpInterval: 9.039169
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    shapeName: Square
-    mission: 8
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '########X#'
+    - '#####X####'
+    shapeName: Arena
+    mission: 9
     coinTarget: 14
     surviveSeconds: 42
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -4860,7 +5140,9 @@ MonoBehaviour:
     rules: 128
     quest: 0
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 76
@@ -4901,23 +5183,24 @@ MonoBehaviour:
     powerUpInterval: 9.016668
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#X######X'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#######X#'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    shapeName: Square
-    mission: 3
+    - '##########'
+    - '#X########'
+    - '##########'
+    - '##########'
+    - '#######X##'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 15
     surviveSeconds: 42
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -4925,6 +5208,8 @@ MonoBehaviour:
     rules: 128
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -4966,31 +5251,31 @@ MonoBehaviour:
     powerUpInterval: 8.994213
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 22
     layout:
-    - '##D#'
-    - '####'
-    - '####'
-    - '##X#'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '###X'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '##K#'
-    - '##S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '##X##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '####X'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 2
     coinTarget: 14
@@ -5003,6 +5288,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -5068,6 +5355,8 @@ MonoBehaviour:
     rules: 128
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -5135,6 +5424,8 @@ MonoBehaviour:
     rules: 128
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -5176,15 +5467,16 @@ MonoBehaviour:
     powerUpInterval: 8.92711
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 6
-    gridHeight: 6
+  - gridWidth: 7
+    gridHeight: 7
     layout:
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
-    - '######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
+    - '#######'
     shapeName: Square
     mission: 0
     coinTarget: 8
@@ -5197,6 +5489,8 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -5238,21 +5532,24 @@ MonoBehaviour:
     powerUpInterval: 8.904828
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    shapeName: Square
-    mission: 3
+    - '##########'
+    - '##########'
+    - '########X#'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#####X####'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 14
     surviveSeconds: 41
-    keys: 3
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -5260,7 +5557,9 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 82
@@ -5301,21 +5600,24 @@ MonoBehaviour:
     powerUpInterval: 8.882587
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - X#########
+    - '##########'
+    - '########X#'
+    shapeName: Arena
+    mission: 9
     coinTarget: 10
     surviveSeconds: 42
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -5323,6 +5625,8 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -5386,6 +5690,8 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -5450,6 +5756,8 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -5498,17 +5806,17 @@ MonoBehaviour:
     - '##########'
     - '##########'
     - '##########'
+    - '#######X##'
     - '##########'
     - '##########'
     - '##########'
+    - '#######X##'
     - '##########'
-    - '##########'
-    - '##########'
-    shapeName: Square
-    mission: 8
+    shapeName: Arena
+    mission: 9
     coinTarget: 15
     surviveSeconds: 43
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -5516,6 +5824,8 @@ MonoBehaviour:
     rules: 1
     quest: 3
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -5563,18 +5873,18 @@ MonoBehaviour:
     - '##########'
     - X#########
     - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
     - '#########X'
-    - '##########'
-    - '#######X##'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '#########X'
-    shapeName: Square
-    mission: 0
+    shapeName: Arena
+    mission: 9
     coinTarget: 15
     surviveSeconds: 43
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -5582,13 +5892,15 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
     number: 87
     score: 44
     helper: 0
-    timeLimit: 55
+    timeLimit: 0
     paintTarget: 0
     thiefRace: 0
     escortSeconds: 0
@@ -5623,31 +5935,31 @@ MonoBehaviour:
     powerUpInterval: 8.771991
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 3
+  - gridWidth: 7
     gridHeight: 22
     layout:
-    - '#D#'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '###'
-    - '#X#'
-    - '###'
-    - '###'
-    - '###'
-    - X##
-    - '###'
-    - '###'
-    - '#X#'
-    - '###'
-    - '###'
-    - '###'
-    - '#K#'
-    - '#S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##X##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - X####
+    - '#####'
+    - '#####'
+    - '##X##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 2
     coinTarget: 14
@@ -5660,6 +5972,8 @@ MonoBehaviour:
     rules: 9
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -5725,6 +6039,8 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -5769,7 +6085,7 @@ MonoBehaviour:
   - gridWidth: 11
     gridHeight: 11
     layout:
-    - '#X########X'
+    - '##########X'
     - '###########'
     - '###X#######'
     - '###########'
@@ -5780,7 +6096,7 @@ MonoBehaviour:
     - '###########'
     - '###########'
     - '###########'
-    shapeName: Square
+    shapeName: Arena
     mission: 9
     coinTarget: 16
     surviveSeconds: 45
@@ -5792,6 +6108,8 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 1
     marathon: 0
     final: 0
@@ -5833,21 +6151,24 @@ MonoBehaviour:
     powerUpInterval: 8.706099
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#######'
-    - '#####X#'
-    - '#X#####'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - '#######X##'
+    - '##########'
+    - '##X#######'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 8
     surviveSeconds: 41
-    keys: 3
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -5855,7 +6176,9 @@ MonoBehaviour:
     rules: 8192
     quest: 0
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 91
@@ -5896,22 +6219,24 @@ MonoBehaviour:
     powerUpInterval: 8.684209
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    shapeName: Square
-    mission: 3
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '#####X####'
+    - '#########X'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 14
     surviveSeconds: 42
-    keys: 3
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -5919,6 +6244,8 @@ MonoBehaviour:
     rules: 8192
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -5960,23 +6287,24 @@ MonoBehaviour:
     powerUpInterval: 8.662355
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#########'
-    - '#########'
-    - '#X#######'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#######X#'
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - '##########'
+    - '#X########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '########X#'
+    shapeName: Arena
+    mission: 9
     coinTarget: 12
     surviveSeconds: 43
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -5984,6 +6312,8 @@ MonoBehaviour:
     rules: 8193
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -6048,6 +6378,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -6113,6 +6445,8 @@ MonoBehaviour:
     rules: 8192
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -6165,13 +6499,13 @@ MonoBehaviour:
     - '##########'
     - '##########'
     - '##########'
-    - '##########'
-    - '##########'
-    shapeName: Square
-    mission: 8
+    - '######X###'
+    - '########X#'
+    shapeName: Arena
+    mission: 9
     coinTarget: 15
     surviveSeconds: 44
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -6179,6 +6513,8 @@ MonoBehaviour:
     rules: 8193
     quest: 1
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -6223,7 +6559,7 @@ MonoBehaviour:
   - gridWidth: 10
     gridHeight: 10
     layout:
-    - '####X#####'
+    - '##########'
     - '#########X'
     - '##########'
     - '##########'
@@ -6233,11 +6569,11 @@ MonoBehaviour:
     - '##########'
     - '##########'
     - '##########'
-    shapeName: Square
-    mission: 3
+    shapeName: Arena
+    mission: 9
     coinTarget: 16
     surviveSeconds: 44
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -6245,6 +6581,8 @@ MonoBehaviour:
     rules: 1
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -6286,33 +6624,33 @@ MonoBehaviour:
     powerUpInterval: 8.553621
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 24
     layout:
-    - '##D#'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '#X##'
-    - '####'
-    - '####'
-    - '####'
-    - '#X##'
-    - '###X'
-    - '####'
-    - '##K#'
-    - '##S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - X#X##
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#X###'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 2
     coinTarget: 15
@@ -6325,6 +6663,8 @@ MonoBehaviour:
     rules: 8
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -6392,6 +6732,8 @@ MonoBehaviour:
     rules: 8192
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 1
     final: 0
@@ -6459,6 +6801,8 @@ MonoBehaviour:
     rules: 8193
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -6522,6 +6866,8 @@ MonoBehaviour:
     rules: 64
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -6563,21 +6909,24 @@ MonoBehaviour:
     powerUpInterval: 8.467244
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - '#X########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '####X#####'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 10
     surviveSeconds: 43
-    keys: 3
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -6585,6 +6934,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -6626,23 +6977,24 @@ MonoBehaviour:
     powerUpInterval: 8.445732
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 9
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    shapeName: Rect
-    mission: 3
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '###X######'
+    - '##########'
+    - '#######X##'
+    shapeName: Arena
+    mission: 9
     coinTarget: 15
     surviveSeconds: 44
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -6650,6 +7002,8 @@ MonoBehaviour:
     rules: 65
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -6713,6 +7067,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -6778,6 +7134,8 @@ MonoBehaviour:
     rules: 64
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -6825,18 +7183,18 @@ MonoBehaviour:
     - '##########'
     - '##########'
     - '##########'
+    - '#########X'
     - '##########'
     - '##########'
     - '##########'
     - '##########'
+    - '######X###'
     - '##########'
-    - '##########'
-    - '##########'
-    shapeName: Square
-    mission: 8
+    shapeName: Arena
+    mission: 9
     coinTarget: 16
     surviveSeconds: 45
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -6844,7 +7202,9 @@ MonoBehaviour:
     rules: 65
     quest: 0
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 106
@@ -6889,21 +7249,21 @@ MonoBehaviour:
     gridHeight: 11
     layout:
     - '###########'
+    - '##########X'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
+    - '##X########'
     - '###########'
     - '###########'
     - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 0
+    - '##X########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 25
     surviveSeconds: 45
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -6911,6 +7271,8 @@ MonoBehaviour:
     rules: 64
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -6952,31 +7314,31 @@ MonoBehaviour:
     powerUpInterval: 8.338642
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 22
     layout:
-    - '##D#'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '##X#'
-    - '####'
-    - '####'
-    - '##X#'
-    - '####'
-    - '##X#'
-    - '####'
-    - '####'
-    - '##K#'
-    - '##S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##X##'
+    - '#####'
+    - '#####'
+    - '###X#'
+    - '#####'
+    - '##X##'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 2
     coinTarget: 15
@@ -6989,6 +7351,8 @@ MonoBehaviour:
     rules: 64
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -7055,6 +7419,8 @@ MonoBehaviour:
     rules: 8256
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -7122,6 +7488,8 @@ MonoBehaviour:
     rules: 65
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -7163,21 +7531,24 @@ MonoBehaviour:
     powerUpInterval: 8.274754
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - X######
-    - '#######'
-    - X######
-    - '#######'
-    - '#######'
-    - '####X##'
-    - '#######'
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - X#########
+    - '##########'
+    - X#########
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 8
     surviveSeconds: 43
-    keys: 3
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -7185,6 +7556,8 @@ MonoBehaviour:
     rules: 16
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -7226,22 +7599,24 @@ MonoBehaviour:
     powerUpInterval: 8.253516
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - '##########'
+    - '#X########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '###X######'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 14
     surviveSeconds: 44
-    keys: 3
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -7249,7 +7624,9 @@ MonoBehaviour:
     rules: 16
     quest: 0
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 112
@@ -7290,23 +7667,24 @@ MonoBehaviour:
     powerUpInterval: 8.232307
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#########'
-    - '#########'
-    - '####X####'
-    - '########X'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '###X##X##'
-    shapeName: Square
-    mission: 3
+    - '##########'
+    - '##########'
+    - '####X#####'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '######X###'
+    shapeName: Arena
+    mission: 9
     coinTarget: 16
     surviveSeconds: 45
-    keys: 3
+    keys: 4
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -7314,6 +7692,8 @@ MonoBehaviour:
     rules: 48
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -7378,6 +7758,8 @@ MonoBehaviour:
     rules: 16
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -7444,6 +7826,8 @@ MonoBehaviour:
     rules: 16
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -7494,16 +7878,16 @@ MonoBehaviour:
     - '###########'
     - '###########'
     - '###########'
+    - X##########
     - '###########'
     - '###########'
+    - '#X####X####'
     - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 8
+    shapeName: Arena
+    mission: 9
     coinTarget: 16
     surviveSeconds: 46
-    keys: 3
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -7511,6 +7895,8 @@ MonoBehaviour:
     rules: 16
     quest: 3
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -7557,20 +7943,20 @@ MonoBehaviour:
     layout:
     - '###########'
     - '#########X#'
-    - X##########
+    - '###########'
     - '###########'
     - '###X#######'
     - '###########'
-    - X##########
+    - '###########'
     - '#######X###'
     - '###########'
     - '###########'
     - '###########'
-    shapeName: Square
-    mission: 0
+    shapeName: Arena
+    mission: 9
     coinTarget: 30
     surviveSeconds: 46
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -7578,6 +7964,8 @@ MonoBehaviour:
     rules: 16
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -7619,7 +8007,7 @@ MonoBehaviour:
     powerUpInterval: 8.12669
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 22
     layout:
     - ..D#..
@@ -7656,6 +8044,8 @@ MonoBehaviour:
     rules: 16
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -7722,6 +8112,8 @@ MonoBehaviour:
     rules: 16
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -7766,18 +8158,18 @@ MonoBehaviour:
   - gridWidth: 11
     gridHeight: 11
     layout:
-    - '#X######X#X'
+    - '########X#X'
     - '###########'
     - '###########'
-    - '#X#########'
     - '###########'
     - '###########'
-    - '####X######'
+    - '###########'
+    - '###########'
     - '###########'
     - '######X####'
     - '###########'
     - '###########'
-    shapeName: Square
+    shapeName: Arena
     mission: 9
     coinTarget: 18
     surviveSeconds: 48
@@ -7789,6 +8181,8 @@ MonoBehaviour:
     rules: 16
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 1
     marathon: 0
     final: 0
@@ -7852,6 +8246,8 @@ MonoBehaviour:
     rules: 16384
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -7893,22 +8289,24 @@ MonoBehaviour:
     powerUpInterval: 8.042687
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    shapeName: Square
-    mission: 3
+    - '##########'
+    - '###X######'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '###X######'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 16
     surviveSeconds: 45
-    keys: 3
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -7916,6 +8314,8 @@ MonoBehaviour:
     rules: 16386
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -7957,23 +8357,25 @@ MonoBehaviour:
     powerUpInterval: 8.021752
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    shapeName: Square
-    mission: 0
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#X#########'
+    - '###########'
+    - '###########'
+    - '######X####'
+    - '###########'
+    - '###########'
+    - '######X####'
+    shapeName: Arena
+    mission: 9
     coinTarget: 18
     surviveSeconds: 46
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -7981,6 +8383,8 @@ MonoBehaviour:
     rules: 16512
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -8045,6 +8449,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -8110,6 +8516,8 @@ MonoBehaviour:
     rules: 16384
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -8154,22 +8562,22 @@ MonoBehaviour:
   - gridWidth: 11
     gridHeight: 11
     layout:
+    - '########X##'
+    - '###########'
+    - '###########'
+    - '##X########'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
+    - '#####X#####'
     - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 8
+    shapeName: Arena
+    mission: 9
     coinTarget: 17
     surviveSeconds: 47
-    keys: 3
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -8177,6 +8585,8 @@ MonoBehaviour:
     rules: 16386
     quest: 4
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -8222,21 +8632,21 @@ MonoBehaviour:
     gridHeight: 11
     layout:
     - '###########'
+    - '########X##'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
+    - '#######X###'
     - '###########'
+    - '####X######'
     - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 3
+    shapeName: Arena
+    mission: 9
     coinTarget: 17
     surviveSeconds: 47
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -8244,6 +8654,8 @@ MonoBehaviour:
     rules: 16386
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -8285,33 +8697,33 @@ MonoBehaviour:
     powerUpInterval: 7.917464
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 24
     layout:
-    - '##D#'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '##X#'
-    - '####'
-    - '##X#'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - X###
-    - '####'
-    - '####'
-    - '##K#'
-    - '##S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##X##'
+    - '#####'
+    - '##X##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - X####
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 2
     coinTarget: 16
@@ -8324,6 +8736,8 @@ MonoBehaviour:
     rules: 2
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -8391,6 +8805,8 @@ MonoBehaviour:
     rules: 16416
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 1
     final: 0
@@ -8432,22 +8848,21 @@ MonoBehaviour:
     powerUpInterval: 7.875923
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#X######X###'
-    - '############'
-    - '############'
-    - '###X########'
-    - '############'
-    - '############'
-    - '#X##########'
-    - '############'
-    - '##X#######X#'
-    - '############'
-    - '############'
-    - '############'
-    shapeName: Square
+    - '#######X###'
+    - '###########'
+    - '###########'
+    - '###X#######'
+    - '###########'
+    - '###########'
+    - '#X#########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    shapeName: Arena
     mission: 9
     coinTarget: 18
     surviveSeconds: 49
@@ -8459,6 +8874,8 @@ MonoBehaviour:
     rules: 16386
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 1
     marathon: 0
     final: 0
@@ -8500,21 +8917,24 @@ MonoBehaviour:
     powerUpInterval: 7.8551893
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    shapeName: Square
-    mission: 0
+    - '##########'
+    - '###X######'
+    - '##########'
+    - '#########X'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 9
     surviveSeconds: 45
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -8522,6 +8942,8 @@ MonoBehaviour:
     rules: 512
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -8563,22 +8985,25 @@ MonoBehaviour:
     powerUpInterval: 7.83448
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '########'
-    - '####X###'
-    - '########'
-    - X#######
-    - '########'
-    - '##X#X###'
-    - '########'
-    - '########'
-    shapeName: Square
-    mission: 3
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - X##########
+    - '###########'
+    - '###########'
+    - '##X##X#####'
+    - '###########'
+    - '###########'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 16
     surviveSeconds: 46
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -8586,6 +9011,8 @@ MonoBehaviour:
     rules: 512
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -8627,23 +9054,25 @@ MonoBehaviour:
     powerUpInterval: 7.813794
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    shapeName: Square
-    mission: 0
+    - '###########'
+    - '###########'
+    - '########X##'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '######X###X'
+    shapeName: Arena
+    mission: 9
     coinTarget: 20
     surviveSeconds: 46
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -8651,6 +9080,8 @@ MonoBehaviour:
     rules: 576
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -8715,6 +9146,8 @@ MonoBehaviour:
     rules: 512
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -8781,6 +9214,8 @@ MonoBehaviour:
     rules: 512
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -8828,19 +9263,19 @@ MonoBehaviour:
     - '###########'
     - '###########'
     - '###########'
+    - '#X#########'
     - '###########'
     - '###########'
+    - '#########X#'
     - '###########'
     - '###########'
+    - '####X######'
     - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 8
+    shapeName: Arena
+    mission: 9
     coinTarget: 17
     surviveSeconds: 48
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -8848,7 +9283,9 @@ MonoBehaviour:
     rules: 528
     quest: 1
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 136
@@ -8893,21 +9330,21 @@ MonoBehaviour:
     gridHeight: 11
     layout:
     - '###########'
+    - '####X##X###'
+    - '###########'
+    - '###########'
+    - '######X####'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 0
+    shapeName: Arena
+    mission: 9
     coinTarget: 32
     surviveSeconds: 48
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -8915,6 +9352,8 @@ MonoBehaviour:
     rules: 544
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -8982,6 +9421,8 @@ MonoBehaviour:
     rules: 512
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -9049,6 +9490,8 @@ MonoBehaviour:
     rules: 512
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -9117,6 +9560,8 @@ MonoBehaviour:
     rules: 576
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -9181,6 +9626,8 @@ MonoBehaviour:
     rules: 32768
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -9222,23 +9669,25 @@ MonoBehaviour:
     powerUpInterval: 7.6286635
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    shapeName: Square
-    mission: 3
+    - '###########'
+    - '#######X###'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '##X########'
+    - '###########'
+    - '###########'
+    - '########X##'
+    shapeName: Arena
+    mission: 9
     coinTarget: 17
     surviveSeconds: 47
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -9246,7 +9695,9 @@ MonoBehaviour:
     rules: 32768
     quest: 0
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 142
@@ -9287,24 +9738,25 @@ MonoBehaviour:
     powerUpInterval: 7.6082063
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    shapeName: Square
-    mission: 0
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#######X###'
+    - '###########'
+    - '#########X#'
+    - '###########'
+    - '###########'
+    - '#####X#####'
+    shapeName: Arena
+    mission: 9
     coinTarget: 24
     surviveSeconds: 47
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -9312,6 +9764,8 @@ MonoBehaviour:
     rules: 33280
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -9376,6 +9830,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -9441,6 +9897,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -9482,26 +9940,25 @@ MonoBehaviour:
     powerUpInterval: 7.5469623
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    shapeName: Square
-    mission: 8
+    - '###########'
+    - '###X#######'
+    - '###########'
+    - '#####X#####'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###X#######'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 18
     surviveSeconds: 49
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -9509,6 +9966,8 @@ MonoBehaviour:
     rules: 33280
     quest: 1
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -9550,26 +10009,25 @@ MonoBehaviour:
     powerUpInterval: 7.52659
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    shapeName: Square
-    mission: 0
+    - '###########'
+    - '#######X###'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#X#########'
+    - '###########'
+    - '#######X###'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 30
     surviveSeconds: 49
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -9577,6 +10035,8 @@ MonoBehaviour:
     rules: 32768
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -9618,7 +10078,7 @@ MonoBehaviour:
     powerUpInterval: 7.5062394
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 24
     layout:
     - ....D#
@@ -9657,6 +10117,8 @@ MonoBehaviour:
     rules: 32768
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -9724,6 +10186,8 @@ MonoBehaviour:
     rules: 32768
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -9793,6 +10257,8 @@ MonoBehaviour:
     rules: 32768
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -9834,21 +10300,25 @@ MonoBehaviour:
     powerUpInterval: 7.4453115
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 7
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    shapeName: Square
-    mission: 0
+    - '######X####'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#########X#'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#######X###'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 12
     surviveSeconds: 47
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -9856,7 +10326,9 @@ MonoBehaviour:
     rules: 128
     quest: 0
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 151
@@ -9897,22 +10369,25 @@ MonoBehaviour:
     powerUpInterval: 7.425043
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 8
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    shapeName: Square
-    mission: 3
+    - '###########'
+    - '###########'
+    - '###########'
+    - '##X########'
+    - '###########'
+    - '###########'
+    - '########X##'
+    - '#X#########'
+    - '###########'
+    - '###########'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 17
     surviveSeconds: 48
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -9920,6 +10395,8 @@ MonoBehaviour:
     rules: 128
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -9961,23 +10438,25 @@ MonoBehaviour:
     powerUpInterval: 7.404795
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    shapeName: Square
-    mission: 1
+    - '###########'
+    - X##########
+    - '#######X###'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '####X######'
+    shapeName: Arena
+    mission: 9
     coinTarget: 18
     surviveSeconds: 40
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -9985,6 +10464,8 @@ MonoBehaviour:
     rules: 32896
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -10048,6 +10529,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -10113,6 +10596,8 @@ MonoBehaviour:
     rules: 128
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -10164,15 +10649,15 @@ MonoBehaviour:
     - '###########'
     - '###########'
     - '###########'
+    - X##########
+    - '#######X###'
+    - '###X#######'
     - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 8
+    shapeName: Arena
+    mission: 9
     coinTarget: 18
     surviveSeconds: 50
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -10180,6 +10665,8 @@ MonoBehaviour:
     rules: 32896
     quest: 3
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -10226,20 +10713,20 @@ MonoBehaviour:
     layout:
     - '###########'
     - '###########'
+    - '######X####'
+    - '#########X#'
     - '###########'
     - '###########'
     - '###########'
+    - '#######X###'
     - '###########'
     - '###########'
     - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 0
+    shapeName: Arena
+    mission: 9
     coinTarget: 25
     surviveSeconds: 50
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -10247,6 +10734,8 @@ MonoBehaviour:
     rules: 128
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -10288,7 +10777,7 @@ MonoBehaviour:
     powerUpInterval: 7.303854
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 20
     layout:
     - ..D#..
@@ -10323,6 +10812,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -10391,6 +10882,8 @@ MonoBehaviour:
     rules: 32896
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 1
     final: 0
@@ -10459,6 +10952,8 @@ MonoBehaviour:
     rules: 32896
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -10523,6 +11018,8 @@ MonoBehaviour:
     rules: 4
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -10564,23 +11061,25 @@ MonoBehaviour:
     powerUpInterval: 7.22345
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    shapeName: Square
-    mission: 0
+    - '###########'
+    - '##########X'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - X##########
+    - '###########'
+    - '###########'
+    - '##X########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 18
     surviveSeconds: 49
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -10588,6 +11087,8 @@ MonoBehaviour:
     rules: 4
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -10629,24 +11130,25 @@ MonoBehaviour:
     powerUpInterval: 7.203397
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    shapeName: Square
-    mission: 1
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#X#########'
+    - '###########'
+    - '#X#########'
+    - '###########'
+    - '###########'
+    - '###X#######'
+    shapeName: Arena
+    mission: 9
     coinTarget: 18
     surviveSeconds: 45
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -10654,6 +11156,8 @@ MonoBehaviour:
     rules: 132
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -10718,6 +11222,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -10784,6 +11290,8 @@ MonoBehaviour:
     rules: 4
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -10829,21 +11337,21 @@ MonoBehaviour:
     gridHeight: 11
     layout:
     - '###########'
+    - '########X##'
+    - '###########'
+    - '########X##'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
+    - '##X########'
     - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 8
+    shapeName: Arena
+    mission: 9
     coinTarget: 19
     surviveSeconds: 50
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -10851,7 +11359,9 @@ MonoBehaviour:
     rules: 532
     quest: 0
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 166
@@ -10892,26 +11402,25 @@ MonoBehaviour:
     powerUpInterval: 7.123368
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    shapeName: Square
-    mission: 0
+    - '###########'
+    - '###########'
+    - '#####X#####'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '######X####'
+    - '###########'
+    - '##########X'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 30
     surviveSeconds: 51
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -10919,6 +11428,8 @@ MonoBehaviour:
     rules: 32772
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -10960,31 +11471,31 @@ MonoBehaviour:
     powerUpInterval: 7.1034064
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 22
     layout:
-    - '##D#'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '#X#X'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '##X#'
-    - '####'
-    - '####'
-    - '####'
-    - '#X##'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '##K#'
-    - '##S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#X##X'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '###X#'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##X##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 2
     coinTarget: 18
@@ -10997,6 +11508,8 @@ MonoBehaviour:
     rules: 132
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -11065,6 +11578,8 @@ MonoBehaviour:
     rules: 68
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -11106,23 +11621,21 @@ MonoBehaviour:
     powerUpInterval: 7.0635376
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    shapeName: Square
+    - '###########'
+    - '##X#X######'
+    - '###########'
+    - '###########'
+    - '##X########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    shapeName: Arena
     mission: 9
     coinTarget: 20
     surviveSeconds: 53
@@ -11134,6 +11647,8 @@ MonoBehaviour:
     rules: 6
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 1
     marathon: 0
     final: 0
@@ -11175,23 +11690,25 @@ MonoBehaviour:
     powerUpInterval: 7.0436296
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    shapeName: Square
-    mission: 0
+    - '#########X#'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#######X###'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#X#########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 15
     surviveSeconds: 49
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -11199,6 +11716,8 @@ MonoBehaviour:
     rules: 256
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -11240,23 +11759,25 @@ MonoBehaviour:
     powerUpInterval: 7.02374
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    shapeName: Square
-    mission: 1
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '##########X'
+    - X##########
+    - '##########X'
+    - '###########'
+    - '###########'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 18
     surviveSeconds: 40
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -11264,7 +11785,9 @@ MonoBehaviour:
     rules: 256
     quest: 0
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 172
@@ -11305,24 +11828,25 @@ MonoBehaviour:
     powerUpInterval: 7.003867
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '##X#####X#'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '#######X##'
-    - '##########'
-    - '##########'
-    shapeName: Square
-    mission: 3
+    - '###X#####X#'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '########X##'
+    - '###########'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 19
     surviveSeconds: 50
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -11330,6 +11854,8 @@ MonoBehaviour:
     rules: 288
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -11395,6 +11921,8 @@ MonoBehaviour:
     rules: 256
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -11461,6 +11989,8 @@ MonoBehaviour:
     rules: 256
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -11512,15 +12042,15 @@ MonoBehaviour:
     - '###########'
     - '###########'
     - '###########'
+    - '#####X#####'
+    - '##########X'
+    - '#X#########'
     - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 8
+    shapeName: Arena
+    mission: 9
     coinTarget: 19
     surviveSeconds: 51
-    keys: 4
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -11528,6 +12058,8 @@ MonoBehaviour:
     rules: 524544
     quest: 4
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -11569,26 +12101,25 @@ MonoBehaviour:
     powerUpInterval: 6.92455
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    shapeName: Square
-    mission: 0
+    - '###########'
+    - '###########'
+    - '#####X##X##'
+    - '#X#########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 30
     surviveSeconds: 52
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -11596,6 +12127,8 @@ MonoBehaviour:
     rules: 288
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -11637,7 +12170,7 @@ MonoBehaviour:
     powerUpInterval: 6.904763
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 22
     layout:
     - ....D#
@@ -11674,6 +12207,8 @@ MonoBehaviour:
     rules: 256
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -11742,6 +12277,8 @@ MonoBehaviour:
     rules: 288
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -11783,23 +12320,21 @@ MonoBehaviour:
     powerUpInterval: 6.8652406
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    shapeName: Square
+    - '###########'
+    - '###X#######'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '##########X'
+    - '########X##'
+    shapeName: Arena
     mission: 9
     coinTarget: 21
     surviveSeconds: 54
@@ -11811,6 +12346,8 @@ MonoBehaviour:
     rules: 288
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 1
     marathon: 0
     final: 0
@@ -11876,6 +12413,8 @@ MonoBehaviour:
     rules: 65536
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -11917,24 +12456,25 @@ MonoBehaviour:
     powerUpInterval: 6.8257847
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#X########'
-    - '##########'
-    - '##########'
-    - X#####X###
-    - '##########'
-    - '##########'
-    - '##X#######'
-    - '#########X'
-    - '##########'
-    - '#######X##'
-    shapeName: Square
-    mission: 3
+    - '##X########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '##########X'
+    - '###########'
+    - '###########'
+    - '########X##'
+    shapeName: Arena
+    mission: 9
     coinTarget: 19
     surviveSeconds: 50
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -11942,6 +12482,8 @@ MonoBehaviour:
     rules: 65536
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -11988,20 +12530,20 @@ MonoBehaviour:
     layout:
     - '##X########'
     - '###########'
-    - '######X####'
     - '###########'
     - '###########'
-    - '########X##'
+    - '###########'
+    - '###########'
     - '####X#X####'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
-    shapeName: Square
-    mission: 1
+    shapeName: Arena
+    mission: 9
     coinTarget: 19
     surviveSeconds: 45
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -12009,6 +12551,8 @@ MonoBehaviour:
     rules: 65792
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -12074,6 +12618,8 @@ MonoBehaviour:
     rules: 65536
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -12141,6 +12687,8 @@ MonoBehaviour:
     rules: 65536
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -12182,26 +12730,25 @@ MonoBehaviour:
     powerUpInterval: 6.747069
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    shapeName: Square
-    mission: 8
+    - '###########'
+    - '###########'
+    - X#X########
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '#X#########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 20
     surviveSeconds: 52
-    keys: 5
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -12209,6 +12756,8 @@ MonoBehaviour:
     rules: 65792
     quest: 1
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -12250,26 +12799,25 @@ MonoBehaviour:
     powerUpInterval: 6.72743
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########X##'
-    - '############'
-    - '####X#######'
-    - '############'
-    - '############'
-    - '############'
-    - '########X###'
-    - '############'
-    - '##########X#'
-    - '#X#X########'
-    - '############'
-    - '############'
-    shapeName: Square
-    mission: 0
+    - '########X##'
+    - '###########'
+    - '####X######'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '##X########'
+    - '###########'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 25
     surviveSeconds: 53
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -12277,6 +12825,8 @@ MonoBehaviour:
     rules: 65544
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -12344,6 +12894,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -12413,6 +12965,8 @@ MonoBehaviour:
     rules: 65568
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 1
     final: 0
@@ -12454,24 +13008,21 @@ MonoBehaviour:
     powerUpInterval: 6.6686087
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '##############'
-    - '###X##########'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##########X###'
-    - X###########X#
-    - '##############'
-    - '###X##########'
-    - '##############'
-    - '###########X##'
-    - '##############'
-    - '##############'
-    - '##############'
-    shapeName: Square
+    - '###########'
+    - '###X#######'
+    - '###########'
+    - '###########'
+    - '#######X###'
+    - '#########X#'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    shapeName: Arena
     mission: 9
     coinTarget: 21
     surviveSeconds: 55
@@ -12483,6 +13034,8 @@ MonoBehaviour:
     rules: 65792
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 1
     marathon: 0
     final: 0
@@ -12524,23 +13077,25 @@ MonoBehaviour:
     powerUpInterval: 6.649033
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    shapeName: Square
-    mission: 0
+    - '#X#########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '######X####'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '######X####'
+    shapeName: Arena
+    mission: 9
     coinTarget: 15
     surviveSeconds: 51
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -12548,6 +13103,8 @@ MonoBehaviour:
     rules: 1024
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -12589,24 +13146,25 @@ MonoBehaviour:
     powerUpInterval: 6.629473
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    shapeName: Square
-    mission: 3
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '##X########'
+    - '###########'
+    - '###X#######'
+    - '#########X#'
+    - '###########'
+    - '###########'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 19
     surviveSeconds: 51
-    keys: 4
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -12614,6 +13172,8 @@ MonoBehaviour:
     rules: 1024
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -12660,7 +13220,6 @@ MonoBehaviour:
     layout:
     - '#X#X#######'
     - '#####X#####'
-    - '########X##'
     - '###########'
     - '###########'
     - '###########'
@@ -12669,11 +13228,12 @@ MonoBehaviour:
     - '###########'
     - '###########'
     - '###########'
-    shapeName: Square
-    mission: 1
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 20
     surviveSeconds: 45
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -12681,6 +13241,8 @@ MonoBehaviour:
     rules: 1056
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -12746,6 +13308,8 @@ MonoBehaviour:
     rules: 131072
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -12813,6 +13377,8 @@ MonoBehaviour:
     rules: 132096
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -12854,26 +13420,25 @@ MonoBehaviour:
     powerUpInterval: 6.551386
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    shapeName: Square
-    mission: 8
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '##########X'
+    - '#X#########'
+    - '###########'
+    - X##########
+    shapeName: Arena
+    mission: 9
     coinTarget: 20
     surviveSeconds: 53
-    keys: 4
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -12881,7 +13446,9 @@ MonoBehaviour:
     rules: 132128
     quest: 4
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 196
@@ -12922,26 +13489,25 @@ MonoBehaviour:
     powerUpInterval: 6.531902
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '############'
-    - '############'
-    - '###X########'
-    - '######X###X#'
-    - '############'
-    - '############'
-    - '############'
-    - '#####X######'
-    - '############'
-    - '#########X##'
-    - '############'
-    - '############'
-    shapeName: Square
-    mission: 0
+    - '###########'
+    - '###########'
+    - '###X#######'
+    - '#########X#'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '########X##'
+    - '###########'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 30
     surviveSeconds: 54
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -12949,6 +13515,8 @@ MonoBehaviour:
     rules: 197632
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -12990,33 +13558,33 @@ MonoBehaviour:
     powerUpInterval: 6.5124335
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 24
     layout:
-    - '##D#'
-    - '####'
-    - '####'
-    - '####'
-    - '#X##'
-    - '####'
-    - '####'
-    - '####'
-    - X###
-    - '##X#'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - X###
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '##K#'
-    - '##S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#X###'
+    - '#####'
+    - '#####'
+    - '#####'
+    - X####
+    - '###X#'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - X####
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 2
     coinTarget: 20
@@ -13029,6 +13597,8 @@ MonoBehaviour:
     rules: 132096
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -13098,6 +13668,8 @@ MonoBehaviour:
     rules: 132384
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -13168,6 +13740,8 @@ MonoBehaviour:
     rules: 132128
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -13233,6 +13807,8 @@ MonoBehaviour:
     rules: 2048
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -13274,24 +13850,25 @@ MonoBehaviour:
     powerUpInterval: 6.434706
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    shapeName: Square
-    mission: 3
+    - '##X##X#####'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '########X##'
+    - '###########'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 20
     surviveSeconds: 52
-    keys: 4
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -13299,7 +13876,9 @@ MonoBehaviour:
     rules: 2048
     quest: 0
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 202
@@ -13340,24 +13919,25 @@ MonoBehaviour:
     powerUpInterval: 6.415311
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    shapeName: Square
-    mission: 0
+    - X##########
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - X######X###
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 12
     surviveSeconds: 53
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -13365,6 +13945,8 @@ MonoBehaviour:
     rules: 2304
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -13430,6 +14012,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -13497,6 +14081,8 @@ MonoBehaviour:
     rules: 2048
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -13538,26 +14124,25 @@ MonoBehaviour:
     powerUpInterval: 6.3572116
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    shapeName: Square
-    mission: 8
+    - '###########'
+    - '###########'
+    - '###X###X###'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '##########X'
+    shapeName: Arena
+    mission: 9
     coinTarget: 21
     surviveSeconds: 54
-    keys: 4
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -13565,6 +14150,8 @@ MonoBehaviour:
     rules: 2056
     quest: 4
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -13606,26 +14193,25 @@ MonoBehaviour:
     powerUpInterval: 6.337874
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '############'
-    - '############'
-    - '###X########'
-    - '############'
-    - '############'
-    - '############'
-    - '#########X##'
-    - '############'
-    - '########X###'
-    - '###X##X#####'
-    - '############'
-    - '##X#########'
-    shapeName: Square
-    mission: 3
+    - '###########'
+    - '###########'
+    - '##X########'
+    - '###########'
+    - '###########'
+    - '########X##'
+    - '###########'
+    - '###########'
+    - '#####X#####'
+    - '###########'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 21
     surviveSeconds: 54
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -13633,6 +14219,8 @@ MonoBehaviour:
     rules: 3072
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -13674,7 +14262,7 @@ MonoBehaviour:
     powerUpInterval: 6.31855
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 22
     layout:
     - ..D#..
@@ -13711,6 +14299,8 @@ MonoBehaviour:
     rules: 2048
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -13779,6 +14369,8 @@ MonoBehaviour:
     rules: 2048
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -13848,6 +14440,8 @@ MonoBehaviour:
     rules: 2112
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -13889,23 +14483,25 @@ MonoBehaviour:
     powerUpInterval: 6.260663
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 9
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    shapeName: Square
-    mission: 0
+    - X##########
+    - '###########'
+    - '###########'
+    - '###########'
+    - '####X######'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '####X######'
+    shapeName: Arena
+    mission: 9
     coinTarget: 10
     surviveSeconds: 52
-    keys: 4
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -13913,7 +14509,9 @@ MonoBehaviour:
     rules: 262144
     quest: 0
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 211
@@ -13954,24 +14552,25 @@ MonoBehaviour:
     powerUpInterval: 6.241395
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    shapeName: Square
-    mission: 3
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '##########X'
+    - '###########'
+    - '########X##'
+    - '###########'
+    - '###X#######'
+    shapeName: Arena
+    mission: 9
     coinTarget: 20
     surviveSeconds: 53
-    keys: 4
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -13979,6 +14578,8 @@ MonoBehaviour:
     rules: 262144
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -14023,6 +14624,7 @@ MonoBehaviour:
   - gridWidth: 11
     gridHeight: 11
     layout:
+    - X#######X##
     - '###########'
     - '###########'
     - '###########'
@@ -14030,15 +14632,14 @@ MonoBehaviour:
     - '###########'
     - '###########'
     - '###########'
+    - '########X##'
     - '###########'
     - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 0
+    shapeName: Arena
+    mission: 9
     coinTarget: 14
     surviveSeconds: 54
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -14046,6 +14647,8 @@ MonoBehaviour:
     rules: 262208
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -14111,6 +14714,8 @@ MonoBehaviour:
     rules: 262144
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -14178,6 +14783,8 @@ MonoBehaviour:
     rules: 262144
     quest: 1
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -14219,26 +14826,25 @@ MonoBehaviour:
     powerUpInterval: 6.16446
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 12
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    shapeName: Square
-    mission: 8
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###X#######'
+    - '###########'
+    - '###########'
+    - '####X######'
+    - '###########'
+    - '###########'
+    - '#########X#'
+    shapeName: Arena
+    mission: 9
     coinTarget: 21
     surviveSeconds: 55
-    keys: 5
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -14246,6 +14852,8 @@ MonoBehaviour:
     rules: 262208
     quest: 4
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -14293,20 +14901,20 @@ MonoBehaviour:
     - '############'
     - '############'
     - '############'
+    - '##X####X#X##'
     - '############'
     - '############'
-    - '#####..#####'
-    - '#####..#####'
+    - '###########X'
     - '############'
     - '############'
     - '############'
     - '############'
     - '############'
-    shapeName: Ring
-    mission: 3
+    shapeName: Arena
+    mission: 9
     coinTarget: 21
     surviveSeconds: 55
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -14314,6 +14922,8 @@ MonoBehaviour:
     rules: 263168
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -14355,31 +14965,31 @@ MonoBehaviour:
     powerUpInterval: 6.126074
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 22
     layout:
-    - '##D#'
-    - '####'
-    - '####'
-    - '####'
-    - '#X##'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - X###
-    - '####'
-    - '####'
-    - '###X'
-    - X###
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '##K#'
-    - '##S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##X##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - X####
+    - '#####'
+    - '#####'
+    - '####X'
+    - X####
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 2
     coinTarget: 21
@@ -14392,6 +15002,8 @@ MonoBehaviour:
     rules: 262144
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -14461,6 +15073,8 @@ MonoBehaviour:
     rules: 262144
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 1
     final: 0
@@ -14502,24 +15116,22 @@ MonoBehaviour:
     powerUpInterval: 6.087741
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    shapeName: Square
+    - '############'
+    - X###########
+    - '############'
+    - '############'
+    - X###########
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '###X#######X'
+    shapeName: Arena
     mission: 9
     coinTarget: 23
     surviveSeconds: 57
@@ -14531,6 +15143,8 @@ MonoBehaviour:
     rules: 262208
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 1
     marathon: 0
     final: 0
@@ -14596,6 +15210,8 @@ MonoBehaviour:
     rules: 524288
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -14637,24 +15253,25 @@ MonoBehaviour:
     powerUpInterval: 6.0494604
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 11
+    gridHeight: 11
     layout:
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    shapeName: Square
-    mission: 3
+    - '########X##'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###X#######'
+    - '#######X###'
+    - '###########'
+    - '###########'
+    shapeName: Arena
+    mission: 9
     coinTarget: 21
     surviveSeconds: 54
-    keys: 4
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -14662,6 +15279,8 @@ MonoBehaviour:
     rules: 524288
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -14706,22 +15325,22 @@ MonoBehaviour:
   - gridWidth: 11
     gridHeight: 11
     layout:
+    - '##########X'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
+    - '######X###X'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 0
+    shapeName: Arena
+    mission: 9
     coinTarget: 14
     surviveSeconds: 55
-    keys: 4
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -14729,6 +15348,8 @@ MonoBehaviour:
     rules: 524296
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -14770,25 +15391,25 @@ MonoBehaviour:
     powerUpInterval: 6.0112324
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 3
+  - gridWidth: 7
     gridHeight: 16
     layout:
-    - '#D#'
-    - '###'
-    - '###'
-    - '##X'
-    - '###'
-    - '###'
-    - '##X'
-    - '###'
-    - '##X'
-    - '###'
-    - X##
-    - '###'
-    - '###'
-    - '###'
-    - '#K#'
-    - '#S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##X##'
+    - '####X'
+    - '#####'
+    - '#X###'
+    - '###X#'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 4
     coinTarget: 50
@@ -14801,6 +15422,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -14868,6 +15491,8 @@ MonoBehaviour:
     rules: 524288
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -14914,6 +15539,8 @@ MonoBehaviour:
     layout:
     - '############'
     - '############'
+    - '######X#####'
+    - '##X#########'
     - '############'
     - '############'
     - '############'
@@ -14921,14 +15548,12 @@ MonoBehaviour:
     - '############'
     - '############'
     - '############'
-    - '############'
-    - '############'
-    - '############'
-    shapeName: Square
-    mission: 8
+    - '##X#######X#'
+    shapeName: Arena
+    mission: 9
     coinTarget: 22
     surviveSeconds: 56
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -14936,7 +15561,9 @@ MonoBehaviour:
     rules: 524808
     quest: 3
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 226
@@ -14980,23 +15607,23 @@ MonoBehaviour:
   - gridWidth: 12
     gridHeight: 12
     layout:
+    - '#########X##'
+    - '############'
+    - '############'
+    - '#X##########'
     - '############'
     - '############'
     - '############'
     - '############'
     - '############'
+    - X########X##
     - '############'
     - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    shapeName: Square
-    mission: 3
+    shapeName: Arena
+    mission: 9
     coinTarget: 22
     surviveSeconds: 56
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -15004,6 +15631,8 @@ MonoBehaviour:
     rules: 524800
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -15045,7 +15674,7 @@ MonoBehaviour:
     powerUpInterval: 5.9349303
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 22
     layout:
     - ..D#..
@@ -15082,6 +15711,8 @@ MonoBehaviour:
     rules: 524288
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -15150,6 +15781,8 @@ MonoBehaviour:
     rules: 524288
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -15191,24 +15824,22 @@ MonoBehaviour:
     powerUpInterval: 5.8968554
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '##############'
-    - '##############'
-    - X#############
-    - '##############'
-    - '##############'
-    - '######X#######'
-    - '#########X####'
-    - '##############'
-    - '##############'
-    - '####X#########'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    shapeName: Square
+    - '############'
+    - X###########
+    - '############'
+    - '############'
+    - '#####X######'
+    - '########X###'
+    - '############'
+    - '############'
+    - '###X########'
+    - '############'
+    - '############'
+    - '############'
+    shapeName: Arena
     mission: 9
     coinTarget: 23
     surviveSeconds: 58
@@ -15220,6 +15851,8 @@ MonoBehaviour:
     rules: 524288
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 1
     marathon: 0
     final: 0
@@ -15264,22 +15897,22 @@ MonoBehaviour:
   - gridWidth: 11
     gridHeight: 11
     layout:
+    - '######X####'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
+    - '###X#######'
     - '###########'
     - '###########'
     - '###########'
     - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 0
+    - '#######X###'
+    shapeName: Arena
+    mission: 9
     coinTarget: 10
     surviveSeconds: 54
-    keys: 4
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -15287,6 +15920,8 @@ MonoBehaviour:
     rules: 1048576
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -15336,17 +15971,17 @@ MonoBehaviour:
     - '###########'
     - '###########'
     - '###########'
+    - '#########X#'
+    - '####X######'
+    - '###########'
+    - '######X####'
     - '###########'
     - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 3
+    shapeName: Arena
+    mission: 9
     coinTarget: 21
     surviveSeconds: 55
-    keys: 4
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -15354,7 +15989,9 @@ MonoBehaviour:
     rules: 1048576
     quest: 0
     guardsPrincess: 0
-    phased: 0
+    cage: 0
+    cardGoal: 0
+    phased: 1
     marathon: 0
     final: 0
     number: 232
@@ -15398,6 +16035,10 @@ MonoBehaviour:
   - gridWidth: 12
     gridHeight: 12
     layout:
+    - X#########X#
+    - '###X########'
+    - '############'
+    - '#########X##'
     - '############'
     - '############'
     - '############'
@@ -15406,15 +16047,11 @@ MonoBehaviour:
     - '############'
     - '############'
     - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    shapeName: Square
-    mission: 0
+    shapeName: Arena
+    mission: 9
     coinTarget: 15
     surviveSeconds: 56
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -15422,6 +16059,8 @@ MonoBehaviour:
     rules: 1048704
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -15488,6 +16127,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -15556,6 +16197,8 @@ MonoBehaviour:
     rules: 1048576
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -15597,27 +16240,26 @@ MonoBehaviour:
     powerUpInterval: 5.7829294
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    shapeName: Square
-    mission: 8
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '########X###'
+    - '###########X'
+    - '############'
+    - '####X####X##'
+    shapeName: Arena
+    mission: 9
     coinTarget: 22
     surviveSeconds: 57
-    keys: 4
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -15625,6 +16267,8 @@ MonoBehaviour:
     rules: 1049600
     quest: 4
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -15666,27 +16310,26 @@ MonoBehaviour:
     powerUpInterval: 5.7639847
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    shapeName: Square
-    mission: 3
+    - '############'
+    - '############'
+    - '###########X'
+    - X###########
+    - '#########X##'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '##########X#'
+    - '############'
+    - '############'
+    shapeName: Arena
+    mission: 9
     coinTarget: 22
     surviveSeconds: 57
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -15694,6 +16337,8 @@ MonoBehaviour:
     rules: 1048592
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -15735,33 +16380,33 @@ MonoBehaviour:
     powerUpInterval: 5.745052
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 24
     layout:
-    - '##D#'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - X###
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - X#X#
-    - '####'
-    - '####'
-    - '####'
-    - '#X##'
-    - '####'
-    - '####'
-    - '####'
-    - '##K#'
-    - '##S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#X###'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - X#X##
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##X##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 2
     coinTarget: 22
@@ -15774,6 +16419,8 @@ MonoBehaviour:
     rules: 1048832
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -15843,6 +16490,8 @@ MonoBehaviour:
     rules: 1048576
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -15914,6 +16563,8 @@ MonoBehaviour:
     rules: 1574976
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -15980,6 +16631,8 @@ MonoBehaviour:
     rules: 0
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -16021,25 +16674,26 @@ MonoBehaviour:
     powerUpInterval: 5.6694403
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    - '###########'
-    shapeName: Square
-    mission: 3
+    - '############'
+    - '##X#########'
+    - '####X#######'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '######X#####'
+    - '############'
+    - '###########X'
+    shapeName: Arena
+    mission: 9
     coinTarget: 22
     surviveSeconds: 56
-    keys: 5
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -16047,6 +16701,8 @@ MonoBehaviour:
     rules: 2
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -16091,23 +16747,23 @@ MonoBehaviour:
   - gridWidth: 12
     gridHeight: 12
     layout:
+    - '####X####X##'
     - '############'
     - '############'
     - '############'
     - '############'
     - '############'
+    - '##X#########'
+    - X###########
     - '############'
     - '############'
     - '############'
     - '############'
-    - '############'
-    - '############'
-    - '############'
-    shapeName: Square
-    mission: 0
+    shapeName: Arena
+    mission: 9
     coinTarget: 16
     surviveSeconds: 56
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -16115,6 +16771,8 @@ MonoBehaviour:
     rules: 4128
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -16181,6 +16839,8 @@ MonoBehaviour:
     rules: 8193
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -16249,6 +16909,8 @@ MonoBehaviour:
     rules: 16400
     quest: 1
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -16290,27 +16952,26 @@ MonoBehaviour:
     powerUpInterval: 5.594018
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    shapeName: Square
-    mission: 8
+    - '############'
+    - '############'
+    - '##########X#'
+    - '#######X####'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '####X#######'
+    - '############'
+    - '############'
+    - '########X###'
+    shapeName: Arena
+    mission: 9
     coinTarget: 23
     surviveSeconds: 58
-    keys: 5
+    keys: 8
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -16318,6 +16979,8 @@ MonoBehaviour:
     rules: 33280
     quest: 1
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -16359,27 +17022,26 @@ MonoBehaviour:
     powerUpInterval: 5.5751915
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 13
+  - gridWidth: 12
+    gridHeight: 12
     layout:
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    shapeName: Square
-    mission: 3
+    - '############'
+    - '############'
+    - '############'
+    - '###########X'
+    - '############'
+    - '############'
+    - '############'
+    - '##########X#'
+    - X###########
+    - '############'
+    - '######X#####'
+    - '############'
+    shapeName: Arena
+    mission: 9
     coinTarget: 23
     surviveSeconds: 58
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
@@ -16387,6 +17049,8 @@ MonoBehaviour:
     rules: 65792
     quest: 0
     guardsPrincess: 0
+    cage: 1
+    cardGoal: 0
     phased: 0
     marathon: 0
     final: 0
@@ -16428,33 +17092,33 @@ MonoBehaviour:
     powerUpInterval: 5.5563765
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 4
+  - gridWidth: 7
     gridHeight: 24
     layout:
-    - '##D#'
-    - '####'
-    - '####'
-    - '#X##'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '####'
-    - '##X#'
-    - '####'
-    - '#X#X'
-    - '####'
-    - '####'
-    - '##X#'
-    - '####'
-    - '####'
-    - '####'
-    - '##K#'
-    - '##S#'
+    - '##D##'
+    - '#####'
+    - '#####'
+    - '##X##'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '###X#'
+    - '#####'
+    - '#X#X#'
+    - '#####'
+    - '#####'
+    - '###X#'
+    - '#####'
+    - '#####'
+    - '#####'
+    - '##K##'
+    - '##S##'
     shapeName: Corridor
     mission: 2
     coinTarget: 22
@@ -16467,6 +17131,8 @@ MonoBehaviour:
     rules: 786432
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -16538,6 +17204,8 @@ MonoBehaviour:
     rules: 1051712
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 0
@@ -16609,6 +17277,8 @@ MonoBehaviour:
     rules: 1024
     quest: 0
     guardsPrincess: 0
+    cage: 0
+    cardGoal: 1
     phased: 0
     marathon: 0
     final: 1

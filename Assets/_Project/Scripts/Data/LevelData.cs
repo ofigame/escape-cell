@@ -113,6 +113,10 @@ namespace SquashBot.Data
 
         /// <summary>Monster levels: the monster guards Princess Lumi, who is freed when it falls.</summary>
         public bool guardsPrincess;
+        /// <summary>Monster levels: no monster, but Princess Mira in an electrified cage to break open.</summary>
+        public bool cage;
+        /// <summary>The mission is still the one on the scenario card (so the card's goal text fits it).</summary>
+        public bool cardGoal;
         [Tooltip("Monster levels: after each hit the monster shields itself and leaps to another tile.")]
         public bool phased;
         [Tooltip("A long level (2-3 minutes): slower-warning blocks, short heavy waves now and then, and a helicopter bringing a super power every 30 seconds.")]

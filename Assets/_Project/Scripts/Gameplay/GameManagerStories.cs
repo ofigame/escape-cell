@@ -53,7 +53,7 @@ namespace SquashBot.Gameplay
 
         private void UpdateThief(float dt)
         {
-            if (thief == null || thiefLeft <= 0 || previewing) return;
+            if (thief == null || thiefLeft <= 0 || previewing || duel) return;
             if (thief.Stunned || thief.Hopping) return;
             thiefTimer -= dt;
             if (thiefTimer > 0f) return;
@@ -86,11 +86,16 @@ namespace SquashBot.Gameplay
                 if (score > bestScore) { bestScore = score; best = n; }
             }
             if (best == thiefPos) return;
+            var left = thiefPos;
             grid.SetOccupied(thiefPos, false);
             thiefPos = best;
             grid.SetOccupied(thiefPos, true);
             thief.HopTo(GridView.ToWorld(thiefPos) + Vector3.up * GridView.SurfaceY, Mathf.Min(0.3f, thiefInterval * 0.6f));
+            // Every third hop Kuzgun kicks something down behind him: the chase has to go around it.
+            if (++thiefHops % 3 == 0 && left != robot.Position) hazards.DropAt(left);
         }
+
+        private int thiefHops;
 
         /// <summary>The race: one step towards the nearest coin (by walking distance), taking it on arrival.</summary>
         private void RaceStep()
@@ -139,6 +144,14 @@ namespace SquashBot.Gameplay
             if (level.thiefRace) return; // in a race bumping into him does nothing
             // A dazed thief can't be caught again: it has to be run down anew.
             if (thief == null || thiefLeft <= 0 || thief.Hopping || thief.Stunned || thiefEscape) return;
+            if (State != GameState.Playing || ArenaActive) return;
+            // Caught! A short duel over the shoulder decides whether the mask cracks.
+            StartDuel();
+        }
+
+        /// <summary>The duel was won: the catch counts, coins spill, and the thief leaps away to be chased again.</summary>
+        private void ThiefCaught()
+        {
             thiefLeft--;
             objectivesDone++;
             var at = GridView.ToWorld(thiefPos);

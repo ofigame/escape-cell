@@ -83,6 +83,7 @@ namespace SquashBot.Data
             var level = Base(mission, d);
             level.score = card.difficulty;
             level.number = card.n;
+            level.cardGoal = true;
             level.helper = card.helper == "Lumi" ? Helper.Lumi : card.helper == "Kuzgun" ? Helper.Kuzgun : Helper.Bip;
             level.allyKuzgun = card.mission == "Kuzgun'la ortak görev";
 
@@ -199,7 +200,44 @@ namespace SquashBot.Data
             if (mission == MissionType.Exit && Has(hazards, "kovalamaca", "dalgası") && level.chaseSpeed <= 0f) level.chaseSpeed = Mathf.Lerp(0.9f, 1.5f, d);
             level.levelEvent = Has(all, "vagon") ? LevelEvent.GoldCart : Has(all, "alarm") ? LevelEvent.Alarm : LevelEvent.None;
             level.final = index == LevelCount - 1;
+            ApplyArenaPlan(level, index, d);
             return level;
+        }
+
+        /// <summary>
+        /// About half of every world is fought in an arena: monsters to beat and, from level 13, Princess Mira's cages to
+        /// break. The rest stay as breathers between them (coins, rain, the story's chases, exits, marathons, vanG's
+        /// avatars). Arena floors are big open squares so the fight ring has room.
+        /// </summary>
+        private static void ApplyArenaPlan(LevelData level, int index, float d)
+        {
+            int world = index / LevelsPerWorld, pos = index % LevelsPerWorld;
+            bool keep = level.final || level.marathon || level.mission == MissionType.Boss || level.mission == MissionType.Thief
+                        || level.mission == MissionType.Escort || level.mission == MissionType.Clone;
+            if (keep) return;
+            bool cage = false, arena = level.mission == MissionType.Monster;
+            if (world == 0) arena |= pos == 5;
+            else if (pos == 1 || pos == 5 || (pos == 0 && world % 2 == 1)) arena = true;
+            else if (pos == 2 || pos == 6) cage = true;
+            if (!arena && !cage) return;
+
+            if (level.mission != MissionType.Monster || cage)
+            {
+                level.cardGoal = false;
+                level.mission = MissionType.Monster;
+                level.keys = Mathf.RoundToInt(cage ? Mathf.Lerp(3f, 6f, d) : Mathf.Lerp(3f, 8f, d));
+                level.phased = !cage && d > 0.35f && index % 3 == 0;
+            }
+            level.cage = cage;
+            level.guardsPrincess = false;
+            level.timeLimit = 0f;
+            level.collapseBehind = false;
+            level.chaseSpeed = 0f;
+            level.lowWalls = false;
+            int size = Mathf.RoundToInt(Mathf.Lerp(9f, 12f, d));
+            level.gridWidth = level.gridHeight = size;
+            level.layout = Layouts.Generate(size, PlatformShape.Square, Mathf.RoundToInt(Mathf.Lerp(1f, 4f, d)), index);
+            level.shapeName = "Arena";
         }
 
         private static void BuildMap(LevelData level, string map, MissionType mission, int seed, float d)
@@ -207,6 +245,9 @@ namespace SquashBot.Data
             var dims = Regex.Match(map, @"(\d+)\s*[×x]\s*(\d+)");
             int w = dims.Success ? int.Parse(dims.Groups[1].Value) : level.gridWidth;
             int h = dims.Success ? int.Parse(dims.Groups[2].Value) : level.gridHeight;
+            // Roomier floors than the cards ask for: never under 7 tiles a side.
+            w = Mathf.Max(w, 7);
+            h = Mathf.Max(h, 7);
             int pillars = Num(map, @"(\d+) (?:taş|sütun|kaya|konteyner|sağlam taş)", 0);
             if (Has(map, "dağınık taş", "dağınık kaya", "taş sütunlar")) pillars = Mathf.Max(pillars, Mathf.Max(w, h) / 2);
             level.gridWidth = Mathf.Max(3, Mathf.Min(w, h));

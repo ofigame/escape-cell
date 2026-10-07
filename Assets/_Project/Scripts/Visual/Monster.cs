@@ -10,7 +10,7 @@ namespace SquashBot.Visual
     /// </summary>
     public class Monster : MonoBehaviour
     {
-        public enum Kind { Slime, Golem, Cyclops, Ghost }
+        public enum Kind { Slime, Golem, Cyclops, Ghost, Cage }
 
         private Kind kind;
         private Transform body, eye, pupil, barRoot, barFill;
@@ -88,6 +88,13 @@ namespace SquashBot.Visual
                     Shapes.Rounded("Mouth", body, new Vector3(0f, 0.42f, 0.42f), new Vector3(0.4f, 0.1f, 0.04f), 0.03f, black);
                     for (int i = 0; i < 4; i++)
                         Shapes.Rounded("Tooth", body, new Vector3((i - 1.5f) * 0.09f, 0.45f, 0.44f), new Vector3(0.05f, 0.07f, 0.02f), 0.01f, white);
+                    break;
+                case Kind.Cage:
+                    // Not a monster at all: Princess Mira in vanG's electrified cage (the bars flash when hit).
+                    skin = MaterialFactory.Create(new Color(1f, 0.8f, 0.35f), new Color(0.6f, 0.4f, 0.1f));
+                    skinColor = new Color(1f, 0.8f, 0.35f);
+                    PrincessMira.BuildCage(body, skin);
+                    PrincessMira.Build(body, 0.95f).localPosition = new Vector3(0f, 0.1f, 0f);
                     break;
                 default:
                     var ghost = MaterialFactory.CreateTransparent(new Color(skinColor.r, skinColor.g, skinColor.b, 0.75f), skinColor * 1.2f);

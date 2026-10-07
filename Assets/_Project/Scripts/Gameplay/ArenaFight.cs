@@ -67,7 +67,8 @@ namespace SquashBot.Gameplay
         private Robot robot;
         private CameraRig rig;
         private FxSystem fx;
-        private Monster monster;
+        private Func<bool> targetGone;
+        private Action windup;
         private Vector3 centre;
         private float radius, difficulty;
         private int hammerLevel;
@@ -115,9 +116,10 @@ namespace SquashBot.Gameplay
         /// Starts a fight: the robot is at its current spot inside the ring (radius <paramref name="ringRadius"/>
         /// around <paramref name="arenaCentre"/>); <paramref name="hardness"/> 0-1 speeds the monster up.
         /// </summary>
-        public void Begin(Monster m, Vector3 arenaCentre, float ringRadius, float hardness, int hammer, LineRenderer arenaRing)
+        public void Begin(Func<bool> gone, Action windUp, Vector3 arenaCentre, float ringRadius, float hardness, int hammer, LineRenderer arenaRing)
         {
-            monster = m;
+            targetGone = gone;
+            windup = windUp;
             centre = Flat(arenaCentre) + Vector3.up * arenaCentre.y;
             radius = ringRadius;
             difficulty = Mathf.Clamp01(hardness);
@@ -368,7 +370,7 @@ namespace SquashBot.Gameplay
 
         private void UpdateAttacks(float dt)
         {
-            if (monster == null || monster.Dead) return;
+            if (targetGone != null && targetGone()) return;
             attackTimer -= dt;
             if (attackTimer <= 0f && attacks.Count < (difficulty > 0.5f ? 2 : 1))
             {
@@ -411,7 +413,7 @@ namespace SquashBot.Gameplay
                     a.point = centre;
                     float rr = 1.75f;
                     Disc(a, new Vector3(centre.x, y, centre.z), rr);
-                    monster.Stomp();
+                    windup?.Invoke();
                     break;
                 }
                 case AttackKind.Wedge:

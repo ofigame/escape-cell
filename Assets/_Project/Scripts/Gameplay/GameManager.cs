@@ -710,7 +710,7 @@ namespace SquashBot.Gameplay
         {
             while (previewing) yield return null;
             yield return new WaitForSeconds(0.8f);
-            if (State != GameState.Playing || !Loc.Has(CardKey("help"))) yield break;
+            if (State != GameState.Playing || !level.cardGoal || !Loc.Has(CardKey("help"))) yield break;
             bipLast = Time.time;
             ui.Bip.Say(Loc.T(CardKey("help")), HelperName, HelperColor);
         }
@@ -1218,6 +1218,7 @@ namespace SquashBot.Gameplay
                     break;
                 case MissionType.Thief:
                     UpdateThief(Time.deltaTime);
+                    UpdateArena(Time.deltaTime);
                     break;
                 case MissionType.Escort:
                     UpdateEscort(Time.deltaTime);
@@ -1482,6 +1483,12 @@ namespace SquashBot.Gameplay
 
         private void OnPowerUpCollected(PowerUpType type, GridPos p)
         {
+            // The first time a skill is picked up, a banner says what it does.
+            if (PlayerPrefs.GetInt("sb_seen_skill." + type, 0) == 0 && type != PowerUpType.Freeze)
+            {
+                PlayerPrefs.SetInt("sb_seen_skill." + type, 1);
+                ui.ShowIntro(Loc.T("skill.title"), Loc.T("skillIntro." + type));
+            }
             switch (type)
             {
                 case PowerUpType.Shield:
@@ -1583,6 +1590,12 @@ namespace SquashBot.Gameplay
                 toolSlot[s] = t;
                 toolLevel[s] = Tools.Level(t.Value);
                 toolCharges[s] = Tools.Charges(toolLevel[s]);
+                // The first level with a tool in the bag: Bip says what its button does.
+                if (PlayerPrefs.GetInt("sb_seen_toolhint." + t.Value, 0) == 0)
+                {
+                    PlayerPrefs.SetInt("sb_seen_toolhint." + t.Value, 1);
+                    ui.Bip.Queue(Loc.F("bip.toolHint", Loc.T("tool." + t.Value), Loc.T("tool." + t.Value + ".desc")));
+                }
             }
 
             if (!toolSlot[0].HasValue && !toolSlot[1].HasValue)
@@ -2196,7 +2209,7 @@ namespace SquashBot.Gameplay
             string suffix = upper ? ".up" : "";
             // Scenario levels say their goal in the card's own words.
             string card = "lvl." + data.number + ".goal";
-            if (data.number > 0 && Loc.Has(card)) return upper ? Loc.T(card).ToUpper(Loc.Culture) : Loc.T(card);
+            if (data.cardGoal && data.number > 0 && Loc.Has(card)) return upper ? Loc.T(card).ToUpper(Loc.Culture) : Loc.T(card);
             switch (data.mission)
             {
                 case MissionType.CollectCoins: return Loc.F("mission.collect" + suffix, data.coinTarget);
@@ -2207,7 +2220,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Tunnel: return Loc.T("mission.tunnel" + suffix);
                 case MissionType.Boss: return Loc.T("mission.boss" + suffix);
                 case MissionType.Quest: return Loc.F("quest.intro." + data.quest, data.keys);
-                case MissionType.Monster: return Loc.F((data.guardsPrincess ? "mission.monsterPrincess" : "mission.monster") + suffix, data.keys);
+                case MissionType.Monster: return Loc.F((data.cage ? "mission.cage" : data.guardsPrincess ? "mission.monsterPrincess" : "mission.monster") + suffix, data.keys);
                 case MissionType.Thief: return Loc.F("mission.thief" + suffix, data.keys);
                 case MissionType.Escort: return Loc.T("mission.escort" + suffix);
                 case MissionType.Clone: return Loc.F("mission.clone" + suffix, data.keys);
@@ -2627,6 +2640,7 @@ namespace SquashBot.Gameplay
         /// <summary>This world's monster: its kind and colour (the briefing shows the same one).</summary>
         private void MonsterLook(out Monster.Kind kind, out Color tint)
         {
+            if (level != null && level.cage) { kind = Monster.Kind.Cage; tint = new Color(1f, 0.8f, 0.35f); return; }
             if (GuardianLooks.Guardian(World, out kind, out tint)) return;
             kind = (Monster.Kind)(World % 4);
             tint = Color.Lerp(WorldTheme.Current.accent, new Color(0.55f, 0.85f, 0.4f), kind == Monster.Kind.Slime ? 0.5f : 0.15f);
@@ -2666,7 +2680,7 @@ namespace SquashBot.Gameplay
             monster = Monster.Create(kind, GridView.ToWorld(monsterPos) + Vector3.up * GridView.SurfaceY, monsterHp, tint, robot.transform, MonsterPointsPerHit);
             GuardianLooks.DressGuardian(monster.Body, World); // the floor's named guardian (Kütükbaş, Penguen Kral...)
             princessPos = new GridPos(-99, -99);
-            if (level.guardsPrincess)
+            if (level.guardsPrincess && !level.cage)
             {
                 // Princess Lumi, frozen in ice right next to the monster: she is freed when it falls.
                 // On the side that blocks the least: the monster stays reachable and no part of the floor is cut off.
@@ -2691,6 +2705,7 @@ namespace SquashBot.Gameplay
             stompTimer = 5f;
             SpawnOrb();
             SetupArenaRing();
+            if (level.cage) BipSay("mira");
             hazards.IsProtected = p => p == monsterPos || p == orbPos;
         }
 
@@ -2822,6 +2837,7 @@ namespace SquashBot.Gameplay
             switch (level.mission)
             {
                 case MissionType.Monster:
+                    if (level.cage) steps.Add((BriefShot.HammerHit, Loc.T("brief.cage")));
                     steps.Add((BriefShot.Hammer, Loc.T("brief.hammer")));
                     steps.Add((BriefShot.HammerHit, Loc.F("brief.hit", Mathf.CeilToInt(objectivesTotal / (float)Weapons.HitDamage))));
                     steps.Add((BriefShot.Stomp, Loc.T("brief.stomp")));
@@ -2879,7 +2895,7 @@ namespace SquashBot.Gameplay
             // The first floors also remind what the danger is.
             if (levelIndex < 3) steps.Add((BriefShot.Block, Loc.T("brief.dodge")));
             // And it closes with the helper's tip: how to beat this cell.
-            if (Loc.Has(CardKey("help"))) steps.Add((BriefShot.Robot, HelperName + ": " + Loc.T(CardKey("help"))));
+            if (level.cardGoal && Loc.Has(CardKey("help"))) steps.Add((BriefShot.Robot, HelperName + ": " + Loc.T(CardKey("help"))));
             return steps;
         }
 

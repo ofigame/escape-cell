@@ -73,6 +73,7 @@ namespace SquashBot.EditorTools
                 Str(sb, "rules", l.rules == FloorRule.None ? "" : l.rules.ToString());
                 Bool(sb, "guardsSpirit", l.guardsPrincess);
                 Bool(sb, "phased", l.phased);
+                Bool(sb, "cage", l.cage);
                 Bool(sb, "marathon", l.marathon);
                 Bool(sb, "final", l.final);
                 Num(sb, "coinInterval", l.coinInterval);
