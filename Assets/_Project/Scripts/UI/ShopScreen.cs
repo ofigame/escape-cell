@@ -82,6 +82,9 @@ namespace SquashBot.UI
             refreshers.Clear();
 
             float y = -24f;
+            Header(content, Loc.T("ws.weapons"), ref y);
+            WeaponRow(content, ref y);
+            y -= 20f;
             Header(content, Loc.T("ws.tools"), ref y);
             SlotsRow(content, ref y);
             foreach (var t in Tools.All) ToolRow(content, t, ref y);
@@ -100,6 +103,67 @@ namespace SquashBot.UI
             Row(content, Item.Life, ref y);
             Row(content, Item.Tunnel, ref y);
             content.sizeDelta = new Vector2(0f, -y + 40f);
+        }
+
+        /// <summary>The hammer: five levels, each hitting harder, holding more blows and looking different.</summary>
+        private void WeaponRow(Transform parent, ref float y)
+        {
+            var row = UiFactory.Pill("Hammer", parent, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 170f), new Color(0.3f, 0.2f, 0.45f, 0.95f));
+            y -= 186f;
+            var icon = UiFactory.Box("Icon", row, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(120f, 120f));
+            var iconFill = UiFactory.Fill(icon, HammerModels.Glow(Weapons.Level), UiSprites.Rounded, 2f);
+            iconFill.raycastTarget = false;
+            var handle = UiFactory.Box("Handle", icon, new Vector2(0.5f, 0.5f), new Vector2(-6f, -12f), new Vector2(16f, 70f));
+            handle.pivot = new Vector2(0.5f, 0.5f);
+            handle.localRotation = Quaternion.Euler(0f, 0f, 35f);
+            UiFactory.Fill(handle, UiFactory.TextDark, UiSprites.Rounded, 8f).raycastTarget = false;
+            var head = UiFactory.Box("Head", icon, new Vector2(0.5f, 0.5f), new Vector2(10f, 16f), new Vector2(70f, 34f));
+            head.pivot = new Vector2(0.5f, 0.5f);
+            head.localRotation = Quaternion.Euler(0f, 0f, 35f);
+            UiFactory.Fill(head, UiFactory.TextDark, UiSprites.Rounded, 8f).raycastTarget = false;
+
+            var name = UiFactory.TextBox("Name", row, new Vector2(0f, 1f), new Vector2(166f, -18f), new Vector2(420f, 56f), "", 42f, Palette.UiText, align: TextAlignmentOptions.Left);
+            var desc = UiFactory.TextBox("Desc", row, new Vector2(0f, 1f), new Vector2(166f, -66f), new Vector2(420f, 70f), "", 27f,
+                new Color(0.85f, 0.86f, 1f, 0.8f), FontStyles.Normal, align: TextAlignmentOptions.TopLeft);
+            desc.textWrappingMode = TextWrappingModes.Normal;
+            var pips = new List<Image>();
+            for (int i = 0; i < Weapons.MaxLevel; i++)
+            {
+                var pip = UiFactory.Box("Pip", row, new Vector2(0f, 0f), new Vector2(166f + i * 44f, 14f), new Vector2(34f, 12f));
+                pips.Add(UiFactory.Fill(pip, Color.white, UiSprites.Rounded, 8f));
+                pips[i].raycastTarget = false;
+            }
+            var buy = UiFactory.MakeButton(row, "", Kind.Gold, new Vector2(1f, 0.5f), new Vector2(-24f, 0f), new Vector2(250f, 120f), () =>
+            {
+                if (Weapons.TryUpgrade())
+                {
+                    AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
+                    Haptics.Medium();
+                    row.localScale = Vector3.one * 1.05f;
+                    bip.Queue(Loc.T("ws.bip.hammer"));
+                    Purchased?.Invoke();
+                }
+                else
+                {
+                    AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                    if (Weapons.NextUnlocked && SaveData.Coins < Weapons.NextPrice) WorkshopTalk.Poor(bip);
+                }
+                Refresh();
+            }, 44f);
+            var label = buy.GetComponentInChildren<TextMeshProUGUI>();
+            refreshers.Add(() =>
+            {
+                int level = Weapons.Level;
+                iconFill.color = HammerModels.Glow(level);
+                name.text = Loc.T("weapon.hammer." + level);
+                string now = Loc.F("weapon.stats", Weapons.DamageAt(level), Weapons.AmmoAt(level));
+                desc.text = Weapons.IsMaxed ? now : now + "\n" + Loc.F("weapon.next", Loc.T("weapon.hammer." + (level + 1)), Weapons.DamageAt(level + 1), Weapons.AmmoAt(level + 1));
+                for (int i = 0; i < pips.Count; i++) pips[i].color = i < level ? new Color(0.36f, 0.85f, 0.6f) : new Color(1f, 1f, 1f, 0.18f);
+                bool locked = !Weapons.IsMaxed && !Weapons.NextUnlocked;
+                label.text = Weapons.IsMaxed ? Loc.T("shop.max") : locked ? Loc.F("ws.lockedAt", Weapons.NextUnlockLevel + 1) : Weapons.NextPrice.ToString();
+                buy.interactable = !Weapons.IsMaxed && !locked;
+                buy.targetGraphic.color = buy.interactable && SaveData.Coins >= Weapons.NextPrice ? Color.white : new Color(1f, 1f, 1f, 0.5f);
+            });
         }
 
         /// <summary>The paint shelf: a door into the garage, where the robot gets its colours back.</summary>

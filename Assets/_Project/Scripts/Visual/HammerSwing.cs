@@ -9,13 +9,15 @@ namespace SquashBot.Visual
         private Vector3 from, target;
         private Transform model;
         private float t;
+        private int level = 3;
 
-        public void Begin(Vector3 start, Vector3 end)
+        public void Begin(Vector3 start, Vector3 end, int level = 3)
         {
             from = start + Vector3.up * 0.6f;
             target = end;
             transform.position = from;
-            model = ThunderHammer.BuildModel(transform, 1.3f);
+            model = HammerModels.Build(transform, level, 1.3f);
+            this.level = level;
         }
 
         private void Update()
@@ -29,7 +31,7 @@ namespace SquashBot.Visual
             flat.y = 0f;
             transform.rotation = Quaternion.LookRotation(flat.sqrMagnitude > 0.001f ? flat : Vector3.forward) * Quaternion.Euler(Mathf.Lerp(-40f, 120f, k), 0f, 0f);
             if (t < 1f) return;
-            ThunderHammer.Strike(target + Vector3.up * 0.4f);
+            if (level >= 3) ThunderHammer.Strike(target + Vector3.up * 0.4f); // thunder and up call the lightning
             Destroy(gameObject, 0.05f);
             enabled = false;
         }

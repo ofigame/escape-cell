@@ -19,6 +19,7 @@ namespace SquashBot.Visual
         private int health, maxHealth;
         private float time, hitT = 1f, stompT = -1f, deadT = -1f;
         private Transform target;
+        private int notchEvery = 1;
 
         public bool Dead => deadT >= 0f;
 
@@ -28,13 +29,14 @@ namespace SquashBot.Visual
         // Big enough to read as the boss of its floor, while still standing on a single tile.
         private const float Size = 1.45f;
 
-        public static Monster Create(Kind kind, Vector3 position, int health, Color tint, Transform lookAt)
+        public static Monster Create(Kind kind, Vector3 position, int health, Color tint, Transform lookAt, int notchEvery = 1)
         {
             var go = new GameObject("Monster " + kind);
             go.transform.position = position;
             var m = go.AddComponent<Monster>();
             m.kind = kind;
             m.health = m.maxHealth = health;
+            m.notchEvery = Mathf.Max(1, notchEvery);
             m.target = lookAt;
             m.skinColor = tint;
             m.Build();
@@ -112,8 +114,8 @@ namespace SquashBot.Visual
             barFill.localPosition = new Vector3(-0.56f, 0f, -0.03f);
             Shapes.Rounded("Fill", barFill, new Vector3(0.56f, 0f, 0f), new Vector3(1.12f, 0.12f, 0.03f), 0.05f, barMat);
             // Notches show how many hits it takes.
-            for (int i = 1; i < maxHealth; i++)
-                Shapes.Rounded("Notch", barRoot, new Vector3(-0.56f + 1.12f * i / maxHealth, 0f, -0.05f), new Vector3(0.025f, 0.16f, 0.02f), 0.01f,
+            for (int i = notchEvery; i < maxHealth; i += notchEvery)
+                Shapes.Rounded("Notch", barRoot, new Vector3(-0.56f + 1.12f * i / (float)maxHealth, 0f, -0.05f), new Vector3(0.025f, 0.16f, 0.02f), 0.01f,
                     MaterialFactory.Create(new Color(0.1f, 0.08f, 0.16f), Color.black));
             RefreshBar();
         }

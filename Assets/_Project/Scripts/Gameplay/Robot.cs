@@ -291,6 +291,37 @@ namespace SquashBot.Gameplay
             gameObject.SetActive(true);
         }
 
+        /// <summary>Arena fights (TPS): the arena moves the robot freely; grid moves and jumps are off meanwhile.</summary>
+        public bool InArena { get; private set; }
+
+        public void EnterArena()
+        {
+            InArena = true;
+            bufferedMove = null;
+            bufferedJump = false;
+            anim = Anim.Idle;
+            visual.localScale = Vector3.one;
+        }
+
+        public void ExitArena() => InArena = false;
+
+        /// <summary>Places the robot (arena only) and turns it toward <paramref name="facing"/> (y ignored).</summary>
+        public void ArenaPlace(Vector3 position, Vector3 facing, bool snapTurn = false)
+        {
+            transform.position = position;
+            facing.y = 0f;
+            if (facing.sqrMagnitude < 0.0001f) return;
+            targetFacing = Quaternion.LookRotation(facing);
+            if (snapTurn) visual.localRotation = targetFacing;
+        }
+
+        /// <summary>A little squash and stretch while running in the arena.</summary>
+        public void ArenaBob(float amount)
+        {
+            float s = 1f + Mathf.Sin(Time.time * 18f) * 0.06f * amount;
+            visual.localScale = new Vector3(1f / s, s, 1f / s);
+        }
+
         /// <summary>Turn to look straight at the camera (the garage shows the robot off from the front).</summary>
         public void FaceCamera()
         {
@@ -355,6 +386,7 @@ namespace SquashBot.Gameplay
 
         public void TryMove(Direction dir)
         {
+            if (InArena) return;
             if (!IsAlive || anim == Anim.Hover) return;
             if (anim == Anim.Hop || anim == Anim.Bump)
             {
@@ -410,6 +442,7 @@ namespace SquashBot.Gameplay
         /// </summary>
         public void TryJump()
         {
+            if (InArena) return;
             if (!IsAlive || anim == Anim.Hover) return;
             if (anim == Anim.Hop || anim == Anim.Bump)
             {

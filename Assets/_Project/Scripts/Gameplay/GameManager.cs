@@ -543,7 +543,7 @@ namespace SquashBot.Gameplay
                 if (boosts.Contains(Boost.StartShield) && Shop.TryUse(Boost.StartShield))
                     GiveArmor(ArmorDuration, robot.Position, Loc.T("float.shield"), Palette.UiCyan);
                 if (boosts.Contains(Boost.StartHammer) && level.mission == MissionType.Monster && Shop.TryUse(Boost.StartHammer))
-                    PickUpOrb();
+                    FillHammerBag();
                 if (boosts.Contains(Boost.DoubleCoins) && Shop.TryUse(Boost.DoubleCoins))
                 {
                     doubleCoins = true;
@@ -873,6 +873,7 @@ namespace SquashBot.Gameplay
         /// <summary>The robot ended up on a hole or fire: a rescue charge saves it, otherwise it falls or burns.</summary>
         private void StepIntoGap(GridPos p)
         {
+            if (robot.InArena) return;
             if (TryRescue(p, crushed: false)) return;
 
             if (grid.GetTile(p) == TileState.Fire)
@@ -1143,7 +1144,8 @@ namespace SquashBot.Gameplay
             weather.SetIntensity(Mathf.Lerp(0.3f, 1f, Mathf.Clamp01(MissionProgress())));
             elapsed += Time.deltaTime;
 
-            var command = input.Poll(robot.transform.position);
+            // In an arena fight the arena reads the touches itself.
+            var command = ArenaActive ? default(InputCommand) : input.Poll(robot.transform.position);
             UpdateHover(command);
             if (!hovering)
             {
@@ -1171,7 +1173,7 @@ namespace SquashBot.Gameplay
             UpdateTools();
 
             // Armor lets the robot stand over a hole or fire; once it wears off, gravity (or heat) wins.
-            if (robot.IsAlive && !robot.IsHopping && !robot.IsHovering && !robot.IsShielded && grid.IsGap(robot.Position))
+            if (robot.IsAlive && !robot.InArena && !robot.IsHopping && !robot.IsHovering && !robot.IsShielded && grid.IsGap(robot.Position))
             {
                 StepIntoGap(robot.Position);
                 return;
@@ -1211,6 +1213,7 @@ namespace SquashBot.Gameplay
                     break;
                 case MissionType.Monster:
                     UpdateMonster(Time.deltaTime);
+                    UpdateArena(Time.deltaTime);
                     UpdateMonsterShield(Time.deltaTime);
                     break;
                 case MissionType.Thief:
@@ -1229,6 +1232,7 @@ namespace SquashBot.Gameplay
 
         private void OnRobotArrived(GridPos p)
         {
+            if (level != null && level.mission == MissionType.Monster && State == GameState.Playing) CheckArenaEntry(p);
             if (State != GameState.Playing) return;
             if (roadPhase == RoadPhase.Walk)
             {
@@ -1336,6 +1340,7 @@ namespace SquashBot.Gameplay
             if (level.mission == MissionType.Escort && p == buddyPos) DazeBuddy(p);
             cameraRig.Punch(0.5f);
 
+            if (robot.InArena) return; // the robot is off the grid, fighting
             if (robot.IsAlive && !robot.IsHovering && robot.Position == p)
             {
                 if (robot.IsShielded)
@@ -1735,6 +1740,7 @@ namespace SquashBot.Gameplay
 
         private void Win(bool escaped)
         {
+            EndArenaFight(false);
             State = GameState.Result;
             slowMoLeft = 0f;
             Time.timeScale = 1f;
@@ -1851,6 +1857,7 @@ namespace SquashBot.Gameplay
 
         private void Lose(string reason)
         {
+            EndArenaFight(false);
             if (roadPhase != RoadPhase.None) return; // already won, on the way to the next floor
             if (MarathonRespawn()) return; // a marathon past its checkpoint goes on from there
             State = GameState.Result;
@@ -2569,7 +2576,8 @@ namespace SquashBot.Gameplay
         private GridPos monsterPos, orbPos;
         private ThunderHammer orb; // the Thunder Hammer lying on the floor
         private GameObject aura;
-        private bool charged;
+        private int hammerAmmo;
+        private bool charged => hammerAmmo > 0;
         private int monsterHp;
         private float orbLeft, orbCheck;
         private const float OrbStay = 7f, OrbWarn = 2.5f;
@@ -2651,10 +2659,11 @@ namespace SquashBot.Gameplay
                 if (score < best) { best = score; monsterPos = t; }
             }
             grid.SetOccupied(monsterPos, true);
-            monsterHp = objectivesTotal = Mathf.Max(2, level.keys);
+            // Health in points: 10 per hit on the card (an upgraded hammer needs fewer blows).
+            monsterHp = objectivesTotal = Mathf.Max(2, level.keys) * MonsterPointsPerHit;
             objectivesDone = 0;
             MonsterLook(out var kind, out var tint);
-            monster = Monster.Create(kind, GridView.ToWorld(monsterPos) + Vector3.up * GridView.SurfaceY, monsterHp, tint, robot.transform);
+            monster = Monster.Create(kind, GridView.ToWorld(monsterPos) + Vector3.up * GridView.SurfaceY, monsterHp, tint, robot.transform, MonsterPointsPerHit);
             GuardianLooks.DressGuardian(monster.Body, World); // the floor's named guardian (Kütükbaş, Penguen Kral...)
             princessPos = new GridPos(-99, -99);
             if (level.guardsPrincess)
@@ -2678,9 +2687,10 @@ namespace SquashBot.Gameplay
                     questGoal = QuestGoal.Create(QuestKind.Princess, GridView.ToWorld(princessPos) + Vector3.up * GridView.SurfaceY, fx);
                 }
             }
-            charged = false;
+            hammerAmmo = 0;
             stompTimer = 5f;
             SpawnOrb();
+            SetupArenaRing();
             hazards.IsProtected = p => p == monsterPos || p == orbPos;
         }
 
@@ -2696,7 +2706,7 @@ namespace SquashBot.Gameplay
             foreach (var t in grid.AllPositions())
             {
                 if (!grid.IsStandable(t) || t == monsterPos || t == robot.Position || hazards.IsThreatened(t) || !reach.Contains(t)) continue;
-                if (t.Manhattan(monsterPos) < 2) continue;
+                if (InArenaZone(t)) continue;
                 options.Add((t, t.Manhattan(robot.Position)));
             }
             if (options.Count == 0) { orbLeft = 1f; return; }
@@ -2717,12 +2727,12 @@ namespace SquashBot.Gameplay
             if (orb != null) Destroy(orb.gameObject);
             orb = null;
             orbPos = new GridPos(-99, -99);
-            charged = true;
-            if (aura == null) aura = ThunderHammer.CreateHeld(robot.transform);
+            hammerAmmo = Mathf.Min(Data.Weapons.MaxAmmo, hammerAmmo + 1);
+            if (aura == null) aura = ShoulderHammer();
             fx.Burst(robot.transform.position + Vector3.up * 0.5f, ThunderHammer.Electric, ThunderHammer.ElectricGlow, 26, 4f);
             AudioManager.PlaySfx(Sfx.Shield, 0.9f, 1.4f);
             Haptics.Medium();
-            FloatAt(robot.transform.position, Loc.T("float.magic"), ThunderHammer.Electric);
+            FloatAt(robot.transform.position, Loc.F("float.ammo", hammerAmmo, Data.Weapons.MaxAmmo), ThunderHammer.Electric);
         }
 
         private void OnRobotBumped(GridPos target)
@@ -2733,56 +2743,14 @@ namespace SquashBot.Gameplay
                 return;
             }
             if (State != GameState.Playing || level == null || level.mission != MissionType.Monster || monster == null || target != monsterPos) return;
-            if (MonsterShielded)
-            {
-                FloatAt(GridView.ToWorld(monsterPos) + Vector3.up, Loc.T("float.monsterShield"), Palette.UiCyan);
-                AudioManager.PlaySfx(Sfx.Blocked, 0.8f, 1.4f);
-                return;
-            }
-            if (!charged)
-            {
-                FloatAt(GridView.ToWorld(monsterPos) + Vector3.up, Loc.T("float.needMagic"), Palette.UiCyan);
-                return;
-            }
-            // A hammer hit: the swing and a lightning bolt.
-            charged = false;
-            if (aura != null) Destroy(aura);
-            aura = null;
-            monsterHp--;
-            objectivesDone++;
-            var at = GridView.ToWorld(monsterPos) + Vector3.up * 0.8f;
-            ThunderHammer.Swing(robot.transform.position, GridView.ToWorld(monsterPos) + Vector3.up * GridView.SurfaceY);
-            fx.Burst(at, ThunderHammer.Electric, ThunderHammer.ElectricGlow * 1.3f, 40, 6f);
-            AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.7f);
-            cameraRig.Shake(0.8f);
-            cameraRig.Punch(0.8f);
-            Haptics.Medium();
-            if (monsterHp <= 0)
-            {
-                monster.Defeat();
-                grid.SetOccupied(monsterPos, false);
-                if (questGoal != null)
-                {
-                    questGoal.Complete();
-                    grid.SetOccupied(princessPos, false);
-                    FloatAt(GridView.ToWorld(princessPos) + Vector3.up, Loc.T("quest.done.Princess"), Palette.UiGold);
-                }
-                FloatAt(at, Loc.T("float.monsterDown"), Palette.UiGold);
-                AudioManager.PlaySfx(Sfx.Squash, 1f, 0.5f);
-                Win();
-                return;
-            }
-            monster.Hit(monsterHp);
-            FloatAt(at, Loc.F("float.monsterHit", monsterHp), Palette.UiGold);
-            if (level.phased) MonsterPhase();
-            SpawnOrb();
+            TryEnterArena(); // walking into the monster starts the fight too
         }
 
         private void UpdateMonster(float dt)
         {
             if (monster == null || monster.Dead) return;
             if (orb != null && (!grid.IsStandable(orbPos) || hazards.IsThreatened(orbPos))) SpawnOrb();
-            if (orb == null && !charged) SpawnOrb();
+            if (orb == null && hammerAmmo < Data.Weapons.MaxAmmo) SpawnOrb();
             if (orb != null && !previewing)
             {
                 // Every second: if the way to the orb got cut off, it moves at once; otherwise it moves when its time is up.
@@ -2800,48 +2768,6 @@ namespace SquashBot.Gameplay
                     SpawnOrb();
                 }
             }
-
-            if (stompWindup >= 0f)
-            {
-                // The tiles around the monster flash while it winds up.
-                stompWindup -= dt;
-                float pulse = 0.55f + 0.45f * Mathf.Sin(Time.time * 24f);
-                for (int x = -1; x <= 1; x++)
-                    for (int y = -1; y <= 1; y++)
-                    {
-                        var p = new GridPos(monsterPos.x + x, monsterPos.y + y);
-                        if (grid.InBounds(p) && p != monsterPos) gridView.SetWarning(p, pulse);
-                    }
-                if (stompWindup < 0f) Slam();
-                return;
-            }
-            stompTimer -= dt;
-            if (stompTimer > 0f) return;
-            stompTimer = Mathf.Lerp(6.5f, 3.5f, LevelCatalog.Difficulty(levelIndex)) + Random.Range(0f, 1.5f);
-            stompWindup = 0.75f;
-            monster.Stomp();
-        }
-
-        /// <summary>The stomp lands: dust and a shake, and a robot next to the monster is knocked back (never hurt).</summary>
-        private void Slam()
-        {
-            fx.Dust(GridView.ToWorld(monsterPos) + Vector3.up * 0.1f, Palette.TileTop, 24, 4f);
-            cameraRig.Shake(0.6f);
-            AudioManager.PlaySfx(Sfx.Impact, 0.8f, 0.6f);
-            var r = robot.Position;
-            if (Mathf.Abs(r.x - monsterPos.x) > 1 || Mathf.Abs(r.y - monsterPos.y) > 1 || robot.IsHopping || !robot.IsAlive) return;
-            int dx = r.x - monsterPos.x, dy = r.y - monsterPos.y;
-            Direction dir = Mathf.Abs(dx) >= Mathf.Abs(dy) ? (dx >= 0 ? Direction.PlusX : Direction.MinusX) : (dy >= 0 ? Direction.PlusY : Direction.MinusY);
-            var o = dir.ToOffset();
-            for (int dist = 2; dist >= 1; dist--)
-            {
-                var landing = new GridPos(r.x + o.x * dist, r.y + o.y * dist);
-                if (!grid.InBounds(landing) || !grid.IsStandable(landing) || hazards.IsThreatened(landing)) continue;
-                robot.Shove(dir, dist, 1.3f);
-                FloatAt(robot.transform.position, Loc.T("float.knocked"), Palette.UiCyan);
-                Haptics.Medium();
-                return;
-            }
         }
 
         private void ClearMonster()
@@ -2852,8 +2778,9 @@ namespace SquashBot.Gameplay
             monster = null;
             orb = null;
             aura = null;
-            charged = false;
+            hammerAmmo = 0;
             stompWindup = -1f;
+            ClearArena();
         }
 
         // ---------- Goal preview ----------
@@ -2896,7 +2823,7 @@ namespace SquashBot.Gameplay
             {
                 case MissionType.Monster:
                     steps.Add((BriefShot.Hammer, Loc.T("brief.hammer")));
-                    steps.Add((BriefShot.HammerHit, Loc.F("brief.hit", objectivesTotal)));
+                    steps.Add((BriefShot.HammerHit, Loc.F("brief.hit", Mathf.CeilToInt(objectivesTotal / (float)Weapons.HitDamage))));
                     steps.Add((BriefShot.Stomp, Loc.T("brief.stomp")));
                     if (level.guardsPrincess) steps.Add((BriefShot.Princess, Loc.T("brief.princessFreed")));
                     if (level.phased) steps.Add((BriefShot.HammerHit, Loc.T("brief.phased")));
@@ -3101,7 +3028,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Tunnel: text = Loc.F("hud.tunnel", coinsThisRun, Mathf.RoundToInt(runner.Progress * 100f)); break;
                 case MissionType.Boss: text = Loc.F("hud.boss", objectivesDone, objectivesTotal); break;
                 case MissionType.Quest: text = questReady ? Loc.T("quest.hudGo." + level.quest) : Loc.F("quest.hud." + level.quest, objectivesDone, objectivesTotal); break;
-                case MissionType.Monster: text = charged ? Loc.T("hud.monsterHit") : Loc.F("hud.monster", monsterHp, objectivesTotal); break;
+                case MissionType.Monster: text = ArenaHud(); break;
                 case MissionType.Thief:
                     text = level.thiefRace ? Loc.F("hud.thiefRace", coinsThisRun, thiefCoins, objectivesTotal) : Loc.F("hud.thief", objectivesDone, objectivesTotal);
                     break;

@@ -261,7 +261,7 @@ namespace SquashBot.Gameplay
 #endif
         }
 
-        private static bool ReadPointer(out bool pressed, out Vector2 position)
+        internal static bool ReadPointer(out bool pressed, out Vector2 position)
         {
 #if ENABLE_INPUT_SYSTEM
             var touch = Touchscreen.current;

@@ -106,10 +106,10 @@ namespace SquashBot.Visual
         /// The hit: a hammer arcs from the robot down onto the monster, and a lightning bolt drops from the sky at
         /// the moment it lands.
         /// </summary>
-        public static void Swing(Vector3 from, Vector3 target)
+        public static void Swing(Vector3 from, Vector3 target, int level = 3)
         {
             var go = new GameObject("HammerSwing");
-            go.AddComponent<HammerSwing>().Begin(from, target);
+            go.AddComponent<HammerSwing>().Begin(from, target, level);
         }
 
         /// <summary>A jagged lightning bolt from high above down to <paramref name="target"/>, fading in a moment.</summary>
