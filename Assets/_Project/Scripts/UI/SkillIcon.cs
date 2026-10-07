@@ -6,6 +6,7 @@ namespace SquashBot.UI
         Shield,
         Freeze,
         Magnet,
-        Hammer
+        Hammer,
+        Super
     }
 }

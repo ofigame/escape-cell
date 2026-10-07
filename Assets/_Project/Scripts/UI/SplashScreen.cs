@@ -85,9 +85,10 @@ namespace SquashBot.UI
             float dt = Mathf.Min(Time.unscaledDeltaTime, 1f / 30f);
             t += dt;
 
-            // The logo settles in with a tiny ease (it already sits there from the launch screen).
+            // The logo fades in and settles with a tiny ease (the launch screen before it shows only the ice).
             float scale = Mathf.Lerp(0.97f, 1f, 1f - Mathf.Pow(1f - Mathf.Clamp01(t / 1.2f), 3f));
             logo.localScale = new Vector3(scale, scale, 1f);
+            logoImage.color = new Color(1f, 1f, 1f, Mathf.Clamp01(t / 0.4f)); // fades in once over the plain ice
             foreach (var s in sparkles)
             {
                 float a = Mathf.Pow(Mathf.Max(0f, Mathf.Sin(t * s.speed + s.phase)), 6f);

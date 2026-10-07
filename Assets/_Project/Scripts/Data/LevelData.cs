@@ -95,6 +95,8 @@ namespace SquashBot.Data
         public bool guardsPrincess;
         [Tooltip("Monster levels: after each hit the monster shields itself and leaps to another tile.")]
         public bool phased;
+        [Tooltip("A long level (2-3 minutes): slower-warning blocks, short heavy waves now and then, and a helicopter bringing a super power every 30 seconds.")]
+        public bool marathon;
 
         [Header("Blocks")]
         [Tooltip("Seconds between the red warning appearing and the block hitting the tile.")]

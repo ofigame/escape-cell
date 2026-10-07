@@ -15,7 +15,7 @@ namespace SquashBot.Data
     public static class LevelCatalog
     {
         public const int LevelsPerWorld = 10;
-        public const int WorldCount = 20;
+        public const int WorldCount = 25;
         public const int LevelCount = LevelsPerWorld * WorldCount;
 
         /// <summary>Shield pickups start appearing from this level (1-based) on.</summary>
@@ -79,6 +79,9 @@ namespace SquashBot.Data
             // From the second world on, the middle quest of the world is a new kind of story: the coin thief on odd worlds,
             // leading Bip to the door on even ones (the other two quests stay classic stories).
             if (world >= 1 && i < 8 && (i + world) % 8 == 3) mission = world % 2 == 1 ? MissionType.Thief : MissionType.Escort;
+            // From the second world on, the coin hunt of the world becomes a long haul: survive two to three minutes.
+            bool marathon = world >= 1 && i < 8 && (i + world) % 8 == 2;
+            if (marathon) mission = MissionType.Survive;
             var rules = Rules(world, index);
             // Poison eats tiles for good, so a poisoned floor can never be fully painted.
             if (mission == MissionType.Paint && (rules & FloorRule.Poison) != 0) mission = MissionType.CollectCoins;
@@ -146,6 +149,16 @@ namespace SquashBot.Data
                 level.lineWaveChance *= 0.5f;
                 Shape(level, index, d);
             }
+            else if (marathon)
+            {
+                // The long haul: a roomy floor, blocks that warn for longer so they can always be seen and dodged.
+                level.marathon = true;
+                level.surviveSeconds = Mathf.Round(120f + d * 60f);
+                level.warningTime *= 1.45f;
+                level.spawnInterval *= 1.05f;
+                level.gridWidth = level.gridHeight = Mathf.Min(16, level.gridWidth + 1);
+                Shape(level, index, d);
+            }
             else if (mission == MissionType.Exit)
             {
                 MakeJourney(level, PickJourney(index, used, exits++), index, d);
@@ -166,7 +179,11 @@ namespace SquashBot.Data
             FloorRule.None, FloorRule.None, FloorRule.None, FloorRule.None, FloorRule.None, FloorRule.None, FloorRule.None,
             FloorRule.Current, FloorRule.Sticky, FloorRule.Poison, FloorRule.Dark, FloorRule.Ice, FloorRule.Wind,
             FloorRule.Laser | FloorRule.Teleport, FloorRule.Trampoline, FloorRule.Glass, FloorRule.Blink, FloorRule.Hunter,
-            FloorRule.Barrel, FloorRule.None,
+            FloorRule.Barrel,
+            // The five floors added below the roof pair two rules each.
+            FloorRule.Sticky | FloorRule.Blink, FloorRule.Wind | FloorRule.Current, FloorRule.Ice | FloorRule.Dark,
+            FloorRule.Barrel | FloorRule.Glass, FloorRule.Hunter | FloorRule.Trampoline,
+            FloorRule.None,
         };
 
         public const int FirstRuleWorld = 7;

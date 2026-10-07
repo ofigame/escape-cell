@@ -301,6 +301,8 @@ namespace SquashBot.Visual
 
         private void PlaceCamera()
         {
+            // Narrow phones see as much of the path's width as a 9:16 screen does.
+            Cam.fieldOfView = CameraFit.Fov(50f, Cam.aspect);
             var focus = Origin + new Vector3(0f, height, 0f);
             Cam.transform.position = focus + new Vector3(0f, 3.2f, -ViewDistance);
             Cam.transform.LookAt(focus + Vector3.up * 0.4f);

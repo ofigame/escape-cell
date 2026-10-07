@@ -200,6 +200,18 @@ namespace SquashBot.Visual
                     buddyProp.transform.SetParent(props, true);
                     buddyProp.transform.localScale = Vector3.one * 1.9f;
                     break;
+                case BriefShot.Super:
+                {
+                    var holder = new GameObject("Big").transform;
+                    holder.SetParent(props, false);
+                    holder.localScale = Vector3.one * 2f;
+                    var box = SuperCrate.Create(Origin);
+                    box.transform.SetParent(holder, false);
+                    box.transform.localPosition = Vector3.zero;
+                    robot = MakeRobot(-Right * 1.4f, 2.2f);
+                    Aim(0.85f, 1f);
+                    break;
+                }
                 case BriefShot.Warden:
                     var warden = WardenBoss.Create(Origin + Vector3.up * 0.6f, 3, cam.transform);
                     warden.transform.SetParent(props, true);

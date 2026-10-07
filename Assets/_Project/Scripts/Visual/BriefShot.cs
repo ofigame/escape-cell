@@ -17,6 +17,7 @@ namespace SquashBot.Visual
         Warden,
         Block,
         Thief,
-        Escort
+        Escort,
+        Super
     }
 }

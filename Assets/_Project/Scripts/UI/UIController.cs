@@ -155,7 +155,9 @@ namespace SquashBot.UI
         public GarageScreen Garage { get; private set; }
         public GuideScreen Guide { get; private set; }
         public BriefingScreen Briefing { get; private set; }
+        public LanguagePicker Languages { get; private set; }
         public SkillBadges Skills { get; private set; }
+        public ObjectiveArrows Arrows { get; private set; }
         public DailyBonusScreen DailyBonus { get; private set; }
 
         private GameObject bannerPlaceholder;
@@ -203,6 +205,7 @@ namespace SquashBot.UI
             DailyBonus = DailyBonusScreen.Create(root);
             Guide = GuideScreen.Create(root);
             Briefing = BriefingScreen.Create(root);
+            Languages = LanguagePicker.Create(root);
             Guide.BackPressed += Guide.Hide;
             HelpButton(Shop.transform, "shop");
             HelpButton(Garage.transform, "garage");
@@ -648,6 +651,7 @@ namespace SquashBot.UI
         {
             hud = UiScreen.Create("HUD", root, out var t);
             Skills = SkillBadges.Create(t);
+            Arrows = ObjectiveArrows.Create(t);
 
             UiFactory.MakeButton(t, "II", Kind.Icon, TopLeft, new Vector2(36f, -36f), new Vector2(124f, 124f), () => PausePressed?.Invoke(), 52f);
 
@@ -725,6 +729,7 @@ namespace SquashBot.UI
             lastProgress = 0f;
             HideAll();
             Skills.HideAll();
+            Arrows.Clear();
             hud.Show();
             SetBanner(false);
             hudLevel.text = levelIndex < 0 ? Loc.T("level.bonus") : Loc.F("level", levelIndex + 1);

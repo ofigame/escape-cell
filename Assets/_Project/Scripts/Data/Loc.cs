@@ -40,19 +40,16 @@ namespace SquashBot.Data
             return English.TryGetValue(key, out value) ? value : key;
         }
 
+        /// <summary>A language's own name for itself (for the language list).</summary>
+        public static string NameOf(Language language) => Table(language).TryGetValue("lang.name", out var name) ? name : language.ToString();
+
         public static string F(string key, params object[] args) => string.Format(T(key), args);
 
-        /// <summary>The order the settings button cycles through.</summary>
+        /// <summary>The order of the language list.</summary>
         public static readonly Language[] Order =
         {
             Language.Turkish, Language.English, Language.Arabic, Language.Spanish, Language.German, Language.Korean, Language.Italian, Language.Azerbaijani
         };
-
-        public static Language NextLanguage()
-        {
-            int i = System.Array.IndexOf(Order, Current);
-            return Order[(i + 1) % Order.Length];
-        }
 
         public static bool IsRightToLeft => Current == Language.Arabic;
 
@@ -156,6 +153,17 @@ namespace SquashBot.Data
             ["btn.close"] = "CLOSE",
             ["result.win"] = "LEVEL CLEAR!",
             ["float.moreTime"] = "+{0} SECONDS!",
+            ["brief.super"] = "Every {0} seconds a helicopter drops a super-power crate. Grab it: {1} seconds untouchable, smash everything!",
+            ["float.superMissed"] = "Missed it!",
+            ["float.heliComing"] = "Helicopter incoming!",
+            ["float.superPower"] = "SUPER POWER! {0} S",
+            ["wave.title"] = "HEAVY ATTACK!",
+            ["wave.text"] = "Hold on, it will pass soon!",
+            ["road.failTitle"] = "BURNT!",
+            ["road.failLife"] = "-1 life · The road starts over",
+            ["road.failFree"] = "The road starts over",
+            ["guide.marathon.t"] = "Long hauls",
+            ["guide.marathon.b"] = "Some levels last two or three minutes. Their blocks warn longer, so you can always see them coming, and now and then a short heavy attack keeps you busy. Every 30 seconds a helicopter drops a golden super-power crate a few tiles away: it waits 10 seconds. Grab it and for 20 seconds nothing can hurt you, and you smash every block you touch.",
             ["btn.guide"] = "GUIDE",
             ["daily.chest"] = "Chest",
             ["mission.thief"] = "A thief stole the coins! Catch it {0} times",
@@ -407,8 +415,23 @@ namespace SquashBot.Data
             ["story.17.2"] = "And they look very, very grumpy.",
             ["story.18.0"] = "The funfair floor! My favourite game: barrel bowling. You are the pin.",
             ["story.18.1"] = "I'm not a pin, I'm number 47!",
-            ["story.19.0"] = "The last floor before the roof. Every trap I have, all at once!",
-            ["story.19.1"] = "And every trick I've learned, all at once. Beep!",
+            ["story.24.0"] = "The last floor before the roof. Every trap I have, all at once!",
+            ["story.24.1"] = "And every trick I've learned, all at once. Beep!",
+            ["world.garden"] = "SPRING GARDEN",
+            ["world.canyon"] = "RED CANYON",
+            ["world.snow"] = "SNOWY PEAK",
+            ["world.harbor"] = "HARBOUR LIGHTS",
+            ["world.clouds"] = "CLOUD MEADOW",
+            ["story.19.0"] = "My rooftop garden! Sticky honey tiles and flower lamps that blink on and off.",
+            ["story.19.1"] = "Smells lovely... for a trap.",
+            ["story.20.0"] = "Wind howls through my canyon, and the floor flows like a river!",
+            ["story.20.1"] = "Then I'll ride the wind. Wheee!",
+            ["story.21.0"] = "Ice under your feet, and the lights are going out one by one.",
+            ["story.21.1"] = "Lucky my eyes glow in the dark.",
+            ["story.22.0"] = "Barrels roll off my ships, right onto glass decks.",
+            ["story.22.1"] = "Glass and barrels... light steps, quick feet!",
+            ["story.23.0"] = "Up in the clouds my blocks hunt you, and trampolines throw you around.",
+            ["story.23.1"] = "Bouncing between the clouds? Best floor ever!",
             ["world.crystal"] = "CRYSTAL CAVE",
             ["world.festival"] = "LIGHT FESTIVAL",
             ["world.factory"] = "RUST FACTORY",
@@ -573,10 +596,10 @@ namespace SquashBot.Data
             ["story.13.1"] = "Zap, blink, beep. I can do that!",
             ["story.14.0"] = "The galaxy floor! My trampolines will fling you to the stars.",
             ["story.14.1"] = "The stars are up. Up is where I am going!",
-            ["story.20.0"] = "The roof door swung open. Number 47 saw the sky, and the shining city below, for the first time.",
-            ["story.20.1"] = "Wow... The sky isn't overrated at all.",
-            ["story.20.2"] = "Impossible... Fine, 47. Maybe I should rewrite my rules.",
-            ["story.20.3"] = "Congratulations! You escaped from Escape Cell!",
+            ["story.25.0"] = "The roof door swung open. Number 47 saw the sky, and the shining city below, for the first time.",
+            ["story.25.1"] = "Wow... The sky isn't overrated at all.",
+            ["story.25.2"] = "Impossible... Fine, 47. Maybe I should rewrite my rules.",
+            ["story.25.3"] = "Congratulations! You escaped from Escape Cell!",
             ["warden.lose.0"] = "WARDEN: Squashed! Back to your cell, 47.",
             ["warden.lose.1"] = "WARDEN: Beep boop, I win again.",
             ["warden.lose.2"] = "WARDEN: My blocks never miss.",
@@ -706,6 +729,17 @@ namespace SquashBot.Data
             ["btn.close"] = "KAPAT",
             ["result.win"] = "BÖLÜM TAMAM!",
             ["float.moreTime"] = "+{0} SANİYE!",
+            ["brief.super"] = "Her {0} saniyede bir helikopter süper güç sandığı bırakır. Kap: {1} saniye dokunulmaz ol, her şeyi yık!",
+            ["float.superMissed"] = "Kaçırdın!",
+            ["float.heliComing"] = "Helikopter geliyor!",
+            ["float.superPower"] = "SÜPER GÜÇ! {0} SN",
+            ["wave.title"] = "YOĞUN SALDIRI!",
+            ["wave.text"] = "Dayan, birazdan geçecek!",
+            ["road.failTitle"] = "YANDIN!",
+            ["road.failLife"] = "-1 can · Yol baştan başlıyor",
+            ["road.failFree"] = "Yol baştan başlıyor",
+            ["guide.marathon.t"] = "Uzun soluk bölümler",
+            ["guide.marathon.b"] = "Bazı bölümler iki üç dakika sürer. Bu bölümlerde bloklar daha uzun süre uyarır, böylece geldiklerini her zaman görürsün; ara sıra kısa ve yoğun bir saldırı seni meşgul eder. Her 30 saniyede bir helikopter birkaç hücre öteye altın bir süper güç sandığı bırakır ve sandık 10 saniye bekler. Onu kaparsan 20 saniye boyunca hiçbir şey sana zarar veremez ve dokunduğun her bloğu yıkarsın.",
             ["btn.guide"] = "REHBER",
             ["daily.chest"] = "Sandık",
             ["mission.thief"] = "Bir hırsız altınları çaldı! Onu {0} kez yakala",
@@ -957,8 +991,23 @@ namespace SquashBot.Data
             ["story.17.2"] = "Hem de çok ama çok huysuz bakıyorlar.",
             ["story.18.0"] = "Lunapark katı! En sevdiğim oyun: varil bowlingi. Lobut sensin.",
             ["story.18.1"] = "Ben lobut değilim, ben 47 numarayım!",
-            ["story.19.0"] = "Çatıdan önceki son kat. Bütün tuzaklarım bir arada!",
-            ["story.19.1"] = "Ben de öğrendiğim her şeyi birleştiririm. Bip!",
+            ["story.24.0"] = "Çatıdan önceki son kat. Bütün tuzaklarım bir arada!",
+            ["story.24.1"] = "Ben de öğrendiğim her şeyi birleştiririm. Bip!",
+            ["world.garden"] = "BAHAR BAHÇESİ",
+            ["world.canyon"] = "KIZIL KANYON",
+            ["world.snow"] = "KARLI ZİRVE",
+            ["world.harbor"] = "LİMAN IŞIKLARI",
+            ["world.clouds"] = "BULUT ÇAYIRI",
+            ["story.19.0"] = "Çatı bahçem! Yapışkan bal hücreleri ve yanıp sönen çiçek lambaları.",
+            ["story.19.1"] = "Mis gibi kokuyor... bir tuzak için.",
+            ["story.20.0"] = "Kanyonumda rüzgâr uğulduyor, zemin de nehir gibi akıyor!",
+            ["story.20.1"] = "O zaman rüzgârla uçarım. Yuhuu!",
+            ["story.21.0"] = "Ayağının altında buz var, ışıklar da birer birer sönüyor.",
+            ["story.21.1"] = "Neyse ki gözlerim karanlıkta parlıyor.",
+            ["story.22.0"] = "Gemilerimden variller yuvarlanıyor, hem de cam güvertelere!",
+            ["story.22.1"] = "Cam ve variller... hafif adım, çevik ayak!",
+            ["story.23.0"] = "Bulutların üstünde bloklarım seni avlıyor, trambolinler de fırlatıyor.",
+            ["story.23.1"] = "Bulutlar arasında zıplamak mı? En güzel kat bu!",
             ["world.crystal"] = "KRİSTAL MAĞARA",
             ["world.festival"] = "IŞIK FESTİVALİ",
             ["world.factory"] = "PAS FABRİKASI",
@@ -1123,10 +1172,10 @@ namespace SquashBot.Data
             ["story.13.1"] = "Vız, ışınlan, bip. Yaparım!",
             ["story.14.0"] = "Galaksi katı! Zıplatan hücrelerim seni yıldızlara fırlatacak.",
             ["story.14.1"] = "Yıldızlar yukarıda. Ben de yukarı gidiyorum zaten!",
-            ["story.20.0"] = "Çatı kapısı açıldı. 47 numara gökyüzünü ve aşağıdaki ışıl ışıl şehri ilk kez gördü.",
-            ["story.20.1"] = "Vay... Gökyüzü hiç de abartılmamış.",
-            ["story.20.2"] = "İmkânsız... Peki 47. Belki de kurallarımı yeniden yazmalıyım.",
-            ["story.20.3"] = "Tebrikler! Escape Cell'den kaçmayı başardın!",
+            ["story.25.0"] = "Çatı kapısı açıldı. 47 numara gökyüzünü ve aşağıdaki ışıl ışıl şehri ilk kez gördü.",
+            ["story.25.1"] = "Vay... Gökyüzü hiç de abartılmamış.",
+            ["story.25.2"] = "İmkânsız... Peki 47. Belki de kurallarımı yeniden yazmalıyım.",
+            ["story.25.3"] = "Tebrikler! Escape Cell'den kaçmayı başardın!",
             ["warden.lose.0"] = "WARDEN: Ezildin! Hücrene dön, 47.",
             ["warden.lose.1"] = "WARDEN: Bip bop, yine ben kazandım.",
             ["warden.lose.2"] = "WARDEN: Bloklarım hiç ıskalamaz.",

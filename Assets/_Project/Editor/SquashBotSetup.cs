@@ -400,11 +400,10 @@ namespace SquashBot.EditorTools
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             PlayerSettings.colorSpace = ColorSpace.Linear;
 
-            // The OFIGAME logo on white ice from the very first frame: the native launch screen (no Unity logo) shows the
-            // same logo and ice as the game's own splash, which then stays until the menu is ready.
-            var logoSprite = SplashSprite(ResourcesDir + "/OfigameLogo.png");
+            // White ice from the very first frame: the native launch screen (no Unity logo) shows the same ice as the game's
+            // own splash, where the OFIGAME logo then fades in and stays until the menu is ready.
             var iceSprite = SplashSprite(ResourcesDir + "/IceBackground.png");
-            PlayerSettings.SplashScreen.show = logoSprite != null;
+            PlayerSettings.SplashScreen.show = iceSprite != null;
             PlayerSettings.SplashScreen.showUnityLogo = false;
             PlayerSettings.SplashScreen.drawMode = PlayerSettings.SplashScreen.DrawMode.AllSequential;
             PlayerSettings.SplashScreen.animationMode = PlayerSettings.SplashScreen.AnimationMode.Static;
@@ -414,7 +413,8 @@ namespace SquashBot.EditorTools
             PlayerSettings.SplashScreen.backgroundColor = Color.white;
             PlayerSettings.SplashScreen.background = iceSprite;
             PlayerSettings.SplashScreen.backgroundPortrait = iceSprite;
-            if (logoSprite != null) PlayerSettings.SplashScreen.logos = new[] { PlayerSettings.SplashScreenLogo.Create(2f, logoSprite) };
+            // The native screen shows the ice only: the logo appears once, in the game's own splash, so it never jumps.
+            PlayerSettings.SplashScreen.logos = new PlayerSettings.SplashScreenLogo[0];
         }
 
         /// <summary>Imports a texture as an uncompressed single sprite (the splash logo and background) and returns it.</summary>

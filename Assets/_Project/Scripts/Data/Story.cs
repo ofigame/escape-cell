@@ -42,7 +42,12 @@ namespace SquashBot.Data
             new[] { W, R },       // 16: blinking lights
             new[] { W, R, W },    // 17: hunting blocks
             new[] { W, R },       // 18: barrels
-            new[] { W, R },       // 19: everything at once
+            new[] { W, R },       // 19: the garden (honey and blinking lamps)
+            new[] { W, R },       // 20: the canyon (wind and currents)
+            new[] { W, R },       // 21: the snowy peak (ice in the dark)
+            new[] { W, R },       // 22: the harbour (barrels on glass)
+            new[] { W, R },       // 23: the cloud meadow (hunters and trampolines)
+            new[] { W, R },       // 24: everything at once
             new[] { N, R, W, N }, // ending: the roof
         };
 

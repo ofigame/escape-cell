@@ -45,7 +45,12 @@ namespace SquashBot.Visual
                 case 116: NeonCube(root); break;
                 case 117: Crate(root); break;
                 case 118: Gumdrop(root); break;
-                case 119: Meteor(root, Hex("#6A4A20"), new Color(1.6f, 1.1f, 0.3f)); break;
+                case 119: Crate(root); break;      // garden
+                case 120: Sandstone(root); break;  // canyon
+                case 121: IceCube(root); break;    // snowy peak
+                case 122: Barrel(root); break;     // harbour
+                case 123: StormCube(root); break;  // cloud meadow
+                case 124: Meteor(root, Hex("#6A4A20"), new Color(1.6f, 1.1f, 0.3f)); break; // the roof
                 case 1: Crate(root); break;
                 case 2: IceCube(root); break;
                 case 3: NeonCube(root); break;

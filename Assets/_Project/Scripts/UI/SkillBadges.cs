@@ -67,6 +67,7 @@ namespace SquashBot.UI
                 case SkillIcon.Shield: return new Color(0.4f, 0.8f, 1f);
                 case SkillIcon.Freeze: return new Color(0.7f, 0.95f, 1f);
                 case SkillIcon.Magnet: return new Color(1f, 0.4f, 0.45f);
+                case SkillIcon.Super: return SuperCrate.Gold;
                 default: return ThunderHammer.Electric;
             }
         }
@@ -105,6 +106,15 @@ namespace SquashBot.UI
                         Part(box, new Vector2(s * x, s * 0.33f), new Vector2(s * 0.2f, s * 0.16f), white, UiSprites.Rounded);
                     }
                     Part(box, new Vector2(0f, -s * 0.24f), new Vector2(s * 0.68f, s * 0.24f), c, UiSprites.Rounded);
+                    break;
+                case SkillIcon.Super:
+                    // A big golden star.
+                    for (int i = 0; i < 5; i++)
+                    {
+                        var arm = Part(box, Vector2.zero, new Vector2(s * 0.22f, s * 0.62f), c, UiSprites.Rounded, i * 72f);
+                        arm.rectTransform.anchoredPosition = Quaternion.Euler(0f, 0f, i * 72f) * new Vector2(0f, s * 0.2f);
+                    }
+                    Part(box, Vector2.zero, new Vector2(s * 0.36f, s * 0.36f), white, UiSprites.Circle);
                     break;
                 default:
                     // The Thunder Hammer: a tilted handle and a head with a bolt.

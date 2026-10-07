@@ -44,7 +44,7 @@ namespace SquashBot.Visual
                 case "world.lavender": return Kind.Sparkle;
                 case "world.sunset": return Kind.Petals;
                 case "world.ice": return Kind.Snow;
-                case "world.neon": return Kind.NeonRain;
+                case "world.neon": return Kind.Fireflies;
                 case "world.lava": return Kind.Embers;
                 case "world.forest": return Kind.Fireflies;
                 case "world.desert": return Kind.Sand;
@@ -60,6 +60,11 @@ namespace SquashBot.Visual
                 case "world.festival": return Kind.Confetti;
                 case "world.factory": return Kind.Smoke;
                 case "world.funfair": return Kind.Confetti;
+                case "world.garden": return Kind.Petals;
+                case "world.canyon": return Kind.Sand;
+                case "world.snow": return Kind.Snow;
+                case "world.harbor": return Kind.Fireflies;
+                case "world.clouds": return Kind.Sparkle;
                 case "world.roof": return Kind.Thunder;
                 default: return Kind.Sparkle;
             }
@@ -69,6 +74,7 @@ namespace SquashBot.Visual
 
         /// <summary>Soft additive glow for particles and trails (also used by the tunnels).</summary>
         public static Material AddMaterial { get { EnsureAssets(); return addMat; } }
+        public static Material AlphaMaterial { get { EnsureAssets(); return alphaMat; } }
 
         private static void EnsureAssets()
         {

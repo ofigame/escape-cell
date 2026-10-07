@@ -120,6 +120,7 @@ namespace SquashBot.Visual
         public void Open(WorldTheme theme)
         {
             gameObject.SetActive(true);
+            Cam.fieldOfView = CameraFit.Fov(34f, Cam.aspect);
             for (int i = robotHolder.childCount - 1; i >= 0; i--) Destroy(robotHolder.GetChild(i).gameObject);
             robotLook?.Invoke(robotHolder);
             accent = theme.accent;

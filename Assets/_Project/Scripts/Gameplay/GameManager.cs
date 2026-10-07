@@ -197,6 +197,7 @@ namespace SquashBot.Gameplay
             runner.CoinCollected += OnTunnelCoin;
             runner.Finished += OnTunnelFinished;
             runner.Arrived += OnRoadArrived;
+            runner.RoadFailed += OnRoadFailed;
             runner.RiskTaken += () => FloatAt(robot.transform.position + Vector3.up * 0.5f, Loc.T("float.risk"), Palette.UiRed);
             runner.Notice += (key, at) => FloatAt(at, Loc.T(key), Palette.UiCyan);
 
@@ -244,6 +245,14 @@ namespace SquashBot.Gameplay
             ui.PausePressed += Pause;
             ui.ResumePressed += Resume;
             ui.SettingToggled += OnSettingToggled;
+            ui.Languages.Chosen += language =>
+            {
+                Loc.Set(language);
+                // Every label is baked at build time, so rebuild the UI in the new language.
+                CreateUi();
+                ShowMenu();
+                ui.ShowSettings();
+            };
             ui.WatchAdPressed += WatchAdForLife;
             ui.ToolPressed += OnToolPressed;
             input.Ignore = p => ui != null && ui.IsOverTool(p);
@@ -293,6 +302,7 @@ namespace SquashBot.Gameplay
             ClearMonster();
             ClearThief();
             ClearEscort();
+            ClearMarathon();
             ClearMonsterShield();
             skillFreezeLeft = skillMagnetLeft = 0f;
             doubleCoins = false;
@@ -690,11 +700,7 @@ namespace SquashBot.Gameplay
                     cameraRig.SetMode(SaveData.PerspectiveView ? ViewMode.Perspective : ViewMode.Isometric);
                     break;
                 case SettingKind.Language:
-                    Loc.Set(Loc.NextLanguage());
-                    // Every label is baked at build time, so rebuild the UI in the new language.
-                    CreateUi();
-                    ShowMenu();
-                    ui.ShowSettings();
+                    ui.Languages.Show();
                     return;
             }
             ui.RefreshSettings();
@@ -1069,7 +1075,8 @@ namespace SquashBot.Gameplay
 
             ui.SetWarning(hazards.AnyWarningActive);
             ui.SetShield(robot.ShieldLeft, Mathf.Max(level.shieldDuration, ArmorDuration));
-            ui.Skills.Set(SkillIcon.Shield, robot.ShieldLeft, Mathf.Max(level.shieldDuration, ArmorDuration));
+            ui.Skills.Set(SkillIcon.Super, superLeft, SuperSeconds);
+            ui.Skills.Set(SkillIcon.Shield, superLeft > 0f ? 0f : robot.ShieldLeft, Mathf.Max(level.shieldDuration, ArmorDuration));
             ui.Skills.Set(SkillIcon.Freeze, skillFreezeLeft, 4f);
             ui.Skills.Set(SkillIcon.Magnet, skillMagnetLeft, 8f);
             ui.Skills.Set(SkillIcon.Hammer, charged ? 1f : 0f, -1f);
@@ -1078,6 +1085,8 @@ namespace SquashBot.Gameplay
             ui.SetHover(HoverEnabled, hoverCooldown);
             UpdateJourney(Time.deltaTime);
             UpdateSkills(Time.deltaTime);
+            if (level.marathon) UpdateMarathon(Time.deltaTime);
+            ui.Arrows.Set(cameraRig.Cam, Goals());
             comboTimer -= Time.deltaTime;
             ui.SetCombo(comboTimer > 0f ? ComboMultiplier : 1, comboTimer / ComboWindow);
             UpdateTools();
@@ -1167,6 +1176,7 @@ namespace SquashBot.Gameplay
             else if (level.mission == MissionType.Monster)
             {
                 if (orb != null && p == orbPos) PickUpOrb();
+                if (crate != null && p == crateTile) PickUpSuper();
             }
             else if (level.mission == MissionType.Quest)
             {
@@ -1804,6 +1814,7 @@ namespace SquashBot.Gameplay
             {
                 PaintTile(robot.Position);
             }
+            if (level.marathon) SetupMarathon();
         }
 
         /// <summary>A free tile far from the robot (never the door), or null if none is free right now.</summary>
@@ -2184,6 +2195,15 @@ namespace SquashBot.Gameplay
             runner.TakeOver();
             AudioManager.PlaySfx(Sfx.Hop, 0.8f, 1.2f);
             ui.ShowIntro(Loc.F("level", levelIndex + 2), Loc.T("road.run"));
+        }
+
+        /// <summary>A crash on the road: it costs a life (while there are any) and the road starts again from the top.</summary>
+        private void OnRoadFailed()
+        {
+            if (State != GameState.Playing || roadPhase != RoadPhase.Run) return;
+            bool paid = Lives.TryConsume();
+            runner.RestartRoad();
+            ui.ShowIntro(Loc.T("road.failTitle"), Loc.T(paid ? "road.failLife" : "road.failFree"));
         }
 
         private void OnRoadArrived()
@@ -2668,6 +2688,7 @@ namespace SquashBot.Gameplay
                     steps.Add((BriefShot.Robot, MissionText(level)));
                     break;
             }
+            if (level.marathon) steps.Add((BriefShot.Super, Loc.F("brief.super", (int)HeliEvery, (int)SuperSeconds)));
             // The first floors also remind what the danger is.
             if (levelIndex < 3) steps.Add((BriefShot.Block, Loc.T("brief.dodge")));
             return steps;
