@@ -109,6 +109,7 @@ namespace SquashBot.Data
                 // An open round arena under vanG's face: lines of code blocks sweep it, and every tile must turn gold.
                 level.final = true;
                 level.layout = Journeys.Arena(9, 2, index);
+                level.shapeName = "Arena";
                 level.lineWaveChance = 0.3f;
                 level.bombChance = 0.12f;
                 level.fireChance = 0f;
@@ -120,6 +121,7 @@ namespace SquashBot.Data
             {
                 // vanG's arena: wide open, lines of blocks sweep it often, three buttons to hit.
                 level.layout = Journeys.Arena(Mathf.RoundToInt(Mathf.Lerp(7f, 14f, d)), world >= 6 ? 3 : 2, index);
+                level.shapeName = "Arena";
                 level.keys = 3;
                 level.lineWaveChance = Mathf.Lerp(0.3f, 0.45f, d);
                 level.bombChance = Mathf.Max(level.bombChance, 0.2f);
@@ -290,6 +292,7 @@ namespace SquashBot.Data
 
         private static void MakeJourney(LevelData level, Journey kind, int index, float d)
         {
+            level.shapeName = kind.ToString();
             switch (kind)
             {
                 case Journey.Corridor:
@@ -337,6 +340,7 @@ namespace SquashBot.Data
             var shape = pool[rng.Next(pool.Length)];
             int pillars = Mathf.Clamp(Mathf.RoundToInt(level.gridWidth * level.gridWidth * 0.025f + d * 2f), 1, 8);
             level.layout = Layouts.Generate(level.gridWidth, shape, pillars, index);
+            level.shapeName = shape.ToString();
         }
 
         /// <summary>All the numbers that follow from a difficulty value (0 = gentle, 1 = the hardest late levels).</summary>
@@ -431,11 +435,15 @@ namespace SquashBot.Data
             };
             int[] pillars = { 0, 0, 0, 0, 0, 1, 0, 1, 1, 1 };
             for (int i = 0; i < levels.Count; i++)
+            {
+                levels[i].shapeName = shapes[i].ToString();
                 if (shapes[i] != PlatformShape.Square || pillars[i] > 0)
                     levels[i].layout = Layouts.Generate(levels[i].gridWidth, shapes[i], pillars[i], 1000 + i);
+            }
 
             // The finale is the first long road: key at the start, door at the far end.
             levels[9].layout = Journeys.Corridor(3, 10, 1, 1009);
+            levels[9].shapeName = "Corridor";
             levels[9].keys = 1;
             levels[9].gridWidth = 3;
             levels[9].gridHeight = 10;

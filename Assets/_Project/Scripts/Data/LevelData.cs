@@ -70,6 +70,8 @@ namespace SquashBot.Data
         [Range(3, 6)] public int gridHeight = 3;
         [Tooltip("Optional shape: one row per line (row 0 = far edge), '#' floor, '.' no tile, 'X' obstacle. Empty = full rectangle.")]
         public string[] layout;
+        [Tooltip("The kind of floor the layout was made from (Square, L, Ring, Corridor, Rooms, Maze, Arena...), for reports.")]
+        public string shapeName;
 
         [Header("Mission")]
         public MissionType mission = MissionType.CollectCoins;
