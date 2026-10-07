@@ -411,7 +411,7 @@ namespace SquashBot.EditorTools
             PlayerSettings.SplashScreen.overlayOpacity = 0f;
             PlayerSettings.SplashScreen.blurBackgroundImage = false;
             PlayerSettings.SplashScreen.unityLogoStyle = PlayerSettings.SplashScreen.UnityLogoStyle.DarkOnLight;
-            PlayerSettings.SplashScreen.backgroundColor = new Color32(0xEC, 0xF5, 0xFC, 0xFF);
+            PlayerSettings.SplashScreen.backgroundColor = Color.white;
             PlayerSettings.SplashScreen.background = iceSprite;
             PlayerSettings.SplashScreen.backgroundPortrait = iceSprite;
             if (logoSprite != null) PlayerSettings.SplashScreen.logos = new[] { PlayerSettings.SplashScreenLogo.Create(2f, logoSprite) };

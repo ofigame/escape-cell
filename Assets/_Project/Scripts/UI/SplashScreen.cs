@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace SquashBot.UI
 {
     /// <summary>
-    /// The studio splash: the OFIGAME logo on white, frosted ice, carrying on seamlessly from the native launch screen
+    /// The studio splash: the OFIGAME logo on plain white with faint clear ice crystals, carrying on seamlessly from the native launch screen
     /// (which shows the same logo and ice). Ice crystals twinkle around the logo, and the whole thing
     /// stays until the menu is ready (and at least a moment), then fades into the menu. A tap skips the wait.
     /// </summary>
@@ -49,7 +49,7 @@ namespace SquashBot.UI
                 fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
                 fitter.aspectRatio = ice.width / (float)ice.height;
             }
-            else UiFactory.Fill(bgRect, new Color(0.93f, 0.96f, 0.99f));
+            else UiFactory.Fill(bgRect, Color.white);
             UiFactory.Fill(UiFactory.Stretch("Tap", canvas.transform), new Color(1f, 1f, 1f, 0.001f)); // catches the skip tap
 
             // Twinkling ice crystals scattered over the frost.
@@ -91,7 +91,7 @@ namespace SquashBot.UI
             foreach (var s in sparkles)
             {
                 float a = Mathf.Pow(Mathf.Max(0f, Mathf.Sin(t * s.speed + s.phase)), 6f);
-                s.img.color = new Color(1f, 1f, 1f, a * 0.9f);
+                s.img.color = new Color(0.72f, 0.8f, 0.9f, a * 0.45f); // faint glassy glints on the white
                 s.rt.localScale = Vector3.one * (0.6f + a * 0.6f);
             }
 
