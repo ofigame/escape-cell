@@ -150,6 +150,7 @@ namespace SquashBot.Gameplay
 
             Application.targetFrameRate = 60;
             QualitySettings.vSyncCount = 0;
+            FrameGovernor.Install(); // phones: scene resolution follows the frame rate
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
             if (levelSet == null || levelSet.levels.Count == 0) levelSet = LevelSet.LoadOrDefault();
 
@@ -2165,19 +2166,76 @@ namespace SquashBot.Gameplay
         private GameObject aura;
         private bool charged;
         private int monsterHp;
+        private float orbLeft, orbCheck;
+        private const float OrbStay = 7f, OrbWarn = 2.5f;
         private GridPos princessPos;
         private float stompTimer, stompWindup = -1f;
+
+        /// <summary>
+        /// The tiles the robot can walk to right now (floor tiles, leaping a one-tile gap like the robot does). Walls,
+        /// pillars, the monster and the princess block the way; falling blocks don't, they are gone in a moment.
+        /// </summary>
+        private HashSet<GridPos> ReachableTiles() => ReachableTiles(monsterPos, princessPos);
+
+        /// <summary>The same, with two given tiles blocked instead (to try out where the monster and the princess could go).</summary>
+        private HashSet<GridPos> ReachableTiles(GridPos blockA, GridPos blockB)
+        {
+            var seen = new HashSet<GridPos> { robot.Position };
+            var queue = new Queue<GridPos>();
+            queue.Enqueue(robot.Position);
+            while (queue.Count > 0)
+            {
+                var p = queue.Dequeue();
+                foreach (var d in DirectionExtensions.All)
+                {
+                    var o = d.ToOffset();
+                    var n = p + o;
+                    if (!grid.IsFloor(n))
+                    {
+                        if (!grid.InBounds(n) || grid.IsWall(n)) continue;
+                        n = n + o;
+                    }
+                    if (!grid.IsFloor(n) || n == blockA || n == blockB || !seen.Add(n)) continue;
+                    queue.Enqueue(n);
+                }
+            }
+            return seen;
+        }
+
+        /// <summary>How many sides of the monster the robot can reach to hit it.</summary>
+        private int OpenSides(GridPos at, HashSet<GridPos> reach)
+        {
+            int open = 0;
+            foreach (var d in DirectionExtensions.All)
+                if (reach.Contains(at + d.ToOffset())) open++;
+            return open;
+        }
 
         private void SetupMonster()
         {
             var centre = new GridPos(grid.Width / 2, grid.Height / 2);
-            monsterPos = robot.Position;
-            int best = int.MaxValue;
+            var none = new GridPos(-99, -99);
+            monsterPos = princessPos = none;
+            var reach = ReachableTiles();
+
+            // Near the middle, on a tile the robot can walk up to from three sides or more, and never on the only way
+            // into a part of the floor (a monster on a bridge would cut the orb, the keys or the exit off). Each try
+            // walks the floor again with the monster there, so only the closest few dozen tiles are tried.
+            var tries = new List<GridPos>();
             foreach (var t in grid.AllPositions())
+                if (grid.IsStandable(t) && t.Manhattan(robot.Position) >= 3 && reach.Contains(t) && OpenSides(t, reach) > 0) tries.Add(t);
+            tries.Sort((a, b) => a.Manhattan(centre).CompareTo(b.Manhattan(centre)));
+            if (tries.Count > 40) tries.RemoveRange(40, tries.Count - 40);
+            monsterPos = tries.Count > 0 ? tries[0] : robot.Position;
+            int best = int.MaxValue;
+            foreach (var t in tries)
             {
-                if (!grid.IsStandable(t) || t.Manhattan(robot.Position) < 3) continue;
-                int d = t.Manhattan(centre);
-                if (d < best) { best = d; monsterPos = t; }
+                var without = ReachableTiles(t, none);
+                int sides = OpenSides(t, without);
+                if (sides == 0) continue;
+                int lost = reach.Count - 1 - without.Count;
+                int score = t.Manhattan(centre) + (sides < 3 ? 100 : 0) + lost * 50;
+                if (score < best) { best = score; monsterPos = t; }
             }
             grid.SetOccupied(monsterPos, true);
             monsterHp = objectivesTotal = Mathf.Max(2, level.keys);
@@ -2189,12 +2247,17 @@ namespace SquashBot.Gameplay
             if (level.guardsPrincess)
             {
                 // Princess Lumi, frozen in ice right next to the monster: she is freed when it falls.
+                // On the side that blocks the least: the monster stays reachable and no part of the floor is cut off.
+                var open = ReachableTiles(monsterPos, none);
+                int bestCut = int.MaxValue;
                 foreach (var d in DirectionExtensions.All)
                 {
                     var n = monsterPos + d.ToOffset();
                     if (!grid.IsStandable(n) || n == robot.Position) continue;
-                    princessPos = n;
-                    break;
+                    var with = ReachableTiles(monsterPos, n);
+                    if (OpenSides(monsterPos, with) == 0) continue;
+                    int cut = open.Count - with.Count;
+                    if (cut < bestCut) { bestCut = cut; princessPos = n; }
                 }
                 if (grid.InBounds(princessPos))
                 {
@@ -2208,21 +2271,31 @@ namespace SquashBot.Gameplay
             hazards.IsProtected = p => p == monsterPos || p == orbPos;
         }
 
-        /// <summary>A new orb lands on a free tile away from the robot and the monster, so every hit needs a run.</summary>
+        /// <summary>
+        /// A new orb lands on a free tile away from the robot and the monster, so every hit needs a run. Only tiles the
+        /// robot can actually walk to count, and the orb doesn't wait forever: after about <see cref="OrbStay"/> seconds (more when it lies farther) it
+        /// flickers and jumps to another tile, so a block or a stomp in the way never stalls the fight.
+        /// </summary>
         private void SpawnOrb()
         {
+            var reach = ReachableTiles();
             var options = new List<(GridPos p, int d)>();
             foreach (var t in grid.AllPositions())
             {
-                if (!grid.IsStandable(t) || t == monsterPos || t == robot.Position || hazards.IsThreatened(t)) continue;
+                if (!grid.IsStandable(t) || t == monsterPos || t == robot.Position || hazards.IsThreatened(t) || !reach.Contains(t)) continue;
                 if (t.Manhattan(monsterPos) < 2) continue;
                 options.Add((t, t.Manhattan(robot.Position)));
             }
-            if (options.Count == 0) return;
-            options.Sort((a, b) => b.d.CompareTo(a.d));
-            orbPos = options[Random.Range(0, Mathf.Max(1, options.Count / 3))].p;
+            if (options.Count == 0) { orbLeft = 1f; return; }
+            // A run, but not across the whole floor: 3-8 tiles away keeps it near the follow camera on big floors.
+            var near = options.FindAll(o => o.d >= 3 && o.d <= 8);
+            if (near.Count == 0) { options.Sort((a, b) => b.d.CompareTo(a.d)); near = options.GetRange(0, Mathf.Max(1, options.Count / 3)); }
+            var pick = near[Random.Range(0, near.Count)];
+            orbPos = pick.p;
             if (orb != null) Destroy(orb.gameObject);
             orb = MagicOrb.Create(GridView.ToWorld(orbPos) + Vector3.up * GridView.SurfaceY);
+            orbLeft = OrbStay + pick.d * 0.6f;
+            orbCheck = 1f;
             fx.Burst(GridView.ToWorld(orbPos) + Vector3.up * 0.6f, new Color(0.75f, 0.45f, 1f), new Color(1.8f, 0.9f, 2.8f), 16, 3f);
         }
 
@@ -2284,6 +2357,23 @@ namespace SquashBot.Gameplay
             if (monster == null || monster.Dead) return;
             if (orb != null && (!grid.IsStandable(orbPos) || hazards.IsThreatened(orbPos))) SpawnOrb();
             if (orb == null && !charged) SpawnOrb();
+            if (orb != null && !previewing)
+            {
+                // Every second: if the way to the orb got cut off, it moves at once; otherwise it moves when its time is up.
+                orbLeft -= dt;
+                orbCheck -= dt;
+                if (orbCheck <= 0f)
+                {
+                    orbCheck = 1f;
+                    if (!ReachableTiles().Contains(orbPos)) orbLeft = 0f;
+                }
+                orb.Leaving = orbLeft < OrbWarn;
+                if (orbLeft <= 0f)
+                {
+                    FloatAt(orb.transform.position + Vector3.up * 0.8f, Loc.T("float.orbMoved"), new Color(0.85f, 0.6f, 1f));
+                    SpawnOrb();
+                }
+            }
 
             if (stompWindup >= 0f)
             {

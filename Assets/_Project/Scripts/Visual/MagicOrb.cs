@@ -15,6 +15,9 @@ namespace SquashBot.Visual
         private Material beamMat;
         private float time, popT;
 
+        /// <summary>True in the orb's last seconds on a tile: it flickers before jumping to another one.</summary>
+        public bool Leaving { get; set; }
+
         public static MagicOrb Create(Vector3 position)
         {
             var go = new GameObject("MagicOrb");
@@ -53,6 +56,7 @@ namespace SquashBot.Visual
             time += Time.deltaTime;
             popT = Mathf.Min(1f, popT + Time.deltaTime * 3f);
             transform.localScale = Vector3.one * (popT < 1f ? Mathf.Sin(popT * Mathf.PI * 0.5f) * (1f + Mathf.Sin(popT * Mathf.PI) * 0.3f) : 1f);
+            if (Leaving) transform.localScale *= 0.8f + 0.2f * Mathf.Sin(time * 18f);
             core.localPosition = new Vector3(0f, 0.6f + Mathf.Sin(time * 3f) * 0.08f, 0f);
             ring1.localPosition = ring2.localPosition = core.localPosition;
             ring1.localRotation = Quaternion.Euler(20f, time * 140f, 0f);

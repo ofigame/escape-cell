@@ -15,6 +15,9 @@ namespace SquashBot.Visual
         public static Mesh RoundedBox(Vector3 size, float radius, int segments = 6)
         {
             radius = Mathf.Min(radius, size.x * 0.5f, size.y * 0.5f, size.z * 0.5f);
+            // Rows per rounded band follow the radius: a hairline bevel on a floor tile needs two, a chunky robot part six.
+            // (Six everywhere put ~4000 triangles in every floor tile and over a million on the big late floors.)
+            segments = Mathf.Clamp(Mathf.CeilToInt(radius * 50f), 2, segments);
             var key = (size, radius);
             if (RoundedBoxes.TryGetValue(key, out var cached) && cached != null) return cached;
 
