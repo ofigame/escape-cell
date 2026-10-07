@@ -10,14 +10,21 @@ namespace SquashBot.Gameplay
     /// <summary>
     /// The long hauls (two to three minutes): every 30 seconds a helicopter flies in and drops a super-power crate a few
     /// tiles from the robot. It waits 10 seconds; grabbing it makes the robot untouchable for 20 seconds, smashing
-    /// every block it meets. Now and then a short heavy wave of blocks keeps the pressure on; the blocks of these
-    /// levels warn longer, so there is always time to see them coming.
+    /// every block it meets. The pace builds up over the level, and every 20-28 seconds a short attack of a different
+    /// kind comes (a block storm, sweeping lines, bombs or hunting blocks); the blocks still warn a little longer than
+    /// elsewhere, so there is always time to see them coming.
     /// </summary>
     public partial class GameManager
     {
-        private const float HeliEvery = 30f, CrateStay = 10f, SuperSeconds = 20f, WaveSeconds = 6f;
+        private const float HeliEvery = 30f, CrateStay = 10f, SuperSeconds = 20f, WaveSeconds = 7f;
+
+        /// <summary>The kinds of heavy attack, taken in turn (shuffled per level).</summary>
+        private enum Wave { Storm, Lines, Bombs, Hunters }
 
         private float heliTimer, crateLeft, superLeft, waveTimer, waveLeft;
+        private float baseLine, baseBombs;
+        private readonly List<Wave> waveOrder = new List<Wave>();
+        private int waveCount;
         private SuperCrate crate;
         private GridPos crateTile = new GridPos(-99, -99);
         private bool heliOnWay;
@@ -26,10 +33,20 @@ namespace SquashBot.Gameplay
         private void SetupMarathon()
         {
             heliTimer = HeliEvery - 6f; // the first one comes a little early
-            waveTimer = Random.Range(35f, 45f);
+            waveTimer = Random.Range(16f, 20f);
             waveLeft = 0f;
             superLeft = 0f;
             heliOnWay = false;
+            baseLine = level.lineWaveChance;
+            baseBombs = level.bombChance;
+            waveOrder.Clear();
+            waveOrder.AddRange(new[] { Wave.Storm, Wave.Lines, Wave.Bombs, Wave.Hunters });
+            for (int i = waveOrder.Count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                (waveOrder[i], waveOrder[j]) = (waveOrder[j], waveOrder[i]);
+            }
+            waveCount = 0;
             hazards.IsProtected = p => p == crateTile;
         }
 
@@ -57,6 +74,9 @@ namespace SquashBot.Gameplay
                 }
             }
 
+            // Standing on the crate picks it up, however the robot got there (a hop, a slide on ice, a current).
+            if (crate != null && robot.Position == crateTile) PickUpSuper();
+
             // The super power.
             if (superLeft > 0f)
             {
@@ -64,25 +84,57 @@ namespace SquashBot.Gameplay
                 if (superLeft <= 0f) EndSuper();
             }
 
-            // A short heavy wave now and then (not while the robot is untouchable: that would waste it).
+            // The pace builds up over the level: half as fast again by the end.
+            float build = 1f + 0.5f * Mathf.Clamp01(elapsed / Mathf.Max(1f, level.surviveSeconds));
+
+            // A short attack now and then (not while the robot is untouchable: that would waste it).
             if (waveLeft > 0f)
             {
                 waveLeft -= dt;
-                if (waveLeft <= 0f) hazards.PaceBoost = 1f;
+                if (waveLeft > 0f) return;
+                EndWave();
             }
-            else if (superLeft <= 0f)
+            hazards.PaceBoost = build;
+            if (superLeft > 0f) return;
+            waveTimer -= dt;
+            if (waveTimer <= 0f) StartWave(build);
+        }
+
+        private void StartWave(float build)
+        {
+            var wave = waveOrder[waveCount++ % waveOrder.Count];
+            waveLeft = WaveSeconds;
+            waveTimer = Random.Range(20f, 28f);
+            switch (wave)
             {
-                waveTimer -= dt;
-                if (waveTimer <= 0f)
-                {
-                    waveLeft = WaveSeconds;
-                    waveTimer = Random.Range(35f, 45f);
-                    hazards.PaceBoost = 2.2f;
-                    ui.ShowIntro(Loc.T("wave.title"), Loc.T("wave.text"));
-                    AudioManager.PlaySfx(Sfx.Warning, 0.9f, 0.8f);
-                    cameraRig.Shake(0.4f);
-                }
+                case Wave.Storm:
+                    hazards.PaceBoost = build * 2.1f;
+                    break;
+                case Wave.Lines:
+                    hazards.PaceBoost = build * 1.4f;
+                    level.lineWaveChance = 0.6f;
+                    break;
+                case Wave.Bombs:
+                    hazards.PaceBoost = build * 1.4f;
+                    level.bombChance = 0.55f;
+                    break;
+                case Wave.Hunters:
+                    hazards.PaceBoost = build * 1.3f;
+                    hazards.Hunting = true;
+                    break;
             }
+            ui.ShowIntro(Loc.T("wave.title"), Loc.T("wave." + wave));
+            AudioManager.PlaySfx(Sfx.Warning, 0.9f, 0.8f);
+            cameraRig.Shake(0.4f);
+        }
+
+        private void EndWave()
+        {
+            waveLeft = 0f;
+            if (level == null) return;
+            level.lineWaveChance = baseLine;
+            level.bombChance = baseBombs;
+            hazards.Hunting = (level.rules & FloorRule.Hunter) != 0;
         }
 
         private void SendHelicopter()
@@ -127,8 +179,8 @@ namespace SquashBot.Gameplay
             // and carries it over holes.
             robot.GiveShield(SuperSeconds, 999);
             if (superAura == null) superAura = MakeSuperAura(robot.transform);
+            if (waveLeft > 0f) EndWave();
             hazards.PaceBoost = 1f;
-            waveLeft = 0f;
             fx.Burst(at + Vector3.up * 0.6f, SuperCrate.Gold, SuperCrate.GoldGlow, 40, 6f);
             cameraRig.Punch(1.2f);
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 1.3f);
@@ -155,7 +207,7 @@ namespace SquashBot.Gameplay
             ClearCrate();
             EndSuper();
             heliOnWay = false;
-            waveLeft = 0f;
+            if (waveLeft > 0f) EndWave();
             if (hazards != null) hazards.PaceBoost = 1f;
             foreach (var h in FindObjectsByType<Helicopter>(FindObjectsSortMode.None)) Destroy(h.gameObject);
         }

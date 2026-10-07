@@ -37,6 +37,8 @@ namespace SquashBot.Gameplay
             public float huntTimer = 0.9f, hopT = 1f;
             public Vector3 hopFrom;
             public bool hunter;
+            /// <summary>The robot stood under it while it warned: getting out in time counts as a dodge.</summary>
+            public bool aimed;
         }
 
         private class Repair
@@ -51,6 +53,9 @@ namespace SquashBot.Gameplay
 
         /// <summary>Raised when a tile breaks into a hole.</summary>
         public event Action<GridPos> TileBroken;
+
+        /// <summary>A hazard that was over the robot came down after it got away (the tile it hit).</summary>
+        public event Action<GridPos> Dodged;
 
         public bool AnyWarningActive { get; private set; }
 
@@ -369,6 +374,7 @@ namespace SquashBot.Gameplay
 
                     float pulse = 0.55f + 0.45f * Mathf.Sin(Time.time * 18f);
                     foreach (var p in h.area) gridView.SetWarning(p, pulse);
+                    if (!h.aimed && robot.IsAlive && h.area.Contains(robot.Position)) h.aimed = true;
 
                     if (h.timeToImpact <= FallDuration)
                     {
@@ -381,6 +387,7 @@ namespace SquashBot.Gameplay
 
                     if (h.timeToImpact <= 0f)
                     {
+                        if (h.aimed && robot.IsAlive && !h.area.Contains(robot.Position)) Dodged?.Invoke(h.pos);
                         if (h.kind == Kind.Bomb) Explode(h, at);
                         else Land(h, at);
                     }

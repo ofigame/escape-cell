@@ -377,7 +377,7 @@ namespace SquashBot.Gameplay
                     o.openLane = l;
                     var mat = kind == Kind.Snow || kind == Kind.Ocean ? themeD : kind == Kind.Sky || kind == Kind.Forest ? themeA : slabMat;
                     for (int wl = 0; wl < Lanes; wl++)
-                        if (wl != l) Shapes.Rounded("Wall", go, new Vector3(LaneX(wl), 1.05f, 0f), new Vector3(LaneWidth * 0.98f, 2.1f, 0.5f), 0.2f, mat);
+                        if (wl != l) Shapes.Rounded("Wall", go, new Vector3(LaneX(wl), WallHeight * 0.5f, 0f), new Vector3(LaneWidth * 0.98f, WallHeight, 0.5f), 0.2f, mat);
                     return true;
                 }
             }

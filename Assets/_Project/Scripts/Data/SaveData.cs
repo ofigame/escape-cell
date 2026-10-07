@@ -13,7 +13,7 @@ namespace SquashBot.Data
         private const string LanguageKey = "sb_language";
         private const string TestModeKey = "sb_test_mode";
 
-        /// <summary>Test builds open every level and never run out of lives. SET TO false BEFORE RELEASE.</summary>
+        /// <summary>Test builds open every level on the map (lives are spent as in the real game). SET TO false BEFORE RELEASE.</summary>
         private const bool TestModeDefault = true;
 
         /// <summary>Highest level index (0-based) the player may start. Lower levels count as completed.</summary>
@@ -53,7 +53,7 @@ namespace SquashBot.Data
             set => SetBool(VibrationKey, value);
         }
 
-        /// <summary>Testing: every level is playable and lives are never spent.</summary>
+        /// <summary>Testing: every level is playable from the map.</summary>
         public static bool TestMode
         {
             get => GetBool(TestModeKey, TestModeDefault);

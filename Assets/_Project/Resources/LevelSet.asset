@@ -455,8 +455,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 2.1392028
-    spawnInterval: 2.167968
+    warningTime: 1.8441403
+    spawnInterval: 1.961495
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.29294637
@@ -832,8 +832,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 2.1154966
-    spawnInterval: 2.1434445
+    warningTime: 1.823704
+    spawnInterval: 1.9393071
     blocksPerWave: 1
     blockLinger: 1.5
     aimAtPlayerChance: 0.28827518
@@ -1564,8 +1564,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 2.0746222
-    spawnInterval: 2.1011608
+    warningTime: 1.7884673
+    spawnInterval: 1.9010502
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.2802211
@@ -1965,8 +1965,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 2.0542157
-    spawnInterval: 2.0800505
+    warningTime: 1.7708756
+    spawnInterval: 1.8819505
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.27620015
@@ -2360,8 +2360,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 2.0344036
-    spawnInterval: 2.059555
+    warningTime: 1.7537961
+    spawnInterval: 1.863407
     blocksPerWave: 2
     blockLinger: 1.5
     aimAtPlayerChance: 0.27229625
@@ -2758,8 +2758,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 2.015074
-    spawnInterval: 2.039559
+    warningTime: 1.7371327
+    spawnInterval: 1.8453153
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.26848745
@@ -3171,8 +3171,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.9961493
-    spawnInterval: 2.0199819
+    warningTime: 1.7208183
+    spawnInterval: 1.8276026
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.26475847
@@ -3585,8 +3585,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.9775722
-    spawnInterval: 2.0007641
+    warningTime: 1.7048036
+    spawnInterval: 1.8102152
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.26109797
@@ -3999,8 +3999,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.9592992
-    spawnInterval: 1.9818611
+    warningTime: 1.6890509
+    spawnInterval: 1.7931124
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.25749737
@@ -4423,8 +4423,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.9412957
-    spawnInterval: 1.9632368
+    warningTime: 1.6735308
+    spawnInterval: 1.7762619
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.2539499
@@ -5233,8 +5233,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.9079304
-    spawnInterval: 1.9287208
+    warningTime: 1.6447675
+    spawnInterval: 1.7450333
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.24737544
@@ -5661,8 +5661,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.890566
-    spawnInterval: 1.9107578
+    warningTime: 1.6297983
+    spawnInterval: 1.7287809
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.24395388
@@ -6097,8 +6097,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.8733869
-    spawnInterval: 1.8929863
+    warningTime: 1.6149886
+    spawnInterval: 1.7127019
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.24056885
@@ -6535,8 +6535,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.8563788
-    spawnInterval: 1.8753917
+    warningTime: 1.6003264
+    spawnInterval: 1.696783
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.2372175
@@ -6969,8 +6969,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.8395295
-    spawnInterval: 1.8579614
+    warningTime: 1.5858012
+    spawnInterval: 1.6810127
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.23389745
@@ -7411,8 +7411,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.8228284
-    spawnInterval: 1.8406845
+    warningTime: 1.5714037
+    spawnInterval: 1.6653813
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.23060659
@@ -7859,8 +7859,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.806266
-    spawnInterval: 1.8235508
+    warningTime: 1.5571258
+    spawnInterval: 1.6498795
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.22734304
@@ -8305,8 +8305,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.7898338
-    spawnInterval: 1.806552
+    warningTime: 1.5429602
+    spawnInterval: 1.6344995
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.22410518
@@ -9161,8 +9161,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.759125
-    spawnInterval: 1.7747843
+    warningTime: 1.516487
+    spawnInterval: 1.6057574
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.21805418
@@ -9621,8 +9621,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.74303
-    spawnInterval: 1.7581342
+    warningTime: 1.5026119
+    spawnInterval: 1.590693
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.21488273
@@ -10081,8 +10081,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.7270399
-    spawnInterval: 1.741593
+    warningTime: 1.4888275
+    spawnInterval: 1.575727
     blocksPerWave: 3
     blockLinger: 1.5
     aimAtPlayerChance: 0.21173202
@@ -10535,8 +10535,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.7111502
-    spawnInterval: 1.7251554
+    warningTime: 1.4751294
+    spawnInterval: 1.5608549
     blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.20860101
@@ -10998,8 +10998,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.6953559
-    spawnInterval: 1.7088164
+    warningTime: 1.4615136
+    spawnInterval: 1.546072
     blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.20548885
@@ -11452,8 +11452,8 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
-    warningTime: 1.6796528
-    spawnInterval: 1.6925719
+    warningTime: 1.4479766
+    spawnInterval: 1.5313746
     blocksPerWave: 4
     blockLinger: 1.5
     aimAtPlayerChance: 0.20239465

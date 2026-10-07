@@ -151,11 +151,11 @@ namespace SquashBot.Data
             }
             else if (marathon)
             {
-                // The long haul: a roomy floor, blocks that warn for longer so they can always be seen and dodged.
+                // The long haul: a roomy floor, blocks that warn a little longer so they can always be seen and dodged, a little more often.
                 level.marathon = true;
                 level.surviveSeconds = Mathf.Round(120f + d * 60f);
-                level.warningTime *= 1.45f;
-                level.spawnInterval *= 1.05f;
+                level.warningTime *= 1.25f;
+                level.spawnInterval *= 0.95f;
                 level.gridWidth = level.gridHeight = Mathf.Min(16, level.gridWidth + 1);
                 Shape(level, index, d);
             }

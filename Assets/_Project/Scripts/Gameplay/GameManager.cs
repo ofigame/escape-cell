@@ -26,8 +26,9 @@ namespace SquashBot.Gameplay
         private const float CloseCallWindow = 0.3f;
         private const float SlowMoScale = 0.35f;
         private const float SlowMoDuration = 0.45f; // real seconds
-        private const int CloseCallsForArmor = 3;
-        private const float ArmorDuration = 5f;
+        private const int CloseCallsForArmor = 4;
+        private const float DodgeStreakGap = 12f;
+        private const float ArmorDuration = 6f;
         private const float SuperArmorDuration = 10f;
         private const int ArmorsForSuper = 3;
         private const int CoinsPerRescue = 8;
@@ -75,7 +76,8 @@ namespace SquashBot.Gameplay
         private float elapsed;
         private float slowMoLeft;
         private int themeWorld = -1;
-        private int closeCalls;
+        private int closeCalls; // dodges in a row toward armor
+        private float lastDodgeTime;
         private bool jumpHintShown;
         private int pendingLevel = -1; // the level the player tried to start without lives
         private int armorsThisLevel;
@@ -173,6 +175,7 @@ namespace SquashBot.Gameplay
             hazards.Init(gridView, robot, fx, cameraRig);
             hazards.Impact += OnBlockImpact;
             hazards.TileBroken += OnTileBroken;
+            hazards.Dodged += OnDodged;
 
             coins = new GameObject("Coins").AddComponent<CoinSystem>();
             coins.Init(robot, hazards, fx);
@@ -203,6 +206,9 @@ namespace SquashBot.Gameplay
 
             CreateUi();
             ShowMenu();
+            // Closed on a road last time: straight back onto it (behind the splash).
+            if (PendingRoad >= LevelCount - 1) PlayerPrefs.DeleteKey(RoadLevelKey);
+            else if (PendingRoad >= 0) ResumeRoad(PendingRoad);
             FrameGovernor.Install(); // picture quality for this device (after the camera's post-processing exists)
             SplashScreen.Show(); // OFIGAME studio logo over the menu, fading out
         }
@@ -211,7 +217,11 @@ namespace SquashBot.Gameplay
         {
             if (ui != null) Destroy(ui.gameObject);
             ui = UIController.Create(LevelCount);
-            ui.PlayPressed += () => ShowMap();
+            ui.PlayPressed += () =>
+            {
+                if (PendingRoad >= 0) ResumeRoad(PendingRoad); // a level won but its road not walked yet
+                else ShowMap();
+            };
             ui.LevelChosen += ShowPrelevel;
             ui.RetryPressed += () => ShowPrelevel(levelIndex);
             ui.PrelevelPlay += (index, boosts) =>
@@ -389,6 +399,11 @@ namespace SquashBot.Gameplay
         private void ShowPrelevel(int index)
         {
             index = Mathf.Clamp(index, 0, LevelCount - 1);
+            if (index == PendingRoad)
+            {
+                ResumeRoad(index);
+                return;
+            }
             // Bought rescues need no slot here: they wait in reserve and step in by themselves (see TryRescue).
             var data = levelSet.levels[index];
             ui.ShowPrelevel(index, LevelCatalog.WorldName(index), MissionText(data), Progress.Stars(index), data.mission == MissionType.Monster, SuggestedBoost(data));
@@ -486,6 +501,7 @@ namespace SquashBot.Gameplay
                 return;
             }
 
+            if (PendingRoad >= 0) PlayerPrefs.DeleteKey(RoadLevelKey); // another level was chosen: that road is given up
             bonusRun = false;
             dailyRun = false;
             levelIndex = Mathf.Clamp(index, 0, LevelCount - 1);
@@ -860,7 +876,7 @@ namespace SquashBot.Gameplay
             return true;
         }
 
-        /// <summary>Armor from a pickup or two close calls; every third one in a level is a long "super" armor.</summary>
+        /// <summary>Armor from a pickup or four dodges in a row; every third one in a level is a long "super" armor.</summary>
         private void GiveArmor(float seconds, GridPos at, string label, Color color)
         {
             armorsThisLevel++;
@@ -1176,7 +1192,6 @@ namespace SquashBot.Gameplay
             else if (level.mission == MissionType.Monster)
             {
                 if (orb != null && p == orbPos) PickUpOrb();
-                if (crate != null && p == crateTile) PickUpSuper();
             }
             else if (level.mission == MissionType.Quest)
             {
@@ -1241,7 +1256,7 @@ namespace SquashBot.Gameplay
         {
             coins.Smash(p);
             powerUps.Smash(p);
-            if (State != GameState.Playing) return;
+            if (State != GameState.Playing || roadPhase != RoadPhase.None) return; // the level is won: nothing on the floor can hurt now
             if (level.mission == MissionType.Escort && p == buddyPos) DazeBuddy(p);
             cameraRig.Punch(0.5f);
 
@@ -1275,24 +1290,34 @@ namespace SquashBot.Gameplay
 
             if (robot.IsAlive && robot.Position.Manhattan(p) == 1) robot.Flinch(GridView.ToWorld(p));
 
+            // A last-moment escape: a beat of slow motion (it also counts as a dodge, see OnDodged).
             if (robot.LastLeftTile == p && Time.time - robot.LastLeftTime < CloseCallWindow)
             {
                 AudioManager.PlaySfx(Sfx.CloseCall);
-                closeCalls++;
-                if (closeCalls >= CloseCallsForArmor && !robot.IsShielded)
-                {
-                    // Two narrow escapes earn a few seconds of armor.
-                    closeCalls = 0;
-                    GiveArmor(ArmorDuration, robot.Position, Loc.T("float.armor"), Palette.UiGold);
-                }
-                else
-                {
-                    FloatAt(GridView.ToWorld(p), Loc.F("float.closeCount", Mathf.Min(closeCalls, CloseCallsForArmor), CloseCallsForArmor), Palette.UiCyan);
-                }
                 slowMoLeft = SlowMoDuration;
                 RechargeTool();
                 cameraRig.Focus(GridView.ToWorld(p), SlowMoDuration + 0.2f);
             }
+        }
+
+        /// <summary>
+        /// The robot got out from under a block or bomb in time. Dodges in a row (each within
+        /// <see cref="DodgeStreakGap"/> seconds of the last) earn armor to break out of a tight spot.
+        /// </summary>
+        private void OnDodged(GridPos p)
+        {
+            if (State != GameState.Playing || roadPhase != RoadPhase.None) return;
+            if (Time.time - lastDodgeTime > DodgeStreakGap) closeCalls = 0;
+            lastDodgeTime = Time.time;
+            if (robot.IsShielded) return;
+            closeCalls++;
+            if (closeCalls >= CloseCallsForArmor)
+            {
+                closeCalls = 0;
+                GiveArmor(ArmorDuration, robot.Position, Loc.T("float.armor"), Palette.UiGold);
+                fx.Burst(robot.transform.position + Vector3.up * 0.5f, Palette.UiGold, Palette.CoinGlow, 24, 5f);
+            }
+            else FloatAt(GridView.ToWorld(p), Loc.F("float.closeCount", closeCalls, CloseCallsForArmor), Palette.UiCyan);
         }
 
         /// <summary>The first holes of a level teach the jump (for the player's first few levels with holes).</summary>
@@ -1621,14 +1646,34 @@ namespace SquashBot.Gameplay
             }
             PlayerPrefs.DeleteKey(FailKey(levelIndex));
 
+            // Stars: how well the level went.
+            int stars = StarRules.Evaluate(starGoals, coinsThisRun, elapsed);
+
+            // Every level leads on to the next by a road, and the level only counts as beaten when the robot arrives:
+            // until then it is saved as "on the road", so quitting there brings the player back onto the road.
+            if (RoadAhead)
+            {
+                PlayerPrefs.SetInt(RoadLevelKey, levelIndex);
+                PlayerPrefs.SetInt(RoadStarsKey, stars);
+                PlayerPrefs.SetInt(RoadCoinsKey, Earned);
+                PlayerPrefs.Save();
+                // Not right now: the win can come from inside the robot's own step (the last coin), which must finish first.
+                StartCoroutine(OpenRoadSoon());
+                return;
+            }
+            StartCoroutine(ShowResultDelayed(CommitWin(stars, Earned)));
+        }
+
+        /// <summary>The level is beaten for good: the next one opens, lives refill, stars are banked. Returns the result card.</summary>
+        private UIController.ResultInfo CommitWin(int stars, int earned)
+        {
             // Only beating the newest level (unlocking the next one) refills lives; replays don't.
             bool unlockedNew = levelIndex >= SaveData.UnlockedLevel;
             if (unlockedNew) Lives.Refill();
             if (levelIndex + 1 > SaveData.UnlockedLevel && levelIndex + 1 < LevelCount)
                 SaveData.UnlockedLevel = levelIndex + 1;
 
-            // Stars: how well the level went. New stars fill the bonus meter.
-            int stars = StarRules.Evaluate(starGoals, coinsThisRun, elapsed);
+            // New stars fill the bonus meter.
             int unlockedBonus = Progress.Award(levelIndex, stars, out _);
             bool surprise = false;
             if (unlockedBonus == 0 && unlockedNew && levelIndex + 1 >= SurpriseFromLevel && Progress.BonusTokens == 0 && Random.value < SurpriseBonusChance)
@@ -1652,21 +1697,13 @@ namespace SquashBot.Gameplay
                 canDouble = true,
                 subtitle = Loc.T(newWorld ? "result.newWorld" : hasNext ? "result.next" : "result.allDone"),
                 note = note,
-                coins = Earned,
+                coins = earned,
                 stars = stars,
                 bonusAvailable = Progress.BonusTokens > 0,
                 meter = unlockedBonus > 0 || surprise ? 1f : Progress.Meter / (float)Progress.StarsPerBonus,
                 meterText = Loc.F("bonus.meter", unlockedBonus > 0 || surprise ? Progress.StarsPerBonus : Progress.Meter, Progress.StarsPerBonus),
             };
-            // Every level leads on to the next by a road: the result waits for the robot to arrive there.
-            if (RoadAhead)
-            {
-                pendingResult = info;
-                // Not right now: the win can come from inside the robot's own step (the last coin), which must finish first.
-                StartCoroutine(OpenRoadSoon());
-                return;
-            }
-            StartCoroutine(ShowResultDelayed(info));
+            return info;
         }
 
         /// <summary>What the next star asks for, e.g. "Next star: 14 coins".</summary>
@@ -1697,6 +1734,7 @@ namespace SquashBot.Gameplay
 
         private void Lose(string reason)
         {
+            if (roadPhase != RoadPhase.None) return; // already won, on the way to the next floor
             State = GameState.Result;
             hazards.Freeze();
             coins.Freeze();
@@ -2062,11 +2100,47 @@ namespace SquashBot.Gameplay
         private enum RoadPhase { None, Walk, Run }
         private RoadPhase roadPhase;
         private GridPos roadExit;
-        private UIController.ResultInfo pendingResult;
         private GameObject roadBeacon;
+
+        // A level won but whose road is not walked yet (-1: none), with the stars and coins it earned.
+        private const string RoadLevelKey = "sb_road_level", RoadStarsKey = "sb_road_stars", RoadCoinsKey = "sb_road_coins";
+        private static int PendingRoad => PlayerPrefs.GetInt(RoadLevelKey, -1);
 
         /// <summary>A road follows every level except bonus rounds and the very last level.</summary>
         private bool RoadAhead => !bonusRun && levelIndex + 1 < LevelCount;
+
+        /// <summary>
+        /// Back onto the road of a level won earlier (the game was closed or left on the way): the platform stands
+        /// swept clean, the robot is on its exit and the road starts at once.
+        /// </summary>
+        private void ResumeRoad(int index)
+        {
+            ResetRun();
+            bonusRun = false;
+            dailyRun = false;
+            continued = false;
+            doubleCoins = false;
+            comboBonus = 0;
+            levelIndex = Mathf.Clamp(index, 0, LevelCount - 1);
+            level = levelSet.levels[levelIndex].Clone();
+            coinsThisRun = PlayerPrefs.GetInt(RoadCoinsKey, 0);
+            elapsed = 0f;
+            ApplyTheme(levelIndex);
+            grid = BuildGrid(level);
+            gridView.Build(grid, fx, level.lowWalls);
+            cameraRig.Frame(grid.Width, grid.Height);
+            cameraRig.SetStyle(CameraStyle.Gameplay);
+            cameraRig.SetMenuFocus(false);
+            cameraRig.Showcase(null, 0f);
+            robot.ApplyOutfit(Cosmetics.Outfit());
+            robot.Spawn(grid, grid.StartSpot ?? grid.CenterFloor());
+            if (grid.Width > FollowFrom || grid.Height > FollowFrom) cameraRig.Follow(robot.transform, FollowWindow, FollowWindow);
+            starGoals = StarRules.For(level, grid.FloorCount);
+            ui.ShowHud(levelIndex);
+            OpenRoad();
+            robot.Spawn(grid, roadExit);
+            TakeOverRoad();
+        }
 
         private IEnumerator OpenRoadSoon()
         {
@@ -2203,7 +2277,7 @@ namespace SquashBot.Gameplay
             if (State != GameState.Playing || roadPhase != RoadPhase.Run) return;
             bool paid = Lives.TryConsume();
             runner.RestartRoad();
-            ui.ShowIntro(Loc.T("road.failTitle"), Loc.T(paid ? "road.failLife" : "road.failFree"));
+            ui.ShowIntro(Loc.T("road.failTitle"), paid ? Loc.T("road.failLife") + "\n" + Loc.F("lives.left", Lives.Count) : Loc.T("road.failFree"));
         }
 
         private void OnRoadArrived()
@@ -2212,10 +2286,13 @@ namespace SquashBot.Gameplay
             roadPhase = RoadPhase.None;
             State = GameState.Result;
             SaveData.Coins += runner.Coins;
-            pendingResult.coins += runner.Coins;
-            pendingResult.subtitle = Loc.T("road.arrived");
+            // Only now is the level beaten: the next one opens and the stars are banked.
+            var info = CommitWin(PlayerPrefs.GetInt(RoadStarsKey, 1), PlayerPrefs.GetInt(RoadCoinsKey, 0) + runner.Coins);
+            PlayerPrefs.DeleteKey(RoadLevelKey);
+            PlayerPrefs.Save();
+            info.subtitle = Loc.T("road.arrived");
             ui.ShowIntro(Loc.T("road.doneTitle"), Loc.T("road.doneText"));
-            StartCoroutine(ShowResultDelayed(pendingResult));
+            StartCoroutine(ShowResultDelayed(info));
         }
 
         private void UpdateRoadWalk()
