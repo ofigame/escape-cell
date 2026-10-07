@@ -35,36 +35,29 @@ namespace SquashBot.Visual
         private static GameObject Ball(Transform p, Vector3 pos, float d, Material m) => Shapes.Primitive(PrimitiveType.Sphere, "Part", p, pos, Vector3.one * d, m);
         private static GameObject Cyl(Transform p, Vector3 pos, Vector3 scale, Material m) => Shapes.Primitive(PrimitiveType.Cylinder, "Part", p, pos, scale, m);
 
-        /// <summary>The falling obstacle for a world.</summary>
-        public static GameObject Block(int world)
+        /// <summary>The falling obstacle of the design being played (<see cref="WorldTheme.Current"/>).</summary>
+        public static GameObject Block()
         {
             var root = new GameObject("Block").transform;
-            switch (world >= 15 ? world + 100 : world % 15)
+            switch (WorldTheme.Current.block)
             {
-                case 115: Crystal(root); break;
-                case 116: NeonCube(root); break;
-                case 117: Crate(root); break;
-                case 118: Gumdrop(root); break;
-                case 119: Crate(root); break;      // garden
-                case 120: Sandstone(root); break;  // canyon
-                case 121: IceCube(root); break;    // snowy peak
-                case 122: Barrel(root); break;     // harbour
-                case 123: StormCube(root); break;  // cloud meadow
-                case 124: Meteor(root, Hex("#6A4A20"), new Color(1.6f, 1.1f, 0.3f)); break; // the roof
-                case 1: Crate(root); break;
-                case 2: IceCube(root); break;
-                case 3: NeonCube(root); break;
-                case 4: Meteor(root, Hex("#3A2422"), new Color(0.9f, 0.25f, 0.03f)); break;
-                case 5: Boulder(root); break;
-                case 6: Sandstone(root); break;
-                case 7: DivingWeight(root); break;
-                case 8: Gumdrop(root); break;
-                case 9: Barrel(root); break;
-                case 10: Meteor(root, Hex("#5A6488"), new Color(0.15f, 0.2f, 0.45f)); break;
-                case 11: Crystal(root); break;
-                case 12: StormCube(root); break;
-                case 13: DataCube(root); break;
-                case 14: Meteor(root, Hex("#4A2A7A"), new Color(1.1f, 0.35f, 1.4f)); break;
+                case BlockStyle.Crate: Crate(root); break;
+                case BlockStyle.IceCube: IceCube(root); break;
+                case BlockStyle.NeonCube: NeonCube(root); break;
+                case BlockStyle.Boulder: Boulder(root); break;
+                case BlockStyle.Sandstone: Sandstone(root); break;
+                case BlockStyle.DivingWeight: DivingWeight(root); break;
+                case BlockStyle.Gumdrop: Gumdrop(root); break;
+                case BlockStyle.Barrel: Barrel(root); break;
+                case BlockStyle.Crystal: Crystal(root); break;
+                case BlockStyle.StormCube: StormCube(root); break;
+                case BlockStyle.DataCube: DataCube(root); break;
+                case BlockStyle.Drone: Drone(root); break;
+                case BlockStyle.MeteorLava: Meteor(root, Hex("#3A2422"), new Color(0.9f, 0.25f, 0.03f)); break;
+                case BlockStyle.MeteorNight: Meteor(root, Hex("#5A6488"), new Color(0.15f, 0.2f, 0.45f)); break;
+                case BlockStyle.MeteorGalaxy: Meteor(root, Hex("#4A2A7A"), new Color(1.1f, 0.35f, 1.4f)); break;
+                case BlockStyle.MeteorGold: Meteor(root, Hex("#6A4A20"), new Color(1.6f, 1.1f, 0.3f)); break;
+                case BlockStyle.MeteorHeart: Meteor(root, Hex("#4A1A2A"), new Color(1.8f, 0.3f, 0.5f)); break;
                 default: Box(root, Vector3.zero, Vector3.one * 0.86f, 0.12f, M("red", Palette.Block, Palette.BlockGlow)); break;
             }
             return root.gameObject;
@@ -188,6 +181,29 @@ namespace SquashBot.Visual
             Box(r, Vector3.zero, new Vector3(0.88f, 0.07f, 0.88f), 0.03f, bolt);
             var zig = Box(r, new Vector3(0f, 0.45f, 0f), new Vector3(0.08f, 0.04f, 0.4f), 0.02f, bolt);
             zig.transform.localRotation = Quaternion.Euler(0f, 30f, 0f);
+        }
+
+        /// <summary>A hunter drone from vanG's sky castle: a squat body on four spinning rotors, one red eye.</summary>
+        private static void Drone(Transform r)
+        {
+            var shell = M("droneShell", Hex("#4A5070"), new Color(0.05f, 0.05f, 0.1f));
+            var trim = M("droneTrim", Hex("#FFD27A"), new Color(1.6f, 1.1f, 0.3f));
+            var rotor = M("droneRotor", Hex("#DDE4F4"), new Color(0.2f, 0.25f, 0.35f));
+            Box(r, new Vector3(0f, -0.05f, 0f), new Vector3(0.62f, 0.34f, 0.62f), 0.14f, shell);
+            Box(r, new Vector3(0f, 0.04f, 0f), new Vector3(0.66f, 0.05f, 0.66f), 0.02f, trim);
+            Ball(r, new Vector3(0f, -0.04f, 0.31f), 0.16f, M("droneEye", Hex("#FF5A6A"), new Color(2.4f, 0.4f, 0.5f)));
+            foreach (float x in new[] { -1f, 1f })
+                foreach (float z in new[] { -1f, 1f })
+                {
+                    var arm = Box(r, new Vector3(x * 0.27f, 0.08f, z * 0.27f), new Vector3(0.26f, 0.05f, 0.06f), 0.02f, shell).transform;
+                    arm.localRotation = Quaternion.Euler(0f, x * z * 45f, 0f);
+                    var hub = new GameObject("Rotor").transform;
+                    hub.SetParent(r, false);
+                    hub.localPosition = new Vector3(x * 0.4f, 0.14f, z * 0.4f);
+                    Cyl(hub, Vector3.zero, new Vector3(0.3f, 0.008f, 0.06f), rotor);
+                    Cyl(hub, Vector3.zero, new Vector3(0.06f, 0.008f, 0.3f), rotor);
+                    hub.gameObject.AddComponent<Spinner>().speed = 900f;
+                }
         }
 
         private static void DataCube(Transform r)

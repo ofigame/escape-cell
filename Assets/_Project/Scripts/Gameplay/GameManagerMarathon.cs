@@ -124,6 +124,7 @@ namespace SquashBot.Gameplay
                     break;
             }
             ui.ShowIntro(Loc.T("wave.title"), Loc.T("wave." + wave));
+            BipSay("wave");
             AudioManager.PlaySfx(Sfx.Warning, 0.9f, 0.8f);
             cameraRig.Shake(0.4f);
         }
@@ -163,6 +164,7 @@ namespace SquashBot.Gameplay
                 fx.Dust(at + Vector3.up * 0.1f, SuperCrate.Gold, 16, 3f);
                 AudioManager.PlaySfx(Sfx.Impact, 0.7f, 1.3f);
                 if (robot.Position == crateTile) PickUpSuper();
+                else BipSay("crate");
             };
             FloatAt(robot.transform.position + Vector3.up * 0.8f, Loc.T("float.heliComing"), SuperCrate.Gold);
             AudioManager.PlaySfx(Sfx.Shield, 0.6f, 0.6f);

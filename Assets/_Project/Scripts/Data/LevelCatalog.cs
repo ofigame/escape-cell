@@ -76,13 +76,21 @@ namespace SquashBot.Data
             float d = Difficulty(index);
             // Shift the first eight missions per world so consecutive worlds don't open the same way.
             var mission = i >= 8 ? Rhythm[i] : Rhythm[(i + world) % 8];
-            // From the second world on, the middle quest of the world is a new kind of story: the coin thief on odd worlds,
-            // leading Bip to the door on even ones (the other two quests stay classic stories).
-            if (world >= 1 && i < 8 && (i + world) % 8 == 3) mission = world % 2 == 1 ? MissionType.Thief : MissionType.Escort;
+            // From the second world on, the middle quest of the world is a new kind of story: the Masked Thief on odd worlds,
+            // guarding Bip to the door on even ones, and the Shadow Clones in the Crystal Cave and on the Star Road (where
+            // they replace the thief; see CloneWorld). The other two quests stay classic stories.
+            if (world >= 1 && i < 8 && (i + world) % 8 == 3) mission = CloneWorld(world) && (world % 2 == 1 || world <= 16) ? MissionType.Clone : world % 2 == 1 ? MissionType.Thief : MissionType.Escort;
             // From the second world on, the coin hunt of the world becomes a long haul: survive two to three minutes.
             bool marathon = world >= 1 && i < 8 && (i + world) % 8 == 2;
             if (marathon) mission = MissionType.Survive;
             var rules = Rules(world, index);
+            // The finale (level 250): vanG's heart, painted gold, with no floor rule in the way.
+            bool final = index == LevelCount - 1;
+            if (final)
+            {
+                mission = MissionType.Paint;
+                rules = FloorRule.None;
+            }
             // Poison eats tiles for good, so a poisoned floor can never be fully painted.
             if (mission == MissionType.Paint && (rules & FloorRule.Poison) != 0) mission = MissionType.CollectCoins;
 
@@ -96,9 +104,21 @@ namespace SquashBot.Data
 
             level.levelEvent = EventFor(index, mission);
 
-            if (mission == MissionType.Boss)
+            if (final)
             {
-                // WARDEN's arena: wide open, lines of blocks sweep it often, three buttons to hit.
+                // An open round arena under vanG's face: lines of code blocks sweep it, and every tile must turn gold.
+                level.final = true;
+                level.layout = Journeys.Arena(9, 2, index);
+                level.lineWaveChance = 0.3f;
+                level.bombChance = 0.12f;
+                level.fireChance = 0f;
+                level.blocksPerWave = Mathf.Max(2, level.blocksPerWave);
+                level.aimAtPlayerChance = 0.15f;
+                level.levelEvent = LevelEvent.None;
+            }
+            else if (mission == MissionType.Boss)
+            {
+                // vanG's arena: wide open, lines of blocks sweep it often, three buttons to hit.
                 level.layout = Journeys.Arena(Mathf.RoundToInt(Mathf.Lerp(7f, 14f, d)), world >= 6 ? 3 : 2, index);
                 level.keys = 3;
                 level.lineWaveChance = Mathf.Lerp(0.3f, 0.45f, d);
@@ -125,6 +145,15 @@ namespace SquashBot.Data
                 level.gridWidth = level.gridHeight = Mathf.Min(16, level.gridWidth + 1);
                 level.blocksPerWave = Mathf.Max(1, level.blocksPerWave - 1);
                 level.aimAtPlayerChance = 0.1f;
+                Shape(level, index, d);
+            }
+            else if (mission == MissionType.Clone)
+            {
+                // A roomy floor to lead the clones around, a few cores spread far apart, calm blocks to lure them under.
+                level.keys = 4 + Mathf.RoundToInt(d * 3f);
+                level.gridWidth = level.gridHeight = Mathf.Min(14, level.gridWidth + 1);
+                level.blocksPerWave = Mathf.Max(1, level.blocksPerWave - 1);
+                level.aimAtPlayerChance = 0.05f;
                 Shape(level, index, d);
             }
             else if (mission == MissionType.Escort)
@@ -171,22 +200,31 @@ namespace SquashBot.Data
         }
 
         /// <summary>
-        /// Each floor from 8 on brings its own rule: currents, candy, poison, darkness, ice, wind, lasers and teleports,
-        /// trampolines, glass, blinking tiles, hunting blocks, barrels. The roof (floor 20) mixes two of them.
+        /// From the Red Canyon (floor 6, level 51) each floor brings the rule its story tells of: mine barrels, the
+        /// desert wind, the old teleport gates, sea currents, sticky seaweed and jellyfish, server lasers, ice, snow, thin ice (glass),
+        /// crystal lasers, poison, cloud trampolines, storm blinks, hunting blocks and the darkness of the Star Road.
+        /// vanG's Heart (the last floor) is dark and adds one more rule met on the way.
         /// </summary>
         private static readonly FloorRule[] Signature =
         {
-            FloorRule.None, FloorRule.None, FloorRule.None, FloorRule.None, FloorRule.None, FloorRule.None, FloorRule.None,
-            FloorRule.Current, FloorRule.Sticky, FloorRule.Poison, FloorRule.Dark, FloorRule.Ice, FloorRule.Wind,
-            FloorRule.Laser | FloorRule.Teleport, FloorRule.Trampoline, FloorRule.Glass, FloorRule.Blink, FloorRule.Hunter,
-            FloorRule.Barrel,
-            // The five floors added below the roof pair two rules each.
-            FloorRule.Sticky | FloorRule.Blink, FloorRule.Wind | FloorRule.Current, FloorRule.Ice | FloorRule.Dark,
-            FloorRule.Barrel | FloorRule.Glass, FloorRule.Hunter | FloorRule.Trampoline,
-            FloorRule.None,
+            FloorRule.None, FloorRule.None, FloorRule.None, FloorRule.None, FloorRule.None, // Channel and Forest worlds
+            FloorRule.Barrel, FloorRule.Wind, FloorRule.Teleport,                                // Red Canyon
+            FloorRule.Current, FloorRule.Sticky | FloorRule.Barrel, FloorRule.Laser | FloorRule.Current, // Sea Floor (the barrels are jellyfish there)
+            FloorRule.Ice, FloorRule.Ice | FloorRule.Sticky, FloorRule.Glass,                     // Snowy Mountain
+            FloorRule.Laser | FloorRule.Teleport, FloorRule.Glass | FloorRule.Teleport, FloorRule.Poison, // Crystal Cave
+            FloorRule.Trampoline, FloorRule.Trampoline | FloorRule.Wind, FloorRule.Wind | FloorRule.Blink,
+            FloorRule.Hunter | FloorRule.Trampoline,                                             // Cloud Bridge
+            FloorRule.Blink | FloorRule.Laser, FloorRule.Dark, FloorRule.Dark | FloorRule.Trampoline, // Star Road
+            FloorRule.Dark,                                                                      // vanG's Heart (+ one more)
         };
 
-        public const int FirstRuleWorld = 7;
+        public const int FirstRuleWorld = 5;
+
+        /// <summary>
+        /// The Masked Thief's levels that belong to the Shadow Clones instead: in the Crystal Cave, where vanG
+        /// builds its hall of mirrors, and on the Star Road, after the thief has given the robot its last energy.
+        /// </summary>
+        public static bool CloneWorld(int world) => (world >= 14 && world <= 16) || world >= 21;
 
         private static FloorRule Rules(int world, int index)
         {
@@ -201,11 +239,9 @@ namespace SquashBot.Data
 
             if (world >= Signature.Length - 1)
             {
-                // The roof: two different rules at once.
-                var a = met[rng.Next(met.Count)];
-                FloorRule b;
-                do b = met[rng.Next(met.Count)]; while (b == a);
-                return a | b;
+                // vanG's Heart: in the dark, with one more rule met on the way.
+                var others = met.FindAll(r => r != FloorRule.Dark);
+                return FloorRule.Dark | others[rng.Next(others.Count)];
             }
 
             var rules = Signature[world];

@@ -209,7 +209,10 @@ namespace SquashBot.Gameplay
             float d = Mathf.Clamp01(level / (float)(Data.LevelCatalog.LevelCount - 1));
             roadLevel = level;
             lastRoad = (seed, origin, heading, level, toWorld);
-            Prepare(seed, RoadTheme(level), origin, heading, road: true, roadLength: 90f + level * 3f, roadDifficulty: d, toWorld: toWorld);
+            bool last = level >= Data.LevelCatalog.LevelCount - 1;
+            Prepare(seed, RoadTheme(level), origin, heading, road: true, roadLength: last ? FinaleLength : 90f + level * 3f, roadDifficulty: d, toWorld: toWorld);
+            finale = last;
+            if (finale) BuildCore();
         }
 
         /// <summary>The road from the top again after a crash: same course, robot back at the start, no camera glide.</summary>
@@ -294,6 +297,8 @@ namespace SquashBot.Gameplay
         /// <summary>Removes the tunnel and gives the robot, camera and input back to the platform game.</summary>
         public void Stop()
         {
+            ClearFinale();
+            finale = false;
             if (!Active && !Prepared) return;
             bool hadRobot = Active;
             Active = false;
@@ -1108,6 +1113,7 @@ namespace SquashBot.Gameplay
             UpdateObstacles(dt);
             UpdateCoins();
             PoseRobot(dt);
+            if (finale) UpdateFinale(dt);
             UpdateCamera(dt);
 
             if (exitRing != null) exitRing.localRotation = Quaternion.Euler(0f, 0f, time * 40f);
@@ -1343,7 +1349,7 @@ namespace SquashBot.Gameplay
             foreach (var (r, root) in rows)
             {
                 float k = Mathf.Clamp01((r - riseStart) / 10f);
-                root.position = Center(r) + Vector3.down * (k * k * 4f);
+                root.position = Center(r) + Vector3.down * (k * k * 4f + CollapseDrop(r));
             }
         }
 

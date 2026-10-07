@@ -28,7 +28,9 @@ namespace SquashBot.Data
         /// <summary>A coin thief runs from the robot: corner it and bump into it a number of times.</summary>
         Thief,
         /// <summary>Lead Bip, a little lost robot that follows a tile behind, through the open door.</summary>
-        Escort
+        Escort,
+        /// <summary>Two Shadow Clones copy every hop mirrored: collect the energy cores without touching them.</summary>
+        Clone
     }
 
     /// <summary>The signature rules of the upper floors (several can be combined).</summary>
@@ -97,6 +99,8 @@ namespace SquashBot.Data
         public bool phased;
         [Tooltip("A long level (2-3 minutes): slower-warning blocks, short heavy waves now and then, and a helicopter bringing a super power every 30 seconds.")]
         public bool marathon;
+        [Tooltip("The very last level: vanG's heart, painted gold; then the last road, chasing vanG's core.")]
+        public bool final;
 
         [Header("Blocks")]
         [Tooltip("Seconds between the red warning appearing and the block hitting the tile.")]

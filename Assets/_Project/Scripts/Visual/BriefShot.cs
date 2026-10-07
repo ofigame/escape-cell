@@ -18,6 +18,8 @@ namespace SquashBot.Visual
         Block,
         Thief,
         Escort,
-        Super
+        Super,
+        /// <summary>The robot hops and two Shadow Clones copy it, mirrored.</summary>
+        Clone
     }
 }

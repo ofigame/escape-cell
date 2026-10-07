@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace SquashBot.Visual
 {
-    /// <summary>Paints the soft space backdrop (gradient, glow, grid lines, planet, stars) into a texture at runtime.</summary>
-    public static class BackgroundArt
+    /// <summary>Paints the backdrop (gradient, glow and the design's landscape) into a texture at runtime.</summary>
+    public static partial class BackgroundArt
     {
         public static Texture2D Generate(int width, int height) => Generate(width, height, WorldTheme.Current);
 
@@ -23,29 +23,8 @@ namespace SquashBot.Visual
                 }
             }
 
-            // Faint "cyber grid" on the upper-left, fading out toward the center.
-            float fadeEnd = width * 0.5f;
-            foreach (float fx in new[] { 0.05f, 0.17f, 0.3f })
-                Line(px, width, height, fx * width, height * 0.38f, fx * width, height, 1.6f, 0.32f, fadeEnd, theme.bgLines);
-            foreach (float fy in new[] { 0.5f, 0.66f, 0.82f })
-                Line(px, width, height, 0f, fy * height, width * 0.5f, (fy + 0.22f) * height, 1.6f, 0.32f, fadeEnd, theme.bgLines);
-
-            // Planet, top right.
-            float minSide = Mathf.Min(width, height);
-            Disc(px, width, height, width * 0.92f, height * 0.86f, minSide * 0.2f, theme.bgPlanet, 0.55f);
-            Disc(px, width, height, width * 0.86f, height * 0.9f, minSide * 0.05f, theme.bgTop, 0.25f);
-            Disc(px, width, height, width * 0.95f, height * 0.8f, minSide * 0.035f, theme.bgTop, 0.2f);
-
-            // Stars.
-            var rng = new System.Random(7);
-            for (int i = 0; i < 55; i++)
-            {
-                float sx = (float)rng.NextDouble() * width;
-                float sy = (float)rng.NextDouble() * height;
-                float r = 0.8f + (float)rng.NextDouble() * 1.8f;
-                Disc(px, width, height, sx, sy, r, theme.bgStar, 0.35f + (float)rng.NextDouble() * 0.5f);
-            }
-            Sparkle(px, width, height, width * 0.94f, height * 0.06f, minSide * 0.035f, theme.bgStar);
+            // The landscape of this design (see BackgroundScenery).
+            PaintScenery(px, width, height, theme);
 
             var tex = new Texture2D(width, height, TextureFormat.RGBA32, false)
             {

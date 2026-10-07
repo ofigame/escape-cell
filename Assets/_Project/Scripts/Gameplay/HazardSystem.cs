@@ -81,7 +81,6 @@ namespace SquashBot.Gameplay
         private CameraRig cameraRig;
         private LevelData level;
         private Func<float> progress;
-        private int world;
 
         private bool running;
         private float spawnTimer;
@@ -104,13 +103,12 @@ namespace SquashBot.Gameplay
             beamMaterial = MaterialFactory.Create(Palette.Marker, Palette.MarkerGlow * 0.3f);
         }
 
-        public void Begin(GridModel model, LevelData data, Func<float> missionProgress, int worldIndex)
+        public void Begin(GridModel model, LevelData data, Func<float> missionProgress)
         {
             Stop();
             grid = model;
             level = data;
             progress = missionProgress;
-            world = worldIndex;
             spawnTimer = 1.0f; // short breather before the first wave
             running = true;
         }
@@ -332,7 +330,7 @@ namespace SquashBot.Gameplay
                 area = new List<GridPos> { p },
                 phase = Phase.Warning,
                 timeToImpact = warning,
-                body = HazardVisuals.Block(world),
+                body = HazardVisuals.Block(),
             };
             h.markers.Add(CreateMarker(p, markerMaterial, true));
             h.body.SetActive(false);

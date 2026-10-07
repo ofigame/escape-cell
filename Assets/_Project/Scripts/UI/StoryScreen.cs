@@ -10,7 +10,8 @@ using Kind = SquashBot.UI.UiFactory.ButtonKind;
 namespace SquashBot.UI
 {
     /// <summary>
-    /// A short comic-style dialogue between robot 47 and WARDEN over the blurred level scene.
+    /// A short comic-style story scene over the blurred level: Bip (left) and vanG (right) talk, the silent Observer
+    /// stands between them, and in the reveal scene the Masked Thief takes vanG's place and takes off its mask.
     /// Lines type out with little voice blips; a tap finishes the line, the next tap moves on. SKIP ends it.
     /// </summary>
     public class StoryScreen : MonoBehaviour
@@ -19,9 +20,12 @@ namespace SquashBot.UI
 
         private UiScreen screen;
         private TextMeshProUGUI chapter, speakerName, line, tapHint;
-        private RectTransform bubble, robotAvatar, wardenAvatar, wardenMouth;
-        private CanvasGroup robotGroup, wardenGroup;
+        private RectTransform bubble, robotAvatar, wardenAvatar, wardenMouth, bipAvatar, thiefAvatar, thiefMask;
+        private CanvasGroup robotGroup, wardenGroup, bipGroup, thiefGroup;
         private Image bubbleRim, robotFace, wardenEye;
+        private Image[] robotEyes;
+        private Image dim;
+        private int lastThiefLine;
 
         private int scene, index;
         private float typed;
@@ -43,7 +47,7 @@ namespace SquashBot.UI
         private void Build(RectTransform root)
         {
             // The whole screen is the "next" button.
-            var dim = UiFactory.Dim(root, new Color(0.05f, 0.04f, 0.14f, 0.55f));
+            dim = UiFactory.Dim(root, new Color(0.05f, 0.04f, 0.14f, 0.55f));
             var tap = dim.gameObject.AddComponent<Button>();
             tap.transition = Selectable.Transition.None;
             tap.onClick.AddListener(Advance);
@@ -71,17 +75,22 @@ namespace SquashBot.UI
                 new Color(1f, 1f, 1f, 0.6f), FontStyles.Normal);
             tapHint.raycastTarget = false;
 
-            robotAvatar = BuildRobot(root);
+            bipAvatar = BuildBip(root);
             wardenAvatar = BuildWarden(root);
+            thiefAvatar = BuildThief(root);
+            robotAvatar = BuildRobot(root);
             robotGroup = robotAvatar.gameObject.AddComponent<CanvasGroup>();
             wardenGroup = wardenAvatar.gameObject.AddComponent<CanvasGroup>();
-            robotGroup.blocksRaycasts = wardenGroup.blocksRaycasts = false;
+            bipGroup = bipAvatar.gameObject.AddComponent<CanvasGroup>();
+            thiefGroup = thiefAvatar.gameObject.AddComponent<CanvasGroup>();
+            robotGroup.blocksRaycasts = wardenGroup.blocksRaycasts = bipGroup.blocksRaycasts = thiefGroup.blocksRaycasts = false;
+            robotAvatar.localScale = Vector3.one * 0.62f;
         }
 
-        /// <summary>Robot 47: the cube head with its visor and two cyan eyes, plus an antenna.</summary>
+        /// <summary>The Observer: the cube head with its visor and two eyes, plus an antenna. It never speaks.</summary>
         private RectTransform BuildRobot(Transform root)
         {
-            var avatar = UiFactory.Box("Robot", root, new Vector2(0.5f, 0.5f), new Vector2(-250f, -420f), new Vector2(300f, 300f));
+            var avatar = UiFactory.Box("Robot", root, new Vector2(0.5f, 0.5f), new Vector2(0f, -470f), new Vector2(300f, 300f));
             avatar.pivot = new Vector2(0.5f, 0.5f);
             var head = UiFactory.Box("Head", avatar, new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(260f, 230f));
             head.pivot = new Vector2(0.5f, 0.5f);
@@ -90,11 +99,13 @@ namespace SquashBot.UI
             var visor = UiFactory.Box("Visor", head, new Vector2(0.5f, 0.5f), new Vector2(0f, 6f), new Vector2(200f, 120f));
             visor.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.Fill(visor, new Color(0.2f, 0.22f, 0.36f), UiSprites.Rounded, 1.6f).raycastTarget = false;
-            foreach (float x in new[] { -44f, 44f })
+            robotEyes = new Image[2];
+            for (int i = 0; i < 2; i++)
             {
-                var eye = UiFactory.Box("Eye", visor, new Vector2(0.5f, 0.5f), new Vector2(x, 4f), new Vector2(38f, 46f));
+                var eye = UiFactory.Box("Eye", visor, new Vector2(0.5f, 0.5f), new Vector2(i == 0 ? -44f : 44f, 4f), new Vector2(38f, 46f));
                 eye.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(eye, Palette.UiCyan, UiSprites.Rounded, 4f).raycastTarget = false;
+                robotEyes[i] = UiFactory.Fill(eye, Palette.UiCyan, UiSprites.Rounded, 4f);
+                robotEyes[i].raycastTarget = false;
             }
             var stick = UiFactory.Box("Antenna", avatar, new Vector2(0.5f, 0.5f), new Vector2(0f, 120f), new Vector2(14f, 50f));
             stick.pivot = new Vector2(0.5f, 0.5f);
@@ -137,18 +148,110 @@ namespace SquashBot.UI
             return avatar;
         }
 
+        /// <summary>Bip: a small, round old archive robot with a cracked screen face, green eyes and one rusty wheel.</summary>
+        private RectTransform BuildBip(Transform root)
+        {
+            var avatar = UiFactory.Box("Bip", root, new Vector2(0.5f, 0.5f), new Vector2(-260f, -420f), new Vector2(280f, 300f));
+            avatar.pivot = new Vector2(0.5f, 0.5f);
+            var wheel = UiFactory.Box("Wheel", avatar, new Vector2(0.5f, 0.5f), new Vector2(0f, -112f), new Vector2(86f, 86f));
+            wheel.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(wheel, new Color(0.62f, 0.4f, 0.28f), UiSprites.Circle).raycastTarget = false;
+            var hub = UiFactory.Box("Hub", wheel, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(34f, 34f));
+            hub.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(hub, new Color(0.35f, 0.27f, 0.24f), UiSprites.Circle).raycastTarget = false;
+            var body = UiFactory.Box("Body", avatar, new Vector2(0.5f, 0.5f), new Vector2(0f, -6f), new Vector2(230f, 200f));
+            body.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(body, new Color(0.93f, 0.86f, 0.7f), UiSprites.Rounded, 0.7f).raycastTarget = false;
+            var screenBox = UiFactory.Box("Screen", body, new Vector2(0.5f, 0.5f), new Vector2(0f, 8f), new Vector2(176f, 128f));
+            screenBox.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(screenBox, new Color(0.12f, 0.24f, 0.2f), UiSprites.Rounded, 1.4f).raycastTarget = false;
+            foreach (float x in new[] { -34f, 34f })
+            {
+                var eye = UiFactory.Box("Eye", screenBox, new Vector2(0.5f, 0.5f), new Vector2(x, 6f), new Vector2(34f, 34f));
+                eye.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(eye, new Color(0.55f, 1f, 0.6f), UiSprites.Circle).raycastTarget = false;
+            }
+            // The crack across the screen.
+            foreach (var (pos, angle, len) in new[] { (new Vector2(40f, 30f), -55f, 70f), (new Vector2(58f, -4f), -20f, 40f) })
+            {
+                var crack = UiFactory.Box("Crack", screenBox, new Vector2(0.5f, 0.5f), pos, new Vector2(5f, len));
+                crack.pivot = new Vector2(0.5f, 0.5f);
+                crack.localRotation = Quaternion.Euler(0f, 0f, angle);
+                UiFactory.Fill(crack, new Color(0.75f, 0.9f, 0.85f, 0.7f), UiSprites.Rounded, 20f).raycastTarget = false;
+            }
+            var stick = UiFactory.Box("Antenna", avatar, new Vector2(0.5f, 0.5f), new Vector2(-50f, 118f), new Vector2(10f, 44f));
+            stick.pivot = new Vector2(0.5f, 0.5f);
+            stick.localRotation = Quaternion.Euler(0f, 0f, 14f);
+            UiFactory.Fill(stick, new Color(0.62f, 0.55f, 0.45f), UiSprites.Rounded, 10f).raycastTarget = false;
+            var tip = UiFactory.Box("Tip", avatar, new Vector2(0.5f, 0.5f), new Vector2(-56f, 142f), new Vector2(26f, 26f));
+            tip.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(tip, new Color(0.55f, 1f, 0.6f), UiSprites.Circle).raycastTarget = false;
+            return avatar;
+        }
+
+        /// <summary>The Masked Thief: an old, scratched Observer head with a dark mask across its eyes.</summary>
+        private RectTransform BuildThief(Transform root)
+        {
+            var avatar = UiFactory.Box("Thief", root, new Vector2(0.5f, 0.5f), new Vector2(250f, -420f), new Vector2(300f, 300f));
+            avatar.pivot = new Vector2(0.5f, 0.5f);
+            var head = UiFactory.Box("Head", avatar, new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(260f, 230f));
+            head.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(head, new Color(0.62f, 0.6f, 0.66f), UiSprites.Rounded, 1.2f).raycastTarget = false;
+            var visor = UiFactory.Box("Visor", head, new Vector2(0.5f, 0.5f), new Vector2(0f, 6f), new Vector2(200f, 120f));
+            visor.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(visor, new Color(0.18f, 0.18f, 0.26f), UiSprites.Rounded, 1.6f).raycastTarget = false;
+            foreach (float x in new[] { -44f, 44f })
+            {
+                var eye = UiFactory.Box("Eye", visor, new Vector2(0.5f, 0.5f), new Vector2(x, 4f), new Vector2(38f, 46f));
+                eye.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(eye, Palette.UiGold, UiSprites.Rounded, 4f).raycastTarget = false;
+            }
+            // Scratches of a long life.
+            foreach (var (pos, angle) in new[] { (new Vector2(-96f, 70f), 30f), (new Vector2(92f, -78f), -40f), (new Vector2(70f, 84f), 70f) })
+            {
+                var scratch = UiFactory.Box("Scratch", head, new Vector2(0.5f, 0.5f), pos, new Vector2(6f, 46f));
+                scratch.pivot = new Vector2(0.5f, 0.5f);
+                scratch.localRotation = Quaternion.Euler(0f, 0f, angle);
+                UiFactory.Fill(scratch, new Color(0.38f, 0.36f, 0.42f), UiSprites.Rounded, 20f).raycastTarget = false;
+            }
+            thiefMask = UiFactory.Box("Mask", head, new Vector2(0.5f, 0.5f), new Vector2(0f, 8f), new Vector2(250f, 70f));
+            thiefMask.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(thiefMask, new Color(0.08f, 0.07f, 0.12f), UiSprites.Rounded, 2f).raycastTarget = false;
+            foreach (float x in new[] { -44f, 44f })
+            {
+                var hole = UiFactory.Box("Hole", thiefMask, new Vector2(0.5f, 0.5f), new Vector2(x, 0f), new Vector2(40f, 22f));
+                hole.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(hole, new Color(1f, 0.85f, 0.4f), UiSprites.Rounded, 8f).raycastTarget = false;
+            }
+            return avatar;
+        }
+
         /// <summary>Plays a scene; <paramref name="onDone"/> runs after the last line (or SKIP).</summary>
         public void Play(int sceneIndex, int world, Action onDone)
         {
             scene = sceneIndex;
             done = onDone;
             robotFace.color = RobotLooks.BodyColor(Mathf.Min(world, LevelCatalog.WorldCount - 1)) * 1.12f;
-            chapter.text = scene == Story.Ending ? Loc.T("story.end") : Loc.F("story.floor", scene + 1);
+            if (scene == Story.Ending) chapter.text = Loc.T("story.end");
+            else if (Story.OpensChapter(scene))
+            {
+                int c = Story.ChapterOf(scene);
+                chapter.text = Loc.T("chapter." + c) + "  ·  " + Loc.T("chapter." + c + ".sub");
+            }
+            else chapter.text = Loc.F("story.chapter", scene * LevelCatalog.LevelsPerWorld + 1, Loc.T(LevelCatalog.WorldKey(scene)));
+            // The ending plays over its own scene (nature waking up), so the shade over it is light.
+            dim.color = new Color(0.05f, 0.04f, 0.14f, scene == Story.Ending ? 0.12f : 0.55f);
+            lastThiefLine = -1;
+            for (int i = 0; i < Story.LineCount(scene); i++)
+                if (Story.SpeakerOf(scene, i) == Speaker.Thief) lastThiefLine = i;
             screen.Show();
             ShowLine(0);
         }
 
         public void Hide() => screen.Hide(true);
+
+        /// <summary>The Masked Thief stands where vanG usually does, until its part of the scene is over.</summary>
+        private bool ThiefOnStage => lastThiefLine >= 0 && index <= lastThiefLine;
 
         private void ShowLine(int i)
         {
@@ -161,12 +264,29 @@ namespace SquashBot.UI
             line.maxVisibleCharacters = 0;
             line.fontStyle = who == Speaker.Narrator ? FontStyles.Italic : FontStyles.Bold;
 
-            Color accent = who == Speaker.Warden ? new Color(1f, 0.45f, 0.5f) : who == Speaker.Robot ? Palette.UiCyan : Palette.UiGold;
-            speakerName.text = who == Speaker.Warden ? Loc.T("story.warden") : who == Speaker.Robot ? Loc.T("story.robot") : "";
+            Color accent = who == Speaker.VanG ? new Color(1f, 0.45f, 0.5f)
+                : who == Speaker.Bip ? new Color(0.55f, 1f, 0.6f)
+                : who == Speaker.Thief ? Palette.UiGold
+                : Palette.UiCyan;
+            speakerName.text = who == Speaker.VanG ? Loc.T("story.warden")
+                : who == Speaker.Bip ? Loc.T("story.bip")
+                : who == Speaker.Thief ? Loc.T("story.firstObserver")
+                : "";
             speakerName.transform.parent.gameObject.SetActive(who != Speaker.Narrator);
             speakerName.color = accent;
             bubbleRim.color = accent;
             tapHint.gameObject.SetActive(false);
+
+            // The reveal: the mask comes off after the first line; the Observer's eyes turn gold with the gift of energy,
+            // and green at the very end, when the world has its colours back.
+            thiefMask.gameObject.SetActive(i == 0);
+            wardenAvatar.gameObject.SetActive(!ThiefOnStage);
+            thiefAvatar.gameObject.SetActive(ThiefOnStage);
+            bool golden = scene > Story.Reveal || (scene == Story.Reveal && i >= Story.LineCount(scene) - 2);
+            bool green = scene == Story.Ending && i == Story.LineCount(scene) - 1;
+            var eyeColor = green ? new Color(0.5f, 1f, 0.55f) : golden ? Palette.UiGold : Palette.UiCyan;
+            foreach (var eye in robotEyes) eye.color = eyeColor;
+            Story.NotifyLine(scene, i);
         }
 
         private void Advance()
@@ -205,11 +325,12 @@ namespace SquashBot.UI
             {
                 typed = Mathf.Min(length, typed + dt * CharsPerSecond);
                 int shown = Mathf.FloorToInt(typed);
-                // Voice blips: robot chirps high, WARDEN grumbles low, the narrator stays quiet.
+                // Voice blips: Bip chirps high, the thief hums, vanG grumbles low, the narrator stays quiet.
                 if (who != Speaker.Narrator && shown / 3 > lastBlip)
                 {
                     lastBlip = shown / 3;
-                    AudioManager.PlaySfx(Sfx.Click, 0.22f, who == Speaker.Robot ? 1.6f : 0.6f, 0.1f);
+                    float pitch = who == Speaker.Bip ? 1.7f : who == Speaker.Thief ? 1.0f : 0.6f;
+                    AudioManager.PlaySfx(Sfx.Click, 0.22f, pitch, 0.1f);
                 }
             }
             line.maxVisibleCharacters = Mathf.FloorToInt(typed);
@@ -217,10 +338,12 @@ namespace SquashBot.UI
             tapHint.gameObject.SetActive(!talking);
             if (!talking) tapHint.alpha = 0.4f + 0.3f * Mathf.Sin(time * 4f);
 
-            // The speaker steps forward and bounces while talking; the other one waits in the shade.
-            Pose(robotAvatar, robotGroup, who == Speaker.Robot, talking, -250f);
-            Pose(wardenAvatar, wardenGroup, who == Speaker.Warden, talking, 250f);
-            float mouth = who == Speaker.Warden && talking ? 12f + Mathf.Abs(Mathf.Sin(time * 22f)) * 30f : 12f;
+            // The speaker steps forward and bounces while talking; the others wait in the shade. The Observer only listens.
+            Pose(bipAvatar, bipGroup, who == Speaker.Bip, talking, -260f, -420f, 1f);
+            Pose(wardenAvatar, wardenGroup, who == Speaker.VanG, talking, 250f, -420f, 1f);
+            Pose(thiefAvatar, thiefGroup, who == Speaker.Thief, talking, 250f, -420f, 1f);
+            Pose(robotAvatar, robotGroup, who == Speaker.Narrator, false, 0f, -470f, 0.62f);
+            float mouth = who == Speaker.VanG && talking ? 12f + Mathf.Abs(Mathf.Sin(time * 22f)) * 30f : 12f;
             wardenMouth.sizeDelta = new Vector2(110f, mouth);
             wardenEye.rectTransform.localScale = Vector3.one * (Mathf.Repeat(time, 3.2f) < 0.12f ? 0.15f : 1f); // blink
 
@@ -228,14 +351,14 @@ namespace SquashBot.UI
             bubble.localScale = new Vector3(pop, pop, 1f);
         }
 
-        private void Pose(RectTransform avatar, CanvasGroup group, bool active, bool talking, float x)
+        private void Pose(RectTransform avatar, CanvasGroup group, bool active, bool talking, float x, float y, float size)
         {
-            float target = active ? 1.08f : 0.86f;
+            float target = (active ? 1.08f : 0.86f) * size;
             float s = Mathf.Lerp(avatar.localScale.x, target, Time.unscaledDeltaTime * 10f);
             avatar.localScale = new Vector3(s, s, 1f);
             group.alpha = Mathf.Lerp(group.alpha, active ? 1f : 0.45f, Time.unscaledDeltaTime * 10f);
             float bob = active && talking ? Mathf.Abs(Mathf.Sin(time * 11f)) * 14f : Mathf.Sin(time * 2f) * 4f;
-            avatar.anchoredPosition = new Vector2(x, -420f + bob);
+            avatar.anchoredPosition = new Vector2(x, y + bob);
         }
     }
 }

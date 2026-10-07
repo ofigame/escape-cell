@@ -280,6 +280,9 @@ namespace SquashBot.Gameplay
 
         private Color paintColor = Color.magenta;
 
+        /// <summary>Paints with <paramref name="color"/> instead of the floor's own paint (the finale's gold).</summary>
+        public void SetPaintColor(Color color) => paintColor = color;
+
         /// <summary>
         /// The paint for a world: of a few vivid colours, the one whose hue is furthest from the tiles and their glow, so a
         /// painted tile never looks like a plain one.

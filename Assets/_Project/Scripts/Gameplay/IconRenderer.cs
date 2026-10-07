@@ -377,7 +377,7 @@ namespace SquashBot.Gameplay
 
         private static void Block(Transform root, int world, Vector3 position, Vector3 euler, float scale)
         {
-            var block = HazardVisuals.Block(world).transform;
+            var block = HazardVisuals.Block().transform;
             block.SetParent(root, false);
             block.position = position;
             block.rotation = Quaternion.Euler(euler);

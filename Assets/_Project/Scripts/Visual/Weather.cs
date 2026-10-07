@@ -37,38 +37,7 @@ namespace SquashBot.Visual
         }
 
         /// <summary>The weather for a world (0-based).</summary>
-        public static Kind ForWorld(int world)
-        {
-            switch (WorldTheme.ForWorld(world).key)
-            {
-                case "world.lavender": return Kind.Sparkle;
-                case "world.sunset": return Kind.Petals;
-                case "world.ice": return Kind.Snow;
-                case "world.neon": return Kind.Fireflies;
-                case "world.lava": return Kind.Embers;
-                case "world.forest": return Kind.Fireflies;
-                case "world.desert": return Kind.Sand;
-                case "world.ocean": return Kind.Bubbles;
-                case "world.candy": return Kind.Confetti;
-                case "world.toxic": return Kind.Toxic;
-                case "world.midnight": return Kind.Thunder;
-                case "world.aurora": return Kind.Snow;
-                case "world.storm": return Kind.Thunder;
-                case "world.cyber": return Kind.DataRain;
-                case "world.galaxy": return Kind.Cosmic;
-                case "world.crystal": return Kind.Crystal;
-                case "world.festival": return Kind.Confetti;
-                case "world.factory": return Kind.Smoke;
-                case "world.funfair": return Kind.Confetti;
-                case "world.garden": return Kind.Petals;
-                case "world.canyon": return Kind.Sand;
-                case "world.snow": return Kind.Snow;
-                case "world.harbor": return Kind.Fireflies;
-                case "world.clouds": return Kind.Sparkle;
-                case "world.roof": return Kind.Thunder;
-                default: return Kind.Sparkle;
-            }
-        }
+        public static Kind ForWorld(int world) => WorldTheme.ForWorld(world).weather;
 
         // ---------- Setup ----------
 

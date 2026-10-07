@@ -158,6 +158,7 @@ namespace SquashBot.UI
         public LanguagePicker Languages { get; private set; }
         public SkillBadges Skills { get; private set; }
         public ObjectiveArrows Arrows { get; private set; }
+        public BipTip Bip { get; private set; }
         public DailyBonusScreen DailyBonus { get; private set; }
 
         private GameObject bannerPlaceholder;
@@ -652,6 +653,7 @@ namespace SquashBot.UI
             hud = UiScreen.Create("HUD", root, out var t);
             Skills = SkillBadges.Create(t);
             Arrows = ObjectiveArrows.Create(t);
+            Bip = BipTip.Create(t);
 
             UiFactory.MakeButton(t, "II", Kind.Icon, TopLeft, new Vector2(36f, -36f), new Vector2(124f, 124f), () => PausePressed?.Invoke(), 52f);
 
@@ -730,6 +732,7 @@ namespace SquashBot.UI
             HideAll();
             Skills.HideAll();
             Arrows.Clear();
+            Bip.Hide();
             hud.Show();
             SetBanner(false);
             hudLevel.text = levelIndex < 0 ? Loc.T("level.bonus") : Loc.F("level", levelIndex + 1);

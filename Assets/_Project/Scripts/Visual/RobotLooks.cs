@@ -14,10 +14,13 @@ namespace SquashBot.Visual
         private static readonly Color BaseLight = new Color(0.76f, 0.8f, 0.9f);
         private static readonly Dictionary<string, Material> Materials = new Dictionary<string, Material>();
 
+        /// <summary>The floor from which the Observer glows gold: the First Observer gave it all its energy (the Star Road).</summary>
+        public const int GoldenFrom = 21;
+
         public static Color BodyColor(int world)
         {
-            if (world % 15 == 14 || world == Data.LevelCatalog.WorldCount - 1) return new Color(0.91f, 0.75f, 0.41f); // galaxy and the roof: golden robot
-            return Color.Lerp(BaseBody, WorldTheme.ForWorld(world).accent, 0.3f);
+            var tint = Color.Lerp(BaseBody, WorldTheme.ForWorld(world).accent, 0.3f);
+            return world >= GoldenFrom ? Color.Lerp(tint, new Color(0.91f, 0.75f, 0.41f), 0.75f) : tint;
         }
 
         public static Color LightColor(int world) => Color.Lerp(BaseLight, WorldTheme.ForWorld(world).accent, 0.2f);
@@ -25,6 +28,7 @@ namespace SquashBot.Visual
         public static Color EyeColor(int world)
         {
             var a = WorldTheme.ForWorld(world).accent;
+            if (world >= GoldenFrom) return new Color(2.4f, 1.7f, 0.5f);
             return world == 0 ? new Color(0.4f, 1.6f, 2.2f) : new Color(a.r * 2.2f, a.g * 2.2f, a.b * 2.2f);
         }
 
@@ -61,6 +65,20 @@ namespace SquashBot.Visual
         private static void Rod(Transform p, float x, Material m) => Cyl(p, new Vector3(x, 0.79f, 0f), new Vector3(0.025f, 0.08f, 0.025f), m);
 
         /// <summary>Builds the accessories for <paramref name="world"/> under <paramref name="root"/> (which is emptied first).</summary>
+        /// <summary>The signature item per floor: 0 none, 1 antenna bulb, 2 earmuffs, 3 glowing brow, 4 horns, 5 sprout, 6 explorer cap,
+        /// 7 diving dome, 8 lollipop, 9 gas mask, 10 crescent moon, 11 halo of lights, 12 lightning bolt, 13 visor, 14 star crown.</summary>
+        private static readonly int[] Signature =
+        {
+            0, 1,           // Grey Channel, Rust Factory
+            5, 8, 10,       // Mint Forest, Spring Garden, Night Forest
+            6, 6, 4,        // Red Canyon, Golden Desert, Ancient Mine
+            1, 7, 7,        // Harbour Lights, Deep Ocean, Sunken Server
+            2, 2, 11,       // Aurora, Snowy Peak, Ice Crystal
+            3, 13, 9,       // Crystal Cave, Hall of Mirrors, Acid Crystals
+            11, 1, 12, 14,  // Cloud Meadow, Sunset Skies, Thunder Storm, Sky Castle
+            13, 10, 14, 14, // Cyber Grid, Lavender Space, Galaxy Core, vanG's Heart
+        };
+
         public static void Build(Transform root, int world)
         {
             for (int i = root.childCount - 1; i >= 0; i--) Object.Destroy(root.GetChild(i).gameObject);
@@ -89,8 +107,8 @@ namespace SquashBot.Visual
             }
             if (world >= 12) Box(root, new Vector3(0f, 0.22f, 0.125f), new Vector3(0.08f, 0.08f, 0.02f), 0.02f, accentGlow);
 
-            // The world's signature item.
-            switch (world % 15)
+            // The world's signature item (the looks below were made for the first floors; each floor borrows the one that suits it).
+            switch (Signature[Mathf.Clamp(world, 0, Signature.Length - 1)])
             {
                 case 1: // Sunset: classic antenna with a warm bulb
                     Rod(root, 0f, metal);

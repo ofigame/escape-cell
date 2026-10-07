@@ -3,8 +3,9 @@ using UnityEngine;
 namespace SquashBot.Visual
 {
     /// <summary>
-    /// The coin thief: a round little raccoon-like bandit with a black mask, a striped tail and a bulging gold sack on
-    /// its back. It hops from tile to tile, ducks when caught (dizzy stars spin over its head) and leaves a coin behind.
+    /// The Masked Thief: an old, scratched Observer robot (the very first one vanG built) with a dark mask across its
+    /// visor, a bent antenna and a bulging gold sack on its back. It hops from tile to tile, ducks when caught (dizzy
+    /// stars spin over its head) and leaves a coin behind.
     /// </summary>
     public class Thief : MonoBehaviour
     {
@@ -33,30 +34,31 @@ namespace SquashBot.Visual
             body = new GameObject("Body").transform;
             body.SetParent(transform, false);
             fur = MaterialFactory.Create(furColor, furColor * 0.15f);
-            var light = MaterialFactory.Create(Color.Lerp(furColor, Color.white, 0.6f), Color.black);
             var mask = MaterialFactory.Create(new Color(0.1f, 0.08f, 0.14f), Color.black);
-            var white = MaterialFactory.Create(Color.white, new Color(0.4f, 0.4f, 0.4f));
             var sackMat = MaterialFactory.Create(new Color(0.62f, 0.45f, 0.28f), Color.black);
             var gold = MaterialFactory.Create(Palette.UiGold, Palette.UiGold * 1.2f);
 
-            Shapes.Rounded("Torso", body, new Vector3(0f, 0.3f, 0f), new Vector3(0.5f, 0.42f, 0.46f), 0.18f, fur);
-            Shapes.Rounded("Belly", body, new Vector3(0f, 0.27f, 0.2f), new Vector3(0.32f, 0.28f, 0.1f), 0.08f, light);
-            Shapes.Rounded("Head", body, new Vector3(0f, 0.68f, 0.04f), new Vector3(0.46f, 0.36f, 0.4f), 0.15f, fur);
-            Shapes.Rounded("Mask", body, new Vector3(0f, 0.71f, 0.23f), new Vector3(0.44f, 0.11f, 0.05f), 0.04f, mask);
-            foreach (float x in new[] { -0.1f, 0.1f })
+            // An old Observer: cube head with a visor, a boxy body, worn grey metal full of scratches.
+            var scratch = MaterialFactory.Create(Color.Lerp(furColor, Color.black, 0.45f), Color.black);
+            var eye = MaterialFactory.Create(Palette.UiGold, Palette.UiGold * 1.6f);
+            Shapes.Rounded("Torso", body, new Vector3(0f, 0.24f, 0f), new Vector3(0.4f, 0.32f, 0.3f), 0.08f, fur);
+            Shapes.Rounded("Head", body, new Vector3(0f, 0.6f, 0f), new Vector3(0.46f, 0.42f, 0.44f), 0.1f, fur);
+            Shapes.Rounded("Visor", body, new Vector3(0f, 0.6f, 0.222f), new Vector3(0.34f, 0.22f, 0.03f), 0.04f, mask);
+            Shapes.Rounded("Mask", body, new Vector3(0f, 0.61f, 0.245f), new Vector3(0.48f, 0.12f, 0.03f), 0.03f, mask);
+            foreach (float x in new[] { -0.075f, 0.075f })
             {
-                Shapes.Primitive(PrimitiveType.Sphere, "Eye", body, new Vector3(x, 0.715f, 0.26f), Vector3.one * 0.075f, white);
-                Shapes.Rounded("Ear", body, new Vector3(x * 1.7f, 0.9f, 0f), new Vector3(0.11f, 0.14f, 0.08f), 0.04f, fur);
-                Shapes.Rounded("Foot", body, new Vector3(x * 1.3f, 0.05f, 0.05f), new Vector3(0.14f, 0.1f, 0.18f), 0.04f, mask);
+                Shapes.Rounded("Eye", body, new Vector3(x, 0.61f, 0.262f), new Vector3(0.07f, 0.045f, 0.01f), 0.01f, eye);
+                Shapes.Rounded("Foot", body, new Vector3(x * 1.4f, 0.04f, 0.03f), new Vector3(0.12f, 0.08f, 0.16f), 0.03f, mask);
             }
-            Shapes.Primitive(PrimitiveType.Sphere, "Nose", body, new Vector3(0f, 0.63f, 0.25f), Vector3.one * 0.06f, mask);
-            // A striped tail.
-            for (int i = 0; i < 4; i++)
-                Shapes.Rounded("Tail", body, new Vector3(0.12f, 0.18f + i * 0.08f, -0.3f - i * 0.04f), new Vector3(0.13f, 0.1f, 0.13f), 0.05f, i % 2 == 0 ? fur : mask);
+            foreach (var (pos, angle) in new[] { (new Vector3(-0.2f, 0.72f, 0.2f), 35f), (new Vector3(0.18f, 0.48f, 0.2f), -30f), (new Vector3(0.12f, 0.3f, 0.152f), 60f) })
+                Shapes.Rounded("Scratch", body, pos, new Vector3(0.012f, 0.1f, 0.01f), 0.004f, scratch).transform.localRotation = Quaternion.Euler(0f, 0f, angle);
+            var stalk = Shapes.Rounded("Antenna", body, new Vector3(0.06f, 0.9f, 0f), new Vector3(0.025f, 0.16f, 0.025f), 0.01f, mask).transform;
+            stalk.localRotation = Quaternion.Euler(0f, 0f, -25f);
+            Shapes.Primitive(PrimitiveType.Sphere, "Tip", body, new Vector3(0.1f, 0.98f, 0f), Vector3.one * 0.06f, eye);
             // The sack on its back, a coin peeking out.
             sack = new GameObject("Sack").transform;
             sack.SetParent(body, false);
-            sack.localPosition = new Vector3(-0.08f, 0.5f, -0.28f);
+            sack.localPosition = new Vector3(-0.06f, 0.42f, -0.26f);
             Shapes.Primitive(PrimitiveType.Sphere, "Bag", sack, Vector3.zero, new Vector3(0.42f, 0.4f, 0.36f), sackMat);
             Shapes.Rounded("Tie", sack, new Vector3(0f, 0.2f, 0f), new Vector3(0.14f, 0.06f, 0.14f), 0.03f, mask);
             Shapes.Primitive(PrimitiveType.Cylinder, "Coin", sack, new Vector3(0.05f, 0.26f, 0f), new Vector3(0.16f, 0.02f, 0.16f), gold).transform.localRotation = Quaternion.Euler(70f, 0f, 20f);

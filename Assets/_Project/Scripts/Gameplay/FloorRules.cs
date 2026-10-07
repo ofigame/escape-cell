@@ -664,11 +664,13 @@ namespace SquashBot.Gameplay
         }
 
         // Barrels: one rolls along a row or column; anything in its path gets flattened.
+        // In the Deep Ocean the same rule brings electric jellyfish instead, drifting slower along their row.
         private class Roll
         {
             public List<GridPos> line;
             public Direction dir;
             public float pos, warn;
+            public bool jelly;
             public Transform body, arrow;
         }
 
@@ -695,11 +697,21 @@ namespace SquashBot.Gameplay
                 }
                 if (r.arrow.gameObject.activeSelf) r.arrow.gameObject.SetActive(false);
                 float before = r.pos;
-                r.pos += dt * 4f;
+                r.pos += dt * (r.jelly ? JellySpeed : 4f);
                 var start = r.line[0];
                 var at = new Vector3(start.x + o.x * r.pos, 0.3f, start.y + o.y * r.pos);
-                r.body.position = at;
-                r.body.Rotate(new Vector3(o.y, 0f, -o.x), 400f * dt, Space.World);
+                if (r.jelly)
+                {
+                    // A jellyfish pulses as it drifts: the bell squeezes and bobs.
+                    float pulse = Mathf.Sin(time * 6f);
+                    r.body.position = at + Vector3.up * (0.25f + pulse * 0.06f);
+                    r.body.localScale = new Vector3(1f + pulse * 0.08f, 1f - pulse * 0.1f, 1f + pulse * 0.08f);
+                }
+                else
+                {
+                    r.body.position = at;
+                    r.body.Rotate(new Vector3(o.y, 0f, -o.x), 400f * dt, Space.World);
+                }
 
                 // Tiles crossed this frame.
                 for (int k = Mathf.Max(0, Mathf.CeilToInt(before)); k <= Mathf.FloorToInt(r.pos) && k < r.line.Count; k++)
@@ -714,6 +726,40 @@ namespace SquashBot.Gameplay
                     rolls.RemoveAt(i);
                 }
             }
+        }
+
+        private const float JellySpeed = 2.6f;
+
+        private Transform MakeBarrel(GridPos o)
+        {
+            var wood = MaterialFactory.Create(new Color(0.75f, 0.45f, 0.25f), Color.black);
+            var band = MaterialFactory.Create(new Color(0.95f, 0.8f, 0.3f), new Color(0.8f, 0.5f, 0.1f));
+            var body = new GameObject("Barrel").transform;
+            body.SetParent(transform, false);
+            var axis = Quaternion.LookRotation(new Vector3(o.y, 0f, -o.x));
+            var cyl = Shapes.Primitive(PrimitiveType.Cylinder, "Body", body, Vector3.zero, new Vector3(0.5f, 0.32f, 0.5f), wood).transform;
+            cyl.rotation = axis * Quaternion.Euler(90f, 0f, 0f);
+            foreach (float off in new[] { -0.18f, 0.18f })
+                Shapes.Primitive(PrimitiveType.Cylinder, "Band", cyl, new Vector3(0f, off / 0.32f * 0.5f, 0f), new Vector3(1.04f, 0.08f, 1.04f), band);
+            return body;
+        }
+
+        /// <summary>An electric jellyfish: a see-through glowing bell with a bright core and dangling tentacles.</summary>
+        private Transform MakeJellyfish()
+        {
+            var bell = MaterialFactory.CreateTransparent(new Color(0.8f, 0.6f, 1f, 0.65f), new Color(1.2f, 0.7f, 2.2f));
+            var core = MaterialFactory.Create(new Color(1f, 0.9f, 1f), new Color(2.2f, 1.6f, 2.6f));
+            var tentacle = MaterialFactory.CreateTransparent(new Color(0.7f, 0.85f, 1f, 0.6f), new Color(0.6f, 1f, 2f));
+            var body = new GameObject("Jellyfish").transform;
+            body.SetParent(transform, false);
+            Shapes.Primitive(PrimitiveType.Sphere, "Bell", body, new Vector3(0f, 0.12f, 0f), new Vector3(0.62f, 0.4f, 0.62f), bell);
+            Shapes.Primitive(PrimitiveType.Sphere, "Core", body, new Vector3(0f, 0.1f, 0f), Vector3.one * 0.16f, core);
+            for (int i = 0; i < 6; i++)
+            {
+                float a = i * Mathf.PI / 3f;
+                Shapes.Rounded("Tentacle", body, new Vector3(Mathf.Cos(a) * 0.17f, -0.14f, Mathf.Sin(a) * 0.17f), new Vector3(0.04f, 0.32f, 0.04f), 0.02f, tentacle);
+            }
+            return body;
         }
 
         private void TrySpawnBarrel()
@@ -734,19 +780,10 @@ namespace SquashBot.Gameplay
                 var danger = line.FindAll(p => grid.IsFloor(p));
                 if (danger.Count == 0 || !SafetyChecker.HasEscape(grid, robot.Position, danger, 3)) continue;
 
-                var wood = MaterialFactory.Create(new Color(0.75f, 0.45f, 0.25f), Color.black);
-                var band = MaterialFactory.Create(new Color(0.95f, 0.8f, 0.3f), new Color(0.8f, 0.5f, 0.1f));
-                var body = new GameObject("Barrel").transform;
-                body.SetParent(transform, false);
+                bool jelly = WorldTheme.Current.key == "world.ocean";
                 var o = dir.ToOffset();
+                var body = jelly ? MakeJellyfish() : MakeBarrel(o);
                 body.position = new Vector3(line[0].x - o.x, 0.3f, line[0].y - o.y);
-                var axis = Quaternion.LookRotation(new Vector3(o.y, 0f, -o.x));
-                var cyl = Shapes.Primitive(PrimitiveType.Cylinder, "Body", body, Vector3.zero, new Vector3(0.5f, 0.32f, 0.5f), wood).transform;
-                cyl.rotation = axis * Quaternion.Euler(90f, 0f, 0f);
-                foreach (float off in new[] { -0.18f, 0.18f })
-                {
-                    Shapes.Primitive(PrimitiveType.Cylinder, "Band", cyl, new Vector3(0f, off / 0.32f * 0.5f, 0f), new Vector3(1.04f, 0.08f, 1.04f), band);
-                }
                 var arrow = new GameObject("Arrow").transform;
                 arrow.SetParent(transform, false);
                 arrow.position = new Vector3(line[0].x - o.x * 0.9f, 0.1f, line[0].y - o.y * 0.9f);
@@ -756,7 +793,7 @@ namespace SquashBot.Gameplay
                 Shapes.Rounded("R", arrow, new Vector3(0.08f, 0f, 0f), new Vector3(0.26f, 0.03f, 0.07f), 0.02f, red).transform.localRotation = Quaternion.Euler(0f, 40f, 0f);
                 spawned.Add(body.gameObject);
                 spawned.Add(arrow.gameObject);
-                rolls.Add(new Roll { line = line, dir = dir, pos = -1f, warn = 1.3f, body = body, arrow = arrow });
+                rolls.Add(new Roll { line = line, dir = dir, pos = -1f, warn = jelly ? 1.6f : 1.3f, jelly = jelly, body = body, arrow = arrow });
                 AudioManager.PlaySfx(Sfx.Warning, 0.5f, 0.8f);
                 return;
             }

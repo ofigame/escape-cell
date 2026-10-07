@@ -9,7 +9,7 @@ using UnityEngine;
 namespace SquashBot.Gameplay
 {
     /// <summary>
-    /// The story missions added after the monster fight: the coin thief to corner and catch, Bip the lost robot to lead
+    /// The story missions added after the monster fight: the Masked Thief to corner and catch, Bip to guard all the way
     /// to the door, and the monster that shields itself and moves after every hit on the upper floors. Like the other
     /// stories they never kill the player by themselves: they keep the robot moving and thinking.
     /// </summary>
@@ -226,6 +226,7 @@ namespace SquashBot.Gameplay
         {
             if (buddy == null || buddyHome || buddy.Dazed) return;
             buddy.Daze(2.2f);
+            BipSay("dazed");
             buddyTimer = 2.2f;
             hazards.Shatter(p);
             var safe = SafeTileNear(buddyPos, robot.Position);

@@ -33,6 +33,8 @@ namespace SquashBot.Visual
         private Transform block;
         private Thief thiefProp;
         private Buddy buddyProp;
+        private ShadowClone cloneA, cloneB;
+        private int cloneStep = -1;
         private Monster monster;
         private QuestGoal goal;
         private ExitPortal door;
@@ -200,6 +202,12 @@ namespace SquashBot.Visual
                     buddyProp.transform.SetParent(props, true);
                     buddyProp.transform.localScale = Vector3.one * 1.9f;
                     break;
+                case BriefShot.Clone:
+                    robot = MakeRobot(Vector3.zero, 2.2f);
+                    cloneA = MakeClone(-Right * 1.5f);
+                    cloneB = MakeClone(Right * 1.5f);
+                    Aim(0.85f, 1f);
+                    break;
                 case BriefShot.Super:
                 {
                     var holder = new GameObject("Big").transform;
@@ -230,6 +238,26 @@ namespace SquashBot.Visual
             // Facing the right-hand side of the stage (where the monster or the door stands), a little towards the viewer.
             holder.rotation = Quaternion.LookRotation(Right + new Vector3(ViewDir.x, 0f, ViewDir.z) * 0.9f);
             return holder;
+        }
+
+        private ShadowClone MakeClone(Vector3 at)
+        {
+            var c = ShadowClone.Create(Origin + at, robotLook);
+            c.transform.SetParent(props, true);
+            c.transform.localScale = Vector3.one * 2.2f;
+            return c;
+        }
+
+        /// <summary>The robot hops left and right; the clones on either side copy every hop, mirrored.</summary>
+        private void UpdateCloneShot()
+        {
+            int s = Mathf.FloorToInt(loopT / 0.75f) % 4;
+            if (s == cloneStep) return;
+            cloneStep = s;
+            float x = s == 1 ? 0.45f : s == 3 ? -0.45f : 0f;
+            robot.localPosition = Right * x;
+            cloneA.HopTo(props.TransformPoint(-Right * (1.5f + x)));
+            cloneB.HopTo(props.TransformPoint(Right * (1.5f - x)));
         }
 
         private Thief MakeThief(Vector3 at)
@@ -271,6 +299,8 @@ namespace SquashBot.Visual
             block = null;
             thiefProp = null;
             buddyProp = null;
+            cloneA = cloneB = null;
+            cloneStep = -1;
             monster = null;
             goal = null;
             door = null;
@@ -326,6 +356,9 @@ namespace SquashBot.Visual
                     break;
                 case BriefShot.Escort:
                     UpdateEscortShot();
+                    break;
+                case BriefShot.Clone:
+                    UpdateCloneShot();
                     break;
             }
         }

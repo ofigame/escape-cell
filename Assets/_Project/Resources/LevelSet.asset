@@ -29,6 +29,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.5
     spawnInterval: 2.2
     blocksPerWave: 1
@@ -63,6 +64,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.49
     spawnInterval: 2.15
     blocksPerWave: 1
@@ -100,6 +102,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.48
     spawnInterval: 2.1
     blocksPerWave: 1
@@ -134,6 +137,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.46
     spawnInterval: 2.05
     blocksPerWave: 1
@@ -172,6 +176,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.45
     spawnInterval: 2
     blocksPerWave: 1
@@ -210,6 +215,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.43
     spawnInterval: 1.97
     blocksPerWave: 1
@@ -249,6 +255,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.42
     spawnInterval: 1.94
     blocksPerWave: 1
@@ -287,6 +294,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.41
     spawnInterval: 1.91
     blocksPerWave: 1
@@ -325,6 +333,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4
     spawnInterval: 1.88
     blocksPerWave: 1
@@ -369,6 +378,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.39
     spawnInterval: 1.86
     blocksPerWave: 1
@@ -414,6 +424,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4772334
     spawnInterval: 2.0674763
     blocksPerWave: 1
@@ -455,6 +466,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.8441403
     spawnInterval: 1.961495
     blocksPerWave: 1
@@ -496,6 +508,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.473417
     spawnInterval: 2.0620244
     blocksPerWave: 1
@@ -536,6 +549,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4715456
     spawnInterval: 2.0593507
     blocksPerWave: 1
@@ -581,6 +595,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4696954
     spawnInterval: 2.0567079
     blocksPerWave: 1
@@ -623,6 +638,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4678651
     spawnInterval: 2.3622067
     blocksPerWave: 1
@@ -664,6 +680,7 @@ MonoBehaviour:
     guardsPrincess: 1
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.466053
     spawnInterval: 2.0515044
     blocksPerWave: 1
@@ -707,6 +724,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4642578
     spawnInterval: 2.3562806
     blocksPerWave: 1
@@ -748,6 +766,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4624785
     spawnInterval: 2.0463977
     blocksPerWave: 1
@@ -790,6 +809,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4607139
     spawnInterval: 2.043877
     blocksPerWave: 2
@@ -832,6 +852,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.823704
     spawnInterval: 1.9393071
     blocksPerWave: 1
@@ -873,6 +894,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4572254
     spawnInterval: 2.2427828
     blocksPerWave: 1
@@ -914,6 +936,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4555002
     spawnInterval: 2.036429
     blocksPerWave: 1
@@ -961,6 +984,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4537867
     spawnInterval: 2.0339808
     blocksPerWave: 1
@@ -1004,6 +1028,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4520843
     spawnInterval: 2.3362813
     blocksPerWave: 1
@@ -1046,6 +1071,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4503925
     spawnInterval: 2.0291321
     blocksPerWave: 1
@@ -1089,6 +1115,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4487108
     spawnInterval: 2.330739
     blocksPerWave: 1
@@ -1130,6 +1157,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4470388
     spawnInterval: 2.024341
     blocksPerWave: 1
@@ -1171,6 +1199,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.445376
     spawnInterval: 2.0219657
     blocksPerWave: 1
@@ -1213,6 +1242,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4437222
     spawnInterval: 2.019603
     blocksPerWave: 2
@@ -1255,6 +1285,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4420769
     spawnInterval: 2.0172527
     blocksPerWave: 1
@@ -1297,6 +1328,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4404398
     spawnInterval: 2.014914
     blocksPerWave: 2
@@ -1343,6 +1375,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4388106
     spawnInterval: 2.0125866
     blocksPerWave: 2
@@ -1387,6 +1420,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.437189
     spawnInterval: 2.3118103
     blocksPerWave: 1
@@ -1430,6 +1464,7 @@ MonoBehaviour:
     guardsPrincess: 1
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4355748
     spawnInterval: 2.007964
     blocksPerWave: 1
@@ -1474,6 +1509,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4339677
     spawnInterval: 2.3065183
     blocksPerWave: 1
@@ -1521,6 +1557,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4323674
     spawnInterval: 2.003382
     blocksPerWave: 2
@@ -1564,6 +1601,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.7884673
     spawnInterval: 1.9010502
     blocksPerWave: 2
@@ -1606,6 +1644,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4291867
     spawnInterval: 1.9988381
     blocksPerWave: 2
@@ -1648,6 +1687,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4276059
     spawnInterval: 1.9965798
     blocksPerWave: 3
@@ -1690,6 +1730,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.426031
     spawnInterval: 1.9943299
     blocksPerWave: 2
@@ -1740,6 +1781,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4244621
     spawnInterval: 1.9920887
     blocksPerWave: 2
@@ -1784,6 +1826,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4228989
     spawnInterval: 2.288334
     blocksPerWave: 1
@@ -1827,6 +1870,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 1
     marathon: 0
+    final: 0
     warningTime: 1.4213413
     spawnInterval: 1.9876304
     blocksPerWave: 1
@@ -1871,6 +1915,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4197891
     spawnInterval: 2.2832248
     blocksPerWave: 1
@@ -1921,6 +1966,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4182422
     spawnInterval: 1.983203
     blocksPerWave: 2
@@ -1965,6 +2011,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.7708756
     spawnInterval: 1.8819505
     blocksPerWave: 2
@@ -2008,6 +2055,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4151636
     spawnInterval: 2.1766858
     blocksPerWave: 1
@@ -2051,6 +2099,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4136318
     spawnInterval: 1.9766169
     blocksPerWave: 2
@@ -2094,6 +2143,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4121047
     spawnInterval: 1.9744353
     blocksPerWave: 3
@@ -2132,11 +2182,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 4096
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4105824
     spawnInterval: 1.9722605
     blocksPerWave: 2
@@ -2177,11 +2228,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 0
+    rules: 4096
     quest: 1
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4090645
     spawnInterval: 2.265606
     blocksPerWave: 1
@@ -2221,11 +2273,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 4096
     quest: 0
     guardsPrincess: 1
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4075512
     spawnInterval: 1.9679302
     blocksPerWave: 1
@@ -2266,11 +2319,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 0
+    rules: 4096
     quest: 3
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4060421
     spawnInterval: 2.2606406
     blocksPerWave: 1
@@ -2311,11 +2365,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 0
-    rules: 0
+    rules: 4096
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4045374
     spawnInterval: 1.9636248
     blocksPerWave: 2
@@ -2355,11 +2410,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 4096
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.7537961
     spawnInterval: 1.863407
     blocksPerWave: 2
@@ -2399,11 +2455,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 0
+    rules: 4096
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4015403
     spawnInterval: 1.9593433
     blocksPerWave: 1
@@ -2442,11 +2499,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 4096
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.4000478
     spawnInterval: 1.9572111
     blocksPerWave: 2
@@ -2485,11 +2543,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 0
+    rules: 4096
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3985592
     spawnInterval: 1.9550846
     blocksPerWave: 2
@@ -2528,11 +2587,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 4096
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3970746
     spawnInterval: 1.9529636
     blocksPerWave: 4
@@ -2573,11 +2633,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 32
     quest: 2
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3955936
     spawnInterval: 2.2434752
     blocksPerWave: 2
@@ -2618,11 +2679,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 0
+    rules: 32
     quest: 0
     guardsPrincess: 0
     phased: 1
     marathon: 0
+    final: 0
     warningTime: 1.3941163
     spawnInterval: 1.9487376
     blocksPerWave: 2
@@ -2664,11 +2726,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 32
     quest: 4
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3926427
     spawnInterval: 2.2386272
     blocksPerWave: 2
@@ -2708,11 +2771,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 0
+    rules: 32
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3911726
     spawnInterval: 1.9445323
     blocksPerWave: 3
@@ -2753,11 +2817,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 32
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.7371327
     spawnInterval: 1.8453153
     blocksPerWave: 3
@@ -2797,11 +2862,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 32
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.388243
     spawnInterval: 2.1343818
     blocksPerWave: 2
@@ -2841,11 +2907,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 4128
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3867831
     spawnInterval: 1.9382616
     blocksPerWave: 3
@@ -2890,11 +2957,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 32
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3853267
     spawnInterval: 1.936181
     blocksPerWave: 3
@@ -2934,11 +3002,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 0
+    rules: 4128
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3838736
     spawnInterval: 1.934105
     blocksPerWave: 3
@@ -2977,11 +3046,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 32
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3824235
     spawnInterval: 1.9320335
     blocksPerWave: 4
@@ -3022,11 +3092,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 1
+    rules: 128
     quest: 0
     guardsPrincess: 1
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3809767
     spawnInterval: 1.9299667
     blocksPerWave: 2
@@ -3068,11 +3139,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1
+    rules: 128
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3795329
     spawnInterval: 2.2170897
     blocksPerWave: 2
@@ -3121,11 +3193,12 @@ MonoBehaviour:
     chaseSpeed: 1.1089846
     lowWalls: 0
     levelEvent: 0
-    rules: 1
+    rules: 128
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3780923
     spawnInterval: 1.9258461
     blocksPerWave: 3
@@ -3166,11 +3239,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 1
+    rules: 160
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.7208183
     spawnInterval: 1.8276026
     blocksPerWave: 3
@@ -3211,11 +3285,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1
+    rules: 128
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3752198
     spawnInterval: 1.9217426
     blocksPerWave: 2
@@ -3255,11 +3330,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 1
+    rules: 160
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.373788
     spawnInterval: 1.919697
     blocksPerWave: 3
@@ -3304,11 +3380,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1
+    rules: 128
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.372359
     spawnInterval: 1.9176557
     blocksPerWave: 3
@@ -3351,11 +3428,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1
+    rules: 160
     quest: 1
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3709328
     spawnInterval: 2.202961
     blocksPerWave: 2
@@ -3396,11 +3474,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 1
+    rules: 128
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3695095
     spawnInterval: 1.913585
     blocksPerWave: 3
@@ -3440,11 +3519,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1
+    rules: 128
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3680888
     spawnInterval: 1.9115554
     blocksPerWave: 4
@@ -3487,11 +3567,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 2
+    rules: 1
     quest: 1
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3666708
     spawnInterval: 2.1959593
     blocksPerWave: 2
@@ -3534,11 +3615,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2
+    rules: 1
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3652556
     spawnInterval: 1.9075079
     blocksPerWave: 3
@@ -3580,11 +3662,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 3
+    rules: 129
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.7048036
     spawnInterval: 1.8102152
     blocksPerWave: 3
@@ -3625,11 +3708,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 2
+    rules: 1
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3624327
     spawnInterval: 2.093823
     blocksPerWave: 2
@@ -3669,11 +3753,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 3
+    rules: 33
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3610252
     spawnInterval: 1.9014646
     blocksPerWave: 3
@@ -3721,11 +3806,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 2
+    rules: 1
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3596202
     spawnInterval: 1.8994573
     blocksPerWave: 3
@@ -3768,11 +3854,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 3
+    rules: 33
     quest: 2
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3582176
     spawnInterval: 2.1820717
     blocksPerWave: 2
@@ -3814,11 +3901,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2
+    rules: 1
     quest: 0
     guardsPrincess: 0
     phased: 1
     marathon: 0
+    final: 0
     warningTime: 1.3568175
     spawnInterval: 1.8954536
     blocksPerWave: 2
@@ -3859,11 +3947,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2
+    rules: 1
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3554198
     spawnInterval: 1.8934568
     blocksPerWave: 3
@@ -3903,11 +3992,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 3
+    rules: 129
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3540244
     spawnInterval: 1.8914635
     blocksPerWave: 4
@@ -3948,11 +4038,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 2
-    rules: 4
+    rules: 4098
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3526314
     spawnInterval: 1.8894736
     blocksPerWave: 3
@@ -3994,11 +4085,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4
+    rules: 4098
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.6890509
     spawnInterval: 1.7931124
     blocksPerWave: 3
@@ -4040,11 +4132,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 4
+    rules: 4098
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3498524
     spawnInterval: 1.8855034
     blocksPerWave: 2
@@ -4063,21 +4156,20 @@ MonoBehaviour:
     powerUpInterval: 8.640538
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 11
-    gridHeight: 11
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '###########'
-    - '###########'
-    - '#X####X####'
-    - '###########'
-    - '#########X#'
-    - '#X#########'
-    - '###.....###'
-    - '###.....###'
-    - '###.....###'
-    - '###.....###'
-    - '###.....###'
-    mission: 0
+    - '##########'
+    - '##########'
+    - '#X########'
+    - '##########'
+    - '########X#'
+    - X##....###
+    - '###....###'
+    - '###....###'
+    - '###....###'
+    - '###....###'
+    mission: 3
     coinTarget: 15
     surviveSeconds: 43
     keys: 3
@@ -4085,11 +4177,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 6
+    rules: 4226
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3484663
     spawnInterval: 1.8835233
     blocksPerWave: 3
@@ -4138,11 +4231,12 @@ MonoBehaviour:
     chaseSpeed: 1.1621443
     lowWalls: 0
     levelEvent: 0
-    rules: 4
+    rules: 4098
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3470825
     spawnInterval: 1.8815464
     blocksPerWave: 3
@@ -4186,11 +4280,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 4
+    rules: 4098
     quest: 3
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3457007
     spawnInterval: 2.1615083
     blocksPerWave: 2
@@ -4233,11 +4328,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4
+    rules: 4098
     quest: 0
     guardsPrincess: 1
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3443214
     spawnInterval: 1.8776019
     blocksPerWave: 2
@@ -4281,11 +4377,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 4
+    rules: 4098
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.342944
     spawnInterval: 2.1569793
     blocksPerWave: 2
@@ -4327,11 +4424,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 6
+    rules: 4099
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3415688
     spawnInterval: 1.8736696
     blocksPerWave: 3
@@ -4371,11 +4469,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4
+    rules: 4098
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3401957
     spawnInterval: 1.871708
     blocksPerWave: 4
@@ -4418,11 +4517,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 8
+    rules: 65
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.6735308
     spawnInterval: 1.7762619
     blocksPerWave: 3
@@ -4464,11 +4564,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 8
+    rules: 65
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3374556
     spawnInterval: 2.0545733
     blocksPerWave: 2
@@ -4508,11 +4609,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 10
+    rules: 193
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3360888
     spawnInterval: 1.865841
     blocksPerWave: 3
@@ -4554,11 +4656,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 8
+    rules: 65
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3347238
     spawnInterval: 1.8638911
     blocksPerWave: 3
@@ -4602,11 +4705,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 8
+    rules: 65
     quest: 4
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3333609
     spawnInterval: 2.1412356
     blocksPerWave: 2
@@ -4649,11 +4753,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 12
+    rules: 67
     quest: 0
     guardsPrincess: 0
     phased: 1
     marathon: 0
+    final: 0
     warningTime: 1.3319999
     spawnInterval: 1.8599999
     blocksPerWave: 2
@@ -4697,11 +4802,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 8
+    rules: 65
     quest: 1
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3306409
     spawnInterval: 2.1367671
     blocksPerWave: 2
@@ -4748,11 +4854,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 12
+    rules: 193
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3292837
     spawnInterval: 1.8561196
     blocksPerWave: 3
@@ -4794,11 +4901,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 8
+    rules: 65
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3279285
     spawnInterval: 1.8541836
     blocksPerWave: 3
@@ -4838,11 +4946,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 10
+    rules: 193
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3265753
     spawnInterval: 1.8522503
     blocksPerWave: 4
@@ -4890,6 +4999,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3252238
     spawnInterval: 1.8503196
     blocksPerWave: 2
@@ -4934,6 +5044,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3238741
     spawnInterval: 1.8483917
     blocksPerWave: 3
@@ -4986,6 +5097,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3225263
     spawnInterval: 1.8464662
     blocksPerWave: 3
@@ -5035,6 +5147,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3211803
     spawnInterval: 2.1212249
     blocksPerWave: 2
@@ -5078,11 +5191,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 24
+    rules: 18
     quest: 0
     guardsPrincess: 1
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3198361
     spawnInterval: 1.842623
     blocksPerWave: 2
@@ -5132,6 +5246,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3184936
     spawnInterval: 2.116811
     blocksPerWave: 2
@@ -5180,11 +5295,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 20
+    rules: 17
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.317153
     spawnInterval: 1.8387899
     blocksPerWave: 3
@@ -5233,6 +5349,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.6447675
     spawnInterval: 1.7450333
     blocksPerWave: 3
@@ -5274,11 +5391,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 20
+    rules: 17
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3144767
     spawnInterval: 1.8349668
     blocksPerWave: 3
@@ -5324,6 +5442,7 @@ MonoBehaviour:
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3131412
     spawnInterval: 1.8330588
     blocksPerWave: 4
@@ -5363,11 +5482,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 32
+    rules: 18
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3118074
     spawnInterval: 1.8311534
     blocksPerWave: 3
@@ -5408,11 +5528,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 0
-    rules: 32
+    rules: 18
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3104751
     spawnInterval: 1.8292502
     blocksPerWave: 3
@@ -5457,11 +5578,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 32
+    rules: 18
     quest: 1
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3091446
     spawnInterval: 2.1014519
     blocksPerWave: 2
@@ -5505,11 +5627,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 40
+    rules: 19
     quest: 0
     guardsPrincess: 0
     phased: 1
     marathon: 0
+    final: 0
     warningTime: 1.3078157
     spawnInterval: 1.825451
     blocksPerWave: 2
@@ -5554,11 +5677,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 32
+    rules: 18
     quest: 3
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3064884
     spawnInterval: 2.097088
     blocksPerWave: 2
@@ -5608,11 +5732,12 @@ MonoBehaviour:
     chaseSpeed: 1.2340068
     lowWalls: 0
     levelEvent: 0
-    rules: 40
+    rules: 19
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3051627
     spawnInterval: 1.821661
     blocksPerWave: 3
@@ -5656,11 +5781,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 32
+    rules: 18
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.6297983
     spawnInterval: 1.7287809
     blocksPerWave: 3
@@ -5703,11 +5829,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 32
+    rules: 18
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3025161
     spawnInterval: 1.9996681
     blocksPerWave: 2
@@ -5749,11 +5876,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 32
+    rules: 18
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.3011951
     spawnInterval: 1.815993
     blocksPerWave: 3
@@ -5794,11 +5922,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 32
+    rules: 18
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2998756
     spawnInterval: 1.8141081
     blocksPerWave: 4
@@ -5842,11 +5971,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 192
+    rules: 512
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2985578
     spawnInterval: 1.8122255
     blocksPerWave: 3
@@ -5892,11 +6022,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 192
+    rules: 512
     quest: 2
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2972414
     spawnInterval: 2.0818965
     blocksPerWave: 2
@@ -5941,11 +6072,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 200
+    rules: 514
     quest: 0
     guardsPrincess: 1
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2959266
     spawnInterval: 1.8084666
     blocksPerWave: 2
@@ -5991,11 +6123,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 192
+    rules: 512
     quest: 4
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2946132
     spawnInterval: 2.0775788
     blocksPerWave: 2
@@ -6043,11 +6176,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 200
+    rules: 513
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2933013
     spawnInterval: 1.8047161
     blocksPerWave: 3
@@ -6092,11 +6226,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 192
+    rules: 512
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.6149886
     spawnInterval: 1.7127019
     blocksPerWave: 3
@@ -6141,11 +6276,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 192
+    rules: 512
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.290682
     spawnInterval: 1.8009742
     blocksPerWave: 2
@@ -6185,11 +6321,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 192
+    rules: 512
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2893745
     spawnInterval: 1.7991064
     blocksPerWave: 3
@@ -6231,11 +6368,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 192
+    rules: 512
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2880683
     spawnInterval: 1.7972405
     blocksPerWave: 3
@@ -6276,11 +6414,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 208
+    rules: 576
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2867637
     spawnInterval: 1.7953767
     blocksPerWave: 4
@@ -6326,11 +6465,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 256
+    rules: 192
     quest: 3
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2854604
     spawnInterval: 2.062542
     blocksPerWave: 2
@@ -6375,11 +6515,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 256
+    rules: 192
     quest: 0
     guardsPrincess: 0
     phased: 1
     marathon: 0
+    final: 0
     warningTime: 1.2841586
     spawnInterval: 1.7916551
     blocksPerWave: 2
@@ -6425,11 +6566,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 256
+    rules: 192
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.282858
     spawnInterval: 2.0582666
     blocksPerWave: 2
@@ -6481,11 +6623,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 256
+    rules: 192
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.281559
     spawnInterval: 1.7879413
     blocksPerWave: 3
@@ -6530,11 +6673,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 256
+    rules: 192
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.6003264
     spawnInterval: 1.696783
     blocksPerWave: 3
@@ -6570,24 +6714,25 @@ MonoBehaviour:
     - '##############'
     - '#####X####X###'
     - '##############'
-    mission: 11
+    mission: 12
     coinTarget: 18
     surviveSeconds: 49
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 256
+    rules: 192
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2789648
-    spawnInterval: 1.9626591
+    spawnInterval: 1.7842355
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.1
+    aimAtPlayerChance: 0.05
     rampUp: 0.24472937
     lineWaveChance: 0.08683762
     bombChance: 0.1194682
@@ -6622,11 +6767,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 320
+    rules: 208
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2776698
     spawnInterval: 1.7823853
     blocksPerWave: 3
@@ -6676,11 +6822,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 256
+    rules: 192
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.276376
     spawnInterval: 1.7805372
     blocksPerWave: 3
@@ -6722,11 +6869,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 288
+    rules: 208
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2750837
     spawnInterval: 1.7786909
     blocksPerWave: 3
@@ -6768,11 +6916,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 256
+    rules: 192
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2737925
     spawnInterval: 1.7768465
     blocksPerWave: 4
@@ -6818,11 +6967,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 512
+    rules: 640
     quest: 0
     guardsPrincess: 1
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2725028
     spawnInterval: 1.7750039
     blocksPerWave: 2
@@ -6869,11 +7019,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 512
+    rules: 640
     quest: 1
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2712142
     spawnInterval: 2.0391376
     blocksPerWave: 2
@@ -6914,11 +7065,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 0
-    rules: 512
+    rules: 640
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.269927
     spawnInterval: 1.7713243
     blocksPerWave: 3
@@ -6964,11 +7116,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 512
+    rules: 640
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.5858012
     spawnInterval: 1.6810127
     blocksPerWave: 3
@@ -6987,43 +7140,42 @@ MonoBehaviour:
     powerUpInterval: 7.3643594
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 16
-    gridHeight: 16
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - '################'
-    - '##X#############'
-    - '################'
-    - '#########X######'
-    - X#####X#########
-    - '################'
-    - '###X############'
-    - '#######..##X####'
-    - '#######..#######'
-    - X###############
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '###########X####'
-    mission: 10
+    - '##############'
+    - '#X############'
+    - '##############'
+    - X####X########
+    - '##############'
+    - '##############'
+    - '######..#X####'
+    - '######..######'
+    - X#############
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '#########X####'
+    mission: 12
     coinTarget: 19
     surviveSeconds: 50
-    keys: 5
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 512
+    rules: 640
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2673563
     spawnInterval: 1.7676519
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.1
+    aimAtPlayerChance: 0.05
     rampUp: 0.24970444
     lineWaveChance: 0.08982265
     bombChance: 0.123116575
@@ -7058,11 +7210,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 576
+    rules: 704
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2660729
     spawnInterval: 1.7658184
     blocksPerWave: 3
@@ -7113,11 +7266,12 @@ MonoBehaviour:
     chaseSpeed: 1.303216
     lowWalls: 0
     levelEvent: 3
-    rules: 512
+    rules: 640
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2647907
     spawnInterval: 1.7639867
     blocksPerWave: 3
@@ -7164,11 +7318,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 544
+    rules: 642
     quest: 2
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2635098
     spawnInterval: 2.0264802
     blocksPerWave: 2
@@ -7210,11 +7365,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 512
+    rules: 640
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2622299
     spawnInterval: 1.7603285
     blocksPerWave: 3
@@ -7256,11 +7412,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 512
+    rules: 640
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2609514
     spawnInterval: 1.758502
     blocksPerWave: 4
@@ -7307,11 +7464,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1024
+    rules: 4
     quest: 2
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2596741
     spawnInterval: 2.0201788
     blocksPerWave: 2
@@ -7356,11 +7514,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 1024
+    rules: 4
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2583979
     spawnInterval: 1.7548542
     blocksPerWave: 3
@@ -7406,11 +7565,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1280
+    rules: 20
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.5714037
     spawnInterval: 1.6653813
     blocksPerWave: 3
@@ -7429,42 +7589,42 @@ MonoBehaviour:
     powerUpInterval: 7.183362
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 15
-    gridHeight: 15
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - X##############
-    - '###############'
-    - '###############'
-    - '#####X#########'
-    - '#########X####X'
-    - '########.......'
-    - '########.......'
-    - '########.......'
-    - '########.......'
-    - '#####X##.......'
-    - '###############'
-    - '###############'
-    - '###X###########'
-    - X##############
-    - '###############'
-    mission: 11
+    - X#############
+    - '##############'
+    - '####X#########'
+    - '##############'
+    - '#######.......'
+    - '#######.......'
+    - '#######.......'
+    - '#######.......'
+    - '#####X#.......'
+    - '#######.......'
+    - '##############'
+    - '###X##########'
+    - X####X########
+    - '##############'
+    mission: 12
     coinTarget: 19
     surviveSeconds: 51
-    keys: 4
+    keys: 6
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 1024
+    rules: 4
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2558492
-    spawnInterval: 1.9263345
+    spawnInterval: 1.7512132
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.1
+    aimAtPlayerChance: 0.05
     rampUp: 0.25463605
     lineWaveChance: 0.092781626
     bombChance: 0.1267331
@@ -7478,20 +7638,26 @@ MonoBehaviour:
     powerUpInterval: 7.1633453
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - ...####...
-    - ...#X##...
-    - ...####...
-    - '########X#'
-    - '##########'
-    - '#########X'
-    - '##########'
-    - ...##X#...
-    - ...####...
-    - ...####...
-    mission: 3
+    - .....######.....
+    - .....######.....
+    - .....######.....
+    - .....X#X###.....
+    - .....######.....
+    - '################'
+    - '#############X##'
+    - '################'
+    - '################'
+    - '##X############X'
+    - '########X#######'
+    - .....######.....
+    - .....####X#.....
+    - .....######.....
+    - .....#####X.....
+    - .....######.....
+    mission: 0
     coinTarget: 19
     surviveSeconds: 51
     keys: 4
@@ -7499,11 +7665,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1088
+    rules: 68
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2545767
     spawnInterval: 1.7493953
     blocksPerWave: 3
@@ -7553,11 +7720,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1024
+    rules: 4
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2533052
     spawnInterval: 1.7475789
     blocksPerWave: 3
@@ -7605,11 +7773,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 1056
+    rules: 6
     quest: 3
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2520349
     spawnInterval: 2.0076287
     blocksPerWave: 2
@@ -7656,11 +7825,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1024
+    rules: 4
     quest: 0
     guardsPrincess: 0
     phased: 1
     marathon: 0
+    final: 0
     warningTime: 1.2507658
     spawnInterval: 1.7439512
     blocksPerWave: 2
@@ -7702,11 +7872,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 1024
+    rules: 4
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2494978
     spawnInterval: 1.7421397
     blocksPerWave: 3
@@ -7748,11 +7919,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1024
+    rules: 4
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2482309
     spawnInterval: 1.74033
     blocksPerWave: 4
@@ -7804,11 +7976,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2048
+    rules: 256
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2469653
     spawnInterval: 1.7385218
     blocksPerWave: 3
@@ -7854,11 +8027,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2048
+    rules: 256
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.5571258
     spawnInterval: 1.6498795
     blocksPerWave: 3
@@ -7904,11 +8078,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2048
+    rules: 256
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2444371
     spawnInterval: 1.7349101
     blocksPerWave: 2
@@ -7948,11 +8123,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 2112
+    rules: 320
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2431747
     spawnInterval: 1.7331067
     blocksPerWave: 3
@@ -8003,11 +8179,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2048
+    rules: 256
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2419134
     spawnInterval: 1.7313049
     blocksPerWave: 3
@@ -8055,11 +8232,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 2048
+    rules: 256
     quest: 4
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2406532
     spawnInterval: 1.9889301
     blocksPerWave: 2
@@ -8106,11 +8284,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2048
+    rules: 256
     quest: 0
     guardsPrincess: 1
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2393941
     spawnInterval: 1.7277057
     blocksPerWave: 2
@@ -8158,11 +8337,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2048
+    rules: 256
     quest: 1
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2381359
     spawnInterval: 1.9847947
     blocksPerWave: 2
@@ -8204,11 +8384,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 2304
+    rules: 768
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2368789
     spawnInterval: 1.7241127
     blocksPerWave: 3
@@ -8250,11 +8431,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2048
+    rules: 256
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.235623
     spawnInterval: 1.7223185
     blocksPerWave: 4
@@ -8300,11 +8482,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 4096
+    rules: 288
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.5429602
     spawnInterval: 1.6344995
     blocksPerWave: 3
@@ -8350,11 +8533,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4096
+    rules: 288
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2331142
     spawnInterval: 1.8906081
     blocksPerWave: 2
@@ -8394,11 +8578,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4160
+    rules: 352
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2318615
     spawnInterval: 1.7169449
     blocksPerWave: 3
@@ -8441,11 +8626,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 3
-    rules: 4096
+    rules: 288
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2306097
     spawnInterval: 1.7151567
     blocksPerWave: 3
@@ -8494,11 +8680,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4096
+    rules: 288
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2293589
     spawnInterval: 1.9703753
     blocksPerWave: 2
@@ -8546,11 +8733,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 4096
+    rules: 288
     quest: 0
     guardsPrincess: 0
     phased: 1
     marathon: 0
+    final: 0
     warningTime: 1.2281091
     spawnInterval: 1.7115846
     blocksPerWave: 2
@@ -8599,11 +8787,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4096
+    rules: 288
     quest: 2
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2268604
     spawnInterval: 1.9662707
     blocksPerWave: 2
@@ -8655,11 +8844,12 @@ MonoBehaviour:
     chaseSpeed: 1.3703783
     lowWalls: 0
     levelEvent: 0
-    rules: 4352
+    rules: 304
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2256126
     spawnInterval: 1.7080182
     blocksPerWave: 3
@@ -8701,11 +8891,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 4096
+    rules: 288
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.224366
     spawnInterval: 1.7062372
     blocksPerWave: 3
@@ -8748,11 +8939,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4224
+    rules: 352
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2231202
     spawnInterval: 1.7044575
     blocksPerWave: 4
@@ -8798,11 +8990,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 1026
+    rules: 1056
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2218755
     spawnInterval: 1.7026794
     blocksPerWave: 2
@@ -8842,11 +9035,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1026
+    rules: 1056
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2206318
     spawnInterval: 1.7009026
     blocksPerWave: 3
@@ -8893,11 +9087,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1026
+    rules: 1056
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2193891
     spawnInterval: 1.6991272
     blocksPerWave: 3
@@ -8946,11 +9141,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1026
+    rules: 1056
     quest: 1
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2181472
     spawnInterval: 1.9519562
     blocksPerWave: 2
@@ -8998,11 +9194,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1538
+    rules: 1060
     quest: 0
     guardsPrincess: 1
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2169063
     spawnInterval: 1.6955806
     blocksPerWave: 2
@@ -9051,11 +9248,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 1026
+    rules: 1056
     quest: 3
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2156665
     spawnInterval: 1.9478806
     blocksPerWave: 2
@@ -9106,11 +9304,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1282
+    rules: 1568
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2144276
     spawnInterval: 1.6920394
     blocksPerWave: 3
@@ -9156,11 +9355,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 1026
+    rules: 1056
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.516487
     spawnInterval: 1.6057574
     blocksPerWave: 3
@@ -9202,11 +9402,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1154
+    rules: 1072
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2119526
     spawnInterval: 1.6885036
     blocksPerWave: 3
@@ -9249,11 +9450,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1026
+    rules: 1056
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2107165
     spawnInterval: 1.6867378
     blocksPerWave: 4
@@ -9293,11 +9495,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 33
+    rules: 2304
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2094812
     spawnInterval: 1.6849732
     blocksPerWave: 3
@@ -9349,11 +9552,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 33
+    rules: 2304
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2082471
     spawnInterval: 1.6832101
     blocksPerWave: 3
@@ -9403,11 +9607,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 33
+    rules: 2304
     quest: 2
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2070137
     spawnInterval: 1.9336654
     blocksPerWave: 2
@@ -9456,11 +9661,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1057
+    rules: 2816
     quest: 0
     guardsPrincess: 0
     phased: 1
     marathon: 0
+    final: 0
     warningTime: 1.2057813
     spawnInterval: 1.6796876
     blocksPerWave: 2
@@ -9510,11 +9716,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 33
+    rules: 2304
     quest: 4
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2045498
     spawnInterval: 1.9296175
     blocksPerWave: 2
@@ -9566,11 +9773,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 289
+    rules: 2320
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2033192
     spawnInterval: 1.6761703
     blocksPerWave: 3
@@ -9616,11 +9824,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 33
+    rules: 2304
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.5026119
     spawnInterval: 1.590693
     blocksPerWave: 3
@@ -9668,11 +9877,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 33
+    rules: 2304
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.2008607
     spawnInterval: 1.8399241
     blocksPerWave: 2
@@ -9714,11 +9924,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 33
+    rules: 2304
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1996328
     spawnInterval: 1.670904
     blocksPerWave: 3
@@ -9761,11 +9972,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 33
+    rules: 2304
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1984059
     spawnInterval: 1.6691512
     blocksPerWave: 4
@@ -9808,11 +10020,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 3
-    rules: 24
+    rules: 1088
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1971797
     spawnInterval: 1.6673995
     blocksPerWave: 3
@@ -9862,11 +10075,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 24
+    rules: 1088
     quest: 3
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1959544
     spawnInterval: 1.9154965
     blocksPerWave: 2
@@ -9915,11 +10129,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 536
+    rules: 1600
     quest: 0
     guardsPrincess: 1
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.19473
     spawnInterval: 1.6639
     blocksPerWave: 2
@@ -9969,11 +10184,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 24
+    rules: 1088
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1935065
     spawnInterval: 1.911475
     blocksPerWave: 2
@@ -10026,11 +10242,12 @@ MonoBehaviour:
     chaseSpeed: 1.4275134
     lowWalls: 0
     levelEvent: 0
-    rules: 280
+    rules: 1104
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1922839
     spawnInterval: 1.6604055
     blocksPerWave: 3
@@ -10076,11 +10293,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 24
+    rules: 1088
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.4888275
     spawnInterval: 1.575727
     blocksPerWave: 3
@@ -10099,43 +10317,42 @@ MonoBehaviour:
     powerUpInterval: 6.145261
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 16
-    gridHeight: 16
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - ........########
-    - ........########
-    - ........########
-    - ........########
-    - ........##X#X###
-    - ........######X#
-    - ........########
-    - ........######X#
-    - '################'
-    - '##############X#'
-    - '################'
-    - '################'
-    - '########X#######'
-    - '#############X##'
-    - '#X##############'
-    - '################'
-    mission: 10
+    - .......#######
+    - .......#######
+    - .......#######
+    - .......##X####
+    - .......####X##
+    - .......#######
+    - .......#####X#
+    - '##############'
+    - '############X#'
+    - '##############'
+    - '##############'
+    - '#######X###X##'
+    - '#X############'
+    - '##############'
+    mission: 12
     coinTarget: 22
     surviveSeconds: 57
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 24
+    rules: 1088
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.189841
     spawnInterval: 1.6569158
     blocksPerWave: 2
     blockLinger: 1.5
-    aimAtPlayerChance: 0.1
+    aimAtPlayerChance: 0.05
     rampUp: 0.28292528
     lineWaveChance: 0.10975515
     bombChance: 0.14747852
@@ -10170,11 +10387,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 24
+    rules: 1088
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1886209
     spawnInterval: 1.6551728
     blocksPerWave: 3
@@ -10216,11 +10434,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 24
+    rules: 1088
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1874017
     spawnInterval: 1.653431
     blocksPerWave: 3
@@ -10263,11 +10482,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1048
+    rules: 1092
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1861832
     spawnInterval: 1.6516904
     blocksPerWave: 4
@@ -10318,11 +10538,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4608
+    rules: 8
     quest: 4
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1849656
     spawnInterval: 1.8974435
     blocksPerWave: 2
@@ -10372,11 +10593,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4608
+    rules: 8
     quest: 0
     guardsPrincess: 0
     phased: 1
     marathon: 0
+    final: 0
     warningTime: 1.1837488
     spawnInterval: 1.6482128
     blocksPerWave: 2
@@ -10427,11 +10649,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 4608
+    rules: 8
     quest: 1
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1825329
     spawnInterval: 1.893447
     blocksPerWave: 2
@@ -10480,11 +10703,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4608
+    rules: 8
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1813178
     spawnInterval: 1.6447397
     blocksPerWave: 4
@@ -10530,11 +10754,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 4608
+    rules: 8
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.4751294
     spawnInterval: 1.5608549
     blocksPerWave: 4
@@ -10583,11 +10808,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4608
+    rules: 8
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1788901
     spawnInterval: 1.8053988
     blocksPerWave: 3
@@ -10627,11 +10853,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 5632
+    rules: 264
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1776774
     spawnInterval: 1.6395391
     blocksPerWave: 4
@@ -10684,11 +10911,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 2
-    rules: 4608
+    rules: 8
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1764655
     spawnInterval: 1.6378078
     blocksPerWave: 4
@@ -10730,11 +10958,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4736
+    rules: 12
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1752545
     spawnInterval: 1.6360778
     blocksPerWave: 4
@@ -10778,11 +11007,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4608
+    rules: 8
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1740441
     spawnInterval: 1.6343489
     blocksPerWave: 5
@@ -10832,11 +11062,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2304
+    rules: 264
     quest: 0
     guardsPrincess: 1
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1728346
     spawnInterval: 1.6326209
     blocksPerWave: 3
@@ -10887,11 +11118,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2304
+    rules: 264
     quest: 2
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.171626
     spawnInterval: 1.8755285
     blocksPerWave: 3
@@ -10943,11 +11175,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 2304
+    rules: 264
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.170418
     spawnInterval: 1.6291686
     blocksPerWave: 4
@@ -10993,11 +11226,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2304
+    rules: 264
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.4615136
     spawnInterval: 1.546072
     blocksPerWave: 4
@@ -11016,43 +11250,42 @@ MonoBehaviour:
     powerUpInterval: 5.8018866
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 16
-    gridHeight: 16
+  - gridWidth: 14
+    gridHeight: 14
     layout:
-    - .....######.....
-    - .....######.....
-    - .....###X##.....
-    - .....######.....
-    - .....######.....
-    - '########X###X###'
-    - '################'
-    - '####X###########'
-    - '##X#############'
-    - '################'
-    - '#######X#####X##'
-    - .....######.....
-    - .....######.....
-    - .....#####X.....
-    - .....######.....
-    - .....######.....
-    mission: 10
+    - ....######....
+    - ....######....
+    - ....###X##....
+    - ....######....
+    - '#######X######'
+    - '##########X###'
+    - '##############'
+    - '##X###########'
+    - '##############'
+    - '######X####X##'
+    - ....######....
+    - ....#####X....
+    - ....######....
+    - ....######....
+    mission: 12
     coinTarget: 23
     surviveSeconds: 58
-    keys: 6
+    keys: 7
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 2304
+    rules: 264
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1680046
     spawnInterval: 1.6257209
     blocksPerWave: 3
     blockLinger: 1.5
-    aimAtPlayerChance: 0.1
+    aimAtPlayerChance: 0.05
     rampUp: 0.29228374
     lineWaveChance: 0.115370244
     bombChance: 0.1543414
@@ -11066,20 +11299,29 @@ MonoBehaviour:
     powerUpInterval: 5.7829294
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 10
+  - gridWidth: 19
+    gridHeight: 19
     layout:
-    - ...####...
-    - ...####...
-    - ...####...
-    - '#######X##'
-    - '##########'
-    - '#########X'
-    - '#######X##'
-    - ...####...
-    - ...####...
-    - ...X###...
-    mission: 3
+    - ......######X......
+    - ......X######......
+    - ......#######......
+    - ......#######......
+    - ......#######......
+    - ......###X###......
+    - '###############X###'
+    - '###################'
+    - '###################'
+    - '#############X#####'
+    - '#####X###########X#'
+    - '###################'
+    - '###################'
+    - ......#######......
+    - ......#######......
+    - ......#######......
+    - ......#######......
+    - ......#######......
+    - ......X######......
+    mission: 0
     coinTarget: 23
     surviveSeconds: 59
     keys: 5
@@ -11087,11 +11329,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2816
+    rules: 268
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.166799
     spawnInterval: 1.6239986
     blocksPerWave: 4
@@ -11145,11 +11388,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2304
+    rules: 264
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1655942
     spawnInterval: 1.6222775
     blocksPerWave: 4
@@ -11200,11 +11444,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2432
+    rules: 776
     quest: 3
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1643901
     spawnInterval: 1.863641
     blocksPerWave: 3
@@ -11246,11 +11491,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2304
+    rules: 264
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1631868
     spawnInterval: 1.6188384
     blocksPerWave: 4
@@ -11294,11 +11540,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2304
+    rules: 264
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1619843
     spawnInterval: 1.6171205
     blocksPerWave: 5
@@ -11350,11 +11597,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4128
+    rules: 72
     quest: 3
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1607826
     spawnInterval: 1.8577142
     blocksPerWave: 3
@@ -11397,11 +11645,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 1
     levelEvent: 3
-    rules: 2080
+    rules: 1032
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1595815
     spawnInterval: 1.613688
     blocksPerWave: 4
@@ -11447,11 +11696,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 1040
+    rules: 9
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 1
+    final: 0
     warningTime: 1.4479766
     spawnInterval: 1.5313746
     blocksPerWave: 4
@@ -11501,11 +11751,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 520
+    rules: 12
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1571817
     spawnInterval: 1.7712857
     blocksPerWave: 3
@@ -11524,30 +11775,20 @@ MonoBehaviour:
     powerUpInterval: 5.612856
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 20
-    gridHeight: 20
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '####################'
-    - '#################X##'
-    - '####################'
-    - '####################'
-    - '########X###########'
-    - '####################'
-    - ..........##########
-    - ..........##########
-    - ..........##########
-    - ..........##########
-    - ..........##########
-    - ..........##########
-    - ..........##X######X
-    - ..........##########
-    - '#####X##############'
-    - '###############X####'
-    - '#################X##'
-    - '####################'
-    - '####X###############'
-    - '####################'
-    mission: 0
+    - '##########'
+    - '##########'
+    - '##########'
+    - .....#####
+    - .....#####
+    - .....#####
+    - .....#X##X
+    - '##########'
+    - '########X#'
+    - '##X#######'
+    mission: 3
     coinTarget: 24
     surviveSeconds: 59
     keys: 5
@@ -11555,11 +11796,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 3
-    rules: 516
+    rules: 136
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.155983
     spawnInterval: 1.6085471
     blocksPerWave: 4
@@ -11613,11 +11855,12 @@ MonoBehaviour:
     chaseSpeed: 1.4917972
     lowWalls: 0
     levelEvent: 0
-    rules: 258
+    rules: 520
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1547849
     spawnInterval: 1.6068356
     blocksPerWave: 4
@@ -11669,11 +11912,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 1
-    rules: 129
+    rules: 4104
     quest: 4
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1535876
     spawnInterval: 1.845894
     blocksPerWave: 3
@@ -11724,11 +11968,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 65
+    rules: 72
     quest: 0
     guardsPrincess: 0
     phased: 1
     marathon: 0
+    final: 0
     warningTime: 1.152391
     spawnInterval: 1.6034157
     blocksPerWave: 3
@@ -11770,11 +12015,12 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 4128
+    rules: 2056
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 0
     warningTime: 1.1511952
     spawnInterval: 1.6017073
     blocksPerWave: 4
@@ -11793,47 +12039,43 @@ MonoBehaviour:
     powerUpInterval: 5.5187807
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 20
-    gridHeight: 20
+  - gridWidth: 10
+    gridHeight: 10
     layout:
-    - '##############'
-    - '##############'
-    - '###########X##'
-    - '##############'
-    - '###########X##'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '##############'
-    - '########X#####'
-    - '##############'
-    - '##############'
-    - '#######S######'
-    mission: 7
+    - '#########'
+    - '#######X#'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#####X###'
+    - '#########'
+    - '####S####'
+    mission: 3
     coinTarget: 24
     surviveSeconds: 60
-    keys: 3
+    keys: 5
     collapseBehind: 0
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 2064
+    rules: 0
     quest: 0
     guardsPrincess: 0
     phased: 0
     marathon: 0
+    final: 1
     warningTime: 1.15
     spawnInterval: 1.6
-    blocksPerWave: 5
+    blocksPerWave: 4
     blockLinger: 1.5
-    aimAtPlayerChance: 0.2
+    aimAtPlayerChance: 0.15
     rampUp: 0.3
-    lineWaveChance: 0.45
-    bombChance: 0.2
+    lineWaveChance: 0.3
+    bombChance: 0.12
     breakTiles: 1
     tileRepairTime: 6
-    fireChance: 0.4
+    fireChance: 0
     fireDuration: 3.5
     coinInterval: 2.2
     coinLifetime: 5
