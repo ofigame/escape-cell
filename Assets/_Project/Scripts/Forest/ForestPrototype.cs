@@ -474,7 +474,7 @@ namespace SquashBot.Forest
                     if (!touch.press.isPressed) continue;
                     int id = touch.touchId.ReadValue();
                     var p = touch.position.ReadValue();
-                    if (joyFinger < 0 && touch.press.wasPressedThisFrame && p.x < Screen.width * 0.5f && p.y < Screen.height * 0.75f)
+                    if (joyFinger < 0 && touch.press.wasPressedThisFrame && OnStickArea(p))
                     {
                         joyFinger = id;
                         joyStart = p;
@@ -485,14 +485,14 @@ namespace SquashBot.Forest
             else if (Mouse.current != null && Mouse.current.leftButton.isPressed)
             {
                 var p = Mouse.current.position.ReadValue();
-                if (joyFinger < 0 && Mouse.current.leftButton.wasPressedThisFrame && p.x < Screen.width * 0.5f) { joyFinger = 0; joyStart = p; }
+                if (joyFinger < 0 && Mouse.current.leftButton.wasPressedThisFrame && OnStickArea(p)) { joyFinger = 0; joyStart = p; }
                 if (joyFinger == 0) { held = true; now = p; }
             }
             if (!held) joyFinger = -1;
             joyBase.gameObject.SetActive(held);
             if (held)
             {
-                float radius = 110f / scale;
+                float radius = 80f / scale;
                 var d = Vector2.ClampMagnitude(now - joyStart, radius);
                 joyInput = d / radius;
                 joyBase.anchoredPosition = joyStart * scale;
@@ -523,6 +523,13 @@ namespace SquashBot.Forest
             if (pos.z >= world.BoardZ - 0.3f) EnterTunnel();
         }
 
+        /// <summary>The stick starts wherever a thumb lands, except on the buttons (bottom right) and the top bar.</summary>
+        private static bool OnStickArea(Vector2 p) =>
+            p.y < Screen.height * 0.82f && !(p.x > Screen.width * 0.55f && p.y < Screen.height * 0.42f);
+
+        private bool InFight() =>
+            (new Vector2(pos.x, pos.z) - world.ClearingCentre).magnitude < ForestWorld.ClearingRadius + 3f && enemies.Exists(e => !e.dead);
+
         private void Move(float dt)
         {
             var input = joyInput;
@@ -531,6 +538,14 @@ namespace SquashBot.Forest
                 // Relative to the camera: up on the stick is "forward", where the camera looks.
                 float stickYaw = Mathf.Atan2(input.x, input.y) * Mathf.Rad2Deg;
                 float target = camYaw + stickYaw;
+                // Path assist: pushing roughly forward follows the path's bends by itself (a thumb on glass is not precise).
+                if (Mathf.Abs(stickYaw) < 40f && !InFight() && pos.y < ForestWorld.DeckHeight - 0.5f)
+                {
+                    float aheadZ = pos.z + 4f;
+                    float pathYaw = Mathf.Atan2(world.PathX(aheadZ) - pos.x, aheadZ - pos.z) * Mathf.Rad2Deg;
+                    if (Mathf.Abs(Mathf.DeltaAngle(target, pathYaw)) < 60f)
+                        target = Mathf.LerpAngle(target, pathYaw, 0.75f * (1f - Mathf.Abs(stickYaw) / 40f));
+                }
                 yaw = Mathf.MoveTowardsAngle(yaw, target, TurnSpeed * dt);
                 float speed = WalkSpeed * Mathf.Clamp01(input.magnitude);
                 var fwd = Quaternion.Euler(0f, yaw, 0f) * Vector3.forward;
