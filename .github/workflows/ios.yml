@@ -75,9 +75,7 @@ jobs:
           buildName: EscapeCell
           # By default the container gets 95% of the runner's ~8 GB and is killed (exit 137) when IL2CPP needs more.
           # A higher limit lets it spill into the swap file added above.
-          dockerMemoryLimit: 46g
-          # Fewer worker threads at once: a slower export that needs much less memory at its peak.
-          customParameters: -job-worker-count 2
+          dockerMemoryLimit: 34g
 
       # Tar keeps the execute bits on Unity's build scripts, which a plain artifact upload would drop.
       - name: Pack Xcode project
