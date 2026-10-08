@@ -89,6 +89,32 @@ jobs:
           # By default the container gets 95% of the runner's ~8 GB and is killed (exit 137) when IL2CPP needs more.
           # A higher limit lets it spill into the swap file added above.
           dockerMemoryLimit: 34g
+        id: export1
+        continue-on-error: true
+
+      # Memory on the hosted runner is borderline: the export is sometimes killed (exit 137) and passes on a re-run.
+      # So one automatic second try, after freeing the page cache and showing what memory and swap are left.
+      - name: Free memory before the second try
+        if: steps.export1.outcome == 'failure'
+        run: |
+          sync && echo 3 | sudo tee /proc/sys/vm/drop_caches
+          docker ps -aq | xargs -r docker rm -f || true
+          sudo rm -rf build/iOS || true
+          swapon --show
+          free -h
+
+      - name: Export Xcode project (second try)
+        if: steps.export1.outcome == 'failure'
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: iOS
+          unityVersion: 6000.6.4f1
+          buildName: EscapeCell
+          dockerMemoryLimit: 34g
 
       # Tar keeps the execute bits on Unity's build scripts, which a plain artifact upload would drop.
       - name: Pack Xcode project
