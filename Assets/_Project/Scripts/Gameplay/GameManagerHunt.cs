@@ -65,7 +65,7 @@ namespace SquashBot.Gameplay
             // The robot and the guards grow with the campaign, up to twice their old size; the robot carries its weapon.
             float grow = Mathf.Clamp01(World / 12f);
             robot.transform.localScale = Vector3.one * Mathf.Lerp(1.5f, 2f, grow);
-            Robot.HopScale = 0.75f;
+            Robot.HopScale = 0.6f;
             hunt.EnemyScale = Mathf.Lerp(1.45f, 1.85f, grow);
             weapon = Armory.Equipped;
             if (heldWeapon != null) Destroy(heldWeapon.gameObject);

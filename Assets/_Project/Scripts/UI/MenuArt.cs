@@ -15,32 +15,41 @@ namespace SquashBot.UI
     {
         public enum Icon { Garage, Shop, Map, Guide, Chest }
 
-        /// <summary>"ESCAPE CELL" in the display font: a dark extruded back, a bright gradient face with a thick outline.</summary>
+        /// <summary>
+        /// The logo: "foi" big in the display font (a dark extruded back, a bright gradient face with a thick outline),
+        /// and "ESCAPE CELL" under it, smaller and spaced out.
+        /// </summary>
         public static void Logo(Transform parent, Vector2 anchor, Vector2 position)
         {
-            var root = UiFactory.Box("Logo", parent, anchor, position, new Vector2(1000f, 340f));
+            var root = UiFactory.Box("Logo", parent, anchor, position, new Vector2(1000f, 360f));
             root.localRotation = Quaternion.Euler(0f, 0f, 2.5f);
             // The extrusion: a few dark copies stepping down make the letters look like thick blocks.
             for (int i = 4; i >= 1; i--)
             {
-                var depth = Layer(root, new Vector2(0f, -i * 5f), Color.Lerp(new Color(0.07f, 0.32f, 0.45f), new Color(0.04f, 0.12f, 0.25f), i / 4f));
+                var depth = Layer(root, "foi", new Vector2(0f, 46f - i * 6f), 250f, Color.Lerp(new Color(0.07f, 0.32f, 0.45f), new Color(0.04f, 0.12f, 0.25f), i / 4f));
                 Outline(depth, new Color(0.04f, 0.1f, 0.22f), 0.22f);
             }
-            var face = Layer(root, Vector2.zero, Color.white);
+            var face = Layer(root, "foi", new Vector2(0f, 46f), 250f, Color.white);
             face.enableVertexGradient = true;
             face.colorGradient = new VertexGradient(Color.white, Color.white, new Color(0.45f, 0.95f, 1f), new Color(0.6f, 1f, 0.85f));
             Outline(face, new Color(0.05f, 0.14f, 0.3f), 0.22f);
+            for (int i = 2; i >= 1; i--)
+                Outline(Layer(root, "ESCAPE CELL", new Vector2(0f, -122f - i * 4f), 70f, new Color(0.04f, 0.12f, 0.25f)), new Color(0.04f, 0.1f, 0.22f), 0.25f);
+            var sub = Layer(root, "ESCAPE CELL", new Vector2(0f, -122f), 70f, Color.white);
+            sub.characterSpacing = 18f;
+            sub.enableVertexGradient = true;
+            sub.colorGradient = new VertexGradient(Color.white, Color.white, new Color(1f, 0.85f, 0.45f), new Color(1f, 0.85f, 0.45f));
+            Outline(sub, new Color(0.05f, 0.14f, 0.3f), 0.25f);
         }
 
-        private static TextMeshProUGUI Layer(Transform root, Vector2 offset, Color color)
+        private static TextMeshProUGUI Layer(Transform root, string text, Vector2 offset, float size, Color color)
         {
-            var box = UiFactory.Box("Layer", root, new Vector2(0.5f, 0.5f), offset, new Vector2(1000f, 340f));
+            var box = UiFactory.Box("Layer", root, new Vector2(0.5f, 0.5f), offset, new Vector2(1000f, size * 1.2f));
             box.pivot = new Vector2(0.5f, 0.5f);
-            var t = UiFactory.Text(box, "ESCAPE\nCELL", 168f, color, title: true);
+            var t = UiFactory.Text(box, text, size, color, title: true);
             t.enableAutoSizing = false;
-            t.fontSize = 168f;
-            t.lineSpacing = -30f;
-            t.characterSpacing = 2f;
+            t.fontSize = size;
+            t.characterSpacing = text.Length > 4 ? 18f : 4f;
             return t;
         }
 

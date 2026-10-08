@@ -96,17 +96,9 @@ namespace SquashBot.Gameplay
             var dark = MaterialFactory.Create(Palette.RobotDark, Color.black);
             eyeMaterial = MaterialFactory.Create(Palette.RobotEye, Palette.RobotEye);
 
-            Shapes.Rounded("LegL", visual, new Vector3(-0.08f, 0.07f, 0f), new Vector3(0.09f, 0.14f, 0.11f), 0.027f, body);
-            Shapes.Rounded("LegR", visual, new Vector3(0.08f, 0.07f, 0f), new Vector3(0.09f, 0.14f, 0.11f), 0.027f, body);
-            Shapes.Rounded("FootL", visual, new Vector3(-0.08f, 0.02f, 0.03f), new Vector3(0.11f, 0.04f, 0.16f), 0.012f, dark);
-            Shapes.Rounded("FootR", visual, new Vector3(0.08f, 0.02f, 0.03f), new Vector3(0.11f, 0.04f, 0.16f), 0.012f, dark);
-            Shapes.Rounded("Body", visual, new Vector3(0f, 0.2f, 0f), new Vector3(0.3f, 0.16f, 0.24f), 0.048f, light);
-            Shapes.Rounded("ArmL", visual, new Vector3(-0.18f, 0.2f, 0f), new Vector3(0.06f, 0.14f, 0.08f), 0.018f, body);
-            Shapes.Rounded("ArmR", visual, new Vector3(0.18f, 0.2f, 0f), new Vector3(0.06f, 0.14f, 0.08f), 0.018f, body);
-            Shapes.Rounded("Head", visual, new Vector3(0f, 0.5f, 0f), new Vector3(0.46f, 0.42f, 0.44f), 0.07f, body);
-            Shapes.Rounded("Visor", visual, new Vector3(0f, 0.5f, 0.222f), new Vector3(0.34f, 0.22f, 0.03f), 0.04f, dark);
-            eyeL = Shapes.Rounded("EyeL", visual, new Vector3(-0.075f, 0.51f, 0.24f), new Vector3(0.07f, 0.08f, 0.02f), 0.01f, eyeMaterial).transform;
-            eyeR = Shapes.Rounded("EyeR", visual, new Vector3(0.075f, 0.51f, 0.24f), new Vector3(0.07f, 0.08f, 0.02f), 0.01f, eyeMaterial).transform;
+            darkMaterial = dark;
+            hero = Mathf.Clamp(Data.SaveData.Hero, 0, HeroModels.Count - 1);
+            (eyeL, eyeR) = HeroModels.Build(visual, hero, body, light, dark, eyeMaterial);
 
             accessories = new GameObject("Accessories").transform;
             accessories.SetParent(visual, false);
@@ -148,14 +140,40 @@ namespace SquashBot.Gameplay
             return true;
         }
 
+        private int hero;
+        private Material darkMaterial;
+        public int Hero => hero;
+
+        // The build's own colours, tinted a little by the world (the classic build takes the world's colours as before).
+        private Color OwnBody(int world) => hero == 0 ? RobotLooks.BodyColor(world) : Color.Lerp(HeroModels.Colours(hero).body, RobotLooks.BodyColor(world), 0.2f);
+        private Color OwnLight(int world) => hero == 0 ? RobotLooks.LightColor(world) : Color.Lerp(HeroModels.Colours(hero).light, RobotLooks.LightColor(world), 0.15f);
+        private Color OwnEye(int world) => hero == 0 ? RobotLooks.EyeColor(world) : HeroModels.Colours(hero).eye;
+
+        /// <summary>Switches to another of foi's four builds (rebuilds the body parts in place).</summary>
+        public void SetHero(int newHero)
+        {
+            newHero = Mathf.Clamp(newHero, 0, HeroModels.Count - 1);
+            if (newHero == hero) return;
+            hero = newHero;
+            for (int i = visual.childCount - 1; i >= 0; i--)
+            {
+                var c = visual.GetChild(i);
+                if (HeroModels.IsPart(c.name)) DestroyImmediate(c.gameObject);
+            }
+            (eyeL, eyeR) = HeroModels.Build(visual, hero, bodyMaterial, lightMaterial, darkMaterial, eyeMaterial);
+            int w = lookWorld;
+            lookWorld = -1;
+            ApplyWorld(Mathf.Max(0, w));
+        }
+
         /// <summary>Dress the robot for a world: its colors and the gear it has earned so far.</summary>
         public void ApplyWorld(int world)
         {
             if (world == lookWorld) return;
             lookWorld = world;
-            MaterialFactory.SetColors(bodyMaterial, RobotLooks.BodyColor(world), Color.black);
-            MaterialFactory.SetColors(lightMaterial, RobotLooks.LightColor(world), Color.black);
-            var eye = RobotLooks.EyeColor(world);
+            MaterialFactory.SetColors(bodyMaterial, OwnBody(world), Color.black);
+            MaterialFactory.SetColors(lightMaterial, OwnLight(world), Color.black);
+            var eye = OwnEye(world);
             MaterialFactory.SetColors(eyeMaterial, eye, eye);
             RobotLooks.Build(accessories, world);
         }
@@ -174,12 +192,12 @@ namespace SquashBot.Gameplay
         {
             int world = Mathf.Max(0, lookWorld);
             var paint = outfit[Data.Slot.Color];
-            var bodyColor = paint.IsDefault ? RobotLooks.BodyColor(world) : paint.color;
-            var lightColor = paint.IsDefault ? RobotLooks.LightColor(world) : Color.Lerp(paint.color, Color.white, 0.35f);
+            var bodyColor = paint.IsDefault ? OwnBody(world) : paint.color;
+            var lightColor = paint.IsDefault ? OwnLight(world) : Color.Lerp(paint.color, Color.white, 0.35f);
             MaterialFactory.SetColors(bodyMaterial, bodyColor, Color.black);
             MaterialFactory.SetColors(lightMaterial, lightColor, Color.black);
             var eyes = outfit[Data.Slot.Eyes];
-            var eye = eyes.IsDefault ? RobotLooks.EyeColor(world) : eyes.color;
+            var eye = eyes.IsDefault ? OwnEye(world) : eyes.color;
             MaterialFactory.SetColors(eyeMaterial, eye, eye);
 
             if (cosmetics == null)

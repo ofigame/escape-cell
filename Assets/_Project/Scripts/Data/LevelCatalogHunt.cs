@@ -12,7 +12,10 @@ namespace SquashBot.Data
     public static partial class LevelCatalog
     {
         /// <summary>Difficulty along the campaign, 0..1, never falling.</summary>
-        private static float HuntDifficulty(int index) => Mathf.Pow(Mathf.Clamp01(index / (float)(LevelCount - 1)), 0.9f);
+        /// The first three floors are the same gentle start; from the fourth on it climbs in steps you can feel (a
+        /// tenth of the way by level 10, a fifth by level 20) and keeps climbing to the end.
+        private static float HuntDifficulty(int index) =>
+            index < 3 ? 0f : 0.06f + 0.94f * Mathf.Pow(Mathf.Clamp01((index - 3) / (float)(LevelCount - 4)), 0.62f);
 
         public static LevelData Hunt(LevelScript.Card card)
         {
@@ -22,7 +25,7 @@ namespace SquashBot.Data
             // The floor: a few training squares, then growing wide shapes.
             int size = index switch
             {
-                0 => 5, 1 => 5, 2 => 6, 3 => 6, 4 => 7, 5 => 7, 6 => 8, 7 => 8,
+                0 => 5, 1 => 5, 2 => 5, 3 => 6, 4 => 7, 5 => 7, 6 => 8, 7 => 8,
                 _ => Mathf.RoundToInt(Mathf.Lerp(9f, 28f, Mathf.Pow(Mathf.InverseLerp(8f, LevelCount - 1, index), 0.8f))),
             };
             var level = new LevelData
@@ -40,7 +43,7 @@ namespace SquashBot.Data
 
             // Crates: gentle at first, a little busier every level; now and then a storm (the hazard rhythm).
             level.warningTime = Mathf.Lerp(1.65f, 1.05f, d);
-            level.spawnInterval = index < 2 ? 3.4f : Mathf.Lerp(2.7f, 1.35f, d);
+            level.spawnInterval = index < 3 ? 3.4f : Mathf.Lerp(2.6f, 1.3f, d);
             level.blocksPerWave = Mathf.Clamp(1 + Mathf.FloorToInt(d * 3.2f), 1, 4);
             level.aimAtPlayerChance = Mathf.Lerp(0.18f, 0.36f, d);
             level.rampUp = Mathf.Lerp(0.1f, 0.25f, d);
@@ -53,7 +56,7 @@ namespace SquashBot.Data
             // The floor's crowd: bugs to squash, robots to beat (none on the very first floor).
             int floorTiles = size * size;
             level.bugs = Mathf.Clamp(2 + Mathf.RoundToInt(d * 12f), 2, Mathf.Max(2, floorTiles / 7));
-            level.robots = index == 0 ? 0 : Mathf.Clamp(1 + Mathf.RoundToInt(d * 7f), 1, Mathf.Max(1, floorTiles / 12));
+            level.robots = index < 3 ? 0 : Mathf.Clamp(1 + Mathf.RoundToInt(d * 7f), 1, Mathf.Max(1, floorTiles / 12));
             // Now and then a tall humanoid enforcer joins them (from level 13), more often late on.
             level.brutes = index < 12 ? 0 : (index % 4 == 1 ? 1 : 0) + (d > 0.55f && index % 2 == 0 ? 1 : 0);
             level.robotHp = 2 + Mathf.RoundToInt(d * 3f);

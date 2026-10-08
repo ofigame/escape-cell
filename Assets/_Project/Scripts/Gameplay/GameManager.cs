@@ -225,6 +225,7 @@ namespace SquashBot.Gameplay
             FrameGovernor.Install(); // picture quality for this device (after the camera's post-processing exists)
             AdMob.Start(); // consent form where required, then AdMob (phones only)
             SplashScreen.Show(); // OFIGAME studio logo over the menu, fading out
+            if (!SaveData.HeroChosen) cameraRig.StartCoroutine(FirstHeroPick());
         }
 
         private void CreateUi()
@@ -274,6 +275,7 @@ namespace SquashBot.Gameplay
             ui.MenuPressed += ShowMenu;
             ui.PausePressed += Pause;
             ui.BagPressed += OpenBag;
+            ui.HeroPicker.Picked += OnHeroPicked;
             ui.WeaponBag.Picked += TakeWeapon;
             ui.WeaponBag.Closed += CloseBag;
             ui.ResumePressed += Resume;

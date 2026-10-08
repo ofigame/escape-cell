@@ -38,6 +38,33 @@ namespace SquashBot.UI
             return rt;
         }
 
+        /// <summary>A picture of one of foi's builds, three-quarters from the front.</summary>
+        public static Texture Hero(int hero)
+        {
+            string key = "hero" + hero;
+            if (cache.TryGetValue(key, out var rt) && rt != null && rt.IsCreated()) return rt;
+            Setup();
+            rt = new RenderTexture(512, 512, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Hero " + hero };
+            rt.Create();
+            var holder = new GameObject("Preview").transform;
+            holder.SetParent(stage, false);
+            var colours = HeroModels.Colours(hero);
+            var body = MaterialFactory.Create(colours.body, Color.black);
+            var light = MaterialFactory.Create(colours.light, Color.black);
+            var dark = MaterialFactory.Create(Palette.RobotDark, Color.black);
+            var eye = MaterialFactory.Create(colours.eye, colours.eye);
+            HeroModels.Build(holder, hero, body, light, dark, eye);
+            holder.localRotation = Quaternion.Euler(0f, 205f, 0f);
+            holder.localPosition = new Vector3(0f, -0.44f, 0f);
+            cam.orthographicSize = 0.52f;
+            cam.targetTexture = rt;
+            cam.Render();
+            cam.targetTexture = null;
+            Object.DestroyImmediate(holder.gameObject);
+            cache[key] = rt;
+            return rt;
+        }
+
         private static void Setup()
         {
             if (cam != null) return;

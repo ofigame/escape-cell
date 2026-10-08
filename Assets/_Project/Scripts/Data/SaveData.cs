@@ -29,6 +29,20 @@ namespace SquashBot.Data
             set { PlayerPrefs.SetInt(CoinsKey, value); PlayerPrefs.Save(); }
         }
 
+        /// <summary>Which of foi's four builds the player plays (0 Classic, 1 Volt, 2 Kaya, 3 Zip).</summary>
+        public static int Hero
+        {
+            get => PlayerPrefs.GetInt("sb_hero", 0);
+            set { PlayerPrefs.SetInt("sb_hero", value); PlayerPrefs.Save(); }
+        }
+
+        /// <summary>The build was picked at the very first start (the picker never opens by itself again).</summary>
+        public static bool HeroChosen
+        {
+            get => PlayerPrefs.GetInt("sb_hero_chosen", 0) == 1;
+            set { PlayerPrefs.SetInt("sb_hero_chosen", value ? 1 : 0); PlayerPrefs.Save(); }
+        }
+
         /// <summary>How far the play camera stands from the robot: 0 near … 3 far (default 2).</summary>
         public static int CameraDistance
         {

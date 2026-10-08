@@ -22,6 +22,8 @@ namespace SquashBot.UI
         public event Action<Dictionary<Slot, Cosmetic>> PreviewChanged;
         /// <summary>A dance was picked: show it off.</summary>
         public event Action DancePreview;
+        /// <summary>The "change build" button (foi's four builds) was pressed.</summary>
+        public event Action HeroPressed;
 
         private const int TabsPerRow = 5;
 
@@ -58,6 +60,8 @@ namespace SquashBot.UI
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var coins = UiFactory.Pill("Coins", bar, new Vector2(1f, 0.5f), new Vector2(-36f, 0f), new Vector2(260f, 100f), UiFactory.PillColor);
             UIController.CoinIcon(coins, new Vector2(56f, 0f));
+            // Switch to another of foi's builds (for coins), under the title bar.
+            UiFactory.MakeButton(root, Loc.T("hero.change"), Kind.Gold, new Vector2(1f, 1f), new Vector2(-36f, -206f), new Vector2(300f, 90f), () => HeroPressed?.Invoke(), 34f);
             coinsText = UiFactory.TextBox("Value", coins, new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Vector2(150f, 90f), "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
 
             // Lower panel

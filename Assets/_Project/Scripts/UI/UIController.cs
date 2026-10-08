@@ -162,6 +162,7 @@ namespace SquashBot.UI
         public ShopScreen Shop { get; private set; }
         public TipCard Tip { get; private set; }
         public WeaponBag WeaponBag { get; private set; }
+        public HeroPicker HeroPicker { get; private set; }
         private RectTransform bagButton;
 
         public void SetBagVisible(bool on) { if (bagButton != null && bagButton.gameObject.activeSelf != on) bagButton.gameObject.SetActive(on); }
@@ -249,6 +250,8 @@ namespace SquashBot.UI
             BuildBanner(root);
             Tip = TipCard.Create(root);
             WeaponBag = WeaponBag.Create(root);
+            HeroPicker = HeroPicker.Create(root);
+            Garage.HeroPressed += () => HeroPicker.Show(true);
         }
 
         // ---------- Menu ----------
