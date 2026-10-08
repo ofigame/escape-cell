@@ -72,6 +72,7 @@ namespace SquashBot.Data
             ["btn.close"] = "닫기",
             ["result.win"] = "레벨 클리어!",
             ["float.moreTime"] = "+{0}초!",
+            ["settings.privacy"] = "개인정보 옵션",
             ["callout.cage"] = "미라 공주를 구하라!",
             ["float.bagged"] = "{0} 가방에 추가 ({1})",
             ["float.healthFull"] = "체력 가득",

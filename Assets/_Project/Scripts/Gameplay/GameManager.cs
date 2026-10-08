@@ -222,6 +222,7 @@ namespace SquashBot.Gameplay
             // Closed on a road last time: the menu comes first, PLAY goes back onto the road.
             if (PendingRoad >= LevelCount) PlayerPrefs.DeleteKey(RoadLevelKey);
             FrameGovernor.Install(); // picture quality for this device (after the camera's post-processing exists)
+            AdMob.Start(); // consent form where required, then AdMob (phones only)
             SplashScreen.Show(); // OFIGAME studio logo over the menu, fading out
         }
 
@@ -256,7 +257,12 @@ namespace SquashBot.Gameplay
             {
                 if (dailyRun) ShowMenu();
                 else if (bonusRun) ShowMap();
-                else ShowMap(animateFrom: levelIndex);
+                else
+                {
+                    // Between levels an interstitial may come first (paced: see Ads.AfterLevel).
+                    int won = levelIndex;
+                    Ads.AfterLevel(won, () => ShowMap(animateFrom: won));
+                }
             };
             ui.BonusPressed += StartBonus;
             ui.ContinuePressed += WatchAdToContinue;

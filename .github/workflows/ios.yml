@@ -93,10 +93,18 @@ jobs:
       - name: Unpack
         run: mkdir xcode && tar -xzf xcode-project.tgz -C xcode
 
+      # The ad SDKs (Google Mobile Ads and the mediation networks) come as CocoaPods: the External Dependency Manager
+      # writes the Podfile during the Unity export (CocoaPods isn't on the Linux runner), so they are installed here.
+      - name: Install CocoaPods dependencies
+        working-directory: xcode
+        run: |
+          if [ -f Podfile ]; then pod install --repo-update; else echo "No Podfile"; fi
+
       - name: Compile without signing
         working-directory: xcode
         run: |
-          xcodebuild -project Unity-iPhone.xcodeproj -target Unity-iPhone -configuration Release \
+          if [ -d Unity-iPhone.xcworkspace ]; then TARGET="-workspace Unity-iPhone.xcworkspace -scheme Unity-iPhone"; else TARGET="-project Unity-iPhone.xcodeproj -target Unity-iPhone"; fi
+          xcodebuild $TARGET -configuration Release \
             -sdk iphoneos SYMROOT="$PWD/out" \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
             build | tail -n 40

@@ -72,6 +72,7 @@ namespace SquashBot.Data
             ["btn.close"] = "BAĞLA",
             ["result.win"] = "SƏVİYYƏ KEÇİLDİ!",
             ["float.moreTime"] = "+{0} SANİYƏ!",
+            ["settings.privacy"] = "Məxfilik seçimləri",
             ["callout.cage"] = "Şahzadə Miranı xilas et!",
             ["float.bagged"] = "{0} ÇANTADA ({1})",
             ["float.healthFull"] = "CANIN DOLUDUR",

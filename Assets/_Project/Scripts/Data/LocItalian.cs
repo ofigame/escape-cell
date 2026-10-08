@@ -72,6 +72,7 @@ namespace SquashBot.Data
             ["btn.close"] = "CHIUDI",
             ["result.win"] = "LIVELLO SUPERATO!",
             ["float.moreTime"] = "+{0} SECONDI!",
+            ["settings.privacy"] = "Opzioni privacy",
             ["callout.cage"] = "Libera la principessa Mira!",
             ["float.bagged"] = "{0} NELLA BORSA ({1})",
             ["float.healthFull"] = "SALUTE AL MASSIMO",

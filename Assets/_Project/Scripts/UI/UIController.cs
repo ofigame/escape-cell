@@ -107,6 +107,7 @@ namespace SquashBot.UI
         private RectTransform shieldPill;
         private RectTransform rescuePill, hoverPill;
         private RectTransform healthPill;
+        private GameObject privacyButton;
         private Image healthFill;
         private TextMeshProUGUI healthText;
         private float healthShown = 1f;
@@ -631,12 +632,16 @@ namespace SquashBot.UI
                 settingFaces[kind] = button.transform.Find("Face").GetComponent<Image>();
             }
 
+            // Where the ad consent form applies, the player can change their answer here.
+            privacyButton = UiFactory.MakeButton(card, Loc.T("settings.privacy"), Kind.Secondary, Bottom, new Vector2(0f, 206f), new Vector2(560f, 74f),
+                Monetization.AdMob.ShowPrivacyOptions, 34f).gameObject;
             UiFactory.MakeButton(card, Loc.T("btn.close"), Kind.Primary, Bottom, new Vector2(0f, 50f), new Vector2(560f, 150f), HideSettings, 64f);
             RefreshSettings();
         }
 
         public void RefreshSettings()
         {
+            if (privacyButton != null) privacyButton.SetActive(Monetization.AdMob.PrivacyOptionsRequired);
             SetSetting(SettingKind.Sound, SaveData.Sound);
             SetSetting(SettingKind.Music, SaveData.Music);
             SetSetting(SettingKind.Vibration, SaveData.Vibration);
@@ -1135,6 +1140,7 @@ namespace SquashBot.UI
         /// <summary>Banners appear only on menu-type screens, never over gameplay.</summary>
         private void SetBanner(bool on)
         {
+            Ads.BannerWanted = on;
             if (on) Ads.Banner.Show();
             else Ads.Banner.Hide();
             bannerPlaceholder.SetActive(on && Ads.Banner.IsPlaceholder);

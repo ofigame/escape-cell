@@ -90,6 +90,7 @@ namespace SquashBot.EditorTools
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
             PlayerSettings.bundleVersion = "0.2";
             EditorUserBuildSettings.buildAppBundle = false;
+            ResolveAndroidDependencies();
 
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
@@ -114,6 +115,26 @@ namespace SquashBot.EditorTools
                 Debug.LogException(e);
                 EditorApplication.Exit(1);
             }
+        }
+
+        /// <summary>
+        /// Lets the External Dependency Manager write the ad SDKs (Google Mobile Ads and the mediation adapters) into the
+        /// custom Gradle templates under Assets/Plugins/Android, so Gradle fetches them during the build. Reflection keeps
+        /// this file compiling without the package.
+        /// </summary>
+        private static void ResolveAndroidDependencies()
+        {
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                var resolver = asm.GetType("GooglePlayServices.PlayServicesResolver");
+                if (resolver == null) continue;
+                var resolve = resolver.GetMethod("ResolveSync", new[] { typeof(bool) });
+                if (resolve == null) break;
+                bool ok = (bool)resolve.Invoke(null, new object[] { true });
+                Debug.Log("[SquashBot] Android dependencies resolved: " + ok);
+                return;
+            }
+            Debug.LogWarning("[SquashBot] External Dependency Manager not found: ad SDKs are not resolved.");
         }
 
         /// <summary>

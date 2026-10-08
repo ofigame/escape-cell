@@ -72,6 +72,7 @@ namespace SquashBot.Data
             ["btn.close"] = "ZU",
             ["result.win"] = "GESCHAFFT!",
             ["float.moreTime"] = "+{0} SEKUNDEN!",
+            ["settings.privacy"] = "Datenschutzoptionen",
             ["callout.cage"] = "Befreie Prinzessin Mira!",
             ["float.bagged"] = "{0} IN DEINER TASCHE ({1})",
             ["float.healthFull"] = "GESUNDHEIT VOLL",

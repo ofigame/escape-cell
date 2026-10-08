@@ -16,6 +16,15 @@ namespace SquashBot.Monetization
         void Show(Action<bool> onFinished);
     }
 
+    /// <summary>A full-screen ad between levels.</summary>
+    public interface IInterstitialAds
+    {
+        bool IsReady { get; }
+
+        /// <summary>Shows the ad (or nothing if none is loaded); <paramref name="onClosed"/> runs either way.</summary>
+        void Show(Action onClosed);
+    }
+
     /// <summary>A small banner anchored to the bottom of the screen, shown only outside gameplay.</summary>
     public interface IBannerAds
     {
@@ -34,9 +43,48 @@ namespace SquashBot.Monetization
     {
         public static IRewardedAds Rewarded { get; set; } = new TestRewardedAds();
         public static IBannerAds Banner { get; set; } = new TestBannerAds();
+        public static IInterstitialAds Interstitial { get; set; } = new NoInterstitialAds();
+
+        /// <summary>The menus want the banner right now (a real banner that loads later shows up if so).</summary>
+        public static bool BannerWanted;
+
+        // Pacing of the ads between levels: never in the first levels, at most every few levels and minutes, and
+        // never right after the player chose to watch a rewarded ad.
+        private const int FreeLevels = 10, LevelsBetween = 3;
+        private const float SecondsBetween = 90f, AfterRewarded = 60f;
+        private static int levelsSince;
+        private static float lastFullScreen = -999f;
+
+        /// <summary>A rewarded or interstitial ad was just watched.</summary>
+        public static void MarkFullScreenShown() => lastFullScreen = Time.realtimeSinceStartup;
+
+        /// <summary>
+        /// After a level is won and the player moves on: maybe an interstitial first, then <paramref name="then"/>.
+        /// </summary>
+        public static void AfterLevel(int levelIndex, Action then)
+        {
+            levelsSince++;
+            float since = Time.realtimeSinceStartup - lastFullScreen;
+            bool due = levelIndex >= FreeLevels && levelsSince >= LevelsBetween && since >= SecondsBetween && since >= AfterRewarded;
+            if (!due || !Interstitial.IsReady)
+            {
+                then?.Invoke();
+                return;
+            }
+            levelsSince = 0;
+            MarkFullScreenShown();
+            Interstitial.Show(then);
+        }
 
         /// <summary>Height (in UI units of the 1080-wide reference canvas) kept free at the bottom of menu screens for the banner.</summary>
         public const float BannerReserve = 170f;
+    }
+
+    /// <summary>No interstitials off the phones (editor, Windows).</summary>
+    public class NoInterstitialAds : IInterstitialAds
+    {
+        public bool IsReady => false;
+        public void Show(Action onClosed) => onClosed?.Invoke();
     }
 
     /// <summary>Placeholder banner: the UI draws a labelled strip in the reserved area so the layout can be checked.</summary>

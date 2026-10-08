@@ -40,6 +40,21 @@
     "com.unity.modules.vehicles": "1.0.0",
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0"
-  }
+    "com.unity.modules.xr": "1.0.0",
+    "com.google.ads.mobile": "11.5.0",
+    "com.google.ads.mobile.mediation.applovin": "8.7.7",
+    "com.google.ads.mobile.mediation.unity": "3.21.1",
+    "com.google.ads.mobile.mediation.liftoffmonetize": "5.7.9",
+    "com.google.external-dependency-manager": "1.2.190"
+  },
+  "scopedRegistries": [
+    {
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.google.ads.mobile",
+        "com.google.external-dependency-manager"
+      ]
+    }
+  ]
 }
