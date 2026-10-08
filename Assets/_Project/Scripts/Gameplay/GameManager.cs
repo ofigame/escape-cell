@@ -253,6 +253,7 @@ namespace SquashBot.Gameplay
             ui.Garage.PreviewChanged += outfit => robot.ApplyOutfit(outfit);
             ui.Garage.DancePreview += robot.Cheer;
             ui.SkillBar.Pressed += OnSkillPressed;
+            ui.ForestPressed += StartForest;
             ui.NextPressed += () =>
             {
                 if (dailyRun) ShowMenu();

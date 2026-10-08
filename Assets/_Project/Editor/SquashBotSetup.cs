@@ -30,6 +30,7 @@ namespace SquashBot.EditorTools
             ImportTextMeshProEssentials();
             SetupRenderPipeline();
             CreateBaseMaterial();
+            ForestAssetBuilder.Build();
             var levelSet = CreateLevelSet();
             CreateMainScene(levelSet);
             ConfigurePlayer();
