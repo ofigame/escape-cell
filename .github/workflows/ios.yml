@@ -1,12 +1,4 @@
-          # Sized to the room there is: on /mnt (the runner's scratch disk) leaving 4 GB free; only if /mnt is small, a
-          # smaller file on the root disk that still leaves ~30 GB for the Unity image, the Library and the build.
-          MNT=$(df --output=avail -BG /mnt | tail -1 | tr -dc 0-9)
-          ROOT=$(df --output=avail -BG / | tail -1 | tr -dc 0-9)
-          if [ "$MNT" -ge 14 ]; then SWAP=/mnt/swapfile; SIZE=$(( MNT - 4 )); else SWAP=/swapfile; SIZE=$(( ROOT - 30 )); fi
-          [ "$SIZE" -gt 24 ] && SIZE=24
-          [ "$SIZE" -lt 4 ] && SIZE=4
-          echo "swap $SIZE GB on $SWAP (mnt $MNT GB free, root $ROOT GB free)"
-          sudo fallocate -l ${SIZE}G $SWAP# Builds an unsigned iPhone app (.ipa) in the cloud, no Mac needed.
+# Builds an unsigned iPhone app (.ipa) in the cloud, no Mac needed.
 #   1. Linux runner: Unity (GameCI Docker image) exports the iOS Xcode project.
 #   2. macOS runner: Xcode compiles it into an .ipa without code signing.
 # Install the .ipa with Sideloadly (free Apple ID, re-sign every 7 days) or switch to TestFlight later.
