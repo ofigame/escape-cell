@@ -31,11 +31,21 @@ namespace SquashBot.EditorTools
             SetupRenderPipeline();
             CreateBaseMaterial();
             ForestAssetBuilder.Build();
+            EnsureJourneyTuning();
             var levelSet = CreateLevelSet();
             CreateMainScene(levelSet);
             ConfigurePlayer();
             AssetDatabase.SaveAssets();
             Debug.Log("[SquashBot] Setup complete. Open Assets/_Project/Scenes/Main.unity and press Play.");
+        }
+
+        /// <summary>The journey controls' feel values as an asset (Resources/Journey), so they can be tuned in the Inspector.</summary>
+        private static void EnsureJourneyTuning()
+        {
+            const string dir = ResourcesDir + "/Journey", path = dir + "/JourneyTuning.asset";
+            if (!AssetDatabase.IsValidFolder(dir)) AssetDatabase.CreateFolder(ResourcesDir, "Journey");
+            if (AssetDatabase.LoadAssetAtPath<SquashBot.Journey.JourneyTuning>(path) != null) return;
+            AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<SquashBot.Journey.JourneyTuning>(), path);
         }
 
         /// <summary>Entry point for: Unity -batchmode -executeMethod SquashBot.EditorTools.SquashBotSetup.SetupBatch</summary>
@@ -419,7 +429,12 @@ namespace SquashBot.EditorTools
             // Less code for IL2CPP to convert: keeps the cloud runner's memory in check (exit code 137 = out of memory).
             PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.iOS, ManagedStrippingLevel.Medium);
             PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.iOS, Il2CppCodeGeneration.OptimizeSize);
-            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
+            // The game plays in landscape (the third-person journey): either way round, never portrait.
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
+            PlayerSettings.allowedAutorotateToPortrait = false;
+            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+            PlayerSettings.allowedAutorotateToLandscapeRight = true;
             PlayerSettings.colorSpace = ColorSpace.Linear;
 
             // White ice from the very first frame: the native launch screen (no Unity logo) shows the same ice as the game's

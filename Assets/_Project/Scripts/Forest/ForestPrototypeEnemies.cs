@@ -21,6 +21,7 @@ namespace SquashBot.Forest
             public Vector3 pos, home, dashDir, target;
             public int hp = 3;
             public float windup = -1f, cooldown, flash, dash = -1f, dazed, phase;
+            public int lastThrow = -1;
             public GameObject ring, lane;
             public bool dead, awake;
             public GuardBot bot;
@@ -83,9 +84,9 @@ namespace SquashBot.Forest
         }
 
         /// <summary>A hammer blow lands on <paramref name="e"/> (<paramref name="to"/>: from the walker to it).</summary>
-        private void HitEnemy(Enemy e, Vector3 to)
+        private void HitEnemy(Enemy e, Vector3 to, int baseDamage = 1)
         {
-            int damage = e.dazed > 0f ? 2 : 1;
+            int damage = e.dazed > 0f ? baseDamage * 2 : baseDamage;
             e.hp -= damage;
             e.flash = 1f;
             e.awake = true;
@@ -271,7 +272,7 @@ namespace SquashBot.Forest
                 e.cooldown = Mathf.Max(1.6f, 2.8f - (Leg - 3) * 0.2f);
                 e.windup = 0f;
                 // Aims a little ahead of a moving walker.
-                var lead = Quaternion.Euler(0f, yaw, 0f) * Vector3.forward * (autoRun ? 2.2f : 0.8f);
+                var lead = Quaternion.Euler(0f, yaw, 0f) * Vector3.forward * (input.Sprint ? 2.2f : 0.8f);
                 e.target = new Vector3(pos.x + lead.x, 0f, pos.z + lead.z);
                 e.target.y = GroundY(e.target.x, e.target.z, pos.y);
                 e.ring.SetActive(true);
