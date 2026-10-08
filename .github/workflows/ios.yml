@@ -37,19 +37,20 @@ jobs:
         run: |
           sudo swapoff -a || true
           sudo rm -f /mnt/swapfile /swapfile
-          # Sized to the room there is: on /mnt (the runner's scratch disk) leaving 4 GB free; only if /mnt is small, a
-          # smaller file on the root disk that still leaves ~30 GB for the Unity image, the Library and the build.
+          # Swap on both disks, each sized to the room it has: /mnt (the scratch disk) keeps 4 GB free, the root disk
+          # keeps ~35 GB for the Unity image, the Library and the build. Together up to 32 GB.
           MNT=$(df --output=avail -BG /mnt | tail -1 | tr -dc 0-9)
           ROOT=$(df --output=avail -BG / | tail -1 | tr -dc 0-9)
-          if [ "$MNT" -ge 14 ]; then SWAP=/mnt/swapfile; SIZE=$(( MNT - 4 )); else SWAP=/swapfile; SIZE=$(( ROOT - 30 )); fi
-          [ "$SIZE" -gt 24 ] && SIZE=24
-          [ "$SIZE" -lt 4 ] && SIZE=4
-          echo "swap ${SIZE} GB on $SWAP (mnt ${MNT} GB free, root ${ROOT} GB free)"
-          sudo fallocate -l ${SIZE}G $SWAP
-          sudo chmod 600 $SWAP
-          sudo mkswap $SWAP
-          sudo swapon $SWAP
-          sudo sysctl vm.swappiness=80
+          A=$(( MNT - 4 )); [ "$A" -gt 22 ] && A=22
+          B=$(( ROOT - 35 )); [ "$B" -gt 10 ] && B=10
+          echo "mnt ${MNT} GB free, root ${ROOT} GB free: swap ${A} GB on /mnt, ${B} GB on /"
+          if [ "$A" -ge 2 ]; then
+            sudo fallocate -l ${A}G /mnt/swapfile && sudo chmod 600 /mnt/swapfile && sudo mkswap /mnt/swapfile && sudo swapon /mnt/swapfile
+          fi
+          if [ "$B" -ge 2 ]; then
+            sudo fallocate -l ${B}G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
+          fi
+          sudo sysctl vm.swappiness=90
           free -h
           df -h / /mnt
 
@@ -74,7 +75,9 @@ jobs:
           buildName: EscapeCell
           # By default the container gets 95% of the runner's ~8 GB and is killed (exit 137) when IL2CPP needs more.
           # A higher limit lets it spill into the swap file added above.
-          dockerMemoryLimit: 34g
+          dockerMemoryLimit: 46g
+          # Fewer worker threads at once: a slower export that needs much less memory at its peak.
+          customParameters: -job-worker-count 2
 
       # Tar keeps the execute bits on Unity's build scripts, which a plain artifact upload would drop.
       - name: Pack Xcode project
