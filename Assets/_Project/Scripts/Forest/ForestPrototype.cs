@@ -21,7 +21,7 @@ namespace SquashBot.Forest
     /// </summary>
     public class ForestPrototype : MonoBehaviour
     {
-        private const float WalkSpeed = 3.6f, TurnSpeed = 420f, JumpSpeed = 5.6f, Gravity = 16f;
+        private const float WalkSpeed = 3.6f, TurnSpeed = 240f, JumpSpeed = 5.6f, Gravity = 16f;
         private const float CamBack = 3.8f, CamUp = 1.55f, CamPitch = 9f;
         private const float HitDamage = 0.25f;
 
@@ -83,6 +83,8 @@ namespace SquashBot.Forest
         private CanvasGroup endPanel;
         private int joyFinger = -1;
         private Vector2 joyStart, joyInput;
+        private bool joyActive, joyDragged;
+        private float joyTime, yawVel, camYawVel;
         private bool jumpQueued, attackQueued;
 
         // Things in the world.
@@ -463,7 +465,7 @@ namespace SquashBot.Forest
                 if (kb.spaceKey.wasPressedThisFrame) jumpQueued = true;
                 if (kb.fKey.wasPressedThisFrame || kb.jKey.wasPressedThisFrame) attackQueued = true;
             }
-            // The joystick: a finger that lands on the left side of the screen (not on a button).
+            // The joystick: a finger that lands anywhere but on a button or the top bar.
             var ts = Touchscreen.current;
             bool held = false;
             Vector2 now = default;
@@ -488,9 +490,17 @@ namespace SquashBot.Forest
                 if (joyFinger < 0 && Mouse.current.leftButton.wasPressedThisFrame && OnStickArea(p)) { joyFinger = 0; joyStart = p; }
                 if (joyFinger == 0) { held = true; now = p; }
             }
+            // A quick tap (no drag) strikes; a drag walks.
+            if (held && !joyActive) { joyActive = true; joyDragged = false; joyTime = Time.unscaledTime; }
+            if (!held && joyActive)
+            {
+                joyActive = false;
+                if (!joyDragged && Time.unscaledTime - joyTime < 0.35f) attackQueued = true;
+            }
             if (!held) joyFinger = -1;
-            joyBase.gameObject.SetActive(held);
-            if (held)
+            if (held && (now - joyStart).magnitude > 16f / scale) joyDragged = true;
+            joyBase.gameObject.SetActive(held && joyDragged);
+            if (held && joyDragged)
             {
                 float radius = 80f / scale;
                 var d = Vector2.ClampMagnitude(now - joyStart, radius);
@@ -546,7 +556,8 @@ namespace SquashBot.Forest
                     if (Mathf.Abs(Mathf.DeltaAngle(target, pathYaw)) < 60f)
                         target = Mathf.LerpAngle(target, pathYaw, 0.75f * (1f - Mathf.Abs(stickYaw) / 40f));
                 }
-                yaw = Mathf.MoveTowardsAngle(yaw, target, TurnSpeed * dt);
+                // Turning eases in and out (a smooth arc, not a snap).
+                yaw = Mathf.SmoothDampAngle(yaw, target, ref yawVel, 0.2f, TurnSpeed, dt);
                 float speed = WalkSpeed * Mathf.Clamp01(input.magnitude);
                 var fwd = Quaternion.Euler(0f, yaw, 0f) * Vector3.forward;
                 var next = pos + fwd * (speed * dt);
@@ -556,7 +567,7 @@ namespace SquashBot.Forest
                 robot.ArenaBob(Mathf.Clamp01(input.magnitude));
             }
             // The camera swings round behind the robot, a little slower than it turns.
-            camYaw = Mathf.MoveTowardsAngle(camYaw, yaw, 160f * dt * (0.4f + Mathf.Abs(Mathf.DeltaAngle(camYaw, yaw)) / 90f));
+            camYaw = Mathf.SmoothDampAngle(camYaw, yaw, ref camYawVel, 0.5f, 140f, dt);
 
             float ground = GroundY(pos.x, pos.z, pos.y);
             if (jumpQueued && grounded) { vy = JumpSpeed; grounded = false; AudioManager.PlaySfx(Sfx.Hop, 0.6f, 1.1f); }
