@@ -15,20 +15,20 @@ namespace SquashBot.Visual
         private Material core;
         private float raise, flash;
 
-        public static GuardBot Build(Transform parent)
+        public static GuardBot Build(Transform parent, Color? plates = null)
         {
             var root = new GameObject("GuardBot").transform;
             root.SetParent(parent, false);
             var g = root.gameObject.AddComponent<GuardBot>();
-            g.Make(root);
+            g.Make(root, plates ?? new Color(0.55f, 0.2f, 0.18f));
             return g;
         }
 
-        private void Make(Transform root)
+        private void Make(Transform root, Color plateColor)
         {
             var metal = MaterialFactory.Create(new Color(0.3f, 0.32f, 0.38f), Color.black);
             var dark = MaterialFactory.Create(new Color(0.14f, 0.15f, 0.19f), Color.black);
-            var plate = MaterialFactory.Create(new Color(0.55f, 0.2f, 0.18f), new Color(0.08f, 0.02f, 0.02f));
+            var plate = MaterialFactory.Create(plateColor, plateColor * 0.12f);
             var red = MaterialFactory.Create(new Color(1f, 0.25f, 0.18f), new Color(2.6f, 0.4f, 0.2f));
             core = MaterialFactory.Create(new Color(1f, 0.45f, 0.2f), new Color(2.4f, 0.8f, 0.25f));
 

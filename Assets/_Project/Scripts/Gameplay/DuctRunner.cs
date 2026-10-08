@@ -683,6 +683,7 @@ namespace SquashBot.Gameplay
             var height = new float[n];
             int straightFrom = roadMode ? Mathf.CeilToInt(length) - 4 : GateRow - 16;
             int r = roadMode ? 8 : 22;
+            float heading = 0f;
             while (r < straightFrom)
             {
                 if (rng.Next(3) > 0)
@@ -690,6 +691,14 @@ namespace SquashBot.Gameplay
                     // A turn: the turning rate eases in and out, total 40-100 degrees.
                     int len = 16 + rng.Next(14);
                     float total = (40f + rng.Next(60)) * (rng.Next(2) == 0 ? -1f : 1f) * Mathf.Deg2Rad;
+                    if (Realistic && roadMode)
+                    {
+                        // A journey's passage never doubles back towards the land it left: its heading stays within 70 degrees.
+                        const float limit = 70f * Mathf.Deg2Rad;
+                        if (Mathf.Abs(heading + total) > limit) total = -total;
+                        total = Mathf.Clamp(total, -limit - heading, limit - heading);
+                        heading += total;
+                    }
                     for (int i = 0; i < len && r + i < straightFrom; i++)
                     {
                         float s = Mathf.Sin((i + 0.5f) / len * Mathf.PI);

@@ -19,7 +19,7 @@ namespace SquashBot.Forest
     /// behind it), climbs stone stairs onto a raised deck full of falling crates and sweeping logs, goes down again,
     /// collects coins and fights two enemy robots in a clearing, and reaches the tunnel mouth.
     /// </summary>
-    public class ForestPrototype : MonoBehaviour
+    public partial class ForestPrototype : MonoBehaviour
     {
         private const float WalkSpeed = 3.6f, TurnSpeed = 240f, JumpSpeed = 5.6f, Gravity = 16f;
         private const float CamBack = 3.8f, CamUp = 1.55f, CamPitch = 9f;
@@ -82,9 +82,8 @@ namespace SquashBot.Forest
         private TextMeshProUGUI coinText, objectiveText;
         private CanvasGroup endPanel;
         private int joyFinger = -1;
-        private Vector2 joyStart, joyInput;
-        private bool joyActive, joyDragged;
-        private float joyTime, yawVel, camYawVel;
+        private Vector2 joyInput;
+        private float yawVel, camYawVel;
         private bool jumpQueued, attackQueued;
 
         // Things in the world.
@@ -98,17 +97,6 @@ namespace SquashBot.Forest
         private Vector3 deckSafe = new Vector3(0f, ForestWorld.DeckHeight + 0.09f, ForestWorld.DeckStart + 1f);
         private readonly List<Transform> rollers = new List<Transform>();
         private Material warnMat, crateMat, goldMat;
-
-        private class Enemy
-        {
-            public Transform root;
-            public Vector3 pos;
-            public int hp = 3;
-            public float windup = -1f, cooldown, flash;
-            public GameObject ring;
-            public bool dead;
-            public GuardBot bot;
-        }
 
         private class Crate
         {
@@ -152,7 +140,9 @@ namespace SquashBot.Forest
             BuildCoins();
             BuildSweepers();
             BuildEnemies();
+            BuildMission();
             BuildHud();
+            BuildAutoBadge();
             AudioManager.PlayMusic(MusicTheme.Menu);
             BuildAmbience();
         }
@@ -297,27 +287,6 @@ namespace SquashBot.Forest
             }
         }
 
-        private void BuildEnemies()
-        {
-            var spots = new[] { new Vector2(-4f, 3f), new Vector2(4.5f, -2f), new Vector2(0.5f, 5.5f), new Vector2(-5f, -4f) };
-            for (int i = 0; i < Mathf.Min(2 + (Leg - 1) / 2, spots.Length); i++)
-            {
-                var off = spots[i];
-                var e = new Enemy();
-                var p = world.ClearingCentre + off;
-                e.pos = new Vector3(p.x, world.TerrainY(p.x, p.y), p.y);
-                e.root = new GameObject("EnemyRobot").transform;
-                e.root.SetParent(world.transform, false);
-                e.bot = GuardBot.Build(e.root);
-                e.ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                Destroy(e.ring.GetComponent<Collider>());
-                e.ring.transform.SetParent(world.transform, false);
-                e.ring.GetComponent<MeshRenderer>().sharedMaterial = warnMat;
-                e.ring.SetActive(false);
-                enemies.Add(e);
-            }
-        }
-
         // ---------- Ambience ----------
 
         private ParticleSystem leaves;
@@ -380,14 +349,14 @@ namespace SquashBot.Forest
             canvas.sortingOrder = 40;
             scaler.matchWidthOrHeight = Screen.width < Screen.height ? 0f : 1f;
             var t = canvas.transform;
-            var hp = UiFactory.Pill("Health", t, new Vector2(0f, 1f), new Vector2(36f, -160f), new Vector2(340f, 70f), UiFactory.PillColor);
+            var hp = UiFactory.Pill("Health", t, new Vector2(0f, 1f), new Vector2(36f, -200f), new Vector2(340f, 70f), UiFactory.PillColor);
             UIController.HeartIcon(hp, new Vector2(40f, 0f), 46f);
             UiFactory.Bar(hp, new Vector2(0f, 0.5f), new Vector2(76f, 0f), new Vector2(240f, 22f), new Color(0.4f, 0.95f, 0.5f), out healthFill);
-            var coinPill = UiFactory.Pill("Coins", t, new Vector2(1f, 1f), new Vector2(-36f, -160f), new Vector2(240f, 90f), UiFactory.PillColor);
+            var coinPill = UiFactory.Pill("Coins", t, new Vector2(1f, 1f), new Vector2(-36f, -200f), new Vector2(240f, 90f), UiFactory.PillColor);
             UIController.CoinIcon(coinPill, new Vector2(52f, 0f));
             coinText = UiFactory.TextBox("Value", coinPill, new Vector2(0f, 0.5f), new Vector2(96f, 0f), new Vector2(130f, 80f), "0", 46f, Palette.UiGold, align: TextAlignmentOptions.Left);
-            var obj = UiFactory.Pill("Objective", t, new Vector2(0.5f, 1f), new Vector2(0f, -60f), new Vector2(720f, 84f), new Color(0.06f, 0.1f, 0.08f, 0.6f));
-            objectiveText = UiFactory.TextBox("Text", obj, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(690f, 76f), "", 36f, Color.white);
+            var obj = UiFactory.Pill("Objective", t, new Vector2(0.5f, 1f), new Vector2(0f, -60f), new Vector2(720f, 118f), new Color(0.06f, 0.1f, 0.08f, 0.6f));
+            objectiveText = UiFactory.TextBox("Text", obj, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(690f, 110f), "", 34f, Color.white);
             objectiveText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.MakeButton(t, "X", UiFactory.ButtonKind.Icon, new Vector2(0f, 1f), new Vector2(36f, -36f), new Vector2(104f, 104f), () => Exited?.Invoke(), 52f);
 
@@ -432,83 +401,10 @@ namespace SquashBot.Forest
             endPanel.alpha = 0f;
             endPanel.blocksRaycasts = false;
             health = 1f;
+            autoRun = false;
             pos = checkpoint = StartPoint();
             yaw = camYaw = 0f;
             camInit = false;
-        }
-
-        // ---------- Input ----------
-
-        /// <summary>Test hook: the robot walks the path by itself (screenshots of the whole leg).</summary>
-        public static bool AutoWalk;
-
-        private void ReadInput()
-        {
-            joyInput = Vector2.zero;
-            if (AutoWalk)
-            {
-                float aheadZ = pos.z + 4f;
-                var target = new Vector3(world.PathX(aheadZ), 0f, aheadZ);
-                var to = target - pos;
-                float rel = Mathf.DeltaAngle(camYaw, Mathf.Atan2(to.x, to.z) * Mathf.Rad2Deg) * Mathf.Deg2Rad;
-                joyInput = new Vector2(Mathf.Sin(rel), Mathf.Cos(rel));
-                if (grounded && (InGap(pos.x, pos.z + 0.35f) || rollers.Exists(r => r.localPosition.z > pos.z && r.localPosition.z - pos.z < 1.6f))) jumpQueued = true;
-                return;
-            }
-            float scale = canvas.GetComponent<RectTransform>().rect.width / Screen.width;
-#if ENABLE_INPUT_SYSTEM
-            var kb = Keyboard.current;
-            if (kb != null)
-            {
-                var k = new Vector2((kb.dKey.isPressed ? 1 : 0) - (kb.aKey.isPressed ? 1 : 0), (kb.wKey.isPressed ? 1 : 0) - (kb.sKey.isPressed ? 1 : 0));
-                if (k != Vector2.zero) joyInput = k.normalized;
-                if (kb.spaceKey.wasPressedThisFrame) jumpQueued = true;
-                if (kb.fKey.wasPressedThisFrame || kb.jKey.wasPressedThisFrame) attackQueued = true;
-            }
-            // The joystick: a finger that lands anywhere but on a button or the top bar.
-            var ts = Touchscreen.current;
-            bool held = false;
-            Vector2 now = default;
-            if (ts != null)
-            {
-                foreach (var touch in ts.touches)
-                {
-                    if (!touch.press.isPressed) continue;
-                    int id = touch.touchId.ReadValue();
-                    var p = touch.position.ReadValue();
-                    if (joyFinger < 0 && touch.press.wasPressedThisFrame && OnStickArea(p))
-                    {
-                        joyFinger = id;
-                        joyStart = p;
-                    }
-                    if (id == joyFinger) { held = true; now = p; }
-                }
-            }
-            else if (Mouse.current != null && Mouse.current.leftButton.isPressed)
-            {
-                var p = Mouse.current.position.ReadValue();
-                if (joyFinger < 0 && Mouse.current.leftButton.wasPressedThisFrame && OnStickArea(p)) { joyFinger = 0; joyStart = p; }
-                if (joyFinger == 0) { held = true; now = p; }
-            }
-            // A quick tap (no drag) strikes; a drag walks.
-            if (held && !joyActive) { joyActive = true; joyDragged = false; joyTime = Time.unscaledTime; }
-            if (!held && joyActive)
-            {
-                joyActive = false;
-                if (!joyDragged && Time.unscaledTime - joyTime < 0.35f) attackQueued = true;
-            }
-            if (!held) joyFinger = -1;
-            if (held && (now - joyStart).magnitude > 16f / scale) joyDragged = true;
-            joyBase.gameObject.SetActive(held && joyDragged);
-            if (held && joyDragged)
-            {
-                float radius = 80f / scale;
-                var d = Vector2.ClampMagnitude(now - joyStart, radius);
-                joyInput = d / radius;
-                joyBase.anchoredPosition = joyStart * scale;
-                joyKnob.anchoredPosition = d * scale;
-            }
-#endif
         }
 
         // ---------- Update ----------
@@ -524,6 +420,7 @@ namespace SquashBot.Forest
             UpdateCoins();
             UpdateDeck(dt);
             UpdateEnemies(dt);
+            UpdateMission(dt);
             UpdateGuide();
             if (hurtLeft > 0f) hurtLeft -= dt;
             UiFactory.SetBar(healthFill, health);
@@ -533,38 +430,20 @@ namespace SquashBot.Forest
             if (pos.z >= world.BoardZ - 0.3f) EnterTunnel();
         }
 
-        /// <summary>The stick starts wherever a thumb lands, except on the buttons (bottom right) and the top bar.</summary>
-        private static bool OnStickArea(Vector2 p) =>
-            p.y < Screen.height * 0.82f && !(p.x > Screen.width * 0.55f && p.y < Screen.height * 0.42f);
-
         private bool InFight() =>
             (new Vector2(pos.x, pos.z) - world.ClearingCentre).magnitude < ForestWorld.ClearingRadius + 3f && enemies.Exists(e => !e.dead);
 
         private void Move(float dt)
         {
-            var input = joyInput;
-            if (input.sqrMagnitude > 0.02f)
+            if (Steer(dt, out float speed))
             {
-                // Relative to the camera: up on the stick is "forward", where the camera looks.
-                float stickYaw = Mathf.Atan2(input.x, input.y) * Mathf.Rad2Deg;
-                float target = camYaw + stickYaw;
-                // Path assist: pushing roughly forward follows the path's bends by itself (a thumb on glass is not precise).
-                if (Mathf.Abs(stickYaw) < 40f && !InFight() && pos.y < ForestWorld.DeckHeight - 0.5f)
-                {
-                    float aheadZ = pos.z + 4f;
-                    float pathYaw = Mathf.Atan2(world.PathX(aheadZ) - pos.x, aheadZ - pos.z) * Mathf.Rad2Deg;
-                    if (Mathf.Abs(Mathf.DeltaAngle(target, pathYaw)) < 60f)
-                        target = Mathf.LerpAngle(target, pathYaw, 0.75f * (1f - Mathf.Abs(stickYaw) / 40f));
-                }
-                // Turning eases in and out (a smooth arc, not a snap).
-                yaw = Mathf.SmoothDampAngle(yaw, target, ref yawVel, 0.2f, TurnSpeed, dt);
-                float speed = WalkSpeed * Mathf.Clamp01(input.magnitude);
                 var fwd = Quaternion.Euler(0f, yaw, 0f) * Vector3.forward;
                 var next = pos + fwd * (speed * dt);
                 next = Collide(next);
+                CheckAutoBlocked(speed * dt, new Vector2(next.x - pos.x, next.z - pos.z).magnitude, dt);
                 pos.x = next.x;
                 pos.z = next.z;
-                robot.ArenaBob(Mathf.Clamp01(input.magnitude));
+                robot.ArenaBob(Mathf.Clamp01(speed / WalkSpeed));
             }
             // The camera swings round behind the robot, a little slower than it turns.
             camYaw = Mathf.SmoothDampAngle(camYaw, yaw, ref camYawVel, 0.5f, 140f, dt);
@@ -657,6 +536,8 @@ namespace SquashBot.Forest
             float maxOff = (new Vector2(next.x, next.z) - world.ClearingCentre).magnitude < ForestWorld.ClearingRadius + 2f ? 14f : 7f;
             next.x = Mathf.Clamp(next.x, px - maxOff, px + maxOff);
             next.z = Mathf.Clamp(next.z, world.Entry == PassageStyle.None ? -12f : ForestWorld.ArriveZ, world.BoardZ + 0.5f);
+            // The passage gate stays shut until the tasks are done.
+            if (GateShut && next.z > world.TunnelZ - 0.9f) next.z = Mathf.Min(pos.z, world.TunnelZ - 0.9f);
             // The cliffs either side of a passage are solid: slide along them, never through.
             if (world.InRock(next.x, next.z))
             {
@@ -695,19 +576,7 @@ namespace SquashBot.Forest
                     var to = e.pos - pos;
                     to.y = 0f;
                     if (to.magnitude > 2.2f || Vector3.Angle(fwd, to) > 75f) continue;
-                    e.hp--;
-                    e.flash = 1f;
-                    e.bot.Flash();
-                    e.bot.SetRaise(0f);
-                    Shockwave.Create(world.ToWorld(e.pos), 1.2f, new Color(1f, 0.85f, 0.45f));
-                    rig.Punch(0.6f);
-                    e.windup = -1f;
-                    e.ring.SetActive(false);
-                    e.pos += to.normalized * 1.2f;
-                    fx.Burst(world.ToWorld(e.pos) + Vector3.up * 0.6f, Palette.UiGold, Palette.CoinGlow, 24, 5f);
-                    rig.Shake(0.5f);
-                    AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.8f);
-                    if (e.hp <= 0) KillEnemy(e);
+                    HitEnemy(e, to);
                 }
             }
             attackQueued = false;
@@ -718,16 +587,6 @@ namespace SquashBot.Forest
                 if (swingT > 0.6f) a = Mathf.Lerp(110f, 0f, (swingT - 0.6f) / 0.4f);
                 if (hammer != null) hammer.localRotation = Quaternion.Euler(20f + a, 0f, -15f);
             }
-        }
-
-        private void KillEnemy(Enemy e)
-        {
-            e.dead = true;
-            fx.Burst(world.ToWorld(e.pos) + Vector3.up * 0.6f, new Color(1f, 0.4f, 0.3f), new Color(2.4f, 0.6f, 0.3f), 50, 7f);
-            Shockwave.Create(world.ToWorld(e.pos), 2f, new Color(1f, 0.6f, 0.3f));
-            e.root.gameObject.SetActive(false);
-            coins += 5;
-            AudioManager.PlaySfx(Sfx.Coin, 1f, 0.9f);
         }
 
         private void UpdateCoins()
@@ -763,6 +622,7 @@ namespace SquashBot.Forest
             {
                 // Back to the last checkpoint with full health.
                 health = 1f;
+                autoRun = false;
                 pos = checkpoint;
                 camInit = false;
             }
@@ -789,6 +649,7 @@ namespace SquashBot.Forest
                 camInit = false;
             }
             UpdateRollers(dt, onDeck);
+            UpdateSpikes(dt, onDeck);
 
             // Falling crates: a red mark, then a crate drops onto it.
             if (onDeck)
@@ -905,55 +766,6 @@ namespace SquashBot.Forest
             }
         }
 
-        private void UpdateEnemies(float dt)
-        {
-            foreach (var e in enemies)
-            {
-                if (e.dead) continue;
-                var to = pos - e.pos;
-                to.y = 0f;
-                float dist = to.magnitude;
-                if (e.cooldown > 0f) e.cooldown -= dt;
-                if (e.windup >= 0f)
-                {
-                    // Winding up a slam: the red ring grows; standing in it when it lands hurts.
-                    e.windup += dt;
-                    float k = e.windup / 0.7f;
-                    e.bot.SetRaise(k * 1.3f);
-                    e.ring.transform.localPosition = e.pos + Vector3.up * 0.03f;
-                    e.ring.transform.localScale = new Vector3(3.8f * k, 0.01f, 3.8f * k);
-                    if (k >= 1f)
-                    {
-                        e.windup = -1f;
-                        e.cooldown = 1.2f;
-                        e.bot.SetRaise(0f);
-                        e.ring.SetActive(false);
-                        Shockwave.Create(world.ToWorld(e.pos), 1.9f, new Color(1f, 0.5f, 0.3f));
-                        rig.Shake(0.5f);
-                        AudioManager.PlaySfx(Sfx.Impact, 0.8f, 0.7f);
-                        if (dist < 1.9f) Hurt(e.pos);
-                    }
-                }
-                else if (dist < 10f)
-                {
-                    if (dist > 1.5f) e.pos += to.normalized * (2.3f * dt);
-                    else if (e.cooldown <= 0f)
-                    {
-                        e.windup = 0f;
-                        e.ring.SetActive(true);
-                    }
-                }
-                e.pos.y = world.TerrainY(e.pos.x, e.pos.z);
-                e.root.localPosition = e.pos + Vector3.up * (e.windup > 0.4f ? (e.windup - 0.4f) * 1.5f : 0f);
-                if (dist > 0.1f) e.root.localRotation = Quaternion.Slerp(e.root.localRotation, Quaternion.LookRotation(to), dt * 6f);
-                if (e.flash > 0f)
-                {
-                    e.flash -= dt * 3f;
-                    e.root.localScale = Vector3.one * (1f + Mathf.Max(0f, e.flash) * 0.15f);
-                }
-            }
-        }
-
         private void UpdateGuide()
         {
             // The next waypoint not yet reached.
@@ -965,8 +777,20 @@ namespace SquashBot.Forest
             string key = fight ? "forest.fight"
                 : pos.y > ForestWorld.DeckHeight - 0.5f && pos.z > ForestWorld.DeckStart - 1f ? "forest.deck"
                 : stage <= 1 ? "forest.follow" : stage == 2 ? "forest.deck" : stage == 3 ? "forest.clearing" : "forest.tunnel";
-            objectiveText.text = Loc.T(key);
+            objectiveText.text = MissionText(Loc.T(key));
 
+            // While the gate is shut and the way is done, the chevron leads to the nearest robot or core left.
+            if (!fight && MissionTarget(out var hunt))
+            {
+                var toward = hunt - pos;
+                toward.y = 0f;
+                var p = pos + Vector3.ClampMagnitude(toward, 2.5f);
+                p.y = GroundY(p.x, p.z, pos.y) + 0.35f + Mathf.Sin(Time.time * 3f) * 0.08f;
+                guide.localPosition = p;
+                if (toward.sqrMagnitude > 0.01f) guide.localRotation = Quaternion.LookRotation(toward);
+                guide.gameObject.SetActive(toward.magnitude > 3f);
+                return;
+            }
             // The chevron: on the path a few metres ahead, pointing on.
             float aheadZ = Mathf.Min(pos.z + 3.5f, next.z);
             float ax = Mathf.Abs(aheadZ - pos.z) < 0.5f ? next.x : world.PathX(aheadZ);
@@ -1027,6 +851,7 @@ namespace SquashBot.Forest
         {
             if (TunnelReached == null) { Finish(); return; }
             suspended = true;
+            autoRun = false;
             canvas.gameObject.SetActive(false);
             guide.gameObject.SetActive(false);
             joyBase.gameObject.SetActive(false);
@@ -1070,6 +895,8 @@ namespace SquashBot.Forest
             BuildCoins();
             BuildSweepers();
             BuildEnemies();
+            BuildMission();
+            autoRun = false;
             robot.EnterArena();
             robot.gameObject.SetActive(true);
             if (hammer == null) hammer = HammerModels.Held(robot.Visual, Weapons.Level);
