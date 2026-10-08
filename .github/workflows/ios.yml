@@ -42,21 +42,28 @@ jobs:
           df -h / /mnt
 
       # The hosted runner's RAM is tight for Unity's iOS shader compilation; without extra swap the build can be
-      # killed by the OOM killer (exit code 137). It goes on /mnt: on the root disk a 20 GB swap left no room for the ~15 GB Unity image.
+      # killed by the OOM killer (exit code 137). Where it goes depends on the runner's disks (see below).
       - name: Add swap space
         run: |
           sudo swapoff -a || true
           sudo rm -f /mnt/swapfile /swapfile
-          # Swap only on /mnt (the scratch disk), sized to its room (keeping 3 GB free). Never on the root disk: the
-          # ~15 GB Unity image is unpacked there and a swap file on it ran the pull out of space (exit 125).
-          MNT=$(df --output=avail -BG /mnt | tail -1 | tr -dc 0-9)
+          # Swap on /mnt when it is a separate scratch disk with room; otherwise on the root disk, but always keeping
+          # 30 GB free there for the ~15 GB Unity image and the build (a swap file that ate that room ended in exit 125).
           ROOT=$(df --output=avail -BG / | tail -1 | tr -dc 0-9)
-          A=$(( MNT - 3 )); [ "$A" -gt 24 ] && A=24
-          echo "mnt ${MNT} GB free, root ${ROOT} GB free: swap ${A} GB on /mnt"
-          if [ "$A" -ge 2 ]; then
-            sudo fallocate -l ${A}G /mnt/swapfile && sudo chmod 600 /mnt/swapfile && sudo mkswap /mnt/swapfile && sudo swapon /mnt/swapfile
+          ROOTDEV=$(df --output=source / | tail -1)
+          MNT=0; MNTDEV=""
+          if [ -d /mnt ]; then MNT=$(df --output=avail -BG /mnt | tail -1 | tr -dc 0-9); MNTDEV=$(df --output=source /mnt | tail -1); fi
+          if [ -n "$MNTDEV" ] && [ "$MNTDEV" != "$ROOTDEV" ] && [ "$MNT" -ge 8 ]; then F=/mnt/swapfile; A=$(( MNT - 3 )); else F=/swapfile; A=$(( ROOT - 30 )); fi
+          [ "$A" -gt 24 ] && A=24
+          echo "root ${ROOT} GB free ($ROOTDEV), mnt ${MNT} GB free ($MNTDEV): swap ${A} GB at $F"
+          if [ "$A" -ge 4 ]; then
+            sudo fallocate -l ${A}G $F || sudo dd if=/dev/zero of=$F bs=1M count=$(( A * 1024 ))
+            sudo chmod 600 $F && sudo mkswap $F && sudo swapon $F
+          else
+            echo "::warning::No room for a swap file - the Unity export may run out of memory (exit 137)"
           fi
           sudo sysctl vm.swappiness=90
+          swapon --show
           free -h
           df -h / /mnt
 
