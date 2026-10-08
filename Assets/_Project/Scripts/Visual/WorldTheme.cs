@@ -195,6 +195,70 @@ namespace SquashBot.Visual
             return levelIndex % Data.LevelCatalog.LevelsPerWorld >= SecondDesignFrom && first.variant != null ? first.variant : first;
         }
 
+        /// <summary>
+        /// The floor colours of each world's realm as foi climbs: pale test cells first, then mint woods, rose gardens,
+        /// a twilight forest, coral and gold canyons, lagoon and abyss seas, ice, amethyst and jade caves, candy-floss
+        /// and sunset clouds and finally the dark cosmic road. Dark floors get bright glowing seams (and the bugs on
+        /// them glow too), so nothing on them disappears. Null keeps the design's own colours.
+        /// </summary>
+        private static readonly (string tile, string slab, Color glow)?[] Realms =
+        {
+            null, null,
+            ("#BFE8D2", "#7FBFA0", new Color(0.4f, 1.9f, 1.2f)),
+            ("#F2C6DE", "#C88AAE", new Color(1.8f, 0.8f, 1.4f)),
+            ("#3E3A6E", "#2A2650", new Color(0.7f, 1.3f, 2.8f)),
+            ("#F2B48A", "#C0704A", new Color(2.2f, 1.0f, 0.4f)),
+            ("#E8C27A", "#B08040", new Color(2.2f, 1.6f, 0.5f)),
+            ("#B8574A", "#7A3028", new Color(2.6f, 0.9f, 0.4f)),
+            ("#5FC4D0", "#2E8090", new Color(0.4f, 1.8f, 2.4f)),
+            ("#2C5E8A", "#173A5A", new Color(0.4f, 1.8f, 2.8f)),
+            ("#1E3A50", "#0F2030", new Color(0.3f, 2.4f, 2.1f)),
+            ("#D8ECFF", "#9CC0E0", new Color(0.8f, 1.6f, 2.6f)),
+            ("#B9D8F0", "#7EA4C8", new Color(0.6f, 1.4f, 2.6f)),
+            ("#8EC8E8", "#5A8EB4", new Color(0.6f, 1.8f, 2.6f)),
+            ("#B48CF0", "#7A50C0", new Color(1.6f, 0.8f, 2.6f)),
+            ("#5A3A9A", "#382270", new Color(1.9f, 1.0f, 2.9f)),
+            ("#40C8B0", "#208070", new Color(0.4f, 2.4f, 1.6f)),
+            ("#FFE0F0", "#F0B0D4", new Color(2.2f, 1.2f, 1.8f)),
+            ("#FFEEC0", "#E8C478", new Color(2.4f, 1.9f, 0.8f)),
+            ("#C8E8FF", "#90C0F0", new Color(0.9f, 1.6f, 2.6f)),
+            ("#F8C4A4", "#E08C6C", new Color(2.4f, 1.2f, 0.8f)),
+            ("#2A2050", "#16102E", new Color(1.5f, 1.1f, 3.0f)),
+            ("#1E1648", "#0C0824", new Color(2.4f, 0.9f, 2.6f)),
+            ("#141230", "#08061A", new Color(0.6f, 2.0f, 3.0f)),
+            ("#321A36", "#1A0A1A", new Color(2.8f, 0.6f, 1.0f)),
+        };
+
+        private static readonly System.Collections.Generic.Dictionary<WorldTheme, WorldTheme> realmCache =
+            new System.Collections.Generic.Dictionary<WorldTheme, WorldTheme>();
+
+        /// <summary>This design with its world's realm floor (the second design a shade of hue apart).</summary>
+        public WorldTheme Realm(int world)
+        {
+            var r = Realms[Mathf.Clamp(world, 0, Realms.Length - 1)];
+            if (!r.HasValue) return this;
+            if (realmCache.TryGetValue(this, out var cached)) return cached;
+            var t = (WorldTheme)MemberwiseClone();
+            bool second = variant == null && System.Array.Exists(All, a => a.variant == this);
+            var tile = Hex(r.Value.tile);
+            var slabColour = Hex(r.Value.slab);
+            if (second)
+            {
+                Color.RGBToHSV(tile, out float h, out float s, out float v);
+                tile = Color.HSVToRGB(Mathf.Repeat(h + 0.035f, 1f), s, v);
+                Color.RGBToHSV(slabColour, out h, out s, out v);
+                slabColour = Color.HSVToRGB(Mathf.Repeat(h + 0.035f, 1f), s, v);
+            }
+            bool dark = tile.grayscale < 0.45f;
+            t.tileTop = tile;
+            t.slab = slabColour;
+            t.tileGlow = r.Value.glow * (dark ? 0.75f : 0.5f);
+            t.slabEdgeGlow = r.Value.glow;
+            t.tileSelfLight = dark ? tile * 0.35f + r.Value.glow * 0.04f : tile * 0.12f;
+            realmCache[this] = t;
+            return t;
+        }
+
         /// <summary>The level of a floor (0-based) from which its second design is used.</summary>
         public const int SecondDesignFrom = 5;
 

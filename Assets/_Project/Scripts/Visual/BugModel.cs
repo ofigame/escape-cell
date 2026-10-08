@@ -21,13 +21,26 @@ namespace SquashBot.Visual
         /// <summary>The colour its insides are (for the splat when it is squashed).</summary>
         public Color Blood { get; private set; } = new Color(0.55f, 0.04f, 0.04f);
 
-        public static BugModel Build(Transform parent, Color accent, int kind = 0)
+        /// <param name="bright">On dark floors and in the later worlds: the bug glows (a lit halo under it, a glowing
+        /// outline and bright eyes), so it never melts into the floor.</param>
+        public static BugModel Build(Transform parent, Color accent, int kind = 0, bool bright = false)
         {
             var root = new GameObject("Bug").transform;
             root.SetParent(parent, false);
             var b = root.gameObject.AddComponent<BugModel>();
             b.Make(root, accent, ((kind % Kinds) + Kinds) % Kinds);
+            if (bright) b.Light(accent);
             return b;
+        }
+
+        private void Light(Color accent)
+        {
+            var halo = MaterialFactory.CreateTransparent(new Color(accent.r, accent.g, accent.b, 0.4f), accent * 1.6f);
+            Shapes.Primitive(PrimitiveType.Cylinder, "Halo", transform, new Vector3(0f, 0.015f, 0f), new Vector3(0.62f, 0.004f, 0.62f), halo);
+            var rim = MaterialFactory.CreateTransparent(new Color(accent.r, accent.g, accent.b, 0.22f), accent * 1.2f);
+            Shapes.Primitive(PrimitiveType.Sphere, "Rim", body, new Vector3(0f, 0.03f, -0.02f), new Vector3(0.4f, 0.27f, 0.46f), rim);
+            foreach (var r in body.GetComponentsInChildren<Renderer>())
+                if (r.name == "Eye") r.transform.localScale *= 1.35f;
         }
 
         private void Make(Transform root, Color accent, int kind)

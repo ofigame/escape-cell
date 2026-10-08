@@ -37,8 +37,8 @@ namespace SquashBot.Gameplay
         private const float SwipeThresholdInches = 0.13f; // small, so a short flick registers on the first frames of the drag
         private const float DecideInches = 0.3f;         // an ambiguous swipe waits until the finger has gone this far
         private const float AmbiguousMargin = 0.18f;     // how clearly one direction must win to fire before that
-        private const float ChainInches = 0.45f;         // a slow drag that keeps going takes another step every this far
-        private const float ChainMinGap = 0.16f;         // ...but not from the tail of a quick flick
+        private const float ChainInches = 0.34f;         // a slow drag that keeps going takes another step every this far
+        private const float ChainMinGap = 0.11f;         // ...but not from the tail of a quick flick
         private const float TapMaxDuration = 0.25f;
         private const float DoubleTapWindow = 0.35f;
         private const float HoldTime = 0.3f;

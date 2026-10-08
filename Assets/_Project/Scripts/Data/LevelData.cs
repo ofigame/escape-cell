@@ -167,6 +167,10 @@ namespace SquashBot.Data
         public int monsterHp = 8;
         [Tooltip("Seconds between the monster's attacks.")]
         public float monsterAttack = 3f;
+        [Tooltip("Armour of the guard robots and the monster: a blow only does the damage above it (weaker weapons barely scratch them).")]
+        public int armor;
+        [Tooltip("Share of health a crate landing on the robot takes.")]
+        public float crateShare = 0.3f;
 
         [Header("Blocks")]
         [Tooltip("Seconds between the red warning appearing and the block hitting the tile.")]

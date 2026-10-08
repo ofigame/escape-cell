@@ -11,6 +11,9 @@ namespace SquashBot.Data
     {
         public const int Max = 9;
 
+        /// <summary>How many of one kind fit now: the backpack's level decides (3 at first, up to <see cref="Max"/>).</summary>
+        public static int Room => Backpack.OrbCapacity;
+
         /// <summary>Kinds that go into the bag (rescues still work by themselves).</summary>
         public static bool Bagged(Gameplay.PowerUpType t) => t != Gameplay.PowerUpType.Rescue;
 
@@ -24,11 +27,11 @@ namespace SquashBot.Data
 
         public static int Count(Gameplay.PowerUpType t) => PlayerPrefs.GetInt(Key(t), 0);
 
-        public static bool Full(Gameplay.PowerUpType t) => Count(t) >= Max;
+        public static bool Full(Gameplay.PowerUpType t) => Count(t) >= Room;
 
         public static void Add(Gameplay.PowerUpType t, int n = 1)
         {
-            PlayerPrefs.SetInt(Key(t), Mathf.Clamp(Count(t) + n, 0, Max));
+            PlayerPrefs.SetInt(Key(t), Mathf.Clamp(Count(t) + n, 0, Mathf.Max(Room, Count(t))));
             PlayerPrefs.Save();
         }
 

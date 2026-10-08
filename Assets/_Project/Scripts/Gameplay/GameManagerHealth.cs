@@ -24,8 +24,6 @@ namespace SquashBot.Gameplay
         private float health = 1f;
         /// <summary>A share of health the next hit takes instead of the usual (set around a robot's blow).</summary>
         private float hitShareOverride = -1f;
-        /// <summary>A crate landing on the robot in the core loop takes this much.</summary>
-        private const float CrateHitShare = 0.3f;
         private float hurtCooldown;
 
         private bool HealthEnabled => !bonusRun && levelIndex >= HealthFromLevel;
@@ -63,7 +61,7 @@ namespace SquashBot.Gameplay
             if (!HealthEnabled) return false;
             if (hurtCooldown > 0f) return true; // still blinking from the last hit
             float share = hitShareOverride >= 0f ? hitShareOverride
-                : level != null && level.mission == MissionType.Hunt && crushed ? CrateHitShare
+                : level != null && level.mission == MissionType.Hunt && crushed ? level.crateShare
                 : HitShare(levelIndex) * weight;
             float damage = share * (1f - Shop.ArmorShare);
             if (health - damage <= 0.001f)

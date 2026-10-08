@@ -621,12 +621,16 @@ namespace SquashBot.Gameplay
                 case Anim.Hop:
                 {
                     float t = Mathf.Clamp01(animTime / (hopDuration * HopScale));
+                    // A swipe already waiting takes over in the last stretch of a plain step, so a run of steps flows
+                    // on without a stop on every tile.
+                    bool flow = HopScale < 1f && bufferedMove.HasValue && t >= 0.8f && Vector3.Distance(from, to) < 1.1f;
+                    if (flow) t = 1f;
                     transform.position = Vector3.Lerp(from, to, t) + Vector3.up * (Mathf.Sin(t * Mathf.PI) * hopHeight);
                     float stretch = 1f + Mathf.Sin(t * Mathf.PI) * 0.15f;
                     visual.localScale = new Vector3(1f / stretch, stretch, 1f / stretch);
                     if (t >= 1f)
                     {
-                        visual.localScale = new Vector3(1.15f, 0.85f, 1.15f);
+                        visual.localScale = flow ? Vector3.one : new Vector3(1.15f, 0.85f, 1.15f);
                         anim = Anim.Idle;
                         Arrived?.Invoke(Position);
                         ConsumeBuffer();

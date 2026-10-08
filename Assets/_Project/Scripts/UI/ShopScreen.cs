@@ -111,9 +111,11 @@ namespace SquashBot.UI
             switch (tab)
             {
                 case Tab.Weapons:
+                    PackCell();
                     foreach (var w in Armory.All) WeaponCell(w);
                     break;
                 case Tab.Tools:
+                    PackCell();
                     BagCell();
                     foreach (var t in Tools.All) ToolCell(t);
                     break;
@@ -225,7 +227,7 @@ namespace SquashBot.UI
             CardName(card, Loc.T("weapon." + w.id));
             var desc = CardDesc(card);
             desc.text = Loc.F("weapon.line", w.damage, w.reach, Loc.T(w.cooldown <= 0.16f ? "weapon.fast" : w.cooldown >= 0.3f ? "weapon.slow" : "weapon.normal"))
-                        + "\n" + Loc.T("weapon.kind." + w.kind);
+                        + "\n" + Loc.T("weapon.kind." + w.kind) + "  ·  " + Loc.F("pack.weight", Backpack.Weight(w));
             var lockText = LockVeil(card, out var veil);
             var buy = BuyButton(card, () =>
             {
@@ -241,7 +243,8 @@ namespace SquashBot.UI
                 else
                 {
                     AudioManager.PlaySfx(Sfx.Bump, 0.6f);
-                    if (Armory.Unlocked(w) && SaveData.Coins < w.price) WorkshopTalk.Poor(bip);
+                    if (Armory.Unlocked(w) && !Backpack.Fits(Backpack.Weight(w))) bip.Queue(Loc.F("pack.tooFull", Backpack.LevelNeeded(Backpack.Weight(w))));
+                    else if (Armory.Unlocked(w) && SaveData.Coins < w.price) WorkshopTalk.Poor(bip);
                 }
                 Refresh();
             });
@@ -252,13 +255,19 @@ namespace SquashBot.UI
                 veil.SetActive(!unlocked);
                 lockText.text = Loc.F("ws.lockedAt", w.unlockAt + 1);
                 image.color = unlocked ? Color.white : new Color(1f, 1f, 1f, 0.35f);
-                label.text = equipped ? Loc.T("weapon.equipped") : owned ? Loc.T("weapon.equip") : unlocked ? w.price.ToString() : Loc.F("ws.lockedAt", w.unlockAt + 1);
+                bool fits = Backpack.Fits(Backpack.Weight(w));
+                label.text = equipped ? Loc.T("weapon.equipped") : owned ? Loc.T("weapon.equip") : !unlocked ? Loc.F("ws.lockedAt", w.unlockAt + 1)
+                    : fits ? w.price.ToString() : Loc.F("pack.needs", Backpack.LevelNeeded(Backpack.Weight(w)));
                 if (owned)
                 {
                     buy.interactable = !equipped;
                     buy.targetGraphic.color = equipped ? UiFactory.GreenStyle.face : UiFactory.CyanStyle.face;
                 }
-                else Afford(buy, unlocked, SaveData.Coins >= w.price);
+                else
+                {
+                    Afford(buy, unlocked, fits && SaveData.Coins >= w.price);
+                    buy.interactable = unlocked; // a tap on a full backpack still says why
+                }
             });
         }
 
@@ -322,7 +331,9 @@ namespace SquashBot.UI
                 else
                 {
                     AudioManager.PlaySfx(Sfx.Bump, 0.6f);
-                    if (Tools.Unlocked(tool) && !Tools.IsMaxed(tool)) WorkshopTalk.Poor(bip);
+                    if (Tools.Unlocked(tool) && !Tools.IsMaxed(tool) && !Backpack.Fits(Backpack.Weight(tool)))
+                        bip.Queue(Loc.F("pack.tooFull", Backpack.LevelNeeded(Backpack.Weight(tool))));
+                    else if (Tools.Unlocked(tool) && !Tools.IsMaxed(tool)) WorkshopTalk.Poor(bip);
                 }
                 Refresh();
             });
@@ -336,9 +347,12 @@ namespace SquashBot.UI
                 int price = Tools.NextPrice(tool);
                 veil.SetActive(locked);
                 lockText.text = Loc.F("ws.lockedAt", Tools.UnlockLevel(tool) + 1);
-                buyLabel.text = locked ? Loc.F("ws.lockedAt", Tools.UnlockLevel(tool) + 1) : maxed ? Loc.T("shop.max") : price.ToString();
-                Afford(buy, !locked && !maxed, SaveData.Coins >= price);
-                desc.text = locked ? Loc.T("ws.src." + tool) : Loc.T(level == 0 ? "tool." + tool + ".desc" : level < Tools.MaxLevel ? "tool." + tool + ".next" : "tool.maxed");
+                bool fits = Backpack.Fits(Backpack.Weight(tool));
+                buyLabel.text = locked ? Loc.F("ws.lockedAt", Tools.UnlockLevel(tool) + 1) : maxed ? Loc.T("shop.max")
+                    : fits ? price.ToString() : Loc.F("pack.needs", Backpack.LevelNeeded(Backpack.Weight(tool)));
+                Afford(buy, !locked && !maxed, fits && SaveData.Coins >= price);
+                desc.text = locked ? Loc.T("ws.src." + tool) : Loc.T(level == 0 ? "tool." + tool + ".desc" : level < Tools.MaxLevel ? "tool." + tool + ".next" : "tool.maxed")
+                    + (locked || maxed ? "" : "  ·  " + Loc.F("pack.weight", Backpack.Weight(tool)));
                 // Owned: the wear/take-off button shares the bottom with the upgrade button.
                 mid.gameObject.SetActive(ownedTool);
                 buyRect.sizeDelta = new Vector2(ownedTool ? 196f : 410f, 92f);
@@ -397,6 +411,79 @@ namespace SquashBot.UI
                 }
                 desc.text = names.Count > 0 ? string.Join(" · ", names) : Loc.T("shop.bagEmpty");
             });
+        }
+
+        /// <summary>
+        /// The backpack: its level, how full it is, and the upgrade to the next level (more room for bigger weapons and
+        /// tools, and for more skill orbs).
+        /// </summary>
+        private void PackCell()
+        {
+            var card = Cell("Backpack", new Color(1f, 0.62f, 0.3f), out var picture);
+            var icon = UiFactory.Box("Icon", picture, new Vector2(0.5f, 0.5f), new Vector2(0f, 10f), new Vector2(110f, 110f));
+            icon.pivot = new Vector2(0.5f, 0.5f);
+            icon.localScale = Vector3.one * 2.2f;
+            DrawBackpack(icon);
+            var levelText = UiFactory.TextBox("Level", picture, new Vector2(0.5f, 0f), new Vector2(0f, -6f), new Vector2(300f, 60f), "", 40f, Palette.UiGold, title: true);
+            levelText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            CardName(card, Loc.T("pack.name"));
+            var desc = CardDesc(card);
+            // How full it is.
+            var track = UiFactory.Box("Track", card, new Vector2(0.5f, 0f), new Vector2(0f, 150f), new Vector2(400f, 22f));
+            track.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(track, new Color(1f, 1f, 1f, 0.14f), UiSprites.Rounded, 6f).raycastTarget = false;
+            var bar = UiFactory.Box("Bar", track, new Vector2(0f, 0.5f), Vector2.zero, new Vector2(0f, 22f));
+            bar.pivot = new Vector2(0f, 0.5f);
+            var barImage = UiFactory.Fill(bar, new Color(1f, 0.7f, 0.3f), UiSprites.Rounded, 6f);
+            barImage.raycastTarget = false;
+            var buy = BuyButton(card, () =>
+            {
+                if (Backpack.TryUpgrade())
+                {
+                    AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
+                    Haptics.Medium();
+                    Pop(card);
+                    bip.Queue(Loc.F("pack.bip", Backpack.Level));
+                    Purchased?.Invoke();
+                }
+                else
+                {
+                    AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                    if (!Backpack.IsMaxed) WorkshopTalk.Poor(bip);
+                }
+                Refresh();
+            });
+            var label = buy.GetComponentInChildren<TextMeshProUGUI>();
+            refreshers.Add(() =>
+            {
+                int used = Backpack.Used, cap = Backpack.Capacity;
+                levelText.text = Loc.F("pack.level", Backpack.Level);
+                bar.sizeDelta = new Vector2(400f * Mathf.Clamp01(used / (float)cap), 22f);
+                barImage.color = used >= cap ? new Color(1f, 0.4f, 0.35f) : new Color(1f, 0.7f, 0.3f);
+                desc.text = Loc.F("pack.room", used, cap, Backpack.OrbCapacity)
+                            + (Backpack.IsMaxed ? "" : "\n" + Loc.F("pack.next", Backpack.CapacityAt(Backpack.Level + 1)));
+                label.text = Backpack.IsMaxed ? Loc.T("shop.max") : Backpack.NextPrice.ToString();
+                Afford(buy, !Backpack.IsMaxed, SaveData.Coins >= Backpack.NextPrice);
+            });
+        }
+
+        /// <summary>A backpack icon for a 110-unit box: body, flap, pocket and straps.</summary>
+        public static void DrawBackpack(RectTransform icon)
+        {
+            void Part(string name, Vector2 pos, Vector2 size, Color c, Sprite s = null)
+            {
+                var r = UiFactory.Box(name, icon, new Vector2(0.5f, 0.5f), pos, size);
+                r.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(r, c, s ?? UiSprites.Rounded, 3f).raycastTarget = false;
+            }
+            var dark = new Color(0.55f, 0.3f, 0.12f);
+            Part("Handle", new Vector2(0f, 42f), new Vector2(34f, 20f), dark);
+            Part("Body", new Vector2(0f, -4f), new Vector2(84f, 92f), new Color(1f, 0.62f, 0.28f));
+            Part("Flap", new Vector2(0f, 26f), new Vector2(84f, 34f), new Color(0.95f, 0.5f, 0.2f));
+            Part("Pocket", new Vector2(0f, -24f), new Vector2(54f, 34f), new Color(0.9f, 0.46f, 0.18f));
+            Part("Buckle", new Vector2(0f, 10f), new Vector2(16f, 16f), new Color(1f, 0.88f, 0.45f));
+            Part("StrapL", new Vector2(-30f, -4f), new Vector2(8f, 80f), dark);
+            Part("StrapR", new Vector2(30f, -4f), new Vector2(8f, 80f), dark);
         }
 
         /// <summary>The paint workshop: a door into the garage.</summary>

@@ -17,6 +17,13 @@ namespace SquashBot.Data
         private static float HuntDifficulty(int index) =>
             index < 3 ? 0f : 0.06f + 0.94f * Mathf.Pow(Mathf.Clamp01((index - 3) / (float)(LevelCount - 4)), 0.62f);
 
+        /// <summary>
+        /// The armour of the floor's guards and monster: 0 up to level 25, then 1 (a two-damage weapon gets through),
+        /// 2 from level 71 (three damage: the mace) and 3 from level 171 (four: the star hammer). Each step comes some
+        /// floors after the weapon that beats it is sold.
+        /// </summary>
+        public static int ArmorAt(int index) => index < 25 ? 0 : index < 70 ? 1 : index < 170 ? 2 : 3;
+
         public static LevelData Hunt(LevelScript.Card card)
         {
             int index = card.n - 1;
@@ -62,7 +69,18 @@ namespace SquashBot.Data
             level.robotHp = 2 + Mathf.RoundToInt(d * 3f);
             level.robotStep = Mathf.Lerp(1.05f, 0.5f, d);
             level.monsterHp = 6 + Mathf.RoundToInt(d * 26f);
-            level.monsterAttack = Mathf.Lerp(3.4f, 1.6f, d);
+            level.monsterAttack = Mathf.Lerp(2.3f, 0.95f, d); // seconds between the monster's attacks: it keeps the pressure on
+
+            // Later floors are meant to need gear from the shop: the guards and the monster wear armour that only a
+            // strong enough weapon (or the super skill's double blows) gets through, and crates hit harder (armour
+            // upgrades soften them).
+            level.armor = ArmorAt(index);
+            level.crateShare = Mathf.Lerp(0.3f, 0.48f, Mathf.InverseLerp(0.25f, 1f, d));
+            if (level.armor > 0)
+            {
+                level.robotHp += level.armor;
+                level.monsterHp += 4 * level.armor;
+            }
 
             level.coinInterval = 2.4f;
             level.maxCoins = 2;

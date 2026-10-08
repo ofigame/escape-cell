@@ -313,7 +313,7 @@ namespace SquashBot.Gameplay
         private void ApplyTheme(int levelIdx)
         {
             int world = LevelCatalog.WorldOf(levelIdx);
-            var theme = WorldTheme.ForLevel(levelIdx);
+            var theme = WorldTheme.ForLevel(levelIdx).Realm(world); // the world's own realm floor
             if (theme == themeNow) return;
             themeNow = theme;
             WorldTheme.SetCurrent(theme);
@@ -2890,6 +2890,9 @@ namespace SquashBot.Gameplay
                 steps.Add((BriefShot.Block, Loc.T("brief.huntCrates")));
                 steps.Add((BriefShot.HammerHit, Loc.T("brief.huntCrowd")));
                 steps.Add((BriefShot.Stomp, Loc.T("brief.huntMonster")));
+                // Armoured floors: what it takes, and whether the weapon in hand has it.
+                if (level.armor > 0)
+                    steps.Add((BriefShot.HammerHit, Loc.F(Armory.Equipped.damage > level.armor ? "brief.armorOk" : "brief.armorNeed", level.armor + 1, Loc.T("weapon." + Armory.Equipped.id))));
                 return steps;
             }
             // The card opens with vanG: the threat and why it built this cell.

@@ -72,7 +72,7 @@ namespace SquashBot.Data
         /// <summary>Buys the weapon (and puts it in the robot's hand).</summary>
         public static bool TryBuy(WeaponDef w)
         {
-            if (Owned(w) || !Unlocked(w) || !Shop.Spend(w.price)) return false;
+            if (Owned(w) || !Unlocked(w) || !Backpack.Fits(Backpack.Weight(w)) || !Shop.Spend(w.price)) return false;
             PlayerPrefs.SetInt("sb_weapon_own_" + w.id, 1);
             Equip(w);
             return true;

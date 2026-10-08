@@ -72,6 +72,8 @@ namespace SquashBot.Gameplay
         private bool attackIsRock, frozen, running;
         private System.Random rng;
         private Color bugColour;
+        /// <summary>Dark floors and the later worlds get glowing bugs, so they always stand out.</summary>
+        private bool BrightBugs => world >= 8 || Visual.WorldTheme.Current.tileTop.grayscale < 0.55f;
         private int world;
 
         public bool MonsterUp => monster != null && !monster.Dead;
@@ -115,6 +117,8 @@ namespace SquashBot.Gameplay
             frozen = false;
             MonsterDown = false;
             monsterHp = level.monsterHp;
+            comboLeft = 0;
+            leapT = -1f;
             var free = FreeTiles(Mathf.Clamp(Mathf.Min(grid.Width, grid.Height) / 2, 1, 3)); // not right next to the robot (small floors allow less room)
             for (int i = 0; i < level.bugs && free.Count > 0; i++) AddBug(Take(free));
             for (int i = 0; i < level.robots && free.Count > 0; i++) AddGuard(Take(free));
@@ -165,7 +169,7 @@ namespace SquashBot.Gameplay
         private void AddBug(GridPos p)
         {
             var b = new Bug { pos = p, wait = (float)rng.NextDouble() };
-            b.model = BugModel.Build(transform, bugColour, world % BugModel.Kinds); // a new kind of bug every world
+            b.model = BugModel.Build(transform, bugColour, world % BugModel.Kinds, BrightBugs); // a new kind of bug every world
             b.from = b.to = At(p);
             b.model.transform.position = b.to;
             b.model.transform.rotation = Quaternion.Euler(0f, rng.Next(4) * 90f, 0f);
@@ -231,17 +235,35 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>A hammer blow on a tile: the monster, a robot or a bug there takes it. True if it hit something.</summary>
+        /// <summary>A blow bounced off armour (too weak a weapon): where.</summary>
+        public event Action<GridPos> Armored;
+
+        /// <summary>
+        /// What a blow does through the floor's armour: the damage above it; a blow that does not get through only
+        /// scratches now and then (one in four), so a weak weapon makes the fight very long rather than impossible.
+        /// </summary>
+        private int ThroughArmor(GridPos p, int damage)
+        {
+            int armor = level != null ? level.armor : 0;
+            if (damage > armor) return damage - armor;
+            fx.Burst(At(p) + Vector3.up * 0.6f, new Color(0.75f, 0.8f, 0.9f), new Color(1.2f, 1.3f, 1.6f), 16, 4f);
+            AudioManager.PlaySfx(Sfx.Blocked, 1f, 1.5f);
+            Armored?.Invoke(p);
+            return rng.Next(4) == 0 ? 1 : 0;
+        }
+
         public bool Strike(GridPos p, int damage)
         {
             if (MonsterUp && Chebyshev(p, monsterPos) == 0)
             {
-                HitMonster(damage);
+                int through = ThroughArmor(p, damage);
+                if (through > 0) HitMonster(through);
                 return true;
             }
             foreach (var g in guards)
             {
                 if (g.dead || g.pos != p) continue;
-                g.hp -= damage;
+                g.hp -= ThroughArmor(p, damage);
                 g.flash = 1f;
                 g.Flash();
                 g.windup = -1f;
@@ -487,15 +509,41 @@ namespace SquashBot.Gameplay
 
         private float WindTime => Mathf.Lerp(0.7f, 0.45f, level.score / 100f);
         private float BruteWindTime => Mathf.Lerp(0.95f, 0.7f, level.score / 100f);
-        /// <summary>Health shares a guard's slam, an enforcer's smash and the monster's blows take.</summary>
-        private const float GuardHitShare = 0.2f, BruteHitShare = 0.45f, MonsterHitShare = 0.3f;
+        /// <summary>Health shares a guard's slam and an enforcer's smash take.</summary>
+        private const float GuardHitShare = 0.2f, BruteHitShare = 0.45f;
+        /// <summary>The monster's blows hurt more on later floors.</summary>
+        private float MonsterHitShare => Mathf.Lerp(0.24f, 0.42f, level.score / 100f);
+
+        /// <summary>Blows still to come in the monster's current combo (later floors chain two or three).</summary>
+        private int comboLeft;
+        /// <summary>The monster's leap towards the robot: 0..1 while in the air, -1 when standing.</summary>
+        private float leapT = -1f;
+        private Vector3 leapFrom, leapTo;
 
         private void UpdateMonster(float dt)
         {
+            float hard = level.score / 100f;
+            bool enraged = monsterHp * 2 <= MonsterHpTotal;
+            if (leapT >= 0f)
+            {
+                // In the air: a heavy arc onto the new tile, a quake where it lands.
+                leapT = Mathf.Min(1f, leapT + dt / 0.55f);
+                monster.transform.position = Vector3.Lerp(leapFrom, leapTo, leapT) + Vector3.up * Mathf.Sin(leapT * Mathf.PI) * 1.6f;
+                if (leapT < 1f) return;
+                leapT = -1f;
+                Shockwave.Create(At(monsterPos), 2.4f, new Color(1f, 0.5f, 0.3f));
+                fx.Dust(At(monsterPos), new Color(0.55f, 0.5f, 0.45f), 22, 4f);
+                AudioManager.PlaySfx(Sfx.Impact, 1f, 0.5f);
+                rig.Shake(0.6f);
+                if (Chebyshev(robot.Position, monsterPos) <= 1) Hit?.Invoke(robot.Position, MonsterHitShare);
+                monsterTimer = Mathf.Min(monsterTimer, 0.35f); // and straight into an attack
+                return;
+            }
             if (attackWind >= 0f)
             {
                 attackWind += dt;
-                float wind = attackIsRock ? 1.1f : 0.95f;
+                // The wind-up shortens on later floors and when the monster is enraged.
+                float wind = (attackIsRock ? 1.1f : 0.95f) * Mathf.Lerp(1f, 0.68f, hard) * (enraged ? 0.85f : 1f);
                 float k = attackWind / wind;
                 foreach (var t in attackTiles) view.SetWarning(t, 0.4f + 0.6f * k);
                 if (k < 1f) return;
@@ -510,17 +558,27 @@ namespace SquashBot.Gameplay
                 AudioManager.PlaySfx(Sfx.Impact, 1f, attackIsRock ? 1f : 0.6f);
                 if (attackTiles.Contains(robot.Position)) Hit?.Invoke(robot.Position, MonsterHitShare);
                 attackTiles.Clear();
+                // A combo: the next blow follows almost at once.
+                if (comboLeft > 0)
+                {
+                    comboLeft--;
+                    monsterTimer = 0.25f;
+                }
                 return;
             }
-            monsterTimer -= dt;
+            monsterTimer -= dt * (enraged ? 1.35f : 1f);
             if (monsterTimer > 0f) return;
             monsterTimer = level.monsterAttack * (0.85f + (float)rng.NextDouble() * 0.3f);
             attackTiles.Clear();
+            int dist = Chebyshev(robot.Position, monsterPos);
+            // Far away: from the second stretch of the campaign the monster leaps after the robot instead of waiting.
+            if (dist >= 4 && hard > 0.12f && rng.NextDouble() < 0.35f + 0.4f * hard && TryLeap()) return;
+            if (comboLeft <= 0 && rng.NextDouble() < hard * 0.8f + (enraged ? 0.25f : 0f)) comboLeft = hard > 0.6f ? 2 : 1;
             // Close by: a stomp all around. Farther: a rock at the robot's tile (and, later, its neighbours too).
-            if (Chebyshev(robot.Position, monsterPos) <= 2 && rng.Next(3) > 0)
+            if (dist <= 2 && rng.Next(3) > 0)
             {
                 attackIsRock = false;
-                int r = level.score > 55 ? 2 : 1;
+                int r = level.score > 55 || enraged && level.score > 25 ? 2 : 1;
                 for (int x = -r; x <= r; x++)
                     for (int y = -r; y <= r; y++)
                     {
@@ -533,13 +591,39 @@ namespace SquashBot.Gameplay
             {
                 attackIsRock = true;
                 attackTiles.Add(robot.Position);
-                if (level.score > 45)
+                if (level.score > 30 || enraged)
                     foreach (var d in DirectionExtensions.All)
                         if (rng.Next(2) == 0 && grid.IsStandable(robot.Position + d.ToOffset())) attackTiles.Add(robot.Position + d.ToOffset());
                 monster.Throw();
                 ThrownRock.Create(At(monsterPos) + Vector3.up * 1.4f, At(robot.Position), 1.1f, new Color(0.6f, 0.5f, 0.45f));
             }
             attackWind = 0f;
+        }
+
+        /// <summary>Leaps to a free tile two away from the robot, on the side it came from. False when none is free.</summary>
+        private bool TryLeap()
+        {
+            GridPos best = monsterPos;
+            int bestScore = int.MaxValue;
+            for (int x = -2; x <= 2; x++)
+                for (int y = -2; y <= 2; y++)
+                {
+                    var t = robot.Position + new GridPos(x, y);
+                    if (Chebyshev(t, robot.Position) != 2 || !grid.IsStandable(t) || grid.IsOccupied(t) || grid.IsGap(t)) continue;
+                    int score = Chebyshev(t, monsterPos);
+                    if (score < bestScore) { bestScore = score; best = t; }
+                }
+            if (best == monsterPos) return false;
+            grid.SetOccupied(monsterPos, false);
+            monsterPos = best;
+            grid.SetOccupied(monsterPos, true);
+            leapFrom = monster.transform.position;
+            leapTo = At(monsterPos);
+            leapTo.y = leapFrom.y;
+            leapT = 0f;
+            monster.Stomp();
+            AudioManager.PlaySfx(Sfx.Hop, 1f, 0.45f);
+            return true;
         }
 
         private void ClearTelegraph(Guard g)

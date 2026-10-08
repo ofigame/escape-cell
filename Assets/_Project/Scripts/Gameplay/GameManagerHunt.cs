@@ -21,6 +21,7 @@ namespace SquashBot.Gameplay
         private float strikeCooldown;
         private WeaponDef weapon;
         private HeldWeapon heldWeapon;
+        private float lastArmorNote = -10f;
 
         /// <summary>Back to the plain robot outside the core loop (normal size, empty-handed).</summary>
         private void ClearHuntDress()
@@ -43,6 +44,13 @@ namespace SquashBot.Gameplay
                 hitShareOverride = -1f;
             };
             hunt.Finished += OnHuntFinished;
+            hunt.Armored += p =>
+            {
+                // Too weak a weapon for this floor's armour: say so (not on every blow).
+                if (Time.unscaledTime - lastArmorNote < 2.5f) return;
+                lastArmorNote = Time.unscaledTime;
+                FloatAt(GridView.ToWorld(p) + Vector3.up * 1.1f, Loc.F("float.armored", level.armor + 1), new Color(0.75f, 0.85f, 1f));
+            };
             hunt.MonsterAppeared += () =>
             {
                 FloatAt(robot.transform.position + Vector3.up * 0.8f, Loc.T("float.monster"), Palette.UiRed);
@@ -65,7 +73,7 @@ namespace SquashBot.Gameplay
             // The robot and the guards grow with the campaign, up to twice their old size; the robot carries its weapon.
             float grow = Mathf.Clamp01(World / 12f);
             robot.transform.localScale = Vector3.one * Mathf.Lerp(1.5f, 2f, grow);
-            Robot.HopScale = 0.6f;
+            Robot.HopScale = 0.6f; // quick and even: each step follows the finger at once, and a run of steps flows on
             hunt.EnemyScale = Mathf.Lerp(1.45f, 1.85f, grow);
             weapon = Armory.Equipped;
             if (heldWeapon != null) Destroy(heldWeapon.gameObject);
@@ -102,6 +110,18 @@ namespace SquashBot.Gameplay
         /// </summary>
         private void MaybeShowTip(string reason)
         {
+            // Lost to armour the weapon in hand can't get through: point at the weapon that can, right away.
+            if (level.armor > 0 && Armory.Equipped.damage <= level.armor)
+            {
+                WeaponDef needed = null;
+                foreach (var w in Armory.All)
+                    if (w.damage > level.armor && Armory.Unlocked(w) && (needed == null || w.price < needed.price)) needed = w;
+                if (needed != null)
+                {
+                    ui.Tip.ShowWeapon(needed, Loc.F("tip.why.armor", level.armor + 1), () => { ShowShop(); ui.Shop.ShowWeapons(); });
+                    return;
+                }
+            }
             int fails = PlayerPrefs.GetInt(FailKey(levelIndex), 0);
             if (fails < 2 || fails % 2 != 0) return;
             bool crushed = reason != null && reason.StartsWith(Loc.T("lose.block"));
@@ -238,11 +258,16 @@ namespace SquashBot.Gameplay
         /// <summary>The close third-person view of the core loop: low and near, behind the robot at the floor's fixed angle.</summary>
         private Vector3 closeCamFocus;
         private bool closeCamOn;
+        /// <summary>The camera's lean towards where the robot is heading (degrees about the vertical), eased slowly.</summary>
+        private float camYaw, camYawVelocity;
+        /// <summary>How far the camera has pulled back for the walk to the exit (1 = playing distance).</summary>
+        private float camPull = 1f, camPullVelocity;
 
         private void UpdateCloseCamera()
         {
-            bool want = State == GameState.Playing && level != null && level.mission == MissionType.Hunt && !runner.Active
-                        && roadPhase == RoadPhase.None && !previewing && !ArenaActive && robot != null;
+            bool walking = roadPhase == RoadPhase.Walk && roadBeacon != null;
+            bool want = (State == GameState.Playing || State == GameState.Paused) && level != null && level.mission == MissionType.Hunt && !runner.Active
+                        && (roadPhase == RoadPhase.None || walking) && !previewing && !ArenaActive && robot != null;
             if (!want)
             {
                 if (closeCamOn)
@@ -250,19 +275,49 @@ namespace SquashBot.Gameplay
                     closeCamOn = false;
                     cameraRig.EndChase();
                 }
+                camYaw = camYawVelocity = 0f;
+                camPull = 1f;
+                camPullVelocity = 0f;
                 return;
             }
+            float dt = Time.unscaledDeltaTime;
             var target = robot.transform.position;
             target.y = 0f;
-            closeCamFocus = closeCamOn ? Vector3.Lerp(closeCamFocus, target, 1f - Mathf.Exp(-8f * Time.deltaTime)) : target;
+            float pullGoal = 1f;
+            if (walking)
+            {
+                // On the way to the exit: pull back and frame the robot and the exit together, so the way out is easy
+                // to find even on the widest floors.
+                var exit = roadBeacon.transform.position;
+                exit.y = 0f;
+                target = Vector3.Lerp(target, exit, 0.5f);
+                float apart = Vector3.Distance(robot.transform.position, exit);
+                pullGoal = Mathf.Clamp(1.45f + apart * 0.09f, 1.45f, 3f);
+            }
+            closeCamFocus = closeCamOn ? Vector3.Lerp(closeCamFocus, target, 1f - Mathf.Exp((walking ? -3f : -11f) * dt)) : target;
             closeCamOn = true;
-            var pos = closeCamFocus + CloseCamOffset * CamDistanceScale[SaveData.CameraDistance];
+            camPull = Mathf.SmoothDamp(camPull, pullGoal, ref camPullVelocity, 0.9f, Mathf.Infinity, dt);
+
+            // A small lean towards the way the robot faces, settling slowly like a slow-motion pan (never a snap).
+            float yawGoal = 0f;
+            if (!walking)
+            {
+                var o = robot.Facing.ToOffset();
+                float angle = Vector3.SignedAngle(new Vector3(1f, 0f, 1f), new Vector3(o.x, 0f, o.y), Vector3.up);
+                yawGoal = Mathf.Abs(angle) > 120f ? 0f : Mathf.Clamp(angle * 0.16f, -CamLean, CamLean);
+            }
+            camYaw = Mathf.SmoothDamp(camYaw, yawGoal, ref camYawVelocity, 1.1f, 25f, dt);
+
+            var offset = Quaternion.Euler(0f, camYaw, 0f) * CloseCamOffset * (CamDistanceScale[SaveData.CameraDistance] * camPull);
+            var pos = closeCamFocus + offset;
             cameraRig.Chase(pos, Quaternion.LookRotation(closeCamFocus + Vector3.up * 0.35f - pos), CloseCamFov);
         }
 
         private static readonly Vector3 CloseCamOffset = new Vector3(-2.7f, 3.9f, -2.7f);
         /// <summary>The settings' camera distances (near, medium, far, farthest), as multiples of the nearest view.</summary>
-        private static readonly float[] CamDistanceScale = { 2.45f, 2.9f, 3.4f, 4.0f };
+        private static readonly float[] CamDistanceScale = { 2.45f, 2.9f, 4.0f, 4.8f };
         private const float CloseCamFov = 50f;
+        /// <summary>The most the camera leans towards the robot's heading, in degrees.</summary>
+        private const float CamLean = 14f;
     }
 }

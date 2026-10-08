@@ -108,7 +108,7 @@ namespace SquashBot.Gameplay
             }
         }
 
-        /// <summary>The slab, glowing edge band and pillar, built cell by cell so they follow the platform's shape.</summary>
+        /// <summary>The slab and its glowing edge band, built cell by cell so they follow the platform's shape (nothing hangs below it).</summary>
         private void BuildPlatform(GridModel grid)
         {
             var root = new GameObject("Platform").transform;
@@ -116,7 +116,6 @@ namespace SquashBot.Gameplay
 
             var slab = MaterialFactory.Create(Palette.Slab, Color.black);
             var glow = MaterialFactory.Create(Palette.Slab, Palette.SlabEdgeGlow);
-            var pillar = MaterialFactory.Create(Palette.Pillar, Color.black);
 
             foreach (var p in grid.AllPositions())
             {
@@ -126,7 +125,6 @@ namespace SquashBot.Gameplay
                 Shapes.Rounded("SlabTop", root, at + new Vector3(0f, -0.19f, 0f), new Vector3(1.16f, 0.3f, 1.16f), 0.06f, slab);
                 Shapes.Rounded("EdgeGlow", root, at + new Vector3(0f, -0.36f, 0f), new Vector3(1.2f, 0.05f, 1.2f), 0.025f, glow);
                 Shapes.Rounded("SlabBottom", root, at + new Vector3(0f, -0.5f, 0f), new Vector3(1.17f, 0.24f, 1.17f), 0.06f, slab);
-                Shapes.Rounded("Pillar", root, at + new Vector3(0f, -4.6f, 0f), new Vector3(1.0f, 8f, 1.0f), 0.04f, pillar);
             }
             // The platform never moves: merge it into a few big meshes, so a 20x20 floor costs a handful of draw calls.
             StaticBatchingUtility.Combine(root.gameObject);

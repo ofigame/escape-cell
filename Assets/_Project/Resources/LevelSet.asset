@@ -64,7 +64,9 @@ MonoBehaviour:
     robotHp: 2
     robotStep: 1.05
     monsterHp: 6
-    monsterAttack: 3.4
+    monsterAttack: 2.3
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.65
     spawnInterval: 3.4
     blocksPerWave: 1
@@ -134,7 +136,9 @@ MonoBehaviour:
     robotHp: 2
     robotStep: 1.05
     monsterHp: 6
-    monsterAttack: 3.4
+    monsterAttack: 2.3
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.65
     spawnInterval: 3.4
     blocksPerWave: 1
@@ -204,7 +208,9 @@ MonoBehaviour:
     robotHp: 2
     robotStep: 1.05
     monsterHp: 6
-    monsterAttack: 3.4
+    monsterAttack: 2.3
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.65
     spawnInterval: 3.4
     blocksPerWave: 1
@@ -275,7 +281,9 @@ MonoBehaviour:
     robotHp: 2
     robotStep: 1.017
     monsterHp: 8
-    monsterAttack: 3.292
+    monsterAttack: 2.2189999
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.614
     spawnInterval: 2.5219998
     blocksPerWave: 1
@@ -347,7 +355,9 @@ MonoBehaviour:
     robotHp: 2
     robotStep: 0.999974
     monsterHp: 8
-    monsterAttack: 3.2362788
+    monsterAttack: 2.1772091
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.5954262
     spawnInterval: 2.481757
     blocksPerWave: 1
@@ -419,7 +429,9 @@ MonoBehaviour:
     robotHp: 2
     robotStep: 0.9908332
     monsterHp: 9
-    monsterAttack: 3.2063634
+    monsterAttack: 2.1547725
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.5854545
     spawnInterval: 2.4601512
     blocksPerWave: 1
@@ -492,7 +504,9 @@ MonoBehaviour:
     robotHp: 2
     robotStep: 0.98335457
     monsterHp: 9
-    monsterAttack: 3.1818879
+    monsterAttack: 2.1364157
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.5772959
     spawnInterval: 2.4424744
     blocksPerWave: 1
@@ -565,7 +579,9 @@ MonoBehaviour:
     robotHp: 2
     robotStep: 0.976785
     monsterHp: 9
-    monsterAttack: 3.1603875
+    monsterAttack: 2.1202905
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.570129
     spawnInterval: 2.4269464
     blocksPerWave: 1
@@ -639,7 +655,9 @@ MonoBehaviour:
     robotHp: 2
     robotStep: 0.97081804
     monsterHp: 10
-    monsterAttack: 3.1408591
+    monsterAttack: 2.1056442
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.5636196
     spawnInterval: 2.4128425
     blocksPerWave: 1
@@ -713,7 +731,9 @@ MonoBehaviour:
     robotHp: 2
     robotStep: 0.96529114
     monsterHp: 10
-    monsterAttack: 3.1227713
+    monsterAttack: 2.0920784
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.5575904
     spawnInterval: 2.399779
     blocksPerWave: 1
@@ -786,7 +806,9 @@ MonoBehaviour:
     robotHp: 2
     robotStep: 0.9601053
     monsterHp: 10
-    monsterAttack: 3.1057994
+    monsterAttack: 2.0793495
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.551933
     spawnInterval: 2.3875215
     blocksPerWave: 1
@@ -861,7 +883,9 @@ MonoBehaviour:
     robotHp: 3
     robotStep: 0.95519453
     monsterHp: 10
-    monsterAttack: 3.0897279
+    monsterAttack: 2.0672958
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.5465759
     spawnInterval: 2.3759143
     blocksPerWave: 1
@@ -936,7 +960,9 @@ MonoBehaviour:
     robotHp: 3
     robotStep: 0.9505123
     monsterHp: 11
-    monsterAttack: 3.074404
+    monsterAttack: 2.055803
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.541468
     spawnInterval: 2.3648472
     blocksPerWave: 1
@@ -1011,7 +1037,9 @@ MonoBehaviour:
     robotHp: 3
     robotStep: 0.9460241
     monsterHp: 11
-    monsterAttack: 3.0597155
+    monsterAttack: 2.0447865
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.5365717
     spawnInterval: 2.3542387
     blocksPerWave: 1
@@ -1086,7 +1114,9 @@ MonoBehaviour:
     robotHp: 3
     robotStep: 0.94170356
     monsterHp: 11
-    monsterAttack: 3.0455754
+    monsterAttack: 2.0341816
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.5318584
     spawnInterval: 2.3440266
     blocksPerWave: 1
@@ -1161,7 +1191,9 @@ MonoBehaviour:
     robotHp: 3
     robotStep: 0.93753
     monsterHp: 11
-    monsterAttack: 3.0319164
+    monsterAttack: 2.0239372
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.5273055
     spawnInterval: 2.3341618
     blocksPerWave: 1
@@ -1236,7 +1268,9 @@ MonoBehaviour:
     robotHp: 3
     robotStep: 0.93348664
     monsterHp: 12
-    monsterAttack: 3.018684
+    monsterAttack: 2.0140128
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.5228945
     spawnInterval: 2.3246047
     blocksPerWave: 1
@@ -1308,7 +1342,9 @@ MonoBehaviour:
     robotHp: 3
     robotStep: 0.92955995
     monsterHp: 12
-    monsterAttack: 3.005833
+    monsterAttack: 2.0043745
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.5186108
     spawnInterval: 2.3153236
     blocksPerWave: 1
@@ -1383,7 +1419,9 @@ MonoBehaviour:
     robotHp: 3
     robotStep: 0.9257385
     monsterHp: 12
-    monsterAttack: 2.9933262
+    monsterAttack: 1.9949945
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.514442
     spawnInterval: 2.306291
     blocksPerWave: 1
@@ -1456,7 +1494,9 @@ MonoBehaviour:
     robotHp: 3
     robotStep: 0.92201275
     monsterHp: 12
-    monsterAttack: 2.9811327
+    monsterAttack: 1.9858495
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.5103775
     spawnInterval: 2.2974846
     blocksPerWave: 1
@@ -1532,7 +1572,9 @@ MonoBehaviour:
     robotHp: 3
     robotStep: 0.9183745
     monsterHp: 12
-    monsterAttack: 2.969226
+    monsterAttack: 1.9769193
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.5064086
     spawnInterval: 2.288885
     blocksPerWave: 1
@@ -1608,7 +1650,9 @@ MonoBehaviour:
     robotHp: 3
     robotStep: 0.91481674
     monsterHp: 12
-    monsterAttack: 2.9575822
+    monsterAttack: 1.9681865
+    armor: 0
+    crateShare: 0.3
     warningTime: 1.5025274
     spawnInterval: 2.2804759
     blocksPerWave: 1
@@ -1681,7 +1725,9 @@ MonoBehaviour:
     robotHp: 3
     robotStep: 0.9113333
     monsterHp: 13
-    monsterAttack: 2.946182
+    monsterAttack: 1.9596363
+    armor: 0
+    crateShare: 0.3005091
     warningTime: 1.4987272
     spawnInterval: 2.2722423
     blocksPerWave: 1
@@ -1757,7 +1803,9 @@ MonoBehaviour:
     robotHp: 3
     robotStep: 0.9079189
     monsterHp: 13
-    monsterAttack: 2.9350076
+    monsterAttack: 1.9512556
+    armor: 0
+    crateShare: 0.30199903
     warningTime: 1.4950024
     spawnInterval: 2.2641718
     blocksPerWave: 1
@@ -1833,7 +1881,9 @@ MonoBehaviour:
     robotHp: 3
     robotStep: 0.9045688
     monsterHp: 13
-    monsterAttack: 2.9240434
+    monsterAttack: 1.9430325
+    armor: 0
+    crateShare: 0.3034609
     warningTime: 1.4913478
     spawnInterval: 2.2562535
     blocksPerWave: 1
@@ -1906,10 +1956,12 @@ MonoBehaviour:
     bugs: 5
     robots: 3
     brutes: 1
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.9012788
-    monsterHp: 13
-    monsterAttack: 2.9132762
+    monsterHp: 17
+    monsterAttack: 1.934957
+    armor: 1
+    crateShare: 0.30489653
     warningTime: 1.4877586
     spawnInterval: 2.2484772
     blocksPerWave: 1
@@ -1982,10 +2034,12 @@ MonoBehaviour:
     bugs: 5
     robots: 3
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8980452
-    monsterHp: 13
-    monsterAttack: 2.9026935
+    monsterHp: 17
+    monsterAttack: 1.92702
+    armor: 1
+    crateShare: 0.30630755
     warningTime: 1.4842311
     spawnInterval: 2.240834
     blocksPerWave: 1
@@ -2058,10 +2112,12 @@ MonoBehaviour:
     bugs: 5
     robots: 3
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8948645
-    monsterHp: 13
-    monsterAttack: 2.8922842
+    monsterHp: 17
+    monsterAttack: 1.9192129
+    armor: 1
+    crateShare: 0.30769548
     warningTime: 1.4807613
     spawnInterval: 2.2333162
     blocksPerWave: 1
@@ -2135,10 +2191,12 @@ MonoBehaviour:
     bugs: 5
     robots: 3
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8917339
-    monsterHp: 13
-    monsterAttack: 2.8820384
+    monsterHp: 17
+    monsterAttack: 1.9115286
+    armor: 1
+    crateShare: 0.3090616
     warningTime: 1.4773461
     spawnInterval: 2.2259164
     blocksPerWave: 1
@@ -2212,10 +2270,12 @@ MonoBehaviour:
     bugs: 6
     robots: 3
     brutes: 1
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8886504
-    monsterHp: 14
-    monsterAttack: 2.871947
+    monsterHp: 18
+    monsterAttack: 1.9039602
+    armor: 1
+    crateShare: 0.31040707
     warningTime: 1.4739823
     spawnInterval: 2.2186284
     blocksPerWave: 1
@@ -2289,10 +2349,12 @@ MonoBehaviour:
     bugs: 6
     robots: 3
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8856118
-    monsterHp: 14
-    monsterAttack: 2.8620024
+    monsterHp: 18
+    monsterAttack: 1.8965017
+    armor: 1
+    crateShare: 0.31173304
     warningTime: 1.4706674
     spawnInterval: 2.211446
     blocksPerWave: 1
@@ -2366,10 +2428,12 @@ MonoBehaviour:
     bugs: 6
     robots: 3
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8826156
-    monsterHp: 14
-    monsterAttack: 2.8521967
+    monsterHp: 18
+    monsterAttack: 1.8891474
+    armor: 1
+    crateShare: 0.31304047
     warningTime: 1.4673989
     spawnInterval: 2.204364
     blocksPerWave: 1
@@ -2443,10 +2507,12 @@ MonoBehaviour:
     bugs: 6
     robots: 3
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.87965983
-    monsterHp: 14
-    monsterAttack: 2.842523
+    monsterHp: 18
+    monsterAttack: 1.8818923
+    armor: 1
+    crateShare: 0.31433025
     warningTime: 1.4641744
     spawnInterval: 2.1973777
     blocksPerWave: 1
@@ -2520,10 +2586,12 @@ MonoBehaviour:
     bugs: 6
     robots: 3
     brutes: 1
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8767425
-    monsterHp: 14
-    monsterAttack: 2.8329756
+    monsterHp: 18
+    monsterAttack: 1.8747317
+    armor: 1
+    crateShare: 0.31560326
     warningTime: 1.4609919
     spawnInterval: 2.1904824
     blocksPerWave: 2
@@ -2596,10 +2664,12 @@ MonoBehaviour:
     bugs: 6
     robots: 3
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.87386197
-    monsterHp: 14
-    monsterAttack: 2.8235483
+    monsterHp: 18
+    monsterAttack: 1.8676611
+    armor: 1
+    crateShare: 0.31686023
     warningTime: 1.4578494
     spawnInterval: 2.1836736
     blocksPerWave: 2
@@ -2673,10 +2743,12 @@ MonoBehaviour:
     bugs: 6
     robots: 3
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8710165
-    monsterHp: 14
-    monsterAttack: 2.814236
+    monsterHp: 18
+    monsterAttack: 1.8606769
+    armor: 1
+    crateShare: 0.31810188
     warningTime: 1.4547453
     spawnInterval: 2.176948
     blocksPerWave: 2
@@ -2750,10 +2822,12 @@ MonoBehaviour:
     bugs: 6
     robots: 3
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8682046
-    monsterHp: 15
-    monsterAttack: 2.8050334
+    monsterHp: 19
+    monsterAttack: 1.8537749
+    armor: 1
+    crateShare: 0.3193289
     warningTime: 1.4516777
     spawnInterval: 2.1703017
     blocksPerWave: 2
@@ -2827,10 +2901,12 @@ MonoBehaviour:
     bugs: 6
     robots: 3
     brutes: 1
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.86542493
-    monsterHp: 15
-    monsterAttack: 2.7959363
+    monsterHp: 19
+    monsterAttack: 1.8469521
+    armor: 1
+    crateShare: 0.32054186
     warningTime: 1.4486454
     spawnInterval: 2.1637316
     blocksPerWave: 2
@@ -2904,10 +2980,12 @@ MonoBehaviour:
     bugs: 6
     robots: 3
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.86267614
-    monsterHp: 15
-    monsterAttack: 2.7869403
+    monsterHp: 19
+    monsterAttack: 1.8402051
+    armor: 1
+    crateShare: 0.3217413
     warningTime: 1.4456466
     spawnInterval: 2.1572344
     blocksPerWave: 2
@@ -2982,10 +3060,12 @@ MonoBehaviour:
     bugs: 6
     robots: 3
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8599571
-    monsterHp: 15
-    monsterAttack: 2.7780416
+    monsterHp: 19
+    monsterAttack: 1.833531
+    armor: 1
+    crateShare: 0.32292783
     warningTime: 1.4426805
     spawnInterval: 2.1508076
     blocksPerWave: 2
@@ -3060,10 +3140,12 @@ MonoBehaviour:
     bugs: 6
     robots: 3
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.85726655
-    monsterHp: 15
-    monsterAttack: 2.769236
+    monsterHp: 19
+    monsterAttack: 1.826927
+    armor: 1
+    crateShare: 0.32410187
     warningTime: 1.4397453
     spawnInterval: 2.144448
     blocksPerWave: 2
@@ -3137,10 +3219,12 @@ MonoBehaviour:
     bugs: 6
     robots: 3
     brutes: 1
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.85460347
-    monsterHp: 15
-    monsterAttack: 2.7605207
+    monsterHp: 19
+    monsterAttack: 1.8203905
+    armor: 1
+    crateShare: 0.32526392
     warningTime: 1.4368402
     spawnInterval: 2.1381538
     blocksPerWave: 2
@@ -3215,10 +3299,12 @@ MonoBehaviour:
     bugs: 6
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.851967
-    monsterHp: 15
-    monsterAttack: 2.751892
+    monsterHp: 19
+    monsterAttack: 1.813919
+    armor: 1
+    crateShare: 0.3264144
     warningTime: 1.4339639
     spawnInterval: 2.1319218
     blocksPerWave: 2
@@ -3293,10 +3379,12 @@ MonoBehaviour:
     bugs: 6
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.849356
-    monsterHp: 15
-    monsterAttack: 2.7433472
+    monsterHp: 19
+    monsterAttack: 1.8075103
+    armor: 1
+    crateShare: 0.32755375
     warningTime: 1.4311156
     spawnInterval: 2.1257505
     blocksPerWave: 2
@@ -3371,10 +3459,12 @@ MonoBehaviour:
     bugs: 6
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8467697
-    monsterHp: 16
-    monsterAttack: 2.7348828
+    monsterHp: 20
+    monsterAttack: 1.801162
+    armor: 1
+    crateShare: 0.3286823
     warningTime: 1.4282942
     spawnInterval: 2.1196375
     blocksPerWave: 2
@@ -3449,10 +3539,12 @@ MonoBehaviour:
     bugs: 6
     robots: 4
     brutes: 1
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8442073
-    monsterHp: 16
-    monsterAttack: 2.7264967
+    monsterHp: 20
+    monsterAttack: 1.7948725
+    armor: 1
+    crateShare: 0.32980046
     warningTime: 1.4254988
     spawnInterval: 2.113581
     blocksPerWave: 2
@@ -3527,10 +3619,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.84166795
-    monsterHp: 16
-    monsterAttack: 2.7181861
+    monsterHp: 20
+    monsterAttack: 1.7886395
+    armor: 1
+    crateShare: 0.3309085
     warningTime: 1.4227287
     spawnInterval: 2.1075788
     blocksPerWave: 2
@@ -3605,10 +3699,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.83915097
-    monsterHp: 16
-    monsterAttack: 2.7099488
+    monsterHp: 20
+    monsterAttack: 1.7824615
+    armor: 1
+    crateShare: 0.33200684
     warningTime: 1.4199829
     spawnInterval: 2.1016295
     blocksPerWave: 2
@@ -3680,10 +3776,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8366556
-    monsterHp: 16
-    monsterAttack: 2.7017822
+    monsterHp: 20
+    monsterAttack: 1.7763366
+    armor: 1
+    crateShare: 0.33309573
     warningTime: 1.4172606
     spawnInterval: 2.0957315
     blocksPerWave: 2
@@ -3759,10 +3857,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 1
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.83418125
-    monsterHp: 16
-    monsterAttack: 2.6936843
+    monsterHp: 20
+    monsterAttack: 1.7702632
+    armor: 1
+    crateShare: 0.33417544
     warningTime: 1.4145614
     spawnInterval: 2.089883
     blocksPerWave: 2
@@ -3837,10 +3937,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.83172727
-    monsterHp: 16
-    monsterAttack: 2.685653
+    monsterHp: 20
+    monsterAttack: 1.7642397
+    armor: 1
+    crateShare: 0.3352463
     warningTime: 1.4118843
     spawnInterval: 2.0840826
     blocksPerWave: 2
@@ -3916,10 +4018,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8292931
-    monsterHp: 16
-    monsterAttack: 2.6776865
+    monsterHp: 20
+    monsterAttack: 1.7582648
+    armor: 1
+    crateShare: 0.33630848
     warningTime: 1.4092288
     spawnInterval: 2.078329
     blocksPerWave: 2
@@ -3995,10 +4099,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.826878
-    monsterHp: 17
-    monsterAttack: 2.6697826
+    monsterHp: 21
+    monsterAttack: 1.7523369
+    armor: 1
+    crateShare: 0.33736232
     warningTime: 1.4065942
     spawnInterval: 2.0726206
     blocksPerWave: 2
@@ -4073,10 +4179,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 1
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8244816
-    monsterHp: 17
-    monsterAttack: 2.6619399
+    monsterHp: 21
+    monsterAttack: 1.7464548
+    armor: 1
+    crateShare: 0.33840802
     warningTime: 1.4039799
     spawnInterval: 2.0669565
     blocksPerWave: 2
@@ -4152,10 +4260,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8221034
-    monsterHp: 17
-    monsterAttack: 2.6541567
+    monsterHp: 21
+    monsterAttack: 1.7406174
+    armor: 1
+    crateShare: 0.3394458
     warningTime: 1.4013854
     spawnInterval: 2.061335
     blocksPerWave: 2
@@ -4231,10 +4341,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8197428
-    monsterHp: 17
-    monsterAttack: 2.646431
+    monsterHp: 21
+    monsterAttack: 1.7348232
+    armor: 1
+    crateShare: 0.34047586
     warningTime: 1.3988103
     spawnInterval: 2.0557556
     blocksPerWave: 2
@@ -4310,10 +4422,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8173994
-    monsterHp: 17
-    monsterAttack: 2.6387618
+    monsterHp: 21
+    monsterAttack: 1.7290713
+    armor: 1
+    crateShare: 0.34149843
     warningTime: 1.3962538
     spawnInterval: 2.0502167
     blocksPerWave: 2
@@ -4389,10 +4503,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 1
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8150727
-    monsterHp: 17
-    monsterAttack: 2.6311471
+    monsterHp: 21
+    monsterAttack: 1.7233604
+    armor: 1
+    crateShare: 0.3425137
     warningTime: 1.3937157
     spawnInterval: 2.0447173
     blocksPerWave: 2
@@ -4464,10 +4580,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8127624
-    monsterHp: 17
-    monsterAttack: 2.6235862
+    monsterHp: 21
+    monsterAttack: 1.7176895
+    armor: 1
+    crateShare: 0.34352186
     warningTime: 1.3911953
     spawnInterval: 2.0392566
     blocksPerWave: 2
@@ -4543,10 +4661,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.81046796
-    monsterHp: 17
-    monsterAttack: 2.6160772
+    monsterHp: 21
+    monsterAttack: 1.7120578
+    armor: 1
+    crateShare: 0.34452307
     warningTime: 1.3886924
     spawnInterval: 2.0338335
     blocksPerWave: 2
@@ -4619,10 +4739,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8081891
-    monsterHp: 17
-    monsterAttack: 2.608619
+    monsterHp: 21
+    monsterAttack: 1.706464
+    armor: 1
+    crateShare: 0.3455175
     warningTime: 1.3862063
     spawnInterval: 2.028447
     blocksPerWave: 2
@@ -4699,10 +4821,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 1
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8059253
-    monsterHp: 18
-    monsterAttack: 2.60121
+    monsterHp: 22
+    monsterAttack: 1.7009076
+    armor: 1
+    crateShare: 0.3465053
     warningTime: 1.3837367
     spawnInterval: 2.023096
     blocksPerWave: 2
@@ -4779,10 +4903,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8036763
-    monsterHp: 18
-    monsterAttack: 2.59385
+    monsterHp: 22
+    monsterAttack: 1.6953874
+    armor: 1
+    crateShare: 0.3474867
     warningTime: 1.3812833
     spawnInterval: 2.0177803
     blocksPerWave: 2
@@ -4859,10 +4985,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.8014418
-    monsterHp: 18
-    monsterAttack: 2.586537
+    monsterHp: 22
+    monsterAttack: 1.6899025
+    armor: 1
+    crateShare: 0.34846178
     warningTime: 1.3788456
     spawnInterval: 2.0124986
     blocksPerWave: 2
@@ -4939,10 +5067,12 @@ MonoBehaviour:
     bugs: 7
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.79922134
-    monsterHp: 18
-    monsterAttack: 2.5792701
+    monsterHp: 22
+    monsterAttack: 1.6844524
+    armor: 1
+    crateShare: 0.34943068
     warningTime: 1.3764232
     spawnInterval: 2.0072505
     blocksPerWave: 2
@@ -5014,10 +5144,12 @@ MonoBehaviour:
     bugs: 8
     robots: 4
     brutes: 1
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.7970147
-    monsterHp: 18
-    monsterAttack: 2.5720482
+    monsterHp: 22
+    monsterAttack: 1.6790361
+    armor: 1
+    crateShare: 0.3503936
     warningTime: 1.374016
     spawnInterval: 2.0020347
     blocksPerWave: 2
@@ -5094,10 +5226,12 @@ MonoBehaviour:
     bugs: 8
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.79482156
-    monsterHp: 18
-    monsterAttack: 2.5648706
+    monsterHp: 22
+    monsterAttack: 1.6736529
+    armor: 1
+    crateShare: 0.3513506
     warningTime: 1.3716235
     spawnInterval: 1.9968508
     blocksPerWave: 2
@@ -5173,10 +5307,12 @@ MonoBehaviour:
     bugs: 8
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.7926416
-    monsterHp: 18
-    monsterAttack: 2.5577362
+    monsterHp: 22
+    monsterAttack: 1.668302
+    armor: 1
+    crateShare: 0.35230187
     warningTime: 1.3692453
     spawnInterval: 1.9916983
     blocksPerWave: 2
@@ -5253,10 +5389,12 @@ MonoBehaviour:
     bugs: 8
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.79047453
-    monsterHp: 18
-    monsterAttack: 2.550644
+    monsterHp: 22
+    monsterAttack: 1.662983
+    armor: 1
+    crateShare: 0.3532475
     warningTime: 1.3668813
     spawnInterval: 1.9865761
     blocksPerWave: 2
@@ -5332,10 +5470,12 @@ MonoBehaviour:
     bugs: 8
     robots: 4
     brutes: 1
-    robotHp: 3
+    robotHp: 4
     robotStep: 0.78832006
-    monsterHp: 18
-    monsterAttack: 2.5435932
+    monsterHp: 22
+    monsterAttack: 1.6576947
+    armor: 1
+    crateShare: 0.3541876
     warningTime: 1.3645309
     spawnInterval: 1.9814838
     blocksPerWave: 2
@@ -5412,10 +5552,12 @@ MonoBehaviour:
     bugs: 8
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 5
     robotStep: 0.786178
-    monsterHp: 18
-    monsterAttack: 2.5365827
+    monsterHp: 26
+    monsterAttack: 1.652437
+    armor: 2
+    crateShare: 0.35512233
     warningTime: 1.3621942
     spawnInterval: 1.9764206
     blocksPerWave: 2
@@ -5492,10 +5634,12 @@ MonoBehaviour:
     bugs: 8
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 5
     robotStep: 0.7840481
-    monsterHp: 19
-    monsterAttack: 2.529612
+    monsterHp: 27
+    monsterAttack: 1.6472089
+    armor: 2
+    crateShare: 0.35605174
     warningTime: 1.3598706
     spawnInterval: 1.9713863
     blocksPerWave: 2
@@ -5569,10 +5713,12 @@ MonoBehaviour:
     bugs: 8
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 5
     robotStep: 0.78192997
-    monsterHp: 19
-    monsterAttack: 2.52268
+    monsterHp: 27
+    monsterAttack: 1.64201
+    armor: 2
+    crateShare: 0.356976
     warningTime: 1.3575599
     spawnInterval: 1.9663799
     blocksPerWave: 2
@@ -5650,10 +5796,12 @@ MonoBehaviour:
     bugs: 8
     robots: 4
     brutes: 1
-    robotHp: 3
+    robotHp: 5
     robotStep: 0.77982354
-    monsterHp: 19
-    monsterAttack: 2.5157862
+    monsterHp: 27
+    monsterAttack: 1.6368396
+    armor: 2
+    crateShare: 0.3578952
     warningTime: 1.355262
     spawnInterval: 1.961401
     blocksPerWave: 2
@@ -5731,10 +5879,12 @@ MonoBehaviour:
     bugs: 8
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 5
     robotStep: 0.7777285
-    monsterHp: 19
-    monsterAttack: 2.5089297
+    monsterHp: 27
+    monsterAttack: 1.6316973
+    armor: 2
+    crateShare: 0.35880938
     warningTime: 1.3529766
     spawnInterval: 1.9564492
     blocksPerWave: 2
@@ -5812,10 +5962,12 @@ MonoBehaviour:
     bugs: 8
     robots: 4
     brutes: 0
-    robotHp: 3
+    robotHp: 5
     robotStep: 0.77564466
-    monsterHp: 19
-    monsterAttack: 2.50211
+    monsterHp: 27
+    monsterAttack: 1.6265824
+    armor: 2
+    crateShare: 0.3597187
     warningTime: 1.3507032
     spawnInterval: 1.9515237
     blocksPerWave: 2
@@ -5893,10 +6045,12 @@ MonoBehaviour:
     bugs: 8
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7735717
-    monsterHp: 19
-    monsterAttack: 2.4953258
+    monsterHp: 27
+    monsterAttack: 1.6214943
+    armor: 2
+    crateShare: 0.36062324
     warningTime: 1.3484418
     spawnInterval: 1.946624
     blocksPerWave: 2
@@ -5974,10 +6128,12 @@ MonoBehaviour:
     bugs: 8
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.77150965
-    monsterHp: 19
-    monsterAttack: 2.4885771
+    monsterHp: 27
+    monsterAttack: 1.6164328
+    armor: 2
+    crateShare: 0.36152306
     warningTime: 1.3461922
     spawnInterval: 1.94175
     blocksPerWave: 2
@@ -6055,10 +6211,12 @@ MonoBehaviour:
     bugs: 8
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.76945806
-    monsterHp: 19
-    monsterAttack: 2.4818628
+    monsterHp: 27
+    monsterAttack: 1.611397
+    armor: 2
+    crateShare: 0.3624183
     warningTime: 1.3439542
     spawnInterval: 1.9369009
     blocksPerWave: 2
@@ -6134,10 +6292,12 @@ MonoBehaviour:
     bugs: 8
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.76741683
-    monsterHp: 19
-    monsterAttack: 2.4751825
+    monsterHp: 27
+    monsterAttack: 1.6063868
+    armor: 2
+    crateShare: 0.363309
     warningTime: 1.3417275
     spawnInterval: 1.9320762
     blocksPerWave: 2
@@ -6215,10 +6375,12 @@ MonoBehaviour:
     bugs: 8
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.76538587
-    monsterHp: 19
-    monsterAttack: 2.4685357
+    monsterHp: 27
+    monsterAttack: 1.6014017
+    armor: 2
+    crateShare: 0.36419526
     warningTime: 1.3395118
     spawnInterval: 1.9272757
     blocksPerWave: 2
@@ -6295,10 +6457,12 @@ MonoBehaviour:
     bugs: 8
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.76336485
-    monsterHp: 20
-    monsterAttack: 2.4619215
+    monsterHp: 28
+    monsterAttack: 1.5964409
+    armor: 2
+    crateShare: 0.36507717
     warningTime: 1.3373071
     spawnInterval: 1.9224987
     blocksPerWave: 2
@@ -6376,10 +6540,12 @@ MonoBehaviour:
     bugs: 8
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7613537
-    monsterHp: 20
-    monsterAttack: 2.4553394
+    monsterHp: 28
+    monsterAttack: 1.5915045
+    armor: 2
+    crateShare: 0.36595476
     warningTime: 1.335113
     spawnInterval: 1.917745
     blocksPerWave: 2
@@ -6457,10 +6623,12 @@ MonoBehaviour:
     bugs: 8
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7593521
-    monsterHp: 20
-    monsterAttack: 2.448789
+    monsterHp: 28
+    monsterAttack: 1.5865916
+    armor: 2
+    crateShare: 0.36682817
     warningTime: 1.3329296
     spawnInterval: 1.913014
     blocksPerWave: 2
@@ -6534,10 +6702,12 @@ MonoBehaviour:
     bugs: 8
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.75736004
-    monsterHp: 20
-    monsterAttack: 2.4422693
+    monsterHp: 28
+    monsterAttack: 1.581702
+    armor: 2
+    crateShare: 0.36769742
     warningTime: 1.3307564
     spawnInterval: 1.9083055
     blocksPerWave: 2
@@ -6616,10 +6786,12 @@ MonoBehaviour:
     bugs: 8
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.75537735
-    monsterHp: 20
-    monsterAttack: 2.4357805
+    monsterHp: 28
+    monsterAttack: 1.5768353
+    armor: 2
+    crateShare: 0.3685626
     warningTime: 1.3285934
     spawnInterval: 1.9036192
     blocksPerWave: 2
@@ -6698,10 +6870,12 @@ MonoBehaviour:
     bugs: 8
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7534037
-    monsterHp: 20
-    monsterAttack: 2.4293215
+    monsterHp: 28
+    monsterAttack: 1.5719911
+    armor: 2
+    crateShare: 0.3694238
     warningTime: 1.3264405
     spawnInterval: 1.8989543
     blocksPerWave: 2
@@ -6780,10 +6954,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7514392
-    monsterHp: 20
-    monsterAttack: 2.422892
+    monsterHp: 28
+    monsterAttack: 1.567169
+    armor: 2
+    crateShare: 0.37028107
     warningTime: 1.3242973
     spawnInterval: 1.8943108
     blocksPerWave: 2
@@ -6862,10 +7038,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7494835
-    monsterHp: 20
-    monsterAttack: 2.4164915
+    monsterHp: 28
+    monsterAttack: 1.5623686
+    armor: 2
+    crateShare: 0.37113446
     warningTime: 1.3221638
     spawnInterval: 1.8896883
     blocksPerWave: 2
@@ -6944,10 +7122,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.74753654
-    monsterHp: 20
-    monsterAttack: 2.4101198
+    monsterHp: 28
+    monsterAttack: 1.5575898
+    armor: 2
+    crateShare: 0.37198403
     warningTime: 1.3200399
     spawnInterval: 1.8850864
     blocksPerWave: 2
@@ -7026,10 +7206,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7455982
-    monsterHp: 20
-    monsterAttack: 2.403776
+    monsterHp: 28
+    monsterAttack: 1.5528319
+    armor: 2
+    crateShare: 0.37282988
     warningTime: 1.3179253
     spawnInterval: 1.8805048
     blocksPerWave: 2
@@ -7103,10 +7285,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.74366826
-    monsterHp: 20
-    monsterAttack: 2.39746
+    monsterHp: 28
+    monsterAttack: 1.5480949
+    armor: 2
+    crateShare: 0.373672
     warningTime: 1.31582
     spawnInterval: 1.8759432
     blocksPerWave: 2
@@ -7185,10 +7369,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7417466
-    monsterHp: 21
-    monsterAttack: 2.391171
+    monsterHp: 29
+    monsterAttack: 1.5433781
+    armor: 2
+    crateShare: 0.37451056
     warningTime: 1.3137236
     spawnInterval: 1.8714011
     blocksPerWave: 2
@@ -7267,10 +7453,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.73983324
-    monsterHp: 21
-    monsterAttack: 2.384909
+    monsterHp: 29
+    monsterAttack: 1.5386815
+    armor: 2
+    crateShare: 0.3753455
     warningTime: 1.3116362
     spawnInterval: 1.8668785
     blocksPerWave: 2
@@ -7349,10 +7537,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.73792785
-    monsterHp: 21
-    monsterAttack: 2.378673
+    monsterHp: 29
+    monsterAttack: 1.5340048
+    armor: 2
+    crateShare: 0.37617692
     warningTime: 1.3095577
     spawnInterval: 1.8623749
     blocksPerWave: 2
@@ -7431,10 +7621,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.73603046
-    monsterHp: 21
-    monsterAttack: 2.3724635
+    monsterHp: 29
+    monsterAttack: 1.5293474
+    armor: 2
+    crateShare: 0.3770049
     warningTime: 1.3074877
     spawnInterval: 1.8578901
     blocksPerWave: 2
@@ -7508,10 +7700,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7341409
-    monsterHp: 21
-    monsterAttack: 2.3662794
+    monsterHp: 29
+    monsterAttack: 1.5247093
+    armor: 2
+    crateShare: 0.37782943
     warningTime: 1.3054264
     spawnInterval: 1.8534238
     blocksPerWave: 2
@@ -7591,10 +7785,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.732259
-    monsterHp: 21
-    monsterAttack: 2.3601203
+    monsterHp: 29
+    monsterAttack: 1.5200902
+    armor: 2
+    crateShare: 0.37865064
     warningTime: 1.3033735
     spawnInterval: 1.8489758
     blocksPerWave: 2
@@ -7674,10 +7870,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.73038465
-    monsterHp: 21
-    monsterAttack: 2.3539863
+    monsterHp: 29
+    monsterAttack: 1.5154897
+    armor: 2
+    crateShare: 0.3794685
     warningTime: 1.3013287
     spawnInterval: 1.8445455
     blocksPerWave: 2
@@ -7757,10 +7955,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.72851783
-    monsterHp: 21
-    monsterAttack: 2.3478768
+    monsterHp: 29
+    monsterAttack: 1.5109075
+    armor: 2
+    crateShare: 0.38028312
     warningTime: 1.2992922
     spawnInterval: 1.8401331
     blocksPerWave: 2
@@ -7840,10 +8040,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.72665834
-    monsterHp: 21
-    monsterAttack: 2.3417912
+    monsterHp: 29
+    monsterAttack: 1.5063432
+    armor: 2
+    crateShare: 0.38109452
     warningTime: 1.2972636
     spawnInterval: 1.835738
     blocksPerWave: 2
@@ -7923,10 +8125,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7248062
-    monsterHp: 21
-    monsterAttack: 2.3357296
+    monsterHp: 29
+    monsterAttack: 1.5017971
+    armor: 2
+    crateShare: 0.38190272
     warningTime: 1.2952431
     spawnInterval: 1.8313601
     blocksPerWave: 2
@@ -8006,10 +8210,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7229612
-    monsterHp: 21
-    monsterAttack: 2.3296914
+    monsterHp: 29
+    monsterAttack: 1.4972684
+    armor: 2
+    crateShare: 0.38270783
     warningTime: 1.2932304
     spawnInterval: 1.8269992
     blocksPerWave: 2
@@ -8089,10 +8295,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7211233
-    monsterHp: 22
-    monsterAttack: 2.3236763
+    monsterHp: 30
+    monsterAttack: 1.4927571
+    armor: 2
+    crateShare: 0.38350984
     warningTime: 1.2912253
     spawnInterval: 1.822655
     blocksPerWave: 2
@@ -8172,10 +8380,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7192923
-    monsterHp: 22
-    monsterAttack: 2.317684
+    monsterHp: 30
+    monsterAttack: 1.4882629
+    armor: 2
+    crateShare: 0.38430882
     warningTime: 1.289228
     spawnInterval: 1.8183272
     blocksPerWave: 2
@@ -8255,10 +8465,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.71746826
-    monsterHp: 22
-    monsterAttack: 2.3117144
+    monsterHp: 30
+    monsterAttack: 1.4837857
+    armor: 2
+    crateShare: 0.38510478
     warningTime: 1.287238
     spawnInterval: 1.8140159
     blocksPerWave: 2
@@ -8338,10 +8550,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7156509
-    monsterHp: 22
-    monsterAttack: 2.3057668
+    monsterHp: 30
+    monsterAttack: 1.479325
+    armor: 2
+    crateShare: 0.38589776
     warningTime: 1.2852556
     spawnInterval: 1.8097204
     blocksPerWave: 2
@@ -8421,10 +8635,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7138403
-    monsterHp: 22
-    monsterAttack: 2.2998412
+    monsterHp: 30
+    monsterAttack: 1.4748807
+    armor: 2
+    crateShare: 0.38668787
     warningTime: 1.2832803
     spawnInterval: 1.8054407
     blocksPerWave: 2
@@ -8504,10 +8720,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.71203625
-    monsterHp: 22
-    monsterAttack: 2.293937
+    monsterHp: 30
+    monsterAttack: 1.4704527
+    armor: 2
+    crateShare: 0.38747507
     warningTime: 1.2813122
     spawnInterval: 1.8011765
     blocksPerWave: 2
@@ -8587,10 +8805,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7102388
-    monsterHp: 22
-    monsterAttack: 2.2880545
+    monsterHp: 30
+    monsterAttack: 1.4660407
+    armor: 2
+    crateShare: 0.3882594
     warningTime: 1.2793514
     spawnInterval: 1.796928
     blocksPerWave: 2
@@ -8665,10 +8885,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.70844775
-    monsterHp: 22
-    monsterAttack: 2.2821927
+    monsterHp: 30
+    monsterAttack: 1.4616445
+    armor: 2
+    crateShare: 0.38904098
     warningTime: 1.2773975
     spawnInterval: 1.7926947
     blocksPerWave: 2
@@ -8749,10 +8971,12 @@ MonoBehaviour:
     bugs: 9
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.706663
-    monsterHp: 22
-    monsterAttack: 2.276352
+    monsterHp: 30
+    monsterAttack: 1.4572638
+    armor: 2
+    crateShare: 0.38981977
     warningTime: 1.2754506
     spawnInterval: 1.7884762
     blocksPerWave: 2
@@ -8833,10 +9057,12 @@ MonoBehaviour:
     bugs: 10
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7048846
-    monsterHp: 22
-    monsterAttack: 2.2705314
+    monsterHp: 30
+    monsterAttack: 1.4528985
+    armor: 2
+    crateShare: 0.3905958
     warningTime: 1.2735105
     spawnInterval: 1.7842727
     blocksPerWave: 3
@@ -8917,10 +9143,12 @@ MonoBehaviour:
     bugs: 10
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7031123
-    monsterHp: 22
-    monsterAttack: 2.2647314
+    monsterHp: 30
+    monsterAttack: 1.4485484
+    armor: 2
+    crateShare: 0.39136916
     warningTime: 1.2715771
     spawnInterval: 1.7800837
     blocksPerWave: 3
@@ -9001,10 +9229,12 @@ MonoBehaviour:
     bugs: 10
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.7013462
-    monsterHp: 22
-    monsterAttack: 2.2589514
+    monsterHp: 30
+    monsterAttack: 1.4442134
+    armor: 2
+    crateShare: 0.39213982
     warningTime: 1.2696503
     spawnInterval: 1.7759092
     blocksPerWave: 3
@@ -9085,10 +9315,12 @@ MonoBehaviour:
     bugs: 10
     robots: 5
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6995861
-    monsterHp: 23
-    monsterAttack: 2.253191
+    monsterHp: 31
+    monsterAttack: 1.4398931
+    armor: 2
+    crateShare: 0.3929079
     warningTime: 1.2677302
     spawnInterval: 1.7717489
     blocksPerWave: 3
@@ -9169,10 +9401,12 @@ MonoBehaviour:
     bugs: 10
     robots: 5
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6978319
-    monsterHp: 23
-    monsterAttack: 2.24745
+    monsterHp: 31
+    monsterAttack: 1.4355874
+    armor: 2
+    crateShare: 0.39367333
     warningTime: 1.2658166
     spawnInterval: 1.7676027
     blocksPerWave: 3
@@ -9251,10 +9485,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.69608366
-    monsterHp: 23
-    monsterAttack: 2.2417285
+    monsterHp: 31
+    monsterAttack: 1.4312963
+    armor: 2
+    crateShare: 0.3944362
     warningTime: 1.2639095
     spawnInterval: 1.7634705
     blocksPerWave: 3
@@ -9335,10 +9571,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.69434124
-    monsterHp: 23
-    monsterAttack: 2.236026
+    monsterHp: 31
+    monsterAttack: 1.4270195
+    armor: 2
+    crateShare: 0.39519653
     warningTime: 1.2620087
     spawnInterval: 1.7593521
     blocksPerWave: 3
@@ -9419,10 +9657,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.69260454
-    monsterHp: 23
-    monsterAttack: 2.2303421
+    monsterHp: 31
+    monsterAttack: 1.4227567
+    armor: 2
+    crateShare: 0.39595437
     warningTime: 1.2601141
     spawnInterval: 1.7552471
     blocksPerWave: 3
@@ -9503,10 +9743,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.69087356
-    monsterHp: 23
-    monsterAttack: 2.224677
+    monsterHp: 31
+    monsterAttack: 1.4185078
+    armor: 2
+    crateShare: 0.3967097
     warningTime: 1.2582257
     spawnInterval: 1.7511556
     blocksPerWave: 3
@@ -9587,10 +9829,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6891481
-    monsterHp: 23
-    monsterAttack: 2.2190304
+    monsterHp: 31
+    monsterAttack: 1.4142728
+    armor: 2
+    crateShare: 0.39746264
     warningTime: 1.2563434
     spawnInterval: 1.7470775
     blocksPerWave: 3
@@ -9671,10 +9915,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6874283
-    monsterHp: 23
-    monsterAttack: 2.2134018
+    monsterHp: 31
+    monsterAttack: 1.4100513
+    armor: 2
+    crateShare: 0.3982131
     warningTime: 1.2544672
     spawnInterval: 1.7430123
     blocksPerWave: 3
@@ -9756,10 +10002,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.68571395
-    monsterHp: 23
-    monsterAttack: 2.207791
+    monsterHp: 31
+    monsterAttack: 1.4058434
+    armor: 2
+    crateShare: 0.3989612
     warningTime: 1.252597
     spawnInterval: 1.7389601
     blocksPerWave: 3
@@ -9841,10 +10089,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.68400496
-    monsterHp: 23
-    monsterAttack: 2.2021983
+    monsterHp: 31
+    monsterAttack: 1.4016486
+    armor: 2
+    crateShare: 0.3997069
     warningTime: 1.2507327
     spawnInterval: 1.7349209
     blocksPerWave: 3
@@ -9926,10 +10176,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6823014
-    monsterHp: 23
-    monsterAttack: 2.1966228
+    monsterHp: 31
+    monsterAttack: 1.3974671
+    armor: 2
+    crateShare: 0.4004503
     warningTime: 1.2488742
     spawnInterval: 1.7308942
     blocksPerWave: 3
@@ -10011,10 +10263,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6806031
-    monsterHp: 23
-    monsterAttack: 2.1910648
+    monsterHp: 31
+    monsterAttack: 1.3932985
+    armor: 2
+    crateShare: 0.40119135
     warningTime: 1.2470216
     spawnInterval: 1.7268801
     blocksPerWave: 3
@@ -10096,10 +10350,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6789101
-    monsterHp: 24
-    monsterAttack: 2.185524
+    monsterHp: 32
+    monsterAttack: 1.3891429
+    armor: 2
+    crateShare: 0.40193015
     warningTime: 1.2451745
     spawnInterval: 1.7228783
     blocksPerWave: 3
@@ -10181,10 +10437,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6772222
-    monsterHp: 24
-    monsterAttack: 2.18
+    monsterHp: 32
+    monsterAttack: 1.385
+    armor: 2
+    crateShare: 0.40266666
     warningTime: 1.2433333
     spawnInterval: 1.7188889
     blocksPerWave: 3
@@ -10264,10 +10522,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.67553943
-    monsterHp: 24
-    monsterAttack: 2.1744928
+    monsterHp: 32
+    monsterAttack: 1.3808696
+    armor: 2
+    crateShare: 0.40340096
     warningTime: 1.2414975
     spawnInterval: 1.7149115
     blocksPerWave: 3
@@ -10349,10 +10609,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6738618
-    monsterHp: 24
-    monsterAttack: 2.1690023
+    monsterHp: 32
+    monsterAttack: 1.3767517
+    armor: 2
+    crateShare: 0.40413302
     warningTime: 1.2396674
     spawnInterval: 1.7109461
     blocksPerWave: 3
@@ -10434,10 +10696,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6721891
-    monsterHp: 24
-    monsterAttack: 2.163528
+    monsterHp: 32
+    monsterAttack: 1.372646
+    armor: 2
+    crateShare: 0.4048629
     warningTime: 1.2378427
     spawnInterval: 1.7069924
     blocksPerWave: 3
@@ -10519,10 +10783,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.67052144
-    monsterHp: 24
-    monsterAttack: 2.1580703
+    monsterHp: 32
+    monsterAttack: 1.3685526
+    armor: 2
+    crateShare: 0.40559065
     warningTime: 1.2360233
     spawnInterval: 1.7030506
     blocksPerWave: 3
@@ -10604,10 +10870,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6688586
-    monsterHp: 24
-    monsterAttack: 2.1526282
+    monsterHp: 32
+    monsterAttack: 1.3644711
+    armor: 2
+    crateShare: 0.40631625
     warningTime: 1.2342093
     spawnInterval: 1.6991203
     blocksPerWave: 3
@@ -10687,10 +10955,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6672006
-    monsterHp: 24
-    monsterAttack: 2.147202
+    monsterHp: 32
+    monsterAttack: 1.3604015
+    armor: 2
+    crateShare: 0.40703973
     warningTime: 1.2324007
     spawnInterval: 1.6952014
     blocksPerWave: 3
@@ -10772,10 +11042,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6655475
-    monsterHp: 24
-    monsterAttack: 2.1417918
+    monsterHp: 32
+    monsterAttack: 1.3563439
+    armor: 2
+    crateShare: 0.4077611
     warningTime: 1.2305973
     spawnInterval: 1.6912941
     blocksPerWave: 3
@@ -10850,10 +11122,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6638991
-    monsterHp: 24
-    monsterAttack: 2.1363971
+    monsterHp: 32
+    monsterAttack: 1.3522979
+    armor: 2
+    crateShare: 0.40848038
     warningTime: 1.228799
     spawnInterval: 1.6873978
     blocksPerWave: 3
@@ -10936,10 +11210,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6622554
-    monsterHp: 24
-    monsterAttack: 2.1310177
+    monsterHp: 32
+    monsterAttack: 1.3482633
+    armor: 2
+    crateShare: 0.40919763
     warningTime: 1.2270058
     spawnInterval: 1.6835127
     blocksPerWave: 3
@@ -11022,10 +11298,12 @@ MonoBehaviour:
     bugs: 10
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6606164
-    monsterHp: 24
-    monsterAttack: 2.1256537
+    monsterHp: 32
+    monsterAttack: 1.3442402
+    armor: 2
+    crateShare: 0.40991285
     warningTime: 1.2252178
     spawnInterval: 1.6796386
     blocksPerWave: 3
@@ -11108,10 +11386,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.658982
-    monsterHp: 24
-    monsterAttack: 2.1203048
+    monsterHp: 32
+    monsterAttack: 1.3402284
+    armor: 2
+    crateShare: 0.41062605
     warningTime: 1.2234348
     spawnInterval: 1.6757755
     blocksPerWave: 3
@@ -11194,10 +11474,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6573521
-    monsterHp: 25
-    monsterAttack: 2.1149704
+    monsterHp: 33
+    monsterAttack: 1.3362279
+    armor: 2
+    crateShare: 0.41133726
     warningTime: 1.2216568
     spawnInterval: 1.671923
     blocksPerWave: 3
@@ -11278,10 +11560,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.65572673
-    monsterHp: 25
-    monsterAttack: 2.109651
+    monsterHp: 33
+    monsterAttack: 1.3322383
+    armor: 2
+    crateShare: 0.41204652
     warningTime: 1.2198837
     spawnInterval: 1.6680813
     blocksPerWave: 3
@@ -11364,10 +11648,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.65410584
-    monsterHp: 25
-    monsterAttack: 2.1043465
+    monsterHp: 33
+    monsterAttack: 1.3282598
+    armor: 2
+    crateShare: 0.4127538
     warningTime: 1.2181154
     spawnInterval: 1.6642501
     blocksPerWave: 3
@@ -11450,10 +11736,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.65248936
-    monsterHp: 25
-    monsterAttack: 2.0990562
+    monsterHp: 33
+    monsterAttack: 1.3242922
+    armor: 2
+    crateShare: 0.41345915
     warningTime: 1.216352
     spawnInterval: 1.6604295
     blocksPerWave: 3
@@ -11534,10 +11822,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.65087736
-    monsterHp: 25
-    monsterAttack: 2.0937805
+    monsterHp: 33
+    monsterAttack: 1.3203353
+    armor: 2
+    crateShare: 0.4141626
     warningTime: 1.2145934
     spawnInterval: 1.6566191
     blocksPerWave: 3
@@ -11620,10 +11910,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6492696
-    monsterHp: 25
-    monsterAttack: 2.0885186
+    monsterHp: 33
+    monsterAttack: 1.316389
+    armor: 2
+    crateShare: 0.41486418
     warningTime: 1.2128395
     spawnInterval: 1.6528189
     blocksPerWave: 3
@@ -11704,10 +11996,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6476661
-    monsterHp: 25
-    monsterAttack: 2.083271
+    monsterHp: 33
+    monsterAttack: 1.3124533
+    armor: 2
+    crateShare: 0.41556385
     warningTime: 1.2110903
     spawnInterval: 1.649029
     blocksPerWave: 3
@@ -11790,10 +12084,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.64606696
-    monsterHp: 25
-    monsterAttack: 2.0780375
+    monsterHp: 33
+    monsterAttack: 1.308528
+    armor: 2
+    crateShare: 0.4162617
     warningTime: 1.2093457
     spawnInterval: 1.6452491
     blocksPerWave: 3
@@ -11869,10 +12165,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.644472
-    monsterHp: 25
-    monsterAttack: 2.0728176
+    monsterHp: 33
+    monsterAttack: 1.3046131
+    armor: 2
+    crateShare: 0.41695768
     warningTime: 1.2076057
     spawnInterval: 1.6414793
     blocksPerWave: 3
@@ -11955,10 +12253,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.64288116
-    monsterHp: 25
-    monsterAttack: 2.0676112
+    monsterHp: 33
+    monsterAttack: 1.3007084
+    armor: 2
+    crateShare: 0.41765183
     warningTime: 1.2058704
     spawnInterval: 1.6377192
     blocksPerWave: 3
@@ -12041,10 +12341,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6412945
-    monsterHp: 25
-    monsterAttack: 2.0624185
+    monsterHp: 33
+    monsterAttack: 1.2968138
+    armor: 2
+    crateShare: 0.4183442
     warningTime: 1.2041395
     spawnInterval: 1.6339688
     blocksPerWave: 3
@@ -12128,10 +12430,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.639712
-    monsterHp: 25
-    monsterAttack: 2.0572393
+    monsterHp: 33
+    monsterAttack: 1.2929294
+    armor: 2
+    crateShare: 0.41903478
     warningTime: 1.202413
     spawnInterval: 1.6302283
     blocksPerWave: 3
@@ -12215,10 +12519,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6381334
-    monsterHp: 25
-    monsterAttack: 2.052073
+    monsterHp: 33
+    monsterAttack: 1.2890548
+    armor: 2
+    crateShare: 0.4197236
     warningTime: 1.200691
     spawnInterval: 1.6264971
     blocksPerWave: 3
@@ -12300,10 +12606,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.63655895
-    monsterHp: 26
-    monsterAttack: 2.0469203
+    monsterHp: 34
+    monsterAttack: 1.2851902
+    armor: 2
+    crateShare: 0.42041063
     warningTime: 1.1989734
     spawnInterval: 1.6227757
     blocksPerWave: 3
@@ -12387,10 +12695,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6349884
-    monsterHp: 26
-    monsterAttack: 2.0417805
+    monsterHp: 34
+    monsterAttack: 1.2813354
+    armor: 2
+    crateShare: 0.42109594
     warningTime: 1.1972601
     spawnInterval: 1.6190636
     blocksPerWave: 3
@@ -12474,10 +12784,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6334219
-    monsterHp: 26
-    monsterAttack: 2.0366535
+    monsterHp: 34
+    monsterAttack: 1.2774901
+    armor: 2
+    crateShare: 0.4217795
     warningTime: 1.1955512
     spawnInterval: 1.6153609
     blocksPerWave: 3
@@ -12559,10 +12871,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.63185924
-    monsterHp: 26
-    monsterAttack: 2.0315394
+    monsterHp: 34
+    monsterAttack: 1.2736545
+    armor: 2
+    crateShare: 0.42246142
     warningTime: 1.1938463
     spawnInterval: 1.6116673
     blocksPerWave: 3
@@ -12646,10 +12960,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.63030046
-    monsterHp: 26
-    monsterAttack: 2.026438
+    monsterHp: 34
+    monsterAttack: 1.2698284
+    armor: 2
+    crateShare: 0.4231416
     warningTime: 1.192146
     spawnInterval: 1.6079829
     blocksPerWave: 3
@@ -12731,10 +13047,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.62874556
-    monsterHp: 26
-    monsterAttack: 2.0213492
+    monsterHp: 34
+    monsterAttack: 1.2660118
+    armor: 2
+    crateShare: 0.4238201
     warningTime: 1.1904496
     spawnInterval: 1.6043077
     blocksPerWave: 3
@@ -12818,10 +13136,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6271944
-    monsterHp: 26
-    monsterAttack: 2.0162728
+    monsterHp: 34
+    monsterAttack: 1.2622045
+    armor: 2
+    crateShare: 0.42449698
     warningTime: 1.1887575
     spawnInterval: 1.6006414
     blocksPerWave: 3
@@ -12898,10 +13218,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.62564707
-    monsterHp: 26
-    monsterAttack: 2.0112088
+    monsterHp: 34
+    monsterAttack: 1.2584065
+    armor: 2
+    crateShare: 0.42517218
     warningTime: 1.1870695
     spawnInterval: 1.596984
     blocksPerWave: 3
@@ -12985,10 +13307,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6241035
-    monsterHp: 26
-    monsterAttack: 2.006157
+    monsterHp: 34
+    monsterAttack: 1.2546176
+    armor: 2
+    crateShare: 0.42584574
     warningTime: 1.1853856
     spawnInterval: 1.5933354
     blocksPerWave: 3
@@ -13072,10 +13396,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6225636
-    monsterHp: 26
-    monsterAttack: 2.0011172
+    monsterHp: 34
+    monsterAttack: 1.2508379
+    armor: 2
+    crateShare: 0.4265177
     warningTime: 1.1837057
     spawnInterval: 1.5896958
     blocksPerWave: 3
@@ -13152,10 +13478,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.62102735
-    monsterHp: 26
-    monsterAttack: 1.9960897
+    monsterHp: 34
+    monsterAttack: 1.2470672
+    armor: 2
+    crateShare: 0.42718804
     warningTime: 1.1820298
     spawnInterval: 1.5860647
     blocksPerWave: 3
@@ -13239,10 +13567,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6194948
-    monsterHp: 26
-    monsterAttack: 1.991074
+    monsterHp: 34
+    monsterAttack: 1.2433054
+    armor: 2
+    crateShare: 0.4278568
     warningTime: 1.1803579
     spawnInterval: 1.5824422
     blocksPerWave: 3
@@ -13326,10 +13656,12 @@ MonoBehaviour:
     bugs: 11
     robots: 6
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6179658
-    monsterHp: 26
-    monsterAttack: 1.98607
+    monsterHp: 34
+    monsterAttack: 1.2395525
+    armor: 2
+    crateShare: 0.428524
     warningTime: 1.17869
     spawnInterval: 1.5788282
     blocksPerWave: 3
@@ -13414,10 +13746,12 @@ MonoBehaviour:
     bugs: 11
     robots: 7
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6164404
-    monsterHp: 26
-    monsterAttack: 1.9810779
+    monsterHp: 34
+    monsterAttack: 1.2358084
+    armor: 2
+    crateShare: 0.42918962
     warningTime: 1.1770259
     spawnInterval: 1.5752228
     blocksPerWave: 3
@@ -13502,10 +13836,12 @@ MonoBehaviour:
     bugs: 11
     robots: 7
     brutes: 0
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6149186
-    monsterHp: 27
-    monsterAttack: 1.9760973
+    monsterHp: 35
+    monsterAttack: 1.232073
+    armor: 2
+    crateShare: 0.42985368
     warningTime: 1.1753657
     spawnInterval: 1.5716258
     blocksPerWave: 3
@@ -13588,10 +13924,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6134003
-    monsterHp: 27
-    monsterAttack: 1.9711283
+    monsterHp: 35
+    monsterAttack: 1.2283461
+    armor: 2
+    crateShare: 0.43051624
     warningTime: 1.1737094
     spawnInterval: 1.568037
     blocksPerWave: 3
@@ -13676,10 +14014,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 4
+    robotHp: 6
     robotStep: 0.6118855
-    monsterHp: 27
-    monsterAttack: 1.9661708
+    monsterHp: 35
+    monsterAttack: 1.2246281
+    armor: 2
+    crateShare: 0.43117723
     warningTime: 1.1720569
     spawnInterval: 1.5644566
     blocksPerWave: 3
@@ -13762,10 +14102,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 4
+    robotHp: 7
     robotStep: 0.61037415
-    monsterHp: 27
-    monsterAttack: 1.9612246
+    monsterHp: 39
+    monsterAttack: 1.2209183
+    armor: 3
+    crateShare: 0.43183672
     warningTime: 1.1704081
     spawnInterval: 1.5608842
     blocksPerWave: 3
@@ -13850,10 +14192,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 0
-    robotHp: 4
+    robotHp: 7
     robotStep: 0.6088662
-    monsterHp: 27
-    monsterAttack: 1.9562894
+    monsterHp: 39
+    monsterAttack: 1.2172171
+    armor: 3
+    crateShare: 0.43249473
     warningTime: 1.168763
     spawnInterval: 1.5573201
     blocksPerWave: 3
@@ -13938,10 +14282,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 4
+    robotHp: 7
     robotStep: 0.60736173
-    monsterHp: 27
-    monsterAttack: 1.9513657
+    monsterHp: 39
+    monsterAttack: 1.2135242
+    armor: 3
+    crateShare: 0.43315125
     warningTime: 1.1671219
     spawnInterval: 1.553764
     blocksPerWave: 3
@@ -14026,10 +14372,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 4
+    robotHp: 7
     robotStep: 0.6058606
-    monsterHp: 27
-    monsterAttack: 1.946453
+    monsterHp: 39
+    monsterAttack: 1.2098397
+    armor: 3
+    crateShare: 0.43380627
     warningTime: 1.1654843
     spawnInterval: 1.550216
     blocksPerWave: 3
@@ -14114,10 +14462,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 4
+    robotHp: 7
     robotStep: 0.60436285
-    monsterHp: 27
-    monsterAttack: 1.9415511
+    monsterHp: 39
+    monsterAttack: 1.2061633
+    armor: 3
+    crateShare: 0.43445987
     warningTime: 1.1638503
     spawnInterval: 1.5466757
     blocksPerWave: 3
@@ -14200,10 +14550,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 0
-    robotHp: 4
+    robotHp: 7
     robotStep: 0.6028684
-    monsterHp: 27
-    monsterAttack: 1.9366602
+    monsterHp: 39
+    monsterAttack: 1.2024951
+    armor: 3
+    crateShare: 0.43511197
     warningTime: 1.16222
     spawnInterval: 1.5431434
     blocksPerWave: 3
@@ -14288,10 +14640,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 4
+    robotHp: 7
     robotStep: 0.6013772
-    monsterHp: 27
-    monsterAttack: 1.93178
+    monsterHp: 39
+    monsterAttack: 1.1988349
+    armor: 3
+    crateShare: 0.43576267
     warningTime: 1.1605933
     spawnInterval: 1.5396187
     blocksPerWave: 3
@@ -14376,10 +14730,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 4
+    robotHp: 7
     robotStep: 0.59988934
-    monsterHp: 27
-    monsterAttack: 1.9269105
+    monsterHp: 39
+    monsterAttack: 1.1951829
+    armor: 3
+    crateShare: 0.43641192
     warningTime: 1.1589701
     spawnInterval: 1.5361019
     blocksPerWave: 3
@@ -14464,10 +14820,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 4
+    robotHp: 7
     robotStep: 0.5984047
-    monsterHp: 27
-    monsterAttack: 1.9220518
+    monsterHp: 39
+    monsterAttack: 1.1915388
+    armor: 3
+    crateShare: 0.43705976
     warningTime: 1.1573505
     spawnInterval: 1.5325929
     blocksPerWave: 3
@@ -14550,10 +14908,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 0
-    robotHp: 4
+    robotHp: 7
     robotStep: 0.59692323
-    monsterHp: 27
-    monsterAttack: 1.9172034
+    monsterHp: 39
+    monsterAttack: 1.1879026
+    armor: 3
+    crateShare: 0.4377062
     warningTime: 1.1557344
     spawnInterval: 1.5290912
     blocksPerWave: 3
@@ -14637,10 +14997,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 4
+    robotHp: 7
     robotStep: 0.59544504
-    monsterHp: 27
-    monsterAttack: 1.9123656
+    monsterHp: 39
+    monsterAttack: 1.1842742
+    armor: 3
+    crateShare: 0.43835124
     warningTime: 1.1541218
     spawnInterval: 1.5255973
     blocksPerWave: 3
@@ -14726,10 +15088,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 4
+    robotHp: 7
     robotStep: 0.59397
-    monsterHp: 28
-    monsterAttack: 1.9075382
+    monsterHp: 40
+    monsterAttack: 1.1806536
+    armor: 3
+    crateShare: 0.4389949
     warningTime: 1.1525127
     spawnInterval: 1.5221108
     blocksPerWave: 3
@@ -14813,10 +15177,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 4
+    robotHp: 7
     robotStep: 0.59249806
-    monsterHp: 28
-    monsterAttack: 1.902721
+    monsterHp: 40
+    monsterAttack: 1.1770407
+    armor: 3
+    crateShare: 0.4396372
     warningTime: 1.1509069
     spawnInterval: 1.5186318
     blocksPerWave: 3
@@ -14902,10 +15268,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5910293
-    monsterHp: 28
-    monsterAttack: 1.897914
+    monsterHp: 40
+    monsterAttack: 1.1734354
+    armor: 3
+    crateShare: 0.4402781
     warningTime: 1.1493046
     spawnInterval: 1.5151601
     blocksPerWave: 3
@@ -14991,10 +15359,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5895636
-    monsterHp: 28
-    monsterAttack: 1.8931173
+    monsterHp: 40
+    monsterAttack: 1.169838
+    armor: 3
+    crateShare: 0.4409177
     warningTime: 1.1477057
     spawnInterval: 1.5116957
     blocksPerWave: 3
@@ -15080,10 +15450,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.588101
-    monsterHp: 28
-    monsterAttack: 1.8883306
+    monsterHp: 40
+    monsterAttack: 1.166248
+    armor: 3
+    crateShare: 0.44155592
     warningTime: 1.1461102
     spawnInterval: 1.5082387
     blocksPerWave: 3
@@ -15169,10 +15541,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.58664143
-    monsterHp: 28
-    monsterAttack: 1.8835539
+    monsterHp: 40
+    monsterAttack: 1.1626654
+    armor: 3
+    crateShare: 0.44219282
     warningTime: 1.1445179
     spawnInterval: 1.5047888
     blocksPerWave: 3
@@ -15256,10 +15630,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5851849
-    monsterHp: 28
-    monsterAttack: 1.8787869
+    monsterHp: 40
+    monsterAttack: 1.1590902
+    armor: 3
+    crateShare: 0.44282842
     warningTime: 1.142929
     spawnInterval: 1.501346
     blocksPerWave: 3
@@ -15345,10 +15721,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5837314
-    monsterHp: 28
-    monsterAttack: 1.8740301
+    monsterHp: 40
+    monsterAttack: 1.1555225
+    armor: 3
+    crateShare: 0.44346264
     warningTime: 1.1413434
     spawnInterval: 1.4979105
     blocksPerWave: 3
@@ -15432,10 +15810,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5822808
-    monsterHp: 28
-    monsterAttack: 1.8692827
+    monsterHp: 40
+    monsterAttack: 1.151962
+    armor: 3
+    crateShare: 0.44409564
     warningTime: 1.1397609
     spawnInterval: 1.4944819
     blocksPerWave: 3
@@ -15521,10 +15901,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5808332
-    monsterHp: 28
-    monsterAttack: 1.8645451
+    monsterHp: 40
+    monsterAttack: 1.1484088
+    armor: 3
+    crateShare: 0.4447273
     warningTime: 1.1381817
     spawnInterval: 1.4910603
     blocksPerWave: 3
@@ -15608,10 +15990,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.57938856
-    monsterHp: 28
-    monsterAttack: 1.8598173
+    monsterHp: 40
+    monsterAttack: 1.1448629
+    armor: 3
+    crateShare: 0.4453577
     warningTime: 1.1366057
     spawnInterval: 1.4876457
     blocksPerWave: 3
@@ -15695,10 +16079,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.57794684
-    monsterHp: 28
-    monsterAttack: 1.8550988
+    monsterHp: 40
+    monsterAttack: 1.141324
+    armor: 3
+    crateShare: 0.44598684
     warningTime: 1.1350329
     spawnInterval: 1.4842379
     blocksPerWave: 3
@@ -15784,10 +16170,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.57650805
-    monsterHp: 28
-    monsterAttack: 1.85039
+    monsterHp: 40
+    monsterAttack: 1.1377923
+    armor: 3
+    crateShare: 0.44661468
     warningTime: 1.1334633
     spawnInterval: 1.4808371
     blocksPerWave: 3
@@ -15873,10 +16261,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.57507205
-    monsterHp: 28
-    monsterAttack: 1.8456905
+    monsterHp: 40
+    monsterAttack: 1.1342678
+    armor: 3
+    crateShare: 0.44724128
     warningTime: 1.1318967
     spawnInterval: 1.4774431
     blocksPerWave: 3
@@ -15963,10 +16353,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.573639
-    monsterHp: 29
-    monsterAttack: 1.8410003
+    monsterHp: 41
+    monsterAttack: 1.1307502
+    armor: 3
+    crateShare: 0.44786662
     warningTime: 1.1303334
     spawnInterval: 1.4740556
     blocksPerWave: 3
@@ -16053,10 +16445,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.57220864
-    monsterHp: 29
-    monsterAttack: 1.8363193
+    monsterHp: 41
+    monsterAttack: 1.1272395
+    armor: 3
+    crateShare: 0.44849077
     warningTime: 1.1287731
     spawnInterval: 1.470675
     blocksPerWave: 3
@@ -16143,10 +16537,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5707812
-    monsterHp: 29
-    monsterAttack: 1.8316476
+    monsterHp: 41
+    monsterAttack: 1.1237357
+    armor: 3
+    crateShare: 0.44911364
     warningTime: 1.1272159
     spawnInterval: 1.467301
     blocksPerWave: 3
@@ -16233,10 +16629,12 @@ MonoBehaviour:
     bugs: 12
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.56935656
-    monsterHp: 29
-    monsterAttack: 1.8269851
+    monsterHp: 41
+    monsterAttack: 1.1202388
+    armor: 3
+    crateShare: 0.4497353
     warningTime: 1.1256616
     spawnInterval: 1.4639336
     blocksPerWave: 3
@@ -16323,10 +16721,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.56793463
-    monsterHp: 29
-    monsterAttack: 1.8223317
+    monsterHp: 41
+    monsterAttack: 1.1167487
+    armor: 3
+    crateShare: 0.45035577
     warningTime: 1.1241105
     spawnInterval: 1.4605728
     blocksPerWave: 3
@@ -16413,10 +16813,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5665155
-    monsterHp: 29
-    monsterAttack: 1.8176872
+    monsterHp: 41
+    monsterAttack: 1.1132653
+    armor: 3
+    crateShare: 0.45097506
     warningTime: 1.1225623
     spawnInterval: 1.4572184
     blocksPerWave: 3
@@ -16496,10 +16898,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5650991
-    monsterHp: 29
-    monsterAttack: 1.8130517
+    monsterHp: 41
+    monsterAttack: 1.1097887
+    armor: 3
+    crateShare: 0.4515931
     warningTime: 1.1210172
     spawnInterval: 1.4538705
     blocksPerWave: 3
@@ -16586,10 +16990,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5636854
-    monsterHp: 29
-    monsterAttack: 1.8084251
+    monsterHp: 41
+    monsterAttack: 1.1063187
+    armor: 3
+    crateShare: 0.45220998
     warningTime: 1.119475
     spawnInterval: 1.4505291
     blocksPerWave: 3
@@ -16673,10 +17079,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.56227446
-    monsterHp: 29
-    monsterAttack: 1.8038074
+    monsterHp: 41
+    monsterAttack: 1.1028554
+    armor: 3
+    crateShare: 0.4528257
     warningTime: 1.1179358
     spawnInterval: 1.4471941
     blocksPerWave: 3
@@ -16761,10 +17169,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5608661
-    monsterHp: 29
-    monsterAttack: 1.7991983
+    monsterHp: 41
+    monsterAttack: 1.0993986
+    armor: 3
+    crateShare: 0.45344022
     warningTime: 1.1163994
     spawnInterval: 1.4438653
     blocksPerWave: 3
@@ -16851,10 +17261,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.55946046
-    monsterHp: 29
-    monsterAttack: 1.794598
+    monsterHp: 41
+    monsterAttack: 1.0959485
+    armor: 3
+    crateShare: 0.4540536
     warningTime: 1.1148659
     spawnInterval: 1.4405429
     blocksPerWave: 3
@@ -16941,10 +17353,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5580574
-    monsterHp: 29
-    monsterAttack: 1.7900062
+    monsterHp: 41
+    monsterAttack: 1.0925046
+    armor: 3
+    crateShare: 0.45466584
     warningTime: 1.1133354
     spawnInterval: 1.4372267
     blocksPerWave: 3
@@ -17031,10 +17445,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5566571
-    monsterHp: 29
-    monsterAttack: 1.7854232
+    monsterHp: 41
+    monsterAttack: 1.0890673
+    armor: 3
+    crateShare: 0.4552769
     warningTime: 1.1118077
     spawnInterval: 1.4339167
     blocksPerWave: 3
@@ -17121,10 +17537,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.55525935
-    monsterHp: 29
-    monsterAttack: 1.7808487
+    monsterHp: 41
+    monsterAttack: 1.0856365
+    armor: 3
+    crateShare: 0.45588684
     warningTime: 1.1102829
     spawnInterval: 1.4306129
     blocksPerWave: 3
@@ -17211,10 +17629,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5538641
-    monsterHp: 29
-    monsterAttack: 1.7762825
+    monsterHp: 41
+    monsterAttack: 1.0822119
+    armor: 3
+    crateShare: 0.45649564
     warningTime: 1.1087608
     spawnInterval: 1.4273151
     blocksPerWave: 3
@@ -17301,10 +17721,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5524715
-    monsterHp: 30
-    monsterAttack: 1.7717249
+    monsterHp: 42
+    monsterAttack: 1.0787936
+    armor: 3
+    crateShare: 0.45710334
     warningTime: 1.1072416
     spawnInterval: 1.4240235
     blocksPerWave: 3
@@ -17390,10 +17812,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.55108136
-    monsterHp: 30
-    monsterAttack: 1.7671754
+    monsterHp: 42
+    monsterAttack: 1.0753815
+    armor: 3
+    crateShare: 0.45770994
     warningTime: 1.105725
     spawnInterval: 1.4207377
     blocksPerWave: 3
@@ -17481,10 +17905,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5496939
-    monsterHp: 30
-    monsterAttack: 1.7626345
+    monsterHp: 42
+    monsterAttack: 1.0719758
+    armor: 3
+    crateShare: 0.4583154
     warningTime: 1.1042114
     spawnInterval: 1.4174582
     blocksPerWave: 3
@@ -17572,10 +17998,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.54830885
-    monsterHp: 30
-    monsterAttack: 1.7581018
+    monsterHp: 42
+    monsterAttack: 1.0685763
+    armor: 3
+    crateShare: 0.45891976
     warningTime: 1.1027006
     spawnInterval: 1.4141846
     blocksPerWave: 3
@@ -17663,10 +18091,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5469264
-    monsterHp: 30
-    monsterAttack: 1.7535772
+    monsterHp: 42
+    monsterAttack: 1.0651828
+    armor: 3
+    crateShare: 0.45952302
     warningTime: 1.1011924
     spawnInterval: 1.4109168
     blocksPerWave: 3
@@ -17751,10 +18181,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.54554635
-    monsterHp: 30
-    monsterAttack: 1.7490608
+    monsterHp: 42
+    monsterAttack: 1.0617956
+    armor: 3
+    crateShare: 0.4601252
     warningTime: 1.0996869
     spawnInterval: 1.407655
     blocksPerWave: 3
@@ -17840,10 +18272,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5441688
-    monsterHp: 30
-    monsterAttack: 1.7445524
+    monsterHp: 42
+    monsterAttack: 1.0584143
+    armor: 3
+    crateShare: 0.46072632
     warningTime: 1.0981841
     spawnInterval: 1.4043989
     blocksPerWave: 3
@@ -17931,10 +18365,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5427937
-    monsterHp: 30
-    monsterAttack: 1.7400521
+    monsterHp: 42
+    monsterAttack: 1.055039
+    armor: 3
+    crateShare: 0.4613264
     warningTime: 1.096684
     spawnInterval: 1.4011487
     blocksPerWave: 3
@@ -18013,10 +18449,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.54142106
-    monsterHp: 30
-    monsterAttack: 1.7355598
+    monsterHp: 42
+    monsterAttack: 1.0516698
+    armor: 3
+    crateShare: 0.46192536
     warningTime: 1.0951866
     spawnInterval: 1.3979043
     blocksPerWave: 3
@@ -18104,10 +18542,12 @@ MonoBehaviour:
     bugs: 13
     robots: 7
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5400508
-    monsterHp: 30
-    monsterAttack: 1.7310754
+    monsterHp: 42
+    monsterAttack: 1.0483065
+    armor: 3
+    crateShare: 0.46252328
     warningTime: 1.0936917
     spawnInterval: 1.3946655
     blocksPerWave: 3
@@ -18195,10 +18635,12 @@ MonoBehaviour:
     bugs: 13
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.538683
-    monsterHp: 30
-    monsterAttack: 1.726599
+    monsterHp: 42
+    monsterAttack: 1.0449492
+    armor: 3
+    crateShare: 0.46312013
     warningTime: 1.0921996
     spawnInterval: 1.3914325
     blocksPerWave: 3
@@ -18286,10 +18728,12 @@ MonoBehaviour:
     bugs: 13
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5373176
-    monsterHp: 30
-    monsterAttack: 1.7221302
+    monsterHp: 42
+    monsterAttack: 1.0415976
+    armor: 3
+    crateShare: 0.46371597
     warningTime: 1.09071
     spawnInterval: 1.388205
     blocksPerWave: 3
@@ -18377,10 +18821,12 @@ MonoBehaviour:
     bugs: 13
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.53595454
-    monsterHp: 30
-    monsterAttack: 1.7176694
+    monsterHp: 42
+    monsterAttack: 1.038252
+    armor: 3
+    crateShare: 0.46431074
     warningTime: 1.089223
     spawnInterval: 1.3849834
     blocksPerWave: 3
@@ -18468,10 +18914,12 @@ MonoBehaviour:
     bugs: 13
     robots: 8
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5345939
-    monsterHp: 30
-    monsterAttack: 1.7132163
+    monsterHp: 42
+    monsterAttack: 1.0349122
+    armor: 3
+    crateShare: 0.4649045
     warningTime: 1.0877388
     spawnInterval: 1.3817673
     blocksPerWave: 3
@@ -18559,10 +19007,12 @@ MonoBehaviour:
     bugs: 13
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5332355
-    monsterHp: 30
-    monsterAttack: 1.7087708
+    monsterHp: 42
+    monsterAttack: 1.0315781
+    armor: 3
+    crateShare: 0.46549723
     warningTime: 1.0862569
     spawnInterval: 1.3785566
     blocksPerWave: 4
@@ -18650,10 +19100,12 @@ MonoBehaviour:
     bugs: 13
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.53187954
-    monsterHp: 30
-    monsterAttack: 1.7043331
+    monsterHp: 42
+    monsterAttack: 1.0282497
+    armor: 3
+    crateShare: 0.46608892
     warningTime: 1.0847776
     spawnInterval: 1.3753515
     blocksPerWave: 4
@@ -18742,10 +19194,12 @@ MonoBehaviour:
     bugs: 13
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5305258
-    monsterHp: 31
-    monsterAttack: 1.6999027
+    monsterHp: 43
+    monsterAttack: 1.0249269
+    armor: 3
+    crateShare: 0.46667963
     warningTime: 1.0833008
     spawnInterval: 1.3721519
     blocksPerWave: 4
@@ -18831,10 +19285,12 @@ MonoBehaviour:
     bugs: 13
     robots: 8
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.52917445
-    monsterHp: 31
-    monsterAttack: 1.69548
+    monsterHp: 43
+    monsterAttack: 1.02161
+    armor: 3
+    crateShare: 0.46726933
     warningTime: 1.0818266
     spawnInterval: 1.3689578
     blocksPerWave: 4
@@ -18921,10 +19377,12 @@ MonoBehaviour:
     bugs: 13
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.52782536
-    monsterHp: 31
-    monsterAttack: 1.6910648
+    monsterHp: 43
+    monsterAttack: 1.0182985
+    armor: 3
+    crateShare: 0.46785802
     warningTime: 1.0803549
     spawnInterval: 1.3657689
     blocksPerWave: 4
@@ -19013,10 +19471,12 @@ MonoBehaviour:
     bugs: 13
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5264786
-    monsterHp: 31
-    monsterAttack: 1.6866572
+    monsterHp: 43
+    monsterAttack: 1.0149928
+    armor: 3
+    crateShare: 0.46844572
     warningTime: 1.0788857
     spawnInterval: 1.3625857
     blocksPerWave: 4
@@ -19096,10 +19556,12 @@ MonoBehaviour:
     bugs: 13
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.52513397
-    monsterHp: 31
-    monsterAttack: 1.6822567
+    monsterHp: 43
+    monsterAttack: 1.0116925
+    armor: 3
+    crateShare: 0.46903244
     warningTime: 1.0774188
     spawnInterval: 1.3594075
     blocksPerWave: 4
@@ -19188,10 +19650,12 @@ MonoBehaviour:
     bugs: 13
     robots: 8
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5237917
-    monsterHp: 31
-    monsterAttack: 1.6778637
+    monsterHp: 43
+    monsterAttack: 1.0083977
+    armor: 3
+    crateShare: 0.46961817
     warningTime: 1.0759546
     spawnInterval: 1.3562348
     blocksPerWave: 4
@@ -19280,10 +19744,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.52245164
-    monsterHp: 31
-    monsterAttack: 1.6734781
+    monsterHp: 43
+    monsterAttack: 1.0051085
+    armor: 3
+    crateShare: 0.47020292
     warningTime: 1.0744927
     spawnInterval: 1.3530674
     blocksPerWave: 4
@@ -19372,10 +19838,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.52111375
-    monsterHp: 31
-    monsterAttack: 1.6690997
+    monsterHp: 43
+    monsterAttack: 1.0018247
+    armor: 3
+    crateShare: 0.47078672
     warningTime: 1.0730332
     spawnInterval: 1.3499053
     blocksPerWave: 4
@@ -19464,10 +19932,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5197782
-    monsterHp: 31
-    monsterAttack: 1.6647286
+    monsterHp: 43
+    monsterAttack: 0.9985464
+    armor: 3
+    crateShare: 0.4713695
     warningTime: 1.0715761
     spawnInterval: 1.3467484
     blocksPerWave: 4
@@ -19556,10 +20026,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5184447
-    monsterHp: 31
-    monsterAttack: 1.6603645
+    monsterHp: 43
+    monsterAttack: 0.99527335
+    armor: 3
+    crateShare: 0.4719514
     warningTime: 1.0701214
     spawnInterval: 1.3435966
     blocksPerWave: 4
@@ -19648,10 +20120,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.51711345
-    monsterHp: 31
-    monsterAttack: 1.6560076
+    monsterHp: 43
+    monsterAttack: 0.9920057
+    armor: 3
+    crateShare: 0.4725323
     warningTime: 1.0686692
     spawnInterval: 1.3404499
     blocksPerWave: 4
@@ -19737,10 +20211,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5157844
-    monsterHp: 31
-    monsterAttack: 1.6516579
+    monsterHp: 43
+    monsterAttack: 0.9887434
+    armor: 3
+    crateShare: 0.47311226
     warningTime: 1.0672193
     spawnInterval: 1.3373085
     blocksPerWave: 4
@@ -19829,10 +20305,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5144574
-    monsterHp: 31
-    monsterAttack: 1.6473153
+    monsterHp: 43
+    monsterAttack: 0.9854864
+    armor: 3
+    crateShare: 0.47369128
     warningTime: 1.0657717
     spawnInterval: 1.334172
     blocksPerWave: 4
@@ -19919,10 +20397,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.51313263
-    monsterHp: 31
-    monsterAttack: 1.6429796
+    monsterHp: 43
+    monsterAttack: 0.9822347
+    armor: 3
+    crateShare: 0.4742694
     warningTime: 1.0643265
     spawnInterval: 1.3310407
     blocksPerWave: 4
@@ -20011,10 +20491,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.51181
-    monsterHp: 31
-    monsterAttack: 1.6386509
+    monsterHp: 43
+    monsterAttack: 0.9789881
+    armor: 3
+    crateShare: 0.47484654
     warningTime: 1.0628836
     spawnInterval: 1.3279145
     blocksPerWave: 4
@@ -20103,10 +20585,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.51048946
-    monsterHp: 32
-    monsterAttack: 1.6343292
+    monsterHp: 44
+    monsterAttack: 0.97574687
+    armor: 3
+    crateShare: 0.47542277
     warningTime: 1.061443
     spawnInterval: 1.3247932
     blocksPerWave: 4
@@ -20196,10 +20680,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.509171
-    monsterHp: 32
-    monsterAttack: 1.6300143
+    monsterHp: 44
+    monsterAttack: 0.9725107
+    armor: 3
+    crateShare: 0.4759981
     warningTime: 1.0600047
     spawnInterval: 1.3216769
     blocksPerWave: 4
@@ -20289,10 +20775,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.50785464
-    monsterHp: 32
-    monsterAttack: 1.6257062
+    monsterHp: 44
+    monsterAttack: 0.96927965
+    armor: 3
+    crateShare: 0.4765725
     warningTime: 1.0585687
     spawnInterval: 1.3185655
     blocksPerWave: 4
@@ -20382,10 +20870,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5065404
-    monsterHp: 32
-    monsterAttack: 1.621405
+    monsterHp: 44
+    monsterAttack: 0.9660537
+    armor: 3
+    crateShare: 0.477146
     warningTime: 1.057135
     spawnInterval: 1.3154591
     blocksPerWave: 4
@@ -20475,10 +20965,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5052282
-    monsterHp: 32
-    monsterAttack: 1.6171106
+    monsterHp: 44
+    monsterAttack: 0.9628329
+    armor: 3
+    crateShare: 0.4777186
     warningTime: 1.0557035
     spawnInterval: 1.3123575
     blocksPerWave: 4
@@ -20568,10 +21060,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5039181
-    monsterHp: 32
-    monsterAttack: 1.612823
+    monsterHp: 44
+    monsterAttack: 0.95961726
+    armor: 3
+    crateShare: 0.47829026
     warningTime: 1.0542743
     spawnInterval: 1.309261
     blocksPerWave: 4
@@ -20659,10 +21153,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 0
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.50261
-    monsterHp: 32
-    monsterAttack: 1.608542
+    monsterHp: 44
+    monsterAttack: 0.9564065
+    armor: 3
+    crateShare: 0.47886106
     warningTime: 1.0528473
     spawnInterval: 1.3061692
     blocksPerWave: 4
@@ -20752,10 +21248,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.50130403
-    monsterHp: 32
-    monsterAttack: 1.6042677
+    monsterHp: 44
+    monsterAttack: 0.95320076
+    armor: 3
+    crateShare: 0.47943097
     warningTime: 1.0514225
     spawnInterval: 1.3030822
     blocksPerWave: 4
@@ -20842,10 +21340,12 @@ MonoBehaviour:
     bugs: 14
     robots: 8
     brutes: 1
-    robotHp: 5
+    robotHp: 8
     robotStep: 0.5
-    monsterHp: 32
-    monsterAttack: 1.6
+    monsterHp: 44
+    monsterAttack: 0.95
+    armor: 3
+    crateShare: 0.48
     warningTime: 1.05
     spawnInterval: 1.3
     blocksPerWave: 4

@@ -53,7 +53,7 @@ namespace SquashBot.Data
 
         public static bool TryBuy(Tool t)
         {
-            if (IsMaxed(t) || !Unlocked(t) || !Shop.Spend(NextPrice(t))) return false;
+            if (IsMaxed(t) || !Unlocked(t) || !Backpack.Fits(Backpack.Weight(t)) || !Shop.Spend(NextPrice(t))) return false;
             bool first = !Owned(t);
             PlayerPrefs.SetInt("sb_tool_" + t, Level(t) + 1);
             if (first && Equipped(0) == null) SetSlot(0, t); // a first tool goes straight into the bag
