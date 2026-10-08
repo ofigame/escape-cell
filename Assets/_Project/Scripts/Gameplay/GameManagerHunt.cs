@@ -146,7 +146,7 @@ namespace SquashBot.Gameplay
 
         private static readonly Vector3 CloseCamOffset = new Vector3(-2.7f, 3.9f, -2.7f);
         /// <summary>The settings' camera distances (near, medium, far, farthest), as multiples of the nearest view.</summary>
-        private static readonly float[] CamDistanceScale = { 1.4f, 1.7f, 2.0f, 2.45f };
+        private static readonly float[] CamDistanceScale = { 2.45f, 2.9f, 3.4f, 4.0f };
         private const float CloseCamFov = 50f;
     }
 }

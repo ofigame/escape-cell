@@ -32,8 +32,8 @@ namespace SquashBot.Data
         /// <summary>How far the play camera stands from the robot: 0 near … 3 far (default 2).</summary>
         public static int CameraDistance
         {
-            get => Mathf.Clamp(PlayerPrefs.GetInt("sb_cam_distance", 2), 0, 3);
-            set { PlayerPrefs.SetInt("sb_cam_distance", Mathf.Clamp(value, 0, 3)); PlayerPrefs.Save(); }
+            get => Mathf.Clamp(PlayerPrefs.GetInt("sb_cam_distance2", 2), 0, 3);
+            set { PlayerPrefs.SetInt("sb_cam_distance2", Mathf.Clamp(value, 0, 3)); PlayerPrefs.Save(); }
         }
 
         public static bool PerspectiveView
