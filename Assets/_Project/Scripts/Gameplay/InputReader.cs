@@ -19,7 +19,10 @@ namespace SquashBot.Gameplay
         /// <summary>The held finger was lifted.</summary>
         public bool holdEnd;
 
-        public bool IsEmpty => !move.HasValue && !jump && !holdStart && !holdPosition.HasValue && !holdEnd;
+        /// <summary>A quick tap (screen pixels), for striking what was tapped.</summary>
+        public Vector2? tap;
+
+        public bool IsEmpty => !move.HasValue && !jump && !holdStart && !holdPosition.HasValue && !holdEnd && !tap.HasValue;
     }
 
     /// <summary>
@@ -149,12 +152,16 @@ namespace SquashBot.Gameplay
                 var move = CheckSwipe(hasPointer ? pos : lastPos, robotWorld, released: true);
                 if (move.HasValue) return new InputCommand { move = move };
                 if (chained) return default; // the end of a drag, not a tap
-                return new InputCommand { jump = RegisterTap() };
+                bool quick = Time.unscaledTime - pressTime <= TapMaxDuration;
+                return new InputCommand { jump = RegisterTap(), tap = quick ? (hasPointer ? pos : lastPos) : (Vector2?)null };
             }
 
             if (consumed) return default;
             return new InputCommand { move = CheckSwipe(pos, robotWorld) }; // triggers mid-drag for snappy response
         }
+
+        /// <summary>The last tap was used (it struck something): it doesn't count towards a double-tap jump.</summary>
+        public void CancelTap() => lastTapTime = -10f;
 
         /// <summary>A short press without movement is a tap; two taps in quick succession make a jump.</summary>
         private bool RegisterTap()

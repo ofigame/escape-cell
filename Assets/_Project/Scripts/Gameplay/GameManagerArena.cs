@@ -142,6 +142,7 @@ namespace SquashBot.Gameplay
             hazards.Freeze();
             floorRules.Freeze();
             enemies.Freeze();
+            hunt.Freeze();
             powerUps.Freeze();
             if (aura != null) aura.SetActive(false);
             arena.Begin(() => monster == null || monster.Dead, MonsterPose, MonsterCentre, ArenaRadius, LevelCatalog.Difficulty(levelIndex), Weapons.Level, null);
@@ -168,6 +169,7 @@ namespace SquashBot.Gameplay
                 hazards.Resume();
                 floorRules.Resume();
                 enemies.Resume();
+                hunt.Resume();
                 powerUps.Resume();
             }
             if (aura != null) aura.SetActive(charged);
@@ -393,6 +395,7 @@ namespace SquashBot.Gameplay
             hazards.Freeze();
             floorRules.Freeze();
             enemies.Freeze();
+            hunt.Freeze();
             powerUps.Freeze();
             arena.Begin(() => thief == null, null, centre, DuelRadius, Mathf.Clamp01(LevelCatalog.Difficulty(levelIndex) + 0.2f), Weapons.Level, null);
             FloatAt(centre + Vector3.up * 1.2f, Loc.T("float.duel"), Palette.UiGold);

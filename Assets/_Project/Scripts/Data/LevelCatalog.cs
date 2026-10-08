@@ -35,12 +35,10 @@ namespace SquashBot.Data
 
         public static List<LevelData> CreateDefault()
         {
-            // Every level comes from its card in the scenario document (see LevelCatalogScript).
+            // Every level is the same loop (crates, bugs and robots, then the monster), growing with the campaign;
+            // the cards still give each level its number and helper (see LevelCatalogHunt).
             var levels = new List<LevelData>();
-            foreach (var card in LevelScript.Cards) levels.Add(FromCard(card));
-
-            for (int i = FirstPowerUpLevel - 1; i < levels.Count; i++)
-                levels[i].powerUpInterval = Mathf.Lerp(11f, 5.5f, Difficulty(i)); // more skills on harder floors
+            foreach (var card in LevelScript.Cards) levels.Add(Hunt(card));
             return levels;
         }
 

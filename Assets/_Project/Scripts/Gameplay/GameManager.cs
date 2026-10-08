@@ -196,6 +196,7 @@ namespace SquashBot.Gameplay
 
             enemies = new GameObject("Enemies").AddComponent<EnemySystem>();
             enemies.Init(gridView, robot, hazards, fx);
+            InitHunt();
             enemies.Hit += OnBlockImpact;
             enemies.Shove += dir => { if (State == GameState.Playing && robot.IsAlive && !robot.IsHopping) robot.Shove(dir, 1, 0.3f, 1.2f); };
             floorRules = new GameObject("FloorRules").AddComponent<FloorRules>();
@@ -361,6 +362,7 @@ namespace SquashBot.Gameplay
             gridView.gameObject.SetActive(true);
             floorRules.Stop();
             enemies.Stop();
+            hunt.Stop();
             hazards.Hunting = false;
             levelEvents.Stop();
             cameraRig.FrameUpper(0f, 1f);
@@ -409,6 +411,7 @@ namespace SquashBot.Gameplay
             if (lobby != null && lobby.IsOpen && !ui.MenuVisible) lobby.Close();
             bool covered = (lobby != null && lobby.IsOpen) || ui.Map.IsOpen;
             if (cameraRig.Cam.enabled == covered) cameraRig.Cam.enabled = !covered;
+            UpdateCloseCamera();
         }
 
         private void ShowMap(int animateFrom = -1)
@@ -824,6 +827,7 @@ namespace SquashBot.Gameplay
             powerUps.Resume();
             floorRules.Resume();
             enemies.Resume();
+            hunt.Resume();
             levelEvents.Resume();
             State = GameState.Playing;
             cameraRig.SetMenuFocus(false);
@@ -1149,7 +1153,8 @@ namespace SquashBot.Gameplay
             UpdateAlly(Time.deltaTime);
             AudioManager.SetTension(Tension());
             // The sky builds from calm to storm as the mission nears its end.
-            weather.SetIntensity(Mathf.Lerp(0.3f, 1f, Mathf.Clamp01(MissionProgress())));
+            if (level.mission == MissionType.Hunt) weather.SetVisible(false); // nothing but crates falls in the core loop
+            else weather.SetIntensity(Mathf.Lerp(0.3f, 1f, Mathf.Clamp01(MissionProgress())));
             elapsed += Time.deltaTime;
 
             // In an arena fight the arena reads the touches itself.
@@ -1157,7 +1162,8 @@ namespace SquashBot.Gameplay
             UpdateHover(command);
             if (!hovering)
             {
-                if (command.jump) robot.TryJump();
+                if (command.tap.HasValue && level.mission == MissionType.Hunt && TapStrike(command.tap.Value)) input.CancelTap();
+                else if (command.jump) robot.TryJump();
                 else if (command.move.HasValue) robot.TryMove(command.move.Value);
             }
 
@@ -1235,6 +1241,9 @@ namespace SquashBot.Gameplay
                 case MissionType.Clone:
                     UpdateClones(Time.deltaTime);
                     break;
+                case MissionType.Hunt:
+                    UpdateHunt(Time.deltaTime);
+                    break;
             }
         }
 
@@ -1269,6 +1278,7 @@ namespace SquashBot.Gameplay
             coins.TryCollect(p);
             if (Shop.MagnetRange > 0) coins.CollectNear(p, Shop.MagnetRange);
             powerUps.TryCollect(p);
+            if (level.mission == MissionType.Hunt) hunt.OnRobotArrived(p);
 
             // Collapsing paths: the tile just left crumbles a moment later.
             var left = robot.LastLeftTile;
@@ -1345,6 +1355,7 @@ namespace SquashBot.Gameplay
         {
             coins.Smash(p);
             powerUps.Smash(p);
+            if (level != null && level.mission == MissionType.Hunt) hunt.OnBlockLanded(p);
             if (State != GameState.Playing || roadPhase != RoadPhase.None) return; // the level is won: nothing on the floor can hurt now
             if (level.mission == MissionType.Clone) KnockClonesAt(p);
             if (level.mission == MissionType.Escort && p == buddyPos) DazeBuddy(p);
@@ -1510,6 +1521,7 @@ namespace SquashBot.Gameplay
                     hazards.Freeze();
                     floorRules.Freeze();
             enemies.Freeze();
+            hunt.Freeze();
                     FloatAt(GridView.ToWorld(p), Loc.T("float.skillFreeze"), new Color(0.55f, 0.85f, 1f));
                     AudioManager.PlaySfx(Sfx.Shield, 0.9f, 0.7f);
                     break;
@@ -1554,6 +1566,7 @@ namespace SquashBot.Gameplay
                     hazards.Resume();
                     floorRules.Resume();
                     enemies.Resume();
+                    hunt.Resume();
                 }
             }
             if (skillMagnetLeft > 0f)
@@ -1680,6 +1693,7 @@ namespace SquashBot.Gameplay
                     hazards.Freeze();
                     floorRules.Freeze();
                     enemies.Freeze();
+                    hunt.Freeze();
                     fx.Burst(robot.transform.position + Vector3.up * 0.5f, new Color(0.7f, 0.9f, 1f), new Color(0.8f, 1.6f, 2.4f), 40, 6f);
                     AudioManager.PlaySfx(Sfx.Shield, 0.9f, 0.7f);
                     FloatAt(robot.transform.position, Loc.T("float.skillFreeze"), new Color(0.55f, 0.85f, 1f));
@@ -1770,6 +1784,7 @@ namespace SquashBot.Gameplay
             powerUps.Freeze();
             floorRules.Freeze();
             enemies.Freeze();
+            hunt.Freeze();
             levelEvents.Freeze();
             HideTools();
             if (hovering) { hovering = false; ShowHoverMarker(false); }
@@ -1887,6 +1902,7 @@ namespace SquashBot.Gameplay
             powerUps.Freeze();
             floorRules.Freeze();
             enemies.Freeze();
+            hunt.Freeze();
             levelEvents.Freeze();
             HideTools();
             if (hovering) { hovering = false; ShowHoverMarker(false); }
@@ -1954,9 +1970,15 @@ namespace SquashBot.Gameplay
         private void SetupMission()
         {
             hazards.IsProtected = null;
+            HazardVisuals.CrateTier = -1;
             objectivesDone = 0;
             chaseFront = -ChaseGraceRows;
             chaseRow = -1;
+            if (level.mission == MissionType.Hunt)
+            {
+                SetupHunt();
+                return;
+            }
 
             if (level.mission == MissionType.Exit)
             {
@@ -2207,6 +2229,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Escort: return EscortProgress();
                 case MissionType.Clone: return objectivesDone / (float)Mathf.Max(1, objectivesTotal);
                 case MissionType.Monster: return objectivesDone / (float)Mathf.Max(1, objectivesTotal);
+                case MissionType.Hunt: return hunt.Progress;
                 case MissionType.Paint: return grid == null ? 0f : painted.Count / (float)PaintGoal;
                 default: return elapsed / level.surviveSeconds;
             }
@@ -2232,6 +2255,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Thief: return Loc.F("mission.thief" + suffix, data.keys);
                 case MissionType.Escort: return Loc.T("mission.escort" + suffix);
                 case MissionType.Clone: return Loc.F("mission.clone" + suffix, data.keys);
+                case MissionType.Hunt: return Loc.T("mission.hunt" + suffix);
                 default: return Loc.F("mission.survive" + suffix, data.surviveSeconds.ToString("0", CultureInfo.InvariantCulture));
             }
         }
@@ -2363,6 +2387,7 @@ namespace SquashBot.Gameplay
             hazards.Stop();
             floorRules.Stop();
             enemies.Stop();
+            hunt.Stop();
             levelEvents.Stop();
             coins.Stop();
             powerUps.Stop();
@@ -2953,6 +2978,7 @@ namespace SquashBot.Gameplay
             powerUps.Freeze();
             floorRules.Freeze();
             enemies.Freeze();
+            hunt.Freeze();
             levelEvents.Freeze();
             coins.Freeze();
         }
@@ -2965,6 +2991,7 @@ namespace SquashBot.Gameplay
                 powerUps.Resume();
                 floorRules.Resume();
                 enemies.Resume();
+                hunt.Resume();
                 levelEvents.Resume();
                 coins.Resume();
             }
@@ -3053,6 +3080,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Boss: text = Loc.F("hud.boss", objectivesDone, objectivesTotal); break;
                 case MissionType.Quest: text = questReady ? Loc.T("quest.hudGo." + level.quest) : Loc.F("quest.hud." + level.quest, objectivesDone, objectivesTotal); break;
                 case MissionType.Monster: text = ArenaHud(); break;
+                case MissionType.Hunt: text = HuntHud(); break;
                 case MissionType.Thief:
                     text = level.thiefRace ? Loc.F("hud.thiefRace", coinsThisRun, thiefCoins, objectivesTotal) : Loc.F("hud.thief", objectivesDone, objectivesTotal);
                     break;

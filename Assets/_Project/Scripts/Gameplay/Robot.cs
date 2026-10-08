@@ -549,6 +549,19 @@ namespace SquashBot.Gameplay
             flinchT = 0f;
         }
 
+        /// <summary>A hammer blow at something on another tile: turn to it and lunge a little that way.</summary>
+        public bool Strike(Vector3 target)
+        {
+            if (!IsAlive || anim != Anim.Idle) return false;
+            var dir = target - transform.position;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.0001f) return false;
+            dir.Normalize();
+            targetFacing = Quaternion.LookRotation(dir);
+            StartAnim(Anim.Bump, transform.position, transform.position + dir * 0.32f);
+            return true;
+        }
+
         /// <summary>Exit missions: spin, shrink and rise into the portal.</summary>
         public void EscapeInto()
         {

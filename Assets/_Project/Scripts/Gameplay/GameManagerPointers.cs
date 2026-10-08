@@ -34,6 +34,9 @@ namespace SquashBot.Gameplay
                     if (!charged && orb != null) goals.Add((At(orbPos), ThunderHammer.Electric));
                     else if (charged && monster != null) goals.Add((At(monsterPos), Palette.UiRed));
                     break;
+                case MissionType.Hunt:
+                    foreach (var (p, isMonster) in hunt.Targets(robot.Position, 3)) goals.Add((At(p), isMonster ? Palette.UiRed : new Color(1f, 0.6f, 0.3f)));
+                    break;
                 case MissionType.Thief:
                     if (thief != null && thiefLeft > 0) goals.Add((At(thiefPos), Palette.UiGold));
                     break;

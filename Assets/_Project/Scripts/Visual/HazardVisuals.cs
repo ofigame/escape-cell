@@ -35,10 +35,100 @@ namespace SquashBot.Visual
         private static GameObject Ball(Transform p, Vector3 pos, float d, Material m) => Shapes.Primitive(PrimitiveType.Sphere, "Part", p, pos, Vector3.one * d, m);
         private static GameObject Cyl(Transform p, Vector3 pos, Vector3 scale, Material m) => Shapes.Primitive(PrimitiveType.Cylinder, "Part", p, pos, scale, m);
 
+        /// <summary>
+        /// The core loop's crates (0 wooden, 1 iron-banded, 2 steel, 3 reinforced with hazard bands, 4 armoured with
+        /// glowing seams), or -1 for each world's own falling obstacle.
+        /// </summary>
+        public static int CrateTier = -1;
+
+        private static void TierCrate(Transform r, int tier)
+        {
+            switch (tier)
+            {
+                case 0: Crate(r); return;
+                case 1:
+                {
+                    var wood = M("wood", Hex("#B8783F"), new Color(0.1f, 0.04f, 0.01f));
+                    var iron = M("iron", Hex("#5C6068"), Color.black);
+                    var rivet = M("rivet", Hex("#A8ADB5"), Color.black);
+                    Box(r, Vector3.zero, Vector3.one * 0.84f, 0.05f, wood);
+                    foreach (float y in new[] { -0.3f, 0.3f })
+                        Box(r, new Vector3(0f, y, 0f), new Vector3(0.88f, 0.09f, 0.88f), 0.02f, iron);
+                    foreach (float x in new[] { -0.3f, 0.3f })
+                        Box(r, new Vector3(x, 0f, 0f), new Vector3(0.09f, 0.88f, 0.88f), 0.02f, iron);
+                    foreach (float a in new[] { -0.3f, 0.3f })
+                        foreach (float b in new[] { -0.3f, 0.3f })
+                            Ball(r, new Vector3(a, b, 0.44f), 0.06f, rivet);
+                    return;
+                }
+                case 2:
+                {
+                    var steel = M("steel", Hex("#8C939C"), new Color(0.03f, 0.03f, 0.04f));
+                    var frame = M("steelFrame", Hex("#4A5058"), Color.black);
+                    Box(r, Vector3.zero, Vector3.one * 0.82f, 0.04f, steel);
+                    const float e = 0.41f, t = 0.08f, l = 0.88f;
+                    foreach (float a in new[] { -e, e })
+                        foreach (float b in new[] { -e, e })
+                        {
+                            Box(r, new Vector3(0f, a, b), new Vector3(l, t, t), 0.02f, frame);
+                            Box(r, new Vector3(a, 0f, b), new Vector3(t, l, t), 0.02f, frame);
+                            Box(r, new Vector3(a, b, 0f), new Vector3(t, t, l), 0.02f, frame);
+                        }
+                    Box(r, Vector3.zero, new Vector3(0.86f, 0.06f, 0.86f), 0.02f, frame);
+                    return;
+                }
+                case 3:
+                {
+                    var dark = M("darkSteel", Hex("#3C424C"), new Color(0.02f, 0.02f, 0.03f));
+                    var yellow = M("hazardYellow", Hex("#F2C230"), new Color(0.35f, 0.25f, 0.02f));
+                    var black = M("hazardBlack", Hex("#1C1C20"), Color.black);
+                    Box(r, Vector3.zero, Vector3.one * 0.84f, 0.05f, dark);
+                    foreach (float y in new[] { -0.25f, 0.25f })
+                    {
+                        Box(r, new Vector3(0f, y, 0f), new Vector3(0.88f, 0.12f, 0.88f), 0.02f, yellow);
+                        for (int i = -2; i <= 2; i++)
+                            Box(r, new Vector3(i * 0.17f, y, 0.445f), new Vector3(0.06f, 0.13f, 0.01f), 0.005f, black)
+                                .transform.localRotation = Quaternion.Euler(0f, 0f, 35f);
+                    }
+                    return;
+                }
+                default:
+                {
+                    var armour = M("armour", Hex("#2A2F3A"), new Color(0.02f, 0.02f, 0.04f));
+                    var seam = M("armourSeam", Hex("#6FE8FF"), new Color(0.5f, 2.2f, 2.8f));
+                    Box(r, Vector3.zero, Vector3.one * 0.86f, 0.08f, armour);
+                    foreach (float y in new[] { -0.2f, 0.2f })
+                        Box(r, new Vector3(0f, y, 0f), new Vector3(0.88f, 0.035f, 0.88f), 0.01f, seam);
+                    Box(r, Vector3.zero, new Vector3(0.035f, 0.88f, 0.88f), 0.01f, seam);
+                    Box(r, new Vector3(0f, 0.44f, 0f), new Vector3(0.36f, 0.04f, 0.36f), 0.02f, seam);
+                    return;
+                }
+            }
+        }
+
+        /// <summary>The core loop's bomb: a red explosive crate with a sputtering fuse.</summary>
+        private static void TntCrate(Transform r)
+        {
+            var red = M("tnt", Hex("#C8322A"), new Color(0.3f, 0.03f, 0.02f));
+            var band = M("tntBand", Hex("#2A1E1A"), Color.black);
+            Box(r, Vector3.zero, Vector3.one * 0.8f, 0.05f, red);
+            foreach (float y in new[] { -0.24f, 0.24f })
+                Box(r, new Vector3(0f, y, 0f), new Vector3(0.84f, 0.08f, 0.84f), 0.02f, band);
+            Box(r, new Vector3(0f, 0f, 0.41f), new Vector3(0.36f, 0.24f, 0.01f), 0.01f, M("tntLabel", Hex("#F4E3C0"), new Color(0.2f, 0.18f, 0.12f)));
+            Cyl(r, new Vector3(0.05f, 0.47f, 0f), new Vector3(0.035f, 0.08f, 0.035f), M("fuse", Hex("#C8B48A"), Color.black));
+            var spark = Ball(r, new Vector3(0.07f, 0.58f, 0f), 0.12f, M("spark", Hex("#FFD27A"), new Color(3f, 1.6f, 0.3f)));
+            spark.AddComponent<Flicker>();
+        }
+
         /// <summary>The falling obstacle of the design being played (<see cref="WorldTheme.Current"/>).</summary>
         public static GameObject Block()
         {
             var root = new GameObject("Block").transform;
+            if (CrateTier >= 0)
+            {
+                TierCrate(root, CrateTier);
+                return root.gameObject;
+            }
             switch (WorldTheme.Current.block)
             {
                 case BlockStyle.Crate: Crate(root); break;
@@ -67,6 +157,11 @@ namespace SquashBot.Visual
         public static GameObject Bomb()
         {
             var root = new GameObject("Bomb").transform;
+            if (CrateTier >= 0)
+            {
+                TntCrate(root);
+                return root.gameObject;
+            }
             Ball(root, Vector3.zero, 0.72f, M("bomb", Hex("#23233A"), new Color(0.05f, 0.05f, 0.12f)));
             Cyl(root, Vector3.zero, new Vector3(0.74f, 0.04f, 0.74f), M("bombBand", Hex("#FF5A3C"), new Color(1.8f, 0.35f, 0.15f)));
             Cyl(root, new Vector3(0f, 0.4f, 0f), new Vector3(0.12f, 0.06f, 0.12f), M("bombCap", Hex("#5A5A70"), Color.black));

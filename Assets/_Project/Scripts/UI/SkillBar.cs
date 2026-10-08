@@ -14,7 +14,7 @@ namespace SquashBot.UI
     /// </summary>
     public class SkillBar : MonoBehaviour
     {
-        private const float Size = 92f, Gap = 10f;
+        private const float Size = 150f, Gap = 58f, IconBase = 92f;
 
         public event Action<PowerUpType> Pressed;
 
@@ -32,8 +32,9 @@ namespace SquashBot.UI
 
         public static SkillBar Create(Transform parent)
         {
-            var rt = UiFactory.Box("SkillBar", parent, new Vector2(0.5f, 0f), new Vector2(0f, 172f), new Vector2(640f, Size));
-            rt.pivot = new Vector2(0.5f, 0f);
+            // A column down the right edge, big enough to hit with a thumb, each skill named under its button.
+            var rt = UiFactory.Box("SkillBar", parent, new Vector2(1f, 0.5f), new Vector2(-118f, 60f), new Vector2(Size, 900f));
+            rt.pivot = new Vector2(0.5f, 0.5f);
             var bar = rt.gameObject.AddComponent<SkillBar>();
             bar.root = rt;
             foreach (var t in SkillBag.Order) bar.slots.Add(bar.MakeSlot(t));
@@ -57,17 +58,24 @@ namespace SquashBot.UI
         private Slot MakeSlot(PowerUpType t)
         {
             var s = new Slot { type = t };
-            s.root = UiFactory.Box(t.ToString(), root, new Vector2(0.5f, 0f), Vector2.zero, new Vector2(Size, Size));
-            s.root.pivot = new Vector2(0.5f, 0f);
+            s.root = UiFactory.Box(t.ToString(), root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(Size, Size));
+            s.root.pivot = new Vector2(0.5f, 0.5f);
             var bg = UiFactory.Fill(s.root, ColorOf(t), UiSprites.Circle);
             UiFactory.Fill(UiFactory.Stretch("Rim", s.root), new Color(1f, 1f, 1f, 0.85f), UiSprites.Ring, 0.35f).raycastTarget = false;
-            var icon = UiFactory.Box("Icon", s.root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(Size, Size));
+            var icon = UiFactory.Box("Icon", s.root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(IconBase, IconBase));
             icon.pivot = new Vector2(0.5f, 0.5f);
+            icon.localScale = Vector3.one * (Size / IconBase);
             DrawIcon(icon, t);
-            var badge = UiFactory.Box("Badge", s.root, new Vector2(1f, 1f), new Vector2(6f, 6f), new Vector2(48f, 48f));
+            var plate = UiFactory.Box("NamePlate", s.root, new Vector2(0.5f, 0f), new Vector2(0f, -4f), new Vector2(190f, 46f));
+            plate.pivot = new Vector2(0.5f, 1f);
+            UiFactory.Fill(plate, new Color(0.08f, 0.07f, 0.16f, 0.82f), UiSprites.Rounded, 8f).raycastTarget = false;
+            var name = UiFactory.TextBox("Name", s.root, new Vector2(0.5f, 0f), new Vector2(0f, -6f), new Vector2(200f, 44f), Loc.T("skillName." + t), 26f, Color.white, title: true);
+            name.rectTransform.pivot = new Vector2(0.5f, 1f);
+            name.raycastTarget = false;
+            var badge = UiFactory.Box("Badge", s.root, new Vector2(1f, 1f), new Vector2(8f, 8f), new Vector2(60f, 60f));
             badge.pivot = new Vector2(1f, 1f);
             UiFactory.Fill(badge, new Color(0.12f, 0.1f, 0.24f, 0.95f), UiSprites.Circle).raycastTarget = false;
-            s.count = UiFactory.TextBox("Count", badge, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(48f, 48f), "", 30f, Color.white, title: true);
+            s.count = UiFactory.TextBox("Count", badge, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(60f, 60f), "", 36f, Color.white, title: true);
             s.count.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             s.count.raycastTarget = false;
             var button = s.root.gameObject.AddComponent<Button>();
@@ -98,7 +106,7 @@ namespace SquashBot.UI
                     break;
                 }
                 case PowerUpType.Heart:
-                    UIController.HeartIcon(icon, new Vector2(Size * 0.5f, 0f), 58f);
+                    UIController.HeartIcon(icon, new Vector2(IconBase * 0.5f, 0f), 58f);
                     break;
                 case PowerUpType.Freeze:
                     for (int k = 0; k < 3; k++)
@@ -145,7 +153,7 @@ namespace SquashBot.UI
                 shown.Add(s);
             }
             for (int i = 0; i < shown.Count; i++)
-                shown[i].root.anchoredPosition = new Vector2((i - (shown.Count - 1) * 0.5f) * (Size + Gap), 0f);
+                shown[i].root.anchoredPosition = new Vector2(0f, ((shown.Count - 1) * 0.5f - i) * (Size + Gap));
         }
 
         /// <summary>A little pop on the slot (a skill was added or fired).</summary>

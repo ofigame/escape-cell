@@ -15,7 +15,7 @@ namespace SquashBot.Gameplay
     public partial class GameManager
     {
         /// <summary>Health bars start at this level (0-based index, so level 21).</summary>
-        public const int HealthFromLevel = 20;
+        public const int HealthFromLevel = 0;
         /// <summary>A heart pickup heals this much.</summary>
         private const float HeartHeal = 0.3f;
         /// <summary>After a hit the robot can't be hurt again for a moment.</summary>

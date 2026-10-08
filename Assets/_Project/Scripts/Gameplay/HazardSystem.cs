@@ -131,6 +131,14 @@ namespace SquashBot.Gameplay
             sheltered.Clear();
         }
 
+        /// <summary>Is a landed block (a crate on the floor) standing on <paramref name="p"/>?</summary>
+        public bool HasLanded(GridPos p)
+        {
+            foreach (var h in hazards)
+                if (h.kind == Kind.Block && h.pos == p && h.phase == Phase.Landed && !h.shattered) return true;
+            return false;
+        }
+
         /// <summary>Smash the landed block on <paramref name="p"/> (armored robot hit by it, or hopping into it).</summary>
         public bool Shatter(GridPos p)
         {
@@ -338,7 +346,7 @@ namespace SquashBot.Gameplay
             marker.transform.rotation = Quaternion.Euler(0f, 45f, 0f); // '+' reads upright on screen
             Shapes.Rounded("PlusA", marker.transform, Vector3.zero, new Vector3(0.5f, 0.02f, 0.13f), 0.01f, material);
             Shapes.Rounded("PlusB", marker.transform, Vector3.zero, new Vector3(0.13f, 0.02f, 0.5f), 0.01f, material);
-            if (beam)
+            if (beam && HazardVisuals.CrateTier < 0) // no light shaft from the sky in the core loop: only the crate falls
                 Shapes.Cube("Beam", marker.transform, new Vector3(0f, DropHeight * 0.5f, 0f), new Vector3(0.03f, DropHeight, 0.03f), beamMaterial);
             return marker;
         }

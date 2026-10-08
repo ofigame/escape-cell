@@ -30,7 +30,9 @@ namespace SquashBot.Data
         /// <summary>Lead Bip, a little lost robot that follows a tile behind, through the open door.</summary>
         Escort,
         /// <summary>Two Shadow Clones copy every hop mirrored: collect the energy cores without touching them.</summary>
-        Clone
+        Clone,
+        /// <summary>The core loop: crates fall; squash the bugs and beat the robots on the floor, then the big monster comes.</summary>
+        Hunt
     }
 
     /// <summary>The signature rules of the upper floors (several can be combined).</summary>
@@ -150,6 +152,19 @@ namespace SquashBot.Data
         public bool allyKuzgun;
         [Tooltip("Moving enemies on the floor (counts).")]
         public int sweepers, erasers, drones, sandworms, crabs, turrets, penguins, springbots;
+
+        [Header("Hunt")]
+        [Tooltip("Bugs to squash (step on them or strike them).")]
+        public int bugs;
+        [Tooltip("Guard robots to beat with the hammer.")]
+        public int robots;
+        public int robotHp = 2;
+        [Tooltip("Seconds between a guard robot's steps.")]
+        public float robotStep = 1f;
+        [Tooltip("Hammer blows the big monster takes.")]
+        public int monsterHp = 8;
+        [Tooltip("Seconds between the monster's attacks.")]
+        public float monsterAttack = 3f;
 
         [Header("Blocks")]
         [Tooltip("Seconds between the red warning appearing and the block hitting the tile.")]
