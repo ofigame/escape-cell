@@ -89,6 +89,9 @@ jobs:
           # By default the container gets 95% of the runner's ~8 GB and is killed (exit 137) when IL2CPP needs more.
           # A higher limit lets it spill into the swap file added above.
           dockerMemoryLimit: 34g
+          # Fewer cores = fewer shader compilers and IL2CPP jobs at once = a lower memory peak (the 2-core runner built fine).
+          dockerCpuLimit: 2
+          versioning: None
         id: export1
         continue-on-error: true
 
@@ -97,6 +100,12 @@ jobs:
       - name: Free memory before the second try
         if: steps.export1.outcome == 'failure'
         run: |
+          # What was killed and how much memory is left, as annotations (readable on the run page without logs).
+          sudo dmesg | grep -i -E "killed process|out of memory|oom" | tail -5 | while read -r l; do echo "::warning::$l"; done || true
+          echo "::warning::$(free -h | tr '\n' ' ')"
+          echo "::warning::$(swapon --show --noheadings | tr '\n' ' ')"
+          sudo git clean -ffdx -e Library || true
+          sudo git checkout -- . || true
           sync && echo 3 | sudo tee /proc/sys/vm/drop_caches
           docker ps -aq | xargs -r docker rm -f || true
           sudo rm -rf build/iOS || true
@@ -115,6 +124,8 @@ jobs:
           unityVersion: 6000.6.4f1
           buildName: EscapeCell
           dockerMemoryLimit: 34g
+          dockerCpuLimit: 2
+          versioning: None
 
       # Tar keeps the execute bits on Unity's build scripts, which a plain artifact upload would drop.
       - name: Pack Xcode project
