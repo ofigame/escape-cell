@@ -39,11 +39,12 @@ jobs:
           sudo rm -f /mnt/swapfile /swapfile
           # On /mnt (the runner's separate scratch disk) when it has room, so the swap doesn't eat the root disk.
           SWAP=/mnt/swapfile
-          [ "$(df --output=avail -BG /mnt | tail -1 | tr -dc 0-9)" -gt 24 ] || SWAP=/swapfile
-          sudo fallocate -l 18G $SWAP
+          [ "$(df --output=avail -BG /mnt | tail -1 | tr -dc 0-9)" -gt 34 ] || SWAP=/swapfile
+          sudo fallocate -l 28G $SWAP
           sudo chmod 600 $SWAP
           sudo mkswap $SWAP
           sudo swapon $SWAP
+          sudo sysctl vm.swappiness=80
           free -h
           df -h / /mnt
 
@@ -68,7 +69,7 @@ jobs:
           buildName: EscapeCell
           # By default the container gets 95% of the runner's ~8 GB and is killed (exit 137) when IL2CPP needs more.
           # A higher limit lets it spill into the swap file added above.
-          dockerMemoryLimit: 22g
+          dockerMemoryLimit: 34g
 
       # Tar keeps the execute bits on Unity's build scripts, which a plain artifact upload would drop.
       - name: Pack Xcode project
