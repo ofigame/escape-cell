@@ -87,6 +87,8 @@ namespace SquashBot.Gameplay
                 return n;
             }
         }
+        /// <summary>How big the guards and enforcers stand (they grow with the campaign).</summary>
+        public float EnemyScale = 1f;
         public int MonsterHpLeft => monsterHp;
         public int MonsterHpTotal => level != null ? level.monsterHp : 1;
 
@@ -180,13 +182,13 @@ namespace SquashBot.Gameplay
             {
                 // vanG's enforcer: a tall humanoid that hits much harder.
                 g.human = HumanoidBot.Build(g.root, accent);
-                g.human.transform.localScale = Vector3.one * 0.7f;
+                g.human.transform.localScale = Vector3.one * 0.7f * EnemyScale;
             }
             else
             {
                 // A new build of guard every world, in that world's colour.
                 g.bot = GuardBot.Build(g.root, Color.Lerp(accent, new Color(0.3f, 0.3f, 0.35f), 0.35f), world);
-                g.bot.transform.localScale = Vector3.one * 0.62f;
+                g.bot.transform.localScale = Vector3.one * 0.62f * EnemyScale;
             }
             g.from = g.to = At(p);
             g.root.position = g.to;

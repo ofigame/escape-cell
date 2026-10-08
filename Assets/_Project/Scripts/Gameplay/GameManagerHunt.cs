@@ -1,6 +1,7 @@
 using SquashBot.Audio;
 using SquashBot.Core;
 using SquashBot.Data;
+using SquashBot.UI;
 using SquashBot.Visual;
 using UnityEngine;
 
@@ -18,6 +19,16 @@ namespace SquashBot.Gameplay
         private const int StrikeReach = 2, SuperStrikeReach = 4;
         private HuntSystem hunt;
         private float strikeCooldown;
+        private WeaponDef weapon;
+        private HeldWeapon heldWeapon;
+
+        /// <summary>Back to the plain robot outside the core loop (normal size, empty-handed).</summary>
+        private void ClearHuntDress()
+        {
+            if (robot != null) robot.transform.localScale = Vector3.one;
+            if (heldWeapon != null) Destroy(heldWeapon.gameObject);
+            heldWeapon = null;
+        }
 
         private void InitHunt()
         {
@@ -50,6 +61,13 @@ namespace SquashBot.Gameplay
         {
             HazardVisuals.CrateTier = Mathf.Clamp(World / 5, 0, 4); // the crates grow sturdier every five worlds
             hunt.Avoid = p => hazards.IsThreatened(p);
+            // The robot and the guards grow with the campaign, up to twice their old size; the robot carries its weapon.
+            float grow = Mathf.Clamp01(World / 12f);
+            robot.transform.localScale = Vector3.one * Mathf.Lerp(1.5f, 2f, grow);
+            hunt.EnemyScale = Mathf.Lerp(1.45f, 1.85f, grow);
+            weapon = Armory.Equipped;
+            if (heldWeapon != null) Destroy(heldWeapon.gameObject);
+            heldWeapon = HeldWeapon.Attach(robot.Visual, weapon);
             hunt.Begin(grid, level, World, levelIndex * 31 + 7);
         }
 
@@ -73,6 +91,65 @@ namespace SquashBot.Gameplay
             Win();
         }
 
+
+        /// <summary>
+        /// After the second loss in a row on a floor (and every other one after), a card suggests one thing from the shop
+        /// that fits why it was lost and what this floor holds: crushed by crates → armour or a shield upgrade (or a
+        /// freezing/slowing tool); beaten by robots, enforcers or the monster → the next stronger weapon open by now
+        /// (a spear when the floor is crowded). Only items open at this level and not yet owned are suggested.
+        /// </summary>
+        private void MaybeShowTip(string reason)
+        {
+            int fails = PlayerPrefs.GetInt(FailKey(levelIndex), 0);
+            if (fails < 2 || fails % 2 != 0) return;
+            bool crushed = reason != null && reason.StartsWith(Loc.T("lose.block"));
+            var current = Armory.Equipped;
+
+            WeaponDef better = null;
+            foreach (var w in Armory.All)
+            {
+                if (Armory.Owned(w) || !Armory.Unlocked(w) || Armory.Power(w) <= Armory.Power(current)) continue;
+                bool crowded = level.robots + level.brutes >= 4;
+                bool fits = crowded ? w.reach >= 3 || w.damage > current.damage : w.damage > current.damage || w.cooldown < current.cooldown * 0.8f;
+                if (!fits) continue;
+                if (better == null || w.price < better.price) better = w;
+            }
+
+            Upgrade? upgrade = null;
+            foreach (var u in new[] { Upgrade.Armor, Upgrade.Shield })
+                if (Shop.Unlocked(u) && !Shop.IsMaxed(u)) { upgrade = u; break; }
+            Tool? tool = null;
+            foreach (var t in new[] { Tool.Freeze, Tool.SlowMo })
+                if (Tools.Unlocked(t) && !Tools.Owned(t)) { tool = t; break; }
+
+            void GoShop(int shelf)
+            {
+                ShowShop();
+                if (shelf == 0) ui.Shop.ShowWeapons();
+                else ui.Shop.ShowShelf(shelf == 2);
+            }
+
+            if (crushed && upgrade.HasValue)
+            {
+                var u = upgrade.Value;
+                ui.Tip.ShowIcon(icon => ShopScreen.DrawUpgrade(icon, u), ShopScreen.UpgradeColor(u), Loc.T("shop." + u), Loc.T("tip.why.crates"), Shop.NextPrice(u), () => GoShop(1));
+            }
+            else if (crushed && tool.HasValue)
+            {
+                var t = tool.Value;
+                ui.Tip.ShowIcon(icon => ToolButton.DrawIcon(icon, t), Palette.UiGold, Loc.T("tool." + t), Loc.T("tip.why.crates"), Tools.NextPrice(t), () => GoShop(2));
+            }
+            else if (better != null)
+            {
+                string why = Loc.T(level.brutes > 0 ? "tip.why.brutes" : hunt.MonsterUp ? "tip.why.monster" : "tip.why.robots");
+                ui.Tip.ShowWeapon(better, why, () => GoShop(0));
+            }
+            else if (upgrade.HasValue)
+            {
+                var u = upgrade.Value;
+                ui.Tip.ShowIcon(icon => ShopScreen.DrawUpgrade(icon, u), ShopScreen.UpgradeColor(u), Loc.T("shop." + u), Loc.T("tip.why.robots"), Shop.NextPrice(u), () => GoShop(1));
+            }
+        }
 
         private string HuntHud() =>
             hunt.MonsterUp || hunt.MonsterDown
@@ -98,7 +175,8 @@ namespace SquashBot.Gameplay
             }
             if (!crowd && !crate) return false;
 
-            int reach = superLeft > 0f ? SuperStrikeReach : StrikeReach;
+            var w = weapon ?? Armory.Equipped;
+            int reach = w.reach + (superLeft > 0f ? SuperStrikeReach - StrikeReach : 0);
             if (HuntSystem.Chebyshev(at, robot.Position) > reach)
             {
                 // Too far: a step towards it.
@@ -108,8 +186,9 @@ namespace SquashBot.Gameplay
                 return true;
             }
             if (strikeCooldown > 0f || !robot.Strike(GridView.ToWorld(at))) return true;
-            strikeCooldown = 0.22f;
-            int damage = superLeft > 0f ? 2 : 1;
+            strikeCooldown = w.cooldown;
+            int damage = w.damage * (superLeft > 0f ? 2 : 1);
+            if (heldWeapon != null) heldWeapon.Swing();
             if (crowd) hunt.Strike(at, damage);
             else if (hazards.Shatter(at))
             {

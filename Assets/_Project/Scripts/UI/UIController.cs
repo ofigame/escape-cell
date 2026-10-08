@@ -158,6 +158,7 @@ namespace SquashBot.UI
         public MapScreen Map { get; private set; }
         public StoryScreen Story { get; private set; }
         public ShopScreen Shop { get; private set; }
+        public TipCard Tip { get; private set; }
         public GarageScreen Garage { get; private set; }
         public GuideScreen Guide { get; private set; }
         public BriefingScreen Briefing { get; private set; }
@@ -237,6 +238,7 @@ namespace SquashBot.UI
             Garage.BackPressed += () => MenuPressed?.Invoke();
             BuildPrelevel(root);
             BuildBanner(root);
+            Tip = TipCard.Create(root);
         }
 
         // ---------- Menu ----------

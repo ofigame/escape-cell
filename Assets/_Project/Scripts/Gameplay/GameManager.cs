@@ -323,6 +323,7 @@ namespace SquashBot.Gameplay
 
         private void ResetRun()
         {
+            ClearHuntDress();
             StopAllCoroutines();
             hovering = false;
             if (hoverMarker != null) hoverMarker.SetActive(false);
@@ -1961,6 +1962,11 @@ namespace SquashBot.Gameplay
                 yield break;
             }
             ui.ShowResult(info);
+            if (!info.won && level != null && level.mission == MissionType.Hunt)
+            {
+                yield return new WaitForSecondsRealtime(0.9f);
+                if (State == GameState.Result) MaybeShowTip(info.subtitle);
+            }
         }
 
         // ---------- Mission ----------
@@ -1970,6 +1976,7 @@ namespace SquashBot.Gameplay
         {
             hazards.IsProtected = null;
             HazardVisuals.CrateTier = -1;
+            ClearHuntDress();
             objectivesDone = 0;
             chaseFront = -ChaseGraceRows;
             chaseRow = -1;

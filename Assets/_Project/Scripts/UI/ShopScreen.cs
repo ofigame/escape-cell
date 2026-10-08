@@ -11,8 +11,9 @@ using Kind = SquashBot.UI.UiFactory.ButtonKind;
 namespace SquashBot.UI
 {
     /// <summary>
-    /// The coin shop: permanent upgrades (with level pips) and one-use items. Every row shows its price and
-    /// greys out when the player can't afford it; buying pops the row and rings the till.
+    /// Bip's workshop as a grid of big cards on four shelves (tabs): weapons (3D pictures of hammers, swords, axes,
+    /// maces and spears, each opening at a level), tools, upgrades and the daily counter. Every card shows a big picture,
+    /// what it does, and its price (greyed when it can't be afforded, locked with the level it opens at).
     /// </summary>
     public class ShopScreen : MonoBehaviour
     {
@@ -33,6 +34,14 @@ namespace SquashBot.UI
 
         private enum Item { Shield, Magnet, Hover, Lives, Rescue, Armor, StartShield, ExtraRescue, StartHammer, DoubleCoins, CoinMagnet, TunnelBoost, Life, Tunnel }
 
+        private enum Tab { Weapons, Tools, Upgrades, Counter }
+
+        private const float CellW = 470f, CellH = 650f, Gap = 30f, TabBarH = 120f;
+        private Tab tab = Tab.Weapons;
+        private readonly Dictionary<Tab, Image> tabFaces = new Dictionary<Tab, Image>();
+        private ScrollRect scroll;
+        private int cells;
+
         public static ShopScreen Create(Transform canvasRoot)
         {
             var screen = UiScreen.Create("Shop", canvasRoot, out var root);
@@ -44,7 +53,7 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            UiFactory.Fill(UiFactory.Stretch("Backdrop", root), new Color(0.08f, 0.07f, 0.18f, 0.96f)).gameObject.AddComponent<IgnoreSafeArea>();
+            UiFactory.Fill(UiFactory.Stretch("Backdrop", root), new Color(0.03f, 0.03f, 0.07f, 0.94f)).gameObject.AddComponent<IgnoreSafeArea>();
 
             var bar = UiFactory.Rect("TopBar", root, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -190f), Vector2.zero);
             UiFactory.MakeButton(bar, "<", Kind.Icon, new Vector2(0f, 0.5f), new Vector2(36f, 0f), new Vector2(124f, 124f), () => BackPressed?.Invoke(), 64f);
@@ -54,13 +63,24 @@ namespace SquashBot.UI
             UIController.CoinIcon(coins, new Vector2(56f, 0f));
             coinsText = UiFactory.TextBox("Value", coins, new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Vector2(150f, 90f), "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
 
-            // Everything below the top bar scrolls.
-            var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(0f, Monetization.Ads.BannerReserve), new Vector2(0f, -190f));
+            // The shelves as tabs.
+            var tabs = UiFactory.Rect("Tabs", root, new Vector2(0f, 1f), Vector2.one, new Vector2(24f, -190f - TabBarH), new Vector2(-24f, -200f));
+            var names = new[] { (Tab.Weapons, "ws.weapons"), (Tab.Tools, "ws.tools"), (Tab.Upgrades, "ws.upgrades"), (Tab.Counter, "ws.counter") };
+            for (int i = 0; i < names.Length; i++)
+            {
+                var (t, key) = names[i];
+                var b = UiFactory.MakeButton(tabs, Loc.T(key), Kind.Secondary, new Vector2((i + 0.5f) / names.Length, 0.5f), Vector2.zero, new Vector2(236f, 92f), () => SetTab(t), 30f);
+                ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0.5f);
+                tabFaces[t] = (Image)b.targetGraphic;
+            }
+
+            // The grid of cards below scrolls.
+            var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(0f, Monetization.Ads.BannerReserve), new Vector2(0f, -200f - TabBarH));
             viewport.gameObject.AddComponent<RectMask2D>();
             UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
             content.pivot = new Vector2(0.5f, 1f);
-            var scroll = root.gameObject.AddComponent<ScrollRect>();
+            scroll = root.gameObject.AddComponent<ScrollRect>();
             scroll.viewport = viewport;
             scroll.content = content;
             scroll.horizontal = false;
@@ -71,166 +91,193 @@ namespace SquashBot.UI
             bip = BipTip.Create(root);
         }
 
-        /// <summary>
-        /// Fills the three shelves: the tool bag (story-locked skills, upgraded with coins), the paint workshop (the garage)
-        /// and the daily counter (a different few one-use items every day). Rebuilt when the day changes.
-        /// </summary>
+        private void SetTab(Tab t)
+        {
+            tab = t;
+            Populate();
+            Refresh();
+            content.anchoredPosition = Vector2.zero;
+        }
+
+        /// <summary>Fills the open shelf with its cards (big picture, name, what it does, price or equip).</summary>
         private void Populate()
         {
             builtDay = System.DateTime.Today.DayOfYear;
             for (int i = content.childCount - 1; i >= 0; i--) Destroy(content.GetChild(i).gameObject);
             refreshers.Clear();
+            cells = 0;
+            foreach (var kv in tabFaces) kv.Value.color = kv.Key == tab ? UiFactory.CyanStyle.face : UiFactory.PurpleStyle.face;
 
-            float y = -24f;
-            Header(content, Loc.T("ws.weapons"), ref y);
-            WeaponRow(content, ref y);
-            y -= 20f;
-            Header(content, Loc.T("ws.tools"), ref y);
-            SlotsRow(content, ref y);
-            foreach (var t in Tools.All) ToolRow(content, t, ref y);
-            Row(content, Item.Shield, ref y);
-            Row(content, Item.Armor, ref y);
-            Row(content, Item.Rescue, ref y);
-            Row(content, Item.Magnet, ref y);
-            Row(content, Item.Hover, ref y);
-            Row(content, Item.Lives, ref y);
-            y -= 20f;
-            Header(content, Loc.T("ws.paint"), ref y);
-            PaintRow(content, ref y);
-            y -= 20f;
-            Header(content, Loc.T("ws.counter"), ref y);
-            foreach (var b in Shop.Counter()) Row(content, (Item)((int)Item.StartShield + (int)b), ref y);
-            Row(content, Item.Life, ref y);
-            Row(content, Item.Tunnel, ref y);
-            content.sizeDelta = new Vector2(0f, -y + 40f);
+            switch (tab)
+            {
+                case Tab.Weapons:
+                    foreach (var w in Armory.All) WeaponCell(w);
+                    break;
+                case Tab.Tools:
+                    BagCell();
+                    foreach (var t in Tools.All) ToolCell(t);
+                    break;
+                case Tab.Upgrades:
+                    foreach (var item in new[] { Item.Shield, Item.Armor, Item.Rescue, Item.Magnet, Item.Hover, Item.Lives }) ItemCell(item);
+                    PaintCell();
+                    break;
+                default:
+                    foreach (var b in Shop.Counter()) ItemCell((Item)((int)Item.StartShield + (int)b));
+                    ItemCell(Item.Life);
+                    ItemCell(Item.Tunnel);
+                    break;
+            }
+            int rows = (cells + 1) / 2;
+            content.sizeDelta = new Vector2(0f, rows * (CellH + Gap) + 60f);
         }
 
-        /// <summary>The hammer: five levels, each hitting harder, holding more blows and looking different.</summary>
-        private void WeaponRow(Transform parent, ref float y)
-        {
-            var row = UiFactory.Pill("Hammer", parent, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 170f), new Color(0.3f, 0.2f, 0.45f, 0.95f));
-            y -= 186f;
-            var icon = UiFactory.Box("Icon", row, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(120f, 120f));
-            var iconFill = UiFactory.Fill(icon, HammerModels.Glow(Weapons.Level), UiSprites.Rounded, 2f);
-            iconFill.raycastTarget = false;
-            var handle = UiFactory.Box("Handle", icon, new Vector2(0.5f, 0.5f), new Vector2(-6f, -12f), new Vector2(16f, 70f));
-            handle.pivot = new Vector2(0.5f, 0.5f);
-            handle.localRotation = Quaternion.Euler(0f, 0f, 35f);
-            UiFactory.Fill(handle, UiFactory.TextDark, UiSprites.Rounded, 8f).raycastTarget = false;
-            var head = UiFactory.Box("Head", icon, new Vector2(0.5f, 0.5f), new Vector2(10f, 16f), new Vector2(70f, 34f));
-            head.pivot = new Vector2(0.5f, 0.5f);
-            head.localRotation = Quaternion.Euler(0f, 0f, 35f);
-            UiFactory.Fill(head, UiFactory.TextDark, UiSprites.Rounded, 8f).raycastTarget = false;
+        // ---------- Cards ----------
 
-            var name = UiFactory.TextBox("Name", row, new Vector2(0f, 1f), new Vector2(166f, -18f), new Vector2(420f, 56f), "", 42f, Palette.UiText, align: TextAlignmentOptions.Left);
-            var desc = UiFactory.TextBox("Desc", row, new Vector2(0f, 1f), new Vector2(166f, -66f), new Vector2(420f, 70f), "", 27f,
-                new Color(0.85f, 0.86f, 1f, 0.8f), FontStyles.Normal, align: TextAlignmentOptions.TopLeft);
-            desc.textWrappingMode = TextWrappingModes.Normal;
+        /// <summary>A card at the next place of the two-column grid, with its big picture area filled in.</summary>
+        private RectTransform Cell(string name, Color glow, out RectTransform picture)
+        {
+            int i = cells++;
+            float x = (i % 2 == 0 ? -1f : 1f) * (CellW + Gap) * 0.5f;
+            float y = -30f - (i / 2) * (CellH + Gap);
+            var card = UiFactory.Card(name, content, new Vector2(0.5f, 1f), new Vector2(x, y), new Vector2(CellW, CellH));
+            card.pivot = new Vector2(0.5f, 1f);
+            // The picture sits on a soft glow of the item's colour.
+            var halo = UiFactory.Box("Halo", card, new Vector2(0.5f, 1f), new Vector2(0f, -180f), new Vector2(380f, 380f));
+            halo.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(halo, new Color(glow.r, glow.g, glow.b, 0.35f), UiSprites.Shadow, 0.5f).raycastTarget = false;
+            picture = UiFactory.Box("Picture", card, new Vector2(0.5f, 1f), new Vector2(0f, -180f), new Vector2(300f, 300f));
+            picture.pivot = new Vector2(0.5f, 0.5f);
+            return card;
+        }
+
+        /// <summary>A shop icon (drawn for a 110-unit box) blown up to fill the picture.</summary>
+        private static RectTransform BigIcon(RectTransform picture, Color colour)
+        {
+            var disc = UiFactory.Box("Disc", picture, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(220f, 220f));
+            disc.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Chunky(disc, UiFactory.StyleOf(colour), 1f, 0f, UiSprites.Circle).raycastTarget = false;
+            var icon = UiFactory.Box("Icon", picture, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(110f, 110f));
+            icon.pivot = new Vector2(0.5f, 0.5f);
+            icon.localScale = Vector3.one * 1.9f;
+            return icon;
+        }
+
+        private static TextMeshProUGUI CardName(RectTransform card, string text) =>
+            UiFactory.TextBox("Name", card, new Vector2(0.5f, 1f), new Vector2(0f, -352f), new Vector2(430f, 56f), text, 38f, Palette.UiText, title: true);
+
+        private static TextMeshProUGUI CardDesc(RectTransform card)
+        {
+            var d = UiFactory.TextBox("Desc", card, new Vector2(0.5f, 1f), new Vector2(0f, -410f), new Vector2(420f, 96f), "", 25f, new Color(0.88f, 0.9f, 1f, 0.82f), FontStyles.Normal);
+            d.textWrappingMode = TextWrappingModes.Normal;
+            d.alignment = TextAlignmentOptions.Top;
+            return d;
+        }
+
+        private static List<Image> Pips(RectTransform card, int count)
+        {
             var pips = new List<Image>();
-            for (int i = 0; i < Weapons.MaxLevel; i++)
+            float w = 40f, gap = 10f, start = -(count * w + (count - 1) * gap) * 0.5f + w * 0.5f;
+            for (int i = 0; i < count; i++)
             {
-                var pip = UiFactory.Box("Pip", row, new Vector2(0f, 0f), new Vector2(166f + i * 44f, 14f), new Vector2(34f, 12f));
+                var pip = UiFactory.Box("Pip", card, new Vector2(0.5f, 0f), new Vector2(start + i * (w + gap), 140f), new Vector2(w, 12f));
+                pip.pivot = new Vector2(0.5f, 0.5f);
                 pips.Add(UiFactory.Fill(pip, Color.white, UiSprites.Rounded, 8f));
                 pips[i].raycastTarget = false;
             }
-            var buy = UiFactory.MakeButton(row, "", Kind.Gold, new Vector2(1f, 0.5f), new Vector2(-24f, 0f), new Vector2(250f, 120f), () =>
+            return pips;
+        }
+
+        private static void SetPips(List<Image> pips, int level)
+        {
+            for (int i = 0; i < pips.Count; i++) pips[i].color = i < level ? new Color(0.36f, 0.85f, 0.6f) : new Color(1f, 1f, 1f, 0.18f);
+        }
+
+        /// <summary>A grey veil with a padlock and the level it opens at (shown while locked).</summary>
+        private static TextMeshProUGUI LockVeil(RectTransform card, out GameObject veil)
+        {
+            var v = UiFactory.Box("Lock", card, new Vector2(0.5f, 1f), new Vector2(0f, -180f), new Vector2(300f, 300f));
+            v.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(v, new Color(0.02f, 0.02f, 0.05f, 0.7f), UiSprites.Circle).raycastTarget = false;
+            var label = UiFactory.TextBox("Text", v, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(280f, 90f), "", 34f, Color.white, title: true);
+            label.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            veil = v.gameObject;
+            return label;
+        }
+
+        private Button BuyButton(RectTransform card, Action onClick, float width = 410f, float x = 0f) =>
+            UiFactory.MakeButton(card, "", Kind.Gold, new Vector2(0.5f, 0f), new Vector2(x, 34f), new Vector2(width, 92f), onClick, 40f);
+
+        private static void Afford(Button b, bool can, bool enough)
+        {
+            b.interactable = can;
+            b.targetGraphic.color = can && enough ? UiFactory.GoldStyle.face : new Color(0.45f, 0.45f, 0.5f, 0.55f);
+        }
+
+        private void Pop(RectTransform card) => card.localScale = Vector3.one * 1.05f;
+
+        /// <summary>A weapon: its picture, how it hits, buy it (opens at its level) or take it in hand.</summary>
+        private void WeaponCell(WeaponDef w)
+        {
+            var card = Cell(w.id, WeaponModels.Glow(w.tier), out var picture);
+            var image = picture.gameObject.AddComponent<RawImage>();
+            image.texture = ItemPreview.Weapon(w);
+            image.raycastTarget = false;
+            CardName(card, Loc.T("weapon." + w.id));
+            var desc = CardDesc(card);
+            desc.text = Loc.F("weapon.line", w.damage, w.reach, Loc.T(w.cooldown <= 0.16f ? "weapon.fast" : w.cooldown >= 0.3f ? "weapon.slow" : "weapon.normal"))
+                        + "\n" + Loc.T("weapon.kind." + w.kind);
+            var lockText = LockVeil(card, out var veil);
+            var buy = BuyButton(card, () =>
             {
-                if (Weapons.TryUpgrade())
+                if (Armory.Owned(w)) Armory.Equip(w);
+                else if (Armory.TryBuy(w))
                 {
                     AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
                     Haptics.Medium();
-                    row.localScale = Vector3.one * 1.05f;
+                    Pop(card);
                     bip.Queue(Loc.T("ws.bip.hammer"));
                     Purchased?.Invoke();
                 }
                 else
                 {
                     AudioManager.PlaySfx(Sfx.Bump, 0.6f);
-                    if (Weapons.NextUnlocked && SaveData.Coins < Weapons.NextPrice) WorkshopTalk.Poor(bip);
+                    if (Armory.Unlocked(w) && SaveData.Coins < w.price) WorkshopTalk.Poor(bip);
                 }
                 Refresh();
-            }, 44f);
+            });
             var label = buy.GetComponentInChildren<TextMeshProUGUI>();
             refreshers.Add(() =>
             {
-                int level = Weapons.Level;
-                iconFill.color = HammerModels.Glow(level);
-                name.text = Loc.T("weapon.hammer." + level);
-                string now = Loc.F("weapon.stats", Weapons.DamageAt(level), Weapons.AmmoAt(level));
-                desc.text = Weapons.IsMaxed ? now : now + "\n" + Loc.F("weapon.next", Loc.T("weapon.hammer." + (level + 1)), Weapons.DamageAt(level + 1), Weapons.AmmoAt(level + 1));
-                for (int i = 0; i < pips.Count; i++) pips[i].color = i < level ? new Color(0.36f, 0.85f, 0.6f) : new Color(1f, 1f, 1f, 0.18f);
-                bool locked = !Weapons.IsMaxed && !Weapons.NextUnlocked;
-                label.text = Weapons.IsMaxed ? Loc.T("shop.max") : locked ? Loc.F("ws.lockedAt", Weapons.NextUnlockLevel + 1) : Weapons.NextPrice.ToString();
-                buy.interactable = !Weapons.IsMaxed && !locked;
-                buy.targetGraphic.color = buy.interactable && SaveData.Coins >= Weapons.NextPrice ? UiFactory.GoldStyle.face : new Color(0.45f, 0.45f, 0.5f, 0.55f);
+                bool owned = Armory.Owned(w), unlocked = Armory.Unlocked(w), equipped = Armory.Equipped == w;
+                veil.SetActive(!unlocked);
+                lockText.text = Loc.F("ws.lockedAt", w.unlockAt + 1);
+                image.color = unlocked ? Color.white : new Color(1f, 1f, 1f, 0.35f);
+                label.text = equipped ? Loc.T("weapon.equipped") : owned ? Loc.T("weapon.equip") : unlocked ? w.price.ToString() : Loc.F("ws.lockedAt", w.unlockAt + 1);
+                if (owned)
+                {
+                    buy.interactable = !equipped;
+                    buy.targetGraphic.color = equipped ? UiFactory.GreenStyle.face : UiFactory.CyanStyle.face;
+                }
+                else Afford(buy, unlocked, SaveData.Coins >= w.price);
             });
         }
 
-        /// <summary>The paint shelf: a door into the garage, where the robot gets its colours back.</summary>
-        private void PaintRow(Transform parent, ref float y)
+        private void ItemCell(Item item)
         {
-            var row = UiFactory.Pill("Paint", parent, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.04f, 0.04f, 0.09f, 0.66f) /* glass */);
-            y -= 166f;
-            var icon = UiFactory.Box("Icon", row, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(110f, 110f));
-            UiFactory.Fill(icon, new Color(1f, 0.6f, 0.75f), UiSprites.Rounded, 2f).raycastTarget = false;
-            foreach (var (pos, c) in new[] { (new Vector2(-20f, 14f), new Color(0.45f, 0.85f, 0.7f)), (new Vector2(20f, 14f), new Color(1f, 0.8f, 0.35f)), (new Vector2(0f, -18f), new Color(0.35f, 0.6f, 1f)) })
-            {
-                var drop = UiFactory.Box("Drop", icon, new Vector2(0.5f, 0.5f), pos, new Vector2(40f, 40f));
-                drop.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(drop, c, UiSprites.Circle).raycastTarget = false;
-            }
-            UiFactory.TextBox("Name", row, new Vector2(0f, 1f), new Vector2(156f, -22f), new Vector2(440f, 56f), Loc.T("ws.paintName"), 42f, Palette.UiText, align: TextAlignmentOptions.Left);
-            UiFactory.TextBox("Desc", row, new Vector2(0f, 1f), new Vector2(156f, -68f), new Vector2(440f, 70f), Loc.T("ws.paintDesc"), 28f,
-                new Color(0.85f, 0.86f, 1f, 0.75f), FontStyles.Normal, align: TextAlignmentOptions.TopLeft).textWrappingMode = TextWrappingModes.Normal;
-            UiFactory.MakeButton(row, Loc.T("ws.paintOpen"), Kind.Primary, new Vector2(1f, 0.5f), new Vector2(-24f, 0f), new Vector2(250f, 110f), () => PaintPressed?.Invoke(), 40f);
-        }
-
-        private static void Header(Transform root, string text, ref float y)
-        {
-            var label = UiFactory.TextBox("Header", root, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(960f, 70f), text, 40f, Palette.UiCyan, align: TextAlignmentOptions.Left);
-            label.characterSpacing = 4f;
-            y -= 80f;
-        }
-
-        private void Row(Transform root, Item item, ref float y)
-        {
-            var row = UiFactory.Pill(item.ToString(), root, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */);
-            y -= 166f;
-
-            var icon = UiFactory.Box("Icon", row, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(110f, 110f));
-            UiFactory.Fill(icon, IconColor(item), UiSprites.Rounded, 2f).raycastTarget = false;
-            DrawIcon(icon, item);
-
+            var card = Cell(item.ToString(), IconColor(item), out var picture);
+            DrawIcon(BigIcon(picture, IconColor(item)), item);
             string key = "shop." + item;
-            UiFactory.TextBox("Name", row, new Vector2(0f, 1f), new Vector2(156f, -22f), new Vector2(380f, 56f), Loc.T(key), 42f, Palette.UiText, align: TextAlignmentOptions.Left);
-            var desc = UiFactory.TextBox("Desc", row, new Vector2(0f, 1f), new Vector2(156f, -68f), new Vector2(380f, 40f), Loc.T(key + ".desc"), 30f,
-                new Color(0.85f, 0.86f, 1f, 0.75f), FontStyles.Normal, align: TextAlignmentOptions.Left);
-
-            // Level pips (upgrades) or the owned count (items).
-            var pips = new List<Image>();
+            CardName(card, Loc.T(key));
+            var desc = CardDesc(card);
+            var pips = IsUpgrade(item) ? Pips(card, Shop.MaxLevel(ToUpgrade(item))) : null;
             TextMeshProUGUI owned = null;
-            if (IsUpgrade(item))
+            if (IsBoost(item))
             {
-                int max = Shop.MaxLevel(ToUpgrade(item));
-                for (int i = 0; i < max; i++)
-                {
-                    var pip = UiFactory.Box("Pip", row, new Vector2(0f, 0f), new Vector2(156f + i * 44f, 14f), new Vector2(34f, 12f));
-                    pips.Add(UiFactory.Fill(pip, Color.white, UiSprites.Rounded, 8f));
-                    pips[i].raycastTarget = false;
-                }
+                owned = UiFactory.TextBox("Owned", card, new Vector2(0.5f, 0f), new Vector2(0f, 130f), new Vector2(400f, 36f), "", 26f, Palette.UiCyan);
+                owned.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             }
-            else if (IsBoost(item))
-            {
-                owned = UiFactory.TextBox("Owned", row, new Vector2(0f, 0f), new Vector2(156f, 6f), new Vector2(300f, 32f), "", 26f, Palette.UiCyan, align: TextAlignmentOptions.Left);
-            }
-
-            // Saving up: how many coins are still missing, with a little bar filling up.
-            var need = UiFactory.TextBox("Need", row, new Vector2(0f, 0.5f), new Vector2(556f, 14f), new Vector2(150f, 50f), "", 24f, new Color(1f, 1f, 1f, 0.7f), FontStyles.Normal);
-            var needBar = UiFactory.Bar(row, new Vector2(0f, 0.5f), new Vector2(556f, -22f), new Vector2(150f, 14f), new Color(1f, 1f, 1f, 0.12f), out var needFill);
-
-            var buy = UiFactory.MakeButton(row, "", Kind.Gold, new Vector2(1f, 0.5f), new Vector2(-24f, 0f), new Vector2(250f, 110f), () => Buy(item, row), 46f);
+            var buy = BuyButton(card, () => Buy(item, card));
             var label = buy.GetComponentInChildren<TextMeshProUGUI>();
-
             refreshers.Add(() =>
             {
                 int price = PriceOf(item);
@@ -238,125 +285,37 @@ namespace SquashBot.UI
                 bool locked = IsUpgrade(item) && !Shop.Unlocked(ToUpgrade(item));
                 bool full = item == Item.Life && Lives.IsFull || IsBoost(item) && Shop.Full(ToBoost(item));
                 label.text = locked ? Loc.F("ws.lockedAt", Shop.UnlockLevel(ToUpgrade(item)) + 1) : maxed ? Loc.T("shop.max") : full ? Loc.T("shop.full") : price.ToString();
-                buy.interactable = !locked && !maxed && !full;
-                buy.targetGraphic.color = !locked && !maxed && !full && SaveData.Coins >= price ? UiFactory.GoldStyle.face : new Color(0.45f, 0.45f, 0.5f, 0.55f);
-                if (IsUpgrade(item))
-                {
-                    int level = Shop.Level(ToUpgrade(item));
-                    for (int i = 0; i < pips.Count; i++) pips[i].color = i < level ? new Color(0.36f, 0.85f, 0.6f) : new Color(1f, 1f, 1f, 0.18f);
-                }
+                Afford(buy, !locked && !maxed && !full, SaveData.Coins >= price);
+                if (pips != null) SetPips(pips, Shop.Level(ToUpgrade(item)));
                 if (owned != null) owned.text = Loc.F("shop.owned", Shop.Owned(ToBoost(item)));
                 desc.text = locked ? Loc.T("ws.src." + ToUpgrade(item)) : Describe(item);
-                bool saving = !locked && !maxed && !full && SaveData.Coins < price;
-                need.gameObject.SetActive(saving);
-                needBar.gameObject.SetActive(saving);
-                if (saving)
-                {
-                    need.text = Loc.F("shop.need", price - SaveData.Coins);
-                    UiFactory.SetBar(needFill, SaveData.Coins / (float)price);
-                }
             });
         }
 
-        /// <summary>The bag itself: two slots showing the tools that ride along; the second slot is bought once.</summary>
-        private void SlotsRow(Transform parent, ref float y)
-        {
-            var row = UiFactory.Pill("Bag", parent, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.04f, 0.04f, 0.09f, 0.66f) /* glass */);
-            y -= 166f;
-            UiFactory.TextBox("Label", row, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(240f, 60f), Loc.T("shop.bag"), 36f, Palette.UiText, align: TextAlignmentOptions.Left);
-
-            for (int s = 0; s < 2; s++)
-            {
-                int slot = s;
-                var box = UiFactory.Box("Slot" + s, row, new Vector2(0f, 0.5f), new Vector2(270f + s * 350f, 0f), new Vector2(330f, 120f));
-                box.pivot = new Vector2(0f, 0.5f);
-                UiFactory.Fill(box, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 1.4f);
-                var icon = UiFactory.Box("Icon", box, new Vector2(0f, 0.5f), new Vector2(14f, 0f), new Vector2(92f, 92f));
-                icon.pivot = new Vector2(0f, 0.5f);
-                var iconFill = UiFactory.Fill(icon, Palette.UiGold, UiSprites.Rounded, 2f);
-                iconFill.raycastTarget = false;
-                var label = UiFactory.TextBox("Name", box, new Vector2(0f, 0.5f), new Vector2(118f, 0f), new Vector2(200f, 90f), "", 30f, Palette.UiText, align: TextAlignmentOptions.Left);
-                label.textWrappingMode = TextWrappingModes.Normal;
-
-                Button buySlot = null;
-                if (s == 1)
-                {
-                    buySlot = UiFactory.MakeButton(box, Tools.SecondSlotPrice.ToString(), Kind.Gold, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300f, 100f), () =>
-                    {
-                        if (Tools.TryBuySecondSlot()) { AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f); Purchased?.Invoke(); }
-                        else AudioManager.PlaySfx(Sfx.Bump, 0.6f);
-                        Refresh();
-                    }, 40f);
-                    ((RectTransform)buySlot.transform).pivot = new Vector2(0.5f, 0.5f);
-                }
-
-                Tool? drawn = null;
-                bool drawnEmpty = false;
-                refreshers.Add(() =>
-                {
-                    bool locked = slot >= Tools.Slots;
-                    if (buySlot != null)
-                    {
-                        buySlot.gameObject.SetActive(locked);
-                        buySlot.interactable = SaveData.Coins >= Tools.SecondSlotPrice;
-                    }
-                    icon.gameObject.SetActive(!locked);
-                    label.gameObject.SetActive(!locked);
-                    if (locked) return;
-                    var t = Tools.Equipped(slot);
-                    label.text = t.HasValue ? Loc.T("tool." + t.Value) : Loc.T("shop.bagEmpty");
-                    iconFill.color = t.HasValue ? Palette.UiGold : new Color(1f, 1f, 1f, 0.12f);
-                    if (drawn != t || drawnEmpty != !t.HasValue)
-                    {
-                        for (int i = icon.childCount - 1; i >= 0; i--) Destroy(icon.GetChild(i).gameObject);
-                        if (t.HasValue) ToolButton.DrawIcon(icon, t.Value);
-                        drawn = t;
-                        drawnEmpty = !t.HasValue;
-                    }
-                });
-            }
-        }
-
         /// <summary>A tool: unlock, upgrade (three levels), put in or take out of the bag.</summary>
-        private void ToolRow(Transform parent, Tool tool, ref float y)
+        private void ToolCell(Tool tool)
         {
-            var row = UiFactory.Pill(tool.ToString(), parent, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */);
-            y -= 166f;
-
-            var icon = UiFactory.Box("Icon", row, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(110f, 110f));
-            UiFactory.Fill(icon, Palette.UiGold, UiSprites.Rounded, 2f).raycastTarget = false;
-            ToolButton.DrawIcon(icon, tool);
-
-            UiFactory.TextBox("Name", row, new Vector2(0f, 1f), new Vector2(156f, -22f), new Vector2(380f, 56f), Loc.T("tool." + tool), 42f, Palette.UiText, align: TextAlignmentOptions.Left);
-            var desc = UiFactory.TextBox("Desc", row, new Vector2(0f, 1f), new Vector2(156f, -68f), new Vector2(380f, 40f), "", 28f,
-                new Color(0.85f, 0.86f, 1f, 0.75f), FontStyles.Normal, align: TextAlignmentOptions.Left);
-            var pips = new List<Image>();
-            for (int i = 0; i < Tools.MaxLevel; i++)
-            {
-                var pip = UiFactory.Box("Pip", row, new Vector2(0f, 0f), new Vector2(156f + i * 44f, 14f), new Vector2(34f, 12f));
-                pips.Add(UiFactory.Fill(pip, Color.white, UiSprites.Rounded, 8f));
-                pips[i].raycastTarget = false;
-            }
-
-            // Middle button: WEAR / TAKE OFF once owned; before that, how many coins are still missing.
-            var need = UiFactory.TextBox("Need", row, new Vector2(0f, 0.5f), new Vector2(556f, 14f), new Vector2(150f, 50f), "", 24f, new Color(1f, 1f, 1f, 0.7f), FontStyles.Normal);
-            var needBar = UiFactory.Bar(row, new Vector2(0f, 0.5f), new Vector2(556f, -22f), new Vector2(150f, 14f), new Color(1f, 1f, 1f, 0.12f), out var needFill);
-            var mid = UiFactory.MakeButton(row, "", Kind.Secondary, new Vector2(0f, 0.5f), new Vector2(548f, 0f), new Vector2(150f, 64f), () =>
+            var card = Cell(tool.ToString(), Palette.UiGold, out var picture);
+            ToolButton.DrawIcon(BigIcon(picture, Palette.UiGold), tool);
+            CardName(card, Loc.T("tool." + tool));
+            var desc = CardDesc(card);
+            var pips = Pips(card, Tools.MaxLevel);
+            var lockText = LockVeil(card, out var veil);
+            var mid = UiFactory.MakeButton(card, "", Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(-108f, 34f), new Vector2(196f, 92f), () =>
             {
                 if (Tools.Owned(tool)) Tools.ToggleEquip(tool);
                 AudioManager.PlaySfx(Sfx.Click, 0.7f, 1.2f);
                 Refresh();
-            }, 26f);
+            }, 30f);
             var midLabel = mid.GetComponentInChildren<TextMeshProUGUI>();
-
-            var buy = UiFactory.MakeButton(row, "", Kind.Gold, new Vector2(1f, 0.5f), new Vector2(-24f, 0f), new Vector2(250f, 110f), () =>
+            var buy = BuyButton(card, () =>
             {
                 bool first = !Tools.Owned(tool);
                 if (Tools.TryBuy(tool))
                 {
                     AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
                     Haptics.Medium();
-                    row.localScale = Vector3.one * 1.05f;
+                    Pop(card);
                     WorkshopTalk.ToolBought(bip, tool, first);
                     Purchased?.Invoke();
                 }
@@ -366,37 +325,93 @@ namespace SquashBot.UI
                     if (Tools.Unlocked(tool) && !Tools.IsMaxed(tool)) WorkshopTalk.Poor(bip);
                 }
                 Refresh();
-            }, 46f);
+            });
             var buyLabel = buy.GetComponentInChildren<TextMeshProUGUI>();
-
+            var buyRect = (RectTransform)buy.transform;
             refreshers.Add(() =>
             {
                 int level = Tools.Level(tool);
-                for (int i = 0; i < pips.Count; i++) pips[i].color = i < level ? new Color(0.36f, 0.85f, 0.6f) : new Color(1f, 1f, 1f, 0.18f);
-                bool maxed = Tools.IsMaxed(tool);
+                SetPips(pips, level);
+                bool maxed = Tools.IsMaxed(tool), locked = !Tools.Unlocked(tool), ownedTool = Tools.Owned(tool);
                 int price = Tools.NextPrice(tool);
-                bool locked = !Tools.Unlocked(tool);
+                veil.SetActive(locked);
+                lockText.text = Loc.F("ws.lockedAt", Tools.UnlockLevel(tool) + 1);
                 buyLabel.text = locked ? Loc.F("ws.lockedAt", Tools.UnlockLevel(tool) + 1) : maxed ? Loc.T("shop.max") : price.ToString();
-                buy.interactable = !locked && !maxed;
-                buy.targetGraphic.color = !locked && !maxed && SaveData.Coins >= price ? UiFactory.GoldStyle.face : new Color(0.45f, 0.45f, 0.5f, 0.55f);
+                Afford(buy, !locked && !maxed, SaveData.Coins >= price);
                 desc.text = locked ? Loc.T("ws.src." + tool) : Loc.T(level == 0 ? "tool." + tool + ".desc" : level < Tools.MaxLevel ? "tool." + tool + ".next" : "tool.maxed");
-                bool ownedTool = Tools.Owned(tool);
+                // Owned: the wear/take-off button shares the bottom with the upgrade button.
                 mid.gameObject.SetActive(ownedTool);
+                buyRect.sizeDelta = new Vector2(ownedTool ? 196f : 410f, 92f);
+                buyRect.anchoredPosition = new Vector2(ownedTool ? 108f : 0f, 34f);
                 if (ownedTool)
                 {
                     bool on = Tools.IsEquipped(tool);
                     midLabel.text = Loc.T(on ? "tool.off" : "tool.on");
-                    midLabel.color = on ? Palette.UiCyan : Palette.UiText;
-                }
-                bool saving = !locked && !ownedTool && SaveData.Coins < price;
-                need.gameObject.SetActive(saving);
-                needBar.gameObject.SetActive(saving);
-                if (saving)
-                {
-                    need.text = Loc.F("shop.need", price - SaveData.Coins);
-                    UiFactory.SetBar(needFill, SaveData.Coins / (float)price);
+                    mid.targetGraphic.color = on ? UiFactory.GreenStyle.face : UiFactory.PurpleStyle.face;
                 }
             });
+        }
+
+        /// <summary>The bag: which tools ride along (two slots; the second is bought once).</summary>
+        private void BagCell()
+        {
+            var card = Cell("Bag", Palette.UiCyan, out var picture);
+            CardName(card, Loc.T("shop.bag"));
+            var desc = CardDesc(card);
+            var slotIcons = new RectTransform[2];
+            for (int s = 0; s < 2; s++)
+            {
+                var box = UiFactory.Box("Slot" + s, picture, new Vector2(0.5f, 0.5f), new Vector2((s == 0 ? -1f : 1f) * 78f, 0f), new Vector2(140f, 140f));
+                box.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(box, new Color(1f, 1f, 1f, 0.08f), UiSprites.Rounded, 1f).raycastTarget = false;
+                UiFactory.Fill(UiFactory.Stretch("Rim", box), new Color(1f, 1f, 1f, 0.3f), UiSprites.Ring, 1f).raycastTarget = false;
+                var icon = UiFactory.Box("Icon", box, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(110f, 110f));
+                icon.pivot = new Vector2(0.5f, 0.5f);
+                slotIcons[s] = icon;
+            }
+            var buySlot = BuyButton(card, () =>
+            {
+                if (Tools.TryBuySecondSlot()) { AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f); Purchased?.Invoke(); }
+                else AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                Refresh();
+            });
+            var label = buySlot.GetComponentInChildren<TextMeshProUGUI>();
+            var drawn = new Tool?[2];
+            var drawnEmpty = new bool[2];
+            refreshers.Add(() =>
+            {
+                bool second = Tools.Slots >= 2;
+                buySlot.gameObject.SetActive(!second);
+                label.text = Tools.SecondSlotPrice.ToString();
+                Afford(buySlot, true, SaveData.Coins >= Tools.SecondSlotPrice);
+                var names = new List<string>();
+                for (int s = 0; s < 2; s++)
+                {
+                    var t = s < Tools.Slots ? Tools.Equipped(s) : null;
+                    if (t.HasValue) names.Add(Loc.T("tool." + t.Value));
+                    if (drawn[s] == t && drawnEmpty[s] == !t.HasValue) continue;
+                    for (int i = slotIcons[s].childCount - 1; i >= 0; i--) Destroy(slotIcons[s].GetChild(i).gameObject);
+                    if (t.HasValue) ToolButton.DrawIcon(slotIcons[s], t.Value);
+                    drawn[s] = t;
+                    drawnEmpty[s] = !t.HasValue;
+                }
+                desc.text = names.Count > 0 ? string.Join(" · ", names) : Loc.T("shop.bagEmpty");
+            });
+        }
+
+        /// <summary>The paint workshop: a door into the garage.</summary>
+        private void PaintCell()
+        {
+            var card = Cell("Paint", new Color(1f, 0.6f, 0.75f), out var picture);
+            foreach (var (pos, c) in new[] { (new Vector2(-55f, 35f), new Color(0.45f, 0.85f, 0.7f)), (new Vector2(55f, 35f), new Color(1f, 0.8f, 0.35f)), (new Vector2(0f, -50f), new Color(0.35f, 0.6f, 1f)) })
+            {
+                var drop = UiFactory.Box("Drop", picture, new Vector2(0.5f, 0.5f), pos, new Vector2(110f, 110f));
+                drop.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Chunky(drop, UiFactory.StyleOf(c), 1f, 0f, UiSprites.Circle).raycastTarget = false;
+            }
+            CardName(card, Loc.T("ws.paintName"));
+            CardDesc(card).text = Loc.T("ws.paintDesc");
+            var open = UiFactory.MakeButton(card, Loc.T("ws.paintOpen"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 34f), new Vector2(410f, 92f), () => PaintPressed?.Invoke(), 40f);
         }
 
         private static bool IsUpgrade(Item item) => item <= Item.Armor;
@@ -420,7 +435,7 @@ namespace SquashBot.UI
             }
         }
 
-        /// <summary>The row's second line: what the next level brings (or what the item does).</summary>
+        /// <summary>The card's text: what the next level brings (or what the item does).</summary>
         private static string Describe(Item item)
         {
             switch (item)
@@ -442,7 +457,7 @@ namespace SquashBot.UI
             }
         }
 
-        private void Buy(Item item, RectTransform row)
+        private void Buy(Item item, RectTransform card)
         {
             bool ok;
             switch (item)
@@ -468,7 +483,7 @@ namespace SquashBot.UI
             {
                 AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
                 Haptics.Medium();
-                row.localScale = Vector3.one * 1.05f;
+                Pop(card);
                 if (IsUpgrade(item)) WorkshopTalk.UpgradeBought(bip, ToUpgrade(item));
                 else if (IsBoost(item)) WorkshopTalk.CounterBought(bip);
                 Purchased?.Invoke();
@@ -489,6 +504,22 @@ namespace SquashBot.UI
             if (WorkshopTalk.IntroDue) WorkshopTalk.Welcome(bip);
         }
 
+        /// <summary>Opens the shop on the weapons shelf, scrolled to a weapon (the "try this" hint).</summary>
+        public void ShowWeapons()
+        {
+            tab = Tab.Weapons;
+            Populate();
+            Show();
+        }
+
+        /// <summary>Opens the shop on the tools/upgrades shelf (the "try this" hint).</summary>
+        public void ShowShelf(bool tools)
+        {
+            tab = tools ? Tab.Tools : Tab.Upgrades;
+            Populate();
+            Show();
+        }
+
         public void Hide()
         {
             bip.Hide();
@@ -507,6 +538,10 @@ namespace SquashBot.UI
             foreach (Transform child in content)
                 if (child.localScale.x > 1f) child.localScale = Vector3.Lerp(child.localScale, Vector3.one, Time.unscaledDeltaTime * 10f);
         }
+
+        /// <summary>An upgrade's shop icon and colour (for the "try this" hint).</summary>
+        public static void DrawUpgrade(RectTransform icon, Upgrade u) => DrawIcon(icon, (Item)(int)u);
+        public static Color UpgradeColor(Upgrade u) => IconColor((Item)(int)u);
 
         // ---------- Icons ----------
 

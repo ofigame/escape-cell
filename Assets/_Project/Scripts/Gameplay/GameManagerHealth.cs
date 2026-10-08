@@ -25,7 +25,7 @@ namespace SquashBot.Gameplay
         /// <summary>A share of health the next hit takes instead of the usual (set around a robot's blow).</summary>
         private float hitShareOverride = -1f;
         /// <summary>A crate landing on the robot in the core loop takes this much.</summary>
-        private const float CrateHitShare = 0.8f;
+        private const float CrateHitShare = 0.3f;
         private float hurtCooldown;
 
         private bool HealthEnabled => !bonusRun && levelIndex >= HealthFromLevel;
