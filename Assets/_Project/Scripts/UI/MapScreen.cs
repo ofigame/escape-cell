@@ -137,7 +137,7 @@ namespace SquashBot.UI
         {
             var theme = WorldTheme.ForWorld(w);
             bool locked = w * LevelCatalog.LevelsPerWorld > unlocked && !openAll;
-            var banner = UiFactory.Pill("Banner " + (w + 1), overlay, new Vector2(0f, 0f), Vector2.zero, new Vector2(680f, 130f), new Color(0.08f, 0.06f, 0.2f, 0.82f));
+            var banner = UiFactory.Pill("Banner " + (w + 1), overlay, new Vector2(0f, 0f), Vector2.zero, new Vector2(680f, 130f), new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */);
             banner.pivot = new Vector2(0.5f, 0.5f);
             var title = UiFactory.TextBox("Name", banner, new Vector2(0.5f, 1f), new Vector2(0f, -14f), new Vector2(640f, 64f),
                 Loc.F("world", w + 1, Loc.T(theme.key)), 42f, theme.accent, title: true);
@@ -148,7 +148,7 @@ namespace SquashBot.UI
             if (locked) Lock(banner, new Vector2(0f, 0.5f), new Vector2(54f, 0f), 0.7f);
             else
             {
-                var image = banner.GetComponent<Image>();
+                var image = banner.Find("Body").GetComponent<Image>();
                 image.raycastTarget = true;
                 var replay = banner.gameObject.AddComponent<Button>();
                 replay.targetGraphic = image;
@@ -266,7 +266,7 @@ namespace SquashBot.UI
             {
                 var star = UiFactory.Box("Star", node, new Vector2(0.5f, 0f), new Vector2((i - 1) * 46f, i == 1 ? y - 8f : y), new Vector2(50f, 50f));
                 star.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(star, i < stars ? Palette.UiGold : new Color(0.1f, 0.08f, 0.22f, 0.75f), UiSprites.Star).raycastTarget = false;
+                UiFactory.Fill(star, i < stars ? Palette.UiGold : new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Star).raycastTarget = false;
             }
         }
 
@@ -299,7 +299,7 @@ namespace SquashBot.UI
             body.pivot = new Vector2(0.5f, 0f);
             UiFactory.Fill(body, new Color(1f, 1f, 1f, 0.85f), UiSprites.Rounded, 2.5f / scale).raycastTarget = false;
             var hole = UiFactory.Box("Hole", body, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(12f, 18f) * scale);
-            UiFactory.Fill(hole, new Color(0.15f, 0.12f, 0.3f, 0.9f), UiSprites.Rounded, 6f).raycastTarget = false;
+            UiFactory.Fill(hole, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 6f).raycastTarget = false;
         }
 
     }

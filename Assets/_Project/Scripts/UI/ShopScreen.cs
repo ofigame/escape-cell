@@ -162,14 +162,14 @@ namespace SquashBot.UI
                 bool locked = !Weapons.IsMaxed && !Weapons.NextUnlocked;
                 label.text = Weapons.IsMaxed ? Loc.T("shop.max") : locked ? Loc.F("ws.lockedAt", Weapons.NextUnlockLevel + 1) : Weapons.NextPrice.ToString();
                 buy.interactable = !Weapons.IsMaxed && !locked;
-                buy.targetGraphic.color = buy.interactable && SaveData.Coins >= Weapons.NextPrice ? Color.white : new Color(1f, 1f, 1f, 0.5f);
+                buy.targetGraphic.color = buy.interactable && SaveData.Coins >= Weapons.NextPrice ? UiFactory.GoldStyle.face : new Color(0.45f, 0.45f, 0.5f, 0.55f);
             });
         }
 
         /// <summary>The paint shelf: a door into the garage, where the robot gets its colours back.</summary>
         private void PaintRow(Transform parent, ref float y)
         {
-            var row = UiFactory.Pill("Paint", parent, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.24f, 0.18f, 0.42f, 0.95f));
+            var row = UiFactory.Pill("Paint", parent, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.04f, 0.04f, 0.09f, 0.66f) /* glass */);
             y -= 166f;
             var icon = UiFactory.Box("Icon", row, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(110f, 110f));
             UiFactory.Fill(icon, new Color(1f, 0.6f, 0.75f), UiSprites.Rounded, 2f).raycastTarget = false;
@@ -194,7 +194,7 @@ namespace SquashBot.UI
 
         private void Row(Transform root, Item item, ref float y)
         {
-            var row = UiFactory.Pill(item.ToString(), root, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.16f, 0.15f, 0.33f, 0.9f));
+            var row = UiFactory.Pill(item.ToString(), root, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */);
             y -= 166f;
 
             var icon = UiFactory.Box("Icon", row, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(110f, 110f));
@@ -239,7 +239,7 @@ namespace SquashBot.UI
                 bool full = item == Item.Life && Lives.IsFull || IsBoost(item) && Shop.Full(ToBoost(item));
                 label.text = locked ? Loc.F("ws.lockedAt", Shop.UnlockLevel(ToUpgrade(item)) + 1) : maxed ? Loc.T("shop.max") : full ? Loc.T("shop.full") : price.ToString();
                 buy.interactable = !locked && !maxed && !full;
-                buy.targetGraphic.color = !locked && !maxed && !full && SaveData.Coins >= price ? Color.white : new Color(1f, 1f, 1f, 0.5f);
+                buy.targetGraphic.color = !locked && !maxed && !full && SaveData.Coins >= price ? UiFactory.GoldStyle.face : new Color(0.45f, 0.45f, 0.5f, 0.55f);
                 if (IsUpgrade(item))
                 {
                     int level = Shop.Level(ToUpgrade(item));
@@ -261,7 +261,7 @@ namespace SquashBot.UI
         /// <summary>The bag itself: two slots showing the tools that ride along; the second slot is bought once.</summary>
         private void SlotsRow(Transform parent, ref float y)
         {
-            var row = UiFactory.Pill("Bag", parent, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.24f, 0.18f, 0.42f, 0.95f));
+            var row = UiFactory.Pill("Bag", parent, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.04f, 0.04f, 0.09f, 0.66f) /* glass */);
             y -= 166f;
             UiFactory.TextBox("Label", row, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(240f, 60f), Loc.T("shop.bag"), 36f, Palette.UiText, align: TextAlignmentOptions.Left);
 
@@ -270,7 +270,7 @@ namespace SquashBot.UI
                 int slot = s;
                 var box = UiFactory.Box("Slot" + s, row, new Vector2(0f, 0.5f), new Vector2(270f + s * 350f, 0f), new Vector2(330f, 120f));
                 box.pivot = new Vector2(0f, 0.5f);
-                UiFactory.Fill(box, new Color(0.1f, 0.08f, 0.22f, 0.9f), UiSprites.Rounded, 1.4f);
+                UiFactory.Fill(box, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 1.4f);
                 var icon = UiFactory.Box("Icon", box, new Vector2(0f, 0.5f), new Vector2(14f, 0f), new Vector2(92f, 92f));
                 icon.pivot = new Vector2(0f, 0.5f);
                 var iconFill = UiFactory.Fill(icon, Palette.UiGold, UiSprites.Rounded, 2f);
@@ -320,7 +320,7 @@ namespace SquashBot.UI
         /// <summary>A tool: unlock, upgrade (three levels), put in or take out of the bag.</summary>
         private void ToolRow(Transform parent, Tool tool, ref float y)
         {
-            var row = UiFactory.Pill(tool.ToString(), parent, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.16f, 0.15f, 0.33f, 0.9f));
+            var row = UiFactory.Pill(tool.ToString(), parent, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(980f, 150f), new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */);
             y -= 166f;
 
             var icon = UiFactory.Box("Icon", row, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(110f, 110f));
@@ -378,7 +378,7 @@ namespace SquashBot.UI
                 bool locked = !Tools.Unlocked(tool);
                 buyLabel.text = locked ? Loc.F("ws.lockedAt", Tools.UnlockLevel(tool) + 1) : maxed ? Loc.T("shop.max") : price.ToString();
                 buy.interactable = !locked && !maxed;
-                buy.targetGraphic.color = !locked && !maxed && SaveData.Coins >= price ? Color.white : new Color(1f, 1f, 1f, 0.5f);
+                buy.targetGraphic.color = !locked && !maxed && SaveData.Coins >= price ? UiFactory.GoldStyle.face : new Color(0.45f, 0.45f, 0.5f, 0.55f);
                 desc.text = locked ? Loc.T("ws.src." + tool) : Loc.T(level == 0 ? "tool." + tool + ".desc" : level < Tools.MaxLevel ? "tool." + tool + ".next" : "tool.maxed");
                 bool ownedTool = Tools.Owned(tool);
                 mid.gameObject.SetActive(ownedTool);

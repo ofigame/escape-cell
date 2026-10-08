@@ -185,7 +185,14 @@ namespace SquashBot.Visual
                 case BriefShot.Block:
                     Tiles(new Color(0.3f, 0.3f, 0.45f));
                     robot = MakeRobot(Vector3.zero, 2.2f);
-                    block = Shapes.Rounded("Block", props, new Vector3(0f, 6f, 0f), new Vector3(0.84f, 0.76f, 0.84f), 0.2f,
+                    if (HazardVisuals.CrateTier >= 0)
+                    {
+                        // The core loop drops crates: show the very crate of this world.
+                        block = HazardVisuals.Block().transform;
+                        block.SetParent(props, false);
+                        block.localPosition = new Vector3(0f, 6f, 0f);
+                    }
+                    else block = Shapes.Rounded("Block", props, new Vector3(0f, 6f, 0f), new Vector3(0.84f, 0.76f, 0.84f), 0.2f,
                         MaterialFactory.Create(Palette.Block, Palette.BlockGlow * 0.5f)).transform;
                     block.gameObject.SetActive(false);
                     break;

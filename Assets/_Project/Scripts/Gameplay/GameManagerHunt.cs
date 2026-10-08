@@ -138,7 +138,7 @@ namespace SquashBot.Gameplay
             cameraRig.Chase(pos, Quaternion.LookRotation(closeCamFocus + Vector3.up * 0.35f - pos), CloseCamFov);
         }
 
-        private static readonly Vector3 CloseCamOffset = new Vector3(-2.7f, 3.9f, -2.7f);
+        private static readonly Vector3 CloseCamOffset = new Vector3(-3.8f, 5.4f, -3.8f); // near, but with room to see what comes
         private const float CloseCamFov = 50f;
     }
 }

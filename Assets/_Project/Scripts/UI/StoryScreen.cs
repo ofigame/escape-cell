@@ -63,7 +63,7 @@ namespace SquashBot.UI
             bubble = UiFactory.Card("Bubble", root, new Vector2(0.5f, 0.5f), new Vector2(0f, 120f), new Vector2(940f, 520f));
             bubbleRim = UiFactory.Fill(UiFactory.Stretch("Rim", bubble), Palette.UiCyan, UiSprites.Ring, 0.9f);
             bubbleRim.raycastTarget = false;
-            var namePill = UiFactory.Pill("Name", bubble, new Vector2(0.5f, 1f), new Vector2(0f, 40f), new Vector2(420f, 90f), new Color(0.1f, 0.08f, 0.22f, 0.95f));
+            var namePill = UiFactory.Pill("Name", bubble, new Vector2(0.5f, 1f), new Vector2(0f, 40f), new Vector2(420f, 90f), new Color(0.04f, 0.04f, 0.09f, 0.66f) /* glass */);
             speakerName = UiFactory.Text(namePill, "", 44f, Palette.UiCyan);
             speakerName.characterSpacing = 4f;
             line = UiFactory.TextBox("Line", bubble, new Vector2(0.5f, 0.5f), new Vector2(0f, 10f), new Vector2(840f, 380f), "", 54f, Palette.UiText, FontStyles.Bold);

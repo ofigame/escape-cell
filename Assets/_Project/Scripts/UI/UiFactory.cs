@@ -15,8 +15,8 @@ namespace SquashBot.UI
     /// <summary>Builds the UI from code: crisp TextMeshPro text, rounded glass cards and animated buttons.</summary>
     public static class UiFactory
     {
-        public static readonly Color CardColor = new Color(0.16f, 0.15f, 0.33f, 0.93f);
-        public static readonly Color PillColor = new Color(0.14f, 0.13f, 0.3f, 0.72f);
+        public static readonly Color CardColor = new Color(0.05f, 0.05f, 0.1f, 0.8f);
+        public static readonly Color PillColor = new Color(0.03f, 0.03f, 0.08f, 0.5f);
         public static readonly Color TextDark = new Color(0.13f, 0.12f, 0.29f);
 
         private static TMP_FontAsset font, titleFont;
@@ -105,10 +105,15 @@ namespace SquashBot.UI
                 if (titleMaterial != null) return titleMaterial;
                 titleMaterial = new Material(TitleFont.material) { name = "Title Underlay" };
                 titleMaterial.EnableKeyword("UNDERLAY_ON");
-                titleMaterial.SetColor("_UnderlayColor", new Color(0.12f, 0.1f, 0.3f, 0.6f));
+                titleMaterial.SetColor("_UnderlayColor", new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */);
                 titleMaterial.SetFloat("_UnderlayOffsetX", 0.6f);
                 titleMaterial.SetFloat("_UnderlayOffsetY", -0.8f);
                 titleMaterial.SetFloat("_UnderlaySoftness", 0.35f);
+                // A thin dark outline keeps every title crisp over cards and the floor alike.
+                titleMaterial.EnableKeyword("OUTLINE_ON");
+                titleMaterial.SetFloat("_OutlineWidth", 0.08f);
+                titleMaterial.SetColor("_OutlineColor", new Color(0.07f, 0.05f, 0.2f));
+                titleMaterial.SetFloat("_FaceDilate", 0.1f);
                 return titleMaterial;
             }
         }
@@ -192,21 +197,31 @@ namespace SquashBot.UI
         {
             var root = Box(name, parent, anchor, position, size);
 
-            var shadow = Rect("Shadow", root, Vector2.zero, Vector2.one, new Vector2(-40f, -56f), new Vector2(40f, 24f));
-            Fill(shadow, new Color(0.05f, 0.03f, 0.15f, 0.55f), UiSprites.Shadow, 0.6f).raycastTarget = false;
+            var shadow = Rect("Shadow", root, Vector2.zero, Vector2.one, new Vector2(-40f, -60f), new Vector2(40f, 24f));
+            Fill(shadow, new Color(0f, 0f, 0.04f, 0.45f), UiSprites.Shadow, 0.6f).raycastTarget = false;
 
+            // Frosted glass: a smoky see-through body (the scene glows through it), a light wash that fades down from the
+            // top edge, and a fine bright rim. No flat colour slab.
             var bg = Stretch("Background", root);
             Fill(bg, CardColor, UiSprites.Rounded, 0.6f);
-
+            var wash = Rect("Wash", root, new Vector2(0f, 0.55f), Vector2.one, new Vector2(2f, 0f), new Vector2(-2f, -2f));
+            Fill(wash, new Color(1f, 1f, 1f, 0.07f), UiSprites.RoundedGradient, 0.7f).raycastTarget = false;
             var rim = Stretch("Rim", root);
-            Fill(rim, new Color(0.62f, 0.92f, 1f, 0.28f), UiSprites.Ring, 0.6f).raycastTarget = false;
+            Fill(rim, new Color(1f, 1f, 1f, 0.3f), UiSprites.Ring, 0.6f).raycastTarget = false;
+            var glint = Rect("Glint", root, new Vector2(0.08f, 1f), new Vector2(0.92f, 1f), new Vector2(0f, -3f), new Vector2(0f, -1f));
+            Fill(glint, new Color(1f, 1f, 1f, 0.35f), UiSprites.Rounded, 6f).raycastTarget = false;
             return root;
         }
 
         public static RectTransform Pill(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size, Color color)
         {
             var root = Box(name, parent, anchor, position, size);
-            Fill(root, color, UiSprites.Rounded, 1.2f).raycastTarget = false;
+            // Glass HUD chips: a see-through body, fully rounded ends and a fine bright rim.
+            float ppu = Mathf.Clamp(88f / Mathf.Max(1f, Mathf.Min(size.x, size.y)), 0.25f, 3f);
+            var body = Stretch("Body", root);
+            Fill(body, color, UiSprites.Rounded, ppu).raycastTarget = false;
+            var rim = Stretch("Rim", root);
+            Fill(rim, new Color(1f, 1f, 1f, 0.22f), UiSprites.Ring, ppu).raycastTarget = false;
             return root;
         }
 
@@ -266,55 +281,133 @@ namespace SquashBot.UI
             Gold
         }
 
+        /// <summary>
+        /// A button colour family: the face colour (tinted over a top-to-bottom gradient), its glow, and the dark shade its
+        /// label's soft shadow uses. Glass faces are frosted, see-through white instead of a colour.
+        /// </summary>
+        public struct ChunkyStyle
+        {
+            public Color face, lip, outline;
+            public bool glass;
+            public ChunkyStyle(string face, string glow, string shade, bool glass = false)
+            {
+                this.face = Hex(face);
+                lip = Hex(glow);
+                outline = Hex(shade);
+                this.glass = glass;
+            }
+        }
+
+        public static readonly ChunkyStyle CyanStyle = new ChunkyStyle("#22C3FF", "#22C3FF", "#05304E");
+        public static readonly ChunkyStyle GoldStyle = new ChunkyStyle("#FFB424", "#FFA51A", "#5C3200");
+        public static readonly ChunkyStyle PurpleStyle = new ChunkyStyle("#FFFFFF24", "#00000000", "#0A0820", glass: true);
+        public static readonly ChunkyStyle GreenStyle = new ChunkyStyle("#2FD07A", "#2FD07A", "#073A1E");
+        public static readonly ChunkyStyle RedStyle = new ChunkyStyle("#FF4F6A", "#FF4F6A", "#4E0A16");
+        public static readonly ChunkyStyle DarkStyle = new ChunkyStyle("#0A0A1499", "#00000000", "#05050C", glass: true);
+
+        /// <summary>A style from any colour (skills, worlds): that colour's face and glow, a deep shade of it for text.</summary>
+        public static ChunkyStyle StyleOf(Color c) => new ChunkyStyle { face = c, lip = c, outline = new Color(c.r * 0.22f, c.g * 0.2f, c.b * 0.3f, 1f) };
+
+        public static ChunkyStyle Style(ButtonKind kind) =>
+            kind == ButtonKind.Primary ? CyanStyle : kind == ButtonKind.Gold ? GoldStyle : kind == ButtonKind.Icon ? DarkStyle : PurpleStyle;
+
+        private static Color Hex(string hex)
+        {
+            ColorUtility.TryParseHtmlString(hex, out var c);
+            return c;
+        }
+
+        /// <summary>
+        /// A modern pressable surface inside the root: fully rounded (a pill, or a circle with the circle sprite), a soft
+        /// glow in its own colour beneath it, the face over a gentle top-to-bottom gradient, and a fine bright edge. Glass
+        /// styles are frosted see-through white with a brighter edge and no glow. Returns the face image (the button's
+        /// target graphic; put content under it). A ppu of 0 or less rounds the ends fully.
+        /// </summary>
+        public static Image Chunky(RectTransform root, ChunkyStyle s, float ppu = 0f, float lip = 0f, Sprite sprite = null)
+        {
+            bool circle = sprite == UiSprites.Circle;
+            float w = root.rect.width > 0f ? root.rect.width : root.sizeDelta.x;
+            float h = root.rect.height > 0f ? root.rect.height : root.sizeDelta.y;
+            if (ppu <= 0f) ppu = Mathf.Clamp(88f / Mathf.Max(1f, Mathf.Min(w, h)), 0.25f, 3f); // radius = half the height: pill ends
+            if (!s.glass)
+            {
+                var glow = Rect("Glow", root, Vector2.zero, Vector2.one, new Vector2(-26f, -34f), new Vector2(26f, 12f));
+                Fill(glow, new Color(s.lip.r, s.lip.g, s.lip.b, 0.42f), UiSprites.Shadow, 0.8f).raycastTarget = false;
+            }
+            else
+            {
+                var drop = Rect("Shadow", root, Vector2.zero, Vector2.one, new Vector2(-18f, -26f), new Vector2(18f, 6f));
+                Fill(drop, new Color(0f, 0f, 0.05f, 0.25f), UiSprites.Shadow, 0.8f).raycastTarget = false;
+            }
+            var face = Stretch("Face", root);
+            Sprite faceSprite = s.glass ? (circle ? UiSprites.Circle : UiSprites.Rounded) : (circle ? UiSprites.CircleGradient : UiSprites.RoundedGradient);
+            var image = Fill(face, s.face, faceSprite, circle ? 1f : ppu);
+            // A top sheen and a fine edge: light catching a polished (or frosted) surface.
+            var sheen = Rect("Sheen", face, new Vector2(circle ? 0.18f : 0f, 0.5f), new Vector2(circle ? 0.82f : 1f, 1f), new Vector2(3f, 0f), new Vector2(-3f, -2f));
+            Fill(sheen, new Color(1f, 1f, 1f, s.glass ? 0.07f : 0.16f), circle ? UiSprites.Circle : UiSprites.Rounded, circle ? 1f : ppu * 1.9f).raycastTarget = false;
+            Fill(Stretch("Edge", face), new Color(1f, 1f, 1f, s.glass ? 0.38f : 0.3f), UiSprites.Ring, circle ? 0.35f : ppu).raycastTarget = false;
+            return image;
+        }
+
+        private static readonly Dictionary<Color, Material> outlined = new Dictionary<Color, Material>();
+
+        /// <summary>The display font with a fine outline in the given colour and a soft shadow under it.</summary>
+        public static Material OutlinedTitle(Color colour)
+        {
+            if (outlined.TryGetValue(colour, out var m) && m != null) return m;
+            m = new Material(TitleFont.material) { name = "Title Outline " + ColorUtility.ToHtmlStringRGB(colour) };
+            m.EnableKeyword("OUTLINE_ON");
+            m.SetFloat("_OutlineWidth", 0.1f);
+            m.SetColor("_OutlineColor", new Color(colour.r, colour.g, colour.b, 0.8f));
+            m.SetFloat("_FaceDilate", 0.05f);
+            m.EnableKeyword("UNDERLAY_ON");
+            m.SetColor("_UnderlayColor", new Color(colour.r * 0.5f, colour.g * 0.5f, colour.b * 0.5f, 0.55f));
+            m.SetFloat("_UnderlayOffsetY", -0.7f);
+            m.SetFloat("_UnderlayDilate", 0.15f);
+            m.SetFloat("_UnderlaySoftness", 0.45f);
+            outlined[colour] = m;
+            return m;
+        }
+
+        private static Material softBody;
+
+        /// <summary>The body font with a soft drop shadow (modern button labels).</summary>
+        public static Material SoftBody
+        {
+            get
+            {
+                if (softBody != null) return softBody;
+                softBody = new Material(Font.material) { name = "Body Soft Shadow" };
+                softBody.EnableKeyword("UNDERLAY_ON");
+                softBody.SetColor("_UnderlayColor", new Color(0f, 0f, 0.08f, 0.45f));
+                softBody.SetFloat("_UnderlayOffsetY", -0.6f);
+                softBody.SetFloat("_UnderlaySoftness", 0.5f);
+                return softBody;
+            }
+        }
+
+        /// <summary>White display text with a fine outline (labels over pictures and the floor: skill names, badges, floating words).</summary>
+        public static TextMeshProUGUI OutlinedText(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size, string text, float fontSize, Color outline)
+        {
+            var t = TextBox(name, parent, anchor, position, size, text, fontSize, Color.white, title: true);
+            t.fontSharedMaterial = OutlinedTitle(outline);
+            return t;
+        }
+
         public static Button MakeButton(Transform parent, string text, ButtonKind kind, Vector2 anchor, Vector2 position, Vector2 size, Action onClick, float fontSize = 64f)
         {
             var root = Box("Button " + text, parent, anchor, position, size);
 
-            var shadow = Rect("Shadow", root, Vector2.zero, Vector2.one, new Vector2(-26f, -38f), new Vector2(26f, 14f));
-            Fill(shadow, new Color(0.05f, 0.03f, 0.15f, kind == ButtonKind.Primary || kind == ButtonKind.Gold ? 0.45f : 0.25f), UiSprites.Shadow, 0.8f).raycastTarget = false;
+            var style = Style(kind);
+            var image = Chunky(root, style);
+            var face = (RectTransform)image.transform;
 
-            var face = Stretch("Face", root);
-            Color fill, textColor;
-            switch (kind)
-            {
-                case ButtonKind.Primary:
-                    fill = Palette.UiCyan;
-                    textColor = TextDark;
-                    break;
-                case ButtonKind.Gold:
-                    fill = Palette.UiGold;
-                    textColor = TextDark;
-                    break;
-                case ButtonKind.Icon:
-                    fill = PillColor;
-                    textColor = Palette.UiText;
-                    break;
-                default:
-                    fill = new Color(0.62f, 0.62f, 1f, 0.2f);
-                    textColor = Palette.UiText;
-                    break;
-            }
-            var image = Fill(face, fill, UiSprites.Rounded, kind == ButtonKind.Icon ? 1.4f : 0.9f);
-
-            if (kind == ButtonKind.Primary || kind == ButtonKind.Gold)
-            {
-                // A soft highlight on the upper half reads as a glossy, pressable surface.
-                var gloss = Rect("Gloss", face, new Vector2(0f, 0.5f), Vector2.one, new Vector2(8f, 0f), new Vector2(-8f, -6f));
-                Fill(gloss, new Color(1f, 1f, 1f, 0.22f), UiSprites.Rounded, 1.4f).raycastTarget = false;
-            }
-            else
-            {
-                Fill(Stretch("Rim", face), new Color(1f, 1f, 1f, 0.3f), UiSprites.Ring, kind == ButtonKind.Icon ? 1.4f : 0.9f).raycastTarget = false;
-            }
-
-            var label = Text(face, text, fontSize, textColor);
-            if (kind == ButtonKind.Primary || kind == ButtonKind.Gold)
-            {
-                // Call-to-action buttons speak in the display font, like the logo.
-                label.font = TitleFont;
-                label.fontSharedMaterial = TitleFont.material;
-                label.fontStyle = Data.Loc.Current == Data.Language.Arabic ? FontStyles.Bold : FontStyles.Normal;
-            }
+            // A clean, heavy sans label in white with a soft shadow.
+            var label = Text(face, text, fontSize * 0.86f, Color.white, style: FontStyles.Bold);
+            label.fontSharedMaterial = SoftBody;
+            label.characterSpacing = 2f;
+            label.rectTransform.offsetMin = new Vector2(14f, 0f);
+            label.rectTransform.offsetMax = new Vector2(-14f, 0f);
 
             var button = root.gameObject.AddComponent<Button>();
             button.targetGraphic = image;

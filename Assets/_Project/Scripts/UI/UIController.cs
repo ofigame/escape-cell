@@ -282,7 +282,7 @@ namespace SquashBot.UI
             var card = UiFactory.Box("LevelCard", t, Bottom, new Vector2(0f, Ads.BannerReserve + 236f), new Vector2(940f, 420f));
             UiFactory.Fill(UiFactory.Rect("Shadow", card, Vector2.zero, Vector2.one, new Vector2(-30f, -44f), new Vector2(30f, 16f)),
                 new Color(0.03f, 0.02f, 0.1f, 0.55f), UiSprites.Shadow, 0.6f).raycastTarget = false;
-            UiFactory.Fill(card, new Color(0.11f, 0.1f, 0.26f, 0.78f), UiSprites.Rounded, 0.8f);
+            UiFactory.Fill(card, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 0.8f);
             var sheen = UiFactory.Rect("Sheen", card, new Vector2(0f, 0.6f), Vector2.one, new Vector2(12f, 0f), new Vector2(-12f, -10f));
             UiFactory.Fill(sheen, new Color(1f, 1f, 1f, 0.06f), UiSprites.Rounded, 1f).raycastTarget = false;
             UiFactory.Fill(UiFactory.Stretch("Rim", card), new Color(0.75f, 0.85f, 1f, 0.35f), UiSprites.Ring, 0.8f).raycastTarget = false;
@@ -301,7 +301,7 @@ namespace SquashBot.UI
 
             // The dock: garage, shop, map and the guide, as glossy orbs on a glass bar.
             var dock = UiFactory.Box("Dock", t, Bottom, new Vector2(0f, Ads.BannerReserve + 14f), new Vector2(1000f, 206f));
-            UiFactory.Fill(dock, new Color(0.08f, 0.07f, 0.2f, 0.72f), UiSprites.Rounded, 0.7f);
+            UiFactory.Fill(dock, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 0.7f);
             UiFactory.Fill(UiFactory.Stretch("Rim", dock), new Color(0.75f, 0.85f, 1f, 0.25f), UiSprites.Ring, 0.7f).raycastTarget = false;
             var items = new (string label, MenuArt.Icon icon, Color color, Action click)[]
             {
@@ -415,7 +415,7 @@ namespace SquashBot.UI
         {
             var tile = UiFactory.Box(boost.ToString(), card, Top, position, new Vector2(250f, 220f));
             tile.pivot = new Vector2(0.5f, 1f);
-            var view = new BoostView { boost = boost, bg = UiFactory.Fill(tile, new Color(0.12f, 0.1f, 0.26f, 0.9f), UiSprites.Rounded, 1.2f) };
+            var view = new BoostView { boost = boost, bg = UiFactory.Fill(tile, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 1.2f) };
             view.ring = UiFactory.Fill(UiFactory.Stretch("Ring", tile), Palette.UiGold, UiSprites.Ring, 1.2f);
             view.ring.raycastTarget = false;
             var name = UiFactory.TextBox("Name", tile, Top, new Vector2(0f, -22f), new Vector2(230f, 110f), Loc.T("shop." + boost), 32f, Palette.UiText);
@@ -663,7 +663,7 @@ namespace SquashBot.UI
         {
             settingValues[kind].text = Loc.T(on ? "on" : "off");
             settingValues[kind].color = on ? Palette.UiCyan : new Color(1f, 1f, 1f, 0.5f);
-            settingFaces[kind].color = on ? new Color(0.62f, 0.62f, 1f, 0.28f) : new Color(0f, 0f, 0f, 0.25f);
+            settingFaces[kind].color = on ? UiFactory.GreenStyle.face : UiFactory.DarkStyle.face;
         }
 
         public void ShowSettings()
@@ -733,7 +733,7 @@ namespace SquashBot.UI
 
             // Hover escape status (bottom centre).
             hoverPill = UiFactory.Pill("Hover", t, Bottom, new Vector2(0f, 60f), new Vector2(480f, 96f), UiFactory.PillColor);
-            hoverFace = hoverPill.GetComponent<Image>();
+            hoverFace = hoverPill.Find("Body").GetComponent<Image>();
             hoverText = UiFactory.Text(hoverPill, "", 42f, Palette.UiText);
             hoverPill.gameObject.SetActive(false);
 
@@ -868,13 +868,18 @@ namespace SquashBot.UI
 
         private void BuildIntro(Transform root)
         {
-            intro = UiFactory.Pill("Intro", root, Middle, new Vector2(0f, 430f), new Vector2(960f, 250f), new Color(0.12f, 0.11f, 0.28f, 0.94f));
+            intro = UiFactory.Pill("Intro", root, Middle, new Vector2(0f, 430f), new Vector2(960f, 250f), new Color(0.04f, 0.04f, 0.09f, 0.66f) /* glass */);
             UiFactory.Fill(UiFactory.Stretch("Rim", intro), new Color(0.62f, 0.92f, 1f, 0.35f), UiSprites.Ring, 1.2f).raycastTarget = false;
             introGroup = intro.gameObject.AddComponent<CanvasGroup>();
             introGroup.blocksRaycasts = false;
-            introTitle = UiFactory.TextBox("Title", intro, Top, new Vector2(0f, -22f), new Vector2(900f, 60f), "", 40f, Palette.UiCyan);
-            introTitle.characterSpacing = 8f;
-            introText = UiFactory.TextBox("Text", intro, Bottom, new Vector2(0f, 22f), new Vector2(910f, 150f), "", 60f, Color.white, title: true);
+            // The title on a gold tab across the top edge, the message in big outlined letters below it.
+            var tab = UiFactory.Box("Tab", intro, Top, new Vector2(0f, 34f), new Vector2(560f, 76f));
+            UiFactory.Chunky(tab, UiFactory.GoldStyle).raycastTarget = false;
+            introTitle = UiFactory.OutlinedText("Title", tab, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(520f, 64f), "", 38f, UiFactory.GoldStyle.outline);
+            introTitle.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            introTitle.characterSpacing = 6f;
+            introText = UiFactory.TextBox("Text", intro, Bottom, new Vector2(0f, 26f), new Vector2(910f, 160f), "", 60f, Color.white, title: true);
+            introText.fontSharedMaterial = UiFactory.OutlinedTitle(new Color(0.07f, 0.05f, 0.2f));
             // Long messages wrap onto two lines instead of shrinking to an unreadable size.
             introText.textWrappingMode = TextWrappingModes.Normal;
             introText.fontSizeMin = 34f;
@@ -892,7 +897,7 @@ namespace SquashBot.UI
 
         private void BuildCallout(Transform root)
         {
-            callout = UiFactory.Pill("Callout", root, Middle, Vector2.zero, new Vector2(600f, 120f), new Color(0.1f, 0.08f, 0.22f, 0.95f));
+            callout = UiFactory.Pill("Callout", root, Middle, Vector2.zero, new Vector2(600f, 120f), new Color(0.04f, 0.04f, 0.09f, 0.66f) /* glass */);
             callout.pivot = new Vector2(0.5f, 0f);
             UiFactory.Fill(UiFactory.Stretch("Rim", callout), Palette.UiGold, UiSprites.Ring, 1.2f).raycastTarget = false;
             var tail = UiFactory.Box("Tail", callout, new Vector2(0.5f, 0f), new Vector2(0f, -14f), new Vector2(34f, 34f));
@@ -900,6 +905,7 @@ namespace SquashBot.UI
             tail.localRotation = Quaternion.Euler(0f, 0f, 45f);
             UiFactory.Fill(tail, Palette.UiGold).raycastTarget = false;
             calloutText = UiFactory.Text(callout, "", 52f, Palette.UiGold, title: true);
+            calloutText.fontSharedMaterial = UiFactory.OutlinedTitle(new Color(0.25f, 0.13f, 0.02f));
             callout.gameObject.SetActive(false);
         }
 
@@ -1202,6 +1208,7 @@ namespace SquashBot.UI
         public void Float(Vector3 screenPos, string text, Color color, float size = 64f)
         {
             var label = UiFactory.Text(canvas.transform, text, size, color, title: true);
+            label.fontSharedMaterial = UiFactory.OutlinedTitle(new Color(color.r * 0.25f, color.g * 0.2f, color.b * 0.3f));
             var rt = label.rectTransform;
             rt.anchorMin = rt.anchorMax = Middle;
             rt.sizeDelta = new Vector2(700f, 140f);

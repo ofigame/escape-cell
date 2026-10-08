@@ -47,7 +47,7 @@ namespace SquashBot.UI
             for (int i = 0; i < rows.Length; i++)
             {
                 var row = UiFactory.Box("Row" + i, card, new Vector2(0.5f, 1f), new Vector2(0f, -270f - i * 120f), new Vector2(780f, 104f));
-                UiFactory.Fill(row, new Color(0.12f, 0.1f, 0.26f, 0.9f), UiSprites.Rounded, 1.4f).raycastTarget = false;
+                UiFactory.Fill(row, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 1.4f).raycastTarget = false;
                 rows[i] = UiFactory.TextBox("Text", row, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(740f, 90f), "", 38f, Palette.UiText);
                 rows[i].rectTransform.pivot = new Vector2(0.5f, 0.5f);
             }

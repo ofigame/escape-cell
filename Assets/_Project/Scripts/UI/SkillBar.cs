@@ -14,7 +14,7 @@ namespace SquashBot.UI
     /// </summary>
     public class SkillBar : MonoBehaviour
     {
-        private const float Size = 150f, Gap = 58f, IconBase = 92f;
+        private const float Size = 150f, Gap = 64f, IconBase = 92f;
 
         public event Action<PowerUpType> Pressed;
 
@@ -60,24 +60,27 @@ namespace SquashBot.UI
             var s = new Slot { type = t };
             s.root = UiFactory.Box(t.ToString(), root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(Size, Size));
             s.root.pivot = new Vector2(0.5f, 0.5f);
-            var bg = UiFactory.Fill(s.root, ColorOf(t), UiSprites.Circle);
-            UiFactory.Fill(UiFactory.Stretch("Rim", s.root), new Color(1f, 1f, 1f, 0.85f), UiSprites.Ring, 0.35f).raycastTarget = false;
-            var icon = UiFactory.Box("Icon", s.root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(IconBase, IconBase));
+            // A modern round button: a soft glow in the skill's colour, a gradient face and a fine bright edge.
+            var c = ColorOf(t);
+            var style = UiFactory.StyleOf(c);
+            var bg = UiFactory.Chunky(s.root, style, 1f, 0f, UiSprites.Circle);
+            var icon = UiFactory.Box("Icon", s.root, new Vector2(0.5f, 0.5f), new Vector2(0f, 6f), new Vector2(IconBase, IconBase));
             icon.pivot = new Vector2(0.5f, 0.5f);
-            icon.localScale = Vector3.one * (Size / IconBase);
+            icon.localScale = Vector3.one * (Size / IconBase * 0.92f);
             DrawIcon(icon, t);
-            var plate = UiFactory.Box("NamePlate", s.root, new Vector2(0.5f, 0f), new Vector2(0f, -4f), new Vector2(190f, 46f));
-            plate.pivot = new Vector2(0.5f, 1f);
-            UiFactory.Fill(plate, new Color(0.08f, 0.07f, 0.16f, 0.82f), UiSprites.Rounded, 8f).raycastTarget = false;
-            var name = UiFactory.TextBox("Name", s.root, new Vector2(0.5f, 0f), new Vector2(0f, -6f), new Vector2(200f, 44f), Loc.T("skillName." + t), 26f, Color.white, title: true);
-            name.rectTransform.pivot = new Vector2(0.5f, 1f);
-            name.raycastTarget = false;
-            var badge = UiFactory.Box("Badge", s.root, new Vector2(1f, 1f), new Vector2(8f, 8f), new Vector2(60f, 60f));
+            // The name on a small glass tag across the bottom of the button, edged in the skill's colour.
+            var ribbon = UiFactory.Box("Ribbon", s.root, new Vector2(0.5f, 0f), new Vector2(0f, -20f), new Vector2(176f, 48f));
+            ribbon.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(UiFactory.Stretch("RibbonFace", ribbon), new Color(0.03f, 0.03f, 0.08f, 0.72f), UiSprites.Rounded, 1.8f).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Stretch("RibbonRim", ribbon), new Color(c.r, c.g, c.b, 0.7f), UiSprites.Ring, 1.8f).raycastTarget = false;
+            var name = UiFactory.OutlinedText("Name", ribbon, new Vector2(0.5f, 0.5f), new Vector2(0f, 1f), new Vector2(166f, 44f), Loc.T("skillName." + t), 28f, new Color(0.05f, 0.04f, 0.14f));
+            name.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            // How many are left: a red badge with a white number.
+            var badge = UiFactory.Box("Badge", s.root, new Vector2(1f, 1f), new Vector2(14f, 14f), new Vector2(62f, 62f));
             badge.pivot = new Vector2(1f, 1f);
-            UiFactory.Fill(badge, new Color(0.12f, 0.1f, 0.24f, 0.95f), UiSprites.Circle).raycastTarget = false;
-            s.count = UiFactory.TextBox("Count", badge, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(60f, 60f), "", 36f, Color.white, title: true);
+            UiFactory.Fill(UiFactory.Stretch("BadgeFace", badge), new Color(1f, 0.3f, 0.36f, 1f), UiSprites.Circle).raycastTarget = false;
+            s.count = UiFactory.OutlinedText("Count", badge, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(60f, 56f), "", 38f, new Color(0.3f, 0.02f, 0.08f));
             s.count.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            s.count.raycastTarget = false;
             var button = s.root.gameObject.AddComponent<Button>();
             button.targetGraphic = bg;
             button.onClick.AddListener(() => Pressed?.Invoke(t));

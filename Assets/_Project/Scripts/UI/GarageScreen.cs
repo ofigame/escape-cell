@@ -148,7 +148,7 @@ namespace SquashBot.UI
                 var c = items[i];
                 int col = i % columns, row = i / columns;
                 var tile = UiFactory.Box(c.id, grid, new Vector2(0f, 1f), new Vector2(col * (cell + gap) + 12f, -row * (cell + gap) - 4f), new Vector2(cell, cell));
-                var bg = UiFactory.Fill(tile, new Color(0.12f, 0.1f, 0.26f, 0.9f), UiSprites.Rounded, 1.2f);
+                var bg = UiFactory.Fill(tile, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 1.2f);
                 var swatch = UiFactory.Box("Swatch", tile, new Vector2(0.5f, 1f), new Vector2(0f, -16f), new Vector2(96f, 96f));
                 var sc = c.color;
                 float m = Mathf.Max(1f, Mathf.Max(sc.r, Mathf.Max(sc.g, sc.b)));

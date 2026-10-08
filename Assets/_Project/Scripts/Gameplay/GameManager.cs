@@ -2865,6 +2865,14 @@ namespace SquashBot.Gameplay
         private List<(BriefShot shot, string text)> BriefSteps()
         {
             var steps = new List<(BriefShot, string)>();
+            if (level.mission == MissionType.Hunt)
+            {
+                // The core loop, told the same way every time: the crates, the crowd, then the monster.
+                steps.Add((BriefShot.Block, Loc.T("brief.huntCrates")));
+                steps.Add((BriefShot.HammerHit, Loc.T("brief.huntCrowd")));
+                steps.Add((BriefShot.Stomp, Loc.T("brief.huntMonster")));
+                return steps;
+            }
             // The card opens with vanG: the threat and why it built this cell.
             if (Loc.Has(CardKey("vang"))) steps.Add((BriefShot.Warden, Loc.T("story.warden") + ": " + Loc.T(CardKey("vang"))));
             switch (level.mission)

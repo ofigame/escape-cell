@@ -15,6 +15,10 @@ namespace SquashBot.UI
         public static Sprite Shadow => shadow != null ? shadow : shadow = Make(ShadowAlpha, Radius + 20);
         public static Sprite Circle => circle != null ? circle : circle = Make(CircleAlpha, 0);
         public static Sprite Star => star != null ? star : star = MakeStar();
+        /// <summary>A rounded fill that is brighter at the top than the bottom (tint it: a modern gradient button).</summary>
+        public static Sprite RoundedGradient => roundedGradient != null ? roundedGradient : roundedGradient = Make(FillAlpha, Radius, true);
+        public static Sprite CircleGradient => circleGradient != null ? circleGradient : circleGradient = Make(CircleAlpha, 0, true);
+        private static Sprite roundedGradient, circleGradient;
 
         private delegate float AlphaFn(float signedDistance);
 
@@ -70,7 +74,7 @@ namespace SquashBot.UI
             return inside;
         }
 
-        private static Sprite Make(AlphaFn fn, int border)
+        private static Sprite Make(AlphaFn fn, int border, bool gradient = false)
         {
             var tex = new Texture2D(Size, Size, TextureFormat.RGBA32, false)
             {
@@ -88,7 +92,8 @@ namespace SquashBot.UI
                 for (int x = 0; x < Size; x++)
                 {
                     float d = RoundedRectDistance(x + 0.5f, y + 0.5f, pad, r);
-                    px[y * Size + x] = new Color32(255, 255, 255, (byte)(fn(d) * 255f));
+                    byte g = gradient ? (byte)(255f * Mathf.Lerp(0.74f, 1f, Mathf.SmoothStep(0f, 1f, y / (float)(Size - 1)))) : (byte)255;
+                    px[y * Size + x] = new Color32(g, g, g, (byte)(fn(d) * 255f));
                 }
             tex.SetPixels32(px);
             tex.Apply(false, true);

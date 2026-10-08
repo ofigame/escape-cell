@@ -62,7 +62,7 @@ namespace SquashBot.UI
 
             // The stage: a soft glowing well the 3D scene sits in.
             var well = UiFactory.Box("Well", card, new Vector2(0.5f, 1f), new Vector2(0f, -140f), new Vector2(860f, 820f));
-            UiFactory.Fill(well, new Color(0.08f, 0.07f, 0.2f, 0.85f), UiSprites.Rounded, 0.8f).raycastTarget = false;
+            UiFactory.Fill(well, new Color(0.04f, 0.04f, 0.09f, 0.66f) /* glass */, UiSprites.Rounded, 0.8f).raycastTarget = false;
             var viewRect = UiFactory.Box("View", well, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(820f, 820f));
             viewRect.pivot = new Vector2(0.5f, 0.5f);
             view = viewRect.gameObject.AddComponent<RawImage>();
