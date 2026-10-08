@@ -19,7 +19,7 @@ namespace SquashBot.Visual
             {
                 case 1: return (new Color(0.2f, 0.62f, 0.66f), new Color(0.96f, 0.86f, 0.4f), new Color(1f, 0.95f, 0.5f));
                 case 2: return (new Color(0.72f, 0.3f, 0.26f), new Color(0.78f, 0.8f, 0.84f), new Color(0.5f, 1f, 0.9f));
-                case 3: return (new Color(0.56f, 0.38f, 0.86f), new Color(1f, 0.68f, 0.82f), new Color(0.75f, 1f, 1f));
+                case 3: return (new Color(0.5f, 0.3f, 0.86f), new Color(1f, 0.55f, 0.35f), new Color(0.55f, 1f, 1f));
                 default: return (Palette.RobotBody, Palette.RobotLight, Palette.RobotEye);
             }
         }
@@ -58,15 +58,23 @@ namespace SquashBot.Visual
                 }
                 case 3: // Zip: slim and tall
                 {
-                    Pair(visual, "Leg", new Vector3(0.06f, 0.09f, 0f), new Vector3(0.06f, 0.18f, 0.08f), 0.025f, body);
-                    Pair(visual, "Foot", new Vector3(0.06f, 0.02f, 0.03f), new Vector3(0.08f, 0.04f, 0.14f), 0.012f, dark);
-                    Shapes.Rounded("Body", visual, new Vector3(0f, 0.25f, 0f), new Vector3(0.22f, 0.16f, 0.18f), 0.06f, light);
-                    Pair(visual, "Arm", new Vector3(0.14f, 0.25f, 0f), new Vector3(0.045f, 0.16f, 0.06f), 0.02f, body);
-                    Shapes.Rounded("Head", visual, new Vector3(0f, 0.57f, 0f), new Vector3(0.38f, 0.46f, 0.36f), 0.15f, body);
-                    Shapes.Rounded("Visor", visual, new Vector3(0f, 0.58f, 0.18f), new Vector3(0.3f, 0.24f, 0.03f), 0.08f, dark);
-                    Pair(visual, "Hero_Ear", new Vector3(0.21f, 0.62f, 0f), new Vector3(0.04f, 0.14f, 0.08f), 0.02f, light);
-                    var l = Shapes.Primitive(PrimitiveType.Sphere, "EyeL", visual, new Vector3(-0.07f, 0.59f, 0.2f), new Vector3(0.1f, 0.12f, 0.03f), eye).transform;
-                    var r = Shapes.Primitive(PrimitiveType.Sphere, "EyeR", visual, new Vector3(0.07f, 0.59f, 0.2f), new Vector3(0.1f, 0.12f, 0.03f), eye).transform;
+                    // A sleek racer: a squared-off head with a crest fin, a tall torso with a glowing core, twin jets on
+                    // its back and thin quick legs. Hard edges, so it reads as a machine from the far play camera.
+                    Pair(visual, "Leg", new Vector3(0.065f, 0.09f, 0f), new Vector3(0.065f, 0.18f, 0.09f), 0.02f, dark);
+                    Pair(visual, "Foot", new Vector3(0.065f, 0.02f, 0.035f), new Vector3(0.09f, 0.045f, 0.16f), 0.012f, body);
+                    Shapes.Rounded("Body", visual, new Vector3(0f, 0.28f, 0f), new Vector3(0.26f, 0.22f, 0.2f), 0.035f, light);
+                    Shapes.Rounded("Hero_Chest", visual, new Vector3(0f, 0.29f, 0.1f), new Vector3(0.17f, 0.12f, 0.02f), 0.02f, body);
+                    Shapes.Primitive(PrimitiveType.Sphere, "Hero_Core", visual, new Vector3(0f, 0.29f, 0.115f), new Vector3(0.06f, 0.06f, 0.02f), eye);
+                    Pair(visual, "Arm", new Vector3(0.165f, 0.27f, 0f), new Vector3(0.05f, 0.17f, 0.07f), 0.018f, dark);
+                    Pair(visual, "Hero_Hand", new Vector3(0.165f, 0.17f, 0f), new Vector3(0.065f, 0.05f, 0.08f), 0.015f, body);
+                    Pair(visual, "Hero_Jet", new Vector3(0.07f, 0.3f, -0.13f), new Vector3(0.08f, 0.18f, 0.08f), 0.03f, dark);
+                    Pair(visual, "Hero_Flame", new Vector3(0.07f, 0.19f, -0.13f), new Vector3(0.05f, 0.05f, 0.05f), 0.02f, eye);
+                    Shapes.Rounded("Head", visual, new Vector3(0f, 0.55f, 0f), new Vector3(0.36f, 0.3f, 0.32f), 0.06f, body);
+                    Shapes.Rounded("Visor", visual, new Vector3(0f, 0.55f, 0.155f), new Vector3(0.3f, 0.17f, 0.03f), 0.04f, dark);
+                    Shapes.Rounded("Hero_Crest", visual, new Vector3(0f, 0.73f, -0.02f), new Vector3(0.05f, 0.08f, 0.26f), 0.02f, light);
+                    Pair(visual, "Hero_Ear", new Vector3(0.195f, 0.56f, 0f), new Vector3(0.04f, 0.12f, 0.12f), 0.015f, body);
+                    var l = Shapes.Rounded("EyeL", visual, new Vector3(-0.072f, 0.56f, 0.172f), new Vector3(0.09f, 0.1f, 0.03f), 0.04f, eye).transform; // baked size: the blink scales eyes from 1
+                    var r = Shapes.Rounded("EyeR", visual, new Vector3(0.072f, 0.56f, 0.172f), new Vector3(0.09f, 0.1f, 0.03f), 0.04f, eye).transform;
                     return (l, r);
                 }
                 default: // Classic

@@ -47,7 +47,7 @@ namespace SquashBot.Gameplay
         /// <summary>Laser gates: each beam (low, then high) burns this long, with a short blink before it switches.</summary>
         private const float LaserPhase = 1.5f;
         /// <summary>Obstacle patterns a course picks from (see Plan).</summary>
-        private const int PatternCount = 18;
+        private const int PatternCount = 22;
 
         /// <summary>A coin was grabbed at this world position.</summary>
         public event Action<Vector3> CoinCollected;
@@ -130,7 +130,11 @@ namespace SquashBot.Gameplay
             /// <summary>A gate of two beams across every lane taking turns: jump the low one, slide under the high one.</summary>
             Laser,
             /// <summary>A heavy ball on a rope swinging across the lanes: pass where it isn't, or jump it.</summary>
-            Swing
+            Swing,
+            /// <summary>A press over one lane that slams down and rises again: pass while it is up, or change lanes.</summary>
+            Crusher,
+            /// <summary>A spinning blade sliding along the floor from lane to lane: jump it or keep out of its way.</summary>
+            Saw
         }
 
         private class Obstacle
@@ -145,6 +149,7 @@ namespace SquashBot.Gameplay
             public float X(float time) =>
                 kind == ObstacleKind.Mover ? Mathf.Sin(time * 1.6f + phase) * LaneWidth
                 : kind == ObstacleKind.Swing ? Mathf.Sin(time * 1.9f + phase) * LaneWidth * 1.15f
+                : kind == ObstacleKind.Saw ? Mathf.Sin(time * 2.4f + phase) * LaneWidth
                 : LaneX(lane);
         }
 
@@ -433,11 +438,11 @@ namespace SquashBot.Gameplay
                     continue;
                 }
                 // Early on only the gentle patterns; the full set from a third of the way in.
-                // On roads a new kind of obstacle joins every 3 levels: coins, holes and blocks first; hurdles from level 4,
-                // full gaps from 7, bars 10, sliding blocks 13, zigzags 16, jump pads 19, pickups 22, rollers 25, walls 28,
-                // spinners 31, laser gates 34, swinging balls 37, jump-and-slide 40, narrow passes 43, double rollers 46.
+                // On roads a new kind of obstacle joins every 2 levels: coins, holes and blocks first, then hurdles, full gaps,
+                // bars, sliding blocks, zigzags, jump pads, pickups, rollers, walls, spinners, laser gates, swinging balls,
+                // jump-and-slide, narrow passes, double rollers, presses, saw blades, press rows and gauntlets (all by level 36).
                 // Bonus tunnels open up as they go.
-                int kinds = roadMode ? Mathf.Clamp(3 + roadLevel / 3, 3, PatternCount) : (p < 0.1f ? 4 : p < 0.2f ? 8 : p < 0.35f ? 12 : PatternCount);
+                int kinds = roadMode ? Mathf.Clamp(4 + roadLevel / 2, 4, PatternCount) : (p < 0.1f ? 4 : p < 0.2f ? 8 : p < 0.35f ? 12 : PatternCount);
                 // Never the same pattern twice in a row (or one back), and now and then one of the newest kinds, so a
                 // new obstacle is really met and the road keeps changing.
                 int pattern, tries = 0;
@@ -588,6 +593,40 @@ namespace SquashBot.Gameplay
                         break;
                     }
 
+                    case 18: // presses over two lanes slamming in turn: time the way through, coins in the third lane
+                    {
+                        int free = rng.Next(Lanes);
+                        int n = 0;
+                        for (int l = 0; l < Lanes; l++)
+                            if (l != free) { obstaclePlan.Add((ObstacleKind.Crusher, l, row + n * 3)); n++; }
+                        CoinLine(free, row - 1, 6);
+                        row += 6;
+                        break;
+                    }
+
+                    case 19: // a saw blade sliding across the lanes: jump it as it passes
+                        obstaclePlan.Add((ObstacleKind.Saw, 1, row));
+                        CoinArc(rng.Next(Lanes), row, 1.3f);
+                        row += 3;
+                        break;
+
+                    case 20: // a press in every lane, one after another: run the gaps between the slams
+                        for (int l = 0; l < Lanes; l++) obstaclePlan.Add((ObstacleKind.Crusher, (l + rng.Next(Lanes)) % Lanes, row + l * 4));
+                        CoinLine(rng.Next(Lanes), row + 1, 8);
+                        row += 11;
+                        break;
+
+                    case 21: // a gauntlet: a saw, then a hurdle, then a press — the pieces met so far, back to back
+                    {
+                        obstaclePlan.Add((ObstacleKind.Saw, 1, row));
+                        obstaclePlan.Add((ObstacleKind.Hurdle, 1, row + 5));
+                        int cl = rng.Next(Lanes);
+                        obstaclePlan.Add((ObstacleKind.Crusher, cl, row + 10));
+                        CoinLine((cl + 1) % Lanes, row + 8, 4);
+                        row += 12;
+                        break;
+                    }
+
                     default: // a pickup: magnet or shield (a couple of each per run), else a coin line
                     {
                         int pl = rng.Next(Lanes);
@@ -668,15 +707,40 @@ namespace SquashBot.Gameplay
                     }
                     r += len;
                 }
-                if (rng.Next(2) == 0)
-                {
-                    // A hill (up then down) under whatever comes next.
-                    int len = 18 + rng.Next(16);
-                    float amp = 0.6f + (float)rng.NextDouble() * 1.4f;
-                    for (int i = 0; i < len && r + i < straightFrom; i++)
-                        height[r + i] = amp * (1f - Mathf.Cos(i / (float)len * Mathf.PI * 2f)) * 0.5f;
-                }
                 r += 8 + rng.Next(16);
+            }
+
+            // The ground rises and falls on its own, through the turns too: hills to crest, valleys to dive into,
+            // roller-coaster waves and long drops that climb back out. Bigger on later roads; never steeper than
+            // about 25 degrees, and level again at the start and the end.
+            float grow = roadMode ? Mathf.Clamp01(roadLevel / 120f) : 0.5f;
+            int h0 = roadMode ? 10 : 24;
+            while (h0 < straightFrom - 12)
+            {
+                int shape = rng.Next(4);
+                float amp = Mathf.Lerp(1.2f, 4.2f, grow) * (0.6f + (float)rng.NextDouble() * 0.6f);
+                int len = Mathf.Max(18, Mathf.RoundToInt(amp * 9f)) + rng.Next(10);
+                if (shape == 2) len = Mathf.Max(len, 30);
+                if (shape == 3) len = Mathf.Max(len + 14, 36);
+                if (h0 + len >= straightFrom) break; // only whole shapes: the ground is level again before the end
+                for (int i = 0; i < len && h0 + i < straightFrom; i++)
+                {
+                    float t = i / (float)len;
+                    float hgt;
+                    switch (shape)
+                    {
+                        case 0: hgt = amp * (1f - Mathf.Cos(t * Mathf.PI * 2f)) * 0.5f; break;                  // a hill
+                        case 1: hgt = -amp * (1f - Mathf.Cos(t * Mathf.PI * 2f)) * 0.5f; break;                 // a valley
+                        case 2: hgt = amp * 0.55f * (1f - Mathf.Cos(t * Mathf.PI * 6f)) * 0.5f; break;          // three waves
+                        default:                                                                               // a long drop, a run along the bottom, the climb out
+                            hgt = t < 0.35f ? -amp * Mathf.SmoothStep(0f, 1f, t / 0.35f)
+                                : t < 0.65f ? -amp
+                                : -amp * (1f - Mathf.SmoothStep(0f, 1f, (t - 0.65f) / 0.35f));
+                            break;
+                    }
+                    height[h0 + i] = hgt;
+                }
+                h0 += len + 4 + rng.Next(roadMode ? Mathf.RoundToInt(Mathf.Lerp(14f, 4f, grow)) : 10);
             }
 
             centers = new Vector3[n];
@@ -1031,10 +1095,58 @@ namespace SquashBot.Gameplay
                     Shapes.Primitive(PrimitiveType.Sphere, "Ball", pivot, new Vector3(0f, -SwingRope, 0f), Vector3.one * 0.8f, blockMat);
                     break;
                 }
+                case ObstacleKind.Crusher:
+                {
+                    // A frame over the lane and a heavy striped press hanging in it.
+                    foreach (float s in new[] { -1f, 1f })
+                        Shapes.Rounded("Post", go, new Vector3(s * LaneWidth * 0.52f, CrusherTop * 0.5f + 0.2f, 0f), new Vector3(0.12f, CrusherTop + 0.4f, 0.16f), 0.04f, stripeMat);
+                    Shapes.Rounded("Beam", go, new Vector3(0f, CrusherTop + 0.4f, 0f), new Vector3(LaneWidth * 1.16f, 0.14f, 0.2f), 0.04f, stripeMat);
+                    var press = new GameObject("Press").transform;
+                    press.SetParent(go, false);
+                    Shapes.Rounded("Block", press, new Vector3(0f, 0.3f, 0f), new Vector3(LaneWidth * 0.9f, 0.6f, 0.8f), 0.08f, blockMat);
+                    for (int i = 0; i < 3; i++)
+                        Shapes.Rounded("Stripe", press, new Vector3(-0.3f + i * 0.3f, 0.3f, -0.41f), new Vector3(0.12f, 0.5f, 0.02f), 0.02f, hurdleMat)
+                            .transform.localRotation = Quaternion.Euler(0f, 0f, 35f);
+                    Shapes.Rounded("Rod", press, new Vector3(0f, 0.6f + CrusherTop * 0.5f, 0f), new Vector3(0.12f, CrusherTop, 0.12f), 0.04f, stripeMat);
+                    o.ringMaterial = MaterialFactory.CreateTransparent(new Color(1f, 0.3f, 0.35f, 0.4f), Palette.TileWarningGlow * 0.4f);
+                    o.ring = Shapes.Rounded("Warning", go, new Vector3(0f, 0.04f, 0f), new Vector3(LaneWidth * 0.9f, 0.02f, 0.8f), 0.04f, o.ringMaterial).transform;
+                    break;
+                }
+                case ObstacleKind.Saw:
+                {
+                    // A blade on edge, spinning, with a glowing rim and a little sled under it.
+                    Shapes.Rounded("Sled", go, new Vector3(0f, 0.04f, 0f), new Vector3(0.5f, 0.08f, 0.5f), 0.03f, stripeMat);
+                    var blade = new GameObject("Blade").transform;
+                    blade.SetParent(go, false);
+                    blade.localPosition = new Vector3(0f, 0.36f, 0f);
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Disc", blade, Vector3.zero, new Vector3(0.66f, 0.03f, 0.66f), MaterialFactory.Create(new Color(0.8f, 0.82f, 0.88f), new Color(0.2f, 0.2f, 0.25f)))
+                        .transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                    for (int i = 0; i < 8; i++)
+                    {
+                        float a = i * Mathf.PI / 4f;
+                        Shapes.Rounded("Tooth", blade, new Vector3(0f, Mathf.Sin(a) * 0.34f, Mathf.Cos(a) * 0.34f), new Vector3(0.04f, 0.1f, 0.1f), 0.01f, barMat)
+                            .transform.localRotation = Quaternion.Euler(-a * Mathf.Rad2Deg, 0f, 0f);
+                    }
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Hub", blade, Vector3.zero, new Vector3(0.16f, 0.06f, 0.16f), barMat)
+                        .transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                    break;
+                }
             }
             obstacles.Add(o);
             PlaceObstacle(o);
         }
+
+        /// <summary>How high the crusher's press hangs over the lane right now (0 = slammed onto the floor).</summary>
+        private float CrusherHeight(Obstacle o)
+        {
+            float u = Mathf.Repeat(time / CrusherPeriod + o.phase, 1f);
+            if (u < 0.5f) return CrusherTop;                                   // up: the way is open
+            if (u < 0.6f) return Mathf.Lerp(CrusherTop, 0f, (u - 0.5f) / 0.1f * ((u - 0.5f) / 0.1f)); // slamming down
+            if (u < 0.75f) return 0f;                                         // down
+            return Mathf.Lerp(0f, CrusherTop, (u - 0.75f) / 0.25f);           // rising again
+        }
+
+        private const float CrusherTop = 1.7f, CrusherPeriod = 1.9f;
 
         private void PlaceObstacle(Obstacle o)
         {
@@ -1066,6 +1178,21 @@ namespace SquashBot.Gameplay
             {
                 var armT = o.go.Find("Arm");
                 if (armT != null) armT.localRotation = Quaternion.Euler(0f, SpinnerAngle(o) * Mathf.Rad2Deg, 0f);
+            }
+            if (o.kind == ObstacleKind.Crusher)
+            {
+                float h = CrusherHeight(o);
+                var press = o.go.Find("Press");
+                if (press != null) press.localPosition = new Vector3(0f, h, 0f);
+                // The floor under it glows red as the press is about to come down.
+                float u = Mathf.Repeat(time / CrusherPeriod + o.phase, 1f);
+                float warn = u > 0.35f && u < 0.75f ? 0.25f + 0.5f * Mathf.Abs(Mathf.Sin(time * 18f)) : 0.08f;
+                if (o.ringMaterial != null) MaterialFactory.SetColors(o.ringMaterial, new Color(1f, 0.3f, 0.35f, warn), Palette.TileWarningGlow * warn);
+            }
+            if (o.kind == ObstacleKind.Saw)
+            {
+                var blade = o.go.Find("Blade");
+                if (blade != null) blade.localRotation = Quaternion.Euler(time * 720f, 0f, 0f);
             }
             if (o.kind == ObstacleKind.Drop) oy = kind == Kind.Surf ? 0.4f + Mathf.Sin(time * 2f + o.phase) * 0.05f : 0.5f + o.y;
             if (o.kind == ObstacleKind.Magnet || o.kind == ObstacleKind.Shield) oy = Mathf.Sin(time * 3f + o.phase) * 0.08f;
@@ -1500,6 +1627,12 @@ namespace SquashBot.Gameplay
                         if (Mathf.Abs(bx - x) < 0.6f && y < by + 0.3f && robotTop > by - 0.4f) Hit(o);
                         break;
                     }
+                    case ObstacleKind.Crusher:
+                        if (dz < 0.45f && dx < 0.6f && CrusherHeight(o) < robotTop - 0.05f) Hit(o);
+                        break;
+                    case ObstacleKind.Saw:
+                        if (dz < 0.45f && dx < 0.55f && y < 0.5f) Hit(o);
+                        break;
                     case ObstacleKind.Pad:
                         if (dz < 0.5f && dx < 0.55f && y < 0.2f && vy <= 0.01f)
                         {

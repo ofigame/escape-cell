@@ -295,11 +295,7 @@ namespace SquashBot.UI
 
             // The level card: a frosted glass panel with the world, the level, its mission and the big PLAY button.
             var card = UiFactory.Box("LevelCard", t, Bottom, new Vector2(0f, Ads.BannerReserve + 236f), new Vector2(940f, 420f));
-            UiFactory.Fill(UiFactory.Rect("Shadow", card, Vector2.zero, Vector2.one, new Vector2(-30f, -44f), new Vector2(30f, 16f)),
-                new Color(0.03f, 0.02f, 0.1f, 0.55f), UiSprites.Shadow, 0.6f).raycastTarget = false;
             UiFactory.Fill(card, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 0.8f);
-            var sheen = UiFactory.Rect("Sheen", card, new Vector2(0f, 0.6f), Vector2.one, new Vector2(12f, 0f), new Vector2(-12f, -10f));
-            UiFactory.Fill(sheen, new Color(1f, 1f, 1f, 0.06f), UiSprites.Rounded, 1f).raycastTarget = false;
             UiFactory.Fill(UiFactory.Stretch("Rim", card), new Color(0.75f, 0.85f, 1f, 0.35f), UiSprites.Ring, 0.8f).raycastTarget = false;
             menuWorld = UiFactory.TextBox("World", card, Top, new Vector2(0f, -26f), new Vector2(860f, 50f), "", 30f, Palette.UiCyan);
             menuWorld.characterSpacing = 5f;

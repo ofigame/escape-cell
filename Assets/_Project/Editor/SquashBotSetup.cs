@@ -409,7 +409,7 @@ namespace SquashBot.EditorTools
         private static void ConfigurePlayer()
         {
             PlayerSettings.companyName = "OFIGAME";
-            PlayerSettings.productName = "foi"; // the name under the icon (short); the store listing reads "foi | Escape Cell"
+            PlayerSettings.productName = "foi cell"; // the game's name, under the icon and in the stores
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.ofigame.escapecell");
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.iOS, "com.ofigame.escapecell");
             PlayerSettings.iOS.targetOSVersionString = "15.0";

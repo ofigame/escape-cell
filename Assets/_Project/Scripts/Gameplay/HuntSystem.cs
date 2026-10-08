@@ -208,11 +208,24 @@ namespace SquashBot.Gameplay
             foreach (var b in bugs) if (!b.dead && b.pos == p) KillBug(b);
         }
 
-        /// <summary>A crate landed on a tile: whatever was there is flattened.</summary>
+        /// <summary>
+        /// A crate landed on a tile: a bug there is flattened; a guard is dented and knocked aside but never finished
+        /// (robots must be beaten by foi, or dodging until the crates crush them would clear the floor for free).
+        /// </summary>
         public void OnBlockLanded(GridPos p)
         {
             foreach (var b in bugs) if (!b.dead && b.pos == p) KillBug(b);
-            foreach (var g in guards) if (!g.dead && g.pos == p) KillGuard(g);
+            foreach (var g in guards)
+            {
+                if (g.dead || g.pos != p) continue;
+                g.hp = Mathf.Max(1, g.hp - 1);
+                g.flash = 1f;
+                g.Flash();
+                g.windup = -1f;
+                ClearTelegraph(g);
+                fx.Dust(At(p), new Color(0.55f, 0.5f, 0.45f), 12, 3f);
+                KnockBack(g);
+            }
         }
 
         /// <summary>Is there something to strike on (or right next to) a tapped tile? Returns the tile it stands on.</summary>
@@ -290,7 +303,14 @@ namespace SquashBot.Gameplay
             var away = new GridPos(g.pos.x - robot.Position.x, g.pos.y - robot.Position.y);
             var dir = Mathf.Abs(away.x) >= Mathf.Abs(away.y) ? new GridPos(Math.Sign(away.x), 0) : new GridPos(0, Math.Sign(away.y));
             var next = g.pos + dir;
-            if (!CanStep(next)) return;
+            if (!CanStep(next))
+            {
+                // Pinned that way: any free side will do.
+                next = g.pos;
+                foreach (var d in DirectionExtensions.All)
+                    if (CanStep(g.pos + d.ToOffset())) { next = g.pos + d.ToOffset(); break; }
+                if (next == g.pos) return;
+            }
             MoveGuard(g, next, 0.12f);
         }
 

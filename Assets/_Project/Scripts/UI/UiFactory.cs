@@ -329,22 +329,10 @@ namespace SquashBot.UI
             float w = root.rect.width > 0f ? root.rect.width : root.sizeDelta.x;
             float h = root.rect.height > 0f ? root.rect.height : root.sizeDelta.y;
             if (ppu <= 0f) ppu = Mathf.Clamp(88f / Mathf.Max(1f, Mathf.Min(w, h)), 0.25f, 3f); // radius = half the height: pill ends
-            if (!s.glass)
-            {
-                var glow = Rect("Glow", root, Vector2.zero, Vector2.one, new Vector2(-26f, -34f), new Vector2(26f, 12f));
-                Fill(glow, new Color(s.lip.r, s.lip.g, s.lip.b, 0.42f), UiSprites.Shadow, 0.8f).raycastTarget = false;
-            }
-            else
-            {
-                var drop = Rect("Shadow", root, Vector2.zero, Vector2.one, new Vector2(-18f, -26f), new Vector2(18f, 6f));
-                Fill(drop, new Color(0f, 0f, 0.05f, 0.25f), UiSprites.Shadow, 0.8f).raycastTarget = false;
-            }
             var face = Stretch("Face", root);
             Sprite faceSprite = s.glass ? (circle ? UiSprites.Circle : UiSprites.Rounded) : (circle ? UiSprites.CircleGradient : UiSprites.RoundedGradient);
             var image = Fill(face, s.face, faceSprite, circle ? 1f : ppu);
-            // A top sheen and a fine edge: light catching a polished (or frosted) surface.
-            var sheen = Rect("Sheen", face, new Vector2(circle ? 0.18f : 0f, 0.5f), new Vector2(circle ? 0.82f : 1f, 1f), new Vector2(3f, 0f), new Vector2(-3f, -2f));
-            Fill(sheen, new Color(1f, 1f, 1f, s.glass ? 0.07f : 0.16f), circle ? UiSprites.Circle : UiSprites.Rounded, circle ? 1f : ppu * 1.9f).raycastTarget = false;
+            // Flat and clean: the gradient face and a fine edge, no glow, drop shadow or sheen around it.
             Fill(Stretch("Edge", face), new Color(1f, 1f, 1f, s.glass ? 0.38f : 0.3f), UiSprites.Ring, circle ? 0.35f : ppu).raycastTarget = false;
             return image;
         }

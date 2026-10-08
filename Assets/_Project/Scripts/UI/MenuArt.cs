@@ -17,7 +17,7 @@ namespace SquashBot.UI
 
         /// <summary>
         /// The logo: "foi" big in the display font (a dark extruded back, a bright gradient face with a thick outline),
-        /// and "ESCAPE CELL" under it, smaller and spaced out.
+        /// and "CELL" under it, smaller and spaced out (the game is "foi cell").
         /// </summary>
         public static void Logo(Transform parent, Vector2 anchor, Vector2 position)
         {
@@ -34,9 +34,13 @@ namespace SquashBot.UI
             face.colorGradient = new VertexGradient(Color.white, Color.white, new Color(0.45f, 0.95f, 1f), new Color(0.6f, 1f, 0.85f));
             Outline(face, new Color(0.05f, 0.14f, 0.3f), 0.22f);
             for (int i = 2; i >= 1; i--)
-                Outline(Layer(root, "ESCAPE CELL", new Vector2(0f, -122f - i * 4f), 70f, new Color(0.04f, 0.12f, 0.25f)), new Color(0.04f, 0.1f, 0.22f), 0.25f);
-            var sub = Layer(root, "ESCAPE CELL", new Vector2(0f, -122f), 70f, Color.white);
-            sub.characterSpacing = 18f;
+            {
+                var back = Layer(root, "CELL", new Vector2(0f, -122f - i * 4f), 84f, new Color(0.04f, 0.12f, 0.25f));
+                back.characterSpacing = 40f;
+                Outline(back, new Color(0.04f, 0.1f, 0.22f), 0.25f);
+            }
+            var sub = Layer(root, "CELL", new Vector2(0f, -122f), 84f, Color.white);
+            sub.characterSpacing = 40f;
             sub.enableVertexGradient = true;
             sub.colorGradient = new VertexGradient(Color.white, Color.white, new Color(1f, 0.85f, 0.45f), new Color(1f, 0.85f, 0.45f));
             Outline(sub, new Color(0.05f, 0.14f, 0.3f), 0.25f);
@@ -69,14 +73,8 @@ namespace SquashBot.UI
         public static Button Tile(Transform parent, string label, Icon icon, Color color, Vector2 anchor, Vector2 position, Vector2 size, Action onClick, float fontSize = 40f)
         {
             var root = UiFactory.Box("Tile " + label, parent, anchor, position, size);
-            var shadow = UiFactory.Rect("Shadow", root, Vector2.zero, Vector2.one, new Vector2(-24f, -40f), new Vector2(24f, 10f));
-            UiFactory.Fill(shadow, new Color(0.05f, 0.03f, 0.15f, 0.5f), UiSprites.Shadow, 0.8f).raycastTarget = false;
-            var lip = UiFactory.Rect("Lip", root, Vector2.zero, Vector2.one, new Vector2(0f, -12f), Vector2.zero);
-            UiFactory.Fill(lip, color * 0.62f + new Color(0f, 0f, 0f, 0.38f), UiSprites.Rounded, 0.8f).raycastTarget = false;
             var face = UiFactory.Stretch("Face", root);
             var image = UiFactory.Fill(face, color, UiSprites.Rounded, 0.8f);
-            var gloss = UiFactory.Rect("Gloss", face, new Vector2(0f, 0.55f), Vector2.one, new Vector2(10f, 0f), new Vector2(-10f, -8f));
-            UiFactory.Fill(gloss, new Color(1f, 1f, 1f, 0.22f), UiSprites.Rounded, 1.2f).raycastTarget = false;
             UiFactory.Fill(UiFactory.Stretch("Rim", face), new Color(1f, 1f, 1f, 0.45f), UiSprites.Ring, 0.8f).raycastTarget = false;
 
             bool wide = size.x > size.y * 1.6f;
@@ -109,7 +107,7 @@ namespace SquashBot.UI
         }
 
         /// <summary>
-        /// A dock button: a glossy coloured orb with its icon and a small label under it, for the menu's bottom bar.
+        /// A dock button: a clean coloured orb with its icon and a small label under it, for the menu's bottom bar.
         /// </summary>
         public static Button DockButton(Transform parent, string label, Icon icon, Color color, Vector2 anchor, Vector2 position, float size, Action onClick)
         {
@@ -118,13 +116,7 @@ namespace SquashBot.UI
             var hit = UiFactory.Fill(root, new Color(1f, 1f, 1f, 0.001f));
             var orb = UiFactory.Box("Orb", root, new Vector2(0.5f, 1f), new Vector2(0f, 0f), new Vector2(size, size));
             orb.pivot = new Vector2(0.5f, 1f);
-            var glow = UiFactory.Box("Glow", orb, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(size * 1.35f, size * 1.35f));
-            glow.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(glow, new Color(color.r, color.g, color.b, 0.25f), UiSprites.Shadow, 0.5f).raycastTarget = false;
             UiFactory.Fill(orb, color, UiSprites.Circle).raycastTarget = false;
-            var gloss = UiFactory.Box("Gloss", orb, new Vector2(0.5f, 1f), new Vector2(0f, -size * 0.08f), new Vector2(size * 0.7f, size * 0.36f));
-            gloss.pivot = new Vector2(0.5f, 1f);
-            UiFactory.Fill(gloss, new Color(1f, 1f, 1f, 0.22f), UiSprites.Circle).raycastTarget = false;
             UiFactory.Fill(UiFactory.Stretch("Rim", orb), new Color(1f, 1f, 1f, 0.55f), UiSprites.Ring, 0.6f).raycastTarget = false;
             var iconBox = UiFactory.Box("Icon", orb, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(size * 0.56f, size * 0.56f));
             iconBox.pivot = new Vector2(0.5f, 0.5f);
