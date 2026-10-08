@@ -404,18 +404,6 @@ namespace SquashBot.Visual
 
         // ---------- Backdrop ----------
 
-        /// <summary>
-        /// The open-air view (the forest prototype): the painted backdrop goes away and the real sky shows, with a
-        /// longer view distance. Off again restores the stage look.
-        /// </summary>
-        public void SetOutdoor(bool on)
-        {
-            background.gameObject.SetActive(!on);
-            Cam.clearFlags = on ? CameraClearFlags.Skybox : CameraClearFlags.SolidColor;
-            Cam.farClipPlane = on ? 300f : 200f;
-            if (on) menuFocusTarget = 0f;
-        }
-
         private void FitBackground()
         {
             float depth = Cam.farClipPlane * 0.9f;

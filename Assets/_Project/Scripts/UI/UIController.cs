@@ -48,7 +48,6 @@ namespace SquashBot.UI
         public event Action GaragePressed;
         public event Action DailyBonusPressed;
         public event Action ShopPressed;
-        public event Action ForestPressed;
         public event Action DailyPressed;
         /// <summary>A HUD tool button was tapped (slot 0 = left, 1 = right).</summary>
         public event Action<int> ToolPressed;
@@ -299,9 +298,6 @@ namespace SquashBot.UI
             menuBonus = UiFactory.MakeButton(card, "", Kind.Gold, Bottom, new Vector2(320f, 30f), new Vector2(240f, 150f), () => DailyBonusPressed?.Invoke(), 34f);
             menuBonusLabel = menuBonus.GetComponentInChildren<TextMeshProUGUI>();
             menuBonus.gameObject.AddComponent<Pulse>();
-
-            // The forest prototype (the third-person journey being tried out).
-            UiFactory.MakeButton(t, Loc.T("menu.forest"), Kind.Gold, Bottom, new Vector2(0f, Ads.BannerReserve + 690f), new Vector2(640f, 120f), () => ForestPressed?.Invoke(), 46f);
 
             // The dock: garage, shop, map and the guide, as glossy orbs on a glass bar.
             var dock = UiFactory.Box("Dock", t, Bottom, new Vector2(0f, Ads.BannerReserve + 14f), new Vector2(1000f, 206f));
@@ -1214,13 +1210,6 @@ namespace SquashBot.UI
         }
 
         // ---------- Common ----------
-
-        /// <summary>Every screen and the banner away (the forest prototype draws its own HUD).</summary>
-        public void HideScreens()
-        {
-            HideAll();
-            SetBanner(false);
-        }
 
         private void HideAll()
         {
