@@ -2459,6 +2459,7 @@ namespace SquashBot.Gameplay
         /// <summary>A crash on the road: it costs a life (while there are any) and the road starts again from the top.</summary>
         private void OnRoadFailed()
         {
+            if (forestRoad) { runner.RestartRoad(); return; } // the forest tunnel: straight back on from the last checkpoint
             if (State != GameState.Playing || roadPhase != RoadPhase.Run) return;
             // A tunnel boost from Bip's counter takes the first crash instead of a life.
             bool boosted = Shop.TryUse(Boost.TunnelBoost);
@@ -2472,6 +2473,7 @@ namespace SquashBot.Gameplay
 
         private void OnRoadArrived()
         {
+            if (forestRoad) { ForestTunnelArrived(); return; }
             if (roadPhase != RoadPhase.Run) return;
             roadPhase = RoadPhase.None;
             State = GameState.Result;

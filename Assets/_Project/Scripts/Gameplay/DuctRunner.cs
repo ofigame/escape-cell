@@ -97,6 +97,9 @@ namespace SquashBot.Gameplay
         public int Coins { get; private set; }
         /// <summary>Test hooks: nothing ends the run (screenshots of the whole course).</summary>
         public static bool TestInvulnerable;
+        /// <summary>Dress the course in the forest's photo textures (the third-person journey's tunnels).</summary>
+        public static bool Realistic;
+        private Kind? roadTheme;
         public float Progress => Mathf.Clamp01(z / length);
 
         private Robot robot;
@@ -208,7 +211,7 @@ namespace SquashBot.Gameplay
         /// <paramref name="heading"/> degrees: it is seen at once, and <see cref="TakeOver"/> puts the robot on it when
         /// it steps onto the edge tile. <paramref name="level"/> (0-based) makes it longer and harder.
         /// </summary>
-        public void PrepareRoad(int seed, Vector3 origin, float heading, int level, int toWorld)
+        public void PrepareRoad(int seed, Vector3 origin, float heading, int level, int toWorld, Kind? theme = null)
         {
             // Every level adds to the road: 90 rows after level 1, 3 more each level (about 840 at the end).
             // Its difficulty follows the level just as closely: speed, spacing and the kinds of obstacles.
@@ -216,8 +219,9 @@ namespace SquashBot.Gameplay
             float d = Mathf.Clamp01(level / (float)(Data.LevelCatalog.LevelCount - 1));
             roadLevel = level;
             lastRoad = (seed, origin, heading, level, toWorld);
+            if (!restarting) roadTheme = theme; // a restart keeps the theme it was given
             bool last = level >= Data.LevelCatalog.LevelCount - 1;
-            Prepare(seed, RoadTheme(level), origin, heading, road: true, roadLength: last ? FinaleLength : 90f + level * 3f, roadDifficulty: d, toWorld: toWorld);
+            Prepare(seed, roadTheme ?? RoadTheme(level), origin, heading, road: true, roadLength: last ? FinaleLength : 90f + level * 3f, roadDifficulty: d, toWorld: toWorld);
             finale = last;
             if (finale) BuildCore();
         }
@@ -391,6 +395,18 @@ namespace SquashBot.Gameplay
             coinMat = MaterialFactory.Create(Palette.Coin, Palette.CoinGlow);
             rimMat = MaterialFactory.Create(Palette.CoinRim, Palette.CoinGlow * 0.4f);
             ThemeMaterials();
+            if (Realistic)
+            {
+                // The forest journey's tunnel: the same course dressed in the photo textures of the forest.
+                Material Load(string n, Material fallback) => Resources.Load<Material>("Forest/" + n) ?? fallback;
+                frameMat = Load("Rock_Mossy", frameMat);
+                slabMat = Load("Rock_Mossy", slabMat);
+                topMat = Load("Bark_Oak", topMat);
+                archMat = Load("Bark_Oak", archMat);
+                blockMat = Load("Rock_Set", blockMat);
+                hurdleMat = Load("Bark_Pine", hurdleMat);
+                barMat = Load("Bark_Pine", barMat);
+            }
         }
 
         // ---------- Course planning ----------
@@ -781,6 +797,32 @@ namespace SquashBot.Gameplay
 
         // ---------- Building ----------
 
+        private Material shellMat, lampMat;
+
+        /// <summary>
+        /// The journey's tunnel: mossy stone walls and a vaulted ceiling over every row, a warm lamp every few rows, so
+        /// the road runs through rock rather than under the sky.
+        /// </summary>
+        private void BuildShell(Transform root, int r)
+        {
+            if (shellMat == null)
+            {
+                shellMat = Resources.Load<Material>("Forest/Rock_Mossy") ?? slabMat;
+                lampMat = MaterialFactory.Create(new Color(1f, 0.8f, 0.45f), new Color(3f, 1.9f, 0.7f));
+            }
+            float half = Lanes * LaneWidth * 0.5f + 0.45f;
+            const float height = 3.3f;
+            foreach (float side in new[] { -1f, 1f })
+            {
+                Shapes.Rounded("Wall", root, new Vector3(side * (half + 0.3f), height * 0.5f - 0.4f, 0f), new Vector3(0.6f, height + 0.8f, 1.04f), 0.08f, shellMat);
+                var haunch = Shapes.Rounded("Haunch", root, new Vector3(side * (half - 0.25f), height - 0.15f, 0f), new Vector3(1.1f, 0.5f, 1.04f), 0.1f, shellMat);
+                haunch.transform.localRotation = Quaternion.Euler(0f, 0f, side * 35f);
+                if (r % 6 == 0)
+                    Shapes.Rounded("Lamp", root, new Vector3(side * (half - 0.02f), 2.1f, 0f), new Vector3(0.12f, 0.22f, 0.18f), 0.04f, lampMat);
+            }
+            Shapes.Rounded("Ceiling", root, new Vector3(0f, height + 0.15f, 0f), new Vector3(half * 2f, 0.4f, 1.04f), 0.08f, shellMat);
+        }
+
         /// <summary>The robot is on a water-slide row right now.</summary>
         private bool OnSlide => slideRows.Count > 0 && slideRows.Contains(Mathf.FloorToInt(z + 0.5f));
 
@@ -842,6 +884,7 @@ namespace SquashBot.Gameplay
             }
 
             if (slideRows.Contains(r)) BuildChute(root, r);
+            if (Realistic) BuildShell(root, r);
             if (IsThemed) BuildThemeRow(root, r);
             else
             {

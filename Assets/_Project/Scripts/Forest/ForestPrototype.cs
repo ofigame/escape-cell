@@ -26,6 +26,16 @@ namespace SquashBot.Forest
         private const float HitDamage = 0.25f;
 
         public event Action Exited;
+        /// <summary>The robot reached the tunnel mouth (the game runs the tunnel, then calls <see cref="NextLeg"/>).</summary>
+        public event Action TunnelReached;
+
+        /// <summary>Which leg of the journey this is (1 = the first forest).</summary>
+        public int Leg { get; private set; } = 1;
+
+        /// <summary>Where the tunnel begins (world).</summary>
+        public Vector3 TunnelEntry => world.ToWorld(new Vector3(0f, world.TerrainY(0f, ForestWorld.TunnelZ), ForestWorld.TunnelZ + 1.5f));
+
+        private bool suspended;
 
         private ForestWorld world;
         private Robot robot;
@@ -83,6 +93,7 @@ namespace SquashBot.Forest
             public float windup = -1f, cooldown, flash;
             public GameObject ring;
             public bool dead;
+            public GuardBot bot;
         }
 
         private class Crate
@@ -129,6 +140,7 @@ namespace SquashBot.Forest
             BuildEnemies();
             BuildHud();
             AudioManager.PlayMusic(MusicTheme.Menu);
+            BuildAmbience();
         }
 
         // ---------- Look: sun, sky, fog ----------
@@ -267,8 +279,6 @@ namespace SquashBot.Forest
 
         private void BuildEnemies()
         {
-            var body = MaterialFactory.Create(new Color(0.42f, 0.16f, 0.15f), Color.black);
-            var eye = MaterialFactory.Create(new Color(1f, 0.3f, 0.2f), new Color(2.4f, 0.4f, 0.2f));
             foreach (var off in new[] { new Vector2(-4f, 3f), new Vector2(4.5f, -2f) })
             {
                 var e = new Enemy();
@@ -276,10 +286,7 @@ namespace SquashBot.Forest
                 e.pos = new Vector3(p.x, world.TerrainY(p.x, p.y), p.y);
                 e.root = new GameObject("EnemyRobot").transform;
                 e.root.SetParent(world.transform, false);
-                var look = robot.BuildLookalike(e.root);
-                look.transform.localScale = Vector3.one * 1.25f;
-                foreach (var r in look.GetComponentsInChildren<MeshRenderer>())
-                    r.sharedMaterial = r.name.StartsWith("Eye") ? eye : body;
+                e.bot = GuardBot.Build(e.root);
                 e.ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 Destroy(e.ring.GetComponent<Collider>());
                 e.ring.transform.SetParent(world.transform, false);
@@ -287,6 +294,60 @@ namespace SquashBot.Forest
                 e.ring.SetActive(false);
                 enemies.Add(e);
             }
+        }
+
+        // ---------- Ambience ----------
+
+        private ParticleSystem leaves;
+        private float stepDust;
+
+        /// <summary>Leaves and pollen drifting down through the light around the camera.</summary>
+        private void BuildAmbience()
+        {
+            var go = new GameObject("DriftingLeaves");
+            go.transform.SetParent(transform, false);
+            leaves = go.AddComponent<ParticleSystem>();
+            leaves.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = leaves.main;
+            main.startLifetime = 10f;
+            main.startSpeed = 0f;
+            main.startSize = new ParticleSystem.MinMaxCurve(0.05f, 0.13f);
+            main.maxParticles = 140;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.startColor = new ParticleSystem.MinMaxGradient(new Color(0.85f, 0.75f, 0.35f, 0.9f), new Color(0.55f, 0.75f, 0.3f, 0.9f));
+            main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+            var emission = leaves.emission;
+            emission.rateOverTime = 14f;
+            var shape = leaves.shape;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = new Vector3(26f, 9f, 26f);
+            var vel = leaves.velocityOverLifetime;
+            vel.enabled = true;
+            vel.x = new ParticleSystem.MinMaxCurve(-0.35f, 0.35f);
+            vel.y = new ParticleSystem.MinMaxCurve(-0.45f, -0.15f);
+            vel.z = new ParticleSystem.MinMaxCurve(-0.35f, 0.35f);
+            var noise = leaves.noise;
+            noise.enabled = true;
+            noise.strength = 0.35f;
+            noise.frequency = 0.35f;
+            var rot = leaves.rotationOverLifetime;
+            rot.enabled = true;
+            rot.z = new ParticleSystem.MinMaxCurve(-2f, 2f);
+            var r = go.GetComponent<ParticleSystemRenderer>();
+            r.sharedMaterial = Resources.Load<Material>("SquashBot_ParticleAlpha");
+            r.renderMode = ParticleSystemRenderMode.Billboard;
+            leaves.Play();
+        }
+
+        private void UpdateAmbience(float dt, bool walking)
+        {
+            if (leaves != null) leaves.transform.position = rig.Cam.transform.position + rig.Cam.transform.forward * 9f;
+            if (!walking || !grounded) return;
+            stepDust -= dt;
+            if (stepDust > 0f) return;
+            stepDust = 0.32f;
+            bool deck = pos.y > ForestWorld.DeckHeight - 0.5f;
+            fx.Dust(world.ToWorld(pos) + Vector3.up * 0.05f, deck ? new Color(0.6f, 0.62f, 0.55f) : new Color(0.45f, 0.36f, 0.26f), 3, 0.7f);
         }
 
         // ---------- HUD ----------
@@ -423,10 +484,11 @@ namespace SquashBot.Forest
 
         private void Update()
         {
-            if (finished) return;
+            if (finished || suspended) return;
             float dt = Mathf.Min(Time.deltaTime, 0.05f);
             ReadInput();
             Move(dt);
+            UpdateAmbience(dt, joyInput.sqrMagnitude > 0.02f);
             UpdateSwing(dt);
             UpdateCoins();
             UpdateDeck(dt);
@@ -436,7 +498,7 @@ namespace SquashBot.Forest
             UiFactory.SetBar(healthFill, health);
             healthFill.color = health > 0.6f ? new Color(0.4f, 0.95f, 0.5f) : health > 0.3f ? new Color(1f, 0.82f, 0.3f) : new Color(1f, 0.38f, 0.38f);
             coinText.text = coins.ToString();
-            if (pos.z >= ForestWorld.TunnelZ - 0.5f) Finish();
+            if (pos.z >= ForestWorld.TunnelZ - 0.5f) EnterTunnel();
         }
 
         private void Move(float dt)
@@ -467,6 +529,12 @@ namespace SquashBot.Forest
             if (pos.y <= ground)
             {
                 pos.y = ground;
+                if (!grounded && vy < -3f)
+                {
+                    // A landing: a puff of dust around the feet.
+                    fx.Dust(world.ToWorld(pos) + Vector3.up * 0.05f, new Color(0.5f, 0.42f, 0.3f), 10, 2f);
+                    AudioManager.PlaySfx(Sfx.Bump, 0.35f, 1.4f);
+                }
                 vy = 0f;
                 grounded = true;
             }
@@ -531,6 +599,7 @@ namespace SquashBot.Forest
 
         private void LateUpdate()
         {
+            if (suspended) return;
             var target = world.ToWorld(pos) + Vector3.up * 0.9f;
             var rot = Quaternion.Euler(CamPitch, camYaw, 0f);
             var want = target - rot * Vector3.forward * CamBack + Vector3.up * (CamUp - 0.9f);
@@ -557,6 +626,10 @@ namespace SquashBot.Forest
                     if (to.magnitude > 2.2f || Vector3.Angle(fwd, to) > 75f) continue;
                     e.hp--;
                     e.flash = 1f;
+                    e.bot.Flash();
+                    e.bot.SetRaise(0f);
+                    Shockwave.Create(world.ToWorld(e.pos), 1.2f, new Color(1f, 0.85f, 0.45f));
+                    rig.Punch(0.6f);
                     e.windup = -1f;
                     e.ring.SetActive(false);
                     e.pos += to.normalized * 1.2f;
@@ -721,12 +794,14 @@ namespace SquashBot.Forest
                     // Winding up a slam: the red ring grows; standing in it when it lands hurts.
                     e.windup += dt;
                     float k = e.windup / 0.7f;
+                    e.bot.SetRaise(k * 1.3f);
                     e.ring.transform.localPosition = e.pos + Vector3.up * 0.03f;
                     e.ring.transform.localScale = new Vector3(3.8f * k, 0.01f, 3.8f * k);
                     if (k >= 1f)
                     {
                         e.windup = -1f;
                         e.cooldown = 1.2f;
+                        e.bot.SetRaise(0f);
                         e.ring.SetActive(false);
                         Shockwave.Create(world.ToWorld(e.pos), 1.9f, new Color(1f, 0.5f, 0.3f));
                         rig.Shake(0.5f);
@@ -776,6 +851,44 @@ namespace SquashBot.Forest
             var dir = new Vector3(world.PathX(aheadZ + 2f) - ax, 0f, 2f);
             guide.localRotation = Quaternion.LookRotation(dir);
             guide.gameObject.SetActive(!fight);
+        }
+
+        /// <summary>Into the tunnel: the forest waits (its HUD and camera step aside) while the tunnel runs.</summary>
+        private void EnterTunnel()
+        {
+            if (TunnelReached == null) { Finish(); return; }
+            suspended = true;
+            canvas.gameObject.SetActive(false);
+            guide.gameObject.SetActive(false);
+            if (hammer != null) hammer.gameObject.SetActive(false);
+            world.gameObject.SetActive(false); // underground now: the forest above would only show through the rock
+            robot.ExitArena();
+            TunnelReached.Invoke();
+        }
+
+        /// <summary>Out of the tunnel: a new stretch of forest (another seed), the robot at its start.</summary>
+        public void NextLeg(int tunnelCoins)
+        {
+            Leg++;
+            coins += tunnelCoins;
+            foreach (var c in crates) { Destroy(c.warn); Destroy(c.box); }
+            crates.Clear();
+            coinObjs.Clear();
+            enemies.Clear();
+            sweepers.Clear();
+            Destroy(world.gameObject);
+            world = ForestWorld.Build(7 + Leg * 101);
+            BuildGuide();
+            BuildCoins();
+            BuildSweepers();
+            BuildEnemies();
+            robot.EnterArena();
+            robot.gameObject.SetActive(true);
+            if (hammer == null) hammer = HammerModels.Held(robot.Visual, Weapons.Level);
+            hammer.gameObject.SetActive(true);
+            Restart();
+            canvas.gameObject.SetActive(true);
+            suspended = false;
         }
 
         private void Finish()
