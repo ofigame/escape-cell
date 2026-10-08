@@ -101,9 +101,9 @@ namespace SquashBot.Visual
         {
             var pivot = new GameObject("HeldWeapon").transform;
             pivot.SetParent(robotVisual, false);
-            pivot.localPosition = new Vector3(0.28f, 0.2f, 0.04f);
+            pivot.localPosition = new Vector3(0.32f, 0.22f, 0.06f);
             var h = pivot.gameObject.AddComponent<HeldWeapon>();
-            WeaponModels.Build(pivot, w, w.kind == WeaponKind.Spear ? 0.62f : 0.72f);
+            WeaponModels.Build(pivot, w, w.kind == WeaponKind.Spear ? 0.95f : 1.15f); // big enough to read on the floor
             h.Pose(0f);
             return h;
         }

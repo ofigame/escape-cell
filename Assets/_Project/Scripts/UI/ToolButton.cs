@@ -82,6 +82,25 @@ namespace SquashBot.UI
 
         private void Update() => punch = Mathf.MoveTowards(punch, 0f, Time.unscaledDeltaTime * 4f);
 
+        /// <summary>A sword (the weapon bag's icon), drawn for a 110-unit box.</summary>
+        public static void DrawSword(RectTransform parent)
+        {
+            var dark = UiFactory.TextDark;
+            var root = UiFactory.Box("Sword", parent, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(110f, 110f));
+            root.pivot = new Vector2(0.5f, 0.5f);
+            root.localRotation = Quaternion.Euler(0f, 0f, -40f);
+            void Part(Vector2 pos, Vector2 size, Color c)
+            {
+                var r = UiFactory.Box("Part", root, new Vector2(0.5f, 0.5f), pos, size);
+                r.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(r, c, UiSprites.Rounded, 8f).raycastTarget = false;
+            }
+            Part(new Vector2(0f, 14f), new Vector2(16f, 70f), Color.white);
+            Part(new Vector2(0f, -24f), new Vector2(44f, 10f), dark);
+            Part(new Vector2(0f, -38f), new Vector2(10f, 22f), dark);
+            Part(new Vector2(0f, -50f), new Vector2(14f, 14f), dark);
+        }
+
         /// <summary>Simple shape icons: a clock (slow motion), planks (bridge), a pulse ring (EMP).</summary>
         public static void DrawIcon(RectTransform parent, Tool tool)
         {

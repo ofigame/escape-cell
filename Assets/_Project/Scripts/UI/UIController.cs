@@ -36,6 +36,8 @@ namespace SquashBot.UI
         public event Action MenuPressed;
         public event Action MapPressed;
         public event Action PausePressed;
+        /// <summary>The weapon bag was opened during a level.</summary>
+        public event Action BagPressed;
         public event Action ResumePressed;
         public event Action<SettingKind> SettingToggled;
         public event Action<int> LevelChosen;
@@ -159,6 +161,13 @@ namespace SquashBot.UI
         public StoryScreen Story { get; private set; }
         public ShopScreen Shop { get; private set; }
         public TipCard Tip { get; private set; }
+        public WeaponBag WeaponBag { get; private set; }
+        private RectTransform bagButton;
+
+        public void SetBagVisible(bool on) { if (bagButton != null && bagButton.gameObject.activeSelf != on) bagButton.gameObject.SetActive(on); }
+
+        /// <summary>The screen point is on the bag button (the play area ignores it).</summary>
+        public bool IsOverBag(Vector2 screen) => bagButton != null && bagButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(bagButton, screen, null);
         public GarageScreen Garage { get; private set; }
         public GuideScreen Guide { get; private set; }
         public BriefingScreen Briefing { get; private set; }
@@ -239,6 +248,7 @@ namespace SquashBot.UI
             BuildPrelevel(root);
             BuildBanner(root);
             Tip = TipCard.Create(root);
+            WeaponBag = WeaponBag.Create(root);
         }
 
         // ---------- Menu ----------
@@ -692,6 +702,20 @@ namespace SquashBot.UI
 
             UiFactory.MakeButton(t, "II", Kind.Icon, TopLeft, new Vector2(36f, -36f), new Vector2(124f, 124f), () => PausePressed?.Invoke(), 52f);
 
+            // The weapon bag (bottom left, above the tool button): opens a pause to pick another weapon.
+            bagButton = UiFactory.Box("Bag", t, new Vector2(0f, 0f), new Vector2(40f, 380f), new Vector2(150f, 150f));
+            var bagFace = UiFactory.Chunky(bagButton, UiFactory.StyleOf(new Color(0.55f, 0.45f, 0.95f)), 1f, 0f, UiSprites.Circle);
+            var bagIcon = UiFactory.Box("Icon", bagButton, new Vector2(0.5f, 0.5f), new Vector2(0f, 8f), new Vector2(110f, 110f));
+            bagIcon.pivot = new Vector2(0.5f, 0.5f);
+            ToolButton.DrawSword(bagIcon);
+            var bagLabel = UiFactory.OutlinedText("Label", bagButton, new Vector2(0.5f, 0f), new Vector2(0f, -16f), new Vector2(180f, 44f), Loc.T("bag.button"), 28f, new Color(0.1f, 0.06f, 0.25f));
+            bagLabel.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var bagBtn = bagButton.gameObject.AddComponent<Button>();
+            bagBtn.targetGraphic = bagFace;
+            bagBtn.onClick.AddListener(() => BagPressed?.Invoke());
+            bagButton.gameObject.AddComponent<ButtonPress>();
+            bagButton.gameObject.SetActive(false);
+
             var mission = missionPill = UiFactory.Pill("Mission", t, Top, new Vector2(0f, -36f), new Vector2(500f, 124f), UiFactory.PillColor);
             hudLevel = UiFactory.TextBox("Level", mission, Top, new Vector2(0f, -10f), new Vector2(480f, 40f), "", 30f, Palette.UiCyan);
             hudLevel.characterSpacing = 6f;
@@ -806,6 +830,7 @@ namespace SquashBot.UI
         public bool IsOverTool(Vector2 screen)
         {
             if (SkillBar != null && SkillBar.IsOver(screen)) return true;
+            if (IsOverBag(screen)) return true;
             foreach (var b in toolButtons)
                 if (b != null && b.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(b.Rect, screen, null)) return true;
             return false;

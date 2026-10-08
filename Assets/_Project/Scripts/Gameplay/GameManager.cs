@@ -273,6 +273,9 @@ namespace SquashBot.Gameplay
             ui.MapPressed += () => ShowMap();
             ui.MenuPressed += ShowMenu;
             ui.PausePressed += Pause;
+            ui.BagPressed += OpenBag;
+            ui.WeaponBag.Picked += TakeWeapon;
+            ui.WeaponBag.Closed += CloseBag;
             ui.ResumePressed += Resume;
             ui.SettingToggled += OnSettingToggled;
             ui.Languages.Chosen += language =>
@@ -413,6 +416,7 @@ namespace SquashBot.Gameplay
             bool covered = (lobby != null && lobby.IsOpen) || ui.Map.IsOpen;
             if (cameraRig.Cam.enabled == covered) cameraRig.Cam.enabled = !covered;
             UpdateCloseCamera();
+            ui.SetBagVisible(level != null && level.mission == MissionType.Hunt && State == GameState.Playing && roadPhase == RoadPhase.None && !previewing && !runner.Active);
         }
 
         private void ShowMap(int animateFrom = -1)
@@ -930,6 +934,12 @@ namespace SquashBot.Gameplay
             if (crushed) hazards.Shatter(p);
             else robot.RescueTo(SafeTileNear(robot.LastLeftTile, p));
 
+            // Saved from 0%: the bar is given some health back, so the robot never stands there "alive at 0%".
+            if (HealthEnabled)
+            {
+                health = Mathf.Max(health, 0.35f);
+                RefreshHealthBar();
+            }
             robot.GiveShield(1.5f); // a moment to get out of trouble
             cameraRig.Shake(0.8f);
             cameraRig.Punch(0.8f);
@@ -2476,6 +2486,7 @@ namespace SquashBot.Gameplay
             if (roadPhase != RoadPhase.Walk) return;
             roadPhase = RoadPhase.Run;
             if (roadBeacon != null) Destroy(roadBeacon);
+            ClearHuntDress(); // the tunnel camera sits right behind the robot: back to its normal size, hands empty
             AudioManager.PlayMusic(MusicTheme.Tunnel);
             runner.TakeOver();
             AudioManager.PlaySfx(Sfx.Hop, 0.8f, 1.2f);

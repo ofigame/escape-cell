@@ -246,8 +246,8 @@ namespace SquashBot.Gameplay
                 g.Flash();
                 g.windup = -1f;
                 ClearTelegraph(g);
-                fx.Burst(At(p) + Vector3.up * 0.4f, Palette.UiGold, Palette.CoinGlow, 18, 4f);
-                Shockwave.Create(At(p), 0.9f, new Color(1f, 0.85f, 0.45f));
+                fx.Burst(At(p) + Vector3.up * 0.4f, Palette.UiGold, Palette.CoinGlow, 34, 6f);
+                Shockwave.Create(At(p), 1.4f, new Color(1f, 0.85f, 0.45f));
                 AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.85f);
                 rig.Shake(0.35f);
                 if (g.hp <= 0) KillGuard(g);
@@ -334,7 +334,7 @@ namespace SquashBot.Gameplay
         {
             monsterHp = Mathf.Max(0, monsterHp - damage);
             monster.Hit(monsterHp);
-            fx.Burst(At(monsterPos) + Vector3.up * 0.8f, Palette.UiGold, Palette.CoinGlow, 26, 5f);
+            fx.Burst(At(monsterPos) + Vector3.up * 0.8f, Palette.UiGold, Palette.CoinGlow, 44, 7f);
             Shockwave.Create(At(monsterPos), 1.3f, new Color(1f, 0.85f, 0.45f));
             AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.7f);
             rig.Punch(0.6f);

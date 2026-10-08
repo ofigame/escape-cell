@@ -13,6 +13,8 @@ namespace SquashBot.Gameplay
     public class Robot : MonoBehaviour
     {
         private const float HopDuration = 0.14f; // snappy, but slow enough to see and follow each step
+        /// <summary>Hops take this share of their usual time (the big robot of the core loop hops quicker, so it never feels sluggish).</summary>
+        public static float HopScale = 1f;
         private const float HopHeight = 0.35f;
         private const int MaxJumpHoles = 2;
         private static readonly Quaternion FacingCamera = Quaternion.LookRotation(new Vector3(-1f, 0f, -1f));
@@ -600,7 +602,7 @@ namespace SquashBot.Gameplay
                 }
                 case Anim.Hop:
                 {
-                    float t = Mathf.Clamp01(animTime / hopDuration);
+                    float t = Mathf.Clamp01(animTime / (hopDuration * HopScale));
                     transform.position = Vector3.Lerp(from, to, t) + Vector3.up * (Mathf.Sin(t * Mathf.PI) * hopHeight);
                     float stretch = 1f + Mathf.Sin(t * Mathf.PI) * 0.15f;
                     visual.localScale = new Vector3(1f / stretch, stretch, 1f / stretch);

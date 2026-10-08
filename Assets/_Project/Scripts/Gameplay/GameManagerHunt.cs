@@ -26,6 +26,7 @@ namespace SquashBot.Gameplay
         private void ClearHuntDress()
         {
             if (robot != null) robot.transform.localScale = Vector3.one;
+            Robot.HopScale = 1f;
             if (heldWeapon != null) Destroy(heldWeapon.gameObject);
             heldWeapon = null;
         }
@@ -64,6 +65,7 @@ namespace SquashBot.Gameplay
             // The robot and the guards grow with the campaign, up to twice their old size; the robot carries its weapon.
             float grow = Mathf.Clamp01(World / 12f);
             robot.transform.localScale = Vector3.one * Mathf.Lerp(1.5f, 2f, grow);
+            Robot.HopScale = 0.75f;
             hunt.EnemyScale = Mathf.Lerp(1.45f, 1.85f, grow);
             weapon = Armory.Equipped;
             if (heldWeapon != null) Destroy(heldWeapon.gameObject);
@@ -151,6 +153,38 @@ namespace SquashBot.Gameplay
             }
         }
 
+        // ---------- The weapon bag (mid-level) ----------
+
+        /// <summary>The bag: the game waits while another weapon is picked.</summary>
+        private void OpenBag()
+        {
+            if (State != GameState.Playing || level == null || level.mission != MissionType.Hunt) return;
+            State = GameState.Paused;
+            Time.timeScale = 0f;
+            cameraRig.SetMenuFocus(true);
+            ui.WeaponBag.Show();
+        }
+
+        private void TakeWeapon(WeaponDef w)
+        {
+            Armory.Equip(w);
+            weapon = w;
+            if (heldWeapon != null) Destroy(heldWeapon.gameObject);
+            heldWeapon = HeldWeapon.Attach(robot.Visual, w);
+            heldWeapon.Swing();
+            CloseBag();
+            FloatAt(robot.transform.position + Vector3.up * 0.6f, Loc.T("weapon." + w.id), WeaponModels.Glow(w.tier));
+            AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.3f);
+        }
+
+        private void CloseBag()
+        {
+            if (State != GameState.Paused) return;
+            State = GameState.Playing;
+            Time.timeScale = slowMoLeft > 0f ? SlowMoScale : 1f;
+            cameraRig.SetMenuFocus(false);
+        }
+
         private string HuntHud() =>
             hunt.MonsterUp || hunt.MonsterDown
                 ? Loc.F("hud.huntBoss", hunt.MonsterHpLeft, hunt.MonsterHpTotal)
@@ -189,6 +223,9 @@ namespace SquashBot.Gameplay
             strikeCooldown = w.cooldown;
             int damage = w.damage * (superLeft > 0f ? 2 : 1);
             if (heldWeapon != null) heldWeapon.Swing();
+            // A blow you can see: a crescent of the weapon's colour sweeping through the target.
+            SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.Glow(w.tier), 1f + 0.15f * w.damage);
+            cameraRig.Shake(0.15f + 0.08f * damage);
             if (crowd) hunt.Strike(at, damage);
             else if (hazards.Shatter(at))
             {
