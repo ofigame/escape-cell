@@ -37,18 +37,14 @@ jobs:
         run: |
           sudo swapoff -a || true
           sudo rm -f /mnt/swapfile /swapfile
-          # Swap on both disks, each sized to the room it has: /mnt (the scratch disk) keeps 4 GB free, the root disk
-          # keeps ~35 GB for the Unity image, the Library and the build. Together up to 32 GB.
+          # Swap only on /mnt (the scratch disk), sized to its room (keeping 3 GB free). Never on the root disk: the
+          # ~15 GB Unity image is unpacked there and a swap file on it ran the pull out of space (exit 125).
           MNT=$(df --output=avail -BG /mnt | tail -1 | tr -dc 0-9)
           ROOT=$(df --output=avail -BG / | tail -1 | tr -dc 0-9)
-          A=$(( MNT - 4 )); [ "$A" -gt 22 ] && A=22
-          B=$(( ROOT - 35 )); [ "$B" -gt 10 ] && B=10
-          echo "mnt ${MNT} GB free, root ${ROOT} GB free: swap ${A} GB on /mnt, ${B} GB on /"
+          A=$(( MNT - 3 )); [ "$A" -gt 24 ] && A=24
+          echo "mnt ${MNT} GB free, root ${ROOT} GB free: swap ${A} GB on /mnt"
           if [ "$A" -ge 2 ]; then
             sudo fallocate -l ${A}G /mnt/swapfile && sudo chmod 600 /mnt/swapfile && sudo mkswap /mnt/swapfile && sudo swapon /mnt/swapfile
-          fi
-          if [ "$B" -ge 2 ]; then
-            sudo fallocate -l ${B}G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
           fi
           sudo sysctl vm.swappiness=90
           free -h
