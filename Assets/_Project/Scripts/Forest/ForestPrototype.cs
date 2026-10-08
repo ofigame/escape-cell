@@ -26,14 +26,24 @@ namespace SquashBot.Forest
         private const float HitDamage = 0.25f;
 
         public event Action Exited;
-        /// <summary>The robot reached the tunnel mouth (the game runs the tunnel, then calls <see cref="NextLeg"/>).</summary>
+        /// <summary>The robot reached the tunnel mouth (the game runs the tunnel, builds the next land with <see cref="PrepareNext"/> and hands back with <see cref="SwitchWorld"/>).</summary>
         public event Action TunnelReached;
+        /// <summary>The robot nears the passage: time to lay the passage and the land beyond, so the mouth shows a real way on.</summary>
+        public event Action TunnelNear;
+        private bool nearSent;
 
         /// <summary>Which leg of the journey this is (1 = the first forest).</summary>
         public int Leg { get; private set; } = 1;
 
-        /// <summary>Where the tunnel begins (world).</summary>
-        public Vector3 TunnelEntry => world.ToWorld(new Vector3(0f, world.TerrainY(0f, ForestWorld.TunnelZ), ForestWorld.TunnelZ + 1.5f));
+        /// <summary>Where the ride (cart or raft) waits inside the passage (world).</summary>
+        public Vector3 BoardPoint => world.ToWorld(new Vector3(0f, 0f, world.BoardZ));
+        /// <summary>How this leg is left: through a cave by cart (odd legs) or down a gorge by raft (even legs).</summary>
+        public PassageStyle ExitStyle => world.Exit;
+        public static PassageStyle StyleFor(int leg) => leg % 2 == 1 ? PassageStyle.Cave : PassageStyle.Gorge;
+        private static int SeedFor(int leg) => 7 + (leg - 1) * 101;
+
+        /// <summary>The next stretch of land, built at the passage's far end while the passage runs.</summary>
+        private ForestWorld nextWorld;
 
         private bool suspended;
 
@@ -82,7 +92,9 @@ namespace SquashBot.Forest
         private readonly List<Enemy> enemies = new List<Enemy>();
         private readonly List<Crate> crates = new List<Crate>();
         private readonly List<Sweeper> sweepers = new List<Sweeper>();
-        private float crateTimer = 1f;
+        private float crateTimer = 1f, rollTimer = 2f;
+        private Vector3 deckSafe = new Vector3(0f, ForestWorld.DeckHeight + 0.09f, ForestWorld.DeckStart + 1f);
+        private readonly List<Transform> rollers = new List<Transform>();
         private Material warnMat, crateMat, goldMat;
 
         private class Enemy
@@ -123,11 +135,11 @@ namespace SquashBot.Forest
 
         private void Setup()
         {
-            world = ForestWorld.Build(7);
+            world = ForestWorld.Build(SeedFor(Leg), ForestWorld.FirstOrigin, Leg, PassageStyle.None, StyleFor(Leg));
             SetLook(true);
             robot.EnterArena();
             robot.gameObject.SetActive(true);
-            pos = checkpoint = new Vector3(0f, world.TerrainY(0f, -6f), -6f);
+            pos = checkpoint = StartPoint();
             yaw = camYaw = 0f;
             hammer = HammerModels.Held(robot.Visual, Weapons.Level);
 
@@ -198,6 +210,7 @@ namespace SquashBot.Forest
             if (hammer != null) Destroy(hammer.gameObject);
             robot.ExitArena();
             Destroy(world.gameObject);
+            if (nextWorld != null) Destroy(nextWorld.gameObject);
             if (canvas != null) Destroy(canvas.gameObject);
             foreach (var c in crates) { Destroy(c.warn); Destroy(c.box); }
             Destroy(gameObject);
@@ -248,19 +261,24 @@ namespace SquashBot.Forest
             for (int i = 0; i < 12; i++)
             {
                 float a = i * Mathf.PI * 2f / 12f;
-                var c = ForestWorld.ClearingCentre + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 6f;
+                var c = world.ClearingCentre + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 6f;
                 Coin(new Vector3(c.x, world.TerrainY(c.x, c.y), c.y));
             }
-            for (float z = ForestWorld.DeckStart + 4f; z < ForestWorld.DeckEnd - 3f; z += 5f)
-                Coin(new Vector3(UnityEngine.Random.Range(-3f, 3f), ForestWorld.DeckHeight, z));
+            for (float z = ForestWorld.DeckStart + 4f; z < world.DeckEnd - 3f; z += 5f)
+                Coin(new Vector3(UnityEngine.Random.Range(-world.DeckHalfWidth + 1.5f, world.DeckHalfWidth - 1.5f), ForestWorld.DeckHeight, z));
         }
 
         private void BuildSweepers()
         {
             var bark = Resources.Load<Material>("Forest/Bark_Pine");
-            foreach (var (z, speed) in new[] { (100f, 80f), (118f, -95f) })
+            // More logs on every leg's (longer, wider) deck, swinging faster.
+            int count = Mathf.Min(2 + (Leg - 1), 6);
+            for (int i = 0; i < count; i++)
             {
-                var s = new Sweeper { centre = new Vector3(0f, ForestWorld.DeckHeight, z), speed = speed, length = 4.2f, angle = z };
+                float z = Mathf.Lerp(ForestWorld.DeckStart + 10f, world.DeckEnd - 8f, i / (float)(count - 1));
+                float speed = (i % 2 == 0 ? 1f : -1f) * (80f + i * 6f) * (1f + (Leg - 1) * 0.12f);
+                float x = count > 3 ? (i % 2 == 0 ? -1f : 1f) * world.DeckHalfWidth * 0.35f : 0f;
+                var s = new Sweeper { centre = new Vector3(x, ForestWorld.DeckHeight, z), speed = speed, length = world.DeckHalfWidth - 0.5f - Mathf.Abs(x) * 0.3f, angle = z * 7f };
                 var post = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 Destroy(post.GetComponent<Collider>());
                 post.transform.SetParent(world.transform, false);
@@ -279,10 +297,12 @@ namespace SquashBot.Forest
 
         private void BuildEnemies()
         {
-            foreach (var off in new[] { new Vector2(-4f, 3f), new Vector2(4.5f, -2f) })
+            var spots = new[] { new Vector2(-4f, 3f), new Vector2(4.5f, -2f), new Vector2(0.5f, 5.5f), new Vector2(-5f, -4f) };
+            for (int i = 0; i < Mathf.Min(2 + (Leg - 1) / 2, spots.Length); i++)
             {
+                var off = spots[i];
                 var e = new Enemy();
-                var p = ForestWorld.ClearingCentre + off;
+                var p = world.ClearingCentre + off;
                 e.pos = new Vector3(p.x, world.TerrainY(p.x, p.y), p.y);
                 e.root = new GameObject("EnemyRobot").transform;
                 e.root.SetParent(world.transform, false);
@@ -410,7 +430,7 @@ namespace SquashBot.Forest
             endPanel.alpha = 0f;
             endPanel.blocksRaycasts = false;
             health = 1f;
-            pos = checkpoint = new Vector3(0f, world.TerrainY(0f, -6f), -6f);
+            pos = checkpoint = StartPoint();
             yaw = camYaw = 0f;
             camInit = false;
         }
@@ -430,6 +450,7 @@ namespace SquashBot.Forest
                 var to = target - pos;
                 float rel = Mathf.DeltaAngle(camYaw, Mathf.Atan2(to.x, to.z) * Mathf.Rad2Deg) * Mathf.Deg2Rad;
                 joyInput = new Vector2(Mathf.Sin(rel), Mathf.Cos(rel));
+                if (grounded && (InGap(pos.x, pos.z + 0.35f) || rollers.Exists(r => r.localPosition.z > pos.z && r.localPosition.z - pos.z < 1.6f))) jumpQueued = true;
                 return;
             }
             float scale = canvas.GetComponent<RectTransform>().rect.width / Screen.width;
@@ -498,7 +519,8 @@ namespace SquashBot.Forest
             UiFactory.SetBar(healthFill, health);
             healthFill.color = health > 0.6f ? new Color(0.4f, 0.95f, 0.5f) : health > 0.3f ? new Color(1f, 0.82f, 0.3f) : new Color(1f, 0.38f, 0.38f);
             coinText.text = coins.ToString();
-            if (pos.z >= ForestWorld.TunnelZ - 0.5f) EnterTunnel();
+            if (!nearSent && pos.z > world.TunnelZ - 28f) { nearSent = true; TunnelNear?.Invoke(); }
+            if (pos.z >= world.BoardZ - 0.3f) EnterTunnel();
         }
 
         private void Move(float dt)
@@ -549,12 +571,27 @@ namespace SquashBot.Forest
             bool onStairsX = Mathf.Abs(x) < ForestWorld.StairsHalfWidth;
             if (onStairsX && z > ForestWorld.StairsUpStart && z < ForestWorld.DeckStart)
                 return Mathf.Lerp(0f, deckTop, (z - ForestWorld.StairsUpStart) / (ForestWorld.DeckStart - ForestWorld.StairsUpStart));
-            if (onStairsX && z > ForestWorld.DeckEnd && z < ForestWorld.StairsDownEnd)
-                return Mathf.Lerp(deckTop, 0f, (z - ForestWorld.DeckEnd) / (ForestWorld.StairsDownEnd - ForestWorld.DeckEnd));
-            if (Mathf.Abs(x) < ForestWorld.DeckHalfWidth && z >= ForestWorld.DeckStart && z <= ForestWorld.DeckEnd && currentY > deckTop - 0.8f)
+            if (onStairsX && z > world.DeckEnd && z < world.StairsDownEnd)
+                return Mathf.Lerp(deckTop, 0f, (z - world.DeckEnd) / (world.StairsDownEnd - world.DeckEnd));
+            if (Mathf.Abs(x) < world.DeckHalfWidth && z >= ForestWorld.DeckStart && z <= world.DeckEnd && currentY > deckTop - 0.8f && !InGap(x, z))
                 return deckTop;
+            if (InPassage(z)) return 0f; // the passage's rock floor (the land behind the cliff lies lower)
             return world.TerrainY(x, z);
         }
+
+        private bool InPassage(float z) =>
+            z > world.TunnelZ - 0.3f || (world.Entry != PassageStyle.None && z < ForestWorld.EntryMouthZ + 0.3f);
+
+        private bool InGap(float x, float z)
+        {
+            foreach (var g in world.Gaps)
+                if (x > g.xMin + 0.15f && x < g.xMax - 0.15f && z > g.yMin + 0.15f && z < g.yMax - 0.15f) return true;
+            return false;
+        }
+
+        private Vector3 StartPoint() => world.Entry == PassageStyle.None
+            ? new Vector3(0f, world.TerrainY(0f, -6f), -6f)
+            : new Vector3(0f, 0f, ForestWorld.ArriveZ + 0.5f);
 
         /// <summary>Keeps the walker out of trunks, off the deck's sides and edges, and near the way.</summary>
         private Vector3 Collide(Vector3 next)
@@ -572,33 +609,41 @@ namespace SquashBot.Forest
             }
             float deckTop = ForestWorld.DeckHeight;
             bool high = pos.y > deckTop - 0.8f;
-            bool inDeck = Mathf.Abs(next.x) < ForestWorld.DeckHalfWidth + 0.3f && next.z > ForestWorld.DeckStart - 0.3f && next.z < ForestWorld.DeckEnd + 0.3f;
+            bool inDeck = Mathf.Abs(next.x) < world.DeckHalfWidth + 0.3f && next.z > ForestWorld.DeckStart - 0.3f && next.z < world.DeckEnd + 0.3f;
             bool stairs = Mathf.Abs(next.x) < ForestWorld.StairsHalfWidth - 0.25f;
             if (high)
             {
                 // On the deck or the stairs: no stepping off the sides.
-                bool onStairs = next.z < ForestWorld.DeckStart || next.z > ForestWorld.DeckEnd;
-                float limit = onStairs ? ForestWorld.StairsHalfWidth - 0.3f : ForestWorld.DeckHalfWidth - 0.4f;
+                bool onStairs = next.z < ForestWorld.DeckStart || next.z > world.DeckEnd;
+                float limit = onStairs ? ForestWorld.StairsHalfWidth - 0.3f : world.DeckHalfWidth - 0.4f;
                 next.x = Mathf.Clamp(next.x, -limit, limit);
             }
             else if (inDeck && !stairs)
             {
                 next = new Vector3(pos.x, next.y, pos.z); // the deck's side is a wall
             }
-            else if (!high && Mathf.Abs(next.x) < ForestWorld.StairsHalfWidth + 0.3f && next.z > ForestWorld.StairsUpStart && next.z < ForestWorld.StairsDownEnd && !stairs)
+            else if (!high && Mathf.Abs(next.x) < ForestWorld.StairsHalfWidth + 0.3f && next.z > ForestWorld.StairsUpStart && next.z < world.StairsDownEnd && !stairs)
             {
                 next = new Vector3(pos.x, next.y, pos.z);
             }
             // Never wander far from the way.
             float px = world.PathX(next.z);
-            float maxOff = (new Vector2(next.x, next.z) - ForestWorld.ClearingCentre).magnitude < ForestWorld.ClearingRadius + 2f ? 14f : 7f;
+            float maxOff = (new Vector2(next.x, next.z) - world.ClearingCentre).magnitude < ForestWorld.ClearingRadius + 2f ? 14f : 7f;
             next.x = Mathf.Clamp(next.x, px - maxOff, px + maxOff);
-            next.z = Mathf.Clamp(next.z, -12f, ForestWorld.TunnelZ + 1f);
+            next.z = Mathf.Clamp(next.z, world.Entry == PassageStyle.None ? -12f : ForestWorld.ArriveZ, world.BoardZ + 0.5f);
+            // The cliffs either side of a passage are solid: slide along them, never through.
+            if (world.InRock(next.x, next.z))
+            {
+                if (!world.InRock(next.x, pos.z)) next.z = pos.z;
+                else if (!world.InRock(pos.x, next.z)) next.x = pos.x;
+                else { next.x = pos.x; next.z = pos.z; }
+            }
             return next;
         }
 
         private void LateUpdate()
         {
+            UpdateDaylight();
             if (suspended) return;
             var target = world.ToWorld(pos) + Vector3.up * 0.9f;
             var rot = Quaternion.Euler(CamPitch, camYaw, 0f);
@@ -699,10 +744,25 @@ namespace SquashBot.Forest
 
         private void UpdateDeck(float dt)
         {
-            bool onDeck = pos.y > ForestWorld.DeckHeight - 0.5f && pos.z > ForestWorld.DeckStart && pos.z < ForestWorld.DeckEnd;
+            bool onDeck = pos.y > ForestWorld.DeckHeight - 0.5f && pos.z > ForestWorld.DeckStart && pos.z < world.DeckEnd;
             if (pos.z > ForestWorld.StairsUpStart && checkpoint.z < ForestWorld.StairsUpStart) checkpoint = new Vector3(0f, 0f, ForestWorld.StairsUpStart - 2f);
-            if (pos.z > ForestWorld.StairsDownEnd && checkpoint.z < ForestWorld.StairsDownEnd) checkpoint = new Vector3(0f, 0f, ForestWorld.StairsDownEnd + 2f);
+            if (pos.z > world.StairsDownEnd && checkpoint.z < world.StairsDownEnd) checkpoint = new Vector3(0f, 0f, world.StairsDownEnd + 2f);
             checkpoint.y = world.TerrainY(checkpoint.x, checkpoint.z);
+
+            // Holes in the deck: a fall costs health and puts the walker back where it last stood on the stone.
+            bool overDeck = Mathf.Abs(pos.x) < world.DeckHalfWidth && pos.z > ForestWorld.DeckStart && pos.z < world.DeckEnd;
+            if (onDeck && grounded && !InGap(pos.x, pos.z)) deckSafe = pos;
+            if (overDeck && pos.y < ForestWorld.DeckHeight - 1.6f)
+            {
+                fx.Dust(world.ToWorld(pos), new Color(0.5f, 0.42f, 0.3f), 12, 2f);
+                pos = deckSafe;
+                vy = 0f;
+                hurtLeft = 0f;
+                Hurt(pos);
+                pos = deckSafe;
+                camInit = false;
+            }
+            UpdateRollers(dt, onDeck);
 
             // Falling crates: a red mark, then a crate drops onto it.
             if (onDeck)
@@ -710,9 +770,10 @@ namespace SquashBot.Forest
                 crateTimer -= dt;
                 if (crateTimer <= 0f)
                 {
-                    crateTimer = UnityEngine.Random.Range(1.1f, 1.8f);
-                    var spot = new Vector3(Mathf.Clamp(pos.x + UnityEngine.Random.Range(-2.5f, 2.5f), -3.8f, 3.8f), ForestWorld.DeckHeight + 0.1f,
-                        Mathf.Clamp(pos.z + UnityEngine.Random.Range(1f, 6f), ForestWorld.DeckStart + 1f, ForestWorld.DeckEnd - 1f));
+                    crateTimer = UnityEngine.Random.Range(1.1f, 1.8f) / (1f + (Leg - 1) * 0.18f);
+                    float edge = world.DeckHalfWidth - 0.7f;
+                    var spot = new Vector3(Mathf.Clamp(pos.x + UnityEngine.Random.Range(-2.5f, 2.5f), -edge, edge), ForestWorld.DeckHeight + 0.1f,
+                        Mathf.Clamp(pos.z + UnityEngine.Random.Range(1f, 6f), ForestWorld.DeckStart + 1f, world.DeckEnd - 1f));
                     var c = new Crate { spot = spot };
                     c.warn = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                     Destroy(c.warn.GetComponent<Collider>());
@@ -780,6 +841,44 @@ namespace SquashBot.Forest
             }
         }
 
+        /// <summary>From the third leg on, logs roll down the deck towards the walker: jump them.</summary>
+        private void UpdateRollers(float dt, bool onDeck)
+        {
+            if (Leg >= 3 && onDeck)
+            {
+                rollTimer -= dt;
+                if (rollTimer <= 0f && pos.z < world.DeckEnd - 10f)
+                {
+                    rollTimer = UnityEngine.Random.Range(3.2f, 4.6f) / (1f + (Leg - 3) * 0.15f);
+                    var log = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                    Destroy(log.GetComponent<Collider>());
+                    log.name = "RollingLog";
+                    log.transform.SetParent(world.transform, false);
+                    log.transform.localScale = new Vector3(0.75f, world.DeckHalfWidth - 0.4f, 0.75f);
+                    log.transform.localPosition = new Vector3(0f, ForestWorld.DeckHeight + 0.46f, Mathf.Min(pos.z + 14f, world.DeckEnd - 0.5f));
+                    log.GetComponent<MeshRenderer>().sharedMaterial = Resources.Load<Material>("Forest/Bark_Pine");
+                    rollers.Add(log.transform);
+                    AudioManager.PlaySfx(Sfx.Bump, 0.5f, 0.6f);
+                }
+            }
+            float speed = 4.2f + (Leg - 3) * 0.4f;
+            for (int i = rollers.Count - 1; i >= 0; i--)
+            {
+                var r = rollers[i];
+                var p = r.localPosition;
+                p.z -= speed * dt;
+                r.localPosition = p;
+                r.localRotation = Quaternion.Euler(-p.z / 0.375f * Mathf.Rad2Deg, 0f, 90f);
+                if (onDeck && Mathf.Abs(pos.z - p.z) < 0.55f && pos.y < ForestWorld.DeckHeight + 0.75f) Hurt(pos + Vector3.forward);
+                if (p.z < ForestWorld.DeckStart)
+                {
+                    fx.Dust(world.ToWorld(p), new Color(0.5f, 0.42f, 0.3f), 10, 2f);
+                    Destroy(r.gameObject);
+                    rollers.RemoveAt(i);
+                }
+            }
+        }
+
         private void UpdateEnemies(float dt)
         {
             foreach (var e in enemies)
@@ -836,7 +935,7 @@ namespace SquashBot.Forest
             int stage = world.Waypoints.Count - 1;
             for (int i = 0; i < world.Waypoints.Count; i++)
                 if (pos.z < world.Waypoints[i].z - 1f) { next = world.Waypoints[i]; stage = i; break; }
-            bool fight = (new Vector2(pos.x, pos.z) - ForestWorld.ClearingCentre).magnitude < ForestWorld.ClearingRadius + 3f && enemies.Exists(e => !e.dead);
+            bool fight = (new Vector2(pos.x, pos.z) - world.ClearingCentre).magnitude < ForestWorld.ClearingRadius + 3f && enemies.Exists(e => !e.dead);
             string key = fight ? "forest.fight"
                 : pos.y > ForestWorld.DeckHeight - 0.5f && pos.z > ForestWorld.DeckStart - 1f ? "forest.deck"
                 : stage <= 1 ? "forest.follow" : stage == 2 ? "forest.deck" : stage == 3 ? "forest.clearing" : "forest.tunnel";
@@ -853,31 +952,94 @@ namespace SquashBot.Forest
             guide.gameObject.SetActive(!fight);
         }
 
-        /// <summary>Into the tunnel: the forest waits (its HUD and camera step aside) while the tunnel runs.</summary>
+        /// <summary>
+        /// The light follows the camera through the passages: a cave swallows the daylight a few metres in and gives
+        /// it back at the far mouth; a gorge only shades it. The camera's place in the land it left and in the land
+        /// ahead tells how deep in it is.
+        /// </summary>
+        private void UpdateDaylight()
+        {
+            if (sun == null || rig == null) return;
+            var cam = rig.Cam.transform.position;
+            float depth = 0f;
+            var style = PassageStyle.None;
+            if (world != null)
+            {
+                float zIn = cam.z - world.Origin.z;
+                depth = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(world.TunnelZ - 1f, world.TunnelZ + 9f, zIn));
+                style = world.Exit;
+                if (world.Entry != PassageStyle.None && !suspended)
+                {
+                    depth = Mathf.Max(depth, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(ForestWorld.EntryMouthZ + 1f, ForestWorld.EntryMouthZ - 9f, zIn)));
+                    if (zIn < world.TunnelZ - 20f) style = world.Entry;
+                }
+            }
+            if (nextWorld != null)
+            {
+                float zOut = cam.z - nextWorld.Origin.z;
+                depth = Mathf.Min(depth, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(ForestWorld.EntryMouthZ + 1f, ForestWorld.EntryMouthZ - 9f, zOut)));
+            }
+            float dark = depth * (style == PassageStyle.Cave ? 0.93f : style == PassageStyle.Gorge ? 0.4f : 0f);
+            sun.intensity = Mathf.Lerp(1.35f, 0.08f, dark);
+            float a = Mathf.Lerp(1f, 0.16f, dark);
+            RenderSettings.ambientSkyColor = new Color(0.56f, 0.64f, 0.72f) * a;
+            RenderSettings.ambientEquatorColor = new Color(0.42f, 0.47f, 0.4f) * a;
+            RenderSettings.ambientGroundColor = new Color(0.24f, 0.23f, 0.19f) * a;
+            RenderSettings.fogColor = Color.Lerp(new Color(0.74f, 0.8f, 0.84f), new Color(0.05f, 0.05f, 0.06f), dark);
+            if (leaves != null)
+            {
+                var em = leaves.emission;
+                em.rateOverTime = 14f * (1f - depth);
+            }
+        }
+
+        /// <summary>
+        /// Onto the ride: the walker steps into the cart (or onto the raft) where it waits inside the passage, and the
+        /// game runs the passage from here. Nothing is hidden: the land stays where it is, behind.
+        /// </summary>
         private void EnterTunnel()
         {
             if (TunnelReached == null) { Finish(); return; }
             suspended = true;
             canvas.gameObject.SetActive(false);
             guide.gameObject.SetActive(false);
+            joyBase.gameObject.SetActive(false);
             if (hammer != null) hammer.gameObject.SetActive(false);
-            world.gameObject.SetActive(false); // underground now: the forest above would only show through the rock
             robot.ExitArena();
             TunnelReached.Invoke();
         }
 
-        /// <summary>Out of the tunnel: a new stretch of forest (another seed), the robot at its start.</summary>
-        public void NextLeg(int tunnelCoins)
+        /// <summary>
+        /// The next stretch of land, built where the passage comes out (<paramref name="arrival"/>: where the ride
+        /// stops, facing on). Its own entry passage meets the ride's end, so the way runs on without a seam.
+        /// </summary>
+        public void PrepareNext(Vector3 arrival)
         {
+            if (nextWorld != null) Destroy(nextWorld.gameObject);
+            int leg = Leg + 1;
+            nextWorld = ForestWorld.Build(SeedFor(leg), arrival - new Vector3(0f, 0f, ForestWorld.ArriveZ), leg, world.Exit, StyleFor(leg));
+        }
+
+        /// <summary>
+        /// Out of the passage: the walker carries on from exactly where the ride stopped, the camera from exactly where
+        /// it was, in the land built ahead. The land left behind is gone.
+        /// </summary>
+        public void SwitchWorld(int rideCoins, Pose cameraPose)
+        {
+            if (nextWorld == null) return;
             Leg++;
-            coins += tunnelCoins;
+            coins += rideCoins;
             foreach (var c in crates) { Destroy(c.warn); Destroy(c.box); }
             crates.Clear();
+            foreach (var r in rollers) if (r != null) Destroy(r.gameObject);
+            rollers.Clear();
             coinObjs.Clear();
             enemies.Clear();
             sweepers.Clear();
             Destroy(world.gameObject);
-            world = ForestWorld.Build(7 + Leg * 101);
+            world = nextWorld;
+            nextWorld = null;
+            nearSent = false;
             BuildGuide();
             BuildCoins();
             BuildSweepers();
@@ -886,7 +1048,19 @@ namespace SquashBot.Forest
             robot.gameObject.SetActive(true);
             if (hammer == null) hammer = HammerModels.Held(robot.Visual, Weapons.Level);
             hammer.gameObject.SetActive(true);
-            Restart();
+
+            var here = robot.transform.position - world.Origin;
+            pos = checkpoint = new Vector3(here.x, 0f, here.z);
+            deckSafe = new Vector3(0f, ForestWorld.DeckHeight + 0.09f, ForestWorld.DeckStart + 1f);
+            var fwd = robot.Visual.forward;
+            yaw = Mathf.Abs(fwd.x) + Mathf.Abs(fwd.z) > 0.01f ? Mathf.Atan2(fwd.x, fwd.z) * Mathf.Rad2Deg : 0f;
+            camYaw = cameraPose.rotation.eulerAngles.y;
+            camPos = cameraPose.position;
+            camInit = true; // glide from the ride's camera into the walk's
+            vy = 0f;
+            grounded = true;
+            rig.Chase(cameraPose.position, cameraPose.rotation, 60f);
+            robot.ArenaPlace(world.ToWorld(pos), Quaternion.Euler(0f, yaw, 0f) * Vector3.forward);
             canvas.gameObject.SetActive(true);
             suspended = false;
         }

@@ -99,6 +99,11 @@ namespace SquashBot.Gameplay
         public static bool TestInvulnerable;
         /// <summary>Dress the course in the forest's photo textures (the third-person journey's tunnels).</summary>
         public static bool Realistic;
+        /// <summary>Realistic passages: a rock ceiling over the course (a cave) or open to the sky (a gorge).</summary>
+        public static bool RealisticRoof = true;
+
+        /// <summary>Where the robot arrives at the end of a road (world): the course's last row.</summary>
+        public Pose EndPose => new Pose(Center(length + 4f), Rotation(length + 4f));
         private Kind? roadTheme;
         public float Progress => Mathf.Clamp01(z / length);
 
@@ -399,9 +404,18 @@ namespace SquashBot.Gameplay
             {
                 // The forest journey's tunnel: the same course dressed in the photo textures of the forest.
                 Material Load(string n, Material fallback) => Resources.Load<Material>("Forest/" + n) ?? fallback;
-                frameMat = Load("Rock_Mossy", frameMat);
                 slabMat = Load("Rock_Mossy", slabMat);
-                topMat = Load("Bark_Oak", topMat);
+                if (kind != Kind.Surf) // a river keeps its water
+                {
+                    frameMat = Load("Rock_Mossy", frameMat);
+                    topMat = Load("Bark_Oak", topMat);
+                }
+                else
+                {
+                    // A real river: clear green water over the rock bed, no tiles.
+                    frameMat = MaterialFactory.CreateTransparent(new Color(0.16f, 0.36f, 0.34f, 0.72f), new Color(0.02f, 0.06f, 0.06f));
+                    topMat = frameMat;
+                }
                 archMat = Load("Bark_Oak", archMat);
                 blockMat = Load("Rock_Set", blockMat);
                 hurdleMat = Load("Bark_Pine", hurdleMat);
@@ -695,6 +709,20 @@ namespace SquashBot.Gameplay
                 r += 8 + rng.Next(16);
             }
 
+            if (Realistic && roadMode)
+            {
+                // The journey's passages end heading the way they began (the next stretch of land lies straight ahead):
+                // a last gentle turn undoes whatever the bends added up to.
+                float sum = 0f;
+                for (int i = 0; i < n; i++) sum += turn[i];
+                int len = 30, start = Mathf.Max(10, straightFrom - len);
+                for (int i = 0; i < len && start + i < straightFrom; i++)
+                {
+                    float s = Mathf.Sin((i + 0.5f) / len * Mathf.PI);
+                    turn[start + i] -= sum * s * (Mathf.PI / 2f) / len;
+                }
+            }
+
             centers = new Vector3[n];
             headings = new float[n];
             slopes = new float[n];
@@ -798,6 +826,7 @@ namespace SquashBot.Gameplay
         // ---------- Building ----------
 
         private Material shellMat, lampMat;
+        private MaterialPropertyBlock shellTiling;
 
         /// <summary>
         /// The journey's tunnel: mossy stone walls and a vaulted ceiling over every row, a warm lamp every few rows, so
@@ -811,16 +840,22 @@ namespace SquashBot.Gameplay
                 lampMat = MaterialFactory.Create(new Color(1f, 0.8f, 0.45f), new Color(3f, 1.9f, 0.7f));
             }
             float half = Lanes * LaneWidth * 0.5f + 0.45f;
-            const float height = 3.3f;
+            float height = RealisticRoof ? 3.3f : 7.5f; // a gorge's walls rise high and open to the sky
             foreach (float side in new[] { -1f, 1f })
             {
-                Shapes.Rounded("Wall", root, new Vector3(side * (half + 0.3f), height * 0.5f - 0.4f, 0f), new Vector3(0.6f, height + 0.8f, 1.04f), 0.08f, shellMat);
+                float lean = RealisticRoof ? 0f : side * (0.4f + Mathf.PerlinNoise(r * 0.15f, side) * 0.8f);
+                var wall = Shapes.Rounded("Wall", root, new Vector3(side * (half + 0.3f) + lean * 0.5f, height * 0.5f - 0.4f, 0f), new Vector3(0.6f + Mathf.Abs(lean), height + 0.8f, 1.04f), 0.08f, shellMat);
+                // Tile the rock by the wall's height so tall gorge walls don't stretch it.
+                shellTiling ??= new MaterialPropertyBlock();
+                shellTiling.SetVector("_BaseMap_ST", new Vector4(0.6f, (height + 0.8f) / 2f, side * 0.37f, r * 0.29f));
+                wall.GetComponent<MeshRenderer>().SetPropertyBlock(shellTiling);
+                if (!RealisticRoof) continue;
                 var haunch = Shapes.Rounded("Haunch", root, new Vector3(side * (half - 0.25f), height - 0.15f, 0f), new Vector3(1.1f, 0.5f, 1.04f), 0.1f, shellMat);
                 haunch.transform.localRotation = Quaternion.Euler(0f, 0f, side * 35f);
                 if (r % 6 == 0)
                     Shapes.Rounded("Lamp", root, new Vector3(side * (half - 0.02f), 2.1f, 0f), new Vector3(0.12f, 0.22f, 0.18f), 0.04f, lampMat);
             }
-            Shapes.Rounded("Ceiling", root, new Vector3(0f, height + 0.15f, 0f), new Vector3(half * 2f, 0.4f, 1.04f), 0.08f, shellMat);
+            if (RealisticRoof) Shapes.Rounded("Ceiling", root, new Vector3(0f, height + 0.15f, 0f), new Vector3(half * 2f, 0.4f, 1.04f), 0.08f, shellMat);
         }
 
         /// <summary>The robot is on a water-slide row right now.</summary>
@@ -850,7 +885,12 @@ namespace SquashBot.Gameplay
 
         private void BuildRow(int r)
         {
-            if (roadMode && r > length) { BuildLanding(r); return; }
+            if (Realistic && roadMode && r > length + 10) return; // the next land's own passage takes over from here
+            if (roadMode && r > length)
+            {
+                if (Realistic) BuildPassageEnd(r); else BuildLanding(r);
+                return;
+            }
             var root = new GameObject("Row " + r).transform;
             root.SetParent(transform, false);
             root.SetPositionAndRotation(Center(r), Rotation(r));
@@ -868,8 +908,13 @@ namespace SquashBot.Gameplay
                     }
                     continue;
                 }
-                Shapes.Rounded("Frame", root, new Vector3(lx, -0.03f, 0f), new Vector3(LaneWidth * 0.93f, 0.1f, 1.0f), 0.045f, frameMat);
-                Shapes.Rounded("Top", root, new Vector3(lx, 0f, 0f), new Vector3(LaneWidth * 0.78f, 0.1f, 0.8f), 0.045f, topMat);
+                if (Realistic && kind == Kind.Surf)
+                    Shapes.Rounded("River", root, new Vector3(lx, -0.02f, 0f), new Vector3(LaneWidth * 1.01f, 0.1f, 1.02f), 0.01f, frameMat);
+                else
+                {
+                    Shapes.Rounded("Frame", root, new Vector3(lx, -0.03f, 0f), new Vector3(LaneWidth * 0.93f, 0.1f, 1.0f), 0.045f, frameMat);
+                    Shapes.Rounded("Top", root, new Vector3(lx, 0f, 0f), new Vector3(LaneWidth * 0.78f, 0.1f, 0.8f), 0.045f, topMat);
+                }
                 Shapes.Rounded("Slab", root, new Vector3(lx, -0.24f, 0f), new Vector3(LaneWidth * 1.02f, 0.36f, 1.12f), 0.05f, slabMat);
                 if (kind == Kind.Mine)
                     foreach (float rx in new[] { -0.28f, 0.28f })
@@ -935,6 +980,17 @@ namespace SquashBot.Gameplay
         }
 
         private Material landingFrame, landingTop, landingGlow;
+
+        /// <summary>A realistic passage's last rows: rock floor under the same walls, leading out into the next land.</summary>
+        private void BuildPassageEnd(int r)
+        {
+            var root = new GameObject("PassageEnd " + r).transform;
+            root.SetParent(transform, false);
+            root.SetPositionAndRotation(Center(r), Rotation(r));
+            Shapes.Rounded("Floor", root, new Vector3(0f, -0.15f, 0f), new Vector3(Lanes * LaneWidth + 0.9f, 0.4f, 1.04f), 0.06f, Resources.Load<Material>("Forest/Rock_Mossy") ?? slabMat);
+            BuildShell(root, r);
+            rows.Enqueue((r, root));
+        }
 
         /// <summary>The end of a road: a wide landing in the next floor's colours under a glowing arch.</summary>
         private void BuildLanding(int r)

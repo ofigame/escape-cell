@@ -15,7 +15,7 @@ namespace SquashBot.Gameplay
         private const int ForestTunnelLevel = 36;
 
         private ForestPrototype forest;
-        private bool forestRoad;
+        private bool forestRoad, forestPassage;
 
         private void StartForest()
         {
@@ -30,16 +30,18 @@ namespace SquashBot.Gameplay
             forest = ForestPrototype.Begin(robot, cameraRig, fx);
             forest.Exited += EndForest;
             forest.TunnelReached += StartForestTunnel;
+            forest.TunnelNear += PrepareForestPassage;
         }
 
         private void EndForest()
         {
             if (forest == null) return;
-            if (forestRoad)
+            if (forestRoad || forestPassage)
             {
-                forestRoad = false;
+                forestRoad = forestPassage = false;
                 runner.Stop();
                 DuctRunner.Realistic = false;
+                DuctRunner.RealisticRoof = true;
             }
             forest.End();
             forest = null;
@@ -47,27 +49,47 @@ namespace SquashBot.Gameplay
             ShowMenu();
         }
 
-        /// <summary>The tunnel: the road course from the tunnel mouth, a little harder with every leg.</summary>
+        /// <summary>
+        /// The passage, laid while the robot is still walking up to its mouth (so the mouth shows a real way on): the
+        /// road course from where the ride waits inside, a little harder with every leg, and the next land at its far
+        /// end. A cave is ridden in a minecart under a rock roof; a gorge is rafted down a river between high walls
+        /// open to the sky.
+        /// </summary>
+        private void PrepareForestPassage()
+        {
+            if (forestPassage) return;
+            forestPassage = true;
+            DuctRunner.Realistic = true;
+            DuctRunner.RealisticRoof = forest.ExitStyle != PassageStyle.Gorge;
+            runner.PrepareRoad(9000 + forest.Leg * 31, forest.BoardPoint, 0f, ForestTunnelLevel + forest.Leg * 4, 1,
+                DuctRunner.RealisticRoof ? DuctRunner.Kind.Mine : DuctRunner.Kind.Surf);
+            forest.PrepareNext(runner.EndPose.position);
+        }
+
+        /// <summary>Aboard: the ride takes the robot and the camera on from where they are.</summary>
         private void StartForestTunnel()
         {
+            PrepareForestPassage();
             forestRoad = true;
-            DuctRunner.Realistic = true;
-            runner.PrepareRoad(9000 + forest.Leg * 31, forest.TunnelEntry, 0f, ForestTunnelLevel + forest.Leg * 4, 1, DuctRunner.Kind.Mine);
             runner.TakeOver();
             AudioManager.PlayMusic(MusicTheme.Tunnel);
             AudioManager.PlaySfx(Sfx.Hop, 0.8f, 1.2f);
-            ui.ShowIntro(Loc.T("forest.tunnelTitle"), Loc.T("road.run"));
+            ui.ShowIntro(Loc.T(DuctRunner.RealisticRoof ? "forest.tunnelTitle" : "forest.gorgeTitle"), Loc.T("road.run"));
         }
 
-        /// <summary>The tunnel walked: out into the next stretch of forest.</summary>
+        /// <summary>Out of the passage: on foot again in the land ahead, from right where the ride stopped.</summary>
         private void ForestTunnelArrived()
         {
             forestRoad = false;
+            forestPassage = false;
             int got = runner.Coins;
+            var cam = cameraRig.Cam.transform;
+            var pose = new Pose(cam.position, cam.rotation);
             runner.Stop();
             DuctRunner.Realistic = false;
+            DuctRunner.RealisticRoof = true;
             AudioManager.PlayMusic(MusicTheme.Menu);
-            forest.NextLeg(got);
+            forest.SwitchWorld(got, pose);
             ui.ShowIntro(Loc.F("forest.legTitle", forest.Leg), Loc.T("forest.follow"));
         }
     }
