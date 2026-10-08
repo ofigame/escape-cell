@@ -652,7 +652,7 @@ namespace SquashBot.UI
                 settingValues[SettingKind.Vibration].color = new Color(1f, 1f, 1f, 0.5f);
             }
             settingValues[SettingKind.Language].text = Loc.T("lang.name");
-            settingValues[SettingKind.Camera].text = Loc.T(SaveData.PerspectiveView ? "view.3d" : "view.iso");
+            settingValues[SettingKind.Camera].text = Loc.T("camDist." + SaveData.CameraDistance);
             var gfx = Loc.T("gfx." + GraphicsQuality.Current);
             settingValues[SettingKind.Graphics].text = GraphicsQuality.Choice.HasValue ? gfx : Loc.F("gfx.auto", gfx);
             settingValues[SettingKind.Graphics].color = Palette.UiCyan;

@@ -54,6 +54,8 @@ namespace SquashBot.Data
             int floorTiles = size * size;
             level.bugs = Mathf.Clamp(2 + Mathf.RoundToInt(d * 12f), 2, Mathf.Max(2, floorTiles / 7));
             level.robots = index == 0 ? 0 : Mathf.Clamp(1 + Mathf.RoundToInt(d * 7f), 1, Mathf.Max(1, floorTiles / 12));
+            // Now and then a tall humanoid enforcer joins them (from level 13), more often late on.
+            level.brutes = index < 12 ? 0 : (index % 4 == 1 ? 1 : 0) + (d > 0.55f && index % 2 == 0 ? 1 : 0);
             level.robotHp = 2 + Mathf.RoundToInt(d * 3f);
             level.robotStep = Mathf.Lerp(1.05f, 0.5f, d);
             level.monsterHp = 6 + Mathf.RoundToInt(d * 26f);

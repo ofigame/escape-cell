@@ -60,6 +60,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 2
     robots: 0
+    brutes: 0
     robotHp: 2
     robotStep: 1.05
     monsterHp: 6
@@ -129,6 +130,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 2
     robots: 1
+    brutes: 0
     robotHp: 2
     robotStep: 1.0461648
     monsterHp: 6
@@ -199,6 +201,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 2
     robots: 1
+    brutes: 0
     robotHp: 2
     robotStep: 1.0428433
     monsterHp: 6
@@ -269,6 +272,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 2
     robots: 1
+    brutes: 0
     robotHp: 2
     robotStep: 1.0396916
     monsterHp: 6
@@ -340,6 +344,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 2
     robots: 1
+    brutes: 0
     robotHp: 2
     robotStep: 1.0366452
     monsterHp: 7
@@ -411,6 +416,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 2
     robots: 1
+    brutes: 0
     robotHp: 2
     robotStep: 1.0336748
     monsterHp: 7
@@ -483,6 +489,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 2
     robots: 1
+    brutes: 0
     robotHp: 2
     robotStep: 1.0307637
     monsterHp: 7
@@ -555,6 +562,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 2
     robots: 1
+    brutes: 0
     robotHp: 2
     robotStep: 1.027901
     monsterHp: 7
@@ -628,6 +636,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 1
+    brutes: 0
     robotHp: 2
     robotStep: 1.025079
     monsterHp: 7
@@ -701,6 +710,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 1
+    brutes: 0
     robotHp: 2
     robotStep: 1.0222921
     monsterHp: 7
@@ -773,6 +783,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 1
+    brutes: 0
     robotHp: 2
     robotStep: 1.0195363
     monsterHp: 7
@@ -847,6 +858,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 1
+    brutes: 0
     robotHp: 2
     robotStep: 1.0168077
     monsterHp: 8
@@ -921,6 +933,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 1
+    brutes: 0
     robotHp: 2
     robotStep: 1.0141039
     monsterHp: 8
@@ -995,6 +1008,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 1
+    brutes: 1
     robotHp: 2
     robotStep: 1.0114226
     monsterHp: 8
@@ -1069,6 +1083,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 1.0087619
     monsterHp: 8
@@ -1143,6 +1158,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 1.0061201
     monsterHp: 8
@@ -1217,6 +1233,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 1.0034958
     monsterHp: 8
@@ -1288,6 +1305,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 2
+    brutes: 1
     robotHp: 2
     robotStep: 1.000888
     monsterHp: 8
@@ -1362,6 +1380,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 0.9982954
     monsterHp: 8
@@ -1434,6 +1453,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 0.9957172
     monsterHp: 9
@@ -1509,6 +1529,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 0.9931526
     monsterHp: 9
@@ -1584,6 +1605,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 2
+    brutes: 1
     robotHp: 2
     robotStep: 0.99060076
     monsterHp: 9
@@ -1656,6 +1678,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 0.988061
     monsterHp: 9
@@ -1731,6 +1754,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 0.9855328
     monsterHp: 9
@@ -1806,6 +1830,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 3
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 0.9830156
     monsterHp: 9
@@ -1881,6 +1906,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 1
     robotHp: 2
     robotStep: 0.98050886
     monsterHp: 9
@@ -1956,6 +1982,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 0.9780121
     monsterHp: 9
@@ -2031,6 +2058,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 0.9755249
     monsterHp: 10
@@ -2107,6 +2135,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 0.97304696
     monsterHp: 10
@@ -2183,6 +2212,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 1
     robotHp: 2
     robotStep: 0.97057784
     monsterHp: 10
@@ -2259,6 +2289,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 0.9681172
     monsterHp: 10
@@ -2335,6 +2366,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 0.96566474
     monsterHp: 10
@@ -2411,6 +2443,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 0.96322024
     monsterHp: 10
@@ -2487,6 +2520,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 1
     robotHp: 2
     robotStep: 0.9607833
     monsterHp: 10
@@ -2562,6 +2596,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 0
     robotHp: 2
     robotStep: 0.9583538
     monsterHp: 10
@@ -2638,6 +2673,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 0
     robotHp: 3
     robotStep: 0.95593137
     monsterHp: 10
@@ -2714,6 +2750,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 0
     robotHp: 3
     robotStep: 0.9535159
     monsterHp: 11
@@ -2790,6 +2827,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 1
     robotHp: 3
     robotStep: 0.95110714
     monsterHp: 11
@@ -2866,6 +2904,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 0
     robotHp: 3
     robotStep: 0.94870484
     monsterHp: 11
@@ -2943,6 +2982,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 0
     robotHp: 3
     robotStep: 0.94630885
     monsterHp: 11
@@ -3020,6 +3060,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 0
     robotHp: 3
     robotStep: 0.94391906
     monsterHp: 11
@@ -3096,6 +3137,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 1
     robotHp: 3
     robotStep: 0.9415352
     monsterHp: 11
@@ -3173,6 +3215,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 0
     robotHp: 3
     robotStep: 0.9391571
     monsterHp: 11
@@ -3250,6 +3293,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 4
     robots: 2
+    brutes: 0
     robotHp: 3
     robotStep: 0.93678474
     monsterHp: 11
@@ -3327,6 +3371,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 2
+    brutes: 0
     robotHp: 3
     robotStep: 0.93441784
     monsterHp: 11
@@ -3404,6 +3449,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 1
     robotHp: 3
     robotStep: 0.9320563
     monsterHp: 12
@@ -3481,6 +3527,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.9297
     monsterHp: 12
@@ -3558,6 +3605,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.9273489
     monsterHp: 12
@@ -3632,6 +3680,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.92500275
     monsterHp: 12
@@ -3710,6 +3759,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 1
     robotHp: 3
     robotStep: 0.9226614
     monsterHp: 12
@@ -3787,6 +3837,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.9203249
     monsterHp: 12
@@ -3865,6 +3916,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.9179931
     monsterHp: 12
@@ -3943,6 +3995,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.91566586
     monsterHp: 12
@@ -4020,6 +4073,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 1
     robotHp: 3
     robotStep: 0.9133431
     monsterHp: 12
@@ -4098,6 +4152,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.91102463
     monsterHp: 13
@@ -4176,6 +4231,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.90871054
     monsterHp: 13
@@ -4254,6 +4310,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.90640056
     monsterHp: 13
@@ -4332,6 +4389,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 1
     robotHp: 3
     robotStep: 0.9040948
     monsterHp: 13
@@ -4406,6 +4464,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.90179306
     monsterHp: 13
@@ -4484,6 +4543,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.89949524
     monsterHp: 13
@@ -4559,6 +4619,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.89720136
     monsterHp: 13
@@ -4638,6 +4699,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 1
     robotHp: 3
     robotStep: 0.8949113
     monsterHp: 13
@@ -4717,6 +4779,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.8926249
     monsterHp: 13
@@ -4796,6 +4859,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 5
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.8903423
     monsterHp: 14
@@ -4875,6 +4939,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.88806325
     monsterHp: 14
@@ -4949,6 +5014,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 1
     robotHp: 3
     robotStep: 0.8857878
     monsterHp: 14
@@ -5028,6 +5094,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.88351583
     monsterHp: 14
@@ -5106,6 +5173,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.8812473
     monsterHp: 14
@@ -5185,6 +5253,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.8789822
     monsterHp: 14
@@ -5263,6 +5332,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 1
     robotHp: 3
     robotStep: 0.87672037
     monsterHp: 14
@@ -5342,6 +5412,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.8744618
     monsterHp: 14
@@ -5421,6 +5492,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.8722065
     monsterHp: 14
@@ -5497,6 +5569,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.86995435
     monsterHp: 15
@@ -5577,6 +5650,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 1
     robotHp: 3
     robotStep: 0.86770535
     monsterHp: 15
@@ -5657,6 +5731,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.8654594
     monsterHp: 15
@@ -5737,6 +5812,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.8632165
     monsterHp: 15
@@ -5817,6 +5893,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.8609766
     monsterHp: 15
@@ -5897,6 +5974,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 1
     robotHp: 3
     robotStep: 0.8587396
     monsterHp: 15
@@ -5977,6 +6055,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.8565056
     monsterHp: 15
@@ -6055,6 +6134,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 3
+    brutes: 0
     robotHp: 3
     robotStep: 0.85427433
     monsterHp: 15
@@ -6135,6 +6215,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.85204595
     monsterHp: 15
@@ -6214,6 +6295,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 4
+    brutes: 1
     robotHp: 3
     robotStep: 0.8498204
     monsterHp: 15
@@ -6294,6 +6376,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.84759754
     monsterHp: 16
@@ -6374,6 +6457,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 6
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.8453774
     monsterHp: 16
@@ -6450,6 +6534,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.8431599
     monsterHp: 16
@@ -6531,6 +6616,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 1
     robotHp: 3
     robotStep: 0.8409451
     monsterHp: 16
@@ -6612,6 +6698,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.83873284
     monsterHp: 16
@@ -6693,6 +6780,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.8365232
     monsterHp: 16
@@ -6774,6 +6862,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.8343161
     monsterHp: 16
@@ -6855,6 +6944,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 1
     robotHp: 3
     robotStep: 0.8321115
     monsterHp: 16
@@ -6936,6 +7026,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.8299093
     monsterHp: 16
@@ -7012,6 +7103,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.8277097
     monsterHp: 17
@@ -7093,6 +7185,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.8255124
     monsterHp: 17
@@ -7174,6 +7267,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 1
     robotHp: 3
     robotStep: 0.8233175
     monsterHp: 17
@@ -7255,6 +7349,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.821125
     monsterHp: 17
@@ -7336,6 +7431,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.8189348
     monsterHp: 17
@@ -7412,6 +7508,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.8167469
     monsterHp: 17
@@ -7494,6 +7591,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 1
     robotHp: 3
     robotStep: 0.81456125
     monsterHp: 17
@@ -7576,6 +7674,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.8123779
     monsterHp: 17
@@ -7658,6 +7757,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.81019676
     monsterHp: 17
@@ -7740,6 +7840,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.80801785
     monsterHp: 17
@@ -7822,6 +7923,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 1
     robotHp: 3
     robotStep: 0.8058411
     monsterHp: 18
@@ -7904,6 +8006,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.8036665
     monsterHp: 18
@@ -7986,6 +8089,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.801494
     monsterHp: 18
@@ -8068,6 +8172,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 7
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.7993237
     monsterHp: 18
@@ -8150,6 +8255,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 4
+    brutes: 1
     robotHp: 3
     robotStep: 0.7971554
     monsterHp: 18
@@ -8232,6 +8338,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.79498917
     monsterHp: 18
@@ -8314,6 +8421,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.792825
     monsterHp: 18
@@ -8396,6 +8504,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.7906629
     monsterHp: 18
@@ -8478,6 +8587,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 4
+    brutes: 1
     robotHp: 3
     robotStep: 0.78850275
     monsterHp: 18
@@ -8555,6 +8665,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.7863446
     monsterHp: 18
@@ -8638,6 +8749,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.78418833
     monsterHp: 19
@@ -8721,6 +8833,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.7820341
     monsterHp: 19
@@ -8804,6 +8917,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 4
+    brutes: 1
     robotHp: 3
     robotStep: 0.7798818
     monsterHp: 19
@@ -8887,6 +9001,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.7777313
     monsterHp: 19
@@ -8970,6 +9085,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 4
+    brutes: 0
     robotHp: 3
     robotStep: 0.7755828
     monsterHp: 19
@@ -9053,6 +9169,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.77343607
     monsterHp: 19
@@ -9134,6 +9251,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.77129126
     monsterHp: 19
@@ -9217,6 +9335,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.76914823
     monsterHp: 19
@@ -9300,6 +9419,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.76700705
     monsterHp: 19
@@ -9383,6 +9503,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.76486766
     monsterHp: 19
@@ -9466,6 +9587,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.76273006
     monsterHp: 20
@@ -9549,6 +9671,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.76059425
     monsterHp: 20
@@ -9633,6 +9756,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.75846016
     monsterHp: 20
@@ -9717,6 +9841,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.7563278
     monsterHp: 20
@@ -9801,6 +9926,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 8
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.7541972
     monsterHp: 20
@@ -9885,6 +10011,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.7520682
     monsterHp: 20
@@ -9969,6 +10096,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.749941
     monsterHp: 20
@@ -10053,6 +10181,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.74781543
     monsterHp: 20
@@ -10135,6 +10264,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.74569154
     monsterHp: 20
@@ -10219,6 +10349,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.74356925
     monsterHp: 20
@@ -10303,6 +10434,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.74144864
     monsterHp: 21
@@ -10387,6 +10519,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.73932964
     monsterHp: 21
@@ -10471,6 +10604,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.73721224
     monsterHp: 21
@@ -10553,6 +10687,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.7350964
     monsterHp: 21
@@ -10637,6 +10772,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.73298216
     monsterHp: 21
@@ -10714,6 +10850,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.73086953
     monsterHp: 21
@@ -10799,6 +10936,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.72875834
     monsterHp: 21
@@ -10884,6 +11022,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.7266488
     monsterHp: 21
@@ -10969,6 +11108,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.72454077
     monsterHp: 21
@@ -11054,6 +11194,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.7224342
     monsterHp: 21
@@ -11137,6 +11278,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.72032917
     monsterHp: 22
@@ -11222,6 +11364,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.71822566
     monsterHp: 22
@@ -11307,6 +11450,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.7161236
     monsterHp: 22
@@ -11390,6 +11534,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.714023
     monsterHp: 22
@@ -11475,6 +11620,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.71192384
     monsterHp: 22
@@ -11558,6 +11704,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.7098262
     monsterHp: 22
@@ -11643,6 +11790,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 9
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.70772994
     monsterHp: 22
@@ -11721,6 +11869,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.70563513
     monsterHp: 22
@@ -11806,6 +11955,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.7035417
     monsterHp: 22
@@ -11891,6 +12041,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.7014497
     monsterHp: 22
@@ -11977,6 +12128,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 5
+    brutes: 0
     robotHp: 4
     robotStep: 0.6993591
     monsterHp: 23
@@ -12063,6 +12215,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 5
+    brutes: 1
     robotHp: 4
     robotStep: 0.6972699
     monsterHp: 23
@@ -12147,6 +12300,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.695182
     monsterHp: 23
@@ -12233,6 +12387,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.69309556
     monsterHp: 23
@@ -12319,6 +12474,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 0
     robotHp: 4
     robotStep: 0.6910104
     monsterHp: 23
@@ -12403,6 +12559,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.68892664
     monsterHp: 23
@@ -12489,6 +12646,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.6868442
     monsterHp: 23
@@ -12573,6 +12731,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.6847631
     monsterHp: 23
@@ -12659,6 +12818,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 0
     robotHp: 4
     robotStep: 0.6826833
     monsterHp: 23
@@ -12738,6 +12898,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.68060476
     monsterHp: 23
@@ -12824,6 +12985,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.67852753
     monsterHp: 24
@@ -12910,6 +13072,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.6764517
     monsterHp: 24
@@ -12989,6 +13152,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 0
     robotHp: 4
     robotStep: 0.674377
     monsterHp: 24
@@ -13075,6 +13239,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.6723037
     monsterHp: 24
@@ -13161,6 +13326,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.6702316
     monsterHp: 24
@@ -13248,6 +13414,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.66816074
     monsterHp: 24
@@ -13335,6 +13502,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 0
     robotHp: 4
     robotStep: 0.66609114
     monsterHp: 24
@@ -13420,6 +13588,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.6640228
     monsterHp: 24
@@ -13507,6 +13676,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 10
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.66195565
     monsterHp: 24
@@ -13592,6 +13762,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.65988976
     monsterHp: 24
@@ -13679,6 +13850,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 0
     robotHp: 4
     robotStep: 0.65782505
     monsterHp: 25
@@ -13766,6 +13938,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.6557616
     monsterHp: 25
@@ -13853,6 +14026,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.65369934
     monsterHp: 25
@@ -13940,6 +14114,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.65163827
     monsterHp: 25
@@ -14025,6 +14200,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 0
     robotHp: 4
     robotStep: 0.64957833
     monsterHp: 25
@@ -14112,6 +14288,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.64751965
     monsterHp: 25
@@ -14199,6 +14376,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.6454621
     monsterHp: 25
@@ -14286,6 +14464,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.6434057
     monsterHp: 25
@@ -14371,6 +14550,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 0
     robotHp: 4
     robotStep: 0.64135045
     monsterHp: 25
@@ -14457,6 +14637,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.63929635
     monsterHp: 25
@@ -14545,6 +14726,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.63724345
     monsterHp: 26
@@ -14631,6 +14813,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.6351916
     monsterHp: 26
@@ -14719,6 +14902,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 0
     robotHp: 4
     robotStep: 0.6331409
     monsterHp: 26
@@ -14807,6 +14991,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.63109136
     monsterHp: 26
@@ -14895,6 +15080,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.62904286
     monsterHp: 26
@@ -14983,6 +15169,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.62699556
     monsterHp: 26
@@ -15069,6 +15256,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 0
     robotHp: 4
     robotStep: 0.6249493
     monsterHp: 26
@@ -15157,6 +15345,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.6229041
     monsterHp: 26
@@ -15243,6 +15432,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.6208601
     monsterHp: 26
@@ -15331,6 +15521,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 6
+    brutes: 1
     robotHp: 4
     robotStep: 0.6188171
     monsterHp: 26
@@ -15417,6 +15608,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 7
+    brutes: 0
     robotHp: 4
     robotStep: 0.6167752
     monsterHp: 26
@@ -15503,6 +15695,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 11
     robots: 7
+    brutes: 1
     robotHp: 4
     robotStep: 0.61473435
     monsterHp: 27
@@ -15591,6 +15784,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 4
     robotStep: 0.61269456
     monsterHp: 27
@@ -15679,6 +15873,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 4
     robotStep: 0.61065584
     monsterHp: 27
@@ -15768,6 +15963,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 0
     robotHp: 4
     robotStep: 0.60861814
     monsterHp: 27
@@ -15857,6 +16053,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 4
     robotStep: 0.60658157
     monsterHp: 27
@@ -15946,6 +16143,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 4
     robotStep: 0.604546
     monsterHp: 27
@@ -16035,6 +16233,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 4
     robotStep: 0.6025114
     monsterHp: 27
@@ -16124,6 +16323,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 0
     robotHp: 4
     robotStep: 0.6004779
     monsterHp: 27
@@ -16213,6 +16413,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 4
     robotStep: 0.59844536
     monsterHp: 27
@@ -16295,6 +16496,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 4
     robotStep: 0.59641385
     monsterHp: 27
@@ -16384,6 +16586,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 4
     robotStep: 0.5943834
     monsterHp: 28
@@ -16470,6 +16673,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 0
     robotHp: 4
     robotStep: 0.59235394
     monsterHp: 28
@@ -16557,6 +16761,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.5903255
     monsterHp: 28
@@ -16646,6 +16851,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.588298
     monsterHp: 28
@@ -16735,6 +16941,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.58627146
     monsterHp: 28
@@ -16824,6 +17031,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 0
     robotHp: 5
     robotStep: 0.58424604
     monsterHp: 28
@@ -16913,6 +17121,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.58222145
     monsterHp: 28
@@ -17002,6 +17211,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.58019793
     monsterHp: 28
@@ -17091,6 +17301,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.57817537
     monsterHp: 28
@@ -17179,6 +17390,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 0
     robotHp: 5
     robotStep: 0.5761537
     monsterHp: 28
@@ -17269,6 +17481,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.57413304
     monsterHp: 28
@@ -17359,6 +17572,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.57211334
     monsterHp: 29
@@ -17449,6 +17663,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 12
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.5700945
     monsterHp: 29
@@ -17536,6 +17751,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 0
     robotHp: 5
     robotStep: 0.5680767
     monsterHp: 29
@@ -17624,6 +17840,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.5660598
     monsterHp: 29
@@ -17714,6 +17931,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.5640439
     monsterHp: 29
@@ -17795,6 +18013,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.5620289
     monsterHp: 29
@@ -17885,6 +18104,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 0
     robotHp: 5
     robotStep: 0.5600148
     monsterHp: 29
@@ -17975,6 +18195,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.55800164
     monsterHp: 29
@@ -18065,6 +18286,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.5559893
     monsterHp: 29
@@ -18155,6 +18377,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.55397797
     monsterHp: 29
@@ -18245,6 +18468,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 0
     robotHp: 5
     robotStep: 0.5519675
     monsterHp: 30
@@ -18335,6 +18559,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.54995793
     monsterHp: 30
@@ -18425,6 +18650,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.5479493
     monsterHp: 30
@@ -18516,6 +18742,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.5459416
     monsterHp: 30
@@ -18604,6 +18831,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 0
     robotHp: 5
     robotStep: 0.5439347
     monsterHp: 30
@@ -18693,6 +18921,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.5419287
     monsterHp: 30
@@ -18784,6 +19013,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 7
+    brutes: 1
     robotHp: 5
     robotStep: 0.53992367
     monsterHp: 30
@@ -18866,6 +19096,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.5379194
     monsterHp: 30
@@ -18957,6 +19188,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 8
+    brutes: 0
     robotHp: 5
     robotStep: 0.53591603
     monsterHp: 30
@@ -19048,6 +19280,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.5339135
     monsterHp: 30
@@ -19139,6 +19372,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.5319119
     monsterHp: 30
@@ -19230,6 +19464,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.52991116
     monsterHp: 31
@@ -19321,6 +19556,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 8
+    brutes: 0
     robotHp: 5
     robotStep: 0.52791125
     monsterHp: 31
@@ -19412,6 +19648,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.52591217
     monsterHp: 31
@@ -19500,6 +19737,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 13
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.523914
     monsterHp: 31
@@ -19591,6 +19829,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 14
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.52191657
     monsterHp: 31
@@ -19680,6 +19919,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 14
     robots: 8
+    brutes: 0
     robotHp: 5
     robotStep: 0.51992005
     monsterHp: 31
@@ -19771,6 +20011,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 14
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.5179243
     monsterHp: 31
@@ -19862,6 +20103,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 14
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.51592946
     monsterHp: 31
@@ -19954,6 +20196,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 14
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.51393545
     monsterHp: 31
@@ -20046,6 +20289,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 14
     robots: 8
+    brutes: 0
     robotHp: 5
     robotStep: 0.5119422
     monsterHp: 31
@@ -20138,6 +20382,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 14
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.5099498
     monsterHp: 32
@@ -20230,6 +20475,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 14
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.50795823
     monsterHp: 32
@@ -20322,6 +20568,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 14
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.5059675
     monsterHp: 32
@@ -20412,6 +20659,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 14
     robots: 8
+    brutes: 0
     robotHp: 5
     robotStep: 0.5039775
     monsterHp: 32
@@ -20504,6 +20752,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 14
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.50198835
     monsterHp: 32
@@ -20593,6 +20842,7 @@ MonoBehaviour:
     springbots: 0
     bugs: 14
     robots: 8
+    brutes: 1
     robotHp: 5
     robotStep: 0.5
     monsterHp: 32

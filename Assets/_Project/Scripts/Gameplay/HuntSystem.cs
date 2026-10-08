@@ -34,11 +34,18 @@ namespace SquashBot.Gameplay
             public GridPos target;
             public int hp;
             public GuardBot bot;
+            public HumanoidBot human;
             public Transform root;
-            public bool dead;
+            public bool dead, brute;
+            /// <summary>The tiles its slam will hit (the target, and its neighbours for a brute).</summary>
+            public readonly List<GridPos> area = new List<GridPos>();
+
+            public void SetRaise(float k) { if (bot != null) bot.SetRaise(k); else human.SetRaise(k); }
+            public void Flash() { if (bot != null) bot.Flash(); else human.Flash(); }
         }
 
-        public event Action<GridPos> Hit;
+        /// <summary>The robot was hit on a tile, taking this share of its health.</summary>
+        public event Action<GridPos, float> Hit;
         public event Action MonsterAppeared;
         public event Action MonsterDefeated;
         /// <summary>A bug or robot was finished (its tile), for coins and combos.</summary>
@@ -65,6 +72,7 @@ namespace SquashBot.Gameplay
         private bool attackIsRock, frozen, running;
         private System.Random rng;
         private Color bugColour;
+        private int world;
 
         public bool MonsterUp => monster != null && !monster.Dead;
         public bool MonsterDown { get; private set; }
@@ -99,6 +107,7 @@ namespace SquashBot.Gameplay
             this.grid = grid;
             this.level = level;
             rng = new System.Random(seed);
+            this.world = world;
             bugColour = Color.HSVToRGB(Mathf.Repeat(world * 0.137f + 0.1f, 1f), 0.7f, 1f);
             running = true;
             frozen = false;
@@ -107,6 +116,7 @@ namespace SquashBot.Gameplay
             var free = FreeTiles(Mathf.Clamp(Mathf.Min(grid.Width, grid.Height) / 2, 1, 3)); // not right next to the robot (small floors allow less room)
             for (int i = 0; i < level.bugs && free.Count > 0; i++) AddBug(Take(free));
             for (int i = 0; i < level.robots && free.Count > 0; i++) AddGuard(Take(free));
+            for (int i = 0; i < level.brutes && free.Count > 0; i++) AddGuard(Take(free), brute: true);
             Total = bugs.Count + guards.Count;
             if (Total == 0) RaiseMonster();
         }
@@ -153,20 +163,31 @@ namespace SquashBot.Gameplay
         private void AddBug(GridPos p)
         {
             var b = new Bug { pos = p, wait = (float)rng.NextDouble() };
-            b.model = BugModel.Build(transform, bugColour);
+            b.model = BugModel.Build(transform, bugColour, world % BugModel.Kinds); // a new kind of bug every world
             b.from = b.to = At(p);
             b.model.transform.position = b.to;
             b.model.transform.rotation = Quaternion.Euler(0f, rng.Next(4) * 90f, 0f);
             bugs.Add(b);
         }
 
-        private void AddGuard(GridPos p)
+        private void AddGuard(GridPos p, bool brute = false)
         {
-            var g = new Guard { pos = p, hp = level.robotHp, step = level.robotStep * (0.8f + (float)rng.NextDouble() * 0.4f) };
-            g.root = new GameObject("GuardRobot").transform;
+            var g = new Guard { pos = p, brute = brute, hp = brute ? level.robotHp * 2 + 2 : level.robotHp, step = level.robotStep * (0.8f + (float)rng.NextDouble() * 0.4f) };
+            g.root = new GameObject(brute ? "Enforcer" : "GuardRobot").transform;
             g.root.SetParent(transform, false);
-            g.bot = GuardBot.Build(g.root);
-            g.bot.transform.localScale = Vector3.one * 0.62f;
+            var accent = Color.HSVToRGB(Mathf.Repeat(world * 0.21f + 0.55f, 1f), 0.75f, 1f);
+            if (brute)
+            {
+                // vanG's enforcer: a tall humanoid that hits much harder.
+                g.human = HumanoidBot.Build(g.root, accent);
+                g.human.transform.localScale = Vector3.one * 0.7f;
+            }
+            else
+            {
+                // A new build of guard every world, in that world's colour.
+                g.bot = GuardBot.Build(g.root, Color.Lerp(accent, new Color(0.3f, 0.3f, 0.35f), 0.35f), world);
+                g.bot.transform.localScale = Vector3.one * 0.62f;
+            }
             g.from = g.to = At(p);
             g.root.position = g.to;
             grid.SetOccupied(p, true);
@@ -220,7 +241,7 @@ namespace SquashBot.Gameplay
                 if (g.dead || g.pos != p) continue;
                 g.hp -= damage;
                 g.flash = 1f;
-                g.bot.Flash();
+                g.Flash();
                 g.windup = -1f;
                 ClearTelegraph(g);
                 fx.Burst(At(p) + Vector3.up * 0.4f, Palette.UiGold, Palette.CoinGlow, 18, 4f);
@@ -252,9 +273,11 @@ namespace SquashBot.Gameplay
         private void KillBug(Bug b)
         {
             b.dead = true;
+            // Squashed flat on its tile: a spray of its blood and a splat that fades, the body pressed into the floor.
             b.model.Squash();
-            Destroy(b.model.gameObject, 1.2f);
-            fx.Burst(At(b.pos) + Vector3.up * 0.1f, bugColour, bugColour * 1.5f, 14, 3f);
+            Destroy(b.model.gameObject, 0.9f);
+            BloodSplat.Create(b.model.transform.position, b.model.Blood, rng.Next());
+            fx.Burst(At(b.pos) + Vector3.up * 0.08f, b.model.Blood, b.model.Blood * 0.6f, 10, 2f);
             AudioManager.PlaySfx(Sfx.Squash, 0.6f, 1.6f);
             Finished?.Invoke(b.pos, false);
             CheckCleared();
@@ -408,35 +431,45 @@ namespace SquashBot.Gameplay
 
             if (g.windup >= 0f)
             {
-                // Winding up: the target tile glows ever redder; the slam lands on it.
+                // Winding up: the tiles it will hit glow ever redder; the slam lands on them.
                 g.windup += dt;
-                float k = g.windup / WindTime;
-                g.bot.SetRaise(k * 1.3f);
-                view.SetWarning(g.target, 0.4f + 0.6f * k);
+                float k = g.windup / (g.brute ? BruteWindTime : WindTime);
+                g.SetRaise(k * 1.3f);
+                foreach (var t in g.area) view.SetWarning(t, 0.4f + 0.6f * k);
                 if (k >= 1f)
                 {
                     g.windup = -1f;
-                    g.cooldown = 1.1f;
-                    g.bot.SetRaise(0f);
-                    view.SetWarning(g.target, 0f);
-                    Shockwave.Create(At(g.target), 1f, new Color(1f, 0.5f, 0.3f));
-                    AudioManager.PlaySfx(Sfx.Impact, 0.7f, 0.8f);
-                    rig.Shake(0.3f);
-                    if (robot.Position == g.target) Hit?.Invoke(g.target);
+                    g.cooldown = g.brute ? 1.3f : 0.55f;
+                    g.SetRaise(0f);
+                    foreach (var t in g.area) view.SetWarning(t, 0f);
+                    Shockwave.Create(At(g.target), g.brute ? 2.2f : 1f, new Color(1f, 0.5f, 0.3f));
+                    if (g.brute) fx.Dust(At(g.target), new Color(0.55f, 0.5f, 0.45f), 18, 4f);
+                    AudioManager.PlaySfx(Sfx.Impact, g.brute ? 1f : 0.7f, g.brute ? 0.55f : 0.8f);
+                    rig.Shake(g.brute ? 0.8f : 0.3f);
+                    if (g.area.Contains(robot.Position)) Hit?.Invoke(robot.Position, g.brute ? BruteHitShare : GuardHitShare);
+                    g.area.Clear();
                 }
                 return;
             }
             if (g.moveT < 1f) return;
-            int dist = robot.Position.Manhattan(g.pos);
-            if (dist == 1 && g.cooldown <= 0f)
+            // Any tile touching it, diagonals too: it swings as soon as it can.
+            int near = Chebyshev(robot.Position, g.pos);
+            if (near <= 1 && g.cooldown <= 0f)
             {
                 g.windup = 0f;
                 g.target = robot.Position;
+                g.area.Clear();
+                g.area.Add(g.target);
+                if (g.brute)
+                    foreach (var d in DirectionExtensions.All)
+                        if (grid.IsFloor(g.target + d.ToOffset())) g.area.Add(g.target + d.ToOffset());
                 return;
             }
+            int dist = robot.Position.Manhattan(g.pos);
             g.step -= dt;
-            if (g.step > 0f || dist <= 1) return;
-            g.step = level.robotStep;
+            if (g.step > 0f || near <= 1) return;
+            g.step = level.robotStep * (g.brute ? 1.3f : 0.72f);
+            if (g.human != null) g.human.Step();
             // One step towards the robot along whichever axis brings it closer and is free.
             GridPos bestNext = g.pos;
             int bestDist = dist;
@@ -450,7 +483,10 @@ namespace SquashBot.Gameplay
             if (bestNext != g.pos) MoveGuard(g, bestNext, level.robotStep);
         }
 
-        private float WindTime => Mathf.Lerp(0.85f, 0.55f, level.score / 100f);
+        private float WindTime => Mathf.Lerp(0.7f, 0.45f, level.score / 100f);
+        private float BruteWindTime => Mathf.Lerp(0.95f, 0.7f, level.score / 100f);
+        /// <summary>Health shares a guard's slam, an enforcer's smash and the monster's blows take.</summary>
+        private const float GuardHitShare = 0.2f, BruteHitShare = 0.45f, MonsterHitShare = 0.3f;
 
         private void UpdateMonster(float dt)
         {
@@ -470,7 +506,7 @@ namespace SquashBot.Gameplay
                 }
                 rig.Shake(attackIsRock ? 0.4f : 0.7f);
                 AudioManager.PlaySfx(Sfx.Impact, 1f, attackIsRock ? 1f : 0.6f);
-                if (attackTiles.Contains(robot.Position)) Hit?.Invoke(robot.Position);
+                if (attackTiles.Contains(robot.Position)) Hit?.Invoke(robot.Position, MonsterHitShare);
                 attackTiles.Clear();
                 return;
             }
@@ -506,7 +542,8 @@ namespace SquashBot.Gameplay
 
         private void ClearTelegraph(Guard g)
         {
-            if (g.windup >= 0f || view != null) view?.SetWarning(g.target, 0f);
+            foreach (var t in g.area) view?.SetWarning(t, 0f);
+            g.area.Clear();
         }
 
         private void ClearTelegraph()

@@ -23,7 +23,13 @@ namespace SquashBot.Gameplay
         {
             hunt = new GameObject("Hunt").AddComponent<HuntSystem>();
             hunt.Init(gridView, robot, fx, cameraRig);
-            hunt.Hit += OnBlockImpact;
+            hunt.Hit += (p, share) =>
+            {
+                // A robot's or the monster's blow: its own share of health, not a crate's.
+                hitShareOverride = share;
+                OnBlockImpact(p);
+                hitShareOverride = -1f;
+            };
             hunt.Finished += OnHuntFinished;
             hunt.MonsterAppeared += () =>
             {
@@ -134,11 +140,13 @@ namespace SquashBot.Gameplay
             target.y = 0f;
             closeCamFocus = closeCamOn ? Vector3.Lerp(closeCamFocus, target, 1f - Mathf.Exp(-8f * Time.deltaTime)) : target;
             closeCamOn = true;
-            var pos = closeCamFocus + CloseCamOffset;
+            var pos = closeCamFocus + CloseCamOffset * CamDistanceScale[SaveData.CameraDistance];
             cameraRig.Chase(pos, Quaternion.LookRotation(closeCamFocus + Vector3.up * 0.35f - pos), CloseCamFov);
         }
 
-        private static readonly Vector3 CloseCamOffset = new Vector3(-3.8f, 5.4f, -3.8f); // near, but with room to see what comes
+        private static readonly Vector3 CloseCamOffset = new Vector3(-2.7f, 3.9f, -2.7f);
+        /// <summary>The settings' camera distances (near, medium, far, farthest), as multiples of the nearest view.</summary>
+        private static readonly float[] CamDistanceScale = { 1.4f, 1.7f, 2.0f, 2.45f };
         private const float CloseCamFov = 50f;
     }
 }

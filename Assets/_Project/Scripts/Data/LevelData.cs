@@ -158,6 +158,8 @@ namespace SquashBot.Data
         public int bugs;
         [Tooltip("Guard robots to beat with the hammer.")]
         public int robots;
+        [Tooltip("Tall humanoid enforcers that hit much harder (now and then).")]
+        public int brutes;
         public int robotHp = 2;
         [Tooltip("Seconds between a guard robot's steps.")]
         public float robotStep = 1f;

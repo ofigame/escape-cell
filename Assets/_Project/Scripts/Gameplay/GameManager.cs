@@ -772,8 +772,7 @@ namespace SquashBot.Gameplay
                     GraphicsQuality.Next();
                     break;
                 case SettingKind.Camera:
-                    SaveData.PerspectiveView = !SaveData.PerspectiveView;
-                    cameraRig.SetMode(SaveData.PerspectiveView ? ViewMode.Perspective : ViewMode.Isometric);
+                    SaveData.CameraDistance = (SaveData.CameraDistance + 1) % 4; // near → medium → far → farthest
                     break;
                 case SettingKind.Language:
                     ui.Languages.Show();
