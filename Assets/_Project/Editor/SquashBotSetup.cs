@@ -424,8 +424,8 @@ namespace SquashBot.EditorTools
         {
             PlayerSettings.companyName = "OFIGAME";
             PlayerSettings.productName = "foi | cell"; // the game's name, under the icon and in the stores
-            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.ofigame.escapecell");
-            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.iOS, "com.ofigame.escapecell");
+            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.ofigame.foicell");
+            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.iOS, "com.ofigame.foicell");
             PlayerSettings.iOS.targetOSVersionString = "15.0";
             PlayerSettings.iOS.buildNumber = "1";
             PlayerSettings.iOS.appleEnableAutomaticSigning = false; // the cloud build compiles unsigned; signing happens at install time

@@ -75,11 +75,25 @@ namespace SquashBot.Data
             }
         }
 
-        /// <summary>Default for first launch: the device's language when the game speaks it, English otherwise.</summary>
+        /// <summary>
+        /// Default for first launch: the device's language when the game speaks it, English otherwise. The device's
+        /// own locale code is read first (Unity's systemLanguage has no Azerbaijani), then Unity's guess.
+        /// </summary>
         public static Language SystemDefault
         {
             get
             {
+                switch (DeviceLanguageCode())
+                {
+                    case "tr": return Language.Turkish;
+                    case "az": return Language.Azerbaijani;
+                    case "ar": return Language.Arabic;
+                    case "es": return Language.Spanish;
+                    case "de": return Language.German;
+                    case "ko": return Language.Korean;
+                    case "it": return Language.Italian;
+                    case "en": return Language.English;
+                }
                 switch (Application.systemLanguage)
                 {
                     case SystemLanguage.Turkish: return Language.Turkish;
@@ -90,6 +104,26 @@ namespace SquashBot.Data
                     case SystemLanguage.Italian: return Language.Italian;
                     default: return Language.English;
                 }
+            }
+        }
+
+        /// <summary>The device's language as a two-letter code ("tr", "az"...), or "" when it can't be read.</summary>
+        private static string DeviceLanguageCode()
+        {
+            try
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                using (var locale = new AndroidJavaClass("java.util.Locale"))
+                using (var current = locale.CallStatic<AndroidJavaObject>("getDefault"))
+                    return (current.Call<string>("getLanguage") ?? "").ToLowerInvariant();
+#else
+                var culture = System.Globalization.CultureInfo.CurrentUICulture;
+                return culture == null || culture.Equals(System.Globalization.CultureInfo.InvariantCulture) ? "" : culture.TwoLetterISOLanguageName.ToLowerInvariant();
+#endif
+            }
+            catch
+            {
+                return "";
             }
         }
 
@@ -212,7 +246,7 @@ namespace SquashBot.Data
             ["weapon.kind.Sword"] = "Sword: very fast swings",
             ["weapon.kind.Axe"] = "Axe: slow but hits hard",
             ["weapon.kind.Mace"] = "Mace: crushing heavy blows",
-            ["weapon.kind.Spear"] = "Spear: strikes a tile farther",
+            ["weapon.kind.Spear"] = "Spear: quick, sharp thrusts",
             ["weapon.equip"] = "EQUIP",
             ["weapon.equipped"] = "EQUIPPED",
             ["tip.title"] = "MAKE IT EASIER!",
@@ -230,7 +264,7 @@ namespace SquashBot.Data
             ["camDist.3"] = "FARTHEST",
             ["brief.huntCrates"] = "Crates fall from the sky. A red mark shows where: step off it!",
             ["brief.huntCrowd"] = "Step on the bugs to squash them. Tap a robot to hit it with your hammer!",
-            ["brief.huntMonster"] = "When they are all gone, the big monster comes. Dodge its red tiles and hammer it down!",
+            ["brief.huntMonster"] = "When they are all gone, vanG's cage opens. Dodge its red tiles, beat it, then cross the bridge to the tunnel!",
             ["mission.hunt"] = "Squash the bugs and beat the robots, then defeat the monster!",
             ["mission.hunt.up"] = "SQUASH THE BUGS, BEAT THE ROBOTS, DEFEAT THE MONSTER!",
             ["hud.hunt"] = "Bugs & robots left: {0}/{1}",
@@ -2356,7 +2390,7 @@ namespace SquashBot.Data
             ["weapon.kind.Sword"] = "Kılıç: çok hızlı vuruşlar",
             ["weapon.kind.Axe"] = "Balta: yavaş ama sert vurur",
             ["weapon.kind.Mace"] = "Gürz: ezici, ağır darbeler",
-            ["weapon.kind.Spear"] = "Mızrak: bir kare daha uzağa vurur",
+            ["weapon.kind.Spear"] = "Mızrak: hızlı ve keskin saplamalar",
             ["weapon.equip"] = "KUŞAN",
             ["weapon.equipped"] = "KUŞANILDI",
             ["tip.title"] = "DAHA KOLAY GEÇ!",
@@ -2374,7 +2408,7 @@ namespace SquashBot.Data
             ["camDist.3"] = "ÇOK UZAK",
             ["brief.huntCrates"] = "Gökten kasalar düşer. Kırmızı işaret yerini gösterir: hemen çekil!",
             ["brief.huntCrowd"] = "Böceklerin üstüne basıp ez. Robota dokun, çekicinle vur!",
-            ["brief.huntMonster"] = "Hepsi bitince büyük canavar gelir. Kırmızı karelerden kaç ve onu yere ser!",
+            ["brief.huntMonster"] = "Hepsi bitince vanG'nin kafesi açılır. Kırmızı karelerden kaç, onu yen, sonra köprüden tünele geç!",
             ["mission.hunt"] = "Böcekleri ez, robotları yen, sonra canavarı alt et!",
             ["mission.hunt.up"] = "BÖCEKLERİ EZ, ROBOTLARI YEN, CANAVARI ALT ET!",
             ["hud.hunt"] = "Kalan böcek ve robot: {0}/{1}",

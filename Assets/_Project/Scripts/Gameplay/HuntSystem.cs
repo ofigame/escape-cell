@@ -32,7 +32,10 @@ namespace SquashBot.Gameplay
             public Vector3 from, to;
             public float moveT = 1f, step, windup = -1f, cooldown, flash;
             public GridPos target;
-            public int hp;
+            public int hp, maxHp;
+            /// <summary>The health bar over its head (turns to the camera) and its fill.</summary>
+            public Transform bar, barFill;
+            public Material barMat;
             public GuardBot bot;
             public HumanoidBot human;
             public Transform root;
@@ -204,6 +207,8 @@ namespace SquashBot.Gameplay
                 g.bot = GuardBot.Build(g.root, Color.Lerp(accent, new Color(0.3f, 0.3f, 0.35f), 0.35f), world);
                 g.bot.transform.localScale = Vector3.one * 0.62f * EnemyScale;
             }
+            g.maxHp = Mathf.Max(1, g.hp);
+            AddHealthBar(g);
             g.from = g.to = At(p);
             g.root.position = g.to;
             grid.SetOccupied(p, true);
@@ -502,8 +507,41 @@ namespace SquashBot.Gameplay
             g.step = duration;
         }
 
+
+        /// <summary>A small health bar over a guard's head: dark back, a fill that empties and turns from green to red.</summary>
+        private void AddHealthBar(Guard g)
+        {
+            float top = 0f;
+            foreach (var r in g.root.GetComponentsInChildren<Renderer>()) top = Mathf.Max(top, r.bounds.max.y - g.root.position.y);
+            g.bar = new GameObject("HealthBar").transform;
+            g.bar.SetParent(g.root, false);
+            g.bar.localPosition = new Vector3(0f, top + 0.28f, 0f);
+            float w = g.brute ? 1.05f : 0.8f;
+            Shapes.Rounded("Back", g.bar, Vector3.zero, new Vector3(w + 0.08f, 0.15f, 0.03f), 0.05f, MaterialFactory.Create(new Color(0.08f, 0.06f, 0.12f), Color.black));
+            g.barMat = MaterialFactory.Create(new Color(0.4f, 1f, 0.45f), new Color(0.4f, 1.5f, 0.45f));
+            g.barFill = new GameObject("Fill").transform;
+            g.barFill.SetParent(g.bar, false);
+            g.barFill.localPosition = new Vector3(-w * 0.5f, 0f, -0.025f);
+            Shapes.Rounded("Fill", g.barFill, new Vector3(w * 0.5f, 0f, 0f), new Vector3(w, 0.09f, 0.02f), 0.04f, g.barMat);
+            // Notches: one per point of health, so it reads how many blows are left.
+            if (g.maxHp > 1 && g.maxHp <= 12)
+                for (int i = 1; i < g.maxHp; i++)
+                    Shapes.Rounded("Notch", g.bar, new Vector3(-w * 0.5f + w * i / g.maxHp, 0f, -0.04f), new Vector3(0.02f, 0.12f, 0.02f), 0.008f, MaterialFactory.Create(new Color(0.08f, 0.06f, 0.12f), Color.black));
+        }
+
+        private void UpdateHealthBar(Guard g)
+        {
+            if (g.bar == null) return;
+            var cam = Camera.main;
+            if (cam != null) g.bar.rotation = Quaternion.LookRotation(cam.transform.forward, Vector3.up);
+            float k = Mathf.Clamp01(g.hp / (float)g.maxHp);
+            g.barFill.localScale = new Vector3(Mathf.Max(0.001f, k), 1f, 1f);
+            var c = Color.Lerp(new Color(1f, 0.3f, 0.3f), new Color(0.4f, 1f, 0.45f), k);
+            MaterialFactory.SetColors(g.barMat, c, c * 1.5f);
+        }
         private void UpdateGuard(Guard g, float dt)
         {
+            UpdateHealthBar(g);
             if (g.flash > 0f) g.flash -= dt * 3f;
             g.cooldown -= dt;
             if (g.moveT < 1f)
@@ -538,9 +576,9 @@ namespace SquashBot.Gameplay
                 return;
             }
             if (g.moveT < 1f) return;
-            // Any tile touching it, diagonals too: it swings as soon as it can.
+            // Within two tiles (diagonals count as one), the same reach as foi's blows: it swings as soon as it can.
             int near = Chebyshev(robot.Position, g.pos);
-            if (near <= 1 && g.cooldown <= 0f)
+            if (near <= AttackReach && g.cooldown <= 0f)
             {
                 g.windup = 0f;
                 g.target = robot.Position;
@@ -635,11 +673,16 @@ namespace SquashBot.Gameplay
             int dist = Chebyshev(robot.Position, monsterPos);
             // On a healing island foi is out of reach: the monster waits (and growls) until it comes back.
             if (grid.IsSafe(robot.Position)) { monsterTimer = 0.6f; return; }
-            // Far away: from the second stretch of the campaign the monster leaps after the robot instead of waiting.
-            if (dist >= 4 && hard > 0.12f && rng.NextDouble() < 0.35f + 0.4f * hard && TryLeap()) return;
+            // Farther than two tiles it can't hit foi: it leaps closer (or waits a moment and tries again).
+            if (dist > AttackReach)
+            {
+                if (rng.NextDouble() < 0.5f + 0.4f * hard && TryLeap()) return;
+                monsterTimer = 0.5f;
+                return;
+            }
             if (comboLeft <= 0 && rng.NextDouble() < hard * 0.8f + (enraged ? 0.25f : 0f)) comboLeft = hard > 0.6f ? 2 : 1;
-            // Close by: a stomp all around. Farther: a rock at the robot's tile (and, later, its neighbours too).
-            if (dist <= 2 && rng.Next(3) > 0)
+            // Right next to it: a stomp all around. Two tiles off: a rock at foi's tile (and, later, its neighbours too).
+            if (dist <= 1 && rng.Next(3) > 0)
             {
                 attackIsRock = false;
                 int r = level.score > 55 || enraged && level.score > 25 ? 2 : 1;
@@ -707,12 +750,23 @@ namespace SquashBot.Gameplay
         /// A fight is on near <paramref name="p"/>: a guard or enforcer within <paramref name="range"/> tiles, or vanG awake
         /// and a little farther. Bugs don't count.
         /// </summary>
+        /// <summary>A guard, an enforcer or the monster stands on this tile (not a bug).</summary>
+        public bool IsFighter(GridPos p)
+        {
+            if (MonsterUp && monsterPos == p) return true;
+            foreach (var g in guards) if (!g.dead && g.pos == p) return true;
+            return false;
+        }
+
         public bool InCombat(GridPos p, int range)
         {
             if (!running) return false;
             foreach (var g in guards) if (!g.dead && Chebyshev(g.pos, p) <= range) return true;
             return MonsterUp && MonsterAwake && Chebyshev(monsterPos, p) <= range + 2;
         }
+
+        /// <summary>How far the robots and vanG reach with a blow: two tiles, like foi; three is out of reach.</summary>
+        public const int AttackReach = 2;
 
         public static int Chebyshev(GridPos a, GridPos b) => Mathf.Max(Mathf.Abs(a.x - b.x), Mathf.Abs(a.y - b.y));
     }

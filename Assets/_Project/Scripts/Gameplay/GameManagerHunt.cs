@@ -10,13 +10,14 @@ namespace SquashBot.Gameplay
     /// <summary>
     /// The core loop (<see cref="MissionType.Hunt"/>): crates fall, bugs and guard robots roam (see
     /// <see cref="HuntSystem"/>), the robot strikes whatever is tapped — a robot, a bug, a crate on the floor, the
-    /// monster — when it is within reach (two tiles; four while the super skill runs; farther taps step towards it),
+    /// monster — when it is within reach (two tiles; farther taps step towards it),
     /// and the floor is won when the monster that rises after the crowd falls. The camera stays close behind the
     /// robot (a fixed angle, so swipes always mean the same directions).
     /// </summary>
     public partial class GameManager
     {
-        private const int StrikeReach = 2, SuperStrikeReach = 4;
+        /// <summary>How far a blow reaches (diagonals count as one step), for every weapon and the super skill alike.</summary>
+        private const int StrikeReach = 2;
         private HuntSystem hunt;
         private float strikeCooldown;
         private WeaponDef weapon;
@@ -98,6 +99,7 @@ namespace SquashBot.Gameplay
         private void UpdateHunt(float dt)
         {
             strikeCooldown -= dt;
+            UpdatePendingStrike();
         }
 
         private void OnHuntFinished(GridPos p, bool robotKind)
@@ -147,7 +149,7 @@ namespace SquashBot.Gameplay
             {
                 if (Armory.Owned(w) || !Armory.Unlocked(w) || Armory.Power(w) <= Armory.Power(current)) continue;
                 bool crowded = level.robots + level.brutes >= 4;
-                bool fits = crowded ? w.reach >= 3 || w.damage > current.damage : w.damage > current.damage || w.cooldown < current.cooldown * 0.8f;
+                bool fits = crowded ? w.cooldown < current.cooldown * 0.85f || w.damage > current.damage : w.damage > current.damage || w.cooldown < current.cooldown * 0.8f;
                 if (!fits) continue;
                 if (better == null || w.price < better.price) better = w;
             }
@@ -244,9 +246,10 @@ namespace SquashBot.Gameplay
             }
             if (!crowd && !crate) return false;
 
-            var w = weapon ?? Armory.Equipped;
-            int reach = w.reach + (superLeft > 0f ? SuperStrikeReach - StrikeReach : 0);
-            if (HuntSystem.Chebyshev(at, robot.Position) > reach)
+            // Two tiles away (diagonals count as one) is in reach for every weapon; three is not.
+            bool inReach = HuntSystem.Chebyshev(at, robot.Position) <= StrikeReach;
+            TapMarker.Create(GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY, inReach ? new Color(1f, 0.82f, 0.3f) : new Color(0.6f, 0.9f, 1f));
+            if (!inReach)
             {
                 // Too far: a step towards it.
                 int dx = at.x - robot.Position.x, dy = at.y - robot.Position.y;
@@ -254,7 +257,31 @@ namespace SquashBot.Gameplay
                 robot.TryMove(dir);
                 return true;
             }
-            if (strikeCooldown > 0f || !robot.Strike(GridView.ToWorld(at))) return true;
+            if (crowd && hunt.IsFighter(at)) lastStrikeTap = Time.time; // the fight view comes in while foi attacks a robot or vanG (not bugs)
+            if (!TryStrikeNow(at, crowd)) pendingStrike = (at, crowd, Time.time); // mid-hop or between swings: strike as soon as foi can
+            return true;
+        }
+
+        /// <summary>A tapped target waiting for foi to land or for the weapon to come round (dropped after a moment).</summary>
+        private (GridPos at, bool crowd, float time)? pendingStrike;
+        private float lastStrikeTap = -10f;
+
+        private void UpdatePendingStrike()
+        {
+            if (!pendingStrike.HasValue) return;
+            var (at, crowd, time) = pendingStrike.Value;
+            if (Time.time - time > 0.35f || HuntSystem.Chebyshev(at, robot.Position) > StrikeReach) { pendingStrike = null; return; }
+            if (TryStrikeNow(at, crowd)) pendingStrike = null;
+        }
+
+        /// <summary>
+        /// The blow itself, when foi is free to swing: it turns to face the target at once (behind it too) and
+        /// strikes. False when it can't yet (mid-hop, or the weapon is still coming round).
+        /// </summary>
+        private bool TryStrikeNow(GridPos at, bool crowd)
+        {
+            var w = weapon ?? Armory.Equipped;
+            if (strikeCooldown > 0f || !robot.Strike(GridView.ToWorld(at))) return false;
             strikeCooldown = w.cooldown;
             int damage = w.damage * (superLeft > 0f ? 2 : 1);
             if (heldWeapon != null) heldWeapon.Swing();
@@ -281,7 +308,9 @@ namespace SquashBot.Gameplay
         /// <summary>A lean towards the side a blow went to (degrees), held for a moment after each strike.</summary>
         private float strikeLean, strikeLeanLeft;
         /// <summary>0 = the usual view .. 1 = the low, close fight view; and how long since the last enemy was near.</summary>
-        private float combatBlend, combatBlendVelocity, combatQuiet;
+        private float combatBlend, combatBlendVelocity;
+        /// <summary>Seconds the fight view stays after the last attack.</summary>
+        private const float FightViewHold = 1.3f;
 
         /// <summary>
         /// After a blow the camera turns a little towards it: right when the target stood to the right or straight
@@ -333,11 +362,10 @@ namespace SquashBot.Gameplay
             closeCamOn = true;
             camPull = Mathf.SmoothDamp(camPull, pullGoal, ref camPullVelocity, 0.9f, Mathf.Infinity, dt);
 
-            // The fight view: when a robot comes within three tiles (or vanG is awake nearby) the camera glides lower
-            // and closer; it rises again a moment after the last one is gone. Never for bugs, and only if the setting is on.
-            bool fight = !walking && SaveData.CombatCamera && hunt.InCombat(robot.Position, combatBlend > 0.5f ? 5 : 3);
-            combatQuiet = fight ? 0f : combatQuiet + dt;
-            float fightGoal = fight || combatQuiet < 1.2f && combatBlend > 0.5f && SaveData.CombatCamera ? 1f : 0f;
+            // The fight view: while foi is attacking a robot or vanG (a tap on one in the last moment) the camera glides
+            // lower and closer; when the attacks stop it rises again. Never for bugs, and only if the setting is on.
+            bool fight = !walking && SaveData.CombatCamera && Time.time - lastStrikeTap < FightViewHold;
+            float fightGoal = fight ? 1f : 0f;
             combatBlend = Mathf.SmoothDamp(combatBlend, fightGoal, ref combatBlendVelocity, 0.45f, Mathf.Infinity, dt);
 
             // A small lean towards the way the robot faces, settling slowly like a slow-motion pan (never a snap).

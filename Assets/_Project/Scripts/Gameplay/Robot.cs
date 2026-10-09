@@ -606,6 +606,7 @@ namespace SquashBot.Gameplay
             if (dir.sqrMagnitude < 0.0001f) return false;
             dir.Normalize();
             targetFacing = Quaternion.LookRotation(dir);
+            visual.localRotation = targetFacing; // face the target at once, even one behind: no slow turn before a blow
             StartAnim(Anim.Bump, transform.position, transform.position + dir * 0.32f);
             return true;
         }

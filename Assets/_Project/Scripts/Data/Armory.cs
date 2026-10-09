@@ -36,11 +36,11 @@ namespace SquashBot.Data
             new WeaponDef { id = "ironSword", kind = WeaponKind.Sword, tier = 2, damage = 2, reach = 2, cooldown = 0.13f, price = 400, unlockAt = 4 },
             new WeaponDef { id = "stoneAxe", kind = WeaponKind.Axe, tier = 1, damage = 3, reach = 2, cooldown = 0.3f, price = 900, unlockAt = 11 },
             new WeaponDef { id = "steelHammer", kind = WeaponKind.Hammer, tier = 2, damage = 3, reach = 2, cooldown = 0.22f, price = 1500, unlockAt = 22 },
-            new WeaponDef { id = "spear", kind = WeaponKind.Spear, tier = 2, damage = 2, reach = 3, cooldown = 0.2f, price = 1800, unlockAt = 32 },
+            new WeaponDef { id = "spear", kind = WeaponKind.Spear, tier = 2, damage = 2, reach = 2, cooldown = 0.2f, price = 1800, unlockAt = 32 },
             new WeaponDef { id = "mace", kind = WeaponKind.Mace, tier = 3, damage = 4, reach = 2, cooldown = 0.34f, price = 3000, unlockAt = 50 },
             new WeaponDef { id = "crystalSword", kind = WeaponKind.Sword, tier = 4, damage = 3, reach = 2, cooldown = 0.12f, price = 4200, unlockAt = 70 },
             new WeaponDef { id = "battleAxe", kind = WeaponKind.Axe, tier = 4, damage = 5, reach = 2, cooldown = 0.27f, price = 6000, unlockAt = 95 },
-            new WeaponDef { id = "stormSpear", kind = WeaponKind.Spear, tier = 4, damage = 4, reach = 3, cooldown = 0.18f, price = 8000, unlockAt = 125 },
+            new WeaponDef { id = "stormSpear", kind = WeaponKind.Spear, tier = 4, damage = 4, reach = 2, cooldown = 0.18f, price = 8000, unlockAt = 125 },
             new WeaponDef { id = "starHammer", kind = WeaponKind.Hammer, tier = 5, damage = 6, reach = 2, cooldown = 0.23f, price = 12000, unlockAt = 165 },
             new WeaponDef { id = "flameSword", kind = WeaponKind.Sword, tier = 5, damage = 5, reach = 2, cooldown = 0.11f, price = 16000, unlockAt = 205 },
         };
