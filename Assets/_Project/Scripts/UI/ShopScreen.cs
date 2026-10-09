@@ -120,6 +120,7 @@ namespace SquashBot.UI
                     foreach (var t in Tools.All) ToolCell(t);
                     break;
                 case Tab.Upgrades:
+                    FifiCell();
                     foreach (var item in new[] { Item.Shield, Item.Armor, Item.Rescue, Item.Magnet, Item.Hover, Item.Lives }) ItemCell(item);
                     PaintCell();
                     break;
@@ -531,6 +532,53 @@ namespace SquashBot.UI
                 desc.text = left > 0 ? Loc.F("ad.coinsLeft", left) : Loc.T("ad.coinsTomorrow");
                 label.text = left <= 0 ? Loc.T("shop.full") : ready ? Loc.T("ad.watch") : Loc.T("ad.notReady");
                 Afford(buy, left > 0 && ready, true);
+            });
+        }
+
+        /// <summary>Fifi, foi's companion: its level, what it does, and the next upgrade.</summary>
+        private void FifiCell()
+        {
+            var card = Cell("Fifi", new Color(0.45f, 1f, 0.75f), out var picture);
+            // Fifi's face: a boxy shell with a dark screen and two green eyes.
+            var shell = UiFactory.Box("Shell", picture, new Vector2(0.5f, 0.5f), new Vector2(0f, 10f), new Vector2(230f, 190f));
+            shell.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(shell, new Color(0.85f, 0.88f, 0.92f), UiSprites.Rounded, 0.6f).raycastTarget = false;
+            var screenRect = UiFactory.Box("Screen", shell, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(170f, 110f));
+            screenRect.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(screenRect, new Color(0.12f, 0.24f, 0.2f), UiSprites.Rounded, 1f).raycastTarget = false;
+            foreach (float x in new[] { -38f, 38f })
+            {
+                var eye = UiFactory.Box("Eye", screenRect, new Vector2(0.5f, 0.5f), new Vector2(x, 4f), new Vector2(40f, 40f));
+                eye.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(eye, new Color(0.55f, 1f, 0.6f), UiSprites.Circle).raycastTarget = false;
+            }
+            CardName(card, Loc.T("fifi.name"));
+            var desc = CardDesc(card);
+            var pips = Pips(card, FifiUpgrades.MaxLevel);
+            var buy = BuyButton(card, () =>
+            {
+                if (FifiUpgrades.TryUpgrade())
+                {
+                    AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
+                    Haptics.Medium();
+                    Pop(card);
+                    bip.Queue(Loc.F("fifi.bip", FifiUpgrades.Level));
+                    Purchased?.Invoke();
+                }
+                else
+                {
+                    AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                    if (!FifiUpgrades.IsMaxed) WorkshopTalk.Poor(bip);
+                }
+                Refresh();
+            });
+            var label = buy.GetComponentInChildren<TextMeshProUGUI>();
+            refreshers.Add(() =>
+            {
+                SetPips(pips, FifiUpgrades.Level);
+                desc.text = Loc.F("fifi.stats", FifiUpgrades.ZapDamage, FifiUpgrades.ZapInterval.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture), FifiUpgrades.MaxHealth);
+                label.text = FifiUpgrades.IsMaxed ? Loc.T("shop.max") : FifiUpgrades.NextPrice.ToString();
+                Afford(buy, !FifiUpgrades.IsMaxed, SaveData.Coins >= FifiUpgrades.NextPrice);
             });
         }
 

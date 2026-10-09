@@ -19,6 +19,7 @@ namespace SquashBot.Visual
                 case 2: return new Color(0.82f, 0.86f, 0.95f);
                 case 3: return new Color(0.55f, 0.85f, 1f);
                 case 4: return new Color(0.75f, 0.5f, 1f);
+                case 6: return new Color(0.45f, 1f, 0.95f); // utopian plasma
                 default: return new Color(1f, 0.6f, 0.2f);
             }
         }
@@ -31,6 +32,7 @@ namespace SquashBot.Visual
                 case 2: return MaterialFactory.Create(new Color(0.78f, 0.8f, 0.86f), new Color(0.05f, 0.05f, 0.06f));
                 case 3: return MaterialFactory.Create(new Color(0.55f, 0.85f, 1f), new Color(0.3f, 0.7f, 1.1f));
                 case 4: return MaterialFactory.Create(new Color(0.78f, 0.55f, 1f), new Color(0.7f, 0.35f, 1.4f));
+                case 6: return MaterialFactory.Create(new Color(0.8f, 1f, 0.97f), new Color(0.6f, 2.4f, 2.2f));
                 default: return MaterialFactory.Create(new Color(1f, 0.62f, 0.2f), new Color(2.2f, 0.9f, 0.2f));
             }
         }

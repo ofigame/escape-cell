@@ -13,12 +13,12 @@ namespace SquashBot.Data
     {
         private const string LevelKey = "sb_pack_level";
 
-        /// <summary>Room at each level (1..7).</summary>
-        private static readonly int[] Capacities = { 4, 9, 16, 26, 40, 56, 72 };
+        /// <summary>Room at each level (1..8).</summary>
+        private static readonly int[] Capacities = { 4, 9, 16, 26, 40, 56, 72, 96 };
         /// <summary>The price of reaching each level (level 1 is where everyone starts).</summary>
-        private static readonly int[] Prices = { 0, 400, 1200, 2800, 5500, 9500, 15000 };
+        private static readonly int[] Prices = { 0, 400, 1200, 2800, 5500, 9500, 15000, 22000 };
         /// <summary>Skill orbs of one kind the backpack holds at each level.</summary>
-        private static readonly int[] OrbRoom = { 3, 4, 5, 6, 7, 8, 9 };
+        private static readonly int[] OrbRoom = { 3, 4, 5, 6, 7, 8, 9, 9 };
 
         public static int MaxLevel => Capacities.Length;
 
@@ -50,6 +50,8 @@ namespace SquashBot.Data
                 case "stormSpear": return 6;
                 case "starHammer": return 8;
                 case "flameSword": return 9;
+                case "plasmaBlade": return 10;
+                case "novaMace": return 12;
                 default: return w.tier + 1;
             }
         }

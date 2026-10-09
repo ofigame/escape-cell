@@ -27,6 +27,7 @@ namespace SquashBot.Gameplay
         /// <summary>Back to the plain robot outside the core loop (normal size, empty-handed).</summary>
         private void ClearHuntDress()
         {
+            ClearFifi();
             if (robot != null) robot.transform.localScale = Vector3.one;
             Robot.HopScale = 1f;
             if (heldWeapon != null) Destroy(heldWeapon.gameObject);
@@ -46,6 +47,7 @@ namespace SquashBot.Gameplay
             };
             hunt.Finished += OnHuntFinished;
             hunt.SleepingHit += OnSleepingHit;
+            InitFifi();
             hunt.Armored += p =>
             {
                 // Too weak a weapon for this floor's armour: say so (not on every blow).
@@ -95,12 +97,14 @@ namespace SquashBot.Gameplay
             SetupCage();
             hunt.Begin(grid, level, World, levelIndex * 31 + 7);
             SetupPotions();
+            SetupFifi();
         }
 
         private void UpdateHunt(float dt)
         {
             strikeCooldown -= dt;
             UpdatePendingStrike();
+            UpdateFifi(dt);
         }
 
         private void OnHuntFinished(GridPos p, bool robotKind)
@@ -113,6 +117,7 @@ namespace SquashBot.Gameplay
 
         private void OnHuntWon()
         {
+            if (fifi != null && fifiUp) fifi.Cheer();
             OpenBridge();
             slowMoLeft = 0.8f;
             cameraRig.Punch(1f);

@@ -160,6 +160,10 @@ namespace SquashBot.Data
         public int robots;
         [Tooltip("Tall humanoid enforcers that hit much harder (now and then).")]
         public int brutes;
+        [Tooltip("Guard towers that shoot from afar (blind right next to them).")]
+        public int towers;
+        [Tooltip("Blows a guard tower takes.")]
+        public int towerHp = 5;
         public int robotHp = 2;
         [Tooltip("Seconds between a guard robot's steps.")]
         public float robotStep = 1f;

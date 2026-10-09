@@ -853,6 +853,7 @@ namespace SquashBot.Gameplay
             ui.ShowHud(levelIndex);
             // Back in with a full health bar.
             health = 1f;
+            ReviveFifi();
             hurtCooldown = 0f;
             RefreshHealthBar();
             fx.Burst(GridView.ToWorld(at) + Vector3.up * 0.5f, Palette.ShieldPickup, Palette.ShieldPickupGlow, 30, 5f);

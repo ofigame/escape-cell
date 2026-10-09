@@ -43,6 +43,9 @@ namespace SquashBot.Data
             new WeaponDef { id = "stormSpear", kind = WeaponKind.Spear, tier = 4, damage = 4, reach = 2, cooldown = 0.18f, price = 8000, unlockAt = 125 },
             new WeaponDef { id = "starHammer", kind = WeaponKind.Hammer, tier = 5, damage = 6, reach = 2, cooldown = 0.23f, price = 12000, unlockAt = 165 },
             new WeaponDef { id = "flameSword", kind = WeaponKind.Sword, tier = 5, damage = 5, reach = 2, cooldown = 0.11f, price = 16000, unlockAt = 205 },
+            // The utopian worlds' gear (the last floors' armour needs it): plasma blade and nova mace.
+            new WeaponDef { id = "plasmaBlade", kind = WeaponKind.Sword, tier = 6, damage = 7, reach = 2, cooldown = 0.11f, price = 22000, unlockAt = 212 },
+            new WeaponDef { id = "novaMace", kind = WeaponKind.Mace, tier = 6, damage = 9, reach = 2, cooldown = 0.24f, price = 30000, unlockAt = 232 },
         };
 
         private const string EquipKey = "sb_weapon";

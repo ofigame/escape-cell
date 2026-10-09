@@ -97,6 +97,32 @@ namespace SquashBot.Visual
 
         public void Cheer() => cheer = 0f;
 
+        private Transform hpBar, hpFill;
+        private Material hpMat;
+
+        /// <summary>Shows a health bar over Fifi (0..1); negative hides it.</summary>
+        public void SetHealth(float k)
+        {
+            if (hpBar == null)
+            {
+                if (k < 0f) return;
+                hpBar = new GameObject("HealthBar").transform;
+                hpBar.SetParent(transform, false);
+                hpBar.localPosition = new Vector3(0f, 0.9f, 0f);
+                Shapes.Rounded("Back", hpBar, Vector3.zero, new Vector3(0.6f, 0.12f, 0.03f), 0.04f, MaterialFactory.Create(new Color(0.08f, 0.06f, 0.12f), Color.black));
+                hpMat = MaterialFactory.Create(new Color(0.45f, 0.9f, 1f), new Color(0.5f, 1.4f, 1.8f));
+                hpFill = new GameObject("Fill").transform;
+                hpFill.SetParent(hpBar, false);
+                hpFill.localPosition = new Vector3(-0.27f, 0f, -0.025f);
+                Shapes.Rounded("Fill", hpFill, new Vector3(0.27f, 0f, 0f), new Vector3(0.54f, 0.07f, 0.02f), 0.03f, hpMat);
+            }
+            hpBar.gameObject.SetActive(k >= 0f);
+            if (k < 0f) return;
+            hpFill.localScale = new Vector3(Mathf.Max(0.001f, Mathf.Clamp01(k)), 1f, 1f);
+            var c = Color.Lerp(new Color(1f, 0.35f, 0.35f), new Color(0.45f, 0.9f, 1f), k);
+            MaterialFactory.SetColors(hpMat, c, c * 1.5f);
+        }
+
         /// <summary>Rides on <paramref name="back"/> (the robot's back): small, no glow under it, bobbing along.</summary>
         public void Ride(Transform back)
         {
@@ -136,6 +162,7 @@ namespace SquashBot.Visual
             }
             else body.localPosition = new Vector3(0f, Mathf.Abs(Mathf.Sin(time * 4f)) * 0.03f, 0f);
             antenna.localRotation = Quaternion.Euler(Mathf.Sin(time * 7f) * 12f, 0f, Mathf.Cos(time * 5f) * 10f);
+            if (hpBar != null && hpBar.gameObject.activeSelf && Camera.main != null) hpBar.rotation = Quaternion.LookRotation(Camera.main.transform.forward, Vector3.up);
             MaterialFactory.SetColors(shell, dazed ? Color.Lerp(ShellColor, Color.white, 0.4f + 0.3f * Mathf.Sin(time * 12f)) : ShellColor, ShellColor * 0.2f);
         }
     }

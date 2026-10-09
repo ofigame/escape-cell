@@ -23,7 +23,7 @@ namespace SquashBot.Data
         /// the stone axe), 3 from level 71 (four: the mace) and 4 from level 171 (five: the battle axe). Each step comes
         /// some floors after the weapon that beats it is sold.
         /// </summary>
-        public static int ArmorAt(int index) => index < 25 ? 0 : index < 70 ? 2 : index < 170 ? 3 : 4;
+        public static int ArmorAt(int index) => index < 25 ? 0 : index < 70 ? 2 : index < 170 ? 3 : index < 215 ? 4 : 5;
 
         /// <summary>
         /// Adds healing islands to a layout: a 2x2 patch of 'H' tiles one empty column off the east edge (and, for
@@ -101,7 +101,10 @@ namespace SquashBot.Data
             int size = index switch
             {
                 0 => 7, 1 => 7, 2 => 7, 3 => 8, 4 => 9, 5 => 9, 6 => 10, 7 => 10, // bigger from the very first floor
-                _ => Mathf.RoundToInt(Mathf.Lerp(11f, 32f, Mathf.Pow(Mathf.InverseLerp(8f, LevelCount - 1, index), 0.8f))),
+                // Wide floors that keep growing; past level 100 the utopian worlds open up even more.
+                _ => index < 100
+                    ? Mathf.RoundToInt(Mathf.Lerp(11f, 30f, Mathf.Pow(Mathf.InverseLerp(8f, 99f, index), 0.85f)))
+                    : Mathf.RoundToInt(Mathf.Lerp(31f, 40f, Mathf.InverseLerp(100f, LevelCount - 1, index))),
             };
             var level = new LevelData
             {
@@ -113,9 +116,8 @@ namespace SquashBot.Data
                 final = index == LevelCount - 1,
             };
             level.layout = FloorShapes.For(index, size, out level.shapeName);
-            // Each world's 4th level is a pyramid and its 8th terraces (both change from world to world, see FloorRelief).
             int inWorld = index % LevelsPerWorld;
-            level.terrain = inWorld == 3 ? TerrainKind.Pyramid : inWorld == 7 ? TerrainKind.Terraces : TerrainKind.Flat;
+            level.terrain = TerrainKind.Flat; // the pyramids and terraces are switched off (they looked odd in places)
             // Hard floors (from level 26: the 3rd, 6th and 10th of each world) get healing islands a leap off the side
             // edges: one, two from level 121.
             if (index >= 25 && (inWorld == 2 || inWorld == 5 || inWorld == 9))
@@ -144,6 +146,9 @@ namespace SquashBot.Data
             // Now and then a tall humanoid enforcer joins them (from level 13), more often late on.
             level.brutes = index < 12 ? 0 : (index % 4 == 1 ? 1 : 0) + (d > 0.55f && index % 2 == 0 ? 1 : 0);
             level.robotHp = 2 + Mathf.RoundToInt(d * 3f);
+            // Guard towers from level 16 (one at first, up to six on the late, wide floors), sturdier as they go.
+            level.towers = index < 15 ? 0 : Mathf.Clamp(1 + Mathf.FloorToInt(d * 4f) + (index >= 100 ? 1 : 0), 1, Mathf.Max(1, floorTiles / 60));
+            level.towerHp = 4 + Mathf.RoundToInt(d * 10f);
             level.robotStep = Mathf.Lerp(1.05f, 0.5f, d);
             level.monsterHp = 6 + Mathf.RoundToInt(d * 26f);
             level.monsterAttack = Mathf.Lerp(2.3f, 0.95f, d); // seconds between the monster's attacks: it keeps the pressure on
@@ -157,6 +162,7 @@ namespace SquashBot.Data
             {
                 level.robotHp += level.armor - 1;
                 level.monsterHp += 4 * (level.armor - 1);
+                level.towerHp += level.armor - 1;
             }
 
             level.coinInterval = 2.4f;

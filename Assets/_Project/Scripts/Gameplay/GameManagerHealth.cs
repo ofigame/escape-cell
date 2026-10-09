@@ -63,7 +63,10 @@ namespace SquashBot.Gameplay
             float share = hitShareOverride >= 0f ? hitShareOverride
                 : level != null && level.mission == MissionType.Hunt && crushed ? level.crateShare
                 : HitShare(levelIndex) * weight;
-            float damage = share * (1f - Shop.ArmorShare);
+            // foi toughens up along the campaign (a quarter less from every hit by the last level), and the workshop's
+            // armour comes on top: the enemies grow too, so the shop still matters.
+            float toughness = Mathf.Lerp(1f, 0.74f, levelIndex / (float)(LevelCatalog.LevelCount - 1));
+            float damage = share * toughness * (1f - Shop.ArmorShare);
             if (health - damage <= 0.001f)
             {
                 health = 0f;

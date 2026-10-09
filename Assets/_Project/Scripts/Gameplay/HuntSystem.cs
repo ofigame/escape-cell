@@ -15,7 +15,7 @@ namespace SquashBot.Gameplay
     /// it stomps the tiles around it and hurls rocks at the robot's tile (both shown in red first), and falls after
     /// enough hammer blows. Robots and the monster stand on their tiles (occupied); bugs don't block.
     /// </summary>
-    public class HuntSystem : MonoBehaviour
+    public partial class HuntSystem : MonoBehaviour
     {
         private class Bug
         {
@@ -89,6 +89,10 @@ namespace SquashBot.Gameplay
         public GridPos MonsterTile => monsterPos;
         /// <summary>Where the monster waits from the start (by the gate to the tunnel); null = it rises later.</summary>
         public GridPos? MonsterSpot;
+        /// <summary>The tile Fifi (foi's companion) hovers over, while it is with foi; the enemies can hit it there.</summary>
+        public GridPos? CompanionTile;
+        /// <summary>Fifi was hit (points of its health).</summary>
+        public event Action<int> CompanionHurt;
         /// <summary>A blow landed on the monster while it was still asleep.</summary>
         public event Action<GridPos> SleepingHit;
         public int Total { get; private set; }
@@ -99,6 +103,7 @@ namespace SquashBot.Gameplay
                 int n = 0;
                 foreach (var b in bugs) if (!b.dead) n++;
                 foreach (var g in guards) if (!g.dead) n++;
+                n += TowersLeft;
                 return n;
             }
         }
@@ -136,7 +141,11 @@ namespace SquashBot.Gameplay
             for (int i = 0; i < level.bugs && free.Count > 0; i++) AddBug(Take(free));
             for (int i = 0; i < level.robots && free.Count > 0; i++) AddGuard(Take(free));
             for (int i = 0; i < level.brutes && free.Count > 0; i++) AddGuard(Take(free), brute: true);
-            Total = bugs.Count + guards.Count;
+            // Guard towers, set well away from where foi starts.
+            var far = new List<GridPos>();
+            foreach (var p in free) if (Chebyshev(p, robot.Position) >= 4) far.Add(p);
+            for (int i = 0; i < level.towers && far.Count > 0; i++) { var tp = Take(far); free.Remove(tp); AddTower(tp); }
+            Total = bugs.Count + guards.Count + towers.Count;
             MonsterAwake = false;
             if (MonsterSpot.HasValue) RaiseMonster(asleep: Total > 0);
             else if (Total == 0) RaiseMonster();
@@ -153,6 +162,7 @@ namespace SquashBot.Gameplay
             }
             bugs.Clear();
             guards.Clear();
+            StopTowers();
             ClearTelegraph();
             if (monster != null) Destroy(monster.gameObject);
             monster = null;
@@ -231,6 +241,7 @@ namespace SquashBot.Gameplay
         /// </summary>
         public void OnBlockLanded(GridPos p)
         {
+            if (CompanionTile.HasValue && CompanionTile.Value == p) CompanionHurt?.Invoke(2);
             foreach (var b in bugs) if (!b.dead && b.pos == p) KillBug(b);
             foreach (var g in guards)
             {
@@ -269,6 +280,7 @@ namespace SquashBot.Gameplay
                 if (d < best) { best = d; pick = tile; found = true; }
             }
             if (MonsterUp) Try(monster.transform.position, 2f * monster.transform.lossyScale.y, monsterPos, 0.8f);
+            PickTowers(Try);
             foreach (var g in guards)
                 if (!g.dead) Try(g.root.position, g.bar != null ? g.bar.localPosition.y : 1.2f, g.pos, 0.8f); // fighters first when close
             foreach (var b in bugs)
@@ -281,6 +293,7 @@ namespace SquashBot.Gameplay
         public bool HasTargetAt(GridPos p)
         {
             if (MonsterUp && monsterPos == p) return true;
+            if (TowerAt(p)) return true;
             foreach (var g in guards) if (!g.dead && (g.pos == p || (g.moveT < 1f && g.prevPos == p))) return true;
             foreach (var b in bugs) if (!b.dead && b.pos == p) return true;
             return false;
@@ -325,6 +338,7 @@ namespace SquashBot.Gameplay
         /// <summary>A blow on a tile: the monster, a robot or a bug there takes it. True if it hit something.</summary>
         public bool Strike(GridPos p, int damage)
         {
+            if (StrikeTower(p, damage)) return true;
             if (MonsterUp && Chebyshev(p, monsterPos) == 0)
             {
                 if (!MonsterAwake)
@@ -485,6 +499,7 @@ namespace SquashBot.Gameplay
             if (MonsterUp && MonsterAwake) { list.Add((monsterPos, true)); return list; }
             var all = new List<GridPos>();
             foreach (var g in guards) if (!g.dead) all.Add(g.pos);
+            AddTowerTargets(all);
             foreach (var b in bugs) if (!b.dead) all.Add(b.pos);
             all.Sort((a, b) => a.Manhattan(from).CompareTo(b.Manhattan(from)));
             for (int i = 0; i < Mathf.Min(max, all.Count); i++) list.Add((all[i], false));
@@ -499,6 +514,7 @@ namespace SquashBot.Gameplay
             float dt = Time.deltaTime;
             foreach (var b in bugs) if (!b.dead) UpdateBug(b, dt);
             foreach (var g in guards) if (!g.dead) UpdateGuard(g, dt);
+            UpdateTowers(dt);
             if (MonsterUp && MonsterAwake) UpdateMonster(dt);
         }
 
@@ -615,6 +631,7 @@ namespace SquashBot.Gameplay
                     AudioManager.PlaySfx(Sfx.Impact, g.brute ? 1f : 0.7f, g.brute ? 0.55f : 0.8f);
                     rig.Shake(g.brute ? 0.8f : 0.3f);
                     if (g.area.Contains(robot.Position)) Hit?.Invoke(robot.Position, g.brute ? BruteHitShare : GuardHitShare);
+                    if (CompanionTile.HasValue && g.area.Contains(CompanionTile.Value)) CompanionHurt?.Invoke(g.brute ? 3 : 2);
                     g.area.Clear();
                 }
                 return;
@@ -622,10 +639,12 @@ namespace SquashBot.Gameplay
             if (g.moveT < 1f) return;
             // Within two tiles (diagonals count as one), the same reach as foi's blows: it swings as soon as it can.
             int near = Chebyshev(robot.Position, g.pos);
-            if (near <= AttackReach && g.cooldown <= 0f)
+            // Fifi in reach and foi not (or now and then anyway): the robot goes for Fifi.
+            bool atFifi = CompanionTile.HasValue && Chebyshev(CompanionTile.Value, g.pos) <= AttackReach && (near > AttackReach || rng.Next(4) == 0);
+            if ((near <= AttackReach || atFifi) && g.cooldown <= 0f)
             {
                 g.windup = 0f;
-                g.target = robot.Position;
+                g.target = atFifi ? CompanionTile.Value : robot.Position;
                 g.area.Clear();
                 g.area.Add(g.target);
                 if (g.brute)
@@ -680,6 +699,7 @@ namespace SquashBot.Gameplay
                 AudioManager.PlaySfx(Sfx.Impact, 1f, 0.5f);
                 rig.Shake(0.6f);
                 if (Chebyshev(robot.Position, monsterPos) <= 1) Hit?.Invoke(robot.Position, MonsterHitShare);
+                if (CompanionTile.HasValue && Chebyshev(CompanionTile.Value, monsterPos) <= 1) CompanionHurt?.Invoke(2);
                 monsterTimer = Mathf.Min(monsterTimer, 0.35f); // and straight into an attack
                 return;
             }
@@ -701,6 +721,7 @@ namespace SquashBot.Gameplay
                 rig.Shake(attackIsRock ? 0.4f : 0.7f);
                 AudioManager.PlaySfx(Sfx.Impact, 1f, attackIsRock ? 1f : 0.6f);
                 if (attackTiles.Contains(robot.Position)) Hit?.Invoke(robot.Position, MonsterHitShare);
+                if (CompanionTile.HasValue && attackTiles.Contains(CompanionTile.Value)) CompanionHurt?.Invoke(2);
                 attackTiles.Clear();
                 // A combo: the next blow follows almost at once.
                 if (comboLeft > 0)
@@ -794,10 +815,39 @@ namespace SquashBot.Gameplay
         /// A fight is on near <paramref name="p"/>: a guard or enforcer within <paramref name="range"/> tiles, or vanG awake
         /// and a little farther. Bugs don't count.
         /// </summary>
+
+        /// <summary>
+        /// The nearest thing for Fifi to zap within <paramref name="range"/> tiles of <paramref name="from"/>: robots,
+        /// towers and an awake vanG first, bugs only when none of those is in range. A sleeping vanG is left alone.
+        /// </summary>
+        public bool CompanionTarget(GridPos from, int range, out GridPos at)
+        {
+            int best = int.MaxValue;
+            bool found = false;
+            GridPos pick = from;
+            void Consider(GridPos p)
+            {
+                int d = Chebyshev(p, from);
+                if (d > range || d >= best) return;
+                best = d;
+                pick = p;
+                found = true;
+            }
+            if (MonsterUp && MonsterAwake) Consider(monsterPos);
+            foreach (var g in guards) if (!g.dead) Consider(g.pos);
+            var towerTiles = new List<GridPos>();
+            AddTowerTargets(towerTiles);
+            foreach (var p in towerTiles) Consider(p);
+            if (!found) foreach (var b in bugs) if (!b.dead) Consider(b.pos);
+            at = pick;
+            return found;
+        }
+
         /// <summary>A guard, an enforcer or the monster stands on this tile (not a bug).</summary>
         public bool IsFighter(GridPos p)
         {
             if (MonsterUp && monsterPos == p) return true;
+            if (TowerAt(p)) return true;
             foreach (var g in guards) if (!g.dead && g.pos == p) return true;
             return false;
         }
@@ -806,6 +856,7 @@ namespace SquashBot.Gameplay
         {
             if (!running) return false;
             foreach (var g in guards) if (!g.dead && Chebyshev(g.pos, p) <= range) return true;
+            if (TowerNear(p, range)) return true;
             return MonsterUp && MonsterAwake && Chebyshev(monsterPos, p) <= range + 2;
         }
 
