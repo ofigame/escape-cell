@@ -225,6 +225,9 @@ namespace SquashBot.Gameplay
             FrameGovernor.Install(); // picture quality for this device (after the camera's post-processing exists)
             AdMob.Start(); // consent form where required, then AdMob (phones only)
             SplashScreen.Show(); // OFIGAME studio logo over the menu, fading out
+            // Developer tool: -sbExport <folder> writes every model as PNG + OBJ (see AssetExporter), then quits.
+            var exportFolder = AssetExporter.RequestedFolder();
+            if (exportFolder != null) cameraRig.StartCoroutine(AssetExporter.Run(exportFolder, robot));
             if (!SaveData.HeroChosen) cameraRig.StartCoroutine(FirstHeroPick());
         }
 
