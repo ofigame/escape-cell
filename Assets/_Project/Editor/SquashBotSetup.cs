@@ -4,6 +4,7 @@ using SquashBot.Data;
 using SquashBot.Gameplay;
 using UnityEditor;
 using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -55,13 +56,26 @@ namespace SquashBot.EditorTools
         [MenuItem("Squash Bot/Build Windows Test")]
         public static void BuildWindowsTest()
         {
-            var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
+            // Windows can't have '|' in a folder name (the player's data folder is named after the product): the test
+            // build is "foi cell" for the duration, the phones keep "foi | cell".
+            string name = PlayerSettings.productName;
+            PlayerSettings.productName = name.Replace(" | ", " ").Replace("|", " ");
+            BuildReport report;
+            try
             {
-                scenes = new[] { ScenePath },
-                locationPathName = "Builds/Windows/EscapeCell.exe",
-                target = BuildTarget.StandaloneWindows64,
-                options = BuildOptions.Development,
-            });
+                report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
+                {
+                    scenes = new[] { ScenePath },
+                    locationPathName = "Builds/Windows/EscapeCell.exe",
+                    target = BuildTarget.StandaloneWindows64,
+                    options = BuildOptions.Development,
+                });
+            }
+            finally
+            {
+                PlayerSettings.productName = name;
+                AssetDatabase.SaveAssets();
+            }
             Debug.Log($"[SquashBot] Windows build: {report.summary.result}");
         }
 
@@ -409,7 +423,7 @@ namespace SquashBot.EditorTools
         private static void ConfigurePlayer()
         {
             PlayerSettings.companyName = "OFIGAME";
-            PlayerSettings.productName = "foi cell"; // the game's name, under the icon and in the stores
+            PlayerSettings.productName = "foi | cell"; // the game's name, under the icon and in the stores
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.ofigame.escapecell");
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.iOS, "com.ofigame.escapecell");
             PlayerSettings.iOS.targetOSVersionString = "15.0";
