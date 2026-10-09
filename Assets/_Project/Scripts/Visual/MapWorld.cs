@@ -180,48 +180,102 @@ namespace SquashBot.Visual
             return stone;
         }
 
-        /// <summary>The world's island: a big rock with its theme's landmarks, below the world's first stone.</summary>
+        /// <summary>
+        /// The world's island, a little diorama of what waits there: its realm floor (the same tiles and glowing seams
+        /// as in play), and on it the world's own bugs, guard robot, enforcer, crate and end monster, in their real
+        /// looks. Locked worlds show it too (a peek at what is ahead), under a dimmer light.
+        /// </summary>
         private void BuildIsland(int world, bool locked)
         {
-            var theme = WorldTheme.ForWorld(world);
+            var theme = WorldTheme.ForWorld(world).Realm(world);
             var island = new GameObject("Island " + (world + 1)).transform;
             island.SetParent(path, false);
             island.position = IslandPosition(world);
             var rng = new System.Random(world * 31 + 5);
             float R() => (float)rng.NextDouble();
 
-            var grass = MaterialFactory.Create(locked ? new Color(0.25f, 0.23f, 0.36f) : Color.Lerp(theme.tileTop, theme.accent, 0.35f), Color.black);
-            var rock = MaterialFactory.Create(locked ? new Color(0.18f, 0.16f, 0.28f) : Color.Lerp(theme.pillar, Color.black, 0.25f), Color.black);
+            float dim = locked ? 0.6f : 1f;
+            var rock = MaterialFactory.Create(Color.Lerp(theme.pillar, Color.black, 0.3f) * dim, Color.black);
+            var slab = MaterialFactory.Create(theme.slab * dim, Color.black);
+            var edge = MaterialFactory.Create(theme.slab * dim, theme.slabEdgeGlow * (locked ? 0.3f : 0.8f));
+            var frame = MaterialFactory.Create(theme.tileTop * dim, theme.tileGlow * (locked ? 0.3f : 1f));
+            var top = MaterialFactory.Create(theme.tileTop * dim, theme.tileSelfLight * dim);
             var glow = MaterialFactory.Create(theme.accent, locked ? theme.accent * 0.2f : theme.accent * 1.6f);
-            var light = MaterialFactory.Create(theme.slab, Color.black);
 
-            Shapes.Rounded("Ground", island, new Vector3(0f, 0f, 0f), new Vector3(7.5f, 0.6f, 4.2f), 0.3f, grass);
-            Shapes.Primitive(PrimitiveType.Sphere, "Underside", island, new Vector3(0f, -0.9f, 0f), new Vector3(7f, 2f, 3.9f), rock);
+            // The floor: the world's slab with its glowing edge band and a grid of its tiles.
+            Shapes.Rounded("Slab", island, new Vector3(0f, -0.15f, 0f), new Vector3(7.6f, 0.4f, 4.3f), 0.12f, slab);
+            Shapes.Rounded("Edge", island, new Vector3(0f, -0.3f, 0f), new Vector3(7.7f, 0.06f, 4.4f), 0.03f, edge);
+            Shapes.Primitive(PrimitiveType.Sphere, "Underside", island, new Vector3(0f, -1f, 0f), new Vector3(7f, 1.8f, 3.9f), rock);
             Shapes.Primitive(PrimitiveType.Sphere, "Drip", island, new Vector3(-1.2f, -1.8f, 0.3f), new Vector3(2f, 1.6f, 1.6f), rock);
             Shapes.Primitive(PrimitiveType.Sphere, "Drip", island, new Vector3(1.6f, -1.6f, -0.2f), new Vector3(1.4f, 1.3f, 1.2f), rock);
-
-            // Landmarks, a different mix on every world: crystals, lamp posts, a little tower.
-            for (int k = 0; k < 4; k++)
-            {
-                float x = -3f + k * 2f + R() * 0.6f;
-                float z = 0.6f + R() * 1.2f;
-                switch ((world + k) % 3)
+            const int cols = 8, rows = 4;
+            const float tile = 0.9f;
+            for (int cx = 0; cx < cols; cx++)
+                for (int cz = 0; cz < rows; cz++)
                 {
-                    case 0:
-                        float h = 0.8f + R() * 0.9f;
-                        Shapes.Rounded("Crystal", island, new Vector3(x, 0.3f + h * 0.5f, z), new Vector3(0.35f, h, 0.35f), 0.08f, glow).transform.localRotation = Quaternion.Euler(0f, 45f, R() * 20f - 10f);
-                        break;
-                    case 1:
-                        Shapes.Rounded("Post", island, new Vector3(x, 0.9f, z), new Vector3(0.1f, 1.2f, 0.1f), 0.04f, rock);
-                        Shapes.Primitive(PrimitiveType.Sphere, "Lamp", island, new Vector3(x, 1.6f, z), Vector3.one * 0.32f, glow);
-                        break;
-                    default:
-                        Shapes.Rounded("Tower", island, new Vector3(x, 1f, z), new Vector3(0.7f, 1.4f, 0.7f), 0.12f, light);
-                        Shapes.Rounded("Roof", island, new Vector3(x, 1.85f, z), new Vector3(0.85f, 0.3f, 0.85f), 0.1f, glow);
-                        Shapes.Rounded("Window", island, new Vector3(x, 1.1f, z - 0.36f), new Vector3(0.22f, 0.3f, 0.04f), 0.04f, glow);
-                        break;
+                    var at = new Vector3((cx - (cols - 1) * 0.5f) * tile, 0.06f, (cz - (rows - 1) * 0.5f) * tile);
+                    Shapes.Rounded("Frame", island, at + new Vector3(0f, -0.03f, 0f), new Vector3(tile * 0.93f, 0.09f, tile * 0.93f), 0.04f, frame);
+                    Shapes.Rounded("Top", island, at, new Vector3(tile * 0.78f, 0.09f, tile * 0.78f), 0.04f, top);
                 }
+            const float floorY = 0.11f;
+            var facing = Quaternion.Euler(0f, 180f, 0f); // towards the map camera
+
+            // The cast, back row over the front edge (where the world's name sits): bugs, a guard, the crate,
+            // the enforcer (from the second world on) and the monster at the back right.
+            var bugColour = Color.HSVToRGB(Mathf.Repeat(world * 0.137f + 0.1f, 1f), 0.7f, 1f);
+            bool brightBugs = world >= 8 || theme.tileTop.grayscale < 0.55f;
+            foreach (var (x, z, yaw) in new[] { (-3.1f, 0.15f, 150f), (-2.3f, 0.75f, 215f), (-2.75f, 1.3f, 175f) })
+            {
+                var bug = BugModel.Build(island, bugColour, world % BugModel.Kinds, brightBugs);
+                bug.transform.localPosition = new Vector3(x, floorY, z);
+                bug.transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
+                bug.transform.localScale = Vector3.one * 1.8f;
             }
+
+            var accent = Color.HSVToRGB(Mathf.Repeat(world * 0.21f + 0.55f, 1f), 0.75f, 1f);
+            var guard = GuardBot.Build(island, Color.Lerp(accent, new Color(0.3f, 0.3f, 0.35f), 0.35f), world);
+            guard.transform.localPosition = new Vector3(-1.1f, floorY, 0.9f);
+            guard.transform.localRotation = facing * Quaternion.Euler(0f, 20f, 0f);
+            guard.transform.localScale = Vector3.one * 1.05f;
+
+            var crate = HazardVisuals.CrateOfTier(world / 5).transform;
+            crate.SetParent(island, false);
+            crate.localPosition = new Vector3(0.35f, floorY + 0.4f, 1.1f);
+            crate.localRotation = Quaternion.Euler(0f, 18f + R() * 20f, 0f);
+            crate.localScale = Vector3.one * 0.95f;
+
+            if (world >= 1)
+            {
+                var brute = HumanoidBot.Build(island, accent);
+                brute.transform.localPosition = new Vector3(1.5f, floorY, 0.55f);
+                brute.transform.localRotation = facing * Quaternion.Euler(0f, -15f, 0f);
+                brute.transform.localScale = Vector3.one * 1.05f;
+            }
+
+            MonsterLook(world, out var kind, out var tint);
+            var monster = Monster.Create(kind, island.position, 1, tint, null);
+            GuardianLooks.DressGuardian(monster.Body, world);
+            monster.transform.SetParent(island, false);
+            monster.transform.localPosition = new Vector3(2.8f, floorY, 1.15f);
+            monster.transform.localRotation = facing * Quaternion.Euler(0f, -25f, 0f);
+            monster.transform.localScale = Vector3.one * 0.8f;
+            var bar = monster.transform.Find("HealthBar");
+            if (bar != null) bar.gameObject.SetActive(false);
+
+            // A lamp at each back corner in the world's accent.
+            foreach (float x in new[] { -3.55f, 3.55f })
+            {
+                Shapes.Rounded("Post", island, new Vector3(x, 0.7f, 1.85f), new Vector3(0.09f, 1.2f, 0.09f), 0.03f, rock);
+                Shapes.Primitive(PrimitiveType.Sphere, "Lamp", island, new Vector3(x, 1.35f, 1.85f), Vector3.one * 0.26f, glow);
+            }
+        }
+
+        /// <summary>The end monster of a world, as play dresses it (its guardian, else the world's kind and colour).</summary>
+        private static void MonsterLook(int world, out Monster.Kind kind, out Color tint)
+        {
+            if (GuardianLooks.Guardian(world, out kind, out tint)) return;
+            kind = (Monster.Kind)(world % 4);
+            tint = Color.Lerp(WorldTheme.ForWorld(world).accent, new Color(0.55f, 0.85f, 0.4f), kind == Monster.Kind.Slime ? 0.5f : 0.15f);
         }
 
         // ---------- Showing and moving ----------

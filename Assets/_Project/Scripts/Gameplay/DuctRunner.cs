@@ -303,7 +303,7 @@ namespace SquashBot.Gameplay
             BuildRide();
             StartThemeFx();
             input.ScreenMode = true;
-            camPos = World(0f, 2.6f, -4.6f);
+            camPos = World(0f, 2.6f, -4.9f);
             PoseRobot(0f);
             UpdateCamera(1f);
         }
@@ -719,10 +719,12 @@ namespace SquashBot.Gameplay
             {
                 int shape = rng.Next(4);
                 float amp = Mathf.Lerp(1.2f, 4.2f, grow) * (0.6f + (float)rng.NextDouble() * 0.6f);
-                int len = Mathf.Max(18, Mathf.RoundToInt(amp * 9f)) + rng.Next(10);
-                if (shape == 2) len = Mathf.Max(len, 30);
-                if (shape == 3) len = Mathf.Max(len + 14, 36);
-                if (h0 + len >= straightFrom) break; // only whole shapes: the ground is level again before the end
+                int len = Mathf.Max(30, Mathf.RoundToInt(amp * 14f)) + rng.Next(16); // long, drawn-out climbs and descents
+                if (shape == 2) len = Mathf.Max(len, 48);
+                if (shape == 3) len = Mathf.Max(len + 20, 56);
+                if (h0 + len >= straightFrom) len = straightFrom - h0 - 2; // short roads: the room that is left
+                if (len < 22) break; // only whole shapes: the ground is level again before the end
+                amp = Mathf.Min(amp, len / (shape == 2 ? 20f : 12f)); // never too steep for its length
                 for (int i = 0; i < len && h0 + i < straightFrom; i++)
                 {
                     float t = i / (float)len;
@@ -1793,11 +1795,11 @@ namespace SquashBot.Gameplay
         private void UpdateCamera(float dt)
         {
             // Behind and above the robot along the course, so the camera swings round the bends with it.
-            float lift = 2.1f + Mathf.Max(y, -1f) * 0.35f;
+            float lift = 2.6f + Mathf.Max(y, -1f) * 0.35f; // a little higher and farther back: bends and hills stay in view
             if (falling) lift = Mathf.Max(1.4f, lift);
-            var target = World(x * 0.55f, lift, z - 3.7f);
+            var target = World(x * 0.5f, lift, z - 4.9f);
             camPos = dt >= 1f ? target : Vector3.Lerp(camPos, target, 1f - Mathf.Exp(-dt * 8f));
-            var look = World(x * 0.75f, 0.55f + Mathf.Max(y, -0.5f) * 0.3f, z + 4.5f);
+            var look = World(x * 0.7f, 0.5f + Mathf.Max(y, -0.5f) * 0.3f, z + 5.5f);
             var rot = Quaternion.LookRotation(look - camPos);
             camRot = dt >= 1f ? rot : Quaternion.Slerp(camRot, rot, 1f - Mathf.Exp(-dt * 10f));
             if (blend < 1f)

@@ -41,6 +41,14 @@ namespace SquashBot.Visual
         /// </summary>
         public static int CrateTier = -1;
 
+        /// <summary>A crate of one tier on its own (the map's world dioramas show each world's crate).</summary>
+        public static GameObject CrateOfTier(int tier)
+        {
+            var root = new GameObject("Crate").transform;
+            TierCrate(root, Mathf.Clamp(tier, 0, 4));
+            return root.gameObject;
+        }
+
         private static void TierCrate(Transform r, int tier)
         {
             switch (tier)

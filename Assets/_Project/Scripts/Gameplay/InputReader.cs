@@ -10,6 +10,8 @@ namespace SquashBot.Gameplay
     public struct InputCommand
     {
         public Direction? move;
+        /// <summary>How fast the finger moved for <see cref="move"/>: 0 slow .. 1 a quick flick; negative = no finger (keys).</summary>
+        public float pace;
         public bool jump;
 
         /// <summary>A press held still long enough (hover escape): fires once.</summary>
@@ -54,6 +56,9 @@ namespace SquashBot.Gameplay
         private float lastTapTime = -10f;
         private bool holding;
 
+        /// <summary>The pace of the last swipe step (see <see cref="InputCommand.pace"/>).</summary>
+        public float LastPace { get; private set; }
+
         /// <summary>Long-press detection is only on where the hover escape is unlocked, so it never steals slow swipes elsewhere.</summary>
         public bool HoldEnabled { get; set; }
 
@@ -96,7 +101,7 @@ namespace SquashBot.Gameplay
         {
             if (ReadJumpKey()) return new InputCommand { jump = true };
             var key = ReadKeyboard();
-            if (key.HasValue) return new InputCommand { move = ScreenMode ? ScreenDirection(key.Value) : Resolve(Rotate45(key.Value), robotWorld) };
+            if (key.HasValue) return new InputCommand { pace = -1f, move = ScreenMode ? ScreenDirection(key.Value) : Resolve(Rotate45(key.Value), robotWorld) };
 
             bool hasPointer = ReadPointer(out bool pressed, out Vector2 pos);
             if (hasPointer && pressed) lastPos = pos;
@@ -150,14 +155,15 @@ namespace SquashBot.Gameplay
                 tracking = false;
                 if (consumed) return default;
                 var move = CheckSwipe(hasPointer ? pos : lastPos, robotWorld, released: true);
-                if (move.HasValue) return new InputCommand { move = move };
+                if (move.HasValue) return new InputCommand { move = move, pace = LastPace };
                 if (chained) return default; // the end of a drag, not a tap
                 bool quick = Time.unscaledTime - pressTime <= TapMaxDuration;
                 return new InputCommand { jump = RegisterTap(), tap = quick ? (hasPointer ? pos : lastPos) : (Vector2?)null };
             }
 
             if (consumed) return default;
-            return new InputCommand { move = CheckSwipe(pos, robotWorld) }; // triggers mid-drag for snappy response
+            var drag = CheckSwipe(pos, robotWorld); // triggers mid-drag for snappy response
+            return new InputCommand { move = drag, pace = LastPace };
         }
 
         /// <summary>The last tap was used (it struck something): it doesn't count towards a double-tap jump.</summary>
@@ -192,6 +198,9 @@ namespace SquashBot.Gameplay
                 if (!released && margin < AmbiguousMargin && travelled < DecideInches) return null;
             }
 
+            // How fast the finger went over this stretch (inches per second): a flick is fast, a slow drag slow.
+            float since = Mathf.Max(0.016f, Time.unscaledTime - (chained ? lastMoveTime : pressTime));
+            LastPace = Mathf.InverseLerp(2f, 10f, travelled / since);
             consumed = !ChainEnabled;
             chained = true;
             startPos = pos; // the next step of a drag is measured from here

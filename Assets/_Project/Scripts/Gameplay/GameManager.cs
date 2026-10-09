@@ -1176,7 +1176,7 @@ namespace SquashBot.Gameplay
             {
                 if (command.tap.HasValue && level.mission == MissionType.Hunt && TapStrike(command.tap.Value)) input.CancelTap();
                 else if (command.jump) robot.TryJump();
-                else if (command.move.HasValue) robot.TryMove(command.move.Value);
+                else if (command.move.HasValue) robot.TryMove(command.move.Value, command.pace);
             }
 
             ui.SetWarning(hazards.AnyWarningActive);
@@ -2534,7 +2534,7 @@ namespace SquashBot.Gameplay
         {
             var command = input.Poll(robot.transform.position);
             if (command.jump) robot.TryJump();
-            else if (command.move.HasValue) robot.TryMove(command.move.Value);
+            else if (command.move.HasValue) robot.TryMove(command.move.Value, command.pace);
             if (roadBeacon != null)
             {
                 float pulse = 1f + Mathf.Sin(Time.time * 6f) * 0.12f;
