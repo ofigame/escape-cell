@@ -19,6 +19,11 @@ jobs:
     name: Unity → Xcode project
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    env:
+      # Optional Docker Hub login (repository secrets DOCKERHUB_USERNAME and DOCKERHUB_TOKEN): anonymous pulls of the
+      # big Unity image share a small per-IP limit on GitHub's runners and often fail with "toomanyrequests".
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      UNITY_IMAGE: unityci/editor:ubuntu-6000.6.4f1-ios-3
     steps:
       - name: Free disk space (the Unity iOS image is large)
         uses: jlumbroso/free-disk-space@v1.3.1
@@ -66,6 +71,25 @@ jobs:
           swapon --show
           free -h
           df -h / /mnt
+
+      - name: Log in to Docker Hub
+        if: env.DOCKERHUB_USERNAME != ''
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # The Unity image is fetched here first, with a few retries a while apart when Docker Hub's pull limit is hit,
+      # so the export step below finds it already on the runner.
+      - name: Pull the Unity image
+        run: |
+          for i in 1 2 3 4 5; do
+            if docker pull "$UNITY_IMAGE"; then exit 0; fi
+            echo "::warning::Pull attempt $i failed (Docker Hub limit?) - waiting before the next try"
+            sleep $(( i * 60 ))
+          done
+          echo "::error::Could not pull $UNITY_IMAGE - add DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets to log in"
+          exit 1
 
       - uses: actions/checkout@v4
 
