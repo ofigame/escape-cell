@@ -37,6 +37,8 @@ namespace SquashBot.Core
         private readonly bool[,] occupied;
         private readonly bool[,] exists;
         private readonly bool[,] wall;
+        private readonly bool[,] safe;
+        private readonly bool[,] cage, bridge;
 
         public GridModel(int width, int height, string[] layout = null)
         {
@@ -46,6 +48,9 @@ namespace SquashBot.Core
             occupied = new bool[width, height];
             exists = new bool[width, height];
             wall = new bool[width, height];
+            safe = new bool[width, height];
+            cage = new bool[width, height];
+            bridge = new bool[width, height];
 
             for (int y = 0; y < height; y++)
                 for (int x = 0; x < width; x++)
@@ -55,6 +60,11 @@ namespace SquashBot.Core
                         c = layout[height - 1 - y][x];
                     exists[x, y] = c != '.';
                     wall[x, y] = c == 'X';
+                    safe[x, y] = c == 'H';
+                    cage[x, y] = c == 'C';
+                    bridge[x, y] = c == 'B';
+                    if (cage[x, y]) CageTiles.Add(new GridPos(x, y));
+                    if (bridge[x, y]) BridgeTiles.Add(new GridPos(x, y));
                     var p = new GridPos(x, y);
                     if (c == 'S') StartSpot = p;
                     else if (c == 'D') DoorSpot = p;
@@ -62,6 +72,19 @@ namespace SquashBot.Core
                     if (exists[x, y] && !wall[x, y]) FloorCount++;
                 }
         }
+
+        /// <summary>A tile of a healing island ('H' in a layout): nothing falls on it and no enemy reaches it.</summary>
+        public bool IsSafe(GridPos p) => InBounds(p) && safe[p.x, p.y];
+
+        /// <summary>A tile of the monster's cage ('C'): shut until the crowd is beaten.</summary>
+        public bool IsCage(GridPos p) => InBounds(p) && cage[p.x, p.y];
+
+        /// <summary>A tile of the bridge to the tunnel ('B'): open once the monster is beaten.</summary>
+        public bool IsBridge(GridPos p) => InBounds(p) && bridge[p.x, p.y];
+
+        public List<GridPos> CageTiles { get; } = new List<GridPos>();
+        /// <summary>The bridge from the cage to the tunnel, nearest the floor first.</summary>
+        public List<GridPos> BridgeTiles { get; } = new List<GridPos>();
 
         public bool InBounds(GridPos p) => p.x >= 0 && p.y >= 0 && p.x < Width && p.y < Height;
 
@@ -106,12 +129,13 @@ namespace SquashBot.Core
         /// <summary>The floor tile closest to the middle of the platform (where the robot starts).</summary>
         public GridPos CenterFloor()
         {
-            var center = new GridPos(Width / 2, Height / 2);
+            // The middle of the main floor: the bridge rows to the north don't count, and never inside the cage.
+            var center = new GridPos(Width / 2, (Height - BridgeTiles.Count) / 2);
             GridPos best = center;
             int bestDistance = int.MaxValue;
             foreach (var p in AllPositions())
             {
-                if (!IsFloor(p)) continue;
+                if (!IsFloor(p) || IsCage(p) || IsBridge(p) || IsSafe(p)) continue;
                 int d = p.Manhattan(center);
                 if (d < bestDistance)
                 {

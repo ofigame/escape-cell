@@ -56,6 +56,9 @@ namespace SquashBot.Core
             var h = new int[grid.Width, grid.Height];
             if (kind == TerrainKind.Pyramid) Pyramids(grid, h, world);
             else Terraces(grid, h, world);
+            // vanG's cage and the bridge to the tunnel stay at ground level.
+            foreach (var p in grid.CageTiles) h[p.x, p.y] = 0;
+            foreach (var p in grid.BridgeTiles) h[p.x, p.y] = 0;
             Smooth(h); // whatever the shape, every slope can be climbed a step at a time
             heights = h;
             // Start low, near the front edge (the side the camera looks from): the climb is ahead.
@@ -64,7 +67,7 @@ namespace SquashBot.Core
             var front = new GridPos(grid.Width / 2, grid.Height / 2);
             foreach (var p in grid.AllPositions())
             {
-                if (!grid.IsFloor(p)) continue;
+                if (!grid.IsFloor(p) || grid.IsSafe(p) || grid.IsCage(p) || grid.IsBridge(p)) continue;
                 int score = h[p.x, p.y] * 1000 + p.x + p.y + Mathf.Abs((p.x - p.y) - (front.x - front.y)) * 2;
                 if (score < bestScore) { bestScore = score; best = p; }
             }

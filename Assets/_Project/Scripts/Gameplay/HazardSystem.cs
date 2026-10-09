@@ -235,7 +235,7 @@ namespace SquashBot.Gameplay
 
             var candidates = new List<GridPos>();
             foreach (var p in grid.AllPositions())
-                if (grid.IsStandable(p) && !taken.Contains(p) && (IsProtected == null || !IsProtected(p)) && InFocus(p))
+                if (grid.IsStandable(p) && !grid.IsSafe(p) && !taken.Contains(p) && (IsProtected == null || !IsProtected(p)) && InFocus(p))
                     candidates.Add(p);
 
             float warning = CurrentWarning;
@@ -308,7 +308,7 @@ namespace SquashBot.Gameplay
                 foreach (var d in DirectionExtensions.All)
                 {
                     var n = center + d.ToOffset();
-                    if (grid.IsFloor(n) && grid.GetTile(n) == TileState.Solid && !taken.Contains(n) && (IsProtected == null || !IsProtected(n))) area.Add(n);
+                    if (grid.IsFloor(n) && !grid.IsSafe(n) && grid.GetTile(n) == TileState.Solid && !taken.Contains(n) && (IsProtected == null || !IsProtected(n))) area.Add(n);
                 }
 
                 var danger = new HashSet<GridPos>(pending);
@@ -361,7 +361,7 @@ namespace SquashBot.Gameplay
         /// <summary>A block called down on <paramref name="p"/> by something else (a scout drone that spotted the robot).</summary>
         public void DropAt(GridPos p)
         {
-            if (grid == null || !grid.IsStandable(p) || IsThreatened(p) || (IsProtected != null && IsProtected(p))) return;
+            if (grid == null || grid.IsSafe(p) || !grid.IsStandable(p) || IsThreatened(p) || (IsProtected != null && IsProtected(p))) return;
             CreateBlock(p, CurrentWarning);
         }
 
@@ -531,7 +531,7 @@ namespace SquashBot.Gameplay
                 if (step.x == 0 && step.y == 0) continue;
                 var n = h.pos + step;
                 bool hitsRobot = n == r && !robot.IsHovering;
-                if (!hitsRobot && (!grid.IsStandable(n) || (IsProtected != null && IsProtected(n)) || IsThreatened(n))) continue;
+                if (grid.IsSafe(n) || !hitsRobot && (!grid.IsStandable(n) || (IsProtected != null && IsProtected(n)) || IsThreatened(n))) continue;
 
                 grid.SetOccupied(h.pos, false);
                 h.hopFrom = tr.position;

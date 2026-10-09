@@ -44,6 +44,7 @@ namespace SquashBot.Gameplay
                 hitShareOverride = -1f;
             };
             hunt.Finished += OnHuntFinished;
+            hunt.SleepingHit += OnSleepingHit;
             hunt.Armored += p =>
             {
                 // Too weak a weapon for this floor's armour: say so (not on every blow).
@@ -53,6 +54,7 @@ namespace SquashBot.Gameplay
             };
             hunt.MonsterAppeared += () =>
             {
+                OpenCage();
                 FloatAt(robot.transform.position + Vector3.up * 0.8f, Loc.T("float.monster"), Palette.UiRed);
                 AudioManager.PlayMusic(MusicTheme.Monster);
             };
@@ -62,6 +64,7 @@ namespace SquashBot.Gameplay
                 MonsterLook(out var kind, out var tint);
                 var m = Monster.Create(kind, GridView.ToWorld(p) + Vector3.up * GridView.SurfaceY, hp, tint, robot.transform, 1);
                 GuardianLooks.DressGuardian(m.Body, World);
+                NameTag(m);
                 return m;
             };
         }
@@ -73,13 +76,23 @@ namespace SquashBot.Gameplay
             // The robot and the guards stand big on the floor and grow with the campaign (back to normal size in the
             // tunnels, see ClearHuntDress); the robot carries its weapon.
             float grow = Mathf.Clamp01(World / 12f);
-            robot.transform.localScale = Vector3.one * Mathf.Lerp(1.8f, 2.35f, grow);
+            robot.transform.localScale = Vector3.one * Mathf.Lerp(1.65f, 2.17f, grow);
             Robot.HopScale = 0.6f; // quick and even: each step follows the finger at once, and a run of steps flows on
-            hunt.EnemyScale = Mathf.Lerp(1.75f, 2.2f, grow);
+            hunt.EnemyScale = Mathf.Lerp(1.6f, 2.03f, grow);
             weapon = Armory.Equipped;
             if (heldWeapon != null) Destroy(heldWeapon.gameObject);
             heldWeapon = HeldWeapon.Attach(robot.Visual, weapon);
+            // The tunnel gate stands from the start in the middle of the north edge, the monster asleep in front of it.
+            huntGate = NorthGate();
+            hunt.MonsterSpot = GateGuardSpot(huntGate);
+            if (gateView != null) Destroy(gateView.gameObject);
+            gateView = TunnelGate.Create(GridView.ToWorld(huntGate) + Vector3.up * GridView.SurfaceY, WorldTheme.Current.accent);
+            var guardSpot = hunt.MonsterSpot.Value;
+            var gateTile = huntGate;
+            hazards.IsProtected = p => p == gateTile || p == guardSpot || grid.IsCage(p) || grid.IsBridge(p);
+            SetupCage();
             hunt.Begin(grid, level, World, levelIndex * 31 + 7);
+            SetupPotions();
         }
 
         private void UpdateHunt(float dt)
@@ -97,6 +110,7 @@ namespace SquashBot.Gameplay
 
         private void OnHuntWon()
         {
+            OpenBridge();
             slowMoLeft = 0.8f;
             cameraRig.Punch(1f);
             Win();
@@ -207,7 +221,7 @@ namespace SquashBot.Gameplay
         }
 
         private string HuntHud() =>
-            hunt.MonsterUp || hunt.MonsterDown
+            hunt.MonsterAwake || hunt.MonsterDown
                 ? Loc.F("hud.huntBoss", hunt.MonsterHpLeft, hunt.MonsterHpTotal)
                 : Loc.F("hud.hunt", hunt.Left, hunt.Total);
 

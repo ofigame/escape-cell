@@ -69,6 +69,7 @@ namespace SquashBot.Gameplay
         private float paceScale = 1f;
         /// <summary>The way the last step was going when a turn follows straight on: the new step curves out of it.</summary>
         private Vector3 carry, hopCarry;
+        private float carryAt = -10f;
         private float bufferedAt;
         private const float BufferLife = 0.25f; // an older swipe is dropped instead of surprising the player later
         private bool bufferedJump;
@@ -561,7 +562,7 @@ namespace SquashBot.Gameplay
             if (distance != 1) paceScale = 1f;
             // Straight on from a step the other way: curve out of it instead of snapping round the corner.
             var dirNow = GridView.ToWorld(target) - GridView.ToWorld(Position);
-            hopCarry = distance == 1 && carry.sqrMagnitude > 0.01f && Vector3.Dot(carry.normalized, dirNow.normalized) < 0.5f ? carry : Vector3.zero;
+            hopCarry = distance == 1 && Time.time - carryAt < 0.3f && carry.sqrMagnitude > 0.01f && Vector3.Dot(carry.normalized, dirNow.normalized) < 0.5f ? carry : Vector3.zero;
             carry = Vector3.zero;
             LastLeftTile = Position;
             LastLeftTime = Time.time;
@@ -635,7 +636,8 @@ namespace SquashBot.Gameplay
         private void Update()
         {
             animTime += Dt;
-            visual.localRotation = Quaternion.Slerp(visual.localRotation, targetFacing, Dt * 13f);
+            // The body swings round softly (a quarter turn takes about a third of a second), never snapping.
+            visual.localRotation = Quaternion.Slerp(visual.localRotation, targetFacing, Dt * 8f);
 
             switch (anim)
             {
@@ -659,11 +661,11 @@ namespace SquashBot.Gameplay
                         // (a Hermite curve), so the corner is a smooth swing rather than a sharp click.
                         float t2 = t * t, t3 = t2 * t;
                         var span = to - from;
-                        ground = (2f * t3 - 3f * t2 + 1f) * from + (t3 - 2f * t2 + t) * hopCarry * 0.55f
+                        ground = (2f * t3 - 3f * t2 + 1f) * from + (t3 - 2f * t2 + t) * hopCarry * 0.8f
                                  + (-2f * t3 + 3f * t2) * to + (t3 - t2) * span;
                     }
                     transform.position = ground + Vector3.up * (Mathf.Sin(t * Mathf.PI) * hopHeight);
-                    if (flow) carry = new Vector3(to.x - from.x, 0f, to.z - from.z);
+                    if (t >= 1f) { carry = new Vector3(to.x - from.x, 0f, to.z - from.z); carryAt = Time.time; } // a turn soon after curves out of this step
                     float stretch = 1f + Mathf.Sin(t * Mathf.PI) * 0.15f;
                     visual.localScale = new Vector3(1f / stretch, stretch, 1f / stretch);
                     if (t >= 1f)
@@ -760,9 +762,8 @@ namespace SquashBot.Gameplay
             if (bufferedMove == null) return;
             var dir = bufferedMove.Value;
             bufferedMove = null;
-            if (Time.time - bufferedAt > BufferLife) { carry = Vector3.zero; return; }
+            if (Time.time - bufferedAt > BufferLife) return;
             TryMove(dir, bufferedPace);
-            carry = Vector3.zero; // only the very next step curves out of the last one
         }
     }
 }

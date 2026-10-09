@@ -368,6 +368,7 @@ namespace SquashBot.Gameplay
             weather.SetVisible(true);
             weather.SetIntensity(0.45f);
             if (roadBeacon != null) Destroy(roadBeacon);
+            ClearGate();
             gridView.gameObject.SetActive(true);
             floorRules.Stop();
             enemies.Stop();
@@ -1307,7 +1308,7 @@ namespace SquashBot.Gameplay
             coins.TryCollect(p);
             if (Shop.MagnetRange > 0) coins.CollectNear(p, Shop.MagnetRange);
             powerUps.TryCollect(p);
-            if (level.mission == MissionType.Hunt) hunt.OnRobotArrived(p);
+            if (level.mission == MissionType.Hunt) { hunt.OnRobotArrived(p); OnHuntArrived(p); }
 
             // Collapsing paths: the tile just left crumbles a moment later.
             var left = robot.LastLeftTile;
@@ -2450,6 +2451,12 @@ namespace SquashBot.Gameplay
         /// </summary>
         private GridPos PickExit(out Vector2Int outward)
         {
+            // The core loop leaves through its gate in the middle of the north edge.
+            if (huntGateSet && level != null && level.mission == MissionType.Hunt)
+            {
+                outward = new Vector2Int(0, 1);
+                return huntGate;
+            }
             // How many steps each tile is from the robot (walking, or leaping a one-tile gap like the robot does).
             var steps = new Dictionary<GridPos, int> { [robot.Position] = 0 };
             var queue = new Queue<GridPos>();

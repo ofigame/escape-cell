@@ -247,8 +247,8 @@ namespace SquashBot.Gameplay
             length = roadLength;
             difficulty = roadDifficulty;
             nextWorld = toWorld;
-            speedStart = road ? Mathf.Lerp(6.1f, 7.2f, roadDifficulty) : SpeedStart; // brisk from the very first road
-            speedEnd = road ? Mathf.Lerp(7.8f, 10.4f, roadDifficulty) : SpeedEnd;
+            speedStart = road ? Mathf.Lerp(7.3f, 8.6f, roadDifficulty) : SpeedStart * 1.2f; // brisk from the very first road
+            speedEnd = road ? Mathf.Lerp(9.4f, 12.4f, roadDifficulty) : SpeedEnd * 1.2f;
             startDelay = road ? 0f : StartDelay;
             transform.SetPositionAndRotation(origin, Quaternion.Euler(0f, heading, 0f));
             risky = false;

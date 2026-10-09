@@ -78,6 +78,14 @@ namespace SquashBot.Gameplay
 
         public bool MonsterUp => monster != null && !monster.Dead;
         public bool MonsterDown { get; private set; }
+        /// <summary>The monster is fighting (it sleeps by the gate until the crowd is beaten).</summary>
+        public bool MonsterAwake { get; private set; }
+        /// <summary>The tile the monster stands on.</summary>
+        public GridPos MonsterTile => monsterPos;
+        /// <summary>Where the monster waits from the start (by the gate to the tunnel); null = it rises later.</summary>
+        public GridPos? MonsterSpot;
+        /// <summary>A blow landed on the monster while it was still asleep.</summary>
+        public event Action<GridPos> SleepingHit;
         public int Total { get; private set; }
         public int Left
         {
@@ -95,7 +103,7 @@ namespace SquashBot.Gameplay
         public int MonsterHpTotal => level != null ? level.monsterHp : 1;
 
         /// <summary>0..1: the crowd counts for 60%, the monster for 40%.</summary>
-        public float Progress => Total == 0 ? 1f : 0.6f * (Total - Left) / Total + (monster != null || MonsterDown ? 0.4f * (1f - monsterHp / (float)Mathf.Max(1, MonsterHpTotal)) : 0f);
+        public float Progress => Total == 0 ? 1f : 0.6f * (Total - Left) / Total + (MonsterAwake || MonsterDown ? 0.4f * (1f - monsterHp / (float)Mathf.Max(1, MonsterHpTotal)) : 0f);
 
         public void Init(GridView view, Robot robot, FxSystem fx, CameraRig rig)
         {
@@ -124,7 +132,9 @@ namespace SquashBot.Gameplay
             for (int i = 0; i < level.robots && free.Count > 0; i++) AddGuard(Take(free));
             for (int i = 0; i < level.brutes && free.Count > 0; i++) AddGuard(Take(free), brute: true);
             Total = bugs.Count + guards.Count;
-            if (Total == 0) RaiseMonster();
+            MonsterAwake = false;
+            if (MonsterSpot.HasValue) RaiseMonster(asleep: Total > 0);
+            else if (Total == 0) RaiseMonster();
         }
 
         public void Stop()
@@ -152,7 +162,7 @@ namespace SquashBot.Gameplay
         {
             var list = new List<GridPos>();
             foreach (var p in grid.AllPositions())
-                if (grid.IsStandable(p) && Chebyshev(p, robot.Position) >= awayFromRobot) list.Add(p);
+                if (grid.IsStandable(p) && !grid.IsSafe(p) && Chebyshev(p, robot.Position) >= awayFromRobot && (!MonsterSpot.HasValue || p != MonsterSpot.Value)) list.Add(p);
             return list;
         }
 
@@ -269,6 +279,14 @@ namespace SquashBot.Gameplay
         {
             if (MonsterUp && Chebyshev(p, monsterPos) == 0)
             {
+                if (!MonsterAwake)
+                {
+                    // Asleep by the gate: the crowd comes first.
+                    fx.Burst(At(p) + Vector3.up * 0.8f, new Color(0.75f, 0.8f, 0.9f), new Color(1.2f, 1.3f, 1.6f), 14, 3f);
+                    AudioManager.PlaySfx(Sfx.Blocked, 0.8f, 1.4f);
+                    SleepingHit?.Invoke(p);
+                    return true;
+                }
                 int through = ThroughArmor(p, damage);
                 if (through > 0) HitMonster(through);
                 return true;
@@ -343,18 +361,36 @@ namespace SquashBot.Gameplay
 
         private void CheckCleared()
         {
-            if (Left == 0 && monster == null && !MonsterDown) RaiseMonster();
+            if (Left != 0 || MonsterDown) return;
+            if (monster == null) RaiseMonster();
+            else if (!MonsterAwake) Wake();
         }
 
-        private void RaiseMonster()
+        /// <summary>The crowd is beaten: the monster guarding the gate wakes up and the fight is on.</summary>
+        private void Wake()
         {
-            // On a free tile a few steps from the robot, as central as possible.
+            MonsterAwake = true;
+            monsterTimer = level.monsterAttack + 0.6f;
+            fx.Burst(At(monsterPos) + Vector3.up * 0.8f, new Color(0.7f, 0.4f, 1f), new Color(1.6f, 0.8f, 2.4f), 60, 7f);
+            Shockwave.Create(At(monsterPos), 3f, new Color(0.8f, 0.5f, 1f));
+            monster.Stomp();
+            rig.Shake(1f);
+            AudioManager.PlaySfx(Sfx.Impact, 1f, 0.45f);
+            MonsterAppeared?.Invoke();
+        }
+
+        /// <param name="asleep">Placed at the start, guarding the gate: it only wakes when the crowd is beaten.</param>
+        private void RaiseMonster(bool asleep = false)
+        {
+            // At its spot by the gate, else on a free tile a few steps from the robot, as central as possible.
             var centre = new GridPos(grid.Width / 2, grid.Height / 2);
             GridPos best = robot.Position;
             int score = int.MaxValue;
+            if (MonsterSpot.HasValue && grid.IsStandable(MonsterSpot.Value)) { best = MonsterSpot.Value; score = -1; }
             foreach (var p in grid.AllPositions())
             {
-                if (!grid.IsStandable(p) || Chebyshev(p, robot.Position) < 3) continue;
+                if (score < 0) break;
+                if (!grid.IsStandable(p) || grid.IsSafe(p) || Chebyshev(p, robot.Position) < 3) continue;
                 int open = 0;
                 foreach (var d in DirectionExtensions.All) if (grid.IsStandable(p + d.ToOffset())) open++;
                 if (open < 3) continue;
@@ -365,6 +401,12 @@ namespace SquashBot.Gameplay
             grid.SetOccupied(monsterPos, true);
             monster = CreateMonster?.Invoke(monsterPos, level.monsterHp);
             monsterTimer = level.monsterAttack + 1f;
+            if (asleep)
+            {
+                MonsterAwake = false;
+                return;
+            }
+            MonsterAwake = true;
             fx.Burst(At(monsterPos) + Vector3.up * 0.6f, new Color(0.7f, 0.4f, 1f), new Color(1.6f, 0.8f, 2.4f), 60, 7f);
             Shockwave.Create(At(monsterPos), 2.5f, new Color(0.8f, 0.5f, 1f));
             rig.Shake(1f);
@@ -392,7 +434,7 @@ namespace SquashBot.Gameplay
         public List<(GridPos, bool)> Targets(GridPos from, int max)
         {
             var list = new List<(GridPos, bool)>();
-            if (MonsterUp) { list.Add((monsterPos, true)); return list; }
+            if (MonsterUp && MonsterAwake) { list.Add((monsterPos, true)); return list; }
             var all = new List<GridPos>();
             foreach (var g in guards) if (!g.dead) all.Add(g.pos);
             foreach (var b in bugs) if (!b.dead) all.Add(b.pos);
@@ -409,7 +451,7 @@ namespace SquashBot.Gameplay
             float dt = Time.deltaTime;
             foreach (var b in bugs) if (!b.dead) UpdateBug(b, dt);
             foreach (var g in guards) if (!g.dead) UpdateGuard(g, dt);
-            if (MonsterUp) UpdateMonster(dt);
+            if (MonsterUp && MonsterAwake) UpdateMonster(dt);
         }
 
         private bool CanStep(GridPos from, GridPos p) => FloorRelief.StepOk(from, p) &&
@@ -591,6 +633,8 @@ namespace SquashBot.Gameplay
             monsterTimer = level.monsterAttack * (0.85f + (float)rng.NextDouble() * 0.3f);
             attackTiles.Clear();
             int dist = Chebyshev(robot.Position, monsterPos);
+            // On a healing island foi is out of reach: the monster waits (and growls) until it comes back.
+            if (grid.IsSafe(robot.Position)) { monsterTimer = 0.6f; return; }
             // Far away: from the second stretch of the campaign the monster leaps after the robot instead of waiting.
             if (dist >= 4 && hard > 0.12f && rng.NextDouble() < 0.35f + 0.4f * hard && TryLeap()) return;
             if (comboLeft <= 0 && rng.NextDouble() < hard * 0.8f + (enraged ? 0.25f : 0f)) comboLeft = hard > 0.6f ? 2 : 1;
@@ -603,7 +647,7 @@ namespace SquashBot.Gameplay
                     for (int y = -r; y <= r; y++)
                     {
                         var t = monsterPos + new GridPos(x, y);
-                        if ((x != 0 || y != 0) && grid.IsStandable(t)) attackTiles.Add(t);
+                        if ((x != 0 || y != 0) && grid.IsStandable(t) && !grid.IsSafe(t)) attackTiles.Add(t);
                     }
                 monster.Stomp();
             }
@@ -613,7 +657,7 @@ namespace SquashBot.Gameplay
                 attackTiles.Add(robot.Position);
                 if (level.score > 30 || enraged)
                     foreach (var d in DirectionExtensions.All)
-                        if (rng.Next(2) == 0 && grid.IsStandable(robot.Position + d.ToOffset())) attackTiles.Add(robot.Position + d.ToOffset());
+                        if (rng.Next(2) == 0 && grid.IsStandable(robot.Position + d.ToOffset()) && !grid.IsSafe(robot.Position + d.ToOffset())) attackTiles.Add(robot.Position + d.ToOffset());
                 monster.Throw();
                 ThrownRock.Create(At(monsterPos) + Vector3.up * 1.4f, At(robot.Position), 1.1f, new Color(0.6f, 0.5f, 0.45f));
             }
@@ -629,7 +673,7 @@ namespace SquashBot.Gameplay
                 for (int y = -2; y <= 2; y++)
                 {
                     var t = robot.Position + new GridPos(x, y);
-                    if (Chebyshev(t, robot.Position) != 2 || !grid.IsStandable(t) || grid.IsOccupied(t) || grid.IsGap(t)) continue;
+                    if (Chebyshev(t, robot.Position) != 2 || !grid.IsStandable(t) || grid.IsOccupied(t) || grid.IsGap(t) || grid.IsSafe(t)) continue;
                     int score = Chebyshev(t, monsterPos);
                     if (score < bestScore) { bestScore = score; best = t; }
                 }

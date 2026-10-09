@@ -107,6 +107,7 @@ namespace SquashBot.Visual
                         Shapes.Primitive(PrimitiveType.Sphere, "Eye", body, new Vector3(s, 0.95f, 0.36f), new Vector3(0.14f, 0.2f, 0.1f), eyeMat);
                     break;
             }
+            if (kind != Kind.Cage) Menace(skinColor);
             body.localScale = Vector3.one * Size;
 
             // The health bar over its head.
@@ -133,6 +134,55 @@ namespace SquashBot.Visual
             barFill.localScale = new Vector3(Mathf.Max(0.001f, k), 1f, 1f);
             var c = Color.Lerp(new Color(1f, 0.3f, 0.3f), new Color(0.4f, 1f, 0.4f), k);
             MaterialFactory.SetColors(barMat, c, c * 1.6f);
+        }
+
+        /// <summary>
+        /// Makes any monster look the part: glowing red eyes, a pair of curved horns, fangs under its face and a row of
+        /// spikes down its back, all placed from the size of the body it was built with.
+        /// </summary>
+        private void Menace(Color skin)
+        {
+            MaterialFactory.SetColors(eyeMat, new Color(1f, 0.22f, 0.12f), new Color(3.2f, 0.45f, 0.2f));
+            var bounds = new Bounds(body.position, Vector3.zero);
+            foreach (var r in body.GetComponentsInChildren<Renderer>()) bounds.Encapsulate(r.bounds);
+            var size = bounds.size;
+            var c = bounds.center - body.position;
+            float top = c.y + size.y * 0.5f, front = c.z + size.z * 0.5f, back = c.z - size.z * 0.5f, half = size.x * 0.5f;
+            var horn = MaterialFactory.Create(new Color(0.92f, 0.86f, 0.72f), new Color(0.1f, 0.08f, 0.05f));
+            var tip = MaterialFactory.Create(new Color(0.25f, 0.08f, 0.08f), Color.black);
+            var fang = MaterialFactory.Create(Color.white, new Color(0.4f, 0.4f, 0.4f));
+            var spike = MaterialFactory.Create(skin * 0.4f, Color.black);
+
+            // Horns: three tapering pieces each, sweeping out and up from the top of the head.
+            foreach (float s in new[] { -1f, 1f })
+            {
+                var basePos = new Vector3(s * half * 0.45f, top - 0.04f, c.z + size.z * 0.12f);
+                for (int i = 0; i < 3; i++)
+                {
+                    float k = i / 2f;
+                    float w = Mathf.Lerp(0.16f, 0.06f, k);
+                    var at = basePos + new Vector3(s * (0.06f + 0.1f * i), 0.1f + 0.12f * i - 0.02f * i * i, -0.03f * i);
+                    Shapes.Rounded("Horn", body, at, new Vector3(w, 0.16f, w), w * 0.4f, i == 2 ? tip : horn)
+                        .transform.localRotation = Quaternion.Euler(0f, 0f, -s * (25f + 18f * i));
+                }
+            }
+            // Fangs: hanging at the front, a little under the middle of the face.
+            float jaw = c.y + size.y * 0.05f;
+            for (int i = 0; i < 4; i++)
+            {
+                float x = (i - 1.5f) * half * 0.22f;
+                float len = i == 0 || i == 3 ? 0.14f : 0.09f;
+                Shapes.Rounded("Fang", body, new Vector3(x, jaw - len * 0.5f, front + 0.01f), new Vector3(0.05f, len, 0.04f), 0.015f, fang)
+                    .transform.localRotation = Quaternion.Euler(-10f, 0f, 0f);
+            }
+            // Spikes along the back.
+            for (int i = 0; i < 4; i++)
+            {
+                float t = i / 3f;
+                var at = new Vector3(0f, Mathf.Lerp(top - 0.05f, c.y + size.y * 0.15f, t), Mathf.Lerp(c.z - size.z * 0.1f, back + 0.02f, t));
+                Shapes.Rounded("Spike", body, at, new Vector3(0.05f, 0.2f, 0.12f), 0.03f, spike)
+                    .transform.localRotation = Quaternion.Euler(-35f - 25f * t, 0f, 0f);
+            }
         }
 
         /// <summary>A magic hit: it reels, flashes white and its health bar drops.</summary>
