@@ -45,6 +45,9 @@ namespace SquashBot.Data
                 final = index == LevelCount - 1,
             };
             level.layout = FloorShapes.For(index, size, out level.shapeName);
+            // Each world's 4th level is a pyramid and its 8th terraces (both change from world to world, see FloorRelief).
+            int inWorld = index % LevelsPerWorld;
+            level.terrain = inWorld == 3 ? TerrainKind.Pyramid : inWorld == 7 ? TerrainKind.Terraces : TerrainKind.Flat;
             level.gridWidth = level.layout[0].Length;
             level.gridHeight = level.layout.Length;
 

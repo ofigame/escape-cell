@@ -667,7 +667,9 @@ namespace SquashBot.Gameplay
             bool shaped = data.layout != null && data.layout.Length > 0;
             int w = shaped ? data.layout[0].Length : data.gridWidth;
             int h = shaped ? data.layout.Length : data.gridHeight;
-            return new GridModel(w, h, data.layout);
+            var grid = new GridModel(w, h, data.layout);
+            FloorRelief.Apply(grid, data.terrain, LevelCatalog.WorldOf(Mathf.Max(0, data.number - 1)));
+            return grid;
         }
 
         private void BeginRun()
@@ -1037,12 +1039,20 @@ namespace SquashBot.Gameplay
         private bool TryScreenToGrid(Vector2 screen, out GridPos cell)
         {
             var ray = cameraRig.Cam.ScreenPointToRay(screen);
-            var plane = new Plane(Vector3.up, new Vector3(0f, GridView.SurfaceY, 0f));
             cell = default;
-            if (!plane.Raycast(ray, out float distance)) return false;
-            var hit = ray.GetPoint(distance);
-            cell = new GridPos(Mathf.Clamp(Mathf.RoundToInt(hit.x), 0, grid.Width - 1), Mathf.Clamp(Mathf.RoundToInt(hit.z), 0, grid.Height - 1));
-            return true;
+            // On a raised floor the finger may point at a step's top: try the highest steps first and take the first tile
+            // that really stands at the height where the ray met it.
+            for (int h = FloorRelief.MaxHeight; h >= 0; h--)
+            {
+                var plane = new Plane(Vector3.up, new Vector3(0f, GridView.SurfaceY + h * FloorRelief.Step, 0f));
+                if (!plane.Raycast(ray, out float distance)) continue;
+                var hit = ray.GetPoint(distance);
+                var at = new GridPos(Mathf.Clamp(Mathf.RoundToInt(hit.x), 0, grid.Width - 1), Mathf.Clamp(Mathf.RoundToInt(hit.z), 0, grid.Height - 1));
+                if (h > 0 && (FloorRelief.HeightAt(at) != h || !grid.Exists(at))) continue;
+                cell = at;
+                return true;
+            }
+            return false;
         }
 
         private void ShowHoverMarker(bool on)

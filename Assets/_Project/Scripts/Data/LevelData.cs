@@ -167,6 +167,8 @@ namespace SquashBot.Data
         public int monsterHp = 8;
         [Tooltip("Seconds between the monster's attacks.")]
         public float monsterAttack = 3f;
+        [Tooltip("The floor's relief: flat, a pyramid or terraces (each world's 4th and 8th levels).")]
+        public SquashBot.Core.TerrainKind terrain;
         [Tooltip("Armour of the guard robots and the monster: a blow only does the damage above it (weaker weapons barely scratch them).")]
         public int armor;
         [Tooltip("Share of health a crate landing on the robot takes.")]

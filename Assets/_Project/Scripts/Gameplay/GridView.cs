@@ -52,7 +52,8 @@ namespace SquashBot.Gameplay
         }
         private FxSystem fx;
 
-        public static Vector3 ToWorld(GridPos p) => new Vector3(p.x, 0f, p.y);
+        /// <summary>A tile's centre in the world, standing on its step of the floor's relief (see <see cref="FloorRelief"/>).</summary>
+        public static Vector3 ToWorld(GridPos p) => new Vector3(p.x, FloorRelief.HeightAt(p) * FloorRelief.Step, p.y);
 
         public void Build(GridModel grid, FxSystem fxSystem, bool lowWalls = false)
         {
@@ -125,6 +126,15 @@ namespace SquashBot.Gameplay
                 Shapes.Rounded("SlabTop", root, at + new Vector3(0f, -0.19f, 0f), new Vector3(1.16f, 0.3f, 1.16f), 0.06f, slab);
                 Shapes.Rounded("EdgeGlow", root, at + new Vector3(0f, -0.36f, 0f), new Vector3(1.2f, 0.05f, 1.2f), 0.025f, glow);
                 Shapes.Rounded("SlabBottom", root, at + new Vector3(0f, -0.5f, 0f), new Vector3(1.17f, 0.24f, 1.17f), 0.06f, slab);
+                // A raised tile stands on a block of the slab down to the base, with a glowing band at every step.
+                int steps = FloorRelief.HeightAt(p);
+                if (steps > 0)
+                {
+                    float top = at.y - 0.5f, bottom = -0.6f;
+                    Shapes.Rounded("Riser", root, new Vector3(at.x, (top + bottom) * 0.5f, at.z), new Vector3(1.1f, top - bottom, 1.1f), 0.05f, slab);
+                    for (int s = 0; s < steps; s++)
+                        Shapes.Rounded("StepGlow", root, new Vector3(at.x, s * FloorRelief.Step - 0.36f, at.z), new Vector3(1.13f, 0.04f, 1.13f), 0.02f, glow);
+                }
             }
             // The platform never moves: merge it into a few big meshes, so a 20x20 floor costs a handful of draw calls.
             StaticBatchingUtility.Combine(root.gameObject);

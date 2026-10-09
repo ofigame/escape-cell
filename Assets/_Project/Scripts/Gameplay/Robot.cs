@@ -290,8 +290,9 @@ namespace SquashBot.Gameplay
             if (!grounded) return;
 
             var p = transform.position;
-            float height = Mathf.Max(0f, p.y);
-            shadow.position = new Vector3(p.x, GridView.SurfaceY + 0.004f, p.z);
+            float ground = GridView.ToWorld(new GridPos(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.z))).y; // the step under it
+            float height = Mathf.Max(0f, p.y - ground);
+            shadow.position = new Vector3(p.x, ground + GridView.SurfaceY + 0.004f, p.z);
             float s = 0.48f * (1f - Mathf.Clamp01(height) * 0.35f);
             shadow.localScale = new Vector3(s, 0.004f, s);
         }
@@ -445,6 +446,15 @@ namespace SquashBot.Gameplay
                 return;
             }
 
+            // A wall of the floor's relief too high to climb (more than one step up, or a drop of more than two): bump.
+            if (grid.Exists(target) && !FloorRelief.StepOk(Position, target))
+            {
+                StartAnim(Anim.Bump, transform.position, transform.position + new Vector3(offset.x, 0f, offset.y) * 0.2f);
+                AudioManager.PlaySfx(Sfx.Bump, 0.5f, 0.8f);
+                Haptics.Light();
+                return;
+            }
+
             // With armor, hopping onto a landed block smashes it and the robot takes the tile.
             bool blocked = grid.InBounds(target) && grid.IsOccupied(target) && !(IsShielded && BlockSmasher != null && BlockSmasher(target));
             if (!grid.InBounds(target) || blocked)
@@ -558,6 +568,9 @@ namespace SquashBot.Gameplay
             Position = target;
             hopDuration = HopDuration * (distance == 1 ? 1f : 1.2f + 0.5f * distance);
             hopHeight = HopHeight * (distance == 1 ? 1f : 1.4f + 0.4f * distance);
+            // Climbing a step: a higher arc, so it looks like a hop up rather than a slide.
+            float climb = (GridView.ToWorld(target).y - transform.position.y) / FloorRelief.Step;
+            if (climb > 0.1f) hopHeight += 0.25f * climb;
             StartAnim(Anim.Hop, transform.position, GridView.ToWorld(target));
         }
 

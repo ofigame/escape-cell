@@ -300,7 +300,7 @@ namespace SquashBot.Gameplay
             }
             float dt = Time.unscaledDeltaTime;
             var target = robot.transform.position;
-            target.y = 0f;
+            target.y = GridView.ToWorld(robot.Position).y * 0.85f; // rises with the floor's steps
             float pullGoal = 1f;
             if (walking)
             {

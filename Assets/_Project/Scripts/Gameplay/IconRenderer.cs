@@ -63,6 +63,7 @@ namespace SquashBot.Gameplay
             RenderSettings.ambientLight = Palette.Ambient * 0.9f;
 
             var fx = new GameObject("FX").AddComponent<FxSystem>();
+            FloorRelief.Clear();
             var grid = new GridModel(3, 3);
             var gridView = new GameObject("Grid").AddComponent<GridView>();
             gridView.Build(grid, fx);

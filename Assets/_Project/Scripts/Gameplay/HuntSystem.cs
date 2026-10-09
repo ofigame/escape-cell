@@ -303,12 +303,12 @@ namespace SquashBot.Gameplay
             var away = new GridPos(g.pos.x - robot.Position.x, g.pos.y - robot.Position.y);
             var dir = Mathf.Abs(away.x) >= Mathf.Abs(away.y) ? new GridPos(Math.Sign(away.x), 0) : new GridPos(0, Math.Sign(away.y));
             var next = g.pos + dir;
-            if (!CanStep(next))
+            if (!CanStep(g.pos, next))
             {
                 // Pinned that way: any free side will do.
                 next = g.pos;
                 foreach (var d in DirectionExtensions.All)
-                    if (CanStep(g.pos + d.ToOffset())) { next = g.pos + d.ToOffset(); break; }
+                    if (CanStep(g.pos, g.pos + d.ToOffset())) { next = g.pos + d.ToOffset(); break; }
                 if (next == g.pos) return;
             }
             MoveGuard(g, next, 0.12f);
@@ -412,7 +412,7 @@ namespace SquashBot.Gameplay
             if (MonsterUp) UpdateMonster(dt);
         }
 
-        private bool CanStep(GridPos p) =>
+        private bool CanStep(GridPos from, GridPos p) => FloorRelief.StepOk(from, p) &&
             grid.IsStandable(p) && !grid.IsOccupied(p) && !grid.IsGap(p) && p != robot.Position && (Avoid == null || !Avoid(p));
 
         private void UpdateBug(Bug b, float dt)
@@ -431,7 +431,7 @@ namespace SquashBot.Gameplay
             foreach (var d in DirectionExtensions.All)
             {
                 var n = b.pos + d.ToOffset();
-                if (!grid.IsStandable(n) || grid.IsOccupied(n) || grid.IsGap(n) || bugs.Exists(o => !o.dead && o.pos == n)) continue;
+                if (!grid.IsStandable(n) || grid.IsOccupied(n) || grid.IsGap(n) || bugs.Exists(o => !o.dead && o.pos == n) || !FloorRelief.StepOk(b.pos, n)) continue;
                 options.Add(n);
             }
             if (options.Count == 0) return;
@@ -520,7 +520,7 @@ namespace SquashBot.Gameplay
             foreach (var d in DirectionExtensions.All)
             {
                 var n = g.pos + d.ToOffset();
-                if (!CanStep(n)) continue;
+                if (!CanStep(g.pos, n)) continue;
                 int nd = robot.Position.Manhattan(n);
                 if (nd < bestDist || (nd == bestDist && rng.Next(2) == 0 && nd < dist)) { bestDist = nd; bestNext = n; }
             }

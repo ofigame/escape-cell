@@ -29,7 +29,7 @@ namespace SquashBot.Core
         public int FloorCount { get; }
 
         /// <summary>Spots a layout may mark: where the robot starts ('S'), where keys lie ('K'), where the door is ('D').</summary>
-        public GridPos? StartSpot { get; }
+        public GridPos? StartSpot { get; set; }
         public GridPos? DoorSpot { get; }
         public List<GridPos> KeySpots { get; } = new List<GridPos>();
 
