@@ -303,7 +303,7 @@ namespace SquashBot.Gameplay
             BuildRide();
             StartThemeFx();
             input.ScreenMode = true;
-            camPos = World(0f, 2.6f, -4.9f);
+            camPos = World(0f, 3.2f, -4.9f);
             PoseRobot(0f);
             UpdateCamera(1f);
         }
@@ -1795,7 +1795,7 @@ namespace SquashBot.Gameplay
         private void UpdateCamera(float dt)
         {
             // Behind and above the robot along the course, so the camera swings round the bends with it.
-            float lift = 2.6f + Mathf.Max(y, -1f) * 0.35f; // a little higher and farther back: bends and hills stay in view
+            float lift = 3.2f + Mathf.Max(y, -1f) * 0.35f; // a little higher and farther back: bends and hills stay in view
             if (falling) lift = Mathf.Max(1.4f, lift);
             var target = World(x * 0.5f, lift, z - 4.9f);
             camPos = dt >= 1f ? target : Vector3.Lerp(camPos, target, 1f - Mathf.Exp(-dt * 8f));

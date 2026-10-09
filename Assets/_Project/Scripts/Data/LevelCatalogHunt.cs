@@ -18,11 +18,11 @@ namespace SquashBot.Data
             index < 3 ? 0f : 0.06f + 0.94f * Mathf.Pow(Mathf.Clamp01((index - 3) / (float)(LevelCount - 4)), 0.62f);
 
         /// <summary>
-        /// The armour of the floor's guards and monster: 0 up to level 25, then 1 (a two-damage weapon gets through),
-        /// 2 from level 71 (three damage: the mace) and 3 from level 171 (four: the star hammer). Each step comes some
-        /// floors after the weapon that beats it is sold.
+        /// The armour of the floor's guards and monster: 0 up to level 25, then 2 (a three-damage weapon gets through:
+        /// the stone axe), 3 from level 71 (four: the mace) and 4 from level 171 (five: the battle axe). Each step comes
+        /// some floors after the weapon that beats it is sold.
         /// </summary>
-        public static int ArmorAt(int index) => index < 25 ? 0 : index < 70 ? 1 : index < 170 ? 2 : 3;
+        public static int ArmorAt(int index) => index < 25 ? 0 : index < 70 ? 2 : index < 170 ? 3 : 4;
 
         public static LevelData Hunt(LevelScript.Card card)
         {
@@ -78,8 +78,8 @@ namespace SquashBot.Data
             level.crateShare = Mathf.Lerp(0.3f, 0.48f, Mathf.InverseLerp(0.25f, 1f, d));
             if (level.armor > 0)
             {
-                level.robotHp += level.armor;
-                level.monsterHp += 4 * level.armor;
+                level.robotHp += level.armor - 1;
+                level.monsterHp += 4 * (level.armor - 1);
             }
 
             level.coinInterval = 2.4f;

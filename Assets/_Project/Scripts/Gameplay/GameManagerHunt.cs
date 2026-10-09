@@ -70,11 +70,12 @@ namespace SquashBot.Gameplay
         {
             HazardVisuals.CrateTier = Mathf.Clamp(World / 5, 0, 4); // the crates grow sturdier every five worlds
             hunt.Avoid = p => hazards.IsThreatened(p);
-            // The robot and the guards grow with the campaign, up to twice their old size; the robot carries its weapon.
+            // The robot and the guards stand big on the floor and grow with the campaign (back to normal size in the
+            // tunnels, see ClearHuntDress); the robot carries its weapon.
             float grow = Mathf.Clamp01(World / 12f);
-            robot.transform.localScale = Vector3.one * Mathf.Lerp(1.5f, 2f, grow);
+            robot.transform.localScale = Vector3.one * Mathf.Lerp(1.8f, 2.35f, grow);
             Robot.HopScale = 0.6f; // quick and even: each step follows the finger at once, and a run of steps flows on
-            hunt.EnemyScale = Mathf.Lerp(1.45f, 1.85f, grow);
+            hunt.EnemyScale = Mathf.Lerp(1.75f, 2.2f, grow);
             weapon = Armory.Equipped;
             if (heldWeapon != null) Destroy(heldWeapon.gameObject);
             heldWeapon = HeldWeapon.Attach(robot.Visual, weapon);
@@ -245,6 +246,7 @@ namespace SquashBot.Gameplay
             if (heldWeapon != null) heldWeapon.Swing();
             // A blow you can see: a crescent of the weapon's colour sweeping through the target.
             SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.Glow(w.tier), 1f + 0.15f * w.damage);
+            LeanTowardsBlow(GridView.ToWorld(at));
             cameraRig.Shake(0.15f + 0.08f * damage);
             if (crowd) hunt.Strike(at, damage);
             else if (hazards.Shatter(at))
@@ -262,6 +264,22 @@ namespace SquashBot.Gameplay
         private float camYaw, camYawVelocity;
         /// <summary>How far the camera has pulled back for the walk to the exit (1 = playing distance).</summary>
         private float camPull = 1f, camPullVelocity;
+        /// <summary>A lean towards the side a blow went to (degrees), held for a moment after each strike.</summary>
+        private float strikeLean, strikeLeanLeft;
+
+        /// <summary>
+        /// After a blow the camera turns a little towards it: right when the target stood to the right or straight
+        /// ahead, left when it stood to the left.
+        /// </summary>
+        private void LeanTowardsBlow(Vector3 target)
+        {
+            var forward = Quaternion.Euler(0f, camYaw, 0f) * new Vector3(1f, 0f, 1f).normalized;
+            var right = Vector3.Cross(Vector3.up, forward);
+            var to = target - robot.transform.position;
+            to.y = 0f;
+            strikeLean = Vector3.Dot(to.normalized, right) >= -0.15f ? StrikeLean : -StrikeLean;
+            strikeLeanLeft = 1.3f;
+        }
 
         private void UpdateCloseCamera()
         {
@@ -306,7 +324,9 @@ namespace SquashBot.Gameplay
                 float angle = Vector3.SignedAngle(new Vector3(1f, 0f, 1f), new Vector3(o.x, 0f, o.y), Vector3.up);
                 yawGoal = Mathf.Abs(angle) > 120f ? 0f : Mathf.Clamp(angle * 0.16f, -CamLean, CamLean);
             }
-            camYaw = Mathf.SmoothDamp(camYaw, yawGoal, ref camYawVelocity, 1.1f, 25f, dt);
+            bool striking = strikeLeanLeft > 0f;
+            if (striking) { strikeLeanLeft -= dt; yawGoal = Mathf.Clamp(yawGoal + strikeLean, -CamLean - StrikeLean, CamLean + StrikeLean); }
+            camYaw = Mathf.SmoothDamp(camYaw, yawGoal, ref camYawVelocity, striking ? 0.45f : 1.1f, striking ? 60f : 25f, dt);
 
             var offset = Quaternion.Euler(0f, camYaw, 0f) * CloseCamOffset * (CamDistanceScale[SaveData.CameraDistance] * camPull);
             var pos = closeCamFocus + offset;
@@ -319,5 +339,7 @@ namespace SquashBot.Gameplay
         private const float CloseCamFov = 50f;
         /// <summary>The most the camera leans towards the robot's heading, in degrees.</summary>
         private const float CamLean = 14f;
+        /// <summary>How far the camera turns towards a blow, in degrees.</summary>
+        private const float StrikeLean = 12f;
     }
 }

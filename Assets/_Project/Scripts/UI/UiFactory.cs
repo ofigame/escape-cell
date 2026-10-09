@@ -390,6 +390,12 @@ namespace SquashBot.UI
             var image = Chunky(root, style);
             var face = (RectTransform)image.transform;
 
+            if (text == "<")
+            {
+                // A back button: a drawn arrow instead of a "<" letter.
+                BackArrow(face, Mathf.Min(size.x, size.y) * 0.5f);
+                text = "";
+            }
             // A clean, heavy sans label in white with a soft shadow.
             var label = Text(face, text, fontSize * 0.86f, Color.white, style: FontStyles.Bold);
             label.fontSharedMaterial = SoftBody;
@@ -414,6 +420,26 @@ namespace SquashBot.UI
             });
             root.gameObject.AddComponent<ButtonPress>();
             return button;
+        }
+
+        /// <summary>A white "back" arrow (a head of two strokes and a shaft) centred in <paramref name="parent"/>, <paramref name="size"/> across.</summary>
+        public static void BackArrow(RectTransform parent, float size)
+        {
+            var icon = Box("BackIcon", parent, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(size, size));
+            icon.pivot = new Vector2(0.5f, 0.5f);
+            float stroke = size * 0.15f;
+            void Stroke(Vector2 at, float length, float angle)
+            {
+                var s = Box("Stroke", icon, new Vector2(0.5f, 0.5f), at, new Vector2(length, stroke));
+                s.pivot = new Vector2(0.5f, 0.5f);
+                s.localRotation = Quaternion.Euler(0f, 0f, angle);
+                Fill(s, Color.white, UiSprites.Rounded, Mathf.Max(0.5f, 40f / stroke)).raycastTarget = false;
+            }
+            float head = size * 0.42f;
+            var tip = new Vector2(-size * 0.36f, 0f);
+            Stroke(tip + new Vector2(head * 0.5f * 0.7071f, head * 0.5f * 0.7071f), head, 45f);
+            Stroke(tip + new Vector2(head * 0.5f * 0.7071f, -head * 0.5f * 0.7071f), head, -45f);
+            Stroke(new Vector2(size * 0.02f, 0f), size * 0.74f, 0f);
         }
 
         public static Image Bar(Transform parent, Vector2 anchor, Vector2 position, Vector2 size, Color color, out Image fill)

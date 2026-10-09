@@ -842,6 +842,10 @@ namespace SquashBot.Gameplay
             cameraRig.SetMenuFocus(false);
             cameraRig.SetStyle(CameraStyle.Gameplay);
             ui.ShowHud(levelIndex);
+            // Back in with a full health bar.
+            health = 1f;
+            hurtCooldown = 0f;
+            RefreshHealthBar();
             fx.Burst(GridView.ToWorld(at) + Vector3.up * 0.5f, Palette.ShieldPickup, Palette.ShieldPickupGlow, 30, 5f);
             FloatAt(GridView.ToWorld(at), Loc.T("float.revive"), Palette.UiCyan);
             if (timed) FloatAt(GridView.ToWorld(at) + Vector3.up * 0.6f, Loc.F("float.moreTime", ReviveSeconds), Palette.UiGold);
