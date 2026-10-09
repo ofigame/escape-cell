@@ -19,6 +19,7 @@ namespace SquashBot.UI
         Vibration,
         Language,
         Camera,
+        CombatCamera,
         Graphics,
         TestMode
     }
@@ -610,7 +611,7 @@ namespace SquashBot.UI
         {
             settings = UiScreen.Create("Settings", root, out var t);
             UiFactory.Dim(t, new Color(0.06f, 0.05f, 0.18f, 0.5f));
-            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1450f));
+            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1590f));
             UiFactory.TextBox("Title", card, Top, new Vector2(0f, -50f), new Vector2(800f, 120f), Loc.T("settings.title"), 90f, Palette.UiText, title: true);
 
             var rows = new[]
@@ -620,6 +621,7 @@ namespace SquashBot.UI
                 (SettingKind.Vibration, "settings.vibration"),
                 (SettingKind.Language, "settings.language"),
                 (SettingKind.Camera, "settings.camera"),
+                (SettingKind.CombatCamera, "settings.combatCam"),
                 (SettingKind.Graphics, "settings.graphics"),
                 (SettingKind.TestMode, "settings.test"),
             };
@@ -664,6 +666,7 @@ namespace SquashBot.UI
             }
             settingValues[SettingKind.Language].text = Loc.T("lang.name");
             settingValues[SettingKind.Camera].text = Loc.T("camDist." + SaveData.CameraDistance);
+            SetSetting(SettingKind.CombatCamera, SaveData.CombatCamera);
             var gfx = Loc.T("gfx." + GraphicsQuality.Current);
             settingValues[SettingKind.Graphics].text = GraphicsQuality.Choice.HasValue ? gfx : Loc.F("gfx.auto", gfx);
             settingValues[SettingKind.Graphics].color = Palette.UiCyan;

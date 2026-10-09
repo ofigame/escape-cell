@@ -72,6 +72,7 @@ namespace SquashBot.Data
             ["btn.close"] = "닫기",
             ["result.win"] = "레벨 클리어!",
             ["float.moreTime"] = "+{0}초!",
+            ["settings.combatCam"] = "전투 카메라",
             ["monster.vanG"] = "괴물 vanG",
             ["float.potion"] = "체력 회복!",
             ["float.asleep"] = "잠자는 중 - 먼저 다른 적을 물리쳐요",

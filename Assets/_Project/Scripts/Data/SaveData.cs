@@ -44,6 +44,13 @@ namespace SquashBot.Data
         }
 
         /// <summary>How far the play camera stands from the robot: 0 near … 3 far (default 2).</summary>
+        /// <summary>The camera drops lower and closer while foi fights robots or vanG (not for bugs).</summary>
+        public static bool CombatCamera
+        {
+            get => PlayerPrefs.GetInt("sb_combat_cam", 1) == 1;
+            set { PlayerPrefs.SetInt("sb_combat_cam", value ? 1 : 0); PlayerPrefs.Save(); }
+        }
+
         public static int CameraDistance
         {
             get => Mathf.Clamp(PlayerPrefs.GetInt("sb_cam_distance2", 2), 0, 3);

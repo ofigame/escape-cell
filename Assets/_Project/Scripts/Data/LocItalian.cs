@@ -72,6 +72,7 @@ namespace SquashBot.Data
             ["btn.close"] = "CHIUDI",
             ["result.win"] = "LIVELLO SUPERATO!",
             ["float.moreTime"] = "+{0} SECONDI!",
+            ["settings.combatCam"] = "Camera combattimento",
             ["monster.vanG"] = "Mostro vanG",
             ["float.potion"] = "SALUTE PIENA!",
             ["float.asleep"] = "DORME - SCONFIGGI PRIMA GLI ALTRI",

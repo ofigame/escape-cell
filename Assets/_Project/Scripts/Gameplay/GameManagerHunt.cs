@@ -280,6 +280,8 @@ namespace SquashBot.Gameplay
         private float camPull = 1f, camPullVelocity;
         /// <summary>A lean towards the side a blow went to (degrees), held for a moment after each strike.</summary>
         private float strikeLean, strikeLeanLeft;
+        /// <summary>0 = the usual view .. 1 = the low, close fight view; and how long since the last enemy was near.</summary>
+        private float combatBlend, combatBlendVelocity, combatQuiet;
 
         /// <summary>
         /// After a blow the camera turns a little towards it: right when the target stood to the right or straight
@@ -310,6 +312,7 @@ namespace SquashBot.Gameplay
                 camYaw = camYawVelocity = 0f;
                 camPull = 1f;
                 camPullVelocity = 0f;
+                combatBlend = combatBlendVelocity = 0f;
                 return;
             }
             float dt = Time.unscaledDeltaTime;
@@ -330,6 +333,13 @@ namespace SquashBot.Gameplay
             closeCamOn = true;
             camPull = Mathf.SmoothDamp(camPull, pullGoal, ref camPullVelocity, 0.9f, Mathf.Infinity, dt);
 
+            // The fight view: when a robot comes within three tiles (or vanG is awake nearby) the camera glides lower
+            // and closer; it rises again a moment after the last one is gone. Never for bugs, and only if the setting is on.
+            bool fight = !walking && SaveData.CombatCamera && hunt.InCombat(robot.Position, combatBlend > 0.5f ? 5 : 3);
+            combatQuiet = fight ? 0f : combatQuiet + dt;
+            float fightGoal = fight || combatQuiet < 1.2f && combatBlend > 0.5f && SaveData.CombatCamera ? 1f : 0f;
+            combatBlend = Mathf.SmoothDamp(combatBlend, fightGoal, ref combatBlendVelocity, 0.45f, Mathf.Infinity, dt);
+
             // A small lean towards the way the robot faces, settling slowly like a slow-motion pan (never a snap).
             float yawGoal = 0f;
             if (!walking)
@@ -342,12 +352,18 @@ namespace SquashBot.Gameplay
             if (striking) { strikeLeanLeft -= dt; yawGoal = Mathf.Clamp(yawGoal + strikeLean, -CamLean - StrikeLean, CamLean + StrikeLean); }
             camYaw = Mathf.SmoothDamp(camYaw, yawGoal, ref camYawVelocity, striking ? 0.45f : 1.1f, striking ? 60f : 25f, dt);
 
-            var offset = Quaternion.Euler(0f, camYaw, 0f) * CloseCamOffset * (CamDistanceScale[SaveData.CameraDistance] * camPull);
+            var baseOffset = Vector3.Lerp(CloseCamOffset, FightCamOffset, combatBlend);
+            var offset = Quaternion.Euler(0f, camYaw, 0f) * baseOffset * (CamDistanceScale[SaveData.CameraDistance] * camPull * Mathf.Lerp(1f, FightCamCloser, combatBlend));
             var pos = closeCamFocus + offset;
-            cameraRig.Chase(pos, Quaternion.LookRotation(closeCamFocus + Vector3.up * 0.35f - pos), CloseCamFov);
+            // Low down, it looks a little higher, over foi towards the fight.
+            cameraRig.Chase(pos, Quaternion.LookRotation(closeCamFocus + Vector3.up * Mathf.Lerp(0.35f, 0.9f, combatBlend) - pos), Mathf.Lerp(CloseCamFov, FightCamFov, combatBlend));
         }
 
         private static readonly Vector3 CloseCamOffset = new Vector3(-2.7f, 3.9f, -2.7f);
+        /// <summary>The fight view: the same heading, much lower (about 30 degrees down instead of 46).</summary>
+        private static readonly Vector3 FightCamOffset = new Vector3(-2.7f, 2.2f, -2.7f);
+        /// <summary>How much closer the fight view sits, and its slightly wider lens.</summary>
+        private const float FightCamCloser = 0.8f, FightCamFov = 54f;
         /// <summary>The settings' camera distances (near, medium, far, farthest), as multiples of the nearest view.</summary>
         private static readonly float[] CamDistanceScale = { 2.45f, 2.9f, 4.0f, 4.8f };
         private const float CloseCamFov = 50f;

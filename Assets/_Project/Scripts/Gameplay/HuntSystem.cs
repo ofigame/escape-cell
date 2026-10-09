@@ -703,6 +703,17 @@ namespace SquashBot.Gameplay
             attackWind = -1f;
         }
 
+        /// <summary>
+        /// A fight is on near <paramref name="p"/>: a guard or enforcer within <paramref name="range"/> tiles, or vanG awake
+        /// and a little farther. Bugs don't count.
+        /// </summary>
+        public bool InCombat(GridPos p, int range)
+        {
+            if (!running) return false;
+            foreach (var g in guards) if (!g.dead && Chebyshev(g.pos, p) <= range) return true;
+            return MonsterUp && MonsterAwake && Chebyshev(monsterPos, p) <= range + 2;
+        }
+
         public static int Chebyshev(GridPos a, GridPos b) => Mathf.Max(Mathf.Abs(a.x - b.x), Mathf.Abs(a.y - b.y));
     }
 }

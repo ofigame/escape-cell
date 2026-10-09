@@ -72,6 +72,7 @@ namespace SquashBot.Data
             ["btn.close"] = "BAĞLA",
             ["result.win"] = "SƏVİYYƏ KEÇİLDİ!",
             ["float.moreTime"] = "+{0} SANİYƏ!",
+            ["settings.combatCam"] = "Döyüş kamerası",
             ["monster.vanG"] = "Canavar vanG",
             ["float.potion"] = "CAN DOLDU!",
             ["float.asleep"] = "YATIR - ƏVVƏLCƏ DİGƏRLƏRİNİ MƏĞLUB ET",

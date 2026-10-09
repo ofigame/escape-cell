@@ -784,6 +784,9 @@ namespace SquashBot.Gameplay
                 case SettingKind.Graphics:
                     GraphicsQuality.Next();
                     break;
+                case SettingKind.CombatCamera:
+                    SaveData.CombatCamera = !SaveData.CombatCamera;
+                    break;
                 case SettingKind.Camera:
                     SaveData.CameraDistance = (SaveData.CameraDistance + 1) % 4; // near → medium → far → farthest
                     break;
