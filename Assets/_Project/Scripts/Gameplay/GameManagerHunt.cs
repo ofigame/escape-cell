@@ -80,6 +80,7 @@ namespace SquashBot.Gameplay
             robot.transform.localScale = Vector3.one * Mathf.Lerp(1.65f, 2.17f, grow);
             Robot.HopScale = 0.6f; // quick and even: each step follows the finger at once, and a run of steps flows on
             hunt.EnemyScale = Mathf.Lerp(1.6f, 2.03f, grow);
+            adHealUsed = false;
             weapon = Armory.Equipped;
             if (heldWeapon != null) Destroy(heldWeapon.gameObject);
             heldWeapon = HeldWeapon.Attach(robot.Visual, weapon);
@@ -234,8 +235,12 @@ namespace SquashBot.Gameplay
         /// </summary>
         private bool TapStrike(Vector2 screen)
         {
-            if (!TryScreenToGrid(screen, out var cell)) return false;
-            bool crowd = hunt.TargetNear(cell, out var at);
+            // The target is picked on the screen first (robots are tall: anywhere on their body counts), then by the tile
+            // the finger points at on the floor.
+            bool crowd = hunt.PickOnScreen(cameraRig.Cam, screen, Screen.height * 0.07f, out var at);
+            bool onFloor = TryScreenToGrid(screen, out var cell);
+            if (!crowd && !onFloor) return false;
+            if (!crowd) crowd = hunt.TargetNear(cell, out at);
             bool crate = false;
             if (!crowd)
             {
@@ -270,6 +275,8 @@ namespace SquashBot.Gameplay
         {
             if (!pendingStrike.HasValue) return;
             var (at, crowd, time) = pendingStrike.Value;
+            // The target stepped on meanwhile: follow it to its new tile.
+            if (crowd && !hunt.HasTargetAt(at) && hunt.TargetNear(at, out var moved)) at = moved;
             if (Time.time - time > 0.35f || HuntSystem.Chebyshev(at, robot.Position) > StrikeReach) { pendingStrike = null; return; }
             if (TryStrikeNow(at, crowd)) pendingStrike = null;
         }

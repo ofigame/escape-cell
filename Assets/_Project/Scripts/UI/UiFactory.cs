@@ -118,6 +118,12 @@ namespace SquashBot.UI
             }
         }
 
+        /// <summary>
+        /// How a canvas fits the screen: by width on phones (the 1080x1920 design or narrower), by height on anything
+        /// wider (tablets such as the iPad, and landscape), so nothing grows too tall to fit.
+        /// </summary>
+        public static float MatchFor(int width, int height) => width / (float)Mathf.Max(1, height) > 1080f / 1920f + 0.01f ? 1f : 0f;
+
         public static Canvas CreateCanvas(string name, out CanvasScaler scaler)
         {
             var go = new GameObject(name);
@@ -129,7 +135,7 @@ namespace SquashBot.UI
             scaler = go.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080f, 1920f);
-            scaler.matchWidthOrHeight = 0f;
+            scaler.matchWidthOrHeight = MatchFor(Screen.width, Screen.height);
 
             go.AddComponent<GraphicRaycaster>();
             EnsureEventSystem();

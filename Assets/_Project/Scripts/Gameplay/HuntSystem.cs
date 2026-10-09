@@ -33,6 +33,8 @@ namespace SquashBot.Gameplay
             public float moveT = 1f, step, windup = -1f, cooldown, flash;
             public GridPos target;
             public int hp, maxHp;
+            /// <summary>The tile it is stepping (or being knocked) off: while it moves, a blow there still lands.</summary>
+            public GridPos prevPos;
             /// <summary>The health bar over its head (turns to the camera) and its fill.</summary>
             public Transform bar, barFill;
             public Material barMat;
@@ -243,6 +245,47 @@ namespace SquashBot.Gameplay
             }
         }
 
+        /// <summary>
+        /// What a tap on the screen points at, judged on the screen itself: the bug, robot or monster whose drawn body
+        /// (anywhere from its feet to its head) is nearest the finger, within <paramref name="radius"/> pixels.
+        /// Tall robots are hit wherever they are touched (a ray to the floor would land a tile or two behind them).
+        /// </summary>
+        public bool PickOnScreen(Camera cam, Vector2 screen, float radius, out GridPos at)
+        {
+            at = default;
+            if (cam == null || !running) return false;
+            float best = radius;
+            bool found = false;
+            GridPos pick = default;
+            void Try(Vector3 feet, float height, GridPos tile, float bias)
+            {
+                // The distance from the finger to the body's upright line, feet to head, on the screen.
+                var a = cam.WorldToScreenPoint(feet);
+                var b = cam.WorldToScreenPoint(feet + Vector3.up * height);
+                if (a.z <= 0f || b.z <= 0f) return;
+                var ab = (Vector2)(b - a);
+                float t = ab.sqrMagnitude < 1f ? 0f : Mathf.Clamp01(Vector2.Dot(screen - (Vector2)a, ab) / ab.sqrMagnitude);
+                float d = Vector2.Distance(screen, (Vector2)a + ab * t) * bias;
+                if (d < best) { best = d; pick = tile; found = true; }
+            }
+            if (MonsterUp) Try(monster.transform.position, 2f * monster.transform.lossyScale.y, monsterPos, 0.8f);
+            foreach (var g in guards)
+                if (!g.dead) Try(g.root.position, g.bar != null ? g.bar.localPosition.y : 1.2f, g.pos, 0.8f); // fighters first when close
+            foreach (var b in bugs)
+                if (!b.dead) Try(b.model.transform.position, 0.3f, b.pos, 1f);
+            at = pick;
+            return found;
+        }
+
+        /// <summary>Something to strike still stands on (or is stepping off) this tile.</summary>
+        public bool HasTargetAt(GridPos p)
+        {
+            if (MonsterUp && monsterPos == p) return true;
+            foreach (var g in guards) if (!g.dead && (g.pos == p || (g.moveT < 1f && g.prevPos == p))) return true;
+            foreach (var b in bugs) if (!b.dead && b.pos == p) return true;
+            return false;
+        }
+
         /// <summary>Is there something to strike on (or right next to) a tapped tile? Returns the tile it stands on.</summary>
         public bool TargetNear(GridPos tapped, out GridPos at)
         {
@@ -262,7 +305,6 @@ namespace SquashBot.Gameplay
             return best <= 1;
         }
 
-        /// <summary>A hammer blow on a tile: the monster, a robot or a bug there takes it. True if it hit something.</summary>
         /// <summary>A blow bounced off armour (too weak a weapon): where.</summary>
         public event Action<GridPos> Armored;
 
@@ -280,6 +322,7 @@ namespace SquashBot.Gameplay
             return rng.Next(4) == 0 ? 1 : 0;
         }
 
+        /// <summary>A blow on a tile: the monster, a robot or a bug there takes it. True if it hit something.</summary>
         public bool Strike(GridPos p, int damage)
         {
             if (MonsterUp && Chebyshev(p, monsterPos) == 0)
@@ -298,7 +341,7 @@ namespace SquashBot.Gameplay
             }
             foreach (var g in guards)
             {
-                if (g.dead || g.pos != p) continue;
+                if (g.dead || (g.pos != p && !(g.moveT < 1f && g.prevPos == p))) continue;
                 g.hp -= ThroughArmor(p, damage);
                 g.flash = 1f;
                 g.Flash();
@@ -499,6 +542,7 @@ namespace SquashBot.Gameplay
         private void MoveGuard(Guard g, GridPos next, float duration)
         {
             grid.SetOccupied(g.pos, false);
+            g.prevPos = g.pos;
             g.pos = next;
             grid.SetOccupied(next, true);
             g.from = g.root.position;

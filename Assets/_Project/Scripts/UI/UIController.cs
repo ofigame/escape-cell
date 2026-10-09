@@ -39,6 +39,8 @@ namespace SquashBot.UI
         public event Action PausePressed;
         /// <summary>The weapon bag was opened during a level.</summary>
         public event Action BagPressed;
+        /// <summary>The "watch an ad, fill your health" button was pressed (shown when health runs low).</summary>
+        public event Action AdHealPressed;
         public event Action ResumePressed;
         public event Action<SettingKind> SettingToggled;
         public event Action<int> LevelChosen;
@@ -164,7 +166,11 @@ namespace SquashBot.UI
         public TipCard Tip { get; private set; }
         public WeaponBag WeaponBag { get; private set; }
         public HeroPicker HeroPicker { get; private set; }
+        public AdOfferCard AdOffer { get; private set; }
         private RectTransform bagButton;
+        private RectTransform adHealButton;
+        public void SetAdHealVisible(bool on) { if (adHealButton != null && adHealButton.gameObject.activeSelf != on) adHealButton.gameObject.SetActive(on); }
+        private bool IsOverAdHeal(Vector2 screen) => adHealButton != null && adHealButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(adHealButton, screen, null);
 
         public void SetBagVisible(bool on) { if (bagButton != null && bagButton.gameObject.activeSelf != on) bagButton.gameObject.SetActive(on); }
 
@@ -252,6 +258,7 @@ namespace SquashBot.UI
             Tip = TipCard.Create(root);
             WeaponBag = WeaponBag.Create(root);
             HeroPicker = HeroPicker.Create(root);
+            AdOffer = AdOfferCard.Create(root);
             Garage.HeroPressed += () => HeroPicker.Show(true);
         }
 
@@ -718,6 +725,19 @@ namespace SquashBot.UI
             bagButton.gameObject.AddComponent<ButtonPress>();
             bagButton.gameObject.SetActive(false);
 
+            // Low on health: watch an ad and fill the bar (above the bag, pulsing; once a level).
+            adHealButton = UiFactory.Box("AdHeal", t, new Vector2(0f, 0f), new Vector2(40f, 570f), new Vector2(150f, 150f));
+            var healFace = UiFactory.Chunky(adHealButton, UiFactory.StyleOf(new Color(0.25f, 0.78f, 0.55f)), 1f, 0f, UiSprites.Circle);
+            HeartIcon(adHealButton, new Vector2(75f, 6f), 84f);
+            var healLabel = UiFactory.OutlinedText("Label", adHealButton, new Vector2(0.5f, 0f), new Vector2(0f, -16f), new Vector2(220f, 44f), Loc.T("ad.heal"), 26f, new Color(0.04f, 0.22f, 0.14f));
+            healLabel.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var healBtn = adHealButton.gameObject.AddComponent<Button>();
+            healBtn.targetGraphic = healFace;
+            healBtn.onClick.AddListener(() => AdHealPressed?.Invoke());
+            adHealButton.gameObject.AddComponent<ButtonPress>();
+            adHealButton.gameObject.AddComponent<Pulse>();
+            adHealButton.gameObject.SetActive(false);
+
             var mission = missionPill = UiFactory.Pill("Mission", t, Top, new Vector2(0f, -36f), new Vector2(500f, 124f), UiFactory.PillColor);
             hudLevel = UiFactory.TextBox("Level", mission, Top, new Vector2(0f, -10f), new Vector2(480f, 40f), "", 30f, Palette.UiCyan);
             hudLevel.characterSpacing = 6f;
@@ -833,6 +853,7 @@ namespace SquashBot.UI
         {
             if (SkillBar != null && SkillBar.IsOver(screen)) return true;
             if (IsOverBag(screen)) return true;
+            if (IsOverAdHeal(screen)) return true;
             foreach (var b in toolButtons)
                 if (b != null && b.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(b.Rect, screen, null)) return true;
             return false;
@@ -1290,8 +1311,9 @@ namespace SquashBot.UI
                 RefreshLives();
             }
 
-            // Portrait: fit the width; landscape: fit the height. Fixed-size cards then work in both.
-            scaler.matchWidthOrHeight = Screen.width < Screen.height ? 0f : 1f;
+            // Phones (as narrow as the 9:16 design or narrower): fit the width. Tablets and landscape: fit the height, so the
+            // layout keeps its phone proportions top to bottom and the extra width becomes margin at the sides.
+            scaler.matchWidthOrHeight = UiFactory.MatchFor(Screen.width, Screen.height);
 
             // The red edge bars are off: with rain everywhere they framed every level in red; the tiles warn by themselves.
             float warnPulse = 0f;

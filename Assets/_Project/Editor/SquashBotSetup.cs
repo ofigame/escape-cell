@@ -79,6 +79,43 @@ namespace SquashBot.EditorTools
             Debug.Log($"[SquashBot] Windows build: {report.summary.result}");
         }
 
+        /// <summary>
+        /// A non-development Windows build (no "Development Build" mark) for store screenshots:
+        /// Builds/Showcase/foi.exe, otherwise the same as the test build.
+        /// </summary>
+        public static void ShowcaseBatch()
+        {
+            try
+            {
+                Setup();
+                string name = PlayerSettings.productName;
+                PlayerSettings.productName = name.Replace(" | ", " ").Replace("|", " ");
+                BuildReport report;
+                try
+                {
+                    report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
+                    {
+                        scenes = new[] { ScenePath },
+                        locationPathName = "Builds/Showcase/foi.exe",
+                        target = BuildTarget.StandaloneWindows64,
+                        options = BuildOptions.None,
+                    });
+                }
+                finally
+                {
+                    PlayerSettings.productName = name;
+                    AssetDatabase.SaveAssets();
+                }
+                Debug.Log($"[SquashBot] Windows build: {report.summary.result}");
+                EditorApplication.Exit(0);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                EditorApplication.Exit(1);
+            }
+        }
+
         public static void SetupAndBuildBatch()
         {
             try

@@ -124,6 +124,7 @@ namespace SquashBot.UI
                     PaintCell();
                     break;
                 default:
+                    AdCoinsCell();
                     foreach (var b in Shop.Counter()) ItemCell((Item)((int)Item.StartShield + (int)b));
                     ItemCell(Item.Life);
                     ItemCell(Item.Tunnel);
@@ -484,6 +485,53 @@ namespace SquashBot.UI
             Part("Buckle", new Vector2(0f, 10f), new Vector2(16f, 16f), new Color(1f, 0.88f, 0.45f));
             Part("StrapL", new Vector2(-30f, -4f), new Vector2(8f, 80f), dark);
             Part("StrapR", new Vector2(30f, -4f), new Vector2(8f, 80f), dark);
+        }
+
+        /// <summary>Coins for an ad: a few times a day, the count left shown on the card.</summary>
+        private void AdCoinsCell()
+        {
+            var card = Cell("AdCoins", Palette.UiGold, out var picture);
+            // A little stack of coins.
+            foreach (var (pos, size) in new[] { (new Vector2(-60f, -30f), 120f), (new Vector2(55f, -40f), 110f), (new Vector2(0f, 45f), 130f) })
+            {
+                var coin = UiFactory.Box("Coin", picture, new Vector2(0.5f, 0.5f), pos, new Vector2(size, size));
+                coin.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(coin, Palette.UiGold, UiSprites.Circle).raycastTarget = false;
+                var inner = UiFactory.Box("Inner", coin, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(size * 0.64f, size * 0.64f));
+                inner.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(inner, new Color(1f, 0.9f, 0.55f), UiSprites.Circle).raycastTarget = false;
+            }
+            CardName(card, Loc.F("ad.coinsName", AdRewards.ShopCoins));
+            var desc = CardDesc(card);
+            var buy = BuyButton(card, () =>
+            {
+                if (AdRewards.ShopAdsLeft <= 0 || !Monetization.Ads.Rewarded.IsReady)
+                {
+                    AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                    return;
+                }
+                Monetization.Ads.Rewarded.Show(rewarded =>
+                {
+                    if (rewarded)
+                    {
+                        AdRewards.GrantShopCoins();
+                        AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
+                        Haptics.Medium();
+                        Pop(card);
+                        Purchased?.Invoke();
+                    }
+                    Refresh();
+                });
+            });
+            var label = buy.GetComponentInChildren<TextMeshProUGUI>();
+            refreshers.Add(() =>
+            {
+                int left = AdRewards.ShopAdsLeft;
+                bool ready = Monetization.Ads.Rewarded.IsReady;
+                desc.text = left > 0 ? Loc.F("ad.coinsLeft", left) : Loc.T("ad.coinsTomorrow");
+                label.text = left <= 0 ? Loc.T("shop.full") : ready ? Loc.T("ad.watch") : Loc.T("ad.notReady");
+                Afford(buy, left > 0 && ready, true);
+            });
         }
 
         /// <summary>The paint workshop: a door into the garage.</summary>

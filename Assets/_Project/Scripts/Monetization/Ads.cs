@@ -115,7 +115,7 @@ namespace SquashBot.Monetization
         {
             var canvas = UiFactory.CreateCanvas("TestAd", out var scaler);
             canvas.sortingOrder = 100;
-            scaler.matchWidthOrHeight = Screen.width < Screen.height ? 0f : 1f;
+            scaler.matchWidthOrHeight = UiFactory.MatchFor(Screen.width, Screen.height);
             var screen = canvas.gameObject.AddComponent<TestAdScreen>();
             screen.done = onFinished;
             screen.Build(canvas.transform);

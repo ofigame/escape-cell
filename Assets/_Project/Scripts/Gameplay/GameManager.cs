@@ -278,6 +278,7 @@ namespace SquashBot.Gameplay
             ui.MenuPressed += ShowMenu;
             ui.PausePressed += Pause;
             ui.BagPressed += OpenBag;
+            ui.AdHealPressed += OnAdHealPressed;
             ui.HeroPicker.Picked += OnHeroPicked;
             ui.WeaponBag.Picked += TakeWeapon;
             ui.WeaponBag.Closed += CloseBag;
@@ -423,6 +424,7 @@ namespace SquashBot.Gameplay
             if (cameraRig.Cam.enabled == covered) cameraRig.Cam.enabled = !covered;
             UpdateCloseCamera();
             ui.SetBagVisible(level != null && level.mission == MissionType.Hunt && State == GameState.Playing && roadPhase == RoadPhase.None && !previewing && !runner.Active);
+            ui.SetAdHealVisible(AdHealOffered && !runner.Active);
         }
 
         private void ShowMap(int animateFrom = -1)
@@ -530,6 +532,7 @@ namespace SquashBot.Gameplay
             robot.Cheer();
             FloatAt(robot.transform.position + Vector3.up * 0.4f, Loc.F("daily.got", got), Palette.UiGold);
             ui.RefreshMenuCoins();
+            OfferDailyDouble(got);
         }
 
         private void StartLevel(int index, List<Boost> boosts = null)
