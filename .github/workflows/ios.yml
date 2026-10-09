@@ -14,6 +14,11 @@ on:
   push:
     tags: ['ios-*']
 
+# A newer iOS build cancels one still running (only the latest push matters).
+concurrency:
+  group: ios-build
+  cancel-in-progress: true
+
 jobs:
   unity:
     name: Unity → Xcode project
