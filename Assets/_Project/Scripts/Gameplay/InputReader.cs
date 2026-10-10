@@ -13,6 +13,8 @@ namespace SquashBot.Gameplay
         /// <summary>How fast the finger moved for <see cref="move"/>: 0 slow .. 1 a quick flick; negative = no finger (keys).</summary>
         public float pace;
         public bool jump;
+        /// <summary>The finger is still down after a swipe: foi keeps walking that way (stops at edges and holes).</summary>
+        public bool held;
 
         /// <summary>A press held still long enough (hover escape): fires once.</summary>
         public bool holdStart;
@@ -55,6 +57,8 @@ namespace SquashBot.Gameplay
         private float pressTime;
         private float lastTapTime = -10f;
         private bool holding;
+        /// <summary>The direction foi keeps walking while the finger stays down after a swipe.</summary>
+        private Direction? heldDir;
 
         /// <summary>The pace of the last swipe step (see <see cref="InputCommand.pace"/>).</summary>
         public float LastPace { get; private set; }
@@ -108,6 +112,7 @@ namespace SquashBot.Gameplay
 
             if (pressed && !tracking)
             {
+                heldDir = null;
                 tracking = true;
                 consumed = false;
                 chained = false;
@@ -153,6 +158,7 @@ namespace SquashBot.Gameplay
             {
                 // A quick flick can be released before any mid-drag frame saw it move, so judge it on release too.
                 tracking = false;
+                heldDir = null;
                 if (consumed) return default;
                 var move = CheckSwipe(hasPointer ? pos : lastPos, robotWorld, released: true);
                 if (move.HasValue) return new InputCommand { move = move, pace = LastPace };
@@ -163,7 +169,13 @@ namespace SquashBot.Gameplay
 
             if (consumed) return default;
             var drag = CheckSwipe(pos, robotWorld); // triggers mid-drag for snappy response
-            return new InputCommand { move = drag, pace = LastPace };
+            if (drag.HasValue)
+            {
+                if (ChainEnabled) heldDir = drag; // and keeps going while the finger stays down; a new swipe turns it
+                return new InputCommand { move = drag, pace = LastPace };
+            }
+            if (ChainEnabled && heldDir.HasValue) return new InputCommand { move = heldDir, pace = Mathf.Max(LastPace, 0.5f), held = true };
+            return default;
         }
 
         /// <summary>The last tap was used (it struck something): it doesn't count towards a double-tap jump.</summary>

@@ -333,6 +333,7 @@ namespace SquashBot.Gameplay
             var w = weapon ?? Armory.Equipped;
             if (strikeCooldown > 0f || !robot.Strike(GridView.ToWorld(at))) return false;
             strikeCooldown = Armory.Cooldown(w);
+            if (crowd && hunt.IsFighter(at)) NoteFightBlow(); // a blow or two into a fight, Fifi teleports in
             int damage = Armory.Damage(w) * (superLeft > 0f ? 2 : 1);
             if (w.kind == WeaponKind.Whirl)
             {

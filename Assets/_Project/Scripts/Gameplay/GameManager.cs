@@ -1050,6 +1050,16 @@ namespace SquashBot.Gameplay
             AudioManager.PlaySfx(Sfx.Hop, 0.7f, 0.8f);
         }
 
+        /// <summary>
+        /// Walking on by itself (finger held after a swipe), foi only steps onto plain free floor: it stops at the edge,
+        /// at holes and fire, and in front of walls, crates and robots rather than leaping or bumping into them.
+        /// </summary>
+        private bool HeldStepOk(Direction dir)
+        {
+            var target = robot.Position + dir.ToOffset();
+            return grid.IsStandable(target) && !grid.IsGap(target) && FloorRelief.StepOk(robot.Position, target);
+        }
+
         private bool TryScreenToGrid(Vector2 screen, out GridPos cell)
         {
             var ray = cameraRig.Cam.ScreenPointToRay(screen);
@@ -1214,7 +1224,7 @@ namespace SquashBot.Gameplay
             {
                 if (command.tap.HasValue && level.mission == MissionType.Hunt && TapStrike(command.tap.Value)) input.CancelTap();
                 else if (command.jump) robot.TryJump();
-                else if (command.move.HasValue) robot.TryMove(command.move.Value, command.pace);
+                else if (command.move.HasValue && (!command.held || HeldStepOk(command.move.Value))) robot.TryMove(command.move.Value, command.pace);
             }
 
             ui.SetWarning(hazards.AnyWarningActive);
@@ -2587,7 +2597,7 @@ namespace SquashBot.Gameplay
         {
             var command = input.Poll(robot.transform.position);
             if (command.jump) robot.TryJump();
-            else if (command.move.HasValue) robot.TryMove(command.move.Value, command.pace);
+            else if (command.move.HasValue && (!command.held || HeldStepOk(command.move.Value))) robot.TryMove(command.move.Value, command.pace);
             if (roadBeacon != null)
             {
                 float pulse = 1f + Mathf.Sin(Time.time * 6f) * 0.12f;

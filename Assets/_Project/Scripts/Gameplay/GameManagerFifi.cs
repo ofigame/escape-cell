@@ -7,9 +7,8 @@ using UnityEngine;
 namespace SquashBot.Gameplay
 {
     /// <summary>
-    /// Fifi, the helper who comes when it is needed: not at foi's side all the time, it drops in from the sky when foi
-    /// is in trouble (health running low in a fight, a crowd closing in, or vanG awake), landing with a shock that
-    /// zaps whatever stands next to it. Then it rolls along a tile behind foi and zaps the nearest robot, tower or awake
+    /// Fifi, the helper who comes when it is needed: not at foi's side all the time, it teleports in a blow or two after foi
+    /// starts a fight (a column of light, Fifi forming out of it), with a pulse that zaps whatever stands next to it. Then it rolls along a tile behind foi and zaps the nearest robot, tower or awake
     /// vanG within two tiles (bugs when nothing bigger is near), as long as the fight goes on; when things calm down it
     /// flies off again and can be called again a little later. It has its own health — slams, crates, vanG and tower
     /// bolts on its tile hurt it, and the robots now and then go for it. Down to nothing, it is out until the next
@@ -33,7 +32,10 @@ namespace SquashBot.Gameplay
         private float fifiReadyAt, fifiStayLeft, fifiStayed, fifiDropT = -1f, fifiLeaveT = -1f;
         private Vector3 fifiDropFrom, fifiDropTo;
 
-        private const float FifiStay = 12f, FifiMaxStay = 28f, FifiRecall = 14f;
+        private const float FifiStay = 12f, FifiMaxStay = 28f, FifiRecall = 10f;
+        /// <summary>Blows on robots since Fifi last left, how many it waits for before it comes, and the last one.</summary>
+        private int fifiBlows, fifiCallAfter = 2;
+        private float lastFightBlowAt = -10f;
 
         private static readonly Color FifiZap = new Color(0.45f, 1f, 0.75f);
 
@@ -52,7 +54,9 @@ namespace SquashBot.Gameplay
             fifiHp = FifiUpgrades.MaxHealth;
             fifiUp = fifiDown = false;
             fifiDropT = fifiLeaveT = -1f;
-            fifiReadyAt = Time.time + 6f;
+            fifiReadyAt = Time.time;
+            fifiBlows = 0;
+            fifiCallAfter = Random.Range(1, 3);
             fifi.SetHealth(1f);
         }
 
@@ -81,13 +85,16 @@ namespace SquashBot.Gameplay
         private bool FifiCanStand(GridPos p) =>
             grid.IsStandable(p) && !grid.IsCage(p) && !grid.IsBridge(p) && p != robot.Position && FloorRelief.StepOk(p, p);
 
-        /// <summary>Is foi in trouble right now (worth calling Fifi down)?</summary>
-        private bool FoiNeedsHelp()
+        /// <summary>foi struck a robot, a tower or vanG: after one or two such blows Fifi teleports in to help.</summary>
+        private void NoteFightBlow()
         {
-            float danger = hunt.Danger(robot.Position);
-            bool hurt = HealthEnabled && health < 0.6f;
-            return (hurt && danger >= 0.3f) || danger >= 0.8f || (hunt.MonsterUp && hunt.MonsterAwake);
+            fifiBlows++;
+            lastFightBlowAt = Time.time;
         }
+
+        /// <summary>Is the fight still on (worth Fifi staying)?</summary>
+        private bool FoiNeedsHelp() =>
+            Time.time - lastFightBlowAt < 5f || hunt.Danger(robot.Position) >= 0.5f || (hunt.MonsterUp && hunt.MonsterAwake);
 
         private void UpdateFifi(float dt)
         {
@@ -96,8 +103,8 @@ namespace SquashBot.Gameplay
             if (fifiLeaveT >= 0f) { UpdateFifiLeave(dt); return; }
             if (!fifiUp)
             {
-                // Away in the sky: it comes down when foi is in trouble.
-                if (!fifiDown && Time.time >= fifiReadyAt && FoiNeedsHelp()) DropFifi();
+                // Away: it teleports in once foi has started a fight (a blow or two in).
+                if (!fifiDown && Time.time >= fifiReadyAt && fifiBlows >= fifiCallAfter) DropFifi();
                 return;
             }
 
@@ -153,21 +160,26 @@ namespace SquashBot.Gameplay
             if (!spot.HasValue) { fifiReadyAt = Time.time + 1f; return; }
             fifiTile = spot.Value;
             fifiDropTo = GridView.ToWorld(fifiTile) + Vector3.up * GridView.SurfaceY;
-            fifiDropFrom = fifiDropTo + Vector3.up * 9f;
             fifi.gameObject.SetActive(true);
-            fifi.Place(fifiDropFrom);
+            fifi.Place(fifiDropTo);
+            fifi.transform.localScale = Vector3.zero;
             fifiDropT = 0f;
-            AudioManager.PlaySfx(Sfx.Warning, 0.4f, 1.8f);
+            TeleportBeam.Create(fifiDropTo, FifiZap);
+            fx.Burst(fifiDropTo + Vector3.up * 0.5f, FifiZap, FifiZap * 2.6f, 30, 4f);
+            AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.5f);
         }
 
         private void UpdateFifiDrop(float dt)
         {
-            fifiDropT = Mathf.Min(1f, fifiDropT + dt / 0.5f);
-            fifi.transform.position = Vector3.Lerp(fifiDropFrom, fifiDropTo, fifiDropT * fifiDropT); // falls faster and faster
-            fifi.transform.Rotate(0f, dt * 720f, 0f);
+            fifiDropT = Mathf.Min(1f, fifiDropT + dt / 0.35f);
+            // It forms out of the light: grows from nothing with a little overshoot, spinning.
+            float s = fifiDropT < 0.8f ? Mathf.Lerp(0f, 1.15f, fifiDropT / 0.8f) : Mathf.Lerp(1.15f, 1f, (fifiDropT - 0.8f) / 0.2f);
+            fifi.transform.localScale = Vector3.one * 1.6f * s;
+            fifi.transform.Rotate(0f, dt * 900f, 0f);
             if (fifiDropT < 1f) return;
             fifiDropT = -1f;
             fifi.Place(fifiDropTo);
+            fifi.transform.localScale = Vector3.one * 1.6f;
             fifi.transform.rotation = Quaternion.LookRotation(GridView.ToWorld(robot.Position) - GridView.ToWorld(fifiTile));
             fifiUp = true;
             fifiFollowedFrom = robot.Position;
@@ -176,12 +188,11 @@ namespace SquashBot.Gameplay
             fifiCooldown = 0.4f;
             fifi.SetHealth(fifiHp / (float)FifiUpgrades.MaxHealth);
             hunt.CompanionTile = fifiTile;
-            // The landing: a quake that zaps everything right around it.
+            // The arrival: a pulse of energy that zaps everything right around it.
             Shockwave.Create(fifiDropTo, 2.2f, FifiZap);
             fx.Burst(fifiDropTo + Vector3.up * 0.3f, FifiZap, FifiZap * 2.4f, 40, 6f);
-            fx.Dust(fifiDropTo, new Color(0.6f, 0.6f, 0.65f), 18, 4f);
-            cameraRig.Shake(0.45f);
-            AudioManager.PlaySfx(Sfx.Impact, 0.8f, 1.3f);
+            cameraRig.Shake(0.3f);
+            AudioManager.PlaySfx(Sfx.Impact, 0.6f, 1.6f);
             Haptics.Medium();
             for (int x = -1; x <= 1; x++)
                 for (int y = -1; y <= 1; y++)
@@ -197,18 +208,22 @@ namespace SquashBot.Gameplay
             fifiLeaveT = 0f;
             fifiDropFrom = fifi.transform.position;
             fifi.Cheer();
-            AudioManager.PlaySfx(Sfx.Hop, 0.6f, 1.6f);
+            TeleportBeam.Create(fifiDropFrom, FifiZap);
+            AudioManager.PlaySfx(Sfx.Shield, 0.6f, 1.9f);
         }
 
         private void UpdateFifiLeave(float dt)
         {
-            fifiLeaveT = Mathf.Min(1f, fifiLeaveT + dt / 0.8f);
-            fifi.transform.position = fifiDropFrom + Vector3.up * (fifiLeaveT * fifiLeaveT * 10f);
-            fifi.transform.Rotate(0f, dt * 540f, 0f);
+            fifiLeaveT = Mathf.Min(1f, fifiLeaveT + dt / 0.35f);
+            fifi.transform.localScale = Vector3.one * 1.6f * (1f - fifiLeaveT); // shrinks into the light
+            fifi.transform.Rotate(0f, dt * 900f, 0f);
             if (fifiLeaveT < 1f) return;
             fifiLeaveT = -1f;
             fifi.gameObject.SetActive(false);
+            fifi.transform.localScale = Vector3.one * 1.6f;
             fifiReadyAt = Time.time + FifiRecall;
+            fifiBlows = 0;
+            fifiCallAfter = Random.Range(1, 3);
         }
 
         /// <summary>Fifi was hit (points of its health).</summary>
