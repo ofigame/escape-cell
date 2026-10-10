@@ -60,6 +60,8 @@ namespace SquashBot.Gameplay
         public event Action MonsterDefeated;
         /// <summary>A bug or robot was finished (its tile), for coins and combos.</summary>
         public event Action<GridPos, bool> Finished;
+        /// <summary>What was just knocked out (a robot, a tower, a bug), for the daily quests.</summary>
+        public event Action<DailyGoal> Felled;
 
         /// <summary>Makes the monster at a tile (the game dresses it in the floor's guardian look).</summary>
         public Func<GridPos, int, Monster> CreateMonster;
@@ -464,6 +466,7 @@ namespace SquashBot.Gameplay
             fx.Burst(At(b.pos) + Vector3.up * 0.08f, b.model.Blood, b.model.Blood * 0.6f, 10, 2f);
             AudioManager.PlaySfx(Sfx.Squash, 0.6f, 1.6f);
             Finished?.Invoke(b.pos, false);
+            Felled?.Invoke(DailyGoal.Bugs);
             CheckCleared();
         }
 
@@ -478,6 +481,7 @@ namespace SquashBot.Gameplay
             rig.Shake(0.5f);
             Destroy(g.root.gameObject);
             Finished?.Invoke(g.pos, true);
+            Felled?.Invoke(DailyGoal.Robots);
             CheckCleared();
         }
 

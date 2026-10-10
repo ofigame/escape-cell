@@ -2012,6 +2012,12 @@ namespace SquashBot.Gameplay
                 yield break;
             }
             ui.ShowResult(info);
+            if (info.won)
+            {
+                // The floor's chest, a moment after the result card comes up.
+                yield return new WaitForSecondsRealtime(0.7f);
+                if (State == GameState.Result) OfferChest();
+            }
             if (!info.won && level != null && level.mission == MissionType.Hunt)
             {
                 yield return new WaitForSecondsRealtime(0.9f);

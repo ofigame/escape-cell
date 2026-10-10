@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using SquashBot.Audio;
 using SquashBot.Core;
+using SquashBot.Data;
 using SquashBot.Visual;
 using UnityEngine;
 
@@ -251,6 +252,7 @@ namespace SquashBot.Gameplay
             rig.Shake(0.7f);
             Destroy(t.root.gameObject);
             Finished?.Invoke(t.pos, true);
+            Felled?.Invoke(DailyGoal.Towers);
             CheckCleared();
         }
 

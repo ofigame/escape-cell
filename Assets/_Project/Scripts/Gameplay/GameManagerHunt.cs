@@ -50,6 +50,7 @@ namespace SquashBot.Gameplay
             hunt.SleepingHit += OnSleepingHit;
             InitFifi();
             InitUtopia();
+            InitRewards();
             hunt.Armored += p =>
             {
                 // Too weak a weapon for this floor's armour: say so (not on every blow).
@@ -112,7 +113,7 @@ namespace SquashBot.Gameplay
 
         private void OnHuntFinished(GridPos p, bool robotKind)
         {
-            if (robotKind) { hitStopLeft = 0.06f; cameraRig.Punch(0.35f); }
+            if (robotKind) { hitStopLeft = 0.06f; cameraRig.Punch(0.35f); CountStreak(p); }
             int reward = robotKind ? 3 : 1;
             coinsThisRun += reward;
             comboTimer = ComboWindow;
@@ -121,6 +122,7 @@ namespace SquashBot.Gameplay
 
         private void OnHuntWon()
         {
+            QuestProgress(DailyGoal.Wins);
             if (fifi != null && fifiUp) fifi.Cheer();
             OpenBridge();
             slowMoLeft = 0.8f;

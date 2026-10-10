@@ -64,6 +64,7 @@ namespace SquashBot.Gameplay
                 return;
             }
             bombsLeft--;
+            QuestProgress(DailyGoal.Bombs);
             ui.SetBombs(bombsLeft, true);
             var from = robot.transform.position + Vector3.up * 1f;
             var to = GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY;

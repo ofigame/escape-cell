@@ -168,6 +168,13 @@ namespace SquashBot.UI
         public WeaponBag WeaponBag { get; private set; }
         public HeroPicker HeroPicker { get; private set; }
         public AdOfferCard AdOffer { get; private set; }
+        public ChestCard Chest { get; private set; }
+        public QuestsScreen Quests { get; private set; }
+        private Button menuQuests;
+        private GameObject questsPing;
+
+        /// <summary>The quests button's red dot: a finished quest waits to be claimed.</summary>
+        private void RefreshQuests() { if (questsPing != null) questsPing.SetActive(DailyQuests.Claimable > 0); }
         private RectTransform bagButton;
         private RectTransform adHealButton;
         public void SetAdHealVisible(bool on) { if (adHealButton != null && adHealButton.gameObject.activeSelf != on) adHealButton.gameObject.SetActive(on); }
@@ -274,6 +281,9 @@ namespace SquashBot.UI
             WeaponBag = WeaponBag.Create(root);
             HeroPicker = HeroPicker.Create(root);
             AdOffer = AdOfferCard.Create(root);
+            Chest = ChestCard.Create(root);
+            Quests = QuestsScreen.Create(root);
+            Quests.Claimed += () => { RefreshMenuCoins(); RefreshQuests(); };
             Garage.HeroPressed += () => HeroPicker.Show(true);
         }
 
@@ -315,6 +325,15 @@ namespace SquashBot.UI
             UiFactory.Fill(ping, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
             UiFactory.Text(ping, "!", 32f, Color.white);
             menuDaily.gameObject.AddComponent<Pulse>();
+
+            // Today's quests: under the chest, with a red dot while one is done and waiting.
+            menuQuests = MenuArt.DockButton(t, Loc.T("quests.button"), MenuArt.Icon.Guide, new Color(0.45f, 0.75f, 1f), TopLeft, new Vector2(110f, -400f), 120f, () => Quests.Show());
+            ((RectTransform)menuQuests.transform).pivot = new Vector2(0.5f, 0.5f);
+            var qPing = UiFactory.Box("Ping", menuQuests.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(44f, 44f));
+            qPing.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(qPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
+            UiFactory.Text(qPing, "!", 32f, Color.white);
+            questsPing = qPing.gameObject;
 
             // The level card: a frosted glass panel with the world, the level, its mission and the big PLAY button.
             var card = UiFactory.Box("LevelCard", t, Bottom, new Vector2(0f, Ads.BannerReserve + 236f), new Vector2(940f, 420f));
@@ -387,6 +406,7 @@ namespace SquashBot.UI
             menuCoins.text = coins.ToString();
             menuStars.text = Progress.TotalStars(levelCount).ToString();
             menuDaily.gameObject.SetActive(DailyChest.Ready);
+            RefreshQuests();
             RefreshDailyBonus();
             RefreshLives();
         }
