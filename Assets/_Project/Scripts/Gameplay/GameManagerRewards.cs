@@ -37,7 +37,7 @@ namespace SquashBot.Gameplay
             string text = key != null ? Loc.T(key) : Loc.F("streak.n", n);
             var colour = n >= 12 ? new Color(1f, 0.4f, 0.9f) : n >= 8 ? new Color(1f, 0.55f, 0.25f) : n >= 5 ? Palette.UiGold : Palette.UiCyan;
             ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.62f), text, colour, 96f + Mathf.Min(n, 16) * 2f);
-            ui.Flash(colour, 0.18f);
+            ui.Flash(colour, 0.1f);
             Shockwave.Create(robot.transform.position, 2f + Mathf.Min(n, 12) * 0.15f, colour);
             fx.Burst(robot.transform.position + Vector3.up * 0.8f, colour, colour * 2.4f, 30 + n * 2, 6f);
             AudioManager.PlaySfx(Sfx.Win, 0.55f, 1.1f + Mathf.Min(n, 16) * 0.03f);

@@ -114,6 +114,15 @@ namespace SquashBot.UI
             if (world != null) world.Close();
         }
 
+        /// <summary>
+        /// The UI is rebuilt (a new language): the 3D map lives outside the canvas, so it goes with this screen,
+        /// or its camera would stay on top of the game.
+        /// </summary>
+        private void OnDestroy()
+        {
+            if (world != null) Destroy(world.gameObject);
+        }
+
         /// <summary>True while the 3D map is on screen (the game's own camera can rest).</summary>
         public bool IsOpen => screen.IsVisible;
 
