@@ -112,6 +112,7 @@ namespace SquashBot.UI
             {
                 case Tab.Weapons:
                     PackCell();
+                    BombCell();
                     foreach (var w in Armory.All) WeaponCell(w);
                     break;
                 case Tab.Tools:
@@ -228,12 +229,34 @@ namespace SquashBot.UI
             image.raycastTarget = false;
             CardName(card, Loc.T("weapon." + w.id));
             var desc = CardDesc(card);
-            desc.text = Loc.F("weapon.line", w.damage, w.reach, Loc.T(w.cooldown <= 0.16f ? "weapon.fast" : w.cooldown >= 0.3f ? "weapon.slow" : "weapon.normal"))
-                        + "\n" + Loc.T("weapon.kind." + w.kind) + "  ·  " + Loc.F("pack.weight", Backpack.Weight(w));
+            var pips = Pips(card, Armory.MaxLevel);
             var lockText = LockVeil(card, out var veil);
-            var buy = BuyButton(card, () =>
+            // Owned: take it in hand (left) beside the level-up (right).
+            var equip = UiFactory.MakeButton(card, "", Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(-108f, 34f), new Vector2(196f, 92f), () =>
             {
                 if (Armory.Owned(w)) Armory.Equip(w);
+                AudioManager.PlaySfx(Sfx.Click, 0.7f, 1.2f);
+                Refresh();
+            }, 30f);
+            var equipLabel = equip.GetComponentInChildren<TextMeshProUGUI>();
+            var buy = BuyButton(card, () =>
+            {
+                if (Armory.Owned(w))
+                {
+                    if (Armory.TryUpgrade(w))
+                    {
+                        AudioManager.PlaySfx(Sfx.Coin, 1f, 1.4f);
+                        Haptics.Medium();
+                        Pop(card);
+                        bip.Queue(Loc.F("weapon.upgraded", Armory.Level(w)));
+                        Purchased?.Invoke();
+                    }
+                    else
+                    {
+                        AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                        if (Armory.Level(w) < Armory.MaxLevel) WorkshopTalk.Poor(bip);
+                    }
+                }
                 else if (Armory.TryBuy(w))
                 {
                     AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
@@ -251,25 +274,117 @@ namespace SquashBot.UI
                 Refresh();
             });
             var label = buy.GetComponentInChildren<TextMeshProUGUI>();
+            var buyRect = (RectTransform)buy.transform;
+            // Sell (top right, a second tap confirms): frees its room in the backpack for a part of what it cost.
+            float sellArmed = -10f;
+            var sell = UiFactory.MakeButton(card, "", Kind.Secondary, new Vector2(1f, 1f), new Vector2(-96f, -40f), new Vector2(170f, 62f), () =>
+            {
+                if (Time.unscaledTime - sellArmed > 2.5f)
+                {
+                    sellArmed = Time.unscaledTime;
+                    AudioManager.PlaySfx(Sfx.Click, 0.6f, 0.9f);
+                    Refresh();
+                    return;
+                }
+                int coins = Armory.SellPrice(w);
+                if (Armory.Sell(w))
+                {
+                    AudioManager.PlaySfx(Sfx.Coin, 1f, 0.9f);
+                    bip.Queue(Loc.F("ws.sold", coins));
+                    Purchased?.Invoke();
+                }
+                sellArmed = -10f;
+                Refresh();
+            }, 22f);
+            ((RectTransform)sell.transform).pivot = new Vector2(0.5f, 0.5f);
+            var sellLabel = sell.GetComponentInChildren<TextMeshProUGUI>();
             refreshers.Add(() =>
             {
                 bool owned = Armory.Owned(w), unlocked = Armory.Unlocked(w), equipped = Armory.Equipped == w;
+                int lv = Armory.Level(w);
+                int dmg = Armory.Damage(w);
+                float cd = Armory.Cooldown(w);
+                desc.text = Loc.F("weapon.line", dmg, w.reach, Loc.T(cd <= 0.16f ? "weapon.fast" : cd >= 0.3f ? "weapon.slow" : "weapon.normal"))
+                            + "\n" + Loc.T("weapon.kind." + w.kind) + "  ·  " + Loc.F("pack.weight", Backpack.Weight(w))
+                            + (owned && lv < Armory.MaxLevel ? "  ·  " + Loc.F("weapon.nextLevel", Armory.Damage(w, lv + 1)) : "");
+                SetPips(pips, owned ? lv : 0);
                 veil.SetActive(!unlocked);
                 lockText.text = Loc.F("ws.lockedAt", w.unlockAt + 1);
                 image.color = unlocked ? Color.white : new Color(1f, 1f, 1f, 0.35f);
                 bool fits = Backpack.Fits(Backpack.Weight(w));
-                label.text = equipped ? Loc.T("weapon.equipped") : owned ? Loc.T("weapon.equip") : !unlocked ? Loc.F("ws.lockedAt", w.unlockAt + 1)
-                    : fits ? w.price.ToString() : Loc.F("pack.needs", Backpack.LevelNeeded(Backpack.Weight(w)));
+                equip.gameObject.SetActive(owned);
+                buyRect.sizeDelta = new Vector2(owned ? 196f : 410f, 92f);
+                buyRect.anchoredPosition = new Vector2(owned ? 108f : 0f, 34f);
+                sell.gameObject.SetActive(Armory.CanSell(w));
+                bool armed = Time.unscaledTime - sellArmed <= 2.5f;
+                sellLabel.text = armed ? Loc.T("ws.sellSure") : Loc.F("ws.sell", Armory.SellPrice(w));
+                sell.targetGraphic.color = armed ? UiFactory.GoldStyle.face : UiFactory.PurpleStyle.face;
                 if (owned)
                 {
-                    buy.interactable = !equipped;
-                    buy.targetGraphic.color = equipped ? UiFactory.GreenStyle.face : UiFactory.CyanStyle.face;
+                    equipLabel.text = Loc.T(equipped ? "weapon.equipped" : "weapon.equip");
+                    equip.interactable = !equipped;
+                    equip.targetGraphic.color = equipped ? UiFactory.GreenStyle.face : UiFactory.CyanStyle.face;
+                    int up = Armory.UpgradePrice(w);
+                    label.text = lv >= Armory.MaxLevel ? Loc.T("shop.max") : Loc.F("weapon.levelUp", up);
+                    Afford(buy, lv < Armory.MaxLevel, SaveData.Coins >= up);
                 }
                 else
                 {
+                    label.text = !unlocked ? Loc.F("ws.lockedAt", w.unlockAt + 1)
+                        : fits ? w.price.ToString() : Loc.F("pack.needs", Backpack.LevelNeeded(Backpack.Weight(w)));
                     Afford(buy, unlocked, fits && SaveData.Coins >= w.price);
                     buy.interactable = unlocked; // a tap on a full backpack still says why
                 }
+            });
+        }
+
+        /// <summary>Bombs (from level 31): bought once, three ride along to every floor; two more levels for a bigger bang.</summary>
+        private void BombCell()
+        {
+            var card = Cell("Bombs", new Color(1f, 0.5f, 0.25f), out var picture);
+            var disc = UiFactory.Box("Bomb", picture, new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(200f, 200f));
+            disc.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(disc, new Color(0.13f, 0.11f, 0.15f), UiSprites.Circle).raycastTarget = false;
+            var shine = UiFactory.Box("Shine", picture, new Vector2(0.5f, 0.5f), new Vector2(-45f, 35f), new Vector2(50f, 50f));
+            shine.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(shine, new Color(1f, 1f, 1f, 0.25f), UiSprites.Circle).raycastTarget = false;
+            var fuse = UiFactory.Box("Fuse", picture, new Vector2(0.5f, 0.5f), new Vector2(55f, 100f), new Vector2(26f, 60f));
+            fuse.pivot = new Vector2(0.5f, 0.5f);
+            fuse.localRotation = Quaternion.Euler(0f, 0f, -30f);
+            UiFactory.Fill(fuse, new Color(0.85f, 0.7f, 0.45f), UiSprites.Rounded, 8f).raycastTarget = false;
+            var spark = UiFactory.Box("Spark", picture, new Vector2(0.5f, 0.5f), new Vector2(75f, 135f), new Vector2(50f, 50f));
+            spark.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(spark, new Color(1f, 0.85f, 0.3f), UiSprites.Circle).raycastTarget = false;
+            CardName(card, Loc.T("bomb.name"));
+            var desc = CardDesc(card);
+            var pips = Pips(card, Bombs.MaxLevel);
+            var lockText = LockVeil(card, out var veil);
+            var buy = BuyButton(card, () =>
+            {
+                if (Bombs.TryBuy())
+                {
+                    AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
+                    Haptics.Medium();
+                    Pop(card);
+                    bip.Queue(Loc.T("bomb.bip"));
+                    Purchased?.Invoke();
+                }
+                else
+                {
+                    AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                    if (Bombs.Unlocked && !Bombs.IsMaxed) WorkshopTalk.Poor(bip);
+                }
+                Refresh();
+            });
+            var label = buy.GetComponentInChildren<TextMeshProUGUI>();
+            refreshers.Add(() =>
+            {
+                SetPips(pips, Bombs.Level);
+                veil.SetActive(!Bombs.Unlocked);
+                lockText.text = Loc.F("ws.lockedAt", Bombs.FromLevel + 1);
+                desc.text = Loc.F("bomb.desc", Bombs.PerFloor, Bombs.Owned ? Bombs.Damage : 6);
+                label.text = !Bombs.Unlocked ? Loc.F("ws.lockedAt", Bombs.FromLevel + 1) : Bombs.IsMaxed ? Loc.T("shop.max") : Bombs.NextPrice.ToString();
+                Afford(buy, Bombs.Unlocked && !Bombs.IsMaxed, SaveData.Coins >= Bombs.NextPrice);
             });
         }
 
@@ -341,6 +456,25 @@ namespace SquashBot.UI
             });
             var buyLabel = buy.GetComponentInChildren<TextMeshProUGUI>();
             var buyRect = (RectTransform)buy.transform;
+            // Sell a level back (top right, a second tap confirms).
+            float sellArmed = -10f;
+            var sell = UiFactory.MakeButton(card, "", Kind.Secondary, new Vector2(1f, 1f), new Vector2(-96f, -40f), new Vector2(170f, 62f), () =>
+            {
+                if (Time.unscaledTime - sellArmed > 2.5f) { sellArmed = Time.unscaledTime; AudioManager.PlaySfx(Sfx.Click, 0.6f, 0.9f); Refresh(); return; }
+                int coins = Tools.SellPrice(tool);
+                if (Tools.Sell(tool)) { AudioManager.PlaySfx(Sfx.Coin, 1f, 0.9f); bip.Queue(Loc.F("ws.sold", coins)); Purchased?.Invoke(); }
+                sellArmed = -10f;
+                Refresh();
+            }, 22f);
+            ((RectTransform)sell.transform).pivot = new Vector2(0.5f, 0.5f);
+            var sellLabel = sell.GetComponentInChildren<TextMeshProUGUI>();
+            refreshers.Add(() =>
+            {
+                sell.gameObject.SetActive(Tools.Owned(tool));
+                bool armed = Time.unscaledTime - sellArmed <= 2.5f;
+                sellLabel.text = armed ? Loc.T("ws.sellSure") : Loc.F("ws.sell", Tools.SellPrice(tool));
+                sell.targetGraphic.color = armed ? UiFactory.GoldStyle.face : UiFactory.PurpleStyle.face;
+            });
             refreshers.Add(() =>
             {
                 int level = Tools.Level(tool);

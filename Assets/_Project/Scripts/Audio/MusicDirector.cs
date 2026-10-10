@@ -34,6 +34,12 @@ namespace SquashBot.Audio
         private float tension, tensionTarget;
         private bool on = true;
 
+        // The fight layer: a hard-rock loop over the world's music, as loud as the danger (see SetDanger).
+        private const float RockVolume = 0.3f;
+        private AudioSource rock;
+        private Task<float[]> rockRender;
+        private float danger, dangerTarget;
+
         public static MusicDirector Create(GameObject host)
         {
             var d = host.AddComponent<MusicDirector>();
@@ -51,8 +57,20 @@ namespace SquashBot.Audio
                 }
                 d.decks[k] = deck;
             }
+            d.rock = host.AddComponent<AudioSource>();
+            d.rock.playOnAwake = false;
+            d.rock.loop = true;
+            d.rock.spatialBlend = 0f;
+            d.rock.volume = 0f;
+            d.rockRender = Task.Run(() => MusicSynth.RenderRock());
             return d;
         }
+
+        /// <summary>
+        /// 0 = no fight .. 1 = surrounded: the rock layer comes in with it and the world's music steps back a little.
+        /// Kept under the effects. Smoothed, so it can be set every frame.
+        /// </summary>
+        public void SetDanger(float value) => dangerTarget = Mathf.Clamp01(value);
 
         /// <summary>The theme to play (switches with a crossfade once it is ready).</summary>
         public void Play(MusicTheme theme)
@@ -75,6 +93,7 @@ namespace SquashBot.Audio
                     d.live = false;
                     d.fade = 0f;
                 }
+            if (!enabled && rock != null) rock.Stop();
         }
 
         /// <summary>Slow motion bends the music too.</summary>
@@ -82,6 +101,7 @@ namespace SquashBot.Audio
         {
             foreach (var d in decks)
                 foreach (var s in d.sources) s.pitch = pitch;
+            if (rock != null) rock.pitch = pitch;
         }
 
         private void Request(MusicTheme theme)
@@ -113,6 +133,27 @@ namespace SquashBot.Audio
             var cur = decks[current];
             if (on && hasWanted && (!cur.live || cur.theme != wanted) && clips.TryGetValue(wanted, out var set)) Switch(set);
 
+            // The fight layer: made into a clip once rendered, started in time with nothing (it is its own loop).
+            if (rockRender != null && rockRender.IsCompleted)
+            {
+                if (rockRender.Status == TaskStatus.RanToCompletion)
+                {
+                    var data = rockRender.Result;
+                    rock.clip = AudioClip.Create("music_rock", data.Length, 1, MusicSynth.Rate, false);
+                    rock.clip.SetData(data, 0);
+                }
+                rockRender = null;
+            }
+            danger = Mathf.MoveTowards(danger, dangerTarget, dt * (dangerTarget > danger ? 1.4f : 0.3f));
+            float rockMix = Smooth(0.05f, 0.7f, danger);
+            if (rock.clip != null)
+            {
+                if (on && rockMix > 0.01f && !rock.isPlaying) rock.Play();
+                else if (rockMix <= 0.01f && rock.isPlaying && danger < 0.02f) rock.Stop();
+                rock.volume = on ? RockVolume * rockMix : 0f;
+            }
+            float duck = 1f - 0.45f * rockMix;
+
             // Layer mix: the groove comes in from a little tension, the intense layer near the top.
             float[] layer = { 1f, Smooth(0.15f, 0.45f, tension), Smooth(0.55f, 0.85f, tension) };
             for (int k = 0; k < 2; k++)
@@ -120,7 +161,7 @@ namespace SquashBot.Audio
                 var d = decks[k];
                 if (!d.live) continue;
                 d.fade = Mathf.MoveTowards(d.fade, k == current ? 1f : 0f, dt / FadeSeconds);
-                for (int i = 0; i < d.sources.Length; i++) d.sources[i].volume = Volume * d.fade * layer[i] * (i == 0 ? 0.85f : 1f);
+                for (int i = 0; i < d.sources.Length; i++) d.sources[i].volume = Volume * duck * d.fade * layer[i] * (i == 0 ? 0.85f : 1f);
                 if (k != current && d.fade <= 0f)
                 {
                     foreach (var s in d.sources) s.Stop();

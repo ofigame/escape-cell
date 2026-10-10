@@ -39,6 +39,7 @@ namespace SquashBot.UI
         public event Action PausePressed;
         /// <summary>The weapon bag was opened during a level.</summary>
         public event Action BagPressed;
+        public event Action BombPressed;
         /// <summary>The "watch an ad, fill your health" button was pressed (shown when health runs low).</summary>
         public event Action AdHealPressed;
         public event Action ResumePressed;
@@ -175,6 +176,20 @@ namespace SquashBot.UI
         public void SetBagVisible(bool on) { if (bagButton != null && bagButton.gameObject.activeSelf != on) bagButton.gameObject.SetActive(on); }
 
         /// <summary>The screen point is on the bag button (the play area ignores it).</summary>
+        private RectTransform bombButton;
+        private TMPro.TextMeshProUGUI bombCount;
+
+        /// <summary>The bomb button: hidden with none left this floor, else showing how many.</summary>
+        public void SetBombs(int left, bool show)
+        {
+            if (bombButton == null) return;
+            bool on = show && left > 0;
+            if (bombButton.gameObject.activeSelf != on) bombButton.gameObject.SetActive(on);
+            if (on) bombCount.text = left.ToString();
+        }
+
+        private bool IsOverBomb(Vector2 screen) => bombButton != null && bombButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(bombButton, screen, null);
+
         public bool IsOverBag(Vector2 screen) => bagButton != null && bagButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(bagButton, screen, null);
         public GarageScreen Garage { get; private set; }
         public GuideScreen Guide { get; private set; }
@@ -725,6 +740,27 @@ namespace SquashBot.UI
             bagButton.gameObject.AddComponent<ButtonPress>();
             bagButton.gameObject.SetActive(false);
 
+            // Bombs (from level 31, three a floor): bottom right, a round black bomb with its count.
+            bombButton = UiFactory.Box("Bomb", t, new Vector2(1f, 0f), new Vector2(-190f, 380f), new Vector2(150f, 150f));
+            var bombFace = UiFactory.Chunky(bombButton, UiFactory.StyleOf(new Color(0.95f, 0.45f, 0.25f)), 1f, 0f, UiSprites.Circle);
+            var bombBody = UiFactory.Box("Body", bombButton, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(84f, 84f));
+            bombBody.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(bombBody, new Color(0.12f, 0.1f, 0.14f), UiSprites.Circle).raycastTarget = false;
+            var fuse = UiFactory.Box("Fuse", bombButton, new Vector2(0.5f, 0.5f), new Vector2(26f, 44f), new Vector2(14f, 30f));
+            fuse.pivot = new Vector2(0.5f, 0.5f);
+            fuse.localRotation = Quaternion.Euler(0f, 0f, -30f);
+            UiFactory.Fill(fuse, new Color(0.85f, 0.7f, 0.45f), UiSprites.Rounded, 4f).raycastTarget = false;
+            var spark = UiFactory.Box("Spark", bombButton, new Vector2(0.5f, 0.5f), new Vector2(36f, 60f), new Vector2(24f, 24f));
+            spark.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(spark, new Color(1f, 0.85f, 0.3f), UiSprites.Circle).raycastTarget = false;
+            bombCount = UiFactory.OutlinedText("Count", bombButton, new Vector2(0.5f, 0f), new Vector2(0f, -16f), new Vector2(180f, 44f), "3", 32f, new Color(0.25f, 0.08f, 0.02f));
+            bombCount.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var bombBtn = bombButton.gameObject.AddComponent<Button>();
+            bombBtn.targetGraphic = bombFace;
+            bombBtn.onClick.AddListener(() => BombPressed?.Invoke());
+            bombButton.gameObject.AddComponent<ButtonPress>();
+            bombButton.gameObject.SetActive(false);
+
             // Low on health: watch an ad and fill the bar (above the bag, pulsing; once a level).
             adHealButton = UiFactory.Box("AdHeal", t, new Vector2(0f, 0f), new Vector2(40f, 570f), new Vector2(150f, 150f));
             var healFace = UiFactory.Chunky(adHealButton, UiFactory.StyleOf(new Color(0.25f, 0.78f, 0.55f)), 1f, 0f, UiSprites.Circle);
@@ -854,6 +890,7 @@ namespace SquashBot.UI
             if (SkillBar != null && SkillBar.IsOver(screen)) return true;
             if (IsOverBag(screen)) return true;
             if (IsOverAdHeal(screen)) return true;
+            if (IsOverBomb(screen)) return true;
             foreach (var b in toolButtons)
                 if (b != null && b.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(b.Rect, screen, null)) return true;
             return false;

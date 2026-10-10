@@ -28,6 +28,7 @@ namespace SquashBot.Gameplay
         private void ClearHuntDress()
         {
             ClearFifi();
+            if (ui != null) HideBombs();
             if (robot != null) robot.transform.localScale = Vector3.one;
             Robot.HopScale = 1f;
             if (heldWeapon != null) Destroy(heldWeapon.gameObject);
@@ -99,6 +100,7 @@ namespace SquashBot.Gameplay
             hunt.Begin(grid, level, World, levelIndex * 31 + 7);
             SetupPotions();
             SetupFifi();
+            SetupBombs();
         }
 
         private void UpdateHunt(float dt)
@@ -110,6 +112,7 @@ namespace SquashBot.Gameplay
 
         private void OnHuntFinished(GridPos p, bool robotKind)
         {
+            if (robotKind) { hitStopLeft = 0.06f; cameraRig.Punch(0.35f); }
             int reward = robotKind ? 3 : 1;
             coinsThisRun += reward;
             comboTimer = ComboWindow;
@@ -135,11 +138,11 @@ namespace SquashBot.Gameplay
         private void MaybeShowTip(string reason)
         {
             // Lost to armour the weapon in hand can't get through: point at the weapon that can, right away.
-            if (level.armor > 0 && Armory.Equipped.damage <= level.armor)
+            if (level.armor > 0 && Armory.Damage(Armory.Equipped) <= level.armor)
             {
                 WeaponDef needed = null;
                 foreach (var w in Armory.All)
-                    if (w.damage > level.armor && Armory.Unlocked(w) && (needed == null || w.price < needed.price)) needed = w;
+                    if (Armory.Damage(w) > level.armor && Armory.Unlocked(w) && (needed == null || w.price < needed.price)) needed = w;
                 if (needed != null)
                 {
                     ui.Tip.ShowWeapon(needed, Loc.F("tip.why.armor", level.armor + 1), () => { ShowShop(); ui.Shop.ShowWeapons(); });
@@ -156,7 +159,7 @@ namespace SquashBot.Gameplay
             {
                 if (Armory.Owned(w) || !Armory.Unlocked(w) || Armory.Power(w) <= Armory.Power(current)) continue;
                 bool crowded = level.robots + level.brutes >= 4;
-                bool fits = crowded ? w.cooldown < current.cooldown * 0.85f || w.damage > current.damage : w.damage > current.damage || w.cooldown < current.cooldown * 0.8f;
+                bool fits = crowded ? Armory.Cooldown(w) < Armory.Cooldown(current) * 0.85f || Armory.Damage(w) > Armory.Damage(current) : Armory.Damage(w) > Armory.Damage(current) || Armory.Cooldown(w) < Armory.Cooldown(current) * 0.8f;
                 if (!fits) continue;
                 if (better == null || w.price < better.price) better = w;
             }
@@ -327,11 +330,16 @@ namespace SquashBot.Gameplay
         {
             var w = weapon ?? Armory.Equipped;
             if (strikeCooldown > 0f || !robot.Strike(GridView.ToWorld(at))) return false;
-            strikeCooldown = w.cooldown;
-            int damage = w.damage * (superLeft > 0f ? 2 : 1);
+            strikeCooldown = Armory.Cooldown(w);
+            int damage = Armory.Damage(w) * (superLeft > 0f ? 2 : 1);
+            if (w.kind == WeaponKind.Whirl)
+            {
+                WhirlStrike(w, damage);
+                return true;
+            }
             if (heldWeapon != null) heldWeapon.Swing();
             // A blow you can see: a crescent of the weapon's colour sweeping through the target.
-            SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.Glow(w.tier), 1f + 0.15f * w.damage);
+            SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.Glow(w.tier), 1f + 0.15f * Armory.Damage(w));
             LeanTowardsBlow(GridView.ToWorld(at));
             cameraRig.Shake(0.15f + 0.08f * damage);
             if (crowd)

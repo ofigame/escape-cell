@@ -158,6 +158,8 @@ namespace SquashBot.Data
         public int bugs;
         [Tooltip("Guard robots to beat with the hammer.")]
         public int robots;
+        [Tooltip("How many of the robots are on the floor at once (the rest drop in as they fall); 0 = all at once.")]
+        public int robotsAtOnce;
         [Tooltip("Tall humanoid enforcers that hit much harder (now and then).")]
         public int brutes;
         [Tooltip("Guard towers that shoot from afar (blind right next to them).")]

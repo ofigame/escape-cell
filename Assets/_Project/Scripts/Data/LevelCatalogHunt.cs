@@ -111,10 +111,10 @@ namespace SquashBot.Data
             // The floor: a few training squares, then growing wide shapes.
             int size = index switch
             {
-                0 => 7, 1 => 7, 2 => 7, 3 => 8, 4 => 9, 5 => 9, 6 => 10, 7 => 10, // bigger from the very first floor
+                0 => 9, 1 => 9, 2 => 10, 3 => 10, 4 => 11, 5 => 11, 6 => 12, 7 => 12, // bigger from the very first floor
                 // Wide floors that keep growing; past level 100 the utopian worlds open up even more.
                 _ => index < 100
-                    ? Mathf.RoundToInt(Mathf.Lerp(11f, 30f, Mathf.Pow(Mathf.InverseLerp(8f, 99f, index), 0.85f)))
+                    ? Mathf.RoundToInt(Mathf.Lerp(12f, 30f, Mathf.Pow(Mathf.InverseLerp(8f, 99f, index), 0.85f)))
                     : Mathf.RoundToInt(Mathf.Lerp(31f, 40f, Mathf.InverseLerp(100f, LevelCount - 1, index))),
             };
             var level = new LevelData
@@ -128,7 +128,9 @@ namespace SquashBot.Data
             };
             level.layout = FloorShapes.For(index, size, out level.shapeName);
             int inWorld = index % LevelsPerWorld;
-            level.terrain = TerrainKind.Flat; // the pyramids and terraces are switched off (they looked odd in places)
+            // The tall pyramids and terraces are switched off (they looked odd in places); gentle mounds instead: a few
+            // low plateaus a short step up, on every third floor from level 9.
+            level.terrain = index >= 8 && inWorld % 3 == 1 ? TerrainKind.Mounds : TerrainKind.Flat;
             // Hard floors (from level 26: the 3rd, 6th and 10th of each world) get healing islands a leap off the side
             // edges: one, two from level 121.
             if (index >= 25 && (inWorld == 2 || inWorld == 5 || inWorld == 9))
@@ -153,10 +155,13 @@ namespace SquashBot.Data
             // The floor's crowd: bugs to squash, robots to beat (none on the very first floor).
             int floorTiles = size * size;
             level.bugs = Mathf.Clamp(2 + Mathf.RoundToInt(d * 12f), 2, Mathf.Max(2, floorTiles / 7));
-            level.robots = index < 3 ? 0 : Mathf.Clamp(1 + Mathf.RoundToInt(d * 7f), 1, Mathf.Max(1, floorTiles / 12));
+            // Plenty of robots on every floor (20 on the very first, up to 45 late on), but only a few at a time: when
+            // one falls another drops in from the sky somewhere off, so the floor stays busy without being overwhelming.
+            level.robots = 20 + Mathf.RoundToInt(d * 25f);
+            level.robotsAtOnce = Mathf.Clamp(3 + Mathf.RoundToInt(d * 5f), 3, Mathf.Max(3, floorTiles / 14));
             // Now and then a tall humanoid enforcer joins them (from level 13), more often late on.
             level.brutes = index < 12 ? 0 : (index % 4 == 1 ? 1 : 0) + (d > 0.55f && index % 2 == 0 ? 1 : 0);
-            level.robotHp = 2 + Mathf.RoundToInt(d * 3f);
+            level.robotHp = index < 5 ? 1 : 2 + Mathf.RoundToInt(d * 3f); // the first floors: one blow each, easy but many
             // Guard towers from level 16 (one at first, up to six on the late, wide floors), sturdier as they go.
             level.towers = index < 15 ? 0 : Mathf.Clamp(1 + Mathf.FloorToInt(d * 4f) + (index >= 100 ? 1 : 0), 1, Mathf.Max(1, floorTiles / 60));
             level.towerHp = 4 + Mathf.RoundToInt(d * 10f);

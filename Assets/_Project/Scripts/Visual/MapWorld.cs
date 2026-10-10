@@ -233,7 +233,9 @@ namespace SquashBot.Visual
             }
 
             var accent = Color.HSVToRGB(Mathf.Repeat(world * 0.21f + 0.55f, 1f), 0.75f, 1f);
-            var guard = GuardBot.Build(island, Color.Lerp(accent, new Color(0.3f, 0.3f, 0.35f), 0.35f), world);
+            // The perfect city's worlds (level 101 on) show its pearl guards.
+            var guard = world >= 10 ? GuardBot.Build(island, Color.HSVToRGB(Mathf.Repeat(world * 0.21f + 0.5f, 1f), 0.6f, 1f), world, utopian: true)
+                : GuardBot.Build(island, Color.Lerp(accent, new Color(0.3f, 0.3f, 0.35f), 0.35f), world);
             guard.transform.localPosition = new Vector3(-1.1f, floorY, 0.9f);
             guard.transform.localRotation = facing * Quaternion.Euler(0f, 20f, 0f);
             guard.transform.localScale = Vector3.one * 1.05f;
@@ -243,6 +245,16 @@ namespace SquashBot.Visual
             crate.localPosition = new Vector3(0.35f, floorY + 0.4f, 1.1f);
             crate.localRotation = Quaternion.Euler(0f, 18f + R() * 20f, 0f);
             crate.localScale = Vector3.one * 0.95f;
+
+            // The world's guard tower (from the second world on, as on its floors).
+            if (world >= 1)
+            {
+                var tower = TowerModel.Build(island, TowerModel.DesignFor(world, 0), accent);
+                tower.transform.localPosition = new Vector3(-0.3f, floorY, 1.6f);
+                tower.transform.localRotation = facing;
+                tower.transform.localScale = Vector3.one * 0.72f;
+                tower.enabled = false; // a still picture: no aiming, no glow pulses
+            }
 
             if (world >= 1)
             {

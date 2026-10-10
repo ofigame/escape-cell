@@ -44,6 +44,8 @@ namespace SquashBot.Data
                 case "stoneAxe": return 2;
                 case "steelHammer": return 3;
                 case "spear": return 3;
+                case "whirlBlade": return 4;
+                case "stormWhirl": return 8;
                 case "mace": return 4;
                 case "crystalSword": return 5;
                 case "battleAxe": return 6;

@@ -3,7 +3,7 @@ using UnityEngine;
 namespace SquashBot.Core
 {
     /// <summary>The floor's relief in a level: flat, a pyramid (each world's 4th level) or terraces (its 8th).</summary>
-    public enum TerrainKind { Flat, Pyramid, Terraces }
+    public enum TerrainKind { Flat, Pyramid, Terraces, Mounds }
 
     /// <summary>
     /// The heights of the floor being played: whole steps per tile (0 = the base). Everything placed with
@@ -17,8 +17,9 @@ namespace SquashBot.Core
     /// </summary>
     public static class FloorRelief
     {
-        /// <summary>Height of one step in world units.</summary>
-        public const float Step = 0.55f;
+        /// <summary>Height of one step in world units (lower on the gentle mounds).</summary>
+        public static float Step { get; private set; } = TallStep;
+        private const float TallStep = 0.55f, LowStep = 0.3f;
         public const int MaxClimb = 1, MaxDrop = 2;
 
         private static int[,] heights;
@@ -46,15 +47,21 @@ namespace SquashBot.Core
             return d <= MaxClimb && -d <= MaxDrop;
         }
 
-        public static void Clear() => heights = null;
+        public static void Clear()
+        {
+            heights = null;
+            Step = TallStep;
+        }
 
         /// <summary>Raises the floor for a level (flat leaves it level) and moves the start onto low ground.</summary>
         public static void Apply(GridModel grid, TerrainKind kind, int world)
         {
             heights = null;
+            Step = kind == TerrainKind.Mounds ? LowStep : TallStep;
             if (kind == TerrainKind.Flat) return;
             var h = new int[grid.Width, grid.Height];
             if (kind == TerrainKind.Pyramid) Pyramids(grid, h, world);
+            else if (kind == TerrainKind.Mounds) Mounds(grid, h, world);
             else Terraces(grid, h, world);
             // vanG's cage and the bridge to the tunnel stay at ground level.
             foreach (var p in grid.CageTiles) h[p.x, p.y] = 0;
@@ -72,6 +79,22 @@ namespace SquashBot.Core
                 if (score < bestScore) { bestScore = score; best = p; }
             }
             if (grid.StartSpot == null || h[grid.StartSpot.Value.x, grid.StartSpot.Value.y] > 0) grid.StartSpot = best;
+        }
+
+        // ---------- Mounds: a few low plateaus, one gentle step up ----------
+
+        private static void Mounds(GridModel grid, int[,] h, int world)
+        {
+            var rng = new System.Random(world * 7919 + grid.Width * 31 + grid.Height);
+            int count = 2 + (grid.Width * grid.Height) / 260 + world % 2;
+            for (int i = 0; i < count; i++)
+            {
+                int w = 3 + rng.Next(3), d = 3 + rng.Next(2);
+                int x0 = 1 + rng.Next(Mathf.Max(1, grid.Width - w - 1)), y0 = 1 + rng.Next(Mathf.Max(1, grid.Height - d - 5));
+                for (int x = x0; x < x0 + w && x < grid.Width; x++)
+                    for (int y = y0; y < y0 + d && y < grid.Height; y++)
+                        if (grid.IsFloor(new GridPos(x, y))) h[x, y] = 1;
+            }
         }
 
         // ---------- Pyramids (each world's 4th level) ----------

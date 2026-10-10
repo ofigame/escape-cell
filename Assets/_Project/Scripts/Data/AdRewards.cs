@@ -9,8 +9,9 @@ namespace SquashBot.Data
     /// </summary>
     public static class AdRewards
     {
-        /// <summary>Coins for one workshop ad.</summary>
-        public const int ShopCoins = 50;
+        /// <summary>Coins for one workshop ad: they grow with the campaign (50 at the start, about 550 by level 100), so an
+        /// ad is always worth a real step towards the next weapon or upgrade.</summary>
+        public static int ShopCoins => 50 + 5 * Mathf.Min(SaveData.UnlockedLevel, 200);
         /// <summary>Workshop ads per day.</summary>
         public const int ShopAdsPerDay = 5;
 

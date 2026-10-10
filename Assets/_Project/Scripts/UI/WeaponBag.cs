@@ -77,7 +77,7 @@ namespace SquashBot.UI
                 UiFactory.TextBox("Name", card, new Vector2(0.5f, 0f), new Vector2(0f, 96f), new Vector2(300f, 50f), Loc.T("weapon." + weapon.id), 30f, Palette.UiText, title: true)
                     .rectTransform.pivot = new Vector2(0.5f, 0.5f);
                 UiFactory.TextBox("Stats", card, new Vector2(0.5f, 0f), new Vector2(0f, 50f), new Vector2(300f, 40f),
-                    Loc.F("bag.stats", weapon.damage, weapon.reach), 24f, new Color(0.85f, 0.9f, 1f, 0.85f), FontStyles.Normal).rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                    Loc.F("bag.stats", Armory.Damage(weapon), weapon.reach), 24f, new Color(0.85f, 0.9f, 1f, 0.85f), FontStyles.Normal).rectTransform.pivot = new Vector2(0.5f, 0.5f);
                 if (inHand)
                     UiFactory.TextBox("InHandLabel", card, new Vector2(0.5f, 1f), new Vector2(0f, -22f), new Vector2(280f, 40f), Loc.T("weapon.equipped"), 24f, new Color(0.4f, 1f, 0.6f), title: true)
                         .rectTransform.pivot = new Vector2(0.5f, 0.5f);

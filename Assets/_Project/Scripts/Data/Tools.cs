@@ -61,6 +61,21 @@ namespace SquashBot.Data
             return true;
         }
 
+        /// <summary>What the workshop pays back for the tool's top level (two fifths of its price).</summary>
+        public static int SellPrice(Tool t) => Owned(t) ? Mathf.RoundToInt(Prices[Level(t) - 1] * 0.4f) : 0;
+
+        /// <summary>Sells one level of a tool back (its room in the backpack frees up); at nothing it leaves the bag.</summary>
+        public static bool Sell(Tool t)
+        {
+            if (!Owned(t)) return false;
+            SaveData.Coins += SellPrice(t);
+            int level = Level(t) - 1;
+            if (level <= 0 && IsEquipped(t)) ToggleEquip(t);
+            PlayerPrefs.SetInt("sb_tool_" + t, level);
+            PlayerPrefs.Save();
+            return true;
+        }
+
         // ---------- Bag ----------
 
         public static int Slots => PlayerPrefs.GetInt("sb_tool_slot2", 0) == 1 ? 2 : 1;

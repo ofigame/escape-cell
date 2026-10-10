@@ -13,20 +13,22 @@ MonoBehaviour:
   m_Name: LevelSet
   m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Data.LevelSet
   levels:
-  - gridWidth: 7
-    gridHeight: 11
+  - gridWidth: 9
+    gridHeight: 13
     layout:
-    - ...B...
-    - ...B...
-    - ...B...
-    - ...B...
-    - '##CCC##'
-    - '##CCC##'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
+    - ....B....
+    - ....B....
+    - ....B....
+    - ....B....
+    - '###CCC###'
+    - '###CCC###'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
     shapeName: Square
     mission: 13
     coinTarget: 5
@@ -65,7 +67,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 2
-    robots: 0
+    robots: 20
+    robotsAtOnce: 3
     brutes: 0
     towers: 0
     towerHp: 4
@@ -74,7 +77,7 @@ MonoBehaviour:
     shieldHits: 2
     repairDrones: 0
     reactor: 0
-    robotHp: 2
+    robotHp: 1
     robotStep: 1.05
     monsterHp: 6
     monsterAttack: 2.3
@@ -99,20 +102,22 @@ MonoBehaviour:
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 11
+  - gridWidth: 9
+    gridHeight: 13
     layout:
-    - ...B...
-    - ...B...
-    - ...B...
-    - ...B...
-    - '##CCC##'
-    - '##CCC##'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
+    - ....B....
+    - ....B....
+    - ....B....
+    - ....B....
+    - '###CCC###'
+    - '###CCC###'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
+    - '#########'
     shapeName: Square
     mission: 13
     coinTarget: 5
@@ -151,7 +156,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 2
-    robots: 0
+    robots: 20
+    robotsAtOnce: 3
     brutes: 0
     towers: 0
     towerHp: 4
@@ -160,7 +166,7 @@ MonoBehaviour:
     shieldHits: 2
     repairDrones: 0
     reactor: 0
-    robotHp: 2
+    robotHp: 1
     robotStep: 1.05
     monsterHp: 6
     monsterAttack: 2.3
@@ -185,20 +191,23 @@ MonoBehaviour:
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 7
-    gridHeight: 11
+  - gridWidth: 10
+    gridHeight: 14
     layout:
-    - ...B...
-    - ...B...
-    - ...B...
-    - ...B...
-    - '##CCC##'
-    - '##CCC##'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
-    - '#######'
+    - .....B....
+    - .....B....
+    - .....B....
+    - .....B....
+    - '####CCC###'
+    - '####CCC###'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
     shapeName: Square
     mission: 13
     coinTarget: 5
@@ -237,7 +246,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 2
-    robots: 0
+    robots: 20
+    robotsAtOnce: 3
     brutes: 0
     towers: 0
     towerHp: 4
@@ -246,7 +256,7 @@ MonoBehaviour:
     shieldHits: 2
     repairDrones: 0
     reactor: 0
-    robotHp: 2
+    robotHp: 1
     robotStep: 1.05
     monsterHp: 6
     monsterAttack: 2.3
@@ -271,21 +281,23 @@ MonoBehaviour:
     powerUpInterval: 0
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 8
-    gridHeight: 12
+  - gridWidth: 10
+    gridHeight: 14
     layout:
-    - ....B...
-    - ....B...
-    - ....B...
-    - ....B...
-    - '###CCC##'
-    - '###CCC##'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
-    - '########'
+    - .....B....
+    - .....B....
+    - .....B....
+    - .....B....
+    - '####CCC###'
+    - '####CCC###'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
     shapeName: Square
     mission: 13
     coinTarget: 5
@@ -324,7 +336,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 3
-    robots: 1
+    robots: 22
+    robotsAtOnce: 3
     brutes: 0
     towers: 0
     towerHp: 5
@@ -333,7 +346,7 @@ MonoBehaviour:
     shieldHits: 2
     repairDrones: 0
     reactor: 0
-    robotHp: 2
+    robotHp: 1
     robotStep: 1.017
     monsterHp: 8
     monsterAttack: 2.2189999
@@ -358,22 +371,24 @@ MonoBehaviour:
     powerUpInterval: 10.7
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 13
+  - gridWidth: 11
+    gridHeight: 15
     layout:
-    - ....B....
-    - ....B....
-    - ....B....
-    - ....B....
-    - '###CCC###'
-    - '###CCC###'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
+    - .....B.....
+    - .....B.....
+    - .....B.....
+    - .....B.....
+    - '####CCC####'
+    - '####CCC####'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
     shapeName: Square
     mission: 13
     coinTarget: 5
@@ -412,7 +427,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 3
-    robots: 2
+    robots: 22
+    robotsAtOnce: 3
     brutes: 0
     towers: 0
     towerHp: 5
@@ -421,7 +437,7 @@ MonoBehaviour:
     shieldHits: 2
     repairDrones: 0
     reactor: 0
-    robotHp: 2
+    robotHp: 1
     robotStep: 0.999974
     monsterHp: 8
     monsterAttack: 2.1772091
@@ -446,22 +462,24 @@ MonoBehaviour:
     powerUpInterval: 10.545218
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 13
+  - gridWidth: 11
+    gridHeight: 15
     layout:
-    - ....B....
-    - ....B....
-    - ....B....
-    - ....B....
-    - '###CCC###'
-    - '###CCC###'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
+    - .....B.....
+    - .....B.....
+    - .....B.....
+    - .....B.....
+    - '####CCC####'
+    - '####CCC####'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
+    - '###########'
     shapeName: Square
     mission: 13
     coinTarget: 5
@@ -500,7 +518,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 3
-    robots: 2
+    robots: 23
+    robotsAtOnce: 4
     brutes: 0
     towers: 0
     towerHp: 5
@@ -534,23 +553,25 @@ MonoBehaviour:
     powerUpInterval: 10.462121
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 14
+  - gridWidth: 12
+    gridHeight: 16
     layout:
-    - .....B....
-    - .....B....
-    - .....B....
-    - .....B....
-    - '####CCC###'
-    - '####CCC###'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
+    - ......B.....
+    - ......B.....
+    - ......B.....
+    - ......B.....
+    - '#####CCC####'
+    - '#####CCC####'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
     shapeName: Square
     mission: 13
     coinTarget: 5
@@ -589,7 +610,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 3
-    robots: 2
+    robots: 23
+    robotsAtOnce: 4
     brutes: 0
     towers: 0
     towerHp: 5
@@ -623,23 +645,25 @@ MonoBehaviour:
     powerUpInterval: 10.394133
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 10
-    gridHeight: 14
+  - gridWidth: 12
+    gridHeight: 16
     layout:
-    - .....B....
-    - .....B....
-    - .....B....
-    - .....B....
-    - '####CCC###'
-    - '####CCC###'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
-    - '##########'
+    - ......B.....
+    - ......B.....
+    - ......B.....
+    - ......B.....
+    - '#####CCC####'
+    - '#####CCC####'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
     shapeName: Square
     mission: 13
     coinTarget: 5
@@ -678,7 +702,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 4
-    robots: 2
+    robots: 23
+    robotsAtOnce: 4
     brutes: 0
     towers: 0
     towerHp: 5
@@ -710,275 +735,6 @@ MonoBehaviour:
     coinLifetime: 5
     maxCoins: 2
     powerUpInterval: 10.33441
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 15
-    layout:
-    - ....B....
-    - ....B....
-    - ....B....
-    - ....B....
-    - '###CCC###'
-    - '###CCC###'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '###X#####'
-    - '#########'
-    - '#########'
-    shapeName: Plaza
-    mission: 13
-    coinTarget: 5
-    surviveSeconds: 30
-    keys: 1
-    collapseBehind: 0
-    chaseSpeed: 0
-    lowWalls: 0
-    levelEvent: 0
-    rules: 0
-    quest: 0
-    guardsPrincess: 0
-    cage: 0
-    cardGoal: 0
-    phased: 0
-    marathon: 0
-    final: 0
-    number: 9
-    score: 14
-    helper: 0
-    timeLimit: 0
-    paintTarget: 0
-    thiefRace: 0
-    escortSeconds: 0
-    escortStops: 0
-    cloneKnockouts: 0
-    stages: 0
-    hitsPerStage: 0
-    allyKuzgun: 0
-    sweepers: 0
-    erasers: 0
-    drones: 0
-    sandworms: 0
-    crabs: 0
-    turrets: 0
-    penguins: 0
-    springbots: 0
-    bugs: 4
-    robots: 2
-    brutes: 0
-    towers: 0
-    towerHp: 5
-    utopia: 0
-    shieldEvery: 0
-    shieldHits: 2
-    repairDrones: 0
-    reactor: 0
-    robotHp: 2
-    robotStep: 0.97081804
-    monsterHp: 10
-    monsterAttack: 2.1056442
-    terrain: 0
-    armor: 0
-    crateShare: 0.3
-    warningTime: 1.5636196
-    spawnInterval: 2.4128425
-    blocksPerWave: 1
-    blockLinger: 2.401554
-    aimAtPlayerChance: 0.2059141
-    rampUp: 0.12159508
-    lineWaveChance: 0
-    bombChance: 0.053540606
-    breakTiles: 0
-    tileRepairTime: 6.640082
-    fireChance: 0
-    fireDuration: 3.5
-    coinInterval: 2.4
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 10.280164
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 15
-    layout:
-    - ....B....
-    - ....B....
-    - ....B....
-    - ....B....
-    - '###CCC###'
-    - '###CCC###'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '#########'
-    - '###X#####'
-    - '#########'
-    - '#########'
-    shapeName: Plaza
-    mission: 13
-    coinTarget: 5
-    surviveSeconds: 30
-    keys: 1
-    collapseBehind: 0
-    chaseSpeed: 0
-    lowWalls: 0
-    levelEvent: 0
-    rules: 0
-    quest: 0
-    guardsPrincess: 0
-    cage: 0
-    cardGoal: 0
-    phased: 0
-    marathon: 0
-    final: 0
-    number: 10
-    score: 15
-    helper: 0
-    timeLimit: 0
-    paintTarget: 0
-    thiefRace: 0
-    escortSeconds: 0
-    escortStops: 0
-    cloneKnockouts: 0
-    stages: 0
-    hitsPerStage: 0
-    allyKuzgun: 0
-    sweepers: 0
-    erasers: 0
-    drones: 0
-    sandworms: 0
-    crabs: 0
-    turrets: 0
-    penguins: 0
-    springbots: 0
-    bugs: 4
-    robots: 2
-    brutes: 0
-    towers: 0
-    towerHp: 6
-    utopia: 0
-    shieldEvery: 0
-    shieldHits: 2
-    repairDrones: 0
-    reactor: 0
-    robotHp: 2
-    robotStep: 0.96529114
-    monsterHp: 10
-    monsterAttack: 2.0920784
-    terrain: 0
-    armor: 0
-    crateShare: 0.3
-    warningTime: 1.5575904
-    spawnInterval: 2.399779
-    blocksPerWave: 1
-    blockLinger: 2.4156225
-    aimAtPlayerChance: 0.20772289
-    rampUp: 0.123102404
-    lineWaveChance: 0
-    bombChance: 0.055025093
-    breakTiles: 0
-    tileRepairTime: 6.6149597
-    fireChance: 0
-    fireDuration: 3.5
-    coinInterval: 2.4
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 10.229919
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 12
-    gridHeight: 14
-    layout:
-    - ......B.....
-    - ......B.....
-    - ......B.....
-    - ......B.....
-    - '#####CCC####'
-    - '#####CCC####'
-    - '###X#####X##'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    - '###X#####X##'
-    - '############'
-    - '############'
-    shapeName: Plaza
-    mission: 13
-    coinTarget: 5
-    surviveSeconds: 30
-    keys: 1
-    collapseBehind: 0
-    chaseSpeed: 0
-    lowWalls: 0
-    levelEvent: 0
-    rules: 0
-    quest: 0
-    guardsPrincess: 0
-    cage: 0
-    cardGoal: 0
-    phased: 0
-    marathon: 0
-    final: 0
-    number: 11
-    score: 16
-    helper: 0
-    timeLimit: 0
-    paintTarget: 0
-    thiefRace: 0
-    escortSeconds: 0
-    escortStops: 0
-    cloneKnockouts: 0
-    stages: 0
-    hitsPerStage: 0
-    allyKuzgun: 0
-    sweepers: 0
-    erasers: 0
-    drones: 0
-    sandworms: 0
-    crabs: 0
-    turrets: 0
-    penguins: 0
-    springbots: 0
-    bugs: 4
-    robots: 2
-    brutes: 0
-    towers: 0
-    towerHp: 6
-    utopia: 0
-    shieldEvery: 0
-    shieldHits: 2
-    repairDrones: 0
-    reactor: 0
-    robotHp: 2
-    robotStep: 0.9601053
-    monsterHp: 10
-    monsterAttack: 2.0793495
-    terrain: 0
-    armor: 0
-    crateShare: 0.3
-    warningTime: 1.551933
-    spawnInterval: 2.3875215
-    blocksPerWave: 1
-    blockLinger: 2.4288228
-    aimAtPlayerChance: 0.20942008
-    rampUp: 0.124516726
-    lineWaveChance: 0
-    bombChance: 0.05641799
-    breakTiles: 0
-    tileRepairTime: 6.5913877
-    fireChance: 0
-    fireDuration: 3.5
-    coinInterval: 2.4
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 10.1827755
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 10
@@ -1017,8 +773,8 @@ MonoBehaviour:
     phased: 0
     marathon: 0
     final: 0
-    number: 12
-    score: 17
+    number: 9
+    score: 14
     helper: 0
     timeLimit: 0
     paintTarget: 0
@@ -1038,60 +794,61 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 4
-    robots: 2
+    robots: 24
+    robotsAtOnce: 4
     brutes: 0
     towers: 0
-    towerHp: 6
+    towerHp: 5
     utopia: 0
     shieldEvery: 0
     shieldHits: 2
     repairDrones: 0
     reactor: 0
-    robotHp: 3
-    robotStep: 0.95519453
+    robotHp: 2
+    robotStep: 0.97081804
     monsterHp: 10
-    monsterAttack: 2.0672958
+    monsterAttack: 2.1056442
     terrain: 0
     armor: 0
     crateShare: 0.3
-    warningTime: 1.5465759
-    spawnInterval: 2.3759143
+    warningTime: 1.5636196
+    spawnInterval: 2.4128425
     blocksPerWave: 1
-    blockLinger: 2.4413228
-    aimAtPlayerChance: 0.21102723
-    rampUp: 0.12585603
+    blockLinger: 2.401554
+    aimAtPlayerChance: 0.2059141
+    rampUp: 0.12159508
     lineWaveChance: 0
-    bombChance: 0.057736993
+    bombChance: 0.053540606
     breakTiles: 0
-    tileRepairTime: 6.569066
+    tileRepairTime: 6.640082
     fireChance: 0
     fireDuration: 3.5
     coinInterval: 2.4
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 10.138132
+    powerUpInterval: 10.280164
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 12
+  - gridWidth: 10
     gridHeight: 16
     layout:
-    - ......B.....
-    - ......B.....
-    - ......B.....
-    - ......B.....
-    - '#####CCC####'
-    - '#####CCC####'
-    - '############'
-    - '############'
-    - '####....####'
-    - '####....####'
-    - '####....####'
-    - '####....####'
-    - '############'
-    - '############'
-    - '############'
-    - '############'
-    shapeName: Pit
+    - .....B....
+    - .....B....
+    - .....B....
+    - .....B....
+    - '####CCC###'
+    - '####CCC###'
+    - '##########'
+    - '##########'
+    - '###X######'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '##########'
+    - '###X######'
+    - '##########'
+    - '##########'
+    shapeName: Plaza
     mission: 13
     coinTarget: 5
     surviveSeconds: 30
@@ -1108,8 +865,8 @@ MonoBehaviour:
     phased: 0
     marathon: 0
     final: 0
-    number: 13
-    score: 18
+    number: 10
+    score: 15
     helper: 0
     timeLimit: 0
     paintTarget: 0
@@ -1129,7 +886,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 4
-    robots: 2
+    robots: 24
+    robotsAtOnce: 4
     brutes: 0
     towers: 0
     towerHp: 6
@@ -1138,29 +896,120 @@ MonoBehaviour:
     shieldHits: 2
     repairDrones: 0
     reactor: 0
-    robotHp: 3
-    robotStep: 0.9505123
-    monsterHp: 11
-    monsterAttack: 2.055803
+    robotHp: 2
+    robotStep: 0.96529114
+    monsterHp: 10
+    monsterAttack: 2.0920784
     terrain: 0
     armor: 0
     crateShare: 0.3
-    warningTime: 1.541468
-    spawnInterval: 2.3648472
+    warningTime: 1.5575904
+    spawnInterval: 2.399779
     blocksPerWave: 1
-    blockLinger: 2.4532413
-    aimAtPlayerChance: 0.21255961
-    rampUp: 0.127133
+    blockLinger: 2.4156225
+    aimAtPlayerChance: 0.20772289
+    rampUp: 0.123102404
     lineWaveChance: 0
-    bombChance: 0.058994625
+    bombChance: 0.055025093
     breakTiles: 0
-    tileRepairTime: 6.5477834
+    tileRepairTime: 6.6149597
     fireChance: 0
     fireDuration: 3.5
     coinInterval: 2.4
     coinLifetime: 5
     maxCoins: 2
-    powerUpInterval: 10.095567
+    powerUpInterval: 10.229919
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 13
+    gridHeight: 15
+    layout:
+    - ......B......
+    - ......B......
+    - ......B......
+    - ......B......
+    - '#####CCC#####'
+    - '#####CCC#####'
+    - '#############'
+    - '###X#####X###'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '###X#####X###'
+    - '#############'
+    - '#############'
+    shapeName: Plaza
+    mission: 13
+    coinTarget: 5
+    surviveSeconds: 30
+    keys: 1
+    collapseBehind: 0
+    chaseSpeed: 0
+    lowWalls: 0
+    levelEvent: 0
+    rules: 0
+    quest: 0
+    guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
+    phased: 0
+    marathon: 0
+    final: 0
+    number: 11
+    score: 16
+    helper: 0
+    timeLimit: 0
+    paintTarget: 0
+    thiefRace: 0
+    escortSeconds: 0
+    escortStops: 0
+    cloneKnockouts: 0
+    stages: 0
+    hitsPerStage: 0
+    allyKuzgun: 0
+    sweepers: 0
+    erasers: 0
+    drones: 0
+    sandworms: 0
+    crabs: 0
+    turrets: 0
+    penguins: 0
+    springbots: 0
+    bugs: 4
+    robots: 24
+    robotsAtOnce: 4
+    brutes: 0
+    towers: 0
+    towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
+    robotHp: 2
+    robotStep: 0.9601053
+    monsterHp: 10
+    monsterAttack: 2.0793495
+    terrain: 0
+    armor: 0
+    crateShare: 0.3
+    warningTime: 1.551933
+    spawnInterval: 2.3875215
+    blocksPerWave: 1
+    blockLinger: 2.4288228
+    aimAtPlayerChance: 0.20942008
+    rampUp: 0.124516726
+    lineWaveChance: 0
+    bombChance: 0.05641799
+    breakTiles: 0
+    tileRepairTime: 6.5913877
+    fireChance: 0
+    fireDuration: 3.5
+    coinInterval: 2.4
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 10.1827755
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 11
@@ -1200,6 +1049,193 @@ MonoBehaviour:
     phased: 0
     marathon: 0
     final: 0
+    number: 12
+    score: 17
+    helper: 0
+    timeLimit: 0
+    paintTarget: 0
+    thiefRace: 0
+    escortSeconds: 0
+    escortStops: 0
+    cloneKnockouts: 0
+    stages: 0
+    hitsPerStage: 0
+    allyKuzgun: 0
+    sweepers: 0
+    erasers: 0
+    drones: 0
+    sandworms: 0
+    crabs: 0
+    turrets: 0
+    penguins: 0
+    springbots: 0
+    bugs: 4
+    robots: 24
+    robotsAtOnce: 4
+    brutes: 0
+    towers: 0
+    towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
+    robotHp: 3
+    robotStep: 0.95519453
+    monsterHp: 10
+    monsterAttack: 2.0672958
+    terrain: 3
+    armor: 0
+    crateShare: 0.3
+    warningTime: 1.5465759
+    spawnInterval: 2.3759143
+    blocksPerWave: 1
+    blockLinger: 2.4413228
+    aimAtPlayerChance: 0.21102723
+    rampUp: 0.12585603
+    lineWaveChance: 0
+    bombChance: 0.057736993
+    breakTiles: 0
+    tileRepairTime: 6.569066
+    fireChance: 0
+    fireDuration: 3.5
+    coinInterval: 2.4
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 10.138132
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 13
+    gridHeight: 17
+    layout:
+    - ......B......
+    - ......B......
+    - ......B......
+    - ......B......
+    - '#####CCC#####'
+    - '#####CCC#####'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#####...#####'
+    - '#####...#####'
+    - '#####...#####'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
+    - '#############'
+    shapeName: Pit
+    mission: 13
+    coinTarget: 5
+    surviveSeconds: 30
+    keys: 1
+    collapseBehind: 0
+    chaseSpeed: 0
+    lowWalls: 0
+    levelEvent: 0
+    rules: 0
+    quest: 0
+    guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
+    phased: 0
+    marathon: 0
+    final: 0
+    number: 13
+    score: 18
+    helper: 0
+    timeLimit: 0
+    paintTarget: 0
+    thiefRace: 0
+    escortSeconds: 0
+    escortStops: 0
+    cloneKnockouts: 0
+    stages: 0
+    hitsPerStage: 0
+    allyKuzgun: 0
+    sweepers: 0
+    erasers: 0
+    drones: 0
+    sandworms: 0
+    crabs: 0
+    turrets: 0
+    penguins: 0
+    springbots: 0
+    bugs: 4
+    robots: 25
+    robotsAtOnce: 4
+    brutes: 0
+    towers: 0
+    towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
+    robotHp: 3
+    robotStep: 0.9505123
+    monsterHp: 11
+    monsterAttack: 2.055803
+    terrain: 0
+    armor: 0
+    crateShare: 0.3
+    warningTime: 1.541468
+    spawnInterval: 2.3648472
+    blocksPerWave: 1
+    blockLinger: 2.4532413
+    aimAtPlayerChance: 0.21255961
+    rampUp: 0.127133
+    lineWaveChance: 0
+    bombChance: 0.058994625
+    breakTiles: 0
+    tileRepairTime: 6.5477834
+    fireChance: 0
+    fireDuration: 3.5
+    coinInterval: 2.4
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 10.095567
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 12
+    gridHeight: 18
+    layout:
+    - ......B.....
+    - ......B.....
+    - ......B.....
+    - ......B.....
+    - '#####CCC####'
+    - '#####CCC####'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '###X#####X##'
+    - '############'
+    - '############'
+    - '############'
+    - '############'
+    - '###X#####X##'
+    - '############'
+    - '############'
+    shapeName: Plaza
+    mission: 13
+    coinTarget: 5
+    surviveSeconds: 30
+    keys: 1
+    collapseBehind: 0
+    chaseSpeed: 0
+    lowWalls: 0
+    levelEvent: 0
+    rules: 0
+    quest: 0
+    guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
+    phased: 0
+    marathon: 0
+    final: 0
     number: 14
     score: 19
     helper: 0
@@ -1221,7 +1257,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 4
-    robots: 2
+    robots: 25
+    robotsAtOnce: 4
     brutes: 1
     towers: 0
     towerHp: 6
@@ -1255,26 +1292,27 @@ MonoBehaviour:
     powerUpInterval: 10.054765
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 17
+  - gridWidth: 14
+    gridHeight: 18
     layout:
-    - ......B......
-    - ......B......
-    - ......B......
-    - ......B......
-    - '#####CCC#####'
-    - '#####CCC#####'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
+    - .......B......
+    - .......B......
+    - .......B......
+    - .......B......
+    - '######CCC#####'
+    - '######CCC#####'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
     shapeName: Square
     mission: 13
     coinTarget: 5
@@ -1313,7 +1351,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 4
-    robots: 2
+    robots: 25
+    robotsAtOnce: 4
     brutes: 0
     towers: 0
     towerHp: 6
@@ -1326,7 +1365,7 @@ MonoBehaviour:
     robotStep: 0.94170356
     monsterHp: 11
     monsterAttack: 2.0341816
-    terrain: 0
+    terrain: 3
     armor: 0
     crateShare: 0.3
     warningTime: 1.5318584
@@ -1347,26 +1386,27 @@ MonoBehaviour:
     powerUpInterval: 10.015488
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 17
+  - gridWidth: 14
+    gridHeight: 18
     layout:
-    - ......B......
-    - ......B......
-    - ......B......
-    - ......B......
-    - '#####CCC#####'
-    - '#####CCC#####'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
+    - .......B......
+    - .......B......
+    - .......B......
+    - .......B......
+    - '######CCC#####'
+    - '######CCC#####'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
     shapeName: Square
     mission: 13
     coinTarget: 5
@@ -1405,7 +1445,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 4
-    robots: 2
+    robots: 25
+    robotsAtOnce: 4
     brutes: 0
     towers: 1
     towerHp: 6
@@ -1437,187 +1478,6 @@ MonoBehaviour:
     coinLifetime: 5
     maxCoins: 2
     powerUpInterval: 9.977546
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 9
-    gridHeight: 17
-    layout:
-    - ....B....
-    - ....B....
-    - ....B....
-    - ....B....
-    - ...CCC...
-    - ..#CCC#..
-    - .#######.
-    - .#######.
-    - .#######.
-    - .#######.
-    - '#########'
-    - .#######.
-    - .#######.
-    - .#######.
-    - .#######.
-    - ..#####..
-    - ....#....
-    shapeName: Oval
-    mission: 13
-    coinTarget: 5
-    surviveSeconds: 30
-    keys: 1
-    collapseBehind: 0
-    chaseSpeed: 0
-    lowWalls: 0
-    levelEvent: 0
-    rules: 0
-    quest: 0
-    guardsPrincess: 0
-    cage: 0
-    cardGoal: 0
-    phased: 0
-    marathon: 0
-    final: 0
-    number: 17
-    score: 21
-    helper: 0
-    timeLimit: 0
-    paintTarget: 0
-    thiefRace: 0
-    escortSeconds: 0
-    escortStops: 0
-    cloneKnockouts: 0
-    stages: 0
-    hitsPerStage: 0
-    allyKuzgun: 0
-    sweepers: 0
-    erasers: 0
-    drones: 0
-    sandworms: 0
-    crabs: 0
-    turrets: 0
-    penguins: 0
-    springbots: 0
-    bugs: 5
-    robots: 2
-    brutes: 0
-    towers: 1
-    towerHp: 6
-    utopia: 0
-    shieldEvery: 0
-    shieldHits: 2
-    repairDrones: 0
-    reactor: 0
-    robotHp: 3
-    robotStep: 0.93348664
-    monsterHp: 12
-    monsterAttack: 2.0140128
-    terrain: 0
-    armor: 0
-    crateShare: 0.3
-    warningTime: 1.5228945
-    spawnInterval: 2.3246047
-    blocksPerWave: 1
-    blockLinger: 2.4965794
-    aimAtPlayerChance: 0.21813163
-    rampUp: 0.13177635
-    lineWaveChance: 0.042664528
-    bombChance: 0.06356762
-    breakTiles: 1
-    tileRepairTime: 6.470394
-    fireChance: 0
-    fireDuration: 3.5
-    coinInterval: 2.4
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 9.940788
-    powerUpLifetime: 5
-    shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
-    layout:
-    - .......B......
-    - .......B......
-    - .......B......
-    - .......B......
-    - ......CCC.....
-    - ...###CCC##...
-    - ..##########..
-    - .############.
-    - '##############'
-    - '##############'
-    - .############.
-    - ..##########..
-    - ...########...
-    - ......##......
-    shapeName: Oval
-    mission: 13
-    coinTarget: 5
-    surviveSeconds: 30
-    keys: 1
-    collapseBehind: 0
-    chaseSpeed: 0
-    lowWalls: 0
-    levelEvent: 0
-    rules: 0
-    quest: 0
-    guardsPrincess: 0
-    cage: 0
-    cardGoal: 0
-    phased: 0
-    marathon: 0
-    final: 0
-    number: 18
-    score: 22
-    helper: 0
-    timeLimit: 0
-    paintTarget: 0
-    thiefRace: 0
-    escortSeconds: 0
-    escortStops: 0
-    cloneKnockouts: 0
-    stages: 0
-    hitsPerStage: 0
-    allyKuzgun: 0
-    sweepers: 0
-    erasers: 0
-    drones: 0
-    sandworms: 0
-    crabs: 0
-    turrets: 0
-    penguins: 0
-    springbots: 0
-    bugs: 5
-    robots: 3
-    brutes: 1
-    towers: 1
-    towerHp: 6
-    utopia: 0
-    shieldEvery: 0
-    shieldHits: 2
-    repairDrones: 0
-    reactor: 0
-    robotHp: 3
-    robotStep: 0.92955995
-    monsterHp: 12
-    monsterAttack: 2.0043745
-    terrain: 0
-    armor: 0
-    crateShare: 0.3
-    warningTime: 1.5186108
-    spawnInterval: 2.3153236
-    blocksPerWave: 1
-    blockLinger: 2.5065746
-    aimAtPlayerChance: 0.21941674
-    rampUp: 0.13284728
-    lineWaveChance: 0.044270907
-    bombChance: 0.06462231
-    breakTiles: 1
-    tileRepairTime: 6.4525456
-    fireChance: 0
-    fireDuration: 3.5
-    coinInterval: 2.4
-    coinLifetime: 5
-    maxCoins: 2
-    powerUpInterval: 9.905091
     powerUpLifetime: 5
     shieldDuration: 5
   - gridWidth: 10
@@ -1658,6 +1518,192 @@ MonoBehaviour:
     phased: 0
     marathon: 0
     final: 0
+    number: 17
+    score: 21
+    helper: 0
+    timeLimit: 0
+    paintTarget: 0
+    thiefRace: 0
+    escortSeconds: 0
+    escortStops: 0
+    cloneKnockouts: 0
+    stages: 0
+    hitsPerStage: 0
+    allyKuzgun: 0
+    sweepers: 0
+    erasers: 0
+    drones: 0
+    sandworms: 0
+    crabs: 0
+    turrets: 0
+    penguins: 0
+    springbots: 0
+    bugs: 5
+    robots: 25
+    robotsAtOnce: 4
+    brutes: 0
+    towers: 1
+    towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
+    robotHp: 3
+    robotStep: 0.93348664
+    monsterHp: 12
+    monsterAttack: 2.0140128
+    terrain: 0
+    armor: 0
+    crateShare: 0.3
+    warningTime: 1.5228945
+    spawnInterval: 2.3246047
+    blocksPerWave: 1
+    blockLinger: 2.4965794
+    aimAtPlayerChance: 0.21813163
+    rampUp: 0.13177635
+    lineWaveChance: 0.042664528
+    bombChance: 0.06356762
+    breakTiles: 1
+    tileRepairTime: 6.470394
+    fireChance: 0
+    fireDuration: 3.5
+    coinInterval: 2.4
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 9.940788
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 15
+    gridHeight: 15
+    layout:
+    - .......B.......
+    - .......B.......
+    - .......B.......
+    - .......B.......
+    - ......CCC......
+    - ...###CCC###...
+    - ..###########..
+    - .#############.
+    - .#############.
+    - '###############'
+    - .#############.
+    - .#############.
+    - ..###########..
+    - ...#########...
+    - .......#.......
+    shapeName: Oval
+    mission: 13
+    coinTarget: 5
+    surviveSeconds: 30
+    keys: 1
+    collapseBehind: 0
+    chaseSpeed: 0
+    lowWalls: 0
+    levelEvent: 0
+    rules: 0
+    quest: 0
+    guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
+    phased: 0
+    marathon: 0
+    final: 0
+    number: 18
+    score: 22
+    helper: 0
+    timeLimit: 0
+    paintTarget: 0
+    thiefRace: 0
+    escortSeconds: 0
+    escortStops: 0
+    cloneKnockouts: 0
+    stages: 0
+    hitsPerStage: 0
+    allyKuzgun: 0
+    sweepers: 0
+    erasers: 0
+    drones: 0
+    sandworms: 0
+    crabs: 0
+    turrets: 0
+    penguins: 0
+    springbots: 0
+    bugs: 5
+    robots: 25
+    robotsAtOnce: 4
+    brutes: 1
+    towers: 1
+    towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
+    robotHp: 3
+    robotStep: 0.92955995
+    monsterHp: 12
+    monsterAttack: 2.0043745
+    terrain: 3
+    armor: 0
+    crateShare: 0.3
+    warningTime: 1.5186108
+    spawnInterval: 2.3153236
+    blocksPerWave: 1
+    blockLinger: 2.5065746
+    aimAtPlayerChance: 0.21941674
+    rampUp: 0.13284728
+    lineWaveChance: 0.044270907
+    bombChance: 0.06462231
+    breakTiles: 1
+    tileRepairTime: 6.4525456
+    fireChance: 0
+    fireDuration: 3.5
+    coinInterval: 2.4
+    coinLifetime: 5
+    maxCoins: 2
+    powerUpInterval: 9.905091
+    powerUpLifetime: 5
+    shieldDuration: 5
+  - gridWidth: 11
+    gridHeight: 19
+    layout:
+    - .....B.....
+    - .....B.....
+    - .....B.....
+    - .....B.....
+    - ....CCC....
+    - ...#CCC#...
+    - ..#######..
+    - .#########.
+    - .#########.
+    - .#########.
+    - .#########.
+    - '###########'
+    - .#########.
+    - .#########.
+    - .#########.
+    - .#########.
+    - ..#######..
+    - ...#####...
+    - .....#.....
+    shapeName: Oval
+    mission: 13
+    coinTarget: 5
+    surviveSeconds: 30
+    keys: 1
+    collapseBehind: 0
+    chaseSpeed: 0
+    lowWalls: 0
+    levelEvent: 0
+    rules: 0
+    quest: 0
+    guardsPrincess: 0
+    cage: 0
+    cardGoal: 0
+    phased: 0
+    marathon: 0
+    final: 0
     number: 19
     score: 23
     helper: 0
@@ -1679,7 +1725,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 5
-    robots: 3
+    robots: 26
+    robotsAtOnce: 4
     brutes: 0
     towers: 1
     towerHp: 6
@@ -1713,23 +1760,24 @@ MonoBehaviour:
     powerUpInterval: 9.870351
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 14
-    gridHeight: 14
+  - gridWidth: 15
+    gridHeight: 15
     layout:
-    - .......B......
-    - .......B......
-    - .......B......
-    - .......B......
-    - ......CCC.....
-    - ...###CCC##...
-    - ..##########..
-    - .############.
-    - '##############'
-    - '##############'
-    - .############.
-    - ..##########..
-    - ...########...
-    - ......##......
+    - .......B.......
+    - .......B.......
+    - .......B.......
+    - .......B.......
+    - ......CCC......
+    - ...###CCC###...
+    - ..###########..
+    - .#############.
+    - .#############.
+    - '###############'
+    - .#############.
+    - .#############.
+    - ..###########..
+    - ...#########...
+    - .......#.......
     shapeName: Oval
     mission: 13
     coinTarget: 5
@@ -1768,7 +1816,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 5
-    robots: 3
+    robots: 26
+    robotsAtOnce: 4
     brutes: 0
     towers: 1
     towerHp: 6
@@ -1802,27 +1851,28 @@ MonoBehaviour:
     powerUpInterval: 9.83648
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 13
-    gridHeight: 18
+  - gridWidth: 14
+    gridHeight: 19
     layout:
-    - ......B......
-    - ......B......
-    - ......B......
-    - ......B......
-    - '#####CCC.....'
-    - '#####CCC.....'
-    - '########.....'
-    - '########.....'
-    - '########.....'
-    - '########.....'
-    - '########.....'
-    - '########.....'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
-    - '#############'
+    - .......B......
+    - .......B......
+    - .......B......
+    - .......B......
+    - '######CCC.....'
+    - '######CCC.....'
+    - '#########.....'
+    - '#########.....'
+    - '#########.....'
+    - '#########.....'
+    - '#########.....'
+    - '#########.....'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
+    - '##############'
     shapeName: WideL
     mission: 13
     coinTarget: 5
@@ -1861,7 +1911,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 5
-    robots: 3
+    robots: 26
+    robotsAtOnce: 4
     brutes: 0
     towers: 1
     towerHp: 6
@@ -1955,7 +2006,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 5
-    robots: 3
+    robots: 26
+    robotsAtOnce: 4
     brutes: 1
     towers: 1
     towerHp: 6
@@ -1968,7 +2020,7 @@ MonoBehaviour:
     robotStep: 0.91481674
     monsterHp: 12
     monsterAttack: 1.9681865
-    terrain: 0
+    terrain: 3
     armor: 0
     crateShare: 0.3
     warningTime: 1.5025274
@@ -1989,24 +2041,25 @@ MonoBehaviour:
     powerUpInterval: 9.771061
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 15
-    gridHeight: 15
+  - gridWidth: 16
+    gridHeight: 16
     layout:
-    - .......B.......
-    - .......B.......
-    - .......B.......
-    - .......B.......
-    - ......CCC......
-    - ...###CCC###...
-    - ..###########..
-    - .#############.
-    - .#############.
-    - '###############'
-    - .#############.
-    - .#############.
-    - ..###########..
-    - ...#########...
-    - .......#.......
+    - ........B.......
+    - ........B.......
+    - ........B.......
+    - ........B.......
+    - .......CCC......
+    - ....###CCC##....
+    - ..############..
+    - .##############.
+    - .##############.
+    - '################'
+    - '################'
+    - .##############.
+    - .##############.
+    - ..############..
+    - ....########....
+    - .......##.......
     shapeName: Oval
     mission: 13
     coinTarget: 5
@@ -2045,7 +2098,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 5
-    robots: 3
+    robots: 26
+    robotsAtOnce: 4
     brutes: 0
     towers: 2
     towerHp: 7
@@ -2079,28 +2133,29 @@ MonoBehaviour:
     powerUpInterval: 9.739394
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 15
-    gridHeight: 19
+  - gridWidth: 16
+    gridHeight: 20
     layout:
-    - .......B.......
-    - .......B.......
-    - .......B.......
-    - .......B.......
-    - '######CCC######'
-    - '######CCC######'
-    - '###############'
-    - '###############'
-    - '###############'
-    - '###############'
-    - '######...######'
-    - '######...######'
-    - '######...######'
-    - '###############'
-    - '###############'
-    - '###############'
-    - '###############'
-    - '###############'
-    - '###############'
+    - ........B.......
+    - ........B.......
+    - ........B.......
+    - ........B.......
+    - '#######CCC######'
+    - '#######CCC######'
+    - '################'
+    - '################'
+    - '################'
+    - '################'
+    - '######....######'
+    - '######....######'
+    - '######....######'
+    - '######....######'
+    - '################'
+    - '################'
+    - '################'
+    - '################'
+    - '################'
+    - '################'
     shapeName: Pit
     mission: 13
     coinTarget: 5
@@ -2139,7 +2194,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 5
-    robots: 3
+    robots: 26
+    robotsAtOnce: 4
     brutes: 0
     towers: 2
     towerHp: 7
@@ -2173,28 +2229,29 @@ MonoBehaviour:
     powerUpInterval: 9.708354
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 15
-    gridHeight: 19
+  - gridWidth: 16
+    gridHeight: 20
     layout:
-    - .......B.......
-    - .......B.......
-    - .......B.......
-    - .......B.......
-    - '######CCC######'
-    - '######CCC######'
-    - '###############'
-    - '###############'
-    - '###############'
-    - '###############'
-    - '######...######'
-    - '######...######'
-    - '######...######'
-    - '###############'
-    - '###############'
-    - '###############'
-    - '###############'
-    - '###############'
-    - '###############'
+    - ........B.......
+    - ........B.......
+    - ........B.......
+    - ........B.......
+    - '#######CCC######'
+    - '#######CCC######'
+    - '################'
+    - '################'
+    - '################'
+    - '################'
+    - '######....######'
+    - '######....######'
+    - '######....######'
+    - '######....######'
+    - '################'
+    - '################'
+    - '################'
+    - '################'
+    - '################'
+    - '################'
     shapeName: Pit
     mission: 13
     coinTarget: 5
@@ -2233,7 +2290,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 5
-    robots: 3
+    robots: 27
+    robotsAtOnce: 4
     brutes: 0
     towers: 2
     towerHp: 7
@@ -2246,7 +2304,7 @@ MonoBehaviour:
     robotStep: 0.9045688
     monsterHp: 13
     monsterAttack: 1.9430325
-    terrain: 0
+    terrain: 3
     armor: 0
     crateShare: 0.3034609
     warningTime: 1.4913478
@@ -2328,7 +2386,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 5
-    robots: 3
+    robots: 27
+    robotsAtOnce: 4
     brutes: 1
     towers: 2
     towerHp: 8
@@ -2362,29 +2421,30 @@ MonoBehaviour:
     powerUpInterval: 9.647989
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 16
-    gridHeight: 20
+  - gridWidth: 17
+    gridHeight: 21
     layout:
-    - ........B.......
-    - ........B.......
-    - ........B.......
-    - ........B.......
-    - .....##CCC#.....
-    - .....##CCC#.....
-    - .....######.....
-    - .....######.....
-    - .....######.....
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - .....######.....
-    - .....######.....
-    - .....######.....
-    - .....######.....
-    - .....######.....
+    - ........B........
+    - ........B........
+    - ........B........
+    - ........B........
+    - .....##CCC##.....
+    - .....##CCC##.....
+    - .....#######.....
+    - .....#######.....
+    - .....#######.....
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - .....#######.....
+    - .....#######.....
+    - .....#######.....
+    - .....#######.....
+    - .....#######.....
     shapeName: Plus
     mission: 13
     coinTarget: 5
@@ -2423,7 +2483,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 5
-    robots: 3
+    robots: 27
+    robotsAtOnce: 4
     brutes: 0
     towers: 2
     towerHp: 8
@@ -2457,29 +2518,30 @@ MonoBehaviour:
     powerUpInterval: 9.618592
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 16
-    gridHeight: 20
+  - gridWidth: 17
+    gridHeight: 21
     layout:
-    - ........B.......
-    - ........B.......
-    - ........B.......
-    - ........B.......
-    - '#######CCC######'
-    - '#######CCC######'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
+    - ........B........
+    - ........B........
+    - ........B........
+    - ........B........
+    - '#######CCC#######'
+    - '#######CCC#######'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
     shapeName: Square
     mission: 13
     coinTarget: 5
@@ -2518,7 +2580,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 5
-    robots: 3
+    robots: 27
+    robotsAtOnce: 4
     brutes: 0
     towers: 2
     towerHp: 8
@@ -2531,7 +2594,7 @@ MonoBehaviour:
     robotStep: 0.8948645
     monsterHp: 17
     monsterAttack: 1.9192129
-    terrain: 0
+    terrain: 3
     armor: 2
     crateShare: 0.30769548
     warningTime: 1.4807613
@@ -2552,29 +2615,30 @@ MonoBehaviour:
     powerUpInterval: 9.589678
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 16
-    gridHeight: 20
+  - gridWidth: 17
+    gridHeight: 21
     layout:
-    - ........B.......
-    - ........B.......
-    - ........B.......
-    - ........B.......
-    - .....##CCC#.....
-    - .....##CCC#.....
-    - .....######.....
-    - .....######.....
-    - .....######.....
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - .....######.....
-    - .....######.....
-    - .....######.....
-    - .....######.....
-    - .....######.....
+    - ........B........
+    - ........B........
+    - ........B........
+    - ........B........
+    - .....##CCC##.....
+    - .....##CCC##.....
+    - .....#######.....
+    - .....#######.....
+    - .....#######.....
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - .....#######.....
+    - .....#######.....
+    - .....#######.....
+    - .....#######.....
+    - .....#######.....
     shapeName: Plus
     mission: 13
     coinTarget: 5
@@ -2613,7 +2677,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 5
-    robots: 3
+    robots: 27
+    robotsAtOnce: 4
     brutes: 0
     towers: 2
     towerHp: 8
@@ -2647,29 +2712,30 @@ MonoBehaviour:
     powerUpInterval: 9.561217
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 19
-    gridHeight: 20
+  - gridWidth: 20
+    gridHeight: 21
     layout:
-    - .........B.........
-    - .........B.........
-    - .........B.........
-    - .........B.........
-    - .....###CCC........
-    - .....###CCC........
-    - .....######........
-    - .....######........
-    - .....######........
-    - '################...'
-    - '################...'
-    - '################...'
-    - '################.HH'
-    - '################.HH'
-    - '################...'
-    - .....######........
-    - .....######........
-    - .....######........
-    - .....######........
-    - .....######........
+    - ..........B.........
+    - ..........B.........
+    - ..........B.........
+    - ..........B.........
+    - .....####CCC........
+    - .....####CCC........
+    - .....#######........
+    - .....#######........
+    - .....#######........
+    - '#################...'
+    - '#################...'
+    - '#################...'
+    - '#################.HH'
+    - '#################.HH'
+    - '#################...'
+    - '#################...'
+    - .....#######........
+    - .....#######........
+    - .....#######........
+    - .....#######........
+    - .....#######........
     shapeName: Plus
     mission: 13
     coinTarget: 5
@@ -2708,7 +2774,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 3
+    robots: 27
+    robotsAtOnce: 4
     brutes: 1
     towers: 2
     towerHp: 8
@@ -2804,7 +2871,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 3
+    robots: 27
+    robotsAtOnce: 4
     brutes: 0
     towers: 2
     towerHp: 8
@@ -2838,30 +2906,31 @@ MonoBehaviour:
     powerUpInterval: 9.505562
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 17
-    gridHeight: 21
+  - gridWidth: 18
+    gridHeight: 22
     layout:
-    - ........B........
-    - ........B........
-    - ........B........
-    - ........B........
-    - .....##CCC##.....
-    - .....##CCC##.....
-    - .....#######.....
-    - .....#######.....
-    - .....#######.....
-    - '#################'
-    - '#################'
-    - '#################'
-    - '#################'
-    - '#################'
-    - '#################'
-    - '#################'
-    - .....#######.....
-    - .....#######.....
-    - .....#######.....
-    - .....#######.....
-    - .....#######.....
+    - .........B........
+    - .........B........
+    - .........B........
+    - .........B........
+    - .....###CCC##.....
+    - .....###CCC##.....
+    - .....########.....
+    - .....########.....
+    - .....########.....
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - .....########.....
+    - .....########.....
+    - .....########.....
+    - .....########.....
+    - .....########.....
     shapeName: Plus
     mission: 13
     coinTarget: 5
@@ -2900,7 +2969,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 3
+    robots: 28
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 8
@@ -2913,7 +2983,7 @@ MonoBehaviour:
     robotStep: 0.8826156
     monsterHp: 18
     monsterAttack: 1.8891474
-    terrain: 0
+    terrain: 3
     armor: 2
     crateShare: 0.31304047
     warningTime: 1.4673989
@@ -2934,30 +3004,31 @@ MonoBehaviour:
     powerUpInterval: 9.478324
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 20
-    gridHeight: 21
+  - gridWidth: 21
+    gridHeight: 22
     layout:
-    - ..........B.........
-    - ..........B.........
-    - ..........B.........
-    - ..........B.........
-    - .......##CCC........
-    - ....#####CCC#.......
-    - ...###########......
-    - ..#############.....
-    - .###############....
-    - .######...######....
-    - .#####.....#####....
-    - '#####.......#####...'
-    - '#####.......#####.HH'
-    - '#####.......#####.HH'
-    - .#####.....#####....
-    - .######...######....
-    - .###############....
-    - ..#############.....
-    - ...###########......
-    - ....#########.......
-    - .......###..........
+    - ..........B..........
+    - ..........B..........
+    - ..........B..........
+    - ..........B..........
+    - ........#CCC.........
+    - .....####CCC#........
+    - ...############......
+    - ..##############.....
+    - ..##############.....
+    - .#######..#######....
+    - .#####......#####....
+    - .#####......#####....
+    - '#####........#####.HH'
+    - '#####........#####.HH'
+    - .#####......#####....
+    - .#####......#####....
+    - .#######..#######....
+    - ..##############.....
+    - ..##############.....
+    - ...############......
+    - .....########........
+    - ........##...........
     shapeName: Ring
     mission: 13
     coinTarget: 5
@@ -2996,7 +3067,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 3
+    robots: 28
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 8
@@ -3030,30 +3102,31 @@ MonoBehaviour:
     powerUpInterval: 9.451453
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 17
-    gridHeight: 21
+  - gridWidth: 18
+    gridHeight: 22
     layout:
-    - ........B........
-    - ........B........
-    - ........B........
-    - ........B........
-    - .....##CCC##.....
-    - .....##CCC##.....
-    - .....#######.....
-    - .....#######.....
-    - .....#######.....
-    - '#################'
-    - '#################'
-    - '#################'
-    - '#################'
-    - '#################'
-    - '#################'
-    - '#################'
-    - .....#######.....
-    - .....#######.....
-    - .....#######.....
-    - .....#######.....
-    - .....#######.....
+    - .........B........
+    - .........B........
+    - .........B........
+    - .........B........
+    - .....###CCC##.....
+    - .....###CCC##.....
+    - .....########.....
+    - .....########.....
+    - .....########.....
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - '##################'
+    - .....########.....
+    - .....########.....
+    - .....########.....
+    - .....########.....
+    - .....########.....
     shapeName: Plus
     mission: 13
     coinTarget: 5
@@ -3092,7 +3165,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 3
+    robots: 28
+    robotsAtOnce: 5
     brutes: 1
     towers: 2
     towerHp: 8
@@ -3188,7 +3262,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 3
+    robots: 28
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 8
@@ -3201,7 +3276,7 @@ MonoBehaviour:
     robotStep: 0.87386197
     monsterHp: 18
     monsterAttack: 1.8676611
-    terrain: 0
+    terrain: 3
     armor: 2
     crateShare: 0.31686023
     warningTime: 1.4578494
@@ -3285,7 +3360,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 3
+    robots: 28
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 8
@@ -3319,31 +3395,32 @@ MonoBehaviour:
     powerUpInterval: 9.372877
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 18
-    gridHeight: 22
+  - gridWidth: 19
+    gridHeight: 23
     layout:
-    - .........B........
-    - .........B........
-    - .........B........
-    - .........B........
-    - '########CCC#######'
-    - '########CCC#######'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '#######....#######'
-    - '#######....#######'
-    - '#######....#######'
-    - '#######....#######'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
+    - .........B.........
+    - .........B.........
+    - .........B.........
+    - .........B.........
+    - '########CCC########'
+    - '########CCC########'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '#######.....#######'
+    - '#######.....#######'
+    - '#######.....#######'
+    - '#######.....#######'
+    - '#######.....#######'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
     shapeName: Pit
     mission: 13
     coinTarget: 5
@@ -3382,7 +3459,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 3
+    robots: 28
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 8
@@ -3416,31 +3494,32 @@ MonoBehaviour:
     powerUpInterval: 9.347315
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 18
-    gridHeight: 22
+  - gridWidth: 19
+    gridHeight: 23
     layout:
-    - .........B........
-    - .........B........
-    - .........B........
-    - .........B........
-    - '########CCC#######'
-    - '########CCC#######'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '#######....#######'
-    - '#######....#######'
-    - '#######....#######'
-    - '#######....#######'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
+    - .........B.........
+    - .........B.........
+    - .........B.........
+    - .........B.........
+    - '########CCC########'
+    - '########CCC########'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '#######.....#######'
+    - '#######.....#######'
+    - '#######.....#######'
+    - '#######.....#######'
+    - '#######.....#######'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
     shapeName: Pit
     mission: 13
     coinTarget: 5
@@ -3479,7 +3558,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 3
+    robots: 28
+    robotsAtOnce: 5
     brutes: 1
     towers: 2
     towerHp: 8
@@ -3492,7 +3572,7 @@ MonoBehaviour:
     robotStep: 0.86542493
     monsterHp: 19
     monsterAttack: 1.8469521
-    terrain: 0
+    terrain: 3
     armor: 2
     crateShare: 0.32054186
     warningTime: 1.4486454
@@ -3513,30 +3593,30 @@ MonoBehaviour:
     powerUpInterval: 9.322045
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 18
+  - gridWidth: 19
     gridHeight: 21
     layout:
-    - .........B........
-    - .........B........
-    - .........B........
-    - .........B........
-    - '######..CCC.######'
-    - '######..CCC.######'
-    - '######..###.######'
-    - '######..###.######'
-    - '######..###.######'
-    - '######..###.######'
-    - '######..###.######'
-    - '######..###.######'
-    - '######..###.######'
-    - '######..###.######'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
+    - .........B.........
+    - .........B.........
+    - .........B.........
+    - .........B.........
+    - '######..CCC..######'
+    - '######..CCC..######'
+    - '######..###..######'
+    - '######..###..######'
+    - '######..###..######'
+    - '######..###..######'
+    - '######..###..######'
+    - '######..###..######'
+    - '######..###..######'
+    - '######..###..######'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
     shapeName: Horseshoe
     mission: 13
     coinTarget: 5
@@ -3575,7 +3655,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 3
+    robots: 29
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 8
@@ -3673,7 +3754,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 3
+    robots: 29
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 8
@@ -3771,7 +3853,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 3
+    robots: 29
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -3805,30 +3888,31 @@ MonoBehaviour:
     powerUpInterval: 9.247878
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 19
-    gridHeight: 21
+  - gridWidth: 20
+    gridHeight: 22
     layout:
-    - .........B.........
-    - .........B.........
-    - .........B.........
-    - .........B.........
-    - '######..CCC..######'
-    - '######..CCC..######'
-    - '######..###..######'
-    - '######..###..######'
-    - '######..###..######'
-    - '######..###..######'
-    - '######..###..######'
-    - '######..###..######'
-    - '######..###..######'
-    - '######..###..######'
-    - '###################'
-    - '###################'
-    - '###################'
-    - '###################'
-    - '###################'
-    - '###################'
-    - '###################'
+    - ..........B.........
+    - ..........B.........
+    - ..........B.........
+    - ..........B.........
+    - '#######..CCC.#######'
+    - '#######..CCC.#######'
+    - '#######..###.#######'
+    - '#######..###.#######'
+    - '#######..###.#######'
+    - '#######..###.#######'
+    - '#######..###.#######'
+    - '#######..###.#######'
+    - '#######..###.#######'
+    - '#######..###.#######'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '####################'
+    - '####################'
     shapeName: Horseshoe
     mission: 13
     coinTarget: 5
@@ -3867,7 +3951,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 3
+    robots: 29
+    robotsAtOnce: 5
     brutes: 1
     towers: 2
     towerHp: 9
@@ -3880,7 +3965,7 @@ MonoBehaviour:
     robotStep: 0.85460347
     monsterHp: 19
     monsterAttack: 1.8203905
-    terrain: 0
+    terrain: 3
     armor: 2
     crateShare: 0.32526392
     warningTime: 1.4368402
@@ -3901,32 +3986,33 @@ MonoBehaviour:
     powerUpInterval: 9.223668
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 20
-    gridHeight: 23
+  - gridWidth: 21
+    gridHeight: 24
     layout:
-    - ..........B.........
-    - ..........B.........
-    - ..........B.........
-    - ..........B.........
-    - '######...CCC#####...'
-    - '######...CCC#####...'
-    - '######...########...'
-    - '######...########...'
-    - '######...########...'
-    - '######...########...'
-    - '######...########...'
-    - '######...########...'
-    - '######...########...'
-    - '######...########.HH'
-    - '######...########.HH'
-    - '#################...'
-    - '#################...'
-    - '#################...'
-    - '#################...'
-    - '#################...'
-    - '#################...'
-    - '#################...'
-    - '#################...'
+    - ..........B..........
+    - ..........B..........
+    - ..........B..........
+    - ..........B..........
+    - '######...CCC######...'
+    - '######...CCC######...'
+    - '######...#########...'
+    - '######...#########...'
+    - '######...#########...'
+    - '######...#########...'
+    - '######...#########...'
+    - '######...#########...'
+    - '######...#########...'
+    - '######...#########...'
+    - '######...#########.HH'
+    - '##################.HH'
+    - '##################...'
+    - '##################...'
+    - '##################...'
+    - '##################...'
+    - '##################...'
+    - '##################...'
+    - '##################...'
+    - '##################...'
     shapeName: Horseshoe
     mission: 13
     coinTarget: 5
@@ -3965,7 +4051,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 4
+    robots: 29
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -3999,32 +4086,33 @@ MonoBehaviour:
     powerUpInterval: 9.199699
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 19
-    gridHeight: 23
+  - gridWidth: 20
+    gridHeight: 24
     layout:
-    - .........B.........
-    - .........B.........
-    - .........B.........
-    - .........B.........
-    - ........CCC........
-    - .....###CCC###.....
-    - ....###########....
-    - ...#############...
-    - ..###############..
-    - .#################.
-    - .######.....######.
-    - .#####.......#####.
-    - '######.......######'
-    - '######.......######'
-    - '######.......######'
-    - .#####.......#####.
-    - .######.....######.
-    - .#################.
-    - ..###############..
-    - ...#############...
-    - ....###########....
-    - .....#########.....
-    - ........###........
+    - ..........B.........
+    - ..........B.........
+    - ..........B.........
+    - ..........B.........
+    - .........CCC........
+    - ......###CCC##......
+    - ....############....
+    - ...##############...
+    - ..################..
+    - ..################..
+    - .#######....#######.
+    - .######......######.
+    - .#####........#####.
+    - '######........######'
+    - '######........######'
+    - .#####........#####.
+    - .######......######.
+    - .#######....#######.
+    - ..################..
+    - ..################..
+    - ...##############...
+    - ....############....
+    - ......########......
+    - .........##.........
     shapeName: Ring
     mission: 13
     coinTarget: 5
@@ -4063,7 +4151,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 4
+    robots: 29
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -4162,7 +4251,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 4
+    robots: 29
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -4175,7 +4265,7 @@ MonoBehaviour:
     robotStep: 0.8467697
     monsterHp: 20
     monsterAttack: 1.801162
-    terrain: 0
+    terrain: 3
     armor: 2
     crateShare: 0.3286823
     warningTime: 1.4282942
@@ -4261,7 +4351,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 6
-    robots: 4
+    robots: 29
+    robotsAtOnce: 5
     brutes: 1
     towers: 2
     towerHp: 9
@@ -4295,33 +4386,34 @@ MonoBehaviour:
     powerUpInterval: 9.129158
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 20
-    gridHeight: 24
+  - gridWidth: 21
+    gridHeight: 25
     layout:
-    - ..........B.........
-    - ..........B.........
-    - ..........B.........
-    - ..........B.........
-    - ......###CCC##......
-    - ......###CCC##......
-    - ......########......
-    - ......########......
-    - ......########......
-    - ......########......
-    - '####################'
-    - '####################'
-    - '####################'
-    - '####################'
-    - '####################'
-    - '####################'
-    - '####################'
-    - '####################'
-    - ......########......
-    - ......########......
-    - ......########......
-    - ......########......
-    - ......########......
-    - ......########......
+    - ..........B..........
+    - ..........B..........
+    - ..........B..........
+    - ..........B..........
+    - ......###CCC###......
+    - ......###CCC###......
+    - ......#########......
+    - ......#########......
+    - ......#########......
+    - ......#########......
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - '#####################'
+    - ......#########......
+    - ......#########......
+    - ......#########......
+    - ......#########......
+    - ......#########......
+    - ......#########......
     shapeName: Plus
     mission: 13
     coinTarget: 5
@@ -4360,7 +4452,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 29
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -4394,33 +4487,34 @@ MonoBehaviour:
     powerUpInterval: 9.106072
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 18
-    gridHeight: 24
+  - gridWidth: 19
+    gridHeight: 25
     layout:
-    - .........B........
-    - .........B........
-    - .........B........
-    - .........B........
-    - '########CCC.......'
-    - '########CCC.......'
-    - '###########.......'
-    - '###########.......'
-    - '###########.......'
-    - '###########.......'
-    - '###########.......'
-    - '###########.......'
-    - '###########.......'
-    - '###########.......'
-    - '###########.......'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
-    - '##################'
+    - .........B.........
+    - .........B.........
+    - .........B.........
+    - .........B.........
+    - '########CCC........'
+    - '########CCC........'
+    - '###########........'
+    - '###########........'
+    - '###########........'
+    - '###########........'
+    - '###########........'
+    - '###########........'
+    - '###########........'
+    - '###########........'
+    - '###########........'
+    - '###########........'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
+    - '###################'
     shapeName: WideL
     mission: 13
     coinTarget: 5
@@ -4459,7 +4553,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 30
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -4472,7 +4567,7 @@ MonoBehaviour:
     robotStep: 0.83915097
     monsterHp: 20
     monsterAttack: 1.7824615
-    terrain: 0
+    terrain: 3
     armor: 2
     crateShare: 0.33200684
     warningTime: 1.4199829
@@ -4493,27 +4588,28 @@ MonoBehaviour:
     powerUpInterval: 9.083191
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 20
-    gridHeight: 18
+  - gridWidth: 21
+    gridHeight: 19
     layout:
-    - ..........B.........
-    - ..........B.........
-    - ..........B.........
-    - ..........B.........
-    - .........CCC........
-    - .....####CCC###.....
-    - ...##############...
-    - ..################..
-    - .##################.
-    - .##################.
-    - '####################'
-    - '####################'
-    - .##################.
-    - .##################.
-    - ..################..
-    - ...##############...
-    - .....##########.....
-    - .........##.........
+    - ..........B..........
+    - ..........B..........
+    - ..........B..........
+    - ..........B..........
+    - .........CCC.........
+    - .....####CCC####.....
+    - ...###############...
+    - ..#################..
+    - .###################.
+    - .###################.
+    - .###################.
+    - '#####################'
+    - .###################.
+    - .###################.
+    - .###################.
+    - ..#################..
+    - ...###############...
+    - .....###########.....
+    - .........###.........
     shapeName: Oval
     mission: 13
     coinTarget: 5
@@ -4552,7 +4648,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 30
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -4652,7 +4749,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 30
+    robotsAtOnce: 5
     brutes: 1
     towers: 2
     towerHp: 9
@@ -4750,7 +4848,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 30
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -4784,34 +4883,35 @@ MonoBehaviour:
     powerUpInterval: 9.015702
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 21
-    gridHeight: 25
+  - gridWidth: 22
+    gridHeight: 26
     layout:
-    - ..........B..........
-    - ..........B..........
-    - ..........B..........
-    - ..........B..........
-    - '#########CCC#########'
-    - '#########CCC#########'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
-    - '#####################'
+    - ...........B..........
+    - ...........B..........
+    - ...........B..........
+    - ...........B..........
+    - '##########CCC#########'
+    - '##########CCC#########'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
+    - '######################'
     shapeName: Square
     mission: 13
     coinTarget: 5
@@ -4850,7 +4950,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 30
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -4863,7 +4964,7 @@ MonoBehaviour:
     robotStep: 0.8292931
     monsterHp: 20
     monsterAttack: 1.7582648
-    terrain: 0
+    terrain: 3
     armor: 2
     crateShare: 0.33630848
     warningTime: 1.4092288
@@ -4884,34 +4985,35 @@ MonoBehaviour:
     powerUpInterval: 8.993573
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 22
-    gridHeight: 25
+  - gridWidth: 23
+    gridHeight: 26
     layout:
-    - ...........B..........
-    - ...........B..........
-    - ...........B..........
-    - ...........B..........
-    - '##########CCC######...'
-    - '##########CCC######...'
-    - '######.############...'
-    - '###################...'
-    - '##.#####.#####.####...'
-    - '###################...'
-    - '####.#####.#####.##...'
-    - '###################...'
-    - '######.#####.######...'
-    - '###################...'
-    - '##.#####.#####.####.HH'
-    - '###################.HH'
-    - '####.#####.#####.##...'
-    - '###################...'
-    - '######.#####.######...'
-    - '###################...'
-    - '##.#####.#####.####...'
-    - '###################...'
-    - '####.#####.#####.##...'
-    - '###################...'
-    - '###################...'
+    - ...........B...........
+    - ...........B...........
+    - ...........B...........
+    - ...........B...........
+    - '##########CCC#######...'
+    - '##########CCC#######...'
+    - '####################...'
+    - '######.#############...'
+    - '####################...'
+    - '##.#####.#####.#####...'
+    - '####################...'
+    - '####.#####.#####.###...'
+    - '####################...'
+    - '######.#####.#######...'
+    - '####################...'
+    - '##.#####.#####.#####.HH'
+    - '####################.HH'
+    - '####.#####.#####.###...'
+    - '####################...'
+    - '######.#####.#######...'
+    - '####################...'
+    - '##.#####.#####.#####...'
+    - '####################...'
+    - '####.#####.#####.###...'
+    - '####################...'
+    - '####################...'
     shapeName: Holes
     mission: 13
     coinTarget: 5
@@ -4950,7 +5052,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 30
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -4984,32 +5087,33 @@ MonoBehaviour:
     powerUpInterval: 8.971619
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 21
-    gridHeight: 23
+  - gridWidth: 22
+    gridHeight: 24
     layout:
-    - ..........B..........
-    - ..........B..........
-    - ..........B..........
-    - ..........B..........
-    - '#########CCC#########'
-    - '#########CCC#########'
-    - '##.#####.#####.######'
-    - '#####################'
-    - '####.#####.#####.####'
-    - '#####################'
-    - '######.#####.#####.##'
-    - '#####################'
-    - '##.#####.#####.######'
-    - '#####################'
-    - '####.#####.#####.####'
-    - '#####################'
-    - '######.#####.#####.##'
-    - '#####################'
-    - '##.#####.#####.######'
-    - '#####################'
-    - '####.#####.#####.####'
-    - '#####################'
-    - '#####################'
+    - ...........B..........
+    - ...........B..........
+    - ...........B..........
+    - ...........B..........
+    - '##########CCC#########'
+    - '##########CCC#########'
+    - '######################'
+    - '##.#####.#####.#######'
+    - '######################'
+    - '####.#####.#####.#####'
+    - '######################'
+    - '######.#####.#####.###'
+    - '######################'
+    - '##.#####.#####.#######'
+    - '######################'
+    - '####.#####.#####.#####'
+    - '######################'
+    - '######.#####.#####.###'
+    - '######################'
+    - '##.#####.#####.#######'
+    - '######################'
+    - '####.#####.#####.#####'
+    - '######################'
+    - '######################'
     shapeName: Holes
     mission: 13
     coinTarget: 5
@@ -5048,7 +5152,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 30
+    robotsAtOnce: 5
     brutes: 1
     towers: 2
     towerHp: 9
@@ -5149,7 +5254,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 30
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -5162,7 +5268,7 @@ MonoBehaviour:
     robotStep: 0.8221034
     monsterHp: 21
     monsterAttack: 1.7406174
-    terrain: 0
+    terrain: 3
     armor: 2
     crateShare: 0.3394458
     warningTime: 1.4013854
@@ -5250,7 +5356,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 30
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -5351,7 +5458,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 31
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -5385,35 +5493,36 @@ MonoBehaviour:
     powerUpInterval: 8.885449
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 22
-    gridHeight: 26
+  - gridWidth: 23
+    gridHeight: 27
     layout:
-    - ...........B..........
-    - ...........B..........
-    - ...........B..........
-    - ...........B..........
-    - ..........CCC.........
-    - ......####CCC###......
-    - .....############.....
-    - ....##############....
-    - ...################...
-    - ..##################..
-    - .####################.
-    - .#######......#######.
-    - .######........######.
-    - .######........######.
-    - '#######........#######'
-    - '#######........#######'
-    - .######........######.
-    - .######........######.
-    - .#######......#######.
-    - .####################.
-    - ..##################..
-    - ...################...
-    - ....##############....
-    - .....############.....
-    - ......##########......
-    - ..........##..........
+    - ...........B...........
+    - ...........B...........
+    - ...........B...........
+    - ...........B...........
+    - ..........CCC..........
+    - .......###CCC###.......
+    - .....#############.....
+    - ....###############....
+    - ...#################...
+    - ..###################..
+    - ..###################..
+    - .########.....########.
+    - .#######.......#######.
+    - .######.........######.
+    - '#######.........#######'
+    - '#######.........#######'
+    - '#######.........#######'
+    - .######.........######.
+    - .#######.......#######.
+    - .########.....########.
+    - ..###################..
+    - ..###################..
+    - ...#################...
+    - ....###############....
+    - .....#############.....
+    - .......#########.......
+    - ..........###..........
     shapeName: Ring
     mission: 13
     coinTarget: 5
@@ -5452,7 +5561,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 31
+    robotsAtOnce: 5
     brutes: 1
     towers: 2
     towerHp: 9
@@ -5465,7 +5575,7 @@ MonoBehaviour:
     robotStep: 0.8150727
     monsterHp: 21
     monsterAttack: 1.7233604
-    terrain: 0
+    terrain: 3
     armor: 2
     crateShare: 0.3425137
     warningTime: 1.3937157
@@ -5486,28 +5596,29 @@ MonoBehaviour:
     powerUpInterval: 8.864298
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 22
-    gridHeight: 19
+  - gridWidth: 23
+    gridHeight: 20
     layout:
-    - ...........B..........
-    - ...........B..........
-    - ...........B..........
-    - ...........B..........
-    - ..........CCC.........
-    - ...#####..CCC.#####...
-    - ..#######.##########..
-    - .####################.
-    - .####################.
-    - '######################'
-    - '######################'
-    - '######################'
-    - '######################'
-    - '######################'
-    - .####################.
-    - .#########..#########.
-    - ..#######....#######..
-    - ...#####......#####...
-    - ......................
+    - ...........B...........
+    - ...........B...........
+    - ...........B...........
+    - ...........B...........
+    - ..........CCC..........
+    - ....####..CCC..####....
+    - ..###################..
+    - ..###################..
+    - .#####################.
+    - .#####################.
+    - '#######################'
+    - '#######################'
+    - '#######################'
+    - '#######################'
+    - .##########.##########.
+    - .##########.##########.
+    - ..########...########..
+    - ..########...########..
+    - ....####.......####....
+    - .......................
     shapeName: Butterfly
     mission: 13
     coinTarget: 5
@@ -5546,7 +5657,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 31
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -5648,7 +5760,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 31
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -5744,7 +5857,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 31
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -5846,7 +5960,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 31
+    robotsAtOnce: 5
     brutes: 1
     towers: 2
     towerHp: 9
@@ -5859,7 +5974,7 @@ MonoBehaviour:
     robotStep: 0.8059253
     monsterHp: 22
     monsterAttack: 1.7009076
-    terrain: 0
+    terrain: 3
     armor: 2
     crateShare: 0.3465053
     warningTime: 1.3837367
@@ -5880,36 +5995,37 @@ MonoBehaviour:
     powerUpInterval: 8.781139
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 26
-    gridHeight: 27
+  - gridWidth: 27
+    gridHeight: 28
     layout:
-    - .............B............
-    - .............B............
-    - .............B............
-    - .............B............
-    - '############CCC########...'
-    - '############CCC########...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################.HH'
-    - '#######################.HH'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
+    - .............B.............
+    - .............B.............
+    - .............B.............
+    - .............B.............
+    - '############CCC#########...'
+    - '############CCC#########...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################.HH'
+    - '########################.HH'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
     shapeName: Square
     mission: 13
     coinTarget: 5
@@ -5948,7 +6064,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 31
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 9
@@ -5982,36 +6099,37 @@ MonoBehaviour:
     powerUpInterval: 8.7606945
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 16
-    gridHeight: 27
+  - gridWidth: 17
+    gridHeight: 28
     layout:
-    - ........B.......
-    - ........B.......
-    - ........B.......
-    - ........B.......
-    - .......CCC......
-    - ...##..CCC.##...
-    - ..####.#######..
-    - ..############..
-    - .##############.
-    - .##############.
-    - .##############.
-    - .##############.
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - '################'
-    - .##############.
-    - .##############.
-    - .######..######.
-    - .######..######.
-    - ..#####..#####..
-    - ..####....####..
-    - ...##......##...
-    - ................
+    - ........B........
+    - ........B........
+    - ........B........
+    - ........B........
+    - .......CCC.......
+    - ...###.CCC.###...
+    - ..#############..
+    - ..#############..
+    - .###############.
+    - .###############.
+    - .###############.
+    - .###############.
+    - .###############.
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - '#################'
+    - .#######.#######.
+    - .#######.#######.
+    - .#######.#######.
+    - .#######.#######.
+    - .#######.#######.
+    - ..#####...#####..
+    - ..#####...#####..
+    - ...###.....###...
+    - .................
     shapeName: Butterfly
     mission: 13
     coinTarget: 5
@@ -6050,7 +6168,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 31
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 10
@@ -6153,7 +6272,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 7
-    robots: 4
+    robots: 31
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 10
@@ -6166,7 +6286,7 @@ MonoBehaviour:
     robotStep: 0.79922134
     monsterHp: 22
     monsterAttack: 1.6844524
-    terrain: 0
+    terrain: 3
     armor: 2
     crateShare: 0.34943068
     warningTime: 1.3764232
@@ -6249,7 +6369,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 4
+    robots: 31
+    robotsAtOnce: 5
     brutes: 1
     towers: 2
     towerHp: 10
@@ -6352,7 +6473,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 4
+    robots: 32
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 10
@@ -6453,7 +6575,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 4
+    robots: 32
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 10
@@ -6466,7 +6589,7 @@ MonoBehaviour:
     robotStep: 0.7926416
     monsterHp: 22
     monsterAttack: 1.668302
-    terrain: 0
+    terrain: 3
     armor: 2
     crateShare: 0.35230187
     warningTime: 1.3692453
@@ -6487,37 +6610,38 @@ MonoBehaviour:
     powerUpInterval: 8.660378
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 24
-    gridHeight: 28
+  - gridWidth: 25
+    gridHeight: 29
     layout:
-    - ............B...........
-    - ............B...........
-    - ............B...........
-    - ............B...........
-    - ...........CCC..........
-    - ...........CCC..........
-    - ..........####..........
-    - .........######.........
-    - ........########........
-    - .......##########.......
-    - ......############......
-    - .....##############.....
-    - ....################....
-    - ...##################...
-    - ..####################..
-    - .######################.
-    - .######################.
-    - ..####################..
-    - ...##################...
-    - ....################....
-    - .....##############.....
-    - ......############......
-    - .......##########.......
-    - ........########........
-    - .........######.........
-    - ..........####..........
-    - ...........##...........
-    - ........................
+    - ............B............
+    - ............B............
+    - ............B............
+    - ............B............
+    - ...........CCC...........
+    - ...........CCC...........
+    - ..........#####..........
+    - .........#######.........
+    - ........#########........
+    - .......###########.......
+    - ......#############......
+    - .....###############.....
+    - ....#################....
+    - ...###################...
+    - ..#####################..
+    - .#######################.
+    - '#########################'
+    - .#######################.
+    - ..#####################..
+    - ...###################...
+    - ....#################....
+    - .....###############.....
+    - ......#############......
+    - .......###########.......
+    - ........#########........
+    - .........#######.........
+    - ..........#####..........
+    - ...........###...........
+    - ............#............
     shapeName: Diamond
     mission: 13
     coinTarget: 5
@@ -6556,7 +6680,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 4
+    robots: 32
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 10
@@ -6658,7 +6783,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 4
+    robots: 32
+    robotsAtOnce: 5
     brutes: 1
     towers: 2
     towerHp: 10
@@ -6762,7 +6888,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 4
+    robots: 32
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 11
@@ -6866,7 +6993,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 4
+    robots: 32
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 11
@@ -6879,7 +7007,7 @@ MonoBehaviour:
     robotStep: 0.7840481
     monsterHp: 27
     monsterAttack: 1.6472089
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.35605174
     warningTime: 1.3598706
@@ -6963,7 +7091,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 4
+    robots: 32
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 11
@@ -6997,38 +7126,39 @@ MonoBehaviour:
     powerUpInterval: 8.563
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 25
-    gridHeight: 29
+  - gridWidth: 26
+    gridHeight: 30
     layout:
-    - ............B............
-    - ............B............
-    - ............B............
-    - ............B............
-    - '###########CCC###########'
-    - '###########CCC###########'
-    - '#########################'
-    - '#########################'
-    - '#########################'
-    - '#########################'
-    - '#########################'
-    - '#########################'
-    - '#########################'
-    - '#########.......#########'
-    - '#########.......#########'
-    - '#########.......#########'
-    - '#########.......#########'
-    - '#########.......#########'
-    - '#########.......#########'
-    - '#########.......#########'
-    - '#########################'
-    - '#########################'
-    - '#########################'
-    - '#########################'
-    - '#########################'
-    - '#########################'
-    - '#########################'
-    - '#########################'
-    - '#########################'
+    - .............B............
+    - .............B............
+    - .............B............
+    - .............B............
+    - '############CCC###########'
+    - '############CCC###########'
+    - '##########################'
+    - '##########################'
+    - '##########################'
+    - '##########################'
+    - '##########################'
+    - '##########################'
+    - '##########################'
+    - '##########################'
+    - '##########......##########'
+    - '##########......##########'
+    - '##########......##########'
+    - '##########......##########'
+    - '##########......##########'
+    - '##########......##########'
+    - '##########################'
+    - '##########################'
+    - '##########################'
+    - '##########################'
+    - '##########################'
+    - '##########################'
+    - '##########################'
+    - '##########################'
+    - '##########################'
+    - '##########################'
     shapeName: Pit
     mission: 13
     coinTarget: 5
@@ -7067,7 +7197,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 4
+    robots: 32
+    robotsAtOnce: 5
     brutes: 1
     towers: 2
     towerHp: 11
@@ -7101,38 +7232,39 @@ MonoBehaviour:
     powerUpInterval: 8.54385
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 25
-    gridHeight: 29
+  - gridWidth: 26
+    gridHeight: 30
     layout:
-    - ............B............
-    - ............B............
-    - ............B............
-    - ............B............
-    - ..........#CCC...........
-    - ........###CCC...#.......
-    - ........######...###.....
-    - .........#####..#####....
-    - ...##...#############....
-    - ..####.#############.....
-    - ..#################......
-    - .###################.....
-    - ...##################.##.
-    - ....########.###########.
-    - ....######.....##########
-    - ...#######.....##########
-    - '#########.......#########'
-    - '##########.....#######...'
-    - '##########.....######....'
-    - .###########.########....
-    - .##.##################...
-    - .....###################.
-    - ......#################..
-    - .....#############.####..
-    - ....#############...##...
-    - ....#####..#####.........
-    - .....###....#####........
-    - .......#....#####........
-    - ............###..........
+    - .............B............
+    - .............B............
+    - .............B............
+    - .............B............
+    - ..........##CCC...........
+    - ........####CCC...#.......
+    - .........######..###......
+    - .........######..#####....
+    - ...##....#############....
+    - ...###.##############.....
+    - ..##################......
+    - .####################.....
+    - ..###################...#.
+    - ....#####################.
+    - ....#######....###########
+    - ....######......##########
+    - ....######......##########
+    - '##########......######....'
+    - '##########......######....'
+    - '###########....#######....'
+    - .#####################....
+    - .#...###################..
+    - .....####################.
+    - ......##################..
+    - .....##############.###...
+    - ....#############....##...
+    - ....#####....####.........
+    - ......###....####.........
+    - .......#.....#####........
+    - .............###..........
     shapeName: Gear
     mission: 13
     coinTarget: 5
@@ -7171,7 +7303,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 4
+    robots: 32
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 11
@@ -7184,7 +7317,7 @@ MonoBehaviour:
     robotStep: 0.7777285
     monsterHp: 27
     monsterAttack: 1.6316973
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.35880938
     warningTime: 1.3529766
@@ -7276,7 +7409,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 4
+    robots: 32
+    robotsAtOnce: 5
     brutes: 0
     towers: 2
     towerHp: 11
@@ -7381,7 +7515,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 5
+    robots: 33
+    robotsAtOnce: 6
     brutes: 0
     towers: 3
     towerHp: 11
@@ -7486,7 +7621,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 5
+    robots: 33
+    robotsAtOnce: 6
     brutes: 1
     towers: 3
     towerHp: 11
@@ -7499,7 +7635,7 @@ MonoBehaviour:
     robotStep: 0.77150965
     monsterHp: 27
     monsterAttack: 1.6164328
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.36152306
     warningTime: 1.3461922
@@ -7591,7 +7727,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 5
+    robots: 33
+    robotsAtOnce: 6
     brutes: 0
     towers: 3
     towerHp: 11
@@ -7625,36 +7762,37 @@ MonoBehaviour:
     powerUpInterval: 8.449619
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 29
-    gridHeight: 27
+  - gridWidth: 30
+    gridHeight: 28
     layout:
-    - ..............B..............
-    - ..............B..............
-    - ..............B..............
-    - ..............B..............
-    - '#############CCC##########...'
-    - '#############CCC##########...'
-    - '####.#####.#####.#####.###...'
-    - '##########################...'
-    - '######.#####.#####.#######...'
-    - '##########################...'
-    - '##.#####.#####.#####.#####...'
-    - '##########################...'
-    - '####.#####.#####.#####.###...'
-    - '##########################...'
-    - '######.#####.#####.#######...'
-    - '##########################.HH'
-    - '##.#####.#####.#####.#####.HH'
-    - '##########################...'
-    - '####.#####.#####.#####.###...'
-    - '##########################...'
-    - '######.#####.#####.#######...'
-    - '##########################...'
-    - '##.#####.#####.#####.#####...'
-    - '##########################...'
-    - '####.#####.#####.#####.###...'
-    - '##########################...'
-    - '##########################...'
+    - ...............B..............
+    - ...............B..............
+    - ...............B..............
+    - ...............B..............
+    - '##############CCC##########...'
+    - '##############CCC##########...'
+    - '###########################...'
+    - '####.#####.###########.####...'
+    - '###########################...'
+    - '######.#####.#####.#####.##...'
+    - '###########################...'
+    - '##.#####.#####.#####.######...'
+    - '###########################...'
+    - '####.#####.#####.#####.####...'
+    - '###########################...'
+    - '######.#####.#####.#####.##...'
+    - '###########################.HH'
+    - '##.#####.#####.#####.######.HH'
+    - '###########################...'
+    - '####.#####.#####.#####.####...'
+    - '###########################...'
+    - '######.#####.#####.#####.##...'
+    - '###########################...'
+    - '##.#####.#####.#####.######...'
+    - '###########################...'
+    - '####.#####.#####.#####.####...'
+    - '###########################...'
+    - '###########################...'
     shapeName: Holes
     mission: 13
     coinTarget: 5
@@ -7693,7 +7831,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 5
+    robots: 33
+    robotsAtOnce: 6
     brutes: 0
     towers: 3
     towerHp: 11
@@ -7799,7 +7938,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 5
+    robots: 33
+    robotsAtOnce: 6
     brutes: 0
     towers: 3
     towerHp: 11
@@ -7903,7 +8043,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 5
+    robots: 33
+    robotsAtOnce: 6
     brutes: 1
     towers: 3
     towerHp: 11
@@ -7916,7 +8057,7 @@ MonoBehaviour:
     robotStep: 0.76336485
     monsterHp: 28
     monsterAttack: 1.5964409
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.36507717
     warningTime: 1.3373071
@@ -8009,7 +8150,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 5
+    robots: 33
+    robotsAtOnce: 6
     brutes: 0
     towers: 3
     towerHp: 11
@@ -8115,7 +8257,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 5
+    robots: 33
+    robotsAtOnce: 6
     brutes: 0
     towers: 3
     towerHp: 11
@@ -8213,7 +8356,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 5
+    robots: 33
+    robotsAtOnce: 6
     brutes: 0
     towers: 3
     towerHp: 11
@@ -8226,7 +8370,7 @@ MonoBehaviour:
     robotStep: 0.75736004
     monsterHp: 28
     monsterAttack: 1.581702
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.36769742
     warningTime: 1.3307564
@@ -8247,40 +8391,41 @@ MonoBehaviour:
     powerUpInterval: 8.339637
     powerUpLifetime: 5
     shieldDuration: 5
-  - gridWidth: 26
-    gridHeight: 31
+  - gridWidth: 27
+    gridHeight: 32
     layout:
-    - .............B............
-    - .............B............
-    - .............B............
-    - .............B............
-    - '############CCC########...'
-    - '############CCC########...'
-    - '#######################...'
-    - '#######################...'
-    - '###X#####X#####X#######...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '###X#####X#####X#######...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################.HH'
-    - '###X#####X#####X#######.HH'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '###X#####X#####X#######...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '#######################...'
-    - '###X#####X#####X#######...'
-    - '#######################...'
-    - '#######################...'
+    - .............B.............
+    - .............B.............
+    - .............B.............
+    - .............B.............
+    - '############CCC#########...'
+    - '############CCC#########...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '###X#####X#####X#####X##...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '###X#####X#####X#####X##...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################.HH'
+    - '###X#####X#####X#####X##.HH'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '###X#####X#####X#####X##...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '########################...'
+    - '###X#####X#####X#####X##...'
+    - '########################...'
+    - '########################...'
     shapeName: Plaza
     mission: 13
     coinTarget: 5
@@ -8319,7 +8464,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 5
+    robots: 33
+    robotsAtOnce: 6
     brutes: 1
     towers: 3
     towerHp: 11
@@ -8426,7 +8572,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 8
-    robots: 5
+    robots: 33
+    robotsAtOnce: 6
     brutes: 0
     towers: 3
     towerHp: 11
@@ -8533,7 +8680,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 34
+    robotsAtOnce: 6
     brutes: 0
     towers: 3
     towerHp: 11
@@ -8546,7 +8694,7 @@ MonoBehaviour:
     robotStep: 0.7514392
     monsterHp: 28
     monsterAttack: 1.567169
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.37028107
     warningTime: 1.3242973
@@ -8640,7 +8788,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 34
+    robotsAtOnce: 6
     brutes: 0
     towers: 3
     towerHp: 11
@@ -8747,7 +8896,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 34
+    robotsAtOnce: 6
     brutes: 1
     towers: 3
     towerHp: 11
@@ -8854,7 +9004,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 34
+    robotsAtOnce: 6
     brutes: 1
     towers: 3
     towerHp: 12
@@ -8953,7 +9104,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 34
+    robotsAtOnce: 6
     brutes: 0
     towers: 3
     towerHp: 12
@@ -8966,7 +9118,7 @@ MonoBehaviour:
     robotStep: 0.74366826
     monsterHp: 28
     monsterAttack: 1.5480949
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.373672
     warningTime: 1.31582
@@ -9061,7 +9213,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 34
+    robotsAtOnce: 6
     brutes: 1
     towers: 3
     towerHp: 12
@@ -9169,7 +9322,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 34
+    robotsAtOnce: 6
     brutes: 1
     towers: 3
     towerHp: 12
@@ -9277,7 +9431,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 34
+    robotsAtOnce: 6
     brutes: 1
     towers: 3
     towerHp: 12
@@ -9290,7 +9445,7 @@ MonoBehaviour:
     robotStep: 0.73792785
     monsterHp: 29
     monsterAttack: 1.5340048
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.37617692
     warningTime: 1.3095577
@@ -9385,7 +9540,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 34
+    robotsAtOnce: 6
     brutes: 0
     towers: 3
     towerHp: 12
@@ -9485,7 +9641,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 34
+    robotsAtOnce: 6
     brutes: 1
     towers: 3
     towerHp: 12
@@ -9594,7 +9751,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 34
+    robotsAtOnce: 6
     brutes: 1
     towers: 3
     towerHp: 12
@@ -9607,7 +9765,7 @@ MonoBehaviour:
     robotStep: 0.732259
     monsterHp: 29
     monsterAttack: 1.5200902
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.37865064
     warningTime: 1.3033735
@@ -9703,7 +9861,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 35
+    robotsAtOnce: 6
     brutes: 1
     towers: 3
     towerHp: 12
@@ -9812,7 +9971,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 35
+    robotsAtOnce: 6
     brutes: 0
     towers: 3
     towerHp: 12
@@ -9922,7 +10082,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 35
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -10032,7 +10193,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 35
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -10045,7 +10207,7 @@ MonoBehaviour:
     robotStep: 0.7248062
     monsterHp: 29
     monsterAttack: 1.5017971
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.38190272
     warningTime: 1.2952431
@@ -10142,7 +10304,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 35
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -10252,7 +10415,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 35
+    robotsAtOnce: 6
     brutes: 0
     towers: 4
     towerHp: 12
@@ -10362,7 +10526,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 35
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -10375,7 +10540,7 @@ MonoBehaviour:
     robotStep: 0.7192923
     monsterHp: 30
     monsterAttack: 1.4882629
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.38430882
     warningTime: 1.289228
@@ -10472,7 +10637,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 35
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -10582,7 +10748,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 35
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -10692,7 +10859,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 35
+    robotsAtOnce: 6
     brutes: 0
     towers: 4
     towerHp: 12
@@ -10705,7 +10873,7 @@ MonoBehaviour:
     robotStep: 0.7138403
     monsterHp: 30
     monsterAttack: 1.4748807
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.38668787
     warningTime: 1.2832803
@@ -10802,7 +10970,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 35
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -10913,7 +11082,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 35
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -11013,7 +11183,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 36
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -11124,7 +11295,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 9
-    robots: 5
+    robots: 36
+    robotsAtOnce: 6
     brutes: 0
     towers: 4
     towerHp: 12
@@ -11137,7 +11309,7 @@ MonoBehaviour:
     robotStep: 0.706663
     monsterHp: 30
     monsterAttack: 1.4572638
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.38981977
     warningTime: 1.2754506
@@ -11235,7 +11407,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 5
+    robots: 36
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -11346,7 +11519,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 5
+    robots: 36
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -11457,7 +11631,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 5
+    robots: 36
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -11470,7 +11645,7 @@ MonoBehaviour:
     robotStep: 0.7013462
     monsterHp: 30
     monsterAttack: 1.4442134
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.39213982
     warningTime: 1.2696503
@@ -11568,7 +11743,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 5
+    robots: 36
+    robotsAtOnce: 6
     brutes: 0
     towers: 4
     towerHp: 12
@@ -11679,7 +11855,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 5
+    robots: 36
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -11787,7 +11964,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 36
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -11800,7 +11978,7 @@ MonoBehaviour:
     robotStep: 0.69608366
     monsterHp: 31
     monsterAttack: 1.4312963
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.3944362
     warningTime: 1.2639095
@@ -11898,7 +12076,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 36
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 12
@@ -12009,7 +12188,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 36
+    robotsAtOnce: 6
     brutes: 0
     towers: 4
     towerHp: 12
@@ -12120,7 +12300,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 36
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 13
@@ -12231,7 +12412,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 36
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 13
@@ -12244,7 +12426,7 @@ MonoBehaviour:
     robotStep: 0.6891481
     monsterHp: 31
     monsterAttack: 1.4142728
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.39746264
     warningTime: 1.2563434
@@ -12342,7 +12524,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 36
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 13
@@ -12453,7 +12636,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 37
+    robotsAtOnce: 6
     brutes: 0
     towers: 4
     towerHp: 13
@@ -12564,7 +12748,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 37
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 13
@@ -12577,7 +12762,7 @@ MonoBehaviour:
     robotStep: 0.68400496
     monsterHp: 31
     monsterAttack: 1.4016486
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.3997069
     warningTime: 1.2507327
@@ -12676,7 +12861,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 37
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 13
@@ -12788,7 +12974,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 37
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 13
@@ -12900,7 +13087,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 37
+    robotsAtOnce: 6
     brutes: 0
     towers: 4
     towerHp: 13
@@ -12913,7 +13101,7 @@ MonoBehaviour:
     robotStep: 0.6789101
     monsterHp: 32
     monsterAttack: 1.3891429
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.40193015
     warningTime: 1.2451745
@@ -13012,7 +13200,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 37
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 13
@@ -13121,7 +13310,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 37
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 13
@@ -13233,7 +13423,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 37
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 13
@@ -13345,7 +13536,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 37
+    robotsAtOnce: 6
     brutes: 0
     towers: 4
     towerHp: 13
@@ -13358,7 +13550,7 @@ MonoBehaviour:
     robotStep: 0.6721891
     monsterHp: 32
     monsterAttack: 1.372646
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.4048629
     warningTime: 1.2378427
@@ -13457,7 +13649,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 37
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 13
@@ -13569,7 +13762,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 37
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 13
@@ -13678,7 +13872,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 37
+    robotsAtOnce: 6
     brutes: 1
     towers: 4
     towerHp: 13
@@ -13691,7 +13886,7 @@ MonoBehaviour:
     robotStep: 0.6672006
     monsterHp: 32
     monsterAttack: 1.3604015
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.40703973
     warningTime: 1.2324007
@@ -13790,7 +13985,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 37
+    robotsAtOnce: 6
     brutes: 0
     towers: 4
     towerHp: 13
@@ -13891,7 +14087,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 38
+    robotsAtOnce: 7
     brutes: 1
     towers: 4
     towerHp: 13
@@ -14003,7 +14200,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 38
+    robotsAtOnce: 7
     brutes: 1
     towers: 4
     towerHp: 13
@@ -14016,7 +14214,7 @@ MonoBehaviour:
     robotStep: 0.6622554
     monsterHp: 32
     monsterAttack: 1.3482633
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.40919763
     warningTime: 1.2270058
@@ -14115,7 +14313,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 10
-    robots: 6
+    robots: 38
+    robotsAtOnce: 7
     brutes: 1
     towers: 4
     towerHp: 13
@@ -14227,7 +14426,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 38
+    robotsAtOnce: 7
     brutes: 0
     towers: 4
     towerHp: 13
@@ -14339,7 +14539,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 38
+    robotsAtOnce: 7
     brutes: 1
     towers: 4
     towerHp: 13
@@ -14448,7 +14649,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 38
+    robotsAtOnce: 7
     brutes: 1
     towers: 4
     towerHp: 13
@@ -14461,7 +14663,7 @@ MonoBehaviour:
     robotStep: 0.65572673
     monsterHp: 33
     monsterAttack: 1.3322383
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.41204652
     warningTime: 1.2198837
@@ -14561,7 +14763,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 38
+    robotsAtOnce: 7
     brutes: 1
     towers: 4
     towerHp: 13
@@ -14674,7 +14877,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 38
+    robotsAtOnce: 7
     brutes: 0
     towers: 4
     towerHp: 13
@@ -14784,7 +14988,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 38
+    robotsAtOnce: 7
     brutes: 1
     towers: 4
     towerHp: 13
@@ -14797,7 +15002,7 @@ MonoBehaviour:
     robotStep: 0.65087736
     monsterHp: 33
     monsterAttack: 1.3203353
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.4141626
     warningTime: 1.2145934
@@ -14897,7 +15102,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 38
+    robotsAtOnce: 7
     brutes: 1
     towers: 4
     towerHp: 13
@@ -15007,7 +15213,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 38
+    robotsAtOnce: 7
     brutes: 1
     towers: 4
     towerHp: 13
@@ -15120,7 +15327,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 38
+    robotsAtOnce: 7
     brutes: 0
     towers: 4
     towerHp: 13
@@ -15133,7 +15341,7 @@ MonoBehaviour:
     robotStep: 0.64606696
     monsterHp: 33
     monsterAttack: 1.308528
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.4162617
     warningTime: 1.2093457
@@ -15221,7 +15429,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 38
+    robotsAtOnce: 7
     brutes: 1
     towers: 4
     towerHp: 13
@@ -15334,7 +15543,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 1
     towers: 4
     towerHp: 13
@@ -15447,7 +15657,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 1
     towers: 4
     towerHp: 13
@@ -15560,7 +15771,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 0
     towers: 4
     towerHp: 13
@@ -15573,7 +15785,7 @@ MonoBehaviour:
     robotStep: 0.639712
     monsterHp: 33
     monsterAttack: 1.2929294
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.41903478
     warningTime: 1.202413
@@ -15673,7 +15885,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 1
     towers: 4
     towerHp: 13
@@ -15783,7 +15996,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 14
@@ -15896,7 +16110,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 14
@@ -15909,7 +16124,7 @@ MonoBehaviour:
     robotStep: 0.6349884
     monsterHp: 34
     monsterAttack: 1.2813354
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.42109594
     warningTime: 1.1972601
@@ -16009,7 +16224,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 0
     towers: 5
     towerHp: 14
@@ -16119,7 +16335,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 14
@@ -16232,7 +16449,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 14
@@ -16245,7 +16463,7 @@ MonoBehaviour:
     robotStep: 0.63030046
     monsterHp: 34
     monsterAttack: 1.2698284
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.4231416
     warningTime: 1.192146
@@ -16343,7 +16561,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 14
@@ -16457,7 +16676,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 0
     towers: 5
     towerHp: 14
@@ -16559,7 +16779,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 14
@@ -16673,7 +16894,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 14
@@ -16686,7 +16908,7 @@ MonoBehaviour:
     robotStep: 0.6241035
     monsterHp: 34
     monsterAttack: 1.2546176
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.42584574
     warningTime: 1.1853856
@@ -16787,7 +17009,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 14
@@ -16890,7 +17113,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 39
+    robotsAtOnce: 7
     brutes: 0
     towers: 5
     towerHp: 14
@@ -17004,7 +17228,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 40
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 14
@@ -17017,7 +17242,7 @@ MonoBehaviour:
     robotStep: 0.6194948
     monsterHp: 34
     monsterAttack: 1.2433054
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.4278568
     warningTime: 1.1803579
@@ -17118,7 +17343,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 6
+    robots: 40
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 14
@@ -17232,7 +17458,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 7
+    robots: 40
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 14
@@ -17346,7 +17573,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 11
-    robots: 7
+    robots: 40
+    robotsAtOnce: 7
     brutes: 0
     towers: 5
     towerHp: 14
@@ -17359,7 +17587,7 @@ MonoBehaviour:
     robotStep: 0.6149186
     monsterHp: 35
     monsterAttack: 1.232073
-    terrain: 0
+    terrain: 3
     armor: 3
     crateShare: 0.42985368
     warningTime: 1.1753657
@@ -17457,7 +17685,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 40
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 14
@@ -17571,7 +17800,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 40
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 14
@@ -17682,7 +17912,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 40
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 15
@@ -17796,7 +18027,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 40
+    robotsAtOnce: 7
     brutes: 0
     towers: 5
     towerHp: 15
@@ -17809,7 +18041,7 @@ MonoBehaviour:
     robotStep: 0.6088662
     monsterHp: 39
     monsterAttack: 1.2172171
-    terrain: 0
+    terrain: 3
     armor: 4
     crateShare: 0.43249473
     warningTime: 1.168763
@@ -17910,7 +18142,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 40
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 15
@@ -18024,7 +18257,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 40
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 15
@@ -18138,7 +18372,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 40
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 15
@@ -18151,7 +18386,7 @@ MonoBehaviour:
     robotStep: 0.60436285
     monsterHp: 39
     monsterAttack: 1.2061633
-    terrain: 0
+    terrain: 3
     armor: 4
     crateShare: 0.43445987
     warningTime: 1.1638503
@@ -18249,7 +18484,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 40
+    robotsAtOnce: 7
     brutes: 0
     towers: 5
     towerHp: 15
@@ -18364,7 +18600,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 40
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 15
@@ -18479,7 +18716,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 40
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 15
@@ -18492,7 +18730,7 @@ MonoBehaviour:
     robotStep: 0.59988934
     monsterHp: 39
     monsterAttack: 1.1951829
-    terrain: 0
+    terrain: 3
     armor: 4
     crateShare: 0.43641192
     warningTime: 1.1589701
@@ -18594,7 +18832,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 15
@@ -18705,7 +18944,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 0
     towers: 5
     towerHp: 15
@@ -18816,7 +19056,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 15
@@ -18931,7 +19172,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 15
@@ -18944,7 +19186,7 @@ MonoBehaviour:
     robotStep: 0.59397
     monsterHp: 40
     monsterAttack: 1.1806536
-    terrain: 0
+    terrain: 3
     armor: 4
     crateShare: 0.4389949
     warningTime: 1.1525127
@@ -19043,7 +19285,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 15
@@ -19158,7 +19401,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 0
     towers: 5
     towerHp: 15
@@ -19273,7 +19517,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 15
@@ -19286,7 +19531,7 @@ MonoBehaviour:
     robotStep: 0.5895636
     monsterHp: 40
     monsterAttack: 1.169838
-    terrain: 0
+    terrain: 3
     armor: 4
     crateShare: 0.4409177
     warningTime: 1.1477057
@@ -19388,7 +19633,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 15
@@ -19503,7 +19749,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 15
@@ -19614,7 +19861,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 0
     towers: 5
     towerHp: 15
@@ -19627,7 +19875,7 @@ MonoBehaviour:
     robotStep: 0.5851849
     monsterHp: 40
     monsterAttack: 1.1590902
-    terrain: 0
+    terrain: 3
     armor: 4
     crateShare: 0.44282842
     warningTime: 1.142929
@@ -19729,7 +19977,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 15
@@ -19841,7 +20090,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -19956,7 +20206,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -20067,7 +20318,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 0
     towers: 5
     towerHp: 16
@@ -20080,7 +20332,7 @@ MonoBehaviour:
     robotStep: 0.57938856
     monsterHp: 40
     monsterAttack: 1.1448629
-    terrain: 0
+    terrain: 3
     armor: 4
     crateShare: 0.4453577
     warningTime: 1.1366057
@@ -20179,7 +20431,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 41
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -20295,7 +20548,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -20405,7 +20659,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -20418,7 +20673,7 @@ MonoBehaviour:
     robotStep: 0.57507205
     monsterHp: 40
     monsterAttack: 1.1342678
-    terrain: 0
+    terrain: 3
     armor: 4
     crateShare: 0.44724128
     warningTime: 1.1318967
@@ -20521,7 +20776,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 0
     towers: 5
     towerHp: 16
@@ -20637,7 +20893,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -20753,7 +21010,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -20766,7 +21024,7 @@ MonoBehaviour:
     robotStep: 0.5707812
     monsterHp: 41
     monsterAttack: 1.1237357
-    terrain: 0
+    terrain: 3
     armor: 4
     crateShare: 0.44911364
     warningTime: 1.1272159
@@ -20869,7 +21127,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 12
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -20985,7 +21244,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 0
     towers: 5
     towerHp: 16
@@ -21101,7 +21361,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -21207,7 +21468,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -21220,7 +21482,7 @@ MonoBehaviour:
     robotStep: 0.5650991
     monsterHp: 41
     monsterAttack: 1.1097887
-    terrain: 0
+    terrain: 3
     armor: 4
     crateShare: 0.4515931
     warningTime: 1.1210172
@@ -21323,7 +21585,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -21435,7 +21698,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 0
     towers: 5
     towerHp: 16
@@ -21548,7 +21812,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -21561,7 +21826,7 @@ MonoBehaviour:
     robotStep: 0.5608661
     monsterHp: 41
     monsterAttack: 1.0993986
-    terrain: 0
+    terrain: 3
     armor: 4
     crateShare: 0.45344022
     warningTime: 1.1163994
@@ -21664,7 +21929,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -21774,7 +22040,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -21890,7 +22157,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 0
     towers: 5
     towerHp: 16
@@ -21903,7 +22171,7 @@ MonoBehaviour:
     robotStep: 0.5566571
     monsterHp: 41
     monsterAttack: 1.0890673
-    terrain: 0
+    terrain: 3
     armor: 4
     crateShare: 0.4552769
     warningTime: 1.1118077
@@ -22007,7 +22275,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 42
+    robotsAtOnce: 7
     brutes: 1
     towers: 5
     towerHp: 16
@@ -22124,7 +22393,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 43
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 16
@@ -22241,7 +22511,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 43
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 16
@@ -22355,7 +22626,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 43
+    robotsAtOnce: 8
     brutes: 0
     towers: 5
     towerHp: 16
@@ -22368,7 +22640,7 @@ MonoBehaviour:
     robotStep: 0.55108136
     monsterHp: 42
     monsterAttack: 1.0753815
-    terrain: 0
+    terrain: 3
     armor: 4
     crateShare: 0.45770994
     warningTime: 1.105725
@@ -22472,7 +22744,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 43
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 16
@@ -22589,7 +22862,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 43
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 16
@@ -22706,7 +22980,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 43
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 16
@@ -22719,7 +22994,7 @@ MonoBehaviour:
     robotStep: 0.5469264
     monsterHp: 42
     monsterAttack: 1.0651828
-    terrain: 0
+    terrain: 3
     armor: 4
     crateShare: 0.45952302
     warningTime: 1.1011924
@@ -22819,7 +23094,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 43
+    robotsAtOnce: 8
     brutes: 0
     towers: 5
     towerHp: 17
@@ -22933,7 +23209,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 43
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 17
@@ -23050,7 +23327,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 43
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 17
@@ -23063,7 +23341,7 @@ MonoBehaviour:
     robotStep: 0.5427937
     monsterHp: 46
     monsterAttack: 1.055039
-    terrain: 0
+    terrain: 3
     armor: 5
     crateShare: 0.4613264
     warningTime: 1.096684
@@ -23154,7 +23432,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 43
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 17
@@ -23271,7 +23550,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 7
+    robots: 43
+    robotsAtOnce: 8
     brutes: 0
     towers: 5
     towerHp: 17
@@ -23388,7 +23668,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 8
+    robots: 43
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 17
@@ -23505,7 +23786,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 8
+    robots: 43
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 17
@@ -23518,7 +23800,7 @@ MonoBehaviour:
     robotStep: 0.5373176
     monsterHp: 46
     monsterAttack: 1.0415976
-    terrain: 0
+    terrain: 3
     armor: 5
     crateShare: 0.46371597
     warningTime: 1.09071
@@ -23622,7 +23904,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 8
+    robots: 43
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 17
@@ -23739,7 +24022,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 8
+    robots: 43
+    robotsAtOnce: 8
     brutes: 0
     towers: 5
     towerHp: 17
@@ -23856,7 +24140,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 8
+    robots: 43
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 17
@@ -23869,7 +24154,7 @@ MonoBehaviour:
     robotStep: 0.5332355
     monsterHp: 46
     monsterAttack: 1.0315781
-    terrain: 0
+    terrain: 3
     armor: 5
     crateShare: 0.46549723
     warningTime: 1.0862569
@@ -23974,7 +24259,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 17
@@ -24092,7 +24378,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 17
@@ -24206,7 +24493,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 0
     towers: 5
     towerHp: 17
@@ -24219,7 +24507,7 @@ MonoBehaviour:
     robotStep: 0.52917445
     monsterHp: 47
     monsterAttack: 1.02161
-    terrain: 0
+    terrain: 3
     armor: 5
     crateShare: 0.46726933
     warningTime: 1.0818266
@@ -24321,7 +24609,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 17
@@ -24439,7 +24728,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -24544,7 +24834,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -24662,7 +24953,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 13
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 0
     towers: 5
     towerHp: 18
@@ -24675,7 +24967,7 @@ MonoBehaviour:
     robotStep: 0.5237917
     monsterHp: 47
     monsterAttack: 1.0083977
-    terrain: 0
+    terrain: 3
     armor: 5
     crateShare: 0.46961817
     warningTime: 1.0759546
@@ -24780,7 +25072,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -24898,7 +25191,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -25016,7 +25310,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -25029,7 +25324,7 @@ MonoBehaviour:
     robotStep: 0.5197782
     monsterHp: 47
     monsterAttack: 0.9985464
-    terrain: 0
+    terrain: 3
     armor: 5
     crateShare: 0.4713695
     warningTime: 1.0715761
@@ -25134,7 +25429,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 0
     towers: 5
     towerHp: 18
@@ -25252,7 +25548,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -25366,7 +25663,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -25379,7 +25677,7 @@ MonoBehaviour:
     robotStep: 0.5157844
     monsterHp: 47
     monsterAttack: 0.9887434
-    terrain: 0
+    terrain: 3
     armor: 5
     crateShare: 0.47311226
     warningTime: 1.0672193
@@ -25484,7 +25782,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -25599,7 +25898,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 0
     towers: 5
     towerHp: 18
@@ -25717,7 +26017,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 44
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -25836,7 +26137,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 45
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -25849,7 +26151,7 @@ MonoBehaviour:
     robotStep: 0.51048946
     monsterHp: 48
     monsterAttack: 0.97574687
-    terrain: 0
+    terrain: 3
     armor: 5
     crateShare: 0.47542277
     warningTime: 1.061443
@@ -25955,7 +26257,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 45
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -26074,7 +26377,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 45
+    robotsAtOnce: 8
     brutes: 0
     towers: 5
     towerHp: 18
@@ -26193,7 +26497,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 45
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -26206,7 +26511,7 @@ MonoBehaviour:
     robotStep: 0.5065404
     monsterHp: 48
     monsterAttack: 0.9660537
-    terrain: 0
+    terrain: 3
     armor: 5
     crateShare: 0.477146
     warningTime: 1.057135
@@ -26312,7 +26617,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 45
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -26431,7 +26737,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 45
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -26547,7 +26854,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 45
+    robotsAtOnce: 8
     brutes: 0
     towers: 5
     towerHp: 18
@@ -26560,7 +26868,7 @@ MonoBehaviour:
     robotStep: 0.50261
     monsterHp: 48
     monsterAttack: 0.9564065
-    terrain: 0
+    terrain: 3
     armor: 5
     crateShare: 0.47886106
     warningTime: 1.0528473
@@ -26666,7 +26974,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 45
+    robotsAtOnce: 8
     brutes: 1
     towers: 5
     towerHp: 18
@@ -26781,7 +27090,8 @@ MonoBehaviour:
     penguins: 0
     springbots: 0
     bugs: 14
-    robots: 8
+    robots: 45
+    robotsAtOnce: 8
     brutes: 1
     towers: 6
     towerHp: 18

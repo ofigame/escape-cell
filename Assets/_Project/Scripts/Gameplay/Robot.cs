@@ -637,8 +637,8 @@ namespace SquashBot.Gameplay
         private void Update()
         {
             animTime += Dt;
-            // The body swings round softly (a quarter turn takes about a third of a second), never snapping.
-            visual.localRotation = Quaternion.Slerp(visual.localRotation, targetFacing, Dt * 8f);
+            // The body swings round quickly (a quarter turn in about a tenth of a second) but never snaps.
+            visual.localRotation = Quaternion.Slerp(visual.localRotation, targetFacing, Dt * 18f);
 
             switch (anim)
             {

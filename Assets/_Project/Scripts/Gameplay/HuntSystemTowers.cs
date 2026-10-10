@@ -56,13 +56,67 @@ namespace SquashBot.Gameplay
         /// in worlds 1-5, developed 6-10, highly developed 11-17, ultra 18+), each world of a stage unlocks one more of
         /// its five builds, the floor's first tower is the newest one and the rest cycle back through the older ones.
         /// </summary>
-        private int TowerDesign(int n)
+        private int TowerDesign(int n) => TowerModel.DesignFor(world, n);
+
+        /// <summary>
+        /// Where the floor's towers stand, in order rather than at random: first the four corners of the floor (a tile
+        /// in from the edge, so their blind spot can be reached), then the middle of each side, then the quarter
+        /// points, each at least four tiles from the others and away from vanG's cage. Falls back on any far tile.
+        /// </summary>
+        private List<GridPos> TowerSpots(List<GridPos> far, int count)
         {
-            int stage = world < 6 ? 0 : world < 11 ? 1 : world < 18 ? 2 : 3;
-            int stageStart = stage switch { 0 => 1, 1 => 6, 2 => 11, _ => 18 };
-            int unlocked = Mathf.Clamp(world - stageStart + 1, 1, 5);
-            int pick = ((unlocked - 1 - n) % unlocked + unlocked) % unlocked;
-            return stage * 5 + pick;
+            var chosen = new List<GridPos>();
+            if (count <= 0 || far.Count == 0) return chosen;
+            int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
+            foreach (var p in grid.AllPositions())
+            {
+                if (!grid.IsFloor(p) || grid.IsCage(p) || grid.IsBridge(p) || grid.IsSafe(p)) continue;
+                minX = Mathf.Min(minX, p.x); maxX = Mathf.Max(maxX, p.x);
+                minY = Mathf.Min(minY, p.y); maxY = Mathf.Max(maxY, p.y);
+            }
+            (float x, float y)[] pattern =
+            {
+                (0.08f, 0.08f), (0.92f, 0.08f), (0.08f, 0.92f), (0.92f, 0.92f),
+                (0.5f, 0.08f), (0.08f, 0.5f), (0.92f, 0.5f), (0.5f, 0.92f),
+                (0.3f, 0.3f), (0.7f, 0.3f), (0.3f, 0.7f), (0.7f, 0.7f),
+            };
+            bool Clear(GridPos p)
+            {
+                foreach (var c in chosen) if (Chebyshev(c, p) < 4) return false;
+                foreach (var t in towers) if (Chebyshev(t.pos, p) < 4) return false;
+                foreach (var c in grid.CageTiles) if (Chebyshev(c, p) < 3) return false;
+                return true;
+            }
+            foreach (var (fx, fy) in pattern)
+            {
+                if (chosen.Count >= count) break;
+                var target = new Vector2(Mathf.Lerp(minX, maxX, fx), Mathf.Lerp(minY, maxY, fy));
+                GridPos? best = null;
+                float bestD = 4.5f;
+                foreach (var p in far)
+                {
+                    float d = Vector2.Distance(target, new Vector2(p.x, p.y));
+                    if (d < bestD && Clear(p)) { bestD = d; best = p; }
+                }
+                if (best.HasValue) chosen.Add(best.Value);
+            }
+            // Not enough room in the pattern: the farthest-apart of what is left.
+            while (chosen.Count < count)
+            {
+                GridPos? best = null;
+                int bestGap = -1;
+                foreach (var p in far)
+                {
+                    if (chosen.Contains(p)) continue;
+                    int gap = int.MaxValue;
+                    foreach (var c in chosen) gap = Mathf.Min(gap, Chebyshev(c, p));
+                    foreach (var t in towers) gap = Mathf.Min(gap, Chebyshev(t.pos, p));
+                    if (gap > bestGap) { bestGap = gap; best = p; }
+                }
+                if (!best.HasValue || bestGap < 2) break;
+                chosen.Add(best.Value);
+            }
+            return chosen;
         }
 
         private void AddTower(GridPos p, bool reactor = false)

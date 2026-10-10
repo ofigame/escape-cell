@@ -109,6 +109,7 @@ namespace SquashBot.Gameplay
                 foreach (var b in bugs) if (!b.dead) n++;
                 foreach (var g in guards) if (!g.dead) n++;
                 n += TowersLeft;
+                n += guardsToCome;
                 return n;
             }
         }
@@ -144,14 +145,19 @@ namespace SquashBot.Gameplay
             leapT = -1f;
             var free = FreeTiles(Mathf.Clamp(Mathf.Min(grid.Width, grid.Height) / 2, 1, 3)); // not right next to the robot (small floors allow less room)
             for (int i = 0; i < level.bugs && free.Count > 0; i++) AddBug(Take(free));
-            for (int i = 0; i < level.robots && free.Count > 0; i++) AddGuard(Take(free));
+            // Only a few robots at a time; the rest of the floor's robots drop in as they fall (see UpdateReinforcements).
+            guardCap = level.robotsAtOnce > 0 ? level.robotsAtOnce : level.robots;
+            int first = Mathf.Min(level.robots, guardCap);
+            for (int i = 0; i < first && free.Count > 0; i++) AddGuard(Take(free));
+            guardsToCome = level.robots - Mathf.Min(first, guards.Count);
+            nextGuardAt = Time.time + 2f;
             for (int i = 0; i < level.brutes && free.Count > 0; i++) AddGuard(Take(free), brute: true);
             // Guard towers, set well away from where foi starts.
             var far = new List<GridPos>();
             foreach (var p in free) if (Chebyshev(p, robot.Position) >= 4) far.Add(p);
             if (level.reactor && far.Count > 0) { var rp = NearestCentre(far); far.Remove(rp); free.Remove(rp); AddTower(rp, reactor: true); }
-            for (int i = 0; i < level.towers && far.Count > 0; i++) { var tp = Take(far); free.Remove(tp); AddTower(tp); }
-            Total = bugs.Count + guards.Count + towers.Count;
+            foreach (var tp in TowerSpots(far, level.towers)) { far.Remove(tp); free.Remove(tp); AddTower(tp); }
+            Total = bugs.Count + guards.Count + towers.Count + guardsToCome;
             MonsterAwake = false;
             if (MonsterSpot.HasValue) RaiseMonster(asleep: Total > 0);
             else if (Total == 0) RaiseMonster();
@@ -160,6 +166,7 @@ namespace SquashBot.Gameplay
         public void Stop()
         {
             running = false;
+            guardsToCome = 0;
             foreach (var b in bugs) if (b.model != null) Destroy(b.model.gameObject);
             foreach (var g in guards)
             {
@@ -243,6 +250,37 @@ namespace SquashBot.Gameplay
             g.root.position = g.to;
             grid.SetOccupied(p, true);
             guards.Add(g);
+        }
+
+        /// <summary>Robots of this floor still to drop in, how many may be on the floor at once, and when the next comes.</summary>
+        private int guardsToCome, guardCap;
+        private float nextGuardAt;
+
+        /// <summary>
+        /// A robot fell and there are more to come: a new one drops in from the sky onto a free tile away from foi
+        /// (a ring of light marks the spot first), until the floor's count is reached.
+        /// </summary>
+        private void UpdateReinforcements()
+        {
+            if (guardsToCome <= 0 || Time.time < nextGuardAt) return;
+            int alive = 0;
+            foreach (var g in guards) if (!g.dead && !g.brute) alive++;
+            if (alive >= guardCap) return;
+            var spots = FreeTiles(4);
+            spots.RemoveAll(p => grid.IsOccupied(p) || (Avoid != null && Avoid(p)));
+            if (spots.Count == 0) { nextGuardAt = Time.time + 0.5f; return; }
+            var at = Take(spots);
+            AddGuard(at);
+            var ng = guards[guards.Count - 1];
+            ng.from = At(at) + Vector3.up * 7f; // it falls onto its tile
+            ng.root.position = ng.from;
+            ng.moveT = 0f;
+            ng.cooldown = 1f;
+            guardsToCome--;
+            Shockwave.Create(At(at), 1.2f, new Color(1f, 0.55f, 0.35f));
+            fx.Burst(At(at) + Vector3.up * 0.2f, new Color(1f, 0.6f, 0.35f), new Color(2f, 0.9f, 0.4f), 16, 3f);
+            AudioManager.PlaySfx(Sfx.Warning, 0.35f, 1.4f);
+            nextGuardAt = Time.time + Mathf.Lerp(1.4f, 0.8f, level.score / 100f);
         }
 
         // ---------- Interaction ----------
@@ -537,6 +575,7 @@ namespace SquashBot.Gameplay
             foreach (var b in bugs) if (!b.dead) UpdateBug(b, dt);
             foreach (var g in guards) if (!g.dead) UpdateGuard(g, dt);
             UpdateTowers(dt);
+            UpdateReinforcements();
             UpdateDrones(dt);
             if (MonsterUp && MonsterAwake) UpdateMonster(dt);
         }
@@ -902,6 +941,61 @@ namespace SquashBot.Gameplay
             if (!found) foreach (var b in bugs) if (!b.dead) Consider(b.pos, 0f);
             at = pick;
             return found;
+        }
+
+        /// <summary>
+        /// How much of a fight is on around <paramref name="p"/>, 0-1, for the music: robots close by (enforcers more),
+        /// towers that can see foi (more while one aims at it), and vanG awake and near.
+        /// </summary>
+        public float Danger(GridPos p)
+        {
+            if (!running) return 0f;
+            float d = 0f;
+            foreach (var g in guards)
+            {
+                if (g.dead) continue;
+                int r = Chebyshev(g.pos, p);
+                if (r <= 4) d += g.brute ? 0.4f : 0.25f;
+                if (r <= AttackReach) d += 0.15f;
+                if (g.windup >= 0f && g.area.Contains(p)) d += 0.15f;
+            }
+            foreach (var t in towers)
+            {
+                if (t.dead) continue;
+                int r = Chebyshev(t.pos, p);
+                if (r <= (t.reactor ? ReactorRange : TowerRange)) d += t.reactor ? 0.35f : 0.15f;
+                if (t.windup >= 0f && t.area.Contains(p)) d += 0.2f;
+            }
+            if (MonsterUp && MonsterAwake) d += Chebyshev(monsterPos, p) <= 4 ? 0.8f : 0.55f;
+            return Mathf.Clamp01(d);
+        }
+
+        /// <summary>
+        /// Where a bomb does the most within <paramref name="range"/> tiles of foi: the tile whose blast square (of
+        /// <paramref name="radius"/>) holds the most (robots, towers and an awake vanG count double, bugs once). Never
+        /// so close that foi stands in the blast.
+        /// </summary>
+        public bool BombSpot(GridPos from, int range, int radius, out GridPos at)
+        {
+            at = from;
+            if (!running) return false;
+            var weights = new Dictionary<GridPos, int>();
+            void Mark(GridPos p, int w) { weights.TryGetValue(p, out var v); weights[p] = v + w; }
+            if (MonsterUp && MonsterAwake) Mark(monsterPos, 3);
+            foreach (var g in guards) if (!g.dead) Mark(g.pos, g.brute ? 3 : 2);
+            foreach (var t in towers) if (!t.dead) Mark(t.pos, 2);
+            foreach (var dr in drones) if (!dr.dead) Mark(dr.pos, 1);
+            foreach (var b in bugs) if (!b.dead) Mark(b.pos, 1);
+            int best = 0;
+            foreach (var kv in weights)
+            {
+                var centre = kv.Key;
+                if (Chebyshev(centre, from) > range || Chebyshev(centre, from) <= radius) continue;
+                int score = 0;
+                foreach (var o in weights) if (Chebyshev(o.Key, centre) <= radius) score += o.Value;
+                if (score > best) { best = score; at = centre; }
+            }
+            return best > 0;
         }
 
         /// <summary>A guard, an enforcer or the monster stands on this tile (not a bug).</summary>

@@ -14,7 +14,7 @@ namespace SquashBot.Audio
     /// question-and-answer phrase that lands on the chords, and a small reverb gives everything some room. It is
     /// plain math on float arrays, so it runs on a worker thread; tails wrap around, so the loop is seamless.
     /// </summary>
-    public static class MusicSynth
+    public static partial class MusicSynth
     {
         public const int Rate = 22050;
         public const int Layers = 3;

@@ -79,6 +79,19 @@ namespace SquashBot.Visual
                     }
                     Shapes.Primitive(PrimitiveType.Sphere, "Top", root, new Vector3(0f, 0.76f, 0f), Vector3.one * 0.06f, gold);
                     break;
+                case WeaponKind.Whirl:
+                    // A twin blade: a short grip with a curved blade at each end (it is spun, not swung).
+                    Shapes.Rounded("Grip", root, new Vector3(0f, 0.3f, 0f), new Vector3(0.05f, 0.5f, 0.05f), 0.02f, grip);
+                    foreach (float s in new[] { -1f, 1f })
+                    {
+                        var end = new Vector3(0f, 0.3f + s * 0.27f, 0f);
+                        Shapes.Rounded("Collar", root, end, new Vector3(0.08f, 0.04f, 0.08f), 0.02f, gold);
+                        Shapes.Rounded("Blade", root, end + new Vector3(0.08f * s, s * 0.12f, 0f), new Vector3(0.22f, 0.07f, 0.02f), 0.03f, metal)
+                            .transform.localRotation = Quaternion.Euler(0f, 0f, 35f);
+                        Shapes.Rounded("Edge", root, end + new Vector3(-0.06f * s, s * 0.16f, 0f), new Vector3(0.14f, 0.05f, 0.02f), 0.02f, metal)
+                            .transform.localRotation = Quaternion.Euler(0f, 0f, -40f);
+                    }
+                    break;
                 default: // spear
                     Shapes.Rounded("Shaft", root, new Vector3(0f, 0.36f, 0f), new Vector3(0.04f, 0.95f, 0.04f), 0.015f, wood);
                     Shapes.Rounded("Collar", root, new Vector3(0f, 0.84f, 0f), new Vector3(0.07f, 0.05f, 0.07f), 0.02f, gold);
@@ -112,10 +125,27 @@ namespace SquashBot.Visual
 
         public void Swing() => swing = 0f;
 
+        private float spin = 1f;
+        private Vector3 restPosition;
+        private bool rested;
+
+        /// <summary>A whirl: the weapon sweeps a full circle round the robot.</summary>
+        public void Spin() => spin = 0f;
+
         private void Pose(float a) => transform.localRotation = Quaternion.Euler(25f + a, 0f, -12f);
 
         private void Update()
         {
+            if (!rested) { restPosition = transform.localPosition; rested = true; }
+            if (spin < 1f)
+            {
+                spin = Mathf.Min(1f, spin + Time.deltaTime / 0.32f);
+                float ang = spin * 360f;
+                transform.localPosition = Quaternion.Euler(0f, ang, 0f) * restPosition;
+                transform.localRotation = Quaternion.Euler(0f, ang, 0f) * Quaternion.Euler(80f, 0f, -12f);
+                if (spin >= 1f) transform.localPosition = restPosition;
+                return;
+            }
             if (swing >= 1f) { Pose(Mathf.Sin(Time.time * 2f) * 3f); return; }
             swing = Mathf.Min(1f, swing + Time.deltaTime / 0.24f);
             // Wind back, chop down hard, settle.

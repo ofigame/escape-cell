@@ -76,6 +76,8 @@ namespace SquashBot.Gameplay
         private bool doubleCoins; // the Double Coins boost is on for this run
         private float elapsed;
         private float slowMoLeft;
+        /// <summary>A split second of near-freeze when a robot or tower goes down: the blow feels heavy.</summary>
+        private float hitStopLeft;
         private WorldTheme themeNow;
         private int closeCalls; // dodges in a row toward armor
         private float lastDodgeTime;
@@ -278,6 +280,7 @@ namespace SquashBot.Gameplay
             ui.MenuPressed += ShowMenu;
             ui.PausePressed += Pause;
             ui.BagPressed += OpenBag;
+            ui.BombPressed += ThrowBomb;
             ui.AdHealPressed += OnAdHealPressed;
             ui.HeroPicker.Picked += OnHeroPicked;
             ui.WeaponBag.Picked += TakeWeapon;
@@ -400,6 +403,7 @@ namespace SquashBot.Gameplay
         {
             AudioManager.PlayMusic(MusicTheme.Menu);
             AudioManager.SetTension(0f);
+            AudioManager.SetDanger(0f);
             ResetRun();
             State = GameState.Menu;
             ShowBackdrop(NextLevel);
@@ -438,6 +442,7 @@ namespace SquashBot.Gameplay
             }
             AudioManager.PlayMusic(MusicTheme.Menu);
             AudioManager.SetTension(0f);
+            AudioManager.SetDanger(0f);
             if (State != GameState.Menu) ShowBackdrop(NextLevel);
             ResetRun();
             State = GameState.Map;
@@ -1159,12 +1164,15 @@ namespace SquashBot.Gameplay
 
             // Close-call slow motion and the slow-motion tool both bend time; the slower one wins.
             if (slowMoLeft > 0f) slowMoLeft -= Time.unscaledDeltaTime;
+            if (hitStopLeft > 0f) hitStopLeft -= Time.unscaledDeltaTime;
             Time.timeScale = Mathf.Min(slowMoLeft > 0f ? SlowMoScale : 1f, toolSlowLeft > 0f && State == GameState.Playing ? Tools.SlowScale : 1f);
+            if (hitStopLeft > 0f && State == GameState.Playing) Time.timeScale = Mathf.Min(Time.timeScale, 0.08f); // the hit-stop of a knock-out
 
             if (State != GameState.Playing) return;
 
             if (roadPhase == RoadPhase.Walk)
             {
+                AudioManager.SetDanger(0f);
                 UpdateRoadWalk();
                 return;
             }
@@ -1173,6 +1181,7 @@ namespace SquashBot.Gameplay
             {
                 // The tunnel runs itself (input, robot, camera); just keep the HUD current.
                 AudioManager.SetTension(0.55f + 0.4f * runner.Progress);
+                AudioManager.SetDanger(0f);
                 weather.SetVisible(false);
                 elapsed += Time.deltaTime;
                 if (roadPhase == RoadPhase.None) coinsThisRun = runner.Coins;
@@ -1184,12 +1193,15 @@ namespace SquashBot.Gameplay
             {
                 RefreshHud();
                 AudioManager.SetTension(0.05f);
+                AudioManager.SetDanger(0f);
                 return;
             }
 
             UpdateBip(Time.deltaTime);
             UpdateAlly(Time.deltaTime);
             AudioManager.SetTension(Tension());
+            // The hard-rock fight layer: as loud as the fight around foi (and louder when its health runs low).
+            AudioManager.SetDanger(level.mission == MissionType.Hunt && roadPhase == RoadPhase.None ? Mathf.Clamp01(hunt.Danger(robot.Position) + (HealthEnabled && health < 0.4f ? 0.2f : 0f)) : 0f);
             // The sky builds from calm to storm as the mission nears its end.
             if (level.mission == MissionType.Hunt) weather.SetVisible(false); // nothing but crates falls in the core loop
             else weather.SetIntensity(Mathf.Lerp(0.3f, 1f, Mathf.Clamp01(MissionProgress())));
@@ -2413,6 +2425,7 @@ namespace SquashBot.Gameplay
             roadPhase = RoadPhase.Walk;
             State = GameState.Playing;
             input.HoldEnabled = false;
+            HideBombs();
             ShowRoadGuide();
             cameraRig.SetStyle(CameraStyle.Gameplay);
             ui.SetWarning(false);

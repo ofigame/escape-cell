@@ -22,11 +22,11 @@ namespace SquashBot.UI
         private readonly System.Collections.Generic.Queue<(string text, string who, Color? color)> queued = new System.Collections.Generic.Queue<(string, string, Color?)>();
 
         /// <summary>How high above the bottom edge the bubble sits.</summary>
-        public float BaseY = 330f;
+        public float BaseY = 760f; // above the bag and ad-heal buttons on the left, never over them
 
         public static BipTip Create(Transform parent)
         {
-            var rt = UiFactory.Box("BipTip", parent, new Vector2(0f, 0f), new Vector2(24f, 330f), new Vector2(640f, 150f));
+            var rt = UiFactory.Box("BipTip", parent, new Vector2(0f, 0f), new Vector2(24f, 760f), new Vector2(640f, 150f));
             var tip = rt.gameObject.AddComponent<BipTip>();
             tip.root = rt;
             tip.group = rt.gameObject.AddComponent<CanvasGroup>();

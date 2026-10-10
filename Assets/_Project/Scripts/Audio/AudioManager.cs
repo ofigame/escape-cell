@@ -106,6 +106,12 @@ namespace SquashBot.Audio
             if (Instance != null) Instance.music.SetTension(tension);
         }
 
+        /// <summary>How much of a fight is on around foi, 0-1: the hard-rock layer rises and falls with it.</summary>
+        public static void SetDanger(float danger)
+        {
+            if (Instance != null) Instance.music.SetDanger(danger);
+        }
+
         public static void PlaySfx(Sfx sfx, float volume = 1f, float pitch = 1f, float pitchJitter = 0f)
         {
             if (Instance != null) Instance.Play(sfx, volume, pitch, pitchJitter);

@@ -24,6 +24,20 @@ namespace SquashBot.Visual
         public Transform Muzzle { get; private set; }
         public Color BoltColour { get; private set; } = new Color(1f, 0.55f, 0.3f);
 
+        /// <summary>
+        /// Which of the twenty builds the n-th tower of a floor in <paramref name="world"/> gets: the stage follows the world
+        /// (underdeveloped in worlds 1-5, developed 6-10, highly developed 11-17, ultra 18+), each world of a stage unlocks
+        /// one more of its five builds, the first tower is the newest one and the rest cycle back through the older ones.
+        /// </summary>
+        public static int DesignFor(int world, int n)
+        {
+            int stage = world < 6 ? 0 : world < 11 ? 1 : world < 18 ? 2 : 3;
+            int stageStart = stage switch { 0 => 1, 1 => 6, 2 => 11, _ => 18 };
+            int unlocked = Mathf.Clamp(world - stageStart + 1, 1, 5);
+            int pick = ((unlocked - 1 - n) % unlocked + unlocked) % unlocked;
+            return stage * 5 + pick;
+        }
+
         /// <param name="design">0..19: five builds for each stage, from underdeveloped to ultra developed.</param>
         public static TowerModel Build(Transform parent, int design, Color accent)
         {
