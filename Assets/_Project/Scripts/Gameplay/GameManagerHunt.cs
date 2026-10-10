@@ -245,8 +245,26 @@ namespace SquashBot.Gameplay
             // the finger points at on the floor.
             bool crowd = hunt.PickOnScreen(cameraRig.Cam, screen, Screen.height * 0.07f, out var at);
             bool onFloor = TryScreenToGrid(screen, out var cell);
-            if (!crowd && !onFloor) return false;
+            bool tappedFoi = TapOnFoi(screen);
+            if (!crowd && !onFloor && !tappedFoi) return false;
+            if (!onFloor) cell = robot.Position; // only foi's body was touched
             if (!crowd) crowd = hunt.TargetNear(cell, out at);
+            // A tap on foi itself (a robot right behind it is hidden by its body): the blow goes to the best target in
+            // reach, the one behind foi (away from the camera) first.
+            bool onSelf = tappedFoi || (onFloor && cell == robot.Position);
+            if (onSelf && !(crowd && hunt.IsFighter(at) && HuntSystem.Chebyshev(at, robot.Position) <= StrikeReach))
+            {
+                var away = cameraRig.Cam.transform.forward;
+                away.y = 0f;
+                if (hunt.BestInReach(robot.Position, StrikeReach, away.normalized, -1f, out var hidden)) { at = hidden; crowd = true; }
+            }
+            // A tap on the floor towards a robot in reach that the finger missed: the swing still finds it.
+            if (!crowd && onFloor && cell != robot.Position)
+            {
+                var towards = GridView.ToWorld(cell) - GridView.ToWorld(robot.Position);
+                towards.y = 0f;
+                if (HuntSystem.Chebyshev(cell, robot.Position) <= StrikeReach + 1 && hunt.BestInReach(robot.Position, StrikeReach, towards.normalized, 0.6f, out var inLine)) { at = inLine; crowd = true; }
+            }
             bool crate = false;
             if (!crowd)
             {
@@ -271,6 +289,20 @@ namespace SquashBot.Gameplay
             if (crowd && hunt.IsFighter(at)) lastStrikeTap = Time.time; // the fight view comes in while foi attacks a robot or vanG (not bugs)
             if (!TryStrikeNow(at, crowd)) pendingStrike = (at, crowd, Time.time); // mid-hop or between swings: strike as soon as foi can
             return true;
+        }
+
+        /// <summary>Did the finger land on foi's own body on the screen (feet to head)?</summary>
+        private bool TapOnFoi(Vector2 screen)
+        {
+            var cam = cameraRig.Cam;
+            var feet = robot.transform.position;
+            var a = cam.WorldToScreenPoint(feet);
+            var b = cam.WorldToScreenPoint(feet + Vector3.up * 1.1f * robot.transform.lossyScale.y);
+            if (a.z <= 0f || b.z <= 0f) return false;
+            var ab = (Vector2)(b - a);
+            float t = ab.sqrMagnitude < 1f ? 0f : Mathf.Clamp01(Vector2.Dot(screen - (Vector2)a, ab) / ab.sqrMagnitude);
+            float width = Mathf.Max(Screen.height * 0.045f, ab.magnitude * 0.35f);
+            return Vector2.Distance(screen, (Vector2)a + ab * t) < width;
         }
 
         /// <summary>A tapped target waiting for foi to land or for the weapon to come round (dropped after a moment).</summary>
@@ -302,7 +334,16 @@ namespace SquashBot.Gameplay
             SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.Glow(w.tier), 1f + 0.15f * w.damage);
             LeanTowardsBlow(GridView.ToWorld(at));
             cameraRig.Shake(0.15f + 0.08f * damage);
-            if (crowd) hunt.Strike(at, damage);
+            if (crowd)
+            {
+                // The target slipped off the tile mid-swing: the blow lands on whatever is in reach that way.
+                if (!hunt.Strike(at, damage))
+                {
+                    var swing = GridView.ToWorld(at) - GridView.ToWorld(robot.Position);
+                    swing.y = 0f;
+                    if (hunt.BestInReach(robot.Position, StrikeReach, swing.normalized, 0.5f, out var other)) hunt.Strike(other, damage);
+                }
+            }
             else if (hazards.Shatter(at))
             {
                 AudioManager.PlaySfx(Sfx.Blocked, 0.9f, 1.1f);

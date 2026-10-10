@@ -33,7 +33,7 @@ namespace SquashBot.Gameplay
         private const int ArmorsForSuper = 3;
         private const int CoinsPerRescue = 8;
         private static int MaxRescues => Shop.MaxRescues;
-        private const float HoverCooldown = 8f;
+        private const float HoverCooldown = 0f; // no wait between flights
         private const int FailsForAssist = 5;
 
         // Features unlock as the player progresses (world index, 0-based).
@@ -368,6 +368,7 @@ namespace SquashBot.Gameplay
             roadPhase = RoadPhase.None;
             weather.SetVisible(true);
             weather.SetIntensity(0.45f);
+            ClearRoadGuide();
             if (roadBeacon != null) Destroy(roadBeacon);
             ClearGate();
             gridView.gameObject.SetActive(true);
@@ -2412,6 +2413,7 @@ namespace SquashBot.Gameplay
             roadPhase = RoadPhase.Walk;
             State = GameState.Playing;
             input.HoldEnabled = false;
+            ShowRoadGuide();
             cameraRig.SetStyle(CameraStyle.Gameplay);
             ui.SetWarning(false);
             ui.SetHover(false, 0f);
@@ -2519,6 +2521,7 @@ namespace SquashBot.Gameplay
             if (roadPhase != RoadPhase.Walk) return;
             roadPhase = RoadPhase.Run;
             if (roadBeacon != null) Destroy(roadBeacon);
+            ClearRoadGuide();
             ClearHuntDress(); // the tunnel camera sits right behind the robot: back to its normal size, hands empty
             AudioManager.PlayMusic(MusicTheme.Tunnel);
             runner.TakeOver();
@@ -2571,6 +2574,7 @@ namespace SquashBot.Gameplay
                 float pulse = 1f + Mathf.Sin(Time.time * 6f) * 0.12f;
                 roadBeacon.transform.localScale = new Vector3(pulse, 1f, pulse);
             }
+            UpdateRoadGuide();
             RefreshHud();
         }
 

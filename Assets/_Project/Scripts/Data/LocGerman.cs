@@ -72,6 +72,7 @@ namespace SquashBot.Data
             ["btn.close"] = "ZU",
             ["result.win"] = "GESCHAFFT!",
             ["float.moreTime"] = "+{0} SEKUNDEN!",
+            ["float.toTunnel"] = "AB ZUM TUNNEL!",
             ["float.energyShield"] = "WÄCHTER MIT SCHILD!",
             ["float.shieldDown"] = "ENERGIESCHILD WEG!",
             ["float.reactorDown"] = "REAKTOR ZERSTÖRT! DIE STADT LEUCHTET",

@@ -72,6 +72,7 @@ namespace SquashBot.Data
             ["btn.close"] = "닫기",
             ["result.win"] = "레벨 클리어!",
             ["float.moreTime"] = "+{0}초!",
+            ["float.toTunnel"] = "터널로 달려!",
             ["float.energyShield"] = "보호막 경비병!",
             ["float.shieldDown"] = "에너지 보호막 소멸!",
             ["float.reactorDown"] = "반응로 파괴! 도시에 불이 켜진다",

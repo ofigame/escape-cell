@@ -81,6 +81,17 @@ namespace SquashBot.Data
                     if (r < 2) rows[r][x] = 'C';
                     else if (rows[r][x] == '.' || rows[r][x] == 'X') rows[r][x] = '#';
                 }
+            // On shapes open in the middle of the north edge (a U, a ring...) the cage would float over a gap: the
+            // three columns under it are filled down until they meet the floor, so it is always walked to.
+            for (int x = mid - 1; x <= mid + 1; x++)
+            {
+                if (x < 0 || x >= w) continue;
+                int floorAt = -1;
+                for (int r = 3; r < rows.Count && floorAt < 0; r++)
+                    if (rows[r][x] != '.' && rows[r][x] != 'X') floorAt = r;
+                if (floorAt < 0) continue;
+                for (int r = 3; r < floorAt; r++) rows[r][x] = '#';
+            }
             var result = new List<string>();
             for (int i = 0; i < BridgeLength; i++)
             {

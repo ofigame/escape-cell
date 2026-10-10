@@ -62,6 +62,7 @@ namespace SquashBot.Gameplay
                     break;
                 }
             }
+            if (roadPhase == RoadPhase.Walk && roadBeacon != null) goals.Add((At(roadExit), RoadGreen)); // the way to the tunnel
             if (crate != null) goals.Add((At(crateTile), SuperCrate.Gold));
             return goals;
         }

@@ -868,6 +868,42 @@ namespace SquashBot.Gameplay
             return found;
         }
 
+        /// <summary>
+        /// The best thing to strike within <paramref name="reach"/> tiles of <paramref name="from"/>, for blows that
+        /// didn't point at anything (a tap on foi itself, hiding a robot behind it, or on the floor towards one): the
+        /// one most in line with <paramref name="prefer"/> (a flat world direction), nearer ones a little first.
+        /// Fighters (robots, towers, drones, vanG awake) before bugs; <paramref name="minDot"/> is how well in line it
+        /// must be (-1 = any side).
+        /// </summary>
+        public bool BestInReach(GridPos from, int reach, Vector3 prefer, float minDot, out GridPos at)
+        {
+            at = from;
+            if (!running) return false;
+            float best = float.MinValue;
+            bool found = false;
+            GridPos pick = from;
+            void Consider(GridPos p, float bonus)
+            {
+                int d = Chebyshev(p, from);
+                if (d == 0 || d > reach) return;
+                var dir = new Vector3(p.x - from.x, 0f, p.y - from.y).normalized;
+                float dot = prefer.sqrMagnitude > 0.001f ? Vector3.Dot(dir, prefer) : 0f;
+                if (dot < minDot) return;
+                float score = dot - 0.15f * d + bonus;
+                if (score <= best) return;
+                best = score;
+                pick = p;
+                found = true;
+            }
+            if (MonsterUp && MonsterAwake) Consider(monsterPos, 0.3f);
+            foreach (var g in guards) if (!g.dead) Consider(g.pos, 0.2f);
+            foreach (var t in towers) if (!t.dead) Consider(t.pos, 0.1f);
+            foreach (var dr in drones) if (!dr.dead) Consider(dr.pos, 0.1f);
+            if (!found) foreach (var b in bugs) if (!b.dead) Consider(b.pos, 0f);
+            at = pick;
+            return found;
+        }
+
         /// <summary>A guard, an enforcer or the monster stands on this tile (not a bug).</summary>
         public bool IsFighter(GridPos p)
         {
