@@ -13,6 +13,8 @@ namespace SquashBot.Visual
     public class TowerModel : MonoBehaviour
     {
         public const int Designs = 20;
+        /// <summary>The reactor core (the boss tower of the perfect city's tenth floors), past the twenty builds.</summary>
+        public const int Reactor = 20;
 
         private Transform head, spin;
         private Material core;
@@ -28,7 +30,7 @@ namespace SquashBot.Visual
             var root = new GameObject("Tower").transform;
             root.SetParent(parent, false);
             var t = root.gameObject.AddComponent<TowerModel>();
-            t.Make(Mathf.Clamp(design, 0, Designs - 1), accent);
+            t.Make(Mathf.Clamp(design, 0, Reactor), accent);
             return t;
         }
 
@@ -395,6 +397,45 @@ namespace SquashBot.Visual
                     Muzzle = Point(new Vector3(0f, 0f, 0.18f));
                     break;
                 }
+                case Reactor: // the perfect city's reactor core: the boss tower of every tenth floor
+                {
+                    var gold = Bronze;
+                    var pearl = MaterialFactory.Create(new Color(0.93f, 0.94f, 0.96f), new Color(0.07f, 0.07f, 0.08f));
+                    var line = G(new Color(0.35f, 0.95f, 1f), 2.4f);
+                    Cyl("Base", transform, new Vector3(0f, 0.15f, 0f), new Vector3(1.5f, 0.15f, 1.5f), pearl);
+                    Cyl("BaseRing", transform, new Vector3(0f, 0.31f, 0f), new Vector3(1.54f, 0.02f, 1.54f), line);
+                    Cyl("Step", transform, new Vector3(0f, 0.42f, 0f), new Vector3(1.1f, 0.12f, 1.1f), Plate);
+                    for (int i = 0; i < 6; i++)
+                    {
+                        float a = i * Mathf.PI / 3f;
+                        var at = new Vector3(Mathf.Cos(a) * 0.62f, 0f, Mathf.Sin(a) * 0.62f);
+                        Box("Pylon", transform, at + Vector3.up * 1.05f, new Vector3(0.14f, 1.3f, 0.14f), pearl, 0.05f);
+                        Box("PylonLight", transform, at * 1.12f + Vector3.up * 1.05f, new Vector3(0.04f, 1.1f, 0.04f), line);
+                        Ball("Cap", transform, at + Vector3.up * 1.75f, Vector3.one * 0.18f, gold);
+                    }
+                    Core(new Color(0.45f, 0.95f, 1f), 2.8f);
+                    head.localPosition = new Vector3(0f, 1.25f, 0f);
+                    Ball("Core", head, Vector3.zero, Vector3.one * 0.62f, core);
+                    Ball("Glow", head, Vector3.zero, Vector3.one * 0.95f, MaterialFactory.CreateTransparent(new Color(0.4f, 0.9f, 1f, 0.2f), new Color(0.6f, 1.8f, 2.4f)));
+                    spin = new GameObject("Rings").transform;
+                    spin.SetParent(head, false);
+                    foreach (float r in new[] { 0f, 60f, 120f })
+                    {
+                        var ring = new GameObject("Ring").transform;
+                        ring.SetParent(spin, false);
+                        ring.localRotation = Quaternion.Euler(r, 0f, 70f);
+                        for (int i = 0; i < 14; i++)
+                        {
+                            float a = i * Mathf.PI * 2f / 14f;
+                            Box("Seg", ring, new Vector3(Mathf.Cos(a) * 0.62f, 0f, Mathf.Sin(a) * 0.62f), new Vector3(0.1f, 0.04f, 0.2f), gold).localRotation = Quaternion.Euler(0f, -a * Mathf.Rad2Deg, 0f);
+                        }
+                    }
+                    spinSpeed = 70f;
+                    Cyl("Crown", transform, new Vector3(0f, 2f, 0f), new Vector3(0.7f, 0.04f, 0.7f), gold);
+                    BoltColour = new Color(0.45f, 0.95f, 1f);
+                    Muzzle = Point(Vector3.zero);
+                    break;
+                }
                 default: // 20: crystal obelisk: a dark monolith with purple light and a crystal crown
                 {
                     var purple = G(new Color(0.75f, 0.35f, 1f), 2.4f);
@@ -430,7 +471,8 @@ namespace SquashBot.Visual
         {
             time += Time.deltaTime;
             flash = Mathf.Max(0f, flash - Time.deltaTime * 4f);
-            if (spin != null) spin.localRotation = spin.name == "Gear" ? Quaternion.Euler(0f, 0f, 90f) * Quaternion.Euler(0f, time * spinSpeed, 0f) : Quaternion.Euler(0f, 0f, time * spinSpeed);
+            if (spin != null) spin.localRotation = spin.name == "Gear" ? Quaternion.Euler(0f, 0f, 90f) * Quaternion.Euler(0f, time * spinSpeed, 0f)
+                : spin.name == "Rings" ? Quaternion.Euler(time * spinSpeed * 0.4f, time * spinSpeed, 0f) : Quaternion.Euler(0f, 0f, time * spinSpeed);
             float glow = 1.2f + charge * 2.5f + flash * 2f;
             MaterialFactory.SetColors(core, Color.Lerp(coreColor, Color.white, flash * 0.6f), coreColor * glow);
         }

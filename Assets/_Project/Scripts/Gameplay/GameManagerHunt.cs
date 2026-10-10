@@ -48,6 +48,7 @@ namespace SquashBot.Gameplay
             hunt.Finished += OnHuntFinished;
             hunt.SleepingHit += OnSleepingHit;
             InitFifi();
+            InitUtopia();
             hunt.Armored += p =>
             {
                 // Too weak a weapon for this floor's armour: say so (not on every blow).

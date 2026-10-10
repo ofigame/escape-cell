@@ -164,6 +164,16 @@ namespace SquashBot.Data
         public int towers;
         [Tooltip("Blows a guard tower takes.")]
         public int towerHp = 5;
+        [Tooltip("The perfect city (level 101 on): utopian guards and floors.")]
+        public bool utopia;
+        [Tooltip("Every n-th guard wears an energy shield that must be broken first (0 = none).")]
+        public int shieldEvery;
+        [Tooltip("Blows a guard's energy shield takes before it breaks.")]
+        public int shieldHits = 2;
+        [Tooltip("Each tower has a repair drone that mends it until the drone is struck down.")]
+        public bool repairDrones;
+        [Tooltip("A reactor core stands in the middle of the floor: the floor's boss tower.")]
+        public bool reactor;
         public int robotHp = 2;
         [Tooltip("Seconds between a guard robot's steps.")]
         public float robotStep = 1f;

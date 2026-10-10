@@ -188,9 +188,67 @@ namespace SquashBot.Visual
         /// <summary>A floor's first design (its map island, menus and story scenes).</summary>
         public static WorldTheme ForWorld(int worldIndex) => All[Mathf.Clamp(worldIndex, 0, All.Length - 1)];
 
+        /// <summary>The first level (0-based) played in the perfect city.</summary>
+        public const int UtopiaFrom = 100;
+
+        /// <summary>The perfect city's designs: pearl floors with glowing seams under five skies, three worlds each.</summary>
+        private static readonly WorldTheme[] Utopias =
+        {
+            // Dawn city: peach sky, pearl and gold.
+            Pair(P("utopia.dawn", Scenery.Utopia, Weather.Kind.Sparkle, BlockStyle.Drone,
+                    "#8FB8E8", "#F6D2BC", "#FFE6CC", "#FFFFFF", "#FFF0C0", "#FFFFFF", "#F2EEE8", "#E6D8C2", "#B89C70", "#E6E0D4", "#FFD27A", new Color(1.3f, 1.05f, 0.45f)),
+                P("utopia.dawn", Scenery.UtopiaSpires, Weather.Kind.Petals, BlockStyle.Drone,
+                    "#A8B8F0", "#F8C8C0", "#FFE0D8", "#FFFFFF", "#FFE8C0", "#FFFFFF", "#F2EAE8", "#E8D4CC", "#B89080", "#E8DCD6", "#FFC08A", new Color(1.3f, 0.85f, 0.5f))),
+            // Azure city: clear blue sky, white and cyan.
+            Pair(P("utopia.azure", Scenery.Utopia, Weather.Kind.Sparkle, BlockStyle.Drone,
+                    "#4E9AE0", "#BFE4FA", "#E8F8FF", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#EAF2F8", "#D2E2EE", "#7AA4C0", "#DCE6EE", "#7FE8FF", new Color(0.4f, 1.2f, 1.6f)),
+                P("utopia.azure", Scenery.UtopiaSpires, Weather.Kind.Sparkle, BlockStyle.Drone,
+                    "#3E86D0", "#A8D8F6", "#DCF2FF", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#E4EEF6", "#CCDEEC", "#6E98B8", "#D6E2EC", "#8AD8FF", new Color(0.45f, 1.05f, 1.65f))),
+            // Garden city: mint sky, white towers wrapped in green.
+            Pair(P("utopia.garden", Scenery.UtopiaGarden, Weather.Kind.Petals, BlockStyle.Drone,
+                    "#6EC0B0", "#E2F4E4", "#F4FFF0", "#FFFFFF", "#FFF8D0", "#FFFFFF", "#EEF6EE", "#D6E8D2", "#86AE92", "#DEEADA", "#9CF0B8", new Color(0.4f, 1.3f, 0.7f)),
+                P("utopia.garden", Scenery.Utopia, Weather.Kind.Fireflies, BlockStyle.Drone,
+                    "#5AA8A0", "#D2ECDC", "#ECFAF0", "#FFFFFF", "#FFF4C8", "#FFFFFF", "#E8F2EA", "#D0E4D0", "#7AA088", "#DAE8D8", "#B8F08A", new Color(0.65f, 1.3f, 0.45f))),
+            // Twilight city: violet and rose, the lights coming on.
+            Pair(P("utopia.twilight", Scenery.UtopiaSpires, Weather.Kind.Sparkle, BlockStyle.Drone,
+                    "#5E50A0", "#F0B8C8", "#FFD8E0", "#FFE8F0", "#FFE0B0", "#FFFFFF", "#E8DCEC", "#D8C8DC", "#9A80B0", "#F6F0F6", "#FFA8D8", new Color(2.0f, 1.0f, 1.8f)),
+                P("utopia.twilight", Scenery.UtopiaNight, Weather.Kind.Fireflies, BlockStyle.DataCube,
+                    "#3A3070", "#B880B8", "#E8A8D0", "#FFD0E8", "#FFD0A0", "#FFFFFF", "#DCD0E4", "#C8B8D4", "#6E5A90", "#F0EAF4", "#FF90D0", new Color(2.2f, 0.9f, 2.0f))),
+            // Night city: deep blue, neon and holograms.
+            Pair(P("utopia.night", Scenery.UtopiaNight, Weather.Kind.DataRain, BlockStyle.DataCube,
+                    "#121A3E", "#2A3870", "#4A6AC0", "#8AD0FF", "#C8E8FF", "#FFFFFF", "#C8D0E6", "#2A3460", "#1C2448", "#DCE2F0", "#6FF0FF", new Color(0.6f, 1.8f, 2.8f)),
+                P("utopia.night", Scenery.UtopiaNight, Weather.Kind.Cosmic, BlockStyle.DataCube,
+                    "#1A1240", "#3A2870", "#7050C0", "#D0A0FF", "#FFC8F0", "#FFFFFF", "#D0C8E6", "#342860", "#221A48", "#E2DCF2", "#C890FF", new Color(1.6f, 0.9f, 2.8f))),
+        };
+
+        private static readonly System.Collections.Generic.Dictionary<int, WorldTheme> utopiaCache =
+            new System.Collections.Generic.Dictionary<int, WorldTheme>();
+
+        /// <summary>
+        /// A level of the perfect city: dawn, azure, garden, twilight and night skies, three worlds each, the second
+        /// design for levels 6-10. It keeps its world's name (the map and the story still call it that).
+        /// </summary>
+        private static WorldTheme Utopia(int levelIndex)
+        {
+            if (utopiaCache.TryGetValue(levelIndex, out var cached)) return cached;
+            int world = levelIndex / Data.LevelCatalog.LevelsPerWorld;
+            var pair = Utopias[Mathf.Clamp((world - UtopiaFrom / Data.LevelCatalog.LevelsPerWorld) / 3, 0, Utopias.Length - 1)];
+            var design = levelIndex % Data.LevelCatalog.LevelsPerWorld >= SecondDesignFrom ? pair.variant : pair;
+            var t = (WorldTheme)design.MemberwiseClone();
+            t.key = ForWorld(world).key;
+            t.utopian = true;
+            t.variant = null;
+            utopiaCache[levelIndex] = t;
+            return t;
+        }
+
+        /// <summary>A perfect-city design: its pearl floor stays (no realm floor over it).</summary>
+        public bool utopian;
+
         /// <summary>The design a level is played in: the floor's first one for its levels 1-5, the second for 6-10.</summary>
         public static WorldTheme ForLevel(int levelIndex)
         {
+            if (levelIndex >= UtopiaFrom) return Utopia(levelIndex);
             var first = ForWorld(levelIndex / Data.LevelCatalog.LevelsPerWorld);
             return levelIndex % Data.LevelCatalog.LevelsPerWorld >= SecondDesignFrom && first.variant != null ? first.variant : first;
         }
@@ -236,7 +294,7 @@ namespace SquashBot.Visual
         public WorldTheme Realm(int world)
         {
             var r = Realms[Mathf.Clamp(world, 0, Realms.Length - 1)];
-            if (!r.HasValue) return this;
+            if (!r.HasValue || utopian) return this;
             if (realmCache.TryGetValue(this, out var cached)) return cached;
             var t = (WorldTheme)MemberwiseClone();
             bool second = variant == null && System.Array.Exists(All, a => a.variant == this);

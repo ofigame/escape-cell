@@ -69,6 +69,11 @@ MonoBehaviour:
     brutes: 0
     towers: 0
     towerHp: 4
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 2
     robotStep: 1.05
     monsterHp: 6
@@ -150,6 +155,11 @@ MonoBehaviour:
     brutes: 0
     towers: 0
     towerHp: 4
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 2
     robotStep: 1.05
     monsterHp: 6
@@ -231,6 +241,11 @@ MonoBehaviour:
     brutes: 0
     towers: 0
     towerHp: 4
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 2
     robotStep: 1.05
     monsterHp: 6
@@ -313,6 +328,11 @@ MonoBehaviour:
     brutes: 0
     towers: 0
     towerHp: 5
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 2
     robotStep: 1.017
     monsterHp: 8
@@ -396,6 +416,11 @@ MonoBehaviour:
     brutes: 0
     towers: 0
     towerHp: 5
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 2
     robotStep: 0.999974
     monsterHp: 8
@@ -479,6 +504,11 @@ MonoBehaviour:
     brutes: 0
     towers: 0
     towerHp: 5
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 2
     robotStep: 0.9908332
     monsterHp: 9
@@ -563,6 +593,11 @@ MonoBehaviour:
     brutes: 0
     towers: 0
     towerHp: 5
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 2
     robotStep: 0.98335457
     monsterHp: 9
@@ -647,6 +682,11 @@ MonoBehaviour:
     brutes: 0
     towers: 0
     towerHp: 5
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 2
     robotStep: 0.976785
     monsterHp: 9
@@ -732,6 +772,11 @@ MonoBehaviour:
     brutes: 0
     towers: 0
     towerHp: 5
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 2
     robotStep: 0.97081804
     monsterHp: 10
@@ -817,6 +862,11 @@ MonoBehaviour:
     brutes: 0
     towers: 0
     towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 2
     robotStep: 0.96529114
     monsterHp: 10
@@ -901,6 +951,11 @@ MonoBehaviour:
     brutes: 0
     towers: 0
     towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 2
     robotStep: 0.9601053
     monsterHp: 10
@@ -987,6 +1042,11 @@ MonoBehaviour:
     brutes: 0
     towers: 0
     towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 3
     robotStep: 0.95519453
     monsterHp: 10
@@ -1073,6 +1133,11 @@ MonoBehaviour:
     brutes: 0
     towers: 0
     towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 3
     robotStep: 0.9505123
     monsterHp: 11
@@ -1160,6 +1225,11 @@ MonoBehaviour:
     brutes: 1
     towers: 0
     towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 3
     robotStep: 0.9460241
     monsterHp: 11
@@ -1247,6 +1317,11 @@ MonoBehaviour:
     brutes: 0
     towers: 0
     towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 3
     robotStep: 0.94170356
     monsterHp: 11
@@ -1334,6 +1409,11 @@ MonoBehaviour:
     brutes: 0
     towers: 1
     towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 3
     robotStep: 0.93753
     monsterHp: 11
@@ -1421,6 +1501,11 @@ MonoBehaviour:
     brutes: 0
     towers: 1
     towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 3
     robotStep: 0.93348664
     monsterHp: 12
@@ -1505,6 +1590,11 @@ MonoBehaviour:
     brutes: 1
     towers: 1
     towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 3
     robotStep: 0.92955995
     monsterHp: 12
@@ -1593,6 +1683,11 @@ MonoBehaviour:
     brutes: 0
     towers: 1
     towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 3
     robotStep: 0.9257385
     monsterHp: 12
@@ -1677,6 +1772,11 @@ MonoBehaviour:
     brutes: 0
     towers: 1
     towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 3
     robotStep: 0.92201275
     monsterHp: 12
@@ -1765,6 +1865,11 @@ MonoBehaviour:
     brutes: 0
     towers: 1
     towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 3
     robotStep: 0.9183745
     monsterHp: 12
@@ -1854,6 +1959,11 @@ MonoBehaviour:
     brutes: 1
     towers: 1
     towerHp: 6
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 3
     robotStep: 0.91481674
     monsterHp: 12
@@ -1939,6 +2049,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 7
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 3
     robotStep: 0.9113333
     monsterHp: 13
@@ -2028,6 +2143,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 7
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 3
     robotStep: 0.9079189
     monsterHp: 13
@@ -2117,6 +2237,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 7
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 3
     robotStep: 0.9045688
     monsterHp: 13
@@ -2207,6 +2332,11 @@ MonoBehaviour:
     brutes: 1
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.9012788
     monsterHp: 17
@@ -2297,6 +2427,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8980452
     monsterHp: 17
@@ -2387,6 +2522,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8948645
     monsterHp: 17
@@ -2477,6 +2617,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8917339
     monsterHp: 17
@@ -2567,6 +2712,11 @@ MonoBehaviour:
     brutes: 1
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8886504
     monsterHp: 18
@@ -2658,6 +2808,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8856118
     monsterHp: 18
@@ -2749,6 +2904,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8826156
     monsterHp: 18
@@ -2840,6 +3000,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.87965983
     monsterHp: 18
@@ -2931,6 +3096,11 @@ MonoBehaviour:
     brutes: 1
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8767425
     monsterHp: 18
@@ -3022,6 +3192,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.87386197
     monsterHp: 18
@@ -3114,6 +3289,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8710165
     monsterHp: 18
@@ -3206,6 +3386,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8682046
     monsterHp: 19
@@ -3298,6 +3483,11 @@ MonoBehaviour:
     brutes: 1
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.86542493
     monsterHp: 19
@@ -3389,6 +3579,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.86267614
     monsterHp: 19
@@ -3482,6 +3677,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 8
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8599571
     monsterHp: 19
@@ -3575,6 +3775,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.85726655
     monsterHp: 19
@@ -3666,6 +3871,11 @@ MonoBehaviour:
     brutes: 1
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.85460347
     monsterHp: 19
@@ -3759,6 +3969,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.851967
     monsterHp: 19
@@ -3852,6 +4067,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.849356
     monsterHp: 19
@@ -3946,6 +4166,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8467697
     monsterHp: 20
@@ -4040,6 +4265,11 @@ MonoBehaviour:
     brutes: 1
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8442073
     monsterHp: 20
@@ -4134,6 +4364,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.84166795
     monsterHp: 20
@@ -4228,6 +4463,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.83915097
     monsterHp: 20
@@ -4316,6 +4556,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8366556
     monsterHp: 20
@@ -4411,6 +4656,11 @@ MonoBehaviour:
     brutes: 1
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.83418125
     monsterHp: 20
@@ -4504,6 +4754,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.83172727
     monsterHp: 20
@@ -4599,6 +4854,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8292931
     monsterHp: 20
@@ -4694,6 +4954,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.826878
     monsterHp: 21
@@ -4787,6 +5052,11 @@ MonoBehaviour:
     brutes: 1
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8244816
     monsterHp: 21
@@ -4883,6 +5153,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8221034
     monsterHp: 21
@@ -4979,6 +5254,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8197428
     monsterHp: 21
@@ -5075,6 +5355,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8173994
     monsterHp: 21
@@ -5171,6 +5456,11 @@ MonoBehaviour:
     brutes: 1
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8150727
     monsterHp: 21
@@ -5260,6 +5550,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8127624
     monsterHp: 21
@@ -5357,6 +5652,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.81046796
     monsterHp: 21
@@ -5448,6 +5748,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8081891
     monsterHp: 21
@@ -5545,6 +5850,11 @@ MonoBehaviour:
     brutes: 1
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8059253
     monsterHp: 22
@@ -5642,6 +5952,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 9
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8036763
     monsterHp: 22
@@ -5739,6 +6054,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 10
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.8014418
     monsterHp: 22
@@ -5837,6 +6157,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 10
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.79922134
     monsterHp: 22
@@ -5928,6 +6253,11 @@ MonoBehaviour:
     brutes: 1
     towers: 2
     towerHp: 10
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.7970147
     monsterHp: 22
@@ -6026,6 +6356,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 10
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.79482156
     monsterHp: 22
@@ -6122,6 +6457,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 10
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.7926416
     monsterHp: 22
@@ -6220,6 +6560,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 10
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.79047453
     monsterHp: 22
@@ -6317,6 +6662,11 @@ MonoBehaviour:
     brutes: 1
     towers: 2
     towerHp: 10
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 4
     robotStep: 0.78832006
     monsterHp: 22
@@ -6416,6 +6766,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 5
     robotStep: 0.786178
     monsterHp: 26
@@ -6515,6 +6870,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 5
     robotStep: 0.7840481
     monsterHp: 27
@@ -6607,6 +6967,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 5
     robotStep: 0.78192997
     monsterHp: 27
@@ -6706,6 +7071,11 @@ MonoBehaviour:
     brutes: 1
     towers: 2
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 5
     robotStep: 0.77982354
     monsterHp: 27
@@ -6805,6 +7175,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 5
     robotStep: 0.7777285
     monsterHp: 27
@@ -6905,6 +7280,11 @@ MonoBehaviour:
     brutes: 0
     towers: 2
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 5
     robotStep: 0.77564466
     monsterHp: 27
@@ -7005,6 +7385,11 @@ MonoBehaviour:
     brutes: 0
     towers: 3
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7735717
     monsterHp: 27
@@ -7105,6 +7490,11 @@ MonoBehaviour:
     brutes: 1
     towers: 3
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.77150965
     monsterHp: 27
@@ -7205,6 +7595,11 @@ MonoBehaviour:
     brutes: 0
     towers: 3
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.76945806
     monsterHp: 27
@@ -7302,6 +7697,11 @@ MonoBehaviour:
     brutes: 0
     towers: 3
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.76741683
     monsterHp: 27
@@ -7403,6 +7803,11 @@ MonoBehaviour:
     brutes: 0
     towers: 3
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.76538587
     monsterHp: 27
@@ -7502,6 +7907,11 @@ MonoBehaviour:
     brutes: 1
     towers: 3
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.76336485
     monsterHp: 28
@@ -7603,6 +8013,11 @@ MonoBehaviour:
     brutes: 0
     towers: 3
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7613537
     monsterHp: 28
@@ -7704,6 +8119,11 @@ MonoBehaviour:
     brutes: 0
     towers: 3
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7593521
     monsterHp: 28
@@ -7797,6 +8217,11 @@ MonoBehaviour:
     brutes: 0
     towers: 3
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.75736004
     monsterHp: 28
@@ -7898,6 +8323,11 @@ MonoBehaviour:
     brutes: 1
     towers: 3
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.75537735
     monsterHp: 28
@@ -8000,6 +8430,11 @@ MonoBehaviour:
     brutes: 0
     towers: 3
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7534037
     monsterHp: 28
@@ -8102,6 +8537,11 @@ MonoBehaviour:
     brutes: 0
     towers: 3
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7514392
     monsterHp: 28
@@ -8204,6 +8644,11 @@ MonoBehaviour:
     brutes: 0
     towers: 3
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7494835
     monsterHp: 28
@@ -8306,6 +8751,11 @@ MonoBehaviour:
     brutes: 1
     towers: 3
     towerHp: 11
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.74753654
     monsterHp: 28
@@ -8408,6 +8858,11 @@ MonoBehaviour:
     brutes: 1
     towers: 3
     towerHp: 12
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7455982
     monsterHp: 28
@@ -8502,6 +8957,11 @@ MonoBehaviour:
     brutes: 0
     towers: 3
     towerHp: 12
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.74366826
     monsterHp: 28
@@ -8605,6 +9065,11 @@ MonoBehaviour:
     brutes: 1
     towers: 3
     towerHp: 12
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7417466
     monsterHp: 29
@@ -8708,6 +9173,11 @@ MonoBehaviour:
     brutes: 1
     towers: 3
     towerHp: 12
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.73983324
     monsterHp: 29
@@ -8811,6 +9281,11 @@ MonoBehaviour:
     brutes: 1
     towers: 3
     towerHp: 12
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.73792785
     monsterHp: 29
@@ -8914,6 +9389,11 @@ MonoBehaviour:
     brutes: 0
     towers: 3
     towerHp: 12
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.73603046
     monsterHp: 29
@@ -9009,6 +9489,11 @@ MonoBehaviour:
     brutes: 1
     towers: 3
     towerHp: 12
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7341409
     monsterHp: 29
@@ -9113,6 +9598,11 @@ MonoBehaviour:
     brutes: 1
     towers: 3
     towerHp: 12
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.732259
     monsterHp: 29
@@ -9217,6 +9707,11 @@ MonoBehaviour:
     brutes: 1
     towers: 3
     towerHp: 12
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.73038465
     monsterHp: 29
@@ -9321,6 +9816,11 @@ MonoBehaviour:
     brutes: 0
     towers: 3
     towerHp: 12
+    utopia: 0
+    shieldEvery: 0
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.72851783
     monsterHp: 29
@@ -9393,7 +9893,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -9426,6 +9926,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.72665834
     monsterHp: 29
@@ -9498,7 +10003,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -9531,6 +10036,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7248062
     monsterHp: 29
@@ -9603,7 +10113,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -9636,6 +10146,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7229612
     monsterHp: 29
@@ -9708,7 +10223,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -9741,6 +10256,11 @@ MonoBehaviour:
     brutes: 0
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7211233
     monsterHp: 30
@@ -9813,7 +10333,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -9846,6 +10366,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7192923
     monsterHp: 30
@@ -9918,7 +10443,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -9951,6 +10476,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.71746826
     monsterHp: 30
@@ -10023,7 +10553,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -10056,6 +10586,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7156509
     monsterHp: 30
@@ -10128,7 +10663,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -10161,6 +10696,11 @@ MonoBehaviour:
     brutes: 0
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.7138403
     monsterHp: 30
@@ -10233,7 +10773,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -10266,6 +10806,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 0
     robotHp: 6
     robotStep: 0.71203625
     monsterHp: 30
@@ -10339,7 +10884,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -10372,6 +10917,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 0
+    reactor: 1
     robotHp: 6
     robotStep: 0.7102388
     monsterHp: 30
@@ -10434,7 +10984,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -10467,6 +11017,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.70844775
     monsterHp: 30
@@ -10540,7 +11095,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -10573,6 +11128,11 @@ MonoBehaviour:
     brutes: 0
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.706663
     monsterHp: 30
@@ -10646,7 +11206,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -10679,6 +11239,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.7048846
     monsterHp: 30
@@ -10752,7 +11317,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -10785,6 +11350,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.7031123
     monsterHp: 30
@@ -10858,7 +11428,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -10891,6 +11461,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.7013462
     monsterHp: 30
@@ -10964,7 +11539,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -10997,6 +11572,11 @@ MonoBehaviour:
     brutes: 0
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6995861
     monsterHp: 31
@@ -11070,7 +11650,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -11103,6 +11683,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6978319
     monsterHp: 31
@@ -11173,7 +11758,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -11206,6 +11791,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.69608366
     monsterHp: 31
@@ -11279,7 +11869,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -11312,6 +11902,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.69434124
     monsterHp: 31
@@ -11385,7 +11980,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -11418,6 +12013,11 @@ MonoBehaviour:
     brutes: 0
     towers: 4
     towerHp: 12
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 1
     robotHp: 6
     robotStep: 0.69260454
     monsterHp: 31
@@ -11491,7 +12091,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -11524,6 +12124,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.69087356
     monsterHp: 31
@@ -11597,7 +12202,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -11630,6 +12235,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6891481
     monsterHp: 31
@@ -11703,7 +12313,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -11736,6 +12346,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6874283
     monsterHp: 31
@@ -11809,7 +12424,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -11842,6 +12457,11 @@ MonoBehaviour:
     brutes: 0
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.68571395
     monsterHp: 31
@@ -11915,7 +12535,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -11948,6 +12568,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.68400496
     monsterHp: 31
@@ -12022,7 +12647,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -12055,6 +12680,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6823014
     monsterHp: 31
@@ -12129,7 +12759,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -12162,6 +12792,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6806031
     monsterHp: 31
@@ -12236,7 +12871,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -12269,6 +12904,11 @@ MonoBehaviour:
     brutes: 0
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6789101
     monsterHp: 32
@@ -12343,7 +12983,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -12376,6 +13016,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6772222
     monsterHp: 32
@@ -12447,7 +13092,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -12480,6 +13125,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 1
     robotHp: 6
     robotStep: 0.67553943
     monsterHp: 32
@@ -12554,7 +13204,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -12587,6 +13237,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6738618
     monsterHp: 32
@@ -12661,7 +13316,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -12694,6 +13349,11 @@ MonoBehaviour:
     brutes: 0
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6721891
     monsterHp: 32
@@ -12768,7 +13428,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -12801,6 +13461,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.67052144
     monsterHp: 32
@@ -12875,7 +13540,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -12908,6 +13573,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6688586
     monsterHp: 32
@@ -12979,7 +13649,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -13012,6 +13682,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6672006
     monsterHp: 32
@@ -13086,7 +13761,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -13119,6 +13794,11 @@ MonoBehaviour:
     brutes: 0
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6655475
     monsterHp: 32
@@ -13182,7 +13862,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -13215,6 +13895,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6638991
     monsterHp: 32
@@ -13289,7 +13974,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -13322,6 +14007,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6622554
     monsterHp: 32
@@ -13396,7 +14086,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -13429,6 +14119,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6606164
     monsterHp: 32
@@ -13503,7 +14198,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -13536,6 +14231,11 @@ MonoBehaviour:
     brutes: 0
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 1
     robotHp: 6
     robotStep: 0.658982
     monsterHp: 32
@@ -13610,7 +14310,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -13643,6 +14343,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6573521
     monsterHp: 33
@@ -13714,7 +14419,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -13747,6 +14452,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.65572673
     monsterHp: 33
@@ -13822,7 +14532,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -13855,6 +14565,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.65410584
     monsterHp: 33
@@ -13930,7 +14645,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -13963,6 +14678,11 @@ MonoBehaviour:
     brutes: 0
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.65248936
     monsterHp: 33
@@ -14035,7 +14755,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -14068,6 +14788,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.65087736
     monsterHp: 33
@@ -14143,7 +14868,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -14176,6 +14901,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6492696
     monsterHp: 33
@@ -14248,7 +14978,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -14281,6 +15011,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6476661
     monsterHp: 33
@@ -14356,7 +15091,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -14389,6 +15124,11 @@ MonoBehaviour:
     brutes: 0
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.64606696
     monsterHp: 33
@@ -14452,7 +15192,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -14485,6 +15225,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.644472
     monsterHp: 33
@@ -14560,7 +15305,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -14593,6 +15338,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 1
     robotHp: 6
     robotStep: 0.64288116
     monsterHp: 33
@@ -14668,7 +15418,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -14701,6 +15451,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6412945
     monsterHp: 33
@@ -14776,7 +15531,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -14809,6 +15564,11 @@ MonoBehaviour:
     brutes: 0
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.639712
     monsterHp: 33
@@ -14884,7 +15644,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -14917,6 +15677,11 @@ MonoBehaviour:
     brutes: 1
     towers: 4
     towerHp: 13
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6381334
     monsterHp: 33
@@ -14989,7 +15754,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -15022,6 +15787,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.63655895
     monsterHp: 34
@@ -15097,7 +15867,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -15130,6 +15900,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6349884
     monsterHp: 34
@@ -15205,7 +15980,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -15238,6 +16013,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6334219
     monsterHp: 34
@@ -15310,7 +16090,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -15343,6 +16123,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.63185924
     monsterHp: 34
@@ -15418,7 +16203,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -15451,6 +16236,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.63030046
     monsterHp: 34
@@ -15524,7 +16314,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -15557,6 +16347,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.62874556
     monsterHp: 34
@@ -15633,7 +16428,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -15666,6 +16461,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 1
     robotHp: 6
     robotStep: 0.6271944
     monsterHp: 34
@@ -15730,7 +16530,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -15763,6 +16563,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.62564707
     monsterHp: 34
@@ -15839,7 +16644,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -15872,6 +16677,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6241035
     monsterHp: 34
@@ -15948,7 +16758,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -15981,6 +16791,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6225636
     monsterHp: 34
@@ -16046,7 +16861,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -16079,6 +16894,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.62102735
     monsterHp: 34
@@ -16155,7 +16975,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -16188,6 +17008,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6194948
     monsterHp: 34
@@ -16264,7 +17089,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -16297,6 +17122,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6179658
     monsterHp: 34
@@ -16373,7 +17203,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -16406,6 +17236,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6164404
     monsterHp: 34
@@ -16482,7 +17317,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -16515,6 +17350,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6149186
     monsterHp: 35
@@ -16588,7 +17428,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -16621,6 +17461,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 6
     robotStep: 0.6134003
     monsterHp: 35
@@ -16697,7 +17542,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -16730,6 +17575,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 14
+    utopia: 1
+    shieldEvery: 3
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 1
     robotHp: 6
     robotStep: 0.6118855
     monsterHp: 35
@@ -16803,7 +17653,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -16836,6 +17686,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 7
     robotStep: 0.61037415
     monsterHp: 39
@@ -16912,7 +17767,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -16945,6 +17800,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 7
     robotStep: 0.6088662
     monsterHp: 39
@@ -17021,7 +17881,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -17054,6 +17914,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 7
     robotStep: 0.60736173
     monsterHp: 39
@@ -17130,7 +17995,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -17163,6 +18028,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 7
     robotStep: 0.6058606
     monsterHp: 39
@@ -17239,7 +18109,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -17272,6 +18142,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 7
     robotStep: 0.60436285
     monsterHp: 39
@@ -17345,7 +18220,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -17378,6 +18253,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 7
     robotStep: 0.6028684
     monsterHp: 39
@@ -17455,7 +18335,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -17488,6 +18368,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 7
     robotStep: 0.6013772
     monsterHp: 39
@@ -17565,7 +18450,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -17598,6 +18483,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 7
     robotStep: 0.59988934
     monsterHp: 39
@@ -17675,7 +18565,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -17708,6 +18598,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 7
     robotStep: 0.5984047
     monsterHp: 39
@@ -17781,7 +18676,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -17814,6 +18709,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 1
     robotHp: 7
     robotStep: 0.59692323
     monsterHp: 39
@@ -17887,7 +18787,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -17920,6 +18820,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 7
     robotStep: 0.59544504
     monsterHp: 39
@@ -17997,7 +18902,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -18030,6 +18935,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 7
     robotStep: 0.59397
     monsterHp: 40
@@ -18104,7 +19014,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -18137,6 +19047,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 7
     robotStep: 0.59249806
     monsterHp: 40
@@ -18214,7 +19129,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -18247,6 +19162,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5910293
     monsterHp: 40
@@ -18324,7 +19244,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -18357,6 +19277,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5895636
     monsterHp: 40
@@ -18434,7 +19359,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -18467,6 +19392,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.588101
     monsterHp: 40
@@ -18544,7 +19474,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -18577,6 +19507,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.58664143
     monsterHp: 40
@@ -18650,7 +19585,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -18683,6 +19618,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5851849
     monsterHp: 40
@@ -18760,7 +19700,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -18793,6 +19733,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 15
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5837314
     monsterHp: 40
@@ -18867,7 +19812,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -18900,6 +19845,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 1
     robotHp: 8
     robotStep: 0.5822808
     monsterHp: 40
@@ -18977,7 +19927,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -19010,6 +19960,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5808332
     monsterHp: 40
@@ -19083,7 +20038,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -19116,6 +20071,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.57938856
     monsterHp: 40
@@ -19190,7 +20150,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -19223,6 +20183,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.57794684
     monsterHp: 40
@@ -19301,7 +20266,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -19334,6 +20299,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.57650805
     monsterHp: 40
@@ -19406,7 +20376,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -19439,6 +20409,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.57507205
     monsterHp: 40
@@ -19517,7 +20492,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -19550,6 +20525,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.573639
     monsterHp: 41
@@ -19628,7 +20608,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -19661,6 +20641,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.57220864
     monsterHp: 41
@@ -19739,7 +20724,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -19772,6 +20757,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5707812
     monsterHp: 41
@@ -19850,7 +20840,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -19883,6 +20873,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.56935656
     monsterHp: 41
@@ -19961,7 +20956,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -19994,6 +20989,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 2
+    repairDrones: 1
+    reactor: 1
     robotHp: 8
     robotStep: 0.56793463
     monsterHp: 41
@@ -20072,7 +21072,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -20105,6 +21105,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5665155
     monsterHp: 41
@@ -20173,7 +21178,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -20206,6 +21211,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5650991
     monsterHp: 41
@@ -20284,7 +21294,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -20317,6 +21327,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5636854
     monsterHp: 41
@@ -20391,7 +21406,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -20424,6 +21439,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.56227446
     monsterHp: 41
@@ -20499,7 +21519,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -20532,6 +21552,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5608661
     monsterHp: 41
@@ -20610,7 +21635,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -20643,6 +21668,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.55946046
     monsterHp: 41
@@ -20715,7 +21745,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -20748,6 +21778,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5580574
     monsterHp: 41
@@ -20826,7 +21861,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -20859,6 +21894,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5566571
     monsterHp: 41
@@ -20938,7 +21978,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -20971,6 +22011,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.55525935
     monsterHp: 41
@@ -21050,7 +22095,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -21083,6 +22128,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 1
     robotHp: 8
     robotStep: 0.5538641
     monsterHp: 41
@@ -21162,7 +22212,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -21195,6 +22245,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5524715
     monsterHp: 42
@@ -21271,7 +22326,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -21304,6 +22359,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.55108136
     monsterHp: 42
@@ -21383,7 +22443,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -21416,6 +22476,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5496939
     monsterHp: 42
@@ -21495,7 +22560,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -21528,6 +22593,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.54830885
     monsterHp: 42
@@ -21607,7 +22677,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -21640,6 +22710,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 16
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 8
     robotStep: 0.5469264
     monsterHp: 42
@@ -21715,7 +22790,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -21748,6 +22823,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 17
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.54554635
     monsterHp: 46
@@ -21824,7 +22904,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -21857,6 +22937,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 17
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.5441688
     monsterHp: 46
@@ -21936,7 +23021,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -21969,6 +23054,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 17
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.5427937
     monsterHp: 46
@@ -22035,7 +23125,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -22068,6 +23158,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 17
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.54142106
     monsterHp: 46
@@ -22147,7 +23242,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -22180,6 +23275,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 17
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 1
     robotHp: 9
     robotStep: 0.5400508
     monsterHp: 46
@@ -22259,7 +23359,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -22292,6 +23392,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 17
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.538683
     monsterHp: 46
@@ -22371,7 +23476,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -22404,6 +23509,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 17
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.5373176
     monsterHp: 46
@@ -22483,7 +23593,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -22516,6 +23626,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 17
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.53595454
     monsterHp: 46
@@ -22595,7 +23710,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -22628,6 +23743,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 17
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.5345939
     monsterHp: 46
@@ -22707,7 +23827,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -22740,6 +23860,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 17
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.5332355
     monsterHp: 46
@@ -22820,7 +23945,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -22853,6 +23978,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 17
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.53187954
     monsterHp: 46
@@ -22933,7 +24063,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -22966,6 +24096,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 17
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.5305258
     monsterHp: 47
@@ -23042,7 +24177,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -23075,6 +24210,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 17
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.52917445
     monsterHp: 47
@@ -23152,7 +24292,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -23185,6 +24325,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 17
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.52782536
     monsterHp: 47
@@ -23265,7 +24410,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -23298,6 +24443,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 1
     robotHp: 9
     robotStep: 0.5264786
     monsterHp: 47
@@ -23365,7 +24515,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -23398,6 +24548,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.52513397
     monsterHp: 47
@@ -23478,7 +24633,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -23511,6 +24666,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.5237917
     monsterHp: 47
@@ -23591,7 +24751,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -23624,6 +24784,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.52245164
     monsterHp: 47
@@ -23704,7 +24869,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -23737,6 +24902,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.52111375
     monsterHp: 47
@@ -23817,7 +24987,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -23850,6 +25020,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.5197782
     monsterHp: 47
@@ -23930,7 +25105,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -23963,6 +25138,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.5184447
     monsterHp: 47
@@ -24043,7 +25223,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -24076,6 +25256,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.51711345
     monsterHp: 47
@@ -24152,7 +25337,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -24185,6 +25370,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.5157844
     monsterHp: 47
@@ -24265,7 +25455,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -24298,6 +25488,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.5144574
     monsterHp: 47
@@ -24375,7 +25570,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -24408,6 +25603,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 1
     robotHp: 9
     robotStep: 0.51313263
     monsterHp: 47
@@ -24488,7 +25688,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -24521,6 +25721,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.51181
     monsterHp: 47
@@ -24602,7 +25807,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -24635,6 +25840,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.51048946
     monsterHp: 48
@@ -24716,7 +25926,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -24749,6 +25959,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.509171
     monsterHp: 48
@@ -24830,7 +26045,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -24863,6 +26078,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.50785464
     monsterHp: 48
@@ -24944,7 +26164,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -24977,6 +26197,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.5065404
     monsterHp: 48
@@ -25058,7 +26283,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -25091,6 +26316,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.5052282
     monsterHp: 48
@@ -25172,7 +26402,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -25205,6 +26435,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.5039181
     monsterHp: 48
@@ -25283,7 +26518,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 192
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -25316,6 +26551,11 @@ MonoBehaviour:
     brutes: 0
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.50261
     monsterHp: 48
@@ -25397,7 +26637,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 1152
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -25430,6 +26670,11 @@ MonoBehaviour:
     brutes: 1
     towers: 5
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 0
     robotHp: 9
     robotStep: 0.50130403
     monsterHp: 48
@@ -25507,7 +26752,7 @@ MonoBehaviour:
     chaseSpeed: 0
     lowWalls: 0
     levelEvent: 0
-    rules: 0
+    rules: 128
     quest: 0
     guardsPrincess: 0
     cage: 0
@@ -25540,6 +26785,11 @@ MonoBehaviour:
     brutes: 1
     towers: 6
     towerHp: 18
+    utopia: 1
+    shieldEvery: 2
+    shieldHits: 3
+    repairDrones: 1
+    reactor: 1
     robotHp: 9
     robotStep: 0.5
     monsterHp: 48

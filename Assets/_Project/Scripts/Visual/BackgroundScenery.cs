@@ -90,6 +90,10 @@ namespace SquashBot.Visual
                 case Scenery.BlackHole: Stars(s, rng, 110, 0f); BlackHole(s); break;
                 case Scenery.CoreRings: Stars(s, rng, 50, 0f); CoreRings(s); break;
                 case Scenery.VanGFace: Stars(s, rng, 40, 0f); VanGFace(s, rng); break;
+                case Scenery.Utopia: UtopiaCity(c, s, rng, CityStyle.Day); break;
+                case Scenery.UtopiaSpires: UtopiaCity(c, s, rng, CityStyle.Spires); break;
+                case Scenery.UtopiaGarden: UtopiaCity(c, s, rng, CityStyle.Garden); break;
+                case Scenery.UtopiaNight: UtopiaCity(c, s, rng, CityStyle.Night); break;
                 default: PlanetsAndGrid(s); break;
             }
         }

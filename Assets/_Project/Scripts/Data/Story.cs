@@ -51,7 +51,7 @@ namespace SquashBot.Data
             new[] { N, N, N, N },
             new[] { N, N, N, N, N },
             new[] { N, N, N, N },
-            new[] { N, N, N, N, V, N, V },
+            new[] { N, N, N, N, V, N, V, N, B, V },
             new[] { N, N, N, N, N, N, B, N },
             new[] { N, N, N, B, N },
             new[] { N, N, V, N },
@@ -65,7 +65,7 @@ namespace SquashBot.Data
             new[] { N, N, T, N },
             new[] { N, N, N, B, N },
             new[] { N, N, N, V, N },
-            new[] { N, N, N, V, N },
+            new[] { N, N, N, V, N, N, B, N },
             new[] { N, N, V, N, N, N, V, N, N, N },
         };
 

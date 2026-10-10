@@ -19,6 +19,8 @@ namespace SquashBot.Visual
         // Cloud Bridge
         Clouds, Islands, SunsetClouds, Balloons, StormClouds, Vortex, Castle, CastleGate,
         // Star Road
-        CyberCity, DataStreams, Meteors, Spiral, BlackHole, CoreRings, VanGFace
+        CyberCity, DataStreams, Meteors, Spiral, BlackHole, CoreRings, VanGFace,
+        // The perfect city (level 101 on)
+        Utopia, UtopiaSpires, UtopiaGarden, UtopiaNight
     }
 }

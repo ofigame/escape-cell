@@ -24,6 +24,10 @@ namespace SquashBot.Gameplay
             public Material barMat;
             public TowerModel model;
             public bool dead;
+            /// <summary>The perfect city's reactor core: the floor's boss tower (see HuntSystemUtopia).</summary>
+            public bool reactor;
+            /// <summary>The tiles its shot will hit: foi's tile (and, for the reactor, the four around it).</summary>
+            public readonly List<GridPos> area = new List<GridPos>();
         }
 
         private readonly List<Tower> towers = new List<Tower>();
@@ -61,14 +65,17 @@ namespace SquashBot.Gameplay
             return stage * 5 + pick;
         }
 
-        private void AddTower(GridPos p)
+        private void AddTower(GridPos p, bool reactor = false)
         {
-            var t = new Tower { pos = p, hp = level.towerHp, maxHp = Mathf.Max(1, level.towerHp), cooldown = 1.5f + (float)rng.NextDouble() };
+            int hp = reactor ? ReactorHp : level.towerHp;
+            var t = new Tower { pos = p, hp = hp, maxHp = Mathf.Max(1, hp), cooldown = 1.5f + (float)rng.NextDouble(), reactor = reactor };
             t.root = new GameObject("GuardTower").transform;
             t.root.SetParent(transform, false);
             var accent = Color.HSVToRGB(Mathf.Repeat(world * 0.21f + 0.55f, 1f), 0.75f, 1f);
-            t.model = TowerModel.Build(t.root, TowerDesign(towers.Count), accent);
-            t.model.transform.localScale = Vector3.one * Mathf.Lerp(1.1f, 1.4f, Mathf.Clamp01(world / 12f));
+            int built = 0;
+            foreach (var o in towers) if (!o.reactor) built++;
+            t.model = TowerModel.Build(t.root, reactor ? TowerModel.Reactor : TowerDesign(built), accent);
+            t.model.transform.localScale = Vector3.one * Mathf.Lerp(1.1f, 1.4f, Mathf.Clamp01(world / 12f)) * (reactor ? 1.25f : 1f);
             t.root.position = At(p);
             grid.SetOccupied(p, true);
             // Its health bar over the top.
@@ -77,7 +84,7 @@ namespace SquashBot.Gameplay
             t.bar = new GameObject("HealthBar").transform;
             t.bar.SetParent(t.root, false);
             t.bar.localPosition = new Vector3(0f, top + 0.3f, 0f);
-            const float w = 1f;
+            float w = reactor ? 1.6f : 1f;
             Shapes.Rounded("Back", t.bar, Vector3.zero, new Vector3(w + 0.08f, 0.15f, 0.03f), 0.05f, MaterialFactory.Create(new Color(0.08f, 0.06f, 0.12f), Color.black));
             t.barMat = MaterialFactory.Create(new Color(1f, 0.75f, 0.3f), new Color(1.5f, 1f, 0.4f));
             t.barFill = new GameObject("Fill").transform;
@@ -85,6 +92,7 @@ namespace SquashBot.Gameplay
             t.barFill.localPosition = new Vector3(-w * 0.5f, 0f, -0.025f);
             Shapes.Rounded("Fill", t.barFill, new Vector3(w * 0.5f, 0f, 0f), new Vector3(w, 0.09f, 0.02f), 0.04f, t.barMat);
             towers.Add(t);
+            if (level.repairDrones) for (int i = 0; i < (reactor ? 2 : 1); i++) AddDrone(t);
         }
 
         private void StopTowers()
@@ -93,9 +101,10 @@ namespace SquashBot.Gameplay
             {
                 if (t.root != null) Destroy(t.root.gameObject);
                 if (!t.dead && grid != null) grid.SetOccupied(t.pos, false);
-                if (t.windup >= 0f) view?.SetWarning(t.target, 0f);
+                if (t.windup >= 0f) foreach (var a in t.area) view?.SetWarning(a, 0f);
             }
             towers.Clear();
+            StopDrones();
         }
 
         private void UpdateTowers(float dt)
@@ -113,34 +122,46 @@ namespace SquashBot.Gameplay
                     t.windup += dt;
                     float w = t.windup / TowerWind;
                     t.model.SetCharge(w);
-                    view.SetWarning(t.target, 0.35f + 0.65f * w);
+                    foreach (var a in t.area) view.SetWarning(a, 0.35f + 0.65f * w);
                     if (w < 1f) continue;
                     // Fire: the bolt flies to the marked tile; whoever still stands there is hit.
                     t.windup = -1f;
                     t.model.SetCharge(0f);
                     t.model.Flash();
-                    var target = t.target;
                     var colour = t.model.BoltColour;
-                    AudioManager.PlaySfx(Sfx.Blocked, 0.7f, 1.6f);
-                    TowerBolt.Fire(t.model.Muzzle.position, At(target) + Vector3.up * 0.3f, colour, 0.32f, () =>
+                    float share = t.reactor ? ReactorHitShare : TowerHitShare;
+                    AudioManager.PlaySfx(Sfx.Blocked, 0.7f, t.reactor ? 1.1f : 1.6f);
+                    if (t.reactor) rig.Shake(0.4f);
+                    foreach (var a in t.area)
                     {
-                        if (view != null) view.SetWarning(target, 0f);
-                        if (!running) return;
-                        Shockwave.Create(At(target), 0.9f, colour);
-                        fx.Burst(At(target) + Vector3.up * 0.3f, colour, colour * 2f, 14, 3f);
-                        if (robot.Position == target) Hit?.Invoke(target, TowerHitShare);
-                        if (CompanionTile.HasValue && CompanionTile.Value == target) CompanionHurt?.Invoke(1);
-                    });
-                    t.cooldown = TowerReload * (0.85f + (float)rng.NextDouble() * 0.3f);
+                        var target = a;
+                        TowerBolt.Fire(t.model.Muzzle.position, At(target) + Vector3.up * 0.3f, colour, 0.32f, () =>
+                        {
+                            if (view != null) view.SetWarning(target, 0f);
+                            if (!running) return;
+                            Shockwave.Create(At(target), 0.9f, colour);
+                            fx.Burst(At(target) + Vector3.up * 0.3f, colour, colour * 2f, 14, 3f);
+                            if (robot.Position == target) Hit?.Invoke(target, share);
+                            if (CompanionTile.HasValue && CompanionTile.Value == target) CompanionHurt?.Invoke(t.reactor ? 2 : 1);
+                        });
+                    }
+                    t.area.Clear();
+                    t.cooldown = TowerReload * (t.reactor ? 0.8f : 1f) * (0.85f + (float)rng.NextDouble() * 0.3f);
                     continue;
                 }
                 t.cooldown -= dt;
                 if (t.cooldown > 0f) continue;
                 int d = Chebyshev(t.pos, robot.Position);
                 // Out of sight, in the blind spot right next to it, or on a healing island: no shot (it looks again soon).
-                if (d > TowerRange || d <= TowerBlindSpot || grid.IsSafe(robot.Position)) { t.cooldown = 0.4f; continue; }
+                if (d > (t.reactor ? ReactorRange : TowerRange) || d <= TowerBlindSpot || grid.IsSafe(robot.Position)) { t.cooldown = 0.4f; continue; }
                 t.windup = 0f;
                 t.target = robot.Position;
+                t.area.Clear();
+                t.area.Add(t.target);
+                // The reactor's shot spreads: a cross of five tiles round foi.
+                if (t.reactor)
+                    foreach (var dir in DirectionExtensions.All)
+                        if (grid.IsFloor(t.target + dir.ToOffset()) && !grid.IsSafe(t.target + dir.ToOffset())) t.area.Add(t.target + dir.ToOffset());
             }
         }
 
@@ -166,7 +187,9 @@ namespace SquashBot.Gameplay
         {
             t.dead = true;
             grid.SetOccupied(t.pos, false);
-            if (t.windup >= 0f) view.SetWarning(t.target, 0f);
+            if (t.windup >= 0f) foreach (var a in t.area) view.SetWarning(a, 0f);
+            KillDronesOf(t);
+            if (t.reactor) ReactorFell(t);
             fx.Burst(At(t.pos) + Vector3.up * 0.8f, new Color(0.7f, 0.65f, 0.6f), new Color(1.6f, 1.2f, 0.6f), 50, 7f);
             fx.Dust(At(t.pos), new Color(0.6f, 0.55f, 0.5f), 26, 5f);
             Shockwave.Create(At(t.pos), 2f, new Color(1f, 0.7f, 0.4f));

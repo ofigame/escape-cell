@@ -53,6 +53,9 @@ namespace SquashBot.Gameplay
 
         public bool Has(FloorRule r) => (rules & r) != 0;
 
+        /// <summary>A tile this level's rules made special (a pad, an energy panel...): its own look stays on it.</summary>
+        public bool IsSpecial(GridPos p) => special != null && grid != null && grid.InBounds(p) && special[p.x, p.y] != Special.None;
+
         public void Init(GridView gridView, Robot bot, HazardSystem hazardSystem, FxSystem fxSystem, CameraRig cameraRig)
         {
             view = gridView;
@@ -87,7 +90,9 @@ namespace SquashBot.Gameplay
             if (Has(FloorRule.Ice)) Mark(Special.Ice, 0.34f);
             if (Has(FloorRule.Trampoline)) Mark(Special.Trampoline, 0.14f);
             if (Has(FloorRule.Glass)) Mark(Special.Glass, 0.4f);
-            if (Has(FloorRule.Blink)) { Mark(Special.BlinkA, 0.16f); Mark(Special.BlinkB, 0.16f); }
+            // The wide hunt floors of the perfect city get fewer of them: energy panels here and there, not a minefield.
+            float blinkShare = level.mission == MissionType.Hunt ? 0.06f : 0.16f;
+            if (Has(FloorRule.Blink)) { Mark(Special.BlinkA, blinkShare); Mark(Special.BlinkB, blinkShare); }
             if (Has(FloorRule.Teleport)) PlacePads();
             if (Has(FloorRule.Dark)) view.Light = Lit;
 
@@ -244,6 +249,8 @@ namespace SquashBot.Gameplay
             {
                 if (!grid.IsFloor(p) || special[p.x, p.y] != Special.None) continue;
                 if (p == start || (grid.DoorSpot.HasValue && p == grid.DoorSpot.Value) || grid.KeySpots.Contains(p)) continue;
+                // On a hunt floor the crowd and the towers are already standing: keep their tiles (and foi's) plain.
+                if (level.mission == MissionType.Hunt && (grid.IsOccupied(p) || p == robot.Position)) continue;
                 if (isProtected != null && isProtected(p)) continue;
                 list.Add(p);
             }
@@ -327,7 +334,8 @@ namespace SquashBot.Gameplay
                 case Special.BlinkB:
                 {
                     bool a = kind == Special.BlinkA;
-                    view.SetTint(p, a ? new Color(1f, 0.55f, 0.95f) : new Color(0.55f, 0.75f, 1f), a ? new Color(0.5f, 0.1f, 0.45f) : new Color(0.1f, 0.25f, 0.55f));
+                    if (level.utopia) view.SetTint(p, a ? new Color(1f, 0.86f, 0.5f) : new Color(0.5f, 0.95f, 1f), a ? new Color(0.9f, 0.6f, 0.15f) : new Color(0.15f, 0.7f, 0.9f)); // energy panels
+                    else view.SetTint(p, a ? new Color(1f, 0.55f, 0.95f) : new Color(0.55f, 0.75f, 1f), a ? new Color(0.5f, 0.1f, 0.45f) : new Color(0.1f, 0.25f, 0.55f));
                     break;
                 }
                 case Special.Teleport:

@@ -42,6 +42,11 @@ namespace SquashBot.Gameplay
             public HumanoidBot human;
             public Transform root;
             public bool dead, brute;
+            /// <summary>Blows its energy shield still takes (the perfect city's guards), its bubble and material.</summary>
+            public int shield;
+            public Transform bubble;
+            public Material bubbleMat;
+            public float shieldFlash;
             /// <summary>The tiles its slam will hit (the target, and its neighbours for a brute).</summary>
             public readonly List<GridPos> area = new List<GridPos>();
 
@@ -144,6 +149,7 @@ namespace SquashBot.Gameplay
             // Guard towers, set well away from where foi starts.
             var far = new List<GridPos>();
             foreach (var p in free) if (Chebyshev(p, robot.Position) >= 4) far.Add(p);
+            if (level.reactor && far.Count > 0) { var rp = NearestCentre(far); far.Remove(rp); free.Remove(rp); AddTower(rp, reactor: true); }
             for (int i = 0; i < level.towers && far.Count > 0; i++) { var tp = Take(far); free.Remove(tp); AddTower(tp); }
             Total = bugs.Count + guards.Count + towers.Count;
             MonsterAwake = false;
@@ -172,6 +178,15 @@ namespace SquashBot.Gameplay
         public void Resume() => frozen = false;
 
         // ---------- Spawning ----------
+
+        /// <summary>The tile of a list nearest the middle of the floor.</summary>
+        private GridPos NearestCentre(List<GridPos> list)
+        {
+            var centre = new GridPos(grid.Width / 2, grid.Height / 2);
+            var best = list[0];
+            foreach (var p in list) if (p.Manhattan(centre) < best.Manhattan(centre)) best = p;
+            return best;
+        }
 
         private List<GridPos> FreeTiles(int awayFromRobot)
         {
@@ -216,11 +231,14 @@ namespace SquashBot.Gameplay
             else
             {
                 // A new build of guard every world, in that world's colour.
-                g.bot = GuardBot.Build(g.root, Color.Lerp(accent, new Color(0.3f, 0.3f, 0.35f), 0.35f), world);
+                // In the perfect city: pearl and gold guards lit in the floor's colour.
+                g.bot = level.utopia ? GuardBot.Build(g.root, Color.HSVToRGB(Mathf.Repeat(world * 0.21f + 0.5f, 1f), 0.6f, 1f), world, utopian: true)
+                    : GuardBot.Build(g.root, Color.Lerp(accent, new Color(0.3f, 0.3f, 0.35f), 0.35f), world);
                 g.bot.transform.localScale = Vector3.one * 0.62f * EnemyScale;
             }
             g.maxHp = Mathf.Max(1, g.hp);
             AddHealthBar(g);
+            if (level.shieldEvery > 0 && guards.Count % level.shieldEvery == level.shieldEvery - 1) AddShield(g);
             g.from = g.to = At(p);
             g.root.position = g.to;
             grid.SetOccupied(p, true);
@@ -281,6 +299,7 @@ namespace SquashBot.Gameplay
             }
             if (MonsterUp) Try(monster.transform.position, 2f * monster.transform.lossyScale.y, monsterPos, 0.8f);
             PickTowers(Try);
+            PickDrones(Try);
             foreach (var g in guards)
                 if (!g.dead) Try(g.root.position, g.bar != null ? g.bar.localPosition.y : 1.2f, g.pos, 0.8f); // fighters first when close
             foreach (var b in bugs)
@@ -293,7 +312,7 @@ namespace SquashBot.Gameplay
         public bool HasTargetAt(GridPos p)
         {
             if (MonsterUp && monsterPos == p) return true;
-            if (TowerAt(p)) return true;
+            if (TowerAt(p) || DroneAt(p)) return true;
             foreach (var g in guards) if (!g.dead && (g.pos == p || (g.moveT < 1f && g.prevPos == p))) return true;
             foreach (var b in bugs) if (!b.dead && b.pos == p) return true;
             return false;
@@ -356,6 +375,8 @@ namespace SquashBot.Gameplay
             foreach (var g in guards)
             {
                 if (g.dead || (g.pos != p && !(g.moveT < 1f && g.prevPos == p))) continue;
+                // An energy shield takes the blow first (any weapon cracks it: one blow, one charge).
+                if (g.shield > 0) { HitShield(g, p); return true; }
                 g.hp -= ThroughArmor(p, damage);
                 g.flash = 1f;
                 g.Flash();
@@ -369,6 +390,7 @@ namespace SquashBot.Gameplay
                 else KnockBack(g);
                 return true;
             }
+            if (StrikeDrone(p)) return true;
             foreach (var b in bugs)
             {
                 if (b.dead || b.pos != p) continue;
@@ -515,6 +537,7 @@ namespace SquashBot.Gameplay
             foreach (var b in bugs) if (!b.dead) UpdateBug(b, dt);
             foreach (var g in guards) if (!g.dead) UpdateGuard(g, dt);
             UpdateTowers(dt);
+            UpdateDrones(dt);
             if (MonsterUp && MonsterAwake) UpdateMonster(dt);
         }
 
@@ -602,6 +625,7 @@ namespace SquashBot.Gameplay
         private void UpdateGuard(Guard g, float dt)
         {
             UpdateHealthBar(g);
+            UpdateShield(g, dt);
             if (g.flash > 0f) g.flash -= dt * 3f;
             g.cooldown -= dt;
             if (g.moveT < 1f)
@@ -838,6 +862,7 @@ namespace SquashBot.Gameplay
             var towerTiles = new List<GridPos>();
             AddTowerTargets(towerTiles);
             foreach (var p in towerTiles) Consider(p);
+            foreach (var dr in drones) if (!dr.dead) Consider(dr.pos);
             if (!found) foreach (var b in bugs) if (!b.dead) Consider(b.pos);
             at = pick;
             return found;

@@ -165,6 +165,22 @@ namespace SquashBot.Data
                 level.towerHp += level.armor - 1;
             }
 
+            // The perfect city (level 101 on): pearl guards, a third of them (half from level 171) behind energy shields,
+            // repair drones mending the towers (from level 111), a reactor core as the boss of every tenth floor, and
+            // the city's own floor rules: teleport pads on every floor, lasers and energy panels taking turns.
+            if (index >= 100)
+            {
+                level.utopia = true;
+                level.shieldEvery = index >= 170 ? 2 : 3;
+                level.shieldHits = index >= 200 ? 3 : 2;
+                level.repairDrones = index >= 110;
+                level.reactor = inWorld == 9;
+                var rules = FloorRule.Teleport;
+                if (inWorld % 3 == 1 || (index >= 150 && inWorld % 3 == 0 && inWorld != 9)) rules |= FloorRule.Laser;
+                if (inWorld % 3 == 2) rules |= FloorRule.Blink;
+                level.rules = rules;
+            }
+
             level.coinInterval = 2.4f;
             level.maxCoins = 2;
             level.powerUpInterval = index < FirstPowerUpLevel - 1 ? 0f : Mathf.Lerp(11f, 6f, d);

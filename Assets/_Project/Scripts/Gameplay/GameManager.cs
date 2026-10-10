@@ -39,7 +39,7 @@ namespace SquashBot.Gameplay
         // Features unlock as the player progresses (world index, 0-based).
         private const int RescueFromWorld = 1;
         private const int FireFromWorld = 2;
-        private const int HoverFromWorld = 3;
+        private const int HoverFromWorld = 0; // press-and-hold flight is there from the very first level
 
         [SerializeField] private LevelSet levelSet;
 
