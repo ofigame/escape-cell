@@ -1,4 +1,5 @@
 using System.Collections;
+using SquashBot.Data;
 using SquashBot.Visual;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
@@ -26,13 +27,17 @@ namespace SquashBot.Gameplay
         /// </summary>
         private void ApplyFortressLight(bool on)
         {
-            Shapes.CastShadows = on;
+            GridView.FortressTiles = on;
+            // Real shadows cost: soft on strong phones, hard on middling ones, none on the weakest (the rest of the look stays).
+            var tier = Data.GraphicsQuality.Current;
+            bool shadows = on && tier != Data.GraphicsTier.Low;
+            Shapes.CastShadows = shadows;
             var key = FindAnyObjectByType<Light>();
             foreach (var l in FindObjectsByType<Light>(FindObjectsSortMode.None))
                 if (l.type == LightType.Directional) { key = l; break; }
             if (key != null)
             {
-                key.shadows = on ? LightShadows.Soft : LightShadows.None;
+                key.shadows = !shadows ? LightShadows.None : tier == Data.GraphicsTier.High ? LightShadows.Soft : LightShadows.Hard;
                 key.shadowStrength = 0.75f;
                 key.color = on ? new Color(1f, 0.9f, 0.8f) : Color.white;
                 key.intensity = on ? 1.15f : 1f;
@@ -40,23 +45,34 @@ namespace SquashBot.Gameplay
             }
             if (on)
             {
+                // Light from the sky above, the horizon round about and the dark ground below, in the floor's own colours.
+                var t = WorldTheme.Current;
                 RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-                RenderSettings.ambientSkyColor = new Color(0.55f, 0.5f, 0.7f);
-                RenderSettings.ambientEquatorColor = new Color(0.62f, 0.45f, 0.42f);
-                RenderSettings.ambientGroundColor = new Color(0.18f, 0.16f, 0.2f);
+                RenderSettings.ambientSkyColor = Color.Lerp(t.ambient, t.bgTop, 0.35f) * 0.8f;
+                RenderSettings.ambientEquatorColor = Color.Lerp(t.ambient, t.bgGlow, 0.4f) * 0.75f;
+                RenderSettings.ambientGroundColor = Color.Lerp(t.bgBottom, Color.black, 0.6f);
             }
             else RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
             if (robot != null)
                 foreach (var r in robot.Visual.GetComponentsInChildren<Renderer>(true))
-                    r.shadowCastingMode = on ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
+                    r.shadowCastingMode = shadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
         }
 
-        /// <summary>Level 1's fortress round the floor, and its stairs set on fire.</summary>
+        private GlassCell glassCell;
+        private float glassSince = -1f;
+
+        /// <summary>
+        /// The fortress round the floor (its stage grows with the worlds; level 1 is the stone one), its stairs set on
+        /// fire, and foi's glass cell on the start tile.
+        /// </summary>
         private void SetupFortressFloor()
         {
             ClearFortressFloor();
-            if (level == null || !level.fortress) return;
-            fortressFloor = FortressFloor.Build(grid, gridView.transform);
+            if (level == null || level.mission != MissionType.Hunt) return;
+            int stage = level.fortress ? 0 : FortressFloor.StageFor(World);
+            fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface);
+            glassCell = GlassCell.Create(GridView.ToWorld(robot.Position) + Vector3.up * GridView.SurfaceY, robot.transform.localScale.x * 0.62f);
+            glassSince = -1f;
             foreach (var p in grid.LavaTiles)
             {
                 grid.SetTile(p, Core.TileState.Fire);
@@ -68,6 +84,40 @@ namespace SquashBot.Gameplay
         {
             if (fortressFloor != null) Destroy(fortressFloor.gameObject);
             fortressFloor = null;
+            if (glassCell != null) Destroy(glassCell.gameObject);
+            glassCell = null;
+        }
+
+        /// <summary>
+        /// While foi is still in its cell: the first touch (or a moment's wait) breaks the glass and that touch does
+        /// nothing else. Returns the command to carry on with.
+        /// </summary>
+        private InputCommand GlassCellGate(InputCommand command)
+        {
+            if (glassCell == null || glassCell.Broken || level == null || level.mission != MissionType.Hunt) return command;
+            if (glassSince < 0f)
+            {
+                // Nothing moves while foi is still behind the glass: robots, crates and floor rules wait for it.
+                glassSince = Time.time;
+                hunt.Freeze();
+                hazards.Freeze();
+                floorRules.Freeze();
+            }
+            if (command.IsEmpty && Time.time - glassSince < 2f) return default;
+            // foi breaks out: a punch, a white flash in the glass, the shards fly; the floor comes alive.
+            glassCell.Shatter();
+            hunt.Resume();
+            hazards.Resume();
+            floorRules.Resume();
+            if (heldWeapon != null) heldWeapon.Swing();
+            robot.Strike(robot.transform.position + robot.transform.forward);
+            cameraRig.Shake(0.6f);
+            cameraRig.Punch(0.5f);
+            fx.Burst(robot.transform.position + Vector3.up * 0.8f, new Color(0.55f, 0.9f, 1f), new Color(0.8f, 2f, 3f), 40, 6f);
+            Audio.AudioManager.PlaySfx(Audio.Sfx.Blocked, 1f, 1.7f);
+            Audio.AudioManager.PlaySfx(Audio.Sfx.Impact, 0.7f, 1.4f);
+            Audio.Haptics.Medium();
+            return default;
         }
 
         private void StartFortressViewIfAsked()

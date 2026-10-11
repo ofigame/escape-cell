@@ -60,6 +60,47 @@ namespace SquashBot.Data
             return result;
         }
 
+        /// <summary>
+        /// Burning stairs ('F') leading off the floor: three tiles in the middle of the south edge (a new row under the
+        /// floor where the bottom row has floor there), and with <paramref name="sides"/> one tile off the east and the
+        /// west edge, on the row nearest the middle whose edge tile is floor (a new column each side).
+        /// </summary>
+        private static string[] WithFireStairs(string[] layout, bool sides)
+        {
+            bool Floor(char c) => c != '.' && c != 'X' && c != 'H';
+            var rows = new List<string>(layout);
+            int w = rows[0].Length, mid = w / 2;
+            string last = rows[rows.Count - 1];
+            var south = new char[w];
+            bool any = false;
+            for (int x = 0; x < w; x++)
+            {
+                bool stair = x >= mid - 1 && x <= mid + 1 && Floor(last[x]);
+                south[x] = stair ? 'F' : '.';
+                any |= stair;
+            }
+            if (any) rows.Add(new string(south));
+            if (sides)
+            {
+                int h = rows.Count - (any ? 1 : 0);
+                int Pick(bool east)
+                {
+                    int best = -1, bestD = int.MaxValue;
+                    for (int r = 1; r < h - 1; r++)
+                    {
+                        char c = east ? rows[r][w - 1] : rows[r][0];
+                        int d = Mathf.Abs(r - h / 2);
+                        if (Floor(c) && d < bestD) { bestD = d; best = r; }
+                    }
+                    return best;
+                }
+                int er = Pick(true), wr = Pick(false);
+                for (int r = 0; r < rows.Count; r++)
+                    rows[r] = (wr >= 0 ? (r == wr ? "F" : ".") : "") + rows[r] + (er >= 0 ? (r == er ? "F" : ".") : "");
+            }
+            return rows.ToArray();
+        }
+
         /// <summary>Tiles of the bridge from vanG's cage to the tunnel.</summary>
         public const int BridgeLength = 4;
 
@@ -147,6 +188,8 @@ namespace SquashBot.Data
             // edges: one, two from level 121.
             if (index >= 25 && (inWorld == 2 || inWorld == 5 || inWorld == 9))
                 level.layout = WithHealIslands(level.layout, index >= 120 ? 2 : 1);
+            // The fortress's burning stairs off the south edge (and off the east and west ones where no healing island is).
+            if (index > 0) level.layout = WithFireStairs(level.layout, sides: !(index >= 25 && (inWorld == 2 || inWorld == 5 || inWorld == 9)));
             // vanG's cage in the middle of the north edge, the bridge from it to the tunnel beyond.
             level.layout = WithCageAndBridge(level.layout);
             level.gridWidth = level.layout[0].Length;

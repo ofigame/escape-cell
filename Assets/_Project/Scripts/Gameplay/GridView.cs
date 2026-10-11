@@ -53,6 +53,9 @@ namespace SquashBot.Gameplay
         private FxSystem fx;
 
         /// <summary>A tile's centre in the world, standing on its step of the floor's relief (see <see cref="FloorRelief"/>).</summary>
+        /// <summary>The fortress look for the floor (stone or metal slabs with mortar, no glowing bands): every core-loop floor.</summary>
+        public static bool FortressTiles;
+
         public static Vector3 ToWorld(GridPos p) => new Vector3(p.x, FloorRelief.HeightAt(p) * FloorRelief.Step, p.y);
 
         public void Build(GridModel grid, FxSystem fxSystem, bool lowWalls = false)
@@ -82,7 +85,7 @@ namespace SquashBot.Gameplay
                 tile.transform.SetParent(root.transform, false);
 
                 Material frame, top;
-                if (WorldTheme.Current.fortress)
+                if (FortressTiles)
                 {
                     // Fortress stone: dark mortar between big slabs, each slab its own shade, rough and matt, a few cracked.
                     float shade = 0.86f + (float)stone.NextDouble() * 0.24f;
@@ -138,7 +141,7 @@ namespace SquashBot.Gameplay
             var slab = MaterialFactory.Create(Palette.Slab, Color.black);
             var glow = MaterialFactory.Create(Palette.Slab, Palette.SlabEdgeGlow);
 
-            bool fortress = WorldTheme.Current.fortress;
+            bool fortress = FortressTiles;
             if (fortress) glow = slab; // plain stone, no glowing band
             foreach (var p in grid.AllPositions())
             {

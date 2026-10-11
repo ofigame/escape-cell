@@ -84,7 +84,7 @@ namespace SquashBot.Gameplay
             // tunnels, see ClearHuntDress); the robot carries its weapon.
             float grow = Mathf.Clamp01(World / 12f);
             robot.transform.localScale = Vector3.one * Mathf.Lerp(1.65f, 2.17f, grow);
-            Robot.HopScale = 0.6f; // quick and even: each step follows the finger at once, and a run of steps flows on
+            Robot.HopScale = 0.9f; // steady and readable: each step follows the finger, a run of steps flows on (0.6 felt too fast)
             hunt.EnemyScale = Mathf.Lerp(1.6f, 2.03f, grow);
             adHealUsed = false;
             weapon = Armory.Equipped;

@@ -322,7 +322,7 @@ namespace SquashBot.Gameplay
         {
             int world = LevelCatalog.WorldOf(levelIdx);
             var theme = WorldTheme.ForLevel(levelIdx).Realm(world); // the world's own realm floor
-            ApplyFortressLight(theme.fortress);
+            ApplyFortressLight(levelSet != null && levelIdx >= 0 && levelIdx < levelSet.levels.Count && levelSet.levels[levelIdx].mission == MissionType.Hunt);
             if (theme == themeNow) return;
             themeNow = theme;
             WorldTheme.SetCurrent(theme);
@@ -1222,6 +1222,7 @@ namespace SquashBot.Gameplay
 
             // In an arena fight the arena reads the touches itself.
             var command = ArenaActive ? default(InputCommand) : input.Poll(robot.transform.position);
+            command = GlassCellGate(command); // foi starts each floor in its glass cell
             UpdateHover(command);
             if (!hovering)
             {
