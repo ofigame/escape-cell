@@ -25,9 +25,11 @@ namespace SquashBot.Gameplay
         /// warm, like the setting sun), and the ambient light comes from the sky, the horizon and the ground instead of
         /// one flat colour. Elsewhere it all goes back to the light, flat, shadowless look (cheaper on phones).
         /// </summary>
-        private void ApplyFortressLight(bool on)
+        private void ApplyFortressLight(bool on, int world = 0, WorldTheme theme = null)
         {
             GridView.FortressTiles = on;
+            theme = theme ?? WorldTheme.Current;
+            GridView.FortressStone = FortressStoneFor(world, theme.accent);
             // Real shadows cost: soft on strong phones, hard on middling ones, none on the weakest (the rest of the look stays).
             var tier = Data.GraphicsQuality.Current;
             bool shadows = on && tier != Data.GraphicsTier.Low;
@@ -46,7 +48,7 @@ namespace SquashBot.Gameplay
             if (on)
             {
                 // Light from the sky above, the horizon round about and the dark ground below, in the floor's own colours.
-                var t = WorldTheme.Current;
+                var t = theme;
                 RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
                 RenderSettings.ambientSkyColor = Color.Lerp(t.ambient, t.bgTop, 0.35f) * 0.8f;
                 RenderSettings.ambientEquatorColor = Color.Lerp(t.ambient, t.bgGlow, 0.4f) * 0.75f;
@@ -70,7 +72,7 @@ namespace SquashBot.Gameplay
             ClearFortressFloor();
             if (level == null || level.mission != MissionType.Hunt) return;
             int stage = level.fortress ? 0 : FortressFloor.StageFor(World);
-            fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface);
+            fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, level.fortressStages > 1 ? level.stageBounds : null);
             glassCell = GlassCell.Create(GridView.ToWorld(robot.Position) + Vector3.up * GridView.SurfaceY, robot.transform.localScale.x * 0.62f);
             glassSince = -1f;
             foreach (var p in grid.LavaTiles)
@@ -80,12 +82,25 @@ namespace SquashBot.Gameplay
             }
         }
 
+        /// <summary>
+        /// The colour ramp of the fortress floors: pale, almost white stone in the first worlds; then every world tinted in
+        /// its own colour, going from light to deep and dark — the far worlds feel like a war among the stars.
+        /// </summary>
+        private static Color FortressStoneFor(int world, Color accent)
+        {
+            float t = Mathf.Clamp01(world / 24f);
+            Color.RGBToHSV(accent, out float h, out _, out _);
+            var tint = Color.HSVToRGB(h, Mathf.Lerp(0.06f, 0.38f, t), Mathf.Lerp(0.9f, 0.24f, Mathf.Pow(t, 0.8f)));
+            return world < 2 ? Color.Lerp(new Color(0.86f, 0.86f, 0.88f), tint, 0.3f) : tint;
+        }
+
         private void ClearFortressFloor()
         {
             if (fortressFloor != null) Destroy(fortressFloor.gameObject);
             fortressFloor = null;
             if (glassCell != null) Destroy(glassCell.gameObject);
             glassCell = null;
+            ClearStageGates();
         }
 
         /// <summary>

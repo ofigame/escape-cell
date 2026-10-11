@@ -32,8 +32,10 @@ namespace SquashBot.Visual
         }
 
         /// <param name="surface">The tile transform of a grid cell (walkway plates hang on it).</param>
-        public static Transform Build(GridModel grid, Transform parent, int stage, Color accent, GridPos start, Func<GridPos, Transform> surface)
+        /// <param name="stageBounds">The floor's fortress stages (x0, y0, x1, y1 each): four towers round every stage.</param>
+        public static Transform Build(GridModel grid, Transform parent, int stage, Color accent, GridPos start, Func<GridPos, Transform> surface, int[] stageBounds = null)
         {
+            lightsLeft = MaxLights;
             var root = new GameObject("Fortress").transform;
             root.SetParent(parent, false);
             var k = new Kit
@@ -79,7 +81,20 @@ namespace SquashBot.Visual
             int minX = int.MaxValue, minZ = int.MaxValue, maxX = int.MinValue, maxZ = int.MinValue;
             foreach (var p in grid.AllPositions())
                 if (Main(p)) { minX = Mathf.Min(minX, p.x); maxX = Mathf.Max(maxX, p.x); minZ = Mathf.Min(minZ, p.y); maxZ = Mathf.Max(maxZ, p.y); }
-            if (minX <= maxX)
+            if (stageBounds != null && stageBounds.Length >= 8)
+            {
+                // A fortress of stages: four towers round each, just off its corners (clear of the fire stairs).
+                for (int s = 0; s < stageBounds.Length / 4; s++)
+                    foreach (var (sx, sz) in new[] { (-1, -1), (1, -1), (-1, 1), (1, 1) })
+                    {
+                        var c = new GridPos(sx < 0 ? stageBounds[s * 4] : stageBounds[s * 4 + 2], sz < 0 ? stageBounds[s * 4 + 1] : stageBounds[s * 4 + 3]);
+                        var at = GridView.ToWorld(c) + new Vector3(sx * 1.35f, 0f, sz * 1.35f) + Vector3.up * (y0 - 0.1f);
+                        float height = sz < 0 ? 0.55f : 0.85f;
+                        if (stage == 2) TechTower(root, k, at, height);
+                        else Spire(root, k, stage, at, height);
+                    }
+            }
+            else if (minX <= maxX)
                 foreach (var (sx, sz) in new[] { (-1, -1), (1, -1), (-1, 1), (1, 1) })
                 {
                     // The floor tile nearest that corner, the tower just outside it.
@@ -130,6 +145,19 @@ namespace SquashBot.Visual
             foreach (var p in grid.LavaTiles)
             {
                 var at = GridView.ToWorld(p);
+                if (Inner(grid, p))
+                {
+                    // A fire pit sunk into the middle of a stage (hard floors' last stages): a stone rim round a pool of fire.
+                    foreach (var d in new[] { new Vector3(1f, 0f, 0f), new Vector3(-1f, 0f, 0f), new Vector3(0f, 0f, 1f), new Vector3(0f, 0f, -1f) })
+                        Box("PitRim", root, at + d * 0.45f + Vector3.up * (y0 - 0.02f), d.x != 0 ? new Vector3(0.12f, 0.16f, 1f) : new Vector3(1f, 0.16f, 0.12f), k.stoneLight, 0.03f);
+                    Box("PitWall", root, at + Vector3.up * (y0 - 0.45f), new Vector3(0.9f, 0.8f, 0.9f), k.stoneDark, 0.03f);
+                    Box("FirePool", root, at + Vector3.up * (y0 - 0.04f), new Vector3(0.78f, 0.04f, 0.78f), k.lava, 0.01f);
+                    var f = Flames.Create(root);
+                    f.transform.position = at + Vector3.up * y0;
+                    f.transform.localScale = Vector3.one * 1.1f;
+                    AddLight(root, at + Vector3.up * 0.6f, new Color(1f, 0.5f, 0.15f), 3f, 2.2f);
+                    continue;
+                }
                 var o = OutwardOf(grid, p);
                 for (int s = 0; s < 4; s++)
                 {
@@ -146,6 +174,7 @@ namespace SquashBot.Visual
             // One warm light over the fire pits of each side (a few lights in all: cheap on phones).
             foreach (var p in grid.LavaTiles)
             {
+                if (Inner(grid, p)) continue;
                 var o = OutwardOf(grid, p);
                 var nb = new GridPos(p.x + (o.y != 0 ? 1 : 0), p.y + (o.x != 0 ? 1 : 0));
                 if (grid.IsLava(nb)) continue; // the end of a run: one light per flight
@@ -155,8 +184,14 @@ namespace SquashBot.Visual
             return root;
         }
 
+        /// <summary>Point lights still allowed on this floor (a handful in all keeps phones smooth).</summary>
+        private const int MaxLights = 10;
+        private static int lightsLeft;
+
         private static void AddLight(Transform root, Vector3 at, Color c, float range, float intensity)
         {
+            if (lightsLeft <= 0) return;
+            lightsLeft--;
             var l = new GameObject("Light").AddComponent<Light>();
             l.transform.SetParent(root, false);
             l.transform.position = at;
@@ -270,6 +305,14 @@ namespace SquashBot.Visual
             Shapes.Primitive(PrimitiveType.Sphere, "Dish", s, new Vector3(0.2f, 4.35f, 0f), new Vector3(0.7f, 0.18f, 0.7f), k.steel);
             Shapes.Primitive(PrimitiveType.Cylinder, "Antenna", s, new Vector3(-0.25f, 4.9f, 0.2f), new Vector3(0.06f, 0.8f, 0.06f), k.dark);
             Shapes.Primitive(PrimitiveType.Sphere, "Tip", s, new Vector3(-0.25f, 5.75f, 0.2f), Vector3.one * 0.16f, k.light);
+        }
+
+        /// <summary>A fire tile with floor all round it: a pit inside a stage rather than stairs off its edge.</summary>
+        private static bool Inner(GridModel grid, GridPos p)
+        {
+            foreach (var d in new[] { new GridPos(1, 0), new GridPos(-1, 0), new GridPos(0, 1), new GridPos(0, -1) })
+                if (!grid.IsFloor(p + d) || grid.IsLava(p + d)) return false;
+            return true;
         }
 
         /// <summary>Which way a stair tile leads off the floor (towards the side with no floor).</summary>

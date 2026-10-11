@@ -144,6 +144,79 @@ namespace SquashBot.Data
             return result.ToArray();
         }
 
+        /// <summary>How many fortress stages a floor has: one up to level 20, then two, three (61), four (111), five (161) and six from level 201.</summary>
+        public static int StageCount(int index) => index < 20 ? 1 : index < 60 ? 2 : index < 110 ? 3 : index < 160 ? 4 : index < 200 ? 5 : 6;
+
+        /// <summary>The hard floors: from level 91 on, and before that every world's last floor from level 31.</summary>
+        public static bool IsHard(int index) => index >= 90 || (index >= 30 && index % LevelsPerWorld == LevelsPerWorld - 1);
+
+        /// <summary>
+        /// A floor of fortress stages, stacked from south (stage 1, where foi's cell is) to north (the last, with vanG's
+        /// cage and the tunnel bridge beyond): stages growing from a small first yard to a huge last field and all growing
+        /// with the campaign, joined by three-tile bridges whose middle tile is a gate ('G', shut until the stage before
+        /// is cleared). Burning stairs ('F') stand off the corners of every stage and off the south edge of the first;
+        /// on hard floors the last stage also has two fire pits in it. <paramref name="bounds"/> gets x0, y0, x1, y1 of
+        /// each stage (grid coordinates, y up from the bottom row), first stage first.
+        /// </summary>
+        private static string[] StageLayout(int index, float d, bool hard, out int[] bounds, out int cells)
+        {
+            int n = StageCount(index);
+            // One stage: the classic floor growing a little each level. Several: the first a small yard round foi's cell,
+            // every next one clearly bigger (four tiles wider, three longer), the sixth a huge last field.
+            int first = n == 1 ? (index < 8 ? 9 + index / 2 : Mathf.RoundToInt(Mathf.Lerp(11f, 13f, Mathf.InverseLerp(8f, 19f, index))))
+                : Mathf.RoundToInt(Mathf.Lerp(8f, 10f, Mathf.InverseLerp(20f, LevelCount - 1, index)));
+            var sizes = new int[n];   // widths (odd: the bridges sit on the middle column)
+            var lengths = new int[n]; // rows, south to north
+            for (int s = 0; s < n; s++)
+            {
+                int extra = n == 6 && s == 5 ? 4 : 0;
+                sizes[s] = (first + 4 * s + extra) | 1;
+                lengths[s] = first + 3 * s + extra;
+            }
+            int w = sizes[n - 1] + 2; // a column each side for the corner stairs
+            int mid = w / 2;
+            var rows = new List<string>(); // built top (north, the last stage) down
+            var tops = new int[n];
+            cells = 0;
+            for (int s = n - 1; s >= 0; s--)
+            {
+                int sz = sizes[s], len = lengths[s], x0 = mid - sz / 2, x1 = mid + sz / 2;
+                tops[s] = rows.Count;
+                for (int r = 0; r < len; r++)
+                {
+                    var row = new string('.', w).ToCharArray();
+                    for (int x = x0; x <= x1; x++) row[x] = '#';
+                    if (r == 0 || r == len - 1) { row[x0 - 1] = 'F'; row[x1 + 1] = 'F'; } // burning stairs off the corners
+                    if (r == len / 2 && s == 0) row[mid] = 'S';                          // foi's cell
+                    if (hard && s == n - 1 && n > 1 && r == len / 2 + 1) { row[mid - sz / 4 - 1] = 'F'; row[mid + sz / 4 + 1] = 'F'; } // two fire pits
+                    rows.Add(new string(row));
+                    cells += sz;
+                }
+                if (s > 0)
+                    for (int b = 0; b < 3; b++)
+                    {
+                        var row = new string('.', w).ToCharArray();
+                        row[mid] = b == 1 ? 'G' : '#';
+                        rows.Add(new string(row));
+                    }
+            }
+            // The first stage's south stairs.
+            var south = new string('.', w).ToCharArray();
+            for (int x = mid - 1; x <= mid + 1; x++) south[x] = 'F';
+            rows.Add(new string(south));
+            int h = rows.Count;
+            bounds = new int[n * 4];
+            for (int s = 0; s < n; s++)
+            {
+                int sz = sizes[s];
+                bounds[s * 4] = mid - sz / 2;
+                bounds[s * 4 + 2] = mid + sz / 2;
+                bounds[s * 4 + 3] = h - 1 - tops[s];
+                bounds[s * 4 + 1] = h - 1 - (tops[s] + lengths[s] - 1);
+            }
+            return rows.ToArray();
+        }
+
         public static LevelData Hunt(LevelScript.Card card)
         {
             int index = card.n - 1;
@@ -179,17 +252,20 @@ namespace SquashBot.Data
                 rows.Add(".....FFF.....");
                 level.layout = rows.ToArray();
             }
-            else level.layout = FloorShapes.For(index, size, out level.shapeName);
             int inWorld = index % LevelsPerWorld;
+            level.hard = IsHard(index);
+            if (index > 0)
+            {
+                // Every other floor: a chain of fortress stages joined by gated bridges (see StageLayout).
+                level.layout = StageLayout(index, d, level.hard, out level.stageBounds, out int cells);
+                level.fortressStages = level.stageBounds.Length / 4;
+                level.shapeName = "stages" + level.fortressStages;
+                size = Mathf.Max(9, Mathf.RoundToInt(Mathf.Sqrt(cells)));
+            }
+            else level.fortressStages = 1;
             // The tall pyramids and terraces are switched off (they looked odd in places); gentle mounds instead: a few
             // low plateaus a short step up, on every third floor from level 9.
             level.terrain = index >= 8 && inWorld % 3 == 1 ? TerrainKind.Mounds : TerrainKind.Flat;
-            // Hard floors (from level 26: the 3rd, 6th and 10th of each world) get healing islands a leap off the side
-            // edges: one, two from level 121.
-            if (index >= 25 && (inWorld == 2 || inWorld == 5 || inWorld == 9))
-                level.layout = WithHealIslands(level.layout, index >= 120 ? 2 : 1);
-            // The fortress's burning stairs off the south edge (and off the east and west ones where no healing island is).
-            if (index > 0) level.layout = WithFireStairs(level.layout, sides: !(index >= 25 && (inWorld == 2 || inWorld == 5 || inWorld == 9)));
             // vanG's cage in the middle of the north edge, the bridge from it to the tunnel beyond.
             level.layout = WithCageAndBridge(level.layout);
             level.gridWidth = level.layout[0].Length;

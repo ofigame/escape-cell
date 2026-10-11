@@ -67,6 +67,7 @@ namespace SquashBot.Core
                     bridge[x, y] = c == 'B';
                     lava[x, y] = c == 'F';
                     if (lava[x, y]) LavaTiles.Add(new GridPos(x, y));
+                    if (c == 'G') GateTiles.Add(new GridPos(x, y));
                     if (cage[x, y]) CageTiles.Add(new GridPos(x, y));
                     if (bridge[x, y]) BridgeTiles.Add(new GridPos(x, y));
                     var p = new GridPos(x, y);
@@ -93,6 +94,10 @@ namespace SquashBot.Core
         /// <summary>A fiery stairway off the floor ('F'): it burns whoever steps or is knocked onto it.</summary>
         public bool IsLava(GridPos p) => InBounds(p) && lava[p.x, p.y];
         public List<GridPos> LavaTiles { get; } = new List<GridPos>();
+
+        /// <summary>The gates on the bridges between fortress stages ('G'): shut until the stage before is cleared.</summary>
+        public List<GridPos> GateTiles { get; } = new List<GridPos>();
+        public bool IsGate(GridPos p) => GateTiles.Contains(p);
 
         public bool InBounds(GridPos p) => p.x >= 0 && p.y >= 0 && p.x < Width && p.y < Height;
 

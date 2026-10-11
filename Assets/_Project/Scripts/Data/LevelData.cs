@@ -178,6 +178,12 @@ namespace SquashBot.Data
         public bool reactor;
         [Tooltip("The fortress floor (level 1): ramparts, corner spires, burning stairs and real shadows.")]
         public bool fortress;
+        [Tooltip("Fortress stages on this floor (1..6), joined by gated bridges.")]
+        public int fortressStages = 1;
+        [Tooltip("x0, y0, x1, y1 of each stage in grid coordinates, the first (foi's cell) first.")]
+        public int[] stageBounds;
+        [Tooltip("A hard floor: easy and very strong robots mixed, fire pits in the last stage, Fifi falls with foi, a rescue gives half health.")]
+        public bool hard;
         public int robotHp = 2;
         [Tooltip("Seconds between a guard robot's steps.")]
         public float robotStep = 1f;

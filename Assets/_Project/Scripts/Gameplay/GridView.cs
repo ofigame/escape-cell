@@ -27,6 +27,9 @@ namespace SquashBot.Gameplay
             public float bounceStrength = 1f;
             public bool tinted;
             public Color tint, tintGlow;
+            /// <summary>Fortress stone: this slab's own colour, its mortar and its faint light (else the theme's tile).</summary>
+            public bool stone;
+            public Color stoneTop, stoneFrame, stoneGlow;
             // The colours last sent to the materials: a tile is only re-coloured when something changed.
             public Color shownTop, shownTopGlow, shownFrame, shownFrameGlow;
             public bool shown;
@@ -55,6 +58,8 @@ namespace SquashBot.Gameplay
         /// <summary>A tile's centre in the world, standing on its step of the floor's relief (see <see cref="FloorRelief"/>).</summary>
         /// <summary>The fortress look for the floor (stone or metal slabs with mortar, no glowing bands): every core-loop floor.</summary>
         public static bool FortressTiles;
+        /// <summary>The fortress stone's colour on this floor: light in the first worlds, each world its own hue, darker and darker later on.</summary>
+        public static Color FortressStone = new Color(0.7f, 0.7f, 0.74f);
 
         public static Vector3 ToWorld(GridPos p) => new Vector3(p.x, FloorRelief.HeightAt(p) * FloorRelief.Step, p.y);
 
@@ -85,13 +90,15 @@ namespace SquashBot.Gameplay
                 tile.transform.SetParent(root.transform, false);
 
                 Material frame, top;
+                Color slabTop = default;
                 if (FortressTiles)
                 {
                     // Fortress stone: dark mortar between big slabs, each slab its own shade, rough and matt, a few cracked.
                     float shade = 0.86f + (float)stone.NextDouble() * 0.24f;
-                    var stoneColour = Palette.TileTop * shade;
+                    var stoneColour = FortressStone * shade;
                     stoneColour.a = 1f;
-                    frame = MaterialFactory.CreateSurface(Palette.TileTop * 0.42f, Color.black, 0.05f, 0f);
+                    slabTop = stoneColour;
+                    frame = MaterialFactory.CreateSurface(FortressStone * 0.42f, Color.black, 0.05f, 0f);
                     top = MaterialFactory.CreateSurface(stoneColour, Palette.TileSelfLight * 0.25f, 0.18f, 0f);
                     Shapes.Rounded("Frame", tile.transform, new Vector3(0f, -0.04f, 0f), new Vector3(0.98f, 0.1f, 0.98f), 0.02f, frame);
                     Shapes.Rounded("Top", tile.transform, new Vector3(0f, 0f, 0f), new Vector3(0.9f, 0.1f, 0.9f), 0.035f, top);
@@ -128,7 +135,8 @@ namespace SquashBot.Gameplay
                     Shapes.Rounded("Rim", hole.transform, o, s, 0.01f, holeRim);
                 hole.SetActive(false);
 
-                tiles[p.x, p.y] = new TileView { tile = tile, hole = hole, top = top, frame = frame };
+                tiles[p.x, p.y] = new TileView { tile = tile, hole = hole, top = top, frame = frame, stone = FortressTiles,
+                    stoneTop = slabTop, stoneFrame = FortressStone * 0.42f, stoneGlow = Palette.TileSelfLight * 0.25f };
             }
         }
 
@@ -142,7 +150,7 @@ namespace SquashBot.Gameplay
             var glow = MaterialFactory.Create(Palette.Slab, Palette.SlabEdgeGlow);
 
             bool fortress = FortressTiles;
-            if (fortress) glow = slab; // plain stone, no glowing band
+            if (fortress) glow = slab = MaterialFactory.Create(Color.Lerp(Palette.Slab, FortressStone * 0.5f, 0.6f), Color.black); // plain stone in the floor's shade, no glowing band
             foreach (var p in grid.AllPositions())
             {
                 if (!grid.Exists(p) || grid.IsLava(p)) continue;
@@ -270,8 +278,8 @@ namespace SquashBot.Gameplay
                     continue;
                 }
 
-                var topColor = t.tinted ? t.tint : Palette.TileTop;
-                var topGlow = t.tinted ? t.tintGlow : Palette.TileSelfLight;
+                var topColor = t.tinted ? t.tint : t.stone ? t.stoneTop : Palette.TileTop;
+                var topGlow = t.tinted ? t.tintGlow : t.stone ? t.stoneGlow : Palette.TileSelfLight;
                 if (t.painted)
                 {
                     // Painted tiles glow in the accent color; a fresh coat flashes brighter for a moment.
@@ -285,8 +293,8 @@ namespace SquashBot.Gameplay
                 float dim = Mathf.Lerp(0.07f, 1f, lit);
                 var newTop = Color.Lerp(topColor * dim, Palette.TileWarningTop, t.warning);
                 var newTopGlow = Color.Lerp(topGlow * dim, Color.black, t.warning);
-                var frameColor = t.painted ? paintColor : Palette.TileTop * dim;
-                var frameGlow = t.painted ? paintColor * 1.6f : Palette.TileGlow * (dim * dim);
+                var frameColor = t.painted ? paintColor : (t.stone ? t.stoneFrame : Palette.TileTop) * dim;
+                var frameGlow = t.painted ? paintColor * 1.6f : t.stone ? Color.black : Palette.TileGlow * (dim * dim);
                 var newFrame = Color.Lerp(frameColor, Palette.TileWarningTop, t.warning);
                 var newFrameGlow = Color.Lerp(frameGlow, Palette.TileWarningGlow * 1.3f, t.warning);
                 // Big floors have hundreds of tiles: only touch the materials of the ones whose colour changed.

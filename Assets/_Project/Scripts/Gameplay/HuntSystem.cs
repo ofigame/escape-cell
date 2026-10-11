@@ -24,6 +24,8 @@ namespace SquashBot.Gameplay
             public float moveT = 1f, wait;
             public BugModel model;
             public bool dead;
+            /// <summary>The fortress stage it belongs to.</summary>
+            public int stage;
         }
 
         private class Guard
@@ -42,6 +44,8 @@ namespace SquashBot.Gameplay
             public HumanoidBot human;
             public Transform root;
             public bool dead, brute;
+            /// <summary>The fortress stage it belongs to, and its rank there (-1 classic, 0 easy … 99 an elite).</summary>
+            public int stage, rank = -1;
             /// <summary>Blows its energy shield still takes (the perfect city's guards), its bubble and material.</summary>
             public int shield;
             public Transform bubble;
@@ -145,6 +149,17 @@ namespace SquashBot.Gameplay
             monsterHp = level.monsterHp;
             comboLeft = 0;
             leapT = -1f;
+            SetupStages();
+            if (stageCount > 1) SpawnStages();
+            else SpawnClassic();
+            Total = bugs.Count + guards.Count + towers.Count + guardsToCome;
+            MonsterAwake = false;
+            if (MonsterSpot.HasValue) RaiseMonster(asleep: Total > 0);
+            else if (Total == 0) RaiseMonster();
+        }
+
+        private void SpawnClassic()
+        {
             var free = FreeTiles(Mathf.Clamp(Mathf.Min(grid.Width, grid.Height) / 2, 1, 3)); // not right next to the robot (small floors allow less room)
             for (int i = 0; i < level.bugs && free.Count > 0; i++) AddBug(Take(free));
             // Only a few robots at a time; the rest of the floor's robots drop in as they fall (see UpdateReinforcements).
@@ -159,10 +174,6 @@ namespace SquashBot.Gameplay
             foreach (var p in free) if (Chebyshev(p, robot.Position) >= 4) far.Add(p);
             if (level.reactor && far.Count > 0) { var rp = NearestCentre(far); far.Remove(rp); free.Remove(rp); AddTower(rp, reactor: true); }
             foreach (var tp in TowerSpots(far, level.towers)) { far.Remove(tp); free.Remove(tp); AddTower(tp); }
-            Total = bugs.Count + guards.Count + towers.Count + guardsToCome;
-            MonsterAwake = false;
-            if (MonsterSpot.HasValue) RaiseMonster(asleep: Total > 0);
-            else if (Total == 0) RaiseMonster();
         }
 
         public void Stop()
@@ -217,7 +228,7 @@ namespace SquashBot.Gameplay
 
         private void AddBug(GridPos p)
         {
-            var b = new Bug { pos = p, wait = (float)rng.NextDouble() };
+            var b = new Bug { pos = p, stage = StageOf(p), wait = (float)rng.NextDouble() };
             b.model = BugModel.Build(transform, bugColour, world % BugModel.Kinds, BrightBugs); // a new kind of bug every world
             b.from = b.to = At(p);
             b.model.transform.position = b.to;
@@ -225,9 +236,15 @@ namespace SquashBot.Gameplay
             bugs.Add(b);
         }
 
-        private void AddGuard(GridPos p, bool brute = false)
+        /// <param name="rank">On fortress floors: 0 an easy one-blow robot, each rank up one more blow and a later
+        /// world's build; 99 an elite enforcer (hard floors' last stage). -1 the classic guard.</param>
+        private void AddGuard(GridPos p, bool brute = false, int rank = -1)
         {
-            var g = new Guard { pos = p, brute = brute, hp = brute ? level.robotHp * 2 + 2 : level.robotHp, step = level.robotStep * (0.8f + (float)rng.NextDouble() * 0.4f) };
+            int hp = brute ? level.robotHp * 2 + 2 : level.robotHp;
+            if (rank >= 99) hp = level.robotHp * 3 + 4;
+            else if (rank == 0 && !brute) hp = 1;
+            else if (rank > 0 && !brute) hp = Mathf.Max(1, level.robotHp / 2) + rank;
+            var g = new Guard { pos = p, brute = brute, rank = rank, stage = StageOf(p), hp = hp, step = level.robotStep * (rank == 0 ? 1.25f : 1f) * (0.8f + (float)rng.NextDouble() * 0.4f) };
             g.root = new GameObject(brute ? "Enforcer" : "GuardRobot").transform;
             g.root.SetParent(transform, false);
             var accent = Color.HSVToRGB(Mathf.Repeat(world * 0.21f + 0.55f, 1f), 0.75f, 1f);
@@ -235,15 +252,16 @@ namespace SquashBot.Gameplay
             {
                 // vanG's enforcer: a tall humanoid that hits much harder.
                 g.human = HumanoidBot.Build(g.root, accent);
-                g.human.transform.localScale = Vector3.one * 0.7f * EnemyScale;
+                g.human.transform.localScale = Vector3.one * (rank >= 99 ? 0.88f : 0.7f) * EnemyScale;
             }
             else
             {
                 // A new build of guard every world, in that world's colour.
                 // In the perfect city: pearl and gold guards lit in the floor's colour.
-                g.bot = level.utopia ? GuardBot.Build(g.root, Color.HSVToRGB(Mathf.Repeat(world * 0.21f + 0.5f, 1f), 0.6f, 1f), world, utopian: true)
-                    : GuardBot.Build(g.root, Color.Lerp(accent, new Color(0.3f, 0.3f, 0.35f), 0.35f), world);
-                g.bot.transform.localScale = Vector3.one * 0.62f * EnemyScale;
+                int build = rank < 0 ? world : Mathf.Max(0, world - 2 + rank * 2); // the easy ones an older build, each rank a newer one
+                g.bot = level.utopia ? GuardBot.Build(g.root, Color.HSVToRGB(Mathf.Repeat(world * 0.21f + 0.5f, 1f), 0.6f, 1f), build, utopian: true)
+                    : GuardBot.Build(g.root, Color.Lerp(accent, new Color(0.3f, 0.3f, 0.35f), 0.35f), build);
+                g.bot.transform.localScale = Vector3.one * (rank == 0 ? 0.55f : 0.62f + Mathf.Max(0, rank) * 0.02f) * EnemyScale;
             }
             g.maxHp = Mathf.Max(1, g.hp);
             AddHealthBar(g);
@@ -264,6 +282,7 @@ namespace SquashBot.Gameplay
         /// </summary>
         private void UpdateReinforcements()
         {
+            if (stageCount > 1) { UpdateStageReinforcements(); return; }
             if (guardsToCome <= 0 || Time.time < nextGuardAt) return;
             int alive = 0;
             foreach (var g in guards) if (!g.dead && !g.brute) alive++;
@@ -527,6 +546,7 @@ namespace SquashBot.Gameplay
 
         private void CheckCleared()
         {
+            CheckGates();
             if (Left != 0 || MonsterDown) return;
             if (monster == null) RaiseMonster();
             else if (!MonsterAwake) Wake();
@@ -605,6 +625,14 @@ namespace SquashBot.Gameplay
             foreach (var g in guards) if (!g.dead) all.Add(g.pos);
             AddTowerTargets(all);
             foreach (var b in bugs) if (!b.dead) all.Add(b.pos);
+            if (stageCount > 1)
+            {
+                // Fortress floors point at what is left in foi's stage; with it clear, at the open gate ahead.
+                int rs = RobotStage;
+                var here = all.FindAll(p => StageOf(p) == rs);
+                if (here.Count == 0 && rs < gateOpen.Length && gateOpen[rs] && gateGroups[rs].Count > 0) here.Add(gateGroups[rs][0]);
+                if (here.Count > 0) all = here;
+            }
             all.Sort((a, b) => a.Manhattan(from).CompareTo(b.Manhattan(from)));
             for (int i = 0; i < Mathf.Min(max, all.Count); i++) list.Add((all[i], false));
             return list;
@@ -737,13 +765,14 @@ namespace SquashBot.Gameplay
                     if (g.brute) fx.Dust(At(g.target), new Color(0.55f, 0.5f, 0.45f), 18, 4f);
                     AudioManager.PlaySfx(Sfx.Impact, g.brute ? 1f : 0.7f, g.brute ? 0.55f : 0.8f);
                     rig.Shake(g.brute ? 0.8f : 0.3f);
-                    if (g.area.Contains(robot.Position)) Hit?.Invoke(robot.Position, g.brute ? BruteHitShare : GuardHitShare);
+                    if (g.area.Contains(robot.Position)) Hit?.Invoke(robot.Position, ShareOf(g));
                     if (CompanionTile.HasValue && g.area.Contains(CompanionTile.Value)) CompanionHurt?.Invoke(g.brute ? 3 : 2);
                     g.area.Clear();
                 }
                 return;
             }
             if (g.moveT < 1f) return;
+            if (stageCount > 1 && g.stage != RobotStage && StageOf(g.pos) != RobotStage) return; // it waits in its own stage
             // Within two tiles (diagonals count as one), the same reach as foi's blows: it swings as soon as it can.
             int near = Chebyshev(robot.Position, g.pos);
             // Fifi in reach and foi not (or now and then anyway): the robot goes for Fifi.
@@ -781,6 +810,8 @@ namespace SquashBot.Gameplay
         private float BruteWindTime => Mathf.Lerp(0.95f, 0.7f, level.score / 100f);
         /// <summary>Health shares a guard's slam and an enforcer's smash take.</summary>
         private const float GuardHitShare = 0.2f, BruteHitShare = 0.45f;
+        /// <summary>A fortress robot's slam: the easy ones barely sting, each rank a little more, an elite most of all.</summary>
+        private static float ShareOf(Guard g) => g.rank >= 99 ? 0.55f : g.brute ? BruteHitShare : g.rank == 0 ? 0.12f : g.rank > 0 ? Mathf.Min(0.3f, 0.16f + g.rank * 0.025f) : GuardHitShare;
         /// <summary>The monster's blows hurt more on later floors.</summary>
         private float MonsterHitShare => Mathf.Lerp(0.24f, 0.42f, level.score / 100f);
 

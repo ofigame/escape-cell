@@ -322,7 +322,7 @@ namespace SquashBot.Gameplay
         {
             int world = LevelCatalog.WorldOf(levelIdx);
             var theme = WorldTheme.ForLevel(levelIdx).Realm(world); // the world's own realm floor
-            ApplyFortressLight(levelSet != null && levelIdx >= 0 && levelIdx < levelSet.levels.Count && levelSet.levels[levelIdx].mission == MissionType.Hunt);
+            ApplyFortressLight(levelSet != null && levelIdx >= 0 && levelIdx < levelSet.levels.Count && levelSet.levels[levelIdx].mission == MissionType.Hunt, world, theme);
             if (theme == themeNow) return;
             themeNow = theme;
             WorldTheme.SetCurrent(theme);
@@ -964,7 +964,7 @@ namespace SquashBot.Gameplay
             // Saved from 0%: the bar is given some health back, so the robot never stands there "alive at 0%".
             if (HealthEnabled)
             {
-                health = Mathf.Max(health, 0.35f);
+                health = Mathf.Max(health, level != null && level.hard ? 0.5f : 0.35f); // hard floors: half the bar
                 RefreshHealthBar();
             }
             robot.GiveShield(1.5f); // a moment to get out of trouble
@@ -1960,6 +1960,8 @@ namespace SquashBot.Gameplay
             EndArenaFight(false);
             if (roadPhase != RoadPhase.None) return; // already won, on the way to the next floor
             if (MarathonRespawn()) return; // a marathon past its checkpoint goes on from there
+            if (StageRespawn()) return; // a fortress floor goes on from the stage foi fell in
+            if (level != null && level.hard && level.mission == MissionType.Hunt) KnockOutFifi(); // on hard floors Fifi falls with foi
             State = GameState.Result;
             hazards.Freeze();
             coins.Freeze();
@@ -2877,6 +2879,7 @@ namespace SquashBot.Gameplay
                 if (target == thiefPos) CatchThief();
                 return;
             }
+            if (State == GameState.Playing && level != null && level.mission == MissionType.Hunt) OnStageGateBumped(target);
             if (State != GameState.Playing || level == null || level.mission != MissionType.Monster || monster == null || target != monsterPos) return;
             TryEnterArena(); // walking into the monster starts the fight too
         }
@@ -3178,7 +3181,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Boss: text = Loc.F("hud.boss", objectivesDone, objectivesTotal); break;
                 case MissionType.Quest: text = questReady ? Loc.T("quest.hudGo." + level.quest) : Loc.F("quest.hud." + level.quest, objectivesDone, objectivesTotal); break;
                 case MissionType.Monster: text = ArenaHud(); break;
-                case MissionType.Hunt: text = HuntHud(); break;
+                case MissionType.Hunt: text = StagePrefix() + HuntHud(); break;
                 case MissionType.Thief:
                     text = level.thiefRace ? Loc.F("hud.thiefRace", coinsThisRun, thiefCoins, objectivesTotal) : Loc.F("hud.thief", objectivesDone, objectivesTotal);
                     break;

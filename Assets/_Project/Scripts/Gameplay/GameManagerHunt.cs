@@ -49,6 +49,7 @@ namespace SquashBot.Gameplay
             };
             hunt.Finished += OnHuntFinished;
             hunt.SleepingHit += OnSleepingHit;
+            InitStages();
             InitFifi();
             InitUtopia();
             InitRewards();
@@ -97,13 +98,14 @@ namespace SquashBot.Gameplay
             gateView = TunnelGate.Create(GridView.ToWorld(huntGate) + Vector3.up * GridView.SurfaceY, WorldTheme.Current.accent);
             var guardSpot = hunt.MonsterSpot.Value;
             var gateTile = huntGate;
-            hazards.IsProtected = p => p == gateTile || p == guardSpot || grid.IsCage(p) || grid.IsBridge(p);
+            hazards.IsProtected = p => p == gateTile || p == guardSpot || grid.IsCage(p) || grid.IsBridge(p) || grid.IsGate(p);
             SetupCage();
             hunt.Begin(grid, level, World, levelIndex * 31 + 7);
             SetupPotions();
             SetupFifi();
             SetupBombs();
             SetupFortressFloor();
+            SetupStageGates();
         }
 
         private void UpdateHunt(float dt)

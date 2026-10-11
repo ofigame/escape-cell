@@ -235,7 +235,13 @@ namespace SquashBot.Gameplay
             fifi.Daze(0.4f);
             fifi.SetHealth(fifiHp / (float)FifiUpgrades.MaxHealth);
             if (fifiHp > 0) return;
-            // Down: out of the fight for this floor.
+            KnockOutFifi();
+        }
+
+        /// <summary>Fifi goes down: out of the fight for this floor (or until foi comes back, see ReviveFifi).</summary>
+        private void KnockOutFifi()
+        {
+            if (fifi == null || !fifi.gameObject.activeSelf) { fifiUp = false; fifiDown = true; hunt.CompanionTile = null; return; }
             fifiUp = false;
             fifiDown = true;
             hunt.CompanionTile = null;
