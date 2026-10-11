@@ -417,6 +417,12 @@ namespace SquashBot.Gameplay
             var target = robot.transform.position;
             target.y = GridView.ToWorld(robot.Position).y * 0.85f; // rises with the floor's steps
             float pullGoal = 1f;
+            // In a fight the view leads towards the way foi strikes, so the side it fights on is never cut off.
+            if (!walking && combatBlend > 0.01f)
+            {
+                var lead = robot.Facing.ToOffset();
+                target += new Vector3(lead.x, 0f, lead.y) * (FightLead * combatBlend);
+            }
             if (walking)
             {
                 // On the way to the exit: pull back and frame the robot and the exit together, so the way out is easy
@@ -460,9 +466,11 @@ namespace SquashBot.Gameplay
         /// <summary>The fight view: the same heading, much lower (about 30 degrees down instead of 46).</summary>
         private static readonly Vector3 FightCamOffset = new Vector3(-2.7f, 2.2f, -2.7f);
         /// <summary>How much closer the fight view sits, and its slightly wider lens.</summary>
-        private const float FightCamCloser = 0.8f, FightCamFov = 54f;
+        private const float FightCamCloser = 0.9f, FightCamFov = 56f;
+        /// <summary>How many tiles the fight view leads towards the way foi strikes.</summary>
+        private const float FightLead = 1.4f;
         /// <summary>The settings' camera distances (near, medium, far, farthest), as multiples of the nearest view.</summary>
-        private static readonly float[] CamDistanceScale = { 2.45f, 2.9f, 4.0f, 4.8f };
+        private static readonly float[] CamDistanceScale = { 4.0f, 4.8f, 5.7f, 6.8f };
         private const float CloseCamFov = 50f;
         /// <summary>The most the camera leans towards the robot's heading, in degrees.</summary>
         private const float CamLean = 14f;

@@ -1221,12 +1221,14 @@ namespace SquashBot.Gameplay
             elapsed += Time.deltaTime;
 
             // In an arena fight the arena reads the touches itself.
+            input.CircleEnabled = level.mission == MissionType.Hunt && roadPhase == RoadPhase.None;
             var command = ArenaActive ? default(InputCommand) : input.Poll(robot.transform.position);
             command = GlassCellGate(command); // foi starts each floor in its glass cell
             UpdateHover(command);
             if (!hovering)
             {
-                if (command.tap.HasValue && level.mission == MissionType.Hunt && TapStrike(command.tap.Value)) input.CancelTap();
+                if (command.spin) SpinAttack();
+                else if (command.tap.HasValue && level.mission == MissionType.Hunt && TapStrike(command.tap.Value)) input.CancelTap();
                 else if (command.jump) robot.TryJump();
                 else if (command.move.HasValue && (!command.held || HeldStepOk(command.move.Value))) robot.TryMove(command.move.Value, command.pace);
             }
@@ -1906,6 +1908,9 @@ namespace SquashBot.Gameplay
             pendingEnding = levelIndex == LevelCount - 1 && !Story.Seen(Story.Ending);
             bool hasNext = levelIndex + 1 < LevelCount;
             bool newWorld = unlockedNew && hasNext && (levelIndex + 1) % LevelCatalog.LevelsPerWorld == 0;
+            // A good moment for a store rating (first at level 10, then at a world's end; see RatePrompt).
+            if (unlockedNew && Monetization.RatePrompt.ShouldAsk(levelIndex + 1, (levelIndex + 1) % LevelCatalog.LevelsPerWorld == 0))
+                StartCoroutine(AskRatingSoon());
             // The card's hook (a teaser for the next cell) comes first; otherwise the bonus or star news.
             string note = Loc.Has(CardKey("hook")) ? Loc.T(CardKey("hook"))
                 : surprise ? Loc.T("bonus.surprise")
@@ -1927,6 +1932,13 @@ namespace SquashBot.Gameplay
                 meterText = Loc.F("bonus.meter", unlockedBonus > 0 || surprise ? Progress.StarsPerBonus : Progress.Meter, Progress.StarsPerBonus),
             };
             return info;
+        }
+
+        /// <summary>The rating card comes over the result card once it has settled.</summary>
+        private IEnumerator AskRatingSoon()
+        {
+            yield return new WaitForSeconds(2.2f);
+            if (State == GameState.Result) Monetization.RatePrompt.Ask();
         }
 
         /// <summary>What the next star asks for, e.g. "Next star: 14 coins".</summary>

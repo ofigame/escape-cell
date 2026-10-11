@@ -78,6 +78,17 @@ namespace SquashBot.Gameplay
 
             tiles = new TileView[grid.Width, grid.Height];
             var stone = new System.Random(grid.Width * 131 + grid.Height);
+            // Dark fortress floors are decks of metal plates rather than stone: shared materials for their details.
+            bool metal = FortressTiles && FortressStone.grayscale < 0.42f;
+            var accent = WorldTheme.Current.accent;
+            Material seamMat = null, wearMat = null, boltMat = null;
+            if (metal)
+            {
+
+                seamMat = MaterialFactory.Create(accent, accent * 2.2f);
+                wearMat = MaterialFactory.CreateSurface(FortressStone * 0.55f, Color.black, 0.1f, 0f);
+                boltMat = MaterialFactory.CreateSurface(new Color(0.62f, 0.64f, 0.7f), Color.black, 0.75f, 0.85f);
+            }
             foreach (var p in grid.AllPositions())
             {
                 if (!grid.Exists(p)) continue; // shaped platforms leave some cells empty
@@ -98,11 +109,39 @@ namespace SquashBot.Gameplay
                     var stoneColour = FortressStone * shade;
                     stoneColour.a = 1f;
                     slabTop = stoneColour;
-                    frame = MaterialFactory.CreateSurface(FortressStone * 0.42f, Color.black, 0.05f, 0f);
-                    top = MaterialFactory.CreateSurface(stoneColour, Palette.TileSelfLight * 0.25f, 0.18f, 0f);
+                    frame = MaterialFactory.CreateSurface(FortressStone * 0.42f, Color.black, metal ? 0.35f : 0.05f, metal ? 0.4f : 0f);
+                    top = MaterialFactory.CreateSurface(stoneColour, Palette.TileSelfLight * 0.25f, metal ? 0.5f : 0.18f, metal ? 0.35f : 0f);
                     Shapes.Rounded("Frame", tile.transform, new Vector3(0f, -0.04f, 0f), new Vector3(0.98f, 0.1f, 0.98f), 0.02f, frame);
                     Shapes.Rounded("Top", tile.transform, new Vector3(0f, 0f, 0f), new Vector3(0.9f, 0.1f, 0.9f), 0.035f, top);
-                    if (stone.Next(6) == 0)
+                    if (metal)
+                    {
+                        // A raised inner plate catches the light on its bevel; corner bolts; now and then a light strip
+                        // sunk along one edge in the world's colour, and scuffs of wear.
+                        int kind = stone.Next(10);
+                        if (kind < 6) Shapes.Rounded("Plate", tile.transform, new Vector3(0f, 0.035f, 0f), new Vector3(0.62f, 0.05f, 0.62f), 0.02f, top); // the tile's own material: warnings still light it
+                        else if (kind < 8)
+                        {
+                            bool alongX = stone.Next(2) == 0;
+                            Shapes.Rounded("Grille", tile.transform, new Vector3(0f, 0.04f, 0f), alongX ? new Vector3(0.66f, 0.04f, 0.3f) : new Vector3(0.3f, 0.04f, 0.66f), 0.01f, top);
+                            for (int i = -1; i <= 1; i++)
+                                Shapes.Rounded("Slat", tile.transform, alongX ? new Vector3(0f, 0.062f, i * 0.09f) : new Vector3(i * 0.09f, 0.062f, 0f),
+                                    alongX ? new Vector3(0.62f, 0.008f, 0.03f) : new Vector3(0.03f, 0.008f, 0.62f), 0.004f, frame);
+                        }
+                        if (kind < 6)
+                            foreach (var (bx, bz) in new[] { (-1, -1), (1, 1) })
+                                Shapes.Rounded("Bolt", tile.transform, new Vector3(bx * 0.36f, 0.054f, bz * 0.36f), new Vector3(0.05f, 0.02f, 0.05f), 0.02f, boltMat);
+                        if (stone.Next(7) == 0)
+                        {
+                            int side = stone.Next(4);
+                            var at = side switch { 0 => new Vector3(0f, 0.052f, 0.41f), 1 => new Vector3(0f, 0.052f, -0.41f), 2 => new Vector3(0.41f, 0.052f, 0f), _ => new Vector3(-0.41f, 0.052f, 0f) };
+                            Shapes.Rounded("Seam", tile.transform, at, side < 2 ? new Vector3(0.7f, 0.01f, 0.025f) : new Vector3(0.025f, 0.01f, 0.7f), 0.005f, seamMat);
+                        }
+                        if (stone.Next(5) == 0)
+                            Shapes.Rounded("Wear", tile.transform, new Vector3((float)stone.NextDouble() * 0.4f - 0.2f, 0.051f, (float)stone.NextDouble() * 0.4f - 0.2f),
+                                new Vector3(0.18f + (float)stone.NextDouble() * 0.2f, 0.003f, 0.1f + (float)stone.NextDouble() * 0.12f), 0.04f, wearMat)
+                                .transform.localRotation = Quaternion.Euler(0f, stone.Next(180), 0f);
+                    }
+                    else if (stone.Next(6) == 0)
                         Shapes.Rounded("Crack", tile.transform, new Vector3((float)stone.NextDouble() * 0.3f - 0.15f, 0.052f, (float)stone.NextDouble() * 0.3f - 0.15f), new Vector3(0.38f, 0.004f, 0.025f), 0.004f, frame)
                             .transform.localRotation = Quaternion.Euler(0f, stone.Next(180), 0f);
                 }

@@ -710,7 +710,7 @@ namespace SquashBot.UI
             refreshers.Add(() =>
             {
                 SetPips(pips, FifiUpgrades.Level);
-                desc.text = Loc.F("fifi.stats", FifiUpgrades.ZapDamage, FifiUpgrades.ZapInterval.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture), FifiUpgrades.MaxHealth);
+                desc.text = Loc.F("fifi.stats", FifiUpgrades.ZapDamage, FifiUpgrades.ZapInterval.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture));
                 label.text = FifiUpgrades.IsMaxed ? Loc.T("shop.max") : FifiUpgrades.NextPrice.ToString();
                 Afford(buy, !FifiUpgrades.IsMaxed, SaveData.Coins >= FifiUpgrades.NextPrice);
             });

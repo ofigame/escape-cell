@@ -26,7 +26,10 @@ namespace SquashBot.Gameplay
         /// <summary>A quick tap (screen pixels), for striking what was tapped.</summary>
         public Vector2? tap;
 
-        public bool IsEmpty => !move.HasValue && !jump && !holdStart && !holdPosition.HasValue && !holdEnd && !tap.HasValue;
+        /// <summary>A quick circle drawn with the finger: foi spins round, striking all around it.</summary>
+        public bool spin;
+
+        public bool IsEmpty => !move.HasValue && !jump && !holdStart && !holdPosition.HasValue && !holdEnd && !tap.HasValue && !spin;
     }
 
     /// <summary>
@@ -59,6 +62,32 @@ namespace SquashBot.Gameplay
         private bool holding;
         /// <summary>The direction foi keeps walking while the finger stays down after a swipe.</summary>
         private Direction? heldDir;
+
+        // The circle gesture: how far the finger's path has turned since the press (degrees, signed), the last point and
+        // heading of the path, and whether this press already spun.
+        private const float CircleSegmentInches = 0.07f, CircleTurn = 300f, CircleTime = 1.1f, CircleHint = 150f, CircleHintTime = 0.6f;
+        private float pathTurn;
+        private Vector2 pathPoint;
+        private Vector2? pathHeading;
+        private bool spun;
+
+        /// <summary>The circle gesture is on (the core loop's floors).</summary>
+        public bool CircleEnabled { get; set; }
+
+        /// <summary>The path is curling round quickly: hold the steps back, it is probably a circle being drawn.</summary>
+        private bool Circling => CircleEnabled && Mathf.Abs(pathTurn) >= CircleHint && Time.unscaledTime - pressTime <= CircleHintTime + 0.5f;
+
+        /// <summary>Follows the finger's path; true once it has gone round (nearly) a full circle quickly enough.</summary>
+        private bool TrackCircle(Vector2 pos)
+        {
+            float dpi = Screen.dpi > 0 ? Screen.dpi : 160f;
+            var seg = pos - pathPoint;
+            if (seg.magnitude / dpi < CircleSegmentInches) return false;
+            if (pathHeading.HasValue) pathTurn += Vector2.SignedAngle(pathHeading.Value, seg);
+            pathHeading = seg;
+            pathPoint = pos;
+            return Mathf.Abs(pathTurn) >= CircleTurn && Time.unscaledTime - pressTime <= CircleTime;
+        }
 
         /// <summary>The pace of the last swipe step (see <see cref="InputCommand.pace"/>).</summary>
         public float LastPace { get; private set; }
@@ -118,6 +147,10 @@ namespace SquashBot.Gameplay
                 chained = false;
                 startPos = pos;
                 pressTime = Time.unscaledTime;
+                pathTurn = 0f;
+                pathPoint = pos;
+                pathHeading = null;
+                spun = false;
                 if (Ignore != null && Ignore(pos))
                 {
                     consumed = true; // a button press: no swipe, tap or hover from it
@@ -144,6 +177,15 @@ namespace SquashBot.Gameplay
                 return new InputCommand { holdEnd = true, holdPosition = hasPointer ? pos : lastPos };
             }
 
+            if (CircleEnabled && pressed && !spun && !ScreenMode && (!consumed || chained) && TrackCircle(pos))
+            {
+                spun = true;
+                consumed = true;
+                heldDir = null;
+                lastTapTime = -10f;
+                return new InputCommand { spin = true };
+            }
+
             // Held still long enough: start a hover instead of a swipe or tap.
             if (HoldEnabled && pressed && !consumed && !chained && Time.unscaledTime - pressTime >= HoldTime
                 && (pos - startPos).magnitude < SwipeThresholdInches * (Screen.dpi > 0 ? Screen.dpi : 160f))
@@ -168,6 +210,7 @@ namespace SquashBot.Gameplay
             }
 
             if (consumed) return default;
+            if (Circling) { heldDir = null; return default; } // a circle on the way: no steps meanwhile
             var drag = CheckSwipe(pos, robotWorld); // triggers mid-drag for snappy response
             if (drag.HasValue)
             {

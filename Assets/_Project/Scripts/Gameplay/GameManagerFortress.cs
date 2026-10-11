@@ -42,7 +42,7 @@ namespace SquashBot.Gameplay
                 key.shadows = !shadows ? LightShadows.None : tier == Data.GraphicsTier.High ? LightShadows.Soft : LightShadows.Hard;
                 key.shadowStrength = 0.75f;
                 key.color = on ? new Color(1f, 0.9f, 0.8f) : Color.white;
-                key.intensity = on ? 1.15f : 1f;
+                key.intensity = on ? Mathf.Lerp(1.15f, 1.5f, 1f - Mathf.Clamp01(GridView.FortressStone.grayscale / 0.6f)) : 1f; // dark decks need a stronger sun for their sheen
                 key.transform.rotation = on ? Quaternion.Euler(42f, 35f, 0f) : Quaternion.Euler(50f, 20f, 0f);
             }
             if (on)
@@ -121,6 +121,12 @@ namespace SquashBot.Gameplay
             if (command.IsEmpty && Time.time - glassSince < 2f) return default;
             // foi breaks out: a punch, a white flash in the glass, the shards fly; the floor comes alive.
             glassCell.Shatter();
+            if (levelIndex >= 2 && PlayerPrefs.GetInt("sb_spin_tip", 0) == 0)
+            {
+                // Once, from level 3: how to spin.
+                PlayerPrefs.SetInt("sb_spin_tip", 1);
+                ui.ShowIntro(Loc.T("spin.tipTitle"), Loc.T("spin.tip"));
+            }
             hunt.Resume();
             hazards.Resume();
             floorRules.Resume();

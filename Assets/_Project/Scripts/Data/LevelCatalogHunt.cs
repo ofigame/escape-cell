@@ -164,12 +164,12 @@ namespace SquashBot.Data
             // One stage: the classic floor growing a little each level. Several: the first a small yard round foi's cell,
             // every next one clearly bigger (four tiles wider, three longer), the sixth a huge last field.
             int first = n == 1 ? (index < 8 ? 9 + index / 2 : Mathf.RoundToInt(Mathf.Lerp(11f, 13f, Mathf.InverseLerp(8f, 19f, index))))
-                : Mathf.RoundToInt(Mathf.Lerp(8f, 10f, Mathf.InverseLerp(20f, LevelCount - 1, index)));
+                : Mathf.RoundToInt(Mathf.Lerp(13f, 15f, Mathf.InverseLerp(20f, LevelCount - 1, index))); // always bigger than level 1's 11x11
             var sizes = new int[n];   // widths (odd: the bridges sit on the middle column)
             var lengths = new int[n]; // rows, south to north
             for (int s = 0; s < n; s++)
             {
-                int extra = n == 6 && s == 5 ? 4 : 0;
+                int extra = n == 6 && s == 5 ? 6 : 0;
                 sizes[s] = (first + 4 * s + extra) | 1;
                 lengths[s] = first + 3 * s + extra;
             }
@@ -285,10 +285,10 @@ namespace SquashBot.Data
 
             // The floor's crowd: bugs to squash, robots to beat (none on the very first floor).
             int floorTiles = size * size;
-            level.bugs = Mathf.Clamp(2 + Mathf.RoundToInt(d * 12f), 2, Mathf.Max(2, floorTiles / 7));
+            level.bugs = Mathf.Clamp(2 + Mathf.RoundToInt(d * 12f) + (level.fortressStages - 1) * 3, 2, Mathf.Max(2, floorTiles / 7));
             // Plenty of robots on every floor (20 on the very first, up to 45 late on), but only a few at a time: when
             // one falls another drops in from the sky somewhere off, so the floor stays busy without being overwhelming.
-            level.robots = 20 + Mathf.RoundToInt(d * 25f);
+            level.robots = 20 + Mathf.RoundToInt(d * 25f) + (level.fortressStages - 1) * 8; // the bigger stages hold more
             level.robotsAtOnce = Mathf.Clamp(3 + Mathf.RoundToInt(d * 5f), 3, Mathf.Max(3, floorTiles / 14));
             // Now and then a tall humanoid enforcer joins them (from level 13), more often late on.
             level.brutes = index < 12 ? 0 : (index % 4 == 1 ? 1 : 0) + (d > 0.55f && index % 2 == 0 ? 1 : 0);

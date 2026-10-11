@@ -57,7 +57,7 @@ namespace SquashBot.Gameplay
             fifiReadyAt = Time.time;
             fifiBlows = 0;
             fifiCallAfter = Random.Range(1, 3);
-            fifi.SetHealth(1f);
+            fifi.SetHealth(FifiBar);
         }
 
         private void ClearFifi()
@@ -108,6 +108,7 @@ namespace SquashBot.Gameplay
                 return;
             }
 
+            fifi.SetHealth(FifiBar);
             // It stays while the fight goes on, then flies off.
             fifiStayLeft -= dt;
             fifiStayed += dt;
@@ -186,7 +187,7 @@ namespace SquashBot.Gameplay
             fifiStayLeft = FifiStay;
             fifiStayed = 0f;
             fifiCooldown = 0.4f;
-            fifi.SetHealth(fifiHp / (float)FifiUpgrades.MaxHealth);
+            fifi.SetHealth(FifiBar);
             hunt.CompanionTile = fifiTile;
             // The arrival: a pulse of energy that zaps everything right around it.
             Shockwave.Create(fifiDropTo, 2.2f, FifiZap);
@@ -226,17 +227,19 @@ namespace SquashBot.Gameplay
             fifiCallAfter = Random.Range(1, 3);
         }
 
-        /// <summary>Fifi was hit (points of its health).</summary>
+        /// <summary>
+        /// Fifi was hit: it only reels for a moment. Fifi has no health of its own any more — on hard floors its bar
+        /// follows foi's and it goes down when foi does (see FifiBar, Lose and StageRespawn).
+        /// </summary>
         private void HurtFifi(int points)
         {
             if (!fifiUp || fifi == null || Time.time - fifiHurtAt < FifiHurtGrace) return;
             fifiHurtAt = Time.time;
-            fifiHp -= points;
             fifi.Daze(0.4f);
-            fifi.SetHealth(fifiHp / (float)FifiUpgrades.MaxHealth);
-            if (fifiHp > 0) return;
-            KnockOutFifi();
         }
+
+        /// <summary>Fifi's bar: foi's own health on hard floors, none elsewhere.</summary>
+        private float FifiBar => level != null && level.hard ? health : -1f;
 
         /// <summary>Fifi goes down: out of the fight for this floor (or until foi comes back, see ReviveFifi).</summary>
         private void KnockOutFifi()
@@ -259,7 +262,7 @@ namespace SquashBot.Gameplay
             if (fifi == null || level == null || level.mission != MissionType.Hunt) return;
             fifiHp = FifiUpgrades.MaxHealth;
             fifiDown = false;
-            fifi.SetHealth(1f);
+            fifi.SetHealth(FifiBar);
             if (fifiUp || fifiDropT >= 0f) return;
             fifiLeaveT = -1f;
             DropFifi();
