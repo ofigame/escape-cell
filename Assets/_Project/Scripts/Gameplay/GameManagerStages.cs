@@ -33,6 +33,92 @@ namespace SquashBot.Gameplay
         {
             foreach (var g in stageGates.Values) if (g != null) Destroy(g.gameObject);
             stageGates.Clear();
+            ClearBridgeGuide();
+        }
+
+        // ---------- The way over the bridge ----------
+        // When a gate opens, arrows on the floor run from foi to the next stage's entrance until foi gets there.
+        private GridPos? bridgeGoal;
+        private int bridgeStage = -1;
+        private GridPos bridgeFrom = new GridPos(-99, -99);
+        private readonly List<Transform> bridgeMarks = new List<Transform>();
+        private Material bridgeMat;
+        private static readonly Color BridgeGold = new Color(1f, 0.78f, 0.3f);
+
+        private void StartBridgeGuide(int stage)
+        {
+            ClearBridgeGuide();
+            if (stage + 1 >= hunt.StageCount) return;
+            bridgeStage = stage;
+            bridgeGoal = hunt.StageEntry(stage + 1);
+            bridgeMat ??= MaterialFactory.Create(BridgeGold, new Color(2.2f, 1.5f, 0.45f));
+        }
+
+        private void ClearBridgeGuide()
+        {
+            foreach (var m in bridgeMarks) if (m != null) Destroy(m.gameObject);
+            bridgeMarks.Clear();
+            bridgeGoal = null;
+            bridgeStage = -1;
+            bridgeFrom = new GridPos(-99, -99);
+        }
+
+        private void UpdateBridgeGuide()
+        {
+            if (!bridgeGoal.HasValue || hunt == null) return;
+            if (hunt.RobotStage > bridgeStage) { ClearBridgeGuide(); return; } // over the bridge: done
+            if (robot.Position != bridgeFrom) BuildBridgeTrail();
+            for (int i = 0; i < bridgeMarks.Count; i++)
+            {
+                // A wave of light running along the arrows towards the bridge.
+                float wave = Mathf.Repeat(Time.time * 7f - i, 9f);
+                float k = wave < 1.6f ? 1f - wave / 1.6f : 0f;
+                if (bridgeMarks[i] != null) bridgeMarks[i].localScale = Vector3.one * (1.6f + k * 0.6f);
+            }
+        }
+
+        /// <summary>The shortest walk from foi to the next stage's entrance over the floor, an arrow on each tile.</summary>
+        private void BuildBridgeTrail()
+        {
+            bridgeFrom = robot.Position;
+            foreach (var m in bridgeMarks) if (m != null) Destroy(m.gameObject);
+            bridgeMarks.Clear();
+            var goal = bridgeGoal.Value;
+            var came = new Dictionary<GridPos, GridPos> { [robot.Position] = robot.Position };
+            var queue = new Queue<GridPos>();
+            queue.Enqueue(robot.Position);
+            bool found = false;
+            while (queue.Count > 0 && !found)
+            {
+                var p = queue.Dequeue();
+                foreach (var d in DirectionExtensions.All)
+                {
+                    var n = p + d.ToOffset();
+                    if (came.ContainsKey(n) || !grid.IsFloor(n) || grid.IsLava(n) || grid.IsCage(n)) continue;
+                    came[n] = p;
+                    if (n == goal) { found = true; break; }
+                    queue.Enqueue(n);
+                }
+            }
+            if (!found) return;
+            var path = new List<GridPos>();
+            for (var p = goal; p != robot.Position; p = came[p]) path.Add(p);
+            path.Reverse();
+            var prev = robot.Position;
+            foreach (var p in path)
+            {
+                var dir = GridView.ToWorld(p) - GridView.ToWorld(prev);
+                dir.y = 0f;
+                var mark = new GameObject("BridgeArrow").transform;
+                mark.position = GridView.ToWorld(p) + Vector3.up * (GridView.SurfaceY + 0.08f);
+                if (dir.sqrMagnitude > 0.001f) mark.rotation = Quaternion.LookRotation(dir);
+                Shapes.Rounded("Shaft", mark, new Vector3(0f, 0f, -0.06f), new Vector3(0.12f, 0.03f, 0.34f), 0.02f, bridgeMat);
+                foreach (float s in new[] { -1f, 1f })
+                    Shapes.Rounded("Head", mark, new Vector3(s * 0.09f, 0f, 0.14f), new Vector3(0.09f, 0.03f, 0.26f), 0.02f, bridgeMat)
+                        .transform.localRotation = Quaternion.Euler(0f, -s * 40f, 0f);
+                bridgeMarks.Add(mark);
+                prev = p;
+            }
         }
 
         private void OnGateOpened(int stage, List<GridPos> tiles)
@@ -46,6 +132,7 @@ namespace SquashBot.Gameplay
                 FloatAt(GridView.ToWorld(t) + Vector3.up * 0.8f, Loc.F("float.gateOpen", stage + 2), Palette.UiGold);
             }
             if (tiles.Count > 0) FloatAt(robot.transform.position + Vector3.up * 0.9f, Loc.F("float.gateOpen", stage + 2), Palette.UiGold);
+            StartBridgeGuide(stage);
             AudioManager.PlaySfx(Sfx.Shield, 1f, 0.8f);
             AudioManager.PlaySfx(Sfx.Impact, 0.6f, 1.3f);
             cameraRig.Shake(0.4f);
@@ -55,11 +142,15 @@ namespace SquashBot.Gameplay
         /// <summary>foi bumped into a shut gate: say what opens it (not on every bump).</summary>
         private void OnStageGateBumped(GridPos p)
         {
-            if (!grid.IsGate(p) || Time.unscaledTime - lastGateNote < 2f) return;
+            if ((!grid.IsGate(p) && !StageLocked(p)) || Time.unscaledTime - lastGateNote < 2f) return;
             lastGateNote = Time.unscaledTime;
             FloatAt(GridView.ToWorld(p) + Vector3.up * 1.1f, Loc.T("float.gateShut"), new Color(1f, 0.6f, 0.4f));
         }
         private float lastGateNote = -10f;
+
+        /// <summary>A tile behind a shut stage gate (fortress floors of the core loop only).</summary>
+        private bool StageLocked(GridPos p) =>
+            State == GameState.Playing && level != null && level.mission == MissionType.Hunt && hunt != null && hunt.StageLocked(p);
 
         /// <summary>"Stage 2/4 · ..." in the HUD on fortress floors.</summary>
         private string StagePrefix() =>

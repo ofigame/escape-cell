@@ -288,7 +288,9 @@ namespace SquashBot.Data
             level.bugs = Mathf.Clamp(2 + Mathf.RoundToInt(d * 12f) + (level.fortressStages - 1) * 3, 2, Mathf.Max(2, floorTiles / 7));
             // Plenty of robots on every floor (20 on the very first, up to 45 late on), but only a few at a time: when
             // one falls another drops in from the sky somewhere off, so the floor stays busy without being overwhelming.
-            level.robots = 20 + Mathf.RoundToInt(d * 25f) + (level.fortressStages - 1) * 8; // the bigger stages hold more
+            level.robots = 24 + Mathf.RoundToInt(d * 34f) + (level.fortressStages - 1) * 12; // the bigger stages hold more
+            // A tenth of the crowd are vanG's warlords (from level 6): very strong, as strong as the level is far in.
+            level.elites = index < 5 ? 0 : Mathf.Max(1, Mathf.RoundToInt(level.robots * 0.1f));
             level.robotsAtOnce = Mathf.Clamp(3 + Mathf.RoundToInt(d * 5f), 3, Mathf.Max(3, floorTiles / 14));
             // Now and then a tall humanoid enforcer joins them (from level 13), more often late on.
             level.brutes = index < 12 ? 0 : (index % 4 == 1 ? 1 : 0) + (d > 0.55f && index % 2 == 0 ? 1 : 0);

@@ -34,8 +34,9 @@ namespace SquashBot.Gameplay
                 int x0 = stageBounds[s * 4], y0 = stageBounds[s * 4 + 1], x1 = stageBounds[s * 4 + 2], y1 = stageBounds[s * 4 + 3];
                 if (p.y >= y0 && p.y <= y1 && p.x >= x0 - 1 && p.x <= x1 + 1) return s;
             }
+            // A bridge: up to its gate it belongs with the stage south of it, past the gate with the next one.
             for (int s = 0; s < stageCount - 1; s++)
-                if (p.y > stageBounds[s * 4 + 3] && p.y < stageBounds[(s + 1) * 4 + 1]) return s;
+                if (p.y > stageBounds[s * 4 + 3] && p.y < stageBounds[(s + 1) * 4 + 1]) return p.y > stageBounds[s * 4 + 3] + 2 ? s + 1 : s;
             return p.y < stageBounds[1] ? 0 : stageCount - 1;
         }
 
@@ -45,6 +46,18 @@ namespace SquashBot.Gameplay
             if (stageCount <= 1 || s <= 0) return grid.StartSpot ?? grid.CenterFloor();
             int x = (stageBounds[s * 4] + stageBounds[s * 4 + 2]) / 2;
             return new GridPos(x, stageBounds[s * 4 + 1] + 1);
+        }
+
+        /// <summary>
+        /// A tile in a stage whose gate is still shut: foi may not get there any way at all — walking, leaping, flying or
+        /// being rescued (see Robot.Forbidden and GameManager.SafeTileNear).
+        /// </summary>
+        public bool StageLocked(GridPos p)
+        {
+            if (stageCount <= 1 || gateOpen == null) return false;
+            int open = 0;
+            while (open < gateOpen.Length && gateOpen[open]) open++;
+            return StageOf(p) > open;
         }
 
         /// <summary>The stage foi is standing in.</summary>
@@ -107,11 +120,17 @@ namespace SquashBot.Gameplay
                 for (int i = 0; i < now && away.Count > 0; i++) { var p = Take(away); freeIn[s].Remove(p); AddGuard(p, rank: RankFor(s)); spawned++; }
                 stageToCome[s] = robotsHere - spawned;
             }
-            // Enforcers in the last stage; on hard floors a few elites (very tough) there too.
+            // Enforcers in the last stage; vanG's warlords (the very strong tenth of the crowd) spread over the stages
+            // after the first, more of them the further in.
             int last = stageCount - 1;
-            int elites = level.hard ? 1 + stageCount / 3 : 0;
-            for (int i = 0; i < level.brutes + elites && freeIn[last].Count > 0; i++)
-                AddGuard(Take(freeIn[last]), brute: true, rank: i >= level.brutes ? 99 : -1);
+            for (int i = 0; i < level.brutes && freeIn[last].Count > 0; i++) AddGuard(Take(freeIn[last]), brute: true);
+            int elitesLeft = level.elites;
+            for (int s = 1; s < stageCount && elitesLeft > 0; s++)
+            {
+                int here = s == last ? elitesLeft : Mathf.Min(elitesLeft, Mathf.RoundToInt(level.elites * s / (float)(shares - 1)));
+                var far = freeIn[s].FindAll(p => Chebyshev(p, robot.Position) >= 4);
+                for (int i = 0; i < here && far.Count > 0; i++) { var p = Take(far); freeIn[s].Remove(p); AddGuard(p, brute: true, rank: 99); elitesLeft--; }
+            }
             // Towers in the stages after the first (all in the first on a one-stage floor), and the reactor in the last.
             for (int s = 0; s < stageCount; s++)
             {

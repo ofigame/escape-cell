@@ -167,6 +167,39 @@ namespace SquashBot.Visual
         /// <summary>Flattened into the floor under a foot or a hammer.</summary>
         public void Squash() => squash = 0f;
 
+        private float hurt = -1f;
+
+        /// <summary>Hit but not finished: it flattens for a moment and springs back up.</summary>
+        public void Hurt() => hurt = 0f;
+
+        /// <summary>
+        /// Tougher bugs further in (tier 1-3): an armour plate on the back and pincers, then a row of spikes, then horns
+        /// and glowing red eyes.
+        /// </summary>
+        public void Armor(int tier)
+        {
+            if (tier <= 0) return;
+            var steel = MaterialFactory.CreateSurface(new Color(0.36f, 0.36f, 0.4f), Color.black, 0.7f, 0.8f);
+            var red = MaterialFactory.Create(new Color(1f, 0.15f, 0.08f), new Color(3f, 0.3f, 0.1f));
+            Shapes.Rounded("ArmorPlate", body, new Vector3(0f, 0.075f, -0.02f), new Vector3(0.28f, 0.07f, 0.34f), 0.035f, steel);
+            foreach (float s in new[] { -1f, 1f })
+                Shapes.Rounded("Pincer", body, new Vector3(s * 0.06f, 0.0f, 0.2f), new Vector3(0.035f, 0.035f, 0.12f), 0.015f, steel)
+                    .transform.localRotation = Quaternion.Euler(0f, -s * 25f, 0f);
+            if (tier >= 2)
+                for (int i = 0; i < 3; i++)
+                    Shapes.Rounded("Spike", body, new Vector3(0f, 0.13f, -0.1f + i * 0.08f), new Vector3(0.03f, 0.09f, 0.03f), 0.012f, steel)
+                        .transform.localRotation = Quaternion.Euler(-20f, 0f, 0f);
+            if (tier >= 3)
+            {
+                foreach (float s in new[] { -1f, 1f })
+                {
+                    Shapes.Rounded("Horn", body, new Vector3(s * 0.07f, 0.08f, 0.15f), new Vector3(0.025f, 0.1f, 0.025f), 0.01f, steel)
+                        .transform.localRotation = Quaternion.Euler(30f, 0f, -s * 25f);
+                    Shapes.Primitive(PrimitiveType.Sphere, "RedEye", body, new Vector3(s * 0.045f, 0.05f, 0.17f), Vector3.one * 0.045f, red);
+                }
+            }
+        }
+
         private void Update()
         {
             float t = Time.time * 30f;
@@ -179,6 +212,13 @@ namespace SquashBot.Visual
                 body.localPosition = new Vector3(0f, Mathf.Lerp(0.12f, 0.02f, k) - Mathf.Max(0f, squash - 0.5f) * 0.1f, 0f);
                 for (int i = 0; i < legs.Count; i++) legs[i].localRotation = Quaternion.Euler(0f, legYaw[i], -20f);
                 return;
+            }
+            if (hurt >= 0f)
+            {
+                hurt += Time.deltaTime / 0.3f;
+                float d = hurt < 1f ? Mathf.Sin(hurt * Mathf.PI) : 0f;
+                body.localScale = new Vector3(1f + 0.2f * d, 1f - 0.45f * d, 1f + 0.2f * d);
+                if (hurt >= 1f) { hurt = -1f; body.localScale = Vector3.one; }
             }
             moving = Mathf.Max(0f, moving - Time.deltaTime);
             float amp = moving > 0f ? 25f : 3f;

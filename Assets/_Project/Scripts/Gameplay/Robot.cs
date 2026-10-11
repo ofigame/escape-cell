@@ -35,6 +35,8 @@ namespace SquashBot.Gameplay
 
         /// <summary>Called when an armored robot hops into a landed block; returns true if the block was smashed.</summary>
         public Func<GridPos, bool> BlockSmasher;
+        /// <summary>Tiles foi may not reach by a step or a leap (a fortress stage behind a shut gate).</summary>
+        public Func<GridPos, bool> Forbidden;
         public float ShieldLeft => shieldLeft;
 
         /// <summary>Raised when a hop lands on its target tile.</summary>
@@ -464,7 +466,7 @@ namespace SquashBot.Gameplay
             }
 
             // With armor, hopping onto a landed block smashes it and the robot takes the tile.
-            bool blocked = grid.InBounds(target) && grid.IsOccupied(target) && !(IsShielded && BlockSmasher != null && BlockSmasher(target));
+            bool blocked = grid.InBounds(target) && ((grid.IsOccupied(target) && !(IsShielded && BlockSmasher != null && BlockSmasher(target))) || (Forbidden != null && Forbidden(target)));
             if (!grid.InBounds(target) || blocked)
             {
                 if (blocked) BumpedInto?.Invoke(target);
@@ -525,7 +527,7 @@ namespace SquashBot.Gameplay
             {
                 landing = next; // nothing to land on: fall short into the first hole
             }
-            else if (noLanding || (grid.IsOccupied(landing) && !(IsShielded && BlockSmasher != null && BlockSmasher(landing))))
+            else if (noLanding || (Forbidden != null && Forbidden(landing)) || (grid.IsOccupied(landing) && !(IsShielded && BlockSmasher != null && BlockSmasher(landing))))
             {
                 // A block or obstacle sits where we'd land, or it is the platform's edge: refuse the jump.
                 StartAnim(Anim.Bump, transform.position, transform.position + new Vector3(offset.x, 0f, offset.y) * 0.25f);

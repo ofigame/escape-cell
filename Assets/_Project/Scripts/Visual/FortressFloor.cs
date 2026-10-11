@@ -33,9 +33,11 @@ namespace SquashBot.Visual
 
         /// <param name="surface">The tile transform of a grid cell (walkway plates hang on it).</param>
         /// <param name="stageBounds">The floor's fortress stages (x0, y0, x1, y1 each): four towers round every stage.</param>
-        public static Transform Build(GridModel grid, Transform parent, int stage, Color accent, GridPos start, Func<GridPos, Transform> surface, int[] stageBounds = null)
+        /// <param name="wallHeight">How tall the ramparts stand (1 = the first worlds'; they rise further on).</param>
+        public static Transform Build(GridModel grid, Transform parent, int stage, Color accent, GridPos start, Func<GridPos, Transform> surface, int[] stageBounds = null, float wallHeight = 1f)
         {
             lightsLeft = MaxLights;
+            WallHeight = wallHeight;
             var root = new GameObject("Fortress").transform;
             root.SetParent(parent, false);
             var k = new Kit
@@ -44,14 +46,18 @@ namespace SquashBot.Visual
                 steel = M(new Color(0.36f, 0.38f, 0.44f), 0.55f, 0.6f), copper = M(new Color(0.72f, 0.42f, 0.24f), 0.5f, 0.7f), dark = M(new Color(0.13f, 0.14f, 0.17f), 0.35f, 0.4f),
                 blue = G(new Color(0.35f, 0.75f, 1f), 2.2f), warm = G(new Color(1f, 0.6f, 0.25f), 2.4f), lava = G(new Color(1f, 0.45f, 0.1f), 3f),
             };
-            k.lightColour = stage == 2 ? Color.Lerp(accent, new Color(0.4f, 0.9f, 1f), 0.4f) : new Color(1f, 0.6f, 0.28f);
+            // Warm orange lights everywhere (a touch of the world's colour on the far worlds), like lamps in dusk.
+            k.lightColour = stage == 2 ? Color.Lerp(new Color(1f, 0.55f, 0.22f), accent, 0.25f) : new Color(1f, 0.6f, 0.28f);
             k.light = G(k.lightColour, 2.4f);
             k.screen = G(stage == 2 ? k.lightColour : new Color(0.35f, 0.75f, 1f), 1.6f);
-            if (stage == 2)
+            if (stage >= 1)
             {
-                k.stoneDark = M(new Color(0.16f, 0.18f, 0.22f), 0.45f, 0.5f);
-                k.stone = M(new Color(0.24f, 0.26f, 0.31f), 0.45f, 0.5f);
-                k.stoneLight = M(new Color(0.34f, 0.36f, 0.42f), 0.45f, 0.5f);
+                // The ramparts are clearly darker than the floor they ring, in the floor's own hue: foi fights inside them.
+                var f = GridView.FortressStone;
+                float metal = stage == 2 ? 0.5f : 0.15f, smooth = stage == 2 ? 0.45f : 0.2f;
+                k.stoneDark = M(f * 0.34f, smooth, metal);
+                k.stone = M(f * 0.48f, smooth, metal);
+                k.stoneLight = M(f * 0.62f, smooth, metal);
             }
             float y0 = GridView.SurfaceY;
 
@@ -71,7 +77,7 @@ namespace SquashBot.Visual
                     if (grid.IsSafe(nb + d) || grid.IsFloor(nb + d)) continue; // a gap foi leaps across: leave it open
                     var at = GridView.ToWorld(p) + new Vector3(d.x, 0f, d.y) * 0.78f + Vector3.up * (y0 + 0.2f);
                     bool alongX = d.y != 0;
-                    Wall(root, k, stage, at, alongX, n, new Vector3(d.x, 0f, d.y));
+                    Wall(root, k, stage, at, alongX, n, new Vector3(d.x, 0f, d.y), front: d.x < 0 || d.y < 0);
                     if (n % 9 == 4) lightSpots.Add(at + new Vector3(-d.x, 0f, -d.y) * 0.3f + Vector3.up * 0.35f);
                     n++;
                 }
@@ -203,9 +209,40 @@ namespace SquashBot.Visual
         }
 
         /// <summary>One block of wall on a tile edge, in the stage's style.</summary>
-        private static void Wall(Transform root, Kit k, int stage, Vector3 at, bool alongX, int i, Vector3 outward)
+        private static float WallHeight = 1f;
+
+        /// <param name="front">A wall on the camera's side of the floor: kept lower so it never hides foi.</param>
+        private static void Wall(Transform root, Kit k, int stage, Vector3 at, bool alongX, int i, Vector3 outward, bool front = false)
         {
             Vector3 S(float along, float h, float across) => alongX ? new Vector3(along, h, across) : new Vector3(across, h, along);
+            if (stage >= 1)
+            {
+                // A thick rampart of dark plates with soft edges, a band of warm light along its inner face, round
+                // portholes and now and then a taller buttress — taller further into the campaign.
+                float h = (stage == 2 ? 0.95f : 0.8f) * WallHeight * (front ? 0.55f : 1f);
+                float bottom = at.y - 0.35f;
+                var mid = new Vector3(at.x, bottom + h * 0.5f, at.z);
+                Box("Rampart", root, mid, S(1.04f, h, 0.62f), k.stoneDark, 0.12f);
+                Box("Cap", root, new Vector3(at.x, bottom + h + 0.03f, at.z), S(1.06f, 0.08f, 0.68f), stage == 1 ? k.copper : k.stone, 0.04f);
+                Box("Band", root, new Vector3(at.x, bottom + h * 0.62f, at.z) - outward * 0.315f, S(0.84f, 0.05f, 0.02f), k.light, 0.01f);
+                Box("Plinth", root, new Vector3(at.x, bottom + 0.42f, at.z) - outward * 0.3f, S(1.0f, 0.12f, 0.06f), k.stone, 0.03f);
+                if (i % 3 == 1 && !front)
+                {
+                    var port = Shapes.Primitive(PrimitiveType.Cylinder, "Port", root, new Vector3(at.x, bottom + h * 0.4f, at.z) - outward * 0.32f, new Vector3(0.2f, 0.015f, 0.2f), k.light).transform;
+                    port.rotation = Quaternion.LookRotation(Vector3.up, -outward);
+                    Shapes.Primitive(PrimitiveType.Cylinder, "PortRim", root, new Vector3(at.x, bottom + h * 0.4f, at.z) - outward * 0.31f, new Vector3(0.28f, 0.012f, 0.28f), k.stone).transform
+                        .rotation = Quaternion.LookRotation(Vector3.up, -outward);
+                }
+                if (i % 6 == 4)
+                {
+                    float bh = h * 1.3f;
+                    Box("Buttress", root, new Vector3(at.x, bottom + bh * 0.5f, at.z) + outward * 0.05f, S(0.42f, bh, 0.78f), k.stone, 0.12f);
+                    Box("ButtressLight", root, new Vector3(at.x, bottom + bh - 0.12f, at.z) - outward * 0.345f, S(0.2f, 0.08f, 0.02f), k.light, 0.01f);
+                }
+                if (stage == 2 && i % 4 == 2)
+                    Box("Vent", root, new Vector3(at.x, bottom + h * 0.82f, at.z) - outward * 0.315f, S(0.32f, 0.1f, 0.02f), k.dark, 0.01f);
+                return;
+            }
             switch (stage)
             {
                 case 0:
@@ -291,9 +328,9 @@ namespace SquashBot.Visual
             s.SetParent(root, false);
             s.position = at;
             s.localScale = new Vector3(0.8f, 0.8f * height, 0.8f);
-            Box("Base", s, new Vector3(0f, 0.5f, 0f), new Vector3(1.9f, 1f, 1.9f), k.stoneDark, 0.06f);
+            Box("Base", s, new Vector3(0f, 0.5f, 0f), new Vector3(1.9f, 1f, 1.9f), k.stoneDark, 0.3f);
             Box("Band", s, new Vector3(0f, 1.02f, 0f), new Vector3(1.95f, 0.06f, 1.95f), k.light, 0.02f);
-            Box("Mid", s, new Vector3(0f, 2.3f, 0f), new Vector3(1.35f, 2.5f, 1.35f), k.stone, 0.06f);
+            Box("Mid", s, new Vector3(0f, 2.3f, 0f), new Vector3(1.35f, 2.5f, 1.35f), k.stone, 0.4f);
             for (int i = 0; i < 4; i++)
             {
                 float a = i * Mathf.PI / 2f;
@@ -301,7 +338,7 @@ namespace SquashBot.Visual
                 Box("Screen", s, face * 0.68f + Vector3.up * 2.1f, new Vector3(Mathf.Abs(face.z) * 0.8f + 0.03f, 1.2f, Mathf.Abs(face.x) * 0.8f + 0.03f), k.screen, 0.02f);
                 Box("Strip", s, face * 0.68f + Vector3.up * 3.05f, new Vector3(Mathf.Abs(face.z) * 1.1f + 0.03f, 0.06f, Mathf.Abs(face.x) * 1.1f + 0.03f), k.light, 0.01f);
             }
-            Box("Top", s, new Vector3(0f, 3.85f, 0f), new Vector3(0.95f, 0.6f, 0.95f), k.stoneDark, 0.05f);
+            Box("Top", s, new Vector3(0f, 3.85f, 0f), new Vector3(0.95f, 0.6f, 0.95f), k.stoneDark, 0.25f);
             Shapes.Primitive(PrimitiveType.Sphere, "Dish", s, new Vector3(0.2f, 4.35f, 0f), new Vector3(0.7f, 0.18f, 0.7f), k.steel);
             Shapes.Primitive(PrimitiveType.Cylinder, "Antenna", s, new Vector3(-0.25f, 4.9f, 0.2f), new Vector3(0.06f, 0.8f, 0.06f), k.dark);
             Shapes.Primitive(PrimitiveType.Sphere, "Tip", s, new Vector3(-0.25f, 5.75f, 0.2f), Vector3.one * 0.16f, k.light);

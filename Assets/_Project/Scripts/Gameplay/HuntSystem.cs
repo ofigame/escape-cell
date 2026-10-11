@@ -26,6 +26,8 @@ namespace SquashBot.Gameplay
             public bool dead;
             /// <summary>The fortress stage it belongs to.</summary>
             public int stage;
+            /// <summary>Blows (or stomps) it takes: one early on, more further in.</summary>
+            public int hp = 1;
         }
 
         private class Guard
@@ -89,7 +91,11 @@ namespace SquashBot.Gameplay
         private System.Random rng;
         private Color bugColour;
         /// <summary>Dark floors and the later worlds get glowing bugs, so they always stand out.</summary>
-        private bool BrightBugs => world >= 8 || Visual.WorldTheme.Current.tileTop.grayscale < 0.55f;
+        private bool BrightBugs => true; // always lit, so they never melt into the floor
+        /// <summary>How many blows a bug takes on this floor: one on the first floors, up to five far in.</summary>
+        private int BugHp => level.number <= 8 ? 1 : Mathf.Min(5, 2 + (level.number - 9) / 70);
+        /// <summary>Its armour (looks): plain, plated, spiked, horned.</summary>
+        private int BugTier => level.number <= 8 ? 0 : Mathf.Min(3, 1 + (level.number - 9) / 70);
         private int world;
 
         public bool MonsterUp => monster != null && !monster.Dead;
@@ -169,6 +175,9 @@ namespace SquashBot.Gameplay
             guardsToCome = level.robots - Mathf.Min(first, guards.Count);
             nextGuardAt = Time.time + 2f;
             for (int i = 0; i < level.brutes && free.Count > 0; i++) AddGuard(Take(free), brute: true);
+            // vanG's warlords: the very strong tenth of the crowd, kept away from where foi starts.
+            var away = free.FindAll(p => Chebyshev(p, robot.Position) >= 4);
+            for (int i = 0; i < level.elites && away.Count > 0; i++) { var p = Take(away); free.Remove(p); AddGuard(p, brute: true, rank: 99); }
             // Guard towers, set well away from where foi starts.
             var far = new List<GridPos>();
             foreach (var p in free) if (Chebyshev(p, robot.Position) >= 4) far.Add(p);
@@ -228,8 +237,10 @@ namespace SquashBot.Gameplay
 
         private void AddBug(GridPos p)
         {
-            var b = new Bug { pos = p, stage = StageOf(p), wait = (float)rng.NextDouble() };
+            var b = new Bug { pos = p, stage = StageOf(p), wait = (float)rng.NextDouble(), hp = BugHp };
             b.model = BugModel.Build(transform, bugColour, world % BugModel.Kinds, BrightBugs); // a new kind of bug every world
+            b.model.Armor(BugTier);
+            b.model.transform.localScale = Vector3.one * (1.5f + BugTier * 0.12f) * Mathf.Max(1f, EnemyScale * 0.65f); // big enough to see
             b.from = b.to = At(p);
             b.model.transform.position = b.to;
             b.model.transform.rotation = Quaternion.Euler(0f, rng.Next(4) * 90f, 0f);
@@ -251,8 +262,8 @@ namespace SquashBot.Gameplay
             if (brute)
             {
                 // vanG's enforcer: a tall humanoid that hits much harder.
-                g.human = HumanoidBot.Build(g.root, accent);
-                g.human.transform.localScale = Vector3.one * (rank >= 99 ? 0.88f : 0.7f) * EnemyScale;
+                g.human = HumanoidBot.Build(g.root, accent, rank >= 99 ? Menace : 0);
+                g.human.transform.localScale = Vector3.one * (rank >= 99 ? 0.92f : 0.7f) * EnemyScale;
             }
             else
             {
@@ -309,7 +320,7 @@ namespace SquashBot.Gameplay
         /// <summary>The robot landed on a tile: a bug there is squashed.</summary>
         public void OnRobotArrived(GridPos p)
         {
-            foreach (var b in bugs) if (!b.dead && b.pos == p) KillBug(b);
+            foreach (var b in bugs) if (!b.dead && b.pos == p) HitBug(b, 1);
         }
 
         /// <summary>
@@ -460,7 +471,7 @@ namespace SquashBot.Gameplay
             foreach (var b in bugs)
             {
                 if (b.dead || b.pos != p) continue;
-                KillBug(b);
+                HitBug(b, damage);
                 return true;
             }
             return false;
@@ -513,6 +524,17 @@ namespace SquashBot.Gameplay
                 yield return null;
             }
             if (body != null) Destroy(body.gameObject);
+        }
+
+        /// <summary>A stomp or a blow on a bug: tough ones flatten, spring back and scurry off until their last one.</summary>
+        private void HitBug(Bug b, int damage)
+        {
+            b.hp -= Mathf.Max(1, damage);
+            if (b.hp <= 0) { KillBug(b); return; }
+            b.model.Hurt();
+            fx.Burst(At(b.pos) + Vector3.up * 0.15f, b.model.Blood, b.model.Blood * 0.6f, 6, 1.5f);
+            AudioManager.PlaySfx(Sfx.Blocked, 0.4f, 1.8f);
+            b.wait = 0f; // off it goes at once
         }
 
         private void KillBug(Bug b)
@@ -686,7 +708,7 @@ namespace SquashBot.Gameplay
             b.pos = next;
             b.moveT = 0f;
             b.model.Scuttle();
-            if (next == robot.Position) KillBug(b);
+            if (next == robot.Position) HitBug(b, 1);
         }
 
         private void MoveGuard(Guard g, GridPos next, float duration)
@@ -811,6 +833,9 @@ namespace SquashBot.Gameplay
         /// <summary>Health shares a guard's slam and an enforcer's smash take.</summary>
         private const float GuardHitShare = 0.2f, BruteHitShare = 0.45f;
         /// <summary>A fortress robot's slam: the easy ones barely sting, each rank a little more, an elite most of all.</summary>
+        /// <summary>How terrifying the warlords look on this floor (1 early … 4 from level 180).</summary>
+        private int Menace => Mathf.Clamp(1 + level.number / 60, 1, 4);
+
         private static float ShareOf(Guard g) => g.rank >= 99 ? 0.55f : g.brute ? BruteHitShare : g.rank == 0 ? 0.12f : g.rank > 0 ? Mathf.Min(0.3f, 0.16f + g.rank * 0.025f) : GuardHitShare;
         /// <summary>The monster's blows hurt more on later floors.</summary>
         private float MonsterHitShare => Mathf.Lerp(0.24f, 0.42f, level.score / 100f);

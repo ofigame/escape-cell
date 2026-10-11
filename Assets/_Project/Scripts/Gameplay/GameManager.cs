@@ -173,6 +173,7 @@ namespace SquashBot.Gameplay
             robot.Arrived += OnRobotArrived;
             robot.BumpedInto += OnRobotBumped;
             robot.BlockSmasher = SmashBlock;
+            robot.Forbidden = p => StageLocked(p);
 
             hazards = new GameObject("Hazards").AddComponent<HazardSystem>();
             hazards.Init(gridView, robot, fx, cameraRig);
@@ -553,8 +554,9 @@ namespace SquashBot.Gameplay
                 return;
             }
 
-            // Each attempt costs a life (unlocking a new level refills them). Without lives, offer the ad instead.
-            if (!Lives.TryConsume())
+            // A life is spent only when the level is lost (closing the game mid-level costs nothing; unlocking a new
+            // level refills them). Without lives, offer the ad instead.
+            if (Lives.Count <= 0)
             {
                 pendingLevel = index;
                 ui.ShowNoLives();
@@ -993,12 +995,12 @@ namespace SquashBot.Gameplay
         /// <summary><paramref name="preferred"/> if it is safe, otherwise the standable tile closest to <paramref name="near"/>.</summary>
         private GridPos SafeTileNear(GridPos preferred, GridPos near)
         {
-            if (grid.InBounds(preferred) && grid.IsStandable(preferred) && !hazards.IsThreatened(preferred)) return preferred;
+            if (grid.InBounds(preferred) && grid.IsStandable(preferred) && !hazards.IsThreatened(preferred) && !StageLocked(preferred)) return preferred;
             GridPos best = preferred;
             int bestScore = int.MaxValue;
             foreach (var t in grid.AllPositions())
             {
-                if (!grid.IsStandable(t)) continue;
+                if (!grid.IsStandable(t) || StageLocked(t)) continue;
                 int score = t.Manhattan(near) * 10 + (hazards.IsThreatened(t) ? 100 : 0);
                 if (score < bestScore)
                 {
@@ -1047,7 +1049,8 @@ namespace SquashBot.Gameplay
             hoverCooldown = HoverCooldown;
             ShowHoverMarker(false);
             if (!robot.IsAlive) return;
-            var target = grid.IsStandable(hoverTarget) ? hoverTarget : SafeTileNear(robot.Position, hoverTarget);
+            var target = grid.IsStandable(hoverTarget) && !StageLocked(hoverTarget) ? hoverTarget : SafeTileNear(robot.Position, robot.Position);
+            if (StageLocked(hoverTarget)) FloatAt(GridView.ToWorld(hoverTarget) + Vector3.up * 1.1f, Loc.T("float.gateShut"), new Color(1f, 0.6f, 0.4f));
             robot.EndHover(target);
             AudioManager.PlaySfx(Sfx.Hop, 0.7f, 0.8f);
         }
@@ -1994,6 +1997,7 @@ namespace SquashBot.Gameplay
             }
 
             PlayerPrefs.SetInt(FailKey(levelIndex), PlayerPrefs.GetInt(FailKey(levelIndex), 0) + 1);
+            if (!dailyRun) Lives.TryConsume(); // the loss itself costs the life (not starting the level)
             StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
             {
                 won = false,

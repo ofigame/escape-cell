@@ -60,6 +60,8 @@ namespace SquashBot.Gameplay
         public static bool FortressTiles;
         /// <summary>The fortress stone's colour on this floor: light in the first worlds, each world its own hue, darker and darker later on.</summary>
         public static Color FortressStone = new Color(0.7f, 0.7f, 0.74f);
+        /// <summary>The sci-fi worlds: the fortress floor is a deck of metal plates rather than stone.</summary>
+        public static bool FortressMetal;
 
         public static Vector3 ToWorld(GridPos p) => new Vector3(p.x, FloorRelief.HeightAt(p) * FloorRelief.Step, p.y);
 
@@ -79,7 +81,7 @@ namespace SquashBot.Gameplay
             tiles = new TileView[grid.Width, grid.Height];
             var stone = new System.Random(grid.Width * 131 + grid.Height);
             // Dark fortress floors are decks of metal plates rather than stone: shared materials for their details.
-            bool metal = FortressTiles && FortressStone.grayscale < 0.42f;
+            bool metal = FortressTiles && FortressMetal;
             var accent = WorldTheme.Current.accent;
             Material seamMat = null, wearMat = null, boltMat = null;
             if (metal)

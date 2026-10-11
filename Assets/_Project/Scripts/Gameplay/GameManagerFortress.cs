@@ -30,6 +30,7 @@ namespace SquashBot.Gameplay
             GridView.FortressTiles = on;
             theme = theme ?? WorldTheme.Current;
             GridView.FortressStone = FortressStoneFor(world, theme.accent);
+            GridView.FortressMetal = FortressFloor.StageFor(world) == 2;
             // Real shadows cost: soft on strong phones, hard on middling ones, none on the weakest (the rest of the look stays).
             var tier = Data.GraphicsQuality.Current;
             bool shadows = on && tier != Data.GraphicsTier.Low;
@@ -72,7 +73,13 @@ namespace SquashBot.Gameplay
             ClearFortressFloor();
             if (level == null || level.mission != MissionType.Hunt) return;
             int stage = level.fortress ? 0 : FortressFloor.StageFor(World);
-            fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, level.fortressStages > 1 ? level.stageBounds : null);
+            // The ramparts rise further into the campaign (the first worlds keep theirs).
+            float wallHeight = stage == 0 ? 1f : Mathf.Lerp(1f, 1.7f, Mathf.InverseLerp(5f, 24f, World));
+            fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, level.fortressStages > 1 ? level.stageBounds : null, wallHeight);
+            // Craft crossing the sky over the later fortresses.
+            if (stage >= 1)
+                SkyTraffic.Create(fortressFloor, () => robot != null ? robot.transform.position : Vector3.zero,
+                    Color.Lerp(new Color(1f, 0.55f, 0.22f), WorldTheme.Current.accent, 0.25f), stage == 2 ? 5 : 3, levelIndex * 17 + 3);
             glassCell = GlassCell.Create(GridView.ToWorld(robot.Position) + Vector3.up * GridView.SurfaceY, robot.transform.localScale.x * 0.62f);
             glassSince = -1f;
             foreach (var p in grid.LavaTiles)
@@ -88,9 +95,11 @@ namespace SquashBot.Gameplay
         /// </summary>
         private static Color FortressStoneFor(int world, Color accent)
         {
+            // The floor itself never goes very dark (the walls round it are the dark part, see FortressFloor): a soft
+            // grey with the world's hue, deeper in the far worlds, like brushed metal under a dusk sky.
             float t = Mathf.Clamp01(world / 24f);
             Color.RGBToHSV(accent, out float h, out _, out _);
-            var tint = Color.HSVToRGB(h, Mathf.Lerp(0.06f, 0.38f, t), Mathf.Lerp(0.9f, 0.24f, Mathf.Pow(t, 0.8f)));
+            var tint = Color.HSVToRGB(h, Mathf.Lerp(0.06f, 0.16f, t), Mathf.Lerp(0.9f, 0.46f, Mathf.Pow(t, 0.8f)));
             return world < 2 ? Color.Lerp(new Color(0.86f, 0.86f, 0.88f), tint, 0.3f) : tint;
         }
 

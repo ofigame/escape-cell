@@ -66,6 +66,15 @@ namespace SquashBot.Core
             // vanG's cage and the bridge to the tunnel stay at ground level.
             foreach (var p in grid.CageTiles) h[p.x, p.y] = 0;
             foreach (var p in grid.BridgeTiles) h[p.x, p.y] = 0;
+            foreach (var p in grid.GateTiles) h[p.x, p.y] = 0;
+            // foi's glass cell always stands in the middle of the first stage, on flat ground round about.
+            if (grid.StartSpot.HasValue)
+                for (int x = -2; x <= 2; x++)
+                    for (int y = -2; y <= 2; y++)
+                    {
+                        var q = grid.StartSpot.Value + new GridPos(x, y);
+                        if (grid.InBounds(q)) h[q.x, q.y] = 0;
+                    }
             Smooth(h); // whatever the shape, every slope can be climbed a step at a time
             heights = h;
             // Start low, near the front edge (the side the camera looks from): the climb is ahead.
@@ -78,7 +87,7 @@ namespace SquashBot.Core
                 int score = h[p.x, p.y] * 1000 + p.x + p.y + Mathf.Abs((p.x - p.y) - (front.x - front.y)) * 2;
                 if (score < bestScore) { bestScore = score; best = p; }
             }
-            if (grid.StartSpot == null || h[grid.StartSpot.Value.x, grid.StartSpot.Value.y] > 0) grid.StartSpot = best;
+            if (grid.StartSpot == null) grid.StartSpot = best;
         }
 
         // ---------- Mounds: a few low plateaus, one gentle step up ----------

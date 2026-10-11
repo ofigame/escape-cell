@@ -113,6 +113,7 @@ namespace SquashBot.Gameplay
             strikeCooldown -= dt;
             UpdatePendingStrike();
             UpdateFifi(dt);
+            UpdateBridgeGuide();
         }
 
         private void OnHuntFinished(GridPos p, bool robotKind)
