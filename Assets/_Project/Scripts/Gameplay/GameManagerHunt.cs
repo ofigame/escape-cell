@@ -101,6 +101,7 @@ namespace SquashBot.Gameplay
             hazards.IsProtected = p => p == gateTile || p == guardSpot || grid.IsCage(p) || grid.IsBridge(p) || grid.IsGate(p);
             SetupCage();
             hunt.Begin(grid, level, World, levelIndex * 31 + 7);
+            introPending = true; // the opening shot over the whole floor
             SetupPotions();
             SetupFifi();
             SetupBombs();
@@ -460,7 +461,41 @@ namespace SquashBot.Gameplay
             var offset = Quaternion.Euler(0f, camYaw, 0f) * baseOffset * (CamDistanceScale[SaveData.CameraDistance] * camPull * Mathf.Lerp(1f, FightCamCloser, combatBlend));
             var pos = closeCamFocus + offset;
             // Low down, it looks a little higher, over foi towards the fight.
-            cameraRig.Chase(pos, Quaternion.LookRotation(closeCamFocus + Vector3.up * Mathf.Lerp(0.35f, 0.9f, combatBlend) - pos), Mathf.Lerp(CloseCamFov, FightCamFov, combatBlend));
+            var rot = Quaternion.LookRotation(closeCamFocus + Vector3.up * Mathf.Lerp(0.35f, 0.9f, combatBlend) - pos);
+            float fov = Mathf.Lerp(CloseCamFov, FightCamFov, combatBlend);
+            if (introPending) { introPending = false; introStart = Time.time; }
+            if (IntroRunning)
+            {
+                // The opening shot: the whole floor from high above (every stage of it), then gliding down to foi.
+                float t = Time.time - introStart;
+                float k = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t - IntroHold) / IntroGlide));
+                IntroPose(out var ipos, out var irot);
+                pos = Vector3.Lerp(ipos, pos, k);
+                rot = Quaternion.Slerp(irot, rot, k);
+                fov = Mathf.Lerp(IntroFov, fov, k);
+                closeCamFocus = target;
+                cameraRig.Cam.farClipPlane = Mathf.Max(200f, Vector3.Distance(ipos, closeCamFocus) * 1.8f);
+            }
+            else if (cameraRig.Cam.farClipPlane > 200f) cameraRig.Cam.farClipPlane = 200f;
+            cameraRig.Chase(pos, rot, fov);
+        }
+
+        /// <summary>The opening shot at the start of a floor (see UpdateCloseCamera): waiting to start, and since when.</summary>
+        private bool introPending;
+        private float introStart = -100f;
+        private const float IntroHold = 1.1f, IntroGlide = 1.7f, IntroFov = 46f;
+        public bool IntroRunning => Time.time - introStart < IntroHold + IntroGlide;
+
+        /// <summary>Where the opening shot looks from: above the middle of the whole floor, far enough to see all of it.</summary>
+        private void IntroPose(out Vector3 pos, out Quaternion rot)
+        {
+            var centre = new Vector3((grid.Width - 1) * 0.5f, FloorRelief.MaxHeight * FloorRelief.Step * 0.5f, (grid.Height - 1) * 0.5f);
+            // The floor runs long to the north: seen from the south and high up, at the play view's heading.
+            var dir = new Vector3(-0.32f, 1f, -0.55f).normalized;
+            float span = Mathf.Max(grid.Width * 1.25f, grid.Height);
+            float dist = span * 0.5f / Mathf.Tan(IntroFov * 0.5f * Mathf.Deg2Rad) + 4f;
+            pos = centre + dir * dist;
+            rot = Quaternion.LookRotation(centre - pos);
         }
 
         private static readonly Vector3 CloseCamOffset = new Vector3(-2.7f, 3.9f, -2.7f);

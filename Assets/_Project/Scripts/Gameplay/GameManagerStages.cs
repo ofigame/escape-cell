@@ -25,13 +25,23 @@ namespace SquashBot.Gameplay
         {
             ClearStageGates();
             if (level == null || level.mission != MissionType.Hunt) return;
+            // One gate across each bridge (its gate tiles side by side in a row); every tile of it opens it.
+            var done = new HashSet<GridPos>();
             foreach (var g in grid.GateTiles)
-                stageGates[g] = StageGate.Create(GridView.ToWorld(g) + Vector3.up * GridView.SurfaceY, WorldTheme.Current.accent);
+            {
+                if (done.Contains(g)) continue;
+                var row = grid.GateTiles.FindAll(o => o.y == g.y && Mathf.Abs(o.x - g.x) <= 3);
+                Vector3 centre = Vector3.zero;
+                foreach (var o in row) { centre += GridView.ToWorld(o); done.Add(o); }
+                centre /= row.Count;
+                var gate = StageGate.Create(centre + Vector3.up * GridView.SurfaceY, WorldTheme.Current.accent, row.Count);
+                foreach (var o in row) stageGates[o] = gate;
+            }
         }
 
         private void ClearStageGates()
         {
-            foreach (var g in stageGates.Values) if (g != null) Destroy(g.gameObject);
+            foreach (var g in new HashSet<StageGate>(stageGates.Values)) if (g != null) Destroy(g.gameObject);
             stageGates.Clear();
             ClearBridgeGuide();
         }
@@ -129,7 +139,6 @@ namespace SquashBot.Gameplay
                 var at = GridView.ToWorld(t) + Vector3.up * 0.6f;
                 fx.Burst(at, new Color(1f, 0.7f, 0.45f), new Color(2.4f, 1.4f, 0.6f), 40, 6f);
                 Shockwave.Create(GridView.ToWorld(t), 2f, new Color(1f, 0.6f, 0.35f));
-                FloatAt(GridView.ToWorld(t) + Vector3.up * 0.8f, Loc.F("float.gateOpen", stage + 2), Palette.UiGold);
             }
             if (tiles.Count > 0) FloatAt(robot.transform.position + Vector3.up * 0.9f, Loc.F("float.gateOpen", stage + 2), Palette.UiGold);
             StartBridgeGuide(stage);

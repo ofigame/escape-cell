@@ -13,7 +13,7 @@ namespace SquashBot.Gameplay
     /// </summary>
     public partial class GameManager
     {
-        private const float SpinCooldown = 1.1f;
+        private const float SpinCooldown = 0.28f; // short: circling on keeps spinning
         private float spinReadyAt;
 
         private void SpinAttack()

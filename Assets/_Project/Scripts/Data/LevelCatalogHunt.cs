@@ -158,6 +158,12 @@ namespace SquashBot.Data
         /// on hard floors the last stage also has two fire pits in it. <paramref name="bounds"/> gets x0, y0, x1, y1 of
         /// each stage (grid coordinates, y up from the bottom row), first stage first.
         /// </summary>
+        /// <summary>The bridges between fortress stages: rows long (each climbing a stair up to the next, higher stage),
+        /// and the row of the gate counted from the lower stage's side.</summary>
+        public const int BridgeRows = 8, BridgeGateRow = 3;
+        /// <summary>How many steps each stage stands above the one before it.</summary>
+        public const int StageRise = 3;
+
         private static string[] StageLayout(int index, float d, bool hard, out int[] bounds, out int cells)
         {
             int n = StageCount(index);
@@ -188,15 +194,19 @@ namespace SquashBot.Data
                     for (int x = x0; x <= x1; x++) row[x] = '#';
                     if (r == 0 || r == len - 1) { row[x0 - 1] = 'F'; row[x1 + 1] = 'F'; } // burning stairs off the corners
                     if (r == len / 2 && s == 0) row[mid] = 'S';                          // foi's cell
-                    if (hard && s == n - 1 && n > 1 && r == len / 2 + 1) { row[mid - sz / 4 - 1] = 'F'; row[mid + sz / 4 + 1] = 'F'; } // two fire pits
+                    if (hard && s == n - 1 && n > 1 && (r == len / 2 + 1 || r == len / 2 + 2))
+                        foreach (int x in new[] { mid - sz / 4 - 2, mid - sz / 4 - 1, mid + sz / 4 + 1, mid + sz / 4 + 2 }) row[x] = 'F'; // two fire pits, 2x2 each
                     rows.Add(new string(row));
                     cells += sz;
                 }
                 if (s > 0)
-                    for (int b = 0; b < 3; b++)
+                    for (int b = 0; b < BridgeRows; b++)
                     {
+                        // Two tiles wide; the gate across it a few rows up from the lower stage.
                         var row = new string('.', w).ToCharArray();
-                        row[mid] = b == 1 ? 'G' : '#';
+                        char c = BridgeRows - 1 - b == BridgeGateRow ? 'G' : '#';
+                        row[mid - 1] = c;
+                        row[mid] = c;
                         rows.Add(new string(row));
                     }
             }

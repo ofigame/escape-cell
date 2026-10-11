@@ -66,10 +66,13 @@ namespace SquashBot.Gameplay
         // The circle gesture: how far the finger's path has turned since the press (degrees, signed), the last point and
         // heading of the path, and whether this press already spun.
         private const float CircleSegmentInches = 0.07f, CircleTurn = 300f, CircleTime = 1.1f, CircleHint = 150f, CircleHintTime = 0.6f;
-        private float pathTurn;
+        private float pathTurn, spinMark;
         private Vector2 pathPoint;
         private Vector2? pathHeading;
         private bool spun;
+        /// <summary>After the first circle, each further turn of the finger (this many degrees) spins again, for as long
+        /// as the finger keeps circling.</summary>
+        private const float CircleAgain = 270f;
 
         /// <summary>The circle gesture is on (the core loop's floors).</summary>
         public bool CircleEnabled { get; set; }
@@ -86,6 +89,7 @@ namespace SquashBot.Gameplay
             if (pathHeading.HasValue) pathTurn += Vector2.SignedAngle(pathHeading.Value, seg);
             pathHeading = seg;
             pathPoint = pos;
+            if (spun) return Mathf.Abs(pathTurn - spinMark) >= CircleAgain; // still circling: again
             return Mathf.Abs(pathTurn) >= CircleTurn && Time.unscaledTime - pressTime <= CircleTime;
         }
 
@@ -151,6 +155,7 @@ namespace SquashBot.Gameplay
                 pathPoint = pos;
                 pathHeading = null;
                 spun = false;
+                spinMark = 0f;
                 if (Ignore != null && Ignore(pos))
                 {
                     consumed = true; // a button press: no swipe, tap or hover from it
@@ -177,9 +182,10 @@ namespace SquashBot.Gameplay
                 return new InputCommand { holdEnd = true, holdPosition = hasPointer ? pos : lastPos };
             }
 
-            if (CircleEnabled && pressed && !spun && !ScreenMode && (!consumed || chained) && TrackCircle(pos))
+            if (CircleEnabled && pressed && !ScreenMode && (spun || !consumed || chained) && TrackCircle(pos))
             {
                 spun = true;
+                spinMark = pathTurn;
                 consumed = true;
                 heldDir = null;
                 lastTapTime = -10f;

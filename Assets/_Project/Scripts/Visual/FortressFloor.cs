@@ -115,27 +115,9 @@ namespace SquashBot.Visual
                     else Spire(root, k, stage, at, height);
                 }
 
-            // Walkways (stage 1 and 2): the row and the column through foi's cell.
-            if (stage >= 1 && surface != null)
+            // The hexagonal pad round foi's cell (stage 1 and 2).
+            if (stage >= 1)
             {
-                var plate = stage == 1 ? M(new Color(0.3f, 0.32f, 0.37f), 0.5f, 0.6f) : M(new Color(0.12f, 0.13f, 0.16f), 0.4f, 0.4f);
-                foreach (var p in grid.AllPositions())
-                {
-                    if (!Main(p) || (p.x != start.x && p.y != start.y) || p == start) continue;
-                    var s = surface(p);
-                    if (s == null) continue;
-                    bool alongX = p.y == start.y;
-                    Box("Walkway", s, new Vector3(0f, 0.053f, 0f), alongX ? new Vector3(1f, 0.012f, 0.46f) : new Vector3(0.46f, 0.012f, 1f), plate, 0.01f);
-                    for (int i = -1; i <= 1; i++)
-                    {
-                        // Grating bars (stage 1) or conveyor chevrons (stage 2).
-                        var bar = Box(stage == 1 ? "Grate" : "Chevron", s, new Vector3(alongX ? i * 0.3f : 0f, 0.061f, alongX ? 0f : i * 0.3f),
-                            alongX ? new Vector3(0.05f, 0.006f, 0.4f) : new Vector3(0.4f, 0.006f, 0.05f), stage == 1 ? k.dark : k.light, 0.004f);
-                        if (stage == 2) bar.localRotation = Quaternion.Euler(0f, alongX ? 0f : 90f, 0f);
-                    }
-                    foreach (float e in new[] { -0.24f, 0.24f })
-                        Box("Rail", s, alongX ? new Vector3(0f, 0.062f, e) : new Vector3(e, 0.062f, 0f), alongX ? new Vector3(1f, 0.01f, 0.025f) : new Vector3(0.025f, 0.01f, 1f), stage == 1 ? k.copper : k.light, 0.004f);
-                }
                 // The hexagonal pad round foi's cell.
                 var c = GridView.ToWorld(start) + Vector3.up * (y0 + 0.065f);
                 for (int i = 0; i < 6; i++)
@@ -155,13 +137,17 @@ namespace SquashBot.Visual
                 {
                     // A fire pit sunk into the middle of a stage (hard floors' last stages): a stone rim round a pool of fire.
                     foreach (var d in new[] { new Vector3(1f, 0f, 0f), new Vector3(-1f, 0f, 0f), new Vector3(0f, 0f, 1f), new Vector3(0f, 0f, -1f) })
+                        if (!grid.IsLava(p + new GridPos((int)d.x, (int)d.z)))
                         Box("PitRim", root, at + d * 0.45f + Vector3.up * (y0 - 0.02f), d.x != 0 ? new Vector3(0.12f, 0.16f, 1f) : new Vector3(1f, 0.16f, 0.12f), k.stoneLight, 0.03f);
-                    Box("PitWall", root, at + Vector3.up * (y0 - 0.45f), new Vector3(0.9f, 0.8f, 0.9f), k.stoneDark, 0.03f);
-                    Box("FirePool", root, at + Vector3.up * (y0 - 0.04f), new Vector3(0.78f, 0.04f, 0.78f), k.lava, 0.01f);
+                    // Sunk deep: dark stone sides down to a pool of fire, flames licking up out of it.
+                    foreach (var d in new[] { new GridPos(1, 0), new GridPos(-1, 0), new GridPos(0, 1), new GridPos(0, -1) })
+                        if (!grid.IsLava(p + d))
+                            Box("PitSide", root, at + new Vector3(d.x * 0.47f, y0 - 0.3f, d.y * 0.47f), d.x != 0 ? new Vector3(0.06f, 0.6f, 1f) : new Vector3(1f, 0.6f, 0.06f), k.stoneDark, 0.01f);
+                    Box("FirePool", root, at + Vector3.up * (y0 - 0.55f), new Vector3(1.0f, 0.06f, 1.0f), k.lava, 0.005f);
                     var f = Flames.Create(root);
-                    f.transform.position = at + Vector3.up * y0;
+                    f.transform.position = at + Vector3.up * (y0 - 0.5f);
                     f.transform.localScale = Vector3.one * 1.1f;
-                    AddLight(root, at + Vector3.up * 0.6f, new Color(1f, 0.5f, 0.15f), 3f, 2.2f);
+                    if (!grid.IsLava(p + new GridPos(-1, 0)) && !grid.IsLava(p + new GridPos(0, -1))) AddLight(root, at + new Vector3(0.5f, 0.6f, 0.5f), new Color(1f, 0.5f, 0.15f), 3.5f, 2.4f); // one per pit
                     continue;
                 }
                 var o = OutwardOf(grid, p);
@@ -348,7 +334,7 @@ namespace SquashBot.Visual
         private static bool Inner(GridModel grid, GridPos p)
         {
             foreach (var d in new[] { new GridPos(1, 0), new GridPos(-1, 0), new GridPos(0, 1), new GridPos(0, -1) })
-                if (!grid.IsFloor(p + d) || grid.IsLava(p + d)) return false;
+                if (!grid.IsFloor(p + d)) return false; // lava next to it is the same pit
             return true;
         }
 

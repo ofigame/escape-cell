@@ -682,7 +682,8 @@ namespace SquashBot.Gameplay
             int w = shaped ? data.layout[0].Length : data.gridWidth;
             int h = shaped ? data.layout.Length : data.gridHeight;
             var grid = new GridModel(w, h, data.layout);
-            FloorRelief.Apply(grid, data.terrain, LevelCatalog.WorldOf(Mathf.Max(0, data.number - 1)));
+            FloorRelief.Apply(grid, data.terrain, LevelCatalog.WorldOf(Mathf.Max(0, data.number - 1)),
+                data.fortressStages > 1 ? data.stageBounds : null, LevelCatalog.StageRise, LevelCatalog.BridgeRows);
             return grid;
         }
 

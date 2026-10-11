@@ -19,7 +19,7 @@ namespace SquashBot.Core
     {
         /// <summary>Height of one step in world units (lower on the gentle mounds).</summary>
         public static float Step { get; private set; } = TallStep;
-        private const float TallStep = 0.55f, LowStep = 0.3f;
+        private const float TallStep = 0.55f, LowStep = 0.3f, StageStep = 0.45f;
         public const int MaxClimb = 1, MaxDrop = 2;
 
         private static int[,] heights;
@@ -53,16 +53,32 @@ namespace SquashBot.Core
             Step = TallStep;
         }
 
-        /// <summary>Raises the floor for a level (flat leaves it level) and moves the start onto low ground.</summary>
-        public static void Apply(GridModel grid, TerrainKind kind, int world)
+        /// <summary>
+        /// Raises the floor for a level (flat leaves it level) and moves the start onto low ground. Fortress stages
+        /// (<paramref name="stageBounds"/>: x0, y0, x1, y1 each, south to north) each stand <paramref name="rise"/> steps
+        /// above the one before, the bridges between them climbing as stairs; any relief sits on top of that.
+        /// </summary>
+        public static void Apply(GridModel grid, TerrainKind kind, int world, int[] stageBounds = null, int rise = 3, int bridgeRows = 8)
         {
             heights = null;
-            Step = kind == TerrainKind.Mounds ? LowStep : TallStep;
-            if (kind == TerrainKind.Flat) return;
+            bool stages = stageBounds != null && stageBounds.Length >= 8;
+            Step = stages ? StageStep : kind == TerrainKind.Mounds ? LowStep : TallStep;
+            if (kind == TerrainKind.Flat && !stages) return;
             var h = new int[grid.Width, grid.Height];
             if (kind == TerrainKind.Pyramid) Pyramids(grid, h, world);
             else if (kind == TerrainKind.Mounds) Mounds(grid, h, world);
-            else Terraces(grid, h, world);
+            else if (kind == TerrainKind.Terraces) Terraces(grid, h, world);
+            if (stages)
+            {
+                // The relief stays off the bridges and the rows next to them, so each stair meets its stage evenly.
+                int n = stageBounds.Length / 4;
+                foreach (var p in grid.AllPositions())
+                    for (int s = 0; s < n - 1; s++)
+                    {
+                        int top = stageBounds[s * 4 + 3], next = stageBounds[(s + 1) * 4 + 1];
+                        if (p.y >= top - 2 && p.y <= next + 2) h[p.x, p.y] = 0;
+                    }
+            }
             // vanG's cage and the bridge to the tunnel stay at ground level.
             foreach (var p in grid.CageTiles) h[p.x, p.y] = 0;
             foreach (var p in grid.BridgeTiles) h[p.x, p.y] = 0;
@@ -76,6 +92,11 @@ namespace SquashBot.Core
                         if (grid.InBounds(q)) h[q.x, q.y] = 0;
                     }
             Smooth(h); // whatever the shape, every slope can be climbed a step at a time
+            if (stages)
+            {
+                int n = stageBounds.Length / 4;
+                foreach (var p in grid.AllPositions()) h[p.x, p.y] += StageLift(p.y, stageBounds, n, rise, bridgeRows);
+            }
             heights = h;
             // Start low, near the front edge (the side the camera looks from): the climb is ahead.
             GridPos best = grid.CenterFloor();
@@ -208,6 +229,22 @@ namespace SquashBot.Core
             int period = (levels - 1) * 2;
             int k = i % period;
             return k < levels ? k : period - k;
+        }
+
+        /// <summary>How high a row of a fortress of stages stands: each stage <paramref name="rise"/> steps above the last, the
+        /// bridge rows between climbing evenly from one to the next.</summary>
+        private static int StageLift(int y, int[] b, int n, int rise, int bridgeRows)
+        {
+            for (int s = 0; s < n; s++)
+            {
+                if (y <= b[s * 4 + 3]) return s * rise; // in stage s (or the stairs south of the first)
+                if (s < n - 1 && y < b[(s + 1) * 4 + 1])
+                {
+                    int k = y - b[s * 4 + 3]; // 1..bridgeRows up the bridge
+                    return s * rise + k * rise / (bridgeRows + 1);
+                }
+            }
+            return (n - 1) * rise; // the cage and the tunnel bridge beyond the last stage
         }
 
         /// <summary>Lowers any tile more than one step above a neighbour, so every slope can be climbed.</summary>

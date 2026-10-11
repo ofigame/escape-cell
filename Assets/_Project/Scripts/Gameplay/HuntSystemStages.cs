@@ -36,7 +36,7 @@ namespace SquashBot.Gameplay
             }
             // A bridge: up to its gate it belongs with the stage south of it, past the gate with the next one.
             for (int s = 0; s < stageCount - 1; s++)
-                if (p.y > stageBounds[s * 4 + 3] && p.y < stageBounds[(s + 1) * 4 + 1]) return p.y > stageBounds[s * 4 + 3] + 2 ? s + 1 : s;
+                if (p.y > stageBounds[s * 4 + 3] && p.y < stageBounds[(s + 1) * 4 + 1]) return p.y > stageBounds[s * 4 + 3] + 1 + Data.LevelCatalog.BridgeGateRow ? s + 1 : s;
             return p.y < stageBounds[1] ? 0 : stageCount - 1;
         }
 

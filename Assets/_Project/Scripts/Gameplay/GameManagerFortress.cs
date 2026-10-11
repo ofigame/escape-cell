@@ -127,6 +127,7 @@ namespace SquashBot.Gameplay
                 hazards.Freeze();
                 floorRules.Freeze();
             }
+            if (IntroRunning || introPending) { glassSince = Time.time; return default; } // the opening shot first
             if (command.IsEmpty && Time.time - glassSince < 2f) return default;
             // foi breaks out: a punch, a white flash in the glass, the shards fly; the floor comes alive.
             glassCell.Shatter();
