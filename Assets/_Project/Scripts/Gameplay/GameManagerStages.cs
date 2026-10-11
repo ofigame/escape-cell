@@ -157,6 +157,21 @@ namespace SquashBot.Gameplay
         }
         private float lastGateNote = -10f;
 
+        /// <summary>The fortress stage a tile belongs to, from the level's own layout (a bridge counts with the stage it
+        /// starts from until its gate, then with the next).</summary>
+        private int StageAt(GridPos p)
+        {
+            var b = level != null ? level.stageBounds : null;
+            if (b == null || b.Length < 8) return 0;
+            int n = b.Length / 4;
+            for (int s = 0; s < n; s++)
+            {
+                if (p.y <= b[s * 4 + 3]) return s;
+                if (s < n - 1 && p.y < b[(s + 1) * 4 + 1]) return p.y > b[s * 4 + 3] + 1 + LevelCatalog.BridgeGateRow ? s + 1 : s;
+            }
+            return n - 1;
+        }
+
         /// <summary>A tile behind a shut stage gate (fortress floors of the core loop only).</summary>
         private bool StageLocked(GridPos p) =>
             State == GameState.Playing && level != null && level.mission == MissionType.Hunt && hunt != null && hunt.StageLocked(p);

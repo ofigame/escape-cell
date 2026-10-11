@@ -426,7 +426,8 @@ namespace SquashBot.Gameplay
                 UpdateEditorZoom();
                 EditorPose(out var epos, out var erot);
                 cameraRig.Chase(epos, erot, IntroFov);
-                cameraRig.Cam.farClipPlane = Mathf.Max(200f, Vector3.Distance(epos, robot.transform.position) * 2f);
+                cameraRig.Cam.farClipPlane = Mathf.Clamp(editDist * 2.2f, 200f, 260f);
+                SetWideViewShadows(false);
                 closeCamOn = true;
                 closeCamFocus = robot.transform.position;
                 return;
@@ -489,10 +490,26 @@ namespace SquashBot.Gameplay
                 rot = Quaternion.Slerp(irot, rot, k);
                 fov = Mathf.Lerp(IntroFov, fov, k);
                 closeCamFocus = target;
-                cameraRig.Cam.farClipPlane = Mathf.Max(200f, Vector3.Distance(ipos, closeCamFocus) * 1.8f);
+                cameraRig.Cam.farClipPlane = Mathf.Clamp(Vector3.Distance(ipos, closeCamFocus) * 1.8f, 200f, 400f);
+                SetWideViewShadows(k > 0.85f); // no shadows over the wide view (memory on phones)
             }
-            else if (cameraRig.Cam.farClipPlane > 200f) cameraRig.Cam.farClipPlane = 200f;
+            else
+            {
+                if (cameraRig.Cam.farClipPlane > 200f) cameraRig.Cam.farClipPlane = 200f;
+                SetWideViewShadows(true);
+            }
             cameraRig.Chase(pos, rot, fov);
+        }
+
+        private bool wideShadowsOff;
+
+        /// <summary>Real-time shadows off while the camera takes in a wide view (set-up, the opening shot), back after.</summary>
+        private void SetWideViewShadows(bool on)
+        {
+            if (on == !wideShadowsOff) return;
+            wideShadowsOff = !on;
+            var data = cameraRig.Cam.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
+            if (data != null) data.renderShadows = on;
         }
 
         /// <summary>The opening shot at the start of a floor (see UpdateCloseCamera): waiting to start, and since when.</summary>

@@ -31,6 +31,7 @@ namespace SquashBot.UI
         private readonly Image[] faces = new Image[3];
         private readonly TextMeshProUGUI[] counts = new TextMeshProUGUI[3];
         private readonly TextMeshProUGUI[] names = new TextMeshProUGUI[3];
+        private readonly RawImage[] pictures = new RawImage[3];
 
         public UiScreen Screen => screen;
         public bool IsOpen => screen.IsVisible;
@@ -71,11 +72,15 @@ namespace SquashBot.UI
             for (int i = 0; i < 3; i++)
             {
                 int k = i;
-                var b = UiFactory.MakeButton(panel, "", Kind.Secondary, new Vector2((i + 0.5f) / 3f, 1f), new Vector2(0f, -120f), new Vector2(320f, 170f), () => KindSelected?.Invoke((DefenseKind)k), 30f);
+                var b = UiFactory.MakeButton(panel, "", Kind.Secondary, new Vector2((i + 0.5f) / 3f, 1f), new Vector2(0f, -104f), new Vector2(320f, 214f), () => KindSelected?.Invoke((DefenseKind)k), 30f);
                 ((RectTransform)b.transform).pivot = new Vector2(0.5f, 1f);
                 faces[i] = (Image)b.targetGraphic;
-                names[i] = UiFactory.TextBox("Name", b.transform, new Vector2(0.5f, 1f), new Vector2(0f, -22f), new Vector2(300f, 60f), Loc.T("def." + (DefenseKind)k), 36f, Palette.UiText, title: true);
-                counts[i] = UiFactory.TextBox("Count", b.transform, new Vector2(0.5f, 0f), new Vector2(0f, 24f), new Vector2(300f, 56f), "", 32f, Palette.UiGold);
+                var pic = UiFactory.Box("Picture", b.transform, new Vector2(0.5f, 1f), new Vector2(0f, -8f), new Vector2(120f, 120f));
+                pic.pivot = new Vector2(0.5f, 1f);
+                pictures[i] = pic.gameObject.AddComponent<RawImage>();
+                pictures[i].raycastTarget = false;
+                names[i] = UiFactory.TextBox("Name", b.transform, new Vector2(0.5f, 0f), new Vector2(0f, 44f), new Vector2(300f, 46f), Loc.T("def." + (DefenseKind)k), 32f, Palette.UiText, title: true);
+                counts[i] = UiFactory.TextBox("Count", b.transform, new Vector2(0.5f, 0f), new Vector2(0f, 8f), new Vector2(300f, 40f), "", 28f, Palette.UiGold);
             }
             UiFactory.MakeButton(panel, Loc.T("def.start"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 30f), new Vector2(600f, 140f), () => StartPressed?.Invoke(), 70f);
         }
@@ -99,9 +104,11 @@ namespace SquashBot.UI
         public void SetHint(string text) => hint.text = text;
 
         /// <summary>One defence button: how many are ready (or the level it opens at), highlighted when picked.</summary>
-        public void SetKind(DefenseKind k, string count, bool locked, bool selected)
+        public void SetKind(DefenseKind k, string count, bool locked, bool selected, Texture picture = null)
         {
             int i = (int)k;
+            if (picture != null) pictures[i].texture = picture;
+            pictures[i].color = locked ? new Color(1f, 1f, 1f, 0.35f) : Color.white;
             counts[i].text = count;
             counts[i].color = locked ? new Color(1f, 1f, 1f, 0.5f) : Palette.UiGold;
             names[i].color = locked ? new Color(1f, 1f, 1f, 0.5f) : Palette.UiText;

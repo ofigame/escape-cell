@@ -76,7 +76,7 @@ namespace SquashBot.Visual
             muzzle = new GameObject("Muzzle").transform;
             muzzle.SetParent(bow, false);
             muzzle.localPosition = new Vector3(0f, 0f, 0.08f);
-            t.localScale = Vector3.one * 1.25f;
+            t.localScale = Vector3.one * 2.1f;
         }
 
         private void BuildCannon(int tier, Material white, Material blue, Material dark, Material gold, Material wood)
@@ -104,7 +104,7 @@ namespace SquashBot.Visual
             muzzle = new GameObject("Muzzle").transform;
             muzzle.SetParent(turret, false);
             muzzle.localPosition = new Vector3(0f, 0.42f, 0.46f);
-            t.localScale = Vector3.one * 1.3f;
+            t.localScale = Vector3.one * 2.0f;
         }
 
         private void BuildTower(int tier, Material white, Material blue, Material dark, Material gold)
@@ -146,7 +146,7 @@ namespace SquashBot.Visual
                     .transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
                 muzzle.localPosition = new Vector3(0f, 0.15f, 0.55f);
             }
-            t.localScale = Vector3.one * 1.15f;
+            t.localScale = Vector3.one * 1.7f;
         }
 
         /// <summary>Turns towards a point (its turret, or the archer's whole body).</summary>

@@ -119,7 +119,8 @@ namespace SquashBot.Gameplay
         {
             defenseEditing = true;
             editKind = DefenseKind.Archer;
-            markerMat ??= MaterialFactory.CreateTransparent(new Color(0.4f, 0.95f, 1f, 0.45f), new Color(0.6f, 2.2f, 3f));
+            markerMat ??= MaterialFactory.CreateTransparent(new Color(0.45f, 0.95f, 1f, 0.7f), new Color(1.6f, 4.6f, 6f));
+            beamMat ??= MaterialFactory.CreateTransparent(new Color(0.45f, 0.95f, 1f, 0.3f), new Color(1f, 3f, 4f));
             ui.DefenseEditor.Show();
             FocusStage(0);
             if (gift) ui.DefenseEditor.SetHint(Loc.T("def.gift"));
@@ -145,7 +146,7 @@ namespace SquashBot.Gameplay
             {
                 bool locked = !Defenses.Unlocked(k);
                 string count = locked ? Loc.F("def.lockedAt", Defenses.UnlockAt(k) + 1) : Loc.F("def.ready", Defenses.Available(k));
-                ui.DefenseEditor.SetKind(k, count, locked, k == editKind);
+                ui.DefenseEditor.SetKind(k, count, locked, k == editKind, DefensePortraits.Get(k, Defenses.Tier(k, levelIndex)));
             }
             string hint = Loc.T("def.hint") + "\n" + Loc.T("def.move");
             if (levelIndex < 29) hint += "\n" + Loc.T("def.extra");
@@ -166,19 +167,25 @@ namespace SquashBot.Gameplay
                     {
                         var p = new GridPos(x, y);
                         if (!DefenseSlots.TowerOk(grid, defenseRects, p, start, out _) || grid.IsOccupied(p)) continue;
-                        Marker(GridView.ToWorld(p) + Vector3.up * (GridView.SurfaceY + 0.06f), 0.55f);
+                        Marker(GridView.ToWorld(p) + Vector3.up * (GridView.SurfaceY + 0.06f), 0.72f, false);
                     }
                 return;
             }
             foreach (var s in defenseSlots)
-                if (s.kind == editKind && s.stage == editStage && !defenses.Has(s.Placement)) Marker(s.world + Vector3.up * 0.05f, s.kind == DefenseKind.Archer ? 0.9f : 0.75f);
+                if (s.kind == editKind && s.stage == editStage && !defenses.Has(s.Placement)) Marker(s.world + Vector3.up * 0.05f, s.kind == DefenseKind.Archer ? 1.3f : 1.1f, true);
         }
 
-        private void Marker(Vector3 at, float size)
+        private Material beamMat;
+
+        /// <summary>A bright pulsing disc on a free spot; the tower-top and rampart spots also get a beam of light.</summary>
+        private void Marker(Vector3 at, float size, bool beam)
         {
-            var m = Shapes.Primitive(PrimitiveType.Cylinder, "DefenseSpot", null, at, new Vector3(size, 0.02f, size), markerMat);
+            var m = Shapes.Primitive(PrimitiveType.Cylinder, "DefenseSpot", null, at, new Vector3(size, 0.03f, size), markerMat);
             m.AddComponent<Pulse3D>();
             defenseMarkers.Add(m);
+            if (!beam) return;
+            var b = Shapes.Primitive(PrimitiveType.Cylinder, "DefenseBeam", null, at + Vector3.up * 1.2f, new Vector3(size * 0.35f, 1.2f, size * 0.35f), beamMat);
+            defenseMarkers.Add(b);
         }
 
         private void ClearMarkers()
@@ -294,7 +301,15 @@ namespace SquashBot.Gameplay
         /// <summary>Two fingers pinching (or the mouse wheel): the view comes closer or stands back.</summary>
         private void UpdateEditorZoom()
         {
-            float maxDist = Mathf.Max(grid.Width, grid.Height) * 1.2f + 10f;
+            // Never further back than it takes to see the biggest stage whole: a far view of a whole 200+ floor draws
+            // thousands of pieces at once and phones run out of memory.
+            float maxDist = 10f;
+            for (int s = 0; s < defenseRects.Length / 4; s++)
+            {
+                float w = defenseRects[s * 4 + 2] - defenseRects[s * 4] + 3f, h = defenseRects[s * 4 + 3] - defenseRects[s * 4 + 1] + 3f;
+                maxDist = Mathf.Max(maxDist, Mathf.Max(w * 1.25f, h) * 0.5f / Mathf.Tan(IntroFov * 0.5f * Mathf.Deg2Rad) + 6f);
+            }
+            maxDist = Mathf.Min(maxDist, 70f);
 #if ENABLE_INPUT_SYSTEM
             var ts = UnityEngine.InputSystem.Touchscreen.current;
             if (ts != null && ts.touches.Count >= 2 && ts.touches[0].press.isPressed && ts.touches[1].press.isPressed)
@@ -357,6 +372,17 @@ namespace SquashBot.Gameplay
                     ui.SetPrelevelDefense(PrelevelDefenseLabel(index));
                 });
             });
+        }
+
+        /// <summary>Is there anything to set up in this level (ready defences, or ones already standing)? And what, in words.</summary>
+        private bool DefensesToOffer(int index, out string detail)
+        {
+            var parts = new List<string>();
+            int placed = Defenses.Placed(index).Count;
+            foreach (var k in Defenses.All)
+                if (Defenses.Unlocked(k) && Defenses.Available(k) > 0) parts.Add(Loc.T("def." + k) + " " + Defenses.Available(k));
+            detail = (placed > 0 ? Loc.F("def.placedHere", placed) + (parts.Count > 0 ? " · " : "") : "") + string.Join(" · ", parts);
+            return placed > 0 || parts.Count > 0;
         }
 
         /// <summary>The DEFENCES button on the before-level card says how many stand ready in that level.</summary>

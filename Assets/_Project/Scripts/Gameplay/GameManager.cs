@@ -249,7 +249,14 @@ namespace SquashBot.Gameplay
             ui.PrelevelPlay += (index, boosts) =>
             {
                 ui.HidePrelevel();
-                StartLevel(index, boosts);
+                // Defences ready (or already standing in this level)? Ask whether to set them up first.
+                if (DefensesToOffer(index, out string detail))
+                    ui.AskDefense(detail, yes =>
+                    {
+                        defenseEditPending = yes;
+                        StartLevel(index, boosts);
+                    });
+                else StartLevel(index, boosts);
             };
             ui.Map.LevelOf = i => i >= 0 && i < LevelCount ? levelSet.levels[i] : null;
             ui.Map.RobotLook = t => robot.BuildLookalike(t);
@@ -401,6 +408,30 @@ namespace SquashBot.Gameplay
             cameraRig.SetStyle(CameraStyle.MenuOrbit);
             cameraRig.SetMenuFocus(true);
             robot.Spawn(grid, grid.CenterFloor());
+        }
+
+        /// <summary>
+        /// Android's back button (the Escape key): never leaves the game. Playing → pause, paused → back in, set-up →
+        /// back to the map, a card or screen → closed back towards the menu; on the menu itself it does nothing.
+        /// </summary>
+        private void HandleBackButton()
+        {
+#if ENABLE_INPUT_SYSTEM
+            var kb = UnityEngine.InputSystem.Keyboard.current;
+            if (kb == null || !kb.escapeKey.wasPressedThisFrame || fortress != null || ui == null) return;
+#else
+            if (!Input.GetKeyDown(KeyCode.Escape) || fortress != null || ui == null) return;
+#endif
+            if (ui.Guide.Visible) return; // the guide closes itself
+            if (defenseEditing) { defenseEditing = false; ClearMarkers(); ui.DefenseEditor.Hide(); ui.SetHudHidden(false); ShowMap(); return; }
+            switch (State)
+            {
+                case GameState.Playing: Pause(); return;
+                case GameState.Paused: Resume(); return;
+                case GameState.Result: ShowMap(); return;
+            }
+            if (ui.PrelevelOpen) { ui.HidePrelevel(); return; }
+            if (ui.Map.IsOpen || ui.Shop.Screen.IsVisible || ui.Garage.Screen.IsVisible || ui.Quests.IsOpen) ShowMenu();
         }
 
         private void ShowMenu()
@@ -728,6 +759,7 @@ namespace SquashBot.Gameplay
 
             SetupMission();
             hazards.Begin(grid, level, MissionProgress);
+            floorRules.StageOf = level.fortressStages > 1 ? StageAt : (System.Func<GridPos, int>)null;
             floorRules.Begin(grid, level, levelIndex, p => hazards.IsProtected != null && hazards.IsProtected(p));
             enemies.Begin(grid, level, levelIndex, p => hazards.IsProtected != null && hazards.IsProtected(p),
                 p => level.mission == MissionType.Paint && painted.Contains(p), Unpaint);
@@ -1180,6 +1212,7 @@ namespace SquashBot.Gameplay
         private void Update()
         {
             UpdateFortressView();
+            HandleBackButton();
             if (State == GameState.Paused) return;
 
             // Close-call slow motion and the slow-motion tool both bend time; the slower one wins.

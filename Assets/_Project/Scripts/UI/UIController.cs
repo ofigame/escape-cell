@@ -281,6 +281,7 @@ namespace SquashBot.UI
             Shop.PaintPressed += () => GaragePressed?.Invoke();
             Garage.BackPressed += () => MenuPressed?.Invoke();
             BuildPrelevel(root);
+            BuildDefenseAsk(root);
             BuildBanner(root);
             Tip = TipCard.Create(root);
             WeaponBag = WeaponBag.Create(root);
@@ -443,7 +444,7 @@ namespace SquashBot.UI
         {
             prelevel = UiScreen.Create("Prelevel", root, out var t);
             UiFactory.Dim(t, new Color(0.06f, 0.05f, 0.18f, 0.55f));
-            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1130f));
+            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1000f));
             prelevel.SetPopTarget(card);
 
             UiFactory.MakeButton(card, "X", Kind.Icon, TopRight, new Vector2(-24f, -24f), new Vector2(100f, 100f), () =>
@@ -468,9 +469,7 @@ namespace SquashBot.UI
 
             UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(0f, 46f), new Vector2(620f, 160f),
                 () => PrelevelPlay?.Invoke(preLevel, preBoosts.FindAll(v => v.on).ConvertAll(v => v.boost)), 84f);
-            var def = UiFactory.MakeButton(card, Loc.T("def.button"), Kind.Gold, Bottom, new Vector2(0f, 222f), new Vector2(560f, 100f),
-                () => PrelevelDefense?.Invoke(preLevel, preBoosts.FindAll(v => v.on).ConvertAll(v => v.boost)), 40f);
-            preDefense = def.GetComponentInChildren<TextMeshProUGUI>();
+
         }
 
         private BoostView BoostTile(Transform card, Vector2 position, Boost boost)
@@ -560,6 +559,43 @@ namespace SquashBot.UI
         }
 
         public void HidePrelevel() => prelevel.Hide(true);
+        public bool PrelevelOpen => prelevel != null && prelevel.IsVisible;
+
+        // ---------- "Set up defences?" after PLAY ----------
+
+        private UiScreen defenseAsk;
+        private TextMeshProUGUI defenseAskText;
+        private Action<bool> defenseAnswer;
+
+        private void BuildDefenseAsk(Transform root)
+        {
+            defenseAsk = UiScreen.Create("DefenseAsk", root, out var t);
+            UiFactory.Dim(t, new Color(0.06f, 0.05f, 0.18f, 0.6f));
+            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 640f));
+            defenseAsk.SetPopTarget(card);
+            UiFactory.TextBox("Title", card, Top, new Vector2(0f, -50f), new Vector2(780f, 80f), Loc.T("def.title"), 54f, Palette.UiText, title: true);
+            defenseAskText = UiFactory.TextBox("Text", card, Top, new Vector2(0f, -150f), new Vector2(760f, 170f), Loc.T("def.ask"), 38f, new Color(0.88f, 0.9f, 1f, 0.9f), FontStyles.Normal);
+            defenseAskText.textWrappingMode = TextWrappingModes.Normal;
+            UiFactory.MakeButton(card, Loc.T("def.askYes"), Kind.Gold, Bottom, new Vector2(0f, 200f), new Vector2(640f, 130f), () => AnswerDefense(true), 46f);
+            UiFactory.MakeButton(card, Loc.T("def.askNo"), Kind.Primary, Bottom, new Vector2(0f, 46f), new Vector2(640f, 130f), () => AnswerDefense(false), 46f);
+        }
+
+        private void AnswerDefense(bool yes)
+        {
+            defenseAsk.Hide(true);
+            var answer = defenseAnswer;
+            defenseAnswer = null;
+            answer?.Invoke(yes);
+        }
+
+        /// <summary>After PLAY: "set up your defences first?" (how many stand ready); the answer goes to the game.</summary>
+        public void AskDefense(string detail, Action<bool> answer)
+        {
+            defenseAnswer = answer;
+            defenseAskText.text = Loc.T("def.ask") + (string.IsNullOrEmpty(detail) ? "" : "\n" + detail);
+            defenseAsk.Show();
+            defenseAsk.transform.SetAsLastSibling();
+        }
 
         /// <summary>The DEFENCES button's label (with what is placed in this level).</summary>
         public void SetPrelevelDefense(string text) { if (preDefense != null) preDefense.text = text; }
@@ -1355,6 +1391,7 @@ namespace SquashBot.UI
             Guide.Hide();
             Briefing.Hide();
             prelevel.Hide(true);
+            if (defenseAsk != null) defenseAsk.Hide(true);
             settings.Hide(true);
             noLives.Hide(true);
             hud.Hide(true);

@@ -430,11 +430,25 @@ namespace SquashBot.UI
             }
         }
 
+        /// <summary>The defence's real 3D look on a soft disc of its colour.</summary>
+        private static RawImage DefensePicture(RectTransform picture, DefenseKind k, int tier)
+        {
+            var disc = UiFactory.Box("Disc", picture, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(240f, 240f));
+            disc.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Chunky(disc, UiFactory.StyleOf(DefenseColor(k)), 1f, 0f, UiSprites.Circle).raycastTarget = false;
+            var img = UiFactory.Box("Model", picture, new Vector2(0.5f, 0.5f), new Vector2(0f, 6f), new Vector2(300f, 300f));
+            img.pivot = new Vector2(0.5f, 0.5f);
+            var raw = img.gameObject.AddComponent<RawImage>();
+            raw.texture = DefensePortraits.Get(k, tier);
+            raw.raycastTarget = false;
+            return raw;
+        }
+
         /// <summary>A pack of three of a defence: how many are ready and placed, the pack's price.</summary>
         private void DefensePackCell(DefenseKind k)
         {
             var card = Cell("Pack " + k, DefenseColor(k), out var picture);
-            DefenseIcon(BigIcon(picture, DefenseColor(k)), k);
+            DefensePicture(picture, k, Defenses.Step(k));
             CardName(card, Loc.F("def.packName", Loc.T("def." + k)));
             var desc = CardDesc(card);
             var lockText = LockVeil(card, out var veil);
@@ -470,7 +484,7 @@ namespace SquashBot.UI
         private void DefenseStepCell(DefenseKind k)
         {
             var card = Cell("Step " + k, DefenseColor(k), out var picture);
-            DefenseIcon(BigIcon(picture, DefenseColor(k)), k);
+            var model = DefensePicture(picture, k, Defenses.Step(k));
             CardName(card, Loc.F("def.stepName", Loc.T("def." + k)));
             var desc = CardDesc(card);
             var pips = Pips(card, Defenses.MaxStep);
@@ -494,6 +508,7 @@ namespace SquashBot.UI
             refreshers.Add(() =>
             {
                 SetPips(pips, Defenses.Step(k));
+                model.texture = DefensePortraits.Get(k, Defenses.Step(k));
                 bool maxed = Defenses.IsMaxed(k), open = Defenses.NextStepOpen(k);
                 desc.text = Loc.F("def.stepDesc", Defenses.Step(k), Defenses.MaxStep);
                 label.text = maxed ? Loc.T("shop.max") : open ? Defenses.NextStepPrice(k).ToString() : Loc.F("ws.lockedAt", Defenses.StepFrom(Defenses.Step(k) + 1) + 1);

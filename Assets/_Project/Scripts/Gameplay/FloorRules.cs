@@ -257,20 +257,36 @@ namespace SquashBot.Gameplay
             return list;
         }
 
+        /// <summary>The fortress stage of a tile (null: one floor): a teleport pair always stays inside one stage.</summary>
+        public Func<GridPos, int> StageOf;
+
+        /// <summary>A pair of teleport pads far apart — one pair in every fortress stage, each sending only within it.</summary>
         private void PlacePads()
         {
-            var free = FreeTiles();
-            if (free.Count < 2) return;
-            var a = free[rng.Next(free.Count)];
-            GridPos b = a;
-            int best = -1;
-            foreach (var p in free)
-                if (p.Manhattan(a) > best) { best = p.Manhattan(a); b = p; }
-            foreach (var p in new[] { a, b })
+            var all = FreeTiles();
+            all.RemoveAll(p => grid.IsLava(p) || grid.IsGate(p) || grid.IsBridge(p) || grid.IsCage(p));
+            var stages = new Dictionary<int, List<GridPos>>();
+            foreach (var p in all)
             {
-                special[p.x, p.y] = Special.Teleport;
-                pads.Add(p);
-                Decorate(p, Special.Teleport);
+                int s = StageOf != null ? StageOf(p) : 0;
+                if (!stages.TryGetValue(s, out var list)) stages[s] = list = new List<GridPos>();
+                list.Add(p);
+            }
+            foreach (var free in stages.Values)
+            {
+                if (free.Count < 2) continue;
+                var a = free[rng.Next(free.Count)];
+                GridPos b = a;
+                int best = -1;
+                foreach (var p in free)
+                    if (p.Manhattan(a) > best) { best = p.Manhattan(a); b = p; }
+                if (b == a) continue;
+                foreach (var p in new[] { a, b })
+                {
+                    special[p.x, p.y] = Special.Teleport;
+                    pads.Add(p); // pairs side by side: 0-1, 2-3, ...
+                    Decorate(p, Special.Teleport);
+                }
             }
         }
 
@@ -432,7 +448,9 @@ namespace SquashBot.Gameplay
                 case Special.Teleport:
                 {
                     if (teleportLock.HasValue && teleportLock.Value == p) return false;
-                    var other = pads[0] == p ? pads[1] : pads[0];
+                    int at = pads.IndexOf(p);
+                    if (at < 0) return false;
+                    var other = pads[at ^ 1]; // its partner, in the same stage
                     if (!grid.IsStandable(other)) return false;
                     fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(0.8f, 0.6f, 1f), new Color(1.6f, 0.6f, 2.4f), 18, 4f);
                     AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.6f);
