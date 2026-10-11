@@ -158,6 +158,7 @@ namespace SquashBot.Gameplay
 
             Application.targetFrameRate = 60;
             Application.lowMemory += OnLowMemory;
+            if (Debug.isDebugBuild) gameObject.AddComponent<DevStats>(); // test builds: FPS and memory in the corner
             QualitySettings.vSyncCount = 0;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
             if (levelSet == null || levelSet.levels.Count == 0) levelSet = LevelSet.LoadOrDefault();
