@@ -126,7 +126,19 @@ namespace SquashBot.Data
                 cardGoal = false,
                 final = index == LevelCount - 1,
             };
-            level.layout = FloorShapes.For(index, size, out level.shapeName);
+            // Level 1 is the fortress: an 11x11 stone floor with a flight of stairs in the middle of each side. vanG's
+            // cage stands on the north stairs (the bridge to the tunnel beyond it); the others burn ('F').
+            if (index == 0)
+            {
+                size = 11;
+                level.fortress = true;
+                level.shapeName = "fortress";
+                var rows = new List<string> { ".....###.....", ".....###....." };
+                for (int r = 0; r < 11; r++) rows.Add(r == 5 ? "F###########F" : ".###########.");
+                rows.Add(".....FFF.....");
+                level.layout = rows.ToArray();
+            }
+            else level.layout = FloorShapes.For(index, size, out level.shapeName);
             int inWorld = index % LevelsPerWorld;
             // The tall pyramids and terraces are switched off (they looked odd in places); gentle mounds instead: a few
             // low plateaus a short step up, on every third floor from level 9.

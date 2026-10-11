@@ -69,6 +69,7 @@ namespace SquashBot.Gameplay
             var obstacleCap = MaterialFactory.Create(WorldTheme.Current.accent, WorldTheme.Current.accent * 1.2f);
 
             tiles = new TileView[grid.Width, grid.Height];
+            var stone = new System.Random(grid.Width * 131 + grid.Height);
             foreach (var p in grid.AllPositions())
             {
                 if (!grid.Exists(p)) continue; // shaped platforms leave some cells empty
@@ -80,10 +81,29 @@ namespace SquashBot.Gameplay
                 var tile = new GameObject("Tile");
                 tile.transform.SetParent(root.transform, false);
 
-                var frame = MaterialFactory.Create(Palette.TileTop, Palette.TileGlow);
-                var top = MaterialFactory.Create(Palette.TileTop, Palette.TileSelfLight);
-                Shapes.Rounded("Frame", tile.transform, new Vector3(0f, -0.03f, 0f), new Vector3(0.93f, 0.1f, 0.93f), 0.045f, frame);
-                Shapes.Rounded("Top", tile.transform, new Vector3(0f, 0f, 0f), new Vector3(0.78f, 0.1f, 0.78f), 0.045f, top);
+                Material frame, top;
+                if (WorldTheme.Current.fortress)
+                {
+                    // Fortress stone: dark mortar between big slabs, each slab its own shade, rough and matt, a few cracked.
+                    float shade = 0.86f + (float)stone.NextDouble() * 0.24f;
+                    var stoneColour = Palette.TileTop * shade;
+                    stoneColour.a = 1f;
+                    frame = MaterialFactory.CreateSurface(Palette.TileTop * 0.42f, Color.black, 0.05f, 0f);
+                    top = MaterialFactory.CreateSurface(stoneColour, Palette.TileSelfLight * 0.25f, 0.18f, 0f);
+                    Shapes.Rounded("Frame", tile.transform, new Vector3(0f, -0.04f, 0f), new Vector3(0.98f, 0.1f, 0.98f), 0.02f, frame);
+                    Shapes.Rounded("Top", tile.transform, new Vector3(0f, 0f, 0f), new Vector3(0.9f, 0.1f, 0.9f), 0.035f, top);
+                    if (stone.Next(6) == 0)
+                        Shapes.Rounded("Crack", tile.transform, new Vector3((float)stone.NextDouble() * 0.3f - 0.15f, 0.052f, (float)stone.NextDouble() * 0.3f - 0.15f), new Vector3(0.38f, 0.004f, 0.025f), 0.004f, frame)
+                            .transform.localRotation = Quaternion.Euler(0f, stone.Next(180), 0f);
+                }
+                else
+                {
+                    frame = MaterialFactory.Create(Palette.TileTop, Palette.TileGlow);
+                    top = MaterialFactory.Create(Palette.TileTop, Palette.TileSelfLight);
+                    Shapes.Rounded("Frame", tile.transform, new Vector3(0f, -0.03f, 0f), new Vector3(0.93f, 0.1f, 0.93f), 0.045f, frame);
+                    Shapes.Rounded("Top", tile.transform, new Vector3(0f, 0f, 0f), new Vector3(0.78f, 0.1f, 0.78f), 0.045f, top);
+                }
+                if (grid.IsLava(p)) tile.SetActive(false); // the fortress's burning stairs: dressed by FortressFloor
 
                 if (grid.IsWall(p) && lowWalls)
                 {
@@ -118,9 +138,11 @@ namespace SquashBot.Gameplay
             var slab = MaterialFactory.Create(Palette.Slab, Color.black);
             var glow = MaterialFactory.Create(Palette.Slab, Palette.SlabEdgeGlow);
 
+            bool fortress = WorldTheme.Current.fortress;
+            if (fortress) glow = slab; // plain stone, no glowing band
             foreach (var p in grid.AllPositions())
             {
-                if (!grid.Exists(p)) continue;
+                if (!grid.Exists(p) || grid.IsLava(p)) continue;
                 var at = ToWorld(p);
                 // Slightly oversized pieces overlap their neighbours, so only the outer outline shows.
                 Shapes.Rounded("SlabTop", root, at + new Vector3(0f, -0.19f, 0f), new Vector3(1.16f, 0.3f, 1.16f), 0.06f, slab);

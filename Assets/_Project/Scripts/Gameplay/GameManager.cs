@@ -322,6 +322,7 @@ namespace SquashBot.Gameplay
         {
             int world = LevelCatalog.WorldOf(levelIdx);
             var theme = WorldTheme.ForLevel(levelIdx).Realm(world); // the world's own realm floor
+            ApplyFortressLight(theme.fortress);
             if (theme == themeNow) return;
             themeNow = theme;
             WorldTheme.SetCurrent(theme);

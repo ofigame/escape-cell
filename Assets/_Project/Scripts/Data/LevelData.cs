@@ -176,6 +176,8 @@ namespace SquashBot.Data
         public bool repairDrones;
         [Tooltip("A reactor core stands in the middle of the floor: the floor's boss tower.")]
         public bool reactor;
+        [Tooltip("The fortress floor (level 1): ramparts, corner spires, burning stairs and real shadows.")]
+        public bool fortress;
         public int robotHp = 2;
         [Tooltip("Seconds between a guard robot's steps.")]
         public float robotStep = 1f;

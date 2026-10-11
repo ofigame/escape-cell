@@ -17,6 +17,59 @@ namespace SquashBot.Gameplay
         private float fortressYaw, fortressPitch = 36f, fortressZoom = 8.4f;
         private Vector2? fortressDrag;
 
+        private Transform fortressFloor;
+
+        /// <summary>
+        /// The fortress floor's look: everything built from here on casts real soft shadows from the key light (low and
+        /// warm, like the setting sun), and the ambient light comes from the sky, the horizon and the ground instead of
+        /// one flat colour. Elsewhere it all goes back to the light, flat, shadowless look (cheaper on phones).
+        /// </summary>
+        private void ApplyFortressLight(bool on)
+        {
+            Shapes.CastShadows = on;
+            var key = FindAnyObjectByType<Light>();
+            foreach (var l in FindObjectsByType<Light>(FindObjectsSortMode.None))
+                if (l.type == LightType.Directional) { key = l; break; }
+            if (key != null)
+            {
+                key.shadows = on ? LightShadows.Soft : LightShadows.None;
+                key.shadowStrength = 0.75f;
+                key.color = on ? new Color(1f, 0.9f, 0.8f) : Color.white;
+                key.intensity = on ? 1.15f : 1f;
+                key.transform.rotation = on ? Quaternion.Euler(42f, 35f, 0f) : Quaternion.Euler(50f, 20f, 0f);
+            }
+            if (on)
+            {
+                RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+                RenderSettings.ambientSkyColor = new Color(0.55f, 0.5f, 0.7f);
+                RenderSettings.ambientEquatorColor = new Color(0.62f, 0.45f, 0.42f);
+                RenderSettings.ambientGroundColor = new Color(0.18f, 0.16f, 0.2f);
+            }
+            else RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+            if (robot != null)
+                foreach (var r in robot.Visual.GetComponentsInChildren<Renderer>(true))
+                    r.shadowCastingMode = on ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
+        }
+
+        /// <summary>Level 1's fortress round the floor, and its stairs set on fire.</summary>
+        private void SetupFortressFloor()
+        {
+            ClearFortressFloor();
+            if (level == null || !level.fortress) return;
+            fortressFloor = FortressFloor.Build(grid, gridView.transform);
+            foreach (var p in grid.LavaTiles)
+            {
+                grid.SetTile(p, Core.TileState.Fire);
+                gridView.Ignite(p);
+            }
+        }
+
+        private void ClearFortressFloor()
+        {
+            if (fortressFloor != null) Destroy(fortressFloor.gameObject);
+            fortressFloor = null;
+        }
+
         private void StartFortressViewIfAsked()
         {
             if (System.Environment.CommandLine.Contains("-arena")) cameraRig.StartCoroutine(OpenFortressSoon());

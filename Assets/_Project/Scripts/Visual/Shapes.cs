@@ -4,6 +4,9 @@ namespace SquashBot.Visual
 {
     public static class Shapes
     {
+        /// <summary>Shapes made while this is on cast real shadows (the fortress floor turns it on; off elsewhere for speed).</summary>
+        public static bool CastShadows;
+
         public static GameObject Cube(string name, Transform parent, Vector3 localPos, Vector3 scale, Material material)
         {
             return Primitive(PrimitiveType.Cube, name, parent, localPos, scale, material);
@@ -18,7 +21,7 @@ namespace SquashBot.Visual
             go.AddComponent<MeshFilter>().sharedMesh = MeshFactory.RoundedBox(size, radius);
             var renderer = go.AddComponent<MeshRenderer>();
             renderer.sharedMaterial = material;
-            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            renderer.shadowCastingMode = CastShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
             return go;
         }
 
@@ -32,7 +35,7 @@ namespace SquashBot.Visual
             go.transform.localScale = scale;
             var renderer = go.GetComponent<MeshRenderer>();
             renderer.sharedMaterial = material;
-            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            renderer.shadowCastingMode = CastShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
             return go;
         }
     }

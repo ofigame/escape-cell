@@ -80,6 +80,16 @@ namespace SquashBot.Visual
             return new Material(shader);
         }
 
+        /// <summary>A lit material with its own surface: how glossy (0 rough stone .. 1 polished) and how metallic it is.</summary>
+        public static Material CreateSurface(Color color, Color emission, float smoothness, float metallic)
+        {
+            var m = Create(color, emission);
+            m.SetFloat("_Smoothness", smoothness);
+            m.SetFloat("_Glossiness", smoothness);
+            m.SetFloat("_Metallic", metallic);
+            return m;
+        }
+
         public static void SetColors(Material material, Color color, Color emission)
         {
             material.SetColor(BaseColorId, color);

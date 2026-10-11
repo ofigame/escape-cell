@@ -440,7 +440,14 @@ namespace SquashBot.Gameplay
             Facing = dir;
             targetFacing = Quaternion.LookRotation(new Vector3(offset.x, 0f, offset.y));
 
-            // Swiping toward a hole or fire leaps over it automatically, so jumping stays in the flow of play.
+            // Swiping toward a hole or fire leaps over it automatically, so jumping stays in the flow of play; the fortress's
+            // burning stairs lead off the floor, so there foi steps down into the flames instead.
+            if (grid.IsLava(target))
+            {
+                HopTo(target, 1);
+                AudioManager.PlaySfx(Sfx.Hop, 0.55f);
+                return;
+            }
             if (grid.IsGap(target))
             {
                 Jump(dir);

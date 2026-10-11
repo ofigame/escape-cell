@@ -27,6 +27,7 @@ namespace SquashBot.Gameplay
         /// <summary>Back to the plain robot outside the core loop (normal size, empty-handed).</summary>
         private void ClearHuntDress()
         {
+            ClearFortressFloor();
             ClearFifi();
             if (ui != null) HideBombs();
             if (robot != null) robot.transform.localScale = Vector3.one;
@@ -102,6 +103,7 @@ namespace SquashBot.Gameplay
             SetupPotions();
             SetupFifi();
             SetupBombs();
+            SetupFortressFloor();
         }
 
         private void UpdateHunt(float dt)

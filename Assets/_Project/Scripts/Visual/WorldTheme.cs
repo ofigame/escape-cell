@@ -245,9 +245,28 @@ namespace SquashBot.Visual
         /// <summary>A perfect-city design: its pearl floor stays (no realm floor over it).</summary>
         public bool utopian;
 
+        /// <summary>The fortress of level 1: grey stone under a sunset city, warm torchlight, real shadows.</summary>
+        public bool fortress;
+
+        private static WorldTheme fortressTheme;
+
+        private static WorldTheme Fortress
+        {
+            get
+            {
+                if (fortressTheme != null) return fortressTheme;
+                fortressTheme = P(ForWorld(0).key, Scenery.UtopiaNight, Weather.Kind.Embers, BlockStyle.Crate,
+                    "#16142C", "#6E3E52", "#B8685A", "#FFB48A", "#FFB070", "#FFFFFF", "#B6AEC6", "#3A3A44", "#26262E", "#8E8E98", "#FFA850", new Color(0.9f, 0.5f, 0.22f));
+                fortressTheme.utopian = true; // keeps its own stone floor
+                fortressTheme.fortress = true;
+                return fortressTheme;
+            }
+        }
+
         /// <summary>The design a level is played in: the floor's first one for its levels 1-5, the second for 6-10.</summary>
         public static WorldTheme ForLevel(int levelIndex)
         {
+            if (levelIndex == 0) return Fortress; // level 1: the fortress
             if (levelIndex >= UtopiaFrom) return Utopia(levelIndex);
             var first = ForWorld(levelIndex / Data.LevelCatalog.LevelsPerWorld);
             return levelIndex % Data.LevelCatalog.LevelsPerWorld >= SecondDesignFrom && first.variant != null ? first.variant : first;

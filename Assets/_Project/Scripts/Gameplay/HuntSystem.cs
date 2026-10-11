@@ -426,7 +426,14 @@ namespace SquashBot.Gameplay
                 Shockwave.Create(At(p), 1.4f, new Color(1f, 0.85f, 0.45f));
                 AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.85f);
                 rig.Shake(0.35f);
-                if (g.hp <= 0) KillGuard(g);
+                if (g.hp <= 0)
+                {
+                    // A finishing blow by the burning stairs sends it tumbling into the flames.
+                    var away = new GridPos(g.pos.x - robot.Position.x, g.pos.y - robot.Position.y);
+                    var dir = Mathf.Abs(away.x) >= Mathf.Abs(away.y) ? new GridPos(Math.Sign(away.x), 0) : new GridPos(0, Math.Sign(away.y));
+                    if (grid.IsLava(g.pos + dir)) BurnGuard(g, g.pos + dir);
+                    else KillGuard(g);
+                }
                 else KnockBack(g);
                 return true;
             }
@@ -445,6 +452,8 @@ namespace SquashBot.Gameplay
             var away = new GridPos(g.pos.x - robot.Position.x, g.pos.y - robot.Position.y);
             var dir = Mathf.Abs(away.x) >= Mathf.Abs(away.y) ? new GridPos(Math.Sign(away.x), 0) : new GridPos(0, Math.Sign(away.y));
             var next = g.pos + dir;
+            // Knocked onto the fortress's burning stairs: it tumbles down into the flames.
+            if (grid.IsLava(next)) { BurnGuard(g, next); return; }
             if (!CanStep(g.pos, next))
             {
                 // Pinned that way: any free side will do.
@@ -454,6 +463,37 @@ namespace SquashBot.Gameplay
                 if (next == g.pos) return;
             }
             MoveGuard(g, next, 0.12f);
+        }
+
+        /// <summary>A robot knocked down the burning stairs: it falls, catches fire and is gone (it counts as beaten).</summary>
+        private void BurnGuard(Guard g, GridPos into)
+        {
+            grid.SetOccupied(g.pos, false);
+            g.dead = true;
+            ClearTelegraph(g);
+            var from = g.root.position;
+            var at = At(into) + Vector3.down * 0.6f;
+            fx.Burst(at + Vector3.up * 0.5f, new Color(1f, 0.5f, 0.15f), new Color(3f, 1.2f, 0.25f), 46, 6f);
+            fx.Dust(at, new Color(0.25f, 0.22f, 0.22f), 20, 3f);
+            Shockwave.Create(At(into), 1.4f, new Color(1f, 0.55f, 0.2f));
+            AudioManager.PlaySfx(Sfx.Squash, 0.9f, 0.7f);
+            rig.Shake(0.5f);
+            StartCoroutine(FallAndBurn(g.root, from, at));
+            Finished?.Invoke(into, true);
+            Felled?.Invoke(DailyGoal.Robots);
+            CheckCleared();
+        }
+
+        private System.Collections.IEnumerator FallAndBurn(Transform body, Vector3 from, Vector3 to)
+        {
+            for (float t = 0f; t < 1f && body != null; t += Time.deltaTime / 0.5f)
+            {
+                body.position = Vector3.Lerp(from, to, t) + Vector3.up * Mathf.Sin(t * Mathf.PI) * 0.5f;
+                body.rotation *= Quaternion.Euler(Time.deltaTime * 400f, 0f, Time.deltaTime * 200f);
+                body.localScale = Vector3.one * (1f - t * 0.6f);
+                yield return null;
+            }
+            if (body != null) Destroy(body.gameObject);
         }
 
         private void KillBug(Bug b)

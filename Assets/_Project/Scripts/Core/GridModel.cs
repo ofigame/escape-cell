@@ -18,6 +18,7 @@ namespace SquashBot.Core
     /// an L, a T, a ring...) and put fixed obstacles (walls) on others.
     /// Layout rows use '#' for a floor tile, '.' for no tile and 'X' for a tile with an obstacle; row 0 is the far edge.
     /// 'S', 'K' and 'D' are floor tiles that also mark the start, a key and the door.
+    /// 'F' is a fiery stairway off the edge of the floor (it is set on fire when the level starts).
     /// </summary>
     public class GridModel
     {
@@ -38,7 +39,7 @@ namespace SquashBot.Core
         private readonly bool[,] exists;
         private readonly bool[,] wall;
         private readonly bool[,] safe;
-        private readonly bool[,] cage, bridge;
+        private readonly bool[,] cage, bridge, lava;
 
         public GridModel(int width, int height, string[] layout = null)
         {
@@ -51,6 +52,7 @@ namespace SquashBot.Core
             safe = new bool[width, height];
             cage = new bool[width, height];
             bridge = new bool[width, height];
+            lava = new bool[width, height];
 
             for (int y = 0; y < height; y++)
                 for (int x = 0; x < width; x++)
@@ -63,6 +65,8 @@ namespace SquashBot.Core
                     safe[x, y] = c == 'H';
                     cage[x, y] = c == 'C';
                     bridge[x, y] = c == 'B';
+                    lava[x, y] = c == 'F';
+                    if (lava[x, y]) LavaTiles.Add(new GridPos(x, y));
                     if (cage[x, y]) CageTiles.Add(new GridPos(x, y));
                     if (bridge[x, y]) BridgeTiles.Add(new GridPos(x, y));
                     var p = new GridPos(x, y);
@@ -85,6 +89,10 @@ namespace SquashBot.Core
         public List<GridPos> CageTiles { get; } = new List<GridPos>();
         /// <summary>The bridge from the cage to the tunnel, nearest the floor first.</summary>
         public List<GridPos> BridgeTiles { get; } = new List<GridPos>();
+
+        /// <summary>A fiery stairway off the floor ('F'): it burns whoever steps or is knocked onto it.</summary>
+        public bool IsLava(GridPos p) => InBounds(p) && lava[p.x, p.y];
+        public List<GridPos> LavaTiles { get; } = new List<GridPos>();
 
         public bool InBounds(GridPos p) => p.x >= 0 && p.y >= 0 && p.x < Width && p.y < Height;
 
