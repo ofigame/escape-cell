@@ -94,10 +94,11 @@ namespace SquashBot.Gameplay
             heldWeapon = HeldWeapon.Attach(robot.Visual, weapon);
             // The tunnel gate stands from the start in the middle of the north edge, the monster asleep in front of it.
             huntGate = NorthGate();
-            hunt.MonsterSpot = GateGuardSpot(huntGate);
+            // The battle arenas have no cage and no tunnel: vanG rises in the courtyard when the crowd is beaten.
+            hunt.MonsterSpot = arenaRun ? (GridPos?)null : GateGuardSpot(huntGate);
             if (gateView != null) Destroy(gateView.gameObject);
-            gateView = TunnelGate.Create(GridView.ToWorld(huntGate) + Vector3.up * GridView.SurfaceY, WorldTheme.Current.accent);
-            var guardSpot = hunt.MonsterSpot.Value;
+            gateView = arenaRun ? null : TunnelGate.Create(GridView.ToWorld(huntGate) + Vector3.up * GridView.SurfaceY, WorldTheme.Current.accent);
+            var guardSpot = hunt.MonsterSpot ?? new GridPos(-99, -99);
             var gateTile = huntGate;
             hazards.IsProtected = p => p == gateTile || p == guardSpot || grid.IsCage(p) || grid.IsBridge(p) || grid.IsGate(p);
             SetupCage();

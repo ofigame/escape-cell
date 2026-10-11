@@ -272,6 +272,7 @@ namespace SquashBot.Gameplay
             ui.NextPressed += () =>
             {
                 if (dailyRun) ShowMenu();
+                else if (arenaRun) ShowArenas();
                 else if (bonusRun) ShowMap();
                 else
                 {
@@ -291,6 +292,7 @@ namespace SquashBot.Gameplay
             ui.BagPressed += OpenBag;
             ui.BombPressed += ThrowBomb;
             WireDefenseUi();
+            WireArenaUi();
             ui.AdHealPressed += OnAdHealPressed;
             ui.HeroPicker.Picked += OnHeroPicked;
             ui.WeaponBag.Picked += TakeWeapon;
@@ -431,6 +433,7 @@ namespace SquashBot.Gameplay
                 case GameState.Result: ShowMap(); return;
             }
             if (ui.PrelevelOpen) { ui.HidePrelevel(); return; }
+            if (ui.Arenas.IsOpen) { ui.Arenas.Hide(); return; }
             if (ui.Map.IsOpen || ui.Shop.Screen.IsVisible || ui.Garage.Screen.IsVisible || ui.Quests.IsOpen) ShowMenu();
         }
 
@@ -535,6 +538,7 @@ namespace SquashBot.Gameplay
             }
             ui.DailyBonus.Hide();
             bonusRun = true;
+            arenaRun = false;
             dailyRun = true;
             levelIndex = NextLevel;
             StartBonusGame(game);
@@ -599,6 +603,7 @@ namespace SquashBot.Gameplay
 
             if (PendingRoad >= 0) PlayerPrefs.DeleteKey(RoadLevelKey); // another level was chosen: that road is given up
             bonusRun = false;
+            arenaRun = false;
             dailyRun = false;
             levelIndex = Mathf.Clamp(index, 0, LevelCount - 1);
             level = levelSet.levels[levelIndex].Clone();
@@ -645,6 +650,7 @@ namespace SquashBot.Gameplay
             if (Progress.BonusTokens <= 0) return;
             Progress.BonusTokens--;
             bonusRun = true;
+            arenaRun = false;
             dailyRun = false;
             levelIndex = NextLevel;
             var tunnels = new[] { BonusGame.Duct, BonusGame.Surf, BonusGame.Mine };
@@ -1904,7 +1910,7 @@ namespace SquashBot.Gameplay
             SaveData.Coins += Earned;
             if (bonusRun)
             {
-                ShowBonusResult();
+                if (arenaRun) EndArena(true); else ShowBonusResult();
                 return;
             }
             PlayerPrefs.DeleteKey(FailKey(levelIndex));
@@ -2023,7 +2029,7 @@ namespace SquashBot.Gameplay
             SaveData.Coins += Earned;
             if (bonusRun)
             {
-                ShowBonusResult();
+                if (arenaRun) EndArena(false); else ShowBonusResult();
                 return;
             }
 
@@ -2439,6 +2445,7 @@ namespace SquashBot.Gameplay
         {
             ResetRun();
             bonusRun = false;
+            arenaRun = false;
             dailyRun = false;
             continued = false;
             doubleCoins = false;

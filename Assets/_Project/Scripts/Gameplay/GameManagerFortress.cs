@@ -29,8 +29,10 @@ namespace SquashBot.Gameplay
         {
             GridView.FortressTiles = on;
             theme = theme ?? WorldTheme.Current;
-            GridView.FortressStone = FortressStoneFor(world, theme.accent);
-            GridView.FortressMetal = FortressFloor.StageFor(world) == 2;
+            GridView.FortressStone = arenaRun ? new Color(0.8f, 0.8f, 0.82f) : FortressStoneFor(world, theme.accent); // the arenas: light grey marble
+            GridView.Marble = arenaRun;
+
+            GridView.FortressMetal = !arenaRun && FortressFloor.StageFor(world) == 2;
             // Real shadows cost: soft on strong phones, hard on middling ones, none on the weakest (the rest of the look stays).
             var tier = Data.GraphicsQuality.Current;
             bool shadows = on && tier != Data.GraphicsTier.Low;
@@ -73,10 +75,20 @@ namespace SquashBot.Gameplay
             ClearFortressFloor();
             if (level == null || level.mission != MissionType.Hunt) return;
             int stage = level.fortress ? 0 : FortressFloor.StageFor(World);
+            if (arenaRun) stage = Mathf.Max(1, stage); // the arenas are always grand fortresses
             // The ramparts rise further into the campaign (the first worlds keep theirs).
             float wallHeight = stage == 0 ? 1f : Mathf.Lerp(1.2f, 2.5f, Mathf.InverseLerp(5f, 24f, World));
             FortressFloor.TowerGrow = Mathf.Lerp(1f, 1.9f, Mathf.InverseLerp(0f, 24f, World)); // the corner towers grow world by world
+            if (arenaRun)
+            {
+                // The arenas: high ramparts and towering corner towers round a huge courtyard.
+                wallHeight = 4.3f + arenaIndex * 0.12f; // very high, thick ramparts
+                FortressFloor.TowerGrow = Mathf.Max(FortressFloor.TowerGrow, 1.8f + arenaIndex * 0.04f);
+            }
+            FortressFloor.SkipCornerTowers = arenaRun;
+            FortressFloor.WallThick = arenaRun ? 2.1f : 1f;
             fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, FortressRects(), wallHeight);
+            if (arenaRun) ArenaDecor.Build(fortressFloor, level.stageBounds, BattleArenas.Cut(arenaIndex), arenaIndex, robot.Position);
             // Craft crossing the sky over the later fortresses.
             if (stage >= 1)
                 SkyTraffic.Create(fortressFloor, () => robot != null ? robot.transform.position : Vector3.zero,

@@ -31,6 +31,7 @@ namespace SquashBot.Gameplay
             killStreak = Time.time - lastKillAt <= StreakWindow ? killStreak + 1 : 1;
             lastKillAt = Time.time;
             int n = killStreak;
+            ArenaStreakGift(n);
             bool callout = n == 3 || n == 5 || n == 8 || n == 12 || (n > 12 && n % 4 == 0);
             if (!callout) return;
             string key = n == 3 ? "streak.3" : n == 5 ? "streak.5" : n == 8 ? "streak.8" : n == 12 ? "streak.12" : null;

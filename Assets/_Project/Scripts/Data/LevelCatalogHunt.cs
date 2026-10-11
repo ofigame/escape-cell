@@ -109,6 +109,9 @@ namespace SquashBot.Data
         /// under it made floor so the cage always joins the main floor, and a one-tile bridge ('B') running north from
         /// the cage's middle over <see cref="BridgeLength"/> new rows.
         /// </summary>
+        /// <summary>vanG's cage and the bridge to the tunnel added to any layout (the battle arenas use it too).</summary>
+        public static string[] WithCage(string[] layout) => WithCageAndBridge(layout);
+
         private static string[] WithCageAndBridge(string[] layout)
         {
             int w = layout[0].Length;

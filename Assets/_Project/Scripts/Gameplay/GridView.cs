@@ -62,6 +62,9 @@ namespace SquashBot.Gameplay
         public static Color FortressStone = new Color(0.7f, 0.7f, 0.74f);
         /// <summary>The sci-fi worlds: the fortress floor is a deck of metal plates rather than stone.</summary>
         public static bool FortressMetal;
+        /// <summary>The battle arenas: one polished marble floor instead of slabs.</summary>
+        public static bool Marble;
+        private static Material veinMat;
 
         public static Vector3 ToWorld(GridPos p) => new Vector3(p.x, FloorRelief.HeightAt(p) * FloorRelief.Step, p.y);
 
@@ -104,7 +107,26 @@ namespace SquashBot.Gameplay
 
                 Material frame, top;
                 Color slabTop = default;
-                if (FortressTiles)
+                if (FortressTiles && Marble)
+                {
+                    // Polished grey marble laid edge to edge: hairline seams, gentle shade changes, veins here and there,
+                    // so the courtyard reads as one floor rather than squares.
+                    float shade = 0.97f + (float)stone.NextDouble() * 0.06f;
+                    var marble = FortressStone * shade;
+                    marble.a = 1f;
+                    slabTop = marble;
+                    frame = MaterialFactory.CreateSurface(FortressStone * 0.9f, Color.black, 0.7f, 0f);
+                    top = MaterialFactory.CreateSurface(marble, Palette.TileSelfLight * 0.15f, 0.78f, 0.05f);
+                    Shapes.Rounded("Frame", tile.transform, new Vector3(0f, -0.04f, 0f), new Vector3(1.0f, 0.1f, 1.0f), 0.005f, frame);
+                    Shapes.Rounded("Top", tile.transform, new Vector3(0f, 0f, 0f), new Vector3(0.985f, 0.1f, 0.985f), 0.008f, top);
+                    if (veinMat == null) veinMat = MaterialFactory.CreateSurface(FortressStone * 0.62f, Color.black, 0.8f, 0f);
+                    if (stone.Next(3) == 0)
+                        for (int v = 0; v < 1 + stone.Next(2); v++)
+                            Shapes.Rounded("Vein", tile.transform, new Vector3((float)stone.NextDouble() * 0.5f - 0.25f, 0.051f, (float)stone.NextDouble() * 0.5f - 0.25f),
+                                new Vector3(0.5f + (float)stone.NextDouble() * 0.45f, 0.002f, 0.012f + (float)stone.NextDouble() * 0.012f), 0.004f, veinMat)
+                                .transform.localRotation = Quaternion.Euler(0f, stone.Next(180), 0f);
+                }
+                else if (FortressTiles)
                 {
                     // Fortress stone: dark mortar between big slabs, each slab its own shade, rough and matt, a few cracked.
                     float shade = 0.86f + (float)stone.NextDouble() * 0.24f;
@@ -177,7 +199,7 @@ namespace SquashBot.Gameplay
                 hole.SetActive(false);
 
                 tiles[p.x, p.y] = new TileView { tile = tile, hole = hole, top = top, frame = frame, stone = FortressTiles,
-                    stoneTop = slabTop, stoneFrame = FortressStone * 0.42f, stoneGlow = Palette.TileSelfLight * 0.25f };
+                    stoneTop = slabTop, stoneFrame = FortressStone * (Marble ? 0.9f : 0.42f), stoneGlow = Palette.TileSelfLight * (Marble ? 0.15f : 0.25f) };
             }
         }
 

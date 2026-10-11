@@ -168,6 +168,8 @@ namespace SquashBot.UI
         public StoryScreen Story { get; private set; }
         public ShopScreen Shop { get; private set; }
         public DefenseEditorScreen DefenseEditor { get; private set; }
+        public BattleArenaScreen Arenas { get; private set; }
+        public event Action ArenasPressed;
         public TipCard Tip { get; private set; }
         public WeaponBag WeaponBag { get; private set; }
         public HeroPicker HeroPicker { get; private set; }
@@ -268,6 +270,7 @@ namespace SquashBot.UI
             Story = StoryScreen.Create(root);
             Shop = ShopScreen.Create(root);
             DefenseEditor = DefenseEditorScreen.Create(root);
+            Arenas = BattleArenaScreen.Create(root);
             Garage = GarageScreen.Create(root);
             DailyBonus = DailyBonusScreen.Create(root);
             Guide = GuideScreen.Create(root);
@@ -340,6 +343,10 @@ namespace SquashBot.UI
             UiFactory.Fill(qPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
             UiFactory.Text(qPing, "!", 32f, Color.white);
             questsPing = qPing.gameObject;
+
+            // The battle arenas: top right, under the settings.
+            var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopRight, new Vector2(-110f, -230f), 120f, () => ArenasPressed?.Invoke());
+            ((RectTransform)arenas.transform).pivot = new Vector2(0.5f, 0.5f);
 
             // The level card: a frosted glass panel with the world, the level, its mission and the big PLAY button.
             var card = UiFactory.Box("LevelCard", t, Bottom, new Vector2(0f, Ads.BannerReserve + 236f), new Vector2(940f, 420f));
@@ -1386,6 +1393,7 @@ namespace SquashBot.UI
             Story.Hide();
             Shop.Hide();
             DefenseEditor.Hide();
+            Arenas.Hide();
             Garage.Hide();
             DailyBonus.Hide();
             Guide.Hide();
