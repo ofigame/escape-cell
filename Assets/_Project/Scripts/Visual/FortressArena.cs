@@ -35,10 +35,16 @@ namespace SquashBot.Visual
         private static Material M(float r, float g, float b, float glow = 0f) =>
             MaterialFactory.Create(new Color(r, g, b), new Color(r, g, b) * glow);
 
-        private readonly Material stone = M(0.42f, 0.42f, 0.48f), stoneDark = M(0.27f, 0.27f, 0.33f), stoneLight = M(0.53f, 0.53f, 0.59f);
-        private readonly Material steel = M(0.36f, 0.38f, 0.44f), copper = M(0.72f, 0.42f, 0.24f), dark = M(0.16f, 0.17f, 0.21f);
-        private readonly Material blue = MaterialFactory.Create(new Color(0.35f, 0.75f, 1f), new Color(0.6f, 1.6f, 2.6f));
-        private readonly Material warm = MaterialFactory.Create(new Color(1f, 0.62f, 0.25f), new Color(2.4f, 1.2f, 0.35f));
+        private Material stone, stoneDark, stoneLight, steel, copper, dark, blue, warm;
+
+        /// <summary>The materials are made when the arena is built (Unity allows no materials in field initialisers).</summary>
+        private void MakeMaterials()
+        {
+            stone = M(0.42f, 0.42f, 0.48f); stoneDark = M(0.27f, 0.27f, 0.33f); stoneLight = M(0.53f, 0.53f, 0.59f);
+            steel = M(0.36f, 0.38f, 0.44f); copper = M(0.72f, 0.42f, 0.24f); dark = M(0.16f, 0.17f, 0.21f);
+            blue = MaterialFactory.Create(new Color(0.35f, 0.75f, 1f), new Color(0.6f, 1.6f, 2.6f));
+            warm = MaterialFactory.Create(new Color(1f, 0.62f, 0.25f), new Color(2.4f, 1.2f, 0.35f));
+        }
 
         private Transform Box(string n, Transform p, Vector3 at, Vector3 size, Material m, float r = 0.04f) =>
             Shapes.Rounded(n, p, at, size, Mathf.Min(r, Mathf.Min(size.x, Mathf.Min(size.y, size.z)) * 0.45f), m).transform;
@@ -53,6 +59,7 @@ namespace SquashBot.Visual
 
         private void Build(Func<Transform, GameObject> robotLook, WorldTheme sky)
         {
+            MakeMaterials();
             var t = transform;
             float edge = Half + 0.5f;
 
