@@ -34,7 +34,7 @@ namespace SquashBot.UI
 
         private enum Item { Shield, Magnet, Hover, Lives, Rescue, Armor, StartShield, ExtraRescue, StartHammer, DoubleCoins, CoinMagnet, TunnelBoost, Life, Tunnel }
 
-        private enum Tab { Weapons, Tools, Upgrades, Counter }
+        private enum Tab { Weapons, Tools, Defense, Upgrades, Counter }
 
         private const float CellW = 470f, CellH = 650f, Gap = 30f, TabBarH = 120f;
         private Tab tab = Tab.Weapons;
@@ -65,11 +65,11 @@ namespace SquashBot.UI
 
             // The shelves as tabs.
             var tabs = UiFactory.Rect("Tabs", root, new Vector2(0f, 1f), Vector2.one, new Vector2(24f, -190f - TabBarH), new Vector2(-24f, -200f));
-            var names = new[] { (Tab.Weapons, "ws.weapons"), (Tab.Tools, "ws.tools"), (Tab.Upgrades, "ws.upgrades"), (Tab.Counter, "ws.counter") };
+            var names = new[] { (Tab.Weapons, "ws.weapons"), (Tab.Tools, "ws.tools"), (Tab.Defense, "ws.defense"), (Tab.Upgrades, "ws.upgrades"), (Tab.Counter, "ws.counter") };
             for (int i = 0; i < names.Length; i++)
             {
                 var (t, key) = names[i];
-                var b = UiFactory.MakeButton(tabs, Loc.T(key), Kind.Secondary, new Vector2((i + 0.5f) / names.Length, 0.5f), Vector2.zero, new Vector2(236f, 92f), () => SetTab(t), 30f);
+                var b = UiFactory.MakeButton(tabs, Loc.T(key), Kind.Secondary, new Vector2((i + 0.5f) / names.Length, 0.5f), Vector2.zero, new Vector2(196f, 92f), () => SetTab(t), 26f);
                 ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0.5f);
                 tabFaces[t] = (Image)b.targetGraphic;
             }
@@ -120,6 +120,9 @@ namespace SquashBot.UI
                     BagCell();
                     foreach (var t in Tools.All) ToolCell(t);
                     break;
+                case Tab.Defense:
+                    foreach (var k in Defenses.All) { DefensePackCell(k); DefenseStepCell(k); }
+                    break;
                 case Tab.Upgrades:
                     FifiCell();
                     foreach (var item in new[] { Item.Shield, Item.Armor, Item.Rescue, Item.Magnet, Item.Hover, Item.Lives }) ItemCell(item);
@@ -129,7 +132,7 @@ namespace SquashBot.UI
                     AdCoinsCell();
                     foreach (var b in Shop.Counter()) ItemCell((Item)((int)Item.StartShield + (int)b));
                     ItemCell(Item.Life);
-                    ItemCell(Item.Tunnel);
+                    // (the bonus-round ticket is gone with the bonus rounds)
                     break;
             }
             int rows = (cells + 1) / 2;
@@ -385,6 +388,116 @@ namespace SquashBot.UI
                 desc.text = Loc.F("bomb.desc", Bombs.PerFloor, Bombs.Owned ? Bombs.Damage : 6);
                 label.text = !Bombs.Unlocked ? Loc.F("ws.lockedAt", Bombs.FromLevel + 1) : Bombs.IsMaxed ? Loc.T("shop.max") : Bombs.NextPrice.ToString();
                 Afford(buy, Bombs.Unlocked && !Bombs.IsMaxed, SaveData.Coins >= Bombs.NextPrice);
+            });
+        }
+
+        // ---------- Defences ----------
+
+        private static Color DefenseColor(DefenseKind k) => k == DefenseKind.Archer ? new Color(0.45f, 0.85f, 0.5f) : k == DefenseKind.Cannon ? new Color(1f, 0.6f, 0.3f) : new Color(0.45f, 0.75f, 1f);
+
+        /// <summary>A defence drawn from UI shapes: a bow and arrow, a cannon, a turret tower.</summary>
+        private static void DefenseIcon(RectTransform icon, DefenseKind k)
+        {
+            var dark = UiFactory.TextDark;
+            Image Part(string n, Vector2 at, Vector2 size, Color c, Sprite s = null, float rot = 0f)
+            {
+                var r = UiFactory.Box(n, icon, new Vector2(0.5f, 0.5f), at, size);
+                r.pivot = new Vector2(0.5f, 0.5f);
+                r.localRotation = Quaternion.Euler(0f, 0f, rot);
+                var img = UiFactory.Fill(r, c, s ?? UiSprites.Rounded, 6f);
+                img.raycastTarget = false;
+                return img;
+            }
+            switch (k)
+            {
+                case DefenseKind.Archer:
+                    Part("Bow", new Vector2(-8f, 0f), new Vector2(70f, 90f), dark, UiSprites.Ring, 0f);
+                    Part("String", new Vector2(18f, 0f), new Vector2(5f, 84f), Color.white);
+                    Part("Arrow", new Vector2(4f, 0f), new Vector2(84f, 7f), dark);
+                    Part("Head", new Vector2(44f, 0f), new Vector2(18f, 18f), dark, null, 45f);
+                    break;
+                case DefenseKind.Cannon:
+                    Part("Barrel", new Vector2(8f, 10f), new Vector2(80f, 30f), dark, null, 25f);
+                    Part("Wheel", new Vector2(-10f, -18f), new Vector2(46f, 46f), dark, UiSprites.Circle);
+                    Part("Hub", new Vector2(-10f, -18f), new Vector2(16f, 16f), Color.white, UiSprites.Circle);
+                    break;
+                default:
+                    Part("Base", new Vector2(0f, -38f), new Vector2(70f, 18f), dark);
+                    Part("Column", new Vector2(0f, -8f), new Vector2(34f, 50f), dark);
+                    Part("Head", new Vector2(0f, 26f), new Vector2(56f, 40f), dark, UiSprites.Circle);
+                    Part("Eye", new Vector2(0f, 28f), new Vector2(26f, 9f), Color.white);
+                    break;
+            }
+        }
+
+        /// <summary>A pack of three of a defence: how many are ready and placed, the pack's price.</summary>
+        private void DefensePackCell(DefenseKind k)
+        {
+            var card = Cell("Pack " + k, DefenseColor(k), out var picture);
+            DefenseIcon(BigIcon(picture, DefenseColor(k)), k);
+            CardName(card, Loc.F("def.packName", Loc.T("def." + k)));
+            var desc = CardDesc(card);
+            var lockText = LockVeil(card, out var veil);
+            var buy = BuyButton(card, () =>
+            {
+                if (Defenses.TryBuyPack(k))
+                {
+                    AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
+                    Haptics.Medium();
+                    Pop(card);
+                    Purchased?.Invoke();
+                }
+                else
+                {
+                    AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                    if (Defenses.Unlocked(k)) WorkshopTalk.Poor(bip);
+                }
+                Refresh();
+            });
+            var label = buy.GetComponentInChildren<TextMeshProUGUI>();
+            refreshers.Add(() =>
+            {
+                bool open = Defenses.Unlocked(k);
+                veil.SetActive(!open);
+                lockText.text = Loc.F("ws.lockedAt", Defenses.UnlockAt(k) + 1);
+                desc.text = Loc.T("def." + k + ".desc") + "\n" + Loc.F("def.stock", Defenses.Available(k), Defenses.Reserved(k));
+                label.text = open ? Defenses.PackPrice(k).ToString() : Loc.F("ws.lockedAt", Defenses.UnlockAt(k) + 1);
+                Afford(buy, open, SaveData.Coins >= Defenses.PackPrice(k));
+            });
+        }
+
+        /// <summary>The defence's strength, bought for good: three steps, the 2nd from level 100, the 3rd from level 200.</summary>
+        private void DefenseStepCell(DefenseKind k)
+        {
+            var card = Cell("Step " + k, DefenseColor(k), out var picture);
+            DefenseIcon(BigIcon(picture, DefenseColor(k)), k);
+            CardName(card, Loc.F("def.stepName", Loc.T("def." + k)));
+            var desc = CardDesc(card);
+            var pips = Pips(card, Defenses.MaxStep);
+            var buy = BuyButton(card, () =>
+            {
+                if (Defenses.TryUpgrade(k))
+                {
+                    AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
+                    Haptics.Medium();
+                    Pop(card);
+                    Purchased?.Invoke();
+                }
+                else
+                {
+                    AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                    if (Defenses.NextStepOpen(k)) WorkshopTalk.Poor(bip);
+                }
+                Refresh();
+            });
+            var label = buy.GetComponentInChildren<TextMeshProUGUI>();
+            refreshers.Add(() =>
+            {
+                SetPips(pips, Defenses.Step(k));
+                bool maxed = Defenses.IsMaxed(k), open = Defenses.NextStepOpen(k);
+                desc.text = Loc.F("def.stepDesc", Defenses.Step(k), Defenses.MaxStep);
+                label.text = maxed ? Loc.T("shop.max") : open ? Defenses.NextStepPrice(k).ToString() : Loc.F("ws.lockedAt", Defenses.StepFrom(Defenses.Step(k) + 1) + 1);
+                Afford(buy, open, SaveData.Coins >= Defenses.NextStepPrice(k));
             });
         }
 

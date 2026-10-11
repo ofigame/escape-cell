@@ -50,13 +50,14 @@ namespace SquashBot.Gameplay
             hunt.Finished += OnHuntFinished;
             hunt.SleepingHit += OnSleepingHit;
             InitStages();
+            InitDefense();
             InitFifi();
             InitUtopia();
             InitRewards();
             hunt.Armored += p =>
             {
-                // Too weak a weapon for this floor's armour: say so (not on every blow).
-                if (Time.unscaledTime - lastArmorNote < 2.5f) return;
+                // Too weak a weapon for this floor's armour: say so (not on every blow, never for a defence's shot).
+                if (defenseStrike || Time.unscaledTime - lastArmorNote < 2.5f) return;
                 lastArmorNote = Time.unscaledTime;
                 FloatAt(GridView.ToWorld(p) + Vector3.up * 1.1f, Loc.F("float.armored", level.armor + 1), new Color(0.75f, 0.85f, 1f));
             };
@@ -107,6 +108,7 @@ namespace SquashBot.Gameplay
             SetupBombs();
             SetupFortressFloor();
             SetupStageGates();
+            SetupDefenses();
         }
 
         private void UpdateHunt(float dt)
@@ -119,8 +121,9 @@ namespace SquashBot.Gameplay
 
         private void OnHuntFinished(GridPos p, bool robotKind)
         {
-            if (robotKind) { hitStopLeft = 0.06f; cameraRig.Punch(0.35f); CountStreak(p); }
+            if (robotKind && !defenseStrike) { hitStopLeft = 0.06f; cameraRig.Punch(0.35f); CountStreak(p); }
             int reward = robotKind ? 3 : 1;
+            if (defenseStrike) reward /= 2; // felled by a defence: half the coins
             coinsThisRun += reward;
             comboTimer = ComboWindow;
             FloatAt(GridView.ToWorld(p) + Vector3.up * 0.7f, "+" + reward, Palette.UiGold);
@@ -416,6 +419,18 @@ namespace SquashBot.Gameplay
                 return;
             }
             float dt = Time.unscaledDeltaTime;
+            if (defenseEditing)
+            {
+                // Setting up defences: the stage on show from above (the set-up panels over the HUD).
+                if (!ui.DefenseEditor.IsOpen) { ui.DefenseEditor.Show(); ui.SetHudHidden(true); RefreshEditor(); }
+                UpdateEditorZoom();
+                EditorPose(out var epos, out var erot);
+                cameraRig.Chase(epos, erot, IntroFov);
+                cameraRig.Cam.farClipPlane = Mathf.Max(200f, Vector3.Distance(epos, robot.transform.position) * 2f);
+                closeCamOn = true;
+                closeCamFocus = robot.transform.position;
+                return;
+            }
             var target = robot.transform.position;
             target.y = GridView.ToWorld(robot.Position).y * 0.85f; // rises with the floor's steps
             float pullGoal = 1f;

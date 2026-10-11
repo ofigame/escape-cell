@@ -75,7 +75,7 @@ namespace SquashBot.Gameplay
             int stage = level.fortress ? 0 : FortressFloor.StageFor(World);
             // The ramparts rise further into the campaign (the first worlds keep theirs).
             float wallHeight = stage == 0 ? 1f : Mathf.Lerp(1f, 1.7f, Mathf.InverseLerp(5f, 24f, World));
-            fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, level.fortressStages > 1 ? level.stageBounds : null, wallHeight);
+            fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, FortressRects(), wallHeight);
             // Craft crossing the sky over the later fortresses.
             if (stage >= 1)
                 SkyTraffic.Create(fortressFloor, () => robot != null ? robot.transform.position : Vector3.zero,
@@ -110,6 +110,7 @@ namespace SquashBot.Gameplay
             if (glassCell != null) Destroy(glassCell.gameObject);
             glassCell = null;
             ClearStageGates();
+            if (defenses != null) defenses.Clear();
         }
 
         /// <summary>
@@ -127,7 +128,7 @@ namespace SquashBot.Gameplay
                 hazards.Freeze();
                 floorRules.Freeze();
             }
-            if (IntroRunning || introPending) { glassSince = Time.time; return default; } // the opening shot first
+            if (defenseEditing || IntroRunning || introPending) { glassSince = Time.time; return default; } // set-up and the opening shot first
             if (command.IsEmpty && Time.time - glassSince < 2f) return default;
             // foi breaks out: a punch, a white flash in the glass, the shards fly; the floor comes alive.
             glassCell.Shatter();

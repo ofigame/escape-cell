@@ -38,6 +38,7 @@ namespace SquashBot.Visual
         {
             lightsLeft = MaxLights;
             WallHeight = wallHeight;
+            LastStage = stage;
             var root = new GameObject("Fortress").transform;
             root.SetParent(parent, false);
             var k = new Kit
@@ -87,15 +88,13 @@ namespace SquashBot.Visual
             int minX = int.MaxValue, minZ = int.MaxValue, maxX = int.MinValue, maxZ = int.MinValue;
             foreach (var p in grid.AllPositions())
                 if (Main(p)) { minX = Mathf.Min(minX, p.x); maxX = Mathf.Max(maxX, p.x); minZ = Mathf.Min(minZ, p.y); maxZ = Mathf.Max(maxZ, p.y); }
-            if (stageBounds != null && stageBounds.Length >= 8)
+            if (stageBounds != null && stageBounds.Length >= 4)
             {
                 // A fortress of stages: four towers round each, just off its corners (clear of the fire stairs).
                 for (int s = 0; s < stageBounds.Length / 4; s++)
                     foreach (var (sx, sz) in new[] { (-1, -1), (1, -1), (-1, 1), (1, 1) })
                     {
-                        var c = new GridPos(sx < 0 ? stageBounds[s * 4] : stageBounds[s * 4 + 2], sz < 0 ? stageBounds[s * 4 + 1] : stageBounds[s * 4 + 3]);
-                        var at = GridView.ToWorld(c) + new Vector3(sx * 1.35f, 0f, sz * 1.35f) + Vector3.up * (y0 - 0.1f);
-                        float height = sz < 0 ? 0.55f : 0.85f;
+                        var at = CornerTowerBase(stageBounds, s, sx, sz, out float height);
                         if (stage == 2) TechTower(root, k, at, height);
                         else Spire(root, k, stage, at, height);
                     }
@@ -179,6 +178,40 @@ namespace SquashBot.Visual
         /// <summary>Point lights still allowed on this floor (a handful in all keeps phones smooth).</summary>
         private const int MaxLights = 10;
         private static int lightsLeft;
+
+        // ---------- Where the player's defences stand (see DefenseSlots) ----------
+
+        /// <summary>The style of the fortress built last (0 stone, 1 copper, 2 sci-fi).</summary>
+        public static int LastStage { get; private set; }
+        public static readonly (int sx, int sz)[] Corners = { (-1, -1), (1, -1), (-1, 1), (1, 1) };
+
+        /// <summary>The foot of a stage's corner tower and its height (the front ones are shorter).</summary>
+        public static Vector3 CornerTowerBase(int[] b, int s, int sx, int sz, out float height)
+        {
+            var c = new GridPos(sx < 0 ? b[s * 4] : b[s * 4 + 2], sz < 0 ? b[s * 4 + 1] : b[s * 4 + 3]);
+            height = sz < 0 ? 0.55f : 0.85f;
+            return GridView.ToWorld(c) + new Vector3(sx * 1.35f, 0f, sz * 1.35f) + Vector3.up * (GridView.SurfaceY - 0.1f);
+        }
+
+        /// <summary>Where an archer stands on a corner tower: its gallery (or the tech tower's roof), on the stage's side.</summary>
+        public static Vector3 CornerTowerTop(int[] b, int s, int corner)
+        {
+            var (sx, sz) = Corners[corner];
+            var at = CornerTowerBase(b, s, sx, sz, out float height);
+            float top = (LastStage == 2 ? 4.15f : 4.78f) * 0.8f * height;
+            return at + Vector3.up * top - new Vector3(sx, 0f, sz).normalized * (LastStage == 2 ? 0.15f : 0.5f);
+        }
+
+        /// <summary>The top of the rampart running along a floor tile's edge (outward one step from it).</summary>
+        public static Vector3 WallTop(GridPos p, GridPos outward)
+        {
+            var o = new Vector3(outward.x, 0f, outward.y);
+            var at = GridView.ToWorld(p) + o * 0.78f + Vector3.up * (GridView.SurfaceY + 0.2f);
+            if (LastStage == 0) return at + Vector3.up * 0.45f;
+            bool front = outward.x < 0 || outward.y < 0;
+            float h = (LastStage == 2 ? 0.95f : 0.8f) * WallHeight * (front ? 0.55f : 1f);
+            return new Vector3(at.x, at.y - 0.35f + h + 0.07f, at.z);
+        }
 
         private static void AddLight(Transform root, Vector3 at, Color c, float range, float intensity)
         {

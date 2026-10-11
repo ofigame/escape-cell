@@ -56,16 +56,20 @@ namespace SquashBot.Gameplay
             AudioManager.PlaySfx(Sfx.Coin, 0.8f, 1.6f);
         }
 
-        /// <summary>The chest after a won floor, over the result card.</summary>
+        /// <summary>The chest meter filled on the floor just won: the surprise chest comes over the result card.</summary>
+        private bool chestPending;
+
+        /// <summary>The surprise chest after a won floor (only when the chest meter filled), over the result card.</summary>
         private void OfferChest()
         {
-            if (bonusRun || dailyRun || level == null) return;
+            if (bonusRun || dailyRun || level == null || !chestPending) return;
+            chestPending = false;
             var reward = LevelChest.Roll(levelIndex);
             ui.Chest.Show(reward.rarity, () =>
             {
                 LevelChest.Grant(reward);
                 ui.RefreshMenuCoins();
-                return ChestLine(reward.coins, reward.lives);
+                return LevelChest.Describe(reward, reward.coins);
             }, Ads.Rewarded.IsReady ? () =>
             {
                 Ads.Rewarded.Show(rewarded =>
@@ -73,12 +77,9 @@ namespace SquashBot.Gameplay
                     if (!rewarded) return;
                     SaveData.Coins += reward.coins;
                     ui.RefreshMenuCoins();
-                    ui.Chest.ShowDoubled(ChestLine(reward.coins * 2, reward.lives));
+                    ui.Chest.ShowDoubled(LevelChest.Describe(reward, reward.coins * 2));
                 });
             } : (System.Action)null);
         }
-
-        private static string ChestLine(int coins, int lives) =>
-            Loc.F("chest.coins", coins) + (lives > 0 ? "\n" + Loc.F("chest.lives", lives) : "");
     }
 }

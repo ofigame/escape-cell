@@ -78,6 +78,13 @@ namespace SquashBot.Data
         }
 
         public static int Owned(Boost b) => PlayerPrefs.GetInt("sb_boost_" + b, 0);
+
+        /// <summary>A boost given (a chest's gift), up to what can be carried.</summary>
+        public static void Give(Boost b, int n = 1)
+        {
+            PlayerPrefs.SetInt("sb_boost_" + b, Mathf.Min(MaxCarried, Owned(b) + n));
+            PlayerPrefs.Save();
+        }
         public static int Price(Boost b) => BoostPrices[(int)b];
         public static bool Full(Boost b) => Owned(b) >= MaxCarried;
 

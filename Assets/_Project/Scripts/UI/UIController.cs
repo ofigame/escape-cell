@@ -59,6 +59,9 @@ namespace SquashBot.UI
         public event Action<int> ToolPressed;
         /// <summary>PLAY on the before-level card: level, start with a shield, take an extra rescue.</summary>
         public event Action<int, List<Boost>> PrelevelPlay;
+        /// <summary>The before-level card's DEFENCES button: start the level in set-up mode.</summary>
+        public event Action<int, List<Boost>> PrelevelDefense;
+        private TextMeshProUGUI preDefense;
         public event Action PrelevelClosed;
 
         /// <summary>Everything the result card shows.</summary>
@@ -164,6 +167,7 @@ namespace SquashBot.UI
         public MapScreen Map { get; private set; }
         public StoryScreen Story { get; private set; }
         public ShopScreen Shop { get; private set; }
+        public DefenseEditorScreen DefenseEditor { get; private set; }
         public TipCard Tip { get; private set; }
         public WeaponBag WeaponBag { get; private set; }
         public HeroPicker HeroPicker { get; private set; }
@@ -263,6 +267,7 @@ namespace SquashBot.UI
             BuildNoLives(root);
             Story = StoryScreen.Create(root);
             Shop = ShopScreen.Create(root);
+            DefenseEditor = DefenseEditorScreen.Create(root);
             Garage = GarageScreen.Create(root);
             DailyBonus = DailyBonusScreen.Create(root);
             Guide = GuideScreen.Create(root);
@@ -438,7 +443,7 @@ namespace SquashBot.UI
         {
             prelevel = UiScreen.Create("Prelevel", root, out var t);
             UiFactory.Dim(t, new Color(0.06f, 0.05f, 0.18f, 0.55f));
-            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1000f));
+            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1130f));
             prelevel.SetPopTarget(card);
 
             UiFactory.MakeButton(card, "X", Kind.Icon, TopRight, new Vector2(-24f, -24f), new Vector2(100f, 100f), () =>
@@ -463,6 +468,9 @@ namespace SquashBot.UI
 
             UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(0f, 46f), new Vector2(620f, 160f),
                 () => PrelevelPlay?.Invoke(preLevel, preBoosts.FindAll(v => v.on).ConvertAll(v => v.boost)), 84f);
+            var def = UiFactory.MakeButton(card, Loc.T("def.button"), Kind.Gold, Bottom, new Vector2(0f, 222f), new Vector2(560f, 100f),
+                () => PrelevelDefense?.Invoke(preLevel, preBoosts.FindAll(v => v.on).ConvertAll(v => v.boost)), 40f);
+            preDefense = def.GetComponentInChildren<TextMeshProUGUI>();
         }
 
         private BoostView BoostTile(Transform card, Vector2 position, Boost boost)
@@ -552,6 +560,9 @@ namespace SquashBot.UI
         }
 
         public void HidePrelevel() => prelevel.Hide(true);
+
+        /// <summary>The DEFENCES button's label (with what is placed in this level).</summary>
+        public void SetPrelevelDefense(string text) { if (preDefense != null) preDefense.text = text; }
 
         private class BoostView
         {
@@ -870,6 +881,13 @@ namespace SquashBot.UI
             UiFactory.Fill(icon, Palette.UiGold, UiSprites.Circle).raycastTarget = false;
             var inner = UiFactory.Box("Inner", icon, Middle, Vector2.zero, new Vector2(36f, 36f));
             UiFactory.Fill(inner, new Color(1f, 0.9f, 0.55f), UiSprites.Circle).raycastTarget = false;
+        }
+
+        /// <summary>Hides the playing HUD and its buttons for a while (setting up defences), or brings them back.</summary>
+        public void SetHudHidden(bool hidden)
+        {
+            hud.gameObject.SetActive(!hidden);
+            if (SkillBar != null) SkillBar.gameObject.SetActive(!hidden);
         }
 
         public void ShowHud(int levelIndex)
@@ -1331,6 +1349,7 @@ namespace SquashBot.UI
             Map.Hide();
             Story.Hide();
             Shop.Hide();
+            DefenseEditor.Hide();
             Garage.Hide();
             DailyBonus.Hide();
             Guide.Hide();

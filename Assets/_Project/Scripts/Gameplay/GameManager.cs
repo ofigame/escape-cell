@@ -283,6 +283,7 @@ namespace SquashBot.Gameplay
             ui.PausePressed += Pause;
             ui.BagPressed += OpenBag;
             ui.BombPressed += ThrowBomb;
+            WireDefenseUi();
             ui.AdHealPressed += OnAdHealPressed;
             ui.HeroPicker.Picked += OnHeroPicked;
             ui.WeaponBag.Picked += TakeWeapon;
@@ -466,6 +467,8 @@ namespace SquashBot.Gameplay
             // Bought rescues need no slot here: they wait in reserve and step in by themselves (see TryRescue).
             var data = levelSet.levels[index];
             ui.ShowPrelevel(index, LevelCatalog.WorldName(index), MissionText(data), Progress.Stars(index), data.mission == MissionType.Monster, SuggestedBoost(data), Shop.BoostsAllowed(data));
+            ui.SetPrelevelDefense(PrelevelDefenseLabel(index));
+            OfferArcherAd(index);
         }
 
         /// <summary>The boost that helps most on this level: the hammer for a monster, double coins for coin hunts, else a shield.</summary>
@@ -1872,6 +1875,7 @@ namespace SquashBot.Gameplay
                 return;
             }
             PlayerPrefs.DeleteKey(FailKey(levelIndex));
+            Defenses.ConsumeOnWin(levelIndex); // the defences that stood in it are used up
 
             // Stars: how well the level went.
             int stars = StarRules.Evaluate(starGoals, coinsThisRun, elapsed);
@@ -1900,14 +1904,9 @@ namespace SquashBot.Gameplay
             if (levelIndex + 1 > SaveData.UnlockedLevel && levelIndex + 1 < LevelCount)
                 SaveData.UnlockedLevel = levelIndex + 1;
 
-            // New stars fill the bonus meter.
-            int unlockedBonus = Progress.Award(levelIndex, stars, out _);
-            bool surprise = false;
-            if (unlockedBonus == 0 && unlockedNew && levelIndex + 1 >= SurpriseFromLevel && Progress.BonusTokens == 0 && Random.value < SurpriseBonusChance)
-            {
-                Progress.BonusTokens++;
-                surprise = true;
-            }
+            Progress.Award(levelIndex, stars, out _); // the stars are kept (no bonus rounds any more)
+            // The coins of the floor fill the chest meter; a full meter brings the surprise chest.
+            chestPending = LevelChest.AddCoins(earned, levelIndex);
 
             pendingEnding = levelIndex == LevelCount - 1 && !Story.Seen(Story.Ending);
             bool hasNext = levelIndex + 1 < LevelCount;
@@ -1917,8 +1916,6 @@ namespace SquashBot.Gameplay
                 StartCoroutine(AskRatingSoon());
             // The card's hook (a teaser for the next cell) comes first; otherwise the bonus or star news.
             string note = Loc.Has(CardKey("hook")) ? Loc.T(CardKey("hook"))
-                : surprise ? Loc.T("bonus.surprise")
-                : unlockedBonus > 0 ? Loc.T("bonus.ready")
                 : stars < 3 ? StarHint(stars)
                 : Loc.T("star.max");
 
@@ -1931,9 +1928,9 @@ namespace SquashBot.Gameplay
                 note = note,
                 coins = earned,
                 stars = stars,
-                bonusAvailable = Progress.BonusTokens > 0,
-                meter = unlockedBonus > 0 || surprise ? 1f : Progress.Meter / (float)Progress.StarsPerBonus,
-                meterText = Loc.F("bonus.meter", unlockedBonus > 0 || surprise ? Progress.StarsPerBonus : Progress.Meter, Progress.StarsPerBonus),
+                bonusAvailable = false,
+                meter = chestPending ? 1f : LevelChest.Meter / (float)LevelChest.Cost(levelIndex),
+                meterText = Loc.F("chest.meter", chestPending ? LevelChest.Cost(levelIndex) : LevelChest.Meter, LevelChest.Cost(levelIndex)),
             };
             return info;
         }

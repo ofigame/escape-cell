@@ -29,8 +29,8 @@ namespace SquashBot.Data
         /// <summary>Bonus rounds waiting to be played.</summary>
         public static int BonusTokens
         {
-            get => PlayerPrefs.GetInt(TokensKey, 0);
-            set { PlayerPrefs.SetInt(TokensKey, Mathf.Max(0, value)); PlayerPrefs.Save(); }
+            get => 0; // bonus rounds after levels are gone (user decision); the chest meter rewards instead
+            set { }
         }
 
         /// <summary>Records a result. Returns how many bonus rounds it unlocked (usually 0 or 1).</summary>
@@ -41,12 +41,8 @@ namespace SquashBot.Data
             if (newStars == 0) return 0;
 
             PlayerPrefs.SetInt(StarsKey + level, stars);
-            int meter = Meter + newStars;
-            int unlocked = meter / StarsPerBonus;
-            PlayerPrefs.SetInt(MeterKey, meter % StarsPerBonus);
-            PlayerPrefs.SetInt(TokensKey, BonusTokens + unlocked);
             PlayerPrefs.Save();
-            return unlocked;
+            return 0;
         }
     }
 
