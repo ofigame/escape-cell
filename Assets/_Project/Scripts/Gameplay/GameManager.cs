@@ -157,6 +157,7 @@ namespace SquashBot.Gameplay
             }
 
             Application.targetFrameRate = 60;
+            Application.lowMemory += OnLowMemory;
             QualitySettings.vSyncCount = 0;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
             if (levelSet == null || levelSet.levels.Count == 0) levelSet = LevelSet.LoadOrDefault();
@@ -410,6 +411,18 @@ namespace SquashBot.Gameplay
             cameraRig.SetStyle(CameraStyle.MenuOrbit);
             cameraRig.SetMenuFocus(true);
             robot.Spawn(grid, grid.CenterFloor());
+        }
+
+        /// <summary>The phone is running out of memory: drop the heavy extras (shadows) and free what is unused.</summary>
+        private void OnLowMemory()
+        {
+            lowMemoryMode = true;
+            Shapes.CastShadows = false;
+            var data = cameraRig != null ? cameraRig.Cam.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>() : null;
+            if (data != null) data.renderShadows = false;
+            Resources.UnloadUnusedAssets();
+            System.GC.Collect();
+            Debug.LogWarning("[foi] Low memory: shadows off, unused assets freed.");
         }
 
         /// <summary>
@@ -730,6 +743,10 @@ namespace SquashBot.Gameplay
         private void BeginRun()
         {
             ResetRun();
+            // A fresh floor: let go of the last floor's materials and meshes (built from code, they pile up otherwise
+            // and long sessions run phones out of memory).
+            Resources.UnloadUnusedAssets();
+            System.GC.Collect();
             continued = false;
             closeCalls = 0;
             jumpHintShown = false;

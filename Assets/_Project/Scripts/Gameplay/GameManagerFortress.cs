@@ -1,4 +1,5 @@
 using System.Collections;
+using SquashBot.Core;
 using SquashBot.Data;
 using SquashBot.Visual;
 using UnityEngine;
@@ -29,13 +30,13 @@ namespace SquashBot.Gameplay
         {
             GridView.FortressTiles = on;
             theme = theme ?? WorldTheme.Current;
-            GridView.FortressStone = arenaRun ? new Color(0.8f, 0.8f, 0.82f) : FortressStoneFor(world, theme.accent); // the arenas: light grey marble
-            GridView.Marble = arenaRun;
-
-            GridView.FortressMetal = !arenaRun && FortressFloor.StageFor(world) == 2;
+            // Polished marble floors everywhere (the arenas' design), in each world's colour — or the arena's own.
+            GridView.FortressStone = arenaRun ? BattleArenas.Style(arenaIndex).floor : FortressStoneFor(world, theme.accent);
+            GridView.Marble = true;
+            GridView.FortressMetal = false;
             // Real shadows cost: soft on strong phones, hard on middling ones, none on the weakest (the rest of the look stays).
             var tier = Data.GraphicsQuality.Current;
-            bool shadows = on && tier != Data.GraphicsTier.Low;
+            bool shadows = on && tier != Data.GraphicsTier.Low && !lowMemoryMode;
             Shapes.CastShadows = shadows;
             var key = FindAnyObjectByType<Light>();
             foreach (var l in FindObjectsByType<Light>(FindObjectsSortMode.None))
@@ -76,19 +77,33 @@ namespace SquashBot.Gameplay
             if (level == null || level.mission != MissionType.Hunt) return;
             int stage = level.fortress ? 0 : FortressFloor.StageFor(World);
             if (arenaRun) stage = Mathf.Max(1, stage); // the arenas are always grand fortresses
-            // The ramparts rise further into the campaign (the first worlds keep theirs).
-            float wallHeight = stage == 0 ? 1f : Mathf.Lerp(1.2f, 2.5f, Mathf.InverseLerp(5f, 24f, World));
+            // The ramparts rise and thicken further into the campaign, and stage by stage inside a level (each
+            // stage's walls higher and thicker than the one before), in a stone tinted by the world.
+            float camp = Mathf.InverseLerp(0f, 24f, World);
+            float wallHeight = Mathf.Lerp(1.15f, 3.0f, camp);
+            float wallThick = Mathf.Lerp(1.0f, 1.9f, camp);
+            FortressFloor.WallScaleAt = level.fortressStages > 1 ? p => 1f + 0.22f * StageAt(p) : (System.Func<GridPos, float>)null;
+            FortressFloor.WallTint = Color.Lerp(new Color(0.66f, 0.66f, 0.69f), WorldTheme.Current.accent, 0.18f) * Mathf.Lerp(1f, 0.62f, camp);
+            FortressFloor.Fx = FortressFloor.WallFx.None;
             FortressFloor.TowerGrow = Mathf.Lerp(1f, 1.9f, Mathf.InverseLerp(0f, 24f, World)); // the corner towers grow world by world
             if (arenaRun)
             {
                 // The arenas: high ramparts and towering corner towers round a huge courtyard.
                 wallHeight = 4.3f + arenaIndex * 0.12f; // very high, thick ramparts
+                wallThick = 2.1f;
                 FortressFloor.TowerGrow = Mathf.Max(FortressFloor.TowerGrow, 1.8f + arenaIndex * 0.04f);
+                var st = BattleArenas.Style(arenaIndex);
+                FortressFloor.WallTint = st.wall;
+                FortressFloor.Fx = (FortressFloor.WallFx)st.fx;
+                FortressFloor.FxColour = st.accent;
+                FortressFloor.WallScaleAt = null;
             }
             FortressFloor.SkipCornerTowers = arenaRun;
-            FortressFloor.WallThick = arenaRun ? 2.1f : 1f;
+            FortressFloor.WallThick = wallThick;
             fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, FortressRects(), wallHeight);
-            if (arenaRun) ArenaDecor.Build(fortressFloor, level.stageBounds, BattleArenas.Cut(arenaIndex), arenaIndex, robot.Position);
+            if (arenaRun) ArenaDecor.Build(fortressFloor, grid, level.stageBounds, arenaIndex, robot.Position, BattleArenas.Style(arenaIndex).accent, BattleArenas.Style(arenaIndex).trim);
+            // The fortress never moves: its thousands of pieces are merged into a few big meshes (far fewer draw calls).
+            StaticBatchingUtility.Combine(fortressFloor.gameObject);
             // Craft crossing the sky over the later fortresses.
             if (stage >= 1)
                 SkyTraffic.Create(fortressFloor, () => robot != null ? robot.transform.position : Vector3.zero,

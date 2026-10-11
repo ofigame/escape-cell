@@ -505,8 +505,11 @@ namespace SquashBot.Gameplay
         private bool wideShadowsOff;
 
         /// <summary>Real-time shadows off while the camera takes in a wide view (set-up, the opening shot), back after.</summary>
+        private bool lowMemoryMode;
+
         private void SetWideViewShadows(bool on)
         {
+            if (lowMemoryMode) on = false; // once the phone warned of low memory, shadows stay off
             if (on == !wideShadowsOff) return;
             wideShadowsOff = !on;
             var data = cameraRig.Cam.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
@@ -527,6 +530,20 @@ namespace SquashBot.Gameplay
             var dir = new Vector3(-0.32f, 1f, -0.55f).normalized;
             float span = Mathf.Max(grid.Width * 1.25f, grid.Height);
             float dist = span * 0.5f / Mathf.Tan(IntroFov * 0.5f * Mathf.Deg2Rad) + 4f;
+            // Never further back than the biggest single stage needs (a whole 6-stage floor at once is too much for phones).
+            var rects = level.stageBounds;
+            if (rects != null && rects.Length >= 8)
+            {
+                float maxStage = 0f;
+                for (int s = 0; s < rects.Length / 4; s++)
+                    maxStage = Mathf.Max(maxStage, Mathf.Max((rects[s * 4 + 2] - rects[s * 4] + 3f) * 1.25f, rects[s * 4 + 3] - rects[s * 4 + 1] + 3f));
+                float cap = Mathf.Min(70f, maxStage * 0.5f / Mathf.Tan(IntroFov * 0.5f * Mathf.Deg2Rad) + 6f);
+                if (dist > cap)
+                {
+                    dist = cap;
+                    centre = new Vector3(centre.x, centre.y, rects[1] + (rects[3] - rects[1]) * 0.5f + cap * 0.35f); // frame the first stages and what lies ahead
+                }
+            }
             pos = centre + dir * dist;
             rot = Quaternion.LookRotation(centre - pos);
         }

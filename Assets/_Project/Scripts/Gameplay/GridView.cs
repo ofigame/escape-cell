@@ -83,6 +83,7 @@ namespace SquashBot.Gameplay
 
             tiles = new TileView[grid.Width, grid.Height];
             var stone = new System.Random(grid.Width * 131 + grid.Height);
+            veinMat = null; // this floor's own vein colour
             // Dark fortress floors are decks of metal plates rather than stone: shared materials for their details.
             bool metal = FortressTiles && FortressMetal;
             var accent = WorldTheme.Current.accent;

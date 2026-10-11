@@ -38,6 +38,8 @@ namespace SquashBot.Visual
         {
             lightsLeft = MaxLights;
             WallHeight = wallHeight;
+            lastGrid = grid;
+            flamesLeft = 40;
             LastStage = stage;
             var root = new GameObject("Fortress").transform;
             root.SetParent(parent, false);
@@ -60,7 +62,17 @@ namespace SquashBot.Visual
                 k.stone = M(f * 0.48f, smooth, metal);
                 k.stoneLight = M(f * 0.62f, smooth, metal);
             }
-            if (WallThick > 1.5f)
+            if (WallTint.HasValue)
+            {
+                // The ramparts' own colour (each arena, each world): stone in that tint — or blocks of ice.
+                var t = WallTint.Value;
+                k.stoneDark = Fx == WallFx.Ice ? MaterialFactory.CreateTransparent(new Color(t.r, t.g, t.b, 0.62f), t * 0.35f) : M(t * 0.82f, 0.35f, 0f);
+                k.stone = Fx == WallFx.Ice ? MaterialFactory.CreateTransparent(new Color(t.r, t.g, t.b, 0.75f), t * 0.45f) : M(t, 0.4f, 0f);
+                k.stoneLight = M(Color.Lerp(t, Color.white, 0.3f), 0.5f, 0f);
+                k.dark = M(t * 0.55f, 0.2f, 0f);
+                fxMat = MaterialFactory.Create(FxColour, FxColour * 2.4f);
+            }
+            else if (WallThick > 1.5f)
             {
                 // The arenas: thick ramparts of pale grey dressed stone (never brown), lighter caps.
                 k.stoneDark = M(new Color(0.55f, 0.56f, 0.59f), 0.3f, 0f);
@@ -86,7 +98,7 @@ namespace SquashBot.Visual
                     if (grid.IsSafe(nb + d) || grid.IsFloor(nb + d)) continue; // a gap foi leaps across: leave it open
                     var at = GridView.ToWorld(p) + new Vector3(d.x, 0f, d.y) * 0.78f + Vector3.up * (y0 + 0.2f);
                     bool alongX = d.y != 0;
-                    Wall(root, k, stage, at, alongX, n, new Vector3(d.x, 0f, d.y), front: d.x < 0 || d.y < 0);
+                    Wall(root, k, stage, at, alongX, n, new Vector3(d.x, 0f, d.y), front: d.x < 0 || d.y < 0, scale: WallScaleAt != null ? WallScaleAt(p) : 1f);
                     if (n % 9 == 4) lightSpots.Add(at + new Vector3(-d.x, 0f, -d.y) * 0.3f + Vector3.up * 0.35f);
                     n++;
                 }
@@ -192,12 +204,21 @@ namespace SquashBot.Visual
 
         /// <summary>The style of the fortress built last (0 stone, 1 copper, 2 sci-fi).</summary>
         public static int LastStage { get; private set; }
+        private static GridModel lastGrid;
         /// <summary>How much bigger the corner towers stand on this floor (they grow world by world).</summary>
         public static float TowerGrow = 1f;
         /// <summary>The battle arenas put up their own towers (see ArenaDecor).</summary>
         public static bool SkipCornerTowers;
-        /// <summary>How thick the ramparts are (1 = the levels'; the arenas' are much thicker).</summary>
+        /// <summary>How thick the ramparts are (1 = the first levels'; thicker further in, much thicker in the arenas).</summary>
         public static float WallThick = 1f;
+        /// <summary>What crowns the ramparts: nothing, fire all along them, ice (see-through blocks), a glowing edge.</summary>
+        public enum WallFx { None, Flames, Ice, Glow }
+        public static WallFx Fx;
+        /// <summary>The ramparts' own colour (null: from the floor), and the colour of their glow.</summary>
+        public static Color? WallTint;
+        public static Color FxColour = new Color(1f, 0.55f, 0.2f);
+        /// <summary>Taller, thicker ramparts per floor tile (each fortress stage stands higher than the one before).</summary>
+        public static Func<GridPos, float> WallScaleAt;
         private static float TowerWide => 1f + (TowerGrow - 1f) * 0.4f;
         public static readonly (int sx, int sz)[] Corners = { (-1, -1), (1, -1), (-1, 1), (1, 1) };
 
@@ -205,6 +226,21 @@ namespace SquashBot.Visual
         public static Vector3 CornerTowerBase(int[] b, int s, int sx, int sz, out float height)
         {
             var c = new GridPos(sx < 0 ? b[s * 4] : b[s * 4 + 2], sz < 0 ? b[s * 4 + 1] : b[s * 4 + 3]);
+            if (lastGrid != null && !lastGrid.IsFloor(c))
+            {
+                // A shaped stage (hexagon, octagon): the tower stands off the floor's own corner nearest the box's.
+                float best = float.MaxValue;
+                var near = c;
+                for (int x = b[s * 4]; x <= b[s * 4 + 2]; x++)
+                    for (int y = b[s * 4 + 1]; y <= b[s * 4 + 3]; y++)
+                    {
+                        var q = new GridPos(x, y);
+                        if (!lastGrid.IsFloor(q) || lastGrid.IsLava(q)) continue;
+                        float d = (x - c.x) * (x - c.x) + (y - c.y) * (y - c.y);
+                        if (d < best) { best = d; near = q; }
+                    }
+                c = near;
+            }
             height = sz < 0 ? 0.55f : 0.85f;
             return GridView.ToWorld(c) + new Vector3(sx, 0f, sz) * (1.35f * TowerWide) + Vector3.up * (GridView.SurfaceY - 0.1f);
         }
@@ -223,9 +259,8 @@ namespace SquashBot.Visual
         {
             var o = new Vector3(outward.x, 0f, outward.y);
             var at = GridView.ToWorld(p) + o * 0.78f + Vector3.up * (GridView.SurfaceY + 0.2f);
-            if (LastStage == 0) return at + Vector3.up * 0.45f;
             bool front = outward.x < 0 || outward.y < 0;
-            float h = (LastStage == 2 ? 0.95f : 0.8f) * WallHeight * (front ? 0.55f : 1f);
+            float h = (LastStage == 2 ? 0.95f : 0.8f) * WallHeight * (WallScaleAt != null ? WallScaleAt(p) : 1f) * (front ? 0.55f : 1f);
             return new Vector3(at.x, at.y - 0.35f + h + 0.07f, at.z);
         }
 
@@ -247,21 +282,33 @@ namespace SquashBot.Visual
         private static float WallHeight = 1f;
 
         /// <param name="front">A wall on the camera's side of the floor: kept lower so it never hides foi.</param>
-        private static void Wall(Transform root, Kit k, int stage, Vector3 at, bool alongX, int i, Vector3 outward, bool front = false)
+        private static Material fxMat;
+        private static int flamesLeft;
+
+        private static void Wall(Transform root, Kit k, int stage, Vector3 at, bool alongX, int i, Vector3 outward, bool front = false, float scale = 1f)
         {
             Vector3 S(float along, float h, float across) => alongX ? new Vector3(along, h, across) : new Vector3(across, h, along);
-            if (stage >= 1)
+            if (true) // every style now builds real ramparts that grow (the old low stone walls are kept below for reference)
             {
                 // A thick rampart of dark plates with soft edges, a band of warm light along its inner face, round
                 // portholes and now and then a taller buttress — taller further into the campaign.
-                float h = (stage == 2 ? 0.95f : 0.8f) * WallHeight * (front ? 0.55f : 1f);
+                float h = (stage == 2 ? 0.95f : 0.8f) * WallHeight * scale * (front ? 0.55f : 1f);
                 float bottom = at.y - 0.35f;
-                float thick = 0.62f * WallThick;
+                float thick = 0.62f * WallThick * scale;
                 var o = outward * (thick - 0.62f) * 0.5f; // a thicker wall grows outward, its inner face stays put
                 var mid = new Vector3(at.x, bottom + h * 0.5f, at.z) + o;
                 Box("Rampart", root, mid, S(1.04f, h, thick), k.stoneDark, 0.12f);
-                bool grand = WallThick > 1.5f;
-                Box("Cap", root, new Vector3(at.x, bottom + h + 0.03f, at.z) + o, S(1.06f, 0.1f, thick + 0.06f), grand ? k.stoneLight : stage == 1 ? k.copper : k.stone, 0.04f);
+                bool grand = WallThick * scale > 1.45f;
+                Box("Cap", root, new Vector3(at.x, bottom + h + 0.03f, at.z) + o, S(1.06f, 0.1f, thick + 0.06f), grand || WallTint.HasValue ? k.stoneLight : stage == 1 ? k.copper : k.stone, 0.04f);
+                if (Fx == WallFx.Flames && i % 2 == 0 && flamesLeft-- > 0) // a capped number of fires (phones)
+                {
+                    // Fire all along the top of the ramparts.
+                    var fl = Flames.Create(root);
+                    fl.transform.position = new Vector3(at.x, bottom + h + 0.1f, at.z) + o;
+                    fl.transform.localScale = Vector3.one * (0.55f + thick * 0.15f);
+                }
+                else if (Fx == WallFx.Glow && fxMat != null)
+                    Box("TopGlow", root, new Vector3(at.x, bottom + h + 0.09f, at.z) + o - outward * (thick * 0.5f - 0.04f), S(1.04f, 0.05f, 0.07f), fxMat, 0.01f);
                 if (grand)
                 {
                     // Dressed stone: courses along the inner face, staggered joints, merlons on top.

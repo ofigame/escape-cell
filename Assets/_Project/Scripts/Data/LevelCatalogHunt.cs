@@ -190,12 +190,17 @@ namespace SquashBot.Data
             for (int s = n - 1; s >= 0; s--)
             {
                 int sz = sizes[s], len = lengths[s], x0 = mid - sz / 2, x1 = mid + sz / 2;
+                // Not every stage is a square: from level 11 some are octagons or hexagons.
+                int shape = index < 10 ? 0 : (index * 3 + s * 2) % 3;
                 tops[s] = rows.Count;
                 for (int r = 0; r < len; r++)
                 {
                     var row = new string('.', w).ToCharArray();
-                    for (int x = x0; x <= x1; x++) row[x] = '#';
-                    if (r == 0 || r == len - 1) { row[x0 - 1] = 'F'; row[x1 + 1] = 'F'; } // burning stairs off the corners
+                    float dc = Mathf.Abs(r - (len - 1) * 0.5f);
+                    int inset = shape == 1 ? Mathf.Max(0, Mathf.Min(sz, len) / 4 - Mathf.Min(r, len - 1 - r))
+                        : shape == 2 ? Mathf.Min(Mathf.RoundToInt(dc * 0.5f), sz / 2 - 2) : 0;
+                    for (int x = x0 + inset; x <= x1 - inset; x++) row[x] = '#';
+                    if (r == 0 || r == len - 1) { row[x0 + inset - 1] = 'F'; row[x1 - inset + 1] = 'F'; } // burning stairs off the corners
                     if (r == len / 2 && s == 0) row[mid] = 'S';                          // foi's cell
                     if (hard && s == n - 1 && n > 1 && (r == len / 2 + 1 || r == len / 2 + 2))
                         foreach (int x in new[] { mid - sz / 4 - 2, mid - sz / 4 - 1, mid + sz / 4 + 1, mid + sz / 4 + 2 }) row[x] = 'F'; // two fire pits, 2x2 each

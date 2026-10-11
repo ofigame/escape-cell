@@ -14,55 +14,58 @@ namespace SquashBot.Visual
     {
         private static Material white, orange, blue, dark, glowBlue, glowOrange;
 
-        private static void Materials()
+        private static void Materials(Color accent, Color trim)
         {
             white = MaterialFactory.CreateSurface(new Color(0.92f, 0.9f, 0.86f), Color.black, 0.55f, 0.1f);
-            orange = MaterialFactory.CreateSurface(new Color(1f, 0.5f, 0.12f), new Color(0.25f, 0.08f, 0f), 0.6f, 0.3f);
-            blue = MaterialFactory.CreateSurface(new Color(0.2f, 0.42f, 0.88f), new Color(0.05f, 0.12f, 0.3f), 0.7f, 0.3f);
+            orange = MaterialFactory.CreateSurface(accent, accent * 0.25f, 0.6f, 0.3f);
+            blue = MaterialFactory.CreateSurface(trim, trim * 0.15f, 0.7f, 0.3f);
             dark = MaterialFactory.CreateSurface(new Color(0.24f, 0.25f, 0.3f), Color.black, 0.5f, 0.55f);
-            glowBlue = MaterialFactory.Create(new Color(0.45f, 0.75f, 1f), new Color(0.8f, 1.8f, 3.2f));
-            glowOrange = MaterialFactory.Create(new Color(1f, 0.65f, 0.3f), new Color(3f, 1.4f, 0.4f));
+            glowBlue = MaterialFactory.Create(Color.Lerp(trim, Color.white, 0.3f), trim * 2.6f);
+            glowOrange = MaterialFactory.Create(Color.Lerp(accent, Color.white, 0.2f), accent * 3f);
         }
 
-        /// <param name="b">The square the courtyard is cut from (x0, y0, x1, y1), <paramref name="cut"/> its corner cut.</param>
-        public static void Build(Transform root, int[] b, int cut, int arena, GridPos start)
+        /// <summary>
+        /// Towers all round the courtyard, whatever its shape: eight rays from the middle find its edge, and a tower
+        /// stands just beyond — tall spires at the back, domed drums at the sides, cannon bastions and a low turret at
+        /// the front (never in the way) — then the landmarks behind the far wall and the pad round foi's cell.
+        /// </summary>
+        public static void Build(Transform root, GridModel grid, int[] b, int arena, GridPos start, Color accent, Color trim)
         {
-            Materials();
-            int x0 = b[0], y0 = b[1], x1 = b[2], y1 = b[3];
+            Materials(accent, trim);
             float grow = 1.9f + arena * 0.06f; // towering, above the high ramparts
-            // The eight corners of the octagon, each with a tower just outside it.
-            var corners = new (int x, int y, float ox, float oy)[]
+            var centre = new Vector2((b[0] + b[2]) * 0.5f, (b[1] + b[3]) * 0.5f);
+            for (int k = 0; k < 8; k++)
             {
-                (x0, y0 + cut, -1f, -0.4f), (x0 + cut, y0, -0.4f, -1f), (x1 - cut, y0, 0.4f, -1f), (x1, y0 + cut, 1f, -0.4f),
-                (x1, y1 - cut, 1f, 0.4f), (x1 - cut, y1, 0.4f, 1f), (x0 + cut, y1, -0.4f, 1f), (x0, y1 - cut, -1f, 0.4f),
-            };
-            for (int i = 0; i < corners.Length; i++)
-            {
-                var c = corners[i];
-                var at = GridView.ToWorld(new GridPos(c.x, c.y)) + new Vector3(c.ox, 0f, c.oy).normalized * 1.9f + Vector3.up * (GridView.SurfaceY - 0.1f);
-                if (i == 1 || i == 2) Turret(root, at, grow * 0.9f);           // the front: low, never in the way
-                else if (i == 5 || i == 6) Spire(root, at, grow * (1.15f + (i % 2) * 0.25f)); // the back: tall spires
-                else Drum(root, at, grow * (i == 0 || i == 3 ? 0.85f : 1.05f));  // the sides: domed drums
+                float ang = k * 45f * Mathf.Deg2Rad;
+                var dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
+                // Walk out to the courtyard's edge along the ray.
+                var last = start;
+                for (float t = 0f; t < 80f; t += 0.5f)
+                {
+                    var q = new GridPos(Mathf.RoundToInt(centre.x + dir.x * t), Mathf.RoundToInt(centre.y + dir.y * t));
+                    if (!grid.InBounds(q)) break;
+                    if (grid.IsFloor(q) && !grid.IsLava(q)) last = q;
+                    else if (t - Vector2.Distance(new Vector2(last.x, last.y), centre) > 3f) break; // well past the edge
+                }
+                var at = GridView.ToWorld(last) + new Vector3(dir.x, 0f, dir.y) * 2.2f + Vector3.up * (GridView.SurfaceY - 0.1f);
+                if (k == 5 || k == 7) Bastion(root, at, k == 5 ? -1f : 1f, grow);      // front corners: cannon bastions
+                else if (k == 6) Turret(root, at, grow * 0.85f);                        // front middle: a low turret
+                else if (k >= 1 && k <= 3) Spire(root, at, grow * (k == 2 ? 1.35f : 1.1f)); // the back: tall spires
+                else Drum(root, at, grow);                                              // the sides: domed drums
             }
             // Landmarks beyond the far wall: a giant spire to the right, a domed hall to the left.
-            float midX = (x0 + x1) * 0.5f;
-            var far = new Vector3(0f, GridView.SurfaceY - 0.1f, y1 + 3.6f);
-            Spire(root, new Vector3(midX + (x1 - x0) * 0.22f, far.y, far.z), grow * 1.9f);
-            Hall(root, new Vector3(midX - (x1 - x0) * 0.2f, far.y, far.z + 0.5f), grow * 1.3f);
-            // Cannon bastions on the two front corners.
-            foreach (float s in new[] { -1f, 1f })
-            {
-                float x = s < 0 ? x0 + cut * 0.35f - 1.6f : x1 - cut * 0.35f + 1.6f;
-                Bastion(root, new Vector3(x, GridView.SurfaceY - 0.1f, y0 + cut * 0.35f - 1.6f), s, grow);
-            }
-            // The hexagonal pad round foi's cell, with orange spokes.
-            var centre = GridView.ToWorld(start) + Vector3.up * (GridView.SurfaceY + 0.06f);
+            float midX = (b[0] + b[2]) * 0.5f, wide = b[2] - b[0];
+            float farZ = b[3] + 4.2f, y = GridView.SurfaceY - 0.1f;
+            Spire(root, new Vector3(midX + wide * 0.24f, y, farZ), grow * 1.9f);
+            Hall(root, new Vector3(midX - wide * 0.22f, y, farZ + 0.5f), grow * 1.3f);
+            // The hexagonal pad round foi's cell, with spokes of light.
+            var c = GridView.ToWorld(start) + Vector3.up * (GridView.SurfaceY + 0.06f);
             for (int i = 0; i < 6; i++)
             {
                 float a = i * Mathf.PI / 3f + Mathf.PI / 6f;
-                var mid = centre + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * 2.2f;
+                var mid = c + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * 2.2f;
                 Box("HexEdge", root, mid, new Vector3(2.5f, 0.04f, 0.14f), orange, 0.02f).localRotation = Quaternion.Euler(0f, -a * Mathf.Rad2Deg + 90f, 0f);
-                Box("Spoke", root, centre + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * 1.2f, new Vector3(1.4f, 0.03f, 0.06f), glowOrange, 0.01f)
+                Box("Spoke", root, c + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * 1.2f, new Vector3(1.4f, 0.03f, 0.06f), glowOrange, 0.01f)
                     .localRotation = Quaternion.Euler(0f, -a * Mathf.Rad2Deg, 0f);
             }
         }
