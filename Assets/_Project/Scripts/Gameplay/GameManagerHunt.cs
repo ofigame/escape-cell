@@ -532,7 +532,7 @@ namespace SquashBot.Gameplay
 
         private static readonly Vector3 CloseCamOffset = new Vector3(-2.7f, 3.9f, -2.7f);
         /// <summary>The fight view: the same heading, much lower (about 30 degrees down instead of 46).</summary>
-        private static readonly Vector3 FightCamOffset = new Vector3(-2.7f, 2.2f, -2.7f);
+        private static readonly Vector3 FightCamOffset = new Vector3(-2.7f, 3.1f, -2.7f); // steeper than before (user asked)
         /// <summary>How much closer the fight view sits, and its slightly wider lens.</summary>
         private const float FightCamCloser = 0.9f, FightCamFov = 56f;
         /// <summary>How many tiles the fight view leads towards the way foi strikes.</summary>

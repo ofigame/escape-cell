@@ -74,7 +74,8 @@ namespace SquashBot.Gameplay
             if (level == null || level.mission != MissionType.Hunt) return;
             int stage = level.fortress ? 0 : FortressFloor.StageFor(World);
             // The ramparts rise further into the campaign (the first worlds keep theirs).
-            float wallHeight = stage == 0 ? 1f : Mathf.Lerp(1f, 1.7f, Mathf.InverseLerp(5f, 24f, World));
+            float wallHeight = stage == 0 ? 1f : Mathf.Lerp(1.2f, 2.5f, Mathf.InverseLerp(5f, 24f, World));
+            FortressFloor.TowerGrow = Mathf.Lerp(1f, 1.9f, Mathf.InverseLerp(0f, 24f, World)); // the corner towers grow world by world
             fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, FortressRects(), wallHeight);
             // Craft crossing the sky over the later fortresses.
             if (stage >= 1)
