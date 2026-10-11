@@ -111,7 +111,8 @@ namespace SquashBot.UI
         public void Hide()
         {
             screen.Hide();
-            if (world != null) world.Close();
+            // The 3D map is thousands of pieces: gone while the game is played (built again, in a moment, next time).
+            if (world != null) { world.Close(); Destroy(world.gameObject); world = null; unlocked = -1; }
         }
 
         /// <summary>

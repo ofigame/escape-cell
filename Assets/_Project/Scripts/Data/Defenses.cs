@@ -91,7 +91,9 @@ namespace SquashBot.Data
         {
             public DefenseKind kind;
             public int x, y, dx, dy;
-            public Placement(DefenseKind kind, int x, int y, int dx = 0, int dy = 0) { this.kind = kind; this.x = x; this.y = y; this.dx = dx; this.dy = dy; }
+            /// <summary>Already spent: the level was started with it standing (it stays for the retries, free).</summary>
+            public bool paid;
+            public Placement(DefenseKind kind, int x, int y, int dx = 0, int dy = 0) { this.kind = kind; this.x = x; this.y = y; this.dx = dx; this.dy = dy; paid = false; }
             public bool SameSpot(Placement o) => kind == o.kind && x == o.x && y == o.y && dx == o.dx && dy == o.dy;
         }
 
@@ -103,7 +105,7 @@ namespace SquashBot.Data
                 var f = part.Split(':');
                 if (f.Length < 3 || !int.TryParse(f[0], out int k) || !int.TryParse(f[1], out int x) || !int.TryParse(f[2], out int y)) continue;
                 int dx = f.Length > 3 && int.TryParse(f[3], out int a) ? a : 0, dy = f.Length > 4 && int.TryParse(f[4], out int b) ? b : 0;
-                list.Add(new Placement((DefenseKind)Mathf.Clamp(k, 0, 2), x, y, dx, dy));
+                list.Add(new Placement((DefenseKind)Mathf.Clamp(k, 0, 2), x, y, dx, dy) { paid = f.Length > 5 && f[5] == "1" });
             }
             return list;
         }
@@ -111,7 +113,7 @@ namespace SquashBot.Data
         public static void Save(int levelIndex, List<Placement> list)
         {
             var parts = new List<string>();
-            foreach (var p in list) parts.Add($"{(int)p.kind}:{p.x}:{p.y}:{p.dx}:{p.dy}");
+            foreach (var p in list) parts.Add($"{(int)p.kind}:{p.x}:{p.y}:{p.dx}:{p.dy}:{(p.paid ? 1 : 0)}");
             PlayerPrefs.SetString(PlaceKey + levelIndex, string.Join(";", parts));
             var levels = Levels();
             if (list.Count > 0) levels.Add(levelIndex); else levels.Remove(levelIndex);
@@ -119,12 +121,38 @@ namespace SquashBot.Data
             PlayerPrefs.Save();
         }
 
-        /// <summary>The level was won: what stood in it is used up.</summary>
+        /// <summary>
+        /// The level starts with these standing: each one not yet spent is spent now (placing and leaving without
+        /// playing costs nothing; tries after this one are free until the level is won).
+        /// </summary>
+        public static void PayPlaced(int levelIndex)
+        {
+            var list = Placed(levelIndex);
+            bool changed = false;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].paid) continue;
+                var p = list[i];
+                AddStock(p.kind, -1);
+                p.paid = true;
+                list[i] = p;
+                changed = true;
+            }
+            if (changed) Save(levelIndex, list);
+        }
+
+        /// <summary>Taken back in set-up: one already spent comes back to the stock.</summary>
+        public static void Refund(Placement p)
+        {
+            if (p.paid) AddStock(p.kind, 1);
+        }
+
+        /// <summary>The level was won: what stood in it is used up (anything not yet spent is spent too).</summary>
         public static void ConsumeOnWin(int levelIndex)
         {
             var list = Placed(levelIndex);
             if (list.Count == 0) return;
-            foreach (var p in list) AddStock(p.kind, -1);
+            foreach (var p in list) if (!p.paid) AddStock(p.kind, -1);
             Save(levelIndex, new List<Placement>());
         }
 
@@ -133,7 +161,7 @@ namespace SquashBot.Data
         {
             int n = 0;
             foreach (int level in Levels())
-                foreach (var p in Placed(level)) if (p.kind == k) n++;
+                foreach (var p in Placed(level)) if (p.kind == k && !p.paid) n++; // spent ones are out of the stock already
             return n;
         }
 

@@ -403,7 +403,7 @@ namespace SquashBot.Gameplay
         private void ShowBackdrop(int levelIdx)
         {
             ApplyTheme(levelIdx);
-            var preview = levelSet.levels[levelIdx];
+            var preview = BackdropOf(levelSet.levels[levelIdx]);
             grid = BuildGrid(preview);
             gridView.Build(grid, fx, preview.lowWalls);
             robot.ApplyOutfit(Cosmetics.Outfit());
@@ -411,6 +411,27 @@ namespace SquashBot.Gameplay
             cameraRig.SetStyle(CameraStyle.MenuOrbit);
             cameraRig.SetMenuFocus(true);
             robot.Spawn(grid, grid.CenterFloor());
+        }
+
+        /// <summary>
+        /// The floor behind the menu: for a fortress of stages only its first stage — building a whole 6-stage floor
+        /// every time the menu or the map comes up cost seconds and memory (and crashed phones), for a blurred backdrop.
+        /// </summary>
+        private static LevelData BackdropOf(LevelData level)
+        {
+            var b = level.stageBounds;
+            if (level.fortressStages <= 1 || b == null || b.Length < 8 || level.layout == null) return level;
+            int h = level.layout.Length;
+            int top = h - 1 - b[3], bottom = Mathf.Min(h - 1, h - 1 - b[1] + 1); // stage 1's rows and the stairs below
+            var rows = new string[bottom - top + 1];
+            for (int r = top; r <= bottom; r++) rows[r - top] = level.layout[r];
+            var p = level.Clone();
+            p.layout = rows;
+            p.gridWidth = rows[0].Length;
+            p.gridHeight = rows.Length;
+            p.stageBounds = null;
+            p.fortressStages = 1;
+            return p;
         }
 
         /// <summary>The phone is running out of memory: drop the heavy extras (shadows) and free what is unused.</summary>
@@ -438,7 +459,7 @@ namespace SquashBot.Gameplay
             if (!Input.GetKeyDown(KeyCode.Escape) || fortress != null || ui == null) return;
 #endif
             if (ui.Guide.Visible) return; // the guide closes itself
-            if (defenseEditing) { defenseEditing = false; ClearMarkers(); ui.DefenseEditor.Hide(); ui.SetHudHidden(false); ShowMap(); return; }
+            if (defenseEditing) { LeaveDefenseEditor(); return; }
             switch (State)
             {
                 case GameState.Playing: Pause(); return;
@@ -735,7 +756,8 @@ namespace SquashBot.Gameplay
             int w = shaped ? data.layout[0].Length : data.gridWidth;
             int h = shaped ? data.layout.Length : data.gridHeight;
             var grid = new GridModel(w, h, data.layout);
-            FloorRelief.Apply(grid, data.terrain, LevelCatalog.WorldOf(Mathf.Max(0, data.number - 1)),
+            // No raised areas inside a stage any more (user decision); the stages still rise one above the other.
+            FloorRelief.Apply(grid, TerrainKind.Flat, LevelCatalog.WorldOf(Mathf.Max(0, data.number - 1)),
                 data.fortressStages > 1 ? data.stageBounds : null, LevelCatalog.StageRise, LevelCatalog.BridgeRows);
             return grid;
         }

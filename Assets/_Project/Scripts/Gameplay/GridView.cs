@@ -16,6 +16,7 @@ namespace SquashBot.Gameplay
         {
             public GameObject tile;
             public GameObject hole;
+            public Transform root;
             public Material top;
             public Material frame;
             public float warning;
@@ -33,7 +34,12 @@ namespace SquashBot.Gameplay
             // The colours last sent to the materials: a tile is only re-coloured when something changed.
             public Color shownTop, shownTopGlow, shownFrame, shownFrameGlow;
             public bool shown;
+            /// <summary>Still on the floor's one shared marble material (copied the first time this tile changes colour).</summary>
+            public bool sharedMat;
+            public Renderer topRenderer;
         }
+
+        private Material marbleTop;
 
         private TileView[,] tiles;
 
@@ -84,6 +90,7 @@ namespace SquashBot.Gameplay
             tiles = new TileView[grid.Width, grid.Height];
             var stone = new System.Random(grid.Width * 131 + grid.Height);
             veinMat = null; // this floor's own vein colour
+            marbleTop = null;
             // Dark fortress floors are decks of metal plates rather than stone: shared materials for their details.
             bool metal = FortressTiles && FortressMetal;
             var accent = WorldTheme.Current.accent;
@@ -112,17 +119,18 @@ namespace SquashBot.Gameplay
                 {
                     // Polished grey marble laid edge to edge: hairline seams, gentle shade changes, veins here and there,
                     // so the courtyard reads as one floor rather than squares.
-                    float shade = 0.97f + (float)stone.NextDouble() * 0.06f;
-                    var marble = FortressStone * shade;
+                    // One slab per tile, no separate seam piece, and one material shared by the whole floor until a tile
+                    // changes colour (a warning, paint): a big floor costs a few materials instead of thousands.
+                    var marble = FortressStone;
                     marble.a = 1f;
                     slabTop = marble;
-                    frame = MaterialFactory.CreateSurface(FortressStone * 0.9f, Color.black, 0.7f, 0f);
-                    top = MaterialFactory.CreateSurface(marble, Palette.TileSelfLight * 0.15f, 0.78f, 0.05f);
-                    Shapes.Rounded("Frame", tile.transform, new Vector3(0f, -0.04f, 0f), new Vector3(1.0f, 0.1f, 1.0f), 0.005f, frame);
-                    Shapes.Rounded("Top", tile.transform, new Vector3(0f, 0f, 0f), new Vector3(0.985f, 0.1f, 0.985f), 0.008f, top);
+                    if (marbleTop == null) marbleTop = MaterialFactory.CreateSurface(marble, Palette.TileSelfLight * 0.15f, 0.78f, 0.05f);
+                    frame = null;
+                    top = marbleTop;
+                    sharedTopRenderer = Shapes.Rounded("Top", tile.transform, new Vector3(0f, -0.005f, 0f), new Vector3(0.995f, 0.11f, 0.995f), 0.006f, top).GetComponent<Renderer>();
                     if (veinMat == null) veinMat = MaterialFactory.CreateSurface(FortressStone * 0.62f, Color.black, 0.8f, 0f);
-                    if (stone.Next(3) == 0)
-                        for (int v = 0; v < 1 + stone.Next(2); v++)
+                    if (stone.Next(grid.FloorCount > 2500 ? 9 : 4) == 0) // fewer veins on the big floors (memory)
+                        for (int v = 0; v < 1; v++)
                             Shapes.Rounded("Vein", tile.transform, new Vector3((float)stone.NextDouble() * 0.5f - 0.25f, 0.051f, (float)stone.NextDouble() * 0.5f - 0.25f),
                                 new Vector3(0.5f + (float)stone.NextDouble() * 0.45f, 0.002f, 0.012f + (float)stone.NextDouble() * 0.012f), 0.004f, veinMat)
                                 .transform.localRotation = Quaternion.Euler(0f, stone.Next(180), 0f);
@@ -193,13 +201,14 @@ namespace SquashBot.Gameplay
                     Shapes.Rounded("Band", tile.transform, new Vector3(0f, 0.3f, 0f), new Vector3(0.82f, 0.06f, 0.82f), 0.025f, obstacleCap);
                 }
 
-                var hole = Shapes.Rounded("Hole", root.transform, new Vector3(0f, -0.27f, 0f), new Vector3(0.9f, 0.5f, 0.9f), 0.02f, holeMaterial);
-                foreach (var (o, s) in new[] { (new Vector3(0f, 0.27f, 0.44f), new Vector3(0.94f, 0.05f, 0.06f)), (new Vector3(0f, 0.27f, -0.44f), new Vector3(0.94f, 0.05f, 0.06f)),
-                    (new Vector3(0.44f, 0.27f, 0f), new Vector3(0.06f, 0.05f, 0.94f)), (new Vector3(-0.44f, 0.27f, 0f), new Vector3(0.06f, 0.05f, 0.94f)) })
-                    Shapes.Rounded("Rim", hole.transform, o, s, 0.01f, holeRim);
-                hole.SetActive(false);
-
-                tiles[p.x, p.y] = new TileView { tile = tile, hole = hole, top = top, frame = frame, stone = FortressTiles,
+                // The hole under a broken tile is made only when a tile actually breaks (see Break): thousands of hidden
+                // holes waiting on a big floor cost memory for nothing.
+                holeMat = holeMaterial;
+                holeRimMat = holeRim;
+                bool shared = FortressTiles && Marble;
+                tiles[p.x, p.y] = new TileView { tile = tile, hole = null, root = root.transform, top = top, frame = frame, stone = FortressTiles,
+                    sharedMat = shared, topRenderer = shared ? sharedTopRenderer : null, shown = shared,
+                    shownTop = slabTop, shownTopGlow = Palette.TileSelfLight * 0.15f,
                     stoneTop = slabTop, stoneFrame = FortressStone * (Marble ? 0.9f : 0.42f), stoneGlow = Palette.TileSelfLight * (Marble ? 0.15f : 0.25f) };
             }
         }
@@ -215,27 +224,56 @@ namespace SquashBot.Gameplay
 
             bool fortress = FortressTiles;
             if (fortress) glow = slab = MaterialFactory.Create(Color.Lerp(Palette.Slab, FortressStone * 0.5f, 0.6f), Color.black); // plain stone in the floor's shade, no glowing band
+            int pieces = 0;
             foreach (var p in grid.AllPositions())
             {
                 if (!grid.Exists(p) || grid.IsLava(p)) continue;
                 var at = ToWorld(p);
-                // Slightly oversized pieces overlap their neighbours, so only the outer outline shows.
+                int steps = FloorRelief.HeightAt(p);
+                // Only the platform's rim is ever seen from the side: a tile with every neighbour standing at least as
+                // high needs no slab or riser under it (on a 6-stage floor that is tens of thousands of pieces saved).
+                int lowest = steps;
+                bool edge = false;
+                foreach (var d in DirectionExtensions.All)
+                {
+                    var n = p + d.ToOffset();
+                    if (!grid.Exists(n) || grid.IsLava(n)) { edge = true; lowest = -1; break; }
+                    int hn = FloorRelief.HeightAt(n);
+                    if (hn < steps) { edge = true; lowest = Mathf.Min(lowest, hn); }
+                }
+                if (!edge && fortress && Marble) continue; // under a seamless marble floor the inner slabs are never seen
                 Shapes.Rounded("SlabTop", root, at + new Vector3(0f, -0.19f, 0f), new Vector3(1.16f, 0.3f, 1.16f), 0.06f, slab);
+                pieces++;
+                if (!edge) continue;
+                // Slightly oversized pieces overlap their neighbours, so only the outer outline shows.
                 Shapes.Rounded("EdgeGlow", root, at + new Vector3(0f, -0.36f, 0f), new Vector3(1.2f, 0.05f, 1.2f), 0.025f, glow);
                 Shapes.Rounded("SlabBottom", root, at + new Vector3(0f, -0.5f, 0f), new Vector3(1.17f, 0.24f, 1.17f), 0.06f, slab);
-                // A raised tile stands on a block of the slab down to the base, with a glowing band at every step.
-                int steps = FloorRelief.HeightAt(p);
+                pieces += 2;
+                // A raised tile on the rim stands on a block of the slab down to the base, a glowing band at each of its
+                // visible steps (at most four).
                 if (steps > 0)
                 {
                     float top = at.y - 0.5f, bottom = -0.6f;
                     Shapes.Rounded("Riser", root, new Vector3(at.x, (top + bottom) * 0.5f, at.z), new Vector3(1.1f, top - bottom, 1.1f), 0.05f, slab);
-                    for (int s = 0; s < steps; s++)
+                    pieces++;
+                    for (int s = Mathf.Max(0, Mathf.Max(lowest, steps - 4)); s < steps; s++, pieces++)
                         Shapes.Rounded("StepGlow", root, new Vector3(at.x, s * FloorRelief.Step - 0.36f, at.z), new Vector3(1.13f, 0.04f, 1.13f), 0.02f, glow);
                 }
             }
             // The platform never moves: merge it into a few big meshes, so a 20x20 floor costs a handful of draw calls.
-            StaticBatchingUtility.Combine(root.gameObject);
+            if (pieces < 9000) StaticBatchingUtility.Combine(root.gameObject);
         }
+        private Renderer sharedTopRenderer;
+
+        /// <summary>A tile about to change colour gets its own copy of the shared marble.</summary>
+        private static void OwnMaterial(TileView t)
+        {
+            if (!t.sharedMat || t.topRenderer == null) return;
+            t.top = new Material(t.top);
+            t.topRenderer.sharedMaterial = t.top;
+            t.sharedMat = false;
+        }
+
         public void Clear()
         {
             for (int i = transform.childCount - 1; i >= 0; i--)
@@ -257,7 +295,20 @@ namespace SquashBot.Gameplay
             if (t == null) return;
             fx.Burst(t.tile.transform.position, Palette.TileTop, Palette.TileGlow, 14, 3f);
             t.tile.SetActive(false);
+            if (t.hole == null) t.hole = MakeHole(t.root);
             t.hole.SetActive(true);
+        }
+
+        private Material holeMat, holeRimMat;
+
+        /// <summary>A black pit with a glowing rim, under a broken tile.</summary>
+        private GameObject MakeHole(Transform root)
+        {
+            var hole = Shapes.Rounded("Hole", root, new Vector3(0f, -0.27f, 0f), new Vector3(0.9f, 0.5f, 0.9f), 0.02f, holeMat);
+            foreach (var (o, s) in new[] { (new Vector3(0f, 0.27f, 0.44f), new Vector3(0.94f, 0.05f, 0.06f)), (new Vector3(0f, 0.27f, -0.44f), new Vector3(0.94f, 0.05f, 0.06f)),
+                (new Vector3(0.44f, 0.27f, 0f), new Vector3(0.06f, 0.05f, 0.94f)), (new Vector3(-0.44f, 0.27f, 0f), new Vector3(0.06f, 0.05f, 0.94f)) })
+                Shapes.Rounded("Rim", hole.transform, o, s, 0.01f, holeRimMat);
+            return hole;
         }
 
         public void Repair(GridPos p)
@@ -265,7 +316,7 @@ namespace SquashBot.Gameplay
             var t = tiles[p.x, p.y];
             if (t == null) return;
             t.tile.SetActive(true);
-            t.hole.SetActive(false);
+            if (t.hole != null) t.hole.SetActive(false);
             t.pop = 0f;
         }
 
@@ -335,8 +386,9 @@ namespace SquashBot.Gameplay
                 {
                     // Glowing embers that breathe with the flames.
                     float heat = 0.75f + 0.25f * Mathf.Sin(Time.time * 9f);
+                    OwnMaterial(t);
                     MaterialFactory.SetColors(t.top, new Color(1f, 0.45f, 0.18f), new Color(1.8f, 0.55f, 0.08f) * heat);
-                    MaterialFactory.SetColors(t.frame, new Color(1f, 0.6f, 0.2f), new Color(2.4f, 0.9f, 0.15f) * heat);
+                    if (t.frame != null) MaterialFactory.SetColors(t.frame, new Color(1f, 0.6f, 0.2f), new Color(2.4f, 0.9f, 0.15f) * heat);
                     t.warning = 0f;
                     t.shown = false;
                     continue;
@@ -361,11 +413,13 @@ namespace SquashBot.Gameplay
                 var frameGlow = t.painted ? paintColor * 1.6f : t.stone ? Color.black : Palette.TileGlow * (dim * dim);
                 var newFrame = Color.Lerp(frameColor, Palette.TileWarningTop, t.warning);
                 var newFrameGlow = Color.Lerp(frameGlow, Palette.TileWarningGlow * 1.3f, t.warning);
+                if (t.frame == null) { newFrame = t.shownFrame; newFrameGlow = t.shownFrameGlow; } // no seam piece on marble
                 // Big floors have hundreds of tiles: only touch the materials of the ones whose colour changed.
                 if (!t.shown || newTop != t.shownTop || newTopGlow != t.shownTopGlow || newFrame != t.shownFrame || newFrameGlow != t.shownFrameGlow)
                 {
+                    OwnMaterial(t);
                     MaterialFactory.SetColors(t.top, newTop, newTopGlow);
-                    MaterialFactory.SetColors(t.frame, newFrame, newFrameGlow);
+                    if (t.frame != null) MaterialFactory.SetColors(t.frame, newFrame, newFrameGlow);
                     t.shownTop = newTop; t.shownTopGlow = newTopGlow; t.shownFrame = newFrame; t.shownFrameGlow = newFrameGlow;
                     t.shown = true;
                 }

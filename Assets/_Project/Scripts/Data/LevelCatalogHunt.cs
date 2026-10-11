@@ -283,7 +283,7 @@ namespace SquashBot.Data
             else level.fortressStages = 1;
             // The tall pyramids and terraces are switched off (they looked odd in places); gentle mounds instead: a few
             // low plateaus a short step up, on every third floor from level 9.
-            level.terrain = index >= 8 && inWorld % 3 == 1 ? TerrainKind.Mounds : TerrainKind.Flat;
+            level.terrain = TerrainKind.Flat; // no raised areas inside a stage (user decision)
             // vanG's cage in the middle of the north edge, the bridge from it to the tunnel beyond.
             level.layout = WithCageAndBridge(level.layout);
             level.gridWidth = level.layout[0].Length;

@@ -209,6 +209,8 @@ namespace SquashBot.Visual
         public static float TowerGrow = 1f;
         /// <summary>The battle arenas put up their own towers (see ArenaDecor).</summary>
         public static bool SkipCornerTowers;
+        /// <summary>Full stonework detail on the ramparts (the arenas only: one courtyard, not six stages of walls).</summary>
+        public static bool Detailed;
         /// <summary>How thick the ramparts are (1 = the first levels'; thicker further in, much thicker in the arenas).</summary>
         public static float WallThick = 1f;
         /// <summary>What crowns the ramparts: nothing, fire all along them, ice (see-through blocks), a glowing edge.</summary>
@@ -309,9 +311,10 @@ namespace SquashBot.Visual
                 }
                 else if (Fx == WallFx.Glow && fxMat != null)
                     Box("TopGlow", root, new Vector3(at.x, bottom + h + 0.09f, at.z) + o - outward * (thick * 0.5f - 0.04f), S(1.04f, 0.05f, 0.07f), fxMat, 0.01f);
-                if (grand)
+                if (grand && Detailed)
                 {
-                    // Dressed stone: courses along the inner face, staggered joints, merlons on top.
+                    // Dressed stone: courses along the inner face, staggered joints, merlons on top (the arenas; the
+                    // levels' long walls keep just the merlons, below, to stay light on phones).
                     var face = new Vector3(at.x, 0f, at.z) - outward * 0.315f;
                     for (float y = 0.7f; y < h - 0.1f; y += 0.7f)
                         Box("Course", root, new Vector3(face.x, bottom + y, face.z), S(1.04f, 0.035f, 0.02f), k.dark, 0.005f);
@@ -319,8 +322,8 @@ namespace SquashBot.Visual
                     for (float y = 0.35f; y < h - 0.1f && i % 2 == 0; y += 0.7f, row++)
                         Box("Joint", root, new Vector3(face.x, bottom + y, face.z) + (alongX ? Vector3.right : Vector3.forward) * ((row + i) % 2 == 0 ? -0.25f : 0.25f),
                             S(0.035f, 0.66f, 0.02f), k.dark, 0.005f);
-                    if (i % 2 == 0) Box("Merlon", root, new Vector3(at.x, bottom + h + 0.3f, at.z) + o, S(0.5f, 0.45f, thick * 0.8f), k.stone, 0.06f);
                 }
+                if (grand && i % 2 == 0) Box("Merlon", root, new Vector3(at.x, bottom + h + 0.3f, at.z) + o, S(0.5f, 0.45f, thick * 0.8f), k.stone, 0.06f);
                 Box("Band", root, new Vector3(at.x, bottom + h * 0.62f, at.z) - outward * 0.315f, S(0.84f, 0.05f, 0.02f), k.light, 0.01f);
                 Box("Plinth", root, new Vector3(at.x, bottom + 0.42f, at.z) - outward * 0.3f, S(1.0f, 0.12f, 0.06f), k.stone, 0.03f);
                 if (i % 3 == 1 && !front)

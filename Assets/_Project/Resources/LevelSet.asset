@@ -1157,7 +1157,7 @@ MonoBehaviour:
     robotStep: 0.95519453
     monsterHp: 10
     monsterAttack: 2.0672958
-    terrain: 3
+    terrain: 0
     armor: 0
     crateShare: 0.3
     warningTime: 1.5465759
@@ -1451,7 +1451,7 @@ MonoBehaviour:
     robotStep: 0.94170356
     monsterHp: 11
     monsterAttack: 2.0341816
-    terrain: 3
+    terrain: 0
     armor: 0
     crateShare: 0.3
     warningTime: 1.5318584
@@ -1746,7 +1746,7 @@ MonoBehaviour:
     robotStep: 0.92955995
     monsterHp: 12
     monsterAttack: 2.0043745
-    terrain: 3
+    terrain: 0
     armor: 0
     crateShare: 0.3
     warningTime: 1.5186108
@@ -2190,7 +2190,7 @@ MonoBehaviour:
     robotStep: 0.91481674
     monsterHp: 12
     monsterAttack: 1.9681865
-    terrain: 3
+    terrain: 0
     armor: 0
     crateShare: 0.3
     warningTime: 1.5025274
@@ -2559,7 +2559,7 @@ MonoBehaviour:
     robotStep: 0.9045688
     monsterHp: 13
     monsterAttack: 1.9430325
-    terrain: 3
+    terrain: 0
     armor: 0
     crateShare: 0.3034609
     warningTime: 1.4913478
@@ -2928,7 +2928,7 @@ MonoBehaviour:
     robotStep: 0.8948645
     monsterHp: 17
     monsterAttack: 1.9192129
-    terrain: 3
+    terrain: 0
     armor: 2
     crateShare: 0.30769548
     warningTime: 1.4807613
@@ -3420,7 +3420,7 @@ MonoBehaviour:
     robotStep: 0.8826156
     monsterHp: 18
     monsterAttack: 1.8891474
-    terrain: 3
+    terrain: 0
     armor: 2
     crateShare: 0.31304047
     warningTime: 1.4673989
@@ -3789,7 +3789,7 @@ MonoBehaviour:
     robotStep: 0.87386197
     monsterHp: 18
     monsterAttack: 1.8676611
-    terrain: 3
+    terrain: 0
     armor: 2
     crateShare: 0.31686023
     warningTime: 1.4578494
@@ -4158,7 +4158,7 @@ MonoBehaviour:
     robotStep: 0.86542493
     monsterHp: 19
     monsterAttack: 1.8469521
-    terrain: 3
+    terrain: 0
     armor: 2
     crateShare: 0.32054186
     warningTime: 1.4486454
@@ -4650,7 +4650,7 @@ MonoBehaviour:
     robotStep: 0.85460347
     monsterHp: 19
     monsterAttack: 1.8203905
-    terrain: 3
+    terrain: 0
     armor: 2
     crateShare: 0.32526392
     warningTime: 1.4368402
@@ -5019,7 +5019,7 @@ MonoBehaviour:
     robotStep: 0.8467697
     monsterHp: 20
     monsterAttack: 1.801162
-    terrain: 3
+    terrain: 0
     armor: 2
     crateShare: 0.3286823
     warningTime: 1.4282942
@@ -5388,7 +5388,7 @@ MonoBehaviour:
     robotStep: 0.83915097
     monsterHp: 20
     monsterAttack: 1.7824615
-    terrain: 3
+    terrain: 0
     armor: 2
     crateShare: 0.33200684
     warningTime: 1.4199829
@@ -5880,7 +5880,7 @@ MonoBehaviour:
     robotStep: 0.8292931
     monsterHp: 20
     monsterAttack: 1.7582648
-    terrain: 3
+    terrain: 0
     armor: 2
     crateShare: 0.33630848
     warningTime: 1.4092288
@@ -6249,7 +6249,7 @@ MonoBehaviour:
     robotStep: 0.8221034
     monsterHp: 21
     monsterAttack: 1.7406174
-    terrain: 3
+    terrain: 0
     armor: 2
     crateShare: 0.3394458
     warningTime: 1.4013854
@@ -6618,7 +6618,7 @@ MonoBehaviour:
     robotStep: 0.8150727
     monsterHp: 21
     monsterAttack: 1.7233604
-    terrain: 3
+    terrain: 0
     armor: 2
     crateShare: 0.3425137
     warningTime: 1.3937157
@@ -7164,7 +7164,7 @@ MonoBehaviour:
     robotStep: 0.8059253
     monsterHp: 22
     monsterAttack: 1.7009076
-    terrain: 3
+    terrain: 0
     armor: 2
     crateShare: 0.3465053
     warningTime: 1.3837367
@@ -7614,7 +7614,7 @@ MonoBehaviour:
     robotStep: 0.79922134
     monsterHp: 22
     monsterAttack: 1.6844524
-    terrain: 3
+    terrain: 0
     armor: 2
     crateShare: 0.34943068
     warningTime: 1.3764232
@@ -8064,7 +8064,7 @@ MonoBehaviour:
     robotStep: 0.7926416
     monsterHp: 22
     monsterAttack: 1.668302
-    terrain: 3
+    terrain: 0
     armor: 2
     crateShare: 0.35230187
     warningTime: 1.3692453
@@ -8664,7 +8664,7 @@ MonoBehaviour:
     robotStep: 0.7840481
     monsterHp: 27
     monsterAttack: 1.6472089
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.35605174
     warningTime: 1.3598706
@@ -9114,7 +9114,7 @@ MonoBehaviour:
     robotStep: 0.7777285
     monsterHp: 27
     monsterAttack: 1.6316973
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.35880938
     warningTime: 1.3529766
@@ -9564,7 +9564,7 @@ MonoBehaviour:
     robotStep: 0.77150965
     monsterHp: 27
     monsterAttack: 1.6164328
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.36152306
     warningTime: 1.3461922
@@ -10176,7 +10176,7 @@ MonoBehaviour:
     robotStep: 0.76336485
     monsterHp: 28
     monsterAttack: 1.5964409
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.36507717
     warningTime: 1.3373071
@@ -10635,7 +10635,7 @@ MonoBehaviour:
     robotStep: 0.75736004
     monsterHp: 28
     monsterAttack: 1.581702
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.36769742
     warningTime: 1.3307564
@@ -11094,7 +11094,7 @@ MonoBehaviour:
     robotStep: 0.7514392
     monsterHp: 28
     monsterAttack: 1.567169
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.37028107
     warningTime: 1.3242973
@@ -11706,7 +11706,7 @@ MonoBehaviour:
     robotStep: 0.74366826
     monsterHp: 28
     monsterAttack: 1.5480949
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.373672
     warningTime: 1.31582
@@ -12165,7 +12165,7 @@ MonoBehaviour:
     robotStep: 0.73792785
     monsterHp: 29
     monsterAttack: 1.5340048
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.37617692
     warningTime: 1.3095577
@@ -12624,7 +12624,7 @@ MonoBehaviour:
     robotStep: 0.732259
     monsterHp: 29
     monsterAttack: 1.5200902
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.37865064
     warningTime: 1.3033735
@@ -13236,7 +13236,7 @@ MonoBehaviour:
     robotStep: 0.7248062
     monsterHp: 29
     monsterAttack: 1.5017971
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.38190272
     warningTime: 1.2952431
@@ -13695,7 +13695,7 @@ MonoBehaviour:
     robotStep: 0.7192923
     monsterHp: 30
     monsterAttack: 1.4882629
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.38430882
     warningTime: 1.289228
@@ -14154,7 +14154,7 @@ MonoBehaviour:
     robotStep: 0.7138403
     monsterHp: 30
     monsterAttack: 1.4748807
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.38668787
     warningTime: 1.2832803
@@ -14828,7 +14828,7 @@ MonoBehaviour:
     robotStep: 0.706663
     monsterHp: 30
     monsterAttack: 1.4572638
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.38981977
     warningTime: 1.2754506
@@ -15380,7 +15380,7 @@ MonoBehaviour:
     robotStep: 0.7013462
     monsterHp: 30
     monsterAttack: 1.4442134
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.39213982
     warningTime: 1.2696503
@@ -15932,7 +15932,7 @@ MonoBehaviour:
     robotStep: 0.69608366
     monsterHp: 31
     monsterAttack: 1.4312963
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.3944362
     warningTime: 1.2639095
@@ -16668,7 +16668,7 @@ MonoBehaviour:
     robotStep: 0.6891481
     monsterHp: 31
     monsterAttack: 1.4142728
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.39746264
     warningTime: 1.2563434
@@ -17220,7 +17220,7 @@ MonoBehaviour:
     robotStep: 0.68400496
     monsterHp: 31
     monsterAttack: 1.4016486
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.3997069
     warningTime: 1.2507327
@@ -17772,7 +17772,7 @@ MonoBehaviour:
     robotStep: 0.6789101
     monsterHp: 32
     monsterAttack: 1.3891429
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.40193015
     warningTime: 1.2451745
@@ -18508,7 +18508,7 @@ MonoBehaviour:
     robotStep: 0.6721891
     monsterHp: 32
     monsterAttack: 1.372646
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.4048629
     warningTime: 1.2378427
@@ -19060,7 +19060,7 @@ MonoBehaviour:
     robotStep: 0.6672006
     monsterHp: 32
     monsterAttack: 1.3604015
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.40703973
     warningTime: 1.2324007
@@ -19612,7 +19612,7 @@ MonoBehaviour:
     robotStep: 0.6622554
     monsterHp: 32
     monsterAttack: 1.3482633
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.40919763
     warningTime: 1.2270058
@@ -20348,7 +20348,7 @@ MonoBehaviour:
     robotStep: 0.65572673
     monsterHp: 33
     monsterAttack: 1.3322383
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.41204652
     warningTime: 1.2198837
@@ -20900,7 +20900,7 @@ MonoBehaviour:
     robotStep: 0.65087736
     monsterHp: 33
     monsterAttack: 1.3203353
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.4141626
     warningTime: 1.2145934
@@ -21452,7 +21452,7 @@ MonoBehaviour:
     robotStep: 0.64606696
     monsterHp: 33
     monsterAttack: 1.308528
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.4162617
     warningTime: 1.2093457
@@ -22188,7 +22188,7 @@ MonoBehaviour:
     robotStep: 0.639712
     monsterHp: 33
     monsterAttack: 1.2929294
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.41903478
     warningTime: 1.202413
@@ -22740,7 +22740,7 @@ MonoBehaviour:
     robotStep: 0.6349884
     monsterHp: 34
     monsterAttack: 1.2813354
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.42109594
     warningTime: 1.1972601
@@ -23292,7 +23292,7 @@ MonoBehaviour:
     robotStep: 0.63030046
     monsterHp: 34
     monsterAttack: 1.2698284
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.4231416
     warningTime: 1.192146
@@ -24096,7 +24096,7 @@ MonoBehaviour:
     robotStep: 0.6241035
     monsterHp: 34
     monsterAttack: 1.2546176
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.42584574
     warningTime: 1.1853856
@@ -24750,7 +24750,7 @@ MonoBehaviour:
     robotStep: 0.6194948
     monsterHp: 34
     monsterAttack: 1.2433054
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.4278568
     warningTime: 1.1803579
@@ -25404,7 +25404,7 @@ MonoBehaviour:
     robotStep: 0.6149186
     monsterHp: 35
     monsterAttack: 1.232073
-    terrain: 3
+    terrain: 0
     armor: 3
     crateShare: 0.42985368
     warningTime: 1.1753657
@@ -26276,7 +26276,7 @@ MonoBehaviour:
     robotStep: 0.6088662
     monsterHp: 39
     monsterAttack: 1.2172171
-    terrain: 3
+    terrain: 0
     armor: 4
     crateShare: 0.43249473
     warningTime: 1.168763
@@ -26930,7 +26930,7 @@ MonoBehaviour:
     robotStep: 0.60436285
     monsterHp: 39
     monsterAttack: 1.2061633
-    terrain: 3
+    terrain: 0
     armor: 4
     crateShare: 0.43445987
     warningTime: 1.1638503
@@ -27584,7 +27584,7 @@ MonoBehaviour:
     robotStep: 0.59988934
     monsterHp: 39
     monsterAttack: 1.1951829
-    terrain: 3
+    terrain: 0
     armor: 4
     crateShare: 0.43641192
     warningTime: 1.1589701
@@ -28456,7 +28456,7 @@ MonoBehaviour:
     robotStep: 0.59397
     monsterHp: 40
     monsterAttack: 1.1806536
-    terrain: 3
+    terrain: 0
     armor: 4
     crateShare: 0.4389949
     warningTime: 1.1525127
@@ -29110,7 +29110,7 @@ MonoBehaviour:
     robotStep: 0.5895636
     monsterHp: 40
     monsterAttack: 1.169838
-    terrain: 3
+    terrain: 0
     armor: 4
     crateShare: 0.4409177
     warningTime: 1.1477057
@@ -29764,7 +29764,7 @@ MonoBehaviour:
     robotStep: 0.5851849
     monsterHp: 40
     monsterAttack: 1.1590902
-    terrain: 3
+    terrain: 0
     armor: 4
     crateShare: 0.44282842
     warningTime: 1.142929
@@ -30636,7 +30636,7 @@ MonoBehaviour:
     robotStep: 0.57938856
     monsterHp: 40
     monsterAttack: 1.1448629
-    terrain: 3
+    terrain: 0
     armor: 4
     crateShare: 0.4453577
     warningTime: 1.1366057
@@ -31305,7 +31305,7 @@ MonoBehaviour:
     robotStep: 0.57507205
     monsterHp: 40
     monsterAttack: 1.1342678
-    terrain: 3
+    terrain: 0
     armor: 4
     crateShare: 0.44724128
     warningTime: 1.1318967
@@ -31974,7 +31974,7 @@ MonoBehaviour:
     robotStep: 0.5707812
     monsterHp: 41
     monsterAttack: 1.1237357
-    terrain: 3
+    terrain: 0
     armor: 4
     crateShare: 0.44911364
     warningTime: 1.1272159
@@ -32954,7 +32954,7 @@ MonoBehaviour:
     robotStep: 0.5650991
     monsterHp: 41
     monsterAttack: 1.1097887
-    terrain: 3
+    terrain: 0
     armor: 4
     crateShare: 0.4515931
     warningTime: 1.1210172
@@ -33755,7 +33755,7 @@ MonoBehaviour:
     robotStep: 0.5608661
     monsterHp: 41
     monsterAttack: 1.0993986
-    terrain: 3
+    terrain: 0
     armor: 4
     crateShare: 0.45344022
     warningTime: 1.1163994
@@ -34556,7 +34556,7 @@ MonoBehaviour:
     robotStep: 0.5566571
     monsterHp: 41
     monsterAttack: 1.0890673
-    terrain: 3
+    terrain: 0
     armor: 4
     crateShare: 0.4552769
     warningTime: 1.1118077
@@ -35624,7 +35624,7 @@ MonoBehaviour:
     robotStep: 0.55108136
     monsterHp: 42
     monsterAttack: 1.0753815
-    terrain: 3
+    terrain: 0
     armor: 4
     crateShare: 0.45770994
     warningTime: 1.105725
@@ -36425,7 +36425,7 @@ MonoBehaviour:
     robotStep: 0.5469264
     monsterHp: 42
     monsterAttack: 1.0651828
-    terrain: 3
+    terrain: 0
     armor: 4
     crateShare: 0.45952302
     warningTime: 1.1011924
@@ -37226,7 +37226,7 @@ MonoBehaviour:
     robotStep: 0.5427937
     monsterHp: 46
     monsterAttack: 1.055039
-    terrain: 3
+    terrain: 0
     armor: 5
     crateShare: 0.4613264
     warningTime: 1.096684
@@ -38294,7 +38294,7 @@ MonoBehaviour:
     robotStep: 0.5373176
     monsterHp: 46
     monsterAttack: 1.0415976
-    terrain: 3
+    terrain: 0
     armor: 5
     crateShare: 0.46371597
     warningTime: 1.09071
@@ -39095,7 +39095,7 @@ MonoBehaviour:
     robotStep: 0.5332355
     monsterHp: 46
     monsterAttack: 1.0315781
-    terrain: 3
+    terrain: 0
     armor: 5
     crateShare: 0.46549723
     warningTime: 1.0862569
@@ -39896,7 +39896,7 @@ MonoBehaviour:
     robotStep: 0.52917445
     monsterHp: 47
     monsterAttack: 1.02161
-    terrain: 3
+    terrain: 0
     armor: 5
     crateShare: 0.46726933
     warningTime: 1.0818266
@@ -40964,7 +40964,7 @@ MonoBehaviour:
     robotStep: 0.5237917
     monsterHp: 47
     monsterAttack: 1.0083977
-    terrain: 3
+    terrain: 0
     armor: 5
     crateShare: 0.46961817
     warningTime: 1.0759546
@@ -41765,7 +41765,7 @@ MonoBehaviour:
     robotStep: 0.5197782
     monsterHp: 47
     monsterAttack: 0.9985464
-    terrain: 3
+    terrain: 0
     armor: 5
     crateShare: 0.4713695
     warningTime: 1.0715761
@@ -42566,7 +42566,7 @@ MonoBehaviour:
     robotStep: 0.5157844
     monsterHp: 47
     monsterAttack: 0.9887434
-    terrain: 3
+    terrain: 0
     armor: 5
     crateShare: 0.47311226
     warningTime: 1.0672193
@@ -43634,7 +43634,7 @@ MonoBehaviour:
     robotStep: 0.51048946
     monsterHp: 48
     monsterAttack: 0.97574687
-    terrain: 3
+    terrain: 0
     armor: 5
     crateShare: 0.47542277
     warningTime: 1.061443
@@ -44435,7 +44435,7 @@ MonoBehaviour:
     robotStep: 0.5065404
     monsterHp: 48
     monsterAttack: 0.9660537
-    terrain: 3
+    terrain: 0
     armor: 5
     crateShare: 0.477146
     warningTime: 1.057135
@@ -45236,7 +45236,7 @@ MonoBehaviour:
     robotStep: 0.50261
     monsterHp: 48
     monsterAttack: 0.9564065
-    terrain: 3
+    terrain: 0
     armor: 5
     crateShare: 0.47886106
     warningTime: 1.0528473

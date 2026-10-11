@@ -83,7 +83,9 @@ namespace SquashBot.Gameplay
             float wallHeight = Mathf.Lerp(1.15f, 3.0f, camp);
             float wallThick = Mathf.Lerp(1.0f, 1.9f, camp);
             FortressFloor.WallScaleAt = level.fortressStages > 1 ? p => 1f + 0.22f * StageAt(p) : (System.Func<GridPos, float>)null;
-            FortressFloor.WallTint = Color.Lerp(new Color(0.66f, 0.66f, 0.69f), WorldTheme.Current.accent, 0.18f) * Mathf.Lerp(1f, 0.62f, camp);
+            // The ramparts: the world's colour in a mid-dark tone (dark, never very dark), the floor its lightest tone.
+            Color.RGBToHSV(WorldTheme.Current.accent, out float wh, out _, out _);
+            FortressFloor.WallTint = Color.HSVToRGB(wh, 0.22f, Mathf.Lerp(0.6f, 0.48f, camp));
             FortressFloor.Fx = FortressFloor.WallFx.None;
             FortressFloor.TowerGrow = Mathf.Lerp(1f, 1.9f, Mathf.InverseLerp(0f, 24f, World)); // the corner towers grow world by world
             if (arenaRun)
@@ -99,11 +101,12 @@ namespace SquashBot.Gameplay
                 FortressFloor.WallScaleAt = null;
             }
             FortressFloor.SkipCornerTowers = arenaRun;
+            FortressFloor.Detailed = arenaRun;
             FortressFloor.WallThick = wallThick;
             fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, FortressRects(), wallHeight);
             if (arenaRun) ArenaDecor.Build(fortressFloor, grid, level.stageBounds, arenaIndex, robot.Position, BattleArenas.Style(arenaIndex).accent, BattleArenas.Style(arenaIndex).trim);
             // The fortress never moves: its thousands of pieces are merged into a few big meshes (far fewer draw calls).
-            StaticBatchingUtility.Combine(fortressFloor.gameObject);
+            if (fortressFloor.GetComponentsInChildren<MeshRenderer>().Length < 6000) StaticBatchingUtility.Combine(fortressFloor.gameObject); // never on a huge one (memory)
             // Craft crossing the sky over the later fortresses.
             if (stage >= 1)
                 SkyTraffic.Create(fortressFloor, () => robot != null ? robot.transform.position : Vector3.zero,
@@ -125,9 +128,10 @@ namespace SquashBot.Gameplay
         {
             // The floor itself never goes very dark (the walls round it are the dark part, see FortressFloor): a soft
             // grey with the world's hue, deeper in the far worlds, like brushed metal under a dusk sky.
+            // Always the lightest tone of the world's colour: the floor is never dark (the walls carry the depth).
             float t = Mathf.Clamp01(world / 24f);
             Color.RGBToHSV(accent, out float h, out _, out _);
-            var tint = Color.HSVToRGB(h, Mathf.Lerp(0.06f, 0.16f, t), Mathf.Lerp(0.9f, 0.46f, Mathf.Pow(t, 0.8f)));
+            var tint = Color.HSVToRGB(h, Mathf.Lerp(0.06f, 0.14f, t), 0.9f);
             return world < 2 ? Color.Lerp(new Color(0.86f, 0.86f, 0.88f), tint, 0.3f) : tint;
         }
 

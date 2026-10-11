@@ -50,7 +50,7 @@ namespace SquashBot.Gameplay
             e.StageStep += d => FocusStage(Mathf.Clamp(editStage + d, 0, defenseRects.Length / 4 - 1));
             e.Dragged += PanEditor;
             e.StartPressed += CloseDefenseEditor;
-            e.BackPressed += () => { defenseEditing = false; ClearMarkers(); e.Hide(); ui.SetHudHidden(false); ShowMap(); };
+            e.BackPressed += LeaveDefenseEditor;
             e.Tapped += OnEditorTap;
         }
 
@@ -99,7 +99,11 @@ namespace SquashBot.Gameplay
             // Level 1 the first time: three archers as a gift, and set-up opens to show how.
             bool gift = levelIndex == 0 && Defenses.GrantStarterOnce();
             if (defenseEditPending || gift) OpenDefenseEditor(gift);
-            else AddDefenseRobots(kept);
+            else
+            {
+                Defenses.PayPlaced(levelIndex); // the level is being played with them: they are spent now
+                AddDefenseRobots(kept);
+            }
             defenseEditPending = false;
         }
 
@@ -115,8 +119,24 @@ namespace SquashBot.Gameplay
 
         // ---------- Set-up ----------
 
+        /// <summary>What stood in the level when set-up opened: leaving without playing puts it all back.</summary>
+        private List<Defenses.Placement> editSnapshot = new List<Defenses.Placement>();
+
+        /// <summary>Out of set-up without playing: nothing is spent — the level's defences go back to how they were.</summary>
+        private void LeaveDefenseEditor()
+        {
+            if (!defenseEditing) return;
+            defenseEditing = false;
+            Defenses.Save(levelIndex, editSnapshot);
+            ClearMarkers();
+            ui.DefenseEditor.Hide();
+            ui.SetHudHidden(false);
+            ShowMap();
+        }
+
         private void OpenDefenseEditor(bool gift = false)
         {
+            editSnapshot = Defenses.Placed(levelIndex);
             defenseEditing = true;
             editKind = DefenseKind.Archer;
             markerMat ??= MaterialFactory.CreateTransparent(new Color(0.45f, 0.95f, 1f, 0.7f), new Color(1.6f, 4.6f, 6f));
@@ -133,6 +153,11 @@ namespace SquashBot.Gameplay
             ClearMarkers();
             ui.DefenseEditor.Hide();
             ui.SetHudHidden(false);
+            // Spent ones taken back in this set-up return to the stock; the rest are spent now (START: played with them).
+            var now = Defenses.Placed(levelIndex);
+            foreach (var old in editSnapshot)
+                if (old.paid && !now.Exists(p => p.SameSpot(old))) Defenses.Refund(old);
+            Defenses.PayPlaced(levelIndex);
             AddDefenseRobots(Defenses.Placed(levelIndex));
             introPending = true; // the opening shot, then the cell breaks
             AudioManager.PlaySfx(Sfx.Win, 0.5f, 1.4f);
