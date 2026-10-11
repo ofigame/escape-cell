@@ -151,9 +151,9 @@ namespace SquashBot.Gameplay
         public int Hero => hero;
 
         // The build's own colours, tinted a little by the world (the classic build takes the world's colours as before).
-        private Color OwnBody(int world) => hero == 0 ? RobotLooks.BodyColor(world) : Color.Lerp(HeroModels.Colours(hero).body, RobotLooks.BodyColor(world), 0.2f);
-        private Color OwnLight(int world) => hero == 0 ? RobotLooks.LightColor(world) : Color.Lerp(HeroModels.Colours(hero).light, RobotLooks.LightColor(world), 0.15f);
-        private Color OwnEye(int world) => hero == 0 ? RobotLooks.EyeColor(world) : HeroModels.Colours(hero).eye;
+        private Color OwnBody(int world) => hero == 0 ? HeroModels.Colours(0).body : Color.Lerp(HeroModels.Colours(hero).body, RobotLooks.BodyColor(world), 0.2f);
+        private Color OwnLight(int world) => hero == 0 ? HeroModels.Colours(0).light : Color.Lerp(HeroModels.Colours(hero).light, RobotLooks.LightColor(world), 0.15f);
+        private Color OwnEye(int world) => hero == 0 ? HeroModels.Colours(0).eye : HeroModels.Colours(hero).eye;
 
         /// <summary>Switches to another of foi's four builds (rebuilds the body parts in place).</summary>
         public void SetHero(int newHero)

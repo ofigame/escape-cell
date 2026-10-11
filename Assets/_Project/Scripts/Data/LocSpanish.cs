@@ -145,7 +145,7 @@ namespace SquashBot.Data
             ["camDist.3"] = "MUY LEJOS",
             ["daily.menu"] = "BONUS\n{0}/{1}",
             ["float.monster"] = "¡LLEGA EL MONSTRUO!",
-            ["hero.0"] = "Clásico",
+            ["hero.0"] = "foi",
             ["hero.1"] = "Volt",
             ["hero.2"] = "Kaya",
             ["hero.3"] = "Zip",
