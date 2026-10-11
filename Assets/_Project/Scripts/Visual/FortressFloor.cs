@@ -40,6 +40,7 @@ namespace SquashBot.Visual
             WallHeight = wallHeight;
             lastGrid = grid;
             flamesLeft = 40;
+            agedMats.Clear();
             LastStage = stage;
             var root = new GameObject("Fortress").transform;
             root.SetParent(parent, false);
@@ -285,6 +286,21 @@ namespace SquashBot.Visual
 
         /// <param name="front">A wall on the camera's side of the floor: kept lower so it never hides foi.</param>
         private static Material fxMat;
+        private static readonly Dictionary<(Material, int), Material> agedMats = new Dictionary<(Material, int), Material>();
+
+        /// <summary>A rampart's material with the aged-stone pattern, tiled so its courses keep their size at any height
+        /// (ice stays clear).</summary>
+        private static Material Aged(Material src, float h)
+        {
+            if (Fx == WallFx.Ice) return src;
+            int rows = Mathf.Max(1, Mathf.RoundToInt(h / 0.9f));
+            if (agedMats.TryGetValue((src, rows), out var m) && m != null) return m;
+            m = new Material(src) { name = src.name + " aged" };
+            m.SetTexture("_BaseMap", StoneTexture.Aged);
+            m.SetTextureScale("_BaseMap", new Vector2(1f, rows));
+            agedMats[(src, rows)] = m;
+            return m;
+        }
         private static int flamesLeft;
 
         private static void Wall(Transform root, Kit k, int stage, Vector3 at, bool alongX, int i, Vector3 outward, bool front = false, float scale = 1f)
@@ -299,7 +315,7 @@ namespace SquashBot.Visual
                 float thick = 0.62f * WallThick * scale;
                 var o = outward * (thick - 0.62f) * 0.5f; // a thicker wall grows outward, its inner face stays put
                 var mid = new Vector3(at.x, bottom + h * 0.5f, at.z) + o;
-                Box("Rampart", root, mid, S(1.04f, h, thick), k.stoneDark, 0.12f);
+                Box("Rampart", root, mid, S(1.04f, h, thick), Aged(k.stoneDark, h), 0.12f);
                 bool grand = WallThick * scale > 1.45f;
                 Box("Cap", root, new Vector3(at.x, bottom + h + 0.03f, at.z) + o, S(1.06f, 0.1f, thick + 0.06f), grand || WallTint.HasValue ? k.stoneLight : stage == 1 ? k.copper : k.stone, 0.04f);
                 if (Fx == WallFx.Flames && i % 2 == 0 && flamesLeft-- > 0) // a capped number of fires (phones)
@@ -311,7 +327,7 @@ namespace SquashBot.Visual
                 }
                 else if (Fx == WallFx.Glow && fxMat != null)
                     Box("TopGlow", root, new Vector3(at.x, bottom + h + 0.09f, at.z) + o - outward * (thick * 0.5f - 0.04f), S(1.04f, 0.05f, 0.07f), fxMat, 0.01f);
-                if (grand && Detailed)
+                if (false) // the stonework is in the aged-stone texture now (no extra pieces)
                 {
                     // Dressed stone: courses along the inner face, staggered joints, merlons on top (the arenas; the
                     // levels' long walls keep just the merlons, below, to stay light on phones).
@@ -336,7 +352,7 @@ namespace SquashBot.Visual
                 if (i % 6 == 4)
                 {
                     float bh = h * 1.3f;
-                    Box("Buttress", root, new Vector3(at.x, bottom + bh * 0.5f, at.z) + outward * 0.05f, S(0.42f, bh, 0.78f), k.stone, 0.12f);
+                    Box("Buttress", root, new Vector3(at.x, bottom + bh * 0.5f, at.z) + outward * 0.05f, S(0.42f, bh, 0.78f), Aged(k.stone, bh), 0.12f);
                     Box("ButtressLight", root, new Vector3(at.x, bottom + bh - 0.12f, at.z) - outward * 0.345f, S(0.2f, 0.08f, 0.02f), k.light, 0.01f);
                 }
                 if (stage == 2 && i % 4 == 2)

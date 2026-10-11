@@ -37,9 +37,13 @@ namespace SquashBot.Gameplay
             /// <summary>Still on the floor's one shared marble material (copied the first time this tile changes colour).</summary>
             public bool sharedMat;
             public Renderer topRenderer;
+            /// <summary>The grout under a marble tile (hidden while the tile is broken).</summary>
+            public GameObject grout;
         }
 
-        private Material marbleTop;
+        private Material marbleTop, groutMat;
+        private Transform groutRoot;
+        private GameObject groutObj;
 
         private TileView[,] tiles;
 
@@ -91,6 +95,8 @@ namespace SquashBot.Gameplay
             var stone = new System.Random(grid.Width * 131 + grid.Height);
             veinMat = null; // this floor's own vein colour
             marbleTop = null;
+            groutMat = null;
+            groutRoot = null;
             // Dark fortress floors are decks of metal plates rather than stone: shared materials for their details.
             bool metal = FortressTiles && FortressMetal;
             var accent = WorldTheme.Current.accent;
@@ -127,7 +133,15 @@ namespace SquashBot.Gameplay
                     if (marbleTop == null) marbleTop = MaterialFactory.CreateSurface(marble, Palette.TileSelfLight * 0.15f, 0.78f, 0.05f);
                     frame = null;
                     top = marbleTop;
-                    sharedTopRenderer = Shapes.Rounded("Top", tile.transform, new Vector3(0f, -0.005f, 0f), new Vector3(0.995f, 0.11f, 0.995f), 0.006f, top).GetComponent<Renderer>();
+                    // Laid in blocks of four: the joints inside a block are hairlines, round each block a little wider,
+                    // showing the darker grout beneath (a few tones darker than the marble, never heavy).
+                    float gl = p.x % 2 == 0 ? 0.03f : 0.004f, gr = p.x % 2 == 1 ? 0.03f : 0.004f;
+                    float gb = p.y % 2 == 0 ? 0.03f : 0.004f, gt = p.y % 2 == 1 ? 0.03f : 0.004f;
+                    sharedTopRenderer = Shapes.Rounded("Top", tile.transform, new Vector3((gl - gr) * 0.5f, -0.005f, (gb - gt) * 0.5f),
+                        new Vector3(1f - gl - gr, 0.11f, 1f - gb - gt), 0.006f, top).GetComponent<Renderer>();
+                    if (groutRoot == null) { groutRoot = new GameObject("Grout").transform; groutRoot.SetParent(transform, false); }
+                    if (groutMat == null) groutMat = MaterialFactory.CreateSurface(FortressStone * 0.8f, Color.black, 0.3f, 0f);
+                    groutObj = Shapes.Primitive(PrimitiveType.Cube, "Grout", groutRoot, ToWorld(p) + new Vector3(0f, 0.025f, 0f), new Vector3(1f, 0.02f, 1f), groutMat);
                     if (veinMat == null) veinMat = MaterialFactory.CreateSurface(FortressStone * 0.62f, Color.black, 0.8f, 0f);
                     if (stone.Next(grid.FloorCount > 2500 ? 9 : 4) == 0) // fewer veins on the big floors (memory)
                         for (int v = 0; v < 1; v++)
@@ -207,10 +221,12 @@ namespace SquashBot.Gameplay
                 holeRimMat = holeRim;
                 bool shared = FortressTiles && Marble;
                 tiles[p.x, p.y] = new TileView { tile = tile, hole = null, root = root.transform, top = top, frame = frame, stone = FortressTiles,
-                    sharedMat = shared, topRenderer = shared ? sharedTopRenderer : null, shown = shared,
+                    sharedMat = shared, topRenderer = shared ? sharedTopRenderer : null, shown = shared, grout = shared ? groutObj : null,
                     shownTop = slabTop, shownTopGlow = Palette.TileSelfLight * 0.15f,
                     stoneTop = slabTop, stoneFrame = FortressStone * (Marble ? 0.9f : 0.42f), stoneGlow = Palette.TileSelfLight * (Marble ? 0.15f : 0.25f) };
             }
+            // The grout never moves: one merged mesh (plain cubes, light) instead of a piece per tile.
+            if (groutRoot != null) StaticBatchingUtility.Combine(groutRoot.gameObject);
         }
 
         /// <summary>The slab and its glowing edge band, built cell by cell so they follow the platform's shape (nothing hangs below it).</summary>
@@ -295,6 +311,7 @@ namespace SquashBot.Gameplay
             if (t == null) return;
             fx.Burst(t.tile.transform.position, Palette.TileTop, Palette.TileGlow, 14, 3f);
             t.tile.SetActive(false);
+            if (t.grout != null) t.grout.SetActive(false);
             if (t.hole == null) t.hole = MakeHole(t.root);
             t.hole.SetActive(true);
         }
@@ -316,6 +333,7 @@ namespace SquashBot.Gameplay
             var t = tiles[p.x, p.y];
             if (t == null) return;
             t.tile.SetActive(true);
+            if (t.grout != null) t.grout.SetActive(true);
             if (t.hole != null) t.hole.SetActive(false);
             t.pop = 0f;
         }

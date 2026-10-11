@@ -345,7 +345,7 @@ namespace SquashBot.UI
             questsPing = qPing.gameObject;
 
             // The battle arenas: top right, under the settings.
-            var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopRight, new Vector2(-110f, -230f), 120f, () => ArenasPressed?.Invoke());
+            var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopRight, new Vector2(-110f, -400f), 120f, () => ArenasPressed?.Invoke());
             ((RectTransform)arenas.transform).pivot = new Vector2(0.5f, 0.5f);
 
             // The level card: a frosted glass panel with the world, the level, its mission and the big PLAY button.

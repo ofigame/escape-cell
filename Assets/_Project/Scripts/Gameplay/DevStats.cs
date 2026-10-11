@@ -36,7 +36,7 @@ namespace SquashBot.Gameplay
                 style = new GUIStyle(GUI.skin.label) { fontSize = Mathf.Max(18, Screen.height / 60), fontStyle = FontStyle.Bold };
                 style.normal.textColor = Color.white;
             }
-            var r = new Rect(12f, Screen.height * 0.12f, Screen.width * 0.6f, style.fontSize * 3f);
+            var r = new Rect(12f, Screen.height * 0.21f, Screen.width * 0.6f, style.fontSize * 3f); // under the HUD's health bar
             var shadow = new Rect(r.x + 2f, r.y + 2f, r.width, r.height);
             var c = style.normal.textColor;
             style.normal.textColor = new Color(0f, 0f, 0f, 0.8f);
