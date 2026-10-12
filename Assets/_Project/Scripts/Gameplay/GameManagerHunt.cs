@@ -24,6 +24,19 @@ namespace SquashBot.Gameplay
         private HeldWeapon heldWeapon;
         private float lastArmorNote = -10f;
 
+        /// <summary>foi's height as it stands (its body, without the weapon it carries): the robots are sized against it.</summary>
+        private float FoiHeight()
+        {
+            float top = 0f;
+            foreach (var r in robot.GetComponentsInChildren<Renderer>())
+            {
+                if (!r.enabled || r is ParticleSystemRenderer || r is TrailRenderer || r is LineRenderer) continue;
+                if (heldWeapon != null && r.transform.IsChildOf(heldWeapon.transform)) continue;
+                top = Mathf.Max(top, r.bounds.max.y - robot.transform.position.y);
+            }
+            return Mathf.Clamp(top, 0.6f, 2.5f);
+        }
+
         /// <summary>Back to the plain robot outside the core loop (normal size, empty-handed).</summary>
         private void ClearHuntDress()
         {
@@ -82,10 +95,12 @@ namespace SquashBot.Gameplay
         {
             HazardVisuals.CrateTier = Mathf.Clamp(World / 5, 0, 4); // the crates grow sturdier every five worlds
             hunt.Avoid = p => hazards.IsThreatened(p);
-            // The robot and the guards stand big on the floor and grow with the campaign (back to normal size in the
-            // tunnels, see ClearHuntDress); the robot carries its weapon.
+            // The guards stand big on the floor and grow with the campaign; foi keeps its tunnel size everywhere, and
+            // the big robots (warlords, enforcers) shrink by the same share foi used to grow, so they still tower over it
+            // as before relative to the crowd. foi carries its weapon.
             float grow = Mathf.Clamp01(World / 12f);
-            robot.transform.localScale = Vector3.one * Mathf.Lerp(1.65f, 2.17f, grow);
+            robot.transform.localScale = Vector3.one;
+            hunt.FoiHeight = FoiHeight();
             Robot.HopScale = 0.9f; // steady and readable: each step follows the finger, a run of steps flows on (0.6 felt too fast)
             hunt.EnemyScale = Mathf.Lerp(1.6f, 2.03f, grow);
             adHealUsed = false;

@@ -19,7 +19,7 @@ namespace SquashBot.Gameplay
     /// </summary>
     public partial class GameManager
     {
-        private const float TpsDistance = 6.2f, TpsFov = 58f, TpsTurnSpeed = 240f, TpsPitchSpeed = 120f;
+        private const float TpsDistance = 5.2f, TpsFov = 58f, TpsTurnSpeed = 240f, TpsPitchSpeed = 120f;
         private TpsControls tps;
         private readonly System.Collections.Generic.List<(Vector3 at, bool big)> mapEnemies = new System.Collections.Generic.List<(Vector3 at, bool big)>();
         private bool tpsOn, tpsStrike, tpsSpin, tpsJump;
@@ -177,7 +177,7 @@ namespace SquashBot.Gameplay
         private void TpsPose(out Vector3 pos, out Quaternion rot)
         {
             if (Gunning) { GunPose(out pos, out rot); return; }
-            var focus = robot.transform.position + Vector3.up * 1.1f;
+            var focus = robot.transform.position + Vector3.up * 0.8f; // foi is its tunnel size: look a little lower
             var dir = Quaternion.Euler(tpsPitch, tpsYaw, 0f) * Vector3.forward;
             pos = focus - dir * TpsDistance + Quaternion.Euler(0f, tpsYaw, 0f) * Vector3.right * tpsSide; // a touch to the right
             rot = Quaternion.LookRotation(dir);

@@ -131,6 +131,16 @@ namespace SquashBot.Gameplay
         }
         /// <summary>How big the guards and enforcers stand (they grow with the campaign).</summary>
         public float EnemyScale = 1f;
+        /// <summary>foi's height (world units, measured at its size): every robot is sized against it.</summary>
+        public float FoiHeight;
+
+        /// <summary>How tall a model stands above its root (its renderers' tops).</summary>
+        private static float HeightOf(Transform root)
+        {
+            float top = 0f;
+            foreach (var r in root.GetComponentsInChildren<Renderer>()) top = Mathf.Max(top, r.bounds.max.y - root.position.y);
+            return top;
+        }
         public int MonsterHpLeft => monsterHp;
         public int MonsterHpTotal => level != null ? level.monsterHp : 1;
 
@@ -254,7 +264,7 @@ namespace SquashBot.Gameplay
             var b = new Bug { pos = p, stage = StageOf(p), wait = (float)rng.NextDouble(), hp = BugHp };
             b.model = BugModel.Build(transform, bugColour, world % BugModel.Kinds, BrightBugs); // a new kind of bug every world
             b.model.Armor(BugTier);
-            b.model.transform.localScale = Vector3.one * (1.5f + BugTier * 0.12f) * Mathf.Max(1f, EnemyScale * 0.65f); // big enough to see
+            b.model.transform.localScale = Vector3.one * (1.5f + BugTier * 0.12f) * Mathf.Max(1f, EnemyScale * 0.65f) * 0.72f; // smaller now, beside a smaller foi
             b.from = b.to = At(p);
             b.model.transform.position = b.to;
             b.model.transform.rotation = Quaternion.Euler(0f, rng.Next(4) * 90f, 0f);
@@ -289,6 +299,15 @@ namespace SquashBot.Gameplay
                 g.bot.transform.localScale = Vector3.one * (rank == 0 ? 0.55f : 0.62f + Mathf.Max(0, rank) * 0.02f) * EnemyScale;
             }
             g.maxHp = Mathf.Max(1, g.hp);
+            // Sized against foi, so the floors look big: a robot as tall as foi (the easy ones a touch smaller), the
+            // enforcers two steps taller, the warlords taller still.
+            if (FoiHeight > 0.05f)
+            {
+                var model = g.bot != null ? g.bot.transform : g.human.transform;
+                float h = HeightOf(g.root);
+                float want = FoiHeight * (g.human != null ? (rank >= 99 ? 1.65f : 1.45f) : (rank == 0 ? 0.92f : 1f));
+                if (h > 0.05f) model.localScale *= want / h;
+            }
             AddHealthBar(g);
             if (level.shieldEvery > 0 && guards.Count % level.shieldEvery == level.shieldEvery - 1) AddShield(g);
             g.from = g.to = At(p);
