@@ -641,7 +641,7 @@ namespace SquashBot.Gameplay
         }
 
         private Vector3 freeVel;
-        private float stridePhase;
+        private float stridePhase, lastBob;
 
         /// <summary>
         /// The battle arenas: walks foi freely (any direction, any speed) instead of tile to tile. It eases into the
@@ -656,7 +656,8 @@ namespace SquashBot.Gameplay
             if (anim == Anim.Cheer && cheerBrief && wantVel.sqrMagnitude > 0.01f) { cheerBrief = false; transform.position = from; visual.localScale = Vector3.one; anim = Anim.Idle; }
             if (anim != Anim.Idle) { freeVel = Vector3.zero; return; } // a blow or a spin in progress
             freeVel = Vector3.MoveTowards(freeVel, wantVel, dt * 28f);
-            var pos = transform.position;
+            var pos = transform.position - Vector3.up * lastBob;
+            lastBob = 0f;
             float speed = freeVel.magnitude;
             if (speed > 0.05f)
             {
@@ -682,13 +683,15 @@ namespace SquashBot.Gameplay
                     else { next = pos; freeVel *= 0.5f; }
                 }
                 var tile = new GridPos(Mathf.RoundToInt(next.x), Mathf.RoundToInt(next.z));
-                next.y = GridView.ToWorld(tile).y;
+                // Up and down the floor's steps smoothly (no pop at the tile edge).
+                next.y = Mathf.MoveTowards(pos.y, GridView.ToWorld(tile).y, dt * 4f);
                 targetFacing = Quaternion.LookRotation(new Vector3(freeVel.x, 0f, freeVel.z));
                 Facing = Mathf.Abs(freeVel.x) >= Mathf.Abs(freeVel.z) ? (freeVel.x > 0f ? Direction.PlusX : Direction.MinusX) : (freeVel.z > 0f ? Direction.PlusY : Direction.MinusY);
                 // A light stride: a bob and a squash in step with the pace.
                 stridePhase += dt * (6f + speed * 2.2f);
                 float bob = Mathf.Abs(Mathf.Sin(stridePhase)) * Mathf.Min(0.07f, speed * 0.015f);
                 transform.position = next + Vector3.up * bob;
+                lastBob = bob;
                 float s = 1f + Mathf.Sin(stridePhase * 2f) * 0.025f;
                 visual.localScale = new Vector3(1f / s, s, 1f / s);
                 if (tile != Position && grid.InBounds(tile))
@@ -702,7 +705,7 @@ namespace SquashBot.Gameplay
             else
             {
                 freeVel = Vector3.zero;
-                transform.position = new Vector3(pos.x, GridView.ToWorld(Position).y, pos.z);
+                transform.position = new Vector3(pos.x, Mathf.MoveTowards(pos.y, GridView.ToWorld(Position).y, dt * 4f), pos.z);
             }
         }
 

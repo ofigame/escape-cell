@@ -29,7 +29,10 @@ namespace SquashBot.Gameplay
         /// <summary>A quick circle drawn with the finger: foi spins round, striking all around it.</summary>
         public bool spin;
 
-        public bool IsEmpty => !move.HasValue && !jump && !holdStart && !holdPosition.HasValue && !holdEnd && !tap.HasValue && !spin;
+        /// <summary>Free walking (stick mode): the floating stick's push, -1..1 on each screen axis.</summary>
+        public Vector2? stick;
+
+        public bool IsEmpty => !move.HasValue && !jump && !holdStart && !holdPosition.HasValue && !holdEnd && !tap.HasValue && !spin && !stick.HasValue;
     }
 
     /// <summary>
@@ -73,6 +76,19 @@ namespace SquashBot.Gameplay
         /// <summary>After the first circle, each further turn of the finger (this many degrees) spins again, for as long
         /// as the finger keeps circling.</summary>
         private const float CircleAgain = 270f;
+
+        /// <summary>
+        /// Free walking on the floors: a drag is a floating stick (it appears where the finger lands and follows it if it
+        /// runs past its edge) instead of tile steps; a quick tap still strikes, two taps jump, a circle spins, a long
+        /// still press hovers.
+        /// </summary>
+        public bool StickMode { get; set; }
+        /// <summary>The stick right now (screen pixels): whether it is out, its base and the finger.</summary>
+        public bool StickActive { get; private set; }
+        public Vector2 StickBase => startPos;
+        public Vector2 StickFinger => lastPos;
+        /// <summary>The stick's reach from its base (screen pixels).</summary>
+        public static float StickRadius => 0.45f * (Screen.dpi > 0 ? Screen.dpi : 160f);
 
         /// <summary>The circle gesture is on (the core loop's floors).</summary>
         public bool CircleEnabled { get; set; }
@@ -156,6 +172,7 @@ namespace SquashBot.Gameplay
                 pathHeading = null;
                 spun = false;
                 spinMark = 0f;
+                StickActive = false;
                 if (Ignore != null && Ignore(pos))
                 {
                     consumed = true; // a button press: no swipe, tap or hover from it
@@ -193,13 +210,34 @@ namespace SquashBot.Gameplay
             }
 
             // Held still long enough: start a hover instead of a swipe or tap.
-            if (HoldEnabled && pressed && !consumed && !chained && Time.unscaledTime - pressTime >= HoldTime
+            if (HoldEnabled && pressed && !consumed && !chained && !StickActive && Time.unscaledTime - pressTime >= (StickMode ? 0.5f : HoldTime)
                 && (pos - startPos).magnitude < SwipeThresholdInches * (Screen.dpi > 0 ? Screen.dpi : 160f))
             {
                 holding = true;
                 consumed = true;
                 lastTapTime = -10f;
                 return new InputCommand { holdStart = true, holdPosition = pos };
+            }
+
+            if (StickMode)
+            {
+                float dpi = Screen.dpi > 0 ? Screen.dpi : 160f;
+                if (!pressed)
+                {
+                    tracking = false;
+                    bool walked = StickActive;
+                    StickActive = false;
+                    if (consumed || walked) return default;
+                    bool quickTap = Time.unscaledTime - pressTime <= TapMaxDuration;
+                    return new InputCommand { jump = RegisterTap(), tap = quickTap ? (hasPointer ? pos : lastPos) : (Vector2?)null };
+                }
+                if (consumed) return default;
+                var delta = pos - startPos;
+                if (!StickActive && delta.magnitude > 0.08f * dpi) { StickActive = true; lastTapTime = -10f; }
+                if (!StickActive) return default;
+                float radius = StickRadius;
+                if (delta.magnitude > radius) { startPos = pos - delta.normalized * radius; delta = pos - startPos; } // the base follows the finger
+                return new InputCommand { stick = delta / radius };
             }
 
             if (!pressed)

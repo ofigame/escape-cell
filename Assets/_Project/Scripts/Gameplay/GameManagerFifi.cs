@@ -44,12 +44,20 @@ namespace SquashBot.Gameplay
             hunt.CompanionHurt += HurtFifi;
         }
 
+        /// <summary>Fifi's size: as tall as foi.</summary>
+        private float fifiSize = 1f;
+
         /// <summary>A new floor: Fifi waits in the sky at full health, ready to be called down soon.</summary>
         private void SetupFifi()
         {
             ClearFifi();
             fifi = Buddy.Create(GridView.ToWorld(robot.Position) + Vector3.up * 30f);
-            fifi.transform.localScale = Vector3.one * 1.6f;
+            // As tall as foi (measured, like the robots).
+            fifi.transform.localScale = Vector3.one;
+            float tall = 0f;
+            foreach (var r in fifi.GetComponentsInChildren<Renderer>()) if (!(r is ParticleSystemRenderer)) tall = Mathf.Max(tall, r.bounds.max.y - fifi.transform.position.y);
+            fifiSize = tall > 0.05f ? Mathf.Clamp(FoiHeight() / tall, 0.4f, 2.5f) : 1f;
+            fifi.transform.localScale = Vector3.one * fifiSize;
             fifi.gameObject.SetActive(false);
             fifiHp = FifiUpgrades.MaxHealth;
             fifiUp = fifiDown = false;
@@ -175,12 +183,12 @@ namespace SquashBot.Gameplay
             fifiDropT = Mathf.Min(1f, fifiDropT + dt / 0.35f);
             // It forms out of the light: grows from nothing with a little overshoot, spinning.
             float s = fifiDropT < 0.8f ? Mathf.Lerp(0f, 1.15f, fifiDropT / 0.8f) : Mathf.Lerp(1.15f, 1f, (fifiDropT - 0.8f) / 0.2f);
-            fifi.transform.localScale = Vector3.one * 1.6f * s;
+            fifi.transform.localScale = Vector3.one * fifiSize * s;
             fifi.transform.Rotate(0f, dt * 900f, 0f);
             if (fifiDropT < 1f) return;
             fifiDropT = -1f;
             fifi.Place(fifiDropTo);
-            fifi.transform.localScale = Vector3.one * 1.6f;
+            fifi.transform.localScale = Vector3.one * fifiSize;
             fifi.transform.rotation = Quaternion.LookRotation(GridView.ToWorld(robot.Position) - GridView.ToWorld(fifiTile));
             fifiUp = true;
             fifiFollowedFrom = robot.Position;
@@ -216,12 +224,12 @@ namespace SquashBot.Gameplay
         private void UpdateFifiLeave(float dt)
         {
             fifiLeaveT = Mathf.Min(1f, fifiLeaveT + dt / 0.35f);
-            fifi.transform.localScale = Vector3.one * 1.6f * (1f - fifiLeaveT); // shrinks into the light
+            fifi.transform.localScale = Vector3.one * fifiSize * (1f - fifiLeaveT); // shrinks into the light
             fifi.transform.Rotate(0f, dt * 900f, 0f);
             if (fifiLeaveT < 1f) return;
             fifiLeaveT = -1f;
             fifi.gameObject.SetActive(false);
-            fifi.transform.localScale = Vector3.one * 1.6f;
+            fifi.transform.localScale = Vector3.one * fifiSize;
             fifiReadyAt = Time.time + FifiRecall;
             fifiBlows = 0;
             fifiCallAfter = Random.Range(1, 3);

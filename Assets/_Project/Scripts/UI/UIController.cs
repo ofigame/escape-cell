@@ -429,6 +429,36 @@ namespace SquashBot.UI
         /// <summary>True while the main menu is up (its 3D lobby is showing).</summary>
         public bool MenuVisible => menu.IsVisible;
 
+        private RectTransform stickBase, stickKnob;
+
+        /// <summary>The floating stick under the finger on the floors (faint: a ring and a knob), or hidden.</summary>
+        public void ShowStick(bool on, Vector2 baseScreen, Vector2 fingerScreen)
+        {
+            if (stickBase == null)
+            {
+                if (!on) return;
+                var rootRect = (RectTransform)canvas.transform;
+                stickBase = UiFactory.Box("Stick", rootRect, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(200f, 200f));
+                stickBase.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(stickBase, new Color(1f, 1f, 1f, 0.1f), UiSprites.Circle).raycastTarget = false;
+                UiFactory.Fill(UiFactory.Stretch("Rim", stickBase), new Color(1f, 1f, 1f, 0.35f), UiSprites.Ring, 0.25f).raycastTarget = false;
+                stickKnob = UiFactory.Box("Knob", rootRect, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(90f, 90f));
+                stickKnob.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(stickKnob, new Color(1f, 1f, 1f, 0.45f), UiSprites.Circle).raycastTarget = false;
+            }
+            stickBase.gameObject.SetActive(on);
+            stickKnob.gameObject.SetActive(on);
+            if (!on) return;
+            var rect = (RectTransform)canvas.transform;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, baseScreen, null, out var b);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, fingerScreen, null, out var k);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, baseScreen + Vector2.right * SquashBot.Gameplay.InputReader.StickRadius, null, out var edge);
+            float radius = Mathf.Max(40f, (edge - b).magnitude);
+            stickBase.sizeDelta = Vector2.one * radius * 2f;
+            stickBase.anchoredPosition = b;
+            stickKnob.anchoredPosition = b + Vector2.ClampMagnitude(k - b, radius);
+        }
+
         /// <summary>The arena tip on the main menu: 2 s after the menu opens it shows for 6 s, then again every 25 s
         /// (fading, with a little bob), while the menu is up and no other screen covers it.</summary>
         private void UpdateArenaTip(float dt)

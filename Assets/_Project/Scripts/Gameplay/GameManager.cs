@@ -1144,6 +1144,43 @@ namespace SquashBot.Gameplay
         /// Walking on by itself (finger held after a swipe), foi only steps onto plain free floor: it stops at the edge,
         /// at holes and fire, and in front of walls, crates and robots rather than leaping or bumping into them.
         /// </summary>
+        private float gapPush;
+
+        /// <summary>
+        /// Free walking on the floors: the stick's push turned into a way on the floor as the camera sees it (up on the
+        /// screen is away from the camera), a walk part-way and a run all the way out. Holes, fire and too-high steps
+        /// stop foi (it never stumbles in); pushing on against a hole for a moment leaps it.
+        /// </summary>
+        private void FloorWalk(Vector2? stick)
+        {
+            if (glassCell != null && !glassCell.Broken) return; // still behind the glass (the first push breaks it)
+            if (IntroRunning || introPending) return;
+            var vel = Vector3.zero;
+            if (stick.HasValue)
+            {
+                var cam = cameraRig.Cam.transform;
+                var f = cam.forward; f.y = 0f;
+                var r = cam.right; r.y = 0f;
+                var s = stick.Value;
+                float push = s.magnitude;
+                float speed = push < 0.2f ? 0f : Mathf.Lerp(2.0f, 5.2f, Mathf.InverseLerp(0.2f, 1f, push));
+                var dir = r.normalized * s.x + f.normalized * s.y;
+                if (dir.sqrMagnitude > 0.0001f) vel = dir.normalized * speed;
+            }
+            robot.FreeStep(vel, Time.deltaTime, FloorWalkable);
+            // Pushing on against a hole: a leap over it (as a swipe into a hole used to).
+            var ahead = robot.Position + robot.Facing.ToOffset();
+            if (vel.sqrMagnitude > 1f && grid.IsGap(ahead) && !grid.IsLava(ahead))
+            {
+                gapPush += Time.deltaTime;
+                if (gapPush > 0.22f) { gapPush = 0f; robot.TryJump(); }
+            }
+            else gapPush = 0f;
+        }
+
+        /// <summary>A tile foi may walk onto freely on a floor: solid, free, not fire, not a step too high.</summary>
+        private bool FloorWalkable(GridPos p) => grid.IsStandable(p) && !grid.IsGap(p) && !grid.IsLava(p) && FloorRelief.StepOk(robot.Position, p);
+
         private bool HeldStepOk(Direction dir)
         {
             var target = robot.Position + dir.ToOffset();
@@ -1311,6 +1348,8 @@ namespace SquashBot.Gameplay
 
             // In an arena fight the arena reads the touches itself.
             input.CircleEnabled = level.mission == MissionType.Hunt && roadPhase == RoadPhase.None;
+            // The floors walk freely too (a floating stick under the finger), like the arenas.
+            input.StickMode = level.mission == MissionType.Hunt && roadPhase == RoadPhase.None && !tpsOn && !defenseEditing;
             var command = ArenaActive ? default(InputCommand) : tpsOn ? TpsCommand() : input.Poll(robot.transform.position);
             command = GlassCellGate(command); // foi starts each floor in its glass cell
             UpdateHover(command);
@@ -1321,7 +1360,9 @@ namespace SquashBot.Gameplay
                 else if (command.tap.HasValue && level.mission == MissionType.Hunt && TapStrike(command.tap.Value)) input.CancelTap();
                 else if (command.jump) robot.TryJump();
                 else if (command.move.HasValue && (!command.held || HeldStepOk(command.move.Value))) robot.TryMove(command.move.Value, command.pace);
+                if (input.StickMode) FloorWalk(command.stick);
             }
+            ui.ShowStick(input.StickMode && input.StickActive && !hovering, input.StickBase, input.StickFinger);
 
             ui.SetWarning(hazards.AnyWarningActive);
             ui.SetShield(robot.ShieldLeft, Mathf.Max(level.shieldDuration, ArmorDuration));
