@@ -640,6 +640,72 @@ namespace SquashBot.Gameplay
             StartAnim(Anim.Escape, transform.position, transform.position + Vector3.up * 1.2f);
         }
 
+        private Vector3 freeVel;
+        private float stridePhase;
+
+        /// <summary>
+        /// The battle arenas: walks foi freely (any direction, any speed) instead of tile to tile. It eases into the
+        /// wanted velocity, keeps a body's width from anything it may not stand on (sliding along walls rather than
+        /// stopping dead), turns to the way it goes with a light stride bob, and when it crosses into another tile that
+        /// tile becomes its grid position (and the game hears it arrive there, as after a step).
+        /// </summary>
+        public void FreeStep(Vector3 wantVel, float dt, Func<GridPos, bool> walkable)
+        {
+            if (!IsAlive || InArena || grid == null) { freeVel = Vector3.zero; return; }
+            // The short victory dance gives way the moment the stick is pushed.
+            if (anim == Anim.Cheer && cheerBrief && wantVel.sqrMagnitude > 0.01f) { cheerBrief = false; transform.position = from; visual.localScale = Vector3.one; anim = Anim.Idle; }
+            if (anim != Anim.Idle) { freeVel = Vector3.zero; return; } // a blow or a spin in progress
+            freeVel = Vector3.MoveTowards(freeVel, wantVel, dt * 28f);
+            var pos = transform.position;
+            float speed = freeVel.magnitude;
+            if (speed > 0.05f)
+            {
+                bool Free(Vector3 p)
+                {
+                    const float r = 0.3f;
+                    foreach (var o in new[] { Vector3.zero, new Vector3(r, 0f, 0f), new Vector3(-r, 0f, 0f), new Vector3(0f, 0f, r), new Vector3(0f, 0f, -r) })
+                    {
+                        var t = new GridPos(Mathf.RoundToInt(p.x + o.x), Mathf.RoundToInt(p.z + o.z));
+                        if (t != Position && !walkable(t)) return false;
+                    }
+                    return true;
+                }
+                var step = freeVel * dt;
+                var next = pos + step;
+                if (!Free(next))
+                {
+                    // Slide along whatever is in the way.
+                    var alongX = pos + new Vector3(step.x, 0f, 0f);
+                    var alongZ = pos + new Vector3(0f, 0f, step.z);
+                    if (Mathf.Abs(step.x) > 0.0001f && Free(alongX)) next = alongX;
+                    else if (Mathf.Abs(step.z) > 0.0001f && Free(alongZ)) next = alongZ;
+                    else { next = pos; freeVel *= 0.5f; }
+                }
+                var tile = new GridPos(Mathf.RoundToInt(next.x), Mathf.RoundToInt(next.z));
+                next.y = GridView.ToWorld(tile).y;
+                targetFacing = Quaternion.LookRotation(new Vector3(freeVel.x, 0f, freeVel.z));
+                Facing = Mathf.Abs(freeVel.x) >= Mathf.Abs(freeVel.z) ? (freeVel.x > 0f ? Direction.PlusX : Direction.MinusX) : (freeVel.z > 0f ? Direction.PlusY : Direction.MinusY);
+                // A light stride: a bob and a squash in step with the pace.
+                stridePhase += dt * (6f + speed * 2.2f);
+                float bob = Mathf.Abs(Mathf.Sin(stridePhase)) * Mathf.Min(0.07f, speed * 0.015f);
+                transform.position = next + Vector3.up * bob;
+                float s = 1f + Mathf.Sin(stridePhase * 2f) * 0.025f;
+                visual.localScale = new Vector3(1f / s, s, 1f / s);
+                if (tile != Position && grid.InBounds(tile))
+                {
+                    LastLeftTile = Position;
+                    LastLeftTime = Time.time;
+                    Position = tile;
+                    Arrived?.Invoke(Position);
+                }
+            }
+            else
+            {
+                freeVel = Vector3.zero;
+                transform.position = new Vector3(pos.x, GridView.ToWorld(Position).y, pos.z);
+            }
+        }
+
         /// <summary>A quick victory dance that does not stop foi (it can walk off at once; a step ends the dance).</summary>
         public void CheerBrief()
         {

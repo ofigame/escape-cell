@@ -1,6 +1,8 @@
+using SquashBot.Audio;
 using SquashBot.Core;
 using SquashBot.Data;
 using SquashBot.UI;
+using SquashBot.Visual;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -19,6 +21,7 @@ namespace SquashBot.Gameplay
     {
         private const float TpsDistance = 6.2f, TpsFov = 58f, TpsTurnSpeed = 240f, TpsPitchSpeed = 120f;
         private TpsControls tps;
+        private readonly System.Collections.Generic.List<(Vector3 at, bool big)> mapEnemies = new System.Collections.Generic.List<(Vector3 at, bool big)>();
         private bool tpsOn, tpsStrike, tpsSpin, tpsJump;
         private float tpsYaw = 45f, tpsPitch = 27f;
         /// <summary>How far to the right of foi the camera sits (a touch, so foi stands a little left of the middle).</summary>
@@ -40,6 +43,7 @@ namespace SquashBot.Gameplay
             tpsYaw = 45f; // the usual view's way (looking along +x +z)
             tpsPitch = 27f;
             tps.Show(true);
+            tps.Minimap.Build(grid, BattleArenas.LastBuildings, BattleArenas.LastPosts);
             robot.WalkStyle = true; // the arenas: walking and running, not hopping
             Screen.orientation = ScreenOrientation.LandscapeLeft;
         }
@@ -64,6 +68,9 @@ namespace SquashBot.Gameplay
             Screen.orientation = ScreenOrientation.Portrait;
         }
 
+        /// <summary>A tile foi may walk onto in the arenas: solid floor, no robot or crate on it, no fire.</summary>
+        private bool FreeWalkable(GridPos p) => grid.IsStandable(p) && !grid.IsGap(p) && !grid.IsLava(p);
+
         private Vector3 TpsForward => Quaternion.Euler(0f, tpsYaw, 0f) * Vector3.forward;
 
         /// <summary>This frame's command from the TPS controls (and keys), the camera turned by the right thumb.</summary>
@@ -71,6 +78,8 @@ namespace SquashBot.Gameplay
         {
             float dt = Time.unscaledDeltaTime;
             UpdateArenaGifts();
+            hunt.Enemies(mapEnemies);
+            tps.Minimap.Tick(dt, robot.transform.position, Gunning ? gunYaw : tpsYaw, mapEnemies);
             var look = tps.TakeLook();
             bool onGun = manned != null;
             if (!onGun)
@@ -108,11 +117,22 @@ namespace SquashBot.Gameplay
             if (tpsStrike) { tpsStrike = false; KeyStrike(TpsForward); }
             if (tpsSpin) { tpsSpin = false; command.spin = true; return command; }
             if (tpsJump) { tpsJump = false; command.jump = true; return command; }
-            if (move.magnitude < 0.3f) return command;
-            // The stick's way on the floor, turned by the camera, to the nearest of the four floor directions.
             var fwd = TpsForward;
             var right = new Vector3(fwd.z, 0f, -fwd.x);
             var want = right * move.x + fwd * move.y;
+            bool inGlass = glassCell != null && !glassCell.Broken;
+            if (!inGlass)
+            {
+                // Free walking and running: any way the stick points, as fast as it is pushed (a walk part-way, a run
+                // all the way out, never a dash); walls, buildings and robots stop foi, which slides along them.
+                float push = move.magnitude;
+                float speed = push < 0.25f ? 0f : Mathf.Lerp(2.2f, 5.6f, Mathf.InverseLerp(0.25f, 1f, push));
+                var vel = want.sqrMagnitude > 0.0001f ? want.normalized * speed : Vector3.zero;
+                robot.FreeStep(vel, Time.deltaTime, FreeWalkable);
+                return command;
+            }
+            if (move.magnitude < 0.3f) return command;
+            // Still in the glass cell: the first push breaks out (a step the nearest floor way).
             float best = float.MinValue;
             foreach (var d in DirectionExtensions.All)
             {
@@ -142,7 +162,15 @@ namespace SquashBot.Gameplay
             }
             var ahead = robot.Position + new GridPos(Mathf.RoundToInt(fwd.x), Mathf.RoundToInt(fwd.z));
             if (hazards.HasLanded(ahead)) { if (!TryStrikeNow(ahead, false)) pendingStrike = (ahead, false, Time.time); return; }
-            if (strikeCooldown <= 0f && robot.Strike(robot.transform.position + fwd * 1.5f)) strikeCooldown = 0.25f;
+            if (strikeCooldown <= 0f && robot.Strike(robot.transform.position + fwd * 1.5f))
+            {
+                // Nothing in reach: a swing at the air all the same (the blade flashes, a whoosh), so every tap answers.
+                strikeCooldown = 0.25f;
+                var w = weapon ?? Armory.Equipped;
+                if (heldWeapon != null) heldWeapon.Swing();
+                SlashFx.Create(robot.transform.position, robot.transform.position + fwd * 1.6f, WeaponModels.Glow(w.tier), 1f);
+                AudioManager.PlaySfx(Sfx.Hop, 0.5f, 1.6f);
+            }
         }
 
         /// <summary>The camera over foi's shoulder: behind it by the camera's turn, a little above, looking past it.</summary>

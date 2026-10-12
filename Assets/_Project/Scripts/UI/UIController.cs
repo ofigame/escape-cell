@@ -351,16 +351,18 @@ namespace SquashBot.UI
             var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopRight, new Vector2(-110f, -400f), 120f, () => ArenasPressed?.Invoke());
             ((RectTransform)arenas.transform).pivot = new Vector2(0.5f, 0.5f);
             // Now and then a speech bubble to the left of it: win an arena battle, grab the big gifts.
-            arenaTip = UiFactory.Box("ArenaTip", t, TopRight, new Vector2(-420f, -400f), new Vector2(470f, 150f));
+            arenaTip = UiFactory.Box("ArenaTip", t, TopRight, new Vector2(-430f, -400f), new Vector2(480f, 170f));
             arenaTip.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.Fill(arenaTip, new Color(1f, 0.97f, 0.9f, 0.97f), UiSprites.Rounded, 0.8f).raycastTarget = false;
             var tail = UiFactory.Box("Tail", arenaTip, new Vector2(1f, 0.5f), new Vector2(-4f, 0f), new Vector2(34f, 34f));
             tail.pivot = new Vector2(0.5f, 0.5f);
             tail.localRotation = Quaternion.Euler(0f, 0f, 45f);
             UiFactory.Fill(tail, new Color(1f, 0.97f, 0.9f, 0.97f), UiSprites.Rounded, 4f).raycastTarget = false;
-            var tipText = UiFactory.TextBox("Text", arenaTip, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(430f, 130f), Loc.T("arena.tip"), 34f, new Color(0.35f, 0.12f, 0.1f));
+            var tipText = UiFactory.TextBox("Text", arenaTip, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 150f), Loc.T("arena.tip"), 34f, new Color(0.35f, 0.12f, 0.1f));
+            tipText.textWrappingMode = TMPro.TextWrappingModes.Normal;
+            tipText.overflowMode = TMPro.TextOverflowModes.Ellipsis;
             tipText.enableAutoSizing = true;
-            tipText.fontSizeMin = 26f;
+            tipText.fontSizeMin = 18f;
             tipText.fontSizeMax = 38f;
             tipText.raycastTarget = false;
             arenaTipGroup = arenaTip.gameObject.AddComponent<CanvasGroup>();
@@ -438,7 +440,7 @@ namespace SquashBot.UI
             bool show = can && phase > 2f && phase < 8f;
             arenaTipGroup.alpha = Mathf.MoveTowards(arenaTipGroup.alpha, show ? 1f : 0f, dt * 3f);
             float bob = Mathf.Sin(Time.unscaledTime * 3f) * 6f;
-            arenaTip.anchoredPosition = new Vector2(-420f + bob, -400f);
+            arenaTip.anchoredPosition = new Vector2(-430f + bob, -400f);
         }
 
         public void ShowMenu(int levelIndex, int coins, string world, string mission)
@@ -1159,10 +1161,22 @@ namespace SquashBot.UI
             UiFactory.TextBox("Title", card, Top, new Vector2(0f, -60f), new Vector2(760f, 130f), Loc.T("pause.title"), 90f, Palette.UiText, title: true);
             UiFactory.MakeButton(card, Loc.T("btn.resume"), Kind.Primary, Top, new Vector2(0f, -240f), new Vector2(600f, 160f), () => ResumePressed?.Invoke(), 70f);
             UiFactory.MakeButton(card, Loc.T("btn.restart"), Kind.Secondary, Top, new Vector2(0f, -430f), new Vector2(600f, 150f), () => RetryPressed?.Invoke(), 60f);
-            UiFactory.MakeButton(card, Loc.T("btn.map"), Kind.Secondary, Top, new Vector2(0f, -610f), new Vector2(600f, 150f), () => MapPressed?.Invoke(), 60f);
+            pauseMap = UiFactory.MakeButton(card, Loc.T("btn.map"), Kind.Secondary, Top, new Vector2(0f, -610f), new Vector2(600f, 150f), () => { if (pauseToMenu) MenuPressed?.Invoke(); else MapPressed?.Invoke(); }, 60f);
         }
 
-        public void ShowPause() => pause.Show();
+        private UnityEngine.UI.Button pauseMap;
+        private bool pauseToMenu;
+
+        /// <summary>The pause card's third button: the map in the levels, the main menu in a battle arena.</summary>
+        public void ShowPause(bool toMenu)
+        {
+            pauseToMenu = toMenu;
+            var label = pauseMap.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+            if (label != null) label.text = Loc.T(toMenu ? "btn.menu" : "btn.map");
+            pause.Show();
+        }
+
+        public void ShowPause() => ShowPause(false);
         public void HidePause() => pause.Hide();
 
         // ---------- Result ----------

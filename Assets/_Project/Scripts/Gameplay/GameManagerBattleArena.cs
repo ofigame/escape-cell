@@ -209,7 +209,7 @@ namespace SquashBot.Gameplay
                 if (body == null) { arenaGifts.RemoveAt(i); continue; }
                 body.rotation = Quaternion.Euler(0f, Time.time * 90f + i * 40f, 0f);
                 body.position = GridView.ToWorld(tile) + Vector3.up * (GridView.SurfaceY + 0.4f + Mathf.Sin(Time.time * 3f + i) * 0.1f);
-                if (robot.Position != tile) continue;
+                if (HuntSystem.Chebyshev(robot.Position, tile) > 1) continue; // next to it is close enough
                 OpenArenaGift(kind, body.position);
                 Destroy(body.gameObject);
                 arenaGifts.RemoveAt(i);

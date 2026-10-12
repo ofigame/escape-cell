@@ -22,6 +22,8 @@ namespace SquashBot.UI
         private RectTransform stickArea, spinButton, jumpButton, crosshair;
         private TMPro.TextMeshProUGUI ammoText;
         public event Action Strike, Spin, Jump;
+        /// <summary>The arena's map in the bottom-right corner.</summary>
+        public ArenaMinimap Minimap { get; private set; }
 
         private Vector2 look;
         private Canvas canvas;
@@ -42,7 +44,9 @@ namespace SquashBot.UI
             var c = canvas.gameObject.AddComponent<TpsControls>();
             c.canvas = canvas;
             c.scaler = scaler;
-            var root = canvas.transform;
+            // Everything inside the screen's safe area (clear of an iPhone's notch and home bar).
+            var root = UiFactory.Stretch("Safe", canvas.transform);
+            root.gameObject.AddComponent<SafeArea>();
             // The look area first (under everything else), the stick's area over its left part, the buttons on top.
             Area<LookArea>("LookArea", root, new Vector2(0.4f, 0f), new Vector2(1f, 0.82f)).owner = c;
             var stick = Area<Stick>("MoveArea", root, new Vector2(0f, 0f), new Vector2(0.4f, 0.82f));
@@ -67,6 +71,7 @@ namespace SquashBot.UI
             c.strikeButton = Button(root, "Strike", new Vector2(-190f, 200f), 200f, new Color(1f, 0.55f, 0.25f, 0.85f), 0, () => c.Strike?.Invoke()).GetComponent<PressButton>();
             c.spinButton = Button(root, "Spin", new Vector2(-440f, 150f), 135f, new Color(0.45f, 0.75f, 1f, 0.8f), 1, () => c.Spin?.Invoke());
             c.jumpButton = Button(root, "Jump", new Vector2(-420f, 360f), 130f, new Color(0.55f, 1f, 0.6f, 0.8f), 2, () => c.Jump?.Invoke());
+            c.Minimap = ArenaMinimap.Create(root);
             c.SetGunMode(false, 0);
             c.Show(false);
             return c;
@@ -95,6 +100,9 @@ namespace SquashBot.UI
             stickArea.gameObject.SetActive(!on);
             spinButton.gameObject.SetActive(!on);
             jumpButton.localRotation = Quaternion.Euler(0f, 0f, on ? 180f : 0f); // the chevron points down: climb down
+            // On foot a tap on the right side strikes, so the strike button is only there on a gun (held: a burst).
+            strikeButton.gameObject.SetActive(on);
+            jumpButton.gameObject.SetActive(on);
             // On the gun the right thumb aims, so the fire button moves to the left thumb (and the bullets with it).
             var fire = (RectTransform)strikeButton.transform;
             fire.anchorMin = fire.anchorMax = on ? Vector2.zero : new Vector2(1f, 0f);

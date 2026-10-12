@@ -501,6 +501,15 @@ namespace SquashBot.Gameplay
             return false;
         }
 
+        /// <summary>Where every robot still standing is (vanG and the warlords marked big), for the arena map.</summary>
+        public void Enemies(System.Collections.Generic.List<(Vector3 at, bool big)> into)
+        {
+            into.Clear();
+            if (!running) return;
+            foreach (var g in guards) if (!g.dead && g.root != null) into.Add((g.root.position, g.rank >= 99 || g.brute));
+            if (MonsterUp && monster != null) into.Add((monster.transform.position, true));
+        }
+
         /// <summary>
         /// A gun-post bullet along a ray: the first robot or bug whose body it passes through takes it — a warlord or
         /// enforcer a tenth of its health, any other robot half, a bug all. Returns where it struck (or flew out).

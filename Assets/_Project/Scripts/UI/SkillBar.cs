@@ -176,6 +176,9 @@ namespace SquashBot.UI
 
         private void Update()
         {
+            bool sideways = Screen.width > Screen.height;
+            root.localScale = Vector3.one * (sideways ? 0.62f : 1f);
+            root.anchoredPosition = sideways ? new Vector2(-80f, 40f) : new Vector2(-118f, 60f);
             foreach (var s in slots)
             {
                 if (s.punch <= 0f) continue;

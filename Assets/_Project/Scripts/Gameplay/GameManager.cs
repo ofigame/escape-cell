@@ -135,7 +135,7 @@ namespace SquashBot.Gameplay
 
         private int World => LevelCatalog.WorldOf(levelIndex);
         private bool RescueEnabled => World >= RescueFromWorld;
-        private bool HoverEnabled => World >= HoverFromWorld;
+        private bool HoverEnabled => World >= HoverFromWorld && !arenaRun; // the arenas walk freely: no hover
 
         private int LevelCount => levelSet.levels.Count;
         private int NextLevel => Mathf.Clamp(SaveData.UnlockedLevel, 0, LevelCount - 1);
@@ -843,7 +843,7 @@ namespace SquashBot.Gameplay
             State = GameState.Paused;
             Time.timeScale = 0f;
             cameraRig.SetMenuFocus(true);
-            ui.ShowPause();
+            ui.ShowPause(arenaRun); // an arena: back to the main menu, not the map
         }
 
         private void Resume()
@@ -1431,9 +1431,8 @@ namespace SquashBot.Gameplay
             }
             if (robot.StepId != null) StepMark.Leave(GridView.ToWorld(p) + Vector3.up * GridView.SurfaceY, robot.StepId, robot.StepColor);
 
-            coins.TryCollect(p);
+            CollectAround(p);
             if (Shop.MagnetRange > 0) coins.CollectNear(p, Shop.MagnetRange);
-            powerUps.TryCollect(p);
             if (level.mission == MissionType.Hunt) { hunt.OnRobotArrived(p); OnHuntArrived(p); }
 
             // Collapsing paths: the tile just left crumbles a moment later.
@@ -1504,6 +1503,21 @@ namespace SquashBot.Gameplay
                 {
                     var p = new GridPos(x, next);
                     if (grid.IsFloor(p)) gridView.SetWarning(p, pulse);
+                }
+        }
+
+        /// <summary>Coins and pick-ups on the tile foi stands on or any of the eight round it are taken (easy to grab).</summary>
+        private void CollectAround(GridPos p)
+        {
+            coins.TryCollect(p);
+            powerUps.TryCollect(p);
+            for (int dx = -1; dx <= 1; dx++)
+                for (int dy = -1; dy <= 1; dy++)
+                {
+                    if (dx == 0 && dy == 0) continue;
+                    var n = p + new GridPos(dx, dy);
+                    coins.TryCollect(n);
+                    powerUps.TryCollect(n);
                 }
         }
 
