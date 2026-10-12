@@ -39,6 +39,8 @@ namespace SquashBot.Gameplay
             public int hp, maxHp;
             /// <summary>Gun-post bullets' fractions of health not yet taken (each takes a share of its whole).</summary>
             public float chip;
+            /// <summary>Until when it is roused by a blow on a robot near it (it comes at a run).</summary>
+            public float alertUntil;
             /// <summary>Its wind-up is a smash at the rampart under foi's gun post (foi is up there).</summary>
             public bool atWall;
             /// <summary>The tile it is stepping (or being knocked) off: while it moves, a blow there still lands.</summary>
@@ -489,6 +491,7 @@ namespace SquashBot.Gameplay
             {
                 if (g.dead || (g.pos != p && !(g.moveT < 1f && g.prevPos == p))) continue;
                 // An energy shield takes the blow first (any weapon cracks it: one blow, one charge).
+                RaiseAlarm(g);
                 if (g.shield > 0) { HitShield(g, p); return true; }
                 g.hp -= ThroughArmor(p, damage);
                 g.flash = 1f;
@@ -574,6 +577,7 @@ namespace SquashBot.Gameplay
             if (hitB != null) { HitBug(hitB, 99); return true; }
             var hg = hitG;
             if (hg.shield > 0) { HitShield(hg, hg.pos); return true; }
+            RaiseAlarm(hg);
             hg.chip += hg.maxHp * (hg.brute || hg.rank >= 99 ? 0.1f : 0.5f);
             int dmg = Mathf.FloorToInt(hg.chip + 0.0001f);
             hg.chip -= dmg;
@@ -583,6 +587,19 @@ namespace SquashBot.Gameplay
             fx.Burst(point, new Color(1f, 0.75f, 0.35f), new Color(2.2f, 1.2f, 0.4f), 10, 3f);
             if (hg.hp <= 0) KillGuard(hg);
             return true;
+        }
+
+        /// <summary>A robot was hit: every robot within six tiles of it (in its own stage) comes running for a while.</summary>
+        private void RaiseAlarm(Guard hit)
+        {
+            float until = Time.time + 5f;
+            foreach (var o in guards)
+            {
+                if (o.dead || Chebyshev(o.pos, hit.pos) > 6) continue;
+                if (stageCount > 1 && o.stage != hit.stage) continue;
+                o.alertUntil = until;
+                if (o.step > level.robotStep * 0.3f) o.step = level.robotStep * 0.3f; // off at once
+            }
         }
 
         private void KnockBack(Guard g)
@@ -940,7 +957,7 @@ namespace SquashBot.Gameplay
             int dist = goal.Manhattan(g.pos);
             g.step -= dt;
             if (g.step > 0f || (!PlayerAway && near <= 1) || (PlayerAway && Chebyshev(g.pos, goal) <= 1)) return;
-            g.step = level.robotStep * (g.brute ? 1.3f : 0.72f);
+            g.step = level.robotStep * (g.brute ? 1.3f : 0.72f) * (Time.time < g.alertUntil ? 0.45f : 1f); // roused: at a run
             if (g.human != null) g.human.Step();
             // The arena city: round the buildings by the street map (distances from the goal), never stuck behind a block.
             if (level.hardAtOnce > 0 && FlowStep(g, goal)) return;

@@ -73,7 +73,7 @@ namespace SquashBot.Data
         /// the gun posts' stairs (round and diamond courtyards lose their tips).</summary>
         private const int PostRowWidth = 13;
 
-        public static bool Unlocked(int i) => SaveData.UnlockedLevel >= UnlockAt(i);
+        public static bool Unlocked(int i) => SaveData.UnlockedLevel >= UnlockAt(i) || SaveData.TestMode; // test builds: every arena
 
         public static int BestStreak(int i) => PlayerPrefs.GetInt("sb_arena_best_" + i, 0);
         public static int Wins(int i) => PlayerPrefs.GetInt("sb_arena_wins_" + i, 0);

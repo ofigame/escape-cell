@@ -13,8 +13,8 @@ namespace SquashBot.Data
         private const string LanguageKey = "sb_language";
         private const string TestModeKey = "sb_test_mode";
 
-        /// <summary>Test builds on the computer open every level on the map; phone builds (store and test releases alike) never.</summary>
-#if REAL_ADS || ((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR)
+        /// <summary>Test builds (the computer, and the developer's own test APK) can open every level and arena; Play bundles never.</summary>
+#if REAL_ADS || ((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR && !TEST_TOOLS)
         private const bool TestModeDefault = false;
 #else
         private const bool TestModeDefault = true;
@@ -88,7 +88,7 @@ namespace SquashBot.Data
         /// <summary>Testing: every level is playable from the map.</summary>
         public static bool TestMode
         {
-#if REAL_ADS || ((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR)
+#if REAL_ADS || ((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR && !TEST_TOOLS)
             get => false; // levels open one by one on every phone build
 #else
             get => GetBool(TestModeKey, TestModeDefault);

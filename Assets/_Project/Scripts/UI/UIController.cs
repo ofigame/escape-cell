@@ -784,8 +784,8 @@ namespace SquashBot.UI
                 (SettingKind.Camera, "settings.camera"),
                 (SettingKind.CombatCamera, "settings.combatCam"),
                 (SettingKind.Graphics, "settings.graphics"),
-#if !REAL_ADS && !((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR)
-                (SettingKind.TestMode, "settings.test"), // computer test builds only
+#if !REAL_ADS && (TEST_TOOLS || !((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR))
+                (SettingKind.TestMode, "settings.test"), // test builds only (never a Play bundle)
 #endif
             };
             for (int i = 0; i < rows.Length; i++)

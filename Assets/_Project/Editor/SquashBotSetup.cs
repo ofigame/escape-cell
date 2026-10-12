@@ -143,13 +143,23 @@ namespace SquashBot.EditorTools
             EditorUserBuildSettings.buildAppBundle = false;
             ResolveAndroidDependencies();
 
-            var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
+            // The developer's own test APK carries the test tools (the "all levels open" switch in the settings); the
+            // Play bundles (closed test and store alike) never do.
+            var target = NamedBuildTarget.Android;
+            string before = PlayerSettings.GetScriptingDefineSymbols(target);
+            PlayerSettings.SetScriptingDefineSymbols(target, string.IsNullOrEmpty(before) ? "TEST_TOOLS" : before + ";TEST_TOOLS");
+            BuildReport report;
+            try
             {
-                scenes = new[] { ScenePath },
-                locationPathName = "Builds/Android/EscapeCell.apk",
-                target = BuildTarget.Android,
-                options = BuildOptions.None,
-            });
+                report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
+                {
+                    scenes = new[] { ScenePath },
+                    locationPathName = "Builds/Android/EscapeCell.apk",
+                    target = BuildTarget.Android,
+                    options = BuildOptions.None,
+                });
+            }
+            finally { PlayerSettings.SetScriptingDefineSymbols(target, before); }
             Debug.Log($"[SquashBot] Android build: {report.summary.result} ({report.summary.totalErrors} errors)");
         }
 
