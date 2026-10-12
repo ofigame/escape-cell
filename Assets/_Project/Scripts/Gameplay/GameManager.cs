@@ -161,6 +161,7 @@ namespace SquashBot.Gameplay
             if (Debug.isDebugBuild) gameObject.AddComponent<DevStats>(); // test builds: FPS and memory in the corner
             QualitySettings.vSyncCount = 0;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
+            LockPortrait();
             if (levelSet == null || levelSet.levels.Count == 0) levelSet = LevelSet.LoadOrDefault();
 
             cameraRig = CameraRig.Create(SaveData.PerspectiveView ? ViewMode.Perspective : ViewMode.Isometric);
@@ -474,6 +475,7 @@ namespace SquashBot.Gameplay
 
         private void ShowMenu()
         {
+            ExitTps();
             AudioManager.PlayMusic(MusicTheme.Menu);
             AudioManager.SetTension(0f);
             AudioManager.SetDanger(0f);
@@ -1308,7 +1310,7 @@ namespace SquashBot.Gameplay
 
             // In an arena fight the arena reads the touches itself.
             input.CircleEnabled = level.mission == MissionType.Hunt && roadPhase == RoadPhase.None;
-            var command = ArenaActive ? default(InputCommand) : input.Poll(robot.transform.position);
+            var command = ArenaActive ? default(InputCommand) : tpsOn ? TpsCommand() : input.Poll(robot.transform.position);
             command = GlassCellGate(command); // foi starts each floor in its glass cell
             UpdateHover(command);
             if (!hovering)

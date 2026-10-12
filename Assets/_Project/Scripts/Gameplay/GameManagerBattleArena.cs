@@ -42,6 +42,7 @@ namespace SquashBot.Gameplay
             levelIndex = BattleArenas.ThemeLevel(i);
             level = BuildArenaLevel(i);
             BeginRun();
+            EnterTps(); // fought in landscape, over foi's shoulder
             ui.ShowIntro(Loc.T("arena." + i), Loc.T("arena.intro"));
             AudioManager.PlaySfx(Sfx.Win, 0.7f, 0.9f);
             RefreshHud();
@@ -124,6 +125,7 @@ namespace SquashBot.Gameplay
         /// <summary>The arena ended: its record kept, the result card says how it went.</summary>
         private void EndArena(bool won)
         {
+            ExitTps();
             BattleArenas.Record(arenaIndex, arenaBestStreak, won);
             if (won)
             {

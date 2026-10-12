@@ -480,6 +480,7 @@ namespace SquashBot.Gameplay
             // Low down, it looks a little higher, over foi towards the fight.
             var rot = Quaternion.LookRotation(closeCamFocus + Vector3.up * Mathf.Lerp(0.35f, 0.9f, combatBlend) - pos);
             float fov = Mathf.Lerp(CloseCamFov, FightCamFov, combatBlend);
+            if (TpsActive) { TpsPose(out pos, out rot); fov = TpsFov; } // the battle arenas: over foi's shoulder
             if (introPending) { introPending = false; introStart = Time.time; }
             if (IntroRunning)
             {
