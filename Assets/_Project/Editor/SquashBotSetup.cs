@@ -185,7 +185,10 @@ namespace SquashBot.EditorTools
                 string ks = Environment.GetEnvironmentVariable("PLAY_KEYSTORE");
                 if (string.IsNullOrEmpty(ks) || !File.Exists(ks)) throw new Exception("PLAY_KEYSTORE not set or missing: the upload key is needed for a Play build.");
                 Setup();
-                var defines = new System.Collections.Generic.List<string>(before.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)) { "REAL_ADS" };
+                // -testAds: the closed-test bundle keeps Google's test ads (testers may tap them freely); otherwise live ads.
+                bool testAds = Environment.CommandLine.Contains("-testAds");
+                var defines = new System.Collections.Generic.List<string>(before.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
+                if (!testAds) defines.Add("REAL_ADS");
                 PlayerSettings.SetScriptingDefineSymbols(target, string.Join(";", defines));
                 PlayerSettings.Android.useCustomKeystore = true;
                 PlayerSettings.Android.keystoreName = ks;
@@ -204,7 +207,7 @@ namespace SquashBot.EditorTools
                 var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
                 {
                     scenes = new[] { ScenePath },
-                    locationPathName = $"Builds/Play/foicell-1.0-{code}.aab",
+                    locationPathName = $"Builds/Play/foicell-1.0-{code}{(Environment.CommandLine.Contains("-testAds") ? "-test" : "")}.aab",
                     target = BuildTarget.Android,
                     options = BuildOptions.None,
                 });
