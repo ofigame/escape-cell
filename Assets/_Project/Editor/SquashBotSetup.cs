@@ -170,8 +170,8 @@ namespace SquashBot.EditorTools
 
         /// <summary>
         /// The Google Play store build: an Android App Bundle (Builds/Play/foicell-1.0-&lt;code&gt;.aab) with live ads (REAL_ADS,
-        /// which also turns the test mode off), version 1.0, a version code from the date and hour (yyMMddHH, always
-        /// rising), signed with the upload key the environment gives (PLAY_KEYSTORE, PLAY_KEYSTORE_PASS, PLAY_KEY_ALIAS,
+        /// which also turns the test mode off), version 1.0, a version code from the date, hour and tenth of the hour
+        /// (yyMMddHHt, always rising), signed with the upload key the environment gives (PLAY_KEYSTORE, PLAY_KEYSTORE_PASS, PLAY_KEY_ALIAS,
         /// PLAY_KEY_PASS — kept by the developer, never in the repository). Without the key it stops: Play refuses an
         /// unsigned bundle.
         /// </summary>
@@ -179,7 +179,7 @@ namespace SquashBot.EditorTools
         {
             var target = NamedBuildTarget.Android;
             string before = PlayerSettings.GetScriptingDefineSymbols(target);
-            int code = int.Parse(DateTime.Now.ToString("yyMMddHH"));
+            int code = int.Parse(DateTime.Now.ToString("yyMMddHH")) * 10 + DateTime.Now.Minute / 6; // yyMMddHH + a tenth of the hour: always rising, never twice in an hour
             try
             {
                 string ks = Environment.GetEnvironmentVariable("PLAY_KEYSTORE");
