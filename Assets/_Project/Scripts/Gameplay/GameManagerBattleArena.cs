@@ -46,6 +46,7 @@ namespace SquashBot.Gameplay
             levelIndex = BattleArenas.ThemeLevel(i);
             level = BuildArenaLevel(i);
             BeginRun();
+            SpawnKeptAllies();
             EnterTps(); // fought in landscape, over foi's shoulder
             ui.ShowIntro(Loc.T(BattleArenas.NameKey(i)), Loc.T("arena.intro"));
             AudioManager.PlaySfx(Sfx.Win, 0.7f, 0.9f);
@@ -69,7 +70,8 @@ namespace SquashBot.Gameplay
             l.mission = MissionType.Hunt;
             // Two worlds harder than its own world: every arena fights like the world two steps ahead (the first world's
             // arena as hard as world 3, the last ones capped at the last world). Everything grows with that — the
-            // crowd, how many stand at once (never more than 10 easy and 5 warlords), their health, pace and armour,
+            // crowd (twice the old one), how many stand at once (25 in the first arena, five more each arena after, up to
+            // ArenaAtOnceCap for the phones; a fifth of them warlords), their health, pace and armour,
             // the towers, vanG — while the robots keep the look of the arena's own world.
             int harder = Mathf.Min(BattleArenas.Count - 1, i + 2);
             int strengthLevel = Mathf.Min(LevelCatalog.LevelCount - 1, harder * LevelCatalog.LevelsPerWorld + 5);
@@ -77,18 +79,23 @@ namespace SquashBot.Gameplay
             l.armor = levelSet.levels[strengthLevel].armor;
             float d = harder / (float)(BattleArenas.Count - 1); // 0 … 1 across the worlds
             l.score = Mathf.RoundToInt(Mathf.Lerp(20f, 95f, d));
-            l.elites = Mathf.RoundToInt(Mathf.Lerp(4f, 24f, d));
-            l.robots = Mathf.RoundToInt(Mathf.Lerp(24f, 90f, d)); // the easy ones (the warlords come on top)
-            l.robotsAtOnce = Mathf.RoundToInt(Mathf.Lerp(5f, 10f, d));
-            l.hardAtOnce = Mathf.RoundToInt(Mathf.Lerp(1f, 5f, d));
+            l.elites = Mathf.RoundToInt(Mathf.Lerp(8f, 48f, d));
+            l.robots = Mathf.RoundToInt(Mathf.Lerp(48f, 180f, d)); // the easy ones (the warlords come on top)
+            int atOnce = Mathf.Min(ArenaAtOnceCap, 25 + 5 * i);
+            l.hardAtOnce = Mathf.Max(1, atOnce / 5);
+            l.robotsAtOnce = atOnce - l.hardAtOnce;
             l.brutes = 0;
             l.towers = Mathf.RoundToInt(Mathf.Lerp(0f, 8f, d));
             l.bugs = Mathf.RoundToInt(Mathf.Lerp(10f, 40f, d));
             l.robotHp = Mathf.RoundToInt(Mathf.Lerp(1f, 5f, d));
             l.robotStep = Mathf.Lerp(1.05f, 0.5f, d);
             l.monsterHp = Mathf.RoundToInt(Mathf.Lerp(18f, 130f, d));
+            Calm(l);
             return l;
         }
+
+        /// <summary>The most robots standing at once in an arena (more would choke a phone).</summary>
+        private const int ArenaAtOnceCap = 60;
 
         /// <summary>A kill streak in an arena: gifts at 5, 10, 15, 25 (and every 10 after).</summary>
         private void ArenaStreakGift(int n)
@@ -265,6 +272,7 @@ namespace SquashBot.Gameplay
         /// <summary>The arena ended: its record kept, the result card says how it went.</summary>
         private void EndArena(bool won)
         {
+            if (trailRun || !won) KeepAllies(0); // beaten: the allies are lost
             if (trailRun)
             {
                 // Beaten on a road: back to its start next time (nothing to record).

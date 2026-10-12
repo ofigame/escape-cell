@@ -808,6 +808,7 @@ namespace SquashBot.Gameplay
 
             SetupMission();
             hazards.Begin(grid, level, MissionProgress);
+            if (arenaRun) hazards.Freeze(); // the battle arenas and their roads: nothing falls from the sky
             floorRules.StageOf = level.fortressStages > 1 ? StageAt : (System.Func<GridPos, int>)null;
             floorRules.Begin(grid, level, levelIndex, p => hazards.IsProtected != null && hazards.IsProtected(p));
             enemies.Begin(grid, level, levelIndex, p => hazards.IsProtected != null && hazards.IsProtected(p),

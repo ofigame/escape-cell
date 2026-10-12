@@ -21,6 +21,8 @@ namespace SquashBot.Data
 
         /// <summary>The road laid out last (grid coordinates): where foi starts, the gate tile, the clearings.</summary>
         public static GridPoint Start, Gate;
+        /// <summary>Chests on every road (each sets allies free, see GameManagerTrail).</summary>
+        public const int ChestCount = 5;
         public static readonly List<Clearing> Clearings = new List<Clearing>();
 
         public struct GridPoint { public int x, y; public GridPoint(int x, int y) { this.x = x; this.y = y; } }
@@ -30,7 +32,7 @@ namespace SquashBot.Data
         {
             var rng = new System.Random(7700 + target * 53);
             float k = target / (float)(BattleArenas.Count - 1);
-            int bends = 7 + Mathf.RoundToInt(k * 5f);          // 7 … 12 bends
+            int bends = 8 + Mathf.RoundToInt(k * 5f);          // 8 … 13 bends
             int step = 13;                                       // rows between bends
             int w = 64, h = bends * step + 26;
             var g = new char[h][];
@@ -68,16 +70,23 @@ namespace SquashBot.Data
                     Disc(p.x, p.y, 2.6f);
                 }
             }
-            // Clearings at some bends: robots and chests in turn (the first stays quiet, the last is the gate's square).
+            // A clearing at every bend (not the first or the gate's square): five of them, spread along the road, hold a
+            // chest (see ChestCount), the rest a band of robots.
             Clearings.Clear();
             for (int i = 1; i < points.Count - 1; i++)
             {
-                if (i % 2 == 0 && rng.Next(3) == 0) continue;
                 var p = points[i];
                 int radius = 5 + rng.Next(2);
                 Disc(p.x, p.y, radius);
-                var kind = (Clearings.Count % 3 == 1) ? ClearingKind.Chest : ClearingKind.Robots;
-                Clearings.Add(new Clearing { x = Mathf.RoundToInt(p.x), y = h - 1 - Mathf.RoundToInt(p.y), radius = radius, kind = kind });
+                Clearings.Add(new Clearing { x = Mathf.RoundToInt(p.x), y = h - 1 - Mathf.RoundToInt(p.y), radius = radius, kind = ClearingKind.Robots });
+            }
+            int n = Clearings.Count;
+            for (int j = 0; j < Mathf.Min(ChestCount, n); j++)
+            {
+                int at = Mathf.Min(n - 1, Mathf.FloorToInt((j + 0.5f) * n / ChestCount));
+                var c = Clearings[at];
+                c.kind = ClearingKind.Chest;
+                Clearings[at] = c;
             }
             // The gate's square at the top, the gate in its north edge; foi starts at the bottom.
             var top = points[points.Count - 1];

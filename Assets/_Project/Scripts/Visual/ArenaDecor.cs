@@ -426,7 +426,7 @@ namespace SquashBot.Visual
                         int reach = Mathf.CeilToInt(s * 1.1f);
                         for (int ox = -reach; ox <= reach; ox++)
                             for (int oy = -reach; oy <= reach; oy++)
-                                if (ox * ox + oy * oy <= reach * reach) BuildingTop[new GridPos(x + ox, y + oy)] = y0 + hgt * 0.5f;
+                                if (ox * ox + oy * oy <= reach * reach) BuildingTop[new GridPos(x + ox, y + oy)] = y0 + hgt * 1.05f;
                         Shapes.Primitive(PrimitiveType.Cylinder, "Foot", t, new Vector3(0f, hgt * 0.2f, 0f), new Vector3(s * 2.2f, hgt * 0.2f, s * 2.2f), peakDarkM);
                         Shapes.Primitive(PrimitiveType.Cylinder, "Mid", t, new Vector3(0f, hgt * 0.55f, 0f), new Vector3(s * 1.5f, hgt * 0.2f, s * 1.5f), peakM);
                         Shapes.Primitive(PrimitiveType.Cylinder, "Top", t, new Vector3(0f, hgt * 0.85f, 0f), new Vector3(s * 0.85f, hgt * 0.15f, s * 0.85f), peakDarkM);

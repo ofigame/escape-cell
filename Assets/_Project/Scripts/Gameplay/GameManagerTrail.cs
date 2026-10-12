@@ -43,6 +43,34 @@ namespace SquashBot.Gameplay
         private Transform arenaExit;
         private GridPos arenaExitTile;
 
+        // ---------- Allies (see HuntSystemAllies) ----------
+
+        private const int MaxAllies = 24;
+        private const string AlliesKey = "sb_allies";
+        private int AllyHp => 3 + arenaIndex / 3;
+
+        /// <summary>The allies foi has with it (carried from road to arena and on, kept between sessions).</summary>
+        private int AlliesKept => PlayerPrefs.GetInt(AlliesKey, 0);
+
+        private void KeepAllies(int n)
+        {
+            if (n != AlliesKept) PlayerPrefs.SetInt(AlliesKey, Mathf.Clamp(n, 0, MaxAllies));
+        }
+
+        /// <summary>A new road or arena: the allies foi brought along stand round it.</summary>
+        private void SpawnKeptAllies()
+        {
+            hunt.AllyDamage = 1 + arenaIndex / 6;
+            int n = Mathf.Min(MaxAllies, AlliesKept);
+            for (int i = 0; i < n; i++) hunt.AddAlly(robot.Position, AllyHp);
+        }
+
+        /// <summary>Each frame of a fight: the allies still standing are kept.</summary>
+        private void TrackAllies()
+        {
+            if (State == GameState.Playing && arenaRun && !arenaGiftsPhase) KeepAllies(hunt.AlliesAlive);
+        }
+
         /// <summary>Where the open world picks up: the road out of the last arena won (or the first road).</summary>
         private int TrailResumeTarget()
         {
@@ -69,6 +97,7 @@ namespace SquashBot.Gameplay
             BeginRun();
             EnterTps();
             SetupTrail();
+            SpawnKeptAllies();
             ui.ShowIntro(Loc.F("trail.title", Loc.T(BattleArenas.NameKey(trailTarget))), Loc.T("trail.intro"));
             AudioManager.PlaySfx(Sfx.Win, 0.5f, 1.1f);
             RefreshHud();
@@ -101,7 +130,20 @@ namespace SquashBot.Gameplay
             l.robotHp = Mathf.RoundToInt(Mathf.Lerp(1f, 4f, d));
             l.robotStep = Mathf.Lerp(1.0f, 0.6f, d);
             l.monsterHp = 1;
+            Calm(l);
             return l;
+        }
+
+        /// <summary>The battle arenas and their roads are a plain fight: no crates from the sky, no holes, no floor tricks.</summary>
+        private static void Calm(LevelData l)
+        {
+            l.rules = FloorRule.None;
+            l.breakTiles = false;
+            l.bombChance = 0f;
+            l.fireChance = 0f;
+            l.lineWaveChance = 0f;
+            l.blocksPerWave = 0;
+            l.sweepers = l.erasers = l.drones = l.sandworms = l.crabs = l.turrets = l.penguins = l.springbots = 0;
         }
 
         /// <summary>The road's people and things: robot bands, chests and their guardians, the gate, the scenery.</summary>
@@ -241,7 +283,11 @@ namespace SquashBot.Gameplay
             var at = GridView.ToWorld(chest.tile) + Vector3.up * (GridView.SurfaceY + 1f);
             fx.Burst(at, Palette.Coin, Palette.CoinGlow, 60, 7f);
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 1.2f);
-            FloatAt(at, Loc.T("trail.chestOpen"), Palette.UiGold);
+            // Robots locked in it come out to fight on foi's side (more on later roads).
+            int freed = 0, want = 2 + arenaIndex / 4;
+            for (int i = 0; i < want && hunt.AlliesAlive < MaxAllies; i++) if (hunt.AddAlly(chest.tile, AllyHp)) freed++;
+            KeepAllies(hunt.AlliesAlive);
+            FloatAt(at, Loc.T("trail.chestOpen") + (freed > 0 ? "\n" + Loc.F("trail.allies", freed) : ""), Palette.UiGold);
             // Its gifts scatter round it.
             int[] kinds = { 0, 1, 2, 2 };
             int n = 0;

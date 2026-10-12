@@ -228,6 +228,7 @@ namespace SquashBot.Gameplay
             }
             bugs.Clear();
             guards.Clear();
+            StopAllies();
             StopTowers();
             ClearTelegraph();
             if (monster != null) Destroy(monster.gameObject);
@@ -841,6 +842,7 @@ namespace SquashBot.Gameplay
             float dt = Time.deltaTime;
             foreach (var b in bugs) if (!b.dead) UpdateBug(b, dt);
             foreach (var g in guards) if (!g.dead) UpdateGuard(g, dt);
+            UpdateAllies(dt);
             UpdateTowers(dt);
             UpdateReinforcements();
             UpdateDrones(dt);
@@ -965,6 +967,7 @@ namespace SquashBot.Gameplay
                     else if (g.area.Contains(robot.Position)) Hit?.Invoke(robot.Position, ShareOf(g));
                     g.atWall = false;
                     if (CompanionTile.HasValue && g.area.Contains(CompanionTile.Value)) CompanionHurt?.Invoke(g.brute ? 3 : 2);
+                    HurtAllies(g, g.area);
                     g.area.Clear();
                 }
                 return;
@@ -975,6 +978,20 @@ namespace SquashBot.Gameplay
             int near = Chebyshev(robot.Position, g.pos);
             // Fifi in reach and foi not (or now and then anyway): the robot goes for Fifi.
             bool atFifi = CompanionTile.HasValue && Chebyshev(CompanionTile.Value, g.pos) <= AttackReach && (near > AttackReach || rng.Next(4) == 0);
+            // An ally nearer than foi: it fights the ally (now and then foi in reach anyway).
+            var ally = NearestAlly(g.pos, out int allyD);
+            bool atAlly = ally != null && allyD < near && !(near <= AttackReach && rng.Next(3) == 0);
+            if (atAlly && allyD <= AttackReach && g.cooldown <= 0f)
+            {
+                g.windup = 0f;
+                g.target = ally.pos;
+                g.area.Clear();
+                g.area.Add(g.target);
+                if (g.brute)
+                    foreach (var d in DirectionExtensions.All)
+                        if (grid.IsFloor(g.target + d.ToOffset())) g.area.Add(g.target + d.ToOffset());
+                return;
+            }
             if ((near <= AttackReach || atFifi) && g.cooldown <= 0f && !PlayerAway)
             {
                 g.windup = 0f;
@@ -988,8 +1005,8 @@ namespace SquashBot.Gameplay
             }
             // foi up on a gun post: the crowd holds its ground; the warlords march to the foot of the rampart under the
             // gun and smash at it from there (they never climb).
-            var goal = robot.Position;
-            if (PlayerAway)
+            var goal = atAlly ? ally.pos : robot.Position;
+            if (PlayerAway && !atAlly)
             {
                 if (g.rank < 99 || WallTarget == null || !(WallTarget() is GridPos wall)) return;
                 goal = wall;
@@ -1005,11 +1022,11 @@ namespace SquashBot.Gameplay
             }
             int dist = goal.Manhattan(g.pos);
             g.step -= dt;
-            if (g.step > 0f || (!PlayerAway && near <= 1) || (PlayerAway && Chebyshev(g.pos, goal) <= 1)) return;
+            if (g.step > 0f || (!PlayerAway && (atAlly ? allyD : near) <= 1) || (PlayerAway && Chebyshev(g.pos, goal) <= 1)) return;
             g.step = level.robotStep * (g.brute ? 1.3f : 0.72f) * (Time.time < g.alertUntil ? 0.45f : 1f); // roused: at a run
             if (g.human != null) g.human.Step();
             // The arena city: round the buildings by the street map (distances from the goal), never stuck behind a block.
-            if (level.hardAtOnce > 0 && FlowStep(g, goal)) return;
+            if (level.hardAtOnce > 0 && !atAlly && FlowStep(g, goal)) return;
             // One step towards the robot along whichever axis brings it closer and is free.
             GridPos bestNext = g.pos;
             int bestDist = dist;

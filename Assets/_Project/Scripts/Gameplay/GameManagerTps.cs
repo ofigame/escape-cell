@@ -82,6 +82,7 @@ namespace SquashBot.Gameplay
             UpdateArenaGifts();
             UpdateTrail(Time.deltaTime);
             UpdateArenaExit();
+            TrackAllies();
             hunt.Enemies(mapEnemies);
             tps.Minimap.Tick(dt, robot.transform.position, Gunning ? gunYaw : tpsYaw, mapEnemies);
             var look = tps.TakeLook();
