@@ -334,7 +334,7 @@ namespace SquashBot.UI
             bool circle = sprite == UiSprites.Circle;
             float w = root.rect.width > 0f ? root.rect.width : root.sizeDelta.x;
             float h = root.rect.height > 0f ? root.rect.height : root.sizeDelta.y;
-            if (ppu <= 0f) ppu = Mathf.Clamp(88f / Mathf.Max(1f, Mathf.Min(w, h)), 0.25f, 3f); // radius = half the height: pill ends
+            if (ppu <= 0f) ppu = 44f / 30f; // every button: corners of a 30-unit radius (the sprite's 44-pixel corner)
             var face = Stretch("Face", root);
             Sprite faceSprite = s.glass ? (circle ? UiSprites.Circle : UiSprites.Rounded) : (circle ? UiSprites.CircleGradient : UiSprites.RoundedGradient);
             var image = Fill(face, s.face, faceSprite, circle ? 1f : ppu);

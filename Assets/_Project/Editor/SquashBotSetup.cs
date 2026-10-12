@@ -469,7 +469,13 @@ namespace SquashBot.EditorTools
             // Less code for IL2CPP to convert: keeps the cloud runner's memory in check (exit code 137 = out of memory).
             PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.iOS, ManagedStrippingLevel.Medium);
             PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.iOS, Il2CppCodeGeneration.OptimizeSize);
-            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
+            // Portrait in play (locked at start by the game), landscape allowed for the battle arenas' TPS fight: the
+            // phone's app manifest / Info.plist must list both, so the setting is auto-rotation with the three allowed.
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
+            PlayerSettings.allowedAutorotateToPortrait = true;
+            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+            PlayerSettings.allowedAutorotateToLandscapeRight = true;
             PlayerSettings.colorSpace = ColorSpace.Linear;
 
             // White ice from the very first frame: the native launch screen (no Unity logo) shows the same ice as the game's
