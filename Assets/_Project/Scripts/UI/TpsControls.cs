@@ -13,13 +13,19 @@ namespace SquashBot.UI
     /// </summary>
     public class TpsControls : MonoBehaviour
     {
-        public const float StickRadius = 170f;
+        public const float StickRadius = 130f;
 
         public Vector2 Move { get; private set; }
+        /// <summary>The strike button is held (a gun post fires while it is).</summary>
+        public bool StrikeHeld => strikeButton != null && strikeButton.Held;
+        private PressButton strikeButton;
+        private RectTransform stickArea, spinButton, jumpButton, crosshair;
+        private TMPro.TextMeshProUGUI ammoText;
         public event Action Strike, Spin, Jump;
 
         private Vector2 look;
         private Canvas canvas;
+        private CanvasScaler scaler;
 
         /// <summary>The camera turn gathered since the last call (screen heights dragged, x right, y up).</summary>
         public Vector2 TakeLook()
@@ -31,18 +37,37 @@ namespace SquashBot.UI
 
         public static TpsControls Create()
         {
-            var canvas = UiFactory.CreateCanvas("TpsControls", out _);
+            var canvas = UiFactory.CreateCanvas("TpsControls", out var scaler);
             canvas.sortingOrder = 9;
             var c = canvas.gameObject.AddComponent<TpsControls>();
             c.canvas = canvas;
+            c.scaler = scaler;
             var root = canvas.transform;
             // The look area first (under everything else), the stick's area over its left part, the buttons on top.
             Area<LookArea>("LookArea", root, new Vector2(0.4f, 0f), new Vector2(1f, 0.82f)).owner = c;
             var stick = Area<Stick>("MoveArea", root, new Vector2(0f, 0f), new Vector2(0.4f, 0.82f));
             stick.Build(c);
-            Button(root, "Strike", new Vector2(-230f, 250f), 250f, new Color(1f, 0.55f, 0.25f, 0.85f), 0, () => c.Strike?.Invoke());
-            Button(root, "Spin", new Vector2(-470f, 170f), 170f, new Color(0.45f, 0.75f, 1f, 0.8f), 1, () => c.Spin?.Invoke());
-            Button(root, "Jump", new Vector2(-260f, 520f), 160f, new Color(0.55f, 1f, 0.6f, 0.8f), 2, () => c.Jump?.Invoke());
+            c.stickArea = (RectTransform)stick.transform;
+            // The gun post's aim: a crosshair in the middle and the bullets left (shown only up on a post).
+            c.crosshair = UiFactory.Box("Crosshair", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(90f, 90f));
+            c.crosshair.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(UiFactory.Stretch("Ring", c.crosshair), new Color(1f, 0.35f, 0.25f, 0.95f), UiSprites.Ring, 0.35f).raycastTarget = false;
+            var dot = UiFactory.Box("Dot", c.crosshair, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(14f, 14f));
+            dot.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(dot, new Color(1f, 0.35f, 0.25f), UiSprites.Circle).raycastTarget = false;
+            foreach (var (pos, size) in new[] { (new Vector2(0f, 62f), new Vector2(6f, 30f)), (new Vector2(0f, -62f), new Vector2(6f, 30f)), (new Vector2(62f, 0f), new Vector2(30f, 6f)), (new Vector2(-62f, 0f), new Vector2(30f, 6f)) })
+            {
+                var tick = UiFactory.Box("Tick", c.crosshair, new Vector2(0.5f, 0.5f), pos, size);
+                tick.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(tick, new Color(1f, 0.35f, 0.25f, 0.95f), UiSprites.Rounded, 3f).raycastTarget = false;
+            }
+            c.ammoText = UiFactory.TextBox("Ammo", root, new Vector2(1f, 0f), new Vector2(-190f, 330f), new Vector2(260f, 70f), "100", 56f, Color.white);
+            c.ammoText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            c.ammoText.raycastTarget = false;
+            c.strikeButton = Button(root, "Strike", new Vector2(-190f, 200f), 200f, new Color(1f, 0.55f, 0.25f, 0.85f), 0, () => c.Strike?.Invoke()).GetComponent<PressButton>();
+            c.spinButton = Button(root, "Spin", new Vector2(-390f, 130f), 135f, new Color(0.45f, 0.75f, 1f, 0.8f), 1, () => c.Spin?.Invoke());
+            c.jumpButton = Button(root, "Jump", new Vector2(-200f, 410f), 130f, new Color(0.55f, 1f, 0.6f, 0.8f), 2, () => c.Jump?.Invoke());
+            c.SetGunMode(false, 0);
             c.Show(false);
             return c;
         }
@@ -60,7 +85,20 @@ namespace SquashBot.UI
             return area.gameObject.AddComponent<T>();
         }
 
-        private static void Button(Transform parent, string name, Vector2 fromBottomRight, float size, Color colour, int symbol, Action down)
+        /// <summary>Up on a gun post: the crosshair and bullets show, the stick and spin go, the jump button climbs down.</summary>
+        public void SetGunMode(bool on, int ammo)
+        {
+            crosshair.gameObject.SetActive(on);
+            ammoText.gameObject.SetActive(on);
+            ammoText.text = ammo.ToString();
+            ammoText.color = ammo <= 15 ? new Color(1f, 0.45f, 0.35f) : Color.white;
+            stickArea.gameObject.SetActive(!on);
+            spinButton.gameObject.SetActive(!on);
+            jumpButton.localRotation = Quaternion.Euler(0f, 0f, on ? 180f : 0f); // the chevron points down: climb down
+            if (on) Move = Vector2.zero;
+        }
+
+        private static RectTransform Button(Transform parent, string name, Vector2 fromBottomRight, float size, Color colour, int symbol, Action down)
         {
             var r = UiFactory.Box(name, parent, new Vector2(1f, 0f), fromBottomRight, new Vector2(size, size));
             r.pivot = new Vector2(0.5f, 0.5f);
@@ -84,6 +122,7 @@ namespace SquashBot.UI
                 Bar(r, new Vector2(size * 0.1f, 0f), new Vector2(size * 0.1f, size * 0.36f), 40f);
             }
             r.gameObject.AddComponent<PressButton>().down = down;
+            return r;
         }
 
         private static void Bar(RectTransform parent, Vector2 at, Vector2 size, float angle)
@@ -93,6 +132,10 @@ namespace SquashBot.UI
             b.localRotation = Quaternion.Euler(0f, 0f, angle);
             UiFactory.Fill(b, Color.white, UiSprites.Rounded, 4f).raycastTarget = false;
         }
+
+        // Made while the phone was still upright: the scale follows the screen as it turns (landscape fits the height),
+        // or everything would come out sized for the long side.
+        private void Update() => scaler.matchWidthOrHeight = UiFactory.MatchFor(Screen.width, Screen.height);
 
         private void OnDisable() { Move = Vector2.zero; look = Vector2.zero; }
 
@@ -115,7 +158,7 @@ namespace SquashBot.UI
         {
             private TpsControls owner;
             private RectTransform area, baseRect, knob;
-            private Vector2 home = new Vector2(300f, 300f);
+            private Vector2 home = new Vector2(240f, 240f);
             private int pointer = int.MinValue;
 
             public void Build(TpsControls c)
@@ -180,6 +223,7 @@ namespace SquashBot.UI
             public Action down;
             private float pressed;
             private bool held;
+            public bool Held => held;
             public void OnPointerDown(PointerEventData e) { held = true; pressed = 1f; down?.Invoke(); }
             public void OnPointerUp(PointerEventData e) => held = false;
             private void Update()

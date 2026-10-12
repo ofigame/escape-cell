@@ -83,8 +83,9 @@ namespace SquashBot.Visual
             }
             float y0 = GridView.SurfaceY;
 
-            bool Main(GridPos p) => grid.IsFloor(p) && !grid.IsCage(p) && !grid.IsBridge(p) && !grid.IsLava(p) && !grid.IsSafe(p);
-            bool Keep(GridPos p) => grid.IsLava(p) || grid.IsCage(p) || grid.IsBridge(p) || grid.IsSafe(p) || grid.IsFloor(p);
+            // Obstacle tiles count as floor for the walls (the arenas' gun-post stairs stand on them against the rampart).
+            bool Main(GridPos p) => (grid.IsFloor(p) || grid.IsWall(p)) && !grid.IsCage(p) && !grid.IsBridge(p) && !grid.IsLava(p) && !grid.IsSafe(p);
+            bool Keep(GridPos p) => grid.IsLava(p) || grid.IsCage(p) || grid.IsBridge(p) || grid.IsSafe(p) || grid.IsFloor(p) || grid.IsWall(p);
 
             // Walls on every outer edge of the floor.
             var lightSpots = new List<Vector3>();

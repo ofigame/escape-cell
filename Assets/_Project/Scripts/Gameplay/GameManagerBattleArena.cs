@@ -39,11 +39,12 @@ namespace SquashBot.Gameplay
             arenaRun = true;
             arenaIndex = i;
             arenaBestStreak = 0;
+            arenaGiftsPhase = arenaGiftsDone = false;
             levelIndex = BattleArenas.ThemeLevel(i);
             level = BuildArenaLevel(i);
             BeginRun();
             EnterTps(); // fought in landscape, over foi's shoulder
-            ui.ShowIntro(Loc.T("arena." + i), Loc.T("arena.intro"));
+            ui.ShowIntro(Loc.T(BattleArenas.NameKey(i)), Loc.T("arena.intro"));
             AudioManager.PlaySfx(Sfx.Win, 0.7f, 0.9f);
             RefreshHud();
             ui.SkillBar.Refresh(true);
@@ -63,18 +64,21 @@ namespace SquashBot.Gameplay
             l.marathon = false;
             l.final = false;
             l.mission = MissionType.Hunt;
-            l.number = Mathf.Min(250, levelIndex + 30); // tougher bugs and warlords than the level it borrows
-            float d = Mathf.Clamp01(0.55f + i * 0.05f);
+            l.number = Mathf.Min(250, levelIndex + 20); // a little tougher than the level it borrows
+            float d = Mathf.Clamp01(0.5f + i * 0.02f);
             l.score = Mathf.RoundToInt(d * 100f);
-            l.robots = 70 + i * 14;
-            l.robotsAtOnce = 8 + i / 2;
-            l.elites = Mathf.RoundToInt(l.robots * 0.15f);
-            l.brutes = 2 + i / 3;
-            l.towers = 4 + i / 2;
-            l.bugs = 20 + i * 3;
-            l.robotHp = 2 + Mathf.RoundToInt(d * 4f);
-            l.robotStep = Mathf.Lerp(0.8f, 0.45f, d);
-            l.monsterHp = 30 + i * 6;
+            // A steady fight, never the whole crowd at once: at most 15 robots on the floor — 10 easy ones and 5
+            // warlords — the rest dropping in as they fall.
+            l.elites = 12 + i / 2;
+            l.robots = 40 + i * 3; // the easy ones (the warlords come on top)
+            l.robotsAtOnce = 10;
+            l.hardAtOnce = 5;
+            l.brutes = 0;
+            l.towers = 3 + i / 4;
+            l.bugs = 16 + i;
+            l.robotHp = 1 + Mathf.RoundToInt(d * 3f);
+            l.robotStep = Mathf.Lerp(0.85f, 0.55f, d);
+            l.monsterHp = 30 + i * 4;
             return l;
         }
 
@@ -120,6 +124,134 @@ namespace SquashBot.Gameplay
             ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.5f), text, Palette.UiGold, 64f);
             AudioManager.PlaySfx(Sfx.Coin, 1f, 1.4f);
             fx.Burst(robot.transform.position + Vector3.up * 1f, Palette.Coin, Palette.CoinGlow, 40, 6f);
+        }
+
+        // ---------- The winner's gifts ----------
+
+        private bool arenaGiftsPhase, arenaGiftsDone;
+        private float arenaGiftsUntil;
+        private readonly System.Collections.Generic.List<(GridPos tile, Transform body, int kind)> arenaGifts = new System.Collections.Generic.List<(GridPos, Transform, int)>();
+
+        /// <summary>
+        /// The arena is won: the first time, gifts burst out over the courtyard (boosts, defences and coin bags that
+        /// make the next world easier); won again, a shower of coin bags instead. foi runs round collecting them (the
+        /// fight is over: nothing moves but foi); when all are picked up (or after half a minute) the result card comes.
+        /// </summary>
+        private void StartArenaGifts()
+        {
+            arenaGiftsPhase = true;
+            LeavePostNow();
+            hunt.Freeze();
+            hazards.Freeze();
+            enemies.Freeze();
+            floorRules.Freeze();
+            robot.Cheer();
+            AudioManager.PlaySfx(Sfx.Win);
+            fx.Burst(robot.transform.position + Vector3.up * 0.8f, Palette.Coin, Palette.CoinGlow, 50, 7f);
+            var spots = new System.Collections.Generic.List<GridPos>();
+            foreach (var p in grid.AllPositions())
+            {
+                int d = HuntSystem.Chebyshev(p, robot.Position);
+                if (d >= 2 && d <= 8 && grid.IsStandable(p) && !grid.IsGap(p)) spots.Add(p);
+            }
+            bool first = BattleArenas.Wins(arenaIndex) == 0;
+            int[] kinds = first ? new[] { 0, 0, 0, 1, 1, 2, 2, 2 } : new[] { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 }; // gifts once, then gold
+            foreach (int kind in kinds)
+            {
+                if (spots.Count == 0) break;
+                var at = spots[Random.Range(0, spots.Count)];
+                spots.RemoveAll(q => HuntSystem.Chebyshev(q, at) < 2); // spread out
+                arenaGifts.Add((at, GiftBox(at, kind), kind));
+            }
+            arenaGiftsUntil = Time.time + 30f;
+            ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.62f), Loc.T(first ? "arena.collect" : "arena.collectGold"), Palette.UiGold, 70f);
+        }
+
+        /// <summary>A gift box on a tile (coloured by what it holds, ribboned) or a coin bag, glowing and bobbing.</summary>
+        private Transform GiftBox(GridPos at, int kind)
+        {
+            var colour = kind == 0 ? new Color(0.35f, 0.75f, 1f) : kind == 1 ? new Color(1f, 0.45f, 0.35f) : new Color(1f, 0.82f, 0.25f);
+            var t = new GameObject("ArenaGift").transform;
+            t.position = GridView.ToWorld(at) + Vector3.up * (GridView.SurfaceY + 0.35f);
+            var body = MaterialFactory.Create(colour, colour * 0.6f);
+            var ribbon = MaterialFactory.Create(Color.white, new Color(0.6f, 0.6f, 0.6f));
+            if (kind == 2)
+            {
+                // A fat sack of gold, tied at the neck, coins spilling on top.
+                Shapes.Rounded("Sack", t, Vector3.zero, new Vector3(0.5f, 0.48f, 0.5f), 0.22f, body);
+                Shapes.Rounded("Neck", t, new Vector3(0f, 0.28f, 0f), new Vector3(0.22f, 0.12f, 0.22f), 0.05f, ribbon);
+                Shapes.Rounded("Coin", t, new Vector3(0f, 0.38f, 0f), new Vector3(0.24f, 0.05f, 0.24f), 0.1f, MaterialFactory.Create(Palette.Coin, Palette.CoinGlow));
+            }
+            else
+            {
+                Shapes.Rounded("Box", t, Vector3.zero, new Vector3(0.5f, 0.42f, 0.5f), 0.06f, body);
+                Shapes.Rounded("Lid", t, new Vector3(0f, 0.24f, 0f), new Vector3(0.56f, 0.1f, 0.56f), 0.04f, body);
+                Shapes.Rounded("RibbonA", t, Vector3.zero, new Vector3(0.1f, 0.54f, 0.58f), 0.02f, ribbon);
+                Shapes.Rounded("RibbonB", t, Vector3.zero, new Vector3(0.58f, 0.54f, 0.1f), 0.02f, ribbon);
+                Shapes.Rounded("Bow", t, new Vector3(0f, 0.34f, 0f), new Vector3(0.22f, 0.12f, 0.22f), 0.05f, ribbon);
+            }
+            fx.Burst(t.position, colour, colour * 2f, 14, 4f);
+            return t;
+        }
+
+        /// <summary>Each frame of the gift phase: the boxes spin and bob, foi on one opens it.</summary>
+        private void UpdateArenaGifts()
+        {
+            if (!arenaGiftsPhase) return;
+            for (int i = arenaGifts.Count - 1; i >= 0; i--)
+            {
+                var (tile, body, kind) = arenaGifts[i];
+                if (body == null) { arenaGifts.RemoveAt(i); continue; }
+                body.rotation = Quaternion.Euler(0f, Time.time * 90f + i * 40f, 0f);
+                body.position = GridView.ToWorld(tile) + Vector3.up * (GridView.SurfaceY + 0.4f + Mathf.Sin(Time.time * 3f + i) * 0.1f);
+                if (robot.Position != tile) continue;
+                OpenArenaGift(kind, body.position);
+                Destroy(body.gameObject);
+                arenaGifts.RemoveAt(i);
+            }
+            if (arenaGifts.Count > 0 && Time.time < arenaGiftsUntil) return;
+            foreach (var g in arenaGifts) if (g.body != null) Destroy(g.body.gameObject);
+            arenaGifts.Clear();
+            arenaGiftsPhase = false;
+            arenaGiftsDone = true;
+            Win();
+        }
+
+        private void OpenArenaGift(int kind, Vector3 at)
+        {
+            if (kind == 0)
+            {
+                var counter = new System.Collections.Generic.List<Boost>(Shop.Counter());
+                counter.RemoveAll(Shop.Full);
+                if (counter.Count > 0)
+                {
+                    var b = counter[Random.Range(0, counter.Count)];
+                    Shop.Give(b);
+                    Gifted(Loc.F("arena.giftItem", Loc.T("shop." + b)), at);
+                    return;
+                }
+                kind = 2; // nothing more fits in the bag: gold instead
+            }
+            if (kind == 1)
+            {
+                var open = new System.Collections.Generic.List<DefenseKind>();
+                foreach (var k in Defenses.All) if (Defenses.Unlocked(k)) open.Add(k);
+                var dk = open[Random.Range(0, open.Count)];
+                Defenses.AddStock(dk, 1);
+                Gifted(Loc.F("arena.giftItem", "+1 " + Loc.T("def." + dk)), at);
+                return;
+            }
+            int c = 40 + arenaIndex * 8;
+            coinsThisRun += c;
+            Gifted(Loc.F("arena.giftCoins", c), at);
+        }
+
+        private void Gifted(string text, Vector3 at)
+        {
+            FloatAt(at, text, Palette.UiGold);
+            fx.Burst(at, Palette.Coin, Palette.CoinGlow, 30, 5f);
+            AudioManager.PlaySfx(Sfx.Coin, 1f, 1.3f);
+            Haptics.Light();
         }
 
         /// <summary>The arena ended: its record kept, the result card says how it went.</summary>

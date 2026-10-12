@@ -31,6 +31,7 @@ namespace SquashBot.Gameplay
             GridView.FortressTiles = on;
             theme = theme ?? WorldTheme.Current;
             // Polished marble floors everywhere (the arenas' design), in each world's colour — or the arena's own.
+            GridView.PlainObstacles = arenaRun;
             GridView.FortressStone = arenaRun ? BattleArenas.Style(arenaIndex).floor : FortressStoneFor(world, theme.accent);
             GridView.Marble = true;
             GridView.FortressMetal = false;
@@ -105,6 +106,7 @@ namespace SquashBot.Gameplay
             FortressFloor.WallThick = wallThick;
             fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, FortressRects(), wallHeight);
             if (arenaRun) ArenaDecor.Build(fortressFloor, grid, level.stageBounds, arenaIndex, robot.Position, BattleArenas.Style(arenaIndex).accent, BattleArenas.Style(arenaIndex).trim);
+            if (arenaRun) BuildGunPosts(fortressFloor);
             // The fortress never moves: its thousands of pieces are merged into a few big meshes (far fewer draw calls).
             if (fortressFloor.GetComponentsInChildren<MeshRenderer>().Length < 6000) StaticBatchingUtility.Combine(fortressFloor.gameObject); // never on a huge one (memory)
             // Craft crossing the sky over the later fortresses.

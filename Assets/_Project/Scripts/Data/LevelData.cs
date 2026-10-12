@@ -182,6 +182,8 @@ namespace SquashBot.Data
         public int fortressStages = 1;
         [Tooltip("vanG's warlords: the very strong robots (about a tenth of the crowd).")]
         public int elites;
+        [Tooltip("At most this many warlords at once (0: all at the start); the rest drop in as they fall (the battle arenas).")]
+        public int hardAtOnce;
         [Tooltip("x0, y0, x1, y1 of each stage in grid coordinates, the first (foi's cell) first.")]
         public int[] stageBounds;
         [Tooltip("A hard floor: easy and very strong robots mixed, fire pits in the last stage, Fifi falls with foi, a rescue gives half health.")]

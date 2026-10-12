@@ -36,6 +36,7 @@ namespace SquashBot.Visual
             var centre = new Vector2((b[0] + b[2]) * 0.5f, (b[1] + b[3]) * 0.5f);
             for (int k = 0; k < 8; k++)
             {
+                if (k == 2 || k == 6) continue; // north and south: the gun posts stand there (see GameManagerGuns)
                 float ang = k * 45f * Mathf.Deg2Rad;
                 var dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
                 // Walk out to the courtyard's edge along the ray.

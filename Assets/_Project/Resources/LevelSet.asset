@@ -85,6 +85,7 @@ MonoBehaviour:
     fortress: 1
     fortressStages: 1
     elites: 0
+    hardAtOnce: 0
     stageBounds: 
     hard: 0
     robotHp: 1
@@ -180,6 +181,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 0
+    hardAtOnce: 0
     stageBounds: 01000000010000000900000009000000i
     hard: 0
     robotHp: 1
@@ -276,6 +278,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 0
+    hardAtOnce: 0
     stageBounds: 01000000010000000b0000000a000000i
     hard: 0
     robotHp: 1
@@ -372,6 +375,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 0
+    hardAtOnce: 0
     stageBounds: 01000000010000000b0000000a000000i
     hard: 0
     robotHp: 1
@@ -469,6 +473,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 0
+    hardAtOnce: 0
     stageBounds: 01000000010000000b0000000b000000i
     hard: 0
     robotHp: 1
@@ -566,6 +571,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000b0000000b000000i
     hard: 0
     robotHp: 2
@@ -664,6 +670,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000d0000000c000000i
     hard: 0
     robotHp: 2
@@ -762,6 +769,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000d0000000c000000i
     hard: 0
     robotHp: 2
@@ -859,6 +867,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000b0000000b000000i
     hard: 0
     robotHp: 2
@@ -956,6 +965,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000b0000000b000000i
     hard: 0
     robotHp: 2
@@ -1053,6 +1063,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000b0000000b000000i
     hard: 0
     robotHp: 2
@@ -1151,6 +1162,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000d0000000c000000i
     hard: 0
     robotHp: 3
@@ -1249,6 +1261,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000d0000000c000000i
     hard: 0
     robotHp: 3
@@ -1347,6 +1360,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000d0000000c000000i
     hard: 0
     robotHp: 3
@@ -1445,6 +1459,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000d0000000c000000i
     hard: 0
     robotHp: 3
@@ -1543,6 +1558,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000d0000000c000000i
     hard: 0
     robotHp: 3
@@ -1641,6 +1657,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000d0000000c000000i
     hard: 0
     robotHp: 3
@@ -1740,6 +1757,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000d0000000d000000i
     hard: 0
     robotHp: 3
@@ -1839,6 +1857,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000d0000000d000000i
     hard: 0
     robotHp: 3
@@ -1938,6 +1957,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 1
     elites: 3
+    hardAtOnce: 0
     stageBounds: 01000000010000000d0000000d000000i
     hard: 0
     robotHp: 3
@@ -2061,6 +2081,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 4
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 3
@@ -2184,6 +2205,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 4
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 3
@@ -2307,6 +2329,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 4
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 3
@@ -2430,6 +2453,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 4
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 3
@@ -2553,6 +2577,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 4
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 3
@@ -2676,6 +2701,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 4
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -2799,6 +2825,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 4
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -2922,6 +2949,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 5
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -3045,6 +3073,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 5
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -3168,6 +3197,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -3291,6 +3321,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -3414,6 +3445,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -3537,6 +3569,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -3660,6 +3693,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -3783,6 +3817,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -3906,6 +3941,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -4029,6 +4065,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -4152,6 +4189,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -4275,6 +4313,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -4398,6 +4437,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 1
     robotHp: 4
@@ -4521,6 +4561,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -4644,6 +4685,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -4767,6 +4809,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -4890,6 +4933,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -5013,6 +5057,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -5136,6 +5181,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -5259,6 +5305,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -5382,6 +5429,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -5505,6 +5553,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -5628,6 +5677,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 1
     robotHp: 4
@@ -5751,6 +5801,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -5874,6 +5925,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -5997,6 +6049,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -6120,6 +6173,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -6243,6 +6297,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -6366,6 +6421,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -6489,6 +6545,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -6612,6 +6669,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -6735,6 +6793,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 0
     robotHp: 4
@@ -6858,6 +6917,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 2
     elites: 6
+    hardAtOnce: 0
     stageBounds: 03000000010000000f0000000d00000001000000160000001100000025000000i
     hard: 1
     robotHp: 4
@@ -7008,6 +7068,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 4
@@ -7158,6 +7219,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 4
@@ -7308,6 +7370,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 4
@@ -7458,6 +7521,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 4
@@ -7608,6 +7672,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 4
@@ -7758,6 +7823,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 4
@@ -7908,6 +7974,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 4
@@ -8058,6 +8125,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 4
@@ -8208,6 +8276,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 4
@@ -8358,6 +8427,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 1
     robotHp: 4
@@ -8508,6 +8578,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 5
@@ -8658,6 +8729,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 5
@@ -8808,6 +8880,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 5
@@ -8958,6 +9031,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 5
@@ -9108,6 +9182,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 5
@@ -9258,6 +9333,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 5
@@ -9408,6 +9484,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 6
@@ -9558,6 +9635,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000110000000d00000003000000160000001300000025000000010000002e0000001500000040000000i
     hard: 0
     robotHp: 6
@@ -9711,6 +9789,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 0
     robotHp: 6
@@ -9864,6 +9943,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -10017,6 +10097,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 0
     robotHp: 6
@@ -10170,6 +10251,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 0
     robotHp: 6
@@ -10323,6 +10405,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 0
     robotHp: 6
@@ -10476,6 +10559,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 0
     robotHp: 6
@@ -10629,6 +10713,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 0
     robotHp: 6
@@ -10782,6 +10867,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 0
     robotHp: 6
@@ -10935,6 +11021,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 0
     robotHp: 6
@@ -11088,6 +11175,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 0
     robotHp: 6
@@ -11241,6 +11329,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 0
     robotHp: 6
@@ -11394,6 +11483,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -11547,6 +11637,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -11700,6 +11791,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -11853,6 +11945,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -12006,6 +12099,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -12159,6 +12253,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -12312,6 +12407,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -12465,6 +12561,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -12618,6 +12715,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -12771,6 +12869,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -12924,6 +13023,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -13077,6 +13177,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -13230,6 +13331,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -13383,6 +13485,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -13536,6 +13639,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -13689,6 +13793,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 8
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -13842,6 +13947,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 9
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -13995,6 +14101,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 9
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -14148,6 +14255,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 9
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -14301,6 +14409,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 9
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -14454,6 +14563,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 3
     elites: 9
+    hardAtOnce: 0
     stageBounds: 0500000001000000130000000e0000000300000017000000150000002700000001000000300000001700000043000000i
     hard: 1
     robotHp: 6
@@ -14638,6 +14748,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -14822,6 +14933,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -15006,6 +15118,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -15190,6 +15303,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -15374,6 +15488,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -15558,6 +15673,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -15742,6 +15858,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -15926,6 +16043,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -16110,6 +16228,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -16294,6 +16413,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -16478,6 +16598,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -16662,6 +16783,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -16846,6 +16968,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -17030,6 +17153,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -17214,6 +17338,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -17398,6 +17523,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -17582,6 +17708,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -17766,6 +17893,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -17950,6 +18078,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -18134,6 +18263,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -18318,6 +18448,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -18502,6 +18633,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -18686,6 +18818,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -18870,6 +19003,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -19054,6 +19188,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -19238,6 +19373,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -19422,6 +19558,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -19606,6 +19743,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -19790,6 +19928,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -19974,6 +20113,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -20158,6 +20298,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -20342,6 +20483,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -20526,6 +20668,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 10
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -20710,6 +20853,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -20894,6 +21038,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -21078,6 +21223,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -21262,6 +21408,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -21446,6 +21593,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -21630,6 +21778,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -21814,6 +21963,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -21998,6 +22148,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -22182,6 +22333,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -22366,6 +22518,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -22550,6 +22703,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -22734,6 +22888,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -22918,6 +23073,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -23102,6 +23258,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -23286,6 +23443,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -23470,6 +23628,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -23654,6 +23813,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 4
     elites: 11
+    hardAtOnce: 0
     stageBounds: 0700000001000000150000000e0000000500000017000000170000002700000003000000300000001900000043000000010000004c0000001b00000062000000i
     hard: 1
     robotHp: 6
@@ -23872,6 +24032,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 6
@@ -24090,6 +24251,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 6
@@ -24308,6 +24470,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 6
@@ -24526,6 +24689,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 6
@@ -24744,6 +24908,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 6
@@ -24962,6 +25127,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 6
@@ -25180,6 +25346,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 6
@@ -25398,6 +25565,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 6
@@ -25616,6 +25784,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 6
@@ -25834,6 +26003,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 6
@@ -26052,6 +26222,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 7
@@ -26270,6 +26441,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 7
@@ -26488,6 +26660,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 7
@@ -26706,6 +26879,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 7
@@ -26924,6 +27098,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 7
@@ -27142,6 +27317,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 7
@@ -27360,6 +27536,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 7
@@ -27578,6 +27755,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 7
@@ -27796,6 +27974,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 7
@@ -28014,6 +28193,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 7
@@ -28232,6 +28412,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 7
@@ -28450,6 +28631,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 7
@@ -28668,6 +28850,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 7
@@ -28886,6 +29069,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 8
@@ -29104,6 +29288,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 12
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 8
@@ -29322,6 +29507,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 8
@@ -29540,6 +29726,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 8
@@ -29758,6 +29945,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 8
@@ -29976,6 +30164,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 8
@@ -30194,6 +30383,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 8
@@ -30412,6 +30602,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 8
@@ -30630,6 +30821,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000e0000000700000017000000190000002700000005000000300000001b00000043000000030000004c0000001d00000062000000010000006b0000001f00000084000000i
     hard: 1
     robotHp: 8
@@ -30853,6 +31045,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000f0000000700000018000000190000002900000005000000320000001b00000046000000030000004f0000001d00000066000000010000006f0000001f00000089000000i
     hard: 1
     robotHp: 8
@@ -31076,6 +31269,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000f0000000700000018000000190000002900000005000000320000001b00000046000000030000004f0000001d00000066000000010000006f0000001f00000089000000i
     hard: 1
     robotHp: 8
@@ -31299,6 +31493,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000f0000000700000018000000190000002900000005000000320000001b00000046000000030000004f0000001d00000066000000010000006f0000001f00000089000000i
     hard: 1
     robotHp: 8
@@ -31522,6 +31717,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000f0000000700000018000000190000002900000005000000320000001b00000046000000030000004f0000001d00000066000000010000006f0000001f00000089000000i
     hard: 1
     robotHp: 8
@@ -31745,6 +31941,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000f0000000700000018000000190000002900000005000000320000001b00000046000000030000004f0000001d00000066000000010000006f0000001f00000089000000i
     hard: 1
     robotHp: 8
@@ -31968,6 +32165,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000f0000000700000018000000190000002900000005000000320000001b00000046000000030000004f0000001d00000066000000010000006f0000001f00000089000000i
     hard: 1
     robotHp: 8
@@ -32191,6 +32389,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000f0000000700000018000000190000002900000005000000320000001b00000046000000030000004f0000001d00000066000000010000006f0000001f00000089000000i
     hard: 1
     robotHp: 8
@@ -32414,6 +32613,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 5
     elites: 13
+    hardAtOnce: 0
     stageBounds: 0900000001000000170000000f0000000700000018000000190000002900000005000000320000001b00000046000000030000004f0000001d00000066000000010000006f0000001f00000089000000i
     hard: 1
     robotHp: 8
@@ -32681,6 +32881,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -32948,6 +33149,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -33215,6 +33417,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -33482,6 +33685,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -33749,6 +33953,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -34016,6 +34221,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -34283,6 +34489,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -34550,6 +34757,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -34817,6 +35025,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -35084,6 +35293,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -35351,6 +35561,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -35618,6 +35829,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -35885,6 +36097,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -36152,6 +36365,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -36419,6 +36633,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 8
@@ -36686,6 +36901,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -36953,6 +37169,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -37220,6 +37437,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -37487,6 +37705,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -37754,6 +37973,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -38021,6 +38241,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -38288,6 +38509,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -38555,6 +38777,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -38822,6 +39045,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -39089,6 +39313,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -39356,6 +39581,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -39623,6 +39849,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -39890,6 +40117,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -40157,6 +40385,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -40424,6 +40653,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -40691,6 +40921,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 14
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -40958,6 +41189,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -41225,6 +41457,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -41492,6 +41725,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -41759,6 +41993,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -42026,6 +42261,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -42293,6 +42529,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -42560,6 +42797,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -42827,6 +43065,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -43094,6 +43333,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -43361,6 +43601,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -43628,6 +43869,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -43895,6 +44137,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -44162,6 +44405,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -44429,6 +44673,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -44696,6 +44941,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -44963,6 +45209,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -45230,6 +45477,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -45497,6 +45745,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9
@@ -45764,6 +46013,7 @@ MonoBehaviour:
     fortress: 0
     fortressStages: 6
     elites: 15
+    hardAtOnce: 0
     stageBounds: 0e000000010000001c0000000f0000000c000000180000001e000000290000000a000000320000002000000046000000080000004f0000002200000066000000060000006f0000002400000089000000010000009200000029000000b5000000i
     hard: 1
     robotHp: 9

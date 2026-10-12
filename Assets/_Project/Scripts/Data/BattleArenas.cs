@@ -11,7 +11,8 @@ namespace SquashBot.Data
     /// </summary>
     public static class BattleArenas
     {
-        public const int Count = 10;
+        /// <summary>One arena for every world, opening with it.</summary>
+        public const int Count = LevelCatalog.WorldCount;
 
         public enum Shape { Square, Hexagon, Octagon, Round, Diamond, Cross }
 
@@ -38,16 +39,39 @@ namespace SquashBot.Data
             new Look { shape = Shape.Octagon, floor = new Color(0.4f, 0.3f, 0.3f),   wall = new Color(0.16f, 0.11f, 0.11f), accent = new Color(1f, 0.25f, 0.1f),  trim = new Color(0.9f, 0.7f, 0.2f), fx = 1 },   // vanG's Throne
         };
 
-        public static Look Style(int i) => Looks[Mathf.Clamp(i, 0, Count - 1)];
+        /// <summary>The first ten have their own designs; the later worlds' arenas take their world's colours, each with
+        /// its own shape and crown.</summary>
+        public static Look Style(int i)
+        {
+            i = Mathf.Clamp(i, 0, Count - 1);
+            if (i < Looks.Length) return Looks[i];
+            var theme = SquashBot.Visual.WorldTheme.ForLevel(i * LevelCatalog.LevelsPerWorld);
+            Color.RGBToHSV(theme.accent, out float h, out _, out _);
+            return new Look
+            {
+                shape = (Shape)((i * 7 + 3) % 6),
+                floor = Color.HSVToRGB(h, 0.12f, 0.93f),
+                wall = Color.HSVToRGB(h, 0.4f, 0.5f),
+                accent = theme.accent,
+                trim = Color.HSVToRGB(Mathf.Repeat(h + 0.5f, 1f), 0.6f, 1f),
+                fx = i % 5 == 0 ? 1 : i % 3 == 0 ? 0 : 3,
+            };
+        }
 
-        /// <summary>The level (0-based) the player must have opened for an arena: 20, 40 … 200.</summary>
-        public static int UnlockAt(int i) => 19 + i * 20;
-        /// <summary>Whose enemies it borrows: a level a little past where it opens.</summary>
-        public static int ThemeLevel(int i) => Mathf.Min(249, UnlockAt(i) + 10);
+        /// <summary>The arena's name: its own for the first ten, its world's name after.</summary>
+        public static string NameKey(int i) => i < Looks.Length ? "arena." + i : SquashBot.Visual.WorldTheme.ForLevel(i * LevelCatalog.LevelsPerWorld).key;
+
+        /// <summary>The level (0-based) that opens an arena: its world's first level.</summary>
+        public static int UnlockAt(int i) => i * LevelCatalog.LevelsPerWorld;
+        /// <summary>Whose enemies it borrows: the middle of its world.</summary>
+        public static int ThemeLevel(int i) => Mathf.Min(LevelCatalog.LevelCount - 1, i * LevelCatalog.LevelsPerWorld + 5);
         /// <summary>How hard, 1..5 stars for the card.</summary>
-        public static int Stars(int i) => 1 + i / 2;
-        /// <summary>The courtyard's side (odd, so the cell sits in the middle): bigger with every arena.</summary>
-        public static int Size(int i) => 23 + i * 2;
+        public static int Stars(int i) => 1 + i / 5;
+        /// <summary>The courtyard's side (odd, so the cell sits in the middle): roomy for the TPS fight, bigger every few.</summary>
+        public static int Size(int i) => 33 + 2 * (i / 3);
+        /// <summary>The narrowest the courtyard's first and last rows may be: room on the north and south ramparts for
+        /// the gun posts' stairs (round and diamond courtyards lose their tips).</summary>
+        private const int PostRowWidth = 13;
 
         public static bool Unlocked(int i) => SaveData.UnlockedLevel >= UnlockAt(i);
 
@@ -101,6 +125,18 @@ namespace SquashBot.Data
                         if (row[x] == '#') row[x] = 'F';
                 rows.Add(new string(row));
             }
+            // The gun posts: north and south ramparts each get a stair running along the wall (four obstacle tiles under
+            // the steps, so no robot can climb), rising from a foot tile to a gun on the wall top (see GameManagerGuns).
+            int Width(string row) { int c = 0; foreach (char ch in row) if (ch != '.') c++; return c; }
+            int r0 = 0, r1 = sz - 1;
+            while (r0 < sz / 2 && Width(rows[r0]) < PostRowWidth) rows[r0++] = new string('.', w);
+            while (r1 > sz / 2 && Width(rows[r1]) < PostRowWidth) rows[r1--] = new string('.', w);
+            var north = rows[r0].ToCharArray();
+            for (int x = mid - 1; x <= mid + 2; x++) north[x] = 'X'; // foot at mid - 2, rising east
+            rows[r0] = new string(north);
+            var south = rows[r1].ToCharArray();
+            for (int x = mid - 2; x <= mid + 1; x++) south[x] = 'X'; // foot at mid + 2, rising west
+            rows[r1] = new string(south);
             rows.Add(new string('.', w)); // a margin row to the south
             int h = rows.Count;
             bounds = new[] { 1, h - sz, sz, h - 1 };

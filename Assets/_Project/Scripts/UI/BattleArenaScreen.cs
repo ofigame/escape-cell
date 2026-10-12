@@ -85,7 +85,7 @@ namespace SquashBot.UI
             raw.texture = Resources.Load<Texture2D>("Arenas/arena_" + i);
             raw.color = open ? Color.white : new Color(0.35f, 0.35f, 0.4f);
             raw.raycastTarget = false;
-            UiFactory.TextBox("Name", card, new Vector2(0.5f, 1f), new Vector2(0f, -(CellW - 6f)), new Vector2(CellW - 30f, 56f), Loc.T("arena." + i), 36f, Palette.UiText, title: true);
+            UiFactory.TextBox("Name", card, new Vector2(0.5f, 1f), new Vector2(0f, -(CellW - 6f)), new Vector2(CellW - 30f, 56f), Loc.T(BattleArenas.NameKey(i)), 36f, Palette.UiText, title: true);
             // Difficulty stars.
             for (int s = 0; s < 5; s++)
             {

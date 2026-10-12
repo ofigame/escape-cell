@@ -767,6 +767,7 @@ namespace SquashBot.Gameplay
 
         private void BeginRun()
         {
+            ClearGunPosts();
             ResetRun();
             // A fresh floor: let go of the last floor's materials and meshes (built from code, they pile up otherwise
             // and long sessions run phones out of memory).
@@ -1930,6 +1931,8 @@ namespace SquashBot.Gameplay
 
         private void Win(bool escaped)
         {
+            if (arenaGiftsPhase) return; // foi is gathering the arena's gifts; that ends the win itself
+            if (arenaRun && !arenaGiftsDone && robot.IsAlive) { StartArenaGifts(); return; }
             EndArenaFight(false);
             State = GameState.Result;
             slowMoLeft = 0f;

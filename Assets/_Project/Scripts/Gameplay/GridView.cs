@@ -67,6 +67,8 @@ namespace SquashBot.Gameplay
 
         /// <summary>A tile's centre in the world, standing on its step of the floor's relief (see <see cref="FloorRelief"/>).</summary>
         /// <summary>The fortress look for the floor (stone or metal slabs with mortar, no glowing bands): every core-loop floor.</summary>
+        /// <summary>Obstacle tiles without their pillar (the arenas build their gun-post stairs on them).</summary>
+        public static bool PlainObstacles;
         public static bool FortressTiles;
         /// <summary>The fortress stone's colour on this floor: light in the first worlds, each world its own hue, darker and darker later on.</summary>
         public static Color FortressStone = new Color(0.7f, 0.7f, 0.74f);
@@ -207,7 +209,7 @@ namespace SquashBot.Gameplay
                     Shapes.Rounded("Hedge", tile.transform, new Vector3(0f, 0.2f, 0f), new Vector3(0.86f, 0.34f, 0.86f), 0.1f, obstacleBody);
                     Shapes.Rounded("Cap", tile.transform, new Vector3(0f, 0.38f, 0f), new Vector3(0.6f, 0.05f, 0.6f), 0.02f, obstacleCap);
                 }
-                else if (grid.IsWall(p))
+                else if (grid.IsWall(p) && !PlainObstacles)
                 {
                     // A fixed obstacle: a chunky stone pillar with a glowing cap.
                     Shapes.Rounded("Obstacle", tile.transform, new Vector3(0f, 0.47f, 0f), new Vector3(0.78f, 0.84f, 0.78f), 0.12f, obstacleBody);

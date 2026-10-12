@@ -37,6 +37,10 @@ namespace SquashBot.Gameplay
             public float moveT = 1f, step, windup = -1f, cooldown, flash;
             public GridPos target;
             public int hp, maxHp;
+            /// <summary>Gun-post bullets' fractions of health not yet taken (each takes a share of its whole).</summary>
+            public float chip;
+            /// <summary>Its wind-up is a smash at the rampart under foi's gun post (foi is up there).</summary>
+            public bool atWall;
             /// <summary>The tile it is stepping (or being knocked) off: while it moves, a blow there still lands.</summary>
             public GridPos prevPos;
             /// <summary>The health bar over its head (turns to the camera) and its fill.</summary>
@@ -173,11 +177,19 @@ namespace SquashBot.Gameplay
             int first = Mathf.Min(level.robots, guardCap);
             for (int i = 0; i < first && free.Count > 0; i++) AddGuard(Take(free));
             guardsToCome = level.robots - Mathf.Min(first, guards.Count);
+            hardToCome = 0;
             nextGuardAt = Time.time + 2f;
             for (int i = 0; i < level.brutes && free.Count > 0; i++) AddGuard(Take(free), brute: true);
             // vanG's warlords: the very strong tenth of the crowd, kept away from where foi starts.
             var away = free.FindAll(p => Chebyshev(p, robot.Position) >= 4);
-            for (int i = 0; i < level.elites && away.Count > 0; i++) { var p = Take(away); free.Remove(p); AddGuard(p, brute: true, rank: 99); }
+            int elitesNow = level.hardAtOnce > 0 ? Mathf.Min(level.elites, level.hardAtOnce) : level.elites;
+            for (int i = 0; i < elitesNow && away.Count > 0; i++) { var p = Take(away); free.Remove(p); AddGuard(p, brute: true, rank: 99); }
+            if (level.hardAtOnce > 0)
+            {
+                // The battle arenas: a steady fight, never the whole crowd at once — the warlords drop in as others fall.
+                hardToCome = Mathf.Max(0, level.elites - elitesNow);
+                guardsToCome += hardToCome;
+            }
             // Guard towers, set well away from where foi starts.
             var far = new List<GridPos>();
             foreach (var p in free) if (Chebyshev(p, robot.Position) >= 4) far.Add(p);
@@ -189,6 +201,8 @@ namespace SquashBot.Gameplay
         {
             running = false;
             guardsToCome = 0;
+            hardToCome = 0;
+            PlayerAway = false;
             foreach (var b in bugs) if (b.model != null) Destroy(b.model.gameObject);
             foreach (var g in guards)
             {
@@ -285,6 +299,14 @@ namespace SquashBot.Gameplay
 
         /// <summary>Robots of this floor still to drop in, how many may be on the floor at once, and when the next comes.</summary>
         private int guardsToCome, guardCap;
+        /// <summary>Of those, warlords still to come (only when the floor caps them, see LevelData.hardAtOnce).</summary>
+        private int hardToCome;
+        /// <summary>foi is up on a gun post (off the floor, out of reach): the robots gather below but cannot strike.</summary>
+        public bool PlayerAway;
+        /// <summary>The floor tile at the foot of the rampart under foi's gun (null: foi is not on a gun).</summary>
+        public Func<GridPos?> WallTarget;
+        /// <summary>A warlord smashed the rampart under foi's gun: this share of foi's health.</summary>
+        public event Action<float> AwayHit;
         private float nextGuardAt;
 
         /// <summary>
@@ -295,14 +317,16 @@ namespace SquashBot.Gameplay
         {
             if (stageCount > 1) { UpdateStageReinforcements(); return; }
             if (guardsToCome <= 0 || Time.time < nextGuardAt) return;
-            int alive = 0;
-            foreach (var g in guards) if (!g.dead && !g.brute) alive++;
-            if (alive >= guardCap) return;
+            int alive = 0, hardAlive = 0;
+            foreach (var g in guards) if (!g.dead) { if (!g.brute) alive++; else if (g.rank >= 99) hardAlive++; }
+            bool hard = hardToCome > 0 && hardAlive < level.hardAtOnce;
+            if (!hard && (alive >= guardCap || guardsToCome - hardToCome <= 0)) return;
             var spots = FreeTiles(4);
             spots.RemoveAll(p => grid.IsOccupied(p) || (Avoid != null && Avoid(p)));
             if (spots.Count == 0) { nextGuardAt = Time.time + 0.5f; return; }
             var at = Take(spots);
-            AddGuard(at);
+            if (hard) { AddGuard(at, brute: true, rank: 99); hardToCome--; }
+            else AddGuard(at);
             var ng = guards[guards.Count - 1];
             ng.from = At(at) + Vector3.up * 7f; // it falls onto its tile
             ng.root.position = ng.from;
@@ -475,6 +499,62 @@ namespace SquashBot.Gameplay
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// A gun-post bullet along a ray: the first robot or bug whose body it passes through takes it — a warlord or
+        /// enforcer a tenth of its health, any other robot half, a bug all. Returns where it struck (or flew out).
+        /// </summary>
+        public bool Shoot(Ray ray, float range, out Vector3 point)
+        {
+            point = ray.origin + ray.direction * range;
+            if (!running) return false;
+            float bestT = range;
+            Guard hitG = null;
+            Bug hitB = null;
+            bool Through(Vector3 feet, float height, float radius, out float t)
+            {
+                // Where the ray passes closest to the body's upright axis (seen from above), and whether that is inside it.
+                var d = ray.direction;
+                var flat = new Vector2(d.x, d.z);
+                var w = new Vector2(feet.x - ray.origin.x, feet.z - ray.origin.z);
+                t = flat.sqrMagnitude < 1e-6f ? 0f : Vector2.Dot(w, flat) / flat.sqrMagnitude;
+                if (t <= 0f || t >= bestT) return false;
+                var p = ray.origin + d * t;
+                if (Vector2.Distance(new Vector2(p.x, p.z), new Vector2(feet.x, feet.z)) > radius) return false;
+                return p.y >= feet.y - 0.15f && p.y <= feet.y + height + 0.15f;
+            }
+            foreach (var g in guards)
+            {
+                if (g.dead || g.root == null) continue;
+                float h = g.bar != null ? Mathf.Max(0.8f, g.bar.position.y - g.root.position.y) : 1.2f;
+                if (Through(g.root.position, h, Mathf.Max(0.45f, h * 0.32f), out float t)) { bestT = t; hitG = g; hitB = null; }
+            }
+            foreach (var b in bugs)
+            {
+                if (b.dead || b.model == null) continue;
+                if (Through(b.model.transform.position, 0.45f, 0.5f, out float t)) { bestT = t; hitB = b; hitG = null; }
+            }
+            if (hitG == null && hitB == null)
+            {
+                // Down to the floor, if it gets there first.
+                var floor = new Plane(Vector3.up, new Vector3(0f, GridView.SurfaceY, 0f));
+                if (floor.Raycast(ray, out float f) && f < range) point = ray.GetPoint(f);
+                return false;
+            }
+            point = ray.GetPoint(bestT);
+            if (hitB != null) { HitBug(hitB, 99); return true; }
+            var hg = hitG;
+            if (hg.shield > 0) { HitShield(hg, hg.pos); return true; }
+            hg.chip += hg.maxHp * (hg.brute || hg.rank >= 99 ? 0.1f : 0.5f);
+            int dmg = Mathf.FloorToInt(hg.chip + 0.0001f);
+            hg.chip -= dmg;
+            hg.hp -= dmg;
+            hg.flash = 1f;
+            hg.Flash();
+            fx.Burst(point, new Color(1f, 0.75f, 0.35f), new Color(2.2f, 1.2f, 0.4f), 10, 3f);
+            if (hg.hp <= 0) KillGuard(hg);
+            return true;
         }
 
         private void KnockBack(Guard g)
@@ -787,7 +867,9 @@ namespace SquashBot.Gameplay
                     if (g.brute) fx.Dust(At(g.target), new Color(0.55f, 0.5f, 0.45f), 18, 4f);
                     AudioManager.PlaySfx(Sfx.Impact, g.brute ? 1f : 0.7f, g.brute ? 0.55f : 0.8f);
                     rig.Shake(g.brute ? 0.8f : 0.3f);
-                    if (g.area.Contains(robot.Position)) Hit?.Invoke(robot.Position, ShareOf(g));
+                    if (g.atWall) { if (PlayerAway) AwayHit?.Invoke(ShareOf(g)); }
+                    else if (g.area.Contains(robot.Position)) Hit?.Invoke(robot.Position, ShareOf(g));
+                    g.atWall = false;
                     if (CompanionTile.HasValue && g.area.Contains(CompanionTile.Value)) CompanionHurt?.Invoke(g.brute ? 3 : 2);
                     g.area.Clear();
                 }
@@ -799,7 +881,7 @@ namespace SquashBot.Gameplay
             int near = Chebyshev(robot.Position, g.pos);
             // Fifi in reach and foi not (or now and then anyway): the robot goes for Fifi.
             bool atFifi = CompanionTile.HasValue && Chebyshev(CompanionTile.Value, g.pos) <= AttackReach && (near > AttackReach || rng.Next(4) == 0);
-            if ((near <= AttackReach || atFifi) && g.cooldown <= 0f)
+            if ((near <= AttackReach || atFifi) && g.cooldown <= 0f && !PlayerAway)
             {
                 g.windup = 0f;
                 g.target = atFifi ? CompanionTile.Value : robot.Position;
@@ -810,9 +892,26 @@ namespace SquashBot.Gameplay
                         if (grid.IsFloor(g.target + d.ToOffset())) g.area.Add(g.target + d.ToOffset());
                 return;
             }
-            int dist = robot.Position.Manhattan(g.pos);
+            // foi up on a gun post: the crowd holds its ground; the warlords march to the foot of the rampart under the
+            // gun and smash at it from there (they never climb).
+            var goal = robot.Position;
+            if (PlayerAway)
+            {
+                if (g.rank < 99 || WallTarget == null || !(WallTarget() is GridPos wall)) return;
+                goal = wall;
+                if (Chebyshev(g.pos, wall) <= 1 && g.cooldown <= 0f)
+                {
+                    g.windup = 0f;
+                    g.atWall = true;
+                    g.target = wall;
+                    g.area.Clear();
+                    g.area.Add(wall);
+                    return;
+                }
+            }
+            int dist = goal.Manhattan(g.pos);
             g.step -= dt;
-            if (g.step > 0f || near <= 1) return;
+            if (g.step > 0f || (!PlayerAway && near <= 1) || (PlayerAway && Chebyshev(g.pos, goal) <= 1)) return;
             g.step = level.robotStep * (g.brute ? 1.3f : 0.72f);
             if (g.human != null) g.human.Step();
             // One step towards the robot along whichever axis brings it closer and is free.
@@ -822,7 +921,7 @@ namespace SquashBot.Gameplay
             {
                 var n = g.pos + d.ToOffset();
                 if (!CanStep(g.pos, n)) continue;
-                int nd = robot.Position.Manhattan(n);
+                int nd = goal.Manhattan(n);
                 if (nd < bestDist || (nd == bestDist && rng.Next(2) == 0 && nd < dist)) { bestDist = nd; bestNext = n; }
             }
             if (bestNext != g.pos) MoveGuard(g, bestNext, level.robotStep);

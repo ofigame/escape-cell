@@ -45,6 +45,7 @@ namespace SquashBot.Gameplay
         {
             if (!tpsOn) return;
             tpsOn = false;
+            ClearGunPosts();
             if (tps != null) tps.Show(false);
             Screen.orientation = ScreenOrientation.Portrait;
         }
@@ -65,24 +66,41 @@ namespace SquashBot.Gameplay
         private InputCommand TpsCommand()
         {
             float dt = Time.unscaledDeltaTime;
+            UpdateArenaGifts();
             var look = tps.TakeLook();
-            tpsYaw += look.x * 260f;
-            tpsPitch = Mathf.Clamp(tpsPitch - look.y * 140f, 6f, 55f);
+            bool onGun = manned != null;
+            if (!onGun)
+            {
+                tpsYaw += look.x * 260f;
+                tpsPitch = Mathf.Clamp(tpsPitch - look.y * 140f, 6f, 55f);
+            }
             var move = tps.Move;
+            bool fireHeld = tps.StrikeHeld;
 #if ENABLE_INPUT_SYSTEM
             var k = Keyboard.current;
             if (k != null)
             {
                 var km = new Vector2((k.dKey.isPressed ? 1f : 0f) - (k.aKey.isPressed ? 1f : 0f), (k.wKey.isPressed ? 1f : 0f) - (k.sKey.isPressed ? 1f : 0f));
                 if (km.sqrMagnitude > 0f) move = km.normalized;
-                tpsYaw += ((k.rightArrowKey.isPressed ? 1f : 0f) - (k.leftArrowKey.isPressed ? 1f : 0f)) * TpsTurnSpeed * dt;
-                tpsPitch = Mathf.Clamp(tpsPitch + ((k.downArrowKey.isPressed ? 1f : 0f) - (k.upArrowKey.isPressed ? 1f : 0f)) * TpsPitchSpeed * dt, 6f, 55f);
+                float turn = ((k.rightArrowKey.isPressed ? 1f : 0f) - (k.leftArrowKey.isPressed ? 1f : 0f)) * dt;
+                float tilt = ((k.downArrowKey.isPressed ? 1f : 0f) - (k.upArrowKey.isPressed ? 1f : 0f)) * dt;
+                if (onGun) look += new Vector2(turn * 0.45f, -tilt * 0.6f); // aiming the gun
+                else
+                {
+                    tpsYaw += turn * TpsTurnSpeed;
+                    tpsPitch = Mathf.Clamp(tpsPitch + tilt * TpsPitchSpeed, 6f, 55f);
+                }
+                if (k.spaceKey.isPressed) fireHeld = true;
                 if (k.spaceKey.wasPressedThisFrame) tpsStrike = true;
                 if (k.eKey.wasPressedThisFrame) tpsSpin = true;
                 if (k.qKey.wasPressedThisFrame) tpsJump = true;
             }
 #endif
             var command = default(InputCommand);
+            // The gun posts: climbing onto one, and aiming and firing while up there (the strike button fires).
+            bool down = onGun && tpsJump;
+            UpdateGunPosts(dt, onGun ? look : Vector2.zero, onGun && (fireHeld || tpsStrike), down);
+            if (manned != null || onGun) { tpsStrike = tpsSpin = tpsJump = false; return command; }
             if (tpsStrike) { tpsStrike = false; KeyStrike(TpsForward); }
             if (tpsSpin) { tpsSpin = false; command.spin = true; return command; }
             if (tpsJump) { tpsJump = false; command.jump = true; return command; }
@@ -126,6 +144,7 @@ namespace SquashBot.Gameplay
         /// <summary>The camera over foi's shoulder: behind it by the camera's turn, a little above, looking past it.</summary>
         private void TpsPose(out Vector3 pos, out Quaternion rot)
         {
+            if (Gunning) { GunPose(out pos, out rot); return; }
             var focus = robot.transform.position + Vector3.up * 1.1f;
             var dir = Quaternion.Euler(tpsPitch, tpsYaw, 0f) * Vector3.forward;
             pos = focus - dir * TpsDistance + Quaternion.Euler(0f, tpsYaw, 0f) * Vector3.right * 0.6f; // a touch to the right
