@@ -65,8 +65,8 @@ namespace SquashBot.UI
             c.ammoText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             c.ammoText.raycastTarget = false;
             c.strikeButton = Button(root, "Strike", new Vector2(-190f, 200f), 200f, new Color(1f, 0.55f, 0.25f, 0.85f), 0, () => c.Strike?.Invoke()).GetComponent<PressButton>();
-            c.spinButton = Button(root, "Spin", new Vector2(-390f, 130f), 135f, new Color(0.45f, 0.75f, 1f, 0.8f), 1, () => c.Spin?.Invoke());
-            c.jumpButton = Button(root, "Jump", new Vector2(-200f, 410f), 130f, new Color(0.55f, 1f, 0.6f, 0.8f), 2, () => c.Jump?.Invoke());
+            c.spinButton = Button(root, "Spin", new Vector2(-440f, 150f), 135f, new Color(0.45f, 0.75f, 1f, 0.8f), 1, () => c.Spin?.Invoke());
+            c.jumpButton = Button(root, "Jump", new Vector2(-420f, 360f), 130f, new Color(0.55f, 1f, 0.6f, 0.8f), 2, () => c.Jump?.Invoke());
             c.SetGunMode(false, 0);
             c.Show(false);
             return c;
@@ -98,10 +98,13 @@ namespace SquashBot.UI
             // On the gun the right thumb aims, so the fire button moves to the left thumb (and the bullets with it).
             var fire = (RectTransform)strikeButton.transform;
             fire.anchorMin = fire.anchorMax = on ? Vector2.zero : new Vector2(1f, 0f);
-            fire.anchoredPosition = on ? new Vector2(230f, 230f) : new Vector2(-190f, 200f);
+            fire.anchoredPosition = on ? new Vector2(260f, 260f) : new Vector2(-190f, 200f);
+            strikeButton.baseScale = on ? 1.35f : 1f; // a big fire button for the left thumb
+            jumpButton.GetComponent<PressButton>().baseScale = on ? 1.3f : 1f;
+            ammoText.fontSize = on ? 72f : 56f;
             var ammoRect = ammoText.rectTransform;
             ammoRect.anchorMin = ammoRect.anchorMax = on ? Vector2.zero : new Vector2(1f, 0f);
-            ammoRect.anchoredPosition = on ? new Vector2(230f, 400f) : new Vector2(-190f, 330f);
+            ammoRect.anchoredPosition = on ? new Vector2(260f, 470f) : new Vector2(-190f, 330f);
             if (on) Move = Vector2.zero;
         }
 
@@ -142,7 +145,7 @@ namespace SquashBot.UI
 
         // Made while the phone was still upright: the scale follows the screen as it turns (landscape fits the height),
         // or everything would come out sized for the long side.
-        private void Update() => scaler.matchWidthOrHeight = UiFactory.MatchFor(Screen.width, Screen.height);
+        private void Update() => UiFactory.Fit(scaler);
 
         private void OnDisable() { Move = Vector2.zero; look = Vector2.zero; }
 
@@ -150,14 +153,28 @@ namespace SquashBot.UI
         {
             public TpsControls owner;
             private int pointer = int.MinValue;
+            private float downAt, travelled;
             public void OnInitializePotentialDrag(PointerEventData e) => e.useDragThreshold = false;
-            public void OnPointerDown(PointerEventData e) { if (pointer == int.MinValue) pointer = e.pointerId; }
+            public void OnPointerDown(PointerEventData e)
+            {
+                if (pointer != int.MinValue) return;
+                pointer = e.pointerId;
+                downAt = Time.unscaledTime;
+                travelled = 0f;
+            }
             public void OnDrag(PointerEventData e)
             {
                 if (e.pointerId != pointer) return;
                 owner.look += e.delta / Mathf.Max(1f, Screen.height);
+                travelled += e.delta.magnitude / Mathf.Max(1f, Screen.height);
             }
-            public void OnPointerUp(PointerEventData e) { if (e.pointerId == pointer) pointer = int.MinValue; }
+            public void OnPointerUp(PointerEventData e)
+            {
+                if (e.pointerId != pointer) return;
+                pointer = int.MinValue;
+                // A quick tap on the camera side (not a turn): a strike — or a shot, up on a gun.
+                if (Time.unscaledTime - downAt < 0.28f && travelled < 0.025f) owner.Strike?.Invoke();
+            }
             private void OnDisable() => pointer = int.MinValue;
         }
 
@@ -231,14 +248,16 @@ namespace SquashBot.UI
             private float pressed;
             private bool held;
             public bool Held => held;
+            /// <summary>Its size (bigger up on a gun); the press squash is on top.</summary>
+            public float baseScale = 1f;
             public void OnPointerDown(PointerEventData e) { held = true; pressed = 1f; down?.Invoke(); }
             public void OnPointerUp(PointerEventData e) => held = false;
             private void Update()
             {
                 pressed = Mathf.MoveTowards(pressed, held ? 0.6f : 0f, Time.unscaledDeltaTime * 6f);
-                transform.localScale = Vector3.one * (1f - pressed * 0.12f);
+                transform.localScale = Vector3.one * (baseScale * (1f - pressed * 0.12f));
             }
-            private void OnDisable() { held = false; pressed = 0f; transform.localScale = Vector3.one; }
+            private void OnDisable() { held = false; pressed = 0f; transform.localScale = Vector3.one * baseScale; }
         }
     }
 }

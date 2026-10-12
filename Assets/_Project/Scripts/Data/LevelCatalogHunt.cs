@@ -106,7 +106,7 @@ namespace SquashBot.Data
 
         /// <summary>
         /// vanG's cage and the bridge to the tunnel: a 3x2 cage ('C') in the middle of the top (north) rows, the row
-        /// under it made floor so the cage always joins the main floor, and a one-tile bridge ('B') running north from
+        /// under it made floor so the cage always joins the main floor, and a three-tile bridge ('B') running north from
         /// the cage's middle over <see cref="BridgeLength"/> new rows.
         /// </summary>
         /// <summary>vanG's cage and the bridge to the tunnel added to any layout (the battle arenas use it too).</summary>
@@ -140,7 +140,7 @@ namespace SquashBot.Data
             for (int i = 0; i < BridgeLength; i++)
             {
                 var bridgeRow = new string('.', w).ToCharArray();
-                bridgeRow[mid] = 'B';
+                for (int x = mid - 1; x <= mid + 1; x++) if (x >= 0 && x < w) bridgeRow[x] = 'B'; // three tiles wide, like the cage
                 result.Add(new string(bridgeRow));
             }
             foreach (var r in rows) result.Add(new string(r));

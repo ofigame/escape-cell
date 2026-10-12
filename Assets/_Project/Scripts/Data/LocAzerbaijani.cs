@@ -182,6 +182,8 @@ namespace SquashBot.Data
             ["arena.giftCoins"] = "SERİYA HƏDİYYƏSİ: +{0} qızıl",
             ["arena.giftItem"] = "SERİYA HƏDİYYƏSİ: {0}",
             ["arena.giftChest"] = "SERİYA HƏDİYYƏSİ: SANDIQ!",
+            ["gun.label"] = "SİLAH",
+            ["arena.tip"] = "Meydan döyüşünü qazan, böyük hədiyyələri götür!",
             ["arena.collect"] = "QALİB GƏLDİN! HƏDİYYƏLƏRİ TOPLA!",
             ["arena.collectGold"] = "YENƏ QALİB GƏLDİN! QIZILLARI TOPLA!",
             ["arena.0"] = "Mis Qala",

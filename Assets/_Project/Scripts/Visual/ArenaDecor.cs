@@ -29,12 +29,15 @@ namespace SquashBot.Visual
         /// stands just beyond — tall spires at the back, domed drums at the sides, cannon bastions and a low turret at
         /// the front (never in the way) — then the landmarks behind the far wall and the pad round foi's cell.
         /// </summary>
+        /// <summary>The arenas are cities now: their buildings take the place of the towers and landmarks.</summary>
+        public static bool CityMode = true;
+
         public static void Build(Transform root, GridModel grid, int[] b, int arena, GridPos start, Color accent, Color trim)
         {
             Materials(accent, trim);
             float grow = 1.9f + arena * 0.06f; // towering, above the high ramparts
             var centre = new Vector2((b[0] + b[2]) * 0.5f, (b[1] + b[3]) * 0.5f);
-            for (int k = 0; k < 8; k++)
+            for (int k = 0; k < 8 && !CityMode; k++)
             {
                 if (k == 2 || k == 6) continue; // north and south: the gun posts stand there (see GameManagerGuns)
                 float ang = k * 45f * Mathf.Deg2Rad;
@@ -54,11 +57,14 @@ namespace SquashBot.Visual
                 else if (k >= 1 && k <= 3) Spire(root, at, grow * (k == 2 ? 1.35f : 1.1f)); // the back: tall spires
                 else Drum(root, at, grow);                                              // the sides: domed drums
             }
-            // Landmarks beyond the far wall: a giant spire to the right, a domed hall to the left.
+            // Landmarks beyond the far wall: a giant spire to the right, a domed hall to the left (not in the city).
+            if (!CityMode)
+            {
             float midX = (b[0] + b[2]) * 0.5f, wide = b[2] - b[0];
             float farZ = b[3] + 4.2f, y = GridView.SurfaceY - 0.1f;
             Spire(root, new Vector3(midX + wide * 0.24f, y, farZ), grow * 1.9f);
             Hall(root, new Vector3(midX - wide * 0.22f, y, farZ + 0.5f), grow * 1.3f);
+            }
             // The hexagonal pad round foi's cell, with spokes of light.
             var c = GridView.ToWorld(start) + Vector3.up * (GridView.SurfaceY + 0.06f);
             for (int i = 0; i < 6; i++)
@@ -145,6 +151,133 @@ namespace SquashBot.Visual
             Shapes.Primitive(PrimitiveType.Cylinder, "Muzzle", t, new Vector3(side * 1.15f, 1.0f, -1.45f), new Vector3(0.82f, 0.12f, 0.82f), orange)
                 .transform.localRotation = Quaternion.Euler(70f, side * -35f, 0f);
             Shapes.Primitive(PrimitiveType.Sphere, "Lens", t, new Vector3(side * 1.2f, 0.98f, -1.52f), Vector3.one * 0.4f, glowBlue);
+        }
+
+        /// <summary>The roof height (world y) over each tile a building of the arena city stands on, for the camera.</summary>
+        public static readonly System.Collections.Generic.Dictionary<GridPos, float> BuildingTop = new System.Collections.Generic.Dictionary<GridPos, float>();
+
+        /// <summary>The look of an arena city's buildings, by its world.</summary>
+        private enum CityStyle { Town, Ice, Lava, Neon, Desert, Forest, Harbor, Crystal, Factory, Pearl }
+
+        private static CityStyle StyleFor(string worldKey)
+        {
+            switch (worldKey)
+            {
+                case "world.ice": case "world.snow": return CityStyle.Ice;
+                case "world.canyon": case "world.mine": case "world.heart": return CityStyle.Lava;
+                case "world.cyber": case "world.server": case "world.galaxy": case "world.storm": return CityStyle.Neon;
+                case "world.desert": case "world.sunset": return CityStyle.Desert;
+                case "world.forest": case "world.nightforest": case "world.garden": return CityStyle.Forest;
+                case "world.harbor": case "world.canal": case "world.clouds": return CityStyle.Harbor;
+                case "world.crystal": case "world.mirror": case "world.aurora": case "world.lavender": return CityStyle.Crystal;
+                case "world.factory": case "world.acid": return CityStyle.Factory;
+                case "world.castle": return CityStyle.Town;
+                default: return CityStyle.Pearl;
+            }
+        }
+
+        /// <summary>
+        /// The arena city's buildings (see BattleArenas.Layout), in its world's style: stone town houses with pitched
+        /// roofs, ice blocks, dark lava-lit stone, neon towers, flat sandstone houses, timber houses with green roofs,
+        /// white harbour houses with blue domes, crystal towers, factory halls with chimneys, pearl towers. Each has lit
+        /// window bands (one band wraps the whole floor) and its roof height goes into <see cref="BuildingTop"/>.
+        /// </summary>
+        public static void City(Transform root, System.Collections.Generic.List<SquashBot.Data.BattleArenas.Building> list, Color wall, Color accent, Color trim, int arena)
+        {
+            BuildingTop.Clear();
+            var rng = new System.Random(900 + arena * 13);
+            var style = arena == 0 ? CityStyle.Town : StyleFor(WorldTheme.ForLevel(arena * SquashBot.Data.LevelCatalog.LevelsPerWorld).key);
+            Color body0, body1, roofC, winC;
+            switch (style)
+            {
+                case CityStyle.Ice: body0 = new Color(0.78f, 0.9f, 1f); body1 = new Color(0.62f, 0.8f, 0.95f); roofC = new Color(0.95f, 0.98f, 1f); winC = new Color(0.5f, 0.9f, 1f); break;
+                case CityStyle.Lava: body0 = new Color(0.25f, 0.2f, 0.2f); body1 = new Color(0.35f, 0.25f, 0.22f); roofC = new Color(0.15f, 0.12f, 0.12f); winC = new Color(1f, 0.5f, 0.15f); break;
+                case CityStyle.Neon: body0 = new Color(0.16f, 0.17f, 0.24f); body1 = new Color(0.22f, 0.2f, 0.32f); roofC = new Color(0.1f, 0.1f, 0.15f); winC = Color.Lerp(accent, new Color(0.3f, 1f, 1f), 0.4f); break;
+                case CityStyle.Desert: body0 = new Color(0.92f, 0.8f, 0.6f); body1 = new Color(0.85f, 0.7f, 0.5f); roofC = new Color(0.8f, 0.62f, 0.42f); winC = new Color(1f, 0.85f, 0.5f); break;
+                case CityStyle.Forest: body0 = new Color(0.6f, 0.45f, 0.3f); body1 = new Color(0.86f, 0.8f, 0.68f); roofC = new Color(0.25f, 0.5f, 0.3f); winC = new Color(1f, 0.85f, 0.5f); break;
+                case CityStyle.Harbor: body0 = new Color(0.95f, 0.95f, 0.93f); body1 = new Color(0.88f, 0.92f, 0.95f); roofC = new Color(0.2f, 0.45f, 0.85f); winC = new Color(0.6f, 0.85f, 1f); break;
+                case CityStyle.Crystal: body0 = Color.Lerp(accent, Color.white, 0.55f); body1 = Color.Lerp(accent, Color.white, 0.35f); roofC = accent; winC = Color.Lerp(accent, Color.white, 0.3f); break;
+                case CityStyle.Factory: body0 = new Color(0.45f, 0.45f, 0.48f); body1 = new Color(0.55f, 0.4f, 0.32f); roofC = new Color(0.3f, 0.3f, 0.33f); winC = new Color(1f, 0.9f, 0.5f); break;
+                case CityStyle.Pearl: body0 = new Color(0.95f, 0.94f, 0.92f); body1 = new Color(0.9f, 0.92f, 0.97f); roofC = new Color(0.95f, 0.8f, 0.45f); winC = new Color(0.7f, 0.9f, 1f); break;
+                default: body0 = new Color(0.85f, 0.78f, 0.66f); body1 = new Color(0.78f, 0.7f, 0.6f); roofC = new Color(0.72f, 0.32f, 0.22f); winC = new Color(1f, 0.85f, 0.55f); break; // Town
+            }
+            var bodies = new[]
+            {
+                MaterialFactory.CreateSurface(body0, Color.black, 0.35f, 0.05f),
+                MaterialFactory.CreateSurface(body1, Color.black, 0.35f, 0.05f),
+                MaterialFactory.CreateSurface(Color.Lerp(body0, body1, 0.5f) * 0.92f, Color.black, 0.35f, 0.05f),
+            };
+            bool glassy = style == CityStyle.Ice || style == CityStyle.Crystal;
+            if (glassy) bodies[0] = MaterialFactory.Create(body0, body0 * 0.25f);
+            var roof = MaterialFactory.Create(roofC, roofC * 0.15f);
+            var window = MaterialFactory.Create(winC, winC * (style == CityStyle.Neon || style == CityStyle.Lava ? 2.2f : 1.4f));
+            var dark = MaterialFactory.Create(new Color(0.1f, 0.1f, 0.14f), Color.black);
+            var lit = MaterialFactory.Create(winC, winC * 2.5f);
+            float y0 = GridView.SurfaceY;
+            foreach (var b in list)
+            {
+                var a = GridView.ToWorld(new GridPos(b.x0, b.y0));
+                var c = GridView.ToWorld(new GridPos(b.x1, b.y1));
+                var centre = new Vector3((a.x + c.x) * 0.5f, y0, (a.z + c.z) * 0.5f);
+                float w = Mathf.Abs(c.x - a.x) + 0.96f, d = Mathf.Abs(c.z - a.z) + 0.96f, h = b.height;
+                if (style == CityStyle.Desert || style == CityStyle.Forest || style == CityStyle.Town) h *= 0.75f; // low houses
+                if (style == CityStyle.Neon || style == CityStyle.Crystal || style == CityStyle.Pearl) h *= 1.25f; // towers
+                var t = new GameObject("Building").transform;
+                t.SetParent(root, false);
+                t.position = centre;
+                var body = bodies[rng.Next(bodies.Length)];
+                Box("Body", t, new Vector3(0f, h * 0.5f, 0f), new Vector3(w, h, d), body, 0.1f);
+                // One lit band round each floor (a few dark).
+                for (float fy = 0.9f; fy < h - 0.4f; fy += 1.1f)
+                    Box("Windows", t, new Vector3(0f, fy, 0f), new Vector3(w + 0.03f, 0.32f, d + 0.03f), rng.Next(6) == 0 ? dark : window, 0.03f);
+                float top = h;
+                switch (style)
+                {
+                    case CityStyle.Town:
+                    case CityStyle.Forest:
+                    {
+                        // A pitched roof along the long side.
+                        bool alongX = w >= d;
+                        float span = alongX ? d : w, len = alongX ? w : d;
+                        var ridge = Box("Roof", t, new Vector3(0f, h + span * 0.25f, 0f), new Vector3(span * 0.72f, span * 0.72f, len + 0.1f), roof, 0.04f);
+                        ridge.localRotation = Quaternion.Euler(alongX ? 0f : 0f, alongX ? 90f : 0f, 45f);
+                        ridge.localScale = new Vector3(1f, 1f, 1f);
+                        top = h + span * 0.76f;
+                        if (rng.Next(3) == 0) Box("Chimney", t, new Vector3(w * 0.25f, h + span * 0.45f, d * 0.2f), new Vector3(0.3f, span * 0.6f, 0.3f), body, 0.04f);
+                        break;
+                    }
+                    case CityStyle.Harbor:
+                        Box("Cornice", t, new Vector3(0f, h + 0.06f, 0f), new Vector3(w + 0.1f, 0.12f, d + 0.1f), body, 0.04f);
+                        if (rng.Next(2) == 0) { Shapes.Primitive(PrimitiveType.Sphere, "Dome", t, new Vector3(0f, h + 0.05f, 0f), new Vector3(Mathf.Min(w, d) * 0.7f, Mathf.Min(w, d) * 0.55f, Mathf.Min(w, d) * 0.7f), roof); top = h + Mathf.Min(w, d) * 0.3f; }
+                        break;
+                    case CityStyle.Neon:
+                    case CityStyle.Crystal:
+                    case CityStyle.Pearl:
+                        // A slimmer upper tier and a lit tip.
+                        Box("Tier", t, new Vector3(0f, h + h * 0.18f, 0f), new Vector3(w * 0.6f, h * 0.36f, d * 0.6f), body, 0.08f);
+                        Box("Cap", t, new Vector3(0f, h * 1.37f, 0f), new Vector3(w * 0.66f, 0.12f, d * 0.66f), roof, 0.04f);
+                        Shapes.Primitive(PrimitiveType.Sphere, "Tip", t, new Vector3(0f, h * 1.4f + 0.25f, 0f), Vector3.one * 0.22f, lit);
+                        top = h * 1.4f;
+                        break;
+                    case CityStyle.Factory:
+                        Box("Roof", t, new Vector3(0f, h + 0.08f, 0f), new Vector3(w + 0.1f, 0.16f, d + 0.1f), roof, 0.04f);
+                        if (rng.Next(2) == 0) Shapes.Primitive(PrimitiveType.Cylinder, "Chimney", t, new Vector3(w * 0.25f, h + 1.0f, 0f), new Vector3(0.35f, 1f, 0.35f), dark);
+                        break;
+                    case CityStyle.Lava:
+                        Box("Roof", t, new Vector3(0f, h + 0.08f, 0f), new Vector3(w + 0.12f, 0.16f, d + 0.12f), roof, 0.04f);
+                        Box("Glow", t, new Vector3(0f, h + 0.18f, 0f), new Vector3(w * 0.5f, 0.06f, d * 0.5f), lit, 0.02f);
+                        break;
+                    case CityStyle.Ice:
+                        Box("Snow", t, new Vector3(0f, h + 0.1f, 0f), new Vector3(w + 0.16f, 0.22f, d + 0.16f), roof, 0.1f);
+                        break;
+                    default: // Desert: flat roof with a low parapet
+                        Box("Parapet", t, new Vector3(0f, h + 0.1f, 0f), new Vector3(w + 0.08f, 0.2f, d + 0.08f), roof, 0.04f);
+                        break;
+                }
+                for (int x = b.x0; x <= b.x1; x++)
+                    for (int y = b.y0; y <= b.y1; y++)
+                        BuildingTop[new GridPos(x, y)] = y0 + top + 0.2f;
+            }
         }
 
         private static Transform Group(string name, Transform root, Vector3 at, float scale)

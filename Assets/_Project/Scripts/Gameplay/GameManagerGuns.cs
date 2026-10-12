@@ -25,7 +25,8 @@ namespace SquashBot.Gameplay
 
         private class GunPost
         {
-            public GridPos foot, under;
+            public GridPos foot, foot2, under;
+            public TMPro.TextMeshPro label;
             public Vector3 seat, inward, footWorld, stairLow, stairHigh;
             public int ammo = GunAmmo;
             public Transform pivot, barrel, pad;
@@ -47,50 +48,47 @@ namespace SquashBot.Gameplay
             ClearGunPosts();
             WireGunPostHits();
             gunRoot = new GameObject("GunPosts").transform;
-            var rows = new Dictionary<int, List<int>>();
-            foreach (var p in grid.AllPositions())
-                if (grid.IsWall(p)) { if (!rows.TryGetValue(p.y, out var l)) rows[p.y] = l = new List<int>(); l.Add(p.x); }
-            float midY = (level.stageBounds[1] + level.stageBounds[3]) * 0.5f;
             var st = BattleArenas.Style(arenaIndex);
             var stone = MaterialFactory.Create(Color.Lerp(st.wall, new Color(0.7f, 0.7f, 0.72f), 0.5f), Color.black);
             var stoneEdge = MaterialFactory.Create(Color.Lerp(st.wall, Color.black, 0.25f), Color.black);
             var metal = MaterialFactory.CreateSurface(new Color(0.22f, 0.23f, 0.27f), Color.black, 0.6f, 0.7f);
             var trim = MaterialFactory.Create(st.accent, st.accent * 1.6f);
-            foreach (var kv in rows)
+            foreach (var bp in BattleArenas.LastPosts)
             {
-                var xs = kv.Value;
-                xs.Sort();
-                bool north = kv.Key > midY;
-                var outward = new GridPos(0, north ? 1 : -1);
-                var top = new GridPos(north ? xs[xs.Count - 1] : xs[0], kv.Key);
-                var foot = new GridPos(north ? xs[0] - 1 : xs[xs.Count - 1] + 1, kv.Key);
-                if (!grid.IsFloor(foot)) continue;
-                var post = new GunPost { foot = foot, under = new GridPos(top.x, top.y - outward.y), inward = new Vector3(0f, 0f, -outward.y) };
+                bool north = bp.outward > 0;
+                var outward = new GridPos(0, bp.outward);
+                int wallRow = north ? bp.y1 : bp.y0, innerRow = north ? bp.y0 : bp.y1;
+                var top = new GridPos(bp.topX, wallRow);
+                var foot = new GridPos(bp.footX, wallRow);
+                var foot2 = new GridPos(bp.footX, innerRow);
+                if (!grid.IsFloor(foot) && !grid.IsFloor(foot2)) continue;
+                var post = new GunPost { foot = foot, foot2 = foot2, under = new GridPos(bp.topX, innerRow - outward.y), inward = new Vector3(0f, 0f, -outward.y) };
                 float y0 = GridView.SurfaceY;
                 float wallTop = FortressFloor.WallTop(top, outward).y;
-                // The stair: steps along the wall over the four tiles, from the foot up to the wall top.
+                // The stair: wide steps (two tiles deep) along the wall over its four tiles, from the foot up to the wall top.
                 int steps = 14;
-                float x0 = GridView.ToWorld(new GridPos(north ? xs[0] : xs[xs.Count - 1], kv.Key)).x - (north ? 0.5f : -0.5f);
-                float span = xs.Count;
-                float z = GridView.ToWorld(foot).z + outward.y * 0.12f;
+                int fromX = north ? bp.x0 : bp.x1;
+                float x0 = GridView.ToWorld(new GridPos(fromX, wallRow)).x - (north ? 0.5f : -0.5f);
+                float span = bp.x1 - bp.x0 + 1;
+                float z = (GridView.ToWorld(foot).z + GridView.ToWorld(foot2).z) * 0.5f + outward.y * 0.05f;
                 for (int k = 0; k < steps; k++)
                 {
                     float h = y0 + (k + 1f) / steps * (wallTop - y0);
                     float cx = x0 + (north ? 1f : -1f) * (k + 0.5f) / steps * span;
-                    Shapes.Rounded("Step", floorRoot, new Vector3(cx, (y0 + h) * 0.5f, z), new Vector3(span / steps + 0.02f, h - y0, 0.95f), 0.02f, k % 2 == 0 ? stone : stoneEdge);
+                    Shapes.Rounded("Step", floorRoot, new Vector3(cx, (y0 + h) * 0.5f, z), new Vector3(span / steps + 0.02f, h - y0, 1.9f), 0.02f, k % 2 == 0 ? stone : stoneEdge);
                 }
                 // A low parapet on the stair's open side.
-                var railFrom = new Vector3(x0, y0, z - outward.y * 0.5f);
-                var railTo = new Vector3(x0 + (north ? span : -span), wallTop, z - outward.y * 0.5f);
-                var rail = Shapes.Rounded("Rail", floorRoot, (railFrom + railTo) * 0.5f + Vector3.up * 0.35f, new Vector3((railTo - railFrom).magnitude, 0.12f, 0.12f), 0.04f, trim);
+                var railFrom = new Vector3(x0, y0, z - outward.y * 0.98f);
+                var railTo = new Vector3(x0 + (north ? span : -span), wallTop, z - outward.y * 0.98f);
+                var rail = Shapes.Rounded("Rail", floorRoot, (railFrom + railTo) * 0.5f + Vector3.up * 0.4f, new Vector3((railTo - railFrom).magnitude, 0.14f, 0.14f), 0.05f, trim);
                 rail.transform.localRotation = Quaternion.Euler(0f, 0f, (north ? 1f : -1f) * Mathf.Atan2(wallTop - y0, span) * Mathf.Rad2Deg);
                 // The landing on the wall top and the gun on it, facing the courtyard.
                 var seat = FortressFloor.WallTop(top, outward);
                 post.seat = seat;
-                post.footWorld = GridView.ToWorld(foot) + Vector3.up * y0;
+                post.footWorld = (GridView.ToWorld(foot) + GridView.ToWorld(foot2)) * 0.5f + Vector3.up * y0;
                 post.stairLow = new Vector3(x0, y0, z);
                 post.stairHigh = new Vector3(x0 + (north ? span : -span), wallTop, z);
-                Shapes.Rounded("Landing", floorRoot, seat + Vector3.down * 0.06f, new Vector3(1.8f, 0.14f, 1.8f), 0.04f, stoneEdge);
+                Shapes.Rounded("Landing", floorRoot, seat + Vector3.down * 0.06f + post.inward * 0.3f, new Vector3(2.2f, 0.14f, 2.4f), 0.04f, stoneEdge);
                 var gun = new GameObject("Gun").transform;
                 gun.SetParent(gunRoot, false);
                 gun.position = seat + post.inward * 0.55f;
@@ -106,9 +104,22 @@ namespace SquashBot.Gameplay
                 post.barrel.SetParent(post.pivot, false);
                 foreach (float bx in new[] { -0.09f, 0.09f })
                     Shapes.Rounded("Tube", post.barrel, new Vector3(bx, 0.02f, 0.75f), new Vector3(0.08f, 0.08f, 0.95f), 0.035f, metal);
-                // The glowing foot tile that sends foi up.
+                // "GUN" floating over it (turned to the camera), so it reads as a gun from across the city.
+                post.label = new GameObject("GunLabel").AddComponent<TMPro.TextMeshPro>();
+                post.label.transform.SetParent(gunRoot, false);
+                post.label.transform.position = seat + Vector3.up * 2.2f;
+                post.label.font = SquashBot.UI.UiFactory.Font;
+                post.label.text = Loc.T("gun.label");
+                post.label.fontSize = 13f;
+                post.label.fontStyle = TMPro.FontStyles.Bold;
+                post.label.alignment = TMPro.TextAlignmentOptions.Center;
+                post.label.color = new Color(1f, 0.85f, 0.3f);
+                post.label.outlineWidth = 0.25f;
+                post.label.outlineColor = new Color(0.1f, 0.05f, 0.1f);
+                post.label.rectTransform.sizeDelta = new Vector2(8f, 2.5f);
+                // The two glowing foot tiles that send foi up.
                 post.padMat = MaterialFactory.Create(st.accent, st.accent * 2.4f);
-                post.pad = Shapes.Rounded("Pad", gunRoot, post.footWorld + Vector3.up * 0.06f, new Vector3(0.86f, 0.05f, 0.86f), 0.1f, post.padMat).transform;
+                post.pad = Shapes.Rounded("Pad", gunRoot, post.footWorld + Vector3.up * 0.06f, new Vector3(0.86f, 0.05f, 1.86f), 0.1f, post.padMat).transform;
                 gunPosts.Add(post);
             }
         }
@@ -155,13 +166,21 @@ namespace SquashBot.Gameplay
                 bool live = p.ammo > 0;
                 p.pad.localScale = new Vector3(1f, 1f, 1f) * (live ? 1f + Mathf.Sin(Time.time * 4f) * 0.06f : 0.8f);
                 p.padMat.SetColor("_EmissionColor", live ? BattleArenas.Style(arenaIndex).accent * (1.6f + Mathf.Sin(Time.time * 4f)) : Color.black);
+                if (p.label != null)
+                {
+                    // The label turns to the camera, bobs a little and fades once the gun is empty (or while it is manned).
+                    var cam = cameraRig.Cam.transform;
+                    p.label.transform.rotation = Quaternion.LookRotation(p.label.transform.position - cam.position);
+                    p.label.transform.position = p.seat + Vector3.up * (2.2f + Mathf.Sin(Time.time * 2f) * 0.12f);
+                    p.label.gameObject.SetActive(live && manned != p);
+                }
             }
             if (leftPostFoot.HasValue && robot.Position != leftPostFoot.Value && !robot.IsHopping) leftPostFoot = null;
             if (manned == null)
             {
                 if (!robot.IsAlive || robot.IsHopping || robot.InArena) return;
                 foreach (var p in gunPosts)
-                    if (p.ammo > 0 && robot.Position == p.foot && leftPostFoot != p.foot) { StartCoroutine(Climb(p)); return; }
+                    if (p.ammo > 0 && (robot.Position == p.foot || robot.Position == p.foot2) && leftPostFoot != robot.Position) { StartCoroutine(Climb(p)); return; }
                 return;
             }
             if (gunBusy) return;
@@ -259,10 +278,10 @@ namespace SquashBot.Gameplay
             manned = null;
             gunBusy = false;
             ShowFoi(true);
-            robot.ArenaPlace(p.footWorld, -p.inward, snapTurn: true);
+            robot.ArenaPlace(GridView.ToWorld(robot.Position) + Vector3.up * GridView.SurfaceY, -p.inward, snapTurn: true); // back on the foot tile it climbed from
             robot.ExitArena();
             if (hunt != null) hunt.PlayerAway = false;
-            leftPostFoot = p.foot;
+            leftPostFoot = robot.Position; // step off before climbing again
             if (tps != null) tps.SetGunMode(false, 0);
         }
 

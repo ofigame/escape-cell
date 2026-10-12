@@ -182,6 +182,8 @@ namespace SquashBot.Data
             ["arena.giftCoins"] = "연속 선물: +{0} 코인",
             ["arena.giftItem"] = "연속 선물: {0}",
             ["arena.giftChest"] = "연속 선물: 상자!",
+            ["gun.label"] = "총",
+            ["arena.tip"] = "아레나 전투에서 이기고 큰 선물을 받으세요!",
             ["arena.collect"] = "승리! 선물을 모으세요!",
             ["arena.collectGold"] = "또 승리! 금화를 모으세요!",
             ["arena.0"] = "구리 성채",

@@ -182,6 +182,8 @@ namespace SquashBot.Data
             ["arena.giftCoins"] = "هدية السلسلة: +{0} عملة",
             ["arena.giftItem"] = "هدية السلسلة: {0}",
             ["arena.giftChest"] = "هدية السلسلة: صندوق!",
+            ["gun.label"] = "سلاح",
+            ["arena.tip"] = "اربح معركة الساحة واحصل على الهدايا الكبيرة!",
             ["arena.collect"] = "فزت! اجمع الهدايا!",
             ["arena.collectGold"] = "فزت مجددًا! اجمع الذهب!",
             ["arena.0"] = "قلعة النحاس",

@@ -40,6 +40,7 @@ namespace SquashBot.Gameplay
             tpsYaw = 45f; // the usual view's way (looking along +x +z)
             tpsPitch = 27f;
             tps.Show(true);
+            robot.WalkStyle = true; // the arenas: walking and running, not hopping
             Screen.orientation = ScreenOrientation.LandscapeLeft;
         }
 
@@ -47,6 +48,7 @@ namespace SquashBot.Gameplay
         {
             if (!tpsOn) return;
             tpsOn = false;
+            robot.WalkStyle = false;
             ClearGunPosts();
             if (tps != null) tps.Show(false);
             Screen.orientation = ScreenOrientation.Portrait;
@@ -151,6 +153,21 @@ namespace SquashBot.Gameplay
             var dir = Quaternion.Euler(tpsPitch, tpsYaw, 0f) * Vector3.forward;
             pos = focus - dir * TpsDistance + Quaternion.Euler(0f, tpsYaw, 0f) * Vector3.right * tpsSide; // a touch to the right
             rot = Quaternion.LookRotation(dir);
+            // A building of the arena city between foi and the camera: the camera comes in in front of it (quickly), and
+            // eases back out once the view is clear, so foi is never hidden behind a wall.
+            float full = Vector3.Distance(focus, pos), allowed = full;
+            if (SquashBot.Visual.ArenaDecor.BuildingTop.Count > 0)
+                for (float d = 0.6f; d <= full; d += 0.25f)
+                {
+                    var p = Vector3.Lerp(focus, pos, d / full);
+                    var tile = new GridPos(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.z));
+                    if (SquashBot.Visual.ArenaDecor.BuildingTop.TryGetValue(tile, out float top) && p.y < top) { allowed = Mathf.Max(0.9f, d - 0.5f); break; }
+                }
+            float dt = Time.unscaledDeltaTime;
+            tpsCamDist = allowed < tpsCamDist ? Mathf.Lerp(tpsCamDist, allowed, 1f - Mathf.Exp(-18f * dt)) : Mathf.MoveTowards(tpsCamDist, allowed, dt * 3f);
+            pos = focus + (pos - focus).normalized * tpsCamDist;
         }
+
+        private float tpsCamDist = 6f;
     }
 }

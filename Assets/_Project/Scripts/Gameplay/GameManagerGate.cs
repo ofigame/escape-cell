@@ -28,13 +28,26 @@ namespace SquashBot.Gameplay
         private const float PotionRefill = 25f;
 
         /// <summary>The middle of the north edge: of the tiles with nothing beyond them northwards, the one nearest the middle.</summary>
+        /// <summary>The bridge's middle column.</summary>
+        private int MidBridgeX()
+        {
+            int lo = int.MaxValue, hi = int.MinValue;
+            foreach (var b in grid.BridgeTiles) { lo = Mathf.Min(lo, b.x); hi = Mathf.Max(hi, b.x); }
+            return (lo + hi) / 2;
+        }
+
         private GridPos NorthGate()
         {
             // With vanG's cage and bridge: the bridge's far end, where the tunnel begins.
             if (grid.BridgeTiles.Count > 0)
             {
                 huntGateSet = true;
-                return grid.BridgeTiles[grid.BridgeTiles.Count - 1];
+                // The middle of its far (north) row: the bridge is three tiles wide.
+                int mx = MidBridgeX();
+                GridPos far = grid.BridgeTiles[0];
+                foreach (var b in grid.BridgeTiles)
+                    if (b.y > far.y || (b.y == far.y && Mathf.Abs(b.x - mx) < Mathf.Abs(far.x - mx))) far = b;
+                return far;
             }
             int mid = grid.Width / 2;
             GridPos best = grid.CenterFloor();
@@ -58,7 +71,7 @@ namespace SquashBot.Gameplay
             // In the cage: its middle, on the row nearer the floor.
             if (grid.CageTiles.Count > 0)
             {
-                int bx = grid.BridgeTiles.Count > 0 ? grid.BridgeTiles[0].x : grid.CageTiles[0].x;
+                int bx = grid.BridgeTiles.Count > 0 ? MidBridgeX() : grid.CageTiles[0].x;
                 GridPos inCage = grid.CageTiles[0];
                 foreach (var c in grid.CageTiles)
                     if (Mathf.Abs(c.x - bx) < Mathf.Abs(inCage.x - bx) || (c.x == inCage.x && c.y < inCage.y)) inCage = c;
@@ -195,6 +208,7 @@ namespace SquashBot.Gameplay
                 var at = GridView.ToWorld(b) + Vector3.up * GridView.SurfaceY;
                 foreach (float s in new[] { -1f, 1f })
                 {
+                    if (grid.IsBridge(b + new GridPos((int)s, 0))) continue; // rails only along the bridge's outer sides
                     Shapes.Rounded("Rail", bridgeRails.transform, at + new Vector3(s * 0.52f, 0.32f, 0f), new Vector3(0.06f, 0.06f, 1.02f), 0.02f, rail);
                     Shapes.Rounded("Post", bridgeRails.transform, at + new Vector3(s * 0.52f, 0.16f, 0f), new Vector3(0.08f, 0.32f, 0.08f), 0.02f, rail);
                     Shapes.Primitive(PrimitiveType.Sphere, "Lamp", bridgeRails.transform, at + new Vector3(s * 0.52f, 0.4f, 0f), Vector3.one * 0.1f, lamp);

@@ -92,8 +92,8 @@ namespace SquashBot.Gameplay
             if (arenaRun)
             {
                 // The arenas: high ramparts and towering corner towers round a huge courtyard.
-                wallHeight = 4.3f + arenaIndex * 0.12f; // very high, thick ramparts
-                wallThick = 2.1f;
+                wallHeight = 2.6f + arenaIndex * 0.04f; // ramparts only in the gaps between the buildings
+                wallThick = 1.4f;
                 FortressFloor.TowerGrow = Mathf.Max(FortressFloor.TowerGrow, 1.8f + arenaIndex * 0.04f);
                 var st = BattleArenas.Style(arenaIndex);
                 FortressFloor.WallTint = st.wall;
@@ -102,10 +102,12 @@ namespace SquashBot.Gameplay
                 FortressFloor.WallScaleAt = null;
             }
             FortressFloor.SkipCornerTowers = arenaRun;
+            FortressFloor.SkipWall = arenaRun ? (System.Func<GridPos, bool>)(p => BattleArenas.BuildingAt(p.x, p.y)) : null;
             FortressFloor.Detailed = arenaRun;
             FortressFloor.WallThick = wallThick;
             fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, FortressRects(), wallHeight);
             if (arenaRun) ArenaDecor.Build(fortressFloor, grid, level.stageBounds, arenaIndex, robot.Position, BattleArenas.Style(arenaIndex).accent, BattleArenas.Style(arenaIndex).trim);
+            if (arenaRun) { var look = BattleArenas.Style(arenaIndex); ArenaDecor.City(fortressFloor, BattleArenas.LastBuildings, look.wall, look.accent, look.trim, arenaIndex); }
             if (arenaRun) BuildGunPosts(fortressFloor);
             // The fortress never moves: its thousands of pieces are merged into a few big meshes (far fewer draw calls).
             if (fortressFloor.GetComponentsInChildren<MeshRenderer>().Length < 6000) StaticBatchingUtility.Combine(fortressFloor.gameObject); // never on a huge one (memory)

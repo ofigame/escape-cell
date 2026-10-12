@@ -150,7 +150,7 @@ namespace SquashBot.Gameplay
             hazards.Freeze();
             enemies.Freeze();
             floorRules.Freeze();
-            robot.Cheer();
+            robot.CheerBrief(); // a little dance, and foi is free to run for the gifts
             AudioManager.PlaySfx(Sfx.Win);
             fx.Burst(robot.transform.position + Vector3.up * 0.8f, Palette.Coin, Palette.CoinGlow, 50, 7f);
             var spots = new System.Collections.Generic.List<GridPos>();

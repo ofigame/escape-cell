@@ -143,7 +143,9 @@ namespace SquashBot.Core
         public GridPos CenterFloor()
         {
             // The middle of the main floor: the bridge rows to the north don't count, and never inside the cage.
-            var center = new GridPos(Width / 2, (Height - BridgeTiles.Count) / 2);
+            var bridgeRows = new HashSet<int>();
+            foreach (var b in BridgeTiles) bridgeRows.Add(b.y);
+            var center = new GridPos(Width / 2, (Height - bridgeRows.Count) / 2);
             GridPos best = center;
             int bestDistance = int.MaxValue;
             foreach (var p in AllPositions())

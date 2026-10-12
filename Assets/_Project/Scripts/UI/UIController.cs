@@ -87,6 +87,9 @@ namespace SquashBot.UI
 
         // Menu
         private UiScreen menu;
+        private RectTransform arenaTip;
+        private CanvasGroup arenaTipGroup;
+        private float arenaTipClock;
         private TextMeshProUGUI menuLevel, menuWorld, menuMission, menuCoins, menuLives, menuStars;
         private Button menuDaily, menuBonus;
         private TextMeshProUGUI menuBonusLabel;
@@ -347,6 +350,22 @@ namespace SquashBot.UI
             // The battle arenas: top right, under the settings.
             var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopRight, new Vector2(-110f, -400f), 120f, () => ArenasPressed?.Invoke());
             ((RectTransform)arenas.transform).pivot = new Vector2(0.5f, 0.5f);
+            // Now and then a speech bubble to the left of it: win an arena battle, grab the big gifts.
+            arenaTip = UiFactory.Box("ArenaTip", t, TopRight, new Vector2(-420f, -400f), new Vector2(470f, 150f));
+            arenaTip.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(arenaTip, new Color(1f, 0.97f, 0.9f, 0.97f), UiSprites.Rounded, 0.8f).raycastTarget = false;
+            var tail = UiFactory.Box("Tail", arenaTip, new Vector2(1f, 0.5f), new Vector2(-4f, 0f), new Vector2(34f, 34f));
+            tail.pivot = new Vector2(0.5f, 0.5f);
+            tail.localRotation = Quaternion.Euler(0f, 0f, 45f);
+            UiFactory.Fill(tail, new Color(1f, 0.97f, 0.9f, 0.97f), UiSprites.Rounded, 4f).raycastTarget = false;
+            var tipText = UiFactory.TextBox("Text", arenaTip, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(430f, 130f), Loc.T("arena.tip"), 34f, new Color(0.35f, 0.12f, 0.1f));
+            tipText.enableAutoSizing = true;
+            tipText.fontSizeMin = 26f;
+            tipText.fontSizeMax = 38f;
+            tipText.raycastTarget = false;
+            arenaTipGroup = arenaTip.gameObject.AddComponent<CanvasGroup>();
+            arenaTipGroup.alpha = 0f;
+            arenaTipGroup.blocksRaycasts = false;
 
             // The level card: a frosted glass panel with the world, the level, its mission and the big PLAY button.
             var card = UiFactory.Box("LevelCard", t, Bottom, new Vector2(0f, Ads.BannerReserve + 236f), new Vector2(940f, 420f));
@@ -407,6 +426,20 @@ namespace SquashBot.UI
 
         /// <summary>True while the main menu is up (its 3D lobby is showing).</summary>
         public bool MenuVisible => menu.IsVisible;
+
+        /// <summary>The arena tip on the main menu: 2 s after the menu opens it shows for 6 s, then again every 25 s
+        /// (fading, with a little bob), while the menu is up and no other screen covers it.</summary>
+        private void UpdateArenaTip(float dt)
+        {
+            if (arenaTipGroup == null) return;
+            bool can = menu.IsVisible && SquashBot.Data.BattleArenas.Unlocked(0) && !Arenas.IsOpen && !PrelevelOpen && (settings == null || !settings.IsVisible);
+            arenaTipClock = can ? arenaTipClock + dt : 0f;
+            float phase = arenaTipClock % 25f;
+            bool show = can && phase > 2f && phase < 8f;
+            arenaTipGroup.alpha = Mathf.MoveTowards(arenaTipGroup.alpha, show ? 1f : 0f, dt * 3f);
+            float bob = Mathf.Sin(Time.unscaledTime * 3f) * 6f;
+            arenaTip.anchoredPosition = new Vector2(-420f + bob, -400f);
+        }
 
         public void ShowMenu(int levelIndex, int coins, string world, string mission)
         {
@@ -719,8 +752,8 @@ namespace SquashBot.UI
                 (SettingKind.Camera, "settings.camera"),
                 (SettingKind.CombatCamera, "settings.combatCam"),
                 (SettingKind.Graphics, "settings.graphics"),
-#if !REAL_ADS
-                (SettingKind.TestMode, "settings.test"), // test builds only
+#if !REAL_ADS && !((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR)
+                (SettingKind.TestMode, "settings.test"), // computer test builds only
 #endif
             };
             for (int i = 0; i < rows.Length; i++)
@@ -1415,6 +1448,7 @@ namespace SquashBot.UI
         private void Update()
         {
             float dt = Time.unscaledDeltaTime;
+            UpdateArenaTip(dt);
 
             UpdateJuice(dt);
             if (flash != null && flashLeft > 0f)
@@ -1436,7 +1470,7 @@ namespace SquashBot.UI
 
             // Phones (as narrow as the 9:16 design or narrower): fit the width. Tablets and landscape: fit the height, so the
             // layout keeps its phone proportions top to bottom and the extra width becomes margin at the sides.
-            scaler.matchWidthOrHeight = UiFactory.MatchFor(Screen.width, Screen.height);
+            UiFactory.Fit(scaler);
 
             // The red edge bars are off: with rain everywhere they framed every level in red; the tiles warn by themselves.
             float warnPulse = 0f;

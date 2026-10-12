@@ -182,6 +182,8 @@ namespace SquashBot.Data
             ["arena.giftCoins"] = "REGALO DE RACHA: +{0} monedas",
             ["arena.giftItem"] = "REGALO DE RACHA: {0}",
             ["arena.giftChest"] = "REGALO DE RACHA: ¡UN COFRE!",
+            ["gun.label"] = "ARMA",
+            ["arena.tip"] = "¡Gana una batalla en la arena y llévate grandes regalos!",
             ["arena.collect"] = "¡GANASTE! ¡RECOGE LOS REGALOS!",
             ["arena.collectGold"] = "¡GANASTE OTRA VEZ! ¡RECOGE EL ORO!",
             ["arena.0"] = "Torre de Cobre",

@@ -182,6 +182,8 @@ namespace SquashBot.Data
             ["arena.giftCoins"] = "SERIENGESCHENK: +{0} Münzen",
             ["arena.giftItem"] = "SERIENGESCHENK: {0}",
             ["arena.giftChest"] = "SERIENGESCHENK: EINE TRUHE!",
+            ["gun.label"] = "GESCHÜTZ",
+            ["arena.tip"] = "Gewinne eine Arena-Schlacht, schnapp dir die großen Geschenke!",
             ["arena.collect"] = "GEWONNEN! SAMMLE DIE GESCHENKE!",
             ["arena.collectGold"] = "WIEDER GEWONNEN! SCHNAPP DIR DAS GOLD!",
             ["arena.0"] = "Kupferburg",

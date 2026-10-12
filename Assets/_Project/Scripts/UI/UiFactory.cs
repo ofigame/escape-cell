@@ -124,6 +124,25 @@ namespace SquashBot.UI
         /// </summary>
         public static float MatchFor(int width, int height) => width / (float)Mathf.Max(1, height) > 1080f / 1920f + 0.01f ? 1f : 0f;
 
+        /// <summary>
+        /// Fits a canvas to the screen as it is held: upright, the 1080x1920 design (by width on phones, by height on
+        /// wider screens); sideways (the battle arenas), the same design turned, 1080 units tall, so every button keeps
+        /// the size it has upright instead of shrinking to fit 1920 units into the short side.
+        /// </summary>
+        public static void Fit(CanvasScaler scaler)
+        {
+            if (Screen.width > Screen.height)
+            {
+                scaler.referenceResolution = new Vector2(1920f, 1080f);
+                scaler.matchWidthOrHeight = 1f;
+            }
+            else
+            {
+                scaler.referenceResolution = new Vector2(1080f, 1920f);
+                scaler.matchWidthOrHeight = MatchFor(Screen.width, Screen.height);
+            }
+        }
+
         public static Canvas CreateCanvas(string name, out CanvasScaler scaler)
         {
             var go = new GameObject(name);

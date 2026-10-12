@@ -98,6 +98,7 @@ namespace SquashBot.Visual
                     var nb = p + d;
                     if (Keep(nb)) continue;
                     if (grid.IsSafe(nb + d) || grid.IsFloor(nb + d)) continue; // a gap foi leaps across: leave it open
+                    if (SkipWall != null && SkipWall(nb)) continue; // a building stands there: it is the wall
                     var at = GridView.ToWorld(p) + new Vector3(d.x, 0f, d.y) * 0.78f + Vector3.up * (y0 + 0.2f);
                     bool alongX = d.y != 0;
                     Wall(root, k, stage, at, alongX, n, new Vector3(d.x, 0f, d.y), front: d.x < 0 || d.y < 0, scale: WallScaleAt != null ? WallScaleAt(p) : 1f);
@@ -223,6 +224,8 @@ namespace SquashBot.Visual
         public static Color FxColour = new Color(1f, 0.55f, 0.2f);
         /// <summary>Taller, thicker ramparts per floor tile (each fortress stage stands higher than the one before).</summary>
         public static Func<GridPos, float> WallScaleAt;
+        /// <summary>No rampart on the edge towards this tile (the arena city: its buildings are the walls).</summary>
+        public static Func<GridPos, bool> SkipWall;
         private static float TowerWide => 1f + (TowerGrow - 1f) * 0.4f;
         public static readonly (int sx, int sz)[] Corners = { (-1, -1), (1, -1), (-1, 1), (1, 1) };
 

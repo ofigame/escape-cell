@@ -182,6 +182,8 @@ namespace SquashBot.Data
             ["arena.giftCoins"] = "REGALO SERIE: +{0} monete",
             ["arena.giftItem"] = "REGALO SERIE: {0}",
             ["arena.giftChest"] = "REGALO SERIE: UN FORZIERE!",
+            ["gun.label"] = "ARMA",
+            ["arena.tip"] = "Vinci una battaglia nell'arena, prendi i grandi regali!",
             ["arena.collect"] = "HAI VINTO! RACCOGLI I REGALI!",
             ["arena.collectGold"] = "HAI VINTO ANCORA! PRENDI L'ORO!",
             ["arena.0"] = "Rocca di Rame",

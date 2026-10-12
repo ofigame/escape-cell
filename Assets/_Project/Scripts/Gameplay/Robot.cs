@@ -69,6 +69,12 @@ namespace SquashBot.Gameplay
         private float bufferedPace = -1f;
         /// <summary>How long this step takes, from how fast the finger moved (1 = the normal step).</summary>
         private float paceScale = 1f;
+        /// <summary>The battle arenas only: foi walks and runs on the ground instead of hopping tile to tile.</summary>
+        public bool WalkStyle;
+        /// <summary>How long one tile takes when walking (stick part-way) or running (stick pushed right out).</summary>
+        private float walkStep = 0.3f;
+        /// <summary>A short victory dance that leaves foi free to move (the arenas' gift hunt) rather than freezing it.</summary>
+        private bool cheerBrief;
         /// <summary>The way the last step was going when a turn follows straight on: the new step curves out of it.</summary>
         private Vector3 carry, hopCarry;
         private float carryAt = -10f;
@@ -478,9 +484,15 @@ namespace SquashBot.Gameplay
 
             // The finger sets the pace: a quick flick hops quicker, a slow drag a little slower, within a steady range.
             paceScale = pace < 0f ? 1f : Mathf.Lerp(1.3f, 0.75f, Mathf.Clamp01(pace));
+            // Walking or running in the arenas: a steady stride, a little quicker when the stick is pushed all the way.
+            walkStep = Mathf.Lerp(0.3f, 0.17f, Mathf.InverseLerp(0.6f, 0.95f, pace < 0f ? 0.5f : pace));
             HopTo(target, 1);
-            AudioManager.PlaySfx(Sfx.Hop, 0.55f, 1f, 0.08f);
-            Haptics.Light();
+            if (WalkStyle) AudioManager.PlaySfx(Sfx.Hop, 0.12f, 1.5f, 0.1f); // soft footsteps, no buzz on every tile
+            else
+            {
+                AudioManager.PlaySfx(Sfx.Hop, 0.55f, 1f, 0.08f);
+                Haptics.Light();
+            }
         }
 
         /// <summary>
@@ -628,8 +640,16 @@ namespace SquashBot.Gameplay
             StartAnim(Anim.Escape, transform.position, transform.position + Vector3.up * 1.2f);
         }
 
+        /// <summary>A quick victory dance that does not stop foi (it can walk off at once; a step ends the dance).</summary>
+        public void CheerBrief()
+        {
+            cheerBrief = true;
+            StartAnim(Anim.Cheer, transform.position, transform.position);
+        }
+
         public void Cheer()
         {
+            cheerBrief = false;
             IsAlive = false; // freezes input
             targetFacing = FacingCamera;
             StartAnim(Anim.Cheer, transform.position, transform.position);
@@ -659,7 +679,8 @@ namespace SquashBot.Gameplay
                 }
                 case Anim.Hop:
                 {
-                    float t = Mathf.Clamp01(animTime / (hopDuration * HopScale * paceScale));
+                    bool walk = WalkStyle && Vector3.Distance(from, to) < 1.1f;
+                    float t = Mathf.Clamp01(animTime / (walk ? walkStep : hopDuration * HopScale * paceScale));
                     // A swipe already waiting takes over in the last stretch of a plain step, so a run of steps flows
                     // on without a stop on every tile.
                     bool flow = HopScale < 1f && bufferedMove.HasValue && t >= 0.8f && Vector3.Distance(from, to) < 1.1f;
@@ -674,13 +695,14 @@ namespace SquashBot.Gameplay
                         ground = (2f * t3 - 3f * t2 + 1f) * from + (t3 - 2f * t2 + t) * hopCarry * 0.8f
                                  + (-2f * t3 + 3f * t2) * to + (t3 - t2) * span;
                     }
-                    transform.position = ground + Vector3.up * (Mathf.Sin(t * Mathf.PI) * hopHeight);
+                    // Hopping: an arc. Walking: feet on the ground, just a light stride bob.
+                    transform.position = ground + Vector3.up * (walk ? Mathf.Abs(Mathf.Sin(t * Mathf.PI)) * 0.05f : Mathf.Sin(t * Mathf.PI) * hopHeight);
                     if (t >= 1f) { carry = new Vector3(to.x - from.x, 0f, to.z - from.z); carryAt = Time.time; } // a turn soon after curves out of this step
-                    float stretch = 1f + Mathf.Sin(t * Mathf.PI) * 0.15f;
+                    float stretch = 1f + Mathf.Sin(t * Mathf.PI) * (walk ? 0.03f : 0.15f);
                     visual.localScale = new Vector3(1f / stretch, stretch, 1f / stretch);
                     if (t >= 1f)
                     {
-                        visual.localScale = flow ? Vector3.one : new Vector3(1.15f, 0.85f, 1.15f);
+                        visual.localScale = flow || walk ? Vector3.one : new Vector3(1.15f, 0.85f, 1.15f);
                         anim = Anim.Idle;
                         Arrived?.Invoke(Position);
                         ConsumeBuffer();
@@ -736,6 +758,14 @@ namespace SquashBot.Gameplay
                     else if (dance == "dance.flip") { bounce = Mathf.Sin(Mathf.Clamp01(animTime / 0.8f) * Mathf.PI) * 0.9f; pose = Quaternion.Euler(-360f * Mathf.Clamp01(animTime / 0.8f), 0f, 0f); }
                     transform.position = from + Vector3.up * bounce;
                     visual.localRotation = FacingCamera * pose;
+                    if (cheerBrief && animTime >= 1.6f)
+                    {
+                        cheerBrief = false;
+                        transform.position = from;
+                        visual.localScale = Vector3.one;
+                        anim = Anim.Idle;
+                        break;
+                    }
                     float stretch = 1f + Mathf.Sin(animTime * 15f) * 0.08f * Mathf.Clamp01(1.6f - animTime);
                     visual.localScale = new Vector3(1f / stretch, stretch, 1f / stretch);
                     break;

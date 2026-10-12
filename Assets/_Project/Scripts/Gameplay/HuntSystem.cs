@@ -914,6 +914,8 @@ namespace SquashBot.Gameplay
             if (g.step > 0f || (!PlayerAway && near <= 1) || (PlayerAway && Chebyshev(g.pos, goal) <= 1)) return;
             g.step = level.robotStep * (g.brute ? 1.3f : 0.72f);
             if (g.human != null) g.human.Step();
+            // The arena city: round the buildings by the street map (distances from the goal), never stuck behind a block.
+            if (level.hardAtOnce > 0 && FlowStep(g, goal)) return;
             // One step towards the robot along whichever axis brings it closer and is free.
             GridPos bestNext = g.pos;
             int bestDist = dist;
@@ -925,6 +927,56 @@ namespace SquashBot.Gameplay
                 if (nd < bestDist || (nd == bestDist && rng.Next(2) == 0 && nd < dist)) { bestDist = nd; bestNext = n; }
             }
             if (bestNext != g.pos) MoveGuard(g, bestNext, level.robotStep);
+        }
+
+        private int[,] flow;
+        private GridPos flowGoal = new GridPos(-999, -999);
+        private static readonly System.Collections.Generic.Queue<GridPos> flowQueue = new System.Collections.Generic.Queue<GridPos>();
+
+        /// <summary>
+        /// One step for a robot in the arena city along the street map: every walkable tile's walking distance to the
+        /// goal (worked out again whenever the goal tile changes), so it walks round buildings instead of pressing into
+        /// them. False when there is no way (or no better tile free), so the plain step is tried.
+        /// </summary>
+        private bool FlowStep(Guard g, GridPos goal)
+        {
+            int w = grid.Width, h = grid.Height;
+            if (flow == null || flow.GetLength(0) != w || flow.GetLength(1) != h) { flow = new int[w, h]; flowGoal = new GridPos(-999, -999); }
+            if (goal != flowGoal)
+            {
+                flowGoal = goal;
+                for (int x = 0; x < w; x++) for (int y = 0; y < h; y++) flow[x, y] = int.MaxValue;
+                flowQueue.Clear();
+                if (grid.InBounds(goal)) { flow[goal.x, goal.y] = 0; flowQueue.Enqueue(goal); }
+                while (flowQueue.Count > 0)
+                {
+                    var p = flowQueue.Dequeue();
+                    int next = flow[p.x, p.y] + 1;
+                    foreach (var d in DirectionExtensions.All)
+                    {
+                        var n = p + d.ToOffset();
+                        if (!grid.InBounds(n) || flow[n.x, n.y] <= next) continue;
+                        if (!grid.IsFloor(n) || grid.IsLava(n) || grid.IsCage(n)) continue;
+                        flow[n.x, n.y] = next;
+                        flowQueue.Enqueue(n);
+                    }
+                }
+            }
+            if (!grid.InBounds(g.pos)) return false;
+            int here = flow[g.pos.x, g.pos.y];
+            if (here == int.MaxValue) return false;
+            GridPos best = g.pos;
+            int bestD = here;
+            foreach (var d in DirectionExtensions.All)
+            {
+                var n = g.pos + d.ToOffset();
+                if (!grid.InBounds(n) || !CanStep(g.pos, n)) continue;
+                int nd = flow[n.x, n.y];
+                if (nd < bestD || (nd == bestD && nd < here && rng.Next(2) == 0)) { bestD = nd; best = n; }
+            }
+            if (best == g.pos) return false;
+            MoveGuard(g, best, level.robotStep);
+            return true;
         }
 
         private float WindTime => Mathf.Lerp(0.7f, 0.45f, level.score / 100f);
