@@ -170,8 +170,8 @@ namespace SquashBot.EditorTools
 
         /// <summary>
         /// The Google Play store build: an Android App Bundle (Builds/Play/foicell-1.0-&lt;code&gt;.aab) with live ads (REAL_ADS,
-        /// which also turns the test mode off), version 1.0, a version code from the date, hour and tenth of the hour
-        /// (yyMMddHHt, always rising), signed with the upload key the environment gives (PLAY_KEYSTORE, PLAY_KEYSTORE_PASS, PLAY_KEY_ALIAS,
+        /// which also turns the test mode off), version 1.0, a version code one above the last one built
+        /// (Tools/play-version.txt), signed with the upload key the environment gives (PLAY_KEYSTORE, PLAY_KEYSTORE_PASS, PLAY_KEY_ALIAS,
         /// PLAY_KEY_PASS — kept by the developer, never in the repository). Without the key it stops: Play refuses an
         /// unsigned bundle.
         /// </summary>
@@ -179,7 +179,11 @@ namespace SquashBot.EditorTools
         {
             var target = NamedBuildTarget.Android;
             string before = PlayerSettings.GetScriptingDefineSymbols(target);
-            int code = int.Parse(DateTime.Now.ToString("yyMMddHH")) * 10 + DateTime.Now.Minute / 6; // yyMMddHH + a tenth of the hour: always rising, never twice in an hour
+            // The version code: one more than the last bundle built (E:/OFIGAME/Tools/play-version.txt keeps it), so it always
+            // rises by one and never jumps (Play warns about big jumps: the codes have a ceiling).
+            const string CodeFile = "../Tools/play-version.txt";
+            int last = File.Exists(CodeFile) && int.TryParse(File.ReadAllText(CodeFile).Trim(), out int l) ? l : 26101220;
+            int code = last + 1;
             try
             {
                 string ks = Environment.GetEnvironmentVariable("PLAY_KEYSTORE");
@@ -214,6 +218,7 @@ namespace SquashBot.EditorTools
                     options = BuildOptions.None,
                 });
                 Debug.Log($"[SquashBot] Play build: {report.summary.result} ({report.summary.totalErrors} errors) version 1.0 ({code})");
+                if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded) File.WriteAllText(CodeFile, code.ToString());
                 Restore();
                 EditorApplication.Exit(report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded ? 0 : 1);
             }
