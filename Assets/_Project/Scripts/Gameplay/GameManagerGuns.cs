@@ -272,7 +272,10 @@ namespace SquashBot.Gameplay
             var aim = Quaternion.Euler(gunPitch, gunYaw, 0f) * Vector3.forward;
             var flat = Quaternion.Euler(0f, gunYaw, 0f) * Vector3.forward;
             var right = new Vector3(flat.z, 0f, -flat.x);
-            pos = manned.seat + Vector3.up * 1.62f - flat * 0.3f - right * 0.32f; // over the gun's left shoulder: the gun sits low right, the crosshair clear
+            // Over the gun's left shoulder (the gun sits low right, the crosshair clear); aiming down, the gunner leans
+            // up and out over the parapet, so the battlements never block the view of the wall's foot.
+            float lean = Mathf.Clamp01(gunPitch / 60f);
+            pos = manned.seat + Vector3.up * (1.62f + lean * 0.7f) + flat * (lean * 1.1f - 0.3f) - right * 0.32f;
             rot = Quaternion.LookRotation(aim);
         }
     }

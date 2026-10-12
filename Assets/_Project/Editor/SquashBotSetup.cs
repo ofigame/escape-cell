@@ -169,6 +169,66 @@ namespace SquashBot.EditorTools
         }
 
         /// <summary>
+        /// The Google Play store build: an Android App Bundle (Builds/Play/foicell-1.0-&lt;code&gt;.aab) with live ads (REAL_ADS,
+        /// which also turns the test mode off), version 1.0, a version code from the date and hour (yyMMddHH, always
+        /// rising), signed with the upload key the environment gives (PLAY_KEYSTORE, PLAY_KEYSTORE_PASS, PLAY_KEY_ALIAS,
+        /// PLAY_KEY_PASS — kept by the developer, never in the repository). Without the key it stops: Play refuses an
+        /// unsigned bundle.
+        /// </summary>
+        public static void BuildPlayStoreBatch()
+        {
+            var target = NamedBuildTarget.Android;
+            string before = PlayerSettings.GetScriptingDefineSymbols(target);
+            int code = int.Parse(DateTime.Now.ToString("yyMMddHH"));
+            try
+            {
+                string ks = Environment.GetEnvironmentVariable("PLAY_KEYSTORE");
+                if (string.IsNullOrEmpty(ks) || !File.Exists(ks)) throw new Exception("PLAY_KEYSTORE not set or missing: the upload key is needed for a Play build.");
+                Setup();
+                var defines = new System.Collections.Generic.List<string>(before.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)) { "REAL_ADS" };
+                PlayerSettings.SetScriptingDefineSymbols(target, string.Join(";", defines));
+                PlayerSettings.Android.useCustomKeystore = true;
+                PlayerSettings.Android.keystoreName = ks;
+                PlayerSettings.Android.keystorePass = Environment.GetEnvironmentVariable("PLAY_KEYSTORE_PASS");
+                PlayerSettings.Android.keyaliasName = Environment.GetEnvironmentVariable("PLAY_KEY_ALIAS");
+                PlayerSettings.Android.keyaliasPass = Environment.GetEnvironmentVariable("PLAY_KEY_PASS");
+                ConfigureAndroidTools();
+                PlayerSettings.SetScriptingBackend(target, ScriptingImplementation.IL2CPP);
+                PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
+                PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
+                PlayerSettings.bundleVersion = "1.0";
+                PlayerSettings.Android.bundleVersionCode = code;
+                EditorUserBuildSettings.buildAppBundle = true;
+                ResolveAndroidDependencies();
+                Directory.CreateDirectory("Builds/Play");
+                var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
+                {
+                    scenes = new[] { ScenePath },
+                    locationPathName = $"Builds/Play/foicell-1.0-{code}.aab",
+                    target = BuildTarget.Android,
+                    options = BuildOptions.None,
+                });
+                Debug.Log($"[SquashBot] Play build: {report.summary.result} ({report.summary.totalErrors} errors) version 1.0 ({code})");
+                Restore();
+                EditorApplication.Exit(report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded ? 0 : 1);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                Restore();
+                EditorApplication.Exit(1);
+            }
+
+            void Restore()
+            {
+                PlayerSettings.SetScriptingDefineSymbols(target, before);
+                PlayerSettings.Android.useCustomKeystore = false;
+                PlayerSettings.Android.keystorePass = PlayerSettings.Android.keyaliasPass = "";
+                EditorUserBuildSettings.buildAppBundle = false;
+            }
+        }
+
+        /// <summary>
         /// The Huawei AppGallery APK (Builds/Huawei/foicell-huawei.apk): the Android build with the HUAWEI define, so the
         /// ads come straight from Unity Ads (no Google services on those phones). Signed with the release key when the
         /// environment gives one (HUAWEI_KEYSTORE, HUAWEI_KEYSTORE_PASS, HUAWEI_KEY_ALIAS, HUAWEI_KEY_PASS — kept by the

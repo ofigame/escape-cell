@@ -719,7 +719,9 @@ namespace SquashBot.UI
                 (SettingKind.Camera, "settings.camera"),
                 (SettingKind.CombatCamera, "settings.combatCam"),
                 (SettingKind.Graphics, "settings.graphics"),
-                (SettingKind.TestMode, "settings.test"),
+#if !REAL_ADS
+                (SettingKind.TestMode, "settings.test"), // test builds only
+#endif
             };
             for (int i = 0; i < rows.Length; i++)
             {
@@ -766,7 +768,7 @@ namespace SquashBot.UI
             var gfx = Loc.T("gfx." + GraphicsQuality.Current);
             settingValues[SettingKind.Graphics].text = GraphicsQuality.Choice.HasValue ? gfx : Loc.F("gfx.auto", gfx);
             settingValues[SettingKind.Graphics].color = Palette.UiCyan;
-            SetSetting(SettingKind.TestMode, SaveData.TestMode);
+            if (settingValues.ContainsKey(SettingKind.TestMode)) SetSetting(SettingKind.TestMode, SaveData.TestMode);
         }
 
         private void SetSetting(SettingKind kind, bool on)

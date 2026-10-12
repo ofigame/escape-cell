@@ -95,6 +95,13 @@ namespace SquashBot.UI
             stickArea.gameObject.SetActive(!on);
             spinButton.gameObject.SetActive(!on);
             jumpButton.localRotation = Quaternion.Euler(0f, 0f, on ? 180f : 0f); // the chevron points down: climb down
+            // On the gun the right thumb aims, so the fire button moves to the left thumb (and the bullets with it).
+            var fire = (RectTransform)strikeButton.transform;
+            fire.anchorMin = fire.anchorMax = on ? Vector2.zero : new Vector2(1f, 0f);
+            fire.anchoredPosition = on ? new Vector2(230f, 230f) : new Vector2(-190f, 200f);
+            var ammoRect = ammoText.rectTransform;
+            ammoRect.anchorMin = ammoRect.anchorMax = on ? Vector2.zero : new Vector2(1f, 0f);
+            ammoRect.anchoredPosition = on ? new Vector2(230f, 400f) : new Vector2(-190f, 330f);
             if (on) Move = Vector2.zero;
         }
 

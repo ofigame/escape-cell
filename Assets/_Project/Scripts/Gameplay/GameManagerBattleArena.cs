@@ -64,21 +64,26 @@ namespace SquashBot.Gameplay
             l.marathon = false;
             l.final = false;
             l.mission = MissionType.Hunt;
-            l.number = Mathf.Min(250, levelIndex + 20); // a little tougher than the level it borrows
-            float d = Mathf.Clamp01(0.5f + i * 0.02f);
-            l.score = Mathf.RoundToInt(d * 100f);
-            // A steady fight, never the whole crowd at once: at most 15 robots on the floor — 10 easy ones and 5
-            // warlords — the rest dropping in as they fall.
-            l.elites = 12 + i / 2;
-            l.robots = 40 + i * 3; // the easy ones (the warlords come on top)
-            l.robotsAtOnce = 10;
-            l.hardAtOnce = 5;
+            // Two worlds harder than its own world: every arena fights like the world two steps ahead (the first world's
+            // arena as hard as world 3, the last ones capped at the last world). Everything grows with that — the
+            // crowd, how many stand at once (never more than 10 easy and 5 warlords), their health, pace and armour,
+            // the towers, vanG — while the robots keep the look of the arena's own world.
+            int harder = Mathf.Min(BattleArenas.Count - 1, i + 2);
+            int strengthLevel = Mathf.Min(LevelCatalog.LevelCount - 1, harder * LevelCatalog.LevelsPerWorld + 5);
+            l.number = strengthLevel + 1;
+            l.armor = levelSet.levels[strengthLevel].armor;
+            float d = harder / (float)(BattleArenas.Count - 1); // 0 … 1 across the worlds
+            l.score = Mathf.RoundToInt(Mathf.Lerp(20f, 95f, d));
+            l.elites = Mathf.RoundToInt(Mathf.Lerp(4f, 24f, d));
+            l.robots = Mathf.RoundToInt(Mathf.Lerp(24f, 90f, d)); // the easy ones (the warlords come on top)
+            l.robotsAtOnce = Mathf.RoundToInt(Mathf.Lerp(5f, 10f, d));
+            l.hardAtOnce = Mathf.RoundToInt(Mathf.Lerp(1f, 5f, d));
             l.brutes = 0;
-            l.towers = 3 + i / 4;
-            l.bugs = 16 + i;
-            l.robotHp = 1 + Mathf.RoundToInt(d * 3f);
-            l.robotStep = Mathf.Lerp(0.85f, 0.55f, d);
-            l.monsterHp = 30 + i * 4;
+            l.towers = Mathf.RoundToInt(Mathf.Lerp(0f, 8f, d));
+            l.bugs = Mathf.RoundToInt(Mathf.Lerp(10f, 40f, d));
+            l.robotHp = Mathf.RoundToInt(Mathf.Lerp(1f, 5f, d));
+            l.robotStep = Mathf.Lerp(1.05f, 0.5f, d);
+            l.monsterHp = Mathf.RoundToInt(Mathf.Lerp(18f, 130f, d));
             return l;
         }
 

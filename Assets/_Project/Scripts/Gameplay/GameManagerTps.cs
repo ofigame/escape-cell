@@ -21,6 +21,8 @@ namespace SquashBot.Gameplay
         private TpsControls tps;
         private bool tpsOn, tpsStrike, tpsSpin, tpsJump;
         private float tpsYaw = 45f, tpsPitch = 27f;
+        /// <summary>How far to the right of foi the camera sits (a touch, so foi stands a little left of the middle).</summary>
+        private float tpsSide = 0.6f;
 
         private bool TpsActive => tpsOn && State == GameState.Playing;
 
@@ -147,7 +149,7 @@ namespace SquashBot.Gameplay
             if (Gunning) { GunPose(out pos, out rot); return; }
             var focus = robot.transform.position + Vector3.up * 1.1f;
             var dir = Quaternion.Euler(tpsPitch, tpsYaw, 0f) * Vector3.forward;
-            pos = focus - dir * TpsDistance + Quaternion.Euler(0f, tpsYaw, 0f) * Vector3.right * 0.6f; // a touch to the right
+            pos = focus - dir * TpsDistance + Quaternion.Euler(0f, tpsYaw, 0f) * Vector3.right * tpsSide; // a touch to the right
             rot = Quaternion.LookRotation(dir);
         }
     }
