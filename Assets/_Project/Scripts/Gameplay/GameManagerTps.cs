@@ -83,7 +83,7 @@ namespace SquashBot.Gameplay
             }
 #endif
             var command = default(InputCommand);
-            if (tpsStrike) { tpsStrike = false; TpsStrike(); }
+            if (tpsStrike) { tpsStrike = false; KeyStrike(TpsForward); }
             if (tpsSpin) { tpsSpin = false; command.spin = true; return command; }
             if (tpsJump) { tpsJump = false; command.jump = true; return command; }
             if (move.magnitude < 0.3f) return command;
@@ -103,12 +103,16 @@ namespace SquashBot.Gameplay
             return command;
         }
 
-        /// <summary>The strike button: the best target in reach ahead of the camera (or a swing at the air).</summary>
-        private void TpsStrike()
+        /// <summary>
+        /// A strike from a button or the space bar: the best target in reach, those ahead first (ahead of the camera in
+        /// the arenas' TPS, the way foi faces otherwise), else a crate ahead, else a swing at the air.
+        /// </summary>
+        private void KeyStrike() { var o = robot.Facing.ToOffset(); KeyStrike(new Vector3(o.x, 0f, o.y)); }
+
+        private void KeyStrike(Vector3 fwd)
         {
             if (level == null || level.mission != MissionType.Hunt || !robot.IsAlive) return;
-            var fwd = TpsForward;
-            if (hunt.BestInReach(robot.Position, StrikeReach, fwd, -0.35f, out var at))
+            if (hunt.BestInReach(robot.Position, StrikeReach, fwd, -1.1f, out var at))
             {
                 if (hunt.IsFighter(at)) lastStrikeTap = Time.time;
                 if (!TryStrikeNow(at, true)) pendingStrike = (at, true, Time.time);

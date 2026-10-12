@@ -1315,6 +1315,7 @@ namespace SquashBot.Gameplay
             UpdateHover(command);
             if (!hovering)
             {
+                if (!tpsOn && !ArenaActive && level.mission == MissionType.Hunt && InputReader.AttackKey()) KeyStrike(); // computers: space strikes
                 if (command.spin) SpinAttack();
                 else if (command.tap.HasValue && level.mission == MissionType.Hunt && TapStrike(command.tap.Value)) input.CancelTap();
                 else if (command.jump) robot.TryJump();

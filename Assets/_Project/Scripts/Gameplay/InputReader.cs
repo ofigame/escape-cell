@@ -122,9 +122,9 @@ namespace SquashBot.Gameplay
                 var mouse = Mouse.current;
                 if (mouse != null && mouse.leftButton.isPressed) return true;
                 var kb = Keyboard.current;
-                return kb != null && (kb.spaceKey.isPressed || kb.upArrowKey.isPressed || kb.wKey.isPressed);
+                return kb != null && (kb.upArrowKey.isPressed || kb.wKey.isPressed);
 #else
-                return Input.touchCount > 0 || Input.GetMouseButton(0) || Input.GetKey(KeyCode.Space);
+                return Input.touchCount > 0 || Input.GetMouseButton(0);
 #endif
             }
         }
@@ -309,7 +309,19 @@ namespace SquashBot.Gameplay
             return new Vector2(v.x * c + v.y * c, -v.x * c + v.y * c);
         }
 
+        // On a computer the space bar strikes (see AttackKey); J jumps.
         private static bool ReadJumpKey()
+        {
+#if ENABLE_INPUT_SYSTEM
+            var kb = Keyboard.current;
+            return kb != null && kb.jKey.wasPressedThisFrame;
+#else
+            return Input.GetKeyDown(KeyCode.J);
+#endif
+        }
+
+        /// <summary>The space bar was pressed this frame: a strike at what is in reach (computers).</summary>
+        public static bool AttackKey()
         {
 #if ENABLE_INPUT_SYSTEM
             var kb = Keyboard.current;
