@@ -125,6 +125,7 @@ namespace SquashBot.Gameplay
             var gateTile = huntGate;
             hazards.IsProtected = p => p == gateTile || p == guardSpot || grid.IsCage(p) || grid.IsBridge(p) || grid.IsGate(p);
             SetupCage();
+            hunt.NoMonster = trailRun; // the open world's roads: no vanG
             hunt.Begin(grid, level, World, levelIndex * 31 + 7);
             introPending = true; // the opening shot over the whole floor
             SetupPotions();

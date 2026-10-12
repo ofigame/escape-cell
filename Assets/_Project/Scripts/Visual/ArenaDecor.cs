@@ -280,6 +280,161 @@ namespace SquashBot.Visual
             }
         }
 
+        /// <summary>
+        /// A road's scenery in its world's style (see City for the styles): along the edge of the road rocks, trees,
+        /// cacti, ice blocks, crystals or lamps, and further back the mountains it winds between — stacked, tapering
+        /// peaks (snow-capped in the cold and the stone worlds, glowing in the lava worlds).
+        /// </summary>
+        public static void Trail(Transform root, GridModel grid, int arena, Color wall, Color accent)
+        {
+            var style = StyleFor(WorldTheme.ForLevel(arena * SquashBot.Data.LevelCatalog.LevelsPerWorld).key);
+            var rng = new System.Random(5100 + arena * 17);
+            BuildingTop.Clear(); // the camera keeps out of the mountains instead (see below)
+            int w = grid.Width, h = grid.Height;
+            // How far each empty tile is from the road (up to 8).
+            var near = new int[w, h];
+            var queue = new System.Collections.Generic.Queue<GridPos>();
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                {
+                    var p = new GridPos(x, y);
+                    near[x, y] = grid.Exists(p) ? 0 : 99;
+                    if (near[x, y] == 0) queue.Enqueue(p);
+                }
+            while (queue.Count > 0)
+            {
+                var p = queue.Dequeue();
+                int d = near[p.x, p.y];
+                if (d >= 8) continue;
+                for (int dx = -1; dx <= 1; dx++)
+                    for (int dy = -1; dy <= 1; dy++)
+                    {
+                        var n = new GridPos(p.x + dx, p.y + dy);
+                        if (n.x < 0 || n.y < 0 || n.x >= w || n.y >= h || near[n.x, n.y] <= d + 1) continue;
+                        near[n.x, n.y] = d + 1;
+                        queue.Enqueue(n);
+                    }
+            }
+            Color rock, leaf, peak, cap;
+            bool snow = false, glowPeaks = false;
+            switch (style)
+            {
+                case CityStyle.Ice: rock = new Color(0.75f, 0.88f, 0.98f); leaf = new Color(0.6f, 0.85f, 1f); peak = new Color(0.7f, 0.82f, 0.95f); cap = Color.white; snow = true; break;
+                case CityStyle.Lava: rock = new Color(0.22f, 0.18f, 0.18f); leaf = new Color(1f, 0.45f, 0.12f); peak = new Color(0.25f, 0.18f, 0.16f); cap = new Color(1f, 0.4f, 0.1f); glowPeaks = true; break;
+                case CityStyle.Neon: rock = new Color(0.18f, 0.18f, 0.28f); leaf = accent; peak = new Color(0.16f, 0.15f, 0.26f); cap = accent; glowPeaks = true; break;
+                case CityStyle.Desert: rock = new Color(0.82f, 0.62f, 0.4f); leaf = new Color(0.35f, 0.6f, 0.3f); peak = new Color(0.78f, 0.55f, 0.35f); cap = new Color(0.9f, 0.72f, 0.5f); break;
+                case CityStyle.Forest: rock = new Color(0.45f, 0.45f, 0.42f); leaf = new Color(0.22f, 0.55f, 0.25f); peak = new Color(0.35f, 0.42f, 0.32f); cap = Color.white; snow = true; break;
+                case CityStyle.Harbor: rock = new Color(0.7f, 0.68f, 0.62f); leaf = new Color(0.3f, 0.65f, 0.4f); peak = new Color(0.55f, 0.6f, 0.58f); cap = Color.white; snow = true; break;
+                case CityStyle.Crystal: rock = Color.Lerp(accent, Color.white, 0.5f); leaf = accent; peak = Color.Lerp(accent, new Color(0.3f, 0.3f, 0.4f), 0.5f); cap = Color.Lerp(accent, Color.white, 0.6f); glowPeaks = true; break;
+                case CityStyle.Factory: rock = new Color(0.4f, 0.4f, 0.43f); leaf = new Color(0.9f, 0.7f, 0.3f); peak = new Color(0.38f, 0.36f, 0.36f); cap = new Color(0.55f, 0.5f, 0.45f); break;
+                case CityStyle.Pearl: rock = new Color(0.92f, 0.9f, 0.86f); leaf = new Color(0.95f, 0.8f, 0.45f); peak = new Color(0.85f, 0.85f, 0.9f); cap = Color.white; snow = true; break;
+                default: rock = new Color(0.55f, 0.52f, 0.48f); leaf = new Color(0.35f, 0.6f, 0.3f); peak = new Color(0.5f, 0.48f, 0.45f); cap = Color.white; snow = true; break; // Town
+            }
+            var rockM = MaterialFactory.CreateSurface(rock, Color.black, 0.2f, 0f);
+            var leafM = glowPeaks ? MaterialFactory.Create(leaf, leaf * 1.8f) : MaterialFactory.CreateSurface(leaf, Color.black, 0.25f, 0f);
+            var trunkM = MaterialFactory.Create(new Color(0.4f, 0.26f, 0.15f), Color.black);
+            var peakM = MaterialFactory.CreateSurface(peak, Color.black, 0.15f, 0f);
+            var peakDarkM = MaterialFactory.CreateSurface(peak * 0.85f, Color.black, 0.15f, 0f);
+            var capM = glowPeaks ? MaterialFactory.Create(cap, cap * 2f) : MaterialFactory.CreateSurface(cap, Color.black, 0.3f, 0f);
+            float y0 = GridView.SurfaceY - 0.1f;
+            // The ground between the road and the mountains: sand, grass or snow by the world, with tufts and pebbles.
+            Color ground, speck;
+            switch (style)
+            {
+                case CityStyle.Ice: ground = new Color(0.95f, 0.97f, 1f); speck = Color.white; break; // snow
+                case CityStyle.Desert: case CityStyle.Factory: ground = new Color(0.9f, 0.76f, 0.52f); speck = new Color(0.75f, 0.58f, 0.38f); break;
+                case CityStyle.Lava: ground = new Color(0.42f, 0.3f, 0.24f); speck = new Color(0.25f, 0.18f, 0.15f); break;
+                case CityStyle.Pearl: case CityStyle.Harbor: ground = new Color(0.93f, 0.86f, 0.68f); speck = new Color(0.45f, 0.68f, 0.38f); break;
+                case CityStyle.Neon: case CityStyle.Crystal: ground = new Color(0.32f, 0.5f, 0.36f); speck = Color.Lerp(accent, Color.white, 0.3f); break;
+                default: ground = new Color(0.42f, 0.66f, 0.33f); speck = new Color(0.3f, 0.52f, 0.24f); break; // Town, Forest: grass
+            }
+            bool icy = style == CityStyle.Ice;
+            var groundM = MaterialFactory.CreateSurface(ground, Color.black, icy ? 0.2f : 0.1f, 0f);
+            var speckM = MaterialFactory.CreateSurface(speck, Color.black, icy ? 0.25f : 0.1f, 0f);
+            var groundAt = (GridView.ToWorld(new GridPos(0, 0)) + GridView.ToWorld(new GridPos(w - 1, h - 1))) * 0.5f;
+            Shapes.Primitive(PrimitiveType.Cube, "Ground", root, new Vector3(groundAt.x, y0 - 0.05f, groundAt.z), new Vector3(w + 60f, 0.1f, h + 60f), groundM);
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                {
+                    int d = near[x, y];
+                    if (d == 0 || d > 6 || rng.NextDouble() > 0.3) continue;
+                    var at = GridView.ToWorld(new GridPos(x, y));
+                    var p = new Vector3(at.x + (float)rng.NextDouble() - 0.5f, y0, at.z + (float)rng.NextDouble() - 0.5f);
+                    float s = 0.25f + (float)rng.NextDouble() * 0.35f;
+                    if (icy)
+                        Shapes.Primitive(PrimitiveType.Sphere, "Drift", root, p, new Vector3(s * 2.2f, s * 0.5f, s * 1.6f), speckM); // snowdrifts
+                    else if (style == CityStyle.Desert || style == CityStyle.Factory || style == CityStyle.Lava)
+                        Shapes.Primitive(PrimitiveType.Sphere, "Pebble", root, p, new Vector3(s, s * 0.4f, s * 0.8f), speckM); // stones
+                    else
+                        Shapes.Primitive(PrimitiveType.Cylinder, "Tuft", root, p + Vector3.up * s * 0.3f, new Vector3(s * 0.5f, s * 0.3f, s * 0.5f), speckM); // grass tufts
+                }
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                {
+                    int d = near[x, y];
+                    if (d == 0 || d > 8) continue;
+                    var at = GridView.ToWorld(new GridPos(x, y));
+                    at.y = y0;
+                    double roll = rng.NextDouble();
+                    if (d <= 2 && roll < (d == 1 ? 0.18 : 0.5))
+                    {
+                        // By the road: a prop of the world.
+                        var t = new GameObject("Prop").transform;
+                        t.SetParent(root, false);
+                        t.position = at + new Vector3((float)rng.NextDouble() * 0.5f - 0.25f, 0f, (float)rng.NextDouble() * 0.5f - 0.25f);
+                        t.rotation = Quaternion.Euler(0f, rng.Next(360), 0f);
+                        float s = 0.7f + (float)rng.NextDouble() * 0.6f;
+                        if (style == CityStyle.Forest || style == CityStyle.Town || style == CityStyle.Harbor)
+                        {
+                            if (d == 2 && rng.Next(4) > 0) // trees a row back from the edge (clear of the camera), low rocks on it
+                            {
+                                Shapes.Primitive(PrimitiveType.Cylinder, "Trunk", t, new Vector3(0f, 0.45f * s, 0f), new Vector3(0.18f, 0.45f * s, 0.18f) * s, trunkM);
+                                Shapes.Primitive(PrimitiveType.Sphere, "Crown", t, new Vector3(0f, 1.25f * s, 0f), new Vector3(1.1f, 1.2f, 1.1f) * s, leafM);
+                            }
+                            else Box("Rock", t, new Vector3(0f, 0.3f * s, 0f), new Vector3(0.8f, 0.6f, 0.7f) * s, rockM, 0.15f);
+                        }
+                        else if (style == CityStyle.Desert)
+                        {
+                            if (rng.Next(2) == 0)
+                            {
+                                Shapes.Primitive(PrimitiveType.Capsule, "Cactus", t, new Vector3(0f, 0.7f * s, 0f), new Vector3(0.3f, 0.7f, 0.3f) * s, leafM);
+                                Shapes.Primitive(PrimitiveType.Capsule, "Arm", t, new Vector3(0.22f * s, 0.85f * s, 0f), new Vector3(0.16f, 0.3f, 0.16f) * s, leafM);
+                            }
+                            else Box("Rock", t, new Vector3(0f, 0.25f * s, 0f), new Vector3(0.9f, 0.5f, 0.7f) * s, rockM, 0.2f);
+                        }
+                        else if (style == CityStyle.Ice)
+                            Box("Ice", t, new Vector3(0f, 0.45f * s, 0f), new Vector3(0.7f, 0.9f, 0.7f) * s, leafM, 0.1f);
+                        else if (style == CityStyle.Crystal || style == CityStyle.Neon || style == CityStyle.Lava)
+                        {
+                            float tall = d == 1 ? 0.55f : 1.2f; // short shards on the edge, tall ones behind
+                            var c = Box("Crystal", t, new Vector3(0f, tall * 0.5f * s, 0f), new Vector3(0.3f, tall, 0.3f) * s, leafM, 0.05f);
+                            c.localRotation = Quaternion.Euler(rng.Next(-15, 15), 0f, rng.Next(-15, 15));
+                            Box("Base", t, new Vector3(0f, 0.15f * s, 0f), new Vector3(0.8f, 0.3f, 0.7f) * s, rockM, 0.12f);
+                        }
+                        else Box("Rock", t, new Vector3(0f, 0.3f * s, 0f), new Vector3(0.85f, 0.6f, 0.75f) * s, rockM, 0.15f);
+                    }
+                    else if (d >= 4 && roll < 0.09)
+                    {
+                        // Further back: a mountain, stacked tapering drums, a cap on top.
+                        // Its foot (radius 1.1 s) stays a tile and a half clear of the road.
+                        float s = Mathf.Min(1.4f + (float)rng.NextDouble() * 1.6f + d * 0.2f, (d - 1.5f) / 1.1f);
+                        if (s < 1.1f) continue;
+                        var t = new GameObject("Peak").transform;
+                        t.SetParent(root, false);
+                        t.position = at;
+                        float hgt = s * (1.4f + (float)rng.NextDouble() * 0.8f);
+                        int reach = Mathf.CeilToInt(s * 1.1f);
+                        for (int ox = -reach; ox <= reach; ox++)
+                            for (int oy = -reach; oy <= reach; oy++)
+                                if (ox * ox + oy * oy <= reach * reach) BuildingTop[new GridPos(x + ox, y + oy)] = y0 + hgt * 0.5f;
+                        Shapes.Primitive(PrimitiveType.Cylinder, "Foot", t, new Vector3(0f, hgt * 0.2f, 0f), new Vector3(s * 2.2f, hgt * 0.2f, s * 2.2f), peakDarkM);
+                        Shapes.Primitive(PrimitiveType.Cylinder, "Mid", t, new Vector3(0f, hgt * 0.55f, 0f), new Vector3(s * 1.5f, hgt * 0.2f, s * 1.5f), peakM);
+                        Shapes.Primitive(PrimitiveType.Cylinder, "Top", t, new Vector3(0f, hgt * 0.85f, 0f), new Vector3(s * 0.85f, hgt * 0.15f, s * 0.85f), peakDarkM);
+                        if (snow || glowPeaks) Shapes.Primitive(PrimitiveType.Sphere, "Cap", t, new Vector3(0f, hgt * 0.98f, 0f), new Vector3(s * 0.7f, s * 0.35f, s * 0.7f), capM);
+                    }
+                }
+        }
+
         private static Transform Group(string name, Transform root, Vector3 at, float scale)
         {
             var t = new GameObject(name).transform;

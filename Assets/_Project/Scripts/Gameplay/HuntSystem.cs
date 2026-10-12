@@ -43,6 +43,10 @@ namespace SquashBot.Gameplay
             public float alertUntil;
             /// <summary>Its wind-up is a smash at the rampart under foi's gun post (foi is up there).</summary>
             public bool atWall;
+            /// <summary>A chest's guardian on the roads (see HuntSystemTrail): the chest it keeps near, its number.</summary>
+            public bool spitter;
+            public GridPos home;
+            public int chestId;
             /// <summary>The tile it is stepping (or being knocked) off: while it moves, a blow there still lands.</summary>
             public GridPos prevPos;
             /// <summary>The health bar over its head (turns to the camera) and its fill.</summary>
@@ -176,7 +180,8 @@ namespace SquashBot.Gameplay
             else SpawnClassic();
             Total = bugs.Count + guards.Count + towers.Count + guardsToCome;
             MonsterAwake = false;
-            if (MonsterSpot.HasValue) RaiseMonster(asleep: Total > 0);
+            if (NoMonster) { }
+            else if (MonsterSpot.HasValue) RaiseMonster(asleep: Total > 0);
             else if (Total == 0) RaiseMonster();
         }
 
@@ -721,6 +726,7 @@ namespace SquashBot.Gameplay
         private void KillGuard(Guard g)
         {
             g.dead = true;
+            CheckChestFreed(g);
             grid.SetOccupied(g.pos, false);
             ClearTelegraph(g);
             fx.Burst(At(g.pos) + Vector3.up * 0.5f, new Color(1f, 0.4f, 0.3f), new Color(2.4f, 0.6f, 0.3f), 40, 6f);
@@ -736,7 +742,7 @@ namespace SquashBot.Gameplay
         private void CheckCleared()
         {
             CheckGates();
-            if (Left != 0 || MonsterDown) return;
+            if (Left != 0 || MonsterDown || NoMonster) return;
             if (monster == null) RaiseMonster();
             else if (!MonsterAwake) Wake();
         }
@@ -933,6 +939,7 @@ namespace SquashBot.Gameplay
                 g.moveT = Mathf.Min(1f, g.moveT + dt / 0.25f);
                 g.root.position = Vector3.Lerp(g.from, g.to, g.moveT) + Vector3.up * Mathf.Sin(g.moveT * Mathf.PI) * 0.12f;
             }
+            if (g.spitter) { UpdateSpitter(g, dt); return; }
             var toRobot = GridView.ToWorld(robot.Position) - g.root.position;
             toRobot.y = 0f;
             if (toRobot.sqrMagnitude > 0.01f) g.root.rotation = Quaternion.Slerp(g.root.rotation, Quaternion.LookRotation(toRobot), dt * 8f);

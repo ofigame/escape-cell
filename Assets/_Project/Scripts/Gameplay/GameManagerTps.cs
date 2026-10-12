@@ -54,6 +54,8 @@ namespace SquashBot.Gameplay
             tpsOn = false;
             robot.WalkStyle = false;
             ClearGunPosts();
+            ClearTrail();
+            trailRun = false;
             if (tps != null) tps.Show(false);
             Screen.orientation = ScreenOrientation.Portrait;
         }
@@ -78,6 +80,8 @@ namespace SquashBot.Gameplay
         {
             float dt = Time.unscaledDeltaTime;
             UpdateArenaGifts();
+            UpdateTrail(Time.deltaTime);
+            UpdateArenaExit();
             hunt.Enemies(mapEnemies);
             tps.Minimap.Tick(dt, robot.transform.position, Gunning ? gunYaw : tpsYaw, mapEnemies);
             var look = tps.TakeLook();

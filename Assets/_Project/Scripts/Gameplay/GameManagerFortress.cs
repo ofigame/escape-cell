@@ -102,7 +102,8 @@ namespace SquashBot.Gameplay
                 FortressFloor.WallScaleAt = null;
             }
             FortressFloor.SkipCornerTowers = arenaRun;
-            FortressFloor.SkipWall = arenaRun ? (System.Func<GridPos, bool>)(p => BattleArenas.BuildingAt(p.x, p.y)) : null;
+            FortressFloor.SkipWall = trailRun ? (System.Func<GridPos, bool>)(p => true) // the roads: mountains, no ramparts
+                : arenaRun ? (System.Func<GridPos, bool>)(p => BattleArenas.BuildingAt(p.x, p.y)) : null;
             FortressFloor.Detailed = arenaRun;
             FortressFloor.WallThick = wallThick;
             fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, FortressRects(), wallHeight);

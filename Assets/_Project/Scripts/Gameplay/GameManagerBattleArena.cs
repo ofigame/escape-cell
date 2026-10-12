@@ -24,16 +24,19 @@ namespace SquashBot.Gameplay
             ui.Arenas.ArenaChosen += StartArena;
         }
 
+        /// <summary>The ARENAS button: the open world, picking up on the road out of the last arena won.</summary>
         private void ShowArenas()
         {
             if (State != GameState.Menu) ShowMenu();
-            ui.Arenas.Show();
+            StartTrail(TrailResumeTarget());
         }
 
         private void StartArena(int i)
         {
             if (!BattleArenas.Unlocked(i)) return;
             ui.Arenas.Hide();
+            ClearTrail();
+            trailRun = false;
             bonusRun = true;
             dailyRun = false;
             arenaRun = true;
@@ -219,7 +222,7 @@ namespace SquashBot.Gameplay
             arenaGifts.Clear();
             arenaGiftsPhase = false;
             arenaGiftsDone = true;
-            Win();
+            OpenArenaExit(); // the open world: the exit opens onto the road to the next arena
         }
 
         private void OpenArenaGift(int kind, Vector3 at)
@@ -262,6 +265,13 @@ namespace SquashBot.Gameplay
         /// <summary>The arena ended: its record kept, the result card says how it went.</summary>
         private void EndArena(bool won)
         {
+            if (trailRun)
+            {
+                // Beaten on a road: back to its start next time (nothing to record).
+                ExitTps();
+                ShowBonusResult(Loc.T("trail.lost"));
+                return;
+            }
             ExitTps();
             BattleArenas.Record(arenaIndex, arenaBestStreak, won);
             if (won)
