@@ -47,11 +47,13 @@ namespace SquashBot.UI
             }, 56f).GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
         }
 
-        public void Show()
+        /// <param name="gunsAllowed">The battle arenas: guns can be taken too (on the floors they are shown dimmed).</param>
+        public void Show(bool gunsAllowed = false)
         {
             for (int i = grid.childCount - 1; i >= 0; i--) Destroy(grid.GetChild(i).gameObject);
             var owned = Armory.All.FindAll(Armory.Owned);
             var current = Armory.Equipped;
+            var currentGun = gunsAllowed ? Armory.EquippedGun : null;
             const float w = 320f, h = 400f, gap = 20f;
             int cols = 3;
             for (int i = 0; i < owned.Count; i++)
@@ -62,7 +64,8 @@ namespace SquashBot.UI
                 float y = -row * (h + gap);
                 var card = UiFactory.Card(weapon.id, grid, new Vector2(0.5f, 1f), new Vector2(x, y), new Vector2(w, h));
                 card.pivot = new Vector2(0.5f, 1f);
-                bool inHand = weapon == current;
+                bool inHand = weapon == current || (currentGun != null && weapon == currentGun);
+                bool usable = gunsAllowed || weapon.kind != WeaponKind.Gun;
                 if (inHand)
                     UiFactory.Fill(UiFactory.Stretch("InHand", card), new Color(0.3f, 1f, 0.55f, 0.9f), UiSprites.Ring, 0.6f).raycastTarget = false;
                 var halo = UiFactory.Box("Halo", card, new Vector2(0.5f, 1f), new Vector2(0f, -140f), new Vector2(280f, 280f));
@@ -81,6 +84,14 @@ namespace SquashBot.UI
                 if (inHand)
                     UiFactory.TextBox("InHandLabel", card, new Vector2(0.5f, 1f), new Vector2(0f, -22f), new Vector2(280f, 40f), Loc.T("weapon.equipped"), 24f, new Color(0.4f, 1f, 0.6f), title: true)
                         .rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                if (!usable)
+                {
+                    // A gun on the floors: shown, not taken (the battle arenas only).
+                    card.gameObject.AddComponent<CanvasGroup>().alpha = 0.4f;
+                    UiFactory.TextBox("ArenaOnly", card, new Vector2(0.5f, 1f), new Vector2(0f, -22f), new Vector2(300f, 40f), Loc.T("bag.arenaOnly"), 22f, new Color(1f, 0.8f, 0.4f), title: true)
+                        .rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                    continue;
+                }
                 var button = card.gameObject.AddComponent<Button>();
                 button.targetGraphic = card.Find("Background").GetComponent<Image>();
                 button.onClick.AddListener(() =>

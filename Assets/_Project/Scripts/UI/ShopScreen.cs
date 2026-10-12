@@ -303,7 +303,7 @@ namespace SquashBot.UI
             var sellLabel = sell.GetComponentInChildren<TextMeshProUGUI>();
             refreshers.Add(() =>
             {
-                bool owned = Armory.Owned(w), unlocked = Armory.Unlocked(w), equipped = Armory.Equipped == w;
+                bool owned = Armory.Owned(w), unlocked = Armory.Unlocked(w), equipped = Armory.IsEquipped(w);
                 int lv = Armory.Level(w);
                 int dmg = Armory.Damage(w);
                 float cd = Armory.Cooldown(w);

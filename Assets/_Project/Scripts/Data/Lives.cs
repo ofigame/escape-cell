@@ -23,7 +23,7 @@ namespace SquashBot.Data
             get
             {
                 Update();
-                return PlayerPrefs.GetInt(CountKey, Max);
+                return Mathf.Min(PlayerPrefs.GetInt(CountKey, Max), Max); // (an old save may hold more than today's max)
             }
         }
 

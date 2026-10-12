@@ -35,6 +35,13 @@ namespace SquashBot.Gameplay
             public GridPos pos;
             public Vector3 from, to;
             public float moveT = 1f, step, windup = -1f, cooldown, flash;
+            /// <summary>Seconds the current step takes (robots walk smoothly from tile to tile, one step running into the next).</summary>
+            public float moveDur = 0.25f;
+            /// <summary>One of foi's allies (see HuntSystemAllies): it never holds its tile against foi.</summary>
+            public bool ally;
+            /// <summary>A chest's vanG on the roads: the monster's model, moved like a warlord.</summary>
+            public Monster mon;
+            private bool monStomped;
             public GridPos target;
             public int hp, maxHp;
             /// <summary>Gun-post bullets' fractions of health not yet taken (each takes a share of its whole).</summary>
@@ -46,7 +53,7 @@ namespace SquashBot.Gameplay
             /// <summary>A chest's guardian on the roads (see HuntSystemTrail): the chest it keeps near, its number.</summary>
             public bool spitter;
             public GridPos home;
-            public int chestId;
+            public int chestId = -1;
             /// <summary>The tile it is stepping (or being knocked) off: while it moves, a blow there still lands.</summary>
             public GridPos prevPos;
             /// <summary>The health bar over its head (turns to the camera) and its fill.</summary>
@@ -66,8 +73,17 @@ namespace SquashBot.Gameplay
             /// <summary>The tiles its slam will hit (the target, and its neighbours for a brute).</summary>
             public readonly List<GridPos> area = new List<GridPos>();
 
-            public void SetRaise(float k) { if (bot != null) bot.SetRaise(k); else human.SetRaise(k); }
-            public void Flash() { if (bot != null) bot.Flash(); else human.Flash(); }
+            public void SetRaise(float k)
+            {
+                if (mon != null) { if (k > 0.05f && !monStomped) { mon.Stomp(); monStomped = true; } else if (k <= 0f) monStomped = false; return; }
+                if (bot != null) bot.SetRaise(k); else human.SetRaise(k);
+            }
+
+            public void Flash()
+            {
+                if (mon != null) { mon.Hit(hp); return; }
+                if (bot != null) bot.Flash(); else human.Flash();
+            }
         }
 
         /// <summary>The robot was hit on a tile, taking this share of its health.</summary>
@@ -290,7 +306,7 @@ namespace SquashBot.Gameplay
             var g = new Guard { pos = p, brute = brute, rank = rank, stage = StageOf(p), hp = hp, step = level.robotStep * (rank == 0 ? 1.25f : 1f) * (0.8f + (float)rng.NextDouble() * 0.4f) };
             g.root = new GameObject(brute ? "Enforcer" : "GuardRobot").transform;
             g.root.SetParent(transform, false);
-            var accent = Color.HSVToRGB(Mathf.Repeat(world * 0.21f + 0.55f, 1f), 0.75f, 1f);
+            var accent = RedFoes ? new Color(1f, 0.22f, 0.18f) : Color.HSVToRGB(Mathf.Repeat(world * 0.21f + 0.55f, 1f), 0.75f, 1f);
             if (brute)
             {
                 // vanG's enforcer: a tall humanoid that hits much harder.
@@ -313,8 +329,10 @@ namespace SquashBot.Gameplay
             {
                 var model = g.bot != null ? g.bot.transform : g.human.transform;
                 float h = HeightOf(g.root);
-                float want = FoiHeight * (g.human != null ? (rank >= 99 ? 1.65f : 1.45f) : (rank == 0 ? 0.92f : 1f));
+                float want = FoiHeight * (g.human != null ? (rank >= 99 ? 1.3f : 1.18f) : rank > 0 ? 1.06f : 1f);
                 if (h > 0.05f) model.localScale *= want / h;
+                // Never spindly: a little broader than tall would make them.
+                model.localScale = Vector3.Scale(model.localScale, g.human != null ? new Vector3(1.22f, 1f, 1.22f) : new Vector3(1.12f, 1f, 1.12f));
             }
             AddHealthBar(g);
             if (level.shieldEvery > 0 && guards.Count % level.shieldEvery == level.shieldEvery - 1) AddShield(g);
@@ -349,7 +367,7 @@ namespace SquashBot.Gameplay
             bool hard = hardToCome > 0 && hardAlive < level.hardAtOnce;
             if (!hard && (alive >= guardCap || guardsToCome - hardToCome <= 0)) return;
             var spots = FreeTiles(4);
-            spots.RemoveAll(p => grid.IsOccupied(p) || (Avoid != null && Avoid(p)));
+            spots.RemoveAll(p => grid.IsOccupied(p) || AllyAt(p) || (Avoid != null && Avoid(p)));
             if (spots.Count == 0) { nextGuardAt = Time.time + 0.5f; return; }
             var at = Take(spots);
             if (hard) { AddGuard(at, brute: true, rank: 99); hardToCome--; }
@@ -358,6 +376,7 @@ namespace SquashBot.Gameplay
             ng.from = At(at) + Vector3.up * 7f; // it falls onto its tile
             ng.root.position = ng.from;
             ng.moveT = 0f;
+            ng.moveDur = 0.45f;
             ng.cooldown = 1f;
             guardsToCome--;
             Shockwave.Create(At(at), 1.2f, new Color(1f, 0.55f, 0.35f));
@@ -850,7 +869,7 @@ namespace SquashBot.Gameplay
         }
 
         private bool CanStep(GridPos from, GridPos p) => FloorRelief.StepOk(from, p) &&
-            grid.IsStandable(p) && !grid.IsOccupied(p) && !grid.IsGap(p) && p != robot.Position && (Avoid == null || !Avoid(p));
+            grid.IsStandable(p) && !grid.IsOccupied(p) && !AllyAt(p) && !grid.IsGap(p) && p != robot.Position && (Avoid == null || !Avoid(p));
 
         private void UpdateBug(Bug b, float dt)
         {
@@ -888,14 +907,26 @@ namespace SquashBot.Gameplay
 
         private void MoveGuard(Guard g, GridPos next, float duration)
         {
-            grid.SetOccupied(g.pos, false);
+            if (!g.ally) grid.SetOccupied(g.pos, false);
             g.prevPos = g.pos;
             g.pos = next;
-            grid.SetOccupied(next, true);
+            if (!g.ally) grid.SetOccupied(next, true);
             g.from = g.root.position;
             g.to = At(next);
             g.moveT = 0f;
-            g.step = duration;
+            g.moveDur = Mathf.Max(0.08f, duration);
+            g.step = 0f; // the next step follows straight on: a smooth walk, not a hop and a pause
+        }
+
+        /// <summary>Tiles a second a robot walks: nearly foi's own pace (a touch slower), quicker on harder floors and when roused.</summary>
+        private float GuardSpeed(Guard g)
+        {
+            float v = Mathf.Lerp(3.0f, 4.2f, level.score / 100f);
+            if (g.mon != null) v *= 0.8f;
+            else if (g.brute) v *= g.rank >= 99 ? 0.85f : 0.9f;
+            else if (g.rank == 0) v *= 0.92f;
+            if (Time.time < g.alertUntil) v *= 1.12f;
+            return v;
         }
 
 
@@ -938,8 +969,8 @@ namespace SquashBot.Gameplay
             g.cooldown -= dt;
             if (g.moveT < 1f)
             {
-                g.moveT = Mathf.Min(1f, g.moveT + dt / 0.25f);
-                g.root.position = Vector3.Lerp(g.from, g.to, g.moveT) + Vector3.up * Mathf.Sin(g.moveT * Mathf.PI) * 0.12f;
+                g.moveT = Mathf.Min(1f, g.moveT + dt / g.moveDur);
+                g.root.position = Vector3.Lerp(g.from, g.to, g.moveT) + Vector3.up * Mathf.Abs(Mathf.Sin(g.moveT * Mathf.PI)) * 0.035f; // a light stride
             }
             if (g.spitter) { UpdateSpitter(g, dt); return; }
             var toRobot = GridView.ToWorld(robot.Position) - g.root.position;
@@ -1006,6 +1037,12 @@ namespace SquashBot.Gameplay
             // foi up on a gun post: the crowd holds its ground; the warlords march to the foot of the rampart under the
             // gun and smash at it from there (they never climb).
             var goal = atAlly ? ally.pos : robot.Position;
+            // A chest's guards keep by their chest while foi is away from it.
+            if (g.chestId >= 0 && !atAlly && Chebyshev(robot.Position, g.home) > 8)
+            {
+                if (Chebyshev(g.pos, g.home) <= 2) return;
+                goal = g.home;
+            }
             if (PlayerAway && !atAlly)
             {
                 if (g.rank < 99 || WallTarget == null || !(WallTarget() is GridPos wall)) return;
@@ -1023,7 +1060,7 @@ namespace SquashBot.Gameplay
             int dist = goal.Manhattan(g.pos);
             g.step -= dt;
             if (g.step > 0f || (!PlayerAway && (atAlly ? allyD : near) <= 1) || (PlayerAway && Chebyshev(g.pos, goal) <= 1)) return;
-            g.step = level.robotStep * (g.brute ? 1.3f : 0.72f) * (Time.time < g.alertUntil ? 0.45f : 1f); // roused: at a run
+            float period = 1f / GuardSpeed(g);
             if (g.human != null) g.human.Step();
             // The arena city: round the buildings by the street map (distances from the goal), never stuck behind a block.
             if (level.hardAtOnce > 0 && !atAlly && FlowStep(g, goal)) return;
@@ -1037,7 +1074,7 @@ namespace SquashBot.Gameplay
                 int nd = goal.Manhattan(n);
                 if (nd < bestDist || (nd == bestDist && rng.Next(2) == 0 && nd < dist)) { bestDist = nd; bestNext = n; }
             }
-            if (bestNext != g.pos) MoveGuard(g, bestNext, level.robotStep);
+            if (bestNext != g.pos) MoveGuard(g, bestNext, period);
         }
 
         private int[,] flow;
@@ -1086,7 +1123,7 @@ namespace SquashBot.Gameplay
                 if (nd < bestD || (nd == bestD && nd < here && rng.Next(2) == 0)) { bestD = nd; best = n; }
             }
             if (best == g.pos) return false;
-            MoveGuard(g, best, level.robotStep);
+            MoveGuard(g, best, g.ally ? 1f / AllySpeed : 1f / GuardSpeed(g));
             return true;
         }
 

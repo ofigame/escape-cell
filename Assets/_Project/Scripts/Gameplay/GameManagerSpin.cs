@@ -51,6 +51,65 @@ namespace SquashBot.Gameplay
             Haptics.Medium();
         }
 
+        // ---------- The fury ----------
+
+        /// <summary>Kills in a row (without being hit) that set off the fury, and the rest after one.</summary>
+        private const int FuryStreak = 10;
+        private const float FuryRest = 40f, FurySeconds = 3f;
+        private float furyReadyAt, furyUntil;
+        public bool FuryOn => Time.time < furyUntil;
+
+        /// <summary>
+        /// A long kill streak sets off the fury on its own: for three seconds foi whirls round and round at speed in a
+        /// golden storm, striking every robot within two tiles again and again.
+        /// </summary>
+        private void StartFury()
+        {
+            if (level == null || level.mission != MissionType.Hunt || !robot.IsAlive) return;
+            furyReadyAt = Time.time + FuryRest;
+            furyUntil = Time.time + FurySeconds;
+            ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.7f), Loc.T("streak.fury"), new Color(1f, 0.75f, 0.2f), 120f);
+            ui.Flash(new Color(1f, 0.8f, 0.3f), 0.15f);
+            AudioManager.PlaySfx(Sfx.Win, 0.9f, 0.7f);
+            Haptics.Medium();
+            StartCoroutine(Fury());
+        }
+
+        private IEnumerator Fury()
+        {
+            var v = robot.Visual;
+            var start = v != null ? v.localRotation : Quaternion.identity;
+            var gold = new Color(1f, 0.78f, 0.25f);
+            float nextBlow = 0f, angle = 0f;
+            while (Time.time < furyUntil && robot.IsAlive && level != null)
+            {
+                angle += Time.deltaTime * 1440f; // four turns a second
+                if (v != null) v.localRotation = start * Quaternion.Euler(0f, angle, 0f);
+                if (Time.time >= nextBlow)
+                {
+                    nextBlow = Time.time + 0.22f;
+                    var w = weapon ?? Armory.Equipped;
+                    int damage = Armory.Damage(w) * (superLeft > 0f ? 2 : 1);
+                    var centre = robot.transform.position;
+                    Shockwave.Create(centre, 3.2f, gold);
+                    for (int i = 0; i < 6; i++)
+                    {
+                        float a = i * Mathf.PI / 3f + angle * Mathf.Deg2Rad;
+                        SlashFx.Create(centre, centre + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * 2.4f, gold, 1.4f);
+                    }
+                    int hits = 0;
+                    for (int x = -2; x <= 2; x++)
+                        for (int y = -2; y <= 2; y++)
+                            if ((x != 0 || y != 0) && hunt.Strike(robot.Position + new GridPos(x, y), damage)) hits++;
+                    if (hits > 0) { NoteFightBlow(); cameraRig.Shake(0.2f + 0.05f * hits); }
+                    AudioManager.PlaySfx(Sfx.Hop, 0.6f, 0.5f);
+                    lastStrikeTap = Time.time;
+                }
+                yield return null;
+            }
+            if (v != null) v.localRotation = start;
+        }
+
         /// <summary>foi's body whirls round once (the robot itself keeps facing where it did).</summary>
         private IEnumerator SpinBody(float seconds)
         {

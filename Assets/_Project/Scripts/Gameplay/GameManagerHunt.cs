@@ -18,10 +18,12 @@ namespace SquashBot.Gameplay
     {
         /// <summary>How far a blow reaches (diagonals count as one step), for every weapon and the super skill alike.</summary>
         /// <summary>How far foi strikes: two tiles (diagonals count as one) for every blade, the range of a gun.</summary>
-        private int StrikeReach { get { var w = weapon ?? Armory.Equipped; return w.kind == WeaponKind.Gun ? w.reach : 2; } }
+        private int StrikeReach => 2;
         private HuntSystem hunt;
         private float strikeCooldown;
         private WeaponDef weapon;
+        /// <summary>The gun foi carries in the battle arenas (null on the floors, or with none taken).</summary>
+        private WeaponDef gun;
         private HeldWeapon heldWeapon;
         private float lastArmorNote = -10f;
 
@@ -113,8 +115,10 @@ namespace SquashBot.Gameplay
             hunt.EnemyScale = Mathf.Lerp(1.6f, 2.03f, grow);
             adHealUsed = false;
             weapon = Armory.Equipped;
+            gun = arenaRun ? Armory.EquippedGun : null;
             if (heldWeapon != null) Destroy(heldWeapon.gameObject);
-            heldWeapon = HeldWeapon.Attach(robot.Visual, weapon);
+            heldWeapon = null;
+            ShowHeld(gun ?? weapon);
             // The tunnel gate stands from the start in the middle of the north edge, the monster asleep in front of it.
             huntGate = NorthGate();
             // The battle arenas have no cage and no tunnel: vanG rises in the courtyard when the crowd is beaten.
@@ -125,7 +129,8 @@ namespace SquashBot.Gameplay
             var gateTile = huntGate;
             hazards.IsProtected = p => p == gateTile || p == guardSpot || grid.IsCage(p) || grid.IsBridge(p) || grid.IsGate(p);
             SetupCage();
-            hunt.NoMonster = trailRun; // the open world's roads: no vanG
+            hunt.NoMonster = trailRun;
+            hunt.RedFoes = arenaRun; // the open world's roads: no vanG
             hunt.Begin(grid, level, World, levelIndex * 31 + 7);
             introPending = true; // the opening shot over the whole floor
             SetupPotions();
@@ -146,7 +151,7 @@ namespace SquashBot.Gameplay
 
         private void OnHuntFinished(GridPos p, bool robotKind)
         {
-            if (robotKind && !defenseStrike) { hitStopLeft = 0.06f; cameraRig.Punch(0.35f); CountStreak(p); }
+            if (robotKind && !defenseStrike && !hunt.AllyKill) { hitStopLeft = 0.06f; cameraRig.Punch(0.35f); CountStreak(p); }
             int reward = robotKind ? 3 : 1;
             if (defenseStrike) reward /= 2; // felled by a defence: half the coins
             coinsThisRun += reward;
@@ -193,7 +198,7 @@ namespace SquashBot.Gameplay
             WeaponDef better = null;
             foreach (var w in Armory.All)
             {
-                if (Armory.Owned(w) || !Armory.Unlocked(w) || Armory.Power(w) <= Armory.Power(current)) continue;
+                if (w.kind == WeaponKind.Gun || Armory.Owned(w) || !Armory.Unlocked(w) || Armory.Power(w) <= Armory.Power(current)) continue;
                 bool crowded = level.robots + level.brutes >= 4;
                 bool fits = crowded ? Armory.Cooldown(w) < Armory.Cooldown(current) * 0.85f || Armory.Damage(w) > Armory.Damage(current) : Armory.Damage(w) > Armory.Damage(current) || Armory.Cooldown(w) < Armory.Cooldown(current) * 0.8f;
                 if (!fits) continue;
@@ -245,15 +250,25 @@ namespace SquashBot.Gameplay
             State = GameState.Paused;
             Time.timeScale = 0f;
             cameraRig.SetMenuFocus(true);
-            ui.WeaponBag.Show();
+            ui.WeaponBag.Show(arenaRun);
         }
+
+        /// <summary>The weapon model in foi's hand (rebuilt only when it changes: the arenas switch blade and gun).</summary>
+        private void ShowHeld(WeaponDef w)
+        {
+            if (heldWeapon != null && heldShown == w) return;
+            if (heldWeapon != null) Destroy(heldWeapon.gameObject);
+            heldWeapon = HeldWeapon.Attach(robot.Visual, w);
+            heldShown = w;
+        }
+
+        private WeaponDef heldShown;
 
         private void TakeWeapon(WeaponDef w)
         {
             Armory.Equip(w);
-            weapon = w;
-            if (heldWeapon != null) Destroy(heldWeapon.gameObject);
-            heldWeapon = HeldWeapon.Attach(robot.Visual, w);
+            if (w.kind == WeaponKind.Gun) gun = w; else weapon = w;
+            ShowHeld(w);
             heldWeapon.Swing();
             CloseBag();
             FloatAt(robot.transform.position + Vector3.up * 0.6f, Loc.T("weapon." + w.id), WeaponModels.Glow(w.tier));
@@ -319,10 +334,10 @@ namespace SquashBot.Gameplay
             TapMarker.Create(GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY, inReach ? new Color(1f, 0.82f, 0.3f) : new Color(0.6f, 0.9f, 1f));
             if (!inReach)
             {
-                // Too far: a step towards it.
-                int dx = at.x - robot.Position.x, dy = at.y - robot.Position.y;
-                var dir = Mathf.Abs(dx) >= Mathf.Abs(dy) ? (dx > 0 ? Direction.PlusX : Direction.MinusX) : (dy > 0 ? Direction.PlusY : Direction.MinusY);
-                robot.TryMove(dir);
+                // Too far: a swing that way all the same (a tap is always a blow, never a step).
+                var way = GridView.ToWorld(at) - GridView.ToWorld(robot.Position);
+                way.y = 0f;
+                KeyStrike(way.normalized);
                 return true;
             }
             if (crowd && hunt.IsFighter(at)) lastStrikeTap = Time.time; // the fight view comes in while foi attacks a robot or vanG (not bugs)
@@ -590,7 +605,7 @@ namespace SquashBot.Gameplay
         /// <summary>The fight view: the same heading, much lower (about 30 degrees down instead of 46).</summary>
         private static readonly Vector3 FightCamOffset = new Vector3(-2.7f, 3.1f, -2.7f); // steeper than before (user asked)
         /// <summary>How much closer the fight view sits, and its slightly wider lens.</summary>
-        private const float FightCamCloser = 0.9f, FightCamFov = 56f;
+        private const float FightCamCloser = 0.62f, FightCamFov = 56f; // the fight view sits close behind foi (user asked)
         /// <summary>How many tiles the fight view leads towards the way foi strikes.</summary>
         private const float FightLead = 1.4f;
         /// <summary>The settings' camera distances (near, medium, far, farthest), as multiples of the nearest view.</summary>

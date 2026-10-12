@@ -35,6 +35,9 @@ namespace SquashBot.Gameplay
         }
 
         private readonly List<TrailChest> trailChests = new List<TrailChest>();
+        // The gate's portal (part, how it moves: 0 the pulsing core, ±1 a turning ring, 10+ a spark drawn inwards) and the chests' beams.
+        private readonly List<(Transform t, int kind)> portalParts = new List<(Transform, int)>();
+        private readonly List<Transform> chestGlows = new List<Transform>();
         private readonly List<(GridPos tile, Transform body, int kind)> trailGifts = new List<(GridPos, Transform, int)>();
         private readonly List<(GridPos tile, float until, Transform body)> puddles = new List<(GridPos, float, Transform)>();
         private float puddleHurtAt;
@@ -82,6 +85,7 @@ namespace SquashBot.Gameplay
         /// <summary>A road to arena <paramref name="target"/>: built in its world's look, foi at its foot.</summary>
         private void StartTrail(int target)
         {
+            KeepAllies(0); // a new road: new allies from its own chests (the last ones stay behind)
             ui.Arenas.Hide();
             bonusRun = true;
             dailyRun = false;
@@ -97,7 +101,7 @@ namespace SquashBot.Gameplay
             BeginRun();
             EnterTps();
             SetupTrail();
-            SpawnKeptAllies();
+            hunt.AllyDamage = 1 + arenaIndex / 6;
             ui.ShowIntro(Loc.F("trail.title", Loc.T(BattleArenas.NameKey(trailTarget))), Loc.T("trail.intro"));
             AudioManager.PlaySfx(Sfx.Win, 0.5f, 1.1f);
             RefreshHud();
@@ -169,6 +173,7 @@ namespace SquashBot.Gameplay
                     chest.lid = BuildChest(centre, look.accent);
                     grid.SetOccupied(centre, true);
                     trailChests.Add(chest);
+                    // Its guards: poison spitters, a ring of robots and a vanG — all of them tougher road by road.
                     int guardians = 2 + (trailTarget >= 8 ? 1 : 0) + (trailTarget >= 18 ? 1 : 0);
                     for (int i = 0; i < guardians; i++)
                     {
@@ -176,6 +181,14 @@ namespace SquashBot.Gameplay
                         var p = centre + new GridPos(Mathf.RoundToInt(Mathf.Cos(a) * 2f), Mathf.RoundToInt(Mathf.Sin(a) * 2f));
                         hunt.AddTrailGuard(p, true, centre, chestId);
                     }
+                    int ring = 3 + trailTarget / 4, rank = Mathf.Min(4, 1 + trailTarget / 5);
+                    for (int i = 0; i < ring; i++)
+                    {
+                        float a = i * Mathf.PI * 2f / ring;
+                        var p = centre + new GridPos(Mathf.RoundToInt(Mathf.Cos(a) * 3.4f), Mathf.RoundToInt(Mathf.Sin(a) * 3.4f));
+                        hunt.AddTrailGuard(p, false, centre, chestId, rank);
+                    }
+                    hunt.AddChestBoss(centre + new GridPos(0, -1), centre, chestId, 14 + trailTarget * 4);
                     chestId++;
                 }
                 else
@@ -192,8 +205,11 @@ namespace SquashBot.Gameplay
             }
             trailGate = new GridPos(TrailMap.Gate.x, TrailMap.Gate.y);
             BuildTrailGate(trailGate, look, BattleArenas.Unlocked(trailTarget));
-            ArenaDecor.Trail(trailRoot, grid, trailTarget, look.wall, look.accent);
-            if (trailRoot.GetComponentsInChildren<MeshRenderer>().Length < 6000) StaticBatchingUtility.Combine(trailRoot.gameObject);
+            // The scenery is batched into a few meshes; the chests and the gate stay free to move.
+            var decor = new GameObject("Scenery").transform;
+            decor.SetParent(trailRoot, false);
+            ArenaDecor.Trail(decor, grid, trailTarget, look.wall, look.accent);
+            if (decor.GetComponentsInChildren<MeshRenderer>().Length < 6000) StaticBatchingUtility.Combine(decor.gameObject);
         }
 
         private void ClearTrail()
@@ -201,6 +217,8 @@ namespace SquashBot.Gameplay
             if (trailRoot != null) Destroy(trailRoot.gameObject);
             trailRoot = null;
             trailChests.Clear();
+            portalParts.Clear();
+            chestGlows.Clear();
             foreach (var g in trailGifts) if (g.body != null) Destroy(g.body.gameObject);
             trailGifts.Clear();
             foreach (var p in puddles) if (p.body != null) Destroy(p.body.gameObject);
@@ -214,8 +232,13 @@ namespace SquashBot.Gameplay
         {
             var root = new GameObject("Chest").transform;
             root.position = GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY;
-            var wood = MaterialFactory.Create(new Color(0.55f, 0.33f, 0.18f), Color.black);
-            var band = MaterialFactory.Create(new Color(1f, 0.8f, 0.3f), new Color(0.6f, 0.4f, 0.05f));
+            // Gold all over and glowing, under a beam of light: a chest of allies is seen from far down the road.
+            var wood = MaterialFactory.CreateSurface(new Color(1f, 0.78f, 0.25f), new Color(0.9f, 0.55f, 0.08f), 0.85f, 0.9f);
+            var band = MaterialFactory.Create(new Color(1f, 0.95f, 0.6f), new Color(2.2f, 1.6f, 0.5f));
+            var beam = MaterialFactory.Create(new Color(1f, 0.85f, 0.4f), new Color(1.8f, 1.3f, 0.35f));
+            var beamT = Shapes.Primitive(PrimitiveType.Cylinder, "Beam", root, new Vector3(0f, 3.2f, 0f), new Vector3(0.22f, 3.2f, 0.22f), beam).transform;
+            Shapes.Primitive(PrimitiveType.Cylinder, "Halo", root, new Vector3(0f, 0.02f, 0f), new Vector3(1.9f, 0.01f, 1.9f), band);
+            chestGlows.Add(beamT);
             Shapes.Rounded("Box", root, new Vector3(0f, 0.3f, 0f), new Vector3(0.95f, 0.6f, 0.7f), 0.08f, wood);
             Shapes.Rounded("Band", root, new Vector3(0f, 0.3f, 0f), new Vector3(0.99f, 0.12f, 0.74f), 0.03f, band);
             var lid = new GameObject("Lid").transform;
@@ -242,8 +265,35 @@ namespace SquashBot.Gameplay
             Shapes.Rounded("Trim", root, new Vector3(0f, 3.35f, 0.02f), new Vector3(4.6f, 0.22f, 0.06f), 0.05f, trim);
             if (open)
             {
-                var light = MaterialFactory.Create(new Color(look.accent.r, look.accent.g, look.accent.b, 1f), look.accent * 1.4f);
-                Shapes.Rounded("Light", root, new Vector3(0f, 1.5f, 0.45f), new Vector3(3.7f, 3f, 0.08f), 0.05f, light);
+                // A portal: a deep glowing disc, rings of light turning round it and sparks drawn into its middle.
+                var core = MaterialFactory.Create(Color.Lerp(look.accent, Color.white, 0.2f), look.accent * 2.2f);
+                var deep = MaterialFactory.Create(new Color(0.05f, 0.02f, 0.12f), look.accent * 0.6f);
+                var ringM = MaterialFactory.Create(Color.Lerp(look.accent, Color.white, 0.5f), look.accent * 3f);
+                var portal = new GameObject("Portal").transform;
+                portal.SetParent(root, false);
+                portal.localPosition = new Vector3(0f, 1.6f, 0.45f);
+                Shapes.Primitive(PrimitiveType.Cylinder, "Deep", portal, Vector3.zero, new Vector3(3.6f, 0.03f, 3.0f), deep).transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                var glow = Shapes.Primitive(PrimitiveType.Cylinder, "Core", portal, new Vector3(0f, 0f, -0.03f), new Vector3(1.6f, 0.02f, 1.4f), core).transform;
+                glow.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                portalParts.Add((glow, 0));
+                for (int r = 0; r < 3; r++)
+                {
+                    var ring = new GameObject("Ring").transform;
+                    ring.SetParent(portal, false);
+                    ring.localPosition = new Vector3(0f, 0f, -0.06f - r * 0.02f);
+                    float rad = 1.75f - r * 0.45f;
+                    for (int i = 0; i < 10; i++)
+                    {
+                        float a = i * Mathf.PI * 2f / 10f;
+                        Shapes.Primitive(PrimitiveType.Sphere, "Spark", ring, new Vector3(Mathf.Cos(a) * rad, Mathf.Sin(a) * rad * 0.85f, 0f), Vector3.one * (0.22f - r * 0.04f), ringM);
+                    }
+                    portalParts.Add((ring, r % 2 == 0 ? 1 : -1));
+                }
+                for (int i = 0; i < 8; i++)
+                {
+                    var mote = Shapes.Primitive(PrimitiveType.Sphere, "Mote", portal, Vector3.zero, Vector3.one * 0.14f, ringM).transform;
+                    portalParts.Add((mote, 10 + i));
+                }
                 return;
             }
             var bars = MaterialFactory.Create(new Color(0.25f, 0.25f, 0.3f), Color.black);
@@ -319,6 +369,7 @@ namespace SquashBot.Gameplay
                     if (!alive) { robot.Squash(); AudioManager.PlaySfx(Sfx.Squash); Lose(Loc.T("trail.lost")); return; }
                 }
             }
+            AnimatePortal();
             foreach (var c in trailChests)
                 if (c.open && c.openT < 1f && c.lid != null)
                 {
@@ -352,6 +403,34 @@ namespace SquashBot.Gameplay
                     ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.6f), Loc.F("arena.gateLocked", BattleArenas.UnlockAt(trailTarget) + 1), Palette.UiGold, 56f);
                     AudioManager.PlaySfx(Sfx.Bump, 0.6f);
                 }
+            }
+        }
+
+        /// <summary>The gate's portal turns and draws sparks in; the chests' beams pulse (a freed chest's fades).</summary>
+        private void AnimatePortal()
+        {
+            float t = Time.time;
+            foreach (var (part, kind) in portalParts)
+            {
+                if (part == null) continue;
+                if (kind == 0) part.localScale = new Vector3(1.6f, 0.02f, 1.4f) * (1f + Mathf.Sin(t * 3f) * 0.12f);
+                else if (kind == 1 || kind == -1) part.localRotation = Quaternion.Euler(0f, 0f, t * 70f * kind);
+                else
+                {
+                    // A spark spirals from the rim into the middle, again and again.
+                    float k = Mathf.Repeat(t * 0.6f + (kind - 10) * 0.125f, 1f);
+                    float a = (kind - 10) * 0.785f + k * 5f;
+                    float rad = Mathf.Lerp(2.1f, 0.05f, k);
+                    part.localPosition = new Vector3(Mathf.Cos(a) * rad, Mathf.Sin(a) * rad * 0.85f, -0.1f - k * 0.2f);
+                    part.localScale = Vector3.one * Mathf.Lerp(0.18f, 0.04f, k);
+                }
+            }
+            for (int i = 0; i < chestGlows.Count && i < trailChests.Count; i++)
+            {
+                var b = chestGlows[i];
+                if (b == null) continue;
+                float w = trailChests[i].open ? Mathf.Max(0f, b.localScale.x - Time.deltaTime * 0.3f) : 0.22f + Mathf.Sin(t * 2.5f + i) * 0.06f;
+                b.localScale = new Vector3(w, 3.2f, w);
             }
         }
 

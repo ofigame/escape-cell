@@ -248,7 +248,12 @@ namespace SquashBot.Gameplay
                 else ShowMap();
             };
             ui.LevelChosen += ShowPrelevel;
-            ui.RetryPressed += () => ShowPrelevel(levelIndex);
+            ui.RetryPressed += () =>
+            {
+                // The battle arena mode starts again at the foot of its road (new chests, new allies).
+                if (arenaMode) { ui.HidePause(); Time.timeScale = 1f; ExitTps(); StartTrail(TrailResumeTarget()); }
+                else ShowPrelevel(levelIndex);
+            };
             ui.PrelevelPlay += (index, boosts) =>
             {
                 ui.HidePrelevel();
@@ -767,6 +772,7 @@ namespace SquashBot.Gameplay
 
         private void BeginRun()
         {
+            arenaMode = arenaRun;
             ClearGunPosts();
             ResetRun();
             // A fresh floor: let go of the last floor's materials and meshes (built from code, they pile up otherwise
@@ -1360,6 +1366,7 @@ namespace SquashBot.Gameplay
                 if (!tpsOn && !ArenaActive && level.mission == MissionType.Hunt && InputReader.AttackKey()) KeyStrike(); // computers: space strikes
                 if (command.spin) SpinAttack();
                 else if (command.tap.HasValue && level.mission == MissionType.Hunt && TapStrike(command.tap.Value)) input.CancelTap();
+                else if (command.tap.HasValue && level.mission == MissionType.Hunt && input.StickMode) { KeyStrike(); input.CancelTap(); } // nothing tapped: a blow ahead
                 else if (command.jump) robot.TryJump();
                 else if (command.move.HasValue && (!command.held || HeldStepOk(command.move.Value))) robot.TryMove(command.move.Value, command.pace);
                 if (input.StickMode) FloorWalk(command.stick);
@@ -1707,10 +1714,11 @@ namespace SquashBot.Gameplay
             }
         }
 
-        /// <summary>Taking a hit ends the coin streak.</summary>
+        /// <summary>Taking a hit ends the coin streak and the kill streak.</summary>
         private void BreakCombo()
         {
             comboStreak = 0;
+            killStreak = 0; // and the kill streak: the fury takes a clean run
             comboTimer = 0f;
         }
 
@@ -2094,14 +2102,18 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>A bonus round always ends well: the coins are kept, nothing else changes.</summary>
+        /// <summary>The last run was the battle arena mode (a road or an arena).</summary>
+        private bool arenaMode;
+
         private void ShowBonusResult(string subtitle = null)
         {
             StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
             {
                 won = true,
                 bonusRound = true,
+                arena = arenaMode, // the battle arena mode: again or the menu, no next floor and no map
                 canDouble = true,
-                hasNext = true,
+                hasNext = !arenaMode,
                 subtitle = subtitle ?? Loc.T("result.bonusSub"),
                 coins = Earned,
                 bonusAvailable = Progress.BonusTokens > 0,

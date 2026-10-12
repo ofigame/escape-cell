@@ -119,8 +119,8 @@ namespace SquashBot.Gameplay
             bool down = onGun && tpsJump;
             UpdateGunPosts(dt, onGun ? look : Vector2.zero, onGun && (fireHeld || tpsStrike), down);
             if (manned != null || onGun) { tpsStrike = tpsSpin = tpsJump = false; return command; }
-            if (tpsStrike) { tpsStrike = false; if ((weapon ?? Armory.Equipped).kind == WeaponKind.Gun) FireHandGun(); else KeyStrike(TpsForward); }
-            bool aiming = (weapon ?? Armory.Equipped).kind == WeaponKind.Gun && manned == null;
+            if (tpsStrike) { tpsStrike = false; ArenaAttack(); }
+            bool aiming = gun != null && manned == null;
             tps.SetAim(aiming);
             if (aiming)
             {
@@ -202,9 +202,26 @@ namespace SquashBot.Gameplay
             return new Ray(origin, dir);
         }
 
+        /// <summary>
+        /// A tap in the arenas: a robot close ahead takes the blade, anything further the gun (when foi carries one);
+        /// the model in hand follows.
+        /// </summary>
+        private void ArenaAttack()
+        {
+            if (gun == null || hunt.BestInReach(robot.Position, StrikeReach, TpsForward, 0.2f, out _))
+            {
+                ShowHeld(weapon ?? Armory.Equipped);
+                KeyStrike(TpsForward);
+                return;
+            }
+            ShowHeld(gun);
+            FireHandGun();
+        }
+
         private void FireHandGun()
         {
-            var w = weapon ?? Armory.Equipped;
+            var w = gun;
+            if (w == null) return;
             if (strikeCooldown > 0f || !robot.IsAlive || level == null || level.mission != MissionType.Hunt) return;
             strikeCooldown = Armory.Cooldown(w);
             var ray = AimRay();

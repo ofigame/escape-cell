@@ -67,21 +67,39 @@ namespace SquashBot.Data
 
         public static bool Unlocked(WeaponDef w) => Owned(w) || SaveData.UnlockedLevel >= w.unlockAt;
 
+        private const string GunKey = "sb_gun";
+
+        /// <summary>The blade (or other hand weapon) in foi's hand: the floors' only weapon, the arenas' close one.</summary>
         public static WeaponDef Equipped
         {
             get
             {
                 var w = Get(PlayerPrefs.GetString(EquipKey, All[0].id));
-                return Owned(w) ? w : All[0];
+                return Owned(w) && w.kind != WeaponKind.Gun ? w : All[0];
             }
         }
 
+        /// <summary>The gun foi carries into the battle arenas (null: none). Guns are no use on the floors.</summary>
+        public static WeaponDef EquippedGun
+        {
+            get
+            {
+                string id = PlayerPrefs.GetString(GunKey, "");
+                if (id == "") id = PlayerPrefs.GetString(EquipKey, ""); // a gun picked before guns had their own slot
+                var w = All.Find(x => x.id == id);
+                return w != null && w.kind == WeaponKind.Gun && Owned(w) ? w : null;
+            }
+        }
+
+        /// <summary>Takes a weapon: a gun into the gun slot, anything else into the hand.</summary>
         public static void Equip(WeaponDef w)
         {
             if (!Owned(w)) return;
-            PlayerPrefs.SetString(EquipKey, w.id);
+            PlayerPrefs.SetString(w.kind == WeaponKind.Gun ? GunKey : EquipKey, w.id);
             PlayerPrefs.Save();
         }
+
+        public static bool IsEquipped(WeaponDef w) => w == Equipped || w == EquippedGun;
 
         /// <summary>Buys the weapon (and puts it in the robot's hand).</summary>
         public static bool TryBuy(WeaponDef w)

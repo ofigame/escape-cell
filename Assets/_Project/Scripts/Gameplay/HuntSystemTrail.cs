@@ -17,6 +17,9 @@ namespace SquashBot.Gameplay
         /// <summary>No monster on this floor (the roads): clearing the robots never raises vanG.</summary>
         public bool NoMonster;
 
+        /// <summary>The battle arenas and their roads: enemy robots wear red (foi's allies are blue).</summary>
+        public bool RedFoes;
+
         /// <summary>A spitter's glob landed: the tiles of its poison puddle.</summary>
         public event Action<List<GridPos>> Poisoned;
         /// <summary>The last guardian of a chest fell: the chest's number.</summary>
@@ -25,15 +28,35 @@ namespace SquashBot.Gameplay
         private static readonly Color PoisonColour = new Color(0.45f, 0.95f, 0.3f);
 
         /// <summary>A robot of a road's band, or (spitter) a chest's guardian kept near its chest.</summary>
-        public void AddTrailGuard(GridPos p, bool spitter, GridPos home, int chestId)
+        public void AddTrailGuard(GridPos p, bool spitter, GridPos home, int chestId, int rank = 0)
         {
             if (!grid.IsStandable(p) || grid.IsOccupied(p)) return;
-            AddGuard(p, brute: spitter, rank: spitter ? 97 : 0);
+            AddGuard(p, brute: spitter, rank: spitter ? 97 : rank);
             var g = guards[guards.Count - 1];
             g.spitter = spitter;
             g.home = home;
             g.chestId = chestId;
             if (spitter) { g.hp = g.maxHp = level.robotHp * 3 + 3; g.cooldown = 1.5f; }
+            Total++;
+        }
+
+        /// <summary>
+        /// A chest's vanG: the monster's model, fighting like a warlord (an area smash) and keeping by its chest. Its
+        /// health grows road by road.
+        /// </summary>
+        public void AddChestBoss(GridPos p, GridPos home, int chestId, int hp)
+        {
+            if (CreateMonster == null || !grid.IsStandable(p) || grid.IsOccupied(p)) return;
+            var g = new Guard { pos = p, brute = true, rank = 99, hp = hp, maxHp = hp, home = home, chestId = chestId, step = 0.5f, cooldown = 1.5f };
+            g.root = new GameObject("ChestVanG").transform;
+            g.root.SetParent(transform, false);
+            g.root.position = At(p);
+            g.mon = CreateMonster(p, hp);
+            g.mon.transform.SetParent(g.root, true);
+            g.mon.transform.localPosition = Vector3.zero;
+            g.from = g.to = At(p);
+            grid.SetOccupied(p, true);
+            guards.Add(g);
             Total++;
         }
 
@@ -103,8 +126,8 @@ namespace SquashBot.Gameplay
         /// <summary>A guard fell: if it was a chest's last guardian, the chest is free.</summary>
         private void CheckChestFreed(Guard dead)
         {
-            if (!dead.spitter) return;
-            foreach (var o in guards) if (!o.dead && o.spitter && o.chestId == dead.chestId) return;
+            if (dead.chestId < 0) return;
+            foreach (var o in guards) if (!o.dead && o.chestId == dead.chestId) return;
             ChestFreed?.Invoke(dead.chestId);
         }
     }

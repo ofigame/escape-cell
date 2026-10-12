@@ -70,7 +70,7 @@ namespace SquashBot.Gameplay
             Stop();
             grid = model;
             level = data;
-            rules = data.rules;
+            rules = data.rules & ~(FloorRule.Blink | FloorRule.Glass); // no holes in the floors, ever
             isProtected = protectedTile;
             rng = new System.Random(seed);
             special = new Special[grid.Width, grid.Height];

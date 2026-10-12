@@ -67,7 +67,7 @@ namespace SquashBot.UI
         /// <summary>Everything the result card shows.</summary>
         public struct ResultInfo
         {
-            public bool won, bonusRound, hasNext, bonusAvailable, canContinue, canBuyContinue, canDouble;
+            public bool won, bonusRound, hasNext, bonusAvailable, canContinue, canBuyContinue, canDouble, arena;
             public int continuePrice;
             public string subtitle, note, goalText;
             public float goalProgress;
@@ -868,7 +868,7 @@ namespace SquashBot.UI
             UiFactory.MakeButton(t, "II", Kind.Icon, TopLeft, new Vector2(36f, -36f), new Vector2(124f, 124f), () => PausePressed?.Invoke(), 52f);
 
             // The weapon bag (bottom left, above the tool button): opens a pause to pick another weapon.
-            bagButton = UiFactory.Box("Bag", t, new Vector2(0f, 0f), new Vector2(40f, 380f), new Vector2(150f, 150f));
+            bagButton = UiFactory.Box("Bag", t, new Vector2(0f, 0f), new Vector2(40f, 480f), new Vector2(150f, 150f));
             var bagFace = UiFactory.Chunky(bagButton, UiFactory.StyleOf(new Color(0.55f, 0.45f, 0.95f)), 1f, 0f, UiSprites.Circle);
             var bagIcon = UiFactory.Box("Icon", bagButton, new Vector2(0.5f, 0.5f), new Vector2(0f, 8f), new Vector2(110f, 110f));
             bagIcon.pivot = new Vector2(0.5f, 0.5f);
@@ -1311,7 +1311,7 @@ namespace SquashBot.UI
             // Top slot: BONUS, NEXT, CONTINUE (ad) or RETRY. Second slot: 2x COINS (ad) after a win, RETRY under CONTINUE.
             // Bottom row: MAP and MENU.
             bool ended = info.won || info.bonusRound;
-            bool bonus = info.bonusAvailable && ended;
+            bool bonus = info.bonusAvailable && ended && !info.arena;
             bool next = !bonus && ended && info.hasNext;
             bool contAd = !ended && info.canContinue;
             bool contCoins = !ended && info.canBuyContinue;
@@ -1331,6 +1331,9 @@ namespace SquashBot.UI
             resultRetry.gameObject.SetActive(retryTop || cont);
             ((RectTransform)resultRetry.transform).anchoredPosition = new Vector2(0f, retryTop ? -795f : -965f);
             resultDouble.gameObject.SetActive(ended && info.canDouble && info.coins > 0);
+            // The battle arena mode: no map (MENU alone, in the middle of the bottom row).
+            resultMap.gameObject.SetActive(!info.arena);
+            ((RectTransform)resultMenu.transform).anchoredPosition = new Vector2(info.arena ? 0f : 160f, -1120f);
             resultReward.transform.parent.localScale = Vector3.one;
         }
 

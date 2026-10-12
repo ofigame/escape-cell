@@ -210,6 +210,7 @@ namespace SquashBot.Gameplay
                 {
                     SpawnWave();
                     spawnTimer = level.spawnInterval / (PaceMultiplier * (HasRhythm ? StormPace : 1f));
+                    if (level.mission == MissionType.Hunt) spawnTimer *= 2.5f; // the fights come first: a crate now and then
                 }
                 UpdateRepairs(dt);
                 UpdateShelters(dt);
@@ -634,8 +635,9 @@ namespace SquashBot.Gameplay
             if (sheltered.ContainsKey(p)) return false;
             if (!level.breakTiles || !running || !CanBreakTile() || grid.GetTile(p) != TileState.Solid || (IsProtected != null && IsProtected(p))) return false;
 
-            // Some tiles catch fire for a few seconds instead of breaking into a hole.
+            // Some tiles catch fire for a few seconds; none break into a hole any more.
             bool fire = level.fireChance > 0f && UnityEngine.Random.value < level.fireChance;
+            if (!fire) return false;
             grid.SetTile(p, fire ? TileState.Fire : TileState.Broken);
             if (fire) gridView.Ignite(p);
             else gridView.Break(p);

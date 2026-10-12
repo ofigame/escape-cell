@@ -139,7 +139,7 @@ namespace SquashBot.Data
 
         public static float HoverSeconds => 2f + 0.5f * Level(Upgrade.Hover);
 
-        public static int MaxLives => 5 + Level(Upgrade.Lives);
+        public static int MaxLives => 3 + Level(Upgrade.Lives); // three a day (ads refill)
 
         /// <summary>Rescue charges a level can bank at once.</summary>
         public static int MaxRescues => 3 + Level(Upgrade.Rescue);

@@ -34,10 +34,10 @@ namespace SquashBot.Gameplay
                     {
                         if (Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy)) != r) continue;
                         var q = near + new GridPos(dx, dy);
-                        if (grid.IsStandable(q) && !grid.IsOccupied(q) && !grid.IsGap(q) && q != robot.Position) { p = q; found = true; }
+                        if (r >= 2 && grid.IsStandable(q) && !grid.IsOccupied(q) && !AllyAt(q) && !grid.IsGap(q)) { p = q; found = true; } // not right on foi
                     }
             if (!found) return false;
-            var a = new Guard { pos = p, hp = Mathf.Max(1, hp), maxHp = Mathf.Max(1, hp), step = 0.3f, rank = -1 };
+            var a = new Guard { pos = p, hp = Mathf.Max(1, hp), maxHp = Mathf.Max(1, hp), step = 0.3f, rank = -1, ally = true };
             a.root = new GameObject("Ally").transform;
             a.root.SetParent(transform, false);
             a.bot = GuardBot.Build(a.root, AllyColour, Mathf.Max(0, world));
@@ -46,6 +46,7 @@ namespace SquashBot.Gameplay
             {
                 float h = HeightOf(a.root);
                 if (h > 0.05f) a.bot.transform.localScale *= FoiHeight / h;
+                a.bot.transform.localScale = Vector3.Scale(a.bot.transform.localScale, new Vector3(1.12f, 1f, 1.12f));
             }
             // A glowing ring at its feet: one of foi's.
             Shapes.Primitive(PrimitiveType.Cylinder, "AllyRing", a.root, new Vector3(0f, 0.03f, 0f), new Vector3(0.85f, 0.01f, 0.85f), MaterialFactory.Create(AllyColour, AllyColour * 2.2f));
@@ -53,7 +54,6 @@ namespace SquashBot.Gameplay
             MaterialFactory.SetColors(a.barMat, AllyColour, AllyColour * 1.6f);
             a.from = a.to = At(p);
             a.root.position = a.to;
-            grid.SetOccupied(p, true);
             allies.Add(a);
             fx.Burst(At(p) + Vector3.up * 0.6f, AllyColour, AllyColour * 2f, 18, 4f);
             return true;
@@ -64,9 +64,18 @@ namespace SquashBot.Gameplay
             foreach (var a in allies)
             {
                 if (a.root != null) Destroy(a.root.gameObject);
-                if (!a.dead && grid != null) grid.SetOccupied(a.pos, false);
             }
             allies.Clear();
+        }
+
+        /// <summary>Tiles a second an ally walks: foi's own running pace, so it never falls behind.</summary>
+        private const float AllySpeed = 5f;
+
+        /// <summary>Is an ally standing on (or stepping onto) a tile?</summary>
+        private bool AllyAt(GridPos p)
+        {
+            foreach (var a in allies) if (!a.dead && a.pos == p) return true;
+            return false;
         }
 
         /// <summary>Damage each ally's blow does (later roads' allies hit harder).</summary>
@@ -85,8 +94,8 @@ namespace SquashBot.Gameplay
             a.cooldown -= dt;
             if (a.moveT < 1f)
             {
-                a.moveT = Mathf.Min(1f, a.moveT + dt / 0.22f);
-                a.root.position = Vector3.Lerp(a.from, a.to, a.moveT) + Vector3.up * Mathf.Sin(a.moveT * Mathf.PI) * 0.12f;
+                a.moveT = Mathf.Min(1f, a.moveT + dt / a.moveDur);
+                a.root.position = Vector3.Lerp(a.from, a.to, a.moveT) + Vector3.up * Mathf.Abs(Mathf.Sin(a.moveT * Mathf.PI)) * 0.035f;
             }
             // The nearest enemy in sight (vanG too, once awake).
             Guard foe = null;
@@ -129,10 +138,9 @@ namespace SquashBot.Gameplay
             }
             a.step -= dt;
             if (a.step > 0f) return;
-            a.step = Mathf.Max(0.22f, level.robotStep * 0.5f);
             GridPos goal;
             if (foe != null || atMonster) goal = look;
-            else if (Chebyshev(a.pos, robot.Position) > 2) goal = robot.Position; // keep up with foi
+            else if (Chebyshev(a.pos, robot.Position) > 2) goal = robot.Position; // keep up with foi (as quick as it)
             else return;
             int dist = goal.Manhattan(a.pos);
             GridPos best = a.pos;
@@ -146,7 +154,7 @@ namespace SquashBot.Gameplay
             }
             // Round the bends of a road: the street map towards foi when the plain step is stuck.
             if (best == a.pos && level.hardAtOnce > 0 && !(foe != null || atMonster)) { FlowStep(a, goal); return; }
-            if (best != a.pos) MoveGuard(a, best, a.step);
+            if (best != a.pos) MoveGuard(a, best, 1f / AllySpeed);
         }
 
         /// <summary>An ally's blow on an enemy robot: shields and health as for foi's blows (no knock-back).</summary>
@@ -158,8 +166,11 @@ namespace SquashBot.Gameplay
             g.flash = 1f;
             g.Flash();
             fx.Burst(At(g.pos) + Vector3.up * 0.4f, AllyColour, AllyColour * 1.8f, 16, 4f);
-            if (g.hp <= 0) KillGuard(g);
+            if (g.hp <= 0) { AllyKill = true; KillGuard(g); AllyKill = false; }
         }
+
+        /// <summary>The robot being finished right now fell to an ally (no kill streak for foi).</summary>
+        public bool AllyKill { get; private set; }
 
         /// <summary>The ally nearest a tile (and how far), or null.</summary>
         private Guard NearestAlly(GridPos from, out int dist)
@@ -191,7 +202,6 @@ namespace SquashBot.Gameplay
         private void KillAlly(Guard a)
         {
             a.dead = true;
-            grid.SetOccupied(a.pos, false);
             fx.Burst(At(a.pos) + Vector3.up * 0.5f, AllyColour, AllyColour * 2f, 30, 5f);
             Shockwave.Create(At(a.pos), 1.2f, AllyColour);
             AudioManager.PlaySfx(Sfx.Impact, 0.6f, 1.3f);

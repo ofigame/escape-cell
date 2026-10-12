@@ -180,7 +180,8 @@ namespace SquashBot.Gameplay
                 }
 
                 // The second tap of a double tap fires on touch-down, without waiting for the finger to lift.
-                if (pressTime - lastTapTime <= DoubleTapWindow)
+                // (Not on the floors' free walk: a tap there is a blow, never a jump — the tunnels keep their jumps.)
+                if (pressTime - lastTapTime <= DoubleTapWindow && !(StickMode && !ScreenMode))
                 {
                     lastTapTime = -10f;
                     consumed = true;
