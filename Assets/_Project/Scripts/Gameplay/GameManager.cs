@@ -1318,6 +1318,7 @@ namespace SquashBot.Gameplay
 
             if (runner.Active)
             {
+                ui.ShowStick(false, default, default); // the tunnels have no stick
                 // The tunnel runs itself (input, robot, camera); just keep the HUD current.
                 AudioManager.SetTension(0.55f + 0.4f * runner.Progress);
                 AudioManager.SetDanger(0f);
@@ -2756,9 +2757,13 @@ namespace SquashBot.Gameplay
 
         private void UpdateRoadWalk()
         {
+            // Walking to the tunnel after a win: free walking with the stick, as on the floor.
+            input.StickMode = true;
             var command = input.Poll(robot.transform.position);
             if (command.jump) robot.TryJump();
             else if (command.move.HasValue && (!command.held || HeldStepOk(command.move.Value))) robot.TryMove(command.move.Value, command.pace);
+            FloorWalk(command.stick);
+            ui.ShowStick(input.StickActive, input.StickBase, input.StickFinger);
             if (roadBeacon != null)
             {
                 float pulse = 1f + Mathf.Sin(Time.time * 6f) * 0.12f;

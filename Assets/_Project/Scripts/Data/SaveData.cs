@@ -57,8 +57,8 @@ namespace SquashBot.Data
 
         public static int CameraDistance
         {
-            get => Mathf.Clamp(PlayerPrefs.GetInt("sb_cam_distance3", 1), 0, 3);
-            set { PlayerPrefs.SetInt("sb_cam_distance3", Mathf.Clamp(value, 0, 3)); PlayerPrefs.Save(); }
+            get => Mathf.Clamp(PlayerPrefs.GetInt("sb_cam_distance4", 0), 0, 3); // NEAR by default (a fresh key: everyone starts near)
+            set { PlayerPrefs.SetInt("sb_cam_distance4", Mathf.Clamp(value, 0, 3)); PlayerPrefs.Save(); }
         }
 
         public static bool PerspectiveView

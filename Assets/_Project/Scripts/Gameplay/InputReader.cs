@@ -219,7 +219,7 @@ namespace SquashBot.Gameplay
                 return new InputCommand { holdStart = true, holdPosition = pos };
             }
 
-            if (StickMode)
+            if (StickMode && !ScreenMode) // never in the tunnels (they keep their swipes and taps)
             {
                 float dpi = Screen.dpi > 0 ? Screen.dpi : 160f;
                 if (!pressed)

@@ -202,6 +202,8 @@ namespace SquashBot.EditorTools
                 PlayerSettings.bundleVersion = "1.0";
                 PlayerSettings.Android.bundleVersionCode = code;
                 EditorUserBuildSettings.buildAppBundle = true;
+                // The native debug symbols beside the bundle (Play reads crashes with them).
+                EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Public;
                 ResolveAndroidDependencies();
                 Directory.CreateDirectory("Builds/Play");
                 var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
@@ -228,6 +230,7 @@ namespace SquashBot.EditorTools
                 PlayerSettings.Android.useCustomKeystore = false;
                 PlayerSettings.Android.keystorePass = PlayerSettings.Android.keyaliasPass = "";
                 EditorUserBuildSettings.buildAppBundle = false;
+                EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Disabled;
             }
         }
 
