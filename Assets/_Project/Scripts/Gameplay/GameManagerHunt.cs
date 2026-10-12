@@ -24,6 +24,10 @@ namespace SquashBot.Gameplay
         private HeldWeapon heldWeapon;
         private float lastArmorNote = -10f;
 
+        /// <summary>The hero's size on the floors and in the arenas (wider a quarter, taller two fifths); the tunnels keep 1.</summary>
+        private static readonly Vector3 HeroScale = new Vector3(1.25f, 1.4f, 1.25f);
+        private float foiBaseHeight = 0.875f;
+
         /// <summary>foi's height as it stands (its body, without the weapon it carries): the robots are sized against it.</summary>
         private float FoiHeight()
         {
@@ -100,7 +104,10 @@ namespace SquashBot.Gameplay
             // as before relative to the crowd. foi carries its weapon.
             float grow = Mathf.Clamp01(World / 12f);
             robot.transform.localScale = Vector3.one;
-            hunt.FoiHeight = FoiHeight();
+            foiBaseHeight = FoiHeight(); // the robots and Fifi are sized against foi's plain height
+            hunt.FoiHeight = foiBaseHeight;
+            // The hero stands out in the crowd: a little bigger and a little taller than the robots round it.
+            robot.transform.localScale = HeroScale;
             Robot.HopScale = 0.9f; // steady and readable: each step follows the finger, a run of steps flows on (0.6 felt too fast)
             hunt.EnemyScale = Mathf.Lerp(1.6f, 2.03f, grow);
             adHealUsed = false;
