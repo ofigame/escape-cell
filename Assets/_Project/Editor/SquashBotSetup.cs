@@ -169,6 +169,63 @@ namespace SquashBot.EditorTools
         }
 
         /// <summary>
+        /// The Huawei AppGallery APK (Builds/Huawei/foicell-huawei.apk): the Android build with the HUAWEI define, so the
+        /// ads come straight from Unity Ads (no Google services on those phones). Signed with the release key when the
+        /// environment gives one (HUAWEI_KEYSTORE, HUAWEI_KEYSTORE_PASS, HUAWEI_KEY_ALIAS, HUAWEI_KEY_PASS — kept by the
+        /// developer, never in the repository); otherwise debug-signed for testing on a phone. -realAds adds REAL_ADS.
+        /// </summary>
+        public static void BuildHuaweiBatch()
+        {
+            var target = NamedBuildTarget.Android;
+            string before = PlayerSettings.GetScriptingDefineSymbols(target);
+            try
+            {
+                Setup();
+                var defines = new System.Collections.Generic.List<string>(before.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)) { "HUAWEI" };
+                if (Environment.CommandLine.Contains("-realAds")) defines.Add("REAL_ADS");
+                PlayerSettings.SetScriptingDefineSymbols(target, string.Join(";", defines));
+                string ks = Environment.GetEnvironmentVariable("HUAWEI_KEYSTORE");
+                bool signed = !string.IsNullOrEmpty(ks) && File.Exists(ks);
+                PlayerSettings.Android.useCustomKeystore = signed;
+                if (signed)
+                {
+                    PlayerSettings.Android.keystoreName = ks;
+                    PlayerSettings.Android.keystorePass = Environment.GetEnvironmentVariable("HUAWEI_KEYSTORE_PASS");
+                    PlayerSettings.Android.keyaliasName = Environment.GetEnvironmentVariable("HUAWEI_KEY_ALIAS");
+                    PlayerSettings.Android.keyaliasPass = Environment.GetEnvironmentVariable("HUAWEI_KEY_PASS");
+                }
+                ConfigureAndroidTools();
+                PlayerSettings.SetScriptingBackend(target, ScriptingImplementation.IL2CPP);
+                PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
+                PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
+                PlayerSettings.bundleVersion = "0.2";
+                EditorUserBuildSettings.buildAppBundle = false;
+                ResolveAndroidDependencies();
+                Directory.CreateDirectory("Builds/Huawei");
+                var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
+                {
+                    scenes = new[] { ScenePath },
+                    locationPathName = "Builds/Huawei/foicell-huawei.apk",
+                    target = BuildTarget.Android,
+                    options = BuildOptions.None,
+                });
+                Debug.Log($"[SquashBot] Huawei build: {report.summary.result} ({report.summary.totalErrors} errors){(signed ? " release-signed" : " debug-signed")}");
+                PlayerSettings.SetScriptingDefineSymbols(target, before);
+                PlayerSettings.Android.useCustomKeystore = false;
+                PlayerSettings.Android.keystorePass = PlayerSettings.Android.keyaliasPass = "";
+                AssetDatabase.SaveAssets();
+                EditorApplication.Exit(report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded ? 0 : 1);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                PlayerSettings.SetScriptingDefineSymbols(target, before);
+                PlayerSettings.Android.useCustomKeystore = false;
+                EditorApplication.Exit(1);
+            }
+        }
+
+        /// <summary>
         /// Lets the External Dependency Manager write the ad SDKs (Google Mobile Ads and the mediation adapters) into the
         /// custom Gradle templates under Assets/Plugins/Android, so Gradle fetches them during the build. Reflection keeps
         /// this file compiling without the package.

@@ -17,6 +17,10 @@ namespace SquashBot.Monetization
         /// <summary>Called once at start-up: asks for consent if needed, then starts AdMob and swaps the real ads in.</summary>
         public static void Start()
         {
+#if HUAWEI
+            UnityAdsDirect.Start(); // the AppGallery build: no Google services on those phones, Unity Ads directly
+            return;
+#endif
 #if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
             if (started) return;
             started = true;
@@ -61,7 +65,7 @@ namespace SquashBot.Monetization
         {
             get
             {
-#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
+#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR && !HUAWEI
                 return ConsentInformation.PrivacyOptionsRequirementStatus == PrivacyOptionsRequirementStatus.Required;
 #else
                 return false;
