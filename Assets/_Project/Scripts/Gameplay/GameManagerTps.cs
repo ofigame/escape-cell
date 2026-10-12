@@ -114,7 +114,15 @@ namespace SquashBot.Gameplay
             bool down = onGun && tpsJump;
             UpdateGunPosts(dt, onGun ? look : Vector2.zero, onGun && (fireHeld || tpsStrike), down);
             if (manned != null || onGun) { tpsStrike = tpsSpin = tpsJump = false; return command; }
-            if (tpsStrike) { tpsStrike = false; KeyStrike(TpsForward); }
+            if (tpsStrike) { tpsStrike = false; if ((weapon ?? Armory.Equipped).kind == WeaponKind.Gun) FireHandGun(); else KeyStrike(TpsForward); }
+            bool aiming = (weapon ?? Armory.Equipped).kind == WeaponKind.Gun && manned == null;
+            tps.SetAim(aiming);
+            if (aiming)
+            {
+                var aim = AimRay();
+                var at = cameraRig.Cam.WorldToScreenPoint(aim.GetPoint(8f));
+                if (at.z > 0f) tps.PlaceCrosshair(at);
+            }
             if (tpsSpin) { tpsSpin = false; command.spin = true; return command; }
             if (tpsJump) { tpsJump = false; command.jump = true; return command; }
             var fwd = TpsForward;
@@ -171,6 +179,39 @@ namespace SquashBot.Gameplay
                 SlashFx.Create(robot.transform.position, robot.transform.position + fwd * 1.6f, WeaponModels.Glow(w.tier), 1f);
                 AudioManager.PlaySfx(Sfx.Hop, 0.5f, 1.6f);
             }
+        }
+
+        /// <summary>
+        /// The handheld gun in the arenas: a shot straight through the crosshair in the middle of the screen (the camera
+        /// sits over foi's right shoulder, so it passes beside foi), out to the gun's range; what it meets takes the
+        /// gun's blow. foi turns to face where it fires.
+        /// </summary>
+        /// <summary>
+        /// The gun's aim: from foi's right shoulder, the way the camera faces, nearly level (the camera looks down on
+        /// foi, the gun does not): dragging the view up or down tilts it. The crosshair is drawn where it points.
+        /// </summary>
+        private Ray AimRay()
+        {
+            var origin = robot.transform.position + Vector3.up * 0.75f + Quaternion.Euler(0f, tpsYaw, 0f) * Vector3.right * 0.25f;
+            var dir = Quaternion.Euler(tpsPitch - 24f, tpsYaw, 0f) * Vector3.forward;
+            return new Ray(origin, dir);
+        }
+
+        private void FireHandGun()
+        {
+            var w = weapon ?? Armory.Equipped;
+            if (strikeCooldown > 0f || !robot.IsAlive || level == null || level.mission != MissionType.Hunt) return;
+            strikeCooldown = Armory.Cooldown(w);
+            var ray = AimRay();
+            int damage = Armory.Damage(w) * (superLeft > 0f ? 2 : 1);
+            bool hit = hunt.ShootBlow(ray, w.reach + 1f, damage, out var point);
+            var look = point - robot.transform.position;
+            look.y = 0f;
+            if (look.sqrMagnitude > 0.01f) robot.ArenaFace(look);
+            if (heldWeapon != null) heldWeapon.Swing();
+            GunShotFx(point, w);
+            cameraRig.Shake(0.05f + 0.03f * damage);
+            if (hit) lastStrikeTap = Time.time;
         }
 
         /// <summary>The camera over foi's shoulder: behind it by the camera's turn, a little above, looking past it.</summary>

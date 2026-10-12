@@ -533,6 +533,48 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>
+        /// A handheld gun's shot along a ray (the arenas' crosshair): the first robot, bug or vanG its body passes
+        /// through within <paramref name="range"/> takes an ordinary blow of <paramref name="damage"/> (armour, shields and
+        /// knock-back as for a blade). Returns where the shot ended.
+        /// </summary>
+        public bool ShootBlow(Ray ray, float range, int damage, out Vector3 point)
+        {
+            point = ray.origin + ray.direction * range;
+            if (!running) return false;
+            float best = range;
+            GridPos? tile = null;
+            void Try(Vector3 feet, float height, float radius, GridPos at)
+            {
+                var d = ray.direction;
+                var flat = new Vector2(d.x, d.z);
+                var w = new Vector2(feet.x - ray.origin.x, feet.z - ray.origin.z);
+                float t = flat.sqrMagnitude < 1e-6f ? 0f : Vector2.Dot(w, flat) / flat.sqrMagnitude;
+                if (t <= 0f || t >= best) return;
+                var p = ray.origin + d * t;
+                if (Vector2.Distance(new Vector2(p.x, p.z), new Vector2(feet.x, feet.z)) > radius) return;
+                if (p.y < feet.y - 0.15f || p.y > feet.y + height + 0.25f) return;
+                best = t;
+                tile = at;
+            }
+            foreach (var g in guards)
+            {
+                if (g.dead || g.root == null) continue;
+                float h = g.bar != null ? Mathf.Max(0.8f, g.bar.position.y - g.root.position.y) : 1.2f;
+                Try(g.root.position, h, Mathf.Max(0.45f, h * 0.32f), g.pos);
+            }
+            foreach (var b in bugs) if (!b.dead && b.model != null) Try(b.model.transform.position, 0.45f, 0.5f, b.pos);
+            if (MonsterUp && monster != null) Try(monster.transform.position, 2f * monster.transform.lossyScale.y, 0.9f * monster.transform.lossyScale.x, monsterPos);
+            if (!tile.HasValue)
+            {
+                var floor = new Plane(Vector3.up, new Vector3(0f, GridView.SurfaceY, 0f));
+                if (floor.Raycast(ray, out float f) && f < range) point = ray.GetPoint(f);
+                return false;
+            }
+            point = ray.GetPoint(best);
+            return Strike(tile.Value, damage);
+        }
+
+        /// <summary>
         /// A gun-post bullet along a ray: the first robot or bug whose body it passes through takes it — a warlord or
         /// enforcer a tenth of its health, any other robot half, a bug all. Returns where it struck (or flew out).
         /// </summary>

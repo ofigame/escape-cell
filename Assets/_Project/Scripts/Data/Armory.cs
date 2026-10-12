@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SquashBot.Data
 {
-    public enum WeaponKind { Hammer, Sword, Axe, Mace, Spear, Whirl }
+    public enum WeaponKind { Hammer, Sword, Axe, Mace, Spear, Whirl, Gun }
 
     /// <summary>One weapon of the armory: what it is, how it hits, what it costs and from which level it is sold.</summary>
     public class WeaponDef
@@ -49,6 +49,14 @@ namespace SquashBot.Data
             // The utopian worlds' gear (the last floors' armour needs it): plasma blade and nova mace.
             new WeaponDef { id = "plasmaBlade", kind = WeaponKind.Sword, tier = 6, damage = 7, reach = 2, cooldown = 0.11f, price = 22000, unlockAt = 212 },
             new WeaponDef { id = "novaMace", kind = WeaponKind.Mace, tier = 6, damage = 9, reach = 2, cooldown = 0.24f, price = 30000, unlockAt = 232 },
+            // The guns: fired over foi's shoulder at the crosshair in the arenas (aimed with the right thumb), at a tapped
+            // robot on the floors. Reach is their range in tiles; they hit as hard as the blades of their time.
+            new WeaponDef { id = "waterPistol", kind = WeaponKind.Gun, tier = 1, damage = 2, reach = 7, cooldown = 0.35f, price = 350, unlockAt = 9 },
+            new WeaponDef { id = "laserPistol", kind = WeaponKind.Gun, tier = 2, damage = 3, reach = 8, cooldown = 0.3f, price = 1400, unlockAt = 29 },
+            new WeaponDef { id = "plasmaRifle", kind = WeaponKind.Gun, tier = 3, damage = 4, reach = 10, cooldown = 0.42f, price = 3600, unlockAt = 59 },
+            new WeaponDef { id = "twinBlaster", kind = WeaponKind.Gun, tier = 4, damage = 5, reach = 9, cooldown = 0.2f, price = 7200, unlockAt = 99 },
+            new WeaponDef { id = "stormCannon", kind = WeaponKind.Gun, tier = 5, damage = 7, reach = 10, cooldown = 0.45f, price = 12500, unlockAt = 149 },
+            new WeaponDef { id = "novaCannon", kind = WeaponKind.Gun, tier = 6, damage = 9, reach = 11, cooldown = 0.4f, price = 24000, unlockAt = 199 },
         };
 
         private const string EquipKey = "sb_weapon";

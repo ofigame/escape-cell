@@ -350,6 +350,15 @@ namespace SquashBot.Gameplay
             if (snapTurn) visual.localRotation = targetFacing;
         }
 
+        /// <summary>Turn at once to face a way (a shot in the arenas), whatever it is doing.</summary>
+        public void ArenaFace(Vector3 facing)
+        {
+            facing.y = 0f;
+            if (facing.sqrMagnitude < 0.0001f) return;
+            targetFacing = Quaternion.LookRotation(facing);
+            visual.localRotation = targetFacing;
+        }
+
         /// <summary>A little squash and stretch while running in the arena.</summary>
         public void ArenaBob(float amount)
         {

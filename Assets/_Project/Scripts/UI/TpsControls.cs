@@ -90,10 +90,29 @@ namespace SquashBot.UI
             return area.gameObject.AddComponent<T>();
         }
 
+        private bool aimOn;
+
+        /// <summary>A gun in foi's hand: the crosshair in the middle of the screen (no bullet count: it never runs dry).</summary>
+        public void SetAim(bool on)
+        {
+            if (aimOn == on || ammoText.gameObject.activeSelf) return;
+            aimOn = on;
+            crosshair.gameObject.SetActive(on);
+        }
+
+        /// <summary>Puts the crosshair at a screen point (the hand gun's aim), or back in the middle.</summary>
+        public void PlaceCrosshair(Vector2 screen)
+        {
+            var parent = (RectTransform)crosshair.parent;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screen, null, out var local);
+            crosshair.anchoredPosition = local;
+        }
+
         /// <summary>Up on a gun post: the crosshair and bullets show, the stick and spin go, the jump button climbs down.</summary>
         public void SetGunMode(bool on, int ammo)
         {
-            crosshair.gameObject.SetActive(on);
+            crosshair.gameObject.SetActive(on || aimOn); // a gun in hand keeps its crosshair after the post
+            if (on) crosshair.anchoredPosition = Vector2.zero; // the gun post aims through the middle of the screen
             ammoText.gameObject.SetActive(on);
             ammoText.text = ammo.ToString();
             ammoText.color = ammo <= 15 ? new Color(1f, 0.45f, 0.35f) : Color.white;

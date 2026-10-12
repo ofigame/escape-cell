@@ -92,6 +92,20 @@ namespace SquashBot.Visual
                             .transform.localRotation = Quaternion.Euler(0f, 0f, -40f);
                     }
                     break;
+                case WeaponKind.Gun:
+                {
+                    // A chunky toy blaster pointing forward (+z): grip, body, barrel, a glowing muzzle and power cell.
+                    var glow = MaterialFactory.Create(Glow(w.tier), Glow(w.tier) * 2.2f);
+                    Shapes.Rounded("Grip", root, new Vector3(0f, -0.08f, -0.04f), new Vector3(0.07f, 0.16f, 0.08f), 0.02f, grip);
+                    Shapes.Rounded("Body", root, new Vector3(0f, 0.02f, 0.06f), new Vector3(0.1f, 0.11f, 0.28f), 0.03f, metal);
+                    Shapes.Rounded("Barrel", root, new Vector3(0f, 0.035f, 0.27f), new Vector3(0.055f, 0.055f, 0.2f), 0.02f, grip);
+                    if (w.id == "twinBlaster")
+                        Shapes.Rounded("Barrel2", root, new Vector3(0f, -0.025f, 0.25f), new Vector3(0.05f, 0.05f, 0.18f), 0.02f, grip);
+                    Shapes.Rounded("Muzzle", root, new Vector3(0f, 0.035f, 0.38f), new Vector3(0.07f, 0.07f, 0.04f), 0.02f, glow);
+                    Shapes.Rounded("Cell", root, new Vector3(0f, 0.09f, 0.04f), new Vector3(0.05f, 0.04f, 0.12f), 0.015f, glow);
+                    if (w.tier >= 4) Shapes.Rounded("Fin", root, new Vector3(0f, 0.1f, 0.18f), new Vector3(0.02f, 0.05f, 0.14f), 0.01f, gold);
+                    break;
+                }
                 default: // spear
                     Shapes.Rounded("Shaft", root, new Vector3(0f, 0.36f, 0f), new Vector3(0.04f, 0.95f, 0.04f), 0.015f, wood);
                     Shapes.Rounded("Collar", root, new Vector3(0f, 0.84f, 0f), new Vector3(0.07f, 0.05f, 0.07f), 0.02f, gold);
@@ -118,10 +132,14 @@ namespace SquashBot.Visual
             pivot.SetParent(robotVisual, false);
             pivot.localPosition = new Vector3(0.32f, 0.22f, 0.06f);
             var h = pivot.gameObject.AddComponent<HeldWeapon>();
-            WeaponModels.Build(pivot, w, w.kind == WeaponKind.Spear ? 0.95f : 1.15f); // big enough to read on the floor
+            WeaponModels.Build(pivot, w, w.kind == WeaponKind.Spear ? 0.95f : w.kind == WeaponKind.Gun ? 1.6f : 1.15f); // big enough to read on the floor
+            h.isGun = w.kind == WeaponKind.Gun;
+            if (h.isGun) pivot.localPosition = new Vector3(0.3f, 0.32f, 0.14f); // held out ahead, at the hip
             h.Pose(0f);
             return h;
         }
+
+        private bool isGun;
 
         public void Swing() => swing = 0f;
 
@@ -132,7 +150,7 @@ namespace SquashBot.Visual
         /// <summary>A whirl: the weapon sweeps a full circle round the robot.</summary>
         public void Spin() => spin = 0f;
 
-        private void Pose(float a) => transform.localRotation = Quaternion.Euler(25f + a, 0f, -12f);
+        private void Pose(float a) => transform.localRotation = isGun ? Quaternion.Euler(-a * 0.25f, 0f, 0f) : Quaternion.Euler(25f + a, 0f, -12f);
 
         private void Update()
         {
@@ -147,6 +165,15 @@ namespace SquashBot.Visual
                 return;
             }
             if (swing >= 1f) { Pose(Mathf.Sin(Time.time * 2f) * 3f); return; }
+            if (isGun)
+            {
+                // A shot: the gun kicks up and back, and settles.
+                swing = Mathf.Min(1f, swing + Time.deltaTime / 0.16f);
+                float kick = Mathf.Sin(swing * Mathf.PI);
+                transform.localPosition = restPosition - Vector3.forward * 0.06f * kick;
+                Pose(kick * 60f);
+                return;
+            }
             swing = Mathf.Min(1f, swing + Time.deltaTime / 0.24f);
             // Wind back, chop down hard, settle.
             float a = swing < 0.3f ? Mathf.Lerp(0f, -70f, swing / 0.3f) : swing < 0.55f ? Mathf.Lerp(-70f, 115f, (swing - 0.3f) / 0.25f) : Mathf.Lerp(115f, 0f, (swing - 0.55f) / 0.45f);

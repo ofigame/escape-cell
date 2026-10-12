@@ -17,7 +17,8 @@ namespace SquashBot.Gameplay
     public partial class GameManager
     {
         /// <summary>How far a blow reaches (diagonals count as one step), for every weapon and the super skill alike.</summary>
-        private const int StrikeReach = 2;
+        /// <summary>How far foi strikes: two tiles (diagonals count as one) for every blade, the range of a gun.</summary>
+        private int StrikeReach { get { var w = weapon ?? Armory.Equipped; return w.kind == WeaponKind.Gun ? w.reach : 2; } }
         private HuntSystem hunt;
         private float strikeCooldown;
         private WeaponDef weapon;
@@ -373,8 +374,9 @@ namespace SquashBot.Gameplay
                 return true;
             }
             if (heldWeapon != null) heldWeapon.Swing();
+            if (w.kind == WeaponKind.Gun) GunShotFx(GridView.ToWorld(at) + Vector3.up * 0.6f, w);
             // A blow you can see: a crescent of the weapon's colour sweeping through the target.
-            SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.Glow(w.tier), 1f + 0.15f * Armory.Damage(w));
+            else SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.Glow(w.tier), 1f + 0.15f * Armory.Damage(w));
             LeanTowardsBlow(GridView.ToWorld(at));
             cameraRig.Shake(0.15f + 0.08f * damage);
             if (crowd)
@@ -393,6 +395,18 @@ namespace SquashBot.Gameplay
                 cameraRig.Shake(0.25f);
             }
             return true;
+        }
+
+        /// <summary>A gun fires: a streak of light from its muzzle to <paramref name="to"/>, a flash, a crack.</summary>
+        private void GunShotFx(Vector3 to, WeaponDef w)
+        {
+            var glow = WeaponModels.Glow(w.tier);
+            var muzzle = heldWeapon != null ? heldWeapon.transform.position + heldWeapon.transform.forward * 0.55f : robot.transform.position + Vector3.up * 0.6f;
+            Tracer.Create(muzzle, to, glow);
+            if (w.id == "twinBlaster") Tracer.Create(muzzle + Vector3.up * 0.08f, to + Vector3.up * 0.08f, glow);
+            fx.Burst(muzzle, glow, glow * 2f, 6, 2.5f);
+            fx.Burst(to, glow, glow * 2f, 10, 3f);
+            AudioManager.PlaySfx(Sfx.Impact, 0.45f, 1.7f + 0.1f * w.tier + Random.Range(-0.05f, 0.05f));
         }
 
         /// <summary>The close third-person view of the core loop: low and near, behind the robot at the floor's fixed angle.</summary>
