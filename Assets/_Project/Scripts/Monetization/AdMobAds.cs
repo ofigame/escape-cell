@@ -45,6 +45,13 @@ namespace SquashBot.Monetization
         {
             if (initialized) return;
             initialized = true;
+            // Ads fit for a cartoon game played by all ages: nothing above PG (parental guidance); never marked as
+            // child-directed or under the age of consent (the game is not aimed at children only).
+            MobileAds.SetRequestConfiguration(new RequestConfiguration
+            {
+                MaxAdContentRating = MaxAdContentRating.PG,
+                TagForChildDirectedTreatment = TagForChildDirectedTreatment.Unspecified,
+            });
             MobileAds.Initialize(status =>
             {
                 Debug.Log("[Ads] AdMob initialized.");
