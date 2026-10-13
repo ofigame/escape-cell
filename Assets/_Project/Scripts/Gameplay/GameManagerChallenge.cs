@@ -9,8 +9,9 @@ using UnityEngine;
 namespace SquashBot.Gameplay
 {
     /// <summary>
-    /// The challenge (main menu → CHALLENGE): the waiting room finds a rival close in trophies and army power (a bot for
-    /// now), then the board — an isometric courtyard with the two armies of six groups along its ends and the two foi in
+    /// The challenge (main menu → CHALLENGE): the first time, the player picks a name; the waiting room asks the server
+    /// (<see cref="FoiNet"/>) for a rival close in trophies and army power — a real player's army played by the AI, or a
+    /// bot when nobody fits or there is no network (then a practice match: no trophies) — then the board — an isometric courtyard with the two armies of six groups along its ends and the two foi in
     /// the middle of them. Each turn both sides pick a group in secret (ten seconds); the picks are shown and the two
     /// groups clash live in the middle; the survivors walk back. When one side has no soldiers left the duel begins: foi
     /// is the player's to move and strike, the rival foi fights back, and the soldiers still standing fight on beside
@@ -31,6 +32,11 @@ namespace SquashBot.Gameplay
         private Transform rivalLook;
         private Vector3 boardCentre;
         private bool chCancelled;
+        /// <summary>Bumped by every waiting room, so an old one that is still waiting knows it is over.</summary>
+        private int chLobbyToken;
+        /// <summary>The server's challenge being played (0: none, or a practice match).</summary>
+        private long chMatchId;
+        private bool chOnline;
         /// <summary>How far the player has slid the board view.</summary>
         private Vector3 boardPan;
 
@@ -43,6 +49,9 @@ namespace SquashBot.Gameplay
             chUi = ChallengeScreen.Create(ui.transform.Find("Canvas/SafeArea") ?? ui.transform.Find("Canvas") ?? ui.transform);
             chUi.GroupPicked += g => { if (chPhase == ChPhase.Pick) { chMyPick = g; chUi.SetStatus(Loc.T("ch.waitRival")); } };
             chUi.Leave += () => { chCancelled = true; chUi.HideAll(); };
+            chUi.NameSubmitted += OnNameSubmitted;
+            chUi.NameClosed += () => { chCancelled = true; chPhase = ChPhase.Off; chUi.HideAll(); };
+            chUi.RenamePressed += () => { chCancelled = true; chPhase = ChPhase.Off; chUi.ShowName(Challenge.PlayerName); };
             chUi.BoardTapped += OnBoardTap;
             chUi.BoardDragged += d =>
             {
@@ -70,6 +79,12 @@ namespace SquashBot.Gameplay
             }
             if (chUi == null) InitChallenge();
             if (State != GameState.Menu) ShowMenu();
+            if (!Challenge.NameChosen)
+            {
+                chPhase = ChPhase.Off;
+                chUi.ShowName(Challenge.PlayerName);
+                return;
+            }
             chCancelled = false;
             chPhase = ChPhase.Lobby;
             cameraRig.StartCoroutine(Lobby());
@@ -78,19 +93,99 @@ namespace SquashBot.Gameplay
         private string SideText(string name, int rank, int trophies, int power) =>
             name + "\n" + Challenge.RankName(rank) + " · " + Loc.F("ch.trophies", trophies) + " · " + Loc.F("ch.power", power);
 
-        /// <summary>The waiting room: "looking for a rival", the rival found, then onto the board.</summary>
+        /// <summary>A name typed on the name screen: checked here, then claimed on the server (offline: kept for later).</summary>
+        private void OnNameSubmitted(string name)
+        {
+            if (Challenge.NameProblem(name) is string why) { chUi.NameRefused(Loc.T("ch.name." + why)); return; }
+            chUi.NameChecking();
+            cameraRig.StartCoroutine(FoiNet.SetName(name, (err, profile) =>
+            {
+                if (err != null && err != "offline") { chUi.NameRefused(Loc.T("ch.name." + err)); return; }
+                Challenge.PlayerName = name;
+                Challenge.NameChosen = true;
+                Challenge.Sync(profile);
+                chUi.HideName();
+                StartChallenge();
+            }));
+        }
+
+        private bool LobbyOver(int token) => chCancelled || token != chLobbyToken;
+
+        /// <summary>
+        /// The waiting room: "looking for a rival" while the server gets the player's army and finds a rival (and tells
+        /// of the attacks on the player's army since last time), the rival found, then onto the board.
+        /// </summary>
         private IEnumerator Lobby()
         {
+            int token = ++chLobbyToken;
+            chMatchId = 0;
+            chOnline = false;
             chUi.ShowLobby(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore));
-            yield return new WaitForSecondsRealtime(Random.Range(1.6f, 3f));
-            if (chCancelled) { chPhase = ChPhase.Off; yield break; }
+            float started = Time.realtimeSinceStartup;
             int world = LevelCatalog.WorldOf(Mathf.Max(0, SaveData.UnlockedLevel - 1));
-            rival = Challenge.MakeBot(Random.Range(0, 1000000), Army.EarnedPoints, world);
+
+            bool ok = false;
+            yield return FoiNet.EnsurePlayer(r => ok = r);
+            if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
+            if (ok && FoiNet.SyncedName != Challenge.PlayerName)
+            {
+                // A name chosen offline goes up now; taken meanwhile: pick another.
+                string err = "offline";
+                yield return FoiNet.SetName(Challenge.PlayerName, (e, p) => { err = e; Challenge.Sync(p); });
+                if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
+                if (err != null && err != "offline")
+                {
+                    chPhase = ChPhase.Off;
+                    Challenge.NameChosen = false;
+                    chUi.ShowName(Challenge.PlayerName, Loc.T("ch.name." + err));
+                    yield break;
+                }
+                if (err == "offline") ok = false;
+            }
+            if (ok)
+            {
+                var points = new int[Army.Groups];
+                for (int g = 0; g < Army.Groups; g++) points[g] = Army.GroupPoints(g);
+                yield return FoiNet.PutArmy(points, Army.EarnedPoints, world, Challenge.FoiHpFor(world), Challenge.FoiHitFor(world), 0.5f, r => ok = r);
+                if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
+            }
+            FoiNet.Match match = null;
+            if (ok)
+            {
+                FoiNet.Attack[] attacks = null;
+                yield return FoiNet.Defense(a => attacks = a);
+                if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
+                // From here the challenge counts: no leaving the room.
+                chUi.LockLobby();
+                yield return FoiNet.Find(m => match = m);
+                if (match != null)
+                {
+                    yield return FoiNet.Me(Challenge.Sync);
+                    chUi.SetMyCard(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore));
+                }
+                if (attacks != null && attacks.Length > 0)
+                {
+                    int held = 0, change = 0;
+                    foreach (var a in attacks) { if (a.held) held++; change += a.change; }
+                    chUi.SetLobbyStatus(Loc.F("ch.defense", attacks.Length, held, attacks.Length - held, (change >= 0 ? "+" : "") + change));
+                    yield return new WaitForSecondsRealtime(2.6f);
+                }
+            }
+            float waited = Time.realtimeSinceStartup - started;
+            if (waited < 1.6f) yield return new WaitForSecondsRealtime(1.6f - waited);
+            if (match == null && LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
+
+            chOnline = match != null;
+            chMatchId = match != null ? match.matchId : 0;
+            rival = match != null && match.HasRival
+                ? Challenge.FromRival(match.rival)
+                : Challenge.MakeBot(match != null ? match.seed : Random.Range(0, 1000000), Army.EarnedPoints, world, match != null ? match.trophies : -1);
             int rivalPower = 0;
             for (int g = 0; g < Army.Groups; g++) rivalPower += Mathf.RoundToInt(Army.Soldiers * rival.Power(g) * 10f);
             chUi.ShowRival(SideText(rival.name, rival.Rank, rival.trophies, rivalPower));
-            yield return new WaitForSecondsRealtime(1.8f);
-            if (chCancelled) { chPhase = ChPhase.Off; yield break; }
+            if (!chOnline) chUi.SetLobbyStatus(Loc.T("ch.offline"));
+            yield return new WaitForSecondsRealtime(chOnline ? 1.8f : 2.4f);
+            if (token != chLobbyToken || (match == null && chCancelled)) { if (token == chLobbyToken) chPhase = ChPhase.Off; yield break; }
             chUi.HideLobby();
             BuildBoard(world);
         }
@@ -317,7 +412,13 @@ namespace SquashBot.Gameplay
         {
             if (chPhase == ChPhase.Done) return;
             chPhase = ChPhase.Done;
-            int change = Challenge.Record(won, rival.trophies);
+            // Online the server keeps the score (the same sum, shown at once, then its numbers taken); offline: practice.
+            int change = 0;
+            if (chOnline)
+            {
+                change = Challenge.Record(won, rival.trophies);
+                SendChallengeResult(won);
+            }
             int gold = won ? Challenge.WinGold : 0;
             SaveData.Coins += gold + Earned;
             if (won)
@@ -330,7 +431,7 @@ namespace SquashBot.Gameplay
             }
             chUi.HideAll();
             string line = Loc.F(won ? "ch.wonLine" : "ch.lostLine", rival.name) + "\n"
-                          + (change >= 0 ? "+" : "") + Loc.F("ch.trophies", change) + (gold > 0 ? " · +" + gold + " " + Loc.T("ch.gold") : "")
+                          + (chOnline ? (change >= 0 ? "+" : "") + Loc.F("ch.trophies", change) : Loc.T("ch.offline")) + (gold > 0 ? " · +" + gold + " " + Loc.T("ch.gold") : "")
                           + "\n" + Challenge.RankName(Challenge.Rank) + " · " + Loc.F("ch.trophies", Challenge.Trophies);
             StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
             {
@@ -346,8 +447,22 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>Leaving a challenge (the menu): the board's armies and screens go.</summary>
+        private void SendChallengeResult(bool won)
+        {
+            long id = chMatchId;
+            chMatchId = 0;
+            if (id == 0) return;
+            cameraRig.StartCoroutine(FoiNet.SendResult(id, won, r => { if (r != null) Challenge.Sync(r.profile); }));
+        }
+
         private void EndChallenge()
         {
+            // Walking out of a challenge the server knows of: it is lost (the server would count it so anyway).
+            if (chMatchId != 0 && chPhase != ChPhase.Done)
+            {
+                Challenge.Record(false, rival != null ? rival.trophies : Challenge.Trophies);
+                SendChallengeResult(false);
+            }
             if (!challengeRun && chPhase == ChPhase.Off) return;
             challengeRun = false;
             chPhase = ChPhase.Off;

@@ -26,6 +26,12 @@ namespace SquashBot.UI
         /// <summary>A drag across the board (screen pixels): the view slides over it.</summary>
         public event Action<Vector2> BoardDragged;
 
+        /// <summary>A name typed and confirmed on the name screen; closing it without one.</summary>
+        public event Action<string> NameSubmitted;
+        public event Action NameClosed;
+        /// <summary>"Change name" in the waiting room.</summary>
+        public event Action RenamePressed;
+
         private class TapArea : MonoBehaviour, UnityEngine.EventSystems.IPointerClickHandler, UnityEngine.EventSystems.IBeginDragHandler, UnityEngine.EventSystems.IDragHandler
         {
             public Action<Vector2> tapped, dragged;
@@ -34,7 +40,10 @@ namespace SquashBot.UI
             public void OnDrag(UnityEngine.EventSystems.PointerEventData e) => dragged?.Invoke(e.delta);
         }
 
-        private UiScreen lobby, hud;
+        private UiScreen lobby, hud, namePanel;
+        private TMP_InputField nameInput;
+        private TextMeshProUGUI nameError;
+        private Button nameOk, leaveButton, renameButton;
         private TextMeshProUGUI myCard, theirCard, lobbyStatus, myBar, theirBar, clock, status;
         private RectTransform searchBar;
         private readonly List<(Button button, TextMeshProUGUI count, Image face, Color colour)> groups = new List<(Button, TextMeshProUGUI, Image, Color)>();
@@ -57,7 +66,7 @@ namespace SquashBot.UI
         {
             // The waiting room.
             lobby = UiScreen.Create("ChallengeLobby", root, out var l);
-            UiFactory.Dim(l, new Color(0.03f, 0.03f, 0.1f, 0.9f)).gameObject.AddComponent<IgnoreSafeArea>();
+            UiFactory.Dim(l, new Color(0.03f, 0.03f, 0.1f, 1f)).gameObject.AddComponent<IgnoreSafeArea>();
             UiFactory.TextBox("Title", l, new Vector2(0.5f, 1f), new Vector2(0f, -200f), new Vector2(960f, 110f), Loc.T("ch.title"), 76f, Palette.UiGold, title: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
             myCard = Card(l, new Vector2(0f, 330f), ClashSystem.Mine);
@@ -68,8 +77,13 @@ namespace SquashBot.UI
             searchBar = UiFactory.Box("Search", l, new Vector2(0.5f, 0f), new Vector2(0f, 270f), new Vector2(160f, 14f));
             searchBar.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.Fill(searchBar, Palette.UiCyan, UiSprites.Rounded, 4f).raycastTarget = false;
-            var leave = UiFactory.MakeButton(l, Loc.T("bag.back"), Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(0f, 140f), new Vector2(420f, 110f), () => Leave?.Invoke(), 42f);
+            var leave = UiFactory.MakeButton(l, Loc.T("btn.close"), Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(0f, 140f), new Vector2(420f, 110f), () => Leave?.Invoke(), 42f);
             ((RectTransform)leave.transform).pivot = new Vector2(0.5f, 0.5f);
+            leaveButton = leave;
+            renameButton = UiFactory.MakeButton(l, Loc.T("ch.rename"), Kind.Secondary, new Vector2(0.5f, 0.5f), new Vector2(0f, 150f), new Vector2(360f, 84f), () => RenamePressed?.Invoke(), 30f);
+            ((RectTransform)renameButton.transform).pivot = new Vector2(0.5f, 0.5f);
+
+            BuildNamePanel(root);
 
             // The battle's overlay.
             hud = UiScreen.Create("ChallengeHud", root, out var h);
@@ -92,12 +106,78 @@ namespace SquashBot.UI
             foreach (var g in groups) g.button.gameObject.SetActive(false); // the groups are picked on the board itself
         }
 
+        // ---------- The name ----------
+
+        private void BuildNamePanel(RectTransform root)
+        {
+            namePanel = UiScreen.Create("ChallengeName", root, out var n);
+            UiFactory.Dim(n, new Color(0.03f, 0.03f, 0.1f, 1f)).gameObject.AddComponent<IgnoreSafeArea>();
+            UiFactory.TextBox("Title", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 360f), new Vector2(900f, 110f), Loc.T("ch.nameTitle"), 72f, Palette.UiGold, title: true)
+                .rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var hint = UiFactory.TextBox("Hint", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 250f), new Vector2(900f, 90f), Loc.T("ch.nameHint"), 34f, new Color(1f, 1f, 1f, 0.75f));
+            hint.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            hint.textWrappingMode = TextWrappingModes.Normal;
+
+            var box = UiFactory.Box("Input", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 110f), new Vector2(780f, 140f));
+            box.pivot = new Vector2(0.5f, 0.5f);
+            var bg = UiFactory.Fill(box, new Color(1f, 1f, 1f, 0.12f), UiSprites.Rounded, 1.2f);
+            UiFactory.Fill(UiFactory.Stretch("Rim", box), new Color(ClashSystem.Mine.r, ClashSystem.Mine.g, ClashSystem.Mine.b, 0.9f), UiSprites.Ring, 1.2f).raycastTarget = false;
+            var area = UiFactory.Rect("TextArea", box, Vector2.zero, Vector2.one, new Vector2(36f, 14f), new Vector2(-36f, -14f));
+            area.gameObject.AddComponent<RectMask2D>();
+            var text = UiFactory.Text(area, "", 56f, Color.white);
+            text.enableAutoSizing = false;
+            text.textPreprocessor = null; // typed text is shown as typed
+            var placeholder = UiFactory.Text(area, "foi1234", 56f, new Color(1f, 1f, 1f, 0.3f));
+            placeholder.enableAutoSizing = false;
+            nameInput = box.gameObject.AddComponent<TMP_InputField>();
+            nameInput.textViewport = area;
+            nameInput.textComponent = text;
+            nameInput.placeholder = placeholder;
+            nameInput.targetGraphic = bg;
+            nameInput.characterLimit = 16;
+            nameInput.contentType = TMP_InputField.ContentType.Standard;
+            nameInput.lineType = TMP_InputField.LineType.SingleLine;
+            nameInput.onSubmit.AddListener(_ => SubmitName());
+            nameInput.onValueChanged.AddListener(_ => nameError.text = "");
+
+            nameError = UiFactory.TextBox("Error", n, new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(900f, 70f), "", 34f, new Color(1f, 0.45f, 0.5f), title: true);
+            nameError.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            nameOk = UiFactory.MakeButton(n, Loc.T("ch.nameOk"), Kind.Primary, new Vector2(0.5f, 0.5f), new Vector2(0f, -150f), new Vector2(460f, 130f), SubmitName, 48f);
+            ((RectTransform)nameOk.transform).pivot = new Vector2(0.5f, 0.5f);
+            var back = UiFactory.MakeButton(n, Loc.T("btn.close"), Kind.Secondary, new Vector2(0.5f, 0.5f), new Vector2(0f, -300f), new Vector2(360f, 100f), () => NameClosed?.Invoke(), 38f);
+            ((RectTransform)back.transform).pivot = new Vector2(0.5f, 0.5f);
+        }
+
+        private void SubmitName()
+        {
+            if (!nameOk.interactable) return;
+            NameSubmitted?.Invoke((nameInput.text ?? "").Trim());
+        }
+
+        /// <summary>The name screen, filled with the current name (and why the last one was refused, if it was).</summary>
+        public void ShowName(string current, string error = "")
+        {
+            lobby.Hide(true);
+            hud.Hide(true);
+            nameInput.text = current;
+            nameError.text = error;
+            nameOk.interactable = true;
+            namePanel.Show();
+            transform.SetAsLastSibling();
+        }
+
+        /// <summary>The name is being checked (the button waits), or the answer: an error, or "" to close the screen.</summary>
+        public void NameChecking() { nameOk.interactable = false; nameError.text = Loc.T("ch.name.wait"); }
+        public void NameRefused(string error) { nameOk.interactable = true; nameError.text = error; }
+        public void HideName() => namePanel.Hide(true);
+        public bool NameShowing => namePanel.IsVisible;
+
         private TextMeshProUGUI Card(RectTransform parent, Vector2 at, Color colour)
         {
             var card = UiFactory.Box("Card", parent, new Vector2(0.5f, 0.5f), at, new Vector2(820f, 260f));
             card.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(card, new Color(colour.r, colour.g, colour.b, 0.18f), UiSprites.Rounded, 30f).raycastTarget = false;
-            UiFactory.Fill(UiFactory.Stretch("Rim", card), new Color(colour.r, colour.g, colour.b, 0.8f), UiSprites.Ring, 30f).raycastTarget = false;
+            UiFactory.Fill(card, new Color(colour.r, colour.g, colour.b, 0.18f), UiSprites.Rounded, 1.2f).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Stretch("Rim", card), new Color(colour.r, colour.g, colour.b, 0.8f), UiSprites.Ring, 1.2f).raycastTarget = false;
             var text = UiFactory.TextBox("Text", card, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760f, 230f), "", 40f, Color.white, title: true);
             text.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             text.textWrappingMode = TextWrappingModes.Normal;
@@ -151,6 +231,9 @@ namespace SquashBot.UI
             myCard.text = me;
             theirCard.text = "?";
             lobbyStatus.text = Loc.T("ch.searching");
+            leaveButton.gameObject.SetActive(true);
+            renameButton.gameObject.SetActive(true);
+            searchBar.gameObject.SetActive(true);
             searching = true;
             searchT = 0f;
             lobby.Show();
@@ -168,6 +251,16 @@ namespace SquashBot.UI
 
         public void HideLobby() => lobby.Hide();
 
+        /// <summary>Once the server is asked for a rival there is no going back (the challenge counts).</summary>
+        public void LockLobby()
+        {
+            leaveButton.gameObject.SetActive(false);
+            renameButton.gameObject.SetActive(false);
+        }
+
+        public void SetMyCard(string me) => myCard.text = me;
+        public void SetLobbyStatus(string text) => lobbyStatus.text = text;
+
         // ---------- The battle ----------
 
         public void ShowBattle()
@@ -181,6 +274,7 @@ namespace SquashBot.UI
         {
             lobby.Hide(true);
             hud.Hide(true);
+            namePanel.Hide(true);
         }
 
         public void SetSides(string me, int myLeft, string them, int theirLeft)

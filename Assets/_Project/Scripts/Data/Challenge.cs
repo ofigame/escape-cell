@@ -3,14 +3,45 @@ using UnityEngine;
 namespace SquashBot.Data
 {
     /// <summary>
-    /// The challenge mode's own record (kept on the phone until the online layer comes): the player's name, trophies and
-    /// the highest rank reached, and the opponents. An opponent is a name, a rank, six groups with their development
-    /// points and foi's strength; for now they are bots made to match the player (trophies and army power close).
+    /// The challenge mode's record on the phone: the player's name, trophies and the highest rank reached (the server's,
+    /// copied over after each online challenge; see <see cref="FoiNet"/>), and the opponents. An opponent is a name, a
+    /// rank, six groups with their development points and foi's strength: a real player's army, or a bot made to match.
     /// </summary>
     public static class Challenge
     {
         private const string NameKey = "sb_ch_name", TrophyKey = "sb_ch_trophies", RankKey = "sb_ch_rank",
-            WinsKey = "sb_ch_wins", PlayedKey = "sb_ch_played";
+            WinsKey = "sb_ch_wins", PlayedKey = "sb_ch_played", ChosenKey = "sb_ch_named";
+
+        /// <summary>Whether the player has picked their name (asked on the first challenge).</summary>
+        public static bool NameChosen
+        {
+            get => PlayerPrefs.GetInt(ChosenKey, 0) == 1;
+            set { PlayerPrefs.SetInt(ChosenKey, value ? 1 : 0); PlayerPrefs.Save(); }
+        }
+
+        /// <summary>Why a name cannot be used here (null: it can): 3–16 letters, digits or _ (the server checks the rest).</summary>
+        public static string NameProblem(string name)
+        {
+            if (name == null || name.Length < 3 || name.Length > 16) return "shape";
+            foreach (char c in name) if (!char.IsLetterOrDigit(c) && c != '_') return "shape";
+            return null;
+        }
+
+        /// <summary>Takes the server's record (it decides trophies; the rank reached is kept).</summary>
+        public static void Sync(FoiNet.Profile p)
+        {
+            if (p == null) return;
+            PlayerPrefs.SetInt(TrophyKey, Mathf.Max(0, p.trophies));
+            PlayerPrefs.SetInt(WinsKey, p.wins);
+            PlayerPrefs.SetInt(PlayedKey, p.played);
+            PlayerPrefs.SetInt(RankKey, Mathf.Max(PlayerPrefs.GetInt(RankKey, 0), p.rank));
+            if (!string.IsNullOrEmpty(p.name)) PlayerPrefs.SetString(NameKey, p.name);
+            PlayerPrefs.Save();
+        }
+
+        /// <summary>foi's strength in the duel for a player who has reached <paramref name="world"/>.</summary>
+        public static int FoiHpFor(int world) => 18 + world * 3;
+        public static float FoiHitFor(int world) => Mathf.Lerp(0.09f, 0.14f, world / 24f);
 
         /// <summary>Opens once the first world is finished (its development points are the army's first).</summary>
         public static bool Open => SaveData.UnlockedLevel >= LevelCatalog.LevelsPerWorld || SaveData.TestMode;
@@ -97,12 +128,13 @@ namespace SquashBot.Data
         };
 
         /// <summary>A bot shaped like the player: trophies close, the same development points spread its own way.</summary>
-        public static Opponent MakeBot(int seed, int playerPoints, int world)
+        public static Opponent MakeBot(int seed, int playerPoints, int world, int trophies = -1)
         {
             var rng = new System.Random(seed);
             var o = new Opponent { bot = true };
             o.name = BotNames[rng.Next(BotNames.Length)] + (rng.Next(3) == 0 ? rng.Next(10, 99).ToString() : "");
             o.trophies = Mathf.Max(0, Trophies + rng.Next(-120, 121));
+            if (trophies >= 0) o.trophies = trophies; // the server's
             int pts = Mathf.Max(0, Mathf.RoundToInt(playerPoints * (0.85f + (float)rng.NextDouble() * 0.3f)));
             // Spread: a favourite group or two, the rest across.
             int fav = rng.Next(Army.Groups);
@@ -117,9 +149,22 @@ namespace SquashBot.Data
                 o.points[g] += n;
                 left -= n;
             }
-            o.foiHp = 18 + world * 3;
-            o.foiHit = Mathf.Lerp(0.09f, 0.14f, world / 24f);
+            o.foiHp = FoiHpFor(world);
+            o.foiHit = FoiHitFor(world);
             o.boldness = (float)rng.NextDouble();
+            return o;
+        }
+
+        /// <summary>A real player's army, as the server sent it (played by the game's AI).</summary>
+        public static Opponent FromRival(FoiNet.Rival r)
+        {
+            var o = new Opponent { bot = false, name = r.name, trophies = Mathf.Max(0, r.trophies) };
+            var parts = (r.army ?? "").Split(',');
+            for (int g = 0; g < Army.Groups && g < parts.Length; g++)
+                o.points[g] = int.TryParse(parts[g], out int v) ? Mathf.Clamp(v, 0, 1000) : 0;
+            o.foiHp = r.foiHp > 0 ? Mathf.Clamp(r.foiHp, 10, 400) : FoiHpFor(r.world);
+            o.foiHit = r.foiHit > 0f ? Mathf.Clamp(r.foiHit, 0.05f, 0.3f) : FoiHitFor(r.world);
+            o.boldness = Mathf.Clamp01(r.boldness);
             return o;
         }
     }
