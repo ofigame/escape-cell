@@ -23,10 +23,15 @@ namespace SquashBot.UI
         /// <summary>A tap on the board (screen point): the game finds the group under it.</summary>
         public event Action<Vector2> BoardTapped;
 
-        private class TapArea : MonoBehaviour, UnityEngine.EventSystems.IPointerClickHandler
+        /// <summary>A drag across the board (screen pixels): the view slides over it.</summary>
+        public event Action<Vector2> BoardDragged;
+
+        private class TapArea : MonoBehaviour, UnityEngine.EventSystems.IPointerClickHandler, UnityEngine.EventSystems.IBeginDragHandler, UnityEngine.EventSystems.IDragHandler
         {
-            public Action<Vector2> tapped;
-            public void OnPointerClick(UnityEngine.EventSystems.PointerEventData e) => tapped?.Invoke(e.position);
+            public Action<Vector2> tapped, dragged;
+            public void OnPointerClick(UnityEngine.EventSystems.PointerEventData e) { if (!e.dragging) tapped?.Invoke(e.position); }
+            public void OnBeginDrag(UnityEngine.EventSystems.PointerEventData e) { }
+            public void OnDrag(UnityEngine.EventSystems.PointerEventData e) => dragged?.Invoke(e.delta);
         }
 
         private UiScreen lobby, hud;
@@ -70,7 +75,9 @@ namespace SquashBot.UI
             hud = UiScreen.Create("ChallengeHud", root, out var h);
             var tap = UiFactory.Stretch("BoardTap", h);
             UiFactory.Fill(tap, new Color(0f, 0f, 0f, 0f));
-            tap.gameObject.AddComponent<TapArea>().tapped = p => BoardTapped?.Invoke(p);
+            var area = tap.gameObject.AddComponent<TapArea>();
+            area.tapped = p => BoardTapped?.Invoke(p);
+            area.dragged = d => BoardDragged?.Invoke(d);
             var top = UiFactory.Rect("Top", h, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -380f), new Vector2(0f, -240f)); // under the HUD's top row
             UiFactory.Fill(top, new Color(0.03f, 0.03f, 0.1f, 0.55f)).raycastTarget = false;
             myBar = UiFactory.TextBox("Me", top, new Vector2(0f, 0.5f), new Vector2(30f, -20f), new Vector2(420f, 120f), "", 32f, ClashSystem.Mine, title: true, align: TextAlignmentOptions.Left);

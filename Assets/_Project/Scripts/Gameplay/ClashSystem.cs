@@ -119,6 +119,24 @@ namespace SquashBot.Gameplay
             return list;
         }
 
+        /// <summary>
+        /// Hands a side's living soldiers over to the duel (their models, as they stand), out of the army battle.
+        /// </summary>
+        public List<(Transform root, GuardBot bot, int group, GroupKind kind)> TakeSurvivors(int team)
+        {
+            var list = new List<(Transform, GuardBot, int, GroupKind)>();
+            for (int i = units.Count - 1; i >= 0; i--)
+            {
+                var u = units[i];
+                if (u.dead || u.team != team) continue;
+                u.root.SetParent(null, true);
+                u.bot.SetRaise(0f);
+                list.Add((u.root, u.bot, u.group, u.kind));
+                units.RemoveAt(i);
+            }
+            return list;
+        }
+
         public bool Clashing => clashing;
 
         /// <summary>Sends a group from each side to the middle; they fight until one is gone (or 25 s pass).</summary>
@@ -142,6 +160,7 @@ namespace SquashBot.Gameplay
             t.transform.SetParent(transform, false);
             t.transform.position = spot + Vector3.up * (unitHeight * 2.2f + 1f);
             t.font = SquashBot.UI.UiFactory.Font;
+            t.textPreprocessor = new SquashBot.UI.RtlTextPreprocessor(t);
             t.fontSize = 7f;
             t.alignment = TMPro.TextAlignmentOptions.Center;
             t.color = Color.white;

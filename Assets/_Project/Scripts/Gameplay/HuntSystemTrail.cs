@@ -88,14 +88,53 @@ namespace SquashBot.Gameplay
         /// <summary>The rival foi has fallen (or there is none).</summary>
         public bool ChallengeFoeDown => challengeFoe == null || challengeFoe.dead;
 
-        /// <summary>A soldier of the rival's army for the duel: a red robot of the given strength.</summary>
-        public void AddChallengeSoldier(GridPos p, int hp)
+        /// <summary>A free tile near <paramref name="p"/> (no robot, no ally, not foi's), or null.</summary>
+        private GridPos? FreeNear(GridPos p)
         {
-            if (!grid.IsStandable(p) || grid.IsOccupied(p)) return;
-            AddGuard(p, rank: 1);
-            var g = guards[guards.Count - 1];
-            g.hp = g.maxHp = Mathf.Max(1, hp);
+            for (int r = 0; r <= 4; r++)
+                for (int dx = -r; dx <= r; dx++)
+                    for (int dy = -r; dy <= r; dy++)
+                    {
+                        if (Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy)) != r) continue;
+                        var q = p + new GridPos(dx, dy);
+                        if (grid.IsStandable(q) && !grid.IsOccupied(q) && !AllyAt(q) && q != robot.Position) return q;
+                    }
+            return null;
+        }
+
+        /// <summary>
+        /// A soldier of the rival's army carried into the duel: its own model (<paramref name="body"/>, the soldier as it
+        /// stood) moved onto the nearest free tile, fighting as a robot of the given health.
+        /// </summary>
+        public void AddChallengeSoldier(Vector3 at, int hp, Transform body, GuardBot bot)
+        {
+            var tile = FreeNear(new GridPos(Mathf.RoundToInt(at.x), Mathf.RoundToInt(at.z)));
+            if (!tile.HasValue) { Destroy(body.gameObject); return; }
+            var g = new Guard { pos = tile.Value, hp = Mathf.Max(1, hp), maxHp = Mathf.Max(1, hp), rank = 1, step = 0.4f, cooldown = 0.8f };
+            g.root = body;
+            g.root.SetParent(transform, true);
+            g.root.position = At(tile.Value);
+            g.bot = bot;
+            AddHealthBar(g);
+            g.from = g.to = At(tile.Value);
+            grid.SetOccupied(tile.Value, true);
+            guards.Add(g);
             Total++;
+        }
+
+        /// <summary>One of the player's soldiers carried into the duel as an ally (its own model).</summary>
+        public void AddChallengeAlly(Vector3 at, int hp, Transform body, GuardBot bot)
+        {
+            var tile = FreeNear(new GridPos(Mathf.RoundToInt(at.x), Mathf.RoundToInt(at.z)));
+            if (!tile.HasValue) { Destroy(body.gameObject); return; }
+            var a = new Guard { pos = tile.Value, hp = Mathf.Max(1, hp), maxHp = Mathf.Max(1, hp), rank = -1, step = 0.3f, ally = true };
+            a.root = body;
+            a.root.SetParent(transform, true);
+            a.root.position = At(tile.Value);
+            a.bot = bot;
+            AddHealthBar(a);
+            a.from = a.to = At(tile.Value);
+            allies.Add(a);
         }
 
         public void ClearChallengeFoe() => challengeFoe = null;

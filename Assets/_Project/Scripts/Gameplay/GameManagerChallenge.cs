@@ -31,6 +31,8 @@ namespace SquashBot.Gameplay
         private Transform rivalLook;
         private Vector3 boardCentre;
         private bool chCancelled;
+        /// <summary>How far the player has slid the board view.</summary>
+        private Vector3 boardPan;
 
         private const int BoardW = 25, BoardH = 21, PickSeconds = 10;
 
@@ -42,6 +44,16 @@ namespace SquashBot.Gameplay
             chUi.GroupPicked += g => { if (chPhase == ChPhase.Pick) { chMyPick = g; chUi.SetStatus(Loc.T("ch.waitRival")); } };
             chUi.Leave += () => { chCancelled = true; chUi.HideAll(); };
             chUi.BoardTapped += OnBoardTap;
+            chUi.BoardDragged += d =>
+            {
+                // The finger drags the board: the view slides the other way, kept over the courtyard.
+                var cam = cameraRig.Cam.transform;
+                var right = cam.right; right.y = 0f; right.Normalize();
+                var fwd = cam.forward; fwd.y = 0f; fwd.Normalize();
+                float scale = 26f / Mathf.Max(1f, Screen.height);
+                boardPan -= (right * d.x + fwd * d.y) * scale;
+                boardPan = new Vector3(Mathf.Clamp(boardPan.x, -BoardW * 0.45f, BoardW * 0.45f), 0f, Mathf.Clamp(boardPan.z, -BoardH * 0.45f, BoardH * 0.45f));
+            };
             var go = new GameObject("Clash");
             clash = go.AddComponent<ClashSystem>();
             clash.Init(fx);
@@ -134,6 +146,7 @@ namespace SquashBot.Gameplay
                 myLeft[g] = theirLeft[g] = Army.Soldiers;
             }
             boardCentre = GridView.ToWorld(new GridPos(BoardW / 2, BoardH / 2)) + Vector3.up * GridView.SurfaceY;
+            boardPan = Vector3.zero;
             // foi among its soldiers at the south end, the rival foi facing it at the north.
             robot.Spawn(grid, new GridPos(BoardW / 2, 1));
             if (rivalLook != null) Destroy(rivalLook.gameObject);
@@ -283,17 +296,18 @@ namespace SquashBot.Gameplay
             chPhase = ChPhase.Duel;
             chUi.HideGroups();
             chUi.SetStatus(Loc.T("ch.duel"));
-            var mineLeft = clash.Survivors(0);
-            var theirsLeft = clash.Survivors(1);
+            // The soldiers still standing go into the duel as they are (their own models), the rest of the board clears.
+            var mineLeft = clash.TakeSurvivors(0);
+            var theirsLeft = clash.TakeSurvivors(1);
             clash.Clear();
             if (rivalLook != null) { rivalLook.SetParent(null, true); }
             var look = rivalLook;
             rivalLook = null;
             hunt.AddChallengeFoe(new GridPos(BoardW / 2, BoardH - 2), rival.foiHp, rival.foiHit, look);
-            foreach (var (at, group) in mineLeft)
-                hunt.AddAlly(new GridPos(Mathf.RoundToInt(at.x), Mathf.RoundToInt(at.z)), Mathf.RoundToInt(3f * Army.Power(group)));
-            foreach (var (at, group) in theirsLeft)
-                hunt.AddChallengeSoldier(new GridPos(Mathf.RoundToInt(at.x), Mathf.RoundToInt(at.z)), Mathf.RoundToInt(3f * rival.Power(group)));
+            foreach (var (body, bot, group, kind) in mineLeft)
+                hunt.AddChallengeAlly(body.position, Mathf.RoundToInt(3f * Army.Power(group)), body, bot);
+            foreach (var (body, bot, group, kind) in theirsLeft)
+                hunt.AddChallengeSoldier(body.position, Mathf.RoundToInt(3f * rival.Power(group)), body, bot);
             ui.ShowIntro(Loc.T("ch.duel"), Loc.T("ch.duelText"));
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 0.8f);
         }
@@ -350,8 +364,8 @@ namespace SquashBot.Gameplay
             // Far enough for the whole board on a tall phone, aimed a little south so it sits above the group buttons.
             float aspect = Mathf.Max(0.4f, cameraRig.Cam.aspect);
             float k = Mathf.Clamp(0.86f / aspect, 1f, 2.1f);
-            pos = boardCentre + new Vector3(-7f, 21f, -17f) * k;
-            rot = Quaternion.LookRotation(boardCentre + new Vector3(0f, 0f, -4f) - pos);
+            pos = boardCentre + boardPan + new Vector3(-7f, 21f, -17f) * k;
+            rot = Quaternion.LookRotation(boardCentre + boardPan + new Vector3(0f, 0f, -4f) - pos);
         }
     }
 }
