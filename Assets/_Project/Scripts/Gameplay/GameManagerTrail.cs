@@ -19,6 +19,15 @@ namespace SquashBot.Gameplay
     public partial class GameManager
     {
         private bool trailRun;
+        /// <summary>What stands at a road's end: an arena's gate (the old arena mode or the journey's gate road), or the stairs up to a floor.</summary>
+        private enum TrailEnd { Arena, Stairs, Gate }
+        private TrailEnd trailEnd;
+        /// <summary>The old arena mode (roads between arenas) is on: a won arena opens onto the next road.</summary>
+        private bool trailRunMode;
+        private int trailNextLevel;
+        // The door to the next world in a won journey arena: its two leaves swing open.
+        private Transform doorLeft, doorRight;
+        private float doorT;
         private int trailTarget;
         private GridPos trailGate;
         private Transform trailRoot;
@@ -71,7 +80,7 @@ namespace SquashBot.Gameplay
         /// <summary>Each frame of a fight: the allies still standing are kept.</summary>
         private void TrackAllies()
         {
-            if (State == GameState.Playing && arenaRun && !arenaGiftsPhase) KeepAllies(hunt.AlliesAlive);
+            if (State == GameState.Playing && (arenaRun || journey) && !arenaGiftsPhase && roadPhase == RoadPhase.None) KeepAllies(hunt.AlliesAlive);
         }
 
         /// <summary>Where the open world picks up: the road out of the last arena won (or the first road).</summary>
@@ -86,6 +95,9 @@ namespace SquashBot.Gameplay
         private void StartTrail(int target)
         {
             KeepAllies(0); // a new road: new allies from its own chests (the last ones stay behind)
+            journey = false;
+            trailRunMode = true;
+            trailEnd = TrailEnd.Arena;
             ui.Arenas.Hide();
             bonusRun = true;
             dailyRun = false;
@@ -97,7 +109,8 @@ namespace SquashBot.Gameplay
             arenaBestStreak = 0;
             arenaGiftsPhase = arenaGiftsDone = false;
             levelIndex = BattleArenas.ThemeLevel(trailTarget);
-            level = BuildTrailLevel(trailTarget);
+            var layout = TrailMap.Layout(trailTarget, out var bounds);
+            level = BuildTrailLevel(trailTarget, layout, bounds);
             BeginRun();
             EnterTps();
             SetupTrail();
@@ -108,10 +121,10 @@ namespace SquashBot.Gameplay
             ui.SkillBar.Refresh(true);
         }
 
-        private LevelData BuildTrailLevel(int target)
+        private LevelData BuildTrailLevel(int target, string[] layout, int[] bounds)
         {
             var l = levelSet.levels[levelIndex].Clone();
-            l.layout = TrailMap.Layout(target, out var bounds);
+            l.layout = layout;
             l.stageBounds = bounds;
             l.fortressStages = 1;
             l.gridWidth = l.layout[0].Length;
@@ -204,7 +217,8 @@ namespace SquashBot.Gameplay
                 }
             }
             trailGate = new GridPos(TrailMap.Gate.x, TrailMap.Gate.y);
-            BuildTrailGate(trailGate, look, BattleArenas.Unlocked(trailTarget));
+            if (trailEnd == TrailEnd.Stairs) BuildStairs(trailGate, look);
+            else BuildTrailGate(trailGate, look, trailEnd == TrailEnd.Gate || BattleArenas.Unlocked(trailTarget));
             // The scenery is batched into a few meshes; the chests and the gate stay free to move.
             var decor = new GameObject("Scenery").transform;
             decor.SetParent(trailRoot, false);
@@ -334,7 +348,7 @@ namespace SquashBot.Gameplay
             fx.Burst(at, Palette.Coin, Palette.CoinGlow, 60, 7f);
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 1.2f);
             // Robots locked in it come out to fight on foi's side (more on later roads).
-            int freed = 0, want = 2 + arenaIndex / 4;
+            int freed = 0, want = journey ? 2 + arenaIndex : 2 + arenaIndex / 4; // the journey: two in the first world, one more each world
             for (int i = 0; i < want && hunt.AlliesAlive < MaxAllies; i++) if (hunt.AddAlly(chest.tile, AllyHp)) freed++;
             KeepAllies(hunt.AlliesAlive);
             FloatAt(at, Loc.T("trail.chestOpen") + (freed > 0 ? "\n" + Loc.F("trail.allies", freed) : ""), Palette.UiGold);
@@ -389,7 +403,15 @@ namespace SquashBot.Gameplay
             // The gate: walk into it.
             if (!trailEntering && HuntSystem.Chebyshev(robot.Position, trailGate) <= 1)
             {
-                if (BattleArenas.Unlocked(trailTarget))
+                if (trailEnd == TrailEnd.Stairs)
+                {
+                    // Up the stairs: straight onto the floor.
+                    trailEntering = true;
+                    trailRun = false;
+                    ExitTps();
+                    StartJourneyLevel(trailNextLevel);
+                }
+                else if (trailEnd == TrailEnd.Gate || BattleArenas.Unlocked(trailTarget))
                 {
                     trailEntering = true;
                     int target = trailTarget;
@@ -404,6 +426,68 @@ namespace SquashBot.Gameplay
                     AudioManager.PlaySfx(Sfx.Bump, 0.6f);
                 }
             }
+        }
+
+        /// <summary>A staircase up at a journey road's end: broad steps rising north to the next floor, lit at the top.</summary>
+        private void BuildStairs(GridPos at, BattleArenas.Look look)
+        {
+            var root = new GameObject("Stairs").transform;
+            root.SetParent(trailRoot, false);
+            root.position = GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY;
+            var stone = MaterialFactory.Create(Color.Lerp(look.wall, Color.white, 0.35f), Color.black);
+            var edge = MaterialFactory.Create(look.accent, look.accent * 1.6f);
+            for (int i = 0; i < 7; i++)
+            {
+                float h = 0.36f + i * 0.72f;
+                Shapes.Rounded("Step", root, new Vector3(0f, h * 0.5f, 0.2f + i * 0.5f), new Vector3(4.6f, h, 0.55f), 0.04f, stone);
+                Shapes.Rounded("Edge", root, new Vector3(0f, h + 0.01f, i * 0.5f - 0.04f), new Vector3(4.6f, 0.04f, 0.08f), 0.02f, edge);
+            }
+            foreach (float s in new[] { -1f, 1f })
+                Shapes.Rounded("Rail", root, new Vector3(s * 2.45f, 1.6f, 1.7f), new Vector3(0.25f, 3.2f, 3.8f), 0.08f, stone);
+            var glow = MaterialFactory.Create(Color.Lerp(look.accent, Color.white, 0.5f), look.accent * 2.2f);
+            Shapes.Rounded("Top", root, new Vector3(0f, 5.2f, 3.6f), new Vector3(4.4f, 0.1f, 0.6f), 0.05f, glow);
+            var sign = new GameObject("Sign").AddComponent<TMPro.TextMeshPro>();
+            sign.transform.SetParent(root, false);
+            sign.transform.localPosition = new Vector3(0f, 6.2f, 3.4f);
+            sign.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            sign.font = UiFactory.Font;
+            sign.text = Loc.F("level", trailNextLevel + 1);
+            sign.fontSize = 8f;
+            sign.alignment = TMPro.TextAlignmentOptions.Center;
+            sign.color = new Color(1f, 0.9f, 0.45f);
+            sign.outlineWidth = 0.25f;
+            sign.outlineColor = new Color(0.1f, 0.05f, 0.1f);
+            sign.rectTransform.sizeDelta = new Vector2(9f, 2.5f);
+        }
+
+        /// <summary>The won journey arena's door to the next world: a tall frame, two leaves that swing open, white light beyond.</summary>
+        private void BuildWorldDoor(Transform root, Color accent)
+        {
+            var frame = MaterialFactory.Create(new Color(0.85f, 0.8f, 0.7f), Color.black);
+            var wood = MaterialFactory.CreateSurface(new Color(0.55f, 0.36f, 0.2f), Color.black, 0.3f, 0.1f);
+            var trim = MaterialFactory.Create(accent, accent * 2f);
+            var light = MaterialFactory.Create(new Color(0.95f, 0.97f, 1f), new Color(0.9f, 0.95f, 1.1f));
+            var toFoi = robot.transform.position - root.position;
+            toFoi.y = 0f;
+            if (toFoi.sqrMagnitude > 0.01f) root.rotation = Quaternion.LookRotation(toFoi);
+            foreach (float s in new[] { -1f, 1f })
+                Shapes.Rounded("Post", root, new Vector3(s * 1.55f, 2.1f, 0f), new Vector3(0.5f, 4.2f, 0.6f), 0.08f, frame);
+            Shapes.Rounded("Lintel", root, new Vector3(0f, 4.35f, 0f), new Vector3(3.7f, 0.5f, 0.7f), 0.1f, frame);
+            Shapes.Rounded("Trim", root, new Vector3(0f, 4.35f, 0.36f), new Vector3(3.2f, 0.16f, 0.04f), 0.04f, trim);
+            Shapes.Rounded("Beyond", root, new Vector3(0f, 2f, -0.25f), new Vector3(2.6f, 4f, 0.05f), 0.02f, light);
+            Transform Leaf(float side)
+            {
+                var hinge = new GameObject("Hinge").transform;
+                hinge.SetParent(root, false);
+                hinge.localPosition = new Vector3(side * 1.3f, 0f, 0.1f);
+                Shapes.Rounded("Leaf", hinge, new Vector3(-side * 0.65f, 2f, 0f), new Vector3(1.28f, 3.9f, 0.16f), 0.05f, wood);
+                Shapes.Rounded("Band", hinge, new Vector3(-side * 0.65f, 2.8f, 0.09f), new Vector3(1.2f, 0.1f, 0.03f), 0.02f, trim);
+                Shapes.Rounded("Band", hinge, new Vector3(-side * 0.65f, 1.2f, 0.09f), new Vector3(1.2f, 0.1f, 0.03f), 0.02f, trim);
+                return hinge;
+            }
+            doorLeft = Leaf(-1f);
+            doorRight = Leaf(1f);
+            doorT = 0f;
         }
 
         /// <summary>The gate's portal turns and draws sparks in; the chests' beams pulse (a freed chest's fades).</summary>
@@ -452,11 +536,21 @@ namespace SquashBot.Gameplay
             {
                 if (!grid.IsStandable(p) || grid.IsGap(p)) continue;
                 int d = HuntSystem.Chebyshev(p, robot.Position);
-                if (d >= 3 && d < best) { best = d; arenaExitTile = p; }
+                if (d >= (journey ? 6 : 3) && d < best) { best = d; arenaExitTile = p; } // the journey's door stands well clear
             }
             var accent = BattleArenas.Style(arenaIndex).accent;
             arenaExit = new GameObject("ArenaExit").transform;
             arenaExit.position = GridView.ToWorld(arenaExitTile) + Vector3.up * GridView.SurfaceY;
+            if (journey) { BuildWorldDoor(arenaExit, accent); AudioManager.PlaySfx(Sfx.Win, 0.9f, 1.3f); return; }
+            if (!trailRunMode)
+            {
+                // An arena replayed from the world map: its result card.
+                Destroy(arenaExit.gameObject);
+                arenaExit = null;
+                ExitTps();
+                ShowBonusResult(Loc.F("arena.won", coins));
+                return;
+            }
             Shapes.Primitive(PrimitiveType.Cylinder, "Ring", arenaExit, new Vector3(0f, 0.04f, 0f), new Vector3(1.6f, 0.03f, 1.6f), MaterialFactory.Create(accent, accent * 2.5f));
             Shapes.Primitive(PrimitiveType.Cylinder, "Pillar", arenaExit, new Vector3(0f, 2.5f, 0f), new Vector3(0.9f, 2.5f, 0.9f), MaterialFactory.Create(Color.Lerp(accent, Color.white, 0.5f), accent * 1.6f));
             AudioManager.PlaySfx(Sfx.Win, 0.9f, 1.3f);
@@ -466,6 +560,19 @@ namespace SquashBot.Gameplay
         private void UpdateArenaExit()
         {
             if (arenaExit == null) return;
+            if (journey)
+            {
+                // The door swings open; walking through it is the way into the next world.
+                doorT = Mathf.Min(1f, doorT + Time.deltaTime / 1.6f);
+                float a = Mathf.SmoothStep(0f, 1f, doorT) * 105f;
+                if (doorLeft != null) doorLeft.localRotation = Quaternion.Euler(0f, -a, 0f);
+                if (doorRight != null) doorRight.localRotation = Quaternion.Euler(0f, a, 0f);
+                if (doorT < 0.7f || HuntSystem.Chebyshev(robot.Position, arenaExitTile) > 1) return;
+                Destroy(arenaExit.gameObject);
+                arenaExit = null;
+                JourneyThroughDoor();
+                return;
+            }
             float pulse = 1f + Mathf.Sin(Time.time * 4f) * 0.08f;
             arenaExit.localScale = new Vector3(pulse, 1f, pulse);
             if (HuntSystem.Chebyshev(robot.Position, arenaExitTile) > 1) return;

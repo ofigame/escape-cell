@@ -21,7 +21,9 @@ namespace SquashBot.UI
         private PressButton strikeButton;
         private RectTransform stickArea, spinButton, jumpButton, crosshair;
         private TMPro.TextMeshProUGUI ammoText;
-        public event Action Strike, Spin, Jump;
+        public event Action Strike, Spin, Jump, CameraToggle;
+        private RectTransform camButton;
+        private TMPro.TextMeshProUGUI camLabel;
         /// <summary>The arena's map in the bottom-right corner.</summary>
         public ArenaMinimap Minimap { get; private set; }
 
@@ -72,9 +74,23 @@ namespace SquashBot.UI
             c.spinButton = Button(root, "Spin", new Vector2(-440f, 150f), 135f, new Color(0.45f, 0.75f, 1f, 0.8f), 1, () => c.Spin?.Invoke());
             c.jumpButton = Button(root, "Jump", new Vector2(-420f, 360f), 130f, new Color(0.55f, 1f, 0.6f, 0.8f), 2, () => c.Jump?.Invoke());
             c.Minimap = ArenaMinimap.Create(root);
+            // The floors' view switch (over the shoulder or from above), left of the coin counter.
+            c.camButton = UiFactory.Box("ViewSwitch", root, new Vector2(1f, 1f), new Vector2(-40f, -165f), new Vector2(150f, 90f));
+            UiFactory.Fill(c.camButton, new Color(0.08f, 0.08f, 0.16f, 0.7f), UiSprites.Rounded, 0.8f);
+            UiFactory.Fill(UiFactory.Stretch("Rim", c.camButton), new Color(1f, 1f, 1f, 0.5f), UiSprites.Ring, 0.8f).raycastTarget = false;
+            c.camLabel = UiFactory.Text(c.camButton, "TPS", 40f, Color.white);
+            c.camButton.gameObject.AddComponent<PressButton>().down = () => c.CameraToggle?.Invoke();
+            c.camButton.gameObject.SetActive(false);
             c.SetGunMode(false, 0);
             c.Show(false);
             return c;
+        }
+
+        /// <summary>The view switch: shown on the floors (not the arenas), labelled with the view it is in.</summary>
+        public void SetViewSwitch(bool on, string label)
+        {
+            camButton.gameObject.SetActive(on);
+            camLabel.text = label;
         }
 
         public void Show(bool on)

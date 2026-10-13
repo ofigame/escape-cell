@@ -130,9 +130,9 @@ namespace SquashBot.Gameplay
             hazards.IsProtected = p => p == gateTile || p == guardSpot || grid.IsCage(p) || grid.IsBridge(p) || grid.IsGate(p);
             SetupCage();
             hunt.NoMonster = trailRun;
-            hunt.RedFoes = arenaRun; // the open world's roads: no vanG
+            hunt.RedFoes = arenaRun || journey; // the enemies wear red wherever foi has blue allies // the open world's roads: no vanG
             hunt.Begin(grid, level, World, levelIndex * 31 + 7);
-            introPending = true; // the opening shot over the whole floor
+            introPending = !journey; // the opening shot over the whole floor (not on the journey: straight in from the stairs)
             SetupPotions();
             SetupFifi();
             SetupBombs();
@@ -532,7 +532,7 @@ namespace SquashBot.Gameplay
             // Low down, it looks a little higher, over foi towards the fight.
             var rot = Quaternion.LookRotation(closeCamFocus + Vector3.up * Mathf.Lerp(0.35f, 0.9f, combatBlend) - pos);
             float fov = Mathf.Lerp(CloseCamFov, FightCamFov, combatBlend);
-            if (TpsActive) { TpsPose(out pos, out rot); fov = TpsFov; } // the battle arenas: over foi's shoulder
+            if (TpsActive && !IsoView) { TpsPose(out pos, out rot); fov = TpsFov; } // the battle arenas: over foi's shoulder
             if (introPending) { introPending = false; introStart = Time.time; }
             if (IntroRunning)
             {

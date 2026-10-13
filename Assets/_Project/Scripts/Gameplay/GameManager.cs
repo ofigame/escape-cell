@@ -161,7 +161,7 @@ namespace SquashBot.Gameplay
             if (Debug.isDebugBuild) gameObject.AddComponent<DevStats>(); // test builds: FPS and memory in the corner
             QualitySettings.vSyncCount = 0;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
-            LockPortrait();
+            LockLandscape();
             if (levelSet == null || levelSet.levels.Count == 0) levelSet = LevelSet.LoadOrDefault();
 
             cameraRig = CameraRig.Create(SaveData.PerspectiveView ? ViewMode.Perspective : ViewMode.Isometric);
@@ -244,14 +244,17 @@ namespace SquashBot.Gameplay
             ui = UIController.Create(LevelCount);
             ui.PlayPressed += () =>
             {
-                if (PendingRoad >= 0) ResumeRoad(PendingRoad); // a level won but its road not walked yet
-                else ShowMap();
+                if (PendingRoad >= 0) PlayerPrefs.DeleteKey(RoadLevelKey); // (the old roads between floors are the journey's now)
+                ContinueJourney(); // PLAY: on with the journey from where it stands
             };
             ui.LevelChosen += ShowPrelevel;
+            // The garage: a drag turns foi round (back to facing ahead when the garage closes).
+            ui.Garage.Turned += dx => robot.transform.Rotate(0f, -dx * 540f, 0f, Space.World);
             ui.RetryPressed += () =>
             {
                 // The battle arena mode starts again at the foot of its road (new chests, new allies).
-                if (arenaMode) { ui.HidePause(); Time.timeScale = 1f; ExitTps(); StartTrail(TrailResumeTarget()); }
+                if (journey) { ui.HidePause(); Time.timeScale = 1f; ExitTps(); ContinueJourney(); } // the part foi was on, from its start
+                else if (arenaMode) { ui.HidePause(); Time.timeScale = 1f; ExitTps(); StartTrail(TrailResumeTarget()); }
                 else ShowPrelevel(levelIndex);
             };
             ui.PrelevelPlay += (index, boosts) =>
@@ -295,6 +298,10 @@ namespace SquashBot.Gameplay
             ui.DoublePressed += WatchAdToDouble;
             ui.StoryPressed += world => PlayStory(world, world * LevelCatalog.LevelsPerWorld, () => ShowMap());
             ui.MapPressed += () => ShowMap();
+            ui.WorldMap.Back += ShowMenu;
+            ui.WorldMap.Continue += () => { ui.WorldMap.Hide(); ContinueJourney(); };
+            ui.WorldMap.LevelPicked += ShowPrelevel; // a floor replayed alone, for its stars
+            ui.WorldMap.ArenaPicked += w => { journey = false; ui.WorldMap.Hide(); StartArena(w); };
             ui.MenuPressed += ShowMenu;
             ui.PausePressed += Pause;
             ui.BagPressed += OpenBag;
@@ -480,6 +487,9 @@ namespace SquashBot.Gameplay
 
         private void ShowMenu()
         {
+            robot.transform.rotation = Quaternion.identity; // turned round in the garage: facing ahead again
+            if (journey) SegmentLost(); // left mid-way: that part starts again without the allies won in it
+            else if (arenaMode) KeepAllies(0); // left the battle arena: the allies are gone (they never come back with a new start)
             ExitTps();
             AudioManager.PlayMusic(MusicTheme.Menu);
             AudioManager.SetTension(0f);
@@ -487,8 +497,12 @@ namespace SquashBot.Gameplay
             ResetRun();
             State = GameState.Menu;
             ShowBackdrop(NextLevel);
-            ui.ShowMenu(NextLevel, SaveData.Coins, LevelCatalog.WorldName(NextLevel),
-                PendingRoad >= 0 ? Loc.T("menu.roadPending") : MissionText(levelSet.levels[NextLevel]));
+            // The menu shows where the journey stands: on the road to a floor, on a floor, or on the way to an arena.
+            int jl = JourneyLevel;
+            ui.ShowMenu(jl, SaveData.Coins, LevelCatalog.WorldName(jl),
+                JourneyPhase == JPhase.Road ? Loc.F("journey.toLevel", jl + 1)
+                : JourneyPhase == JPhase.Level ? MissionText(levelSet.levels[jl])
+                : Loc.F("trail.title", Loc.T(BattleArenas.NameKey(LevelCatalog.WorldOf(jl)))));
             if (lobby == null) lobby = LobbyStage.Create(t => robot.BuildLookalike(t));
             lobby.Open(WorldTheme.ForWorld(LevelCatalog.WorldOf(NextLevel)));
             // The robot is the star of the menu: crisp, close and in the middle of the screen.
@@ -524,9 +538,15 @@ namespace SquashBot.Gameplay
             AudioManager.SetTension(0f);
             AudioManager.SetDanger(0f);
             if (State != GameState.Menu) ShowBackdrop(NextLevel);
+            ExitTps();
             ResetRun();
             State = GameState.Map;
-            ui.ShowMap(SaveData.UnlockedLevel, SaveData.Coins, NextLevel, animateFrom);
+            // The world map from above, the pin where the journey stands.
+            int jl = JourneyLevel, jw = LevelCatalog.WorldOf(jl);
+            string pinText = JourneyPhase == JPhase.Road ? Loc.F("wmap.pinRoad", jw + 1, jl + 1)
+                : JourneyPhase == JPhase.Level ? Loc.F("wmap.pinLevel", jw + 1, jl + 1)
+                : Loc.F("wmap.pinArena", jw + 1);
+            ui.ShowWorldMap(Mathf.Max(jw, LevelCatalog.WorldOf(SaveData.UnlockedLevel)), jw, pinText, SaveData.Coins);
             cameraRig.SetMenuFocus(false); // the 3D map has its own camera; the blur is for the menus over the floor
             cameraRig.Showcase(null, 0f);
         }
@@ -564,7 +584,7 @@ namespace SquashBot.Gameplay
         {
             if (State != GameState.Menu) ShowMenu();
             ui.ShowGarage(LevelCatalog.WorldOf(SaveData.UnlockedLevel));
-            cameraRig.Showcase(robot.transform, 1f, 1.9f, 0.55f); // the whole robot, above the paint panel
+            cameraRig.Showcase(robot.transform, 1f, 1.9f, 0.5f, 0.42f); // the whole robot, left of the paint panel
             robot.FaceCamera();
             cameraRig.SetMenuFocus(false);
         }
@@ -579,6 +599,7 @@ namespace SquashBot.Gameplay
                 return;
             }
             ui.DailyBonus.Hide();
+            journey = false;
             bonusRun = true;
             arenaRun = false;
             dailyRun = true;
@@ -628,7 +649,7 @@ namespace SquashBot.Gameplay
         {
             // A new floor opens with its story scene (once; the map banner replays it).
             int floor = LevelCatalog.WorldOf(index);
-            if (index % LevelCatalog.LevelsPerWorld == 0 && !Story.Seen(floor))
+            if (false && index % LevelCatalog.LevelsPerWorld == 0 && !Story.Seen(floor)) // (the story scenes are gone: the journey tells it)
             {
                 PlayStory(floor, index, () => StartLevel(index, boosts));
                 return;
@@ -649,7 +670,9 @@ namespace SquashBot.Gameplay
             dailyRun = false;
             levelIndex = Mathf.Clamp(index, 0, LevelCount - 1);
             level = levelSet.levels[levelIndex].Clone();
+            journey = false; // a floor replayed from the map: alone, no allies
             bool assisted = ApplyAssist(level);
+            ApplyCurve(level, 0);
             BeginRun();
 
             // Boosts picked on the before-level card are spent now (never on boss or marathon levels).
@@ -689,6 +712,7 @@ namespace SquashBot.Gameplay
         /// <summary>A bonus treasure vault: free (no life), nothing to lose, themed like the world the player is in.</summary>
         private void StartBonus()
         {
+            journey = false;
             if (Progress.BonusTokens <= 0) return;
             Progress.BonusTokens--;
             bonusRun = true;
@@ -773,6 +797,8 @@ namespace SquashBot.Gameplay
         private void BeginRun()
         {
             arenaMode = arenaRun;
+            robot.transform.rotation = Quaternion.identity;
+            if (!trailRun) ClearTrail(); // never a road left standing under another floor
             ClearGunPosts();
             ResetRun();
             // A fresh floor: let go of the last floor's materials and meshes (built from code, they pile up otherwise
@@ -990,8 +1016,9 @@ namespace SquashBot.Gameplay
                 ui.HideNoLives();
                 AudioManager.PlaySfx(Sfx.Shield);
                 // Jump straight into the level the player wanted to play.
-                if (pendingLevel >= 0) StartLevel(pendingLevel);
+                if (pendingLevel >= 0) { if (pendingJourney) StartJourneyLevel(pendingLevel); else StartLevel(pendingLevel); }
                 pendingLevel = -1;
+                pendingJourney = false;
             });
         }
 
@@ -1314,17 +1341,26 @@ namespace SquashBot.Gameplay
             Time.timeScale = Mathf.Min(slowMoLeft > 0f ? SlowMoScale : 1f, toolSlowLeft > 0f && State == GameState.Playing ? Tools.SlowScale : 1f);
             if (hitStopLeft > 0f && State == GameState.Playing) Time.timeScale = Mathf.Min(Time.timeScale, 0.08f); // the hit-stop of a knock-out
 
-            if (State != GameState.Playing) return;
+            if (State != GameState.Playing) { if (tpsOn && !arenaRun) ExitTps(); return; } // a floor's controls go with its fight
 
             if (roadPhase == RoadPhase.Walk)
             {
                 AudioManager.SetDanger(0f);
+                if (journeyExit)
+                {
+                    // The journey: out of the won floor with the same controls and view (the exit tile is the way on).
+                    if (!tpsOn) EnterTps();
+                    TpsCommand();
+                    return;
+                }
+                if (tpsOn && !arenaRun) ExitTps();
                 UpdateRoadWalk();
                 return;
             }
 
             if (runner.Active)
             {
+                if (tpsOn && !arenaRun) ExitTps();
                 ui.ShowStick(false, default, default); // the tunnels have no stick
                 // The tunnel runs itself (input, robot, camera); just keep the HUD current.
                 AudioManager.SetTension(0.55f + 0.4f * runner.Progress);
@@ -1358,6 +1394,14 @@ namespace SquashBot.Gameplay
             input.CircleEnabled = level.mission == MissionType.Hunt && roadPhase == RoadPhase.None;
             // The floors walk freely too (a floating stick under the finger), like the arenas.
             input.StickMode = level.mission == MissionType.Hunt && roadPhase == RoadPhase.None && !tpsOn && !defenseEditing;
+            // The floors play with the arenas' controls while foi fights; the road after a win and the monster duel keep their own.
+            if (!arenaRun && level.mission == MissionType.Hunt)
+            {
+                bool want = roadPhase == RoadPhase.None && robot.IsAlive;
+                if (want && !tpsOn) EnterTps();
+                else if (!want && tpsOn) ExitTps();
+                if (tpsOn) tps.Show(!ArenaActive);
+            }
             var command = ArenaActive ? default(InputCommand) : tpsOn ? TpsCommand() : input.Poll(robot.transform.position);
             command = GlassCellGate(command); // foi starts each floor in its glass cell
             UpdateHover(command);
@@ -1382,7 +1426,7 @@ namespace SquashBot.Gameplay
             ui.Skills.Set(SkillIcon.Hammer, charged ? 1f : 0f, -1f);
 
             ui.SetRescues(RescueEnabled, rescues, coinsTowardRescue / (float)CoinsPerRescue);
-            ui.SetHover(HoverEnabled, hoverCooldown);
+            ui.SetHover(HoverEnabled && !tpsOn, hoverCooldown); // (the stick and look controls have no hold-to-fly)
             UpdateJourney(Time.deltaTime);
             UpdateSkills(Time.deltaTime);
             UpdateHealth(Time.deltaTime);
@@ -2029,6 +2073,7 @@ namespace SquashBot.Gameplay
 
             // Stars: how well the level went.
             int stars = StarRules.Evaluate(starGoals, coinsThisRun, elapsed);
+            if (journey) { JourneyLevelWon(stars); return; } // the journey: banked now, then out onto the next road (or into the tunnel)
 
             // Every level leads on to the next by a road, and the level only counts as beaten when the robot arrives:
             // until then it is saved as "on the road", so quitting there brings the player back onto the road.
@@ -2105,15 +2150,16 @@ namespace SquashBot.Gameplay
         /// <summary>The last run was the battle arena mode (a road or an arena).</summary>
         private bool arenaMode;
 
-        private void ShowBonusResult(string subtitle = null)
+        /// <param name="lost">A road or an arena of the journey lost: the card says so and offers it again.</param>
+        private void ShowBonusResult(string subtitle = null, bool lost = false)
         {
             StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
             {
-                won = true,
-                bonusRound = true,
-                arena = arenaMode, // the battle arena mode: again or the menu, no next floor and no map
+                won = !lost,
+                bonusRound = !lost,
+                arena = arenaMode || journey, // the battle arena mode: again or the menu, no next floor and no map
                 canDouble = true,
-                hasNext = !arenaMode,
+                hasNext = !arenaMode && !journey,
                 subtitle = subtitle ?? Loc.T("result.bonusSub"),
                 coins = Earned,
                 bonusAvailable = Progress.BonusTokens > 0,
@@ -2124,6 +2170,7 @@ namespace SquashBot.Gameplay
 
         private void Lose(string reason)
         {
+            if (journey && roadPhase == RoadPhase.None) SegmentLost(); // the allies won in this part are lost
             EndArenaFight(false);
             if (roadPhase != RoadPhase.None) return; // already won, on the way to the next floor
             if (MarathonRespawn()) return; // a marathon past its checkpoint goes on from there
@@ -2153,6 +2200,7 @@ namespace SquashBot.Gameplay
             StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
             {
                 won = false,
+                arena = journey, // the journey: again (from the stairs) or the menu, no map
                 note = Story.LoseQuip(),
                 canContinue = !continued && Ads.Rewarded.IsReady,
                 canBuyContinue = !continued && SaveData.Coins - Earned >= ContinuePrice,
@@ -2550,7 +2598,7 @@ namespace SquashBot.Gameplay
         private static int PendingRoad => PlayerPrefs.GetInt(RoadLevelKey, -1);
 
         /// <summary>A road follows every level except bonus rounds and the very last level.</summary>
-        private bool RoadAhead => !bonusRun && (levelIndex + 1 < LevelCount || level.final);
+        private bool RoadAhead => false; // a floor replayed from the map ends with its card (the journey has its own roads)
 
         /// <summary>
         /// Back onto the road of a level won earlier (the game was closed or left on the way): the platform stands
@@ -2600,7 +2648,7 @@ namespace SquashBot.Gameplay
             roadExit = PickExit(out var outward);
             var origin = GridView.ToWorld(roadExit) + new Vector3(outward.x, 0f, outward.y);
             float heading = outward.y > 0 ? 0f : 90f;
-            runner.PrepareRoad(levelIndex * 7919 + 13, origin, heading, levelIndex, LevelCatalog.WorldOf(levelIndex + 1));
+            if (!journeyExit) runner.PrepareRoad(levelIndex * 7919 + 13, origin, heading, levelIndex, LevelCatalog.WorldOf(levelIndex + 1));
 
             roadBeacon = new GameObject("RoadExit");
             roadBeacon.transform.position = GridView.ToWorld(roadExit) + Vector3.up * GridView.SurfaceY;
@@ -2625,7 +2673,8 @@ namespace SquashBot.Gameplay
             ui.SetShield(0f, 1f);
             ui.SetCombo(1, 0f);
             cameraRig.SetMenuFocus(false);
-            ui.ShowIntro(Loc.T("road.title"), Loc.T("road.go"));
+            if (journeyExit) ui.ShowIntro(Loc.T("journey.exitTitle"), Loc.T("journey.exitText"));
+            else ui.ShowIntro(Loc.T("road.title"), Loc.T("road.go"));
             RefreshHud();
             // The player walks the robot there; the road only starts when it steps onto the exit.
         }
@@ -2723,6 +2772,7 @@ namespace SquashBot.Gameplay
         private void TakeOverRoad()
         {
             if (roadPhase != RoadPhase.Walk) return;
+            if (journeyExit) { JourneyOut(); return; } // the journey: out onto the next road, no tunnel
             roadPhase = RoadPhase.Run;
             if (roadBeacon != null) Destroy(roadBeacon);
             ClearRoadGuide();
@@ -2755,6 +2805,15 @@ namespace SquashBot.Gameplay
         {
             if (roadPhase != RoadPhase.Run) return;
             roadPhase = RoadPhase.None;
+            if (journeyTunnel)
+            {
+                // Through vanG's tunnel at a world's end: on to the short road to the world's arena.
+                journeyTunnel = false;
+                DropBip();
+                SaveData.Coins += runner.Coins;
+                StartJourneyRoad(levelIndex, toGate: true);
+                return;
+            }
             State = GameState.Result;
             DropBip();
             SaveData.Coins += runner.Coins;
@@ -3104,6 +3163,7 @@ namespace SquashBot.Gameplay
 
         private void StartMissionPreview()
         {
+            if (journey) return; // up the stairs and straight into the fight: no briefing, no fly-over
             // Bonus runs start at once; a retry of the level just briefed only gets the quick look at the goal.
             briefedNow = false;
             if (!bonusRun && levelIndex != lastBriefed)

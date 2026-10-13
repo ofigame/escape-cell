@@ -29,6 +29,15 @@ namespace SquashBot.Gameplay
 
         private bool TpsActive => tpsOn && State == GameState.Playing;
 
+        /// <summary>
+        /// The floors are played with the arenas' controls (left thumb moves, right thumb looks and strikes), seen either
+        /// over foi's shoulder exactly as in the arenas or from above as before: a button switches, the choice is kept.
+        /// </summary>
+        private const string LevelViewKey = "sb_level_view";
+        private static bool LevelIso => PlayerPrefs.GetInt(LevelViewKey, 0) == 1;
+        /// <summary>Seen from above right now (a floor in the overhead view).</summary>
+        private bool IsoView => tpsOn && !arenaRun && LevelIso;
+
         private void EnterTps()
         {
             if (tps == null)
@@ -37,15 +46,23 @@ namespace SquashBot.Gameplay
                 tps.Strike += () => tpsStrike = true;
                 tps.Spin += () => tpsSpin = true;
                 tps.Jump += () => tpsJump = true;
+                tps.CameraToggle += () =>
+                {
+                    // The floors: over the shoulder or from above, kept for next time.
+                    PlayerPrefs.SetInt(LevelViewKey, LevelIso ? 0 : 1);
+                    tps.SetViewSwitch(!arenaRun, LevelIso ? "3D" : "TPS");
+                    if (!LevelIso) { tpsYaw = 45f; tpsPitch = 27f; }
+                    AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.1f);
+                };
             }
             tpsOn = true;
             tpsStrike = tpsSpin = tpsJump = false;
             tpsYaw = 45f; // the usual view's way (looking along +x +z)
             tpsPitch = 27f;
             tps.Show(true);
-            tps.Minimap.Build(grid, BattleArenas.LastBuildings, BattleArenas.LastPosts);
+            tps.Minimap.Build(grid, arenaRun ? BattleArenas.LastBuildings : new System.Collections.Generic.List<BattleArenas.Building>(), arenaRun ? BattleArenas.LastPosts : new System.Collections.Generic.List<BattleArenas.Post>());
+            tps.SetViewSwitch(!arenaRun, LevelIso ? "3D" : "TPS");
             robot.WalkStyle = true; // the arenas: walking and running, not hopping
-            Screen.orientation = ScreenOrientation.LandscapeLeft;
         }
 
         private void ExitTps()
@@ -57,17 +74,16 @@ namespace SquashBot.Gameplay
             ClearTrail();
             trailRun = false;
             if (tps != null) tps.Show(false);
-            Screen.orientation = ScreenOrientation.Portrait;
         }
 
-        /// <summary>Portrait everywhere but the arenas: the app allows landscape (for them), the game holds portrait.</summary>
-        private static void LockPortrait()
+        /// <summary>The whole game is played sideways: either landscape way up, never upright.</summary>
+        private static void LockLandscape()
         {
-            Screen.autorotateToPortrait = true;
+            Screen.autorotateToPortrait = false;
             Screen.autorotateToPortraitUpsideDown = false;
-            Screen.autorotateToLandscapeLeft = false;
-            Screen.autorotateToLandscapeRight = false;
-            Screen.orientation = ScreenOrientation.Portrait;
+            Screen.autorotateToLandscapeLeft = true;
+            Screen.autorotateToLandscapeRight = true;
+            Screen.orientation = ScreenOrientation.AutoRotation;
         }
 
         /// <summary>A tile foi may walk onto in the arenas: solid floor, no robot or crate on it, no fire.</summary>
@@ -87,7 +103,13 @@ namespace SquashBot.Gameplay
             tps.Minimap.Tick(dt, robot.transform.position, Gunning ? gunYaw : tpsYaw, mapEnemies);
             var look = tps.TakeLook();
             bool onGun = manned != null;
-            if (!onGun)
+            if (IsoView)
+            {
+                // From above: the stick goes the way the camera looks; the right thumb only strikes.
+                var cf = cameraRig.Cam.transform.forward;
+                tpsYaw = Mathf.Atan2(cf.x, cf.z) * Mathf.Rad2Deg;
+            }
+            else if (!onGun)
             {
                 tpsYaw += look.x * 260f;
                 tpsPitch = Mathf.Clamp(tpsPitch - look.y * 140f, 6f, 55f);
@@ -141,7 +163,7 @@ namespace SquashBot.Gameplay
                 float push = move.magnitude;
                 float speed = push < 0.25f ? 0f : Mathf.Lerp(2.2f, 5.6f, Mathf.InverseLerp(0.25f, 1f, push));
                 var vel = want.sqrMagnitude > 0.0001f ? want.normalized * speed : Vector3.zero;
-                robot.FreeStep(vel, Time.deltaTime, FreeWalkable);
+                robot.FreeStep(vel, Time.deltaTime, arenaRun ? (System.Func<GridPos, bool>)FreeWalkable : FloorWalkable);
                 return command;
             }
             if (move.magnitude < 0.3f) return command;
@@ -211,7 +233,7 @@ namespace SquashBot.Gameplay
             if (gun == null || hunt.BestInReach(robot.Position, StrikeReach, TpsForward, 0.2f, out _))
             {
                 ShowHeld(weapon ?? Armory.Equipped);
-                KeyStrike(TpsForward);
+                if (IsoView) KeyStrike(); else KeyStrike(TpsForward); // from above: the way foi faces
                 return;
             }
             ShowHeld(gun);
@@ -247,12 +269,16 @@ namespace SquashBot.Gameplay
             // A building of the arena city between foi and the camera: the camera comes in in front of it (quickly), and
             // eases back out once the view is clear, so foi is never hidden behind a wall.
             float full = Vector3.Distance(focus, pos), allowed = full;
-            if (SquashBot.Visual.ArenaDecor.BuildingTop.Count > 0)
+            // On the floors the ramparts round the edge do the same: the camera never goes out past the floor's edge low down.
+            bool city = arenaRun && SquashBot.Visual.ArenaDecor.BuildingTop.Count > 0;
+            if (city || !arenaRun)
                 for (float d = 0.6f; d <= full; d += 0.25f)
                 {
                     var p = Vector3.Lerp(focus, pos, d / full);
                     var tile = new GridPos(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.z));
-                    if (SquashBot.Visual.ArenaDecor.BuildingTop.TryGetValue(tile, out float top) && p.y < top) { allowed = Mathf.Max(0.9f, d - 0.5f); break; }
+                    bool blocked = city ? SquashBot.Visual.ArenaDecor.BuildingTop.TryGetValue(tile, out float top) && p.y < top
+                        : grid != null && !grid.Exists(tile) && p.y < GridView.ToWorld(robot.Position).y + 2.6f;
+                    if (blocked) { allowed = Mathf.Max(0.9f, d - 0.5f); break; }
                 }
             float dt = Time.unscaledDeltaTime;
             tpsCamDist = allowed < tpsCamDist ? Mathf.Lerp(tpsCamDist, allowed, 1f - Mathf.Exp(-18f * dt)) : Mathf.MoveTowards(tpsCamDist, allowed, dt * 3f);

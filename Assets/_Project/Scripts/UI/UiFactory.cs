@@ -153,8 +153,7 @@ namespace SquashBot.UI
 
             scaler = go.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1080f, 1920f);
-            scaler.matchWidthOrHeight = MatchFor(Screen.width, Screen.height);
+            Fit(scaler);
 
             go.AddComponent<GraphicRaycaster>();
             EnsureEventSystem();
@@ -218,9 +217,18 @@ namespace SquashBot.UI
         }
 
         /// <summary>A rounded glass card with a soft drop shadow and a faint rim.</summary>
+        /// <summary>The tallest a centred card stands on the 1080-unit-tall landscape screen (taller ones are scaled down).</summary>
+        public const float MaxCardHeight = 900f;
+
         public static RectTransform Card(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size)
         {
             var root = Box(name, parent, anchor, position, size);
+            // The game is played sideways (1080 units tall): a tall centred card shrinks to fit, a little above the banner.
+            if (anchor == new Vector2(0.5f, 0.5f) && size.y > MaxCardHeight)
+            {
+                root.localScale = Vector3.one * (MaxCardHeight / size.y);
+                root.anchoredPosition += new Vector2(0f, 50f);
+            }
 
             var shadow = Rect("Shadow", root, Vector2.zero, Vector2.one, new Vector2(-40f, -60f), new Vector2(40f, 24f));
             Fill(shadow, new Color(0f, 0f, 0.04f, 0.45f), UiSprites.Shadow, 0.6f).raycastTarget = false;

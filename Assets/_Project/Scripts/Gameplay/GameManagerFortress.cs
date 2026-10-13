@@ -116,7 +116,7 @@ namespace SquashBot.Gameplay
             if (stage >= 1)
                 SkyTraffic.Create(fortressFloor, () => robot != null ? robot.transform.position : Vector3.zero,
                     Color.Lerp(new Color(1f, 0.55f, 0.22f), WorldTheme.Current.accent, 0.25f), stage == 2 ? 5 : 3, levelIndex * 17 + 3);
-            glassCell = GlassCell.Create(GridView.ToWorld(robot.Position) + Vector3.up * GridView.SurfaceY, Mathf.Max(robot.transform.localScale.x, robot.transform.localScale.y) * 0.62f);
+            if (!journey) glassCell = GlassCell.Create(GridView.ToWorld(robot.Position) + Vector3.up * GridView.SurfaceY, Mathf.Max(robot.transform.localScale.x, robot.transform.localScale.y) * 0.62f);
             glassSince = -1f;
             foreach (var p in grid.LavaTiles)
             {
