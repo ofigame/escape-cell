@@ -1,0 +1,13 @@
+# R8 keep rules for the Play bundle (minified). The ad SDKs and the Unity bridge are called by name from C# (JNI)
+# and through reflection, so their classes keep their names.
+-keep class com.unity3d.player.** { *; }
+-keep class com.google.unity.ads.** { *; }
+-keep class com.google.android.gms.ads.** { *; }
+-keep class com.google.android.ump.** { *; }
+-keep class com.google.ads.mediation.** { *; }
+-keep class com.unity3d.ads.** { *; }
+-keep class com.unity3d.services.** { *; }
+-keepattributes *Annotation*, Signature, InnerClasses, EnclosingMethod
+-dontwarn com.google.android.gms.**
+-dontwarn com.google.ads.**
+-dontwarn com.unity3d.**

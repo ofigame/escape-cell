@@ -10,24 +10,6 @@
       },
       "url": "https://package.openupm.com"
     },
-    "com.google.ads.mobile.mediation.applovin": {
-      "version": "8.7.7",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.google.ads.mobile": "11.0.0"
-      },
-      "url": "https://package.openupm.com"
-    },
-    "com.google.ads.mobile.mediation.liftoffmonetize": {
-      "version": "5.7.9",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.google.ads.mobile": "11.0.0"
-      },
-      "url": "https://package.openupm.com"
-    },
     "com.google.ads.mobile.mediation.unity": {
       "version": "3.21.1",
       "depth": 0,

@@ -39,6 +39,13 @@ namespace SquashBot.Data
             PlayerPrefs.Save();
         }
 
+        /// <summary>Forgets the challenge record and the name (the online profile was deleted).</summary>
+        public static void ResetLocal()
+        {
+            foreach (var k in new[] { NameKey, TrophyKey, RankKey, WinsKey, PlayedKey, ChosenKey }) PlayerPrefs.DeleteKey(k);
+            PlayerPrefs.Save();
+        }
+
         /// <summary>foi's strength in the duel for a player who has reached <paramref name="world"/>.</summary>
         public static int FoiHpFor(int world) => 18 + world * 3;
         public static float FoiHitFor(int world) => Mathf.Lerp(0.09f, 0.14f, world / 24f);

@@ -153,6 +153,23 @@ namespace SquashBot.Data
             done(list?.items ?? Array.Empty<Attack>());
         }
 
+        /// <summary>
+        /// Deletes the online profile (name, army, every challenge) from the server and forgets it here, along with the
+        /// challenge record. Reports whether it is gone (false: no network, nothing changed).
+        /// </summary>
+        public static IEnumerator DeleteMe(Action<bool> done)
+        {
+            if (!Registered) { Challenge.ResetLocal(); done(true); yield break; }
+            long code = 0;
+            yield return Send("DELETE", "/me", null, true, (c, _) => code = c);
+            if (code != 200 && code != 401) { done(false); yield break; } // 401: already gone on the server
+            PlayerPrefs.DeleteKey(IdKey);
+            PlayerPrefs.DeleteKey(SecretKey);
+            PlayerPrefs.DeleteKey(NameSyncedKey);
+            Challenge.ResetLocal();
+            done(true);
+        }
+
         /// <summary>The player's record on the server. Null: no network.</summary>
         public static IEnumerator Me(Action<Profile> done)
         {

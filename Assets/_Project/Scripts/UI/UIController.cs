@@ -154,6 +154,10 @@ namespace SquashBot.UI
         private RectTransform rescuePill, hoverPill;
         private RectTransform healthPill;
         private GameObject privacyButton;
+        // "Delete my online profile": the first tap asks, the second deletes.
+        private Button deleteOnlineButton;
+        private TextMeshProUGUI deleteOnlineText;
+        private bool deleteOnlineAsked;
         private Image healthFill;
         private TextMeshProUGUI healthText;
         private float healthShown = 1f;
@@ -860,15 +864,52 @@ namespace SquashBot.UI
             }
 
             // Where the ad consent form applies, the player can change their answer here.
-            privacyButton = UiFactory.MakeButton(card, Loc.T("settings.privacy"), Kind.Secondary, Bottom, new Vector2(0f, 206f), new Vector2(560f, 74f),
+            // Under the last row: deleting the online profile, then (where the consent form applies) the ad privacy choice.
+            float underRows = -210f - rows.Length * 140f + 30f;
+            privacyButton = UiFactory.MakeButton(card, Loc.T("settings.privacy"), Kind.Secondary, Top, new Vector2(0f, underRows - 90f), new Vector2(560f, 74f),
                 Monetization.AdMob.ShowPrivacyOptions, 34f).gameObject;
+            deleteOnlineButton = UiFactory.MakeButton(card, Loc.T("settings.deleteOnline"), Kind.Secondary, Top, new Vector2(0f, underRows), new Vector2(620f, 74f),
+                DeleteOnlinePressed, 30f);
+            deleteOnlineText = deleteOnlineButton.GetComponentInChildren<TextMeshProUGUI>();
+            deleteOnlineText.enableAutoSizing = true;
+            deleteOnlineText.fontSizeMin = 18f;
+            deleteOnlineText.fontSizeMax = 30f;
             UiFactory.MakeButton(card, Loc.T("btn.close"), Kind.Primary, Bottom, new Vector2(0f, 50f), new Vector2(560f, 150f), HideSettings, 64f);
             RefreshSettings();
+        }
+
+        private void DeleteOnlinePressed()
+        {
+            if (!deleteOnlineAsked)
+            {
+                deleteOnlineAsked = true;
+                deleteOnlineText.text = Loc.T("settings.deleteSure");
+                deleteOnlineText.color = new Color(1f, 0.55f, 0.6f);
+                return;
+            }
+            deleteOnlineButton.interactable = false;
+            deleteOnlineText.text = Loc.T("ch.name.wait");
+            StartCoroutine(FoiNet.DeleteMe(ok =>
+            {
+                deleteOnlineAsked = false;
+                deleteOnlineButton.interactable = !ok;
+                deleteOnlineText.color = Color.white;
+                deleteOnlineText.text = Loc.T(ok ? "settings.deleted" : "settings.deleteFail");
+            }));
         }
 
         public void RefreshSettings()
         {
             if (privacyButton != null) privacyButton.SetActive(Monetization.AdMob.PrivacyOptionsRequired);
+            if (deleteOnlineButton != null)
+            {
+                // Only once there is something online to delete.
+                deleteOnlineButton.gameObject.SetActive(FoiNet.Registered || Challenge.NameChosen);
+                deleteOnlineButton.interactable = true;
+                deleteOnlineAsked = false;
+                deleteOnlineText.text = Loc.T("settings.deleteOnline");
+                deleteOnlineText.color = Color.white;
+            }
             SetSetting(SettingKind.Sound, SaveData.Sound);
             SetSetting(SettingKind.Music, SaveData.Music);
             SetSetting(SettingKind.Vibration, SaveData.Vibration);

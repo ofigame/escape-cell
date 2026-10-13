@@ -6,7 +6,7 @@ using UnityEngine;
 namespace SquashBot.Monetization
 {
     /// <summary>
-    /// Google AdMob (with mediation: AppLovin, Unity Ads and Liftoff bid for the same slots through the AdMob console).
+    /// Google AdMob (with Unity Ads mediated through the AdMob console).
     /// Start-up order: the consent form (UMP: GDPR and similar, shown only where required) → the SDK → the first ads
     /// are loaded. Only on phones; the editor and the Windows build keep the test stand-ins.
     /// </summary>

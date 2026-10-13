@@ -216,6 +216,9 @@ namespace SquashBot.EditorTools
                 PlayerSettings.bundleVersion = "1.0";
                 PlayerSettings.Android.bundleVersionCode = code;
                 EditorUserBuildSettings.buildAppBundle = true;
+                // R8 shrinks the Java side (Play flags unoptimised DEX); Plugins/Android/proguard-user.txt keeps what C# calls.
+                PlayerSettings.Android.minifyRelease = true;
+                SetProjectFlag("useCustomProguardFile", true);
                 // The native debug symbols beside the bundle (Play reads crashes with them).
                 EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Public;
                 ResolveAndroidDependencies();
@@ -246,7 +249,21 @@ namespace SquashBot.EditorTools
                 PlayerSettings.Android.keystorePass = PlayerSettings.Android.keyaliasPass = "";
                 EditorUserBuildSettings.buildAppBundle = false;
                 EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Disabled;
+                PlayerSettings.Android.minifyRelease = false;
+                SetProjectFlag("useCustomProguardFile", false);
             }
+        }
+
+        /// <summary>Sets a Player Settings switch that has no public API (by its serialized name).</summary>
+        private static void SetProjectFlag(string name, bool on)
+        {
+            var assets = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/ProjectSettings.asset");
+            if (assets.Length == 0) return;
+            var so = new SerializedObject(assets[0]);
+            var p = so.FindProperty(name);
+            if (p == null) { Debug.LogWarning("[SquashBot] No player setting " + name); return; }
+            p.boolValue = on;
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         /// <summary>
