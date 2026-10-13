@@ -134,7 +134,9 @@ namespace SquashBot.Gameplay
             /// <summary>A press over one lane that slams down and rises again: pass while it is up, or change lanes.</summary>
             Crusher,
             /// <summary>A spinning blade sliding along the floor from lane to lane: jump it or keep out of its way.</summary>
-            Saw
+            Saw,
+            /// <summary>A tall, long ramp across every lane: a long, high flight over a wide gap.</summary>
+            BigRamp
         }
 
         private class Obstacle
@@ -450,6 +452,20 @@ namespace SquashBot.Gameplay
                 while ((pattern == last1 || pattern == last2) && ++tries < 8);
                 last2 = last1;
                 last1 = pattern;
+                if (kinds > 4 && rng.Next(6) == 0)
+                {
+                    // Now and then a big ramp (user asked): up it at full speed and fly high and long over a wide gap,
+                    // through a tall arc of coins.
+                    obstaclePlan.Add((ObstacleKind.BigRamp, 1, row));
+                    for (int l = 0; l < Lanes; l++) Hole(l, row + 4, 8);
+                    for (int i = 0; i < 10; i++)
+                    {
+                        float t = i / 9f;
+                        coinPlan.Add((1, row + 3f + t * 10f, 1.4f + Mathf.Sin(t * Mathf.PI) * 4.4f));
+                    }
+                    row += 16;
+                    continue;
+                }
                 switch (pattern)
                 {
                     case 0: // a line of coins in one lane
@@ -993,6 +1009,22 @@ namespace SquashBot.Gameplay
             go.SetParent(transform, false);
             var o = new Obstacle { kind = k, lane = l, row = r, go = go, phase = r * 0.7f, landed = true };
             float w = LaneWidth * Lanes;
+            if (k == ObstacleKind.BigRamp)
+            {
+                // A wide ramp rising 1.8 over three rows, rails along its sides, glowing stripes up its face.
+                var face = Shapes.Rounded("Ramp", go, new Vector3(0f, 0.85f, 1.3f), new Vector3(w + 0.3f, 0.22f, 3.3f), 0.06f, padMat).transform;
+                face.localRotation = Quaternion.Euler(-30f, 0f, 0f);
+                for (int i = 0; i < 4; i++)
+                {
+                    var st = Shapes.Rounded("Stripe", go, new Vector3(0f, 0.3f + i * 0.45f, 0.35f + i * 0.78f), new Vector3(w * 0.8f, 0.04f, 0.14f), 0.02f, stripeMat).transform;
+                    st.localRotation = Quaternion.Euler(-30f, 0f, 0f);
+                }
+                foreach (float s in new[] { -1f, 1f })
+                    Shapes.Rounded("Rail", go, new Vector3(s * (w * 0.5f + 0.2f), 0.95f, 1.3f), new Vector3(0.14f, 2.0f, 3.2f), 0.05f, barMat);
+                obstacles.Add(o);
+                PlaceObstacle(o);
+                return;
+            }
             if (IsThemed && ThemedObstacle(o, go, k, l, r, w))
             {
                 obstacles.Add(o);
@@ -1634,6 +1666,19 @@ namespace SquashBot.Gameplay
                         break;
                     case ObstacleKind.Saw:
                         if (dz < 0.45f && dx < 0.55f && y < 0.5f) Hit(o);
+                        break;
+                    case ObstacleKind.BigRamp:
+                        if (o.row + 2.6f - z < 0.6f && z - o.row < 3.2f && y < 0.4f && vy <= 0.01f && z > o.row + 2f)
+                        {
+                            // Off the top of the ramp: the big flight.
+                            Launch(PadVelocity * 1.3f);
+                            fovKick = 1.2f;
+                            holdTime = MaxHold;
+                            fx.Burst(World(x, 1.8f, o.row + 2.6f), new Color(1f, 0.85f, 0.4f), new Color(2.2f, 1.6f, 0.5f), 34, 6f);
+                            AudioManager.PlaySfx(Sfx.Shield, 1f, 1.2f);
+                            Haptics.Medium();
+                            rig.Punch(0.6f);
+                        }
                         break;
                     case ObstacleKind.Pad:
                         if (dz < 0.5f && dx < 0.55f && y < 0.2f && vy <= 0.01f)

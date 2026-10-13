@@ -250,9 +250,11 @@ namespace SquashBot.Gameplay
             ui.LevelChosen += ShowPrelevel;
             ui.TpsSwitchPressed += () =>
             {
-                PlayerPrefs.SetInt(LevelTpsKey, LevelTps ? 0 : 1);
+                levelTps = !levelTps;
                 AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.1f);
             };
+            // The garage: a drag turns foi round, all the way (back to facing ahead when the garage closes).
+            ui.Garage.Turned += dx => robot.transform.Rotate(0f, -dx * 540f, 0f, Space.World);
             ui.RetryPressed += () =>
             {
                 // The battle arena mode starts again at the foot of its road (new chests, new allies).
@@ -485,6 +487,7 @@ namespace SquashBot.Gameplay
 
         private void ShowMenu()
         {
+            robot.transform.rotation = Quaternion.identity; // turned round in the garage: facing ahead again
             if (arenaMode) KeepAllies(0); // left the battle arena: the allies are gone (they never come back with a new start)
             ExitTps();
             AudioManager.PlayMusic(MusicTheme.Menu);
@@ -780,6 +783,8 @@ namespace SquashBot.Gameplay
         private void BeginRun()
         {
             arenaMode = arenaRun;
+            levelTps = false; // every floor starts in the usual view
+            robot.transform.rotation = Quaternion.identity;
             if (!trailRun) ClearTrail(); // never a road left standing under another floor
             ClearGunPosts();
             ResetRun();
@@ -838,6 +843,8 @@ namespace SquashBot.Gameplay
             State = GameState.Playing;
             AudioManager.PlayMusic(LevelMusic());
             ui.ShowHud(bonusRun ? -1 : levelIndex);
+            // The battle arena mode: the arena (or the road to it) and its world, not BONUS.
+            if (arenaRun) ui.SetHudTitle(Loc.T("arena.title") + " · " + Loc.T(WorldTheme.ForWorld(arenaIndex).key));
             StartMissionPreview();
             if (!bonusRun) StartCoroutine(HelperTip());
         }

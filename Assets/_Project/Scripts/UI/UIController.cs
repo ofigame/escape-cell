@@ -43,6 +43,7 @@ namespace SquashBot.UI
         public event Action TpsSwitchPressed;
         private Button tpsSwitch;
         private TextMeshProUGUI tpsSwitchLabel;
+        private RectTransform tpsPhone;
 
         /// <summary>The TPS switch: shown on the floors' fights, reading TPS (to switch to it) or 2D (back).</summary>
         public void SetTpsSwitch(bool on, bool inTps)
@@ -50,6 +51,13 @@ namespace SquashBot.UI
             if (tpsSwitch == null) return;
             if (tpsSwitch.gameObject.activeSelf != on) tpsSwitch.gameObject.SetActive(on);
             if (on) tpsSwitchLabel.text = inTps ? "2D" : "TPS";
+            if (on && tpsPhone != null)
+            {
+                // Turns a quarter, rests, turns back, rests.
+                float k = Mathf.Repeat(Time.unscaledTime / 2.4f, 1f);
+                float a = k < 0.25f ? Mathf.SmoothStep(0f, 1f, k / 0.25f) : k < 0.5f ? 1f : k < 0.75f ? 1f - Mathf.SmoothStep(0f, 1f, (k - 0.5f) / 0.25f) : 0f;
+                tpsPhone.localRotation = Quaternion.Euler(0f, 0f, (inTps ? 90f : 0f) + (inTps ? -90f : 90f) * a);
+            }
         }
         public event Action BombPressed;
         /// <summary>The "watch an ad, fill your health" button was pressed (shown when health runs low).</summary>
@@ -879,8 +887,16 @@ namespace SquashBot.UI
 
             UiFactory.MakeButton(t, "II", Kind.Icon, TopLeft, new Vector2(36f, -36f), new Vector2(124f, 124f), () => PausePressed?.Invoke(), 52f);
             // TPS on the floors: switches to the arenas' over-the-shoulder fight (sideways) and back.
-            tpsSwitch = UiFactory.MakeButton(t, "TPS", Kind.Icon, TopLeft, new Vector2(176f, -44f), new Vector2(150f, 108f), () => TpsSwitchPressed?.Invoke(), 40f);
+            tpsSwitch = UiFactory.MakeButton(t, "TPS", Kind.Icon, TopRight, new Vector2(-36f, -176f), new Vector2(220f, 100f), () => TpsSwitchPressed?.Invoke(), 38f);
             tpsSwitchLabel = tpsSwitch.GetComponentInChildren<TextMeshProUGUI>();
+            tpsSwitchLabel.rectTransform.offsetMin = new Vector2(70f, tpsSwitchLabel.rectTransform.offsetMin.y);
+            // A little phone that keeps turning on its side: "this turns the screen".
+            tpsPhone = UiFactory.Box("Phone", tpsSwitch.transform, new Vector2(0f, 0.5f), new Vector2(52f, 0f), new Vector2(34f, 56f));
+            tpsPhone.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(tpsPhone, Color.white, UiSprites.Ring, 0.25f).raycastTarget = false;
+            var screenDot = UiFactory.Box("Screen", tpsPhone, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(18f, 34f));
+            screenDot.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(screenDot, Palette.UiCyan, UiSprites.Rounded, 6f).raycastTarget = false;
             tpsSwitch.gameObject.SetActive(false);
 
             // The weapon bag (bottom left, above the tool button): opens a pause to pick another weapon.
@@ -919,7 +935,7 @@ namespace SquashBot.UI
             bombButton.gameObject.SetActive(false);
 
             // Low on health: watch an ad and fill the bar (above the bag, pulsing; once a level).
-            adHealButton = UiFactory.Box("AdHeal", t, new Vector2(0f, 0f), new Vector2(40f, 570f), new Vector2(150f, 150f));
+            adHealButton = UiFactory.Box("AdHeal", t, new Vector2(0f, 0f), new Vector2(210f, 480f), new Vector2(150f, 150f)); // beside the bag, not on it
             var healFace = UiFactory.Chunky(adHealButton, UiFactory.StyleOf(new Color(0.25f, 0.78f, 0.55f)), 1f, 0f, UiSprites.Circle);
             HeartIcon(adHealButton, new Vector2(75f, 6f), 84f);
             var healLabel = UiFactory.OutlinedText("Label", adHealButton, new Vector2(0.5f, 0f), new Vector2(0f, -16f), new Vector2(220f, 44f), Loc.T("ad.heal"), 26f, new Color(0.04f, 0.22f, 0.14f));
@@ -943,7 +959,7 @@ namespace SquashBot.UI
                 "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
 
             // Combo (under the coin counter): streak multiplier with a draining timer.
-            comboPill = UiFactory.Pill("Combo", t, TopRight, new Vector2(-36f, -176f), new Vector2(220f, 86f), new Color(0.55f, 0.32f, 0.05f, 0.85f));
+            comboPill = UiFactory.Pill("Combo", t, TopRight, new Vector2(-270f, -36f), new Vector2(220f, 86f), new Color(0.55f, 0.32f, 0.05f, 0.85f)); // left of the coins (the TPS switch is under them)
             comboText = UiFactory.TextBox("Text", comboPill, Top, new Vector2(0f, -6f), new Vector2(200f, 50f), "", 38f, Palette.UiGold);
             UiFactory.Bar(comboPill, Bottom, new Vector2(0f, 10f), new Vector2(170f, 10f), Palette.UiGold, out comboFill);
             comboPill.gameObject.SetActive(false);
@@ -1027,6 +1043,9 @@ namespace SquashBot.UI
             SetBanner(false);
             hudLevel.text = levelIndex < 0 ? Loc.T("level.bonus") : Loc.F("level", levelIndex + 1);
         }
+
+        /// <summary>The HUD's title line set to something else (the battle arena: its name and its world).</summary>
+        public void SetHudTitle(string text) { if (hudLevel != null) hudLevel.text = text; }
 
         public void SetMission(string text, float progress, int coinsThisRun)
         {

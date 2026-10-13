@@ -108,7 +108,7 @@ namespace SquashBot.Gameplay
             float grow = Mathf.Clamp01(World / 12f);
             robot.transform.localScale = Vector3.one;
             foiBaseHeight = FoiHeight(); // the robots and Fifi are sized against foi's plain height
-            hunt.FoiHeight = foiBaseHeight;
+            hunt.FoiHeight = foiBaseHeight * HeroScale.y; // foi as it stands (the hero scale): no robot is shorter than that
             // The hero stands out in the crowd: a little bigger and a little taller than the robots round it.
             robot.transform.localScale = HeroScale;
             Robot.HopScale = 0.9f; // steady and readable: each step follows the finger, a run of steps flows on (0.6 felt too fast)
@@ -191,7 +191,7 @@ namespace SquashBot.Gameplay
                 }
             }
             int fails = PlayerPrefs.GetInt(FailKey(levelIndex), 0);
-            if (fails < 2 || fails % 2 != 0) return;
+            if (fails < 1) return; // after every loss: what would help, from the shop
             bool crushed = reason != null && reason.StartsWith(Loc.T("lose.block"));
             var current = Armory.Equipped;
 

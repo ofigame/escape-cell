@@ -65,7 +65,7 @@ namespace SquashBot.UI
 
             // The shelves as tabs.
             var tabs = UiFactory.Rect("Tabs", root, new Vector2(0f, 1f), Vector2.one, new Vector2(24f, -190f - TabBarH), new Vector2(-24f, -200f));
-            var names = new[] { (Tab.Weapons, "ws.weapons"), (Tab.Tools, "ws.tools"), (Tab.Defense, "ws.defense"), (Tab.Upgrades, "ws.upgrades"), (Tab.Counter, "ws.counter") };
+            var names = new[] { (Tab.Weapons, "ws.weapons"), (Tab.Tools, "ws.tools"), (Tab.Upgrades, "ws.upgrades"), (Tab.Counter, "ws.counter") };
             for (int i = 0; i < names.Length; i++)
             {
                 var (t, key) = names[i];

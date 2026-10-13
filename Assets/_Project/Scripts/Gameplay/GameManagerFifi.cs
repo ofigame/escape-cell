@@ -56,7 +56,7 @@ namespace SquashBot.Gameplay
             fifi.transform.localScale = Vector3.one;
             float tall = 0f;
             foreach (var r in fifi.GetComponentsInChildren<Renderer>()) if (!(r is ParticleSystemRenderer)) tall = Mathf.Max(tall, r.bounds.max.y - fifi.transform.position.y);
-            fifiSize = tall > 0.05f ? Mathf.Clamp(foiBaseHeight / tall, 0.4f, 2.5f) : 1f;
+            fifiSize = tall > 0.05f ? Mathf.Clamp(foiBaseHeight * HeroScale.y / tall, 0.4f, 2.5f) : 1f; // as tall as foi stands
             fifi.transform.localScale = Vector3.one * fifiSize;
             fifi.gameObject.SetActive(false);
             fifiHp = FifiUpgrades.MaxHealth;

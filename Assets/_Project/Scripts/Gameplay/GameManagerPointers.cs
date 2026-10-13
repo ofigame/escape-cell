@@ -64,6 +64,7 @@ namespace SquashBot.Gameplay
             }
             if (roadPhase == RoadPhase.Walk && roadBeacon != null) goals.Add((At(roadExit), RoadGreen)); // the way to the tunnel
             if (crate != null) goals.Add((At(crateTile), SuperCrate.Gold));
+            if (arenaExit != null) goals.Add((At(arenaExitTile), Palette.UiGold)); // a won arena's door
             return goals;
         }
     }

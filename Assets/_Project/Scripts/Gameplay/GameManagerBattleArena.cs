@@ -132,11 +132,8 @@ namespace SquashBot.Gameplay
             }
             else if (n == 15)
             {
-                var open = new System.Collections.Generic.List<DefenseKind>();
-                foreach (var k in Defenses.All) if (Defenses.Unlocked(k)) open.Add(k);
-                var kind = open[Random.Range(0, open.Count)];
-                Defenses.AddStock(kind, 1);
-                text = Loc.F("arena.giftItem", "+1 " + Loc.T("def." + kind));
+                coinsThisRun += 150;
+                text = Loc.F("arena.giftCoins", 150);
             }
             else if (n >= 25 && (n - 25) % 10 == 0)
             {
@@ -170,6 +167,7 @@ namespace SquashBot.Gameplay
             enemies.Freeze();
             floorRules.Freeze();
             robot.CheerBrief(); // a little dance, and foi is free to run for the gifts
+            if (arenaExit == null) OpenArenaExit(); // every enemy down: the door opens at once (the gifts are a bonus)
             AudioManager.PlaySfx(Sfx.Win);
             fx.Burst(robot.transform.position + Vector3.up * 0.8f, Palette.Coin, Palette.CoinGlow, 50, 7f);
             var spots = new System.Collections.Generic.List<GridPos>();
@@ -238,7 +236,7 @@ namespace SquashBot.Gameplay
             arenaGifts.Clear();
             arenaGiftsPhase = false;
             arenaGiftsDone = true;
-            OpenArenaExit(); // the open world: the exit opens onto the road to the next arena
+            if (arenaExit == null) OpenArenaExit(); // (it opened when the last enemy fell)
         }
 
         private void OpenArenaGift(int kind, Vector3 at)
@@ -256,15 +254,7 @@ namespace SquashBot.Gameplay
                 }
                 kind = 2; // nothing more fits in the bag: gold instead
             }
-            if (kind == 1)
-            {
-                var open = new System.Collections.Generic.List<DefenseKind>();
-                foreach (var k in Defenses.All) if (Defenses.Unlocked(k)) open.Add(k);
-                var dk = open[Random.Range(0, open.Count)];
-                Defenses.AddStock(dk, 1);
-                Gifted(Loc.F("arena.giftItem", "+1 " + Loc.T("def." + dk)), at);
-                return;
-            }
+            if (kind == 1) kind = 2; // (no defences any more: gold instead)
             int c = 40 + arenaIndex * 8;
             coinsThisRun += c;
             Gifted(Loc.F("arena.giftCoins", c), at);

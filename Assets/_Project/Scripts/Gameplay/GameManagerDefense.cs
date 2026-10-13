@@ -83,6 +83,11 @@ namespace SquashBot.Gameplay
             defenses.Clear();
             ClearMarkers();
             defenseEditing = false;
+            // The defences are gone from the game (user decision): nothing is set up or placed any more.
+            defenseEditPending = false;
+            return;
+#pragma warning disable CS0162
+
             if (level == null || level.mission != MissionType.Hunt || bonusRun) { defenseEditPending = false; return; }
             defenseRects = FortressRects();
             defenseSlots = DefenseSlots.Fixed(grid, defenseRects);
@@ -105,6 +110,7 @@ namespace SquashBot.Gameplay
                 AddDefenseRobots(kept);
             }
             defenseEditPending = false;
+#pragma warning restore CS0162
         }
 
         /// <summary>The robots defences bring along on the early floors (three per archer), to their stages.</summary>
@@ -385,6 +391,8 @@ namespace SquashBot.Gameplay
         /// <summary>Back at a level just lost: a short ad for one archer (once per lost level).</summary>
         private void OfferArcherAd(int index)
         {
+            return; // (the defences are gone)
+#pragma warning disable CS0162
             if (index != levelIndex || archerAdLevel == index || !Monetization.Ads.Rewarded.IsReady || PlayerPrefs.GetInt(FailKey(index), 0) <= 0) return;
             archerAdLevel = index;
             ui.AdOffer.Show(Loc.T("def.adTitle"), Loc.T("def.adBody"), () =>
@@ -397,17 +405,22 @@ namespace SquashBot.Gameplay
                     ui.SetPrelevelDefense(PrelevelDefenseLabel(index));
                 });
             });
+#pragma warning restore CS0162
         }
 
         /// <summary>Is there anything to set up in this level (ready defences, or ones already standing)? And what, in words.</summary>
         private bool DefensesToOffer(int index, out string detail)
         {
+            detail = "";
+            return false; // (the defences are gone)
+#pragma warning disable CS0162
             var parts = new List<string>();
             int placed = Defenses.Placed(index).Count;
             foreach (var k in Defenses.All)
                 if (Defenses.Unlocked(k) && Defenses.Available(k) > 0) parts.Add(Loc.T("def." + k) + " " + Defenses.Available(k));
             detail = (placed > 0 ? Loc.F("def.placedHere", placed) + (parts.Count > 0 ? " · " : "") : "") + string.Join(" · ", parts);
             return placed > 0 || parts.Count > 0;
+#pragma warning restore CS0162
         }
 
         /// <summary>The DEFENCES button on the before-level card says how many stand ready in that level.</summary>

@@ -446,33 +446,161 @@ namespace SquashBot.Gameplay
             SaveData.Coins += coins + Earned;
             coinsThisRun = 0;
             ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.62f), Loc.F("arena.won", coins) + "\n" + Loc.T("arena.exitOpen"), Palette.UiGold, 60f);
-            // The exit: the nearest free floor tile three or more tiles from foi.
+            // The door: a free floor tile well away from foi (six tiles or more), the nearest such.
             arenaExitTile = robot.Position;
             int best = int.MaxValue;
             foreach (var p in grid.AllPositions())
             {
                 if (!grid.IsStandable(p) || grid.IsGap(p)) continue;
                 int d = HuntSystem.Chebyshev(p, robot.Position);
-                if (d >= 3 && d < best) { best = d; arenaExitTile = p; }
+                if (d >= 6 && d < best) { best = d; arenaExitTile = p; }
             }
             var accent = BattleArenas.Style(arenaIndex).accent;
-            arenaExit = new GameObject("ArenaExit").transform;
+            arenaExit = new GameObject("ArenaDoor").transform;
             arenaExit.position = GridView.ToWorld(arenaExitTile) + Vector3.up * GridView.SurfaceY;
-            Shapes.Primitive(PrimitiveType.Cylinder, "Ring", arenaExit, new Vector3(0f, 0.04f, 0f), new Vector3(1.6f, 0.03f, 1.6f), MaterialFactory.Create(accent, accent * 2.5f));
-            Shapes.Primitive(PrimitiveType.Cylinder, "Pillar", arenaExit, new Vector3(0f, 2.5f, 0f), new Vector3(0.9f, 2.5f, 0.9f), MaterialFactory.Create(Color.Lerp(accent, Color.white, 0.5f), accent * 1.6f));
+            BuildDoor(arenaExit, accent);
+            GroundArrows(arenaExit, accent);
             AudioManager.PlaySfx(Sfx.Win, 0.9f, 1.3f);
         }
 
-        /// <summary>Each frame in a won arena: the exit pulses; walking into it goes on to the next road.</summary>
+        // The won arena's door: its two leaves (they swing open), the portal parts (kind 0 the pulsing core, ±1 a turning
+        // ring, 10+ a spark drawn in), and the arrows on the floor leading to it.
+        private Transform doorLeft, doorRight;
+        private float doorT;
+        private readonly List<(Transform t, int kind)> doorPortal = new List<(Transform, int)>();
+        private readonly List<Transform> doorArrows = new List<Transform>();
+
+        /// <summary>A tall framed door facing foi; through its frame a portal to the next world turns and draws sparks in.</summary>
+        private void BuildDoor(Transform root, Color accent)
+        {
+            doorPortal.Clear();
+            var frame = MaterialFactory.Create(new Color(0.85f, 0.8f, 0.72f), Color.black);
+            var wood = MaterialFactory.CreateSurface(new Color(0.55f, 0.36f, 0.2f), Color.black, 0.3f, 0.1f);
+            var trim = MaterialFactory.Create(accent, accent * 2f);
+            var toFoi = robot.transform.position - root.position;
+            toFoi.y = 0f;
+            if (toFoi.sqrMagnitude > 0.01f) root.rotation = Quaternion.LookRotation(toFoi);
+            foreach (float s in new[] { -1f, 1f })
+                Shapes.Rounded("Post", root, new Vector3(s * 1.55f, 2.1f, 0f), new Vector3(0.5f, 4.2f, 0.6f), 0.08f, frame);
+            Shapes.Rounded("Lintel", root, new Vector3(0f, 4.35f, 0f), new Vector3(3.7f, 0.5f, 0.7f), 0.1f, frame);
+            Shapes.Rounded("Trim", root, new Vector3(0f, 4.35f, 0.36f), new Vector3(3.2f, 0.16f, 0.04f), 0.04f, trim);
+            // The portal inside the frame.
+            var core = MaterialFactory.Create(Color.Lerp(accent, Color.white, 0.25f), accent * 2.2f);
+            var deep = MaterialFactory.Create(new Color(0.05f, 0.02f, 0.12f), accent * 0.6f);
+            var ringM = MaterialFactory.Create(Color.Lerp(accent, Color.white, 0.5f), accent * 3f);
+            var portal = new GameObject("Portal").transform;
+            portal.SetParent(root, false);
+            portal.localPosition = new Vector3(0f, 2.05f, -0.15f);
+            Shapes.Primitive(PrimitiveType.Cylinder, "Deep", portal, Vector3.zero, new Vector3(2.6f, 0.03f, 3.9f), deep).transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            var glow = Shapes.Primitive(PrimitiveType.Cylinder, "Core", portal, new Vector3(0f, 0f, 0.03f), new Vector3(1.2f, 0.02f, 1.8f), core).transform;
+            glow.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            doorPortal.Add((glow, 0));
+            for (int r = 0; r < 3; r++)
+            {
+                var ring = new GameObject("Ring").transform;
+                ring.SetParent(portal, false);
+                ring.localPosition = new Vector3(0f, 0f, 0.06f + r * 0.02f);
+                float rx = 1.15f - r * 0.3f, ry = 1.75f - r * 0.45f;
+                for (int i = 0; i < 10; i++)
+                {
+                    float an = i * Mathf.PI * 2f / 10f;
+                    Shapes.Primitive(PrimitiveType.Sphere, "Spark", ring, new Vector3(Mathf.Cos(an) * rx, Mathf.Sin(an) * ry, 0f), Vector3.one * (0.2f - r * 0.04f), ringM);
+                }
+                doorPortal.Add((ring, r % 2 == 0 ? 1 : -1));
+            }
+            for (int i = 0; i < 8; i++) doorPortal.Add((Shapes.Primitive(PrimitiveType.Sphere, "Mote", portal, Vector3.zero, Vector3.one * 0.14f, ringM).transform, 10 + i));
+            Transform Leaf(float side)
+            {
+                var hinge = new GameObject("Hinge").transform;
+                hinge.SetParent(root, false);
+                hinge.localPosition = new Vector3(side * 1.3f, 0f, 0.15f);
+                Shapes.Rounded("Leaf", hinge, new Vector3(-side * 0.65f, 2f, 0f), new Vector3(1.28f, 3.9f, 0.16f), 0.05f, wood);
+                Shapes.Rounded("Band", hinge, new Vector3(-side * 0.65f, 2.8f, 0.09f), new Vector3(1.2f, 0.1f, 0.03f), 0.02f, trim);
+                Shapes.Rounded("Band", hinge, new Vector3(-side * 0.65f, 1.2f, 0.09f), new Vector3(1.2f, 0.1f, 0.03f), 0.02f, trim);
+                return hinge;
+            }
+            doorLeft = Leaf(-1f);
+            doorRight = Leaf(1f);
+            doorT = 0f;
+        }
+
+        /// <summary>Glowing arrows on the floor along the way from foi to the door (every second tile of the walkable path).</summary>
+        private void GroundArrows(Transform root, Color accent)
+        {
+            doorArrows.Clear();
+            var came = new Dictionary<GridPos, GridPos>();
+            var queue = new Queue<GridPos>();
+            queue.Enqueue(robot.Position);
+            came[robot.Position] = robot.Position;
+            bool found = false;
+            while (queue.Count > 0 && !found)
+            {
+                var p = queue.Dequeue();
+                foreach (var d in DirectionExtensions.All)
+                {
+                    var n = p + d.ToOffset();
+                    if (came.ContainsKey(n) || !grid.IsStandable(n) || grid.IsGap(n)) continue;
+                    came[n] = p;
+                    if (n == arenaExitTile) { found = true; break; }
+                    queue.Enqueue(n);
+                }
+            }
+            if (!found) return;
+            var path = new List<GridPos>();
+            for (var p = arenaExitTile; p != robot.Position; p = came[p]) path.Add(p);
+            path.Reverse();
+            var mat = MaterialFactory.Create(Color.Lerp(accent, Color.white, 0.4f), accent * 2.2f);
+            for (int i = 1; i + 1 < path.Count - 1; i += 2)
+            {
+                var at = GridView.ToWorld(path[i]) + Vector3.up * (GridView.SurfaceY + 0.05f);
+                var next = GridView.ToWorld(path[i + 1]) + Vector3.up * (GridView.SurfaceY + 0.05f);
+                var arrow = new GameObject("Arrow").transform;
+                arrow.position = at;
+                var dir = next - at;
+                dir.y = 0f;
+                if (dir.sqrMagnitude > 0.001f) arrow.rotation = Quaternion.LookRotation(dir);
+                foreach (float s in new[] { -1f, 1f })
+                    Shapes.Rounded("Wing", arrow, new Vector3(s * 0.14f, 0f, 0f), new Vector3(0.09f, 0.04f, 0.42f), 0.02f, mat).transform.localRotation = Quaternion.Euler(0f, -s * 40f, 0f);
+                arrow.SetParent(root, true);
+                doorArrows.Add(arrow);
+            }
+        }
+
+        /// <summary>Each frame in a won arena: the door swings open, its portal turns, the arrows ripple; walking in goes on.</summary>
         private void UpdateArenaExit()
         {
             if (arenaExit == null) return;
-            float pulse = 1f + Mathf.Sin(Time.time * 4f) * 0.08f;
-            arenaExit.localScale = new Vector3(pulse, 1f, pulse);
-            if (HuntSystem.Chebyshev(robot.Position, arenaExitTile) > 1) return;
+            doorT = Mathf.Min(1f, doorT + Time.deltaTime / 1.6f);
+            float open = Mathf.SmoothStep(0f, 1f, doorT) * 105f;
+            if (doorLeft != null) doorLeft.localRotation = Quaternion.Euler(0f, -open, 0f);
+            if (doorRight != null) doorRight.localRotation = Quaternion.Euler(0f, open, 0f);
+            float t = Time.time;
+            foreach (var (part, kind) in doorPortal)
+            {
+                if (part == null) continue;
+                if (kind == 0) part.localScale = new Vector3(1.2f, 0.02f, 1.8f) * (1f + Mathf.Sin(t * 3f) * 0.12f);
+                else if (kind == 1 || kind == -1) part.localRotation = Quaternion.Euler(0f, 0f, t * 80f * kind);
+                else
+                {
+                    float k = Mathf.Repeat(t * 0.6f + (kind - 10) * 0.125f, 1f);
+                    float an = (kind - 10) * 0.785f + k * 5f;
+                    part.localPosition = new Vector3(Mathf.Cos(an) * Mathf.Lerp(1.3f, 0.05f, k), Mathf.Sin(an) * Mathf.Lerp(1.9f, 0.05f, k), 0.1f + k * 0.2f);
+                    part.localScale = Vector3.one * Mathf.Lerp(0.18f, 0.04f, k);
+                }
+            }
+            for (int i = 0; i < doorArrows.Count; i++)
+                if (doorArrows[i] != null) doorArrows[i].localScale = Vector3.one * (1f + 0.25f * Mathf.Max(0f, Mathf.Sin(t * 5f - i * 0.6f)));
+            if (doorT < 0.7f || HuntSystem.Chebyshev(robot.Position, arenaExitTile) > 1) return;
+            // Through the door: the gold gathered meanwhile is banked, a flash, and on into the next world.
+            SaveData.Coins += Earned;
+            coinsThisRun = 0;
+            ui.Flash(Color.white, 0.8f);
+            AudioManager.PlaySfx(Sfx.Win, 1f, 1.4f);
             int next = arenaIndex + 1;
             Destroy(arenaExit.gameObject);
             arenaExit = null;
+            doorArrows.Clear();
+            doorPortal.Clear();
             if (next >= BattleArenas.Count) { ShowBonusResult(Loc.T("trail.allDone")); return; }
             StartTrail(next);
         }

@@ -66,7 +66,7 @@ namespace SquashBot.Data
             var counter = new List<Boost>(Shop.Counter());
             counter.RemoveAll(Shop.Full); // only boosts there is room for
             var defences = new List<DefenseKind>();
-            foreach (var k in Defenses.All) if (Defenses.Unlocked(k)) defences.Add(k);
+            // (no defences any more: the defences are gone from the game)
             for (int i = 0; i < gifts; i++)
             {
                 float g = Random.value;

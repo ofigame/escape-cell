@@ -29,9 +29,9 @@ namespace SquashBot.Gameplay
 
         private bool TpsActive => tpsOn && State == GameState.Playing;
 
-        /// <summary>The floors fought over the shoulder like the arenas (sideways), when the player switched it on.</summary>
-        private const string LevelTpsKey = "sb_level_tps";
-        private static bool LevelTps => PlayerPrefs.GetInt(LevelTpsKey, 0) == 1;
+        /// <summary>This floor is fought over the shoulder like the arenas (sideways): switched on by the player, for this floor only.</summary>
+        private bool levelTps;
+        private bool LevelTps => levelTps;
 
         private void EnterTps()
         {
@@ -289,6 +289,10 @@ namespace SquashBot.Gameplay
             l.robots = Mathf.CeilToInt(l.robots * 1.25f);
             l.elites = Mathf.CeilToInt(l.elites * 1.2f);
             if (LevelCatalog.WorldOf(levelIndex) >= 2) l.robotHp += 1;
+            // More of the hard ones (user asked): enforcers and warlords, and a vanG that takes far more beating.
+            l.elites = Mathf.CeilToInt(l.elites * 1.35f) + (LevelCatalog.WorldOf(levelIndex) >= 1 ? 1 : 0);
+            l.brutes = Mathf.CeilToInt(l.brutes * 1.5f) + (LevelCatalog.WorldOf(levelIndex) >= 1 ? 1 : 0);
+            l.monsterHp = Mathf.CeilToInt(l.monsterHp * 1.8f);
         }
     }
 }

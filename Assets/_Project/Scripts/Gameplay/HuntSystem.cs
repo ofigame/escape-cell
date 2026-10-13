@@ -1137,7 +1137,7 @@ namespace SquashBot.Gameplay
 
         private static float ShareOf(Guard g) => g.rank >= 99 ? 0.55f : g.brute ? BruteHitShare : g.rank == 0 ? 0.12f : g.rank > 0 ? Mathf.Min(0.3f, 0.16f + g.rank * 0.025f) : GuardHitShare;
         /// <summary>The monster's blows hurt more on later floors.</summary>
-        private float MonsterHitShare => Mathf.Lerp(0.24f, 0.42f, level.score / 100f);
+        private float MonsterHitShare => Mathf.Lerp(0.3f, 0.5f, level.score / 100f);
 
         /// <summary>Blows still to come in the monster's current combo (later floors chain two or three).</summary>
         private int comboLeft;

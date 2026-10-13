@@ -42,6 +42,16 @@ namespace SquashBot.UI
 
         public UiScreen Screen => screen;
 
+        /// <summary>A drag across the open space: foi turns round by this many screen widths.</summary>
+        public event Action<float> Turned;
+
+        /// <summary>A drag area that reports how far the finger moved sideways.</summary>
+        private class DragTurn : MonoBehaviour, UnityEngine.EventSystems.IDragHandler
+        {
+            public Action<float> turned;
+            public void OnDrag(UnityEngine.EventSystems.PointerEventData e) => turned?.Invoke(e.delta.x / Mathf.Max(1f, UnityEngine.Screen.width));
+        }
+
         public static GarageScreen Create(Transform canvasRoot)
         {
             var screen = UiScreen.Create("Garage", canvasRoot, out var root);
@@ -63,6 +73,12 @@ namespace SquashBot.UI
             // Switch to another of foi's builds (for coins), under the title bar.
             UiFactory.MakeButton(root, Loc.T("hero.change"), Kind.Gold, new Vector2(1f, 1f), new Vector2(-36f, -206f), new Vector2(300f, 90f), () => HeroPressed?.Invoke(), 34f);
             coinsText = UiFactory.TextBox("Value", coins, new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Vector2(150f, 90f), "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
+
+            // A drag across the open space above the panel turns foi round (all the way: see its back and its outfit).
+            var turn = UiFactory.Rect("TurnArea", root, Vector2.zero, Vector2.one);
+            UiFactory.Fill(turn, new Color(0f, 0f, 0f, 0f));
+            turn.gameObject.AddComponent<DragTurn>().turned = dx => Turned?.Invoke(dx);
+            turn.SetAsFirstSibling();
 
             // Lower panel
             var panel = UiFactory.Card("Panel", root, new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 20f), new Vector2(1000f, 1040f));
