@@ -42,16 +42,6 @@ namespace SquashBot.UI
 
         public UiScreen Screen => screen;
 
-        /// <summary>A drag across the open space: foi turns round by this many screen widths.</summary>
-        public event Action<float> Turned;
-
-        /// <summary>A drag area that reports how far the finger moved sideways.</summary>
-        private class DragTurn : MonoBehaviour, UnityEngine.EventSystems.IDragHandler
-        {
-            public Action<float> turned;
-            public void OnDrag(UnityEngine.EventSystems.PointerEventData e) => turned?.Invoke(e.delta.x / Mathf.Max(1f, UnityEngine.Screen.width));
-        }
-
         public static GarageScreen Create(Transform canvasRoot)
         {
             var screen = UiScreen.Create("Garage", canvasRoot, out var root);
@@ -71,16 +61,11 @@ namespace SquashBot.UI
             var coins = UiFactory.Pill("Coins", bar, new Vector2(1f, 0.5f), new Vector2(-36f, 0f), new Vector2(260f, 100f), UiFactory.PillColor);
             UIController.CoinIcon(coins, new Vector2(56f, 0f));
             // Switch to another of foi's builds (for coins), under the title bar.
-            UiFactory.MakeButton(bar, Loc.T("hero.change"), Kind.Gold, new Vector2(1f, 0.5f), new Vector2(-330f, 0f), new Vector2(300f, 90f), () => HeroPressed?.Invoke(), 34f);
+            UiFactory.MakeButton(root, Loc.T("hero.change"), Kind.Gold, new Vector2(1f, 1f), new Vector2(-36f, -206f), new Vector2(300f, 90f), () => HeroPressed?.Invoke(), 34f);
             coinsText = UiFactory.TextBox("Value", coins, new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Vector2(150f, 90f), "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
 
             // Lower panel
-            // Sideways: the panel on the right, foi on the left (drag it round to see every side).
-            var turn = UiFactory.Rect("TurnArea", root, Vector2.zero, Vector2.one);
-            UiFactory.Fill(turn, new Color(0f, 0f, 0f, 0f));
-            turn.gameObject.AddComponent<DragTurn>().turned = dx => Turned?.Invoke(dx);
-            turn.SetAsFirstSibling();
-            var panel = UiFactory.Card("Panel", root, new Vector2(1f, 0f), new Vector2(-40f, 30f), new Vector2(1000f, 840f));
+            var panel = UiFactory.Card("Panel", root, new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 20f), new Vector2(1000f, 1040f));
             itemName = UiFactory.TextBox("Name", panel, new Vector2(0.5f, 1f), new Vector2(0f, -20f), new Vector2(940f, 70f), "", 42f, Palette.UiText, title: true);
             itemName.enableAutoSizing = true;
             itemName.fontSizeMin = 26f;
@@ -97,7 +82,7 @@ namespace SquashBot.UI
             }
 
             // The item grid scrolls when a category holds more than three rows.
-            var viewport = UiFactory.Box("GridView", panel, new Vector2(0.5f, 1f), new Vector2(0f, -300f), new Vector2(950f, 370f));
+            var viewport = UiFactory.Box("GridView", panel, new Vector2(0.5f, 1f), new Vector2(0f, -300f), new Vector2(950f, 540f));
             viewport.gameObject.AddComponent<RectMask2D>();
             UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
             grid = UiFactory.Rect("Grid", viewport, new Vector2(0f, 1f), Vector2.one);
@@ -124,7 +109,7 @@ namespace SquashBot.UI
             actionLabel = actionButton.GetComponentInChildren<TextMeshProUGUI>();
 
             bip = BipTip.Create(root);
-            bip.BaseY = 880f;
+            bip.BaseY = Monetization.Ads.BannerReserve + 1080f;
         }
 
         public void Show(int worldReached)

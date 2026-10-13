@@ -174,7 +174,7 @@ namespace SquashBot.Monetization
                             var size = new AndroidJavaObject("com.unity3d.services.banners.UnityBannerSize", 320, 50);
                             view = new AndroidJavaObject("com.unity3d.services.banners.BannerView", activity, BannerUnit, size);
                             var gravity = new AndroidJavaClass("android.view.Gravity");
-                            int g = gravity.GetStatic<int>("BOTTOM") | gravity.GetStatic<int>("LEFT"); // bottom-left (the wide screen's free corner)
+                            int g = gravity.GetStatic<int>("BOTTOM") | gravity.GetStatic<int>("CENTER_HORIZONTAL");
                             var lp = new AndroidJavaObject("android.widget.FrameLayout$LayoutParams", -2, -2, g); // wrap content
                             activity.Call("addContentView", view, lp);
                             view.Call("load");

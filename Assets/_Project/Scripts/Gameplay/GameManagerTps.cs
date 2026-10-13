@@ -29,14 +29,9 @@ namespace SquashBot.Gameplay
 
         private bool TpsActive => tpsOn && State == GameState.Playing;
 
-        /// <summary>
-        /// The floors are played with the arenas' controls (left thumb moves, right thumb looks and strikes), seen either
-        /// over foi's shoulder exactly as in the arenas or from above as before: a button switches, the choice is kept.
-        /// </summary>
-        private const string LevelViewKey = "sb_level_view";
-        private static bool LevelIso => PlayerPrefs.GetInt(LevelViewKey, 0) == 1;
-        /// <summary>Seen from above right now (a floor in the overhead view).</summary>
-        private bool IsoView => tpsOn && !arenaRun && LevelIso;
+        /// <summary>The floors fought over the shoulder like the arenas (sideways), when the player switched it on.</summary>
+        private const string LevelTpsKey = "sb_level_tps";
+        private static bool LevelTps => PlayerPrefs.GetInt(LevelTpsKey, 0) == 1;
 
         private void EnterTps()
         {
@@ -46,23 +41,15 @@ namespace SquashBot.Gameplay
                 tps.Strike += () => tpsStrike = true;
                 tps.Spin += () => tpsSpin = true;
                 tps.Jump += () => tpsJump = true;
-                tps.CameraToggle += () =>
-                {
-                    // The floors: over the shoulder or from above, kept for next time.
-                    PlayerPrefs.SetInt(LevelViewKey, LevelIso ? 0 : 1);
-                    tps.SetViewSwitch(!arenaRun, LevelIso ? "3D" : "TPS");
-                    if (!LevelIso) { tpsYaw = 45f; tpsPitch = 27f; }
-                    AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.1f);
-                };
             }
             tpsOn = true;
             tpsStrike = tpsSpin = tpsJump = false;
-            tpsYaw = journey ? 0f : 45f; // the journey looks north along the way; otherwise the usual view's way (+x +z)
+            tpsYaw = 45f; // the usual view's way (looking along +x +z)
             tpsPitch = 27f;
             tps.Show(true);
             tps.Minimap.Build(grid, arenaRun ? BattleArenas.LastBuildings : new System.Collections.Generic.List<BattleArenas.Building>(), arenaRun ? BattleArenas.LastPosts : new System.Collections.Generic.List<BattleArenas.Post>());
-            tps.SetViewSwitch(!arenaRun, LevelIso ? "3D" : "TPS");
             robot.WalkStyle = true; // the arenas: walking and running, not hopping
+            Screen.orientation = ScreenOrientation.LandscapeLeft;
         }
 
         private void ExitTps()
@@ -74,16 +61,17 @@ namespace SquashBot.Gameplay
             ClearTrail();
             trailRun = false;
             if (tps != null) tps.Show(false);
+            Screen.orientation = ScreenOrientation.Portrait;
         }
 
-        /// <summary>The whole game is played sideways: either landscape way up, never upright.</summary>
-        private static void LockLandscape()
+        /// <summary>Portrait everywhere but the arenas: the app allows landscape (for them), the game holds portrait.</summary>
+        private static void LockPortrait()
         {
-            Screen.autorotateToPortrait = false;
+            Screen.autorotateToPortrait = true;
             Screen.autorotateToPortraitUpsideDown = false;
-            Screen.autorotateToLandscapeLeft = true;
-            Screen.autorotateToLandscapeRight = true;
-            Screen.orientation = ScreenOrientation.AutoRotation;
+            Screen.autorotateToLandscapeLeft = false;
+            Screen.autorotateToLandscapeRight = false;
+            Screen.orientation = ScreenOrientation.Portrait;
         }
 
         /// <summary>A tile foi may walk onto in the arenas: solid floor, no robot or crate on it, no fire.</summary>
@@ -94,7 +82,6 @@ namespace SquashBot.Gameplay
         /// <summary>This frame's command from the TPS controls (and keys), the camera turned by the right thumb.</summary>
         private InputCommand TpsCommand()
         {
-            if (climbing) return default; // up the stairs to the floor: no walking meanwhile
             float dt = Time.unscaledDeltaTime;
             UpdateArenaGifts();
             UpdateTrail(Time.deltaTime);
@@ -104,13 +91,7 @@ namespace SquashBot.Gameplay
             tps.Minimap.Tick(dt, robot.transform.position, Gunning ? gunYaw : tpsYaw, mapEnemies);
             var look = tps.TakeLook();
             bool onGun = manned != null;
-            if (IsoView)
-            {
-                // From above: the stick goes the way the camera looks; the right thumb only strikes.
-                var cf = cameraRig.Cam.transform.forward;
-                tpsYaw = Mathf.Atan2(cf.x, cf.z) * Mathf.Rad2Deg;
-            }
-            else if (!onGun)
+            if (!onGun)
             {
                 tpsYaw += look.x * 260f;
                 tpsPitch = Mathf.Clamp(tpsPitch - look.y * 140f, 6f, 55f);
@@ -234,7 +215,7 @@ namespace SquashBot.Gameplay
             if (gun == null || hunt.BestInReach(robot.Position, StrikeReach, TpsForward, 0.2f, out _))
             {
                 ShowHeld(weapon ?? Armory.Equipped);
-                if (IsoView) KeyStrike(); else KeyStrike(TpsForward); // from above: the way foi faces
+                KeyStrike(TpsForward);
                 return;
             }
             ShowHeld(gun);
@@ -270,7 +251,7 @@ namespace SquashBot.Gameplay
             // A building of the arena city between foi and the camera: the camera comes in in front of it (quickly), and
             // eases back out once the view is clear, so foi is never hidden behind a wall.
             float full = Vector3.Distance(focus, pos), allowed = full;
-            // On the floors the ramparts round the edge do the same: the camera never goes out past the floor's edge low down.
+            // On a floor the ramparts round its edge do the same: the camera never goes out behind them low down.
             bool city = arenaRun && SquashBot.Visual.ArenaDecor.BuildingTop.Count > 0;
             if (city || !arenaRun)
                 for (float d = 0.6f; d <= full; d += 0.25f)
@@ -288,15 +269,26 @@ namespace SquashBot.Gameplay
 
         private float tpsCamDist = 6f;
 
-        /// <summary>A rampart tile: off the floor but right beside it (a journey floor's stairs gap is open).</summary>
+        /// <summary>A rampart tile: off the floor but right beside it.</summary>
         private bool IsRampart(GridPos t)
         {
             if (grid.Exists(t)) return false;
-            if (journey && EntryGap(t, journeyEntry)) return false;
             for (int dx = -1; dx <= 1; dx++)
                 for (int dy = -1; dy <= 1; dy++)
                     if (grid.Exists(t + new GridPos(dx, dy))) return true;
             return false;
+        }
+
+        /// <summary>
+        /// The floors' crowd made tougher (user asked): more robots standing at once, a few more of them, and from the
+        /// third world on one more blow each.
+        /// </summary>
+        private void Toughen(LevelData l)
+        {
+            if (l.robotsAtOnce > 0) l.robotsAtOnce = Mathf.CeilToInt(l.robotsAtOnce * 1.5f);
+            l.robots = Mathf.CeilToInt(l.robots * 1.25f);
+            l.elites = Mathf.CeilToInt(l.elites * 1.2f);
+            if (LevelCatalog.WorldOf(levelIndex) >= 2) l.robotHp += 1;
         }
     }
 }

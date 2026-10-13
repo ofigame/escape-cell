@@ -103,8 +103,7 @@ namespace SquashBot.Gameplay
             }
             FortressFloor.SkipCornerTowers = arenaRun;
             FortressFloor.SkipWall = trailRun ? (System.Func<GridPos, bool>)(p => true) // the roads: mountains, no ramparts
-                : arenaRun ? (System.Func<GridPos, bool>)(p => BattleArenas.BuildingAt(p.x, p.y))
-                : journey ? (System.Func<GridPos, bool>)(p => EntryGap(p, journeyEntry)) : null; // the journey: a gap for the stairs up
+                : arenaRun ? (System.Func<GridPos, bool>)(p => BattleArenas.BuildingAt(p.x, p.y)) : null;
             FortressFloor.Detailed = arenaRun;
             FortressFloor.WallThick = wallThick;
             fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, FortressRects(), wallHeight);
@@ -117,11 +116,10 @@ namespace SquashBot.Gameplay
             if (stage >= 1)
                 SkyTraffic.Create(fortressFloor, () => robot != null ? robot.transform.position : Vector3.zero,
                     Color.Lerp(new Color(1f, 0.55f, 0.22f), WorldTheme.Current.accent, 0.25f), stage == 2 ? 5 : 3, levelIndex * 17 + 3);
-            if (!journey) glassCell = GlassCell.Create(GridView.ToWorld(robot.Position) + Vector3.up * GridView.SurfaceY, Mathf.Max(robot.transform.localScale.x, robot.transform.localScale.y) * 0.62f);
+            glassCell = GlassCell.Create(GridView.ToWorld(robot.Position) + Vector3.up * GridView.SurfaceY, Mathf.Max(robot.transform.localScale.x, robot.transform.localScale.y) * 0.62f);
             glassSince = -1f;
             foreach (var p in grid.LavaTiles)
             {
-                if (journey && !arenaRun && Mathf.Abs(p.x - journeyEntry.x) <= 3 && p.y <= journeyEntry.y + 3) continue; // the way in from the stairs never burns
                 grid.SetTile(p, Core.TileState.Fire);
                 gridView.Ignite(p);
             }

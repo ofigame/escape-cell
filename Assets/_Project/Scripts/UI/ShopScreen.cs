@@ -42,17 +42,6 @@ namespace SquashBot.UI
         private ScrollRect scroll;
         private int cells;
 
-        /// <summary>Cards per row: as many as the wide screen holds (three on most phones, four on the widest).</summary>
-        private int Cols
-        {
-            get
-            {
-                var canvasRect = GetComponentInParent<Canvas>() is Canvas cv ? (RectTransform)cv.rootCanvas.transform : null;
-                float w = canvasRect != null ? canvasRect.rect.width : 1920f;
-                return Mathf.Clamp(Mathf.FloorToInt((w - 60f) / (CellW + Gap)), 2, 4);
-            }
-        }
-
         public static ShopScreen Create(Transform canvasRoot)
         {
             var screen = UiScreen.Create("Shop", canvasRoot, out var root);
@@ -146,7 +135,7 @@ namespace SquashBot.UI
                     // (the bonus-round ticket is gone with the bonus rounds)
                     break;
             }
-            int rows = (cells + Cols - 1) / Cols;
+            int rows = (cells + 1) / 2;
             content.sizeDelta = new Vector2(0f, rows * (CellH + Gap) + 60f);
         }
 
@@ -156,8 +145,8 @@ namespace SquashBot.UI
         private RectTransform Cell(string name, Color glow, out RectTransform picture)
         {
             int i = cells++;
-            float x = ((i % Cols) - (Cols - 1) * 0.5f) * (CellW + Gap);
-            float y = -30f - (i / Cols) * (CellH + Gap);
+            float x = (i % 2 == 0 ? -1f : 1f) * (CellW + Gap) * 0.5f;
+            float y = -30f - (i / 2) * (CellH + Gap);
             var card = UiFactory.Card(name, content, new Vector2(0.5f, 1f), new Vector2(x, y), new Vector2(CellW, CellH));
             card.pivot = new Vector2(0.5f, 1f);
             // The picture sits on a soft glow of the item's colour.

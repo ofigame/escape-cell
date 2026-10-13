@@ -264,10 +264,8 @@ namespace SquashBot.Visual
             frameZoomTarget = zoom;
         }
 
-        /// <param name="shift">Moves the subject sideways on the screen (0.4: well left of the middle, clear of a panel on the right).</param>
-        public void Showcase(Transform subject, float amount, float view = 1.25f, float raise = 0.42f, float shift = 0f)
+        public void Showcase(Transform subject, float amount, float view = 1.25f, float raise = 0.42f)
         {
-            showcaseShift = shift;
             if (subject != null) showcaseSubject = subject;
             showcaseTarget = amount;
             showcaseView = view;
@@ -275,7 +273,7 @@ namespace SquashBot.Visual
         }
 
         /// <summary>Close-up half-height in world units, and how far up the screen the subject sits.</summary>
-        private float showcaseView = 1.25f, showcaseRaise = 0.42f, showcaseShift;
+        private float showcaseView = 1.25f, showcaseRaise = 0.42f;
 
         /// <summary>Blur and darken the scene behind menus.</summary>
         public void SetMenuFocus(bool on) => menuFocusTarget = on ? 1f : 0f;
@@ -388,7 +386,6 @@ namespace SquashBot.Visual
             zoom *= frameZoom;
             var lift = transform.up * (viewHalfHeight * zoom * (0.06f - showcaseRaise * ease - frameLift));
             var offset = transform.right * jitter.x + transform.up * jitter.y;
-            offset += transform.right * (viewHalfHeight * zoom * Cam.aspect * showcaseShift * ease); // the subject off to one side
 
             if (Cam.orthographic)
             {

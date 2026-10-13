@@ -34,6 +34,7 @@ namespace SquashBot.UI
 
             var canvas = UiFactory.CreateCanvas("Splash", out var scaler);
             canvas.sortingOrder = 200;
+            scaler.matchWidthOrHeight = UiFactory.MatchFor(Screen.width, Screen.height);
 
             var splash = canvas.gameObject.AddComponent<SplashScreen>();
             splash.group = canvas.gameObject.AddComponent<CanvasGroup>();

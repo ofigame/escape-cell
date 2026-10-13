@@ -39,6 +39,18 @@ namespace SquashBot.UI
         public event Action PausePressed;
         /// <summary>The weapon bag was opened during a level.</summary>
         public event Action BagPressed;
+        /// <summary>The floors' TPS switch was pressed.</summary>
+        public event Action TpsSwitchPressed;
+        private Button tpsSwitch;
+        private TextMeshProUGUI tpsSwitchLabel;
+
+        /// <summary>The TPS switch: shown on the floors' fights, reading TPS (to switch to it) or 2D (back).</summary>
+        public void SetTpsSwitch(bool on, bool inTps)
+        {
+            if (tpsSwitch == null) return;
+            if (tpsSwitch.gameObject.activeSelf != on) tpsSwitch.gameObject.SetActive(on);
+            if (on) tpsSwitchLabel.text = inTps ? "2D" : "TPS";
+        }
         public event Action BombPressed;
         /// <summary>The "watch an ad, fill your health" button was pressed (shown when health runs low).</summary>
         public event Action AdHealPressed;
@@ -168,8 +180,6 @@ namespace SquashBot.UI
         private float meterShown, meterTarget;
 
         public MapScreen Map { get; private set; }
-        /// <summary>The bird's-eye world map (the journey's map).</summary>
-        public WorldMapScreen WorldMap { get; private set; }
         public StoryScreen Story { get; private set; }
         public ShopScreen Shop { get; private set; }
         public DefenseEditorScreen DefenseEditor { get; private set; }
@@ -220,14 +230,12 @@ namespace SquashBot.UI
         public SkillBar SkillBar { get; private set; }
 
         private Image flash;
-        private float flashLeft, flashStrength, flashSpeed = 3.2f;
+        private float flashLeft, flashStrength;
 
         /// <summary>Flashes the whole screen in <paramref name="color"/> for a moment.</summary>
-        /// <param name="fade">Seconds the flash takes to die away.</param>
-        public void Flash(Color color, float strength = 0.45f, float fade = 0.31f)
+        public void Flash(Color color, float strength = 0.45f)
         {
             if (flash == null) return;
-            flashSpeed = 1f / Mathf.Max(0.05f, fade);
             flash.color = new Color(color.r, color.g, color.b, 0f);
             flashStrength = strength;
             flashLeft = 1f;
@@ -298,7 +306,6 @@ namespace SquashBot.UI
             HeroPicker = HeroPicker.Create(root);
             AdOffer = AdOfferCard.Create(root);
             Chest = ChestCard.Create(root);
-            WorldMap = WorldMapScreen.Create(root);
             Quests = QuestsScreen.Create(root);
             Quests.Claimed += () => { RefreshMenuCoins(); RefreshQuests(); };
             Garage.HeroPressed += () => HeroPicker.Show(true);
@@ -353,14 +360,13 @@ namespace SquashBot.UI
             questsPing = qPing.gameObject;
 
             // The battle arenas: top right, under the settings.
-            var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopLeft, new Vector2(110f, -570f), 120f, () => ArenasPressed?.Invoke());
+            var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopRight, new Vector2(-110f, -400f), 120f, () => ArenasPressed?.Invoke());
             ((RectTransform)arenas.transform).pivot = new Vector2(0.5f, 0.5f);
-            arenas.gameObject.SetActive(false); // the arenas are on the journey's way now (and on the world map)
-            // Now and then a speech bubble to the right of it: win an arena battle, grab the big gifts.
-            arenaTip = UiFactory.Box("ArenaTip", t, TopLeft, new Vector2(430f, -570f), new Vector2(480f, 170f));
+            // Now and then a speech bubble to the left of it: win an arena battle, grab the big gifts.
+            arenaTip = UiFactory.Box("ArenaTip", t, TopRight, new Vector2(-430f, -400f), new Vector2(480f, 170f));
             arenaTip.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.Fill(arenaTip, new Color(1f, 0.97f, 0.9f, 0.97f), UiSprites.Rounded, 0.8f).raycastTarget = false;
-            var tail = UiFactory.Box("Tail", arenaTip, new Vector2(0f, 0.5f), new Vector2(4f, 0f), new Vector2(34f, 34f));
+            var tail = UiFactory.Box("Tail", arenaTip, new Vector2(1f, 0.5f), new Vector2(-4f, 0f), new Vector2(34f, 34f));
             tail.pivot = new Vector2(0.5f, 0.5f);
             tail.localRotation = Quaternion.Euler(0f, 0f, 45f);
             UiFactory.Fill(tail, new Color(1f, 0.97f, 0.9f, 0.97f), UiSprites.Rounded, 4f).raycastTarget = false;
@@ -376,38 +382,37 @@ namespace SquashBot.UI
             arenaTipGroup.blocksRaycasts = false;
 
             // The level card: a frosted glass panel with the world, the level, its mission and the big PLAY button.
-            // Sideways: the card and the dock stand on the right, the robot in the middle, the banner's spot left clear.
-            var card = UiFactory.Box("LevelCard", t, new Vector2(1f, 0f), new Vector2(-40f, 250f), new Vector2(860f, 420f)); // (the banner is bottom-left: the right side reaches down)
+            var card = UiFactory.Box("LevelCard", t, Bottom, new Vector2(0f, Ads.BannerReserve + 236f), new Vector2(940f, 420f));
             UiFactory.Fill(card, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 0.8f);
             UiFactory.Fill(UiFactory.Stretch("Rim", card), new Color(0.75f, 0.85f, 1f, 0.35f), UiSprites.Ring, 0.8f).raycastTarget = false;
-            menuWorld = UiFactory.TextBox("World", card, Top, new Vector2(0f, -26f), new Vector2(800f, 50f), "", 30f, Palette.UiCyan);
+            menuWorld = UiFactory.TextBox("World", card, Top, new Vector2(0f, -26f), new Vector2(860f, 50f), "", 30f, Palette.UiCyan);
             menuWorld.characterSpacing = 5f;
-            menuLevel = UiFactory.TextBox("Level", card, Top, new Vector2(0f, -68f), new Vector2(800f, 100f), "", 76f, Palette.UiText, title: true);
-            menuMission = UiFactory.TextBox("Mission", card, Top, new Vector2(0f, -170f), new Vector2(800f, 52f), "", 34f,
+            menuLevel = UiFactory.TextBox("Level", card, Top, new Vector2(0f, -68f), new Vector2(860f, 100f), "", 76f, Palette.UiText, title: true);
+            menuMission = UiFactory.TextBox("Mission", card, Top, new Vector2(0f, -170f), new Vector2(860f, 52f), "", 34f,
                 new Color(0.85f, 0.86f, 1f, 0.8f), FontStyles.Normal);
 
-            var play = UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(-110f, 30f), new Vector2(540f, 150f), () => PlayPressed?.Invoke(), 84f);
+            var play = UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(-130f, 30f), new Vector2(580f, 150f), () => PlayPressed?.Invoke(), 84f);
             play.gameObject.AddComponent<Pulse>();
             // The daily bonus games, next to PLAY: plays left today, glowing while there are some.
-            menuBonus = UiFactory.MakeButton(card, "", Kind.Gold, Bottom, new Vector2(295f, 30f), new Vector2(220f, 150f), () => DailyBonusPressed?.Invoke(), 34f);
+            menuBonus = UiFactory.MakeButton(card, "", Kind.Gold, Bottom, new Vector2(320f, 30f), new Vector2(240f, 150f), () => DailyBonusPressed?.Invoke(), 34f);
             menuBonusLabel = menuBonus.GetComponentInChildren<TextMeshProUGUI>();
             menuBonus.gameObject.AddComponent<Pulse>();
 
             // The dock: garage, shop, map and the guide, as glossy orbs on a glass bar.
-            var dock = UiFactory.Box("Dock", t, new Vector2(1f, 0f), new Vector2(-40f, 24f), new Vector2(860f, 206f));
+            var dock = UiFactory.Box("Dock", t, Bottom, new Vector2(0f, Ads.BannerReserve + 14f), new Vector2(1000f, 206f));
             UiFactory.Fill(dock, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 0.7f);
             UiFactory.Fill(UiFactory.Stretch("Rim", dock), new Color(0.75f, 0.85f, 1f, 0.25f), UiSprites.Ring, 0.7f).raycastTarget = false;
             var items = new (string label, MenuArt.Icon icon, Color color, Action click)[]
             {
                 (Loc.T("btn.garage"), MenuArt.Icon.Garage, new Color(0.12f, 0.71f, 0.64f), () => GaragePressed?.Invoke()),
                 (Loc.T("btn.shop"), MenuArt.Icon.Shop, new Color(0.94f, 0.54f, 0.16f), () => ShopPressed?.Invoke()),
-                (Loc.T("btn.map"), MenuArt.Icon.Map, new Color(0.42f, 0.36f, 0.88f), () => MapPressed?.Invoke()),
+                (Loc.T("btn.map"), MenuArt.Icon.Map, new Color(0.42f, 0.36f, 0.88f), () => PlayPressed?.Invoke()),
                 (Loc.T("btn.guide"), MenuArt.Icon.Guide, new Color(0.85f, 0.35f, 0.6f), () => Guide.Show()),
             };
             for (int i = 0; i < items.Length; i++)
             {
                 var it = items[i];
-                MenuArt.DockButton(dock, it.label, it.icon, it.color, new Vector2(0.5f, 0.5f), new Vector2((i - 1.5f) * 205f, 0f), 120f, it.click);
+                MenuArt.DockButton(dock, it.label, it.icon, it.color, new Vector2(0.5f, 0.5f), new Vector2((i - 1.5f) * 240f, 0f), 120f, it.click);
             }
         }
 
@@ -471,7 +476,7 @@ namespace SquashBot.UI
         private void UpdateArenaTip(float dt)
         {
             if (arenaTipGroup == null) return;
-            bool can = false && menu.IsVisible && SquashBot.Data.BattleArenas.Unlocked(0) && !Arenas.IsOpen && !PrelevelOpen && (settings == null || !settings.IsVisible);
+            bool can = menu.IsVisible && SquashBot.Data.BattleArenas.Unlocked(0) && !Arenas.IsOpen && !PrelevelOpen && (settings == null || !settings.IsVisible);
             arenaTipClock = can ? arenaTipClock + dt : 0f;
             float phase = arenaTipClock % 25f;
             bool show = can && phase > 2f && phase < 8f;
@@ -688,14 +693,6 @@ namespace SquashBot.UI
             public TextMeshProUGUI info;
         }
 
-        /// <summary>The world map over everything, the pin where the journey stands.</summary>
-        public void ShowWorldMap(Func<int, SquashBot.Visual.JourneyMapArt.WorldPlan> planOf, int openWorld, int pinLevel, bool onRoad, bool atArena, string pinText, int coins)
-        {
-            HideAll();
-            WorldMap.Show(planOf, openWorld, pinLevel, onRoad, atArena, pinText, coins);
-            SetBanner(true);
-        }
-
         public void ShowMap(int unlocked, int coins, int focusLevel, int animateFrom = -1)
         {
             HideAll();
@@ -881,6 +878,10 @@ namespace SquashBot.UI
             flash.gameObject.AddComponent<IgnoreSafeArea>();
 
             UiFactory.MakeButton(t, "II", Kind.Icon, TopLeft, new Vector2(36f, -36f), new Vector2(124f, 124f), () => PausePressed?.Invoke(), 52f);
+            // TPS on the floors: switches to the arenas' over-the-shoulder fight (sideways) and back.
+            tpsSwitch = UiFactory.MakeButton(t, "TPS", Kind.Icon, TopLeft, new Vector2(176f, -44f), new Vector2(150f, 108f), () => TpsSwitchPressed?.Invoke(), 40f);
+            tpsSwitchLabel = tpsSwitch.GetComponentInChildren<TextMeshProUGUI>();
+            tpsSwitch.gameObject.SetActive(false);
 
             // The weapon bag (bottom left, above the tool button): opens a pause to pick another weapon.
             bagButton = UiFactory.Box("Bag", t, new Vector2(0f, 0f), new Vector2(40f, 480f), new Vector2(150f, 150f));
@@ -981,9 +982,9 @@ namespace SquashBot.UI
             UiFactory.Text(alarmPill, Loc.T("hud.alarm"), 38f, Color.white);
             alarmPill.gameObject.SetActive(false);
 
-            // Tool buttons up on the left, beside the bag (the thumbs keep the lower corners for moving and striking).
-            toolButtons[0] = ToolButton.Create(t, new Vector2(0f, 0f), new Vector2(220f, 480f));
-            toolButtons[1] = ToolButton.Create(t, new Vector2(0f, 0f), new Vector2(400f, 480f));
+            // Tool buttons in the bottom corners.
+            toolButtons[0] = ToolButton.Create(t, new Vector2(0f, 0f), new Vector2(40f, 170f));
+            toolButtons[1] = ToolButton.Create(t, new Vector2(1f, 0f), new Vector2(-40f, 170f));
             toolButtons[0].Pressed += () => ToolPressed?.Invoke(0);
             toolButtons[1].Pressed += () => ToolPressed?.Invoke(1);
 
@@ -1400,7 +1401,7 @@ namespace SquashBot.UI
         /// <summary>Bottom strip where the banner ad lives; while no real network is connected, a labelled placeholder.</summary>
         private void BuildBanner(Transform root)
         {
-            var strip = UiFactory.Box("Banner", root, Vector2.zero, Vector2.zero, new Vector2(Ads.BannerWidth, Ads.BannerReserve));
+            var strip = UiFactory.Rect("Banner", root, Vector2.zero, new Vector2(1f, 0f), Vector2.zero, new Vector2(0f, Ads.BannerReserve));
             UiFactory.Fill(strip, new Color(0.05f, 0.04f, 0.12f, 0.92f)).raycastTarget = false;
             UiFactory.Fill(UiFactory.Rect("Line", strip, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -3f), Vector2.zero), new Color(1f, 1f, 1f, 0.12f)).raycastTarget = false;
             UiFactory.Text(strip, Loc.T("ad.banner"), 34f, new Color(1f, 1f, 1f, 0.35f));
@@ -1487,7 +1488,6 @@ namespace SquashBot.UI
         {
             menu.Hide();
             Map.Hide();
-            if (WorldMap != null) WorldMap.Hide();
             Story.Hide();
             Shop.Hide();
             DefenseEditor.Hide();
@@ -1516,7 +1516,7 @@ namespace SquashBot.UI
             UpdateJuice(dt);
             if (flash != null && flashLeft > 0f)
             {
-                flashLeft = Mathf.Max(0f, flashLeft - dt * flashSpeed);
+                flashLeft = Mathf.Max(0f, flashLeft - dt * 3.2f);
                 var fc = flash.color;
                 flash.color = new Color(fc.r, fc.g, fc.b, flashStrength * flashLeft * flashLeft);
             }

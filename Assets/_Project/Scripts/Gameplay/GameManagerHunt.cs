@@ -124,15 +124,15 @@ namespace SquashBot.Gameplay
             // The battle arenas have no cage and no tunnel: vanG rises in the courtyard when the crowd is beaten.
             hunt.MonsterSpot = arenaRun ? (GridPos?)null : GateGuardSpot(huntGate);
             if (gateView != null) Destroy(gateView.gameObject);
-            gateView = arenaRun || (journey && !LastOfWorld) ? null : TunnelGate.Create(GridView.ToWorld(huntGate) + Vector3.up * GridView.SurfaceY, WorldTheme.Current.accent);
+            gateView = arenaRun ? null : TunnelGate.Create(GridView.ToWorld(huntGate) + Vector3.up * GridView.SurfaceY, WorldTheme.Current.accent);
             var guardSpot = hunt.MonsterSpot ?? new GridPos(-99, -99);
             var gateTile = huntGate;
             hazards.IsProtected = p => p == gateTile || p == guardSpot || grid.IsCage(p) || grid.IsBridge(p) || grid.IsGate(p);
             SetupCage();
             hunt.NoMonster = trailRun;
-            hunt.RedFoes = arenaRun || journey; // the enemies wear red wherever foi has blue allies // the open world's roads: no vanG
+            hunt.RedFoes = arenaRun; // the open world's roads: no vanG
             hunt.Begin(grid, level, World, levelIndex * 31 + 7);
-            introPending = !journey; // the opening shot over the whole floor (not on the journey: straight in from the stairs)
+            introPending = true; // the opening shot over the whole floor
             SetupPotions();
             SetupFifi();
             SetupBombs();
@@ -532,7 +532,7 @@ namespace SquashBot.Gameplay
             // Low down, it looks a little higher, over foi towards the fight.
             var rot = Quaternion.LookRotation(closeCamFocus + Vector3.up * Mathf.Lerp(0.35f, 0.9f, combatBlend) - pos);
             float fov = Mathf.Lerp(CloseCamFov, FightCamFov, combatBlend);
-            if (TpsActive && !IsoView) { TpsPose(out pos, out rot); fov = TpsFov; } // the battle arenas: over foi's shoulder
+            if (TpsActive) { TpsPose(out pos, out rot); fov = TpsFov; } // the battle arenas: over foi's shoulder
             if (introPending) { introPending = false; introStart = Time.time; }
             if (IntroRunning)
             {

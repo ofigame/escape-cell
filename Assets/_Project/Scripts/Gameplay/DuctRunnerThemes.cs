@@ -18,12 +18,9 @@ namespace SquashBot.Gameplay
         private bool IsThemed => kind != Kind.Duct && kind != Kind.Surf && kind != Kind.Mine;
 
         /// <summary>The world a road passes through for a level (0-based): simple ducts first, a new world every 30 levels or so.</summary>
-        /// <summary>The journey's tunnel at a world's end: the open-air course of that world's land (set while it is laid).</summary>
-        public static Kind? ThemeOverride;
-
-        public static Kind RoadTheme(int level) => ThemeOverride ?? (
+        public static Kind RoadTheme(int level) =>
             level < 20 ? Kind.Duct : level < 50 ? Kind.Forest : level < 80 ? Kind.Canyon : level < 110 ? Kind.Ocean :
-            level < 140 ? Kind.Snow : level < 170 ? Kind.Crystal : level < 210 ? Kind.Sky : Kind.Void);
+            level < 140 ? Kind.Snow : level < 170 ? Kind.Crystal : level < 210 ? Kind.Sky : Kind.Void;
 
         // Among the stars: lighter gravity and slower lane changes (less grip).
         private float GravityScale => kind == Kind.Void ? 0.7f : 1f;

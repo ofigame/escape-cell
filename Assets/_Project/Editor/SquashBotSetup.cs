@@ -607,9 +607,10 @@ namespace SquashBot.EditorTools
             // Less code for IL2CPP to convert: keeps the cloud runner's memory in check (exit code 137 = out of memory).
             PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.iOS, ManagedStrippingLevel.Medium);
             PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.iOS, Il2CppCodeGeneration.OptimizeSize);
-            // The whole game is played sideways: auto-rotation between the two landscape ways only.
+            // Portrait in play (locked at start by the game), landscape allowed for the battle arenas' TPS fight: the
+            // phone's app manifest / Info.plist must list both, so the setting is auto-rotation with the three allowed.
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
-            PlayerSettings.allowedAutorotateToPortrait = false; // landscape only, from the first frame
+            PlayerSettings.allowedAutorotateToPortrait = true;
             PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
             PlayerSettings.allowedAutorotateToLandscapeLeft = true;
             PlayerSettings.allowedAutorotateToLandscapeRight = true;

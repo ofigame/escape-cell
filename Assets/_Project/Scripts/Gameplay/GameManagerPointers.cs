@@ -64,9 +64,6 @@ namespace SquashBot.Gameplay
             }
             if (roadPhase == RoadPhase.Walk && roadBeacon != null) goals.Add((At(roadExit), RoadGreen)); // the way to the tunnel
             if (crate != null) goals.Add((At(crateTile), SuperCrate.Gold));
-            // The journey: a won arena's door, and a road's stairs or gate once its chest is open.
-            if (arenaExit != null) goals.Add((At(arenaExitTile), Palette.UiGold));
-            if (trailRun && trailRoot != null && trailChests.TrueForAll(c => c.open)) goals.Add((At(trailGate), RoadGreen));
             return goals;
         }
     }

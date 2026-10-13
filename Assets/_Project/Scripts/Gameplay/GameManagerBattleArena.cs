@@ -37,7 +37,6 @@ namespace SquashBot.Gameplay
             ui.Arenas.Hide();
             ClearTrail();
             trailRun = false;
-            if (journey) { SaveJourney(JourneyLevel, JPhase.Arena); BeginSegment(); }
             bonusRun = true;
             dailyRun = false;
             arenaRun = true;
@@ -46,6 +45,15 @@ namespace SquashBot.Gameplay
             arenaGiftsPhase = arenaGiftsDone = false;
             levelIndex = BattleArenas.ThemeLevel(i);
             level = BuildArenaLevel(i);
+            int allies = AlliesKept;
+            if (allies > 0)
+            {
+                // Allies at foi's side: a bigger, tougher crowd meets them (foi still has plenty to fight).
+                level.robots += allies * 3;
+                level.robotsAtOnce = Mathf.Min(level.robotsAtOnce + allies, ArenaAtOnceCap);
+                level.elites += allies / 2;
+                level.robotHp += allies / 6;
+            }
             BeginRun();
             SpawnKeptAllies();
             EnterTps(); // fought in landscape, over foi's shoulder
@@ -273,13 +281,12 @@ namespace SquashBot.Gameplay
         /// <summary>The arena ended: its record kept, the result card says how it went.</summary>
         private void EndArena(bool won)
         {
-            if (journey) { if (!won) SegmentLost(); } // the journey: the allies won in this part are lost
-            else if (trailRun || !won) KeepAllies(0); // beaten: the allies are lost
+            if (trailRun || !won) KeepAllies(0); // beaten: the allies are lost
             if (trailRun)
             {
                 // Beaten on a road: back to its start next time (nothing to record).
                 ExitTps();
-                ShowBonusResult(Loc.T("trail.lost"), lost: journey);
+                ShowBonusResult(Loc.T("trail.lost"));
                 return;
             }
             ExitTps();
@@ -290,7 +297,7 @@ namespace SquashBot.Gameplay
                 SaveData.Coins += c;
                 ShowBonusResult(Loc.F("arena.won", c));
             }
-            else ShowBonusResult(Loc.F("arena.lost", arenaBestStreak), lost: journey);
+            else ShowBonusResult(Loc.F("arena.lost", arenaBestStreak));
         }
     }
 }

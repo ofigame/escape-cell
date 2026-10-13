@@ -77,9 +77,7 @@ namespace SquashBot.Monetization
         }
 
         /// <summary>Height (in UI units of the 1080-wide reference canvas) kept free at the bottom of menu screens for the banner.</summary>
-        public const float BannerReserve = 150f;
-        /// <summary>The banner's width on the landscape screen (a 320x50 banner, bottom-left corner): screens keep it clear.</summary>
-        public const float BannerWidth = 960f;
+        public const float BannerReserve = 170f;
     }
 
     /// <summary>No interstitials off the phones (editor, Windows).</summary>
@@ -117,6 +115,7 @@ namespace SquashBot.Monetization
         {
             var canvas = UiFactory.CreateCanvas("TestAd", out var scaler);
             canvas.sortingOrder = 100;
+            scaler.matchWidthOrHeight = UiFactory.MatchFor(Screen.width, Screen.height);
             var screen = canvas.gameObject.AddComponent<TestAdScreen>();
             screen.done = onFinished;
             screen.Build(canvas.transform);

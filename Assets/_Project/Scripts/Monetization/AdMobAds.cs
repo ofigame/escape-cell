@@ -208,8 +208,8 @@ namespace SquashBot.Monetization
             visible = true;
             if (view == null)
             {
-                var size = AdSize.Banner; // 320x50 in the bottom-left corner: the rest of the wide screen stays free
-                view = new BannerView(AdIds.Banner, size, AdPosition.BottomLeft);
+                var size = AdSize.GetCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(AdSize.FullWidth);
+                view = new BannerView(AdIds.Banner, size, AdPosition.Bottom);
                 view.OnBannerAdLoadFailed += error => Debug.LogWarning("[Ads] Banner failed to load: " + error);
                 view.LoadAd(new AdRequest());
             }

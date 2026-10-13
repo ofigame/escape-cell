@@ -78,6 +78,9 @@ namespace SquashBot.Gameplay
             return false;
         }
 
+        /// <summary>How slowly allies swing (1 = their own pace).</summary>
+        public float AllyPace = 1f;
+
         /// <summary>Damage each ally's blow does (later roads' allies hit harder).</summary>
         public int AllyDamage = 1;
 
@@ -120,7 +123,7 @@ namespace SquashBot.Gameplay
                 a.SetRaise(k * 1.3f);
                 if (k < 1f) return;
                 a.windup = -1f;
-                a.cooldown = 0.6f + (float)rng.NextDouble() * 0.3f;
+                a.cooldown = (0.6f + (float)rng.NextDouble() * 0.3f) * AllyPace;
                 a.SetRaise(0f);
                 Shockwave.Create(At(a.target), 0.9f, AllyColour);
                 AudioManager.PlaySfx(Sfx.Impact, 0.45f, 1.1f);
