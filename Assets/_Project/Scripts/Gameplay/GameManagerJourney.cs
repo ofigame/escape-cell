@@ -47,6 +47,27 @@ namespace SquashBot.Gameplay
         /// <summary>Died in a part: the allies won in it are lost, those brought into it stay.</summary>
         private void SegmentLost() => KeepAllies(Mathf.Min(AlliesKept, PlayerPrefs.GetInt(JSegAlliesKey, 0)));
 
+        /// <summary>The road before floor <paramref name="lvl"/> (or, after a world's last floor, the short gate road): the same every time.</summary>
+        public static string[] JourneyRoadLayout(int lvl, bool toGate, out int[] bounds)
+        {
+            int world = LevelCatalog.WorldOf(lvl);
+            var shape = toGate ? TrailMap.Shape.Gentle : TrailMap.ShapeFor(lvl);
+            int size = toGate ? 3 : 4 + (lvl % LevelCatalog.LevelsPerWorld) / 3 + world / 6;
+            return TrailMap.Layout(9100 + lvl * 131 + (toGate ? 7 : 0), shape, size, toGate ? 0 : 1, out bounds);
+        }
+
+        /// <summary>A world's plan for the world map, from the same layouts the journey plays.</summary>
+        private JourneyMapArt.WorldPlan MapPlan(int w) => JourneyMapArt.Plan(w, LayoutRows, (l, toGate) => JourneyRoadLayout(l, toGate, out _), a => BattleArenas.Layout(a, out _));
+
+        private string[] LayoutRows(int lvl)
+        {
+            var d = levelSet.levels[Mathf.Clamp(lvl, 0, LevelCount - 1)];
+            if (d.layout != null && d.layout.Length > 0) return d.layout;
+            var rows = new string[Mathf.Max(3, d.gridHeight)];
+            for (int i = 0; i < rows.Length; i++) rows[i] = new string('#', Mathf.Max(3, d.gridWidth));
+            return rows;
+        }
+
         /// <summary>PLAY: on from where the journey stands.</summary>
         private void ContinueJourney()
         {
@@ -85,13 +106,12 @@ namespace SquashBot.Gameplay
             arenaBestStreak = 0;
             arenaGiftsPhase = arenaGiftsDone = false;
             levelIndex = lvl;
-            var shape = toGate ? TrailMap.Shape.Gentle : TrailMap.ShapeFor(lvl);
-            int size = toGate ? 3 : 4 + (lvl % LevelCatalog.LevelsPerWorld) / 3 + world / 6;
-            var layout = TrailMap.Layout(9100 + lvl * 131 + (toGate ? 7 : 0), shape, size, toGate ? 0 : 1, out var bounds);
+            var layout = JourneyRoadLayout(lvl, toGate, out var bounds);
             level = BuildTrailLevel(trailTarget, layout, bounds);
             BeginRun();
             EnterTps();
             SetupTrail();
+            if (!toGate) BuildFloorAhead(lvl); // the floor ahead in full view at the road's end
             SpawnKeptAllies();
             ui.ShowIntro(toGate ? Loc.F("trail.title", Loc.T(BattleArenas.NameKey(trailTarget))) : Loc.F("journey.toLevel", lvl + 1),
                 toGate ? Loc.T("journey.toArenaText") : Loc.T("journey.roadText"));
@@ -125,6 +145,7 @@ namespace SquashBot.Gameplay
             ApplyAssist(level);
             ApplyCurve(level, AlliesKept);
             BeginRun();
+            SetupJourneyLevelScene();
             SpawnKeptAllies();
             ui.ShowIntro(Loc.F("level", levelIndex + 1), MissionText(level, upper: true));
             AudioManager.PlaySfx(Sfx.Win, 0.6f, 1.2f);
@@ -151,6 +172,21 @@ namespace SquashBot.Gameplay
             {
                 l.robotHp += 1;
                 l.robots += 2 + w / 4;
+            }
+        }
+
+        /// <summary>The open-air tunnel course that matches a world's land.</summary>
+        private static DuctRunner.Kind TunnelLandFor(int world)
+        {
+            switch (WorldTheme.ForWorld(world).key)
+            {
+                case "world.ice": case "world.snow": return DuctRunner.Kind.Snow;
+                case "world.forest": case "world.nightforest": case "world.garden": return DuctRunner.Kind.Forest;
+                case "world.harbor": case "world.canal": return DuctRunner.Kind.Ocean;
+                case "world.clouds": case "world.castle": case "world.factory": return DuctRunner.Kind.Sky;
+                case "world.crystal": case "world.mirror": case "world.aurora": case "world.lavender": return DuctRunner.Kind.Crystal;
+                case "world.cyber": case "world.server": case "world.galaxy": case "world.storm": return DuctRunner.Kind.Void;
+                default: return DuctRunner.Kind.Canyon; // desert, sunset, canyon, mine, lava and the rest
             }
         }
 
@@ -185,7 +221,7 @@ namespace SquashBot.Gameplay
         /// <summary>The arena won: its door to the next world swung open; through it with a white flash onto the next road.</summary>
         private void JourneyThroughDoor()
         {
-            ui.Flash(Color.white, 0.6f);
+            ui.Flash(Color.white, 1f, 2.6f); // a white light that dies away slowly over the new world
             AudioManager.PlaySfx(Sfx.Win, 1f, 1.4f);
             KeepAllies(0); // the allies stay behind: the next world has its own
             int next = (arenaIndex + 1) * LevelCatalog.LevelsPerWorld;

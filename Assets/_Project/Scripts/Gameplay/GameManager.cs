@@ -488,6 +488,7 @@ namespace SquashBot.Gameplay
         private void ShowMenu()
         {
             robot.transform.rotation = Quaternion.identity; // turned round in the garage: facing ahead again
+            ClearJourneyScene();
             if (journey) SegmentLost(); // left mid-way: that part starts again without the allies won in it
             else if (arenaMode) KeepAllies(0); // left the battle arena: the allies are gone (they never come back with a new start)
             ExitTps();
@@ -546,7 +547,8 @@ namespace SquashBot.Gameplay
             string pinText = JourneyPhase == JPhase.Road ? Loc.F("wmap.pinRoad", jw + 1, jl + 1)
                 : JourneyPhase == JPhase.Level ? Loc.F("wmap.pinLevel", jw + 1, jl + 1)
                 : Loc.F("wmap.pinArena", jw + 1);
-            ui.ShowWorldMap(Mathf.Max(jw, LevelCatalog.WorldOf(SaveData.UnlockedLevel)), jw, pinText, SaveData.Coins);
+            ui.ShowWorldMap(MapPlan, Mathf.Max(jw, LevelCatalog.WorldOf(SaveData.UnlockedLevel)), jl, JourneyPhase == JPhase.Road,
+                JourneyPhase == JPhase.GateRoad || JourneyPhase == JPhase.Arena, pinText, SaveData.Coins);
             cameraRig.SetMenuFocus(false); // the 3D map has its own camera; the blur is for the menus over the floor
             cameraRig.Showcase(null, 0f);
         }
@@ -796,6 +798,7 @@ namespace SquashBot.Gameplay
 
         private void BeginRun()
         {
+            ClearJourneyScene();
             arenaMode = arenaRun;
             robot.transform.rotation = Quaternion.identity;
             if (!trailRun) ClearTrail(); // never a road left standing under another floor
@@ -829,7 +832,9 @@ namespace SquashBot.Gameplay
             cameraRig.SetMenuFocus(false);
             cameraRig.PlayIntro();
             if (level.final) gridView.SetPaintColor(FinalGold);
-            robot.Spawn(grid, grid.StartSpot ?? grid.CenterFloor());
+            // A journey floor is entered at the top of its stairs (its south edge), not in the glass cell.
+            if (journey && !arenaRun) { journeyEntry = EntryOf(grid); robot.Spawn(grid, journeyEntry); }
+            else robot.Spawn(grid, grid.StartSpot ?? grid.CenterFloor());
 
             // Long journeys don't fit the screen: the camera rides along and hazards and pickups stay near the robot.
             bool big = grid.Width > FollowFrom || grid.Height > FollowFrom;
@@ -2648,7 +2653,9 @@ namespace SquashBot.Gameplay
             roadExit = PickExit(out var outward);
             var origin = GridView.ToWorld(roadExit) + new Vector3(outward.x, 0f, outward.y);
             float heading = outward.y > 0 ? 0f : 90f;
+            if (journeyTunnel) DuctRunner.ThemeOverride = TunnelLandFor(World); // the world's own land round its last tunnel
             if (!journeyExit) runner.PrepareRoad(levelIndex * 7919 + 13, origin, heading, levelIndex, LevelCatalog.WorldOf(levelIndex + 1));
+            DuctRunner.ThemeOverride = null;
 
             roadBeacon = new GameObject("RoadExit");
             roadBeacon.transform.position = GridView.ToWorld(roadExit) + Vector3.up * GridView.SurfaceY;

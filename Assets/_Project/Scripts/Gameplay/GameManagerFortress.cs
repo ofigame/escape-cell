@@ -103,7 +103,8 @@ namespace SquashBot.Gameplay
             }
             FortressFloor.SkipCornerTowers = arenaRun;
             FortressFloor.SkipWall = trailRun ? (System.Func<GridPos, bool>)(p => true) // the roads: mountains, no ramparts
-                : arenaRun ? (System.Func<GridPos, bool>)(p => BattleArenas.BuildingAt(p.x, p.y)) : null;
+                : arenaRun ? (System.Func<GridPos, bool>)(p => BattleArenas.BuildingAt(p.x, p.y))
+                : journey ? (System.Func<GridPos, bool>)(p => EntryGap(p, journeyEntry)) : null; // the journey: a gap for the stairs up
             FortressFloor.Detailed = arenaRun;
             FortressFloor.WallThick = wallThick;
             fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, FortressRects(), wallHeight);
@@ -120,6 +121,7 @@ namespace SquashBot.Gameplay
             glassSince = -1f;
             foreach (var p in grid.LavaTiles)
             {
+                if (journey && !arenaRun && Mathf.Abs(p.x - journeyEntry.x) <= 3 && p.y <= journeyEntry.y + 3) continue; // the way in from the stairs never burns
                 grid.SetTile(p, Core.TileState.Fire);
                 gridView.Ignite(p);
             }

@@ -285,7 +285,26 @@ namespace SquashBot.Visual
         /// cacti, ice blocks, crystals or lamps, and further back the mountains it winds between — stacked, tapering
         /// peaks (snow-capped in the cold and the stone worlds, glowing in the lava worlds).
         /// </summary>
-        public static void Trail(Transform root, GridModel grid, int arena, Color wall, Color accent)
+        /// <param name="drop">How far below the floor the land lies (a fortress on its plateau: the land is lower).</param>
+        /// <param name="edge">Tiles left clear round the floor first (a fortress's ramparts stand there).</param>
+        /// <summary>The colour of a world's land round its roads (sand, grass or snow), for the world map.</summary>
+        public static Color GroundOf(int world)
+        {
+            switch (StyleFor(WorldTheme.ForWorld(world).key))
+            {
+                case CityStyle.Ice: return new Color(0.95f, 0.97f, 1f);
+                case CityStyle.Desert: case CityStyle.Factory: return new Color(0.9f, 0.76f, 0.52f);
+                case CityStyle.Lava: return new Color(0.42f, 0.3f, 0.24f);
+                case CityStyle.Pearl: case CityStyle.Harbor: return new Color(0.93f, 0.86f, 0.68f);
+                case CityStyle.Neon: case CityStyle.Crystal: return new Color(0.32f, 0.5f, 0.36f);
+                default: return new Color(0.42f, 0.66f, 0.33f);
+            }
+        }
+
+        /// <summary>Ground the scenery leaves bare (a road's end, where the floor ahead stands).</summary>
+        public static System.Func<GridPos, bool> KeepClear;
+
+        public static void Trail(Transform root, GridModel grid, int arena, Color wall, Color accent, float drop = 0f, int edge = 0)
         {
             var style = StyleFor(WorldTheme.ForLevel(arena * SquashBot.Data.LevelCatalog.LevelsPerWorld).key);
             var rng = new System.Random(5100 + arena * 17);
@@ -305,7 +324,7 @@ namespace SquashBot.Visual
             {
                 var p = queue.Dequeue();
                 int d = near[p.x, p.y];
-                if (d >= 8) continue;
+                if (d >= 8 + edge) continue;
                 for (int dx = -1; dx <= 1; dx++)
                     for (int dy = -1; dy <= 1; dy++)
                     {
@@ -336,7 +355,7 @@ namespace SquashBot.Visual
             var peakM = MaterialFactory.CreateSurface(peak, Color.black, 0.15f, 0f);
             var peakDarkM = MaterialFactory.CreateSurface(peak * 0.85f, Color.black, 0.15f, 0f);
             var capM = glowPeaks ? MaterialFactory.Create(cap, cap * 2f) : MaterialFactory.CreateSurface(cap, Color.black, 0.3f, 0f);
-            float y0 = GridView.SurfaceY - 0.1f;
+            float y0 = GridView.SurfaceY - 0.1f - drop;
             // The ground between the road and the mountains: sand, grass or snow by the world, with tufts and pebbles.
             Color ground, speck;
             switch (style)
@@ -357,7 +376,7 @@ namespace SquashBot.Visual
                 for (int y = 0; y < h; y++)
                 {
                     int d = near[x, y];
-                    if (d == 0 || d > 6 || rng.NextDouble() > 0.3) continue;
+                    if (d <= edge || d > 6 + edge || rng.NextDouble() > 0.3) continue;
                     var at = GridView.ToWorld(new GridPos(x, y));
                     var p = new Vector3(at.x + (float)rng.NextDouble() - 0.5f, y0, at.z + (float)rng.NextDouble() - 0.5f);
                     float s = 0.25f + (float)rng.NextDouble() * 0.35f;
@@ -372,11 +391,13 @@ namespace SquashBot.Visual
                 for (int y = 0; y < h; y++)
                 {
                     int d = near[x, y];
-                    if (d == 0 || d > 8) continue;
+                    if (d == 0 || d > 8 + edge) continue;
+                    int e = d - edge; // the distance from the clear ring round the floor
+                    if (e < 1 || (KeepClear != null && KeepClear(new GridPos(x, y)))) continue;
                     var at = GridView.ToWorld(new GridPos(x, y));
                     at.y = y0;
                     double roll = rng.NextDouble();
-                    if (d <= 2 && roll < (d == 1 ? 0.18 : 0.5))
+                    if (e <= 2 && roll < (e == 1 ? 0.18 : 0.5))
                     {
                         // By the road: a prop of the world.
                         var t = new GameObject("Prop").transform;
@@ -386,7 +407,7 @@ namespace SquashBot.Visual
                         float s = 0.7f + (float)rng.NextDouble() * 0.6f;
                         if (style == CityStyle.Forest || style == CityStyle.Town || style == CityStyle.Harbor)
                         {
-                            if (d == 2 && rng.Next(4) > 0) // trees a row back from the edge (clear of the camera), low rocks on it
+                            if (e == 2 && rng.Next(4) > 0) // trees a row back from the edge (clear of the camera), low rocks on it
                             {
                                 Shapes.Primitive(PrimitiveType.Cylinder, "Trunk", t, new Vector3(0f, 0.45f * s, 0f), new Vector3(0.18f, 0.45f * s, 0.18f) * s, trunkM);
                                 Shapes.Primitive(PrimitiveType.Sphere, "Crown", t, new Vector3(0f, 1.25f * s, 0f), new Vector3(1.1f, 1.2f, 1.1f) * s, leafM);
@@ -406,18 +427,18 @@ namespace SquashBot.Visual
                             Box("Ice", t, new Vector3(0f, 0.45f * s, 0f), new Vector3(0.7f, 0.9f, 0.7f) * s, leafM, 0.1f);
                         else if (style == CityStyle.Crystal || style == CityStyle.Neon || style == CityStyle.Lava)
                         {
-                            float tall = d == 1 ? 0.55f : 1.2f; // short shards on the edge, tall ones behind
+                            float tall = e == 1 ? 0.55f : 1.2f; // short shards on the edge, tall ones behind
                             var c = Box("Crystal", t, new Vector3(0f, tall * 0.5f * s, 0f), new Vector3(0.3f, tall, 0.3f) * s, leafM, 0.05f);
                             c.localRotation = Quaternion.Euler(rng.Next(-15, 15), 0f, rng.Next(-15, 15));
                             Box("Base", t, new Vector3(0f, 0.15f * s, 0f), new Vector3(0.8f, 0.3f, 0.7f) * s, rockM, 0.12f);
                         }
                         else Box("Rock", t, new Vector3(0f, 0.3f * s, 0f), new Vector3(0.85f, 0.6f, 0.75f) * s, rockM, 0.15f);
                     }
-                    else if (d >= 4 && roll < 0.09)
+                    else if (e >= 4 && roll < 0.09)
                     {
                         // Further back: a mountain, stacked tapering drums, a cap on top.
                         // Its foot (radius 1.1 s) stays a tile and a half clear of the road.
-                        float s = Mathf.Min(1.4f + (float)rng.NextDouble() * 1.6f + d * 0.2f, (d - 1.5f) / 1.1f);
+                        float s = Mathf.Min(1.4f + (float)rng.NextDouble() * 1.6f + e * 0.2f, (e - 1.5f) / 1.1f);
                         if (s < 1.1f) continue;
                         var t = new GameObject("Peak").transform;
                         t.SetParent(root, false);

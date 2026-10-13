@@ -220,12 +220,14 @@ namespace SquashBot.UI
         public SkillBar SkillBar { get; private set; }
 
         private Image flash;
-        private float flashLeft, flashStrength;
+        private float flashLeft, flashStrength, flashSpeed = 3.2f;
 
         /// <summary>Flashes the whole screen in <paramref name="color"/> for a moment.</summary>
-        public void Flash(Color color, float strength = 0.45f)
+        /// <param name="fade">Seconds the flash takes to die away.</param>
+        public void Flash(Color color, float strength = 0.45f, float fade = 0.31f)
         {
             if (flash == null) return;
+            flashSpeed = 1f / Mathf.Max(0.05f, fade);
             flash.color = new Color(color.r, color.g, color.b, 0f);
             flashStrength = strength;
             flashLeft = 1f;
@@ -687,10 +689,10 @@ namespace SquashBot.UI
         }
 
         /// <summary>The world map over everything, the pin where the journey stands.</summary>
-        public void ShowWorldMap(int openWorld, int pinWorld, string pinText, int coins)
+        public void ShowWorldMap(Func<int, SquashBot.Visual.JourneyMapArt.WorldPlan> planOf, int openWorld, int pinLevel, bool onRoad, bool atArena, string pinText, int coins)
         {
             HideAll();
-            WorldMap.Show(SquashBot.Data.LevelCatalog.WorldCount, SquashBot.Data.LevelCatalog.LevelsPerWorld, openWorld, pinWorld, pinText, coins);
+            WorldMap.Show(planOf, openWorld, pinLevel, onRoad, atArena, pinText, coins);
             SetBanner(true);
         }
 
@@ -1514,7 +1516,7 @@ namespace SquashBot.UI
             UpdateJuice(dt);
             if (flash != null && flashLeft > 0f)
             {
-                flashLeft = Mathf.Max(0f, flashLeft - dt * 3.2f);
+                flashLeft = Mathf.Max(0f, flashLeft - dt * flashSpeed);
                 var fc = flash.color;
                 flash.color = new Color(fc.r, fc.g, fc.b, flashStrength * flashLeft * flashLeft);
             }

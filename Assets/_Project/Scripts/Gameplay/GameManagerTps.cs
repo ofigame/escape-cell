@@ -57,7 +57,7 @@ namespace SquashBot.Gameplay
             }
             tpsOn = true;
             tpsStrike = tpsSpin = tpsJump = false;
-            tpsYaw = 45f; // the usual view's way (looking along +x +z)
+            tpsYaw = journey ? 0f : 45f; // the journey looks north along the way; otherwise the usual view's way (+x +z)
             tpsPitch = 27f;
             tps.Show(true);
             tps.Minimap.Build(grid, arenaRun ? BattleArenas.LastBuildings : new System.Collections.Generic.List<BattleArenas.Building>(), arenaRun ? BattleArenas.LastPosts : new System.Collections.Generic.List<BattleArenas.Post>());
@@ -94,6 +94,7 @@ namespace SquashBot.Gameplay
         /// <summary>This frame's command from the TPS controls (and keys), the camera turned by the right thumb.</summary>
         private InputCommand TpsCommand()
         {
+            if (climbing) return default; // up the stairs to the floor: no walking meanwhile
             float dt = Time.unscaledDeltaTime;
             UpdateArenaGifts();
             UpdateTrail(Time.deltaTime);
@@ -277,7 +278,7 @@ namespace SquashBot.Gameplay
                     var p = Vector3.Lerp(focus, pos, d / full);
                     var tile = new GridPos(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.z));
                     bool blocked = city ? SquashBot.Visual.ArenaDecor.BuildingTop.TryGetValue(tile, out float top) && p.y < top
-                        : grid != null && !grid.Exists(tile) && p.y < GridView.ToWorld(robot.Position).y + 2.6f;
+                        : grid != null && IsRampart(tile) && p.y < GridView.ToWorld(robot.Position).y + 2.6f;
                     if (blocked) { allowed = Mathf.Max(0.9f, d - 0.5f); break; }
                 }
             float dt = Time.unscaledDeltaTime;
@@ -286,5 +287,16 @@ namespace SquashBot.Gameplay
         }
 
         private float tpsCamDist = 6f;
+
+        /// <summary>A rampart tile: off the floor but right beside it (a journey floor's stairs gap is open).</summary>
+        private bool IsRampart(GridPos t)
+        {
+            if (grid.Exists(t)) return false;
+            if (journey && EntryGap(t, journeyEntry)) return false;
+            for (int dx = -1; dx <= 1; dx++)
+                for (int dy = -1; dy <= 1; dy++)
+                    if (grid.Exists(t + new GridPos(dx, dy))) return true;
+            return false;
+        }
     }
 }

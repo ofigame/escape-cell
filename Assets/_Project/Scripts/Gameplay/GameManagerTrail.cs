@@ -222,7 +222,10 @@ namespace SquashBot.Gameplay
             // The scenery is batched into a few meshes; the chests and the gate stay free to move.
             var decor = new GameObject("Scenery").transform;
             decor.SetParent(trailRoot, false);
+            var gate = trailGate;
+            ArenaDecor.KeepClear = trailEnd == TrailEnd.Stairs ? (System.Func<GridPos, bool>)(p => p.y >= gate.y - 1 && Mathf.Abs(p.x - gate.x) < 40) : null; // the floor ahead stands there
             ArenaDecor.Trail(decor, grid, trailTarget, look.wall, look.accent);
+            ArenaDecor.KeepClear = null;
             if (decor.GetComponentsInChildren<MeshRenderer>().Length < 6000) StaticBatchingUtility.Combine(decor.gameObject);
         }
 
@@ -405,11 +408,9 @@ namespace SquashBot.Gameplay
             {
                 if (trailEnd == TrailEnd.Stairs)
                 {
-                    // Up the stairs: straight onto the floor.
+                    // Up the stairs and onto the floor standing there.
                     trailEntering = true;
-                    trailRun = false;
-                    ExitTps();
-                    StartJourneyLevel(trailNextLevel);
+                    StartCoroutine(ClimbOntoFloor(trailNextLevel));
                 }
                 else if (trailEnd == TrailEnd.Gate || BattleArenas.Unlocked(trailTarget))
                 {
@@ -429,36 +430,8 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>A staircase up at a journey road's end: broad steps rising north to the next floor, lit at the top.</summary>
-        private void BuildStairs(GridPos at, BattleArenas.Look look)
-        {
-            var root = new GameObject("Stairs").transform;
-            root.SetParent(trailRoot, false);
-            root.position = GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY;
-            var stone = MaterialFactory.Create(Color.Lerp(look.wall, Color.white, 0.35f), Color.black);
-            var edge = MaterialFactory.Create(look.accent, look.accent * 1.6f);
-            for (int i = 0; i < 7; i++)
-            {
-                float h = 0.36f + i * 0.72f;
-                Shapes.Rounded("Step", root, new Vector3(0f, h * 0.5f, 0.2f + i * 0.5f), new Vector3(4.6f, h, 0.55f), 0.04f, stone);
-                Shapes.Rounded("Edge", root, new Vector3(0f, h + 0.01f, i * 0.5f - 0.04f), new Vector3(4.6f, 0.04f, 0.08f), 0.02f, edge);
-            }
-            foreach (float s in new[] { -1f, 1f })
-                Shapes.Rounded("Rail", root, new Vector3(s * 2.45f, 1.6f, 1.7f), new Vector3(0.25f, 3.2f, 3.8f), 0.08f, stone);
-            var glow = MaterialFactory.Create(Color.Lerp(look.accent, Color.white, 0.5f), look.accent * 2.2f);
-            Shapes.Rounded("Top", root, new Vector3(0f, 5.2f, 3.6f), new Vector3(4.4f, 0.1f, 0.6f), 0.05f, glow);
-            var sign = new GameObject("Sign").AddComponent<TMPro.TextMeshPro>();
-            sign.transform.SetParent(root, false);
-            sign.transform.localPosition = new Vector3(0f, 6.2f, 3.4f);
-            sign.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-            sign.font = UiFactory.Font;
-            sign.text = Loc.F("level", trailNextLevel + 1);
-            sign.fontSize = 8f;
-            sign.alignment = TMPro.TextAlignmentOptions.Center;
-            sign.color = new Color(1f, 0.9f, 0.45f);
-            sign.outlineWidth = 0.25f;
-            sign.outlineColor = new Color(0.1f, 0.05f, 0.1f);
-            sign.rectTransform.sizeDelta = new Vector2(9f, 2.5f);
-        }
+        private void BuildStairs(GridPos at, BattleArenas.Look look) =>
+            Stairs(trailRoot, GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY, 0f, look, Loc.F("level", trailNextLevel + 1));
 
         /// <summary>The won journey arena's door to the next world: a tall frame, two leaves that swing open, white light beyond.</summary>
         private void BuildWorldDoor(Transform root, Color accent)
