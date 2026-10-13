@@ -132,6 +132,7 @@ namespace SquashBot.Gameplay
             hunt.NoMonster = trailRun;
             hunt.RedFoes = arenaRun; // the open world's roads: no vanG
             hunt.Begin(grid, level, World, levelIndex * 31 + 7);
+            ResetScore();
             introPending = true; // the opening shot over the whole floor
             SetupPotions();
             SetupFifi();

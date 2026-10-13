@@ -93,6 +93,8 @@ namespace SquashBot.UI
         /// <summary>Everything the result card shows.</summary>
         public struct ResultInfo
         {
+            /// <summary>The floor score line (and new development points), or null.</summary>
+            public string scoreLine;
             public bool won, bonusRound, hasNext, bonusAvailable, canContinue, canBuyContinue, canDouble, arena;
             public int continuePrice;
             public string subtitle, note, goalText;
@@ -114,6 +116,8 @@ namespace SquashBot.UI
         // Menu
         private UiScreen menu;
         private RectTransform arenaTip;
+        private GameObject armyPing;
+        private int armyWorld;
         private CanvasGroup arenaTipGroup;
         private float arenaTipClock;
         private TextMeshProUGUI menuLevel, menuWorld, menuMission, menuCoins, menuLives, menuStars;
@@ -205,6 +209,8 @@ namespace SquashBot.UI
         public AdOfferCard AdOffer { get; private set; }
         public ChestCard Chest { get; private set; }
         public QuestsScreen Quests { get; private set; }
+        /// <summary>foi's army: the six soldier groups and their development points.</summary>
+        public ArmyScreen ArmyView { get; private set; }
         private Button menuQuests;
         private GameObject questsPing;
 
@@ -320,6 +326,7 @@ namespace SquashBot.UI
             HeroPicker = HeroPicker.Create(root);
             AdOffer = AdOfferCard.Create(root);
             Chest = ChestCard.Create(root);
+            ArmyView = ArmyScreen.Create(root);
             Quests = QuestsScreen.Create(root);
             Quests.Claimed += () => { RefreshMenuCoins(); RefreshQuests(); };
             Garage.HeroPressed += () => HeroPicker.Show(true);
@@ -372,6 +379,15 @@ namespace SquashBot.UI
             UiFactory.Fill(qPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
             UiFactory.Text(qPing, "!", 32f, Color.white);
             questsPing = qPing.gameObject;
+
+            // The army: under the quests (its free development points glow on it).
+            var army = MenuArt.DockButton(t, Loc.T("army.button"), MenuArt.Icon.Swords, new Color(1f, 0.72f, 0.25f), TopLeft, new Vector2(110f, -570f), 120f, () => ArmyView.Show(armyWorld));
+            ((RectTransform)army.transform).pivot = new Vector2(0.5f, 0.5f);
+            var aPing = UiFactory.Box("Ping", army.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(44f, 44f));
+            aPing.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(aPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
+            UiFactory.Text(aPing, "!", 32f, Color.white);
+            armyPing = aPing.gameObject;
 
             // The battle arenas: top right, under the settings.
             var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopRight, new Vector2(-110f, -400f), 120f, () => ArenasPressed?.Invoke());
@@ -509,6 +525,8 @@ namespace SquashBot.UI
             menuMission.text = mission;
             menuCoins.text = coins.ToString();
             menuStars.text = Progress.TotalStars(levelCount).ToString();
+            armyWorld = SquashBot.Data.LevelCatalog.WorldOf(levelIndex);
+            if (armyPing != null) armyPing.SetActive(SquashBot.Data.Army.FreePoints > 0);
             menuDaily.gameObject.SetActive(DailyChest.Ready);
             RefreshQuests();
             RefreshDailyBonus();
@@ -1320,7 +1338,7 @@ namespace SquashBot.UI
             SetBanner(true);
             resultTitle.text = Loc.T(info.bonusRound ? "result.bonusDone" : info.won ? "result.win" : "result.lose");
             resultTitle.color = info.bonusRound ? Palette.UiGold : info.won ? Palette.UiCyan : Palette.UiRed;
-            resultSub.text = info.subtitle;
+            resultSub.text = string.IsNullOrEmpty(info.scoreLine) ? info.subtitle : info.scoreLine;
             resultReward.text = $"+{info.coins}";
             resultNote.text = info.note ?? "";
             bool goal = !string.IsNullOrEmpty(info.goalText);
@@ -1520,6 +1538,7 @@ namespace SquashBot.UI
             Garage.Hide();
             DailyBonus.Hide();
             Guide.Hide();
+            if (ArmyView != null) ArmyView.Hide();
             Briefing.Hide();
             prelevel.Hide(true);
             if (defenseAsk != null) defenseAsk.Hide(true);

@@ -2055,6 +2055,7 @@ namespace SquashBot.Gameplay
 
             // Stars: how well the level went.
             int stars = StarRules.Evaluate(starGoals, coinsThisRun, elapsed);
+            ScoreFloor(); // the floor score for the army (kept now, shown on the result card)
 
             // Every level leads on to the next by a road, and the level only counts as beaten when the robot arrives:
             // until then it is saved as "on the road", so quitting there brings the player back onto the road.
@@ -2098,6 +2099,7 @@ namespace SquashBot.Gameplay
             var info = new UIController.ResultInfo
             {
                 won = true,
+                scoreLine = ScoreLine(),
                 hasNext = hasNext,
                 canDouble = true,
                 subtitle = Loc.T(newWorld ? "result.newWorld" : hasNext ? "result.next" : "result.allDone"),

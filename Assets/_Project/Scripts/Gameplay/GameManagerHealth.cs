@@ -75,6 +75,7 @@ namespace SquashBot.Gameplay
                 return false;
             }
             health -= damage;
+            hitsTaken++;
             hurtCooldown = HurtGrace;
             ui.Flash(new Color(1f, 0.15f, 0.15f), 0.3f);
             BreakCombo();

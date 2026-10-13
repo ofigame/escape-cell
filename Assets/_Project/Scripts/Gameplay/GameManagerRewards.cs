@@ -31,6 +31,7 @@ namespace SquashBot.Gameplay
             killStreak = Time.time - lastKillAt <= StreakWindow ? killStreak + 1 : 1;
             lastKillAt = Time.time;
             int n = killStreak;
+            bestStreakRun = Mathf.Max(bestStreakRun, n);
             ArenaStreakGift(n);
             if (n >= FuryStreak && Time.time >= furyReadyAt) StartFury();
             bool callout = n == 3 || n == 5 || n == 8 || n == 12 || (n > 12 && n % 4 == 0);
