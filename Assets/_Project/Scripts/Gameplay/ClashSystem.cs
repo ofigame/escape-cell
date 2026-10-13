@@ -33,6 +33,32 @@ namespace SquashBot.Gameplay
         }
 
         private readonly List<Unit> units = new List<Unit>();
+        // Over each group: its kind and soldiers left; under each of mine a ring (lit while it can be picked).
+        private readonly TMPro.TextMeshPro[,] labels = new TMPro.TextMeshPro[2, Army.Groups];
+        private readonly Transform[] rings = new Transform[Army.Groups];
+        private readonly Material[] ringMats = new Material[Army.Groups];
+        private readonly Vector3[,] spots = new Vector3[2, Army.Groups];
+        private readonly bool[] pickable = new bool[Army.Groups];
+        private int pickedGroup = -1;
+
+        /// <summary>Where a group stands (team 0 mine, 1 theirs).</summary>
+        public Vector3 Spot(int team, int group) => spots[team, group];
+
+        /// <summary>Lights the rings of the groups that can be sent this turn (none: all dark), and the one picked.</summary>
+        public void SetPickable(bool[] can, int picked)
+        {
+            pickedGroup = picked;
+            for (int g = 0; g < Army.Groups; g++) pickable[g] = can != null && can[g];
+        }
+
+        /// <summary>Updates the soldier counts over the groups.</summary>
+        public void Label(int team, int group, int left)
+        {
+            var t = labels[team, group];
+            if (t == null) return;
+            t.text = Loc.T("army.kind." + Army.KindOf(group)) + "\n" + left;
+            t.alpha = left > 0 ? 1f : 0.3f;
+        }
         private readonly List<(Transform arrow, Vector3 from, Unit target, float dmg, float t)> arrows = new List<(Transform, Vector3, Unit, float, float)>();
         private Vector3 centre;
         private float clashTime;
@@ -55,6 +81,9 @@ namespace SquashBot.Gameplay
                 {
                     var spot = team == 0 ? mySpots[g] : theirSpots[g];
                     float power = team == 0 ? myPower[g] : theirPower[g];
+                    spots[team, g] = spot;
+                    MakeLabel(team, g, spot);
+                    if (team == 0) MakeRing(g, spot);
                     for (int i = 0; i < Army.Soldiers; i++)
                     {
                         var at = spot + new Vector3((i % 5 - 2f) * 0.42f, 0f, (i / 5 - 0.5f) * 0.5f * (team == 0 ? -1f : 1f));
@@ -65,6 +94,9 @@ namespace SquashBot.Gameplay
 
         public void Clear()
         {
+            for (int t = 0; t < 2; t++) for (int g = 0; g < Army.Groups; g++) { if (labels[t, g] != null) Destroy(labels[t, g].gameObject); labels[t, g] = null; }
+            for (int g = 0; g < Army.Groups; g++) { if (rings[g] != null) Destroy(rings[g].gameObject); rings[g] = null; pickable[g] = false; }
+            pickedGroup = -1;
             foreach (var u in units) if (u.root != null) Destroy(u.root.gameObject);
             units.Clear();
             foreach (var a in arrows) if (a.arrow != null) Destroy(a.arrow.gameObject);
@@ -102,6 +134,29 @@ namespace SquashBot.Gameplay
             clashing = true;
             clashTime = 0f;
             AudioManager.PlaySfx(Sfx.Warning, 0.6f, 0.8f);
+        }
+
+        private void MakeLabel(int team, int g, Vector3 spot)
+        {
+            var t = new GameObject("GroupLabel").AddComponent<TMPro.TextMeshPro>();
+            t.transform.SetParent(transform, false);
+            t.transform.position = spot + Vector3.up * (unitHeight * 2.2f + 1f);
+            t.font = SquashBot.UI.UiFactory.Font;
+            t.fontSize = 7f;
+            t.alignment = TMPro.TextAlignmentOptions.Center;
+            t.color = Color.white;
+            t.fontStyle = TMPro.FontStyles.Bold;
+            t.outlineWidth = 0.35f;
+            t.outlineColor = team == 0 ? new Color(0.05f, 0.2f, 0.55f) : new Color(0.55f, 0.08f, 0.08f);
+            t.rectTransform.sizeDelta = new Vector2(8f, 3f);
+            labels[team, g] = t;
+            Label(team, g, Army.Soldiers);
+        }
+
+        private void MakeRing(int g, Vector3 spot)
+        {
+            ringMats[g] = MaterialFactory.Create(Mine, Mine * 2f);
+            rings[g] = Shapes.Primitive(PrimitiveType.Cylinder, "PickRing", transform, spot + new Vector3(0f, 0.05f, 0f), new Vector3(3.2f, 0.02f, 2.2f), ringMats[g]).transform;
         }
 
         private Unit MakeUnit(int team, int group, GroupKind kind, float power, Vector3 at)
@@ -169,6 +224,20 @@ namespace SquashBot.Gameplay
         private void Update()
         {
             float dt = Time.deltaTime;
+            var cam = Camera.main;
+            for (int t = 0; t < 2; t++)
+                for (int g = 0; g < Army.Groups; g++)
+                    if (labels[t, g] != null && cam != null) labels[t, g].transform.rotation = Quaternion.LookRotation(labels[t, g].transform.position - cam.transform.position);
+            for (int g = 0; g < Army.Groups; g++)
+            {
+                if (rings[g] == null) continue;
+                bool on = pickable[g] || g == pickedGroup;
+                rings[g].gameObject.SetActive(on);
+                if (!on) continue;
+                var c = g == pickedGroup ? new Color(1f, 0.82f, 0.3f) : Mine;
+                float glow = g == pickedGroup ? 3.5f : 2.2f + Mathf.Sin(Time.time * 5f) * 1.4f;
+                MaterialFactory.SetColors(ringMats[g], c, c * glow);
+            }
             UpdateArrows(dt);
             foreach (var u in units)
             {

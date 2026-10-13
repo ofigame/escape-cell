@@ -106,7 +106,7 @@ namespace SquashBot.Data
             ["ch.trophies"] = "{0} kubok",
             ["ch.power"] = "güc {0}",
             ["ch.soldiers"] = "{0} əsgər",
-            ["ch.pick"] = "Göndəriləcək qrupu seç (gizli)",
+            ["ch.pick"] = "Göndərəcəyin qrupuna toxun (gizli)",
             ["ch.waitRival"] = "Seçildi · rəqib gözlənilir",
             ["ch.clashWon"] = "Qrupun toqquşmanı qazandı!",
             ["ch.clashLost"] = "Rəqibin qrupu qazandı",

@@ -41,6 +41,7 @@ namespace SquashBot.Gameplay
             chUi = ChallengeScreen.Create(ui.transform.Find("Canvas/SafeArea") ?? ui.transform.Find("Canvas") ?? ui.transform);
             chUi.GroupPicked += g => { if (chPhase == ChPhase.Pick) { chMyPick = g; chUi.SetStatus(Loc.T("ch.waitRival")); } };
             chUi.Leave += () => { chCancelled = true; chUi.HideAll(); };
+            chUi.BoardTapped += OnBoardTap;
             var go = new GameObject("Clash");
             clash = go.AddComponent<ClashSystem>();
             clash.Init(fx);
@@ -169,6 +170,26 @@ namespace SquashBot.Gameplay
 
         private void RefreshSides() => chUi.SetSides(Challenge.PlayerName, Total(myLeft), rival.name, Total(theirLeft));
 
+        /// <summary>A tap on the board while picking: my group nearest the finger (on the screen) is sent.</summary>
+        private void OnBoardTap(Vector2 screen)
+        {
+            if (chPhase != ChPhase.Pick || chMyPick >= 0) return;
+            var cam = cameraRig.Cam;
+            int best = -1;
+            float bestD = Screen.height * 0.09f;
+            for (int g = 0; g < Army.Groups; g++)
+            {
+                if (myLeft[g] <= 0) continue;
+                var p = cam.WorldToScreenPoint(clash.Spot(0, g) + Vector3.up * 0.4f);
+                if (p.z <= 0f) continue;
+                float d = Vector2.Distance(screen, p);
+                if (d < bestD) { bestD = d; best = g; }
+            }
+            if (best < 0) return;
+            chUi.PickFromBoard(best);
+            clash.SetPickable(null, best);
+        }
+
         private void BeginTurn()
         {
             chPhase = ChPhase.Pick;
@@ -177,6 +198,9 @@ namespace SquashBot.Gameplay
             chBotPickAt = PickSeconds - Random.Range(1.5f, 6.5f);
             RefreshSides();
             chUi.OpenPick(myLeft);
+            var can = new bool[Army.Groups];
+            for (int g = 0; g < Army.Groups; g++) can[g] = myLeft[g] > 0;
+            clash.SetPickable(can, -1);
             chUi.SetStatus(Loc.T("ch.pick"));
         }
 
@@ -214,6 +238,7 @@ namespace SquashBot.Gameplay
                     }
                     if (chTheirPick < 0) chTheirPick = BotPick();
                     chUi.ClosePick();
+                    clash.SetPickable(null, -1);
                     chPhase = ChPhase.Reveal;
                     chTimer = 1.2f;
                     chUi.SetClock("");
@@ -237,6 +262,8 @@ namespace SquashBot.Gameplay
             if (!challengeRun) return;
             myLeft[chMyPick] = mineLeftInGroup;
             theirLeft[chTheirPick] = theirsLeftInGroup;
+            clash.Label(0, chMyPick, mineLeftInGroup);
+            clash.Label(1, chTheirPick, theirsLeftInGroup);
             RefreshSides();
             chUi.SetStatus(mineLeftInGroup > theirsLeftInGroup ? Loc.T("ch.clashWon") : mineLeftInGroup < theirsLeftInGroup ? Loc.T("ch.clashLost") : Loc.T("ch.clashEven"));
             cameraRig.StartCoroutine(AfterClash());

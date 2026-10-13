@@ -106,7 +106,7 @@ namespace SquashBot.Data
             ["ch.trophies"] = "{0} trofei",
             ["ch.power"] = "forza {0}",
             ["ch.soldiers"] = "{0} soldati",
-            ["ch.pick"] = "Scegli un gruppo (segreto)",
+            ["ch.pick"] = "Tocca uno dei tuoi gruppi per mandarlo (segreto)",
             ["ch.waitRival"] = "Scelto · attendo il rivale",
             ["ch.clashWon"] = "Il tuo gruppo ha vinto lo scontro!",
             ["ch.clashLost"] = "Il loro gruppo ha vinto",

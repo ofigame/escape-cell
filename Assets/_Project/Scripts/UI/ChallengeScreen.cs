@@ -20,6 +20,14 @@ namespace SquashBot.UI
     {
         public event Action<int> GroupPicked;
         public event Action Leave;
+        /// <summary>A tap on the board (screen point): the game finds the group under it.</summary>
+        public event Action<Vector2> BoardTapped;
+
+        private class TapArea : MonoBehaviour, UnityEngine.EventSystems.IPointerClickHandler
+        {
+            public Action<Vector2> tapped;
+            public void OnPointerClick(UnityEngine.EventSystems.PointerEventData e) => tapped?.Invoke(e.position);
+        }
 
         private UiScreen lobby, hud;
         private TextMeshProUGUI myCard, theirCard, lobbyStatus, myBar, theirBar, clock, status;
@@ -60,6 +68,9 @@ namespace SquashBot.UI
 
             // The battle's overlay.
             hud = UiScreen.Create("ChallengeHud", root, out var h);
+            var tap = UiFactory.Stretch("BoardTap", h);
+            UiFactory.Fill(tap, new Color(0f, 0f, 0f, 0f));
+            tap.gameObject.AddComponent<TapArea>().tapped = p => BoardTapped?.Invoke(p);
             var top = UiFactory.Rect("Top", h, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -380f), new Vector2(0f, -240f)); // under the HUD's top row
             UiFactory.Fill(top, new Color(0.03f, 0.03f, 0.1f, 0.55f)).raycastTarget = false;
             myBar = UiFactory.TextBox("Me", top, new Vector2(0f, 0.5f), new Vector2(30f, -20f), new Vector2(420f, 120f), "", 32f, ClashSystem.Mine, title: true, align: TextAlignmentOptions.Left);
@@ -71,6 +82,7 @@ namespace SquashBot.UI
             status = UiFactory.TextBox("Status", h, new Vector2(0.5f, 0f), new Vector2(0f, 470f), new Vector2(980f, 70f), "", 38f, Palette.UiGold, title: true);
             status.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             for (int g = 0; g < Army.Groups; g++) GroupButton(h, g);
+            foreach (var g in groups) g.button.gameObject.SetActive(false); // the groups are picked on the board itself
         }
 
         private TextMeshProUGUI Card(RectTransform parent, Vector2 at, Color colour)
@@ -104,6 +116,15 @@ namespace SquashBot.UI
             UiFactory.Fill(badge, colour, UiSprites.Circle).raycastTarget = false;
             var count = UiFactory.Text(badge, "10", 36f, new Color(0.1f, 0.06f, 0.2f));
             groups.Add((b, count, face, colour));
+        }
+
+        /// <summary>A group picked on the board.</summary>
+        public void PickFromBoard(int g)
+        {
+            if (picked >= 0) return;
+            picked = g;
+            AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.2f);
+            GroupPicked?.Invoke(g);
         }
 
         private void Pick(int g)
@@ -171,7 +192,6 @@ namespace SquashBot.UI
             for (int i = 0; i < groups.Count; i++)
             {
                 bool alive = left[i] > 0;
-                groups[i].button.gameObject.SetActive(true);
                 groups[i].button.interactable = alive;
                 groups[i].count.text = left[i].ToString();
                 groups[i].face.color = alive ? new Color(groups[i].colour.r, groups[i].colour.g, groups[i].colour.b, 0.45f) : new Color(1f, 1f, 1f, 0.06f);

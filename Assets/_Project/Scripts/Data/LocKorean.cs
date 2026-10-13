@@ -106,7 +106,7 @@ namespace SquashBot.Data
             ["ch.trophies"] = "트로피 {0}",
             ["ch.power"] = "전투력 {0}",
             ["ch.soldiers"] = "병사 {0}",
-            ["ch.pick"] = "보낼 부대를 고르세요 (비밀)",
+            ["ch.pick"] = "보낼 부대를 터치하세요 (비밀)",
             ["ch.waitRival"] = "선택 완료 · 상대를 기다리는 중",
             ["ch.clashWon"] = "내 부대가 이겼어요!",
             ["ch.clashLost"] = "상대 부대가 이겼어요",
