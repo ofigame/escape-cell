@@ -11,3 +11,6 @@
 -dontwarn com.google.android.gms.**
 -dontwarn com.google.ads.**
 -dontwarn com.unity3d.**
+# The Unity ads plugin also ships a wrapper for Google's next-gen ads SDK (com.google.unity.ads.nextgen), which this
+# game does not use or include.
+-dontwarn com.google.android.libraries.ads.mobile.sdk.**
