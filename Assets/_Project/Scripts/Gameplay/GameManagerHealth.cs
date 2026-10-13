@@ -27,7 +27,7 @@ namespace SquashBot.Gameplay
         private float hurtCooldown;
 
         // The battle arenas always fight with the health bar (they are played like a bonus, but one blow must not end them).
-        private bool HealthEnabled => arenaRun || (!bonusRun && levelIndex >= HealthFromLevel);
+        private bool HealthEnabled => arenaRun || challengeRun || (!bonusRun && levelIndex >= HealthFromLevel);
 
         /// <summary>
         /// The share of the bar one full hit takes: a third at level 21, a sixth around level 150, a tenth at the end

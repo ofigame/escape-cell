@@ -122,15 +122,15 @@ namespace SquashBot.Gameplay
             // The tunnel gate stands from the start in the middle of the north edge, the monster asleep in front of it.
             huntGate = NorthGate();
             // The battle arenas have no cage and no tunnel: vanG rises in the courtyard when the crowd is beaten.
-            hunt.MonsterSpot = arenaRun ? (GridPos?)null : GateGuardSpot(huntGate);
+            hunt.MonsterSpot = arenaRun || challengeRun ? (GridPos?)null : GateGuardSpot(huntGate);
             if (gateView != null) Destroy(gateView.gameObject);
-            gateView = arenaRun ? null : TunnelGate.Create(GridView.ToWorld(huntGate) + Vector3.up * GridView.SurfaceY, WorldTheme.Current.accent);
+            gateView = arenaRun || challengeRun ? null : TunnelGate.Create(GridView.ToWorld(huntGate) + Vector3.up * GridView.SurfaceY, WorldTheme.Current.accent);
             var guardSpot = hunt.MonsterSpot ?? new GridPos(-99, -99);
             var gateTile = huntGate;
             hazards.IsProtected = p => p == gateTile || p == guardSpot || grid.IsCage(p) || grid.IsBridge(p) || grid.IsGate(p);
             SetupCage();
-            hunt.NoMonster = trailRun;
-            hunt.RedFoes = arenaRun; // the open world's roads: no vanG
+            hunt.NoMonster = trailRun || challengeRun;
+            hunt.RedFoes = arenaRun || challengeRun; // the open world's roads: no vanG
             hunt.Begin(grid, level, World, levelIndex * 31 + 7);
             ResetScore();
             introPending = true; // the opening shot over the whole floor
@@ -473,6 +473,16 @@ namespace SquashBot.Gameplay
                 return;
             }
             float dt = Time.unscaledDeltaTime;
+            if (ChallengeArmyPhase)
+            {
+                // The challenge's army battle: the whole board from above its south end.
+                BoardPose(out var bpos, out var brot);
+                cameraRig.Chase(bpos, brot, 46f);
+                if (cameraRig.Cam.farClipPlane < 200f) cameraRig.Cam.farClipPlane = 200f;
+                closeCamOn = true;
+                closeCamFocus = robot.transform.position;
+                return;
+            }
             if (defenseEditing)
             {
                 // Setting up defences: the stage on show from above (the set-up panels over the HUD).

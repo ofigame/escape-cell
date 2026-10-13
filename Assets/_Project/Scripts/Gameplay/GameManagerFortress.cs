@@ -113,10 +113,10 @@ namespace SquashBot.Gameplay
             // The fortress never moves: its thousands of pieces are merged into a few big meshes (far fewer draw calls).
             if (fortressFloor.GetComponentsInChildren<MeshRenderer>().Length < 6000) StaticBatchingUtility.Combine(fortressFloor.gameObject); // never on a huge one (memory)
             // Craft crossing the sky over the later fortresses.
-            if (stage >= 1)
+            if (stage >= 1 && !challengeRun) // (not over the challenge board)
                 SkyTraffic.Create(fortressFloor, () => robot != null ? robot.transform.position : Vector3.zero,
                     Color.Lerp(new Color(1f, 0.55f, 0.22f), WorldTheme.Current.accent, 0.25f), stage == 2 ? 5 : 3, levelIndex * 17 + 3);
-            glassCell = GlassCell.Create(GridView.ToWorld(robot.Position) + Vector3.up * GridView.SurfaceY, Mathf.Max(robot.transform.localScale.x, robot.transform.localScale.y) * 0.62f);
+            if (!challengeRun) glassCell = GlassCell.Create(GridView.ToWorld(robot.Position) + Vector3.up * GridView.SurfaceY, Mathf.Max(robot.transform.localScale.x, robot.transform.localScale.y) * 0.62f);
             glassSince = -1f;
             foreach (var p in grid.LavaTiles)
             {

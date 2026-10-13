@@ -135,7 +135,7 @@ namespace SquashBot.Gameplay
 
         private int World => LevelCatalog.WorldOf(levelIndex);
         private bool RescueEnabled => World >= RescueFromWorld;
-        private bool HoverEnabled => World >= HoverFromWorld && !arenaRun; // the arenas walk freely: no hover
+        private bool HoverEnabled => World >= HoverFromWorld && !arenaRun && !challengeRun; // the arenas walk freely: no hover
 
         private int LevelCount => levelSet.levels.Count;
         private int NextLevel => Mathf.Clamp(SaveData.UnlockedLevel, 0, LevelCount - 1);
@@ -258,7 +258,8 @@ namespace SquashBot.Gameplay
             ui.RetryPressed += () =>
             {
                 // The battle arena mode starts again at the foot of its road (new chests, new allies).
-                if (arenaMode) { ui.HidePause(); Time.timeScale = 1f; ExitTps(); StartTrail(TrailResumeTarget()); }
+                if (challengeRun || chPhase == ChPhase.Done) { ui.HidePause(); Time.timeScale = 1f; EndChallenge(); StartChallenge(); }
+                else if (arenaMode) { ui.HidePause(); Time.timeScale = 1f; ExitTps(); StartTrail(TrailResumeTarget()); }
                 else ShowPrelevel(levelIndex);
             };
             ui.PrelevelPlay += (index, boosts) =>
@@ -487,6 +488,7 @@ namespace SquashBot.Gameplay
 
         private void ShowMenu()
         {
+            EndChallenge();
             robot.transform.rotation = Quaternion.identity; // turned round in the garage: facing ahead again
             if (arenaMode) KeepAllies(0); // left the battle arena: the allies are gone (they never come back with a new start)
             ExitTps();
@@ -782,6 +784,7 @@ namespace SquashBot.Gameplay
 
         private void BeginRun()
         {
+            if (!challengeRun) EndChallenge();
             arenaMode = arenaRun;
             levelTps = false; // every floor starts in the usual view
             robot.transform.rotation = Quaternion.identity;
@@ -1362,6 +1365,7 @@ namespace SquashBot.Gameplay
 
             UpdateBip(Time.deltaTime);
             UpdateAlly(Time.deltaTime);
+            UpdateChallenge(Time.deltaTime);
             AudioManager.SetTension(Tension());
             // The hard-rock fight layer: as loud as the fight around foi (and louder when its health runs low).
             AudioManager.SetDanger(level.mission == MissionType.Hunt && roadPhase == RoadPhase.None ? Mathf.Clamp01(hunt.Danger(robot.Position) + (HealthEnabled && health < 0.4f ? 0.2f : 0f)) : 0f);
@@ -1385,11 +1389,12 @@ namespace SquashBot.Gameplay
             }
             ui.SetTpsSwitch(!arenaRun && level.mission == MissionType.Hunt && roadPhase == RoadPhase.None, tpsOn);
             var command = ArenaActive ? default(InputCommand) : tpsOn ? TpsCommand() : input.Poll(robot.transform.position);
+            if (ChallengeArmyPhase) command = default; // the armies fight: foi waits for its duel
             command = GlassCellGate(command); // foi starts each floor in its glass cell
             UpdateHover(command);
             if (!hovering)
             {
-                if (!tpsOn && !ArenaActive && level.mission == MissionType.Hunt && InputReader.AttackKey()) KeyStrike(); // computers: space strikes
+                if (!tpsOn && !ArenaActive && !ChallengeArmyPhase && level.mission == MissionType.Hunt && InputReader.AttackKey()) KeyStrike(); // computers: space strikes
                 if (command.spin) SpinAttack();
                 else if (command.tap.HasValue && level.mission == MissionType.Hunt && TapStrike(command.tap.Value)) input.CancelTap();
                 else if (command.tap.HasValue && level.mission == MissionType.Hunt && input.StickMode) { KeyStrike(); input.CancelTap(); } // nothing tapped: a blow ahead
@@ -2168,6 +2173,7 @@ namespace SquashBot.Gameplay
             HideTools();
             if (hovering) { hovering = false; ShowHoverMarker(false); }
 
+            if (challengeRun) { ChallengeEnd(false); return; } // a challenge lost: trophies, the result card
             // Coins picked up are kept even on a loss, so every run feels worth it.
             SaveData.Coins += Earned;
             if (bonusRun)

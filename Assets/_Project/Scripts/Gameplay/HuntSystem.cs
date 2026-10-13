@@ -76,13 +76,20 @@ namespace SquashBot.Gameplay
             public void SetRaise(float k)
             {
                 if (mon != null) { if (k > 0.05f && !monStomped) { mon.Stomp(); monStomped = true; } else if (k <= 0f) monStomped = false; return; }
-                if (bot != null) bot.SetRaise(k); else human.SetRaise(k);
+                if (bot != null) bot.SetRaise(k);
+                else if (human != null) human.SetRaise(k);
+                else if (model != null) model.localScale = Vector3.one * (1f + Mathf.Clamp01(k) * 0.12f); // a plain model (the challenge's rival foi) swells to strike
             }
+
+            /// <summary>A plain model (no robot rig): the challenge's rival foi. Its blows take <see cref="share"/> of foi's health.</summary>
+            public Transform model;
+            public float share = -1f;
 
             public void Flash()
             {
                 if (mon != null) { mon.Hit(hp); return; }
-                if (bot != null) bot.Flash(); else human.Flash();
+                if (bot != null) bot.Flash();
+                else if (human != null) human.Flash();
             }
         }
 
@@ -1175,7 +1182,7 @@ namespace SquashBot.Gameplay
         /// <summary>How terrifying the warlords look on this floor (1 early … 4 from level 180).</summary>
         private int Menace => Mathf.Clamp(1 + level.number / 60, 1, 4);
 
-        private static float ShareOf(Guard g) => g.rank >= 99 ? 0.55f : g.brute ? BruteHitShare : g.rank == 0 ? 0.12f : g.rank > 0 ? Mathf.Min(0.3f, 0.16f + g.rank * 0.025f) : GuardHitShare;
+        private static float ShareOf(Guard g) => g.share >= 0f ? g.share : g.rank >= 99 ? 0.55f : g.brute ? BruteHitShare : g.rank == 0 ? 0.12f : g.rank > 0 ? Mathf.Min(0.3f, 0.16f + g.rank * 0.025f) : GuardHitShare;
         /// <summary>The monster's blows hurt more on later floors.</summary>
         private float MonsterHitShare => Mathf.Lerp(0.3f, 0.5f, level.score / 100f);
 

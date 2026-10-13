@@ -39,6 +39,8 @@ namespace SquashBot.UI
         public event Action PausePressed;
         /// <summary>The weapon bag was opened during a level.</summary>
         public event Action BagPressed;
+        /// <summary>CHALLENGE on the menu.</summary>
+        public event Action ChallengePressed;
         /// <summary>The floors' TPS switch was pressed.</summary>
         public event Action TpsSwitchPressed;
         private Button tpsSwitch;
@@ -95,6 +97,8 @@ namespace SquashBot.UI
         {
             /// <summary>The floor score line (and new development points), or null.</summary>
             public string scoreLine;
+            /// <summary>The card's own title (else won / lost / bonus).</summary>
+            public string title;
             public bool won, bonusRound, hasNext, bonusAvailable, canContinue, canBuyContinue, canDouble, arena;
             public int continuePrice;
             public string subtitle, note, goalText;
@@ -392,6 +396,9 @@ namespace SquashBot.UI
             // The battle arenas: top right, under the settings.
             var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopRight, new Vector2(-110f, -400f), 120f, () => ArenasPressed?.Invoke());
             ((RectTransform)arenas.transform).pivot = new Vector2(0.5f, 0.5f);
+            // The challenge: under the battle arenas.
+            var challenge = MenuArt.DockButton(t, Loc.T("ch.button"), MenuArt.Icon.Swords, new Color(0.62f, 0.4f, 1f), TopRight, new Vector2(-110f, -570f), 120f, () => ChallengePressed?.Invoke());
+            ((RectTransform)challenge.transform).pivot = new Vector2(0.5f, 0.5f);
             // Now and then a speech bubble to the left of it: win an arena battle, grab the big gifts.
             arenaTip = UiFactory.Box("ArenaTip", t, TopRight, new Vector2(-430f, -400f), new Vector2(480f, 170f));
             arenaTip.pivot = new Vector2(0.5f, 0.5f);
@@ -1336,7 +1343,7 @@ namespace SquashBot.UI
             intro.gameObject.SetActive(false); // the result card has its own title
             result.Show();
             SetBanner(true);
-            resultTitle.text = Loc.T(info.bonusRound ? "result.bonusDone" : info.won ? "result.win" : "result.lose");
+            resultTitle.text = !string.IsNullOrEmpty(info.title) ? info.title : Loc.T(info.bonusRound ? "result.bonusDone" : info.won ? "result.win" : "result.lose");
             resultTitle.color = info.bonusRound ? Palette.UiGold : info.won ? Palette.UiCyan : Palette.UiRed;
             resultSub.text = string.IsNullOrEmpty(info.scoreLine) ? info.subtitle : info.scoreLine;
             resultReward.text = $"+{info.coins}";
