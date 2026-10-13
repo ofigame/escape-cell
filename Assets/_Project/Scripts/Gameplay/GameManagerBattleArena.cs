@@ -21,14 +21,15 @@ namespace SquashBot.Gameplay
         {
             ui.ArenasPressed += ShowArenas;
             ui.Arenas.BackPressed += () => ui.Arenas.Hide();
-            ui.Arenas.ArenaChosen += StartArena;
+            ui.Arenas.ArenaChosen += i => StartTrail(i); // the road to the chosen arena, then the arena
         }
 
         /// <summary>The ARENAS button: the open world, picking up on the road out of the last arena won.</summary>
         private void ShowArenas()
         {
+            // The battle arenas' map: every arena, the locked ones greyed with the level that opens them.
             if (State != GameState.Menu) ShowMenu();
-            StartTrail(TrailResumeTarget());
+            ui.Arenas.Show();
         }
 
         private void StartArena(int i)

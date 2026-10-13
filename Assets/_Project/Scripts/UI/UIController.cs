@@ -48,6 +48,12 @@ namespace SquashBot.UI
         /// <summary>The TPS switch: shown on the floors' fights, reading TPS (to switch to it) or 2D (back).</summary>
         public void SetTpsSwitch(bool on, bool inTps)
         {
+            // In TPS the lower corners belong to the stick and the strike: the tool buttons go up beside the bag.
+            if (toolButtons[0] != null)
+            {
+                toolButtons[0].Rect.anchoredPosition = inTps ? new Vector2(40f, 660f) : new Vector2(40f, 170f);
+                toolButtons[1].Rect.anchoredPosition = inTps ? new Vector2(-40f, 660f) : new Vector2(-40f, 170f);
+            }
             if (tpsSwitch == null) return;
             if (tpsSwitch.gameObject.activeSelf != on) tpsSwitch.gameObject.SetActive(on);
             if (on) tpsSwitchLabel.text = inTps ? "2D" : "TPS";

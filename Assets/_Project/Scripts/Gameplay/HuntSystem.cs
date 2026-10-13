@@ -860,6 +860,7 @@ namespace SquashBot.Gameplay
             if (!running || frozen || grid == null) return;
             float dt = Time.deltaTime;
             foreach (var b in bugs) if (!b.dead) UpdateBug(b, dt);
+            PickEngaged();
             foreach (var g in guards) if (!g.dead) UpdateGuard(g, dt);
             UpdateAllies(dt);
             UpdateTowers(dt);
@@ -1023,6 +1024,23 @@ namespace SquashBot.Gameplay
                         if (grid.IsFloor(g.target + d.ToOffset())) g.area.Add(g.target + d.ToOffset());
                 return;
             }
+            // Only a few at a time come at foi: the rest hold back in a ring and wait their turn.
+            bool waiting = !atAlly && !atFifi && !engaged.Contains(g) && !PlayerAway;
+            if (waiting && near <= WaitRing)
+            {
+                if (near < WaitRing - 1 && g.moveT >= 1f && (g.step -= dt) <= 0f)
+                {
+                    // Too close while waiting: a step back out.
+                    GridPos back = g.pos; int bd = near;
+                    foreach (var d in DirectionExtensions.All)
+                    {
+                        var n = g.pos + d.ToOffset();
+                        if (CanStep(g.pos, n) && Chebyshev(robot.Position, n) > bd) { bd = Chebyshev(robot.Position, n); back = n; }
+                    }
+                    if (back != g.pos) MoveGuard(g, back, 1f / GuardSpeed(g));
+                }
+                return;
+            }
             if ((near <= AttackReach || atFifi) && g.cooldown <= 0f && !PlayerAway)
             {
                 g.windup = 0f;
@@ -1075,6 +1093,28 @@ namespace SquashBot.Gameplay
                 if (nd < bestDist || (nd == bestDist && rng.Next(2) == 0 && nd < dist)) { bestDist = nd; bestNext = n; }
             }
             if (bestNext != g.pos) MoveGuard(g, bestNext, period);
+        }
+
+        /// <summary>The robots allowed to come at foi right now (the nearest few); the rest wait in a ring.</summary>
+        private readonly HashSet<Guard> engaged = new HashSet<Guard>();
+        private readonly List<Guard> engageOrder = new List<Guard>();
+        /// <summary>How far off the waiting robots hold.</summary>
+        private const int WaitRing = 4;
+
+        /// <summary>How many robots may fight foi at once: three at first, up to six on the late floors.</summary>
+        private int MaxEngaged => Mathf.Clamp(3 + world / 6, 3, 6);
+
+        private void PickEngaged()
+        {
+            engaged.Clear();
+            engageOrder.Clear();
+            foreach (var g in guards) if (!g.dead && !g.ally && !g.spitter) engageOrder.Add(g);
+            var at = robot.Position;
+            engageOrder.Sort((a, b) => Chebyshev(a.pos, at).CompareTo(Chebyshev(b.pos, at)));
+            int n = Mathf.Min(MaxEngaged, engageOrder.Count);
+            for (int i = 0; i < n; i++) engaged.Add(engageOrder[i]);
+            // A robot already swinging keeps its turn.
+            foreach (var g in engageOrder) if (g.windup >= 0f) engaged.Add(g);
         }
 
         private int[,] flow;
