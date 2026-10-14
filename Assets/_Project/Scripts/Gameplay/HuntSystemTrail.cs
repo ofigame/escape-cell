@@ -150,7 +150,26 @@ namespace SquashBot.Gameplay
             allies.Add(a);
         }
 
-        public void ClearChallengeFoe() { challengeFoe = null; ChallengeBattle = false; }
+        /// <summary>The rival's soldiers still standing on foi's stage (the stage battle).</summary>
+        public int ChallengeSoldiersLeft
+        {
+            get { int n = 0; foreach (var g in guards) if (!g.dead && g.soldier != null) n++; return n; }
+        }
+
+        /// <summary>The soldiers still on foi's stage leave it (gone in a puff, no coins).</summary>
+        public void RemoveChallengeSoldiers()
+        {
+            foreach (var g in guards)
+            {
+                if (g.dead || g.soldier == null) continue;
+                g.dead = true;
+                grid.SetOccupied(g.pos, false);
+                fx.Burst(g.root.position + Vector3.up * 0.4f, new Color(0.9f, 0.9f, 1f), new Color(1.6f, 1.6f, 2f), 12, 3f);
+                Destroy(g.root.gameObject);
+            }
+        }
+
+        public void ClearChallengeFoe() { challengeFoe = null; ChallengeBattle = false; UseStreetMap = false; }
 
         /// <summary>The rival foi's state, for tests.</summary>
         public string FoeDebug => challengeFoe == null ? "none" : $"pos {challengeFoe.pos} foi {robot.Position} hp {challengeFoe.hp} wind {challengeFoe.windup:0.0} cd {challengeFoe.cooldown:0.0} step {challengeFoe.step:0.0} moveT {challengeFoe.moveT:0.0} engaged {engaged.Contains(challengeFoe)} combo {foeCombo} back {Time.time < foeBackOffUntil} flee {Time.time < foeFleeUntil}";

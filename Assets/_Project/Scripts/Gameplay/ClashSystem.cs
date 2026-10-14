@@ -47,6 +47,9 @@ namespace SquashBot.Gameplay
             public Vector3 home;
             public float hp, maxHp, dmg, speed, range, cooldown, cd, think;
             public bool fighting, returning, dead, leaving;
+            /// <summary>The rival foi on its own stage (the stage battle): its look, its weapon; it never falls there.</summary>
+            public bool champion;
+            public HeldWeapon held;
             public Unit target;
             public float swing = -1f;
             public bool Archer => Army.Family(kind) == 2;
@@ -134,9 +137,13 @@ namespace SquashBot.Gameplay
             pickedGroup = -1;
             foreach (var u in units) if (u.root != null) Destroy(u.root.gameObject);
             units.Clear();
+            boundsMin = new Vector3(-999f, 0f, -999f);
+            boundsMax = new Vector3(999f, 0f, 999f);
             foreach (var a in arrows) if (a.arrow != null) Destroy(a.arrow.gameObject);
             arrows.Clear();
             clashing = false;
+            melee = false;
+            skirmish = false;
         }
 
         public int Alive(int team, int group = -1)
@@ -157,7 +164,7 @@ namespace SquashBot.Gameplay
                 var u = units[i];
                 if (u.dead || u.team != team) continue;
                 u.root.SetParent(null, true);
-                u.model.SetRaise(0f);
+                if (u.model != null) u.model.SetRaise(0f);
                 list.Add((u.root, u.model, u.group, u.kind));
                 units.RemoveAt(i);
             }
@@ -222,6 +229,62 @@ namespace SquashBot.Gameplay
             foreach (var u in units)
                 if (!u.dead && u.fighting && u.target != null && pick-- == 0) return (u.root.position + u.target.root.position) * 0.5f;
             return null;
+        }
+
+        private bool skirmish;
+
+        /// <summary>
+        /// The stage battle (Meydan Savaşı): the player's soldiers — two of each group, at <paramref name="spots"/> — against
+        /// the rival foi (<paramref name="look"/>, with its weapon) on the rival's stage. It goes on until the soldiers are
+        /// all down (the rival foi never falls there); <see cref="BattleOver"/> tells.
+        /// </summary>
+        public void BeginSkirmish(Vector3[] spots, GroupKind[] kinds, float[] powers, Transform look, HeldWeapon held, Vector3 champAt,
+            float champDamage, float champHp, float soldierHeight)
+        {
+            Clear();
+            unitHeight = soldierHeight;
+            centre = champAt;
+            for (int i = 0; i < spots.Length; i++)
+            {
+                var u = MakeUnit(0, i / 2, kinds[i], powers[i], spots[i]);
+                u.root.rotation = Quaternion.LookRotation(champAt - spots[i]);
+                u.slot = i;
+                units.Add(u);
+            }
+            var c = new Unit { team = 1, group = 0, kind = GroupKind.HeavySword, home = champAt, champion = true, held = held };
+            c.root = look;
+            c.root.position = champAt;
+            c.maxHp = c.hp = champHp;
+            c.dmg = champDamage;
+            c.speed = 2.5f;
+            c.range = 0.95f;
+            c.cooldown = 1.0f;
+            units.Add(c);
+            // Everyone in place, waiting for the word (the opening fly-over): StartSkirmish sets them on.
+            clashing = false;
+            melee = true;
+            skirmish = true;
+            meleeTime = 0f;
+        }
+
+        /// <summary>The stage battle's word to go: the soldiers and the rival foi fall on each other.</summary>
+        public void StartSkirmish()
+        {
+            foreach (var u in units) { if (u.dead) continue; u.fighting = true; u.cd = 0.4f + UnityEngine.Random.value * 0.6f; }
+            clashing = true;
+        }
+
+        /// <summary>The rival foi leaves the stage battle (its look and weapon, where it stands) for the duel.</summary>
+        public (Transform look, HeldWeapon held) TakeChampion()
+        {
+            for (int i = 0; i < units.Count; i++)
+            {
+                if (!units[i].champion) continue;
+                var c = units[i];
+                units.RemoveAt(i);
+                return (c.root, c.held);
+            }
+            return (null, null);
         }
 
         /// <summary>The all-out battle is on.</summary>
@@ -334,8 +397,8 @@ namespace SquashBot.Gameplay
                 if (u.swing >= 0f)
                 {
                     u.swing += dt / 0.3f;
-                    u.model.SetRaise(Mathf.Sin(Mathf.Clamp01(u.swing) * Mathf.PI) * 1.1f);
-                    if (u.swing >= 1f) { u.swing = -1f; u.model.SetRaise(0f); }
+                    if (u.model != null) u.model.SetRaise(Mathf.Sin(Mathf.Clamp01(u.swing) * Mathf.PI) * 1.1f);
+                    if (u.swing >= 1f) { u.swing = -1f; if (u.model != null) u.model.SetRaise(0f); }
                 }
                 if (u.returning)
                 {
@@ -404,8 +467,9 @@ namespace SquashBot.Gameplay
             if (melee)
             {
                 meleeTime += dt;
-                if (mineLeft > 0 && theirsLeft > 0 && meleeTime < BattleSeconds) return;
+                if (mineLeft > 0 && theirsLeft > 0 && (skirmish || meleeTime < BattleSeconds)) return;
                 melee = false;
+                skirmish = false;
                 clashing = false;
                 foreach (var u in units) { u.fighting = false; u.target = null; }
                 BattleOver?.Invoke(mineLeft, theirsLeft);
@@ -465,6 +529,7 @@ namespace SquashBot.Gameplay
         {
             u.cd = u.cooldown * (0.85f + UnityEngine.Random.value * 0.3f);
             u.swing = 0f;
+            if (u.held != null) u.held.Swing();
             float dmg = u.dmg * (0.85f + UnityEngine.Random.value * 0.3f);
             int edge = Army.Edge(u.kind, target.kind);
             if (edge > 0) dmg *= 1.3f;
@@ -557,7 +622,8 @@ namespace SquashBot.Gameplay
         {
             if (target.dead) return;
             target.hp -= dmg;
-            target.model.Flash();
+            if (target.model != null) target.model.Flash();
+            if (target.champion) { target.hp = Mathf.Max(target.hp, 1f); return; } // the rival foi does not fall on its stage
             if (fx != null) fx.Burst(target.root.position + Vector3.up * unitHeight * 0.6f, byTeam == 0 ? Mine : Theirs, (byTeam == 0 ? Mine : Theirs) * 1.6f, 4, 2.5f);
             if (target.hp > 0f) return;
             target.dead = true;

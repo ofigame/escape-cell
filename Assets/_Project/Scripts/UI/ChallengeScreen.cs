@@ -29,6 +29,8 @@ namespace SquashBot.UI
         /// <summary>A name typed and confirmed on the name screen; closing it without one.</summary>
         public event Action<string> NameSubmitted;
         public event Action NameClosed;
+        /// <summary>A kind of challenge was picked: 0 the Arena battle, 1 the Meydan (stage) battle.</summary>
+        public event Action<int> ModePicked;
         /// <summary>"Change name" in the waiting room.</summary>
         public event Action RenamePressed;
 
@@ -89,6 +91,7 @@ namespace SquashBot.UI
             ((RectTransform)renameButton.transform).pivot = new Vector2(0.5f, 0.5f);
 
             BuildNamePanel(root);
+            BuildModes(root);
 
             // The battle's overlay.
             hud = UiScreen.Create("ChallengeHud", root, out var h);
@@ -117,6 +120,63 @@ namespace SquashBot.UI
             for (int g = 0; g < Army.Groups; g++) GroupButton(pickPanel, g);
             pickPanel.gameObject.SetActive(false);
         }
+
+        // ---------- The two kinds of challenge ----------
+
+        private UiScreen modes;
+
+        private void BuildModes(RectTransform root)
+        {
+            modes = UiScreen.Create("ChallengeModes", root, out var m);
+            UiFactory.Dim(m, new Color(0.03f, 0.03f, 0.1f, 1f));
+            UiFactory.TextBox("Title", m, new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(960f, 100f), Loc.T("ch.modeTitle"), 64f, Palette.UiGold, title: true);
+            ModeCard(m, 0, new Vector2(0f, 320f), "arena", "ch.mode.arena", "ch.mode.arenaText", new Color(0.62f, 0.4f, 1f));
+            ModeCard(m, 1, new Vector2(0f, -330f), "stages", "ch.mode.stages", "ch.mode.stagesText", new Color(0.95f, 0.55f, 0.2f));
+            var back = UiFactory.MakeButton(m, Loc.T("btn.close"), Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(0f, 90f), new Vector2(420f, 110f), () => modes.Hide(true), 42f);
+            ((RectTransform)back.transform).pivot = new Vector2(0.5f, 0.5f);
+        }
+
+        /// <summary>A kind's card: a picture from the game itself, its name and a line about it; tapping it picks it.</summary>
+        private void ModeCard(RectTransform parent, int mode, Vector2 at, string picture, string nameKey, string textKey, Color colour)
+        {
+            var card = UiFactory.Box("Mode" + mode, parent, new Vector2(0.5f, 0.5f), at, new Vector2(900f, 600f));
+            card.pivot = new Vector2(0.5f, 0.5f);
+            var face = UiFactory.Fill(card, new Color(colour.r, colour.g, colour.b, 0.2f), UiSprites.Rounded, 1f);
+            UiFactory.Fill(UiFactory.Stretch("Rim", card), colour, UiSprites.Ring, 1f).raycastTarget = false;
+            var picBox = UiFactory.Rect("Picture", card, new Vector2(0f, 0.3f), new Vector2(1f, 1f), new Vector2(24f, 0f), new Vector2(-24f, -24f));
+            picBox.gameObject.AddComponent<RectMask2D>();
+            var tex = Resources.Load<Texture2D>("ChallengeModes/" + picture);
+            var pic = UiFactory.Stretch("Image", picBox).gameObject.AddComponent<RawImage>();
+            pic.texture = tex;
+            pic.color = tex != null ? Color.white : new Color(colour.r, colour.g, colour.b, 0.35f);
+            pic.raycastTarget = false;
+            if (tex != null)
+            {
+                // Fill the frame (cropping the picture's middle band).
+                float frameAspect = 852f / 396f, texAspect = tex.width / (float)tex.height;
+                pic.uvRect = texAspect > frameAspect ? new Rect((1f - frameAspect / texAspect) * 0.5f, 0f, frameAspect / texAspect, 1f)
+                                                     : new Rect(0f, (1f - texAspect / frameAspect) * 0.5f, 1f, texAspect / frameAspect);
+            }
+            var name = UiFactory.TextBox("Name", card, new Vector2(0.5f, 0f), new Vector2(0f, 128f), new Vector2(860f, 70f), Loc.T(nameKey), 52f, Color.white, title: true);
+            name.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var text = UiFactory.TextBox("Text", card, new Vector2(0.5f, 0f), new Vector2(0f, 56f), new Vector2(860f, 70f), Loc.T(textKey), 28f, new Color(1f, 1f, 1f, 0.8f), FontStyles.Normal);
+            text.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            text.textWrappingMode = TextWrappingModes.Normal;
+            var button = card.gameObject.AddComponent<Button>();
+            button.targetGraphic = face;
+            button.onClick.AddListener(() => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(mode); });
+            card.gameObject.AddComponent<ButtonPress>();
+        }
+
+        public void ShowModes()
+        {
+            lobby.Hide(true);
+            hud.Hide(true);
+            modes.Show();
+            transform.SetAsLastSibling();
+        }
+
+        public void HideModes() => modes.Hide(true);
 
         // ---------- The name ----------
 
@@ -352,6 +412,7 @@ namespace SquashBot.UI
             lobby.Hide(true);
             hud.Hide(true);
             namePanel.Hide(true);
+            if (modes != null) modes.Hide(true);
         }
 
         public void SetSides(string me, int myRank, int myLeft, string them, int theirRank, int theirLeft)

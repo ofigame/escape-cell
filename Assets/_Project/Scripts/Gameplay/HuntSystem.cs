@@ -1112,7 +1112,7 @@ namespace SquashBot.Gameplay
             float period = 1f / GuardSpeed(g);
             if (g.human != null) g.human.Step();
             // The arena city: round the buildings by the street map (distances from the goal), never stuck behind a block.
-            if (level.hardAtOnce > 0 && !atAlly && FlowStep(g, robot.Position)) return; // one street map for all (wings would rebuild it per robot)
+            if ((level.hardAtOnce > 0 || UseStreetMap) && !atAlly && FlowStep(g, robot.Position)) return; // one street map for all (wings would rebuild it per robot)
             // One step towards the robot along whichever axis brings it closer and is free.
             GridPos bestNext = g.pos;
             int bestDist = dist;
@@ -1137,6 +1137,9 @@ namespace SquashBot.Gameplay
 
         /// <summary>The challenge's battle: every robot fights at once (no waiting ring), archers shoot from afar.</summary>
         public bool ChallengeBattle;
+
+        /// <summary>Robots find their way by the street map (the stage battle: round the middle stage to the bridges).</summary>
+        public bool UseStreetMap;
 
         private void PickEngaged()
         {

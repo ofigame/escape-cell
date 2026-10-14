@@ -258,7 +258,7 @@ namespace SquashBot.Gameplay
             ui.RetryPressed += () =>
             {
                 // The battle arena mode starts again at the foot of its road (new chests, new allies).
-                if (challengeRun || chPhase == ChPhase.Done) { ui.HidePause(); Time.timeScale = 1f; EndChallenge(); StartChallenge(); }
+                if (challengeRun || chPhase == ChPhase.Done) { ui.HidePause(); Time.timeScale = 1f; EndChallenge(); StartChallenge(false); }
                 else if (arenaMode) { ui.HidePause(); Time.timeScale = 1f; ExitTps(); StartTrail(TrailResumeTarget()); }
                 else ShowPrelevel(levelIndex);
             };

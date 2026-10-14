@@ -19,7 +19,7 @@ namespace SquashBot.Gameplay
     /// </summary>
     public partial class GameManager
     {
-        private enum ChPhase { Off, Lobby, Pick, Reveal, Clash, Battle, Break, Duel, Done }
+        private enum ChPhase { Off, Lobby, Pick, Reveal, Clash, Battle, Break, StageIntro, Stages, Duel, Done }
 
         /// <summary>The armies' point: +1 mine won the battle (1-0), -1 theirs did (0-1), 0 neither (a level battle).</summary>
         private int chLead;
@@ -51,7 +51,7 @@ namespace SquashBot.Gameplay
 
         private const int BoardW = 25, BoardH = 21, PickSeconds = 10;
 
-        private bool ChallengeArmyPhase => challengeRun && chPhase != ChPhase.Duel && chPhase != ChPhase.Off && chPhase != ChPhase.Done;
+        private bool ChallengeArmyPhase => challengeRun && chPhase != ChPhase.Duel && chPhase != ChPhase.Off && chPhase != ChPhase.Done && chPhase != ChPhase.Stages;
 
         private void InitChallenge()
         {
@@ -62,6 +62,7 @@ namespace SquashBot.Gameplay
             chUi.NameClosed += () => { chCancelled = true; chPhase = ChPhase.Off; chUi.HideAll(); };
             chUi.RenamePressed += () => { chCancelled = true; chPhase = ChPhase.Off; chUi.ShowName(Challenge.PlayerName); };
             chUi.BoardTapped += OnBoardTap;
+            chUi.ModePicked += m => { chMode = m == 1 ? ChMode.Stages : ChMode.Arena; chUi.HideModes(); StartChallenge(false); };
             chUi.BoardDragged += d =>
             {
                 // The finger drags the board: the view slides the other way, kept over the courtyard.
@@ -81,7 +82,10 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>CHALLENGE on the menu.</summary>
-        private void StartChallenge()
+        private void StartChallenge() => StartChallenge(true);
+
+        /// <param name="chooseMode">Ask which kind (Arena or Meydan); false: the same kind again (playing again).</param>
+        private void StartChallenge(bool chooseMode)
         {
             if (!Challenge.Open)
             {
@@ -102,6 +106,12 @@ namespace SquashBot.Gameplay
             {
                 chPhase = ChPhase.Off;
                 chUi.ShowName(Challenge.PlayerName);
+                return;
+            }
+            if (chooseMode)
+            {
+                chPhase = ChPhase.Off;
+                chUi.ShowModes();
                 return;
             }
             chCancelled = false;
@@ -258,7 +268,8 @@ namespace SquashBot.Gameplay
             yield return new WaitForSecondsRealtime(chOnline ? 1.8f : 2.4f);
             if (token != chLobbyToken || (match == null && chCancelled)) { if (token == chLobbyToken) chPhase = ChPhase.Off; yield break; }
             chUi.HideLobby();
-            BuildBoard(world);
+            if (chMode == ChMode.Stages) BuildStageBoard(world);
+            else BuildBoard(world);
         }
 
         /// <summary>The courtyard: a plain floor in the world's look, ramparts round it, no crates, no vanG, no cage.</summary>
@@ -456,6 +467,9 @@ namespace SquashBot.Gameplay
                     chPhase = ChPhase.Clash;
                     clash.StartClash(chMyPick, chTheirPick);
                     break;
+                case ChPhase.Stages:
+                    UpdateStageBattle();
+                    break;
                 case ChPhase.Duel:
                     chUi.SetClock(ScoreText());
                     if (hunt.ChallengeFoeDown) ChallengeEnd(true);
@@ -501,6 +515,7 @@ namespace SquashBot.Gameplay
         /// <summary>The battle is over: the winning army's foi goes 1-0 up (a level end: 0-0), the cells break, the soldiers leave.</summary>
         private void OnBattleOver(int mine, int theirs)
         {
+            if (challengeRun && chPhase == ChPhase.Stages) { if (mine == 0) StageWon(-1); return; } // the rival foi cleared its stage
             if (!challengeRun || chPhase != ChPhase.Battle) return;
             chLead = mine > theirs ? 1 : theirs > mine ? -1 : 0;
             if (colosseum != null) { colosseum.Wave(false); colosseum.Cheer(chLead > 0 ? 0 : chLead < 0 ? 1 : -1, 1f); }

@@ -68,6 +68,14 @@ namespace SquashBot.Gameplay
             // armour comes on top: the enemies grow too, so the shop still matters.
             float toughness = Mathf.Lerp(1f, 0.74f, levelIndex / (float)(LevelCatalog.LevelCount - 1));
             float damage = share * toughness * (1f - Shop.ArmorShare);
+            // The stage battle: foi falling on its own stage gives the rival the point; it gets up for the duel.
+            if (challengeRun && chPhase == ChPhase.Stages && health - damage <= 0.001f)
+            {
+                health = 0.4f;
+                RefreshHealthBar();
+                StageWon(-1);
+                return true;
+            }
             if (health - damage <= 0.001f)
             {
                 health = 0f;
