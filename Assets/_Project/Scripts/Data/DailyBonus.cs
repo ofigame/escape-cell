@@ -19,7 +19,9 @@ namespace SquashBot.Data
         {
             string today = GameClock.Today;
             string day = PlayerPrefs.GetString(DayKey, "");
-            if (string.CompareOrdinal(today, day) <= 0) return;
+            // A day stored in another shape (an old non-Gregorian calendar's date) is not a "future" day: roll.
+            bool valid = day.Length == 8 && long.TryParse(day, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out long d) && d >= 20250101;
+            if (valid && string.CompareOrdinal(today, day) <= 0) return;
             PlayerPrefs.SetString(DayKey, today);
             PlayerPrefs.SetInt(UsedKey, 0);
             PlayerPrefs.SetInt(AdKey, 0);
@@ -80,7 +82,7 @@ namespace SquashBot.Data
         public static BonusGame[] TodaysGames()
         {
             var pool = SeenGames();
-            var rng = new System.Random(int.Parse(GameClock.Today));
+            var rng = new System.Random(int.Parse(GameClock.Today, System.Globalization.CultureInfo.InvariantCulture));
             for (int i = pool.Count - 1; i > 0; i--)
             {
                 int j = rng.Next(i + 1);

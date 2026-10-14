@@ -98,7 +98,7 @@ namespace SquashBot.Data
         /// <summary>Something counting towards today's quests happened; true when it finished one just now.</summary>
         public static bool Report(DailyGoal goal, int amount = 1)
         {
-            bool finished = false;
+            bool finished = false, changed = false;
             for (int i = 0; i < Count; i++)
             {
                 var q = Get(i);
@@ -106,7 +106,9 @@ namespace SquashBot.Data
                 int p = Mathf.Min(q.target, q.progress + amount);
                 PlayerPrefs.SetInt(K("prog", i), p);
                 if (p >= q.target) finished = true;
+                changed = true;
             }
+            if (changed) PlayerPrefs.Save();
             return finished;
         }
 

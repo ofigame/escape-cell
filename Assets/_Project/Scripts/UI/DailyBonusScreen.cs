@@ -77,7 +77,10 @@ namespace SquashBot.UI
             for (int i = 0; i < rows.Length; i++)
             {
                 bool done = i < used;
-                rows[i].text = done ? "<s>" + (i + 1) + ".  " + Loc.T("bonusGame." + games[i]) + "</s>" : (i + 1) + ".  " + Loc.T("bonusGame." + games[i]);
+                // Struck through by style, not by a tag (Arabic text is reversed for display, tags and all).
+                rows[i].text = (i + 1) + ".  " + Loc.T("bonusGame." + games[i]);
+                if (done) rows[i].fontStyle |= FontStyles.Strikethrough;
+                else rows[i].fontStyle &= ~FontStyles.Strikethrough;
                 rows[i].color = done ? new Color(1f, 1f, 1f, 0.4f) : Palette.UiText;
             }
             int left = DailyBonus.Left;

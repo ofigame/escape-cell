@@ -190,10 +190,11 @@ namespace SquashBot.Gameplay
                     foreach (var a in t.area)
                     {
                         var target = a;
+                        int gen = beginGen;
                         TowerBolt.Fire(t.model.Muzzle.position, At(target) + Vector3.up * 0.3f, colour, 0.32f, () =>
                         {
-                            if (view != null) view.SetWarning(target, 0f);
-                            if (!running) return;
+                            if (view != null && gen == beginGen) view.SetWarning(target, 0f);
+                            if (!running || gen != beginGen) return; // fired in a level that is over
                             Shockwave.Create(At(target), 0.9f, colour);
                             fx.Burst(At(target) + Vector3.up * 0.3f, colour, colour * 2f, 14, 3f);
                             if (robot.Position == target) Hit?.Invoke(target, share);

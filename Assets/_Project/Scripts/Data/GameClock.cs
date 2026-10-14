@@ -29,7 +29,7 @@ namespace SquashBot.Data
         }
 
         /// <summary>The local calendar day as yyyyMMdd (compares as a string).</summary>
-        public static string Today => DateTime.Now.ToString("yyyyMMdd");
+        public static string Today => DateTime.Now.ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
 
         /// <summary>Seconds until local midnight.</summary>
         public static int SecondsToMidnight => (int)(DateTime.Today.AddDays(1) - DateTime.Now).TotalSeconds;

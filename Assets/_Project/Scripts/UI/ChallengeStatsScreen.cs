@@ -34,6 +34,8 @@ namespace SquashBot.UI
 
         public void Hide() => screen.Hide(true);
 
+        public bool IsOpen => screen.IsVisible;
+
         public void Show()
         {
             foreach (var g in built) if (g != null) Destroy(g);
@@ -50,7 +52,7 @@ namespace SquashBot.UI
             var name2 = UiFactory.TextBox("Name", head, new Vector2(0.5f, 1f), new Vector2(0f, -94f), new Vector2(500f, 50f), Challenge.PlayerName, 34f, Palette.UiCyan, title: true);
             var cups = UiFactory.TextBox("Trophies", head, new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(500f, 60f), Loc.F("ch.trophies", Challenge.Trophies), 44f, Palette.UiGold, title: true);
             var lg = UiFactory.TextBox("League", head, new Vector2(0.5f, 1f), new Vector2(0f, -208f), new Vector2(500f, 44f), Loc.F("ch.league", Challenge.LeagueName(league)), 30f, new Color(1f, 0.85f, 0.5f), title: true);
-            var rec = UiFactory.TextBox("Record", head, new Vector2(0.5f, 0f), new Vector2(0f, 46f), new Vector2(900f, 40f),
+            var rec = UiFactory.TextBox("Record", head, new Vector2(0.5f, 0f), new Vector2(0f, 30f), new Vector2(900f, 40f),
                 Loc.F("ch.record", Challenge.Wins, Challenge.Played) + "   ·   " + Loc.F("ch.defRecord", Challenge.DefWins, Challenge.DefLosses), 26f, new Color(1f, 1f, 1f, 0.85f), FontStyles.Normal);
 
             // The ladder.

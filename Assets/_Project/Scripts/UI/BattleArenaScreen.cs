@@ -20,7 +20,7 @@ namespace SquashBot.UI
 
         private UiScreen screen;
         private RectTransform content;
-        private const float CellW = 470f, CellH = 640f, Gap = 30f;
+        private const float CellW = 470f, CellH = 700f, Gap = 30f;
 
         public UiScreen Screen => screen;
         public bool IsOpen => screen.IsVisible;

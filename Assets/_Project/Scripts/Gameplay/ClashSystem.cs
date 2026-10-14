@@ -220,6 +220,7 @@ namespace SquashBot.Gameplay
                 u.returning = true;
                 u.home = new Vector3(u.root.position.x, u.home.y, centre.z + (u.team == 0 ? -16f : 16f));
             }
+            clashing = melee = skirmish = false; // walking off: no more fighting, no more groups called up
         }
 
         /// <summary>Where one of the fights in the battle is (a soldier in it, picked at random), for the camera's tour.</summary>
@@ -398,9 +399,32 @@ namespace SquashBot.Gameplay
             return u;
         }
 
+        // Who stands where, in half-metre cells (made once a frame): keeping apart looks at the next cells only, not at
+        // all 360 soldiers for each of 360.
+        private const float CellSize = 0.5f;
+        private readonly Dictionary<long, List<Unit>> cells = new Dictionary<long, List<Unit>>();
+        private readonly Stack<List<Unit>> spareCells = new Stack<List<Unit>>();
+
+        private static long CellKey(int cx, int cz) => ((long)cx << 32) ^ (uint)cz;
+
+        private void FillCells()
+        {
+            foreach (var c in cells.Values) { c.Clear(); spareCells.Push(c); }
+            cells.Clear();
+            foreach (var u in units)
+            {
+                if (u.dead) continue;
+                var p = u.root.position;
+                long k = CellKey(Mathf.FloorToInt(p.x / CellSize), Mathf.FloorToInt(p.z / CellSize));
+                if (!cells.TryGetValue(k, out var list)) cells[k] = list = spareCells.Count > 0 ? spareCells.Pop() : new List<Unit>();
+                list.Add(u);
+            }
+        }
+
         private void Update()
         {
             float dt = Time.deltaTime;
+            FillCells();
             var cam = Camera.main;
             for (int t = 0; t < 2; t++)
                 for (int g = 0; g < Army.Groups; g++)
@@ -649,15 +673,22 @@ namespace SquashBot.Gameplay
             if (there) return;
             var step = Vector3.ClampMagnitude(to, u.speed * dt);
             // Keep a little apart from the others (a group on the move goes through the waiting ones: they make way).
-            foreach (var o in units)
-            {
-                if (o == u || o.dead) continue;
-                if ((u.fighting || u.returning) && !o.fighting && !o.returning) continue;
-                var away = u.root.position - o.root.position;
-                away.y = 0f;
-                float d = away.sqrMagnitude;
-                if (d > 0.000001f && d < 0.36f * 0.36f) { d = Mathf.Sqrt(d); step += away / d * (0.36f - d) * 0.5f; }
-            }
+            var here = u.root.position;
+            int cx = Mathf.FloorToInt(here.x / CellSize), cz = Mathf.FloorToInt(here.z / CellSize);
+            for (int ix = cx - 1; ix <= cx + 1; ix++)
+                for (int iz = cz - 1; iz <= cz + 1; iz++)
+                {
+                    if (!cells.TryGetValue(CellKey(ix, iz), out var near)) continue;
+                    foreach (var o in near)
+                    {
+                        if (o == u || o.dead) continue;
+                        if ((u.fighting || u.returning) && !o.fighting && !o.returning) continue;
+                        var away = here - o.root.position;
+                        away.y = 0f;
+                        float d = away.sqrMagnitude;
+                        if (d > 0.000001f && d < 0.36f * 0.36f) { d = Mathf.Sqrt(d); step += away / d * (0.36f - d) * 0.5f; }
+                    }
+                }
             var p = u.root.position + step;
             if (!u.leaving) { p.x = Mathf.Clamp(p.x, boundsMin.x, boundsMax.x); p.z = Mathf.Clamp(p.z, boundsMin.z, boundsMax.z); }
             if (u.champion) { p.x = Mathf.Clamp(p.x, champMin.x, champMax.x); p.z = Mathf.Clamp(p.z, champMin.z, champMax.z); }
@@ -720,7 +751,8 @@ namespace SquashBot.Gameplay
                 if (a.t < 1f) continue;
                 Destroy(a.arrow.gameObject);
                 arrows.RemoveAt(i);
-                if (!a.target.dead) Hit(a.target, a.dmg, 1 - a.target.team);
+                // An arrow landing after its clash is over (the target walked home) misses: the counts stay true.
+                if (!a.target.dead && (a.target.fighting || melee)) Hit(a.target, a.dmg, 1 - a.target.team);
             }
         }
     }

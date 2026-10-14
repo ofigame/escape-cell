@@ -39,8 +39,20 @@ namespace SquashBot.UI
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.TextBox("Hint", root, new Vector2(0.5f, 1f), new Vector2(0f, -250f), new Vector2(900f, 60f), Loc.T("bag.hint"), 32f, new Color(1f, 1f, 1f, 0.75f), FontStyles.Normal)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            grid = UiFactory.Rect("Grid", root, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(30f, 300f), new Vector2(-30f, -320f));
-            UiFactory.MakeButton(root, Loc.T("bag.back"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 120f), new Vector2(560f, 130f), () =>
+            // The cards scroll (many weapons, or the short landscape screen of the arenas): a masked view over the grid.
+            var view = UiFactory.Rect("View", root, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(30f, 200f), new Vector2(-30f, -300f));
+            view.gameObject.AddComponent<RectMask2D>();
+            view.gameObject.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0f); // takes the drag
+            grid = UiFactory.Rect("Grid", view, new Vector2(0f, 1f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero);
+            grid.pivot = new Vector2(0.5f, 1f);
+            var scroll = view.gameObject.AddComponent<ScrollRect>();
+            scroll.content = grid;
+            scroll.viewport = view;
+            scroll.horizontal = false;
+            scroll.movementType = ScrollRect.MovementType.Elastic;
+            scroll.scrollSensitivity = 40f;
+            this.scroll = scroll;
+            UiFactory.MakeButton(root, Loc.T("bag.back"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 100f), new Vector2(560f, 130f), () =>
             {
                 screen.Hide();
                 Closed?.Invoke();
@@ -52,10 +64,16 @@ namespace SquashBot.UI
         {
             for (int i = grid.childCount - 1; i >= 0; i--) Destroy(grid.GetChild(i).gameObject);
             var owned = Armory.All.FindAll(Armory.Owned);
+            // The ones that can be taken here first (on the floors the guns, shown dimmed, come last).
+            if (!gunsAllowed) owned.Sort((a, b) => (a.kind == WeaponKind.Gun ? 1 : 0).CompareTo(b.kind == WeaponKind.Gun ? 1 : 0));
             var current = Armory.Equipped;
             var currentGun = gunsAllowed ? Armory.EquippedGun : null;
             const float w = 320f, h = 400f, gap = 20f;
-            int cols = 3;
+            var area = ((RectTransform)transform).rect;
+            int cols = Mathf.Clamp(Mathf.FloorToInt((area.width - 60f + gap) / (w + gap)), 3, 5); // landscape: more across
+            grid.sizeDelta = new Vector2(0f, Mathf.CeilToInt(owned.Count / (float)cols) * (h + gap) + 20f);
+            grid.anchoredPosition = Vector2.zero;
+            if (scroll != null) scroll.velocity = Vector2.zero;
             for (int i = 0; i < owned.Count; i++)
             {
                 var weapon = owned[i];
@@ -107,5 +125,7 @@ namespace SquashBot.UI
         }
 
         public void Hide() => screen.Hide(true);
+
+        private ScrollRect scroll;
     }
 }

@@ -17,6 +17,9 @@ namespace SquashBot.UI
     public class ChestCard : MonoBehaviour
     {
         private UiScreen screen;
+
+        /// <summary>Closed at once (another screen is taking over).</summary>
+        public void Hide() => screen.Hide(true);
         private RectTransform chest, lid, glow;
         private Image body, lidFace, band, glowImage;
         private TextMeshProUGUI title, rarityLabel, reward;

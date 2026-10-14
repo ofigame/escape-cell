@@ -59,7 +59,7 @@ namespace SquashBot.UI
             UiFactory.MakeButton(bar, "<", Kind.Icon, new Vector2(0f, 0.5f), new Vector2(36f, 20f), new Vector2(124f, 124f), () => BackPressed?.Invoke(), 64f);
             UiFactory.TextBox("Title", bar, new Vector2(0.5f, 1f), new Vector2(0f, -30f), new Vector2(620f, 80f), Loc.T("def.title"), 52f, Palette.UiText, title: true);
             prev = UiFactory.MakeButton(bar, "<", Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(-250f, 24f), new Vector2(110f, 90f), () => StageStep?.Invoke(-1), 50f);
-            next = UiFactory.MakeButton(bar, ">", Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(140f, 24f), new Vector2(110f, 90f), () => StageStep?.Invoke(1), 50f);
+            next = UiFactory.MakeButton(bar, ">", Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(250f, 24f), new Vector2(110f, 90f), () => StageStep?.Invoke(1), 50f);
             stageText = UiFactory.TextBox("Stage", bar, new Vector2(0.5f, 0f), new Vector2(0f, 30f), new Vector2(260f, 80f), "", 40f, Palette.UiCyan);
 
             var panel = UiFactory.Rect("Panel", root, Vector2.zero, new Vector2(1f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve), new Vector2(0f, Monetization.Ads.BannerReserve + 520f));

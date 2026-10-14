@@ -48,9 +48,13 @@ namespace SquashBot.Gameplay
         private float fifiSize = 1f;
 
         /// <summary>A new floor: Fifi waits in the sky at full health, ready to be called down soon.</summary>
+        /// <summary>Fifi, the companion, is out of the game (kept in code, switched off): it never comes to a floor.</summary>
+        private const bool FifiEnabled = false;
+
         private void SetupFifi()
         {
             ClearFifi();
+            if (!FifiEnabled) return;
             fifi = Buddy.Create(GridView.ToWorld(robot.Position) + Vector3.up * 30f);
             // As tall as foi (measured, like the robots).
             fifi.transform.localScale = Vector3.one;

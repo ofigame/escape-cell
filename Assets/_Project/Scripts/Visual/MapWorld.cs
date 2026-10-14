@@ -80,6 +80,7 @@ namespace SquashBot.Visual
             Cam.depth = 5f;
             var data = camGo.AddComponent<UniversalAdditionalCameraData>();
             data.renderPostProcessing = true;
+            data.renderShadows = false; // nothing on the map casts a shadow: no shadow pass
             data.antialiasing = Application.isMobilePlatform ? AntialiasingMode.None : AntialiasingMode.SubpixelMorphologicalAntiAliasing;
         }
 
@@ -92,12 +93,16 @@ namespace SquashBot.Visual
             float top = NodePosition(levelCount - 1).y - Origin.y + 20f;
             var rng = new System.Random(7);
             var star = MaterialFactory.Create(Color.white, new Color(1.6f, 1.6f, 2f));
+            // The stars: one mesh (hundreds of little cubes merged), one draw instead of hundreds of objects.
+            var parts = new List<CombineInstance>();
+            var cube = Shapes.MeshOf(PrimitiveType.Cube);
             for (int i = 0; i < Mathf.Min(900, (int)(top * 2.5f)); i++)
             {
                 var p = new Vector3((float)rng.NextDouble() * 40f - 20f, (float)rng.NextDouble() * top - 10f, 14f + (float)rng.NextDouble() * 18f);
                 float s = 0.05f + (float)rng.NextDouble() * 0.12f;
-                Shapes.Primitive(PrimitiveType.Cube, "Star", back, p, Vector3.one * s, star);
+                parts.Add(new CombineInstance { mesh = cube, transform = Matrix4x4.TRS(p, Quaternion.identity, Vector3.one * s) });
             }
+            MergedPart("Stars", back, parts, star);
             for (int w = 0; w < worlds; w++)
             {
                 var theme = WorldTheme.ForWorld(w);
@@ -116,6 +121,27 @@ namespace SquashBot.Visual
         /// <summary>(Re)builds the stones, islands and dots for the current progress.</summary>
         public void Build(int unlocked, bool openAll)
         {
+            // The map casts no shadows (whatever the last floor set).
+            bool shadows = Shapes.CastShadows;
+            Shapes.CastShadows = false;
+            try { BuildParts(unlocked, openAll); }
+            finally { Shapes.CastShadows = shadows; }
+        }
+
+        private Transform[] islands;
+        private bool[] islandLocked;
+        private Transform islandRoot;
+        private readonly Dictionary<string, Material> shared = new Dictionary<string, Material>();
+
+        /// <summary>One material per look, shared by every stone wearing it (made on first use).</summary>
+        private Material Shared(string key, Color colour, Color emission)
+        {
+            if (!shared.TryGetValue(key, out var m) || m == null) shared[key] = m = MaterialFactory.Create(colour, emission);
+            return m;
+        }
+
+        private void BuildParts(int unlocked, bool openAll)
+        {
             if (path != null) Destroy(path.gameObject);
             stones.Clear();
             stoneTops.Clear();
@@ -123,11 +149,30 @@ namespace SquashBot.Visual
             path.SetParent(transform, false);
             current = Mathf.Clamp(unlocked, 0, levelCount - 1);
 
+            // The islands are the heavy part: each is kept, and made again only when it locks or opens.
             int worlds = Mathf.CeilToInt(levelCount / (float)LevelCatalog.LevelsPerWorld);
-            for (int w = 0; w < worlds; w++) BuildIsland(w, w * LevelCatalog.LevelsPerWorld > unlocked && !openAll);
+            if (islandRoot == null)
+            {
+                islandRoot = new GameObject("Islands").transform;
+                islandRoot.SetParent(transform, false);
+                islands = new Transform[worlds];
+                islandLocked = new bool[worlds];
+            }
+            for (int w = 0; w < worlds; w++)
+            {
+                bool locked = w * LevelCatalog.LevelsPerWorld > unlocked && !openAll;
+                if (islands[w] != null && islandLocked[w] == locked) continue;
+                if (islands[w] != null) Destroy(islands[w].gameObject);
+                islands[w] = BuildIsland(w, locked);
+                islandLocked[w] = locked;
+            }
 
-            var dotDone = MaterialFactory.Create(new Color(1f, 0.95f, 0.8f), new Color(1.6f, 1.4f, 0.9f));
-            var dotLocked = MaterialFactory.Create(new Color(0.35f, 0.33f, 0.5f), Color.black);
+            // The dots between the stones: merged into two meshes (walked, still ahead), two draws for a thousand dots.
+            var dotDone = Shared("dotDone", new Color(1f, 0.95f, 0.8f), new Color(1.6f, 1.4f, 0.9f));
+            var dotLocked = Shared("dotLocked", new Color(0.35f, 0.33f, 0.5f), Color.black);
+            var sphere = Shapes.MeshOf(PrimitiveType.Sphere);
+            var doneParts = new List<CombineInstance>();
+            var aheadParts = new List<CombineInstance>();
             for (int i = 0; i < levelCount; i++)
             {
                 stones.Add(BuildStone(i, unlocked, openAll));
@@ -139,9 +184,11 @@ namespace SquashBot.Visual
                 for (int d = 1; d < dots; d++)
                 {
                     var p = Vector3.Lerp(a, b, d / (float)dots) - Vector3.up * 0.05f - Origin;
-                    Shapes.Primitive(PrimitiveType.Sphere, "Dot", path, p, Vector3.one * 0.13f, done ? dotDone : dotLocked);
+                    (done ? doneParts : aheadParts).Add(new CombineInstance { mesh = sphere, transform = Matrix4x4.TRS(p, Quaternion.identity, Vector3.one * 0.13f) });
                 }
             }
+            MergedPart("DotsDone", path, doneParts, dotDone);
+            MergedPart("DotsAhead", path, aheadParts, dotLocked);
 
             if (robotHolder == null)
             {
@@ -156,6 +203,22 @@ namespace SquashBot.Visual
             maxHeight = NodePosition(levelCount - 1).y - Origin.y;
         }
 
+        /// <summary>Many small pieces of one material as a single mesh (destroyed with its object).</summary>
+        private static void MergedPart(string name, Transform parent, List<CombineInstance> parts, Material material)
+        {
+            if (parts.Count == 0) return;
+            var mesh = new Mesh { name = name, indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+            mesh.CombineMeshes(parts.ToArray(), true, true);
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            go.AddComponent<OwnedMesh>().mesh = mesh;
+            var r = go.AddComponent<MeshRenderer>();
+            r.sharedMaterial = material;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            r.receiveShadows = false;
+        }
+
         private Transform BuildStone(int i, int unlocked, bool openAll)
         {
             var theme = WorldTheme.ForWorld(i / LevelCatalog.LevelsPerWorld);
@@ -166,10 +229,18 @@ namespace SquashBot.Visual
             stone.SetParent(path, false);
             stone.position = NodePosition(i);
 
-            var rock = MaterialFactory.Create(locked ? new Color(0.22f, 0.2f, 0.32f) : Color.Lerp(theme.pillar, new Color(0.25f, 0.22f, 0.35f), 0.35f), Color.black);
+            // Shared per world and state (the pulsing current stone keeps a top of its own).
+            int wd = i / LevelCatalog.LevelsPerWorld;
+            string state = locked ? "L" : completed ? "C" : "O";
+            var rock = locked ? Shared("rockL", new Color(0.22f, 0.2f, 0.32f), Color.black)
+                : Shared("rock" + wd, Color.Lerp(theme.pillar, new Color(0.25f, 0.22f, 0.35f), 0.35f), Color.black);
             Color topColor = locked ? new Color(0.3f, 0.28f, 0.42f) : isCurrent ? Color.white : theme.accent;
-            var top = MaterialFactory.Create(topColor, locked ? Color.black : topColor * (isCurrent ? 0.7f : 0.35f));
-            var rim = MaterialFactory.Create(completed ? Palette.UiGold : locked ? new Color(0.4f, 0.38f, 0.55f) : Color.white,
+            // The stone the map pulses (the current one, or the last when all are done) has its own top: never a shared one.
+            bool pulsed = i == Mathf.Clamp(unlocked, 0, levelCount - 1);
+            var top = isCurrent ? MaterialFactory.Create(topColor, topColor * 0.7f)
+                : pulsed ? MaterialFactory.Create(topColor, locked ? Color.black : topColor * 0.35f)
+                : locked ? Shared("topL", topColor, Color.black) : Shared("top" + wd, topColor, topColor * 0.35f);
+            var rim = Shared("rim" + state, completed ? Palette.UiGold : locked ? new Color(0.4f, 0.38f, 0.55f) : Color.white,
                 completed ? Palette.UiGold * 1.4f : locked ? Color.black : new Color(1.4f, 1.4f, 1.6f));
             // A rounded slab on top, a rock tapering away below (two stacked pieces read as a floating stone).
             Shapes.Primitive(PrimitiveType.Cylinder, "Top", stone, new Vector3(0f, -0.12f, 0f), new Vector3(1.25f, 0.12f, 1.25f), top);
@@ -185,11 +256,11 @@ namespace SquashBot.Visual
         /// as in play), and on it the world's own bugs, guard robot, enforcer, crate and end monster, in their real
         /// looks. Locked worlds show it too (a peek at what is ahead), under a dimmer light.
         /// </summary>
-        private void BuildIsland(int world, bool locked)
+        private Transform BuildIsland(int world, bool locked)
         {
             var theme = WorldTheme.ForWorld(world).Realm(world);
             var island = new GameObject("Island " + (world + 1)).transform;
-            island.SetParent(path, false);
+            island.SetParent(islandRoot, false);
             island.position = IslandPosition(world);
             var rng = new System.Random(world * 31 + 5);
             float R() => (float)rng.NextDouble();
@@ -280,6 +351,7 @@ namespace SquashBot.Visual
                 Shapes.Rounded("Post", island, new Vector3(x, 0.7f, 1.85f), new Vector3(0.09f, 1.2f, 0.09f), 0.03f, rock);
                 Shapes.Primitive(PrimitiveType.Sphere, "Lamp", island, new Vector3(x, 1.35f, 1.85f), Vector3.one * 0.26f, glow);
             }
+            return island;
         }
 
         /// <summary>The end monster of a world, as play dresses it (its guardian, else the world's kind and colour).</summary>
@@ -339,6 +411,14 @@ namespace SquashBot.Visual
             if (hopT < 1f) hopT += dt / 0.7f;
             PlaceRobot();
             PlaceCamera();
+            // Only the islands near the view are awake (their little robots animate; the rest are not drawn or run).
+            if (islands != null)
+                for (int w = 0; w < islands.Length; w++)
+                {
+                    if (islands[w] == null) continue;
+                    bool near = Mathf.Abs(IslandPosition(w).y - Origin.y - height) < 16f;
+                    if (islands[w].gameObject.activeSelf != near) islands[w].gameObject.SetActive(near);
+                }
             // The next level's stone glows in and out.
             if (current >= 0 && current < stoneTops.Count)
             {

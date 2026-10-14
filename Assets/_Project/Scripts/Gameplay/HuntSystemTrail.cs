@@ -71,7 +71,9 @@ namespace SquashBot.Gameplay
         /// </summary>
         public void AddChallengeFoe(GridPos p, int hp, float hitShare, Transform look, HeldWeapon held = null, int shieldHits = 0)
         {
-            if (!grid.IsStandable(p)) return;
+            // Never no rival (that would be a duel won by default): the nearest free tile if this one is taken.
+            if (!grid.IsStandable(p) || grid.IsOccupied(p)) p = FreeNear(p) ?? p;
+            ResetFoeState();
             var g = new Guard { pos = p, brute = false, rank = 98, hp = hp, maxHp = hp, step = 0.4f, cooldown = 1.0f, share = hitShare };
             g.root = new GameObject("RivalFoi").transform;
             g.root.SetParent(transform, false);
@@ -90,7 +92,16 @@ namespace SquashBot.Gameplay
             challengeFoe = g;
             // Its own shield (from its profile): the first blows only crack the bubble.
             if (shieldHits > 0) { AddShield(g); g.shield = shieldHits; }
+        }
+
+        /// <summary>The rival's tactics start fresh each duel (nothing carried over from the last one).</summary>
+        private void ResetFoeState()
+        {
             foeCombo = 0;
+            foeCounter = false;
+            foeHurtStreak = 0;
+            foeHurtAt = -9f;
+            foeFleeUntil = foeBackOffUntil = foeDodgeAt = 0f;
         }
 
         /// <summary>Where the rival foi stands (null once it has fallen).</summary>
@@ -163,13 +174,14 @@ namespace SquashBot.Gameplay
             {
                 if (g.dead || g.soldier == null) continue;
                 g.dead = true;
+                ClearTelegraph(g); // a swing at foi caught halfway: its red tiles go too
                 grid.SetOccupied(g.pos, false);
                 fx.Burst(g.root.position + Vector3.up * 0.4f, new Color(0.9f, 0.9f, 1f), new Color(1.6f, 1.6f, 2f), 12, 3f);
                 Destroy(g.root.gameObject);
             }
         }
 
-        public void ClearChallengeFoe() { challengeFoe = null; ChallengeBattle = false; UseStreetMap = false; }
+        public void ClearChallengeFoe() { challengeFoe = null; ChallengeBattle = false; UseStreetMap = false; ResetFoeState(); }
 
         /// <summary>The rival foi's state, for tests.</summary>
         public string FoeDebug => challengeFoe == null ? "none" : $"pos {challengeFoe.pos} foi {robot.Position} hp {challengeFoe.hp} wind {challengeFoe.windup:0.0} cd {challengeFoe.cooldown:0.0} step {challengeFoe.step:0.0} moveT {challengeFoe.moveT:0.0} engaged {engaged.Contains(challengeFoe)} combo {foeCombo} back {Time.time < foeBackOffUntil} flee {Time.time < foeFleeUntil}";
@@ -445,8 +457,9 @@ namespace SquashBot.Gameplay
 
         private System.Collections.IEnumerator Splash(List<GridPos> tiles, float delay)
         {
+            int gen = beginGen;
             yield return new WaitForSeconds(delay);
-            if (!running) yield break;
+            if (!running || gen != beginGen) yield break; // the level it was spat in is over
             foreach (var t in tiles) fx.Burst(At(t) + Vector3.up * 0.2f, PoisonColour, PoisonColour * 2f, 10, 3f);
             Poisoned?.Invoke(tiles);
         }

@@ -381,13 +381,15 @@ namespace SquashBot.Gameplay
         private const float HoverHeight = 1.15f;
 
         /// <summary>Hover escape: rise into the air and wait for a landing tile.</summary>
-        public void StartHover()
+        /// <returns>False when it can't rise now (mid-hop or mid-bump): the hover has not started.</returns>
+        public bool StartHover()
         {
-            if (!IsAlive || anim == Anim.Hop || anim == Anim.Bump || anim == Anim.Hover) return;
+            if (!IsAlive || anim == Anim.Hop || anim == Anim.Bump || anim == Anim.Hover) return false;
             bufferedMove = null;
             bufferedJump = false;
             targetFacing = FacingCamera;
             StartAnim(Anim.Hover, GridView.ToWorld(Position), GridView.ToWorld(Position));
+            return true;
         }
 
         /// <summary>Glide down from the hover onto <paramref name="target"/>.</summary>
@@ -401,6 +403,8 @@ namespace SquashBot.Gameplay
             Position = target;
             hopDuration = 0.28f;
             hopHeight = 0.25f;
+            paceScale = 1f;
+            hopCarry = Vector3.zero;
             StartAnim(Anim.Hop, transform.position, GridView.ToWorld(target));
         }
 
@@ -413,6 +417,8 @@ namespace SquashBot.Gameplay
             visual.localScale = Vector3.one;
             hopDuration = 0.4f;
             hopHeight = 1.1f;
+            paceScale = 1f;
+            hopCarry = Vector3.zero;
             StartAnim(Anim.Hop, transform.position, GridView.ToWorld(safe));
         }
 
@@ -646,7 +652,8 @@ namespace SquashBot.Gameplay
         {
             IsAlive = false; // freezes input
             targetFacing = FacingCamera;
-            StartAnim(Anim.Escape, transform.position, transform.position + Vector3.up * 1.2f);
+            var from = GroundedPosition;
+            StartAnim(Anim.Escape, from, from + Vector3.up * 1.2f);
         }
 
         private Vector3 freeVel;
@@ -730,8 +737,12 @@ namespace SquashBot.Gameplay
             cheerBrief = false;
             IsAlive = false; // freezes input
             targetFacing = FacingCamera;
-            StartAnim(Anim.Cheer, transform.position, transform.position);
+            var from = GroundedPosition;
+            StartAnim(Anim.Cheer, from, from);
         }
+
+        /// <summary>Where foi stands: mid-hop that is its tile (not the arc), else where it is.</summary>
+        private Vector3 GroundedPosition => anim == Anim.Hop ? GridView.ToWorld(Position) : transform.position;
 
         private void StartAnim(Anim a, Vector3 start, Vector3 end)
         {

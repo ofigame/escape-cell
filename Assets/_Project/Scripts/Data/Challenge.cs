@@ -216,13 +216,14 @@ namespace SquashBot.Data
             var o = new Opponent { bot = false, name = r.name, trophies = Mathf.Max(0, r.trophies) };
             var parts = (r.army ?? "").Split(',');
             for (int g = 0; g < Army.Groups && g < parts.Length; g++)
-                o.points[g] = int.TryParse(parts[g], out int v) ? Mathf.Clamp(v, 0, 1000) : 0;
-            o.foiHp = r.foiHp > 0 ? Mathf.Clamp(r.foiHp, 10, 400) : FoiHpFor(r.world);
-            o.foiHit = r.foiHit > 0f ? Mathf.Clamp(r.foiHit, 0.05f, 0.3f) : FoiHitFor(r.world);
+                o.points[g] = int.TryParse(parts[g], out int v) ? Mathf.Clamp(v, 0, 2500) : 0;
+            o.foiHp = r.foiHp > 0 ? Mathf.Clamp(r.foiHp, 10, FoiHpFor(24)) : FoiHpFor(r.world);
+            o.foiHit = r.foiHit > 0f ? Mathf.Clamp(r.foiHit, 0.05f, 0.15f) : FoiHitFor(r.world);
             o.boldness = Mathf.Clamp01(r.boldness);
-            o.weapon = string.IsNullOrEmpty(r.weapon) ? "mallet" : r.weapon;
-            o.weaponLevel = Mathf.Clamp(r.weaponLevel, 1, 10);
-            o.armor = Mathf.Clamp(r.armor, 0f, 0.5f);
+            var w = string.IsNullOrEmpty(r.weapon) ? null : Armory.All.Find(x => x.id == r.weapon && x.kind != WeaponKind.Gun);
+            o.weapon = w != null ? w.id : "mallet";
+            o.weaponLevel = Mathf.Clamp(r.weaponLevel, 1, Armory.MaxLevel);
+            o.armor = Mathf.Clamp(r.armor, 0f, 0.1f * Shop.MaxLevel(Upgrade.Armor));
             o.shield = Mathf.Clamp(r.shield, 0, 3);
             return o;
         }

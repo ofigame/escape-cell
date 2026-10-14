@@ -50,6 +50,8 @@ namespace SquashBot.Gameplay
             public float alertUntil;
             /// <summary>Its wind-up is a smash at the rampart under foi's gun post (foi is up there).</summary>
             public bool atWall;
+            /// <summary>The health its bar last showed (-1: never drawn).</summary>
+            public int barHp = -1;
             /// <summary>A chest's guardian on the roads (see HuntSystemTrail): the chest it keeps near, its number.</summary>
             public bool spitter;
             public GridPos home;
@@ -194,9 +196,14 @@ namespace SquashBot.Gameplay
             this.rig = rig;
         }
 
+        /// <summary>Counts the Begins: a bolt or glob still in the air from an earlier level checks it and fizzles.</summary>
+        private int beginGen;
+
         public void Begin(GridModel grid, LevelData level, int world, int seed)
         {
             Stop();
+            beginGen++;
+            flowGoal = new GridPos(-999, -999); // the path map is the new floor's
             this.grid = grid;
             this.level = level;
             rng = new System.Random(seed);
@@ -539,6 +546,7 @@ namespace SquashBot.Gameplay
                 g.flash = 1f;
                 g.Flash();
                 g.windup = -1f;
+                if (g == challengeFoe) foeCounter = false; // its swing (a counter too) is cut short
                 ClearTelegraph(g);
                 fx.Burst(At(p) + Vector3.up * 0.4f, Palette.UiGold, Palette.CoinGlow, 34, 6f);
                 Shockwave.Create(At(p), 1.4f, new Color(1f, 0.85f, 0.45f));
@@ -971,11 +979,16 @@ namespace SquashBot.Gameplay
                     Shapes.Rounded("Notch", g.bar, new Vector3(-w * 0.5f + w * i / g.maxHp, 0f, -0.04f), new Vector3(0.02f, 0.12f, 0.02f), 0.008f, MaterialFactory.Create(new Color(0.08f, 0.06f, 0.12f), Color.black));
         }
 
+        private Camera barCam;
+
         private void UpdateHealthBar(Guard g)
         {
             if (g.bar == null) return;
-            var cam = Camera.main;
-            if (cam != null) g.bar.rotation = Quaternion.LookRotation(cam.transform.forward, Vector3.up);
+            if (barCam == null) barCam = Camera.main;
+            if (barCam != null) g.bar.rotation = Quaternion.LookRotation(barCam.transform.forward, Vector3.up);
+            // Fill and colour only when the health changed (a material write each frame for each robot adds up).
+            if (g.barHp == g.hp) return;
+            g.barHp = g.hp;
             float k = Mathf.Clamp01(g.hp / (float)g.maxHp);
             g.barFill.localScale = new Vector3(Mathf.Max(0.001f, k), 1f, 1f);
             var c = Color.Lerp(new Color(1f, 0.3f, 0.3f), new Color(0.4f, 1f, 0.45f), k);
@@ -1346,6 +1359,7 @@ namespace SquashBot.Gameplay
         {
             foreach (var t in g.area) view?.SetWarning(t, 0f);
             g.area.Clear();
+            g.atWall = false; // a cancelled rampart swing: its next blow is an ordinary one
         }
 
         private void ClearTelegraph()

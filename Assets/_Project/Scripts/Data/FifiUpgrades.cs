@@ -32,6 +32,22 @@ namespace SquashBot.Data
         /// <summary>How far Fifi zaps (diagonals count as one step), the same reach as foi's blows.</summary>
         public const int Range = 2;
 
+        private const string RefundKey = "sb_fifi_refunded";
+
+        /// <summary>
+        /// Fifi has left the game: the coins once spent on its levels go back to the player (once) and its level is reset.
+        /// </summary>
+        public static void RefundOnce()
+        {
+            if (PlayerPrefs.GetInt(RefundKey, 0) == 1) return;
+            int spent = 0;
+            for (int l = 1; l < Level; l++) spent += Prices[l];
+            if (spent > 0) SaveData.Coins += spent;
+            PlayerPrefs.SetInt(Key, 1);
+            PlayerPrefs.SetInt(RefundKey, 1);
+            PlayerPrefs.Save();
+        }
+
         public static bool TryUpgrade()
         {
             if (IsMaxed || !Shop.Spend(NextPrice)) return false;

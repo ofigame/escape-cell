@@ -17,7 +17,7 @@ namespace SquashBot.Data
 
         private const string DayKey = "sb_ad_coins_day", CountKey = "sb_ad_coins_count";
 
-        private static string Today => DateTime.Now.ToString("yyyyMMdd");
+        private static string Today => GameClock.Today;
 
         /// <summary>Workshop coin ads left today.</summary>
         public static int ShopAdsLeft => PlayerPrefs.GetString(DayKey, "") == Today ? Mathf.Max(0, ShopAdsPerDay - PlayerPrefs.GetInt(CountKey, 0)) : ShopAdsPerDay;

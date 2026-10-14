@@ -152,9 +152,28 @@ namespace SquashBot.Data
         /// <summary>Sends a challenge's result. Null: not taken (no network: the server counts it lost later).</summary>
         public static IEnumerator SendResult(long matchId, bool won, bool draw, Action<Result> done)
         {
+            // Kept on the phone until the server has it: a lost connection sends it again before the next search.
+            PlayerPrefs.SetString(PendingKey, matchId + "," + (won ? 1 : 0) + "," + (draw ? 1 : 0));
+            PlayerPrefs.Save();
             long code = 0; string body = null;
             yield return Send("POST", "/match/" + matchId + "/result", JsonUtility.ToJson(new ResultBody { won = won && !draw, draw = draw }), true, (c, b) => { code = c; body = b; });
+            // 200 taken, 4xx settled or unknown already: either way nothing more to send.
+            if (code >= 200 && code < 500 && PlayerPrefs.GetString(PendingKey, "").StartsWith(matchId + ","))
+            {
+                PlayerPrefs.DeleteKey(PendingKey);
+                PlayerPrefs.Save();
+            }
             done(code == 200 ? TryParse<Result>(body) : null);
+        }
+
+        private const string PendingKey = "sb_net_pending";
+
+        /// <summary>A result that never reached the server (no network then) goes up now. Reports the server's answer or null.</summary>
+        public static IEnumerator SendPending(Action<Result> done)
+        {
+            var parts = PlayerPrefs.GetString(PendingKey, "").Split(',');
+            if (parts.Length != 3 || !long.TryParse(parts[0], out long id) || id <= 0) { PlayerPrefs.DeleteKey(PendingKey); done(null); yield break; }
+            yield return SendResult(id, parts[1] == "1", parts[2] == "1", done);
         }
 
         /// <summary>
@@ -243,6 +262,15 @@ namespace SquashBot.Data
             {
                 done(0, null);
                 yield break;
+            }
+            if (auth && req.responseCode == 401 && path != "/me")
+            {
+                // The server no longer knows this player (deleted, or its key lost): register afresh next time.
+                PlayerPrefs.DeleteKey(IdKey);
+                PlayerPrefs.DeleteKey(SecretKey);
+                PlayerPrefs.DeleteKey(NameSyncedKey);
+                PlayerPrefs.DeleteKey(PendingKey);
+                PlayerPrefs.Save();
             }
             done(req.responseCode, req.downloadHandler.text);
         }

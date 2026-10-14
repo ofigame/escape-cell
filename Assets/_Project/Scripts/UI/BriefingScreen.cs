@@ -56,7 +56,7 @@ namespace SquashBot.UI
             cardTap.transition = Selectable.Transition.None;
             cardTap.onClick.AddListener(Next);
 
-            title = UiFactory.TextBox("Title", card, new Vector2(0.5f, 1f), new Vector2(0f, -34f), new Vector2(620f, 90f), "", 54f, Palette.UiCyan, title: true);
+            title = UiFactory.TextBox("Title", card, new Vector2(0.5f, 1f), new Vector2(0f, -34f), new Vector2(500f, 90f), "", 54f, Palette.UiCyan, title: true);
             title.characterSpacing = 3f;
             UiFactory.MakeButton(card, Loc.T("brief.skip"), Kind.Secondary, new Vector2(1f, 1f), new Vector2(-26f, -26f), new Vector2(190f, 86f), Finish, 36f);
 
@@ -84,6 +84,10 @@ namespace SquashBot.UI
         {
             steps = new List<string>(stepTexts);
             view.texture = stageTexture;
+            // A picture of another shape than the view (a challenge kind's wide picture): its middle, filling the view.
+            var vr = view.rectTransform.rect;
+            float va = vr.height > 0f ? vr.width / vr.height : 1f, ta = stageTexture != null && stageTexture.height > 0 ? stageTexture.width / (float)stageTexture.height : va;
+            view.uvRect = ta > va + 0.01f ? new Rect((1f - va / ta) * 0.5f, 0f, va / ta, 1f) : ta < va - 0.01f ? new Rect(0f, (1f - ta / va) * 0.5f, 1f, ta / va) : new Rect(0f, 0f, 1f, 1f);
             foreach (var d in dotImages) Destroy(d.gameObject);
             dotImages.Clear();
             for (int i = 0; i < steps.Count && steps.Count > 1; i++)

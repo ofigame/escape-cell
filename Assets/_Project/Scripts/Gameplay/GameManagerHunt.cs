@@ -140,6 +140,7 @@ namespace SquashBot.Gameplay
             SetupFortressFloor();
             SetupStageGates();
             SetupDefenses();
+            ResetScore(); // again: the defences' robots count towards the par time too
         }
 
         private void UpdateHunt(float dt)

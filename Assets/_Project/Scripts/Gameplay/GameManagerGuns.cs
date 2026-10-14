@@ -223,6 +223,7 @@ namespace SquashBot.Gameplay
             hunt.PlayerAway = true;
             AudioManager.PlaySfx(Sfx.Hop, 0.8f, 1.2f);
             yield return Walk(new[] { p.footWorld, p.stairLow, p.stairHigh, p.seat });
+            if (manned != p) yield break; // the post was left during the climb (the arena was won)
             gunYaw = Mathf.Atan2(p.inward.x, p.inward.z) * Mathf.Rad2Deg;
             gunPitch = 16f;
             robot.ArenaPlace(p.seat, p.inward, snapTurn: true);

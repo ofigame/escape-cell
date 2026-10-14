@@ -12,8 +12,18 @@ namespace SquashBot.Visual
         /// A box of the given size whose edges and corners are rounded with the given radius.
         /// Built from a subdivided cube whose vertices are pushed onto a rounded shell, giving smooth normals.
         /// </summary>
+        private static float Snap(float v)
+        {
+            float step = Mathf.Max(0.002f, Mathf.Abs(v) * 0.02f);
+            return Mathf.Round(v / step) * step;
+        }
+
         public static Mesh RoundedBox(Vector3 size, float radius, int segments = 6)
         {
+            // Sizes snapped to 2% steps: random sizes (floor veins, wear, lightning) share a few meshes instead of each
+            // adding one to the cache for good.
+            size = new Vector3(Snap(size.x), Snap(size.y), Snap(size.z));
+            radius = Snap(radius);
             radius = Mathf.Min(radius, size.x * 0.5f, size.y * 0.5f, size.z * 0.5f);
             // Rows per rounded band follow the radius: a hairline bevel on a floor tile needs two, a chunky robot part six.
             // (Six everywhere put ~4000 triangles in every floor tile and over a million on the big late floors.)

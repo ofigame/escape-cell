@@ -19,6 +19,9 @@ namespace SquashBot.UI
         public event Action Claimed;
 
         private UiScreen screen;
+
+        /// <summary>Closed at once (another screen is taking over).</summary>
+        public void Hide() => screen.Hide(true);
         private readonly List<Action> refreshers = new List<Action>();
         private TextMeshProUGUI renew;
 

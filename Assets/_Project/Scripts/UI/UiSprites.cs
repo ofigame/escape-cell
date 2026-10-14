@@ -7,17 +7,19 @@ namespace SquashBot.UI
     {
         private const int Size = 128;
         private const int Radius = 44;
+        /// <summary>The unsliced shapes (circles, stars, smoke) are drawn at any size: twice the pixels, with mipmaps, stay crisp large and calm small.</summary>
+        private const int Big = 256;
 
         private static Sprite rounded, ring, shadow, circle, star;
 
         public static Sprite Rounded => rounded != null ? rounded : rounded = Make(FillAlpha, Radius);
         public static Sprite Ring => ring != null ? ring : ring = Make(RingAlpha, Radius);
         public static Sprite Shadow => shadow != null ? shadow : shadow = Make(ShadowAlpha, Radius + 20);
-        public static Sprite Circle => circle != null ? circle : circle = Make(CircleAlpha, 0);
+        public static Sprite Circle => circle != null ? circle : circle = Make(CircleAlpha, 0, false, Big);
         public static Sprite Star => star != null ? star : star = MakeStar();
         /// <summary>A rounded fill that is brighter at the top than the bottom (tint it: a modern gradient button).</summary>
         public static Sprite RoundedGradient => roundedGradient != null ? roundedGradient : roundedGradient = Make(FillAlpha, Radius, true);
-        public static Sprite CircleGradient => circleGradient != null ? circleGradient : circleGradient = Make(CircleAlpha, 0, true);
+        public static Sprite CircleGradient => circleGradient != null ? circleGradient : circleGradient = Make(CircleAlpha, 0, true, Big);
         private static Sprite roundedGradient, circleGradient, smoke;
 
         /// <summary>A soft puff: bright in the middle, fading to nothing with a wispy, uneven edge (like a breath of smoke).</summary>
@@ -25,7 +27,8 @@ namespace SquashBot.UI
 
         private static Sprite MakeSmoke()
         {
-            var tex = new Texture2D(Size, Size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
+            const int Size = Big;
+            var tex = new Texture2D(Size, Size, TextureFormat.RGBA32, true) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Trilinear };
             var px = new Color32[Size * Size];
             for (int y = 0; y < Size; y++)
                 for (int x = 0; x < Size; x++)
@@ -33,19 +36,19 @@ namespace SquashBot.UI
                     float dx = (x + 0.5f) / Size - 0.5f, dy = (y + 0.5f) / Size - 0.5f;
                     float r = Mathf.Sqrt(dx * dx + dy * dy) * 2f;
                     float ang = Mathf.Atan2(dy, dx);
-                    float wisp = 0.85f + 0.15f * Mathf.PerlinNoise(Mathf.Cos(ang) * 2f + 3f, Mathf.Sin(ang) * 2f + 3f) + 0.1f * Mathf.PerlinNoise(x * 0.08f, y * 0.08f);
+                    float wisp = 0.85f + 0.15f * Mathf.PerlinNoise(Mathf.Cos(ang) * 2f + 3f, Mathf.Sin(ang) * 2f + 3f) + 0.1f * Mathf.PerlinNoise(x * 0.04f, y * 0.04f);
                     float a = Mathf.Pow(Mathf.Clamp01(1f - r / wisp), 2.2f);
                     px[y * Size + x] = new Color32(255, 255, 255, (byte)(a * 255));
                 }
             tex.SetPixels32(px);
-            tex.Apply();
-            return Sprite.Create(tex, new Rect(0, 0, Size, Size), new Vector2(0.5f, 0.5f), 100f);
+            tex.Apply(true, true);
+            return Sprite.Create(tex, new Rect(0, 0, Size, Size), new Vector2(0.5f, 0.5f), 200f);
         }
 
         private delegate float AlphaFn(float signedDistance);
 
         // Signed distance to a rounded rect inset by `pad` pixels (negative inside).
-        private static float RoundedRectDistance(float x, float y, float pad, float r)
+        private static float RoundedRectDistance(float x, float y, float pad, float r, int Size = Size)
         {
             float half = Size * 0.5f - pad;
             float qx = Mathf.Abs(x - Size * 0.5f) - (half - r);
@@ -62,7 +65,8 @@ namespace SquashBot.UI
         /// <summary>A chunky five-pointed star with slightly rounded look (4x4 supersampled edges).</summary>
         private static Sprite MakeStar()
         {
-            var tex = new Texture2D(Size, Size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
+            const int Size = Big;
+            var tex = new Texture2D(Size, Size, TextureFormat.RGBA32, true) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Trilinear };
             var points = new Vector2[10];
             for (int i = 0; i < 10; i++)
             {
@@ -82,8 +86,8 @@ namespace SquashBot.UI
                     px[y * Size + x] = new Color32(255, 255, 255, (byte)(inside * 255 / 16));
                 }
             tex.SetPixels32(px);
-            tex.Apply(false, true);
-            return Sprite.Create(tex, new Rect(0, 0, Size, Size), new Vector2(0.5f, 0.5f), 100f);
+            tex.Apply(true, true);
+            return Sprite.Create(tex, new Rect(0, 0, Size, Size), new Vector2(0.5f, 0.5f), 200f);
         }
 
         private static bool InPolygon(Vector2[] poly, Vector2 p)
@@ -96,12 +100,13 @@ namespace SquashBot.UI
             return inside;
         }
 
-        private static Sprite Make(AlphaFn fn, int border, bool gradient = false)
+        private static Sprite Make(AlphaFn fn, int border, bool gradient = false, int Size = Size)
         {
-            var tex = new Texture2D(Size, Size, TextureFormat.RGBA32, false)
+            bool big = Size > UiSprites.Size; // unsliced: mipmapped
+            var tex = new Texture2D(Size, Size, TextureFormat.RGBA32, big)
             {
                 wrapMode = TextureWrapMode.Clamp,
-                filterMode = FilterMode.Bilinear,
+                filterMode = big ? FilterMode.Trilinear : FilterMode.Bilinear,
             };
 
             bool isShadow = fn == ShadowAlpha;
@@ -113,14 +118,14 @@ namespace SquashBot.UI
             for (int y = 0; y < Size; y++)
                 for (int x = 0; x < Size; x++)
                 {
-                    float d = RoundedRectDistance(x + 0.5f, y + 0.5f, pad, r);
+                    float d = RoundedRectDistance(x + 0.5f, y + 0.5f, pad, r, Size);
                     byte g = gradient ? (byte)(255f * Mathf.Lerp(0.74f, 1f, Mathf.SmoothStep(0f, 1f, y / (float)(Size - 1)))) : (byte)255;
                     px[y * Size + x] = new Color32(g, g, g, (byte)(fn(d) * 255f));
                 }
             tex.SetPixels32(px);
-            tex.Apply(false, true);
+            tex.Apply(big, true);
 
-            return Sprite.Create(tex, new Rect(0, 0, Size, Size), new Vector2(0.5f, 0.5f), 100f, 0,
+            return Sprite.Create(tex, new Rect(0, 0, Size, Size), new Vector2(0.5f, 0.5f), 100f * Size / UiSprites.Size, 0,
                 SpriteMeshType.FullRect, new Vector4(border, border, border, border));
         }
     }

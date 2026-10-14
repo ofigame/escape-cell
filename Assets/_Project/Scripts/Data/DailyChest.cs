@@ -8,7 +8,7 @@ namespace SquashBot.Data
     {
         private const string Key = "sb_daily_chest";
 
-        private static string Today => DateTime.Now.ToString("yyyyMMdd");
+        private static string Today => GameClock.Today;
 
         public static bool Ready => PlayerPrefs.GetString(Key, "") != Today;
 

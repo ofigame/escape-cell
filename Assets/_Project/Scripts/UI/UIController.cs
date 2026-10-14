@@ -167,7 +167,7 @@ namespace SquashBot.UI
         // "Delete my online profile": the first tap asks, the second deletes.
         private Button deleteOnlineButton;
         private TextMeshProUGUI deleteOnlineText;
-        private bool deleteOnlineAsked;
+        private bool deleteOnlineAsked, deleteInFlight;
         private Image healthFill;
         private TextMeshProUGUI healthText;
         private float healthShown = 1f;
@@ -429,7 +429,7 @@ namespace SquashBot.UI
             menuRankText.rectTransform.pivot = new Vector2(0f, 0.5f);
             menuRankCups = UiFactory.TextBox("Cups", menuRank, new Vector2(0f, 0.5f), new Vector2(214f, -26f), new Vector2(290f, 44f), "", 28f, Palette.UiGold, title: true, align: TextAlignmentOptions.Left);
             menuRankCups.rectTransform.pivot = new Vector2(0f, 0.5f);
-            menuDefense = UiFactory.TextBox("Defense", t, Top, new Vector2(0f, -672f), new Vector2(940f, 56f), "", 30f, Palette.UiGold, title: true);
+            menuDefense = UiFactory.TextBox("Defense", t, Top, new Vector2(0f, -672f), new Vector2(640f, 56f), "", 30f, Palette.UiGold, title: true);
             menuDefense.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             menuDefense.textWrappingMode = TMPro.TextWrappingModes.Normal;
             // Now and then a speech bubble to the left of it: win an arena battle, grab the big gifts.
@@ -923,8 +923,10 @@ namespace SquashBot.UI
 
             // Where the ad consent form applies, the player can change their answer here.
             // Under the last row: deleting the online profile, then (where the consent form applies) the ad privacy choice.
-            float underRows = -200f - rows.Length * 120f - 10f;
-            privacyButton = UiFactory.MakeButton(card, Loc.T("settings.privacy"), Kind.Secondary, Top, new Vector2(0f, underRows - 90f), new Vector2(560f, 74f),
+            float underRows = -200f - rows.Length * 120f - 40f;
+            // The card fits its rows: under them the account buttons (each in a row of its own), then CLOSE — nothing overlaps.
+            card.sizeDelta = new Vector2(860f, rows.Length * 120f + 600f);
+            privacyButton = UiFactory.MakeButton(card, Loc.T("settings.privacy"), Kind.Secondary, Top, new Vector2(0f, underRows - 100f), new Vector2(560f, 74f),
                 Monetization.AdMob.ShowPrivacyOptions, 34f).gameObject;
             // A plain button of its own (red words on a dark face), in its own row under the settings.
             deleteOnlineButton = Flat.Button(card, Loc.T("settings.deleteOnline"), Top, new Vector2(0f, underRows), new Vector2(640f, 84f), new Color(0.2f, 0.08f, 0.1f, 0.9f), new Color(1f, 0.55f, 0.58f),
@@ -947,10 +949,13 @@ namespace SquashBot.UI
                 deleteOnlineText.color = new Color(1f, 0.55f, 0.6f);
                 return;
             }
+            if (deleteInFlight) return;
+            deleteInFlight = true;
             deleteOnlineButton.interactable = false;
             deleteOnlineText.text = Loc.T("ch.name.wait");
             StartCoroutine(FoiNet.DeleteMe(ok =>
             {
+                deleteInFlight = false;
                 deleteOnlineAsked = false;
                 deleteOnlineButton.interactable = !ok;
                 deleteOnlineText.color = new Color(1f, 0.55f, 0.58f);
@@ -961,7 +966,7 @@ namespace SquashBot.UI
         public void RefreshSettings()
         {
             if (privacyButton != null) privacyButton.SetActive(Monetization.AdMob.PrivacyOptionsRequired);
-            if (deleteOnlineButton != null)
+            if (deleteOnlineButton != null && !deleteInFlight) // a delete on its way keeps its "wait" until the answer
             {
                 // Only once there is something online to delete.
                 deleteOnlineButton.gameObject.SetActive(FoiNet.Registered || Challenge.NameChosen);
@@ -1003,6 +1008,18 @@ namespace SquashBot.UI
         }
 
         private void HideSettings() => settings.Hide();
+
+        /// <summary>The back button on a card over the menu: closes the top-most one. False when none is up.</summary>
+        public bool CloseTopModal()
+        {
+            if (settings != null && settings.IsVisible) { HideSettings(); return true; }
+            if (noLives != null && noLives.IsVisible) { noLives.Hide(); return true; }
+            if (Quests != null && Quests.IsOpen) { Quests.Hide(); return true; }
+            if (ChallengeStats != null && ChallengeStats.IsOpen) { ChallengeStats.Hide(); return true; }
+            if (ArmyView != null && ArmyView.IsOpen) { ArmyView.Hide(); return true; }
+            if (DailyBonus != null && DailyBonus.Visible) { DailyBonus.Hide(); return true; }
+            return false;
+        }
 
         // ---------- HUD ----------
 
@@ -1092,7 +1109,7 @@ namespace SquashBot.UI
                 "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
 
             // Combo (under the coin counter): streak multiplier with a draining timer.
-            comboPill = UiFactory.Pill("Combo", t, TopRight, new Vector2(-270f, -36f), new Vector2(220f, 86f), new Color(0.55f, 0.32f, 0.05f, 0.85f)); // left of the coins (the TPS switch is under them)
+            comboPill = UiFactory.Pill("Combo", t, TopRight, new Vector2(-36f, -290f), new Vector2(220f, 86f), new Color(0.55f, 0.32f, 0.05f, 0.85f)); // under the coins and the TPS switch (clear of the mission pill)
             comboText = UiFactory.TextBox("Text", comboPill, Top, new Vector2(0f, -6f), new Vector2(200f, 50f), "", 38f, Palette.UiGold);
             UiFactory.Bar(comboPill, Bottom, new Vector2(0f, 10f), new Vector2(170f, 10f), Palette.UiGold, out comboFill);
             comboPill.gameObject.SetActive(false);
@@ -1127,7 +1144,7 @@ namespace SquashBot.UI
             hoverText = UiFactory.Text(hoverPill, "", 42f, Palette.UiText);
             hoverPill.gameObject.SetActive(false);
 
-            alarmPill = UiFactory.Pill("Alarm", t, Top, new Vector2(0f, -310f), new Vector2(560f, 80f), new Color(0.75f, 0.12f, 0.2f, 0.9f));
+            alarmPill = UiFactory.Pill("Alarm", t, Top, new Vector2(0f, -380f), new Vector2(480f, 80f), new Color(0.75f, 0.12f, 0.2f, 0.9f));
             UiFactory.Text(alarmPill, Loc.T("hud.alarm"), 38f, Color.white);
             alarmPill.gameObject.SetActive(false);
 
@@ -1261,7 +1278,8 @@ namespace SquashBot.UI
             healthShown = value;
             UiFactory.SetBar(healthFill, value);
             healthFill.color = value > 0.6f ? new Color(0.4f, 0.95f, 0.5f) : value > 0.3f ? new Color(1f, 0.82f, 0.3f) : new Color(1f, 0.38f, 0.38f);
-            healthText.text = "%" + Mathf.CeilToInt(value * 100f);
+            int pct = Mathf.CeilToInt(value * 100f);
+            healthText.text = Loc.Current == Language.Turkish || Loc.Current == Language.Azerbaijani ? "%" + pct : pct + "%";
         }
 
         public void SetRescues(bool enabled, int count, float progress)
@@ -1434,14 +1452,14 @@ namespace SquashBot.UI
             resultGoal = UiFactory.TextBox("Goal", card, Top, new Vector2(0f, -682f), new Vector2(760f, 48f), "", 32f, Palette.UiText, FontStyles.Bold);
             resultGoalBar = UiFactory.Bar(card, Top, new Vector2(0f, -738f), new Vector2(560f, 22f), new Color(0.36f, 0.85f, 0.6f), out resultGoalFill).gameObject;
 
-            resultNext = UiFactory.MakeButton(card, Loc.T("btn.next"), Kind.Primary, Top, new Vector2(0f, -795f), new Vector2(620f, 150f), () => NextPressed?.Invoke(), 70f);
-            resultRetry = UiFactory.MakeButton(card, Loc.T("btn.retry"), Kind.Primary, Top, new Vector2(0f, -795f), new Vector2(620f, 150f), () => RetryPressed?.Invoke(), 70f);
-            resultBonus = UiFactory.MakeButton(card, Loc.T("btn.bonus"), Kind.Gold, Top, new Vector2(0f, -795f), new Vector2(620f, 150f), () => BonusPressed?.Invoke(), 76f);
+            resultNext = UiFactory.MakeButton(card, Loc.T("btn.next"), Kind.Primary, Top, new Vector2(0f, -795f), new Vector2(620f, 150f), () => ResultTap(NextPressed), 70f);
+            resultRetry = UiFactory.MakeButton(card, Loc.T("btn.retry"), Kind.Primary, Top, new Vector2(0f, -795f), new Vector2(620f, 150f), () => ResultTap(RetryPressed), 70f);
+            resultBonus = UiFactory.MakeButton(card, Loc.T("btn.bonus"), Kind.Gold, Top, new Vector2(0f, -795f), new Vector2(620f, 150f), () => ResultTap(BonusPressed), 76f);
             resultBonus.gameObject.AddComponent<Pulse>();
-            resultContinue = UiFactory.MakeButton(card, Loc.T("btn.continue"), Kind.Gold, Top, new Vector2(0f, -795f), new Vector2(620f, 150f), () => ContinuePressed?.Invoke(), 50f);
+            resultContinue = UiFactory.MakeButton(card, Loc.T("btn.continue"), Kind.Gold, Top, new Vector2(0f, -795f), new Vector2(620f, 150f), () => ResultTap(ContinuePressed), 50f);
             resultContinue.gameObject.AddComponent<Pulse>();
             // Or carry on for coins, no ad needed: the coins saved up finally pay off when a run goes wrong.
-            resultContinueCoins = UiFactory.MakeButton(card, "", Kind.Gold, Top, new Vector2(0f, -795f), new Vector2(300f, 150f), () => ContinueCoinsPressed?.Invoke(), 40f);
+            resultContinueCoins = UiFactory.MakeButton(card, "", Kind.Gold, Top, new Vector2(0f, -795f), new Vector2(300f, 150f), () => ResultTap(ContinueCoinsPressed), 40f);
             resultContinueCoinsLabel = resultContinueCoins.GetComponentInChildren<TextMeshProUGUI>();
             foreach (var l in new[] { resultContinueCoinsLabel, resultContinue.GetComponentInChildren<TextMeshProUGUI>() })
             {
@@ -1450,10 +1468,28 @@ namespace SquashBot.UI
                 l.fontSizeMax = 50f;
                 l.margin = new Vector4(16f, 0f, 16f, 0f);
             }
-            resultDouble = UiFactory.MakeButton(card, Loc.T("btn.double"), Kind.Gold, Top, new Vector2(0f, -965f), new Vector2(620f, 135f), () => DoublePressed?.Invoke(), 54f);
-            resultMap = UiFactory.MakeButton(card, Loc.T("btn.map"), Kind.Secondary, Top, new Vector2(-160f, -1120f), new Vector2(300f, 125f), () => MapPressed?.Invoke(), 54f);
-            resultMenu = UiFactory.MakeButton(card, Loc.T("btn.menu"), Kind.Secondary, Top, new Vector2(160f, -1120f), new Vector2(300f, 125f), () => MenuPressed?.Invoke(), 54f);
+            resultDouble = UiFactory.MakeButton(card, Loc.T("btn.double"), Kind.Gold, Top, new Vector2(0f, -965f), new Vector2(620f, 135f), () => ResultTap(DoublePressed), 54f);
+            resultMap = UiFactory.MakeButton(card, Loc.T("btn.map"), Kind.Secondary, Top, new Vector2(-160f, -1120f), new Vector2(300f, 125f), () => ResultTap(MapPressed), 54f);
+            resultMenu = UiFactory.MakeButton(card, Loc.T("btn.menu"), Kind.Secondary, Top, new Vector2(160f, -1120f), new Vector2(300f, 125f), () => ResultTap(MenuPressed), 54f);
         }
+
+        private bool resultLocked;
+        private float resultLockedAt;
+
+        /// <summary>
+        /// A result button's tap, once: the card takes no second tap until it is shown again (or, if it stays up, as after
+        /// an ad that did not play, for a moment and a half).
+        /// </summary>
+        private void ResultTap(System.Action action)
+        {
+            if (resultLocked && Time.unscaledTime - resultLockedAt < 1.5f) return;
+            resultLocked = true;
+            resultLockedAt = Time.unscaledTime;
+            action?.Invoke();
+        }
+
+        /// <summary>Does the result card up now offer MAP (else MENU is its way out)?</summary>
+        public bool ResultHasMap => resultMap != null && resultMap.gameObject.activeSelf;
 
         public void ShowResult(ResultInfo info)
         {
@@ -1471,6 +1507,10 @@ namespace SquashBot.UI
             resultSub.textWrappingMode = info.challenge ? TextWrappingModes.Normal : TextWrappingModes.NoWrap;
             ((RectTransform)resultSub.transform.parent).sizeDelta = new Vector2(800f, info.challenge ? 330f : 100f);
             resultReward.text = $"+{info.coins}";
+            ((RectTransform)resultReward.transform.parent).anchoredPosition = new Vector2(0f, info.challenge ? -520f : -455f);
+            resultMeterFill.transform.parent.gameObject.SetActive(!info.challenge);
+            resultMeterText.gameObject.SetActive(!info.challenge);
+            resultLocked = false;
             resultNote.text = info.note ?? "";
             bool goal = !string.IsNullOrEmpty(info.goalText);
             resultGoal.gameObject.SetActive(goal);
@@ -1671,6 +1711,13 @@ namespace SquashBot.UI
             Guide.Hide();
             if (ArmyView != null) ArmyView.Hide();
             if (ChallengeStats != null) ChallengeStats.Hide();
+            // The cards over a screen go with it (else the back button would leave them on top of the next one).
+            if (Quests != null) Quests.Hide();
+            if (Tip != null) Tip.Hide();
+            if (Chest != null) Chest.Hide();
+            if (AdOffer != null) AdOffer.Hide();
+            if (WeaponBag != null) WeaponBag.Hide();
+            if (Languages != null) Languages.Hide();
             Briefing.Hide();
             prelevel.Hide(true);
             if (defenseAsk != null) defenseAsk.Hide(true);

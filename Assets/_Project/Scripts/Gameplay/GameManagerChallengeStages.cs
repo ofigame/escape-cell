@@ -146,6 +146,7 @@ namespace SquashBot.Gameplay
             chPhase = ChPhase.StageIntro;
             stageIntroT = 0f;
             hunt.Freeze();
+            cameraRig.StartCoroutine(ChallengeBriefing("stages", 3, () => { }));
             chUi.ShowBattle();
             chUi.HideGroups();
             chUi.SetClock("0 - 0");
@@ -164,7 +165,7 @@ namespace SquashBot.Gameplay
         /// <summary>The opening fly-over's camera: over stage A (held), sweeping down the field to stage B.</summary>
         private void StageIntroPose(out Vector3 pos, out Quaternion rot)
         {
-            stageIntroT += Time.deltaTime;
+            if (!chBriefing) stageIntroT += Time.deltaTime; // the fly-over waits for the briefing cards
             float k = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(1.4f, StageIntroTime - 0.6f, stageIntroT));
             var a = GridView.ToWorld(new GridPos(StW / 2, (A0 + A1) / 2)) + Vector3.up * GridView.SurfaceY;
             var b = GridView.ToWorld(new GridPos(StW / 2, (B0 + B1) / 2)) + Vector3.up * GridView.SurfaceY;
@@ -185,6 +186,13 @@ namespace SquashBot.Gameplay
             chUi.SetStatus(Loc.T("ch.stagesGo"));
             ui.ShowIntro(Loc.T("ch.mode.stages"), Loc.T("ch.stagesIntro"));
             AudioManager.PlaySfx(Sfx.Warning, 0.8f, 1f);
+        }
+
+        /// <summary>The groups still waiting behind the line go (the challenge was left).</summary>
+        private void ClearStageWaiting()
+        {
+            foreach (var grp in waitingB) foreach (var m in grp) if (m != null) Destroy(m.gameObject);
+            waitingB.Clear();
         }
 
         private int WaitingOnB { get { int n = 0; foreach (var g in waitingB) n += g.Count; return n; } }

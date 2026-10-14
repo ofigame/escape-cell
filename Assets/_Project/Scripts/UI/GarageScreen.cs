@@ -65,8 +65,8 @@ namespace SquashBot.UI
         {
             var bar = UiFactory.Rect("TopBar", root, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -190f), Vector2.zero);
             UiFactory.MakeButton(bar, "<", Kind.Icon, new Vector2(0f, 0.5f), new Vector2(36f, 0f), new Vector2(124f, 124f), () => BackPressed?.Invoke(), 64f);
-            UiFactory.Pill("TitleBack", bar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(540f, 96f), UiFactory.PillColor);
-            UiFactory.TextBox("Title", bar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(560f, 110f), Loc.T("garage.title"), 56f, Palette.UiText, title: true)
+            UiFactory.Pill("TitleBack", bar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 96f), UiFactory.PillColor);
+            UiFactory.TextBox("Title", bar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(420f, 110f), Loc.T("garage.title"), 56f, Palette.UiText, title: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var coins = UiFactory.Pill("Coins", bar, new Vector2(1f, 0.5f), new Vector2(-36f, 0f), new Vector2(260f, 100f), UiFactory.PillColor);
             UIController.CoinIcon(coins, new Vector2(56f, 0f));

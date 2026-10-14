@@ -224,12 +224,13 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>A heavy blow lands: the world stops for a blink.</summary>
+        private float blowSlowLeft;
+
         private System.Collections.IEnumerator HitStop(float seconds)
         {
-            if (Time.timeScale < 0.99f) yield break;
-            Time.timeScale = 0.05f;
-            yield return new WaitForSecondsRealtime(seconds);
-            if (State == GameState.Playing && Time.timeScale < 0.1f) Time.timeScale = 1f;
+            // Through the frame's own clock (Update sets the time scale every frame from these timers).
+            hitStopLeft = Mathf.Max(hitStopLeft, seconds);
+            yield break;
         }
 
         /// <summary>The last blow: a white flash, slow motion over the shoulder while the monster falls, then the win.</summary>
@@ -242,10 +243,10 @@ namespace SquashBot.Gameplay
             fx.Burst(at, Palette.UiGold, Palette.CoinGlow * 1.5f, 70, 9f);
             cameraRig.Shake(1.2f);
             Haptics.Medium();
-            Time.timeScale = 0.3f;
+            blowSlowLeft = 0.9f;
             yield return new WaitForSecondsRealtime(0.9f);
             while (State == GameState.Paused) yield return null;
-            Time.timeScale = 1f;
+            blowSlowLeft = 0f;
             if (State != GameState.Playing) yield break;
             {
                 EndArenaFight(false);

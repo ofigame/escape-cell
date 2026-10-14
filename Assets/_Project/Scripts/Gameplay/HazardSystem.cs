@@ -121,9 +121,25 @@ namespace SquashBot.Gameplay
         /// <summary>Picks up again after a Freeze (the player continued after losing).</summary>
         public void Resume() => running = grid != null;
 
+        /// <summary>Counts the Stops: a loop or blast running when the system is stopped (and begun again) under it quits.</summary>
+        private int stopGen;
+
         public void Stop()
         {
             running = false;
+            stopGen++;
+            // A grid kept for the next start (the marathon's respawn) gets its floor back: no crate walls, no fires left.
+            if (grid != null)
+            {
+                foreach (var h in hazards)
+                    if (h.kind == Kind.Block && h.phase == Phase.Landed && !h.shattered) grid.SetOccupied(h.pos, false);
+                foreach (var r in repairs)
+                {
+                    grid.SetTile(r.pos, TileState.Solid);
+                    if (r.fire) gridView.Extinguish(r.pos);
+                    else gridView.Repair(r.pos);
+                }
+            }
             foreach (var h in hazards) DestroyVisuals(h);
             hazards.Clear();
             repairs.Clear();
@@ -217,9 +233,13 @@ namespace SquashBot.Gameplay
             }
 
             AnyWarningActive = false;
+            int gen = stopGen;
             for (int i = hazards.Count - 1; i >= 0; i--)
             {
-                if (UpdateHazard(hazards[i], dt))
+                if (i >= hazards.Count) continue;
+                bool gone = UpdateHazard(hazards[i], dt);
+                if (gen != stopGen) return; // a landing ended the run (and maybe began it again): this frame's list is gone
+                if (gone)
                 {
                     DestroyVisuals(hazards[i]);
                     hazards.RemoveAt(i);
@@ -298,6 +318,7 @@ namespace SquashBot.Gameplay
         /// <summary>One bomb whose blast covers its tile and the four neighbours. Often aimed near the robot.</summary>
         private bool TrySpawnBomb(List<GridPos> candidates, HashSet<GridPos> taken, HashSet<GridPos> pending, float warning, int maxSteps)
         {
+            if (candidates.Count == 0) return false;
             for (int attempt = 0; attempt < 8; attempt++)
             {
                 GridPos center = attempt < 3 && candidates.Contains(robot.Position)
@@ -418,7 +439,8 @@ namespace SquashBot.Gameplay
 
                     float pulse = 0.55f + 0.45f * Mathf.Sin(Time.time * 18f);
                     foreach (var p in h.area) gridView.SetWarning(p, pulse);
-                    if (!h.aimed && robot.IsAlive && h.area.Contains(robot.Position)) h.aimed = true;
+                    // A close call is standing under it near the end (not just crossing its warning early on).
+                    if (!h.aimed && h.timeToImpact <= FallDuration + 0.4f && robot.IsAlive && h.area.Contains(robot.Position)) h.aimed = true;
 
                     if (h.timeToImpact <= FallDuration)
                     {
@@ -506,7 +528,12 @@ namespace SquashBot.Gameplay
             AudioManager.PlaySfx(Sfx.Squash, 0.5f, 1.4f);
             Haptics.Pulse(30, 0.6f);
 
-            foreach (var p in h.area) Impact?.Invoke(p);
+            int gen = stopGen;
+            foreach (var p in h.area)
+            {
+                Impact?.Invoke(p);
+                if (gen != stopGen) return;
+            }
             TryBreakTile(h.pos);
         }
 

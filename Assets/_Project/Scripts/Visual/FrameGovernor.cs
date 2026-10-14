@@ -58,9 +58,12 @@ namespace SquashBot.Visual
         {
             var tier = GraphicsQuality.Current;
             float longSide = Mathf.Max(Screen.width, Screen.height, 1);
-            float maxPixels = tier == GraphicsTier.High ? 3200f : tier == GraphicsTier.Medium ? 2200f : 1700f;
-            minScale = tier == GraphicsTier.High ? 0.9f : tier == GraphicsTier.Medium ? 0.85f : 0.75f;
-            maxScale = Mathf.Clamp(maxPixels / longSide, minScale, 1f);
+            float maxPixels = tier == GraphicsTier.High ? 3200f : tier == GraphicsTier.Medium ? 2400f : 2000f;
+            maxScale = Mathf.Clamp(maxPixels / longSide, 0.8f, 1f);
+            // High never trades sharpness for speed (the glow and weather give way instead); the others only a little.
+            minScale = tier == GraphicsTier.High ? maxScale : Mathf.Min(maxScale, tier == GraphicsTier.Medium ? 0.85f : 0.8f);
+            // FSR's extra full-size pass pays off on the stronger tiers; the weak one takes a plain, cheap upscale.
+            urp.upscalingFilter = tier == GraphicsTier.Low ? UpscalingFilterSelection.Linear : UpscalingFilterSelection.FSR;
             scale = maxScale;
             urp.renderScale = scale;
             if (adaptive) urp.msaaSampleCount = tier == GraphicsTier.High ? 4 : tier == GraphicsTier.Medium ? 2 : 1;
@@ -77,6 +80,8 @@ namespace SquashBot.Visual
         {
             // Paused or in the background: nothing to judge.
             if (!adaptive || Time.timeScale <= 0f) return;
+            // A long frame is a load (a floor or the map being built), not a slow GPU: start the count again after it.
+            if (Time.unscaledDeltaTime > 0.2f) { time = 0f; frames = 0; return; }
             time += Time.unscaledDeltaTime;
             frames++;
             if (time < Window) return;
@@ -85,6 +90,10 @@ namespace SquashBot.Visual
             frames = 0;
 
             int target = Application.targetFrameRate > 0 ? Application.targetFrameRate : 60;
+            // A screen or battery saver holding the game at 30: a cap, not an overload (lowering the picture would not help).
+            float refresh = (float)Screen.currentResolution.refreshRateRatio.value;
+            if (refresh > 1f && refresh < target) target = Mathf.RoundToInt(refresh);
+            if (target > 40 && fps > 28.5f && fps < 31.5f) return;
             if (fps < target * 0.8f)
             {
                 calm = 0f;
@@ -92,7 +101,7 @@ namespace SquashBot.Visual
                 else if (scale > minScale + 0.001f) scale = Mathf.Max(minScale, scale - Step);
                 urp.renderScale = scale;
             }
-            else if (fps > target * 0.95f)
+            else if (fps > target * 0.9f)
             {
                 // Climb back slowly, so it doesn't flip back and forth.
                 calm += Window;

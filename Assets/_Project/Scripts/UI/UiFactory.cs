@@ -420,8 +420,8 @@ namespace SquashBot.UI
 
         public static Button MakeButton(Transform parent, string text, ButtonKind kind, Vector2 anchor, Vector2 position, Vector2 size, Action onClick, float fontSize = 64f)
         {
-            // Never a giant slab: at most 116 tall (and its text in proportion); round icon buttons keep their size.
-            if (kind != ButtonKind.Icon && size.y > 116f)
+            // Never a giant slab: at most 116 tall (and its text in proportion); round icon buttons and tall picture tiles keep their size.
+            if (kind != ButtonKind.Icon && size.y > 116f && size.y < size.x * 0.6f)
             {
                 float k = 116f / size.y;
                 size = new Vector2(size.x, 116f);
@@ -522,7 +522,10 @@ namespace SquashBot.UI
 
         private void Update()
         {
-            float s = Mathf.Lerp(transform.localScale.x, target, Time.unscaledDeltaTime * 20f);
+            // At rest: no write (a scale set every frame, even to the same value, makes the canvas rebuild).
+            float now = transform.localScale.x;
+            if (Mathf.Abs(now - target) < 0.0005f) { if (now != target) transform.localScale = new Vector3(target, target, 1f); return; }
+            float s = Mathf.Lerp(now, target, Time.unscaledDeltaTime * 20f);
             transform.localScale = new Vector3(s, s, 1f);
         }
     }
@@ -579,6 +582,7 @@ namespace SquashBot.UI
         {
             if (showing)
             {
+                if (t >= 1f) return; // shown: nothing left to animate
                 t = Mathf.Min(1f, t + Time.unscaledDeltaTime / 0.3f);
             }
             else

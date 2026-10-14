@@ -124,7 +124,6 @@ namespace SquashBot.UI
                     foreach (var k in Defenses.All) { DefensePackCell(k); DefenseStepCell(k); }
                     break;
                 case Tab.Upgrades:
-                    FifiCell();
                     foreach (var item in new[] { Item.Shield, Item.Armor, Item.Rescue, Item.Magnet, Item.Hover, Item.Lives }) ItemCell(item);
                     PaintCell();
                     break;

@@ -74,6 +74,7 @@ namespace SquashBot.Gameplay
                 boardDraggedAt = Time.unscaledTime;
                 boardPan = new Vector3(Mathf.Clamp(boardPan.x, -BoardW * 0.45f, BoardW * 0.45f), 0f, Mathf.Clamp(boardPan.z, -BoardH * 0.48f, BoardH * 0.48f));
             };
+            if (clash != null) Destroy(clash.gameObject); // built again after a language change: one board only
             var go = new GameObject("Clash");
             clash = go.AddComponent<ClashSystem>();
             clash.Init(fx);
@@ -139,6 +140,34 @@ namespace SquashBot.Gameplay
         }
 
         private bool LobbyOver(int token) => chCancelled || token != chLobbyToken;
+
+        /// <summary>True while the challenge's briefing cards are up (the battle waits).</summary>
+        private bool chBriefing;
+
+        /// <summary>
+        /// The challenge's briefing: the floors' tap-through cards over the kind's own picture (ch.brief.KIND.0 …), then
+        /// <paramref name="then"/>. Leaving the challenge meanwhile drops it.
+        /// </summary>
+        private System.Collections.IEnumerator ChallengeBriefing(string kind, int cards, System.Action then)
+        {
+            var texts = new System.Collections.Generic.List<string>();
+            for (int i = 0; i < cards; i++) texts.Add(Loc.T("ch.brief." + kind + "." + i));
+            bool done = false;
+            void OnDone() => done = true;
+            chBriefing = true;
+            ui.Briefing.Finished += OnDone;
+            try
+            {
+                ui.Briefing.Show(texts, Resources.Load<Texture2D>("ChallengeModes/" + kind));
+                while (!done && challengeRun) yield return null;
+            }
+            finally
+            {
+                ui.Briefing.Finished -= OnDone;
+                chBriefing = false;
+            }
+            if (challengeRun) then();
+        }
 
         /// <summary>Tells the server whether challenges are on, the phone's notification token and the language.</summary>
         private void SyncChallengeSettings()
@@ -220,6 +249,14 @@ namespace SquashBot.Gameplay
                     yield break;
                 }
                 if (err == "offline") ok = false;
+            }
+            if (ok)
+            {
+                // A result lost to the network goes up first; then the settings (on / off, language) the server pushes by.
+                yield return FoiNet.SendPending(r => { if (r != null) Challenge.Sync(r.profile); });
+                yield return FoiNet.PutSettings(Challenge.Enabled, Notifications.Token, FoiNet.LangCode, _ => { });
+                if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
+                ok = FoiNet.Registered;
             }
             if (ok)
             {
@@ -353,7 +390,9 @@ namespace SquashBot.Gameplay
             theirCell = GlassCell.Create(rivalLook.position, cellScale);
             chUi.ShowBattle();
             ui.SetHudTitle(Loc.T("ch.title"));
-            BeginTurn();
+            // The briefing cards first (as on the floors); the first turn when they are through.
+            chPhase = ChPhase.Lobby;
+            cameraRig.StartCoroutine(ChallengeBriefing("arena", 4, BeginTurn));
             AudioManager.PlaySfx(Sfx.Win, 0.6f, 0.9f);
         }
 
@@ -493,6 +532,7 @@ namespace SquashBot.Gameplay
         private IEnumerator AfterClash()
         {
             yield return new WaitForSeconds(1.6f); // the survivors walk back
+            while (challengeRun && State == GameState.Paused) yield return null; // paused right then: carry on after
             if (!challengeRun || State != GameState.Playing) yield break;
             // Whoever's army is down to half first: every soldier still standing on both sides charges.
             int half = Army.Groups * Army.Soldiers / 2;
@@ -622,7 +662,7 @@ namespace SquashBot.Gameplay
                 change = draw ? Challenge.RecordDraw() : Challenge.Record(won, rival.trophies);
                 SendChallengeResult(won, draw);
             }
-            int gold = won ? Challenge.WinGold : 0;
+            int gold = won && chOnline ? Challenge.WinGold : 0; // offline practice pays no prize
             SaveData.Coins += draw ? 0 : gold + Earned;
             if (won)
             {
@@ -669,9 +709,11 @@ namespace SquashBot.Gameplay
                 Challenge.Record(false, rival != null ? rival.trophies : Challenge.Trophies);
                 SendChallengeResult(false);
             }
+            chLobbyToken++; // a waiting room still searching stops there
             if (!challengeRun && chPhase == ChPhase.Off) return;
             challengeRun = false;
             chPhase = ChPhase.Off;
+            ClearStageWaiting();
             if (clash != null) clash.Clear();
             if (chUi != null) chUi.HideAll();
             if (rivalLook != null) Destroy(rivalLook.gameObject);

@@ -86,7 +86,8 @@ namespace SquashBot.Gameplay
 
         private void UpdateAllies(float dt)
         {
-            foreach (var a in allies) if (!a.dead) UpdateAlly(a, dt);
+            // By index: an ally's kill can free a chest whose allies join the list right now.
+            for (int i = 0; i < allies.Count; i++) if (!allies[i].dead) UpdateAlly(allies[i], dt);
         }
 
         private void UpdateAlly(Guard a, float dt)

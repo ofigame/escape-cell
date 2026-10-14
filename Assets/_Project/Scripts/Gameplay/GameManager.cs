@@ -230,6 +230,7 @@ namespace SquashBot.Gameplay
             if (PendingRoad >= LevelCount) PlayerPrefs.DeleteKey(RoadLevelKey);
             FrameGovernor.Install(); // picture quality for this device (after the camera's post-processing exists)
             AdMob.Start(); // consent form where required, then AdMob (phones only)
+            FifiUpgrades.RefundOnce(); // Fifi has left the game: its levels' coins back, once
             SplashScreen.Show(); // OFIGAME studio logo over the menu, fading out
             StartFortressViewIfAsked(); // -arena: the sample fortress battlefield to look around
             // Developer tool: -sbExport <folder> writes every model as PNG + OBJ (see AssetExporter), then quits.
@@ -475,15 +476,17 @@ namespace SquashBot.Gameplay
 #endif
             if (ui.Guide.Visible) return; // the guide closes itself
             if (defenseEditing) { LeaveDefenseEditor(); return; }
+            if (State != GameState.Playing && ui.CloseTopModal()) return; // a card on top closes first
             switch (State)
             {
                 case GameState.Playing: Pause(); return;
                 case GameState.Paused: Resume(); return;
-                case GameState.Result: ShowMap(); return;
+                // The card's own way out: MENU where it shows no MAP (arenas, challenges, roads).
+                case GameState.Result: if (ui.ResultHasMap) ShowMap(); else ShowMenu(); return;
             }
             if (ui.PrelevelOpen) { ui.HidePrelevel(); return; }
             if (ui.Arenas.IsOpen) { ui.Arenas.Hide(); return; }
-            if (ui.Map.IsOpen || ui.Shop.Screen.IsVisible || ui.Garage.Screen.IsVisible || ui.Quests.IsOpen) ShowMenu();
+            if (ui.Map.IsOpen || ui.Shop.Screen.IsVisible || ui.Garage.Screen.IsVisible) ShowMenu();
         }
 
         private void ShowMenu()
@@ -518,6 +521,9 @@ namespace SquashBot.Gameplay
             if (lobby != null && lobby.IsOpen && !ui.MenuVisible) lobby.Close();
             bool covered = (lobby != null && lobby.IsOpen) || ui.Map.IsOpen;
             if (cameraRig.Cam.enabled == covered) cameraRig.Cam.enabled = !covered;
+            // Under the map or the showroom the floor is not seen: its weather and tile animation sleep too.
+            if (weather != null && weather.gameObject.activeSelf == covered) weather.gameObject.SetActive(!covered);
+            if (gridView != null && gridView.enabled == covered) gridView.enabled = !covered;
             UpdateCloseCamera();
             ui.SetBagVisible(level != null && level.mission == MissionType.Hunt && State == GameState.Playing && roadPhase == RoadPhase.None && !previewing && !runner.Active);
             ui.SetAdHealVisible(AdHealOffered && !runner.Active);
@@ -534,6 +540,9 @@ namespace SquashBot.Gameplay
             AudioManager.PlayMusic(MusicTheme.Menu);
             AudioManager.SetTension(0f);
             AudioManager.SetDanger(0f);
+            // Out of a challenge or an arena/road too (their flags and boards would leak into the next floor).
+            EndChallenge();
+            ExitTps();
             if (State != GameState.Menu) ShowBackdrop(NextLevel);
             ResetRun();
             State = GameState.Map;
@@ -870,7 +879,7 @@ namespace SquashBot.Gameplay
             State = GameState.Paused;
             Time.timeScale = 0f;
             cameraRig.SetMenuFocus(true);
-            ui.ShowPause(arenaRun); // an arena: back to the main menu, not the map
+            ui.ShowPause(arenaRun || challengeRun); // an arena or a challenge: back to the main menu, not the map
         }
 
         private void Resume()
@@ -1071,6 +1080,7 @@ namespace SquashBot.Gameplay
         private bool TryRescue(GridPos p, bool crushed)
         {
             if (TryTakeHealthHit(p, crushed, crushed ? 1f : 0.75f)) return true;
+            if (challengeRun) return false; // a duel is fought with what both sides bring: no rescues
             bool bought = false;
             if (RescueEnabled && rescues > 0) rescues--;
             else if (Shop.TryUse(Boost.ExtraRescue)) bought = true;
@@ -1136,12 +1146,12 @@ namespace SquashBot.Gameplay
 
             if (!hovering)
             {
-                if (command.holdStart && HoverEnabled && hoverCooldown <= 0f && robot.IsAlive && !robot.IsHopping)
+                if (command.holdStart && HoverEnabled && hoverCooldown <= 0f && robot.IsAlive && !robot.IsHopping
+                    && robot.StartHover()) // false mid-bump: no hover this time (and no lock-up)
                 {
                     hovering = true;
                     hoverLeft = Shop.HoverSeconds;
                     hoverTarget = robot.Position;
-                    robot.StartHover();
                     ShowHoverMarker(true);
                     AudioManager.PlaySfx(Sfx.Shield, 0.7f, 1.4f);
                     Haptics.Medium();
@@ -1339,6 +1349,7 @@ namespace SquashBot.Gameplay
             if (hitStopLeft > 0f) hitStopLeft -= Time.unscaledDeltaTime;
             Time.timeScale = Mathf.Min(slowMoLeft > 0f ? SlowMoScale : 1f, toolSlowLeft > 0f && State == GameState.Playing ? Tools.SlowScale : 1f);
             if (hitStopLeft > 0f && State == GameState.Playing) Time.timeScale = Mathf.Min(Time.timeScale, 0.08f); // the hit-stop of a knock-out
+            if (blowSlowLeft > 0f) { blowSlowLeft -= Time.unscaledDeltaTime; Time.timeScale = Mathf.Min(Time.timeScale, 0.3f); } // the monster's last blow
 
             if (State != GameState.Playing) { if (tpsOn && !arenaRun && State != GameState.Paused) ExitTps(); return; }
 
@@ -1612,9 +1623,13 @@ namespace SquashBot.Gameplay
 
         private void OnBlockImpact(GridPos p)
         {
-            coins.Smash(p);
-            powerUps.Smash(p);
-            if (level != null && level.mission == MissionType.Hunt) hunt.OnBlockLanded(p);
+            // A crate's landing smashes what lies there; an enemy's blow on foi (a hit share set) only hurts foi.
+            if (hitShareOverride < 0f)
+            {
+                coins.Smash(p);
+                powerUps.Smash(p);
+                if (level != null && level.mission == MissionType.Hunt) hunt.OnBlockLanded(p);
+            }
             if (State != GameState.Playing || roadPhase != RoadPhase.None) return; // the level is won: nothing on the floor can hurt now
             if (level.mission == MissionType.Clone) KnockClonesAt(p);
             if (level.mission == MissionType.Escort && p == buddyPos) DazeBuddy(p);

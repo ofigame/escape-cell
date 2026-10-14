@@ -105,14 +105,16 @@ namespace SquashBot.UI
             coinsText.text = coins.ToString();
             screen.Show();
             world.Open(focusLevel, animateFrom);
+            lastView = default;
             LateUpdate();
         }
 
         public void Hide()
         {
             screen.Hide();
-            // The 3D map is thousands of pieces: gone while the game is played (built again, in a moment, next time).
-            if (world != null) { world.Close(); Destroy(world.gameObject); world = null; unlocked = -1; }
+            // The 3D map sleeps while the game is played (switched off, not drawn, nothing running): opening it again is
+            // instant, and only what progress changed is built anew.
+            if (world != null) world.Close();
         }
 
         /// <summary>
@@ -132,14 +134,35 @@ namespace SquashBot.UI
         private void Rebuild(int unlockedLevel)
         {
             unlocked = unlockedLevel;
-            foreach (var n in nodes) Destroy(n.gameObject);
-            foreach (var b in banners) Destroy(b.gameObject);
-            nodes.Clear();
-            banners.Clear();
             world.Build(unlockedLevel, openAll);
+            // Only the signs and stones whose look changed are made again (a won level changes two or three of them).
             int worlds = Mathf.CeilToInt(levelCount / (float)LevelCatalog.LevelsPerWorld);
-            for (int w = 0; w < worlds; w++) banners.Add(BuildBanner(w));
-            for (int i = 0; i < levelCount; i++) nodes.Add(BuildNode(i));
+            for (int w = 0; w < worlds; w++)
+            {
+                int sig = w * LevelCatalog.LevelsPerWorld > unlocked && !openAll ? 1 : 0;
+                if (w < banners.Count && bannerSig[w] == sig) continue;
+                var b = BuildBanner(w);
+                if (w < banners.Count) { b.SetSiblingIndex(banners[w].GetSiblingIndex()); Destroy(banners[w].gameObject); banners[w] = b; bannerSig[w] = sig; }
+                else { banners.Add(b); bannerSig.Add(sig); }
+            }
+            for (int i = 0; i < levelCount; i++)
+            {
+                int sig = NodeSig(i);
+                if (i < nodes.Count && nodeSig[i] == sig) continue;
+                var n = BuildNode(i);
+                if (i < nodes.Count) { n.SetSiblingIndex(nodes[i].GetSiblingIndex()); Destroy(nodes[i].gameObject); nodes[i] = n; nodeSig[i] = sig; }
+                else { nodes.Add(n); nodeSig.Add(sig); }
+            }
+        }
+
+        private readonly List<int> nodeSig = new List<int>(), bannerSig = new List<int>();
+
+        /// <summary>What a stone's layer shows, as a number: locked, current, or open with its stars.</summary>
+        private int NodeSig(int level)
+        {
+            if (level > unlocked && !openAll) return -1;
+            if (level == unlocked) return -2;
+            return level < unlocked ? Progress.Stars(level) : 9;
         }
 
         /// <summary>A world's sign on its island: name and level range (or the stars it takes), tap to replay its story.</summary>
@@ -253,9 +276,16 @@ namespace SquashBot.UI
         private void LateUpdate()
         {
             if (world == null || !screen.IsVisible) return;
+            // Only when the view moved (or the labels changed): placing 275 labels each frame rebuilds the canvas.
+            var cam = world.Cam.transform;
+            var key = (cam.position, cam.rotation, UnityEngine.Screen.width, UnityEngine.Screen.height, nodes.Count, unlocked);
+            if (key.Equals(lastView)) return;
+            lastView = key;
             for (int i = 0; i < nodes.Count; i++) Follow(nodes[i], world.ScreenPoint(i), 13f);
             for (int w = 0; w < banners.Count; w++) Follow(banners[w], world.IslandScreenPoint(w), 15f);
         }
+
+        private (Vector3, Quaternion, int, int, int, int) lastView;
 
         private void Follow(RectTransform rt, Vector3 sp, float refDistance)
         {

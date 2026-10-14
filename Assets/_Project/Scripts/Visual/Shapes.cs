@@ -25,15 +25,31 @@ namespace SquashBot.Visual
             return go;
         }
 
+        private static readonly System.Collections.Generic.Dictionary<PrimitiveType, Mesh> meshes = new System.Collections.Generic.Dictionary<PrimitiveType, Mesh>();
+
+        /// <summary>Unity's built-in mesh for a primitive (taken once from a throw-away primitive).</summary>
+        public static Mesh MeshOf(PrimitiveType type)
+        {
+            if (meshes.TryGetValue(type, out var m) && m != null) return m;
+            var probe = GameObject.CreatePrimitive(type);
+            m = probe.GetComponent<MeshFilter>().sharedMesh;
+            Object.DestroyImmediate(probe);
+            meshes[type] = m;
+            return m;
+        }
+
+        /// <summary>
+        /// A primitive shape as a plain mesh object: no collider made (and destroyed) for each of the thousands of pieces
+        /// a floor or the map is built from.
+        /// </summary>
         public static GameObject Primitive(PrimitiveType type, string name, Transform parent, Vector3 localPos, Vector3 scale, Material material)
         {
-            var go = GameObject.CreatePrimitive(type);
-            go.name = name;
-            Object.Destroy(go.GetComponent<Collider>());
+            var go = new GameObject(name);
             go.transform.SetParent(parent, false);
             go.transform.localPosition = localPos;
             go.transform.localScale = scale;
-            var renderer = go.GetComponent<MeshRenderer>();
+            go.AddComponent<MeshFilter>().sharedMesh = MeshOf(type);
+            var renderer = go.AddComponent<MeshRenderer>();
             renderer.sharedMaterial = material;
             renderer.shadowCastingMode = CastShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
             return go;

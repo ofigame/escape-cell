@@ -144,12 +144,14 @@ namespace SquashBot.Gameplay
                     if (groutRoot == null) { groutRoot = new GameObject("Grout").transform; groutRoot.SetParent(transform, false); }
                     if (groutMat == null) groutMat = MaterialFactory.CreateSurface(FortressStone * 0.8f, Color.black, 0.3f, 0f);
                     groutObj = Shapes.Primitive(PrimitiveType.Cube, "Grout", groutRoot, ToWorld(p) + new Vector3(0f, 0.025f, 0f), new Vector3(1f, 0.02f, 1f), groutMat);
+                    groutObj.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; // flat: its shadow could never show
                     if (veinMat == null) veinMat = MaterialFactory.CreateSurface(FortressStone * 0.62f, Color.black, 0.8f, 0f);
                     if (stone.Next(grid.FloorCount > 2500 ? 9 : 4) == 0) // fewer veins on the big floors (memory)
                         for (int v = 0; v < 1; v++)
                             Shapes.Rounded("Vein", tile.transform, new Vector3((float)stone.NextDouble() * 0.5f - 0.25f, 0.051f, (float)stone.NextDouble() * 0.5f - 0.25f),
                                 new Vector3(0.5f + (float)stone.NextDouble() * 0.45f, 0.002f, 0.012f + (float)stone.NextDouble() * 0.012f), 0.004f, veinMat)
                                 .transform.localRotation = Quaternion.Euler(0f, stone.Next(180), 0f);
+                    foreach (Transform v in tile.transform) if (v.name == "Vein") v.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 }
                 else if (FortressTiles)
                 {
@@ -279,6 +281,8 @@ namespace SquashBot.Gameplay
                 }
             }
             // The platform never moves: merge it into a few big meshes, so a 20x20 floor costs a handful of draw calls.
+            // Under the floor and round its rim: its shadows fall into the void, never on anything seen (a shadow pass saved).
+            foreach (var pr in root.GetComponentsInChildren<MeshRenderer>()) pr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             if (pieces < 9000) StaticBatchingUtility.Combine(root.gameObject);
         }
         private Renderer sharedTopRenderer;

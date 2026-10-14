@@ -16,6 +16,9 @@ namespace SquashBot.UI
     public class TipCard : MonoBehaviour
     {
         private UiScreen screen;
+
+        /// <summary>Closed at once (another screen is taking over).</summary>
+        public void Hide() => screen.Hide(true);
         private RectTransform picture;
         private TextMeshProUGUI title, text, price;
         private Action go;
