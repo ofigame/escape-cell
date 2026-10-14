@@ -71,6 +71,8 @@ namespace SquashBot.UI
         public event Action BombPressed;
         /// <summary>The "watch an ad, fill your health" button was pressed (shown when health runs low).</summary>
         public event Action AdHealPressed;
+        /// <summary>The challenge duel's heart button (a heart fills part of foi's health).</summary>
+        public event Action DuelHeartPressed;
         public event Action ResumePressed;
         public event Action<SettingKind> SettingToggled;
         public event Action<int> LevelChosen;
@@ -203,6 +205,7 @@ namespace SquashBot.UI
         private UiScreen pause;
         private UiScreen result;
         private TextMeshProUGUI resultTitle, resultSub, resultReward;
+        private RectTransform resultRewardPill;
         private Button resultNext, resultRetry, resultMap, resultMenu, resultBonus, resultContinue, resultContinueCoins, resultDouble;
         private TextMeshProUGUI resultContinueCoinsLabel;
         private RectTransform resultStarRow;
@@ -235,7 +238,18 @@ namespace SquashBot.UI
         /// <summary>The quests button's red dot: a finished quest waits to be claimed.</summary>
         private void RefreshQuests() { if (questsPing != null) questsPing.SetActive(DailyQuests.Claimable > 0); }
         private RectTransform bagButton;
-        private RectTransform adHealButton;
+        private RectTransform adHealButton, duelHeartButton;
+        private TextMeshProUGUI duelHeartCount;
+
+        /// <summary>The duel's hearts: shown with how many are left (hidden outside the duel).</summary>
+        public void SetDuelHearts(bool shown, int left)
+        {
+            if (duelHeartButton == null) return;
+            if (duelHeartButton.gameObject.activeSelf != shown) duelHeartButton.gameObject.SetActive(shown);
+            duelHeartCount.text = left.ToString();
+            duelHeartButton.GetComponent<Button>().interactable = left > 0;
+            duelHeartButton.GetComponent<CanvasGroup>().alpha = left > 0 ? 1f : 0.45f;
+        }
         public void SetAdHealVisible(bool on) { on &= !challengeHud; if (adHealButton != null && adHealButton.gameObject.activeSelf != on) adHealButton.gameObject.SetActive(on); }
         private bool IsOverAdHeal(Vector2 screen) => adHealButton != null && adHealButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(adHealButton, screen, null);
 
@@ -1085,6 +1099,19 @@ namespace SquashBot.UI
             bombButton.gameObject.SetActive(false);
 
             // Low on health: watch an ad and fill the bar (above the bag, pulsing; once a level).
+            // The challenge duel's hearts: a big red button at the bottom right with the hearts left on it.
+            duelHeartButton = UiFactory.Box("DuelHeart", t, new Vector2(1f, 0f), new Vector2(-190f, 380f), new Vector2(170f, 170f));
+            duelHeartButton.gameObject.AddComponent<CanvasGroup>();
+            var dhFace = UiFactory.Chunky(duelHeartButton, UiFactory.StyleOf(new Color(0.95f, 0.3f, 0.4f)), 1f, 0f, UiSprites.Circle);
+            HeartIcon(duelHeartButton, new Vector2(85f, 8f), 96f);
+            duelHeartCount = UiFactory.OutlinedText("Count", duelHeartButton, new Vector2(0.5f, 0f), new Vector2(0f, -18f), new Vector2(180f, 48f), "5", 36f, new Color(0.3f, 0.02f, 0.08f));
+            duelHeartCount.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var dhBtn = duelHeartButton.gameObject.AddComponent<Button>();
+            dhBtn.targetGraphic = dhFace;
+            dhBtn.onClick.AddListener(() => DuelHeartPressed?.Invoke());
+            duelHeartButton.gameObject.AddComponent<ButtonPress>();
+            duelHeartButton.gameObject.SetActive(false);
+
             adHealButton = UiFactory.Box("AdHeal", t, new Vector2(0f, 0f), new Vector2(210f, 480f), new Vector2(150f, 150f)); // beside the bag, not on it
             var healFace = UiFactory.Chunky(adHealButton, UiFactory.StyleOf(new Color(0.25f, 0.78f, 0.55f)), 1f, 0f, UiSprites.Circle);
             HeartIcon(adHealButton, new Vector2(75f, 6f), 84f);
@@ -1195,6 +1222,7 @@ namespace SquashBot.UI
             if (on) foreach (var tb in toolButtons) if (tb != null) tb.Set(null, 0, false, 0f);
             if (missionPill != null) missionPill.gameObject.SetActive(!on);
             if (hudFill != null && hudFill.transform.parent != null) hudFill.transform.parent.gameObject.SetActive(!on);
+            if (!on) SetDuelHearts(false, 0);
         }
 
         public void ShowHud(int levelIndex)
@@ -1434,7 +1462,7 @@ namespace SquashBot.UI
                 resultStars[i].raycastTarget = false;
             }
 
-            var reward = UiFactory.Pill("Reward", card, Top, new Vector2(0f, -455f), new Vector2(360f, 100f), new Color(0f, 0f, 0f, 0.22f));
+            var reward = resultRewardPill = UiFactory.Pill("Reward", card, Top, new Vector2(0f, -455f), new Vector2(360f, 100f), new Color(0f, 0f, 0f, 0.22f));
             CoinIcon(reward, new Vector2(70f, 0f));
             resultReward = UiFactory.TextBox("Value", reward, new Vector2(0f, 0.5f), new Vector2(120f, 0f), new Vector2(220f, 90f),
                 "", 54f, Palette.UiGold, align: TextAlignmentOptions.Left);
@@ -1507,7 +1535,8 @@ namespace SquashBot.UI
             resultSub.textWrappingMode = info.challenge ? TextWrappingModes.Normal : TextWrappingModes.NoWrap;
             ((RectTransform)resultSub.transform.parent).sizeDelta = new Vector2(800f, info.challenge ? 330f : 100f);
             resultReward.text = $"+{info.coins}";
-            ((RectTransform)resultReward.transform.parent).anchoredPosition = new Vector2(0f, info.challenge ? -520f : -455f);
+            resultRewardPill.anchoredPosition = new Vector2(0f, info.challenge ? -520f : -455f);
+            resultRewardPill.gameObject.SetActive(!info.challenge || info.coins > 0); // a challenge with nothing won: no empty pill
             resultMeterFill.transform.parent.gameObject.SetActive(!info.challenge);
             resultMeterText.gameObject.SetActive(!info.challenge);
             resultLocked = false;

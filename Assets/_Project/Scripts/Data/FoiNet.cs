@@ -13,11 +13,37 @@ namespace SquashBot.Data
     /// </summary>
     public static class FoiNet
     {
-        private const string Base = "https://apifoi.ofigame.com/v1";
-        private const string IdKey = "sb_net_id", SecretKey = "sb_net_key", NameSyncedKey = "sb_net_named";
+        /// <summary>The challenge server (a development build may be pointed elsewhere: -foiApi http://host:port).</summary>
+        private static string Base => (DevServer ?? "https://apifoi.ofigame.com") + "/v1";
+
+        /// <summary>A test server given on the command line of a development build (null: the real one).</summary>
+        internal static string DevServer
+        {
+            get
+            {
+                if (devServerRead) return devServer;
+                devServerRead = true;
+                if (!Debug.isDebugBuild) return null;
+                var args = Environment.GetCommandLineArgs();
+                for (int i = 0; i + 1 < args.Length; i++) if (args[i] == "-foiApi") devServer = args[i + 1].TrimEnd('/');
+                return devServer;
+            }
+        }
+
+        private static string devServer;
+        private static bool devServerRead;
+        // A test server keeps its own player (the real one's keys are never sent to it, nor lost to its refusals).
+        private static string Dev => DevServer != null ? "_dev" : "";
+        private static string IdKey => "sb_net_id" + Dev;
+        private static string SecretKey => "sb_net_key" + Dev;
+        private static string NameSyncedKey => "sb_net_named" + Dev;
         private const int Timeout = 8;
 
         public static bool Registered => PlayerPrefs.GetString(IdKey, "").Length > 0;
+
+        /// <summary>The player's id and key, for the live connection's headers.</summary>
+        internal static string AuthId => PlayerPrefs.GetString(IdKey, "");
+        internal static string AuthKey => PlayerPrefs.GetString(SecretKey, "");
 
         /// <summary>The name the server holds for this player (empty: none sent yet).</summary>
         public static string SyncedName
@@ -166,7 +192,7 @@ namespace SquashBot.Data
             done(code == 200 ? TryParse<Result>(body) : null);
         }
 
-        private const string PendingKey = "sb_net_pending";
+        private static string PendingKey => "sb_net_pending" + Dev;
 
         /// <summary>A result that never reached the server (no network then) goes up now. Reports the server's answer or null.</summary>
         public static IEnumerator SendPending(Action<Result> done)

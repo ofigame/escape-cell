@@ -2196,7 +2196,7 @@ namespace SquashBot.Gameplay
             HideTools();
             if (hovering) { hovering = false; ShowHoverMarker(false); }
 
-            if (challengeRun) { ChallengeEnd(false); return; } // foi fell in the duel: 0-2, or 1-1 if its army had won
+            if (challengeRun) { chDuelThem = Mathf.Max(chDuelThem, DuelRounds - chDuelMe); ChallengeEnd(); return; } // foi fell outside a round: the rounds left are lost
             // Coins picked up are kept even on a loss, so every run feels worth it.
             SaveData.Coins += Earned;
             if (bonusRun)

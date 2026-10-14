@@ -19,7 +19,7 @@ namespace SquashBot.Gameplay
     /// </summary>
     public partial class GameManager
     {
-        private enum ChPhase { Off, Lobby, Pick, Reveal, Clash, Battle, Break, StageIntro, Stages, Duel, Done }
+        private enum ChPhase { Off, Lobby, Pick, Reveal, Clash, Battle, Break, StageIntro, Stages, Duel, Wait, Done }
 
         /// <summary>The armies' point: +1 mine won the battle (1-0), -1 theirs did (0-1), 0 neither (a level battle).</summary>
         private int chLead;
@@ -56,7 +56,18 @@ namespace SquashBot.Gameplay
         private void InitChallenge()
         {
             chUi = ChallengeScreen.Create(ui.transform.Find("Canvas/SafeArea") ?? ui.transform.Find("Canvas") ?? ui.transform);
-            chUi.GroupPicked += g => { if (chPhase == ChPhase.Pick) { chMyPick = g; chUi.SetStatus(Loc.T("ch.waitRival")); } };
+            chUi.GroupPicked += g =>
+            {
+                if (chPhase != ChPhase.Pick || (LiveActive && livePickSent)) return;
+                chMyPick = g;
+                chUi.SetStatus(Loc.T("ch.waitRival"));
+                if (LiveActive) { LiveNet.Pick(g); livePickSent = true; }
+            };
+            chUi.FriendHost += () => StartFriend(1, null);
+            chUi.FriendJoin += code => StartFriend(2, code);
+            chUi.FriendClose += CloseFriend;
+            ui.DuelHeartPressed += OnDuelHeart;
+            hunt.FoeHealed += (at, left) => { if (challengeRun) chUi.SetStatus(Loc.F("ch.rivalHeart", left)); };
             chUi.Leave += () => { chCancelled = true; chUi.HideAll(); };
             chUi.NameSubmitted += OnNameSubmitted;
             chUi.NameClosed += () => { chCancelled = true; chPhase = ChPhase.Off; chUi.HideAll(); };
@@ -238,7 +249,9 @@ namespace SquashBot.Gameplay
             int token = ++chLobbyToken;
             chMatchId = 0;
             chOnline = false;
-            chUi.ShowLobby(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore), Challenge.Rank, Loc.T(chMode == ChMode.Stages ? "ch.mode.stages" : "ch.mode.arena"));
+            chLive = chLiveSolo = false;
+            // (Playing a friend, the friend panel stays up until the friend is there.)
+            if (chFriend == 0) chUi.ShowLobby(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore), Challenge.Rank, Loc.T(chMode == ChMode.Stages ? "ch.mode.stages" : "ch.mode.arena"));
             float started = Time.realtimeSinceStartup;
             int world = LevelCatalog.WorldOf(Mathf.Max(0, SaveData.UnlockedLevel - 1));
 
@@ -275,6 +288,21 @@ namespace SquashBot.Gameplay
                 yield return FoiNet.PutArmy(points, Army.EarnedPoints, world, Challenge.FoiHpFor(world), Challenge.FoiHitFor(world), 0.5f,
                     Armory.Equipped.id, Armory.Level(Armory.Equipped), Shop.ArmorShare, Shop.Level(Upgrade.Shield) > 0 ? Shop.ShieldHits : 0, r => ok = r);
                 if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
+            }
+            // The arena (and a friend's code): a live rival first.
+            if (ok && (chFriend != 0 || chMode == ChMode.Arena))
+            {
+                LiveNet.Msg matched = null;
+                yield return LiveSearch(token, m => matched = m);
+                if (LobbyOver(token)) { LiveNet.Close(); chPhase = ChPhase.Off; yield break; }
+                if (matched != null) { yield return StartLive(matched, world, token); yield break; }
+            }
+            if (chFriend != 0)
+            {
+                // A friend's match only: no AI rival instead (the panel says what happened).
+                if (!ok) { chUi.SetFriendStatus(Loc.T("live.offline")); chUi.SetFriendBusy(false); }
+                chPhase = ChPhase.Off;
+                yield break;
             }
             FoiNet.Match match = null;
             if (ok)
@@ -343,6 +371,7 @@ namespace SquashBot.Gameplay
             l.marathon = false;
             l.final = false;
             l.robots = 0; l.robotsAtOnce = 0; l.elites = 0; l.hardAtOnce = 0; l.brutes = 0; l.towers = 0; l.bugs = 0;
+            l.reactor = false; // no reactor tower (and its repair drones) from the late worlds on the board
             l.monsterHp = 1;
             Calm(l);
             level = l;
@@ -402,7 +431,7 @@ namespace SquashBot.Gameplay
             ui.SetHudTitle(Loc.T("ch.title"));
             // The briefing cards first (as on the floors); the first turn when they are through.
             chPhase = ChPhase.Lobby;
-            cameraRig.StartCoroutine(ChallengeBriefing("arena", 4, BeginTurn));
+            cameraRig.StartCoroutine(ChallengeBriefing("arena", 4, () => { if (LiveActive) LiveWaitFor(LiveWait.Start); else BeginTurn(); }));
             AudioManager.PlaySfx(Sfx.Win, 0.6f, 0.9f);
         }
 
@@ -486,6 +515,7 @@ namespace SquashBot.Gameplay
         /// <summary>Each frame of a challenge: the turn's clock, the reveal, the end of the duel.</summary>
         private void UpdateChallenge(float dt)
         {
+            UpdateLive();
             if (!challengeRun || State != GameState.Playing) return;
             switch (chPhase)
             {
@@ -493,6 +523,7 @@ namespace SquashBot.Gameplay
                     chTimer -= dt;
                     chUi.SetClock(Mathf.CeilToInt(Mathf.Max(0f, chTimer)).ToString());
                     chUi.SetPickTime(chTimer / PickSeconds);
+                    if (LiveActive) { LivePickTick(); break; } // the server reveals both picks
                     if (chTheirPick < 0 && chTimer <= chBotPickAt) chTheirPick = BotPick();
                     if (chTimer > 0f && (chMyPick < 0 || chTheirPick < 0)) break;
                     // Time's up (or both have picked): any group left for whoever hasn't.
@@ -514,6 +545,7 @@ namespace SquashBot.Gameplay
                     chTimer -= dt;
                     if (chTimer > 0f) break;
                     chPhase = ChPhase.Clash;
+                    ScriptLiveClash();
                     clash.StartClash(chMyPick, chTheirPick);
                     break;
                 case ChPhase.Stages:
@@ -521,7 +553,7 @@ namespace SquashBot.Gameplay
                     break;
                 case ChPhase.Duel:
                     chUi.SetClock(ScoreText());
-                    if (hunt.ChallengeFoeDown) ChallengeEnd(true);
+                    if (hunt.ChallengeFoeDown) DuelRoundOver(true);
                     break;
             }
         }
@@ -529,6 +561,8 @@ namespace SquashBot.Gameplay
         private void OnClashOver(int mineLeftInGroup, int theirsLeftInGroup)
         {
             if (!challengeRun) return;
+            // Live: the server's numbers (the clash was played to them).
+            if (liveClashMine >= 0) { mineLeftInGroup = liveClashMine; theirsLeftInGroup = liveClashTheirs; liveClashMine = liveClashTheirs = -1; }
             myLeft[chMyPick] = mineLeftInGroup;
             theirLeft[chTheirPick] = theirsLeftInGroup;
             clash.Label(0, chMyPick, mineLeftInGroup);
@@ -544,6 +578,7 @@ namespace SquashBot.Gameplay
             yield return new WaitForSeconds(1.6f); // the survivors walk back
             while (challengeRun && State == GameState.Paused) yield return null; // paused right then: carry on after
             if (!challengeRun || State != GameState.Playing) yield break;
+            if (LiveActive) { LiveWaitFor(LiveWait.AfterClash); yield break; } // the server says: the next turn or the battle
             // Whoever's army is down to half first: every soldier still standing on both sides charges.
             int half = Army.Groups * Army.Soldiers / 2;
             if (Total(myLeft) > half && Total(theirLeft) > half) { BeginTurn(); yield break; }
@@ -621,7 +656,6 @@ namespace SquashBot.Gameplay
         private HeldWeapon rivalHeld;
 
         /// <summary>The score as the board shows it (mine first).</summary>
-        private string ScoreText() => (chLead > 0 ? 1 : 0) + " - " + (chLead < 0 ? 1 : 0);
 
         /// <summary>The cells are broken, the field is clear: the two foi fight it out alone.</summary>
         private void StartChallengeDuel()
@@ -633,13 +667,9 @@ namespace SquashBot.Gameplay
             if (rivalLook != null) { rivalLook.SetParent(null, true); }
             var look = rivalLook;
             rivalLook = null;
-            hunt.ChallengeBattle = true;
-            var w = Armory.Get(rival.weapon);
-            int hp = Mathf.RoundToInt(rival.foiHp / Mathf.Max(0.4f, 1f - rival.armor * 0.8f));
-            float hit = Mathf.Clamp(rival.foiHit * (0.85f + 0.12f * Armory.Damage(w, Mathf.Max(1, rival.weaponLevel))), 0.06f, 0.35f);
-            hunt.FoeBoldness = rival.boldness;
-            hunt.AddChallengeFoe(RivalTile, hp, hit, look, rivalHeld, rival.shield);
-            ui.ShowIntro(Loc.T("ch.duel"), Loc.T("ch.duelText"));
+            AddRivalFoe(RivalTile, look, rivalHeld);
+            BeginDuelRounds();
+            ui.ShowIntro(Loc.T("ch.duel"), Loc.F("ch.round", 1, DuelRounds));
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 0.8f);
         }
 
@@ -650,10 +680,10 @@ namespace SquashBot.Gameplay
             myCell = theirCell = null;
         }
 
-        /// <summary>The duel is decided (the rival foi down, or foi down): the final score — 2-0, 1-1 (a draw) or 0-2.</summary>
-        private void ChallengeEnd(bool wonDuel)
+        /// <summary>All the rounds are fought: the final score (the armies' point and the rounds), e.g. 3-1 or 2-2 (a draw).</summary>
+        private void ChallengeEnd()
         {
-            int me = (chLead > 0 ? 1 : 0) + (wonDuel ? 1 : 0), them = (chLead < 0 ? 1 : 0) + (wonDuel ? 0 : 1);
+            int me = ScoreMine, them = ScoreTheirs;
             ChallengeFinish(me > them ? 1 : me < them ? -1 : 0, me + " - " + them);
         }
 
@@ -663,18 +693,35 @@ namespace SquashBot.Gameplay
             if (chPhase == ChPhase.Done) return;
             chPhase = ChPhase.Done;
             bool won = outcome > 0, draw = outcome == 0;
+            ui.SetDuelHearts(false, 0);
             if (colosseum != null) colosseum.Cheer(won ? 0 : draw ? -1 : 1, 1f);
             // Online the server keeps the score (the same sum, shown at once, then its numbers taken); offline: practice.
             int change = 0;
             float bonusBefore = Challenge.ArmyBonus;
-            if (chOnline)
+            if (chLive && !chLiveSolo)
+            {
+                // Settled on the server: its change, its numbers.
+                change = liveChange;
+                if (liveProfile != null) Challenge.Sync(liveProfile);
+            }
+            else if (chLive)
+            {
+                // Played on alone (the rival left): this side's own end goes up, the server settles it.
+                if (chOnline) { change = draw ? Challenge.RecordDraw() : Challenge.Record(won, rival.trophies); LiveNet.Final(outcome); }
+            }
+            else if (chOnline)
             {
                 change = draw ? Challenge.RecordDraw() : Challenge.Record(won, rival.trophies);
                 SendChallengeResult(won, draw);
             }
             int gold = won && chOnline ? Challenge.WinGold : 0; // offline practice pays no prize
             SaveData.Coins += draw ? 0 : gold + Earned;
-            if (won)
+            if (!won)
+            {
+                State = GameState.Result;
+                hunt.Freeze();
+            }
+            else
             {
                 State = GameState.Result;
                 hunt.Freeze();
@@ -720,6 +767,7 @@ namespace SquashBot.Gameplay
                 SendChallengeResult(false);
             }
             chLobbyToken++; // a waiting room still searching stops there
+            EndLive();
             if (!challengeRun && chPhase == ChPhase.Off) return;
             challengeRun = false;
             chPhase = ChPhase.Off;

@@ -68,12 +68,29 @@ namespace SquashBot.Gameplay
             // armour comes on top: the enemies grow too, so the shop still matters.
             float toughness = Mathf.Lerp(1f, 0.74f, levelIndex / (float)(LevelCatalog.LevelCount - 1));
             float damage = share * toughness * (1f - Shop.ArmorShare);
-            // The stage battle: foi falling on its own stage gives the rival the point; it gets up for the duel.
+            // The stage battle: foi falling on its own stage costs time, not the point (the point is the stage cleared
+            // first): it gets up at its stage's start, health full, shielded a moment, and walks back into the fight.
             if (challengeRun && chPhase == ChPhase.Stages && health - damage <= 0.001f)
             {
-                health = 0.4f;
+                health = 1f;
                 RefreshHealthBar();
-                StageWon(-1);
+                hurtCooldown = 0.5f;
+                var start = new GridPos(StMid, 3);
+                robot.RescueTo(grid.IsStandable(start) && !grid.IsOccupied(start) ? start : SafeTileNear(start, start));
+                robot.GiveShield(2.5f, 99);
+                ui.Flash(new Color(1f, 0.15f, 0.15f), 0.5f);
+                cameraRig.Shake(1f);
+                chUi.SetStatus(Loc.T("ch.stageDown"));
+                AudioManager.PlaySfx(Sfx.Warning, 0.8f, 0.8f);
+                return true;
+            }
+            // The duel: foi's health gone ends the round (the next one starts with it full again).
+            if (challengeRun && chPhase == ChPhase.Duel && health - damage <= 0.001f)
+            {
+                health = 0f;
+                RefreshHealthBar();
+                ui.Flash(new Color(1f, 0.15f, 0.15f), 0.4f);
+                DuelRoundOver(false);
                 return true;
             }
             if (health - damage <= 0.001f)

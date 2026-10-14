@@ -94,6 +94,32 @@ namespace SquashBot.Gameplay
             if (shieldHits > 0) { AddShield(g); g.shield = shieldHits; }
         }
 
+        /// <summary>The rival foi's hearts for the whole duel, and the share of its health each fills.</summary>
+        public int FoeHearts;
+        public float FoeHeartHeal = 0.3f;
+        /// <summary>The rival foi used a heart (where it stands, hearts left).</summary>
+        public event Action<Vector3, int> FoeHealed;
+        private float foeHealAt = -1f;
+
+        /// <summary>
+        /// The rival foi takes a heart when its health is down by more than a heart fills (a 30% heart: under 70%), a
+        /// moment after it notices (as a player would).
+        /// </summary>
+        private void FoeHearten(Guard g)
+        {
+            if (g != challengeFoe || g.dead || FoeHearts <= 0 || g.maxHp <= 0) { foeHealAt = -1f; return; }
+            bool low = g.hp <= g.maxHp * (1f - FoeHeartHeal);
+            if (!low) { foeHealAt = -1f; return; }
+            if (foeHealAt < 0f) { foeHealAt = Time.time + (float)rng.NextDouble() * 0.8f + 0.4f; return; }
+            if (Time.time < foeHealAt) return;
+            foeHealAt = -1f;
+            FoeHearts--;
+            g.hp = Mathf.Min(g.maxHp, g.hp + Mathf.Max(1, Mathf.RoundToInt(g.maxHp * FoeHeartHeal)));
+            fx.Burst(g.root.position + Vector3.up * 0.6f, new Color(1f, 0.35f, 0.45f), new Color(2.4f, 0.6f, 0.8f), 26, 4f);
+            AudioPlay(1.5f);
+            FoeHealed?.Invoke(g.root.position, FoeHearts);
+        }
+
         /// <summary>The rival's tactics start fresh each duel (nothing carried over from the last one).</summary>
         private void ResetFoeState()
         {
@@ -179,6 +205,23 @@ namespace SquashBot.Gameplay
                 fx.Burst(g.root.position + Vector3.up * 0.4f, new Color(0.9f, 0.9f, 1f), new Color(1.6f, 1.6f, 2f), 12, 3f);
                 Destroy(g.root.gameObject);
             }
+        }
+
+        /// <summary>The rival foi leaves the ring (between the duel's rounds): gone at once, its tile free.</summary>
+        public void RemoveChallengeFoe()
+        {
+            var g = challengeFoe;
+            challengeFoe = null;
+            ResetFoeState();
+            if (g == null) return;
+            if (!g.dead)
+            {
+                g.dead = true;
+                ClearTelegraph(g);
+                grid.SetOccupied(g.pos, false);
+            }
+            engaged.Remove(g);
+            if (g.root != null) Destroy(g.root.gameObject);
         }
 
         public void ClearChallengeFoe() { challengeFoe = null; ChallengeBattle = false; UseStreetMap = false; ResetFoeState(); }

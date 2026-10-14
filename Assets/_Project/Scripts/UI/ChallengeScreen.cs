@@ -31,6 +31,9 @@ namespace SquashBot.UI
         public event Action NameClosed;
         /// <summary>A kind of challenge was picked: 0 the Arena battle, 1 the Meydan (stage) battle.</summary>
         public event Action<int> ModePicked;
+        /// <summary>The friend panel: make a code (host), enter one (join), or close it.</summary>
+        public event Action FriendHost, FriendClose;
+        public event Action<string> FriendJoin;
         /// <summary>"Change name" in the waiting room.</summary>
         public event Action RenamePressed;
 
@@ -140,8 +143,101 @@ namespace SquashBot.UI
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
             ModeCard(m, 0, new Vector2(0f, 330f), "arena", "ch.mode.arena", "ch.mode.arenaText", new Color(0.62f, 0.45f, 1f));
             ModeCard(m, 1, new Vector2(0f, -360f), "stages", "ch.mode.stages", "ch.mode.stagesText", new Color(1f, 0.6f, 0.25f));
+            // Play a friend live (a four-digit code), between the cards and CLOSE.
+            var friend = Flat.Button(m, Loc.T("live.friend"), new Vector2(0.5f, 0f), new Vector2(0f, 214f), new Vector2(640f, 100f), Flat.Blue, Flat.Text, ShowFriend, 34f);
+            ((RectTransform)friend.transform).pivot = new Vector2(0.5f, 0.5f);
             var back = Flat.Button(m, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, 90f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => modes.Hide(true), 34f);
             ((RectTransform)back.transform).pivot = new Vector2(0.5f, 0.5f);
+            BuildFriend(root);
+        }
+
+        // ---------- Playing a friend ----------
+
+        private UiScreen friendPanel;
+        private TMP_InputField codeInput;
+        private TextMeshProUGUI friendCode, friendStatus;
+        private Button hostButton, joinButton;
+
+        private void BuildFriend(RectTransform root)
+        {
+            friendPanel = UiScreen.Create("ChallengeFriend", root, out var p);
+            Flat.Background(p);
+            Flat.Label(p, Loc.T("live.friend"), new Vector2(0.5f, 1f), new Vector2(0f, -110f), new Vector2(960f, 80f), 56f, Flat.Text, TextAlignmentOptions.Center, bold: true)
+                .rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var hint = Flat.Label(p, Loc.T("live.friendHint"), new Vector2(0.5f, 1f), new Vector2(0f, -190f), new Vector2(940f, 90f), 28f, Flat.Muted, TextAlignmentOptions.Center, wrap: true);
+            hint.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+
+            // Making a code: the code, big.
+            var hostCard = Flat.Panel(p, "Host", new Vector2(0.5f, 0.5f), new Vector2(0f, 330f), new Vector2(940f, 330f), Flat.Card);
+            hostCard.pivot = new Vector2(0.5f, 0.5f);
+            friendCode = Flat.Label(hostCard, "", new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(900f, 130f), 110f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
+            friendCode.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            friendCode.characterSpacing = 30f;
+            hostButton = Flat.Button(hostCard, Loc.T("live.host"), new Vector2(0.5f, 0f), new Vector2(0f, 80f), new Vector2(560f, 100f), Flat.Blue, Flat.Text, () => FriendHost?.Invoke(), 34f);
+            ((RectTransform)hostButton.transform).pivot = new Vector2(0.5f, 0.5f);
+
+            // Entering a friend's code.
+            var joinCard = Flat.Panel(p, "Join", new Vector2(0.5f, 0.5f), new Vector2(0f, -60f), new Vector2(940f, 330f), Flat.Card);
+            joinCard.pivot = new Vector2(0.5f, 0.5f);
+            var box = UiFactory.Box("Input", joinCard, new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(420f, 120f));
+            box.pivot = new Vector2(0.5f, 0.5f);
+            var bg = UiFactory.Fill(box, Flat.CardHi, UiSprites.Rounded, 1.6f);
+            var area = UiFactory.Rect("TextArea", box, Vector2.zero, Vector2.one, new Vector2(24f, 10f), new Vector2(-24f, -10f));
+            area.gameObject.AddComponent<RectMask2D>();
+            var text = UiFactory.Text(area, "", 64f, Color.white);
+            text.enableAutoSizing = false;
+            text.textPreprocessor = null;
+            text.characterSpacing = 20f;
+            var placeholder = UiFactory.Text(area, "0000", 64f, new Color(1f, 1f, 1f, 0.25f));
+            placeholder.enableAutoSizing = false;
+            codeInput = box.gameObject.AddComponent<TMP_InputField>();
+            codeInput.textViewport = area;
+            codeInput.textComponent = text;
+            codeInput.placeholder = placeholder;
+            codeInput.targetGraphic = bg;
+            codeInput.characterLimit = 4;
+            codeInput.contentType = TMP_InputField.ContentType.IntegerNumber;
+            codeInput.lineType = TMP_InputField.LineType.SingleLine;
+            codeInput.onSubmit.AddListener(_ => Join());
+            joinButton = Flat.Button(joinCard, Loc.T("live.join"), new Vector2(0.5f, 0f), new Vector2(0f, 80f), new Vector2(560f, 100f), Flat.Blue, Flat.Text, Join, 34f);
+            ((RectTransform)joinButton.transform).pivot = new Vector2(0.5f, 0.5f);
+
+            friendStatus = Flat.Label(p, "", new Vector2(0.5f, 0.5f), new Vector2(0f, -320f), new Vector2(940f, 120f), 32f, Flat.Text, TextAlignmentOptions.Center, bold: true, wrap: true);
+            friendStatus.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var close = Flat.Button(p, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, 90f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => FriendClose?.Invoke(), 34f);
+            ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
+        }
+
+        private void Join()
+        {
+            var code = (codeInput.text ?? "").Trim();
+            if (code.Length != 4) { friendStatus.text = Loc.T("live.codeShape"); return; }
+            FriendJoin?.Invoke(code);
+        }
+
+        private void ShowFriend()
+        {
+            AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f);
+            modes.Hide(true);
+            friendCode.text = "- - - -";
+            codeInput.text = "";
+            friendStatus.text = "";
+            SetFriendBusy(false);
+            friendPanel.Show();
+            transform.SetAsLastSibling();
+        }
+
+        public void HideFriend() => friendPanel.Hide(true);
+        public bool FriendOpen => friendPanel != null && friendPanel.IsVisible;
+        public void SetFriendCode(string code) => friendCode.text = code;
+        public void SetFriendStatus(string text) => friendStatus.text = text;
+
+        /// <summary>While a code waits for a friend (or a join is on its way) the buttons rest.</summary>
+        public void SetFriendBusy(bool busy)
+        {
+            hostButton.interactable = !busy;
+            joinButton.interactable = !busy;
+            codeInput.interactable = !busy;
         }
 
         /// <summary>A kind's card: a picture from the game itself, its name and a line about it; tapping it picks it.</summary>
@@ -180,6 +276,7 @@ namespace SquashBot.UI
 
         public void ShowModes()
         {
+            if (friendPanel != null) friendPanel.Hide(true);
             lobby.Hide(true);
             hud.Hide(true);
             modes.Show();

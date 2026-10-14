@@ -996,6 +996,7 @@ namespace SquashBot.Gameplay
         }
         private void UpdateGuard(Guard g, float dt)
         {
+            if (g == challengeFoe) FoeHearten(g);
             UpdateHealthBar(g);
             UpdateShield(g, dt);
             if (g.flash > 0f) g.flash -= dt * 3f;

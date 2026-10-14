@@ -73,6 +73,7 @@ namespace SquashBot.Gameplay
             l.marathon = false;
             l.final = false;
             l.robots = 0; l.robotsAtOnce = 0; l.elites = 0; l.hardAtOnce = 0; l.brutes = 0; l.towers = 0; l.bugs = 0;
+            l.reactor = false; // no reactor tower (and its repair drones) from the late worlds on the board
             l.monsterHp = 1;
             Calm(l);
             level = l;
@@ -246,6 +247,7 @@ namespace SquashBot.Gameplay
             clash.Retreat();
             OpenChallengeGates();
             chPhase = ChPhase.Duel;
+            chDuelMe = chDuelThem = 0;
             chUi.SetClock(ScoreText());
             chUi.SetStatus(Loc.T(lead > 0 ? "ch.stageWon" : "ch.stageLost"));
             AudioManager.PlaySfx(lead > 0 ? Sfx.Win : Sfx.Warning, 0.8f, 1f);
@@ -254,12 +256,8 @@ namespace SquashBot.Gameplay
             look.SetParent(null, true);
             var at = new GridPos(Mathf.Clamp(Mathf.RoundToInt(look.position.x), 0, StW - 1), Mathf.Clamp(Mathf.RoundToInt(look.position.z), A0, A1));
             if (!grid.IsStandable(at) || grid.IsOccupied(at)) at = new GridPos(StMid, A0 + 1);
-            var w = Armory.Get(rival.weapon);
-            int hp = Mathf.RoundToInt(rival.foiHp / Mathf.Max(0.4f, 1f - rival.armor * 0.8f));
-            float hit = Mathf.Clamp(rival.foiHit * (0.85f + 0.12f * Armory.Damage(w, Mathf.Max(1, rival.weaponLevel))), 0.06f, 0.35f);
-            hunt.FoeBoldness = rival.boldness;
-            hunt.ChallengeBattle = true;
-            hunt.AddChallengeFoe(at, hp, hit, look, held, rival.shield);
+            AddRivalFoe(at, look, held);
+            BeginDuelRounds();
             ui.ShowIntro(Loc.T("ch.duel"), Loc.T("ch.gatesOpen"));
         }
 

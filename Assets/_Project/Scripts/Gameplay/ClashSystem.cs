@@ -539,7 +539,14 @@ namespace SquashBot.Gameplay
                     if (Alive(0) > 0) return;
                     mineLeft = 0;
                 }
-                else if (mineLeft > 0 && theirsLeft > 0 && meleeTime < BattleSeconds) return;
+                else if (scriptDeaths != null ? !ScriptMet && mineLeft > 0 && theirsLeft > 0 && meleeTime < BattleSeconds + 20f
+                                              : mineLeft > 0 && theirsLeft > 0 && meleeTime < BattleSeconds) return;
+                if (!skirmish && scriptDeaths != null)
+                {
+                    PayScript();
+                    mineLeft = theirsLeft = 0;
+                    foreach (var u in units) if (!u.dead) { if (u.team == 0) mineLeft++; else theirsLeft++; }
+                }
                 melee = false;
                 skirmish = false;
                 clashing = false;
@@ -547,7 +554,9 @@ namespace SquashBot.Gameplay
                 BattleOver?.Invoke(mineLeft, theirsLeft);
                 return;
             }
-            if (mineLeft > 0 && theirsLeft > 0 && clashTime < 35f) return;
+            if (scriptDeaths != null ? !ScriptMet && mineLeft > 0 && theirsLeft > 0 && clashTime < 45f
+                                     : mineLeft > 0 && theirsLeft > 0 && clashTime < 35f) return;
+            PayScript();
             // Over: the survivors go back to their places (the block closes up again).
             clashing = false;
             int myGroup = -1, theirGroup = -1;
@@ -712,14 +721,54 @@ namespace SquashBot.Gameplay
             if (to.sqrMagnitude > 0.001f) u.root.rotation = Quaternion.Slerp(u.root.rotation, Quaternion.LookRotation(to), 0.35f);
         }
 
+        // ---------- A fight with a set outcome (live challenges: the server decides, both games play the same) ----------
+
+        private int[] scriptDeaths;
+        private readonly int[] died = new int[2];
+
+        /// <summary>
+        /// The next clash (or battle) ends with exactly this many soldiers fallen on each side: a side that has lost its
+        /// share stands firm, and the fight stops once both shares are down (any still owed fall at the end).
+        /// </summary>
+        public void Script(int deathsMine, int deathsTheirs)
+        {
+            scriptDeaths = new[] { Mathf.Max(0, deathsMine), Mathf.Max(0, deathsTheirs) };
+            died[0] = died[1] = 0;
+        }
+
+        private bool ScriptMet => scriptDeaths != null && died[0] >= scriptDeaths[0] && died[1] >= scriptDeaths[1];
+
+        /// <summary>The fall still owed by each side (the fight is over): taken from its fighters, then from the rest.</summary>
+        private void PayScript()
+        {
+            if (scriptDeaths == null) return;
+            for (int t = 0; t < 2; t++)
+                for (int pass = 0; pass < 2 && died[t] < scriptDeaths[t]; pass++)
+                    foreach (var u in units)
+                    {
+                        if (died[t] >= scriptDeaths[t]) break;
+                        if (u.dead || u.team != t || u.champion || (pass == 0 && !u.fighting)) continue;
+                        Kill(u, 1 - t);
+                    }
+            scriptDeaths = null;
+        }
+
         private void Hit(Unit target, float dmg, int byTeam)
         {
             if (target.dead) return;
             target.hp -= dmg;
             if (target.model != null) target.model.Flash();
             if (target.champion) { target.hp = Mathf.Max(target.hp, 1f); return; } // the rival foi does not fall on its stage
+            if (scriptDeaths != null && died[target.team] >= scriptDeaths[target.team]) target.hp = Mathf.Max(target.hp, 0.5f); // its side's share is down: it stands
             if (fx != null) fx.Burst(target.root.position + Vector3.up * unitHeight * 0.6f, byTeam == 0 ? Mine : Theirs, (byTeam == 0 ? Mine : Theirs) * 1.6f, 4, 2.5f);
             if (target.hp > 0f) return;
+            Kill(target, byTeam);
+        }
+
+        private void Kill(Unit target, int byTeam)
+        {
+            if (target.dead) return;
+            died[target.team]++;
             target.dead = true;
             target.fighting = false;
             if (fx != null) fx.Burst(target.root.position + Vector3.up * 0.4f, new Color(1f, 0.6f, 0.3f), new Color(2f, 0.8f, 0.3f), 10, 4f);
