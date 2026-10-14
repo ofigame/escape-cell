@@ -101,8 +101,8 @@ namespace SquashBot.Gameplay
                 FortressFloor.FxColour = st.accent;
                 FortressFloor.WallScaleAt = null;
             }
-            FortressFloor.SkipCornerTowers = arenaRun;
-            FortressFloor.SkipWall = trailRun ? (System.Func<GridPos, bool>)(p => true) // the roads: mountains, no ramparts
+            FortressFloor.SkipCornerTowers = arenaRun || challengeRun;
+            FortressFloor.SkipWall = trailRun || challengeRun ? (System.Func<GridPos, bool>)(p => true) // the roads: mountains, no ramparts (the challenge: its arena)
                 : arenaRun ? (System.Func<GridPos, bool>)(p => BattleArenas.BuildingAt(p.x, p.y)) : null;
             FortressFloor.Detailed = arenaRun;
             FortressFloor.WallThick = wallThick;

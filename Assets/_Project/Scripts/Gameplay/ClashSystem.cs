@@ -29,6 +29,11 @@ namespace SquashBot.Gameplay
         private Vector3 boundsMin = new Vector3(-999f, 0f, -999f), boundsMax = new Vector3(999f, 0f, 999f);
 
         public void SetBounds(Vector3 min, Vector3 max) { boundsMin = min; boundsMax = max; }
+
+        // A clash of two groups stays in the middle: between the two armies' front lines (the waiting groups are its edge).
+        private float zoneMinZ = -999f, zoneMaxZ = 999f;
+
+        public void SetClashZone(float minZ, float maxZ) { zoneMinZ = minZ; zoneMaxZ = maxZ; }
         private float meleeTime;
         /// <summary>How long the all-out battle may go on before the side with more soldiers takes it.</summary>
         public const float BattleSeconds = 60f;
@@ -344,9 +349,9 @@ namespace SquashBot.Gameplay
                 {
                     // Marching: the block keeps its shape on the way to the middle (archers stop at their range).
                     var mine = u.team == 0 ? c0 : c1;
-                    var foe = u.team == 0 ? c1 : c0;
+                    var foe = melee ? (u.team == 0 ? c1 : c0) : new Vector3(centre.x, mine.y, centre.z);
                     var dir = foe - mine; dir.y = 0f;
-                    float stop = u.Archer ? u.range * 0.9f : 0.5f;
+                    float stop = melee ? (u.Archer ? u.range * 0.9f : 0.5f) : (u.Archer ? 2.6f : 0.4f);
                     if (dir.magnitude > stop + 1f)
                     {
                         var offset = u.root.position - mine;
@@ -498,6 +503,12 @@ namespace SquashBot.Gameplay
             }
             var p = u.root.position + step;
             if (!u.leaving) { p.x = Mathf.Clamp(p.x, boundsMin.x, boundsMax.x); p.z = Mathf.Clamp(p.z, boundsMin.z, boundsMax.z); }
+            // In a group clash the fighters keep to the middle (once they are in it): never into the waiting groups.
+            if (u.fighting && !melee)
+            {
+                bool inZone = u.root.position.z >= zoneMinZ && u.root.position.z <= zoneMaxZ;
+                if (inZone) p.z = Mathf.Clamp(p.z, zoneMinZ, zoneMaxZ);
+            }
             u.root.position = new Vector3(p.x, u.home.y, p.z);
             if (step.sqrMagnitude > 0.00001f && !(u.target != null && u.Archer))
                 u.root.rotation = Quaternion.Slerp(u.root.rotation, Quaternion.LookRotation(new Vector3(step.x, 0f, step.z)), dt * 10f);

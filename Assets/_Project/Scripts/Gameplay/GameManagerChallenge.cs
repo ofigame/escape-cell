@@ -24,6 +24,7 @@ namespace SquashBot.Gameplay
         /// <summary>The armies' point: +1 mine won the battle (1-0), -1 theirs did (0-1), 0 neither (a level battle).</summary>
         private int chLead;
         private GlassCell myCell, theirCell;
+        private Colosseum colosseum;
         private float tourNext, zoom = 1f;
         private Vector3 tourSpot;
 
@@ -66,10 +67,10 @@ namespace SquashBot.Gameplay
                 var cam = cameraRig.Cam.transform;
                 var right = cam.right; right.y = 0f; right.Normalize();
                 var fwd = cam.forward; fwd.y = 0f; fwd.Normalize();
-                float scale = 26f / Mathf.Max(1f, Screen.height);
+                float scale = 34f / Mathf.Max(1f, Screen.height);
                 boardPan -= (right * d.x + fwd * d.y) * scale;
                 boardDraggedAt = Time.unscaledTime;
-                boardPan = new Vector3(Mathf.Clamp(boardPan.x, -BoardW * 0.45f, BoardW * 0.45f), 0f, Mathf.Clamp(boardPan.z, -BoardH * 0.45f, BoardH * 0.45f));
+                boardPan = new Vector3(Mathf.Clamp(boardPan.x, -BoardW * 0.45f, BoardW * 0.45f), 0f, Mathf.Clamp(boardPan.z, -BoardH * 0.48f, BoardH * 0.48f));
             };
             var go = new GameObject("Clash");
             clash = go.AddComponent<ClashSystem>();
@@ -301,24 +302,35 @@ namespace SquashBot.Gameplay
             var theirs = new Vector3[Army.Groups];
             var myPower = new float[Army.Groups];
             var theirPower = new float[Army.Groups];
-            int[] xs = { 3, 7, 10, 14, 17, 21 };
+            // Each army in two lines of three: the swords and the light spears in front (towards the middle), the heavy
+            // spears and the archers behind them; foi's cell behind its army.
+            float[] xs = { 5f, 12f, 19f, 5f, 12f, 19f };
+            float[] lineZ = { 5.2f, 5.2f, 5.2f, 2.4f, 2.4f, 2.4f };
             for (int g = 0; g < Army.Groups; g++)
             {
-                mine[g] = GridView.ToWorld(new GridPos(xs[g], 2)) + Vector3.up * GridView.SurfaceY;
-                theirs[g] = GridView.ToWorld(new GridPos(xs[g], BoardH - 3)) + Vector3.up * GridView.SurfaceY;
+                mine[g] = GridView.ToWorld(new GridPos(0, 0)) + new Vector3(xs[g], GridView.SurfaceY, lineZ[g]);
+                theirs[g] = GridView.ToWorld(new GridPos(0, 0)) + new Vector3(xs[g], GridView.SurfaceY, BoardH - 1 - lineZ[g]);
                 myPower[g] = Army.Power(g);
                 theirPower[g] = rival.Power(g);
                 myLeft[g] = theirLeft[g] = Army.Soldiers;
             }
             boardCentre = GridView.ToWorld(new GridPos(BoardW / 2, BoardH / 2)) + Vector3.up * GridView.SurfaceY;
             boardPan = Vector3.zero;
+            // The arena round the courtyard: tiers, gates, torches, banners and the crowd.
+            if (colosseum != null) Destroy(colosseum.gameObject);
+            colosseum = Colosseum.Build(transform, GridView.ToWorld(new GridPos(BoardW / 2, BoardH / 2)), BoardW * 0.5f, BoardH * 0.5f, GridView.SurfaceY - 0.02f, rival.name.GetHashCode());
             // foi among its soldiers at the south end, the rival foi facing it at the north.
-            robot.Spawn(grid, new GridPos(BoardW / 2, 1));
+            // Both foi stand in front of the far stand (opposite the camera), either side of the halfway line.
+            robot.Spawn(grid, new GridPos(0, BoardH / 2 - 4));
+            robot.transform.rotation = Quaternion.Euler(0f, 90f, 0f); // facing the camera across the courtyard
             if (rivalLook != null) Destroy(rivalLook.gameObject);
             rivalLook = RivalLook();
-            rivalLook.position = GridView.ToWorld(new GridPos(BoardW / 2, BoardH - 2)) + Vector3.up * GridView.SurfaceY;
-            rivalLook.rotation = Quaternion.Euler(0f, 180f, 0f);
+            rivalLook.position = GridView.ToWorld(new GridPos(0, BoardH / 2 + 4)) + Vector3.up * GridView.SurfaceY;
+            rivalLook.rotation = Quaternion.Euler(0f, 90f, 0f); // facing the camera across the courtyard
             clash.Begin(boardCentre, mine, theirs, myPower, theirPower, hunt.FoiHeight * 0.8f);
+            // The clashes' ground: between the two front lines (5 rows of soldiers deep each), a little short of them.
+            float origin = GridView.ToWorld(new GridPos(0, 0)).z;
+            clash.SetClashZone(origin + 5.2f + 1.15f + 0.4f, origin + (BoardH - 1) - 5.2f - 1.15f - 0.4f);
             clash.SetBounds(GridView.ToWorld(new GridPos(1, 1)) - new Vector3(0.3f, 0f, 0.3f), GridView.ToWorld(new GridPos(BoardW - 2, BoardH - 2)) + new Vector3(0.3f, 0f, 0.3f));
             // Both foi wait in glass cells while their armies fight; the cells break for the duel.
             chLead = 0;
@@ -453,6 +465,7 @@ namespace SquashBot.Gameplay
             clash.Label(1, chTheirPick, theirsLeftInGroup);
             RefreshSides();
             chUi.SetStatus(mineLeftInGroup > theirsLeftInGroup ? Loc.T("ch.clashWon") : mineLeftInGroup < theirsLeftInGroup ? Loc.T("ch.clashLost") : Loc.T("ch.clashEven"));
+            if (colosseum != null) colosseum.Cheer(mineLeftInGroup > theirsLeftInGroup ? 0 : mineLeftInGroup < theirsLeftInGroup ? 1 : -1, 0.8f);
             cameraRig.StartCoroutine(AfterClash());
         }
 
@@ -475,6 +488,7 @@ namespace SquashBot.Gameplay
             ui.ShowIntro(Loc.T("ch.battle"), Loc.T("ch.battleText"));
             tourNext = 0f;
             clash.StartBattle();
+            if (colosseum != null) { colosseum.Wave(true); colosseum.Cheer(-1, 0.5f); }
         }
 
         /// <summary>The battle is over: the winning army's foi goes 1-0 up (a level end: 0-0), the cells break, the soldiers leave.</summary>
@@ -482,6 +496,7 @@ namespace SquashBot.Gameplay
         {
             if (!challengeRun || chPhase != ChPhase.Battle) return;
             chLead = mine > theirs ? 1 : theirs > mine ? -1 : 0;
+            if (colosseum != null) { colosseum.Wave(false); colosseum.Cheer(chLead > 0 ? 0 : chLead < 0 ? 1 : -1, 1f); }
             for (int g = 0; g < Army.Groups; g++) { myLeft[g] = 0; theirLeft[g] = 0; }
             myLeft[0] = mine; theirLeft[0] = theirs;
             RefreshSides();
@@ -499,6 +514,7 @@ namespace SquashBot.Gameplay
             clash.Retreat();
             if (myCell != null) myCell.Shatter();
             if (theirCell != null) theirCell.Shatter();
+            if (colosseum != null) colosseum.Cheer(-1, 1f);
             AudioManager.PlaySfx(Sfx.Impact, 0.9f, 1.2f);
             yield return new WaitForSeconds(2.6f);
             if (!challengeRun || chPhase != ChPhase.Break) yield break;
@@ -518,7 +534,7 @@ namespace SquashBot.Gameplay
             var look = rivalLook;
             rivalLook = null;
             hunt.ChallengeBattle = true;
-            hunt.AddChallengeFoe(new GridPos(BoardW / 2, BoardH - 2), rival.foiHp, rival.foiHit, look);
+            hunt.AddChallengeFoe(new GridPos(0, BoardH / 2 + 4), rival.foiHp, rival.foiHit, look);
             ui.ShowIntro(Loc.T("ch.duel"), Loc.T("ch.duelText"));
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 0.8f);
         }
@@ -543,6 +559,7 @@ namespace SquashBot.Gameplay
             if (chPhase == ChPhase.Done) return;
             chPhase = ChPhase.Done;
             bool won = outcome > 0, draw = outcome == 0;
+            if (colosseum != null) colosseum.Cheer(won ? 0 : draw ? -1 : 1, 1f);
             // Online the server keeps the score (the same sum, shown at once, then its numbers taken); offline: practice.
             int change = 0;
             if (chOnline)
@@ -602,21 +619,23 @@ namespace SquashBot.Gameplay
             if (rivalLook != null) Destroy(rivalLook.gameObject);
             rivalLook = null;
             DestroyCells();
+            if (colosseum != null) Destroy(colosseum.gameObject);
+            colosseum = null;
             hunt.ClearChallengeFoe();
         }
 
-        /// <summary>The board seen whole from above its south end, while the armies fight.</summary>
+        /// <summary>
+        /// The armies' battle filmed like a football match: the camera sits high on the east stand at the halfway line
+        /// (the player's army on the left, the rival's on the right), turning left and right to follow the fighting and
+        /// closing in on a clash of two groups; in the all-out battle it pans slowly from fight to fight. A finger on the
+        /// board turns it by hand; a little after the finger lifts it goes back to following.
+        /// </summary>
         private void BoardPose(out Vector3 pos, out Quaternion rot)
         {
-            // Far enough for the whole board on a tall phone, aimed a little south so it sits above the group buttons.
-            float aspect = Mathf.Max(0.4f, cameraRig.Cam.aspect);
-            float k = Mathf.Clamp(0.86f / aspect, 1f, 2.1f);
-            // The finger on the board takes the camera; it moves on its own again a little after the finger lifts.
             if (InputReader.PointerHeld) boardDraggedAt = Time.unscaledTime;
             bool free = Time.unscaledTime - boardDraggedAt > 2.5f;
             bool groupClash = chPhase == ChPhase.Clash && clash != null && clash.Clashing && !clash.InBattle;
-            // A clash of two groups: close in on it; afterwards back out. The battle: the whole view, touring the fights.
-            zoom = Mathf.Lerp(zoom, groupClash && free ? 0.55f : 1f, Time.deltaTime * 1.6f);
+            zoom = Mathf.Lerp(zoom, groupClash && free ? 0.5f : 1f, Time.deltaTime * 1.4f);
             Vector3? want = null;
             if (groupClash && clash.FightCentre is Vector3 fight) want = fight;
             else if (chPhase == ChPhase.Battle && clash != null)
@@ -626,13 +645,16 @@ namespace SquashBot.Gameplay
             }
             if (free && want.HasValue)
             {
-                var w = want.Value - boardCentre + new Vector3(0f, 0f, 3f * zoom);
-                w = new Vector3(Mathf.Clamp(w.x, -BoardW * 0.45f, BoardW * 0.45f), 0f, Mathf.Clamp(w.z, -BoardH * 0.45f, BoardH * 0.45f));
-                boardPan = Vector3.Lerp(boardPan, w, Time.deltaTime * (chPhase == ChPhase.Battle ? 0.6f : 1.5f));
+                var w = want.Value - boardCentre;
+                w = new Vector3(Mathf.Clamp(w.x, -BoardW * 0.45f, BoardW * 0.45f), 0f, Mathf.Clamp(w.z, -BoardH * 0.48f, BoardH * 0.48f));
+                boardPan = Vector3.Lerp(boardPan, w, Time.deltaTime * (chPhase == ChPhase.Battle ? 0.7f : 1.6f));
             }
-            k *= zoom;
-            pos = boardCentre + boardPan + new Vector3(-4.5f, 14f, -11.5f) * k;
-            rot = Quaternion.LookRotation(boardCentre + boardPan + new Vector3(0f, 0f, -3f * zoom) - pos);
+            // The camera's seat: high on the east stand, level with the middle of the courtyard.
+            var seat = boardCentre + new Vector3(BoardW * 0.5f + 8.5f, 10.5f, 0f);
+            var focus = boardCentre + boardPan;
+            // Closing in: the camera leans forward along its line of sight (the seat stays where it is in spirit).
+            pos = Vector3.Lerp(seat, focus, (1f - zoom) * 0.9f);
+            rot = Quaternion.LookRotation(focus - pos);
         }
     }
 }
