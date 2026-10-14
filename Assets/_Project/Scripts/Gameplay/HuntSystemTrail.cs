@@ -296,7 +296,30 @@ namespace SquashBot.Gameplay
         private int foeCombo;
 
         /// <summary>The rival foi's wind-up: quicker inside a flurry.</summary>
-        private float FoeWindScale(Guard g) => g != challengeFoe ? 1f : foeCombo > 0 ? 0.4f : 0.6f;
+        private float FoeWindScale(Guard g) => g != challengeFoe ? 1f : foeCounter ? 0.3f : foeCombo > 0 ? 0.4f : 0.6f;
+
+        private float foeHurtAt = -9f;
+        private int foeHurtStreak;
+        private bool foeCounter;
+
+        /// <summary>
+        /// The rival foi took a blow. A second one close behind and it hits straight back (a quick counter at foi) and
+        /// then gets away.
+        /// </summary>
+        private void FoeHurt(Guard g)
+        {
+            foeHurtStreak = Time.time - foeHurtAt < 1.6f ? foeHurtStreak + 1 : 1;
+            foeHurtAt = Time.time;
+            if (foeHurtStreak < 2 || Chebyshev(robot.Position, g.pos) > ReachOf(g)) return;
+            foeHurtStreak = 0;
+            foeCounter = true;
+            foeCombo = 0;
+            g.cooldown = 0f;
+            g.windup = 0f;
+            g.target = robot.Position;
+            g.area.Clear();
+            g.area.Add(g.target);
+        }
 
         /// <summary>
         /// The rival foi just struck. It attacks in flurries — two to four quick blows (more for a bold one), each
@@ -305,6 +328,14 @@ namespace SquashBot.Gameplay
         private void FoeStruck(Guard g)
         {
             if (g != challengeFoe) return;
+            if (foeCounter)
+            {
+                // The counter landed (or missed): away, quickly.
+                foeCounter = false;
+                g.cooldown = 0.6f;
+                foeBackOffUntil = Time.time + 1.2f;
+                return;
+            }
             if (foeCombo > 0)
             {
                 foeCombo--;

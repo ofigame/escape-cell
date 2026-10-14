@@ -642,7 +642,8 @@ namespace SquashBot.Gameplay
                 arena = true,
                 title = Loc.T(won ? "ch.victory" : draw ? "ch.draw" : "ch.defeat"),
                 hasNext = false,
-                canDouble = won,
+                canDouble = false,
+                challenge = true,
                 subtitle = line,
                 coins = draw ? 0 : gold + Earned,
             }));

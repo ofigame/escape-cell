@@ -552,7 +552,8 @@ namespace SquashBot.Gameplay
                     if (grid.IsLava(g.pos + dir)) BurnGuard(g, g.pos + dir);
                     else KillGuard(g);
                 }
-                else if (g != challengeFoe) KnockBack(g); // the rival foi stands its ground and hits back
+                else if (g != challengeFoe) KnockBack(g);
+                else FoeHurt(g); // the rival foi stands its ground and hits back
                 return true;
             }
             if (StrikeDrone(p)) return true;

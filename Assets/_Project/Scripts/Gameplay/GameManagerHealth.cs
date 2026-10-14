@@ -96,7 +96,13 @@ namespace SquashBot.Gameplay
 
             cameraRig.Shake(0.9f);
             cameraRig.Punch(0.7f);
-            fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(1f, 0.35f, 0.35f), new Color(2.4f, 0.5f, 0.4f), 22, 5f);
+            fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(1f, 0.35f, 0.35f), new Color(2.4f, 0.5f, 0.4f), duel ? 40 : 22, duel ? 7f : 5f);
+            if (duel)
+            {
+                // A blow you can see on foi: a red ring bursting round it and sparks off it.
+                Shockwave.Create(robot.transform.position, 1.3f, new Color(1f, 0.25f, 0.25f));
+                fx.Burst(robot.transform.position + Vector3.up * 0.9f, new Color(1f, 0.85f, 0.4f), new Color(2.6f, 1.8f, 0.6f), 18, 6f);
+            }
             AudioManager.PlaySfx(Sfx.Squash, 0.7f, 1.4f);
             Haptics.Medium();
             FloatAt(GridView.ToWorld(p), "-" + Mathf.RoundToInt(damage * 100f) + "%", Palette.UiRed);

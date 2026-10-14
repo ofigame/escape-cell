@@ -100,7 +100,7 @@ namespace SquashBot.UI
             var area = tap.gameObject.AddComponent<TapArea>();
             area.tapped = p => BoardTapped?.Invoke(p);
             area.dragged = d => BoardDragged?.Invoke(d);
-            var top = UiFactory.Rect("Top", h, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -380f), new Vector2(0f, -240f)); // under the HUD's top row
+            var top = UiFactory.Rect("Top", h, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -505f), new Vector2(0f, -365f)); // under the HUD's top row and the health bar
             UiFactory.Fill(top, new Color(0.03f, 0.03f, 0.1f, 0.55f)).raycastTarget = false;
             myBar = UiFactory.TextBox("Me", top, new Vector2(0f, 0.5f), new Vector2(136f, -20f), new Vector2(380f, 120f), "", 32f, ClashSystem.Mine, title: true, align: TextAlignmentOptions.Left);
             myBar.rectTransform.pivot = new Vector2(0f, 0.5f);

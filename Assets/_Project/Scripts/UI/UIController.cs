@@ -101,6 +101,8 @@ namespace SquashBot.UI
             /// <summary>The card's own title (else won / lost / bonus).</summary>
             public string title;
             public bool won, bonusRound, hasNext, bonusAvailable, canContinue, canBuyContinue, canDouble, arena;
+            /// <summary>A challenge's end: only MENU, and the summary large.</summary>
+            public bool challenge;
             public int continuePrice;
             public string subtitle, note, goalText;
             public float goalProgress;
@@ -234,7 +236,7 @@ namespace SquashBot.UI
         private void RefreshQuests() { if (questsPing != null) questsPing.SetActive(DailyQuests.Claimable > 0); }
         private RectTransform bagButton;
         private RectTransform adHealButton;
-        public void SetAdHealVisible(bool on) { if (adHealButton != null && adHealButton.gameObject.activeSelf != on) adHealButton.gameObject.SetActive(on); }
+        public void SetAdHealVisible(bool on) { on &= !challengeHud; if (adHealButton != null && adHealButton.gameObject.activeSelf != on) adHealButton.gameObject.SetActive(on); }
         private bool IsOverAdHeal(Vector2 screen) => adHealButton != null && adHealButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(adHealButton, screen, null);
 
         public void SetBagVisible(bool on) { if (bagButton != null && bagButton.gameObject.activeSelf != on) bagButton.gameObject.SetActive(on); }
@@ -247,7 +249,7 @@ namespace SquashBot.UI
         public void SetBombs(int left, bool show)
         {
             if (bombButton == null) return;
-            bool on = show && left > 0;
+            bool on = show && left > 0 && !challengeHud;
             if (bombButton.gameObject.activeSelf != on) bombButton.gameObject.SetActive(on);
             if (on) bombCount.text = left.ToString();
         }
@@ -1162,8 +1164,16 @@ namespace SquashBot.UI
         }
 
         /// <summary>The challenge's board: no mission pill or progress bar up top (the challenge has its own bar).</summary>
+        /// <summary>The challenge's board: only pause and the bag (no ad buttons, coins, bombs or tools).</summary>
+        private bool challengeHud;
+
         public void SetChallengeHud(bool on)
         {
+            challengeHud = on;
+            if (on) SetAdHealVisible(false);
+            if (bonusPill != null) bonusPill.gameObject.SetActive(!on);
+            if (bombButton != null && on) bombButton.gameObject.SetActive(false);
+            if (on) foreach (var tb in toolButtons) if (tb != null) tb.Set(null, 0, false, 0f);
             if (missionPill != null) missionPill.gameObject.SetActive(!on);
             if (hudFill != null && hudFill.transform.parent != null) hudFill.transform.parent.gameObject.SetActive(!on);
         }
@@ -1200,7 +1210,7 @@ namespace SquashBot.UI
             if (alarmPill != null) alarmPill.gameObject.SetActive(on);
         }
 
-        public void SetTool(int slot, Tool? tool, int charges, bool trial, float active) => toolButtons[slot].Set(tool, charges, trial, active);
+        public void SetTool(int slot, Tool? tool, int charges, bool trial, float active) => toolButtons[slot].Set(challengeHud ? null : tool, charges, trial, active);
 
         public void PunchTool(int slot) => toolButtons[slot].Punch();
 
@@ -1452,6 +1462,12 @@ namespace SquashBot.UI
             resultTitle.text = !string.IsNullOrEmpty(info.title) ? info.title : Loc.T(info.bonusRound ? "result.bonusDone" : info.won ? "result.win" : "result.lose");
             resultTitle.color = info.bonusRound ? Palette.UiGold : info.won ? Palette.UiCyan : Palette.UiRed;
             resultSub.text = string.IsNullOrEmpty(info.scoreLine) ? info.subtitle : info.scoreLine;
+            // A challenge: the summary (score, rival, trophies, rank) large and bright under the title.
+            resultSub.fontSizeMax = info.challenge ? 50f : 38f;
+            resultSub.fontSize = resultSub.fontSizeMax;
+            resultSub.color = info.challenge ? Color.white : new Color(0.88f, 0.89f, 1f, 0.85f);
+            resultSub.textWrappingMode = info.challenge ? TextWrappingModes.Normal : TextWrappingModes.NoWrap;
+            ((RectTransform)resultSub.transform.parent).sizeDelta = new Vector2(800f, info.challenge ? 330f : 100f);
             resultReward.text = $"+{info.coins}";
             resultNote.text = info.note ?? "";
             bool goal = !string.IsNullOrEmpty(info.goalText);
@@ -1500,9 +1516,9 @@ namespace SquashBot.UI
             ((RectTransform)resultContinueCoins.transform).anchoredPosition = new Vector2(contAd ? 160f : 0f, -795f);
             resultContinueCoinsLabel.text = Loc.F("btn.continueCoins", info.continuePrice);
             resultContinue.GetComponentInChildren<TextMeshProUGUI>().text = Loc.T(contCoins ? "btn.continueAdShort" : "btn.continue");
-            resultRetry.gameObject.SetActive(retryTop || cont);
+            resultRetry.gameObject.SetActive((retryTop || cont) && !info.challenge);
             ((RectTransform)resultRetry.transform).anchoredPosition = new Vector2(0f, retryTop ? -795f : -965f);
-            resultDouble.gameObject.SetActive(ended && info.canDouble && info.coins > 0);
+            resultDouble.gameObject.SetActive(ended && info.canDouble && info.coins > 0 && !info.challenge);
             // The battle arena mode: no map (MENU alone, in the middle of the bottom row).
             resultMap.gameObject.SetActive(!info.arena);
             ((RectTransform)resultMenu.transform).anchoredPosition = new Vector2(info.arena ? 0f : 160f, -1120f);
