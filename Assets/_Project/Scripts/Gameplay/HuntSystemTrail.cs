@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using SquashBot.Audio;
 using SquashBot.Core;
+using SquashBot.Data;
 using SquashBot.Visual;
 using UnityEngine;
 
@@ -91,7 +93,7 @@ namespace SquashBot.Gameplay
         /// <summary>A free tile near <paramref name="p"/> (no robot, no ally, not foi's), or null.</summary>
         private GridPos? FreeNear(GridPos p)
         {
-            for (int r = 0; r <= 4; r++)
+            for (int r = 0; r <= 8; r++)
                 for (int dx = -r; dx <= r; dx++)
                     for (int dy = -r; dy <= r; dy++)
                     {
@@ -106,15 +108,16 @@ namespace SquashBot.Gameplay
         /// A soldier of the rival's army carried into the duel: its own model (<paramref name="body"/>, the soldier as it
         /// stood) moved onto the nearest free tile, fighting as a robot of the given health.
         /// </summary>
-        public void AddChallengeSoldier(Vector3 at, int hp, Transform body, GuardBot bot)
+        public void AddChallengeSoldier(Vector3 at, int hp, Transform body, SoldierModel model, GroupKind kind)
         {
             var tile = FreeNear(new GridPos(Mathf.RoundToInt(at.x), Mathf.RoundToInt(at.z)));
             if (!tile.HasValue) { Destroy(body.gameObject); return; }
-            var g = new Guard { pos = tile.Value, hp = Mathf.Max(1, hp), maxHp = Mathf.Max(1, hp), rank = 1, step = 0.4f, cooldown = 0.8f };
+            var g = new Guard { pos = tile.Value, hp = Mathf.Max(1, hp), maxHp = Mathf.Max(1, hp), rank = 1, step = 0.2f + (float)rng.NextDouble() * 0.5f, cooldown = 0.5f + (float)rng.NextDouble() };
             g.root = body;
             g.root.SetParent(transform, true);
             g.root.position = At(tile.Value);
-            g.bot = bot;
+            g.soldier = model;
+            g.soldierKind = kind;
             AddHealthBar(g);
             g.from = g.to = At(tile.Value);
             grid.SetOccupied(tile.Value, true);
@@ -123,21 +126,161 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>One of the player's soldiers carried into the duel as an ally (its own model).</summary>
-        public void AddChallengeAlly(Vector3 at, int hp, Transform body, GuardBot bot)
+        public void AddChallengeAlly(Vector3 at, int hp, Transform body, SoldierModel model, GroupKind kind)
         {
             var tile = FreeNear(new GridPos(Mathf.RoundToInt(at.x), Mathf.RoundToInt(at.z)));
             if (!tile.HasValue) { Destroy(body.gameObject); return; }
-            var a = new Guard { pos = tile.Value, hp = Mathf.Max(1, hp), maxHp = Mathf.Max(1, hp), rank = -1, step = 0.3f, ally = true };
+            var a = new Guard { pos = tile.Value, hp = Mathf.Max(1, hp), maxHp = Mathf.Max(1, hp), rank = -1, step = 0.2f + (float)rng.NextDouble() * 0.4f, ally = true };
             a.root = body;
             a.root.SetParent(transform, true);
             a.root.position = At(tile.Value);
-            a.bot = bot;
+            a.soldier = model;
+            a.soldierKind = kind;
             AddHealthBar(a);
             a.from = a.to = At(tile.Value);
             allies.Add(a);
         }
 
-        public void ClearChallengeFoe() => challengeFoe = null;
+        public void ClearChallengeFoe() { challengeFoe = null; ChallengeBattle = false; }
+
+        // ---------- Wings: robots split up and close round their target ----------
+
+        /// <summary>The side the crowd is on, from foi (radians); the wings fan out round it.</summary>
+        private float crowdAngle;
+        private int flankCount;
+        // The wings in the order they are handed out (neighbours go to opposite sides): straight on, left, right, wider…
+        private static readonly float[] FlankAngles = { 0f, -60f, 60f, -110f, 110f, -30f, 30f, -150f, 150f, 180f };
+
+        private Vector2 FlankDir(Guard g)
+        {
+            if (g.flank < 0) g.flank = flankCount++ % FlankAngles.Length;
+            float a = crowdAngle + FlankAngles[g.flank] * Mathf.Deg2Rad;
+            return new Vector2(Mathf.Cos(a), Mathf.Sin(a));
+        }
+
+        /// <summary>The tile <paramref name="dist"/> from <paramref name="target"/> on the robot's wing (or the nearest standable one).</summary>
+        private GridPos FlankSpot(Guard g, GridPos target, int dist)
+        {
+            var dir = FlankDir(g);
+            for (int r = dist; r >= 1; r--)
+            {
+                var p = target + new GridPos(Mathf.RoundToInt(dir.x * r), Mathf.RoundToInt(dir.y * r));
+                if (grid.IsStandable(p) && !grid.IsGap(p)) return p;
+            }
+            return target;
+        }
+
+        /// <summary>
+        /// Where a robot heads for foi: far off, a point a few tiles out on its wing (so the crowd splits and comes from
+        /// several sides); near, the tile beside foi on its side (so they end up round foi, not stacked in a line).
+        /// </summary>
+        private GridPos FlankGoal(Guard g, int near, int reach)
+        {
+            var target = robot.Position;
+            if (near > 6) return FlankSpot(g, target, 4);
+            if (near > reach) return FlankSpot(g, target, Mathf.Max(1, reach));
+            return target;
+        }
+
+        /// <summary>One step towards a tile (whichever free neighbour brings it closer). False when none does.</summary>
+        private bool StepTowards(Guard g, GridPos goal, float period)
+        {
+            GridPos best = g.pos;
+            int bd = Chebyshev(goal, g.pos);
+            foreach (var d in DirectionExtensions.All)
+            {
+                var n = g.pos + d.ToOffset();
+                if (!CanStep(g.pos, n)) continue;
+                int nd = Chebyshev(goal, n);
+                // Never closer to foi than the ring while waiting.
+                if (Chebyshev(robot.Position, n) < WaitRing - 1) continue;
+                if (nd < bd) { bd = nd; best = n; }
+            }
+            if (best == g.pos) return false;
+            MoveGuard(g, best, period);
+            return true;
+        }
+
+        // ---------- The challenge battle's ways of fighting ----------
+
+        /// <summary>A challenge soldier's extra blow on one its kind beats (swords over archers, spears over swords, archers over spears).</summary>
+        private static int Edge(Guard by, Guard target) =>
+            by.soldier != null && target.soldier != null && Army.Edge(by.soldierKind, target.soldierKind) > 0 ? 1 : 0;
+
+        private static bool IsArcher(Guard g) => g.soldier != null && Army.Family(g.soldierKind) == 2;
+
+        /// <summary>How far a robot strikes from: archers 4 tiles, spears 2, swords 1 (others as ever).</summary>
+        private static int ReachOf(Guard g)
+        {
+            if (g.soldier == null) return AttackReach;
+            int fam = Army.Family(g.soldierKind);
+            return fam == 2 ? 4 : fam == 1 ? 2 : 1;
+        }
+
+        /// <summary>One step away from a tile (the free neighbour farthest from it). False when boxed in.</summary>
+        private bool StepAway(Guard g, GridPos from, float period)
+        {
+            GridPos best = g.pos;
+            int bd = Chebyshev(from, g.pos);
+            foreach (var d in DirectionExtensions.All)
+            {
+                var n = g.pos + d.ToOffset();
+                if (!CanStep(g.pos, n)) continue;
+                int nd = Chebyshev(from, n);
+                if (nd > bd || (nd == bd && rng.Next(3) == 0 && best == g.pos)) { bd = nd; best = n; }
+            }
+            if (best == g.pos) return false;
+            MoveGuard(g, best, period);
+            return true;
+        }
+
+        private float foeFleeUntil, foeBackOffUntil;
+
+        /// <summary>
+        /// The rival foi's own sense, before its usual fighting: badly hurt and foi close, it falls back behind its
+        /// soldiers for a while; right after a blow it steps back out of reach now and then (hit and run). True when it
+        /// moved this frame.
+        /// </summary>
+        private bool FoeTactics(Guard g, int near)
+        {
+            if (g.windup >= 0f || g.moveT < 1f) return false;
+            if (g.hp < g.maxHp * 0.35f && near <= 3 && Time.time > foeFleeUntil + 6f) foeFleeUntil = Time.time + 2.5f;
+            bool flee = Time.time < foeFleeUntil || Time.time < foeBackOffUntil;
+            if (!flee) return false;
+            if ((g.step -= Time.deltaTime) > 0f) return true;
+            g.step = 0f;
+            return StepAway(g, robot.Position, 1f / (GuardSpeed(g) * 1.15f));
+        }
+
+        /// <summary>The rival foi just struck: half the time it backs off a moment.</summary>
+        private void FoeStruck(Guard g)
+        {
+            if (g == challengeFoe && rng.Next(2) == 0) foeBackOffUntil = Time.time + 0.7f;
+        }
+
+        private Material arrowMat;
+
+        /// <summary>An arrow's flight from a shooter to where it lands (a quick arc).</summary>
+        private void ArrowFx(Vector3 from, Vector3 to)
+        {
+            if (arrowMat == null) arrowMat = MaterialFactory.Create(new Color(0.95f, 0.85f, 0.6f), new Color(0.6f, 0.45f, 0.1f));
+            var arrow = Shapes.Rounded("Arrow", transform, from + Vector3.up * 0.5f, new Vector3(0.04f, 0.04f, 0.4f), 0.01f, arrowMat).transform;
+            StartCoroutine(Fly(arrow, from + Vector3.up * 0.5f, to + Vector3.up * 0.3f));
+            AudioManager.PlaySfx(Sfx.Hop, 0.2f, 2f);
+        }
+
+        private System.Collections.IEnumerator Fly(Transform arrow, Vector3 a, Vector3 b)
+        {
+            for (float t = 0f; t < 1f && arrow != null; t += Time.deltaTime / 0.25f)
+            {
+                var p = Vector3.Lerp(a, b, t) + Vector3.up * Mathf.Sin(t * Mathf.PI) * 0.6f;
+                var dir = p - arrow.position;
+                if (dir.sqrMagnitude > 0.0001f) arrow.rotation = Quaternion.LookRotation(dir);
+                arrow.position = p;
+                yield return null;
+            }
+            if (arrow != null) Destroy(arrow.gameObject);
+        }
 
         /// <summary>A spitter's turn: back towards its chest if it strayed, else face foi and lob poison when in range.</summary>
         private void UpdateSpitter(Guard g, float dt)

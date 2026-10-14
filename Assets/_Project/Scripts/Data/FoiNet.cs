@@ -62,7 +62,11 @@ namespace SquashBot.Data
 
         [Serializable] public class Attack { public string attacker; public bool held; public int change; }
 
-        [Serializable] private class AttackList { public Attack[] items; }
+        [Serializable] private class LiveAttack { public string attacker; }
+
+        [Serializable] private class DefenseReply { public LiveAttack[] live; public Attack[] items; }
+
+        [Serializable] private class SettingsBody { public bool enabled; public string pushToken; public string lang; }
 
         [Serializable] private class NameBody { public string name; }
 
@@ -144,14 +148,36 @@ namespace SquashBot.Data
             done(code == 200 ? TryParse<Result>(body) : null);
         }
 
-        /// <summary>The attacks on the player's army since it last looked (empty with no network).</summary>
-        public static IEnumerator Defense(Action<Attack[]> done)
+        /// <summary>
+        /// The player's army: who is fighting it right now (AI in command), and the attacks on it since it last looked.
+        /// Both empty with no network.
+        /// </summary>
+        public static IEnumerator Defense(Action<string[], Attack[]> done)
         {
+            if (!Registered) { done(Array.Empty<string>(), Array.Empty<Attack>()); yield break; }
             long code = 0; string body = null;
             yield return Send("GET", "/defense", null, true, (c, b) => { code = c; body = b; });
-            var list = code == 200 ? TryParse<AttackList>("{\"items\":" + body + "}") : null;
-            done(list?.items ?? Array.Empty<Attack>());
+            var r = code == 200 ? TryParse<DefenseReply>(body) : null;
+            var live = new System.Collections.Generic.List<string>();
+            if (r?.live != null) foreach (var l in r.live) if (!string.IsNullOrEmpty(l.attacker)) live.Add(l.attacker);
+            done(live.ToArray(), r?.items ?? Array.Empty<Attack>());
         }
+
+        /// <summary>Challenges on or off, the phone's notification token (null: unchanged) and the game's language.</summary>
+        public static IEnumerator PutSettings(bool enabled, string pushToken, string lang, Action<bool> done)
+        {
+            if (!Registered) { done(false); yield break; }
+            long code = 0;
+            yield return Send("PUT", "/settings", JsonUtility.ToJson(new SettingsBody { enabled = enabled, pushToken = pushToken, lang = lang }), true, (c, _) => code = c);
+            done(code == 200);
+        }
+
+        /// <summary>The game's language as a short code for the server's notification texts.</summary>
+        public static string LangCode => Loc.Current switch
+        {
+            Language.Turkish => "tr", Language.Arabic => "ar", Language.Spanish => "es", Language.German => "de",
+            Language.Korean => "ko", Language.Italian => "it", Language.Azerbaijani => "az", _ => "en",
+        };
 
         /// <summary>
         /// Deletes the online profile (name, army, every challenge) from the server and forgets it here, along with the

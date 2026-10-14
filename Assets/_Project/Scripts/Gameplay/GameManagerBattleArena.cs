@@ -21,6 +21,7 @@ namespace SquashBot.Gameplay
         {
             ui.ArenasPressed += ShowArenas;
             ui.ChallengePressed += StartChallenge;
+            ui.ChallengeStatsPressed += ShowChallengeStats;
             ui.Arenas.BackPressed += () => ui.Arenas.Hide();
             ui.Arenas.ArenaChosen += i => StartTrail(i); // the road to the chosen arena, then the arena
         }

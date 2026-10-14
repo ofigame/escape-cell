@@ -39,6 +39,7 @@ namespace SquashBot.Gameplay
         private bool chOnline;
         /// <summary>How far the player has slid the board view.</summary>
         private Vector3 boardPan;
+        private float boardDraggedAt = -99f;
 
         private const int BoardW = 25, BoardH = 21, PickSeconds = 10;
 
@@ -61,6 +62,7 @@ namespace SquashBot.Gameplay
                 var fwd = cam.forward; fwd.y = 0f; fwd.Normalize();
                 float scale = 26f / Mathf.Max(1f, Screen.height);
                 boardPan -= (right * d.x + fwd * d.y) * scale;
+                boardDraggedAt = Time.unscaledTime;
                 boardPan = new Vector3(Mathf.Clamp(boardPan.x, -BoardW * 0.45f, BoardW * 0.45f), 0f, Mathf.Clamp(boardPan.z, -BoardH * 0.45f, BoardH * 0.45f));
             };
             var go = new GameObject("Clash");
@@ -77,7 +79,15 @@ namespace SquashBot.Gameplay
                 ui.ShowIntro(Loc.T("ch.title"), Loc.T("ch.locked"));
                 return;
             }
+            if (!Challenge.Enabled)
+            {
+                ui.ShowIntro(Loc.T("ch.title"), Loc.T("ch.disabled"));
+                return;
+            }
+            Notifications.AskOnce(token => cameraRig.StartCoroutine(FoiNet.PutSettings(Challenge.Enabled, token, FoiNet.LangCode, _ => { })));
             if (chUi == null) InitChallenge();
+            ui.ChallengeStats.Hide();
+            ui.ArmyView.Hide();
             if (State != GameState.Menu) ShowMenu();
             if (!Challenge.NameChosen)
             {
@@ -110,6 +120,55 @@ namespace SquashBot.Gameplay
         }
 
         private bool LobbyOver(int token) => chCancelled || token != chLobbyToken;
+
+        /// <summary>Tells the server whether challenges are on, the phone's notification token and the language.</summary>
+        private void SyncChallengeSettings()
+        {
+            ui.RefreshSettings();
+            ui.RefreshMenuRank(ui.MenuDefenseLine);
+            cameraRig.StartCoroutine(FoiNet.PutSettings(Challenge.Enabled, Notifications.Token, FoiNet.LangCode, _ => { }));
+        }
+
+        private float menuWatchNext;
+
+        /// <summary>
+        /// While the menu is up, every half minute: is the player's army being fought right now (by whom), and what
+        /// happened to it since last time — shown on the menu under the rank card. The record is refreshed too.
+        /// </summary>
+        private void WatchArmyFromMenu()
+        {
+            if (Time.unscaledTime < menuWatchNext || !ui.MenuVisible || !FoiNet.Registered || !Challenge.Enabled) return;
+            menuWatchNext = Time.unscaledTime + 30f;
+            cameraRig.StartCoroutine(FoiNet.Defense((live, items) =>
+            {
+                string line = null;
+                if (live.Length > 0) line = Loc.F("ch.live", live[0]);
+                else if (items.Length > 0)
+                {
+                    int held = 0, change = 0;
+                    foreach (var a in items) { if (a.held) held++; change += a.change; }
+                    line = Loc.F("ch.defense", items.Length, held, items.Length - held, (change >= 0 ? "+" : "") + change);
+                    PlayerPrefs.SetString(DefenseNewsKey, line);
+                }
+                else line = PlayerPrefs.GetString(DefenseNewsKey, "");
+                ui.MenuDefenseLine = line;
+                if (items.Length > 0 || live.Length > 0)
+                    cameraRig.StartCoroutine(FoiNet.Me(p => { Challenge.Sync(p); ui.RefreshMenuRank(ui.MenuDefenseLine); }));
+                else ui.RefreshMenuRank(line);
+            }));
+        }
+
+        private const string DefenseNewsKey = "sb_ch_defnews";
+
+        /// <summary>The rank card was tapped: the challenge's overall results (the server's numbers first, if it answers).</summary>
+        private void ShowChallengeStats()
+        {
+            PlayerPrefs.DeleteKey(DefenseNewsKey); // the news has been seen
+            ui.MenuDefenseLine = null;
+            ui.RefreshMenuRank(null);
+            if (!FoiNet.Registered) { ui.ChallengeStats.Show(); return; }
+            cameraRig.StartCoroutine(FoiNet.Me(p => { Challenge.Sync(p); ui.ChallengeStats.Show(); }));
+        }
 
         /// <summary>
         /// The waiting room: "looking for a rival" while the server gets the player's army and finds a rival (and tells
@@ -153,7 +212,7 @@ namespace SquashBot.Gameplay
             if (ok)
             {
                 FoiNet.Attack[] attacks = null;
-                yield return FoiNet.Defense(a => attacks = a);
+                yield return FoiNet.Defense((_, a) => attacks = a);
                 if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
                 // From here the challenge counts: no leaving the room.
                 chUi.LockLobby();
@@ -223,6 +282,8 @@ namespace SquashBot.Gameplay
             trailRun = false;
             dailyRun = false;
             BeginRun();
+            ui.SetChallengeHud(true);
+            ui.SkillBar.Refresh(false);
             hazards.Freeze();
             fifiReadyAt = Time.time + 99999f; // Fifi stays out of challenges
             introPending = false;
@@ -276,7 +337,7 @@ namespace SquashBot.Gameplay
             return n;
         }
 
-        private void RefreshSides() => chUi.SetSides(Challenge.PlayerName, Total(myLeft), rival.name, Total(theirLeft));
+        private void RefreshSides() => chUi.SetSides(Challenge.PlayerName, Challenge.Rank, Total(myLeft), rival.name, rival.Rank, Total(theirLeft));
 
         /// <summary>A tap on the board while picking: my group nearest the finger (on the screen) is sent.</summary>
         private void OnBoardTap(Vector2 screen)
@@ -309,7 +370,7 @@ namespace SquashBot.Gameplay
             var can = new bool[Army.Groups];
             for (int g = 0; g < Army.Groups; g++) can[g] = myLeft[g] > 0;
             clash.SetPickable(can, -1);
-            chUi.SetStatus(Loc.T("ch.pick"));
+            chUi.SetStatus(""); // the pick card says it
         }
 
         /// <summary>The bot's pick, by its boldness: a bold one sends its strongest groups first, a careful one saves them.</summary>
@@ -336,6 +397,7 @@ namespace SquashBot.Gameplay
                 case ChPhase.Pick:
                     chTimer -= dt;
                     chUi.SetClock(Mathf.CeilToInt(Mathf.Max(0f, chTimer)).ToString());
+                    chUi.SetPickTime(chTimer / PickSeconds);
                     if (chTheirPick < 0 && chTimer <= chBotPickAt) chTheirPick = BotPick();
                     if (chTimer > 0f && (chMyPick < 0 || chTheirPick < 0)) break;
                     // Time's up (or both have picked): any group left for whoever hasn't.
@@ -381,11 +443,13 @@ namespace SquashBot.Gameplay
         {
             yield return new WaitForSeconds(1.6f); // the survivors walk back
             if (!challengeRun || State != GameState.Playing) yield break;
-            if (Total(myLeft) > 0 && Total(theirLeft) > 0) { BeginTurn(); yield break; }
+            // Whoever's army is down to half first: the battle is on, every soldier still standing in it.
+            int half = Army.Groups * Army.Soldiers / 2;
+            if (Total(myLeft) > half && Total(theirLeft) > half) { BeginTurn(); yield break; }
             StartChallengeDuel();
         }
 
-        /// <summary>One army is gone: the two foi fight it out, the other army's survivors at their foi's side.</summary>
+        /// <summary>An army is down to half: the two foi fight it out with every soldier both sides have left.</summary>
         private void StartChallengeDuel()
         {
             chPhase = ChPhase.Duel;
@@ -398,14 +462,18 @@ namespace SquashBot.Gameplay
             if (rivalLook != null) { rivalLook.SetParent(null, true); }
             var look = rivalLook;
             rivalLook = null;
+            hunt.ChallengeBattle = true;
             hunt.AddChallengeFoe(new GridPos(BoardW / 2, BoardH - 2), rival.foiHp, rival.foiHit, look);
-            foreach (var (body, bot, group, kind) in mineLeft)
-                hunt.AddChallengeAlly(body.position, Mathf.RoundToInt(3f * Army.Power(group)), body, bot);
-            foreach (var (body, bot, group, kind) in theirsLeft)
-                hunt.AddChallengeSoldier(body.position, Mathf.RoundToInt(3f * rival.Power(group)), body, bot);
+            foreach (var (body, model, group, kind) in mineLeft)
+                hunt.AddChallengeAlly(body.position, SoldierHp(kind, Army.Power(group)), body, model, kind);
+            foreach (var (body, model, group, kind) in theirsLeft)
+                hunt.AddChallengeSoldier(body.position, SoldierHp(kind, rival.Power(group)), body, model, kind);
             ui.ShowIntro(Loc.T("ch.duel"), Loc.T("ch.duelText"));
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 0.8f);
         }
+
+        /// <summary>A soldier's blows to fell in the battle: heavy ones take more, development adds.</summary>
+        private static int SoldierHp(GroupKind kind, float power) => Mathf.Max(1, Mathf.RoundToInt((Army.Heavy(kind) ? 4f : 2.5f) * power));
 
         /// <summary>The challenge is decided: trophies, gold for a win, and the result card (again, or the menu).</summary>
         private void ChallengeEnd(bool won)
@@ -479,8 +547,15 @@ namespace SquashBot.Gameplay
             // Far enough for the whole board on a tall phone, aimed a little south so it sits above the group buttons.
             float aspect = Mathf.Max(0.4f, cameraRig.Cam.aspect);
             float k = Mathf.Clamp(0.86f / aspect, 1f, 2.1f);
-            pos = boardCentre + boardPan + new Vector3(-7f, 21f, -17f) * k;
-            rot = Quaternion.LookRotation(boardCentre + boardPan + new Vector3(0f, 0f, -4f) - pos);
+            // During a clash the view drifts to the fight (unless the player slid it a moment ago).
+            if (clash != null && clash.FightCentre is Vector3 fight && Time.unscaledTime - boardDraggedAt > 4f)
+            {
+                var want = fight - boardCentre + new Vector3(0f, 0f, 3f);
+                want = new Vector3(Mathf.Clamp(want.x, -BoardW * 0.45f, BoardW * 0.45f), 0f, Mathf.Clamp(want.z, -BoardH * 0.45f, BoardH * 0.45f));
+                boardPan = Vector3.Lerp(boardPan, want, Time.deltaTime * 1.5f);
+            }
+            pos = boardCentre + boardPan + new Vector3(-4.5f, 14f, -11.5f) * k;
+            rot = Quaternion.LookRotation(boardCentre + boardPan + new Vector3(0f, 0f, -3f) - pos);
         }
     }
 }

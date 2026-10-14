@@ -10,7 +10,19 @@ namespace SquashBot.Data
     public static class Challenge
     {
         private const string NameKey = "sb_ch_name", TrophyKey = "sb_ch_trophies", RankKey = "sb_ch_rank",
-            WinsKey = "sb_ch_wins", PlayedKey = "sb_ch_played", ChosenKey = "sb_ch_named";
+            WinsKey = "sb_ch_wins", PlayedKey = "sb_ch_played", ChosenKey = "sb_ch_named",
+            DefWinsKey = "sb_ch_defwins", DefLossesKey = "sb_ch_deflosses", EnabledKey = "sb_ch_enabled";
+
+        /// <summary>The defence record (the server's): attacks on the player's army held, and lost.</summary>
+        public static int DefWins => PlayerPrefs.GetInt(DefWinsKey, 0);
+        public static int DefLosses => PlayerPrefs.GetInt(DefLossesKey, 0);
+
+        /// <summary>Challenges on (the default) or turned off in the settings: off, nobody fights the player's army and the mode is closed.</summary>
+        public static bool Enabled
+        {
+            get => PlayerPrefs.GetInt(EnabledKey, 1) == 1;
+            set { PlayerPrefs.SetInt(EnabledKey, value ? 1 : 0); PlayerPrefs.Save(); }
+        }
 
         /// <summary>Whether the player has picked their name (asked on the first challenge).</summary>
         public static bool NameChosen
@@ -34,6 +46,8 @@ namespace SquashBot.Data
             PlayerPrefs.SetInt(TrophyKey, Mathf.Max(0, p.trophies));
             PlayerPrefs.SetInt(WinsKey, p.wins);
             PlayerPrefs.SetInt(PlayedKey, p.played);
+            PlayerPrefs.SetInt(DefWinsKey, p.defWins);
+            PlayerPrefs.SetInt(DefLossesKey, p.defLosses);
             PlayerPrefs.SetInt(RankKey, Mathf.Max(PlayerPrefs.GetInt(RankKey, 0), p.rank));
             if (!string.IsNullOrEmpty(p.name)) PlayerPrefs.SetString(NameKey, p.name);
             PlayerPrefs.Save();
@@ -42,7 +56,7 @@ namespace SquashBot.Data
         /// <summary>Forgets the challenge record and the name (the online profile was deleted).</summary>
         public static void ResetLocal()
         {
-            foreach (var k in new[] { NameKey, TrophyKey, RankKey, WinsKey, PlayedKey, ChosenKey }) PlayerPrefs.DeleteKey(k);
+            foreach (var k in new[] { NameKey, TrophyKey, RankKey, WinsKey, PlayedKey, ChosenKey, DefWinsKey, DefLossesKey }) PlayerPrefs.DeleteKey(k);
             PlayerPrefs.Save();
         }
 
@@ -85,6 +99,10 @@ namespace SquashBot.Data
         public static int Rank => Mathf.Max(PlayerPrefs.GetInt(RankKey, 0), RankFor(Trophies));
 
         public static string RankName(int rank) => Loc.T("rank." + Mathf.Clamp(rank, 0, RankAt.Length - 1));
+
+        /// <summary>The trophy league of the trophies held now (it falls with them, unlike the rank).</summary>
+        public static int League => RankFor(Trophies);
+        public static string LeagueName(int league) => Loc.T("cup." + Mathf.Clamp(league, 0, RankAt.Length - 1));
 
         /// <summary>Trophies a result is worth: a win +30 (more against a stronger foe), a loss -20.</summary>
         public static int TrophyChange(bool won, int opponentTrophies)

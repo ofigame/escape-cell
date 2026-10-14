@@ -12,6 +12,7 @@ dependencies {
     implementation 'com.google.ads.mediation:unity:4.20.1.0' // Packages/com.google.ads.mobile.mediation.unity/source/plugin/Assets/GoogleMobileAds/Mediation/UnityAds/Editor/Dependencies.xml:25
     implementation 'com.google.android.gms:play-services-ads:25.4.0' // Packages/com.google.ads.mobile/GoogleMobileAds/Editor/GoogleMobileAdsDependencies.xml:7
     implementation 'com.google.android.ump:user-messaging-platform:4.0.0' // Packages/com.google.ads.mobile/GoogleMobileAds/Editor/GoogleUmpDependencies.xml:7
+    implementation 'com.google.firebase:firebase-messaging:24.1.2' // Assets/_Project/Editor/FoiPushDependencies.xml:9
     implementation 'com.unity3d.ads:unity-ads:4.20.1' // Packages/com.google.ads.mobile.mediation.unity/source/plugin/Assets/GoogleMobileAds/Mediation/UnityAds/Editor/Dependencies.xml:33
 // Android Resolver Dependencies End
 **DEPS**}

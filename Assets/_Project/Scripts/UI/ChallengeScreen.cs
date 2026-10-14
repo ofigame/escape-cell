@@ -41,6 +41,11 @@ namespace SquashBot.UI
         }
 
         private UiScreen lobby, hud, namePanel;
+        private RectTransform pickPanel, pickBar, myBadge, theirBadge;
+        private TextMeshProUGUI pickTitle;
+        private Image pickFill;
+        private float pickPop = 1f;
+        private int myBadgeRank = -1, theirBadgeRank = -1;
         private TMP_InputField nameInput;
         private TextMeshProUGUI nameError;
         private Button nameOk, leaveButton, renameButton;
@@ -94,16 +99,23 @@ namespace SquashBot.UI
             area.dragged = d => BoardDragged?.Invoke(d);
             var top = UiFactory.Rect("Top", h, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -380f), new Vector2(0f, -240f)); // under the HUD's top row
             UiFactory.Fill(top, new Color(0.03f, 0.03f, 0.1f, 0.55f)).raycastTarget = false;
-            myBar = UiFactory.TextBox("Me", top, new Vector2(0f, 0.5f), new Vector2(30f, -20f), new Vector2(420f, 120f), "", 32f, ClashSystem.Mine, title: true, align: TextAlignmentOptions.Left);
+            myBar = UiFactory.TextBox("Me", top, new Vector2(0f, 0.5f), new Vector2(136f, -20f), new Vector2(380f, 120f), "", 32f, ClashSystem.Mine, title: true, align: TextAlignmentOptions.Left);
             myBar.rectTransform.pivot = new Vector2(0f, 0.5f);
-            theirBar = UiFactory.TextBox("Them", top, new Vector2(1f, 0.5f), new Vector2(-30f, -20f), new Vector2(420f, 120f), "", 32f, ClashSystem.Theirs, title: true, align: TextAlignmentOptions.Right);
+            theirBar = UiFactory.TextBox("Them", top, new Vector2(1f, 0.5f), new Vector2(-136f, -20f), new Vector2(380f, 120f), "", 32f, ClashSystem.Theirs, title: true, align: TextAlignmentOptions.Right);
             theirBar.rectTransform.pivot = new Vector2(1f, 0.5f);
             clock = UiFactory.TextBox("Clock", top, new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(200f, 110f), "", 72f, Color.white, title: true);
             clock.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             status = UiFactory.TextBox("Status", h, new Vector2(0.5f, 0f), new Vector2(0f, 470f), new Vector2(980f, 70f), "", 38f, Palette.UiGold, title: true);
             status.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            for (int g = 0; g < Army.Groups; g++) GroupButton(h, g);
-            foreach (var g in groups) g.button.gameObject.SetActive(false); // the groups are picked on the board itself
+            // The secret pick: a pop-up card at the bottom with the six groups (picture, name, soldiers left) and the clock.
+            pickPanel = UiFactory.Box("Pick", h, new Vector2(0.5f, 0f), new Vector2(0f, 36f), new Vector2(1050f, 400f));
+            pickPanel.pivot = new Vector2(0.5f, 0f);
+            UiFactory.Fill(pickPanel, new Color(0.05f, 0.05f, 0.12f, 0.92f), UiSprites.Rounded, 1f);
+            UiFactory.Fill(UiFactory.Stretch("Rim", pickPanel), new Color(ClashSystem.Mine.r, ClashSystem.Mine.g, ClashSystem.Mine.b, 0.8f), UiSprites.Ring, 1f).raycastTarget = false;
+            pickTitle = UiFactory.TextBox("Title", pickPanel, new Vector2(0.5f, 1f), new Vector2(0f, -14f), new Vector2(980f, 56f), Loc.T("ch.pick"), 36f, Palette.UiGold, title: true);
+            pickBar = UiFactory.Bar(pickPanel, new Vector2(0.5f, 1f), new Vector2(0f, -78f), new Vector2(900f, 14f), Palette.UiCyan, out pickFill).rectTransform;
+            for (int g = 0; g < Army.Groups; g++) GroupButton(pickPanel, g);
+            pickPanel.gameObject.SetActive(false);
         }
 
         // ---------- The name ----------
@@ -188,21 +200,84 @@ namespace SquashBot.UI
         {
             var kind = Army.KindOf(g);
             var colour = ArmyScreen.FamilyColour(kind);
-            float x = (g - 2.5f) * 172f;
-            var b = UiFactory.MakeButton(parent, "", Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(x, 210f), new Vector2(160f, 220f), () => Pick(g), 26f);
+            float x = (g - 2.5f) * 168f;
+            var b = UiFactory.MakeButton(parent, "", Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(x, 150f), new Vector2(156f, 270f), () => Pick(g), 24f);
             ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0.5f);
             var face = (Image)b.targetGraphic;
+            // The soldier's picture up top.
+            UnitPicture(b.transform, kind, new Vector2(0f, 56f), 120f);
             var label = b.GetComponentInChildren<TextMeshProUGUI>();
             label.text = Loc.T("army.kind." + kind);
             label.textWrappingMode = TextWrappingModes.Normal;
-            label.enableAutoSizing = true; label.fontSizeMin = 16f; label.fontSizeMax = 26f;
-            label.rectTransform.offsetMin = new Vector2(8f, 70f);
-            label.rectTransform.offsetMax = new Vector2(-8f, -8f);
-            var badge = UiFactory.Box("Count", b.transform, new Vector2(0.5f, 0f), new Vector2(0f, 46f), new Vector2(76f, 76f));
+            label.enableAutoSizing = true; label.fontSizeMin = 14f; label.fontSizeMax = 24f;
+            label.rectTransform.offsetMin = new Vector2(6f, 58f);
+            label.rectTransform.offsetMax = new Vector2(-6f, -146f);
+            var badge = UiFactory.Box("Count", b.transform, new Vector2(0.5f, 0f), new Vector2(0f, 32f), new Vector2(64f, 64f));
             badge.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.Fill(badge, colour, UiSprites.Circle).raycastTarget = false;
-            var count = UiFactory.Text(badge, "10", 36f, new Color(0.1f, 0.06f, 0.2f));
+            var count = UiFactory.Text(badge, Army.Soldiers.ToString(), 30f, new Color(0.1f, 0.06f, 0.2f));
             groups.Add((b, count, face, colour));
+        }
+
+        /// <summary>
+        /// A soldier of a kind drawn small: legs, a body in the player's blue, a head with a glowing visor, its weapon
+        /// (sword, spear or bow) and, for a heavy one, a round shield and shoulder plates.
+        /// </summary>
+        public static void UnitPicture(Transform parent, GroupKind kind, Vector2 at, float size)
+        {
+            var box = UiFactory.Box("Unit", parent, new Vector2(0.5f, 0.5f), at, new Vector2(size, size));
+            box.pivot = new Vector2(0.5f, 0.5f);
+            float s = size;
+            bool heavy = Army.Heavy(kind);
+            int fam = Army.Family(kind);
+            var team = ClashSystem.Mine;
+            var dark = new Color(0.16f, 0.17f, 0.24f);
+            var metal = new Color(0.86f, 0.89f, 0.95f);
+            var wood = new Color(0.6f, 0.4f, 0.22f);
+            Image P(Vector2 p, Vector2 sz, Color c, Sprite sp, float rot = 0f)
+            {
+                var r = UiFactory.Box("P", box, new Vector2(0.5f, 0.5f), p * s, sz * s);
+                r.pivot = new Vector2(0.5f, 0.5f);
+                r.localRotation = Quaternion.Euler(0f, 0f, rot);
+                var img = UiFactory.Fill(r, c, sp, sp == UiSprites.Rounded ? 5f : 1f);
+                img.raycastTarget = false;
+                return img;
+            }
+            float w = heavy ? 1.15f : 1f;
+            // The weapon behind the arm.
+            if (fam == 0)
+            {
+                P(new Vector2(0.27f, 0.12f), new Vector2(0.07f, heavy ? 0.52f : 0.44f), metal, UiSprites.Rounded, -18f);
+                P(new Vector2(0.22f, -0.1f), new Vector2(0.16f, 0.04f), wood, UiSprites.Rounded, -18f);
+            }
+            else if (fam == 1)
+            {
+                P(new Vector2(0.27f, 0.05f), new Vector2(0.04f, 0.86f), wood, UiSprites.Rounded);
+                P(new Vector2(0.27f, 0.47f), new Vector2(0.09f, 0.14f), metal, UiSprites.Rounded, 45f);
+            }
+            else
+            {
+                for (int i = -2; i <= 2; i++)
+                    P(new Vector2(0.3f - Mathf.Abs(i) * 0.035f, i * 0.1f), new Vector2(0.04f, 0.12f), wood, UiSprites.Rounded, i * 16f);
+                P(new Vector2(0.24f, 0f), new Vector2(0.012f, 0.44f), metal, UiSprites.Rounded);
+            }
+            // Legs, body, belt, arms, head, visor.
+            P(new Vector2(-0.07f * w, -0.3f), new Vector2(0.1f * w, 0.26f), dark, UiSprites.Rounded);
+            P(new Vector2(0.07f * w, -0.3f), new Vector2(0.1f * w, 0.26f), dark, UiSprites.Rounded);
+            P(new Vector2(0f, -0.02f), new Vector2(0.34f * w, 0.34f), team, UiSprites.Rounded);
+            P(new Vector2(0f, -0.15f), new Vector2(0.36f * w, 0.05f), dark, UiSprites.Rounded);
+            P(new Vector2(0.22f * w, -0.02f), new Vector2(0.08f, 0.26f), dark, UiSprites.Rounded);
+            P(new Vector2(0f, 0.27f), new Vector2(0.24f, 0.2f), metal, UiSprites.Rounded);
+            P(new Vector2(0f, 0.27f), new Vector2(0.18f, 0.05f), Color.Lerp(team, Color.white, 0.6f), UiSprites.Rounded);
+            if (heavy)
+            {
+                P(new Vector2(-0.2f, 0.14f), new Vector2(0.13f, 0.07f), team, UiSprites.Rounded);
+                P(new Vector2(0.2f, 0.14f), new Vector2(0.13f, 0.07f), team, UiSprites.Rounded);
+                P(new Vector2(0f, 0.4f), new Vector2(0.04f, 0.09f), team, UiSprites.Rounded);
+                P(new Vector2(-0.24f, -0.06f), new Vector2(0.3f, 0.3f), Color.Lerp(team, Color.black, 0.2f), UiSprites.Circle);
+                P(new Vector2(-0.24f, -0.06f), new Vector2(0.12f, 0.12f), metal, UiSprites.Circle);
+            }
+            else P(new Vector2(-0.22f * w, -0.02f), new Vector2(0.08f, 0.26f), dark, UiSprites.Rounded);
         }
 
         /// <summary>A group picked on the board.</summary>
@@ -211,6 +286,7 @@ namespace SquashBot.UI
             if (picked >= 0) return;
             picked = g;
             AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.2f);
+            pickPanel.gameObject.SetActive(false);
             GroupPicked?.Invoke(g);
         }
 
@@ -220,6 +296,7 @@ namespace SquashBot.UI
             picked = g;
             AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.2f);
             for (int i = 0; i < groups.Count; i++) groups[i].face.color = i == g ? groups[i].colour : new Color(1f, 1f, 1f, 0.12f);
+            pickPanel.gameObject.SetActive(false);
             GroupPicked?.Invoke(g);
         }
 
@@ -277,19 +354,39 @@ namespace SquashBot.UI
             namePanel.Hide(true);
         }
 
-        public void SetSides(string me, int myLeft, string them, int theirLeft)
+        public void SetSides(string me, int myRank, int myLeft, string them, int theirRank, int theirLeft)
         {
             myBar.text = me + "\n" + Loc.F("ch.soldiers", myLeft);
             theirBar.text = them + "\n" + Loc.F("ch.soldiers", theirLeft);
+            // Each side's rank insignia beside its name.
+            var top = (RectTransform)myBar.rectTransform.parent.parent;
+            if (myRank != myBadgeRank)
+            {
+                if (myBadge != null) Destroy(myBadge.gameObject);
+                myBadge = RankArt.Badge(top, myRank, new Vector2(0f, 0.5f), new Vector2(66f, -6f), 110f);
+                myBadgeRank = myRank;
+            }
+            if (theirRank != theirBadgeRank)
+            {
+                if (theirBadge != null) Destroy(theirBadge.gameObject);
+                theirBadge = RankArt.Badge(top, theirRank, new Vector2(1f, 0.5f), new Vector2(-66f, -6f), 110f);
+                theirBadgeRank = theirRank;
+            }
         }
+
+        /// <summary>The pick's clock bar: the share of the ten seconds left.</summary>
+        public void SetPickTime(float left) { if (pickFill != null) UiFactory.SetBar(pickFill, Mathf.Clamp01(left)); }
 
         public void SetClock(string text) => clock.text = text;
         public void SetStatus(string text) => status.text = text;
 
-        /// <summary>A new turn: the groups with soldiers left can be picked.</summary>
+        /// <summary>A new turn: the pick card pops up; the groups with soldiers left can be picked.</summary>
         public void OpenPick(int[] left)
         {
             picked = -1;
+            pickPanel.gameObject.SetActive(true);
+            pickPop = 0f;
+            SetPickTime(1f);
             for (int i = 0; i < groups.Count; i++)
             {
                 bool alive = left[i] > 0;
@@ -302,12 +399,13 @@ namespace SquashBot.UI
         public void ClosePick()
         {
             foreach (var g in groups) g.button.interactable = false;
+            pickPanel.gameObject.SetActive(false);
         }
 
         /// <summary>The duel: the group bar goes away.</summary>
         public void HideGroups()
         {
-            foreach (var g in groups) g.button.gameObject.SetActive(false);
+            pickPanel.gameObject.SetActive(false);
             clock.text = "";
         }
 
@@ -315,6 +413,12 @@ namespace SquashBot.UI
 
         private void Update()
         {
+            if (pickPanel != null && pickPanel.gameObject.activeSelf && pickPop < 1f)
+            {
+                pickPop = Mathf.Min(1f, pickPop + Time.unscaledDeltaTime / 0.25f);
+                float k = 1f + 0.08f * Mathf.Sin(pickPop * Mathf.PI) - (1f - pickPop) * 0.3f;
+                pickPanel.localScale = new Vector3(k, k, 1f);
+            }
             if (!searching || searchBar == null) return;
             searchT += Time.unscaledDeltaTime;
             searchBar.anchoredPosition = new Vector2(Mathf.Sin(searchT * 3f) * 260f, 270f);

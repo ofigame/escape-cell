@@ -14,6 +14,7 @@ namespace SquashBot.UI
 {
     public enum SettingKind
     {
+        Challenge,
         Sound,
         Music,
         Vibration,
@@ -126,6 +127,13 @@ namespace SquashBot.UI
         private float arenaTipClock;
         private TextMeshProUGUI menuLevel, menuWorld, menuMission, menuCoins, menuLives, menuStars;
         private Button menuDaily, menuBonus;
+        private RectTransform menuRank, menuRankBadge;
+        private TextMeshProUGUI menuRankText, menuRankCups, menuDefense;
+        private int menuRankShown = -1;
+        /// <summary>The line about the player's army on the menu (being fought now, or the attacks since last time).</summary>
+        public string MenuDefenseLine;
+        /// <summary>The rank card on the menu: the challenge's overall results.</summary>
+        public event Action ChallengeStatsPressed;
         private TextMeshProUGUI menuBonusLabel;
 
         // Before-level card
@@ -256,6 +264,7 @@ namespace SquashBot.UI
         public BipTip Bip { get; private set; }
         /// <summary>The skill bag's buttons on the play screen.</summary>
         public SkillBar SkillBar { get; private set; }
+        public ChallengeStatsScreen ChallengeStats { get; private set; }
 
         private Image flash;
         private float flashLeft, flashStrength;
@@ -335,6 +344,7 @@ namespace SquashBot.UI
             AdOffer = AdOfferCard.Create(root);
             Chest = ChestCard.Create(root);
             ArmyView = ArmyScreen.Create(root);
+            ChallengeStats = ChallengeStatsScreen.Create(root);
             Quests = QuestsScreen.Create(root);
             Quests.Claimed += () => { RefreshMenuCoins(); RefreshQuests(); };
             Garage.HeroPressed += () => HeroPicker.Show(true);
@@ -400,9 +410,26 @@ namespace SquashBot.UI
             // The battle arenas: top right, under the settings.
             var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopRight, new Vector2(-110f, -400f), 120f, () => ArenasPressed?.Invoke());
             ((RectTransform)arenas.transform).pivot = new Vector2(0.5f, 0.5f);
-            // The challenge: under the battle arenas.
-            var challenge = MenuArt.DockButton(t, Loc.T("ch.button"), MenuArt.Icon.Swords, new Color(0.62f, 0.4f, 1f), TopRight, new Vector2(-110f, -570f), 120f, () => ChallengePressed?.Invoke());
-            ((RectTransform)challenge.transform).pivot = new Vector2(0.5f, 0.5f);
+            // The daily bonus games: under the battle arenas (plays left today, glowing while there are some).
+            menuBonus = MenuArt.DockButton(t, "", MenuArt.Icon.Chest, new Color(1f, 0.6f, 0.2f), TopRight, new Vector2(-110f, -570f), 120f, () => DailyBonusPressed?.Invoke());
+            ((RectTransform)menuBonus.transform).pivot = new Vector2(0.5f, 0.5f);
+            menuBonusLabel = menuBonus.transform.Find("Label").GetComponentInChildren<TextMeshProUGUI>();
+            menuBonus.gameObject.AddComponent<Pulse>();
+
+            // The player's challenge rank (insignia, name, trophies) between the logo and foi.
+            menuRank = UiFactory.Box("Rank", t, Top, new Vector2(0f, -585f), new Vector2(520f, 120f));
+            menuRank.pivot = new Vector2(0.5f, 0.5f);
+            var rankHit = UiFactory.Fill(menuRank, new Color(0.04f, 0.04f, 0.1f, 0.45f), UiSprites.Rounded, 1f);
+            var rankButton = menuRank.gameObject.AddComponent<Button>();
+            rankButton.targetGraphic = rankHit;
+            rankButton.onClick.AddListener(() => { Audio.AudioManager.PlaySfx(Audio.Sfx.Click, 0.7f); ChallengeStatsPressed?.Invoke(); });
+            menuRankText = UiFactory.TextBox("Text", menuRank, new Vector2(0f, 0.5f), new Vector2(214f, 18f), new Vector2(290f, 54f), "", 36f, Color.white, title: true, align: TextAlignmentOptions.Left);
+            menuRankText.rectTransform.pivot = new Vector2(0f, 0.5f);
+            menuRankCups = UiFactory.TextBox("Cups", menuRank, new Vector2(0f, 0.5f), new Vector2(214f, -26f), new Vector2(290f, 44f), "", 28f, Palette.UiGold, title: true, align: TextAlignmentOptions.Left);
+            menuRankCups.rectTransform.pivot = new Vector2(0f, 0.5f);
+            menuDefense = UiFactory.TextBox("Defense", t, Top, new Vector2(0f, -672f), new Vector2(940f, 56f), "", 30f, Palette.UiGold, title: true);
+            menuDefense.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            menuDefense.textWrappingMode = TMPro.TextWrappingModes.Normal;
             // Now and then a speech bubble to the left of it: win an arena battle, grab the big gifts.
             arenaTip = UiFactory.Box("ArenaTip", t, TopRight, new Vector2(-430f, -400f), new Vector2(480f, 170f));
             arenaTip.pivot = new Vector2(0.5f, 0.5f);
@@ -432,12 +459,11 @@ namespace SquashBot.UI
             menuMission = UiFactory.TextBox("Mission", card, Top, new Vector2(0f, -170f), new Vector2(860f, 52f), "", 34f,
                 new Color(0.85f, 0.86f, 1f, 0.8f), FontStyles.Normal);
 
-            var play = UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(-130f, 30f), new Vector2(580f, 150f), () => PlayPressed?.Invoke(), 84f);
+            var play = UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(-225f, 30f), new Vector2(430f, 150f), () => PlayPressed?.Invoke(), 84f);
             play.gameObject.AddComponent<Pulse>();
-            // The daily bonus games, next to PLAY: plays left today, glowing while there are some.
-            menuBonus = UiFactory.MakeButton(card, "", Kind.Gold, Bottom, new Vector2(320f, 30f), new Vector2(240f, 150f), () => DailyBonusPressed?.Invoke(), 34f);
-            menuBonusLabel = menuBonus.GetComponentInChildren<TextMeshProUGUI>();
-            menuBonus.gameObject.AddComponent<Pulse>();
+            // CHALLENGE beside PLAY, the same size, in the challenge's purple.
+            var challenge = UiFactory.MakeButton(card, Loc.T("ch.button"), Kind.Primary, Bottom, new Vector2(225f, 30f), new Vector2(430f, 150f), () => ChallengePressed?.Invoke(), 60f);
+            ((Image)challenge.targetGraphic).color = new Color(0.62f, 0.4f, 1f);
 
             // The dock: garage, shop, map and the guide, as glossy orbs on a glass bar.
             var dock = UiFactory.Box("Dock", t, Bottom, new Vector2(0f, Ads.BannerReserve + 14f), new Vector2(1000f, 206f));
@@ -472,11 +498,38 @@ namespace SquashBot.UI
         {
             if (menuBonus == null) return;
             int left = Data.DailyBonus.Left;
-            menuBonusLabel.text = Loc.F("daily.menu", left, Data.DailyBonus.FreePlays);
+            menuBonusLabel.text = Loc.F("daily.menu", left, Data.DailyBonus.FreePlays).Replace("\n", " ");
             var pulse = menuBonus.GetComponent<Pulse>();
             if (pulse != null) pulse.enabled = left > 0 || Data.DailyBonus.CanWatchAd;
             if (left == 0 && !Data.DailyBonus.CanWatchAd) menuBonus.transform.localScale = Vector3.one;
-            ((Image)menuBonus.targetGraphic).color = left > 0 || Data.DailyBonus.CanWatchAd ? Palette.UiGold : new Color(0.62f, 0.62f, 1f, 0.25f);
+            var orb = menuBonus.transform.Find("Orb")?.GetComponent<Image>();
+            if (orb != null) orb.color = left > 0 || Data.DailyBonus.CanWatchAd ? new Color(1f, 0.6f, 0.2f) : new Color(0.62f, 0.62f, 1f, 0.35f);
+        }
+
+        /// <summary>
+        /// The menu's rank card (insignia, rank, trophies) and the line about the player's army: being fought right now,
+        /// or what happened to it since last time. Hidden until the challenge is open.
+        /// </summary>
+        public void RefreshMenuRank(string defenseLine)
+        {
+            if (menuRank == null) return;
+            bool open = Data.Challenge.Open;
+            menuRank.gameObject.SetActive(open);
+            menuDefense.gameObject.SetActive(open && !string.IsNullOrEmpty(defenseLine));
+            menuDefense.text = defenseLine ?? "";
+            if (!open) return;
+            int rank = Data.Challenge.Rank;
+            int league = Data.Challenge.League;
+            if (rank * 100 + league != menuRankShown)
+            {
+                if (menuRankBadge != null) Destroy(menuRankBadge.gameObject);
+                menuRankBadge = RankArt.Badge(menuRank, rank, new Vector2(0f, 0.5f), new Vector2(70f, 0f), 104f);
+                var cupBox = RankArt.Trophy(menuRank, league, new Vector2(0f, 0.5f), new Vector2(165f, 0f), 84f);
+                cupBox.SetParent(menuRankBadge, true);
+                menuRankShown = rank * 100 + league;
+            }
+            menuRankText.text = Data.Challenge.RankName(rank);
+            menuRankCups.text = Loc.F("ch.trophies", Data.Challenge.Trophies);
         }
 
         /// <summary>True while the main menu is up (its 3D lobby is showing).</summary>
@@ -541,6 +594,7 @@ namespace SquashBot.UI
             menuDaily.gameObject.SetActive(DailyChest.Ready);
             RefreshQuests();
             RefreshDailyBonus();
+            RefreshMenuRank(MenuDefenseLine);
             RefreshLives();
         }
 
@@ -839,6 +893,7 @@ namespace SquashBot.UI
                 (SettingKind.Camera, "settings.camera"),
                 (SettingKind.CombatCamera, "settings.combatCam"),
                 (SettingKind.Graphics, "settings.graphics"),
+                (SettingKind.Challenge, "settings.challenge"),
 #if !REAL_ADS && (TEST_TOOLS || !((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR))
                 (SettingKind.TestMode, "settings.test"), // test builds only (never a Play bundle)
 #endif
@@ -846,14 +901,14 @@ namespace SquashBot.UI
             for (int i = 0; i < rows.Length; i++)
             {
                 var (kind, label) = rows[i];
-                float y = -210f - i * 140f;
-                var labelText = UiFactory.TextBox("Label", card, TopLeft, new Vector2(70f, y), new Vector2(380f, 110f), Loc.T(label), 52f,
+                float y = -200f - i * 120f;
+                var labelText = UiFactory.TextBox("Label", card, TopLeft, new Vector2(70f, y), new Vector2(380f, 100f), Loc.T(label), 52f,
                     Palette.UiText, FontStyles.Normal, align: TextAlignmentOptions.Left);
                 // Long labels and values (the "auto" graphics tier) shrink to fit instead of running into the button.
                 labelText.enableAutoSizing = true;
                 labelText.fontSizeMin = 30f;
                 labelText.fontSizeMax = 52f;
-                var button = UiFactory.MakeButton(card, "", Kind.Secondary, TopRight, new Vector2(-60f, y), new Vector2(330f, 110f),
+                var button = UiFactory.MakeButton(card, "", Kind.Secondary, TopRight, new Vector2(-60f, y), new Vector2(330f, 100f),
                     () => SettingToggled?.Invoke(kind), 46f);
                 settingValues[kind] = button.GetComponentInChildren<TextMeshProUGUI>();
                 settingValues[kind].enableAutoSizing = true;
@@ -865,7 +920,7 @@ namespace SquashBot.UI
 
             // Where the ad consent form applies, the player can change their answer here.
             // Under the last row: deleting the online profile, then (where the consent form applies) the ad privacy choice.
-            float underRows = -210f - rows.Length * 140f + 30f;
+            float underRows = -200f - rows.Length * 120f + 40f;
             privacyButton = UiFactory.MakeButton(card, Loc.T("settings.privacy"), Kind.Secondary, Top, new Vector2(0f, underRows - 90f), new Vector2(560f, 74f),
                 Monetization.AdMob.ShowPrivacyOptions, 34f).gameObject;
             deleteOnlineButton = UiFactory.MakeButton(card, Loc.T("settings.deleteOnline"), Kind.Secondary, Top, new Vector2(0f, underRows), new Vector2(620f, 74f),
@@ -926,6 +981,7 @@ namespace SquashBot.UI
             settingValues[SettingKind.Graphics].text = GraphicsQuality.Choice.HasValue ? gfx : Loc.F("gfx.auto", gfx);
             settingValues[SettingKind.Graphics].color = Palette.UiCyan;
             if (settingValues.ContainsKey(SettingKind.TestMode)) SetSetting(SettingKind.TestMode, SaveData.TestMode);
+            SetSetting(SettingKind.Challenge, Data.Challenge.Enabled);
         }
 
         private void SetSetting(SettingKind kind, bool on)
@@ -1104,8 +1160,16 @@ namespace SquashBot.UI
             if (SkillBar != null) SkillBar.gameObject.SetActive(!hidden);
         }
 
+        /// <summary>The challenge's board: no mission pill or progress bar up top (the challenge has its own bar).</summary>
+        public void SetChallengeHud(bool on)
+        {
+            if (missionPill != null) missionPill.gameObject.SetActive(!on);
+            if (hudFill != null && hudFill.transform.parent != null) hudFill.transform.parent.gameObject.SetActive(!on);
+        }
+
         public void ShowHud(int levelIndex)
         {
+            SetChallengeHud(false);
             lastProgress = 0f;
             HideAll();
             Skills.HideAll();
@@ -1587,6 +1651,7 @@ namespace SquashBot.UI
             DailyBonus.Hide();
             Guide.Hide();
             if (ArmyView != null) ArmyView.Hide();
+            if (ChallengeStats != null) ChallengeStats.Hide();
             Briefing.Hide();
             prelevel.Hide(true);
             if (defenseAsk != null) defenseAsk.Hide(true);

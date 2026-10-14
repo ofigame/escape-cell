@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The challenge's phone notifications (Assets/Plugins/Android/FoiPush.java): Firebase Cloud Messaging. -->
+<dependencies>
+  <androidPackages>
+    <androidPackage spec="com.google.firebase:firebase-messaging:24.1.2">
+      <repositories>
+        <repository>https://maven.google.com/</repository>
+      </repositories>
+    </androidPackage>
+  </androidPackages>
+</dependencies>

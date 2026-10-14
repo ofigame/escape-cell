@@ -61,6 +61,11 @@ namespace SquashBot.Gameplay
             public Material barMat;
             public GuardBot bot;
             public HumanoidBot human;
+            /// <summary>Its wing of the crowd (-1 until it is given one): the side it comes at foi from.</summary>
+            public int flank = -1;
+            /// <summary>A challenge soldier (its kind decides how it fights in the battle).</summary>
+            public SoldierModel soldier;
+            public GroupKind soldierKind;
             public Transform root;
             public bool dead, brute;
             /// <summary>The fortress stage it belongs to, and its rank there (-1 classic, 0 easy … 99 an elite).</summary>
@@ -78,6 +83,7 @@ namespace SquashBot.Gameplay
                 if (mon != null) { if (k > 0.05f && !monStomped) { mon.Stomp(); monStomped = true; } else if (k <= 0f) monStomped = false; return; }
                 if (bot != null) bot.SetRaise(k);
                 else if (human != null) human.SetRaise(k);
+                else if (soldier != null) soldier.SetRaise(k);
                 else if (model != null) model.localScale = Vector3.one * (1f + Mathf.Clamp01(k) * 0.12f); // a plain model (the challenge's rival foi) swells to strike
             }
 
@@ -90,6 +96,7 @@ namespace SquashBot.Gameplay
                 if (mon != null) { mon.Hit(hp); return; }
                 if (bot != null) bot.Flash();
                 else if (human != null) human.Flash();
+                else if (soldier != null) soldier.Flash();
             }
         }
 
@@ -991,14 +998,16 @@ namespace SquashBot.Gameplay
                 g.windup += dt;
                 float k = g.windup / (g.brute ? BruteWindTime : WindTime);
                 g.SetRaise(k * 1.3f);
-                foreach (var t in g.area) view.SetWarning(t, 0.4f + 0.6f * k);
+                if (g.soldier == null || g.area.Contains(robot.Position)) foreach (var t in g.area) view.SetWarning(t, 0.4f + 0.6f * k); // soldiers on soldiers: no red tiles
                 if (k >= 1f)
                 {
                     g.windup = -1f;
-                    g.cooldown = g.brute ? 1.3f : 0.55f;
+                    g.cooldown = g.brute ? 1.3f : g.soldier != null ? 0.6f + (float)rng.NextDouble() * 0.3f : 0.55f;
+                    FoeStruck(g);
                     g.SetRaise(0f);
                     foreach (var t in g.area) view.SetWarning(t, 0f);
-                    Shockwave.Create(At(g.target), g.brute ? 2.2f : 1f, new Color(1f, 0.5f, 0.3f));
+                    if (IsArcher(g)) ArrowFx(g.root.position, At(g.target));
+                    else Shockwave.Create(At(g.target), g.brute ? 2.2f : 1f, new Color(1f, 0.5f, 0.3f));
                     if (g.brute) fx.Dust(At(g.target), new Color(0.55f, 0.5f, 0.45f), 18, 4f);
                     AudioManager.PlaySfx(Sfx.Impact, g.brute ? 1f : 0.7f, g.brute ? 0.55f : 0.8f);
                     rig.Shake(g.brute ? 0.8f : 0.3f);
@@ -1016,11 +1025,13 @@ namespace SquashBot.Gameplay
             // Within two tiles (diagonals count as one), the same reach as foi's blows: it swings as soon as it can.
             int near = Chebyshev(robot.Position, g.pos);
             // Fifi in reach and foi not (or now and then anyway): the robot goes for Fifi.
+            if (g == challengeFoe && FoeTactics(g, near)) return;
+            int reach = ReachOf(g);
             bool atFifi = CompanionTile.HasValue && Chebyshev(CompanionTile.Value, g.pos) <= AttackReach && (near > AttackReach || rng.Next(4) == 0);
             // An ally nearer than foi: it fights the ally (now and then foi in reach anyway).
             var ally = NearestAlly(g.pos, out int allyD);
-            bool atAlly = ally != null && allyD < near && !(near <= AttackReach && rng.Next(3) == 0);
-            if (atAlly && allyD <= AttackReach && g.cooldown <= 0f)
+            bool atAlly = ally != null && allyD < near && !(near <= reach && rng.Next(3) == 0);
+            if (atAlly && allyD <= reach && g.cooldown <= 0f)
             {
                 g.windup = 0f;
                 g.target = ally.pos;
@@ -1033,8 +1044,15 @@ namespace SquashBot.Gameplay
             }
             // Only a few at a time come at foi: the rest hold back in a ring and wait their turn.
             bool waiting = !atAlly && !atFifi && !engaged.Contains(g) && !PlayerAway;
-            if (waiting && near <= WaitRing)
+            if (waiting && near <= WaitRing + 1)
             {
+                // Waiting its turn: it moves round to its wing's place on the ring (the crowd closes round foi).
+                if (near >= WaitRing - 1 && g.moveT >= 1f && g.chestId < 0 && g.mon == null && (g.step -= dt) <= 0f)
+                {
+                    var spot = FlankSpot(g, robot.Position, WaitRing);
+                    if (Chebyshev(spot, g.pos) > 1 && StepTowards(g, spot, 1f / (GuardSpeed(g) * 0.8f))) return;
+                    g.step = 0.3f;
+                }
                 if (near < WaitRing - 1 && g.moveT >= 1f && (g.step -= dt) <= 0f)
                 {
                     // Too close while waiting: a step back out.
@@ -1048,7 +1066,7 @@ namespace SquashBot.Gameplay
                 }
                 return;
             }
-            if ((near <= AttackReach || atFifi) && g.cooldown <= 0f && !PlayerAway)
+            if ((near <= reach || atFifi) && g.cooldown <= 0f && !PlayerAway)
             {
                 g.windup = 0f;
                 g.target = atFifi ? CompanionTile.Value : robot.Position;
@@ -1062,6 +1080,7 @@ namespace SquashBot.Gameplay
             // foi up on a gun post: the crowd holds its ground; the warlords march to the foot of the rampart under the
             // gun and smash at it from there (they never climb).
             var goal = atAlly ? ally.pos : robot.Position;
+            if (!atAlly && !PlayerAway && g.mon == null && g.chestId < 0 && !g.spitter) goal = FlankGoal(g, near, reach);
             // A chest's guards keep by their chest while foi is away from it.
             if (g.chestId >= 0 && !atAlly && Chebyshev(robot.Position, g.home) > 8)
             {
@@ -1084,11 +1103,11 @@ namespace SquashBot.Gameplay
             }
             int dist = goal.Manhattan(g.pos);
             g.step -= dt;
-            if (g.step > 0f || (!PlayerAway && (atAlly ? allyD : near) <= 1) || (PlayerAway && Chebyshev(g.pos, goal) <= 1)) return;
+            if (g.step > 0f || (!PlayerAway && (atAlly ? allyD : near) <= Mathf.Max(1, reach - 1)) || (PlayerAway && Chebyshev(g.pos, goal) <= 1)) return;
             float period = 1f / GuardSpeed(g);
             if (g.human != null) g.human.Step();
             // The arena city: round the buildings by the street map (distances from the goal), never stuck behind a block.
-            if (level.hardAtOnce > 0 && !atAlly && FlowStep(g, goal)) return;
+            if (level.hardAtOnce > 0 && !atAlly && FlowStep(g, robot.Position)) return; // one street map for all (wings would rebuild it per robot)
             // One step towards the robot along whichever axis brings it closer and is free.
             GridPos bestNext = g.pos;
             int bestDist = dist;
@@ -1109,13 +1128,20 @@ namespace SquashBot.Gameplay
         private const int WaitRing = 4;
 
         /// <summary>How many robots may fight foi at once: three at first, up to six on the late floors.</summary>
-        private int MaxEngaged => Mathf.Clamp(3 + world / 6, 3, 6);
+        private int MaxEngaged => ChallengeBattle ? 999 : Mathf.Clamp(3 + world / 6, 3, 6);
+
+        /// <summary>The challenge's battle: every robot fights at once (no waiting ring), archers shoot from afar.</summary>
+        public bool ChallengeBattle;
 
         private void PickEngaged()
         {
             engaged.Clear();
             engageOrder.Clear();
             foreach (var g in guards) if (!g.dead && !g.ally && !g.spitter) engageOrder.Add(g);
+            // Where the crowd stands, seen from foi: the wings fan out from that side.
+            Vector2 sum = Vector2.zero;
+            foreach (var g in engageOrder) sum += new Vector2(g.pos.x - robot.Position.x, g.pos.y - robot.Position.y);
+            crowdAngle = sum.sqrMagnitude > 0.01f ? Mathf.Atan2(sum.y, sum.x) : crowdAngle;
             var at = robot.Position;
             engageOrder.Sort((a, b) => Chebyshev(a.pos, at).CompareTo(Chebyshev(b.pos, at)));
             int n = Mathf.Min(MaxEngaged, engageOrder.Count);

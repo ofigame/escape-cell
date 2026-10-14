@@ -14,7 +14,7 @@ namespace SquashBot.Data
     public static class Army
     {
         public const int Groups = 6;
-        public const int Soldiers = 10;
+        public const int Soldiers = 30;
         /// <summary>Power each development point adds to a group (health and attack).</summary>
         public const float PerPoint = 0.02f;
         /// <summary>A new look for a group every this many points.</summary>
@@ -104,6 +104,16 @@ namespace SquashBot.Data
         }
 
         /// <summary>Gold to take every spent point back (grows with each reset, so it is a choice, not a habit).</summary>
+        /// <summary>Takes up to <paramref name="amount"/> points back off a group (they are free to spend again).</summary>
+        public static bool Take(int group, int amount)
+        {
+            int have = GroupPoints(group);
+            if (have <= 0) return false;
+            PlayerPrefs.SetInt(GroupKey + group, Mathf.Max(0, have - amount));
+            PlayerPrefs.Save();
+            return true;
+        }
+
         public static int ResetPrice => 500 + 500 * PlayerPrefs.GetInt(ResetCountKey, 0);
 
         /// <summary>Takes every spent point back for gold.</summary>

@@ -125,7 +125,8 @@ namespace SquashBot.Gameplay
                 a.windup = -1f;
                 a.cooldown = (0.6f + (float)rng.NextDouble() * 0.3f) * AllyPace;
                 a.SetRaise(0f);
-                Shockwave.Create(At(a.target), 0.9f, AllyColour);
+                if (IsArcher(a)) ArrowFx(a.root.position, At(a.target));
+                else Shockwave.Create(At(a.target), 0.9f, AllyColour);
                 AudioManager.PlaySfx(Sfx.Impact, 0.45f, 1.1f);
                 if (MonsterUp && MonsterAwake && a.target == monsterPos) { HitMonster(AllyDamage); return; }
                 foreach (var g in guards)
@@ -133,7 +134,10 @@ namespace SquashBot.Gameplay
                 return;
             }
             if (a.moveT < 1f) return;
-            if ((foe != null || atMonster) && foeD <= 1 && a.cooldown <= 0f)
+            int reach = ReachOf(a);
+            // An archer with a foe at its elbow: a step back first.
+            if (IsArcher(a) && foe != null && foeD <= 1 && a.step <= 0f && StepAway(a, foe.pos, 1f / AllySpeed)) { a.step = 0.4f; return; }
+            if ((foe != null || atMonster) && foeD <= reach && a.cooldown <= 0f)
             {
                 a.windup = 0f;
                 a.target = look;
@@ -142,7 +146,9 @@ namespace SquashBot.Gameplay
             a.step -= dt;
             if (a.step > 0f) return;
             GridPos goal;
-            if (foe != null || atMonster) goal = look;
+            if ((foe != null || atMonster) && foeD <= Mathf.Max(1, reach - 1)) return; // in reach: hold (archers keep their distance)
+            if (foe != null && !atMonster && foeD > 1) goal = AllyFlank(a, foe.pos); // round the foe on its own side, not in a queue
+            else if (foe != null || atMonster) goal = look;
             else if (Chebyshev(a.pos, robot.Position) > 2) goal = robot.Position; // keep up with foi (as quick as it)
             else return;
             int dist = goal.Manhattan(a.pos);
@@ -160,12 +166,22 @@ namespace SquashBot.Gameplay
             if (best != a.pos) MoveGuard(a, best, 1f / AllySpeed);
         }
 
+        /// <summary>The tile beside a foe on the ally's side of it (allies fan out round their foe), or the foe's tile.</summary>
+        private GridPos AllyFlank(Guard a, GridPos foe)
+        {
+            if (a.flank < 0) a.flank = flankCount++ % FlankAngles.Length;
+            float baseA = Mathf.Atan2(a.pos.y - foe.y, a.pos.x - foe.x);
+            float ang = baseA + FlankAngles[a.flank] * 0.6f * Mathf.Deg2Rad;
+            var p = foe + new GridPos(Mathf.RoundToInt(Mathf.Cos(ang)), Mathf.RoundToInt(Mathf.Sin(ang)));
+            return grid.IsStandable(p) ? p : foe;
+        }
+
         /// <summary>An ally's blow on an enemy robot: shields and health as for foi's blows (no knock-back).</summary>
         private void AllyHit(Guard g, Guard by)
         {
             RaiseAlarm(g);
             if (g.shield > 0) { HitShield(g, g.pos); return; }
-            g.hp -= AllyDamage;
+            g.hp -= AllyDamage + Edge(by, g);
             g.flash = 1f;
             g.Flash();
             fx.Burst(At(g.pos) + Vector3.up * 0.4f, AllyColour, AllyColour * 1.8f, 16, 4f);
@@ -196,7 +212,7 @@ namespace SquashBot.Gameplay
             foreach (var a in allies)
             {
                 if (a.dead || !area.Contains(a.pos)) continue;
-                a.hp -= dmg;
+                a.hp -= dmg + Edge(by, a);
                 a.Flash();
                 if (a.hp <= 0) KillAlly(a);
             }

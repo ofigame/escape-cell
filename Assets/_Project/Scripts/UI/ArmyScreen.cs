@@ -52,14 +52,7 @@ namespace SquashBot.UI
             for (int g = 0; g < Army.Groups; g++) GroupCard(card, g);
             UiFactory.TextBox("Wheel", card, new Vector2(0.5f, 0f), new Vector2(0f, 290f), new Vector2(920f, 50f), Loc.T("army.wheel"), 28f, new Color(1f, 1f, 1f, 0.75f), FontStyles.Normal)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var reset = UiFactory.MakeButton(card, "", Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(-230f, 170f), new Vector2(420f, 100f), () =>
-            {
-                if (Army.TryReset()) { AudioManager.PlaySfx(Sfx.Coin, 0.9f, 1f); Refresh(); }
-                else AudioManager.PlaySfx(Sfx.Bump, 0.6f);
-            }, 30f);
-            ((RectTransform)reset.transform).pivot = new Vector2(0.5f, 0.5f);
-            resetLabel = reset.GetComponentInChildren<TextMeshProUGUI>();
-            var close = UiFactory.MakeButton(card, Loc.T("bag.back"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(230f, 170f), new Vector2(420f, 110f), () => screen.Hide(), 46f);
+            var close = UiFactory.MakeButton(card, Loc.T("btn.close"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 170f), new Vector2(520f, 110f), () => screen.Hide(), 46f);
             ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 
@@ -94,10 +87,12 @@ namespace SquashBot.UI
                 img.raycastTarget = false;
                 stars.Add(img);
             }
-            var plus1 = UiFactory.MakeButton(box, "+1", Kind.Gold, new Vector2(0.5f, 0f), new Vector2(-105f, 24f), new Vector2(190f, 84f), () => Add(g, 1), 38f);
-            var plus5 = UiFactory.MakeButton(box, "+5", Kind.Gold, new Vector2(0.5f, 0f), new Vector2(105f, 24f), new Vector2(190f, 84f), () => Add(g, 5), 38f);
-            ((RectTransform)plus1.transform).pivot = new Vector2(0.5f, 0f);
-            ((RectTransform)plus5.transform).pivot = new Vector2(0.5f, 0f);
+            // Points go on and come off a group one or five at a time.
+            var minus5 = UiFactory.MakeButton(box, "-5", Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(-159f, 24f), new Vector2(100f, 84f), () => Take(g, 5), 34f);
+            var minus1 = UiFactory.MakeButton(box, "-1", Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(-53f, 24f), new Vector2(100f, 84f), () => Take(g, 1), 34f);
+            var plus1 = UiFactory.MakeButton(box, "+1", Kind.Gold, new Vector2(0.5f, 0f), new Vector2(53f, 24f), new Vector2(100f, 84f), () => Add(g, 1), 34f);
+            var plus5 = UiFactory.MakeButton(box, "+5", Kind.Gold, new Vector2(0.5f, 0f), new Vector2(159f, 24f), new Vector2(100f, 84f), () => Add(g, 5), 34f);
+            foreach (var b in new[] { minus5, minus1, plus1, plus5 }) ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0f);
             refreshers.Add(() =>
             {
                 int pts = Army.GroupPoints(g);
@@ -109,7 +104,16 @@ namespace SquashBot.UI
                 bool any = Army.FreePoints > 0;
                 plus1.interactable = any;
                 plus5.interactable = any;
+                minus1.interactable = pts > 0;
+                minus5.interactable = pts > 0;
             });
+        }
+
+        private void Take(int g, int n)
+        {
+            if (Army.Take(g, n)) AudioManager.PlaySfx(Sfx.Click, 0.9f, 0.9f);
+            else AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+            Refresh();
         }
 
         private void Add(int g, int n)
@@ -135,7 +139,6 @@ namespace SquashBot.UI
             freeText.text = Loc.F("army.free", Army.FreePoints, Army.EarnedPoints);
             int score = Army.WorldScore(world);
             worldText.text = Loc.F("army.world", world + 1, score, Mathf.Min(100, score / 10));
-            resetLabel.text = Loc.F("army.reset", Army.ResetPrice);
             foreach (var r in refreshers) r();
         }
     }

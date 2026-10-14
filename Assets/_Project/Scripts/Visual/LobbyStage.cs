@@ -49,7 +49,7 @@ namespace SquashBot.Visual
             data.renderPostProcessing = true;
             data.antialiasing = Application.isMobilePlatform ? AntialiasingMode.None : AntialiasingMode.SubpixelMorphologicalAntiAliasing;
             camGo.transform.localPosition = new Vector3(0f, 2.6f, -13f);
-            camGo.transform.LookAt(Origin + new Vector3(0f, -0.08f, 0f)); // the pedestal sits above the level card
+            camGo.transform.LookAt(Origin + new Vector3(0f, 0.85f, 0f)); // aimed above foi: it stands lower, under the rank card, above the level card
 
             // Floor and a halo behind everything.
             var floor = MaterialFactory.Create(new Color(0.09f, 0.08f, 0.2f), new Color(0.03f, 0.025f, 0.08f));

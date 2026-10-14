@@ -142,8 +142,12 @@ namespace SquashBot.UI
         }
 
         /// <summary>Shows the bag's skills (or hides the bar off the play screen).</summary>
+        /// <summary>No skills at all for now (the challenge: an army battle, not a floor).</summary>
+        public static bool Blocked;
+
         public void Refresh(bool show)
         {
+            show &= !Blocked;
             visible = show;
             var shown = new List<Slot>();
             foreach (var s in slots)

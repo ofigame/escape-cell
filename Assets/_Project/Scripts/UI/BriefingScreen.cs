@@ -122,7 +122,7 @@ namespace SquashBot.UI
             StepShown?.Invoke(index);
         }
 
-        private void Finish()
+        public void Finish()
         {
             if (!screen.IsVisible) return;
             screen.Hide();

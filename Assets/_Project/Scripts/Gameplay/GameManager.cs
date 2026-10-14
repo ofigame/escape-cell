@@ -785,6 +785,7 @@ namespace SquashBot.Gameplay
         private void BeginRun()
         {
             if (!challengeRun) EndChallenge();
+            SkillBar.Blocked = challengeRun;
             arenaMode = arenaRun;
             levelTps = false; // every floor starts in the usual view
             robot.transform.rotation = Quaternion.identity;
@@ -909,6 +910,11 @@ namespace SquashBot.Gameplay
                     break;
                 case SettingKind.CombatCamera:
                     SaveData.CombatCamera = !SaveData.CombatCamera;
+                    break;
+                case SettingKind.Challenge:
+                    // Off: nobody can fight the player's army any more (the server is told) and the mode closes.
+                    Challenge.Enabled = !Challenge.Enabled;
+                    SyncChallengeSettings();
                     break;
                 case SettingKind.Camera:
                     SaveData.CameraDistance = (SaveData.CameraDistance + 1) % 4; // near → medium → far → farthest
@@ -1324,6 +1330,7 @@ namespace SquashBot.Gameplay
         {
             UpdateFortressView();
             HandleBackButton();
+            WatchArmyFromMenu();
             if (State == GameState.Paused) return;
 
             // Close-call slow motion and the slow-motion tool both bend time; the slower one wins.
@@ -1387,7 +1394,7 @@ namespace SquashBot.Gameplay
                 else if (!want && tpsOn) ExitTps();
                 if (tpsOn) tps.Show(!ArenaActive);
             }
-            ui.SetTpsSwitch(!arenaRun && level.mission == MissionType.Hunt && roadPhase == RoadPhase.None, tpsOn);
+            ui.SetTpsSwitch(!arenaRun && !challengeRun && level.mission == MissionType.Hunt && roadPhase == RoadPhase.None, tpsOn);
             var command = ArenaActive ? default(InputCommand) : tpsOn ? TpsCommand() : input.Poll(robot.transform.position);
             if (ChallengeArmyPhase) command = default; // the armies fight: foi waits for its duel
             command = GlassCellGate(command); // foi starts each floor in its glass cell
