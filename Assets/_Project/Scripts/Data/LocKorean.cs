@@ -118,6 +118,8 @@ namespace SquashBot.Data
             ["ch.wonLine"] = "{0}을(를) 이겼어요",
             ["ch.lostLine"] = "{0}에게 졌어요",
             ["ch.gold"] = "골드",
+            ["army.freeLabel"] = "남은 포인트",
+            ["army.earnedOf"] = "획득 {0}",
             ["ch.modeTitle"] = "전투를 선택하세요",
             ["ch.mode.arena"] = "아레나 전투",
             ["ch.mode.arenaText"] = "군대가 아레나에서 맞붙고, 그다음 두 foi가 결투해요.",

@@ -118,6 +118,8 @@ namespace SquashBot.Data
             ["ch.wonLine"] = "هزمت {0}",
             ["ch.lostLine"] = "{0} هزمك",
             ["ch.gold"] = "ذهب",
+            ["army.freeLabel"] = "نقاط متاحة",
+            ["army.earnedOf"] = "من {0} مكتسبة",
             ["ch.modeTitle"] = "اختر معركتك",
             ["ch.mode.arena"] = "معركة الحلبة",
             ["ch.mode.arenaText"] = "تتصادم الجيوش في الحلبة ثم يتبارز الـfoi.",

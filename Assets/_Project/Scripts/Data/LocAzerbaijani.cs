@@ -118,6 +118,8 @@ namespace SquashBot.Data
             ["ch.wonLine"] = "{0} məğlub oldu",
             ["ch.lostLine"] = "{0} səni məğlub etdi",
             ["ch.gold"] = "qızıl",
+            ["army.freeLabel"] = "Sərbəst xal",
+            ["army.earnedOf"] = "{0} qazanılan",
             ["ch.modeTitle"] = "Döyüşünü seç",
             ["ch.mode.arena"] = "ARENA DÖYÜŞÜ",
             ["ch.mode.arenaText"] = "Ordular arenada toqquşur, sonra iki foi duel edir.",

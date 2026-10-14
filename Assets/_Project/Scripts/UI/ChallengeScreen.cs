@@ -51,7 +51,9 @@ namespace SquashBot.UI
         private TMP_InputField nameInput;
         private TextMeshProUGUI nameError;
         private Button nameOk, leaveButton, renameButton;
-        private TextMeshProUGUI myCard, theirCard, lobbyStatus, myBar, theirBar, clock, status;
+        private PlayerCard myCard, theirCard;
+        private TextMeshProUGUI lobbyMode;
+        private TextMeshProUGUI lobbyStatus, myBar, theirBar, clock, status;
         private RectTransform searchBar;
         private readonly List<(Button button, TextMeshProUGUI count, Image face, Color colour)> groups = new List<(Button, TextMeshProUGUI, Image, Color)>();
         private int picked = -1;
@@ -73,22 +75,27 @@ namespace SquashBot.UI
         {
             // The waiting room.
             lobby = UiScreen.Create("ChallengeLobby", root, out var l);
-            UiFactory.Dim(l, new Color(0.03f, 0.03f, 0.1f, 1f)).gameObject.AddComponent<IgnoreSafeArea>();
-            UiFactory.TextBox("Title", l, new Vector2(0.5f, 1f), new Vector2(0f, -200f), new Vector2(960f, 110f), Loc.T("ch.title"), 76f, Palette.UiGold, title: true)
+            Flat.Background(l);
+            Flat.Label(l, Loc.T("ch.title"), new Vector2(0.5f, 1f), new Vector2(0f, -110f), new Vector2(960f, 80f), 58f, Flat.Text, TextAlignmentOptions.Center, bold: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            myCard = Card(l, new Vector2(0f, 330f), ClashSystem.Mine);
-            theirCard = Card(l, new Vector2(0f, -330f), ClashSystem.Theirs);
-            UiFactory.TextBox("Vs", l, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300f, 120f), "VS", 96f, Color.white, title: true).rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            lobbyStatus = UiFactory.TextBox("Status", l, new Vector2(0.5f, 0f), new Vector2(0f, 330f), new Vector2(900f, 70f), "", 40f, Palette.UiCyan, title: true);
+            lobbyMode = Flat.Label(l, "", new Vector2(0.5f, 1f), new Vector2(0f, -170f), new Vector2(960f, 44f), 28f, Flat.Muted, TextAlignmentOptions.Center);
+            lobbyMode.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            myCard = new PlayerCard(l, new Vector2(0f, 250f), Flat.Blue);
+            theirCard = new PlayerCard(l, new Vector2(0f, -250f), Flat.Red);
+            var vs = Flat.Panel(l, "Vs", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(140f, 140f), Flat.CardHi, 0.9f);
+            vs.pivot = new Vector2(0.5f, 0.5f);
+            Flat.Label(vs, "VS", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(120f, 80f), 52f, Flat.Text, TextAlignmentOptions.Center, bold: true).rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            lobbyStatus = Flat.Label(l, "", new Vector2(0.5f, 0f), new Vector2(0f, 330f), new Vector2(940f, 60f), 34f, Flat.Text, TextAlignmentOptions.Center, bold: true, wrap: true);
             lobbyStatus.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            searchBar = UiFactory.Box("Search", l, new Vector2(0.5f, 0f), new Vector2(0f, 270f), new Vector2(160f, 14f));
+            var track = Flat.Panel(l, "Track", new Vector2(0.5f, 0f), new Vector2(0f, 270f), new Vector2(600f, 10f), Flat.Line, 6f);
+            track.pivot = new Vector2(0.5f, 0.5f);
+            searchBar = UiFactory.Box("Search", l, new Vector2(0.5f, 0f), new Vector2(0f, 270f), new Vector2(160f, 10f));
             searchBar.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(searchBar, Palette.UiCyan, UiSprites.Rounded, 4f).raycastTarget = false;
-            var leave = UiFactory.MakeButton(l, Loc.T("btn.close"), Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(0f, 140f), new Vector2(420f, 110f), () => Leave?.Invoke(), 42f);
-            ((RectTransform)leave.transform).pivot = new Vector2(0.5f, 0.5f);
-            leaveButton = leave;
-            renameButton = UiFactory.MakeButton(l, Loc.T("ch.rename"), Kind.Secondary, new Vector2(0.5f, 0.5f), new Vector2(0f, 150f), new Vector2(360f, 84f), () => RenamePressed?.Invoke(), 30f);
+            UiFactory.Fill(searchBar, Flat.Blue, UiSprites.Rounded, 6f).raycastTarget = false;
+            renameButton = Flat.Button(l, Loc.T("ch.rename"), new Vector2(0.5f, 0f), new Vector2(-240f, 130f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => RenamePressed?.Invoke(), 32f);
             ((RectTransform)renameButton.transform).pivot = new Vector2(0.5f, 0.5f);
+            leaveButton = Flat.Button(l, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(240f, 130f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => Leave?.Invoke(), 32f);
+            ((RectTransform)leaveButton.transform).pivot = new Vector2(0.5f, 0.5f);
 
             BuildNamePanel(root);
             BuildModes(root);
@@ -128,22 +135,22 @@ namespace SquashBot.UI
         private void BuildModes(RectTransform root)
         {
             modes = UiScreen.Create("ChallengeModes", root, out var m);
-            UiFactory.Dim(m, new Color(0.03f, 0.03f, 0.1f, 1f));
-            UiFactory.TextBox("Title", m, new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(960f, 100f), Loc.T("ch.modeTitle"), 64f, Palette.UiGold, title: true);
-            ModeCard(m, 0, new Vector2(0f, 320f), "arena", "ch.mode.arena", "ch.mode.arenaText", new Color(0.62f, 0.4f, 1f));
-            ModeCard(m, 1, new Vector2(0f, -330f), "stages", "ch.mode.stages", "ch.mode.stagesText", new Color(0.95f, 0.55f, 0.2f));
-            var back = UiFactory.MakeButton(m, Loc.T("btn.close"), Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(0f, 90f), new Vector2(420f, 110f), () => modes.Hide(true), 42f);
+            Flat.Background(m);
+            Flat.Label(m, Loc.T("ch.modeTitle"), new Vector2(0.5f, 1f), new Vector2(0f, -110f), new Vector2(960f, 80f), 56f, Flat.Text, TextAlignmentOptions.Center, bold: true)
+                .rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            ModeCard(m, 0, new Vector2(0f, 330f), "arena", "ch.mode.arena", "ch.mode.arenaText", new Color(0.62f, 0.45f, 1f));
+            ModeCard(m, 1, new Vector2(0f, -360f), "stages", "ch.mode.stages", "ch.mode.stagesText", new Color(1f, 0.6f, 0.25f));
+            var back = Flat.Button(m, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, 90f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => modes.Hide(true), 34f);
             ((RectTransform)back.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 
         /// <summary>A kind's card: a picture from the game itself, its name and a line about it; tapping it picks it.</summary>
         private void ModeCard(RectTransform parent, int mode, Vector2 at, string picture, string nameKey, string textKey, Color colour)
         {
-            var card = UiFactory.Box("Mode" + mode, parent, new Vector2(0.5f, 0.5f), at, new Vector2(900f, 600f));
+            var card = UiFactory.Box("Mode" + mode, parent, new Vector2(0.5f, 0.5f), at, new Vector2(960f, 640f));
             card.pivot = new Vector2(0.5f, 0.5f);
-            var face = UiFactory.Fill(card, new Color(colour.r, colour.g, colour.b, 0.2f), UiSprites.Rounded, 1f);
-            UiFactory.Fill(UiFactory.Stretch("Rim", card), colour, UiSprites.Ring, 1f).raycastTarget = false;
-            var picBox = UiFactory.Rect("Picture", card, new Vector2(0f, 0.3f), new Vector2(1f, 1f), new Vector2(24f, 0f), new Vector2(-24f, -24f));
+            var face = UiFactory.Fill(card, Flat.Card, UiSprites.Rounded, 1.6f);
+            var picBox = UiFactory.Rect("Picture", card, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(Flat.Pad, -Flat.Pad - 430f), new Vector2(-Flat.Pad, -Flat.Pad));
             picBox.gameObject.AddComponent<RectMask2D>();
             var tex = Resources.Load<Texture2D>("ChallengeModes/" + picture);
             var pic = UiFactory.Stretch("Image", picBox).gameObject.AddComponent<RawImage>();
@@ -153,15 +160,18 @@ namespace SquashBot.UI
             if (tex != null)
             {
                 // Fill the frame (cropping the picture's middle band).
-                float frameAspect = 852f / 396f, texAspect = tex.width / (float)tex.height;
+                float frameAspect = 912f / 430f, texAspect = tex.width / (float)tex.height;
                 pic.uvRect = texAspect > frameAspect ? new Rect((1f - frameAspect / texAspect) * 0.5f, 0f, frameAspect / texAspect, 1f)
                                                      : new Rect(0f, (1f - texAspect / frameAspect) * 0.5f, 1f, texAspect / frameAspect);
             }
-            var name = UiFactory.TextBox("Name", card, new Vector2(0.5f, 0f), new Vector2(0f, 128f), new Vector2(860f, 70f), Loc.T(nameKey), 52f, Color.white, title: true);
-            name.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var text = UiFactory.TextBox("Text", card, new Vector2(0.5f, 0f), new Vector2(0f, 56f), new Vector2(860f, 70f), Loc.T(textKey), 28f, new Color(1f, 1f, 1f, 0.8f), FontStyles.Normal);
-            text.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            text.textWrappingMode = TextWrappingModes.Normal;
+            // A strip of the kind's colour under the picture, then its name and what it is.
+            var strip = UiFactory.Box("Strip", card, new Vector2(0.5f, 1f), new Vector2(0f, -Flat.Pad - 430f), new Vector2(912f, 8f));
+            strip.pivot = new Vector2(0.5f, 1f);
+            UiFactory.Fill(strip, colour).raycastTarget = false;
+            var name = Flat.Label(card, Loc.T(nameKey), new Vector2(0f, 0f), new Vector2(Flat.Pad + 8f, 112f), new Vector2(900f, 60f), 44f, colour, bold: true);
+            name.rectTransform.pivot = new Vector2(0f, 0.5f);
+            var text = Flat.Label(card, Loc.T(textKey), new Vector2(0f, 0f), new Vector2(Flat.Pad + 8f, 48f), new Vector2(900f, 66f), 26f, Flat.Muted, wrap: true);
+            text.rectTransform.pivot = new Vector2(0f, 0.5f);
             var button = card.gameObject.AddComponent<Button>();
             button.targetGraphic = face;
             button.onClick.AddListener(() => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(mode); });
@@ -243,6 +253,40 @@ namespace SquashBot.UI
         public void NameRefused(string error) { nameOk.interactable = true; nameError.text = error; }
         public void HideName() => namePanel.Hide(true);
         public bool NameShowing => namePanel.IsVisible;
+
+        /// <summary>A side's card in the waiting room: its rank insignia, the name, and rank · trophies · power under it.</summary>
+        private class PlayerCard
+        {
+            private readonly RectTransform panel;
+            private readonly TextMeshProUGUI name, detail;
+            private RectTransform badge;
+            private int badgeRank = -1;
+
+            public PlayerCard(RectTransform parent, Vector2 at, Color colour)
+            {
+                panel = Flat.Panel(parent, "Card", new Vector2(0.5f, 0.5f), at, new Vector2(960f, 250f), Flat.Card);
+                panel.pivot = new Vector2(0.5f, 0.5f);
+                var stripe = UiFactory.Box("Stripe", panel, new Vector2(0f, 0.5f), Vector2.zero, new Vector2(12f, 200f));
+                stripe.pivot = new Vector2(0f, 0.5f);
+                UiFactory.Fill(stripe, colour, UiSprites.Rounded, 6f).raycastTarget = false;
+                name = Flat.Label(panel, "", new Vector2(0f, 0.5f), new Vector2(220f, 34f), new Vector2(700f, 64f), 48f, Flat.Text, bold: true);
+                name.rectTransform.pivot = new Vector2(0f, 0.5f);
+                detail = Flat.Label(panel, "", new Vector2(0f, 0.5f), new Vector2(220f, -36f), new Vector2(700f, 50f), 28f, Flat.Muted, wrap: true);
+                detail.rectTransform.pivot = new Vector2(0f, 0.5f);
+            }
+
+            /// <summary>The side's text (its name on the first line) and its rank (-1: not known yet: a question mark).</summary>
+            public void Set(string text, int rank)
+            {
+                var parts = (text ?? "").Split('\n');
+                name.text = parts[0];
+                detail.text = parts.Length > 1 ? parts[1] : "";
+                if (rank == badgeRank) return;
+                if (badge != null) UnityEngine.Object.Destroy(badge.gameObject);
+                badge = rank >= 0 ? RankArt.Badge(panel, rank, new Vector2(0f, 0.5f), new Vector2(110f, 0f), 170f) : null;
+                badgeRank = rank;
+            }
+        }
 
         private TextMeshProUGUI Card(RectTransform parent, Vector2 at, Color colour)
         {
@@ -362,11 +406,12 @@ namespace SquashBot.UI
 
         // ---------- The waiting room ----------
 
-        public void ShowLobby(string me)
+        public void ShowLobby(string me, int myRank, string mode)
         {
             hud.Hide(true);
-            myCard.text = me;
-            theirCard.text = "?";
+            myCard.Set(me, myRank);
+            theirCard.Set("?", -1);
+            lobbyMode.text = mode;
             lobbyStatus.text = Loc.T("ch.searching");
             leaveButton.gameObject.SetActive(true);
             renameButton.gameObject.SetActive(true);
@@ -377,9 +422,9 @@ namespace SquashBot.UI
             transform.SetAsLastSibling();
         }
 
-        public void ShowRival(string them)
+        public void ShowRival(string them, int rank)
         {
-            theirCard.text = them;
+            theirCard.Set(them, rank);
             lobbyStatus.text = Loc.T("ch.found");
             searching = false;
             searchBar.gameObject.SetActive(false);
@@ -395,7 +440,7 @@ namespace SquashBot.UI
             renameButton.gameObject.SetActive(false);
         }
 
-        public void SetMyCard(string me) => myCard.text = me;
+        public void SetMyCard(string me, int rank) => myCard.Set(me, rank);
         public void SetLobbyStatus(string text) => lobbyStatus.text = text;
 
         // ---------- The battle ----------
@@ -482,7 +527,7 @@ namespace SquashBot.UI
             }
             if (!searching || searchBar == null) return;
             searchT += Time.unscaledDeltaTime;
-            searchBar.anchoredPosition = new Vector2(Mathf.Sin(searchT * 3f) * 260f, 270f);
+            searchBar.anchoredPosition = new Vector2(Mathf.Sin(searchT * 3f) * 220f, 270f);
         }
     }
 }

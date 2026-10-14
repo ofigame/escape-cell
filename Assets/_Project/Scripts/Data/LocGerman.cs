@@ -118,6 +118,8 @@ namespace SquashBot.Data
             ["ch.wonLine"] = "Du hast {0} besiegt",
             ["ch.lostLine"] = "{0} hat dich besiegt",
             ["ch.gold"] = "Gold",
+            ["army.freeLabel"] = "Freie Punkte",
+            ["army.earnedOf"] = "von {0} verdient",
             ["ch.modeTitle"] = "Wähle deinen Kampf",
             ["ch.mode.arena"] = "ARENAKAMPF",
             ["ch.mode.arenaText"] = "Die Armeen kämpfen in der Arena, dann duellieren sich die foi.",

@@ -199,7 +199,7 @@ namespace SquashBot.Gameplay
             int token = ++chLobbyToken;
             chMatchId = 0;
             chOnline = false;
-            chUi.ShowLobby(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore));
+            chUi.ShowLobby(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore), Challenge.Rank, Loc.T(chMode == ChMode.Stages ? "ch.mode.stages" : "ch.mode.arena"));
             float started = Time.realtimeSinceStartup;
             int world = LevelCatalog.WorldOf(Mathf.Max(0, SaveData.UnlockedLevel - 1));
 
@@ -241,7 +241,7 @@ namespace SquashBot.Gameplay
                 if (match != null)
                 {
                     yield return FoiNet.Me(Challenge.Sync);
-                    chUi.SetMyCard(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore));
+                    chUi.SetMyCard(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore), Challenge.Rank);
                 }
                 if (attacks != null && attacks.Length > 0)
                 {
@@ -263,7 +263,7 @@ namespace SquashBot.Gameplay
                 : Challenge.MakeBot(match != null ? match.seed : Random.Range(0, 1000000), Army.EarnedPoints, world, match != null ? match.trophies : -1);
             int rivalPower = 0;
             for (int g = 0; g < Army.Groups; g++) rivalPower += Mathf.RoundToInt(Army.Soldiers * rival.Power(g) * 10f);
-            chUi.ShowRival(SideText(rival.name, rival.Rank, rival.trophies, rivalPower));
+            chUi.ShowRival(SideText(rival.name, rival.Rank, rival.trophies, rivalPower), rival.Rank);
             if (!chOnline) chUi.SetLobbyStatus(Loc.T("ch.offline"));
             yield return new WaitForSecondsRealtime(chOnline ? 1.8f : 2.4f);
             if (token != chLobbyToken || (match == null && chCancelled)) { if (token == chLobbyToken) chPhase = ChPhase.Off; yield break; }
