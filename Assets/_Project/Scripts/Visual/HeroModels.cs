@@ -24,6 +24,14 @@ namespace SquashBot.Visual
             }
         }
 
+        /// <summary>
+        /// How much longer than the old design this build's torso is (foi's own build: a longer body). Everything above
+        /// the hips sits this much higher, and so must the garage gear worn there.
+        /// </summary>
+        public static float TorsoExtra(int hero) => hero == 0 ? Extra : 0f;
+
+        private const float Extra = 0.06f;
+
         /// <summary>Builds the body parts of <paramref name="hero"/> under <paramref name="visual"/>; returns the two eyes.</summary>
         public static (Transform eyeL, Transform eyeR) Build(Transform visual, int hero, Material body, Material light, Material dark, Material eye)
         {
@@ -96,27 +104,27 @@ namespace SquashBot.Visual
                         var leg = Shapes.Rounded("Leg" + side, visual, new Vector3(0.075f * s, 0.115f, 0f), new Vector3(0.075f, 0.11f, 0.085f), 0.025f, light).transform;
                         Shapes.Rounded("Knee", leg, new Vector3(0f, 0.055f, 0f), new Vector3(0.085f, 0.03f, 0.09f), 0.012f, dark);
                         // Arm: shoulder ball, white upper arm, grey forearm with a warm stripe, charcoal hand.
-                        var arm = Shapes.Rounded("Arm" + side, visual, new Vector3(0.168f * s, 0.27f, 0f), new Vector3(0.065f, 0.085f, 0.075f), 0.025f, body).transform;
+                        var arm = Shapes.Rounded("Arm" + side, visual, new Vector3(0.168f * s, 0.27f + Extra, 0f), new Vector3(0.065f, 0.085f, 0.075f), 0.025f, body).transform;
                         Shapes.Primitive(PrimitiveType.Sphere, "Shoulder", arm, new Vector3(-0.012f * s, 0.05f, 0f), Vector3.one * 0.075f, dark);
                         Shapes.Rounded("Forearm", arm, new Vector3(0.005f * s, -0.08f, 0.005f), new Vector3(0.072f, 0.085f, 0.08f), 0.025f, light);
                         Shapes.Rounded("Stripe", arm, new Vector3(0.039f * s, -0.075f, 0.005f), new Vector3(0.006f, 0.05f, 0.016f), 0.003f, glow);
                         Shapes.Rounded("Hand", arm, new Vector3(0.005f * s, -0.142f, 0.01f), new Vector3(0.062f, 0.05f, 0.07f), 0.02f, dark);
                     }
-                    Shapes.Rounded("Body", visual, new Vector3(0f, 0.255f, 0f), new Vector3(0.25f, 0.16f, 0.19f), 0.05f, body);
-                    Shapes.Rounded("Hero_Chest", visual, new Vector3(0f, 0.27f, 0.093f), new Vector3(0.14f, 0.09f, 0.015f), 0.03f, body);
+                    Shapes.Rounded("Body", visual, new Vector3(0f, 0.255f + Extra * 0.5f, 0f), new Vector3(0.25f, 0.16f + Extra, 0.19f), 0.05f, body); // a longer body than the first design
+                    Shapes.Rounded("Hero_Chest", visual, new Vector3(0f, 0.27f + Extra * 0.75f, 0.093f), new Vector3(0.14f, 0.09f + Extra * 0.4f, 0.015f), 0.03f, body);
                     Shapes.Rounded("Hero_Belt", visual, new Vector3(0f, 0.183f, 0f), new Vector3(0.235f, 0.022f, 0.18f), 0.01f, glow);
                     Shapes.Rounded("Hero_Hips", visual, new Vector3(0f, 0.16f, 0f), new Vector3(0.19f, 0.05f, 0.15f), 0.02f, dark);
-                    Shapes.Rounded("Hero_Neck", visual, new Vector3(0f, 0.345f, 0f), new Vector3(0.11f, 0.04f, 0.09f), 0.015f, dark);
-                    Shapes.Rounded("Head", visual, new Vector3(0f, 0.525f, 0f), new Vector3(0.44f, 0.36f, 0.4f), 0.085f, body);
-                    Shapes.Rounded("Visor", visual, new Vector3(0f, 0.52f, 0.196f), new Vector3(0.32f, 0.22f, 0.02f), 0.055f, screen);
+                    Shapes.Rounded("Hero_Neck", visual, new Vector3(0f, 0.345f + Extra, 0f), new Vector3(0.11f, 0.04f, 0.09f), 0.015f, dark);
+                    Shapes.Rounded("Head", visual, new Vector3(0f, 0.525f + Extra, 0f), new Vector3(0.44f, 0.36f, 0.4f), 0.085f, body);
+                    Shapes.Rounded("Visor", visual, new Vector3(0f, 0.52f + Extra, 0.196f), new Vector3(0.32f, 0.22f, 0.02f), 0.055f, screen);
                     foreach (float s in new[] { -1f, 1f })
                     {
-                        var ear = Shapes.Primitive(PrimitiveType.Cylinder, s < 0 ? "Hero_EarL" : "Hero_EarR", visual, new Vector3(0.225f * s, 0.53f, -0.01f), new Vector3(0.14f, 0.022f, 0.14f), light).transform;
+                        var ear = Shapes.Primitive(PrimitiveType.Cylinder, s < 0 ? "Hero_EarL" : "Hero_EarR", visual, new Vector3(0.225f * s, 0.53f + Extra, -0.01f), new Vector3(0.14f, 0.022f, 0.14f), light).transform;
                         ear.localRotation = Quaternion.Euler(0f, 0f, 90f);
                         Shapes.Primitive(PrimitiveType.Cylinder, "Core", ear, new Vector3(0f, 0.6f, 0f), new Vector3(0.6f, 0.5f, 0.6f), dark);
                     }
-                    var l = Shapes.Rounded("EyeL", visual, new Vector3(-0.062f, 0.525f, 0.209f), new Vector3(0.048f, 0.1f, 0.014f), 0.022f, eye).transform;
-                    var r = Shapes.Rounded("EyeR", visual, new Vector3(0.062f, 0.525f, 0.209f), new Vector3(0.048f, 0.1f, 0.014f), 0.022f, eye).transform;
+                    var l = Shapes.Rounded("EyeL", visual, new Vector3(-0.062f, 0.525f + Extra, 0.209f), new Vector3(0.048f, 0.1f, 0.014f), 0.022f, eye).transform;
+                    var r = Shapes.Rounded("EyeR", visual, new Vector3(0.062f, 0.525f + Extra, 0.209f), new Vector3(0.048f, 0.1f, 0.014f), 0.022f, eye).transform;
                     return (l, r);
                 }
             }

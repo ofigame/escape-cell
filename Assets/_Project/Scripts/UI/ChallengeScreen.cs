@@ -449,7 +449,9 @@ namespace SquashBot.UI
         {
             lobby.Hide(true);
             hud.Show();
-            transform.SetAsLastSibling();
+            // Under the game's own HUD (and every card), not over it: its finger area (turning the camera) covers the whole
+            // screen, and on top it would swallow the pause and bag buttons and the briefing cards' taps.
+            transform.SetAsFirstSibling();
         }
 
         public void HideAll()

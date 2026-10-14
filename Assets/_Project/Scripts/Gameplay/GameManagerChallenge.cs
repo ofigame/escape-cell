@@ -183,6 +183,15 @@ namespace SquashBot.Gameplay
         /// While the menu is up, every half minute: is the player's army being fought right now (by whom), and what
         /// happened to it since last time — shown on the menu under the rank card. The record is refreshed too.
         /// </summary>
+        /// <summary>The last defence news, in the current language (empty when there is none).</summary>
+        private static string DefenseNews()
+        {
+            var p = PlayerPrefs.GetString(DefenseNewsKey, "").Split('|');
+            if (p.Length != 4 || !int.TryParse(p[0], out int n) || !int.TryParse(p[1], out int held) || !int.TryParse(p[2], out int fell) || !int.TryParse(p[3], out int change))
+                return ""; // none yet, or an old text-shaped entry (in the language of its day)
+            return Loc.F("ch.defense", n, held, fell, (change >= 0 ? "+" : "") + change);
+        }
+
         private void WatchArmyFromMenu()
         {
             if (Time.unscaledTime < menuWatchNext || !ui.MenuVisible || !FoiNet.Registered || !Challenge.Enabled) return;
@@ -197,9 +206,10 @@ namespace SquashBot.Gameplay
                     int fell = 0;
                     foreach (var a in items) { if (a.held) held++; else if (!a.draw) fell++; change += a.change; }
                     line = Loc.F("ch.defense", items.Length, held, fell, (change >= 0 ? "+" : "") + change);
-                    PlayerPrefs.SetString(DefenseNewsKey, line);
+                    // Kept as numbers (written out in whatever language is on when it is shown again).
+                    PlayerPrefs.SetString(DefenseNewsKey, items.Length + "|" + held + "|" + fell + "|" + change);
                 }
-                else line = PlayerPrefs.GetString(DefenseNewsKey, "");
+                else line = DefenseNews();
                 ui.MenuDefenseLine = line;
                 if (items.Length > 0 || live.Length > 0)
                     cameraRig.StartCoroutine(FoiNet.Me(p => { Challenge.Sync(p); ui.RefreshMenuRank(ui.MenuDefenseLine); }));

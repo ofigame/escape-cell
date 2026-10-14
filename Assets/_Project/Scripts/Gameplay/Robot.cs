@@ -116,6 +116,7 @@ namespace SquashBot.Gameplay
 
             accessories = new GameObject("Accessories").transform;
             accessories.SetParent(visual, false);
+            accessories.localPosition = new Vector3(0f, HeroModels.TorsoExtra(hero), 0f); // the worlds' gear rides with the head
 
             shadowMaterial = MaterialFactory.CreateTransparent(new Color(0.22f, 0.2f, 0.45f, 0.3f), Color.black);
             shadow = Shapes.Primitive(PrimitiveType.Cylinder, "Shadow", transform, Vector3.zero, new Vector3(0.48f, 0.004f, 0.48f), shadowMaterial).transform;
@@ -175,6 +176,7 @@ namespace SquashBot.Gameplay
                 if (HeroModels.IsPart(c.name)) DestroyImmediate(c.gameObject);
             }
             (eyeL, eyeR) = HeroModels.Build(visual, hero, bodyMaterial, lightMaterial, darkMaterial, eyeMaterial);
+            accessories.localPosition = new Vector3(0f, HeroModels.TorsoExtra(hero), 0f);
             int w = lookWorld;
             lookWorld = -1;
             ApplyWorld(Mathf.Max(0, w));
@@ -222,19 +224,21 @@ namespace SquashBot.Gameplay
             for (int i = cosmetics.childCount - 1; i >= 0; i--) Destroy(cosmetics.GetChild(i).gameObject);
             var hat = outfit[Data.Slot.Hat];
             var back = outfit[Data.Slot.Back];
-            if (!hat.IsDefault) CosmeticModels.Hat(cosmetics, hat.id, hat.color);
-            if (!back.IsDefault) CosmeticModels.Back(cosmetics, back.id, back.color);
+            // A build with a longer body wears its gear that much higher (head and arms all of it, back and badge half).
+            float extra = HeroModels.TorsoExtra(hero);
+            if (!hat.IsDefault) CosmeticModels.Hat(Raised(extra), hat.id, hat.color);
+            if (!back.IsDefault) CosmeticModels.Back(Raised(extra * 0.6f), back.id, back.color);
             accessories.gameObject.SetActive(hat.IsDefault && back.IsDefault);
 
             // Arm and leg pieces replace the plain ones; shaped eyes replace the plain eye blocks.
             var arms = outfit[Data.Slot.Arms];
             var legs = outfit[Data.Slot.Legs];
-            if (!arms.IsDefault) CosmeticModels.Arms(cosmetics, arms.id, arms.color);
+            if (!arms.IsDefault) CosmeticModels.Arms(Raised(extra), arms.id, arms.color);
             if (!legs.IsDefault) CosmeticModels.Legs(cosmetics, legs.id, legs.color);
             foreach (var part in new[] { "ArmL", "ArmR" }) SetPartShown(part, arms.IsDefault);
             foreach (var part in new[] { "LegL", "LegR", "FootL", "FootR" }) SetPartShown(part, legs.IsDefault);
             var badge = outfit[Data.Slot.Badge];
-            if (!badge.IsDefault) CosmeticModels.Badge(cosmetics, badge.id, badge.color);
+            if (!badge.IsDefault) CosmeticModels.Badge(Raised(extra * 0.5f), badge.id, badge.color);
 
             bool shaped = Data.Cosmetics.ShapedEyes(eyes.id);
             foreach (var e in new[] { eyeL, eyeR })
@@ -251,6 +255,16 @@ namespace SquashBot.Gameplay
             var trail = outfit[Data.Slot.Trail];
             TrailColor = trail.IsDefault ? (Color?)null : trail.color;
             dance = outfit[Data.Slot.Dance].id;
+        }
+
+        /// <summary>A holder for garage gear, <paramref name="y"/> higher than the gear was made for.</summary>
+        private Transform Raised(float y)
+        {
+            if (y == 0f) return cosmetics;
+            var t = new GameObject("Raised").transform;
+            t.SetParent(cosmetics, false);
+            t.localPosition = new Vector3(0f, y, 0f);
+            return t;
         }
 
         /// <summary>Step mark from the paint workshop (null = none) and its colour.</summary>
