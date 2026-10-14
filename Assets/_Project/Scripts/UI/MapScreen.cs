@@ -123,7 +123,19 @@ namespace SquashBot.UI
         /// </summary>
         private void OnDestroy()
         {
+            Application.lowMemory -= DropWorld;
             if (world != null) Destroy(world.gameObject);
+        }
+
+        private void OnEnable() { Application.lowMemory -= DropWorld; Application.lowMemory += DropWorld; }
+
+        /// <summary>The phone runs short of memory: the sleeping map goes (it is built again on the next open).</summary>
+        private void DropWorld()
+        {
+            if (world == null || IsOpen) return;
+            Destroy(world.gameObject);
+            world = null;
+            unlocked = -1;
         }
 
         /// <summary>True while the 3D map is on screen (the game's own camera can rest).</summary>
