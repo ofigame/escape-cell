@@ -205,8 +205,13 @@ namespace SquashBot.UI
         public static Image Fill(RectTransform rt, Color color, Sprite sprite = null, float pixelsPerUnit = 1f)
         {
             // Rounded panels, buttons and their rims: small corners and thin edges everywhere (full circles stay circles).
+            // (A square drawn with a very low ppu is meant round — an orb's rim, a round button's edge — and stays round.)
             if (sprite != null && (sprite == UiSprites.Rounded || sprite == UiSprites.RoundedGradient || sprite == UiSprites.Ring))
-                pixelsPerUnit = Mathf.Max(pixelsPerUnit, MinCornerPpu);
+            {
+                var size = rt.rect.size;
+                bool round = size.x > 0f && Mathf.Abs(size.x - size.y) < 2f && pixelsPerUnit < 1.2f;
+                if (!round) pixelsPerUnit = Mathf.Max(pixelsPerUnit, MinCornerPpu);
+            }
             var image = rt.gameObject.AddComponent<Image>();
             image.sprite = sprite;
             image.type = sprite != null && sprite.border != Vector4.zero ? Image.Type.Sliced : Image.Type.Simple;

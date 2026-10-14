@@ -231,7 +231,6 @@ namespace SquashBot.Gameplay
             FrameGovernor.Install(); // picture quality for this device (after the camera's post-processing exists)
             AdMob.Start(); // consent form where required, then AdMob (phones only)
             SplashScreen.Show(); // OFIGAME studio logo over the menu, fading out
-            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-sbU") >= 0) cameraRig.StartCoroutine(UiShots()); // TEMP-TEST
             StartFortressViewIfAsked(); // -arena: the sample fortress battlefield to look around
             // Developer tool: -sbExport <folder> writes every model as PNG + OBJ (see AssetExporter), then quits.
             var exportFolder = AssetExporter.RequestedFolder();

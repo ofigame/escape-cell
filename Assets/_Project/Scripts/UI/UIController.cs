@@ -923,7 +923,7 @@ namespace SquashBot.UI
 
             // Where the ad consent form applies, the player can change their answer here.
             // Under the last row: deleting the online profile, then (where the consent form applies) the ad privacy choice.
-            float underRows = -200f - rows.Length * 120f + 40f;
+            float underRows = -200f - rows.Length * 120f - 10f;
             privacyButton = UiFactory.MakeButton(card, Loc.T("settings.privacy"), Kind.Secondary, Top, new Vector2(0f, underRows - 90f), new Vector2(560f, 74f),
                 Monetization.AdMob.ShowPrivacyOptions, 34f).gameObject;
             // A plain button of its own (red words on a dark face), in its own row under the settings.
