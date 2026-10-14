@@ -148,6 +148,10 @@ namespace SquashBot.Data
             /// <summary>How it picks its groups: 0 saves its strongest for last … 1 sends it first.</summary>
             public float boldness;
             public bool bot;
+            /// <summary>Its foi's weapon (id), that weapon's level and its armour (0 none … 0.5).</summary>
+            public string weapon = "mallet";
+            public int weaponLevel = 1;
+            public float armor;
 
             public float Power(int g) => 1f + points[g] * Army.PerPoint;
             public int Rank => RankFor(trophies);
@@ -185,6 +189,14 @@ namespace SquashBot.Data
             o.foiHp = FoiHpFor(world);
             o.foiHit = FoiHitFor(world);
             o.boldness = (float)rng.NextDouble();
+            // A bot's foi carries a hand weapon of its stage of the game (one of the better ones open by then) and some armour.
+            int reached = world * LevelCatalog.LevelsPerWorld + LevelCatalog.LevelsPerWorld / 2;
+            var open = Armory.All.FindAll(w => w.kind != WeaponKind.Gun && w.unlockAt <= reached);
+            open.Sort((a, b) => b.damage.CompareTo(a.damage));
+            var pick = open.Count > 0 ? open[Mathf.Min(open.Count - 1, rng.Next(2))] : Armory.All[0];
+            o.weapon = pick.id;
+            o.weaponLevel = 1 + rng.Next(3);
+            o.armor = Mathf.Min(0.5f, world * 0.02f + (float)rng.NextDouble() * 0.1f);
             return o;
         }
 
@@ -198,6 +210,9 @@ namespace SquashBot.Data
             o.foiHp = r.foiHp > 0 ? Mathf.Clamp(r.foiHp, 10, 400) : FoiHpFor(r.world);
             o.foiHit = r.foiHit > 0f ? Mathf.Clamp(r.foiHit, 0.05f, 0.3f) : FoiHitFor(r.world);
             o.boldness = Mathf.Clamp01(r.boldness);
+            o.weapon = string.IsNullOrEmpty(r.weapon) ? "mallet" : r.weapon;
+            o.weaponLevel = Mathf.Clamp(r.weaponLevel, 1, 10);
+            o.armor = Mathf.Clamp(r.armor, 0f, 0.5f);
             return o;
         }
     }

@@ -13,6 +13,8 @@ namespace SquashBot.Audio
     public class MusicDirector : MonoBehaviour
     {
         private const float Volume = 0.5f;
+        /// <summary>The whole music down to this share (the challenge's arena: a murmur of a crowd over it).</summary>
+        public static float Level = 1f;
         private const float FadeSeconds = 1.2f;
         private const int KeepThemes = 3;
 
@@ -150,7 +152,7 @@ namespace SquashBot.Audio
             {
                 if (on && rockMix > 0.01f && !rock.isPlaying) rock.Play();
                 else if (rockMix <= 0.01f && rock.isPlaying && danger < 0.02f) rock.Stop();
-                rock.volume = on ? RockVolume * rockMix : 0f;
+                rock.volume = on ? RockVolume * rockMix * Level : 0f;
             }
             float duck = 1f - 0.45f * rockMix;
 
@@ -161,7 +163,7 @@ namespace SquashBot.Audio
                 var d = decks[k];
                 if (!d.live) continue;
                 d.fade = Mathf.MoveTowards(d.fade, k == current ? 1f : 0f, dt / FadeSeconds);
-                for (int i = 0; i < d.sources.Length; i++) d.sources[i].volume = Volume * duck * d.fade * layer[i] * (i == 0 ? 0.85f : 1f);
+                for (int i = 0; i < d.sources.Length; i++) d.sources[i].volume = Volume * Level * duck * d.fade * layer[i] * (i == 0 ? 0.85f : 1f);
                 if (k != current && d.fade <= 0f)
                 {
                     foreach (var s in d.sources) s.Stop();

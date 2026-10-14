@@ -69,16 +69,19 @@ namespace SquashBot.Gameplay
         /// like a warlord (an area smash), taking <paramref name="hp"/> blows and each of its blows taking
         /// <paramref name="hitShare"/> of foi's health.
         /// </summary>
-        public void AddChallengeFoe(GridPos p, int hp, float hitShare, Transform look)
+        public void AddChallengeFoe(GridPos p, int hp, float hitShare, Transform look, HeldWeapon held = null)
         {
             if (!grid.IsStandable(p)) return;
-            var g = new Guard { pos = p, brute = true, rank = 98, hp = hp, maxHp = hp, step = 0.5f, cooldown = 1.2f, share = hitShare };
+            var g = new Guard { pos = p, brute = false, rank = 98, hp = hp, maxHp = hp, step = 0.4f, cooldown = 1.0f, share = hitShare };
             g.root = new GameObject("RivalFoi").transform;
             g.root.SetParent(transform, false);
             g.root.position = At(p);
             look.SetParent(g.root, false);
             look.localPosition = Vector3.zero;
+            look.localRotation = Quaternion.identity; // it faces where its root faces: at foi
             g.model = look;
+            g.modelScale = look.localScale;
+            g.held = held;
             AddHealthBar(g);
             g.from = g.to = At(p);
             grid.SetOccupied(p, true);
@@ -86,6 +89,9 @@ namespace SquashBot.Gameplay
             Total++;
             challengeFoe = g;
         }
+
+        /// <summary>Where the rival foi stands (null once it has fallen).</summary>
+        public Vector3? ChallengeFoeAt => challengeFoe != null && !challengeFoe.dead ? challengeFoe.root.position : (Vector3?)null;
 
         /// <summary>The rival foi has fallen (or there is none).</summary>
         public bool ChallengeFoeDown => challengeFoe == null || challengeFoe.dead;
@@ -142,6 +148,9 @@ namespace SquashBot.Gameplay
         }
 
         public void ClearChallengeFoe() { challengeFoe = null; ChallengeBattle = false; }
+
+        /// <summary>The rival foi's state, for tests.</summary>
+        public string FoeDebug => challengeFoe == null ? "none" : $"pos {challengeFoe.pos} foi {robot.Position} hp {challengeFoe.hp} wind {challengeFoe.windup:0.0} cd {challengeFoe.cooldown:0.0} step {challengeFoe.step:0.0} moveT {challengeFoe.moveT:0.0} engaged {engaged.Contains(challengeFoe)}";
 
         // ---------- Wings: robots split up and close round their target ----------
 
@@ -234,7 +243,10 @@ namespace SquashBot.Gameplay
             return true;
         }
 
-        private float foeFleeUntil, foeBackOffUntil;
+        private float foeFleeUntil, foeBackOffUntil, foeDodgeAt;
+
+        /// <summary>How bold the rival's foi is (its profile): bold ones press on, careful ones step back and dodge more.</summary>
+        public float FoeBoldness = 0.5f;
 
         /// <summary>
         /// The rival foi's own sense, before its usual fighting: badly hurt and foi close, it falls back behind its
@@ -244,7 +256,13 @@ namespace SquashBot.Gameplay
         private bool FoeTactics(Guard g, int near)
         {
             if (g.windup >= 0f || g.moveT < 1f) return false;
-            if (g.hp < g.maxHp * 0.35f && near <= 3 && Time.time > foeFleeUntil + 6f) foeFleeUntil = Time.time + 2.5f;
+            if (g.hp < g.maxHp * (0.25f + 0.2f * (1f - FoeBoldness)) && near <= 3 && Time.time > foeFleeUntil + 6f) foeFleeUntil = Time.time + 2.5f;
+            // Between blows, face to face with foi: now and then a step to the side (a dodge), more for a careful one.
+            if (near <= 2 && g.cooldown > 0.2f && Time.time > foeDodgeAt && g.step <= 0f)
+            {
+                foeDodgeAt = Time.time + 0.6f;
+                if (rng.NextDouble() < 0.25 + 0.35 * (1f - FoeBoldness) && Sidestep(g)) return true;
+            }
             bool flee = Time.time < foeFleeUntil || Time.time < foeBackOffUntil;
             if (!flee) return false;
             if ((g.step -= Time.deltaTime) > 0f) return true;
@@ -252,10 +270,25 @@ namespace SquashBot.Gameplay
             return StepAway(g, robot.Position, 1f / (GuardSpeed(g) * 1.15f));
         }
 
-        /// <summary>The rival foi just struck: half the time it backs off a moment.</summary>
+        /// <summary>The rival foi just struck: it backs off a moment (a careful one more often).</summary>
         private void FoeStruck(Guard g)
         {
-            if (g == challengeFoe && rng.Next(2) == 0) foeBackOffUntil = Time.time + 0.7f;
+            if (g == challengeFoe && rng.NextDouble() < 0.3 + 0.5 * (1f - FoeBoldness)) foeBackOffUntil = Time.time + 0.7f;
+        }
+
+        /// <summary>A step to a free neighbour as far from foi as it stands now (round foi, not away): false when there is none.</summary>
+        private bool Sidestep(Guard g)
+        {
+            int near = Chebyshev(robot.Position, g.pos);
+            var options = new List<GridPos>();
+            foreach (var d in DirectionExtensions.All)
+            {
+                var n = g.pos + d.ToOffset();
+                if (CanStep(g.pos, n) && Chebyshev(robot.Position, n) == near) options.Add(n);
+            }
+            if (options.Count == 0) return false;
+            MoveGuard(g, options[rng.Next(options.Count)], 1f / (GuardSpeed(g) * 1.3f));
+            return true;
         }
 
         private Material arrowMat;

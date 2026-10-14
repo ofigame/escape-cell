@@ -84,11 +84,14 @@ namespace SquashBot.Gameplay
                 if (bot != null) bot.SetRaise(k);
                 else if (human != null) human.SetRaise(k);
                 else if (soldier != null) soldier.SetRaise(k);
-                else if (model != null) model.localScale = Vector3.one * (1f + Mathf.Clamp01(k) * 0.12f); // a plain model (the challenge's rival foi) swells to strike
+                else if (model != null) model.localScale = modelScale * (1f + Mathf.Clamp01(k) * 0.08f); // a plain model (the challenge's rival foi) swells to strike
             }
 
             /// <summary>A plain model (no robot rig): the challenge's rival foi. Its blows take <see cref="share"/> of foi's health.</summary>
             public Transform model;
+            public Vector3 modelScale = Vector3.one;
+            /// <summary>The weapon in a plain model's hand (the rival foi's own): it chops when the blow lands.</summary>
+            public HeldWeapon held;
             public float share = -1f;
 
             public void Flash()
@@ -1004,6 +1007,7 @@ namespace SquashBot.Gameplay
                     g.windup = -1f;
                     g.cooldown = g.brute ? 1.3f : g.soldier != null ? 0.6f + (float)rng.NextDouble() * 0.3f : 0.55f;
                     FoeStruck(g);
+                    if (g.held != null) g.held.Swing();
                     g.SetRaise(0f);
                     foreach (var t in g.area) view.SetWarning(t, 0f);
                     if (IsArcher(g)) ArrowFx(g.root.position, At(g.target));

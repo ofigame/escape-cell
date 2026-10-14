@@ -327,6 +327,7 @@ namespace SquashBot.Gameplay
             foreach (var u in units) if (!u.dead && u.fighting && u.target != null) targetedBy[u.target] = (targetedBy.TryGetValue(u.target, out int k) ? k : 0) + 1;
             bool contact = n0 > 0 && n1 > 0 && (c0 - c1).sqrMagnitude < 5.5f * 5.5f;
 
+            MakeWay(dt);
             foreach (var u in units)
             {
                 if (u.dead) continue;
@@ -432,6 +433,34 @@ namespace SquashBot.Gameplay
             ClashOver?.Invoke(myGroup >= 0 ? Alive(0, myGroup) : 0, theirGroup >= 0 ? Alive(1, theirGroup) : 0);
         }
 
+        /// <summary>
+        /// Soldiers standing in their blocks step aside for a group marching through (or walking back), then drift back
+        /// to their places.
+        /// </summary>
+        private readonly List<Unit> movers = new List<Unit>();
+
+        private void MakeWay(float dt)
+        {
+            movers.Clear();
+            foreach (var o in units) if (!o.dead && (o.fighting || o.returning)) movers.Add(o);
+            foreach (var u in units)
+            {
+                if (u.dead || u.fighting || u.returning || u.leaving) continue;
+                Vector3 push = Vector3.zero;
+                foreach (var o in movers)
+                {
+                    var away = u.root.position - o.root.position;
+                    away.y = 0f;
+                    float d2 = away.sqrMagnitude;
+                    if (d2 < 0.5f * 0.5f && d2 > 0.000001f) { float d = Mathf.Sqrt(d2); push += away / d * (0.5f - d); }
+                }
+                var p = u.root.position;
+                if (push.sqrMagnitude > 0.0001f) p += push * Mathf.Min(1f, dt * 12f);
+                else { var back = u.home - p; back.y = 0f; p += Vector3.ClampMagnitude(back, dt * 1.2f); }
+                u.root.position = new Vector3(p.x, u.home.y, p.z);
+            }
+        }
+
         private void Strike(Unit u, Unit target)
         {
             u.cd = u.cooldown * (0.85f + UnityEngine.Random.value * 0.3f);
@@ -492,10 +521,11 @@ namespace SquashBot.Gameplay
             there = to.magnitude < 0.08f;
             if (there) return;
             var step = Vector3.ClampMagnitude(to, u.speed * dt);
-            // Keep a little apart from the others.
+            // Keep a little apart from the others (a group on the move goes through the waiting ones: they make way).
             foreach (var o in units)
             {
                 if (o == u || o.dead) continue;
+                if ((u.fighting || u.returning) && !o.fighting && !o.returning) continue;
                 var away = u.root.position - o.root.position;
                 away.y = 0f;
                 float d = away.sqrMagnitude;

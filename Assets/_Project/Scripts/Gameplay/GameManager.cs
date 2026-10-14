@@ -786,6 +786,7 @@ namespace SquashBot.Gameplay
         {
             if (!challengeRun) EndChallenge();
             SkillBar.Blocked = challengeRun;
+            Audio.MusicDirector.Level = challengeRun ? 0.35f : 1f; // the arena: the music low under the crowd
             arenaMode = arenaRun;
             levelTps = false; // every floor starts in the usual view
             robot.transform.rotation = Quaternion.identity;

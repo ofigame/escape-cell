@@ -214,7 +214,8 @@ namespace SquashBot.Gameplay
             {
                 var points = new int[Army.Groups];
                 for (int g = 0; g < Army.Groups; g++) points[g] = Army.GroupPoints(g);
-                yield return FoiNet.PutArmy(points, Army.EarnedPoints, world, Challenge.FoiHpFor(world), Challenge.FoiHitFor(world), 0.5f, r => ok = r);
+                yield return FoiNet.PutArmy(points, Army.EarnedPoints, world, Challenge.FoiHpFor(world), Challenge.FoiHitFor(world), 0.5f,
+                    Armory.Equipped.id, Armory.Level(Armory.Equipped), Shop.ArmorShare, r => ok = r);
                 if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
             }
             FoiNet.Match match = null;
@@ -348,13 +349,18 @@ namespace SquashBot.Gameplay
         private Transform RivalLook()
         {
             var root = new GameObject("RivalLook").transform;
-            robot.BuildLookalike(root);
-            root.localScale = HeroScale;
+            var copy = robot.BuildLookalike(root).transform;
+            root.localScale = robot.Visual.lossyScale; // foi's own size
+            // Not foi's weapon: the rival's.
+            var drop = new System.Collections.Generic.List<GameObject>();
+            foreach (Transform c in copy.GetComponentsInChildren<Transform>(true)) if (c.name == "HeldWeapon") drop.Add(c.gameObject);
+            foreach (var g in drop) DestroyImmediate(g);
             foreach (var r in root.GetComponentsInChildren<Renderer>())
             {
                 var m = r.material;
                 if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", Color.Lerp(m.GetColor("_BaseColor"), ClashSystem.Theirs, 0.45f));
             }
+            rivalHeld = HeldWeapon.Attach(copy, Armory.Get(rival.weapon));
             return root;
         }
 
@@ -512,14 +518,41 @@ namespace SquashBot.Gameplay
             yield return new WaitForSeconds(1.4f);
             if (!challengeRun || chPhase != ChPhase.Break) yield break;
             clash.Retreat();
+            // While the soldiers march off, the two cells glide to the middle with their foi inside.
+            var myTile = new GridPos(BoardW / 2, BoardH / 2 - 2);
+            var myFrom = robot.transform.position;
+            var myTo = GridView.ToWorld(myTile) + Vector3.up * (myFrom.y - GridView.ToWorld(robot.Position).y);
+            var cellOffset = myCell != null ? myCell.transform.position - myFrom : Vector3.zero;
+            var theirFrom = rivalLook != null ? rivalLook.position : Vector3.zero;
+            var theirTo = GridView.ToWorld(RivalTile) + Vector3.up * GridView.SurfaceY;
+            var theirCellOffset = theirCell != null ? theirCell.transform.position - theirFrom : Vector3.zero;
+            for (float t = 0f; t < 1f; t += Time.deltaTime / 2.4f)
+            {
+                if (!challengeRun || chPhase != ChPhase.Break) yield break;
+                float k = Mathf.SmoothStep(0f, 1f, t);
+                robot.transform.position = Vector3.Lerp(myFrom, myTo, k);
+                if (myCell != null) myCell.transform.position = robot.transform.position + cellOffset;
+                if (rivalLook != null) rivalLook.position = Vector3.Lerp(theirFrom, theirTo, k);
+                if (theirCell != null && rivalLook != null) theirCell.transform.position = rivalLook.position + theirCellOffset;
+                yield return null;
+            }
+            robot.Spawn(grid, myTile);
+            robot.transform.rotation = Quaternion.identity; // facing the rival across the middle
+            if (rivalLook != null) { rivalLook.position = theirTo; rivalLook.rotation = Quaternion.Euler(0f, 180f, 0f); }
+            yield return new WaitForSeconds(0.4f);
             if (myCell != null) myCell.Shatter();
             if (theirCell != null) theirCell.Shatter();
             if (colosseum != null) colosseum.Cheer(-1, 1f);
             AudioManager.PlaySfx(Sfx.Impact, 0.9f, 1.2f);
-            yield return new WaitForSeconds(2.6f);
+            yield return new WaitForSeconds(1.2f);
             if (!challengeRun || chPhase != ChPhase.Break) yield break;
             StartChallengeDuel();
         }
+
+        /// <summary>Where the rival foi starts the duel: across the middle from foi.</summary>
+        private static GridPos RivalTile => new GridPos(BoardW / 2, BoardH / 2 + 2);
+
+        private HeldWeapon rivalHeld;
 
         /// <summary>The score as the board shows it (mine first).</summary>
         private string ScoreText() => (chLead > 0 ? 1 : 0) + " - " + (chLead < 0 ? 1 : 0);
@@ -534,7 +567,11 @@ namespace SquashBot.Gameplay
             var look = rivalLook;
             rivalLook = null;
             hunt.ChallengeBattle = true;
-            hunt.AddChallengeFoe(new GridPos(0, BoardH / 2 + 4), rival.foiHp, rival.foiHit, look);
+            var w = Armory.Get(rival.weapon);
+            int hp = Mathf.RoundToInt(rival.foiHp / Mathf.Max(0.4f, 1f - rival.armor * 0.8f));
+            float hit = Mathf.Clamp(rival.foiHit * (0.7f + 0.12f * Armory.Damage(w, Mathf.Max(1, rival.weaponLevel))), 0.05f, 0.35f);
+            hunt.FoeBoldness = rival.boldness;
+            hunt.AddChallengeFoe(RivalTile, hp, hit, look, rivalHeld);
             ui.ShowIntro(Loc.T("ch.duel"), Loc.T("ch.duelText"));
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 0.8f);
         }
@@ -632,12 +669,14 @@ namespace SquashBot.Gameplay
         /// </summary>
         private void BoardPose(out Vector3 pos, out Quaternion rot)
         {
-            if (InputReader.PointerHeld) boardDraggedAt = Time.unscaledTime;
-            bool free = Time.unscaledTime - boardDraggedAt > 2.5f;
+            bool duel = chPhase == ChPhase.Duel;
+            if (InputReader.PointerHeld && !duel) boardDraggedAt = Time.unscaledTime; // in the duel the finger moves foi, not the camera
+            bool free = duel || Time.unscaledTime - boardDraggedAt > 2.5f;
             bool groupClash = chPhase == ChPhase.Clash && clash != null && clash.Clashing && !clash.InBattle;
-            zoom = Mathf.Lerp(zoom, groupClash && free ? 0.5f : 1f, Time.deltaTime * 1.4f);
+            zoom = Mathf.Lerp(zoom, groupClash && free ? 0.65f : 1f, Time.deltaTime * 1.4f);
             Vector3? want = null;
-            if (groupClash && clash.FightCentre is Vector3 fight) want = fight;
+            if (duel) want = hunt.ChallengeFoeAt is Vector3 foe ? (robot.transform.position + foe) * 0.5f : robot.transform.position;
+            else if (groupClash && clash.FightCentre is Vector3 fight) want = fight;
             else if (chPhase == ChPhase.Battle && clash != null)
             {
                 if (Time.unscaledTime >= tourNext && clash.SomeFight() is Vector3 spot) { tourSpot = spot; tourNext = Time.unscaledTime + 4.5f; }
@@ -647,10 +686,10 @@ namespace SquashBot.Gameplay
             {
                 var w = want.Value - boardCentre;
                 w = new Vector3(Mathf.Clamp(w.x, -BoardW * 0.45f, BoardW * 0.45f), 0f, Mathf.Clamp(w.z, -BoardH * 0.48f, BoardH * 0.48f));
-                boardPan = Vector3.Lerp(boardPan, w, Time.deltaTime * (chPhase == ChPhase.Battle ? 0.7f : 1.6f));
+                boardPan = Vector3.Lerp(boardPan, w, Time.deltaTime * (chPhase == ChPhase.Battle ? 0.7f : duel ? 3f : 1.6f));
             }
             // The camera's seat: high on the east stand, level with the middle of the courtyard.
-            var seat = boardCentre + new Vector3(BoardW * 0.5f + 8.5f, 10.5f, 0f);
+            var seat = boardCentre + new Vector3(BoardW * 0.5f + 11f, 12.5f, 0f);
             var focus = boardCentre + boardPan;
             // Closing in: the camera leans forward along its line of sight (the seat stays where it is in spirit).
             pos = Vector3.Lerp(seat, focus, (1f - zoom) * 0.9f);

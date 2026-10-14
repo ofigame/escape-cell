@@ -473,7 +473,7 @@ namespace SquashBot.Gameplay
                 return;
             }
             float dt = Time.unscaledDeltaTime;
-            if (ChallengeArmyPhase)
+            if (ChallengeArmyPhase || (challengeRun && chPhase == ChPhase.Duel))
             {
                 // The challenge's army battle: the whole board from above its south end.
                 BoardPose(out var bpos, out var brot);
