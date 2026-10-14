@@ -19,7 +19,13 @@ namespace SquashBot.Gameplay
     /// </summary>
     public partial class GameManager
     {
-        private enum ChPhase { Off, Lobby, Pick, Reveal, Clash, Duel, Done }
+        private enum ChPhase { Off, Lobby, Pick, Reveal, Clash, Battle, Break, Duel, Done }
+
+        /// <summary>The armies' point: +1 mine won the battle (1-0), -1 theirs did (0-1), 0 neither (a level battle).</summary>
+        private int chLead;
+        private GlassCell myCell, theirCell;
+        private float tourNext, zoom = 1f;
+        private Vector3 tourSpot;
 
         private bool challengeRun;
         private ChPhase chPhase = ChPhase.Off;
@@ -69,6 +75,7 @@ namespace SquashBot.Gameplay
             clash = go.AddComponent<ClashSystem>();
             clash.Init(fx);
             clash.ClashOver += OnClashOver;
+            clash.BattleOver += OnBattleOver;
         }
 
         /// <summary>CHALLENGE on the menu.</summary>
@@ -146,8 +153,9 @@ namespace SquashBot.Gameplay
                 else if (items.Length > 0)
                 {
                     int held = 0, change = 0;
-                    foreach (var a in items) { if (a.held) held++; change += a.change; }
-                    line = Loc.F("ch.defense", items.Length, held, items.Length - held, (change >= 0 ? "+" : "") + change);
+                    int fell = 0;
+                    foreach (var a in items) { if (a.held) held++; else if (!a.draw) fell++; change += a.change; }
+                    line = Loc.F("ch.defense", items.Length, held, fell, (change >= 0 ? "+" : "") + change);
                     PlayerPrefs.SetString(DefenseNewsKey, line);
                 }
                 else line = PlayerPrefs.GetString(DefenseNewsKey, "");
@@ -225,8 +233,9 @@ namespace SquashBot.Gameplay
                 if (attacks != null && attacks.Length > 0)
                 {
                     int held = 0, change = 0;
-                    foreach (var a in attacks) { if (a.held) held++; change += a.change; }
-                    chUi.SetLobbyStatus(Loc.F("ch.defense", attacks.Length, held, attacks.Length - held, (change >= 0 ? "+" : "") + change));
+                    int fell = 0;
+                    foreach (var a in attacks) { if (a.held) held++; else if (!a.draw) fell++; change += a.change; }
+                    chUi.SetLobbyStatus(Loc.F("ch.defense", attacks.Length, held, fell, (change >= 0 ? "+" : "") + change));
                     yield return new WaitForSecondsRealtime(2.6f);
                 }
             }
@@ -310,6 +319,13 @@ namespace SquashBot.Gameplay
             rivalLook.position = GridView.ToWorld(new GridPos(BoardW / 2, BoardH - 2)) + Vector3.up * GridView.SurfaceY;
             rivalLook.rotation = Quaternion.Euler(0f, 180f, 0f);
             clash.Begin(boardCentre, mine, theirs, myPower, theirPower, hunt.FoiHeight * 0.8f);
+            clash.SetBounds(GridView.ToWorld(new GridPos(1, 1)) - new Vector3(0.3f, 0f, 0.3f), GridView.ToWorld(new GridPos(BoardW - 2, BoardH - 2)) + new Vector3(0.3f, 0f, 0.3f));
+            // Both foi wait in glass cells while their armies fight; the cells break for the duel.
+            chLead = 0;
+            DestroyCells();
+            float cellScale = Mathf.Max(robot.transform.localScale.x, robot.transform.localScale.y) * 0.62f;
+            myCell = GlassCell.Create(GridView.ToWorld(robot.Position) + Vector3.up * GridView.SurfaceY, cellScale);
+            theirCell = GlassCell.Create(rivalLook.position, cellScale);
             chUi.ShowBattle();
             ui.SetHudTitle(Loc.T("ch.title"));
             BeginTurn();
@@ -422,6 +438,7 @@ namespace SquashBot.Gameplay
                     clash.StartClash(chMyPick, chTheirPick);
                     break;
                 case ChPhase.Duel:
+                    chUi.SetClock(ScoreText());
                     if (hunt.ChallengeFoeDown) ChallengeEnd(true);
                     break;
             }
@@ -443,52 +460,98 @@ namespace SquashBot.Gameplay
         {
             yield return new WaitForSeconds(1.6f); // the survivors walk back
             if (!challengeRun || State != GameState.Playing) yield break;
-            // Whoever's army is down to half first: the battle is on, every soldier still standing in it.
+            // Whoever's army is down to half first: every soldier still standing on both sides charges.
             int half = Army.Groups * Army.Soldiers / 2;
             if (Total(myLeft) > half && Total(theirLeft) > half) { BeginTurn(); yield break; }
+            StartBattle();
+        }
+
+        /// <summary>An army is down to half: the all-out battle of every soldier left (the foi still in their cells).</summary>
+        private void StartBattle()
+        {
+            chPhase = ChPhase.Battle;
+            chUi.HideGroups();
+            chUi.SetStatus(Loc.T("ch.battle"));
+            ui.ShowIntro(Loc.T("ch.battle"), Loc.T("ch.battleText"));
+            tourNext = 0f;
+            clash.StartBattle();
+        }
+
+        /// <summary>The battle is over: the winning army's foi goes 1-0 up (a level end: 0-0), the cells break, the soldiers leave.</summary>
+        private void OnBattleOver(int mine, int theirs)
+        {
+            if (!challengeRun || chPhase != ChPhase.Battle) return;
+            chLead = mine > theirs ? 1 : theirs > mine ? -1 : 0;
+            for (int g = 0; g < Army.Groups; g++) { myLeft[g] = 0; theirLeft[g] = 0; }
+            myLeft[0] = mine; theirLeft[0] = theirs;
+            RefreshSides();
+            chPhase = ChPhase.Break;
+            chUi.SetClock(ScoreText());
+            chUi.SetStatus(Loc.T(chLead > 0 ? "ch.armyWon" : chLead < 0 ? "ch.armyLost" : "ch.armyEven"));
+            AudioManager.PlaySfx(chLead >= 0 ? Sfx.Win : Sfx.Warning, 0.8f, 1f);
+            cameraRig.StartCoroutine(Break());
+        }
+
+        private IEnumerator Break()
+        {
+            yield return new WaitForSeconds(1.4f);
+            if (!challengeRun || chPhase != ChPhase.Break) yield break;
+            clash.Retreat();
+            if (myCell != null) myCell.Shatter();
+            if (theirCell != null) theirCell.Shatter();
+            AudioManager.PlaySfx(Sfx.Impact, 0.9f, 1.2f);
+            yield return new WaitForSeconds(2.6f);
+            if (!challengeRun || chPhase != ChPhase.Break) yield break;
             StartChallengeDuel();
         }
 
-        /// <summary>An army is down to half: the two foi fight it out with every soldier both sides have left.</summary>
+        /// <summary>The score as the board shows it (mine first).</summary>
+        private string ScoreText() => (chLead > 0 ? 1 : 0) + " - " + (chLead < 0 ? 1 : 0);
+
+        /// <summary>The cells are broken, the field is clear: the two foi fight it out alone.</summary>
         private void StartChallengeDuel()
         {
             chPhase = ChPhase.Duel;
-            chUi.HideGroups();
             chUi.SetStatus(Loc.T("ch.duel"));
-            // The soldiers still standing go into the duel as they are (their own models), the rest of the board clears.
-            var mineLeft = clash.TakeSurvivors(0);
-            var theirsLeft = clash.TakeSurvivors(1);
             clash.Clear();
             if (rivalLook != null) { rivalLook.SetParent(null, true); }
             var look = rivalLook;
             rivalLook = null;
             hunt.ChallengeBattle = true;
             hunt.AddChallengeFoe(new GridPos(BoardW / 2, BoardH - 2), rival.foiHp, rival.foiHit, look);
-            foreach (var (body, model, group, kind) in mineLeft)
-                hunt.AddChallengeAlly(body.position, SoldierHp(kind, Army.Power(group)), body, model, kind);
-            foreach (var (body, model, group, kind) in theirsLeft)
-                hunt.AddChallengeSoldier(body.position, SoldierHp(kind, rival.Power(group)), body, model, kind);
             ui.ShowIntro(Loc.T("ch.duel"), Loc.T("ch.duelText"));
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 0.8f);
         }
 
-        /// <summary>A soldier's blows to fell in the battle: heavy ones take more, development adds.</summary>
-        private static int SoldierHp(GroupKind kind, float power) => Mathf.Max(1, Mathf.RoundToInt((Army.Heavy(kind) ? 4f : 2.5f) * power));
+        private void DestroyCells()
+        {
+            if (myCell != null) Destroy(myCell.gameObject);
+            if (theirCell != null) Destroy(theirCell.gameObject);
+            myCell = theirCell = null;
+        }
 
-        /// <summary>The challenge is decided: trophies, gold for a win, and the result card (again, or the menu).</summary>
-        private void ChallengeEnd(bool won)
+        /// <summary>The duel is decided (the rival foi down, or foi down): the final score — 2-0, 1-1 (a draw) or 0-2.</summary>
+        private void ChallengeEnd(bool wonDuel)
+        {
+            int me = (chLead > 0 ? 1 : 0) + (wonDuel ? 1 : 0), them = (chLead < 0 ? 1 : 0) + (wonDuel ? 0 : 1);
+            ChallengeFinish(me > them ? 1 : me < them ? -1 : 0, me + " - " + them);
+        }
+
+        /// <param name="outcome">1 won, 0 a draw (nobody gains anything), -1 lost.</param>
+        private void ChallengeFinish(int outcome, string score)
         {
             if (chPhase == ChPhase.Done) return;
             chPhase = ChPhase.Done;
+            bool won = outcome > 0, draw = outcome == 0;
             // Online the server keeps the score (the same sum, shown at once, then its numbers taken); offline: practice.
             int change = 0;
             if (chOnline)
             {
-                change = Challenge.Record(won, rival.trophies);
-                SendChallengeResult(won);
+                change = draw ? Challenge.RecordDraw() : Challenge.Record(won, rival.trophies);
+                SendChallengeResult(won, draw);
             }
             int gold = won ? Challenge.WinGold : 0;
-            SaveData.Coins += gold + Earned;
+            SaveData.Coins += draw ? 0 : gold + Earned;
             if (won)
             {
                 State = GameState.Result;
@@ -498,7 +561,7 @@ namespace SquashBot.Gameplay
                 fx.Burst(robot.transform.position + Vector3.up * 0.6f, Palette.Coin, Palette.CoinGlow, 40, 6f);
             }
             chUi.HideAll();
-            string line = Loc.F(won ? "ch.wonLine" : "ch.lostLine", rival.name) + "\n"
+            string line = score + "  ·  " + Loc.F(won ? "ch.wonLine" : draw ? "ch.drawLine" : "ch.lostLine", rival.name) + "\n"
                           + (chOnline ? (change >= 0 ? "+" : "") + Loc.F("ch.trophies", change) : Loc.T("ch.offline")) + (gold > 0 ? " · +" + gold + " " + Loc.T("ch.gold") : "")
                           + "\n" + Challenge.RankName(Challenge.Rank) + " · " + Loc.F("ch.trophies", Challenge.Trophies);
             StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
@@ -506,21 +569,21 @@ namespace SquashBot.Gameplay
                 won = won,
                 bonusRound = true,
                 arena = true,
-                title = Loc.T(won ? "ch.victory" : "ch.defeat"),
+                title = Loc.T(won ? "ch.victory" : draw ? "ch.draw" : "ch.defeat"),
                 hasNext = false,
                 canDouble = won,
                 subtitle = line,
-                coins = gold + Earned,
+                coins = draw ? 0 : gold + Earned,
             }));
         }
 
         /// <summary>Leaving a challenge (the menu): the board's armies and screens go.</summary>
-        private void SendChallengeResult(bool won)
+        private void SendChallengeResult(bool won, bool draw = false)
         {
             long id = chMatchId;
             chMatchId = 0;
             if (id == 0) return;
-            cameraRig.StartCoroutine(FoiNet.SendResult(id, won, r => { if (r != null) Challenge.Sync(r.profile); }));
+            cameraRig.StartCoroutine(FoiNet.SendResult(id, won, draw, r => { if (r != null) Challenge.Sync(r.profile); }));
         }
 
         private void EndChallenge()
@@ -538,6 +601,7 @@ namespace SquashBot.Gameplay
             if (chUi != null) chUi.HideAll();
             if (rivalLook != null) Destroy(rivalLook.gameObject);
             rivalLook = null;
+            DestroyCells();
             hunt.ClearChallengeFoe();
         }
 
@@ -547,15 +611,28 @@ namespace SquashBot.Gameplay
             // Far enough for the whole board on a tall phone, aimed a little south so it sits above the group buttons.
             float aspect = Mathf.Max(0.4f, cameraRig.Cam.aspect);
             float k = Mathf.Clamp(0.86f / aspect, 1f, 2.1f);
-            // During a clash the view drifts to the fight (unless the player slid it a moment ago).
-            if (clash != null && clash.FightCentre is Vector3 fight && Time.unscaledTime - boardDraggedAt > 4f)
+            // The finger on the board takes the camera; it moves on its own again a little after the finger lifts.
+            if (InputReader.PointerHeld) boardDraggedAt = Time.unscaledTime;
+            bool free = Time.unscaledTime - boardDraggedAt > 2.5f;
+            bool groupClash = chPhase == ChPhase.Clash && clash != null && clash.Clashing && !clash.InBattle;
+            // A clash of two groups: close in on it; afterwards back out. The battle: the whole view, touring the fights.
+            zoom = Mathf.Lerp(zoom, groupClash && free ? 0.55f : 1f, Time.deltaTime * 1.6f);
+            Vector3? want = null;
+            if (groupClash && clash.FightCentre is Vector3 fight) want = fight;
+            else if (chPhase == ChPhase.Battle && clash != null)
             {
-                var want = fight - boardCentre + new Vector3(0f, 0f, 3f);
-                want = new Vector3(Mathf.Clamp(want.x, -BoardW * 0.45f, BoardW * 0.45f), 0f, Mathf.Clamp(want.z, -BoardH * 0.45f, BoardH * 0.45f));
-                boardPan = Vector3.Lerp(boardPan, want, Time.deltaTime * 1.5f);
+                if (Time.unscaledTime >= tourNext && clash.SomeFight() is Vector3 spot) { tourSpot = spot; tourNext = Time.unscaledTime + 4.5f; }
+                want = tourSpot;
             }
+            if (free && want.HasValue)
+            {
+                var w = want.Value - boardCentre + new Vector3(0f, 0f, 3f * zoom);
+                w = new Vector3(Mathf.Clamp(w.x, -BoardW * 0.45f, BoardW * 0.45f), 0f, Mathf.Clamp(w.z, -BoardH * 0.45f, BoardH * 0.45f));
+                boardPan = Vector3.Lerp(boardPan, w, Time.deltaTime * (chPhase == ChPhase.Battle ? 0.6f : 1.5f));
+            }
+            k *= zoom;
             pos = boardCentre + boardPan + new Vector3(-4.5f, 14f, -11.5f) * k;
-            rot = Quaternion.LookRotation(boardCentre + boardPan + new Vector3(0f, 0f, -3f) - pos);
+            rot = Quaternion.LookRotation(boardCentre + boardPan + new Vector3(0f, 0f, -3f * zoom) - pos);
         }
     }
 }

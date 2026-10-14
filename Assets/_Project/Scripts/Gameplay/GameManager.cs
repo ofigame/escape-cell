@@ -2180,7 +2180,7 @@ namespace SquashBot.Gameplay
             HideTools();
             if (hovering) { hovering = false; ShowHoverMarker(false); }
 
-            if (challengeRun) { ChallengeEnd(false); return; } // a challenge lost: trophies, the result card
+            if (challengeRun) { ChallengeEnd(false); return; } // foi fell in the duel: 0-2, or 1-1 if its army had won
             // Coins picked up are kept even on a loss, so every run feels worth it.
             SaveData.Coins += Earned;
             if (bonusRun)

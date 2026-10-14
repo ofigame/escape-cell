@@ -21,6 +21,17 @@ namespace SquashBot.Gameplay
     {
         /// <summary>A clash ended: soldiers left in the side's group (0 = mine, 1 = theirs).</summary>
         public event Action<int, int> ClashOver;
+        /// <summary>The all-out battle ended (a side wiped out, or the minute ran out): soldiers left on each side.</summary>
+        public event Action<int, int> BattleOver;
+
+        private bool melee;
+        // The courtyard's floor: soldiers never step off it while they fight (only when they march away at the end).
+        private Vector3 boundsMin = new Vector3(-999f, 0f, -999f), boundsMax = new Vector3(999f, 0f, 999f);
+
+        public void SetBounds(Vector3 min, Vector3 max) { boundsMin = min; boundsMax = max; }
+        private float meleeTime;
+        /// <summary>How long the all-out battle may go on before the side with more soldiers takes it.</summary>
+        public const float BattleSeconds = 60f;
 
         private class Unit
         {
@@ -30,7 +41,7 @@ namespace SquashBot.Gameplay
             public SoldierModel model;
             public Vector3 home;
             public float hp, maxHp, dmg, speed, range, cooldown, cd, think;
-            public bool fighting, returning, dead;
+            public bool fighting, returning, dead, leaving;
             public Unit target;
             public float swing = -1f;
             public bool Archer => Army.Family(kind) == 2;
@@ -162,6 +173,55 @@ namespace SquashBot.Gameplay
             }
         }
 
+        /// <summary>Every soldier still standing on both sides charges: they fight until one side is gone (or the minute is up).</summary>
+        public void StartBattle()
+        {
+            foreach (var u in units)
+            {
+                if (u.dead) continue;
+                u.fighting = true;
+                u.returning = false;
+                u.target = null;
+                u.think = UnityEngine.Random.value * 0.5f;
+                u.cd = 0.3f + UnityEngine.Random.value * 0.8f;
+            }
+            foreach (var l in labels) if (l != null) l.gameObject.SetActive(false);
+            clashing = true;
+            melee = true;
+            meleeTime = 0f;
+            clashTime = 0f;
+            AudioManager.PlaySfx(Sfx.Warning, 0.8f, 0.7f);
+        }
+
+        /// <summary>The battle is over: every soldier left marches off the field, out past its own edge, and is gone.</summary>
+        public void Retreat()
+        {
+            foreach (var u in units)
+            {
+                if (u.dead) continue;
+                u.fighting = false;
+                u.target = null;
+                u.leaving = true;
+                u.returning = true;
+                u.home = new Vector3(u.root.position.x, u.home.y, centre.z + (u.team == 0 ? -16f : 16f));
+            }
+        }
+
+        /// <summary>Where one of the fights in the battle is (a soldier in it, picked at random), for the camera's tour.</summary>
+        public Vector3? SomeFight()
+        {
+            int n = 0;
+            foreach (var u in units) if (!u.dead && u.fighting && u.target != null) n++;
+            if (n == 0) return FightCentre;
+            int pick = UnityEngine.Random.Range(0, n);
+            foreach (var u in units)
+                if (!u.dead && u.fighting && u.target != null && pick-- == 0) return (u.root.position + u.target.root.position) * 0.5f;
+            return null;
+        }
+
+        /// <summary>The all-out battle is on.</summary>
+        public bool InBattle => melee;
+
         /// <summary>Sends a group from each side to the middle; they fight until one is gone (or 35 s pass).</summary>
         public void StartClash(int myGroup, int theirGroup)
         {
@@ -271,7 +331,13 @@ namespace SquashBot.Gameplay
                     u.model.SetRaise(Mathf.Sin(Mathf.Clamp01(u.swing) * Mathf.PI) * 1.1f);
                     if (u.swing >= 1f) { u.swing = -1f; u.model.SetRaise(0f); }
                 }
-                if (u.returning) { Walk(u, u.home, dt, out bool there); if (there) { u.returning = false; Face(u, centre); } continue; }
+                if (u.returning)
+                {
+                    Walk(u, u.home, dt, out bool there);
+                    if (there && u.leaving) { u.dead = true; Destroy(u.root.gameObject); }
+                    else if (there) { u.returning = false; Face(u, centre); }
+                    continue;
+                }
                 if (!u.fighting) continue;
                 u.cd -= dt;
                 if (!contact && u.target == null)
@@ -329,6 +395,16 @@ namespace SquashBot.Gameplay
             clashTime += dt;
             int mineLeft = 0, theirsLeft = 0;
             foreach (var u in units) if (!u.dead && u.fighting) { if (u.team == 0) mineLeft++; else theirsLeft++; }
+            if (melee)
+            {
+                meleeTime += dt;
+                if (mineLeft > 0 && theirsLeft > 0 && meleeTime < BattleSeconds) return;
+                melee = false;
+                clashing = false;
+                foreach (var u in units) { u.fighting = false; u.target = null; }
+                BattleOver?.Invoke(mineLeft, theirsLeft);
+                return;
+            }
             if (mineLeft > 0 && theirsLeft > 0 && clashTime < 35f) return;
             // Over: the survivors go back to their places (the block closes up again).
             clashing = false;
@@ -420,8 +496,9 @@ namespace SquashBot.Gameplay
                 float d = away.sqrMagnitude;
                 if (d > 0.000001f && d < 0.36f * 0.36f) { d = Mathf.Sqrt(d); step += away / d * (0.36f - d) * 0.5f; }
             }
-            u.root.position += step;
-            u.root.position = new Vector3(u.root.position.x, u.home.y, u.root.position.z);
+            var p = u.root.position + step;
+            if (!u.leaving) { p.x = Mathf.Clamp(p.x, boundsMin.x, boundsMax.x); p.z = Mathf.Clamp(p.z, boundsMin.z, boundsMax.z); }
+            u.root.position = new Vector3(p.x, u.home.y, p.z);
             if (step.sqrMagnitude > 0.00001f && !(u.target != null && u.Archer))
                 u.root.rotation = Quaternion.Slerp(u.root.rotation, Quaternion.LookRotation(new Vector3(step.x, 0f, step.z)), dt * 10f);
             else if (u.target != null) Face(u, u.target.root.position);

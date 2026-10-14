@@ -60,7 +60,7 @@ namespace SquashBot.Data
 
         [Serializable] public class Result { public int change; public Profile profile; }
 
-        [Serializable] public class Attack { public string attacker; public bool held; public int change; }
+        [Serializable] public class Attack { public string attacker; public bool held, draw; public int change; }
 
         [Serializable] private class LiveAttack { public string attacker; }
 
@@ -78,7 +78,7 @@ namespace SquashBot.Data
             public float foiHit, boldness;
         }
 
-        [Serializable] private class ResultBody { public bool won; }
+        [Serializable] private class ResultBody { public bool won, draw; }
 
         // ---------- Calls ----------
 
@@ -141,10 +141,10 @@ namespace SquashBot.Data
         }
 
         /// <summary>Sends a challenge's result. Null: not taken (no network: the server counts it lost later).</summary>
-        public static IEnumerator SendResult(long matchId, bool won, Action<Result> done)
+        public static IEnumerator SendResult(long matchId, bool won, bool draw, Action<Result> done)
         {
             long code = 0; string body = null;
-            yield return Send("POST", "/match/" + matchId + "/result", JsonUtility.ToJson(new ResultBody { won = won }), true, (c, b) => { code = c; body = b; });
+            yield return Send("POST", "/match/" + matchId + "/result", JsonUtility.ToJson(new ResultBody { won = won && !draw, draw = draw }), true, (c, b) => { code = c; body = b; });
             done(code == 200 ? TryParse<Result>(body) : null);
         }
 

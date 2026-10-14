@@ -546,12 +546,13 @@ namespace SquashBot.UI
                 var rootRect = (RectTransform)canvas.transform;
                 stickBase = UiFactory.Box("Stick", rootRect, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(200f, 200f));
                 stickBase.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(stickBase, new Color(1f, 1f, 1f, 0.1f), UiSprites.Circle).raycastTarget = false;
-                UiFactory.Fill(UiFactory.Stretch("Rim", stickBase), new Color(1f, 1f, 1f, 0.35f), UiSprites.Ring, 0.25f).raycastTarget = false;
+                // A faint wisp of smoke where the finger went down (no hard ring), and a fainter puff under the finger.
+                UiFactory.Fill(stickBase, new Color(1f, 1f, 1f, 0.07f), UiSprites.Smoke).raycastTarget = false;
                 stickKnob = UiFactory.Box("Knob", rootRect, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(90f, 90f));
                 stickKnob.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(stickKnob, new Color(1f, 1f, 1f, 0.45f), UiSprites.Circle).raycastTarget = false;
+                UiFactory.Fill(stickKnob, new Color(1f, 1f, 1f, 0.12f), UiSprites.Smoke).raycastTarget = false;
             }
+            on &= SquashBot.Gameplay.InputReader.PointerHeld; // gone the moment the finger lifts
             stickBase.gameObject.SetActive(on);
             stickKnob.gameObject.SetActive(on);
             if (!on) return;

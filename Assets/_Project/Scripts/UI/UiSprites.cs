@@ -18,7 +18,29 @@ namespace SquashBot.UI
         /// <summary>A rounded fill that is brighter at the top than the bottom (tint it: a modern gradient button).</summary>
         public static Sprite RoundedGradient => roundedGradient != null ? roundedGradient : roundedGradient = Make(FillAlpha, Radius, true);
         public static Sprite CircleGradient => circleGradient != null ? circleGradient : circleGradient = Make(CircleAlpha, 0, true);
-        private static Sprite roundedGradient, circleGradient;
+        private static Sprite roundedGradient, circleGradient, smoke;
+
+        /// <summary>A soft puff: bright in the middle, fading to nothing with a wispy, uneven edge (like a breath of smoke).</summary>
+        public static Sprite Smoke => smoke != null ? smoke : smoke = MakeSmoke();
+
+        private static Sprite MakeSmoke()
+        {
+            var tex = new Texture2D(Size, Size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
+            var px = new Color32[Size * Size];
+            for (int y = 0; y < Size; y++)
+                for (int x = 0; x < Size; x++)
+                {
+                    float dx = (x + 0.5f) / Size - 0.5f, dy = (y + 0.5f) / Size - 0.5f;
+                    float r = Mathf.Sqrt(dx * dx + dy * dy) * 2f;
+                    float ang = Mathf.Atan2(dy, dx);
+                    float wisp = 0.85f + 0.15f * Mathf.PerlinNoise(Mathf.Cos(ang) * 2f + 3f, Mathf.Sin(ang) * 2f + 3f) + 0.1f * Mathf.PerlinNoise(x * 0.08f, y * 0.08f);
+                    float a = Mathf.Pow(Mathf.Clamp01(1f - r / wisp), 2.2f);
+                    px[y * Size + x] = new Color32(255, 255, 255, (byte)(a * 255));
+                }
+            tex.SetPixels32(px);
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, Size, Size), new Vector2(0.5f, 0.5f), 100f);
+        }
 
         private delegate float AlphaFn(float signedDistance);
 

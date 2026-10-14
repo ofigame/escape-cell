@@ -124,6 +124,14 @@ namespace SquashBot.Data
             return change;
         }
 
+        /// <summary>A drawn challenge (1-1): played, nothing gained or lost. Returns the change (none).</summary>
+        public static int RecordDraw()
+        {
+            PlayerPrefs.SetInt(PlayedKey, Played + 1);
+            PlayerPrefs.Save();
+            return 0;
+        }
+
         /// <summary>Gold a win brings (more the higher the rank).</summary>
         public static int WinGold => 80 + Rank * 20;
 
