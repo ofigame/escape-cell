@@ -569,7 +569,7 @@ namespace SquashBot.Gameplay
             hunt.ChallengeBattle = true;
             var w = Armory.Get(rival.weapon);
             int hp = Mathf.RoundToInt(rival.foiHp / Mathf.Max(0.4f, 1f - rival.armor * 0.8f));
-            float hit = Mathf.Clamp(rival.foiHit * (0.7f + 0.12f * Armory.Damage(w, Mathf.Max(1, rival.weaponLevel))), 0.05f, 0.35f);
+            float hit = Mathf.Clamp(rival.foiHit * (0.85f + 0.12f * Armory.Damage(w, Mathf.Max(1, rival.weaponLevel))), 0.06f, 0.35f);
             hunt.FoeBoldness = rival.boldness;
             hunt.AddChallengeFoe(RivalTile, hp, hit, look, rivalHeld);
             ui.ShowIntro(Loc.T("ch.duel"), Loc.T("ch.duelText"));

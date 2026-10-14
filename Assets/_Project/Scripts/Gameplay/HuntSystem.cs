@@ -552,7 +552,7 @@ namespace SquashBot.Gameplay
                     if (grid.IsLava(g.pos + dir)) BurnGuard(g, g.pos + dir);
                     else KillGuard(g);
                 }
-                else KnockBack(g);
+                else if (g != challengeFoe) KnockBack(g); // the rival foi stands its ground and hits back
                 return true;
             }
             if (StrikeDrone(p)) return true;
@@ -999,7 +999,7 @@ namespace SquashBot.Gameplay
             {
                 // Winding up: the tiles it will hit glow ever redder; the slam lands on them.
                 g.windup += dt;
-                float k = g.windup / (g.brute ? BruteWindTime : WindTime);
+                float k = g.windup / ((g.brute ? BruteWindTime : WindTime) * FoeWindScale(g));
                 g.SetRaise(k * 1.3f);
                 if (g.soldier == null || g.area.Contains(robot.Position)) foreach (var t in g.area) view.SetWarning(t, 0.4f + 0.6f * k); // soldiers on soldiers: no red tiles
                 if (k >= 1f)

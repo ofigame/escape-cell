@@ -76,13 +76,15 @@ namespace SquashBot.Gameplay
             }
             health -= damage;
             hitsTaken++;
-            hurtCooldown = HurtGrace;
+            // The challenge's duel: blows come in flurries — no long blink, no knock to another tile, every blow counts.
+            bool duel = challengeRun && chPhase == ChPhase.Duel;
+            hurtCooldown = duel ? 0.12f : HurtGrace;
             ui.Flash(new Color(1f, 0.15f, 0.15f), 0.3f);
             BreakCombo();
 
             if (crushed) hazards.Shatter(p);
-            else robot.RescueTo(SafeTileNear(robot.LastLeftTile, p));
-            robot.GiveShield(HurtGrace); // the blink: nothing hurts for a moment
+            else if (!duel) robot.RescueTo(SafeTileNear(robot.LastLeftTile, p));
+            if (!duel) robot.GiveShield(HurtGrace); // the blink: nothing hurts for a moment
 
             cameraRig.Shake(0.9f);
             cameraRig.Punch(0.7f);

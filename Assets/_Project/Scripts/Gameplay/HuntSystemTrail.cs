@@ -150,7 +150,7 @@ namespace SquashBot.Gameplay
         public void ClearChallengeFoe() { challengeFoe = null; ChallengeBattle = false; }
 
         /// <summary>The rival foi's state, for tests.</summary>
-        public string FoeDebug => challengeFoe == null ? "none" : $"pos {challengeFoe.pos} foi {robot.Position} hp {challengeFoe.hp} wind {challengeFoe.windup:0.0} cd {challengeFoe.cooldown:0.0} step {challengeFoe.step:0.0} moveT {challengeFoe.moveT:0.0} engaged {engaged.Contains(challengeFoe)}";
+        public string FoeDebug => challengeFoe == null ? "none" : $"pos {challengeFoe.pos} foi {robot.Position} hp {challengeFoe.hp} wind {challengeFoe.windup:0.0} cd {challengeFoe.cooldown:0.0} step {challengeFoe.step:0.0} moveT {challengeFoe.moveT:0.0} engaged {engaged.Contains(challengeFoe)} combo {foeCombo} back {Time.time < foeBackOffUntil} flee {Time.time < foeFleeUntil}";
 
         // ---------- Wings: robots split up and close round their target ----------
 
@@ -267,13 +267,35 @@ namespace SquashBot.Gameplay
             if (!flee) return false;
             if ((g.step -= Time.deltaTime) > 0f) return true;
             g.step = 0f;
-            return StepAway(g, robot.Position, 1f / (GuardSpeed(g) * 1.15f));
+            return StepAway(g, robot.Position, 1f / (GuardSpeed(g) * 1.9f)); // a quick getaway
         }
 
-        /// <summary>The rival foi just struck: it backs off a moment (a careful one more often).</summary>
+        /// <summary>Blows left in the rival foi's current flurry.</summary>
+        private int foeCombo;
+
+        /// <summary>The rival foi's wind-up: quicker inside a flurry.</summary>
+        private float FoeWindScale(Guard g) => g == challengeFoe && foeCombo > 0 ? 0.5f : 1f;
+
+        /// <summary>
+        /// The rival foi just struck. It attacks in flurries — two to four quick blows (more for a bold one), each
+        /// following hard on the last — and when a flurry is spent it backs off a moment (a careful one more often).
+        /// </summary>
         private void FoeStruck(Guard g)
         {
-            if (g == challengeFoe && rng.NextDouble() < 0.3 + 0.5 * (1f - FoeBoldness)) foeBackOffUntil = Time.time + 0.7f;
+            if (g != challengeFoe) return;
+            if (foeCombo > 0)
+            {
+                foeCombo--;
+                if (foeCombo > 0) { g.cooldown = 0.08f; return; }
+            }
+            else
+            {
+                foeCombo = 1 + rng.Next(1, 3) + (rng.NextDouble() < FoeBoldness ? 1 : 0); // this blow opens a flurry of 2-4
+                g.cooldown = 0.08f;
+                return;
+            }
+            g.cooldown = 0.9f + (float)rng.NextDouble() * 0.5f;
+            if (rng.NextDouble() < 0.4 + 0.5 * (1f - FoeBoldness)) foeBackOffUntil = Time.time + 0.8f;
         }
 
         /// <summary>A step to a free neighbour as far from foi as it stands now (round foi, not away): false when there is none.</summary>
@@ -287,7 +309,7 @@ namespace SquashBot.Gameplay
                 if (CanStep(g.pos, n) && Chebyshev(robot.Position, n) == near) options.Add(n);
             }
             if (options.Count == 0) return false;
-            MoveGuard(g, options[rng.Next(options.Count)], 1f / (GuardSpeed(g) * 1.3f));
+            MoveGuard(g, options[rng.Next(options.Count)], 1f / (GuardSpeed(g) * 1.9f));
             return true;
         }
 
