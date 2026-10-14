@@ -172,7 +172,10 @@ namespace SquashBot.Data
             int n = StageCount(index);
             // One stage: the classic floor growing a little each level. Several: the first a small yard round foi's cell,
             // every next one clearly bigger (four tiles wider, three longer), the sixth a huge last field.
-            int first = n == 1 ? (index < 8 ? 9 + index / 2 : Mathf.RoundToInt(Mathf.Lerp(11f, 13f, Mathf.InverseLerp(8f, 19f, index))))
+            // The first twenty floors: every five a bigger stage of a new shape — square, round, hexagon, octagon.
+            int early = index >= 1 && index < 20 ? index / 5 : -1;
+            int first = n == 1 && early >= 0 ? 11 + early * 2
+                : n == 1 ? (index < 8 ? 9 + index / 2 : Mathf.RoundToInt(Mathf.Lerp(11f, 13f, Mathf.InverseLerp(8f, 19f, index))))
                 : Mathf.RoundToInt(Mathf.Lerp(13f, 15f, Mathf.InverseLerp(20f, LevelCount - 1, index))); // always bigger than level 1's 11x11
             var sizes = new int[n];   // widths (odd: the bridges sit on the middle column)
             var lengths = new int[n]; // rows, south to north
@@ -191,14 +194,16 @@ namespace SquashBot.Data
             {
                 int sz = sizes[s], len = lengths[s], x0 = mid - sz / 2, x1 = mid + sz / 2;
                 // Not every stage is a square: from level 11 some are octagons or hexagons.
-                int shape = index < 10 ? 0 : (index * 3 + s * 2) % 3;
+                int shape = early >= 0 ? new[] { 0, 3, 2, 1 }[early] : index < 10 ? 0 : (index * 3 + s * 2) % 3;
                 tops[s] = rows.Count;
                 for (int r = 0; r < len; r++)
                 {
                     var row = new string('.', w).ToCharArray();
                     float dc = Mathf.Abs(r - (len - 1) * 0.5f);
                     int inset = shape == 1 ? Mathf.Max(0, Mathf.Min(sz, len) / 4 - Mathf.Min(r, len - 1 - r))
-                        : shape == 2 ? Mathf.Min(Mathf.RoundToInt(dc * 0.5f), sz / 2 - 2) : 0;
+                        : shape == 2 ? Mathf.Min(Mathf.RoundToInt(dc * 0.5f), sz / 2 - 2)
+                        : shape == 3 ? Mathf.Clamp(sz / 2 - Mathf.RoundToInt((sz / 2 + 0.5f) * Mathf.Sqrt(Mathf.Max(0f, 1f - (dc / ((len - 1) * 0.5f + 0.5f)) * (dc / ((len - 1) * 0.5f + 0.5f))))), 0, sz / 2 - 2) // round
+                        : 0;
                     for (int x = x0 + inset; x <= x1 - inset; x++) row[x] = '#';
                     if (r == 0 || r == len - 1) { row[x0 + inset - 1] = 'F'; row[x1 - inset + 1] = 'F'; } // burning stairs off the corners
                     if (r == len / 2 && s == 0) row[mid] = 'S';                          // foi's cell

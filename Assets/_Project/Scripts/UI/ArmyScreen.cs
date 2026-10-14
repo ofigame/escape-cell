@@ -164,7 +164,8 @@ namespace SquashBot.UI
             freeValue.text = Army.FreePoints.ToString();
             freeOf.text = Loc.F("army.earnedOf", Army.EarnedPoints);
             int score = Army.WorldScore(world);
-            worldText.text = Loc.F("army.world", world + 1, score, Mathf.Min(100, score / 10));
+            worldText.text = Loc.F("army.world", world + 1, score, Mathf.Min(100, score / 10))
+                             + "   ·   " + Loc.F("army.rankBonus", Mathf.RoundToInt(Challenge.ArmyBonus * 100f));
             foreach (var r in refreshers) r();
         }
     }

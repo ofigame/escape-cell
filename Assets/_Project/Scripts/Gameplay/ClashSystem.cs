@@ -139,6 +139,9 @@ namespace SquashBot.Gameplay
             units.Clear();
             boundsMin = new Vector3(-999f, 0f, -999f);
             boundsMax = new Vector3(999f, 0f, 999f);
+            champMin = new Vector3(-999f, 0f, -999f);
+            champMax = new Vector3(999f, 0f, 999f);
+            skirmishGroup = -1;
             foreach (var a in arrows) if (a.arrow != null) Destroy(a.arrow.gameObject);
             arrows.Clear();
             clashing = false;
@@ -232,6 +235,17 @@ namespace SquashBot.Gameplay
         }
 
         private bool skirmish;
+        /// <summary>The group whose turn it is in the stage battle (the others wait in their blocks).</summary>
+        private int skirmishGroup;
+        // Where the rival foi may go (its stage's fighting ground, not the waiting groups' ground).
+        private Vector3 champMin = new Vector3(-999f, 0f, -999f), champMax = new Vector3(999f, 0f, 999f);
+
+        public void SetChampionGround(Vector3 min, Vector3 max) { champMin = min; champMax = max; }
+
+        /// <summary>The group fighting the rival foi now, and how many soldiers are left in all.</summary>
+        public int SkirmishGroup => skirmishGroup;
+        /// <summary>A group's turn has come (its index): the game may say so.</summary>
+        public event Action<int> SkirmishGroupUp;
 
         /// <summary>
         /// The stage battle (Meydan Savaşı): the player's soldiers — two of each group, at <paramref name="spots"/> — against
@@ -244,10 +258,12 @@ namespace SquashBot.Gameplay
             Clear();
             unitHeight = soldierHeight;
             centre = champAt;
+            int perGroup = Mathf.Max(1, spots.Length / Army.Groups);
             for (int i = 0; i < spots.Length; i++)
             {
-                var u = MakeUnit(0, i / 2, kinds[i], powers[i], spots[i]);
-                u.root.rotation = Quaternion.LookRotation(champAt - spots[i]);
+                var u = MakeUnit(0, i / perGroup, kinds[i], powers[i], spots[i]);
+                var face = champAt - spots[i]; face.y = 0f;
+                u.root.rotation = Quaternion.LookRotation(face);
                 u.slot = i;
                 units.Add(u);
             }
@@ -267,11 +283,27 @@ namespace SquashBot.Gameplay
             meleeTime = 0f;
         }
 
-        /// <summary>The stage battle's word to go: the soldiers and the rival foi fall on each other.</summary>
+        /// <summary>The stage battle's word to go: the first group steps up to the rival foi (the rest wait their turn).</summary>
         public void StartSkirmish()
         {
-            foreach (var u in units) { if (u.dead) continue; u.fighting = true; u.cd = 0.4f + UnityEngine.Random.value * 0.6f; }
+            skirmishGroup = -1;
+            foreach (var u in units) if (u.champion) { u.fighting = true; u.cd = 0.6f; }
+            NextSkirmishGroup();
             clashing = true;
+        }
+
+        private void NextSkirmishGroup()
+        {
+            for (int g = skirmishGroup + 1; g < Army.Groups; g++)
+            {
+                if (Alive(0, g) == 0) continue;
+                skirmishGroup = g;
+                foreach (var u in units)
+                    if (!u.dead && u.team == 0 && u.group == g) { u.fighting = true; u.target = null; u.cd = 0.4f + UnityEngine.Random.value * 0.6f; }
+                SkirmishGroupUp?.Invoke(g);
+                return;
+            }
+            skirmishGroup = Army.Groups;
         }
 
         /// <summary>The rival foi leaves the stage battle (its look and weapon, where it stands) for the duel.</summary>
@@ -285,6 +317,15 @@ namespace SquashBot.Gameplay
                 return (c.root, c.held);
             }
             return (null, null);
+        }
+
+        /// <summary>Test aid: where a group's soldiers are and what they do.</summary>
+        public string DebugGroup(int g)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var u in units) if (!u.dead && u.team == 0 && u.group == g) sb.Append($"[{u.root.position.x:0.0},{u.root.position.z:0.0} f{(u.fighting ? 1 : 0)} r{(u.returning ? 1 : 0)} t{(u.target != null ? 1 : 0)}] ");
+            foreach (var u in units) if (u.champion) sb.Append($" CH {u.root.position.x:0.0},{u.root.position.z:0.0} t{(u.target != null ? 1 : 0)}");
+            return sb.ToString();
         }
 
         /// <summary>The all-out battle is on.</summary>
@@ -311,15 +352,15 @@ namespace SquashBot.Gameplay
         {
             var t = new GameObject("GroupLabel").AddComponent<TMPro.TextMeshPro>();
             t.transform.SetParent(transform, false);
-            t.transform.position = spot + Vector3.up * (unitHeight * 2.2f + 1.3f);
+            t.transform.position = spot + Vector3.up * (unitHeight * 1.5f + 0.25f); // right over its soldiers
             t.font = SquashBot.UI.UiFactory.Font;
             t.textPreprocessor = new SquashBot.UI.RtlTextPreprocessor(t);
-            t.fontSize = 4.2f;
+            t.fontSize = 3f;
             t.alignment = TMPro.TextAlignmentOptions.Center;
-            t.color = Color.white;
+            t.color = new Color(1f, 0.85f, 0.3f);
             t.fontStyle = TMPro.FontStyles.Bold;
-            t.outlineWidth = 0.35f;
-            t.outlineColor = team == 0 ? new Color(0.05f, 0.2f, 0.55f) : new Color(0.55f, 0.08f, 0.08f);
+            t.outlineWidth = 0.3f;
+            t.outlineColor = new Color(0.08f, 0.06f, 0.02f);
             t.rectTransform.sizeDelta = new Vector2(8f, 3f);
             labels[team, g] = t;
             Label(team, g, Army.Soldiers);
@@ -467,7 +508,14 @@ namespace SquashBot.Gameplay
             if (melee)
             {
                 meleeTime += dt;
-                if (mineLeft > 0 && theirsLeft > 0 && (skirmish || meleeTime < BattleSeconds)) return;
+                if (skirmish)
+                {
+                    // The group fighting is down: the next steps up; none left: the stage is the rival foi's.
+                    if (mineLeft == 0 && Alive(0) > 0) { NextSkirmishGroup(); return; }
+                    if (Alive(0) > 0) return;
+                    mineLeft = 0;
+                }
+                else if (mineLeft > 0 && theirsLeft > 0 && meleeTime < BattleSeconds) return;
                 melee = false;
                 skirmish = false;
                 clashing = false;
@@ -538,6 +586,20 @@ namespace SquashBot.Gameplay
             var from = u.root.position - target.root.position; from.y = 0f;
             if (from.sqrMagnitude > 0.0001f && Vector3.Dot(target.root.forward, from.normalized) < -0.3f) dmg *= 1.25f;
             if (u.Archer) Shoot(u, target, dmg);
+            else if (u.champion)
+            {
+                // The rival foi's blow catches its target and the nearest one beside it (it fights a whole group alone).
+                Hit(target, dmg, u.team);
+                Unit second = null;
+                float bd = (u.range + 0.45f) * (u.range + 0.45f);
+                foreach (var o in units)
+                {
+                    if (o == target || o.dead || !o.fighting || o.team == u.team) continue;
+                    float d2 = (o.root.position - u.root.position).sqrMagnitude;
+                    if (d2 <= bd) { bd = d2; second = o; }
+                }
+                if (second != null) Hit(second, dmg, u.team);
+            }
             else Hit(target, dmg, u.team);
         }
 
@@ -598,6 +660,7 @@ namespace SquashBot.Gameplay
             }
             var p = u.root.position + step;
             if (!u.leaving) { p.x = Mathf.Clamp(p.x, boundsMin.x, boundsMax.x); p.z = Mathf.Clamp(p.z, boundsMin.z, boundsMax.z); }
+            if (u.champion) { p.x = Mathf.Clamp(p.x, champMin.x, champMax.x); p.z = Mathf.Clamp(p.z, champMin.z, champMax.z); }
             // In a group clash the fighters keep to the middle (once they are in it): never into the waiting groups.
             if (u.fighting && !melee)
             {

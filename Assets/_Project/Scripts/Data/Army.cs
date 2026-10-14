@@ -127,7 +127,8 @@ namespace SquashBot.Data
         }
 
         /// <summary>A group's strength multiplier (1 at no points).</summary>
-        public static float Power(int group) => 1f + GroupPoints(group) * PerPoint;
+        /// <summary>A group's strength: its development points, plus the whole army's rank strength from the challenges.</summary>
+        public static float Power(int group) => 1f + GroupPoints(group) * PerPoint + Challenge.ArmyBonus;
 
         /// <summary>The look tier of a group (0 plain, one more every 25 points).</summary>
         public static int Tier(int group) => GroupPoints(group) / TierStep;

@@ -102,6 +102,13 @@ namespace SquashBot.Data
 
         /// <summary>The trophy league of the trophies held now (it falls with them, unlike the rank).</summary>
         public static int League => RankFor(Trophies);
+
+        /// <summary>
+        /// The whole army's strength from the challenges: 4% a rank step of the trophies held now — winning challenges
+        /// raises it, losing enough trophies to drop a step lowers it again. (The floors' points are spread by hand.)
+        /// </summary>
+        public static float ArmyBonus => BonusFor(Trophies);
+        public static float BonusFor(int trophies) => 0.04f * RankFor(trophies);
         public static string LeagueName(int league) => Loc.T("cup." + Mathf.Clamp(league, 0, RankAt.Length - 1));
 
         /// <summary>Trophies a result is worth: a win +30 (more against a stronger foe), a loss -20.</summary>
@@ -155,7 +162,7 @@ namespace SquashBot.Data
             /// <summary>Blows its foi's shield takes before it breaks (0: none).</summary>
             public int shield;
 
-            public float Power(int g) => 1f + points[g] * Army.PerPoint;
+            public float Power(int g) => 1f + points[g] * Army.PerPoint + BonusFor(trophies);
             public int Rank => RankFor(trophies);
         }
 

@@ -66,6 +66,7 @@ namespace SquashBot.Gameplay
         }
 
         private GlassCell glassCell;
+        private FloorStand floorStand;
         private float glassSince = -1f;
 
         /// <summary>
@@ -110,6 +111,15 @@ namespace SquashBot.Gameplay
             if (arenaRun) ArenaDecor.Build(fortressFloor, grid, level.stageBounds, arenaIndex, robot.Position, BattleArenas.Style(arenaIndex).accent, BattleArenas.Style(arenaIndex).trim);
             if (arenaRun) { var look = BattleArenas.Style(arenaIndex); ArenaDecor.City(fortressFloor, BattleArenas.LastBuildings, look.wall, look.accent, look.trim, arenaIndex); }
             if (arenaRun) BuildGunPosts(fortressFloor);
+            // The floors: a stand of spectators along the far right wall (longer with the floor, more tiers with more stages).
+            floorStand = null;
+            if (!arenaRun && !trailRun && !challengeRun)
+            {
+                float x0 = GridView.ToWorld(new GridPos(grid.Width - 1, 0)).x + 0.5f + wallThick + 0.35f;
+                float z0 = GridView.ToWorld(new GridPos(0, 0)).z - 1f, z1 = GridView.ToWorld(new GridPos(0, grid.Height - 1)).z + 1f;
+                floorStand = FloorStand.Build(fortressFloor, x0, z0, z1, GridView.SurfaceY + wallHeight + 0.1f, 3 + Mathf.Max(1, level.fortressStages),
+                    Color.Lerp(FortressFloor.WallTint ?? new Color(0.7f, 0.66f, 0.6f), Color.white, 0.35f), levelIndex * 31 + 7);
+            }
             // The fortress never moves: its thousands of pieces are merged into a few big meshes (far fewer draw calls).
             if (fortressFloor.GetComponentsInChildren<MeshRenderer>().Length < 6000) StaticBatchingUtility.Combine(fortressFloor.gameObject); // never on a huge one (memory)
             // Craft crossing the sky over the later fortresses.

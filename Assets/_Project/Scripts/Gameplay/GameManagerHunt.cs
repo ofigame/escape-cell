@@ -154,6 +154,7 @@ namespace SquashBot.Gameplay
         {
             if (robotKind && !defenseStrike && !hunt.AllyKill) { hitStopLeft = 0.06f; cameraRig.Punch(0.35f); CountStreak(p); }
             int reward = robotKind ? 3 : 1;
+            if (floorStand != null && robotKind) floorStand.Cheer(0.55f);
             if (defenseStrike) reward /= 2; // felled by a defence: half the coins
             coinsThisRun += reward;
             comboTimer = ComboWindow;
@@ -162,6 +163,7 @@ namespace SquashBot.Gameplay
 
         private void OnHuntWon()
         {
+            if (floorStand != null) floorStand.Cheer(1f);
             QuestProgress(DailyGoal.Wins);
             if (fifi != null && fifiUp) fifi.Cheer();
             OpenBridge();

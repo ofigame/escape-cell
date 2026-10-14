@@ -616,6 +616,7 @@ namespace SquashBot.Gameplay
             if (colosseum != null) colosseum.Cheer(won ? 0 : draw ? -1 : 1, 1f);
             // Online the server keeps the score (the same sum, shown at once, then its numbers taken); offline: practice.
             int change = 0;
+            float bonusBefore = Challenge.ArmyBonus;
             if (chOnline)
             {
                 change = draw ? Challenge.RecordDraw() : Challenge.Record(won, rival.trophies);
@@ -634,7 +635,9 @@ namespace SquashBot.Gameplay
             chUi.HideAll();
             string line = score + "  ·  " + Loc.F(won ? "ch.wonLine" : draw ? "ch.drawLine" : "ch.lostLine", rival.name) + "\n"
                           + (chOnline ? (change >= 0 ? "+" : "") + Loc.F("ch.trophies", change) : Loc.T("ch.offline")) + (gold > 0 ? " · +" + gold + " " + Loc.T("ch.gold") : "")
-                          + "\n" + Challenge.RankName(Challenge.Rank) + " · " + Loc.F("ch.trophies", Challenge.Trophies);
+                          + "\n" + Challenge.RankName(Challenge.Rank) + " · " + Loc.F("ch.trophies", Challenge.Trophies)
+                          + (Mathf.Abs(Challenge.ArmyBonus - bonusBefore) > 0.001f
+                              ? "\n" + Loc.F(Challenge.ArmyBonus > bonusBefore ? "ch.bonusUp" : "ch.bonusDown", Mathf.RoundToInt(Challenge.ArmyBonus * 100f)) : "");
             StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
             {
                 won = won,

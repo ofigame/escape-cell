@@ -24,9 +24,14 @@ namespace SquashBot.Gameplay
         private bool StageMode => challengeRun && chMode == ChMode.Stages;
         private float stageSidesNext;
 
-        private const int StW = 15;
-        // Rows from the south (y = 0): stage B, its bridge (gate on the middle row), the round middle, A's bridge, stage A.
-        private const int B0 = 0, B1 = 13, MidC = 23, A0 = 33, A1 = 46, StH = A1 + 1;
+        private const int StW = 25, StMid = StW / 2;
+        // Rows from the south (y = 0): stage B (its fighting ground, then the waiting groups' ground behind a line), its
+        // bridge (gate on the middle row), the round middle, A's bridge, stage A (fighting ground, then its waiting ground).
+        private const int B0 = 0, BLine = 12, B1 = 16, MidC = 28, A0 = 40, ALine = 52, A1 = 56, StH = A1 + 1;
+        /// <summary>The rival's groups still waiting on foi's stage (their soldiers' models, in their blocks).</summary>
+        private readonly List<List<SoldierModel>> waitingB = new List<List<SoldierModel>>();
+        private int stageGroup;
+        private float nextGroupAt = -1f;
 
         private static string[] StageLayout()
         {
@@ -38,13 +43,13 @@ namespace SquashBot.Gameplay
                 {
                     char c = '.';
                     if ((y >= B0 && y <= B1) || (y >= A0 && y <= A1)) c = '#';
-                    else if ((y > B1 && y < MidC - 6) || (y > MidC + 6 && y < A0)) c = x >= 6 && x <= 8 ? (y == B1 + 2 || y == A0 - 2 ? 'G' : '#') : '.';
+                    else if ((y > B1 && y < MidC - 8) || (y > MidC + 8 && y < A0)) c = x >= StMid - 1 && x <= StMid + 1 ? (y == B1 + 2 || y == A0 - 2 ? 'G' : '#') : '.';
                     else
                     {
-                        float dx = (x - 7) / 7.4f, dy = (y - MidC) / 6.6f;
+                        float dx = (x - StMid) / 12.4f, dy = (y - MidC) / 8.6f;
                         if (dx * dx + dy * dy <= 1f) c = '#';
                     }
-                    if (x == 7 && y == 2) c = 'S';
+                    if (x == StMid && y == 3) c = 'S';
                     row[x] = c;
                 }
                 rows[StH - 1 - y] = new string(row); // the layout's first row is the north end
@@ -86,29 +91,40 @@ namespace SquashBot.Gameplay
             DestroyCells();
             if (colosseum != null) { Destroy(colosseum.gameObject); colosseum = null; }
 
-            // Stage B: the rival's soldiers, two of each group, in two lines across its north half.
-            int[] xs = { 2, 4, 6, 8, 10, 12 };
+            // Stage B: the rival's whole army, six blocks waiting behind the line (foi may not go there); the groups step
+            // up one after another.
+            foreach (var grp in waitingB) foreach (var m in grp) if (m != null) Destroy(m.gameObject);
+            waitingB.Clear();
             for (int g = 0; g < Army.Groups; g++)
-                for (int k = 0; k < 2; k++)
+            {
+                var kind = Army.KindOf(g);
+                var grp = new List<SoldierModel>();
+                var centre = GridView.ToWorld(new GridPos(0, 0)) + new Vector3(2.5f + 4f * g, GridView.SurfaceY, (BLine + B1) * 0.5f + 0.6f);
+                for (int i = 0; i < Army.Soldiers; i++)
                 {
-                    var kind = Army.KindOf(g);
-                    var tile = new GridPos(xs[(g * 2 + k) % 6], k == 0 ? B1 - 2 : B1 - 4 - (g % 2));
                     var model = SoldierModel.Build(hunt.transform, kind, Army.Heavy(kind) ? ClashSystem.Theirs : Color.Lerp(ClashSystem.Theirs, Color.white, 0.3f));
                     model.transform.localScale = Vector3.one * hunt.FoiHeight * 0.8f * (Army.Heavy(kind) ? 1.12f : 1f);
+                    model.transform.position = centre + new Vector3((i % 6 - 2.5f) * 0.42f, 0f, (i / 6 - 2f) * 0.5f);
                     model.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-                    hunt.AddChallengeSoldier(GridView.ToWorld(tile), SoldierHp(kind, rival.Power(g)) + 1, model.transform, model, kind);
+                    grp.Add(model);
                 }
+                waitingB.Add(grp);
+            }
+            for (int y = BLine; y <= B1; y++) for (int x = 0; x < StW; x++) grid.SetOccupied(new GridPos(x, y), true); // the waiting ground
+            stageGroup = 0;
+            nextGroupAt = -1f;
             hunt.ChallengeBattle = false; // a few at a time come at foi, as on the floors
             hunt.UseStreetMap = true;
 
             // Stage A: the player's soldiers against the rival foi.
-            var spots = new Vector3[Army.Groups * 2];
+            var spots = new Vector3[Army.Groups * Army.Soldiers];
             var kinds = new GroupKind[spots.Length];
             var powers = new float[spots.Length];
             for (int i = 0; i < spots.Length; i++)
             {
-                int g = i / 2;
-                spots[i] = GridView.ToWorld(new GridPos(xs[i % 6], A0 + 3 + (i / 6) * 2)) + Vector3.up * GridView.SurfaceY;
+                int g = i / Army.Soldiers, k = i % Army.Soldiers;
+                var centre = GridView.ToWorld(new GridPos(0, 0)) + new Vector3(2.5f + 4f * g, GridView.SurfaceY, (ALine + A1) * 0.5f - 0.6f);
+                spots[i] = centre + new Vector3((k % 6 - 2.5f) * 0.42f, 0f, (k / 6 - 2f) * 0.5f);
                 kinds[i] = Army.KindOf(g);
                 powers[i] = Army.Power(g);
             }
@@ -117,11 +133,12 @@ namespace SquashBot.Gameplay
             var w = Armory.Get(rival.weapon);
             // About three blows a soldier (more against heavy ones), a little more for a stronger weapon: a stage takes
             // the rival foi about as long as it takes foi.
-            float champDamage = 2f + 0.5f * Armory.Damage(w, Mathf.Max(1, rival.weaponLevel));
-            clash.BeginSkirmish(spots, kinds, powers, rivalLook, rivalHeld, GridView.ToWorld(new GridPos(7, A1 - 3)) + Vector3.up * GridView.SurfaceY,
+            float champDamage = 2.4f + 0.6f * Armory.Damage(w, Mathf.Max(1, rival.weaponLevel));
+            clash.BeginSkirmish(spots, kinds, powers, rivalLook, rivalHeld, GridView.ToWorld(new GridPos(StMid, (A0 + ALine) / 2)) + Vector3.up * GridView.SurfaceY,
                 champDamage, 999f, hunt.FoiHeight * 0.8f);
             rivalLook = null; // the stage battle has it now
             clash.SetBounds(GridView.ToWorld(new GridPos(0, A0)) + new Vector3(0.2f, 0f, 0.2f), GridView.ToWorld(new GridPos(StW - 1, A1)) - new Vector3(0.2f, 0f, 0.2f));
+            // (The rival foi may go anywhere on its stage: its blows only land on the group whose turn it is.)
 
             robot.transform.rotation = Quaternion.identity; // facing north, at the rival's soldiers
             // The opening: the camera high over the whole field, from the rival's stage (its foi and the player's soldiers in
@@ -164,19 +181,45 @@ namespace SquashBot.Gameplay
             chPhase = ChPhase.Stages;
             hunt.Resume();
             clash.StartSkirmish();
+            SendStageGroup();
             chUi.SetStatus(Loc.T("ch.stagesGo"));
             ui.ShowIntro(Loc.T("ch.mode.stages"), Loc.T("ch.stagesIntro"));
             AudioManager.PlaySfx(Sfx.Warning, 0.8f, 1f);
         }
 
-        private void RefreshStageSides() =>
-            chUi.SetSides(Challenge.PlayerName, Challenge.Rank, clash.Alive(0), rival.name, rival.Rank, hunt.ChallengeSoldiersLeft);
+        private int WaitingOnB { get { int n = 0; foreach (var g in waitingB) n += g.Count; return n; } }
 
-        /// <summary>The stage battle, every frame: the sides' counts, and who clears their stage first.</summary>
+        private void RefreshStageSides() =>
+            chUi.SetSides(Challenge.PlayerName, Challenge.Rank, clash.Alive(0), rival.name, rival.Rank, hunt.ChallengeSoldiersLeft + WaitingOnB);
+
+        /// <summary>The next of the rival's groups steps out of its block onto foi's fighting ground.</summary>
+        private void SendStageGroup()
+        {
+            while (stageGroup < waitingB.Count && waitingB[stageGroup].Count == 0) stageGroup++;
+            if (stageGroup >= waitingB.Count) return;
+            var kind = Army.KindOf(stageGroup);
+            int hp = Mathf.Max(1, Mathf.RoundToInt((Army.Heavy(kind) ? 2f : 1f) * rival.Power(stageGroup)));
+            foreach (var m in waitingB[stageGroup])
+            {
+                if (m == null) continue;
+                // Out of the block to the front of the fighting ground, under the line.
+                var at = m.transform.position;
+                hunt.AddChallengeSoldier(new Vector3(at.x, at.y, GridView.ToWorld(new GridPos(0, BLine - 2)).z), hp, m.transform, m, kind);
+            }
+            waitingB[stageGroup].Clear();
+            chUi.SetStatus(Loc.F("ch.groupUp", Loc.T("army.kind." + kind)));
+            stageGroup++;
+        }
+
+        /// <summary>The stage battle, every frame: the sides' counts, the next group up, and who clears their stage first.</summary>
         private void UpdateStageBattle()
         {
             if (Time.unscaledTime >= stageSidesNext) { stageSidesNext = Time.unscaledTime + 0.4f; RefreshStageSides(); }
-            if (hunt.ChallengeSoldiersLeft == 0) StageWon(1);
+            if (hunt.ChallengeSoldiersLeft > 0) return;
+            if (WaitingOnB == 0) { StageWon(1); return; }
+            // A group beaten: a breath, then the next one steps up.
+            if (nextGroupAt < 0f) nextGroupAt = Time.time + 1.2f;
+            else if (Time.time >= nextGroupAt) { nextGroupAt = -1f; SendStageGroup(); }
         }
 
         /// <summary>
@@ -188,6 +231,9 @@ namespace SquashBot.Gameplay
             if (chPhase != ChPhase.Stages) return;
             chLead = lead;
             hunt.RemoveChallengeSoldiers();
+            // The waiting blocks leave too, and their ground is free for the duel.
+            foreach (var grp in waitingB) { foreach (var m in grp) if (m != null) Destroy(m.gameObject); grp.Clear(); }
+            for (int y = BLine; y <= B1; y++) for (int x = 0; x < StW; x++) grid.SetOccupied(new GridPos(x, y), false);
             var (look, held) = clash.TakeChampion();
             clash.Retreat();
             OpenChallengeGates();
@@ -199,7 +245,7 @@ namespace SquashBot.Gameplay
             // The rival foi comes down off its stage towards the middle.
             look.SetParent(null, true);
             var at = new GridPos(Mathf.Clamp(Mathf.RoundToInt(look.position.x), 0, StW - 1), Mathf.Clamp(Mathf.RoundToInt(look.position.z), A0, A1));
-            if (!grid.IsStandable(at) || grid.IsOccupied(at)) at = new GridPos(7, A0 + 1);
+            if (!grid.IsStandable(at) || grid.IsOccupied(at)) at = new GridPos(StMid, A0 + 1);
             var w = Armory.Get(rival.weapon);
             int hp = Mathf.RoundToInt(rival.foiHp / Mathf.Max(0.4f, 1f - rival.armor * 0.8f));
             float hit = Mathf.Clamp(rival.foiHit * (0.85f + 0.12f * Armory.Damage(w, Mathf.Max(1, rival.weaponLevel))), 0.06f, 0.35f);

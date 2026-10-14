@@ -461,7 +461,7 @@ namespace SquashBot.UI
             menuMission = UiFactory.TextBox("Mission", card, Top, new Vector2(0f, -170f), new Vector2(860f, 52f), "", 34f,
                 new Color(0.85f, 0.86f, 1f, 0.8f), FontStyles.Normal);
 
-            var play = UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(-225f, 30f), new Vector2(430f, 150f), () => PlayPressed?.Invoke(), 84f);
+            var play = UiFactory.MakeButton(card, Loc.T("menu.mission"), Kind.Primary, Bottom, new Vector2(-225f, 30f), new Vector2(430f, 150f), () => PlayPressed?.Invoke(), 64f);
             play.gameObject.AddComponent<Pulse>();
             // CHALLENGE beside PLAY, the same size, in the challenge's purple.
             var challenge = UiFactory.MakeButton(card, Loc.T("ch.button"), Kind.Primary, Bottom, new Vector2(225f, 30f), new Vector2(430f, 150f), () => ChallengePressed?.Invoke(), 60f);
@@ -926,8 +926,10 @@ namespace SquashBot.UI
             float underRows = -200f - rows.Length * 120f + 40f;
             privacyButton = UiFactory.MakeButton(card, Loc.T("settings.privacy"), Kind.Secondary, Top, new Vector2(0f, underRows - 90f), new Vector2(560f, 74f),
                 Monetization.AdMob.ShowPrivacyOptions, 34f).gameObject;
-            deleteOnlineButton = UiFactory.MakeButton(card, Loc.T("settings.deleteOnline"), Kind.Secondary, Top, new Vector2(0f, underRows), new Vector2(620f, 74f),
+            // A plain button of its own (red words on a dark face), in its own row under the settings.
+            deleteOnlineButton = Flat.Button(card, Loc.T("settings.deleteOnline"), Top, new Vector2(0f, underRows), new Vector2(640f, 84f), new Color(0.2f, 0.08f, 0.1f, 0.9f), new Color(1f, 0.55f, 0.58f),
                 DeleteOnlinePressed, 30f);
+            ((RectTransform)deleteOnlineButton.transform).pivot = new Vector2(0.5f, 0.5f);
             deleteOnlineText = deleteOnlineButton.GetComponentInChildren<TextMeshProUGUI>();
             deleteOnlineText.enableAutoSizing = true;
             deleteOnlineText.fontSizeMin = 18f;
@@ -951,7 +953,7 @@ namespace SquashBot.UI
             {
                 deleteOnlineAsked = false;
                 deleteOnlineButton.interactable = !ok;
-                deleteOnlineText.color = Color.white;
+                deleteOnlineText.color = new Color(1f, 0.55f, 0.58f);
                 deleteOnlineText.text = Loc.T(ok ? "settings.deleted" : "settings.deleteFail");
             }));
         }
@@ -966,7 +968,7 @@ namespace SquashBot.UI
                 deleteOnlineButton.interactable = true;
                 deleteOnlineAsked = false;
                 deleteOnlineText.text = Loc.T("settings.deleteOnline");
-                deleteOnlineText.color = Color.white;
+                deleteOnlineText.color = new Color(1f, 0.55f, 0.58f);
             }
             SetSetting(SettingKind.Sound, SaveData.Sound);
             SetSetting(SettingKind.Music, SaveData.Music);

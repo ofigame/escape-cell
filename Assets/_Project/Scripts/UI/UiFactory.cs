@@ -199,8 +199,14 @@ namespace SquashBot.UI
             return rt;
         }
 
+        /// <summary>The design's corners: rounded a little, never pill-ends (the sprite's corner over at least this many pixels a unit).</summary>
+        public const float MinCornerPpu = 2.75f;
+
         public static Image Fill(RectTransform rt, Color color, Sprite sprite = null, float pixelsPerUnit = 1f)
         {
+            // Rounded panels, buttons and their rims: small corners and thin edges everywhere (full circles stay circles).
+            if (sprite != null && (sprite == UiSprites.Rounded || sprite == UiSprites.RoundedGradient || sprite == UiSprites.Ring))
+                pixelsPerUnit = Mathf.Max(pixelsPerUnit, MinCornerPpu);
             var image = rt.gameObject.AddComponent<Image>();
             image.sprite = sprite;
             image.type = sprite != null && sprite.border != Vector4.zero ? Image.Type.Sliced : Image.Type.Simple;
@@ -353,7 +359,7 @@ namespace SquashBot.UI
             bool circle = sprite == UiSprites.Circle;
             float w = root.rect.width > 0f ? root.rect.width : root.sizeDelta.x;
             float h = root.rect.height > 0f ? root.rect.height : root.sizeDelta.y;
-            if (ppu <= 0f) ppu = 44f / 50f; // every button: corners of a 50-unit radius (the sprite's 44-pixel corner)
+            if (ppu <= 0f) ppu = MinCornerPpu; // every button: small rounded corners
             var face = Stretch("Face", root);
             Sprite faceSprite = s.glass ? (circle ? UiSprites.Circle : UiSprites.Rounded) : (circle ? UiSprites.CircleGradient : UiSprites.RoundedGradient);
             var image = Fill(face, s.face, faceSprite, circle ? 1f : ppu);
@@ -409,6 +415,14 @@ namespace SquashBot.UI
 
         public static Button MakeButton(Transform parent, string text, ButtonKind kind, Vector2 anchor, Vector2 position, Vector2 size, Action onClick, float fontSize = 64f)
         {
+            // Never a giant slab: at most 116 tall (and its text in proportion); round icon buttons keep their size.
+            if (kind != ButtonKind.Icon && size.y > 116f)
+            {
+                float k = 116f / size.y;
+                size = new Vector2(size.x, 116f);
+                fontSize *= Mathf.Lerp(1f, k, 0.8f);
+            }
+            fontSize = Mathf.Min(fontSize, 60f);
             var root = Box("Button " + text, parent, anchor, position, size);
 
             var style = Style(kind);
