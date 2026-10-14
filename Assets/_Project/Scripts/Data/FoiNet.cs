@@ -50,6 +50,7 @@ namespace SquashBot.Data
             public string weapon;
             public int weaponLevel;
             public float armor;
+            public int shield;
         }
 
         [Serializable]
@@ -83,6 +84,7 @@ namespace SquashBot.Data
             public string weapon;
             public int weaponLevel;
             public float armor;
+            public int shield;
         }
 
         [Serializable] private class ResultBody { public bool won, draw; }
@@ -131,9 +133,9 @@ namespace SquashBot.Data
         }
 
         /// <summary>Sends the army rivals will face (the groups' points, foi's strength in the duel).</summary>
-        public static IEnumerator PutArmy(int[] points, int earned, int world, int foiHp, float foiHit, float boldness, string weapon, int weaponLevel, float armor, Action<bool> done)
+        public static IEnumerator PutArmy(int[] points, int earned, int world, int foiHp, float foiHit, float boldness, string weapon, int weaponLevel, float armor, int shield, Action<bool> done)
         {
-            var b = new ArmyBody { army = string.Join(",", points), earned = earned, world = world, foiHp = foiHp, foiHit = foiHit, boldness = boldness, weapon = weapon, weaponLevel = weaponLevel, armor = armor };
+            var b = new ArmyBody { army = string.Join(",", points), earned = earned, world = world, foiHp = foiHp, foiHit = foiHit, boldness = boldness, weapon = weapon, weaponLevel = weaponLevel, armor = armor, shield = shield };
             long code = 0;
             yield return Send("PUT", "/army", JsonUtility.ToJson(b), true, (c, _) => code = c);
             done(code == 200);

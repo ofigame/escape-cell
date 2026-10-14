@@ -47,6 +47,7 @@ namespace SquashBot.Gameplay
         /// <summary>How far the player has slid the board view.</summary>
         private Vector3 boardPan;
         private float boardDraggedAt = -99f;
+        private Vector3 duelPan;
 
         private const int BoardW = 25, BoardH = 21, PickSeconds = 10;
 
@@ -215,7 +216,7 @@ namespace SquashBot.Gameplay
                 var points = new int[Army.Groups];
                 for (int g = 0; g < Army.Groups; g++) points[g] = Army.GroupPoints(g);
                 yield return FoiNet.PutArmy(points, Army.EarnedPoints, world, Challenge.FoiHpFor(world), Challenge.FoiHitFor(world), 0.5f,
-                    Armory.Equipped.id, Armory.Level(Armory.Equipped), Shop.ArmorShare, r => ok = r);
+                    Armory.Equipped.id, Armory.Level(Armory.Equipped), Shop.ArmorShare, Shop.Level(Upgrade.Shield) > 0 ? Shop.ShieldHits : 0, r => ok = r);
                 if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
             }
             FoiNet.Match match = null;
@@ -561,6 +562,7 @@ namespace SquashBot.Gameplay
         private void StartChallengeDuel()
         {
             chPhase = ChPhase.Duel;
+            duelPan = robot.transform.position - boardCentre; duelPan.y = 0f;
             chUi.SetStatus(Loc.T("ch.duel"));
             clash.Clear();
             if (rivalLook != null) { rivalLook.SetParent(null, true); }
@@ -571,7 +573,7 @@ namespace SquashBot.Gameplay
             int hp = Mathf.RoundToInt(rival.foiHp / Mathf.Max(0.4f, 1f - rival.armor * 0.8f));
             float hit = Mathf.Clamp(rival.foiHit * (0.85f + 0.12f * Armory.Damage(w, Mathf.Max(1, rival.weaponLevel))), 0.06f, 0.35f);
             hunt.FoeBoldness = rival.boldness;
-            hunt.AddChallengeFoe(RivalTile, hp, hit, look, rivalHeld);
+            hunt.AddChallengeFoe(RivalTile, hp, hit, look, rivalHeld, rival.shield);
             ui.ShowIntro(Loc.T("ch.duel"), Loc.T("ch.duelText"));
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 0.8f);
         }
@@ -690,6 +692,19 @@ namespace SquashBot.Gameplay
             }
             // The camera's seat: high on the east stand, level with the middle of the courtyard.
             var seat = boardCentre + new Vector3(BoardW * 0.5f + 11f, 12.5f, 0f);
+            if (duel)
+            {
+                // The duel: the same angle as the battle, never turning; it slides gently after foi (a still zone round
+                // the middle of the view, so small steps do not shake it).
+                var aim = robot.transform.position - boardCentre;
+                aim.y = 0f;
+                var gap = aim - duelPan;
+                if (gap.magnitude > 1.5f) duelPan += gap.normalized * (gap.magnitude - 1.5f) * Mathf.Min(1f, Time.deltaTime * 2.5f);
+                var look = (boardCentre - seat).normalized;
+                pos = boardCentre + duelPan - look * 21f;
+                rot = Quaternion.LookRotation(look);
+                return;
+            }
             var focus = boardCentre + boardPan;
             // Closing in: the camera leans forward along its line of sight (the seat stays where it is in spirit).
             pos = Vector3.Lerp(seat, focus, (1f - zoom) * 0.9f);

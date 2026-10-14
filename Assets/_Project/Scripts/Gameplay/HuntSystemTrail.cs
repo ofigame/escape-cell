@@ -69,7 +69,7 @@ namespace SquashBot.Gameplay
         /// like a warlord (an area smash), taking <paramref name="hp"/> blows and each of its blows taking
         /// <paramref name="hitShare"/> of foi's health.
         /// </summary>
-        public void AddChallengeFoe(GridPos p, int hp, float hitShare, Transform look, HeldWeapon held = null)
+        public void AddChallengeFoe(GridPos p, int hp, float hitShare, Transform look, HeldWeapon held = null, int shieldHits = 0)
         {
             if (!grid.IsStandable(p)) return;
             var g = new Guard { pos = p, brute = false, rank = 98, hp = hp, maxHp = hp, step = 0.4f, cooldown = 1.0f, share = hitShare };
@@ -88,6 +88,9 @@ namespace SquashBot.Gameplay
             guards.Add(g);
             Total++;
             challengeFoe = g;
+            // Its own shield (from its profile): the first blows only crack the bubble.
+            if (shieldHits > 0) { AddShield(g); g.shield = shieldHits; }
+            foeCombo = 0;
         }
 
         /// <summary>Where the rival foi stands (null once it has fallen).</summary>
@@ -274,7 +277,7 @@ namespace SquashBot.Gameplay
         private int foeCombo;
 
         /// <summary>The rival foi's wind-up: quicker inside a flurry.</summary>
-        private float FoeWindScale(Guard g) => g == challengeFoe && foeCombo > 0 ? 0.5f : 1f;
+        private float FoeWindScale(Guard g) => g != challengeFoe ? 1f : foeCombo > 0 ? 0.4f : 0.6f;
 
         /// <summary>
         /// The rival foi just struck. It attacks in flurries — two to four quick blows (more for a bold one), each
@@ -290,7 +293,7 @@ namespace SquashBot.Gameplay
             }
             else
             {
-                foeCombo = 1 + rng.Next(1, 3) + (rng.NextDouble() < FoeBoldness ? 1 : 0); // this blow opens a flurry of 2-4
+                foeCombo = 1 + rng.Next(2, 4) + (rng.NextDouble() < FoeBoldness ? 1 : 0); // this blow opens a flurry of 3-5
                 g.cooldown = 0.08f;
                 return;
             }

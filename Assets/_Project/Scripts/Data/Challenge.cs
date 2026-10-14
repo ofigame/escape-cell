@@ -152,6 +152,8 @@ namespace SquashBot.Data
             public string weapon = "mallet";
             public int weaponLevel = 1;
             public float armor;
+            /// <summary>Blows its foi's shield takes before it breaks (0: none).</summary>
+            public int shield;
 
             public float Power(int g) => 1f + points[g] * Army.PerPoint;
             public int Rank => RankFor(trophies);
@@ -197,6 +199,7 @@ namespace SquashBot.Data
             o.weapon = pick.id;
             o.weaponLevel = 1 + rng.Next(3);
             o.armor = Mathf.Min(0.5f, world * 0.02f + (float)rng.NextDouble() * 0.1f);
+            o.shield = world >= 3 && rng.Next(3) == 0 ? 1 + rng.Next(2) : 0;
             return o;
         }
 
@@ -213,6 +216,7 @@ namespace SquashBot.Data
             o.weapon = string.IsNullOrEmpty(r.weapon) ? "mallet" : r.weapon;
             o.weaponLevel = Mathf.Clamp(r.weaponLevel, 1, 10);
             o.armor = Mathf.Clamp(r.armor, 0f, 0.5f);
+            o.shield = Mathf.Clamp(r.shield, 0, 3);
             return o;
         }
     }

@@ -944,6 +944,7 @@ namespace SquashBot.Gameplay
             else if (g.brute) v *= g.rank >= 99 ? 0.85f : 0.9f;
             else if (g.rank == 0) v *= 0.92f;
             if (Time.time < g.alertUntil) v *= 1.12f;
+            if (g == challengeFoe) v *= 1.35f; // the rival foi is as quick on its feet as foi
             return v;
         }
 

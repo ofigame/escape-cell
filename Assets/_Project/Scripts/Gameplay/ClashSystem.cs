@@ -537,7 +537,8 @@ namespace SquashBot.Gameplay
             if (u.fighting && !melee)
             {
                 bool inZone = u.root.position.z >= zoneMinZ && u.root.position.z <= zoneMaxZ;
-                if (inZone) p.z = Mathf.Clamp(p.z, zoneMinZ, zoneMaxZ);
+                bool targetOut = u.target != null && (u.target.root.position.z < zoneMinZ || u.target.root.position.z > zoneMaxZ);
+                if (inZone && !targetOut) p.z = Mathf.Clamp(p.z, zoneMinZ, zoneMaxZ); // a foe out there is still chased
             }
             u.root.position = new Vector3(p.x, u.home.y, p.z);
             if (step.sqrMagnitude > 0.00001f && !(u.target != null && u.Archer))
