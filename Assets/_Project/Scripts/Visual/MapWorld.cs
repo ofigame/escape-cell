@@ -168,7 +168,7 @@ namespace SquashBot.Visual
             }
 
             // Beyond the last level: the Red Desert, the open world (dim until the escape is complete).
-            bool desertOpen = unlocked >= levelCount || openAll;
+            bool desertOpen = unlocked >= levelCount || openAll || Progress.Stars(levelCount - 1) > 0;
             if (desert == null || desertWasOpen != desertOpen)
             {
                 if (desert != null) Destroy(desert.gameObject);

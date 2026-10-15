@@ -224,6 +224,10 @@ namespace SquashBot.UI
         public DefenseEditorScreen DefenseEditor { get; private set; }
         public BattleArenaScreen Arenas { get; private set; }
         public event Action ArenasPressed;
+        /// <summary>The menu's OPEN WORLD button.</summary>
+        public event Action OpenWorldPressed;
+        private Button openWorldButton;
+        public void SetOpenWorldButton(bool on) { if (openWorldButton != null && openWorldButton.gameObject.activeSelf != on) openWorldButton.gameObject.SetActive(on); }
         public TipCard Tip { get; private set; }
         public WeaponBag WeaponBag { get; private set; }
         public HeroPicker HeroPicker { get; private set; }
@@ -441,6 +445,11 @@ namespace SquashBot.UI
             // Friends: under the army (add a friend, invite one to a duel).
             var friends = MenuArt.DockButton(t, Loc.T("friends.button"), MenuArt.Icon.Friends, new Color(0.4f, 0.75f, 1f), TopLeft, new Vector2(110f, -740f), 120f, () => FriendsPressed?.Invoke());
             ((RectTransform)friends.transform).pivot = new Vector2(0.5f, 0.5f);
+
+            // The open world (once the escape is complete): top right, under the daily bonus.
+            openWorldButton = MenuArt.DockButton(t, Loc.T("ow.button"), MenuArt.Icon.House, new Color(0.35f, 0.75f, 0.4f), TopRight, new Vector2(-110f, -740f), 120f, () => OpenWorldPressed?.Invoke());
+            ((RectTransform)openWorldButton.transform).pivot = new Vector2(0.5f, 0.5f);
+            openWorldButton.gameObject.SetActive(false);
 
             // The battle arenas: top right, under the settings.
             var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopRight, new Vector2(-110f, -400f), 120f, () => ArenasPressed?.Invoke());

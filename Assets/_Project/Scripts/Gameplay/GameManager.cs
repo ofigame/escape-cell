@@ -321,6 +321,7 @@ namespace SquashBot.Gameplay
             ui.PausePressed += Pause;
             ui.BagPressed += OpenBag;
             ui.BombPressed += ThrowBomb;
+            ui.OpenWorldPressed += () => { if (!OpenWorld.OwMode.Active) OpenWorld.OwMode.Enter(robot.Visual, ShowMenu); };
             ui.IntroPressed += () => { if (!IntroCinematic.Playing) IntroCinematic.Play(robot.Visual, fx, true); };
             ui.BombSwitchPressed += () => NextBombKind();
             WireDefenseUi();
@@ -529,6 +530,7 @@ namespace SquashBot.Gameplay
             AudioManager.SetDanger(0f);
             ResetRun();
             State = GameState.Menu;
+            ui.SetOpenWorldButton(OpenWorld.OwMode.Open(LevelCount));
             ShowBackdrop(NextLevel);
             ui.ShowMenu(NextLevel, SaveData.Coins, LevelCatalog.WorldName(NextLevel),
                 PendingRoad >= 0 ? Loc.T("menu.roadPending") : MissionText(levelSet.levels[NextLevel]));
@@ -546,6 +548,7 @@ namespace SquashBot.Gameplay
         private void LateUpdate()
         {
             if (ui == null) return;
+            if (OpenWorld.OwMode.Active) return; // the open world films itself (the game's cameras stay off)
             // The splash waits for the menu to stand (a few frames in, when the lobby has drawn).
             if (!SplashScreen.Ready && Time.frameCount > 5) SplashScreen.Ready = true;
             if (lobby != null && lobby.IsOpen && !ui.MenuVisible) lobby.Close();
