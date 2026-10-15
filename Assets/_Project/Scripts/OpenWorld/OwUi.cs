@@ -66,12 +66,13 @@ namespace SquashBot.OpenWorld
             safe.gameObject.AddComponent<SquashBot.UI.SafeArea>();
 
             // Drag areas under everything: the stick (left), the camera (right).
-            var lookArea = UiFactory.Rect("Look", safe, new Vector2(0.45f, 0f), new Vector2(1f, 0.85f));
+            lookArea = UiFactory.Rect("Look", safe, new Vector2(0.45f, 0f), new Vector2(1f, 0.85f));
             lookArea.gameObject.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
             lookArea.gameObject.AddComponent<LookPad>().owner = this;
-            var stickArea = UiFactory.Rect("Stick", safe, new Vector2(0f, 0f), new Vector2(0.45f, 0.85f));
+            stickArea = UiFactory.Rect("Stick", safe, new Vector2(0f, 0f), new Vector2(0.45f, 0.85f));
             stickArea.gameObject.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
-            stickArea.gameObject.AddComponent<Pad>().Build(this);
+            pad = stickArea.gameObject.AddComponent<Pad>();
+            pad.Build(this);
 
             // Top: BACK, money, barn, camera.
             topBar = UiFactory.Rect("Top", safe, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -150f), Vector2.zero);
@@ -145,7 +146,18 @@ namespace SquashBot.OpenWorld
 
         private TextMeshProUGUI camLabel;
 
-        public void SetCameraLabel(bool tps) => camLabel.text = tps ? Loc.T("ow.cam.iso") : "TPS";
+        public void SetCameraLabel(bool tps)
+        {
+            camLabel.text = tps ? Loc.T("ow.cam.iso") : "TPS";
+            // From above: walk by dragging anywhere (the stick shows where the finger went down). TPS: the stick on the
+            // left, the camera on the right.
+            stickArea.anchorMax = new Vector2(tps ? 0.45f : 1f, 0.85f);
+            lookArea.gameObject.SetActive(tps);
+            pad.Floating = !tps;
+        }
+
+        private RectTransform stickArea, lookArea;
+        private Pad pad;
 
         public void SetMoney(long m) => money.text = m.ToString("N0");
 
@@ -176,6 +188,100 @@ namespace SquashBot.OpenWorld
 
         public event Action DefencePressed, ArmyPressed;
         private Button defenceButton, armyButton;
+
+        // ---------- Where the farm is ----------
+
+        private RectTransform farmPointer;
+        private RawImage farmPointerIcon;
+        private CanvasGroup farmPointerGroup;
+
+        /// <summary>A blinking house at the screen's edge the way the farm lies (over the farm when it is in view).</summary>
+        public void SetFarmPointer(bool show, Vector2 screen, Texture icon)
+        {
+            if (farmPointer == null)
+            {
+                farmPointer = UiFactory.Box("FarmPointer", safe, Vector2.zero, Vector2.zero, new Vector2(120f, 120f));
+                farmPointer.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(farmPointer, new Color(0.15f, 0.45f, 0.25f, 0.85f), UiSprites.Circle).raycastTarget = false;
+                UiFactory.Fill(UiFactory.Stretch("Ring", farmPointer), new Color(1f, 1f, 1f, 0.9f), UiSprites.Ring, 0.25f).raycastTarget = false;
+                var pic = UiFactory.Box("Icon", farmPointer, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(96f, 96f));
+                pic.pivot = new Vector2(0.5f, 0.5f);
+                farmPointerIcon = pic.gameObject.AddComponent<RawImage>();
+                farmPointerIcon.raycastTarget = false;
+                farmPointerGroup = farmPointer.gameObject.AddComponent<CanvasGroup>();
+                farmPointerGroup.blocksRaycasts = false;
+                farmPointer.SetAsFirstSibling();
+            }
+            show &= !ListOpen && !MapOpen;
+            if (farmPointer.gameObject.activeSelf != show) farmPointer.gameObject.SetActive(show);
+            if (!show) return;
+            if (farmPointerIcon.texture != icon) farmPointerIcon.texture = icon;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(safe, screen, null, out var local);
+            farmPointer.anchoredPosition = local + safe.rect.size * safe.pivot;
+            float blink = 0.55f + 0.45f * Mathf.Sin(Time.unscaledTime * 5f);
+            farmPointerGroup.alpha = blink;
+            farmPointer.localScale = Vector3.one * (0.92f + 0.08f * blink);
+        }
+
+        // ---------- The map of the regions ----------
+
+        public event Action MapPressed;
+        private Button mapButton;
+        private RectTransform mapPanel;
+
+        public void SetMapButton(bool on)
+        {
+            if (mapButton == null)
+            {
+                mapButton = Flat.Button(safe, Loc.T("ow.map"), new Vector2(1f, 1f), new Vector2(-150f, -230f), new Vector2(250f, 90f), new Color(0.35f, 0.55f, 0.45f), Color.white, () => { AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.1f); MapPressed?.Invoke(); }, 28f);
+                ((RectTransform)mapButton.transform).pivot = new Vector2(0.5f, 0.5f);
+            }
+            on &= !ListOpen && (mapPanel == null || !mapPanel.gameObject.activeSelf);
+            if (mapButton.gameObject.activeSelf != on) mapButton.gameObject.SetActive(on);
+        }
+
+        public bool MapOpen => mapPanel != null && mapPanel.gameObject.activeSelf;
+
+        /// <summary>The 7 × 7 regions coloured by who holds them, with foi, the farm, the co-op and the Fortress marked.</summary>
+        public void ShowMap(int[] regions, int n, Vector2Int foi, Vector2Int farm, Vector2Int coop, Vector2Int fortress, bool fortressDone)
+        {
+            if (mapPanel != null) Destroy(mapPanel.gameObject);
+            mapPanel = UiFactory.Rect("Map", safe, Vector2.zero, Vector2.one, new Vector2(50f, 140f), new Vector2(-50f, -170f));
+            UiFactory.Fill(mapPanel, new Color(0.06f, 0.07f, 0.12f, 0.97f), UiSprites.Rounded, 1f);
+            var title = Flat.Label(mapPanel, Loc.T("ow.map.title"), new Vector2(0.5f, 1f), new Vector2(0f, -60f), new Vector2(800f, 80f), 46f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
+            title.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var close = Flat.Button(mapPanel, "X", new Vector2(1f, 1f), new Vector2(-70f, -60f), new Vector2(100f, 90f), Flat.CardHi, Flat.Text, () => mapPanel.gameObject.SetActive(false), 40f);
+            ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
+            const float cell = 108f;
+            var grid = UiFactory.Box("Grid", mapPanel, new Vector2(0.5f, 0.5f), new Vector2(0f, 40f), new Vector2(cell * n, cell * n));
+            grid.pivot = new Vector2(0.5f, 0.5f);
+            var colours = new[] { new Color(0.35f, 0.72f, 0.4f), new Color(0.9f, 0.75f, 0.3f), new Color(0.85f, 0.25f, 0.2f) };
+            for (int x = 0; x < n; x++)
+                for (int y = 0; y < n; y++)
+                {
+                    var c = UiFactory.Box("Cell", grid, Vector2.zero, new Vector2((x + 0.5f) * cell, (y + 0.5f) * cell), new Vector2(cell - 6f, cell - 6f));
+                    c.pivot = new Vector2(0.5f, 0.5f);
+                    UiFactory.Fill(c, colours[Mathf.Clamp(regions[y * n + x], 0, 2)], UiSprites.Rounded, 2f).raycastTarget = false;
+                    string mark = null;
+                    if (new Vector2Int(x, y) == fortress && !fortressDone && regions[y * n + x] == 2) mark = "!";
+                    if (new Vector2Int(x, y) == coop) mark = "$";
+                    if (new Vector2Int(x, y) == farm) mark = "F";
+                    if (mark != null)
+                    {
+                        var t = Flat.Label(c, mark, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(cell, cell), 52f, Color.white, TextAlignmentOptions.Center, bold: true);
+                        t.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                    }
+                    if (new Vector2Int(x, y) == foi)
+                    {
+                        var dot = UiFactory.Box("Foi", c, new Vector2(1f, 0f), new Vector2(-20f, 20f), new Vector2(30f, 30f));
+                        dot.pivot = new Vector2(0.5f, 0.5f);
+                        UiFactory.Fill(dot, Color.white, UiSprites.Circle).raycastTarget = false;
+                    }
+                }
+            var legend = Flat.Label(mapPanel, Loc.T("ow.map.legend"), new Vector2(0.5f, 0f), new Vector2(0f, 90f), new Vector2(900f, 130f), 26f, Flat.Muted, TextAlignmentOptions.Center, wrap: true);
+            legend.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            mapPanel.SetAsLastSibling();
+        }
 
         /// <summary>The isometric view's zoom (+ nearer, − further and higher).</summary>
         public event Action<float> Zoom;
@@ -310,7 +416,16 @@ namespace SquashBot.OpenWorld
             private OwUi owner;
             private RectTransform area, baseRect, knob;
             private Vector2 home = new Vector2(230f, 260f);
-            private int pointer = int.MinValue;
+            private int pointer = int.MinValue, fingers;
+            private bool two;
+            private bool floating;
+
+            /// <summary>Hidden until a finger goes down, then under it; a second finger stops the walk (it is the camera's).</summary>
+            public bool Floating
+            {
+                get => floating;
+                set { floating = value; Release(); }
+            }
             private const float Radius = 130f;
 
             public void Build(OwUi o)
@@ -330,25 +445,36 @@ namespace SquashBot.OpenWorld
 
             public void OnPointerDown(PointerEventData e)
             {
-                if (pointer != int.MinValue) return;
+                fingers++;
+                if (floating && fingers > 1) { two = true; Release(); return; }
+                if (pointer != int.MinValue || two) return;
+                baseRect.gameObject.SetActive(true);
                 pointer = e.pointerId;
                 var local = Local(e.position);
-                if ((local - baseRect.anchoredPosition).magnitude > Radius * 1.1f) baseRect.anchoredPosition = local;
+                if (floating || (local - baseRect.anchoredPosition).magnitude > Radius * 1.1f) baseRect.anchoredPosition = local;
                 Track(local);
             }
 
-            public void OnDrag(PointerEventData e) { if (e.pointerId == pointer) Track(Local(e.position)); }
+            public void OnDrag(PointerEventData e) { if (e.pointerId == pointer && !two) Track(Local(e.position)); }
 
             public void OnPointerUp(PointerEventData e)
             {
-                if (e.pointerId != pointer) return;
-                pointer = int.MinValue;
-                owner.Move = Vector2.zero;
-                baseRect.anchoredPosition = home;
-                knob.anchoredPosition = Vector2.zero;
+                fingers = Mathf.Max(0, fingers - 1);
+                if (fingers == 0) two = false;
+                if (e.pointerId == pointer) Release();
             }
 
-            private void OnDisable() { pointer = int.MinValue; if (owner != null) owner.Move = Vector2.zero; }
+            private void Release()
+            {
+                pointer = int.MinValue;
+                if (owner != null) owner.Move = Vector2.zero;
+                if (baseRect == null) return;
+                baseRect.anchoredPosition = home;
+                knob.anchoredPosition = Vector2.zero;
+                baseRect.gameObject.SetActive(!floating);
+            }
+
+            private void OnDisable() { fingers = 0; two = false; Release(); }
 
             private Vector2 Local(Vector2 screen)
             {

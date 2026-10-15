@@ -73,6 +73,7 @@ namespace SquashBot.OpenWorld
             ui.CameraPressed += () => SetTps(!tps);
             ui.DefencePressed += ShowDefences;
             ui.ArmyPressed += ShowArmy;
+            ui.MapPressed += () => ui.ShowMap(save.regions, OwRegions.N, OwRegions.Of(pos), OwRegions.Of(OwWorld.FarmCentre), OwRegions.Of(OwWorld.CoopAt), OwRegions.Fortress, save.fortressDone);
             ui.Zoom += d => isoDist = Mathf.Clamp(isoDist + d, MinZoom, MaxZoom);
             foiMax = Mathf.Max(100, Challenge.FoiMaxHp);
             foiHp = foiMax;
@@ -122,6 +123,9 @@ namespace SquashBot.OpenWorld
             // A raid that came while away is fought out by the farm alone; its report is shown now.
             if (save.raidAt > 0 && OwSave.Now >= save.raidAt) RaidWhileAway();
             save.PlanRaid();
+            OwRegions.Init(save);
+            int taken = OwRegions.Spread(save);
+            if (taken > 0) ui.Toast(Loc.F("ow.region.spread", taken));
         }
 
         private FxSystem fx;
@@ -136,7 +140,8 @@ namespace SquashBot.OpenWorld
             if (foiHp > 0f) return;
             foiHp = 0f;
             ui.Toast(Loc.T("ow.raid.foiDown"));
-            battle.FoiDown();
+            if (battle.Raiding) battle.FoiDown();
+            else if (camp != null && camp.Started) camp.Lose();
         }
 
         private void Leave()
@@ -208,7 +213,7 @@ namespace SquashBot.OpenWorld
                 if (km.sqrMagnitude > 0f) move = km.normalized;
                 if (k.spaceKey.wasPressedThisFrame || k.eKey.wasPressedThisFrame) Act(false);
             }
-            float camYaw = tps ? yaw : 45f;
+            float camYaw = tps ? yaw : isoYaw;
             if (move.sqrMagnitude > 0.01f)
             {
                 var fwd = Quaternion.Euler(0f, camYaw, 0f) * new Vector3(move.x, 0f, move.y);
@@ -230,6 +235,8 @@ namespace SquashBot.OpenWorld
                 blockers.Clear();
                 blockers.AddRange(world.Blockers);
                 farm.AddBlockers(blockers);
+                UpdateCamp();
+                if (camp != null) camp.AddBlockers(blockers);
             }
             nearT -= dt;
             if (nearT <= 0f) { nearT = 0.15f; RefreshAction(); }
@@ -239,9 +246,35 @@ namespace SquashBot.OpenWorld
             if (syncT <= 0f) { syncT = 45f; OwSync.Upload(); }
             if (raidT <= 0f) { raidT = 1f; RaidClock(); }
             ui.SetFarmButtons(!battle.Raiding && (pos - OwWorld.FarmCentre).magnitude < OwBattleData.Reach(save.House.land) + 6f);
-            ui.SetZoomButtons(!tps);
-            if (!tps) PinchAndWheel();
+            ui.SetZoomButtons(false);
+            ui.SetMapButton(!battle.Raiding && (camp == null || !camp.Started));
+            if (!tps) { PinchAndWheel(); MouseTurn(); }
             PlaceCamera(p, dt);
+            FarmPointer();
+        }
+
+        /// <summary>The house that shows the way home: over the farm when it is in view, at the screen's edge the way it lies
+        /// when not; gone at the farm.</summary>
+        private void FarmPointer()
+        {
+            bool far = (pos - OwWorld.FarmCentre).magnitude > save.House.land * 0.5f + 8f;
+            if (!far) { ui.SetFarmPointer(false, Vector2.zero, null); return; }
+            var at = OwWorld.World(farm.HouseAt) + Vector3.up * 5f;
+            var sp = cam.WorldToScreenPoint(at);
+            float margin = Mathf.Min(Screen.width, Screen.height) * 0.09f;
+            var rect = new Rect(margin, margin * 1.6f, Screen.width - margin * 2f, Screen.height - margin * 3.6f);
+            var p2 = new Vector2(sp.x, sp.y);
+            if (sp.z < 0f) p2 = new Vector2(Screen.width, Screen.height) - p2; // behind the camera: the other way
+            if (sp.z < 0f || !rect.Contains(p2))
+            {
+                // To the edge, along the line from the middle.
+                var c = rect.center;
+                var d = p2 - c;
+                if (d.sqrMagnitude < 1f) d = Vector2.up;
+                float s = Mathf.Min(rect.width * 0.5f / Mathf.Max(0.001f, Mathf.Abs(d.x)), rect.height * 0.5f / Mathf.Max(0.001f, Mathf.Abs(d.y)));
+                p2 = c + d * Mathf.Min(1f, s);
+            }
+            ui.SetFarmPointer(true, p2, farm.HouseIcon(Mathf.Max(1, save.house)));
         }
 
         private const float MinZoom = 7f, MaxZoom = 42f;
@@ -268,9 +301,32 @@ namespace SquashBot.OpenWorld
                 down++;
             }
             if (down < 2) { pinchLast = -1f; return; }
-            float gap = (a - b).magnitude / Mathf.Max(1f, Screen.height);
-            if (pinchLast > 0f) isoDist = Mathf.Clamp(isoDist - (gap - pinchLast) * 40f, MinZoom, MaxZoom);
+            float h = Mathf.Max(1f, Screen.height);
+            float gap = (a - b).magnitude / h;
+            var mid = (a + b) * 0.5f / h;
+            if (pinchLast > 0f)
+            {
+                // Apart or together: the zoom. Both the same way: the camera goes round foi and tilts.
+                isoDist = Mathf.Clamp(isoDist - (gap - pinchLast) * 40f, MinZoom, MaxZoom);
+                var move = mid - pinchMid;
+                isoYaw += move.x * 220f;
+                isoTilt = Mathf.Clamp(isoTilt - move.y * 90f, -34f, 16f);
+            }
             pinchLast = gap;
+            pinchMid = mid;
+        }
+
+        /// <summary>The isometric camera's turn round foi and its tilt (two fingers the same way, or the right mouse button).</summary>
+        private float isoYaw = 45f, isoTilt;
+        private Vector2 pinchMid;
+
+        private void MouseTurn()
+        {
+            var mouse = Mouse.current;
+            if (mouse == null || !mouse.rightButton.isPressed) return;
+            var d = mouse.delta.ReadValue() / Mathf.Max(1f, Screen.height);
+            isoYaw += d.x * 220f;
+            isoTilt = Mathf.Clamp(isoTilt - d.y * 90f, -34f, 16f);
         }
 
         // ---------- Raids ----------
@@ -278,6 +334,12 @@ namespace SquashBot.OpenWorld
         /// <summary>Once a second: the warning before a raid, the raid when its time comes, the bar during one.</summary>
         private void RaidClock()
         {
+            if (camp != null && camp.Started)
+            {
+                ui.SetHint(Loc.F("ow.op.bar", camp.Left, camp.Cannons, OwCamp.MaxCannons, Mathf.CeilToInt(foiHp), Mathf.CeilToInt(foiMax)), true);
+                return;
+            }
+            if (!battle.Raiding && OwRegions.Get(save, OwRegions.Of(pos)) == RegionState.Bandit && !ui.ListOpen) { ui.SetHint(Loc.T("ow.region.banditHint"), true); return; }
             if (battle.Raiding)
             {
                 int t = Mathf.CeilToInt(battle.TimeLeft);
@@ -333,6 +395,8 @@ namespace SquashBot.OpenWorld
             {
                 var (items, crops) = save.Loot(new System.Random());
                 report = Loc.F("ow.raid.lost", battle.Kills, items + battle.Stolen, crops);
+                OwRegions.Set(save, OwRegions.Of(OwWorld.FarmCentre), RegionState.Bandit);
+                report += "\n" + Loc.T("ow.region.lost");
                 AudioManager.PlaySfx(Sfx.Warning, 0.8f, 0.7f);
             }
             save.RaidDone();
@@ -358,6 +422,8 @@ namespace SquashBot.OpenWorld
                 int fallen = 0;
                 for (int g = 0; g < save.soldiers.Length; g++) { int k = save.soldiers[g] / 3; save.soldiers[g] -= k; fallen += k; }
                 report = Loc.F("ow.raid.awayLost", count, kills, items, crops, fallen);
+                OwRegions.Set(save, OwRegions.Of(OwWorld.FarmCentre), RegionState.Bandit);
+                report += "\n" + Loc.T("ow.region.lost");
             }
             save.RaidDone();
             Changed(true);
@@ -368,6 +434,61 @@ namespace SquashBot.OpenWorld
         private void ShowReport(string report)
         {
             ui.ShowList(Loc.T("ow.raid.report"), new List<OwRow> { new OwRow { text = report, button = Loc.T("ow.ok"), onClick = ui.CloseList, tall = true } });
+        }
+
+        // ---------- Bandit camps ----------
+
+        private OwCamp camp;
+
+        /// <summary>The camp of the nearest bandit region (within reach) stands while foi is near it; an operation left far
+        /// behind is given up.</summary>
+        private void UpdateCamp()
+        {
+            if (camp != null && camp.Started)
+            {
+                if ((pos - camp.Middle).magnitude > 60f) { Destroy(camp.gameObject); camp = null; ui.Toast(Loc.T("ow.op.left")); }
+                return;
+            }
+            Vector2Int? want = null; float best = 48f;
+            var here = OwRegions.Of(pos);
+            for (int dx = -1; dx <= 1; dx++)
+                for (int dy = -1; dy <= 1; dy++)
+                {
+                    var r = here + new Vector2Int(dx, dy);
+                    if (r.x < 0 || r.y < 0 || r.x >= OwRegions.N || r.y >= OwRegions.N || OwRegions.Get(save, r) != RegionState.Bandit) continue;
+                    float d = (OwRegions.CampAt(r) - pos).magnitude;
+                    if (d < best) { best = d; want = r; }
+                }
+            if (camp != null && (want == null || camp.Region != want.Value)) { Destroy(camp.gameObject); camp = null; }
+            if (camp == null && want != null)
+            {
+                camp = OwCamp.Create(transform, save, want.Value, fx, () => pos, HurtFoi);
+                camp.Ended += CampEnded;
+            }
+        }
+
+        private void CampEnded(bool won)
+        {
+            var c = camp;
+            camp = null;
+            string report;
+            if (won)
+            {
+                OwRegions.Set(save, c.Region, RegionState.Safe);
+                save.money += c.Reward;
+                if (c.Fortress) save.fortressDone = true;
+                report = c.Fortress ? Loc.F("ow.op.fortressWon", c.Reward) : Loc.F("ow.op.won", c.Reward, OwRegions.Count(save, RegionState.Bandit));
+            }
+            else
+            {
+                report = Loc.T("ow.op.lost");
+                pos = OwWorld.FarmCentre + new Vector2(0f, -save.House.land * 0.5f - 4f);
+            }
+            foiHp = foiMax;
+            Destroy(c.gameObject, won ? 3f : 0f);
+            battle.Garrison();
+            Changed(false);
+            ShowReport(report);
         }
 
         // ---------- Defences and the army ----------
@@ -480,8 +601,11 @@ namespace SquashBot.OpenWorld
                 lookAt = p + Vector3.up * 0.6f;
                 // Further out the view climbs: from a low three-quarter look to nearly straight down.
                 float k = Mathf.InverseLerp(MinZoom, MaxZoom, isoDist);
-                float a = Mathf.Lerp(46f, 70f, k) * Mathf.Deg2Rad;
-                want = lookAt + Quaternion.Euler(0f, 45f, 0f) * new Vector3(0f, 0f, -Mathf.Cos(a) * isoDist) + Vector3.up * Mathf.Sin(a) * isoDist;
+                float a = Mathf.Clamp(Mathf.Lerp(46f, 70f, k) + isoTilt, 14f, 82f) * Mathf.Deg2Rad;
+                want = lookAt + Quaternion.Euler(0f, isoYaw, 0f) * new Vector3(0f, 0f, -Mathf.Cos(a) * isoDist) + Vector3.up * Mathf.Sin(a) * isoDist;
+                // Never under the ground when tilted low.
+                float floor = OwWorld.Height(want.x - OwWorld.Origin.x, want.z - OwWorld.Origin.z) + OwWorld.Origin.y + 0.8f;
+                if (want.y < floor) want.y = floor;
                 RenderSettings.fogStartDistance = 70f + isoDist * 2f;
                 RenderSettings.fogEndDistance = 130f + isoDist * 3f;
                 cam.fieldOfView = CameraFit.Fov(46f, cam.aspect);
@@ -559,6 +683,12 @@ namespace SquashBot.OpenWorld
             }
             // In a raid the big button strikes when a bandit is near.
             if (battle != null && battle.Raiding && battle.BanditNear(pos, 3.2f)) { main = Loc.T("ow.act.strike"); enabled = true; second = null; }
+            if (camp != null && (camp.Started || (pos - camp.Middle).magnitude < 26f))
+            {
+                if (camp.FoeNear(pos, 3.2f)) { main = Loc.T("ow.act.strike"); enabled = true; }
+                else if (!camp.Started) { main = Loc.T("ow.op.start"); enabled = true; }
+                second = camp.Cannons < OwCamp.MaxCannons ? Loc.F("ow.op.cannon", OwCamp.CannonPrice) : null;
+            }
             ui.SetAction(main, main != null, enabled);
             ui.SetAction2(second);
             if (battle == null || !battle.Raiding) ui.SetHint(target.kind == TargetKind.None && Vector2.Distance(pos, OwWorld.FarmCentre) > 30f ? Loc.T("ow.hint.farm") : null);
@@ -567,6 +697,29 @@ namespace SquashBot.OpenWorld
         private void Act(bool second)
         {
             if (ui.ListOpen) return;
+            if (camp != null && (camp.Started || (pos - camp.Middle).magnitude < 26f))
+            {
+                var dir2 = Quaternion.Euler(0f, facing, 0f) * Vector3.forward;
+                if (second)
+                {
+                    if (camp.Cannons >= OwCamp.MaxCannons) return;
+                    if (!save.Spend(OwCamp.CannonPrice)) { NoMoney(); return; }
+                    camp.PlaceCannon(pos + new Vector2(dir2.x, dir2.z) * 2f, facing);
+                    Changed(false);
+                    return;
+                }
+                if (camp.FoeNear(pos, 3.2f))
+                {
+                    if (strikeCd > 0f) return;
+                    var w2 = Armory.Equipped;
+                    strikeCd = Armory.Cooldown(w2) * 2f;
+                    int hits2 = camp.Strike(pos, new Vector2(dir2.x, dir2.z), Armory.Damage(w2) * 1.5f);
+                    SlashFx.Create(foi.position, foi.position + dir2 * 2f, WeaponModels.GlowOf(w2), 1.2f);
+                    AudioManager.PlaySfx(Sfx.Impact, hits2 > 0 ? 0.9f : 0.4f, 1f);
+                    return;
+                }
+                if (!camp.Started) { camp.Begin(); return; }
+            }
             if (!second && battle.Raiding && battle.BanditNear(pos, 3.2f))
             {
                 if (strikeCd > 0f) return;
@@ -663,7 +816,10 @@ namespace SquashBot.OpenWorld
                     break;
                 case TargetKind.Barn: ShowBarn(); break;
                 case TargetKind.Coop: ShowCoop(); break;
-                case TargetKind.Empty: ShowBuild(target.cell); break;
+                case TargetKind.Empty:
+                    if (OwRegions.Get(save, OwRegions.Of(OwWorld.FarmCentre)) == RegionState.Bandit) { ui.Toast(Loc.T("ow.region.farmTaken")); break; }
+                    ShowBuild(target.cell);
+                    break;
             }
         }
 

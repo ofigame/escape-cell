@@ -272,6 +272,8 @@ namespace SquashBot.OpenWorld
             if (Vector2.Distance(p, FarmCentre) < FarmFlat + 4f) return true;
             if (Vector2.Distance(p, CoopAt) < CoopFlat + 2f) return true;
             if (Vector2.Distance(p, Arrival) < 5f) return true;
+            var reg = OwRegions.Of(p);
+            if (reg != OwRegions.Middle && Vector2.Distance(p, OwRegions.CampAt(reg)) < (reg == OwRegions.Fortress ? 18f : 14f)) return true; // a bandit camp's ground
             foreach (var n in Neighbours) if (Vector2.Distance(p, n) < 16f) return true;
             return false;
         }

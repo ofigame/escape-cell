@@ -118,7 +118,10 @@ namespace SquashBot.OpenWorld
         // ---------- A raid ----------
 
         /// <summary>How many bandits come, by what the farm is worth.</summary>
-        public int RaidSize => Mathf.Clamp(4 + (int)(save.FarmValue() / 1500), 4, 24);
+        public int RaidSize => SizeOf(save);
+
+        /// <summary>How many bandits come: by what the farm is worth, and more with bandit regions round it.</summary>
+        public static int SizeOf(OwSave s) => Mathf.Clamp(Mathf.RoundToInt((4 + s.FarmValue() / 1500f) * (1f + 0.15f * (s.regions != null ? OwRegions.BanditNeighbours(s) : 0))), 4, 28);
 
         public void StartRaid()
         {
@@ -473,7 +476,7 @@ namespace SquashBot.OpenWorld
         public static (bool won, int kills, int count) Simulate(OwSave save, int seed)
         {
             var r = new System.Random(seed);
-            int n = Mathf.Clamp(4 + (int)(save.FarmValue() / 1500), 4, 24);
+            int n = SizeOf(save);
             float scale = 1f + save.house * 0.15f;
             float attack = n * (55f * 0.6f + 9f * 5f) * scale;
             float defence = 0f;

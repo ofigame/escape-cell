@@ -49,6 +49,10 @@ namespace SquashBot.OpenWorld
         public int raidDay, raidsToday;
         /// <summary>Which of the farm sites the farm stands on (moving after selling up changes it).</summary>
         public int site;
+        /// <summary>The 7 × 7 regions (0 safe, 1 border, 2 bandit), when the bandits next spread, the fortress beaten.</summary>
+        public int[] regions;
+        public long spreadAt;
+        public bool fortressDone;
         /// <summary>The last raid's report, shown once.</summary>
         public string report;
 
