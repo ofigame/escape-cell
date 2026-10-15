@@ -94,36 +94,74 @@ namespace SquashBot.Gameplay
             if (shieldHits > 0) { AddShield(g); g.shield = shieldHits; }
         }
 
-        /// <summary>The rival foi's hearts for the whole duel, and the share of its health each fills.</summary>
-        public int FoeHearts;
-        public float FoeHeartHeal = 0.3f;
-        /// <summary>The rival foi used a heart (where it stands, hearts left).</summary>
-        public event Action<Vector3, int> FoeHealed;
-        private float foeHealAt = -1f;
+        // ---------- A live rival foi (another player's, moved by its own game) ----------
 
-        /// <summary>
-        /// The rival foi takes a heart when its health is down by more than a heart fills (a 30% heart: under 70%), a
-        /// moment after it notices (as a player would).
-        /// </summary>
-        private void FoeHearten(Guard g)
+        /// <summary>The rival foi is another player's: no AI, it goes where its game says, its health comes from the server.</summary>
+        public bool FoeRemote;
+
+        /// <summary>foi's blow landed on the live rival (the server is told; it decides the health).</summary>
+        public event Action RemoteFoeStruck;
+
+        private Vector3 remoteTo;
+        private float remoteYaw;
+        private int remoteSwings = -1;
+        private bool remoteSeen;
+
+        /// <summary>Where the live rival's game says it is now (the latest only), its facing and how many blows it has swung.</summary>
+        public void RemoteFoeState(Vector3 pos, float yaw, int swings)
         {
-            if (g != challengeFoe || g.dead || FoeHearts <= 0 || g.maxHp <= 0) { foeHealAt = -1f; return; }
-            bool low = g.hp <= g.maxHp * (1f - FoeHeartHeal);
-            if (!low) { foeHealAt = -1f; return; }
-            if (foeHealAt < 0f) { foeHealAt = Time.time + (float)rng.NextDouble() * 0.8f + 0.4f; return; }
-            if (Time.time < foeHealAt) return;
-            foeHealAt = -1f;
-            FoeHearts--;
-            g.hp = Mathf.Min(g.maxHp, g.hp + Mathf.Max(1, Mathf.RoundToInt(g.maxHp * FoeHeartHeal)));
-            fx.Burst(g.root.position + Vector3.up * 0.6f, new Color(1f, 0.35f, 0.45f), new Color(2.4f, 0.6f, 0.8f), 26, 4f);
-            AudioPlay(1.5f);
-            FoeHealed?.Invoke(g.root.position, FoeHearts);
+            remoteTo = pos;
+            remoteYaw = yaw;
+            var g = challengeFoe;
+            if (g == null || g.dead) return;
+            if (!remoteSeen) { remoteSeen = true; g.root.position = pos; remoteSwings = swings; }
+            if (swings > remoteSwings && remoteSwings >= 0)
+            {
+                // It swung: the blow shows here (the damage, if any, comes from the server).
+                if (g.held != null) g.held.Swing();
+                g.SetRaise(1f);
+                foeRaiseUntil = Time.time + 0.15f;
+            }
+            remoteSwings = swings;
+        }
+
+        private float foeRaiseUntil;
+
+        /// <summary>The live rival's health as the server has it (a share of its full health).</summary>
+        public void SetFoeHealth(float share)
+        {
+            var g = challengeFoe;
+            if (g == null || g.dead) return;
+            int hp = Mathf.Clamp(Mathf.CeilToInt(g.maxHp * share - 0.001f), 0, g.maxHp);
+            if (hp < g.hp) { g.flash = 1f; g.Flash(); }
+            g.hp = Mathf.Max(1, hp); // it falls only when the server says so
+        }
+
+        private void UpdateRemoteFoe(Guard g, float dt)
+        {
+            if (!remoteSeen) return;
+            // Smoothly after the latest word (states come some 15 times a second).
+            var p = g.root.position;
+            var to = new Vector3(remoteTo.x, p.y, remoteTo.z);
+            float gap = Vector3.Distance(p, to);
+            g.root.position = gap > 3f ? to : Vector3.MoveTowards(p, to, Mathf.Max(gap * 12f, 2f) * dt);
+            g.root.rotation = Quaternion.Slerp(g.root.rotation, Quaternion.Euler(0f, remoteYaw, 0f), dt * 14f);
+            if (Time.time > foeRaiseUntil) g.SetRaise(0f);
+            var tile = new GridPos(Mathf.RoundToInt(g.root.position.x), Mathf.RoundToInt(g.root.position.z));
+            if (tile != g.pos && grid.InBounds(tile))
+            {
+                grid.SetOccupied(g.pos, false);
+                g.pos = tile;
+                grid.SetOccupied(tile, true);
+            }
         }
 
         /// <summary>The rival's tactics start fresh each duel (nothing carried over from the last one).</summary>
         private void ResetFoeState()
         {
             foeCombo = 0;
+            remoteSeen = false;
+            remoteSwings = -1;
             foeCounter = false;
             foeHurtStreak = 0;
             foeHurtAt = -9f;

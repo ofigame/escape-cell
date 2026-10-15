@@ -40,6 +40,19 @@ namespace SquashBot.Data
         }
 
         /// <summary>Takes the server's record (it decides trophies; the rank reached is kept).</summary>
+        private const string OtherKey = "sb_ch_other";
+
+        /// <summary>The record outside the ranked matches: won / played against the AI and against friends.</summary>
+        public static (int aiWins, int aiPlayed, int friendWins, int friendPlayed) OtherRecord
+        {
+            get
+            {
+                var p = PlayerPrefs.GetString(OtherKey, "").Split('|');
+                int V(int i) => p.Length == 4 && int.TryParse(p[i], out int v) ? v : 0;
+                return (V(0), V(1), V(2), V(3));
+            }
+        }
+
         public static void Sync(FoiNet.Profile p)
         {
             if (p == null) return;
@@ -48,6 +61,7 @@ namespace SquashBot.Data
             PlayerPrefs.SetInt(PlayedKey, p.played);
             PlayerPrefs.SetInt(DefWinsKey, p.defWins);
             PlayerPrefs.SetInt(DefLossesKey, p.defLosses);
+            PlayerPrefs.SetString(OtherKey, p.aiWins + "|" + p.aiPlayed + "|" + p.friendWins + "|" + p.friendPlayed);
             PlayerPrefs.SetInt(RankKey, Mathf.Max(PlayerPrefs.GetInt(RankKey, 0), p.rank));
             if (!string.IsNullOrEmpty(p.name)) PlayerPrefs.SetString(NameKey, p.name);
             PlayerPrefs.Save();
@@ -56,7 +70,7 @@ namespace SquashBot.Data
         /// <summary>Forgets the challenge record and the name (the online profile was deleted).</summary>
         public static void ResetLocal()
         {
-            foreach (var k in new[] { NameKey, TrophyKey, RankKey, WinsKey, PlayedKey, ChosenKey, DefWinsKey, DefLossesKey }) PlayerPrefs.DeleteKey(k);
+            foreach (var k in new[] { NameKey, TrophyKey, RankKey, WinsKey, PlayedKey, ChosenKey, DefWinsKey, DefLossesKey, OtherKey }) PlayerPrefs.DeleteKey(k);
             PlayerPrefs.Save();
         }
 

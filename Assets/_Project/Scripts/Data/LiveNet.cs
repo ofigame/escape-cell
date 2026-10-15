@@ -10,23 +10,26 @@ namespace SquashBot.Data
 {
     /// <summary>
     /// The live challenge's connection (a WebSocket to the challenge server): queue for a rival, make or enter a friend's
-    /// code, send picks and results. What the server says is queued and read on the main thread (<see cref="Poll"/>);
-    /// a closed connection reads as a message "closed".
+    /// code, send this game's own state and blows. What the server says is queued and read on the main thread
+    /// (<see cref="Poll"/>); a closed connection reads as a message "closed". Nothing is kept: each state read replaces
+    /// the last one.
     /// </summary>
     public static class LiveNet
     {
         private static string Url => FoiNet.DevServer != null ? FoiNet.DevServer.Replace("https://", "wss://").Replace("http://", "ws://") + "/v1/live" : "wss://apifoi.ofigame.com/v1/live";
 
-        /// <summary>A message from the server (only the fields its kind uses are set).</summary>
+        /// <summary>A message from the server (only the fields its kind uses are set; <see cref="raw"/> is the text itself).</summary>
         [Serializable]
         public class Msg
         {
             public string t, code, score;
             public long matchId;
-            public int side, seed, n, mine, theirs, myLeft, theirLeft, outcome, change;
-            public float secs;
+            public int side, seed, mode, min, n, outcome, change, by;
+            public float secs, mine, theirs;
+            public bool won, even, ranked, left;
             public FoiNet.Rival rival;
             public FoiNet.Profile profile;
+            [NonSerialized] public string raw;
         }
 
         private static ClientWebSocket ws;
@@ -63,14 +66,14 @@ namespace SquashBot.Data
             }
             ws = socket;
             cts = source;
-            pingAt = Time.realtimeSinceStartup + 25f;
+            pingAt = Time.realtimeSinceStartup + 20f;
             _ = Receive(socket, source.Token);
             return true;
         }
 
         private static async Task Receive(ClientWebSocket socket, CancellationToken stop)
         {
-            var buffer = new byte[8192];
+            var buffer = new byte[16384];
             var text = new StringBuilder();
             try
             {
@@ -93,7 +96,7 @@ namespace SquashBot.Data
         {
             if (Open && Time.realtimeSinceStartup > pingAt)
             {
-                pingAt = Time.realtimeSinceStartup + 25f;
+                pingAt = Time.realtimeSinceStartup + 20f;
                 Send("{\"t\":\"ping\"}");
             }
             while (inbox.TryDequeue(out var json))
@@ -102,39 +105,60 @@ namespace SquashBot.Data
                 try { m = JsonUtility.FromJson<Msg>(json); }
                 catch (Exception) { continue; }
                 if (m == null || m.t == "pong") continue;
+                m.raw = json;
                 return m;
             }
             return null;
         }
 
-        private static void Send(string json)
+        /// <summary>Sends a message as it is.</summary>
+        public static void Send(string json) => Send(json, false);
+
+        private static void Send(string json, bool state)
         {
             var socket = ws;
             if (socket == null || socket.State != WebSocketState.Open) return;
-            var bytes = Encoding.UTF8.GetBytes(json);
-            _ = SendAsync(socket, bytes);
+            _ = SendAsync(socket, Encoding.UTF8.GetBytes(json), state);
         }
 
         // One send at a time on a socket (a WebSocket takes no overlapping sends).
         private static readonly SemaphoreSlim sendLock = new SemaphoreSlim(1, 1);
+        private static int sending;
 
-        private static async Task SendAsync(ClientWebSocket socket, byte[] bytes)
+        private static async Task SendAsync(ClientWebSocket socket, byte[] bytes, bool state)
         {
+            // A state while another message is still on its way: dropped (the next state says it all again).
+            if (state && Volatile.Read(ref sending) > 0) return;
+            Interlocked.Increment(ref sending);
             await sendLock.WaitAsync();
             try { await socket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None); }
             catch (Exception) { }
-            finally { sendLock.Release(); }
+            finally { sendLock.Release(); Interlocked.Decrement(ref sending); }
         }
 
-        public static void Queue() => Send("{\"t\":\"queue\"}");
-        public static void Host() => Send("{\"t\":\"host\"}");
+        private static string I(float v) => v.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
+        public static void Queue(int mode, int minutes) => Send("{\"t\":\"queue\",\"mode\":" + mode + ",\"min\":" + minutes + "}");
+        public static void Host(int mode, int minutes) => Send("{\"t\":\"host\",\"mode\":" + mode + ",\"min\":" + minutes + "}");
         public static void Join(string code) => Send("{\"t\":\"join\",\"code\":\"" + Clean(code) + "\"}");
         public static void Cancel() => Send("{\"t\":\"cancel\"}");
         public static void Ready() => Send("{\"t\":\"ready\"}");
-        public static void Pick(int group) => Send("{\"t\":\"pick\",\"g\":" + group + "}");
-        public static void Duel(int round, bool won, float seconds) =>
-            Send("{\"t\":\"duel\",\"round\":" + round + ",\"won\":" + (won ? "true" : "false") + ",\"secs\":" + seconds.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + "}");
-        public static void Final(int outcome) => Send("{\"t\":\"final\",\"outcome\":" + Mathf.Clamp(outcome, -1, 1) + "}");
+
+        /// <summary>The duel: where this game's foi is, its facing and the blows it has swung.</summary>
+        public static void DuelState(Vector3 pos, float yaw, int swings) =>
+            Send("{\"t\":\"s\",\"x\":" + I(pos.x) + ",\"z\":" + I(pos.z) + ",\"r\":" + I(yaw) + ",\"w\":" + swings + "}", true);
+
+        /// <summary>The army battle: this game's state (built by the army: its group, soldiers and how many stand).</summary>
+        public static void ArmyState(string body) => Send("{\"t\":\"s\"," + body + "}", true);
+
+        /// <summary>The duel: this game's foi landed a blow on the rival.</summary>
+        public static void Hit() => Send("{\"t\":\"hit\"}");
+
+        /// <summary>The army battle: a blow of one of this game's soldiers on one of the rival's (its slot, the damage).</summary>
+        public static void ArmyHit(int unit, float damage) => Send("{\"t\":\"ah\",\"u\":" + unit + ",\"d\":" + I(damage) + "}");
+
+        /// <summary>The army battle: this side has no soldier left.</summary>
+        public static void Wiped() => Send("{\"t\":\"wiped\"}");
 
         /// <summary>Leaves the live match (a loss) and closes the connection.</summary>
         public static void Leave()
@@ -150,13 +174,12 @@ namespace SquashBot.Data
             ws = null;
             try { cts?.Cancel(); } catch (Exception) { }
             cts = null;
-            if (socket == null) return;
             _ = CloseAsync(socket);
         }
 
         private static async Task CloseAsync(ClientWebSocket socket)
         {
-            // After whatever is still being sent (a last result, a leave).
+            // After whatever is still being sent (a leave).
             await sendLock.WaitAsync();
             try
             {

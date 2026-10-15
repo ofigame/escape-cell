@@ -3,38 +3,38 @@ using System.Collections;
 using SquashBot.Audio;
 using SquashBot.Data;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace SquashBot.Gameplay
 {
     /// <summary>
-    /// Live challenges (the arena kind): the waiting room first looks for a live rival for a while (or waits for a
-    /// friend's code), and only then falls back to a rival's army played by the AI. In a live match each turn's picks
-    /// meet on the server, which decides every clash and the all-out battle; both games play out that same result. The
-    /// duel's rounds are fought against the rival's foi (its AI) on each side and the server compares them. If the rival
-    /// leaves (or the connection drops) the match goes on against the AI.
+    /// Live challenges: the waiting room first looks for a live rival who picked the same kind (and duel length) for a
+    /// while, or waits for a friend's code, and only then takes a rival played by the AI. In a live match each game moves
+    /// its own fighters and sends their state some times a second (the other game shows them; nothing is kept); the
+    /// server checks the blows and keeps the score and the clock. A random live match moves trophies; a friend's does
+    /// not. A player who leaves loses at once.
     /// </summary>
     public partial class GameManager
     {
         /// <summary>Seconds the waiting room looks for a live rival before it takes an AI-played one.</summary>
         private const float LiveWaitSeconds = 20f;
 
-        private bool chLive, chLiveSolo;
+        private bool chLive;
+        /// <summary>This game's side in the live match (0: the south end, left on screen; 1: the north, right).</summary>
+        private int liveSide;
+        private bool liveRanked, liveLeft, liveLost;
         /// <summary>0: a random rival; 1: making a code for a friend; 2: entering a friend's code.</summary>
         private int chFriend;
         private string chFriendCode;
+        private int friendMode, friendMinutes = 3;
 
-        private enum LiveWait { None, Start, AfterClash, Result }
+        private enum LiveWait { None, Start }
         private LiveWait liveWait;
-        /// <summary>The clash about to be played: what is left of each group in it (from the server), -1 when none.</summary>
-        private int liveMyLeft = -1, liveTheirLeft = -1, liveClashMine = -1, liveClashTheirs = -1;
-        private float liveDuelStart, liveResultBy;
-        private bool livePickSent;
         private int liveChange;
         private FoiNet.Profile liveProfile;
+        private float liveStateAt;
 
-        /// <summary>A live match with the rival still there (the server decides).</summary>
-        private bool LiveActive => chLive && !chLiveSolo;
+        /// <summary>A live match being played (the other game is there).</summary>
+        private bool LiveActive => chLive && challengeRun && chPhase != ChPhase.Done;
 
         // ---------- Finding a live rival ----------
 
@@ -49,9 +49,10 @@ namespace SquashBot.Gameplay
                 done(null);
                 yield break;
             }
-            if (chFriend == 1) LiveNet.Host();
+            int mode = chMode == ChMode.Duel ? 1 : 0;
+            if (chFriend == 1) LiveNet.Host(friendMode, friendMinutes);
             else if (chFriend == 2) LiveNet.Join(chFriendCode);
-            else LiveNet.Queue();
+            else LiveNet.Queue(mode, chDuelMinutes);
             float until = Time.realtimeSinceStartup + (chFriend == 0 ? LiveWaitSeconds : 600f);
             while (!LobbyOver(token))
             {
@@ -92,38 +93,43 @@ namespace SquashBot.Gameplay
             done(null);
         }
 
-        /// <summary>A live rival was found: its card in the waiting room, then the arena.</summary>
+        /// <summary>A live rival was found: its card in the waiting room, then the arena of the kind it was made for.</summary>
         private IEnumerator StartLive(LiveNet.Msg m, int world, int token)
         {
             chLive = true;
-            chLiveSolo = false;
+            liveSide = m.side == 1 ? 1 : 0;
+            liveRanked = m.ranked;
+            liveLeft = false;
+            liveLost = false;
             liveWait = LiveWait.None;
-            liveMyLeft = liveTheirLeft = liveClashMine = liveClashTheirs = -1;
             liveProfile = null;
+            liveChange = 0;
             chOnline = true;
             chMatchId = 0;
-            chMode = ChMode.Arena;
+            chMode = m.mode == 1 ? ChMode.Duel : ChMode.Army;
+            chDuelMinutes = m.min is 3 or 5 or 10 ? m.min : 3;
             rival = Challenge.FromRival(m.rival);
             if (chFriend != 0)
             {
                 chUi.HideFriend();
-                chUi.ShowLobby(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore), Challenge.Rank, Loc.T("ch.mode.arena"));
+                chUi.ShowLobby(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore), Challenge.Rank, ModeLabel);
             }
             chUi.LockLobby();
             int rivalPower = 0;
             for (int g = 0; g < Army.Groups; g++) rivalPower += Mathf.RoundToInt(Army.Soldiers * rival.Power(g) * 10f);
             chUi.ShowRival(SideText(rival.name, rival.Rank, rival.trophies, rivalPower), rival.Rank);
-            chUi.SetLobbyStatus(Loc.T("live.found"));
+            chUi.SetLobbyStatus(Loc.T(liveRanked ? "live.found" : "live.foundFriend"));
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 1.2f);
             yield return new WaitForSecondsRealtime(1.8f);
             if (token != chLobbyToken) { LiveNet.Leave(); chLive = false; yield break; }
             chUi.HideLobby();
-            BuildBoard(world);
+            if (chMode == ChMode.Duel) BuildDuelBoard(world);
+            else BuildArmyBoard(world);
         }
 
         // ---------- The match ----------
 
-        /// <summary>This side is ready for what comes next (the briefing read, a clash played out): the server goes on.</summary>
+        /// <summary>This side is ready (the briefing read): the server starts the match when both are.</summary>
         private void LiveWaitFor(LiveWait kind)
         {
             liveWait = kind;
@@ -132,148 +138,128 @@ namespace SquashBot.Gameplay
             chUi.SetStatus(Loc.T("live.waiting"));
         }
 
-        /// <summary>The last round is in: the server compares both sides' duels and settles the match.</summary>
-        private void LiveAwaitResult()
-        {
-            liveWait = LiveWait.Result;
-            chPhase = ChPhase.Wait;
-            liveResultBy = Time.realtimeSinceStartup + 330f;
-            chUi.SetStatus(Loc.T("live.waitDuel"));
-        }
+        [Serializable] private class ArmyHitMsg { public int u; public float d; }
+        [Serializable] private class DuelStateMsg { public float x, z, r; public int w; }
 
-        /// <summary>Each frame of a live match: what the server says.</summary>
+        /// <summary>Each frame of a live match: this game's state goes out, the server's words and the rival's state come in.</summary>
         private void UpdateLive()
         {
             if (!chLive || !challengeRun) return;
-            if (LiveActive && liveWait == LiveWait.Result && Time.realtimeSinceStartup > liveResultBy) { chOnline = false; LiveGoSolo(null); return; }
+            // This game's own state, some times a second (a duel's foi often, an army's soldiers less).
+            if (chPhase == ChPhase.Duel || chPhase == ChPhase.Army)
+            {
+                float every = chPhase == ChPhase.Duel ? 1f / 15f : 1f / 6f;
+                if (Time.unscaledTime >= liveStateAt)
+                {
+                    liveStateAt = Time.unscaledTime + every;
+                    if (chPhase == ChPhase.Duel) LiveNet.DuelState(robot.transform.position, robot.Visual.eulerAngles.y, robot.Swings);
+                    else if (army != null) LiveNet.ArmyState(army.StateBody());
+                }
+            }
             LiveNet.Msg m;
             while ((m = LiveNet.Poll()) != null)
             {
                 switch (m.t)
                 {
-                    case "turn":
-                        if (!LiveActive) break;
+                    case "start":
                         liveWait = LiveWait.None;
-                        livePickSent = false;
-                        BeginTurn();
+                        if (chMode == ChMode.Duel) { chDuelLeft = m.secs; BeginDuel(); }
                         break;
-                    case "rivalPicked":
-                        if (LiveActive && chPhase == ChPhase.Pick && chMyPick < 0) chUi.SetStatus(Loc.T("live.rivalPicked"));
+                    case "resume":
+                        if (chMode == ChMode.Duel) LiveDuelGo(m.secs);
                         break;
-                    case "reveal":
-                        if (!LiveActive) break;
-                        chMyPick = m.mine;
-                        chTheirPick = m.theirs;
-                        liveMyLeft = m.myLeft;
-                        liveTheirLeft = m.theirLeft;
-                        chUi.ClosePick();
-                        clash.SetPickable(null, -1);
-                        chPhase = ChPhase.Reveal;
-                        chTimer = 1.2f;
-                        chUi.SetClock("");
-                        chUi.SetStatus(Loc.T("army.kind." + Army.KindOf(chMyPick)) + "  VS  " + Loc.T("army.kind." + Army.KindOf(chTheirPick)));
-                        AudioManager.PlaySfx(Sfx.Warning, 0.7f, 1.1f);
+                    case "s":
+                        if (chMode == ChMode.Duel)
+                        {
+                            DuelStateMsg s;
+                            try { s = JsonUtility.FromJson<DuelStateMsg>(m.raw); } catch (Exception) { break; }
+                            if (s != null) hunt.RemoteFoeState(new Vector3(s.x, GridView.ToWorld(new Core.GridPos(Mathf.RoundToInt(s.x), Mathf.RoundToInt(s.z))).y, s.z), s.r, s.w);
+                        }
+                        else if (army != null) army.ApplyState(m.raw);
                         break;
-                    case "battle":
-                        if (!LiveActive) break;
+                    case "hp":
+                    {
+                        // The duel's health as the server keeps it (100 each).
+                        float before = health;
+                        health = Mathf.Clamp01(m.mine / 100f);
+                        RefreshHealthBar();
+                        if (health < before - 0.0001f)
+                        {
+                            ui.Flash(new Color(1f, 0.15f, 0.15f), 0.3f);
+                            cameraRig.Shake(0.6f);
+                            fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(1f, 0.35f, 0.35f), new Color(2.4f, 0.5f, 0.4f), 30, 6f);
+                            Haptics.Light();
+                        }
+                        hunt.SetFoeHealth(m.theirs / 100f);
+                        break;
+                    }
+                    case "ko":
+                        LiveKnockdown(m.won, Mathf.RoundToInt(m.mine), Mathf.RoundToInt(m.theirs));
+                        break;
+                    case "round":
+                        chArmyMe = Mathf.RoundToInt(m.mine);
+                        chArmyThem = Mathf.RoundToInt(m.theirs);
                         liveWait = LiveWait.None;
-                        clash.Script(Mathf.Max(0, Total(myLeft) - m.myLeft), Mathf.Max(0, Total(theirLeft) - m.theirLeft));
-                        StartBattle();
+                        chArmyLeft = m.secs;
+                        StartArmyRound(m.n);
+                        chArmyLeft = m.secs;
+                        break;
+                    case "ah":
+                    {
+                        if (army == null) break;
+                        ArmyHitMsg h;
+                        try { h = JsonUtility.FromJson<ArmyHitMsg>(m.raw); } catch (Exception) { break; }
+                        if (h != null) army.ApplyHit(h.u, h.d);
+                        break;
+                    }
+                    case "roundEnd":
+                        chArmyMe = Mathf.RoundToInt(m.mine);
+                        chArmyThem = Mathf.RoundToInt(m.theirs);
+                        if (chPhase == ChPhase.Army) ShowArmyRoundEnd(m.won ? 1 : m.even ? 0 : -1);
                         break;
                     case "result":
                         FinishLive(m);
                         break;
-                    case "rivalLeft":
-                        LiveGoSolo("live.rivalLeft");
-                        break;
                     case "closed":
                     case "error":
+                        // This game lost the server: the match is over here (the server counts it as left).
                         if (chPhase == ChPhase.Done) { chLive = false; break; }
-                        chOnline = false; // nothing more reaches the server: practice from here
-                        LiveGoSolo("live.lost");
+                        liveRanked = false;
+                        liveLost = true;
+                        liveChange = 0;
+                        chUi.SetStatus(Loc.T("live.lost"));
+                        ChallengeFinish(-1, ScoreText());
+                        chLive = false;
                         break;
                 }
             }
-        }
-
-        /// <summary>The live clash about to start: it ends as the server decided.</summary>
-        private void ScriptLiveClash()
-        {
-            if (liveMyLeft < 0) return;
-            clash.Script(Mathf.Max(0, myLeft[chMyPick] - liveMyLeft), Mathf.Max(0, theirLeft[chTheirPick] - liveTheirLeft));
-            liveClashMine = liveMyLeft;
-            liveClashTheirs = liveTheirLeft;
-            liveMyLeft = liveTheirLeft = -1;
-        }
-
-        /// <summary>A live pick turn: the clock runs out with no pick, any group left goes (the rival's comes from the server).</summary>
-        private void LivePickTick()
-        {
-            if (chTimer > 0f || chMyPick >= 0 || livePickSent) return;
-            int start = Random.Range(0, Army.Groups);
-            for (int k = 0; k < Army.Groups; k++)
-                if (myLeft[(start + k) % Army.Groups] > 0) { chMyPick = (start + k) % Army.Groups; break; }
-            if (chMyPick >= 0) { LiveNet.Pick(chMyPick); livePickSent = true; }
-            chUi.SetStatus(Loc.T("ch.waitRival"));
-        }
-
-        /// <summary>The rival is gone (or the connection): the match goes on against the AI from where it stands.</summary>
-        private void LiveGoSolo(string why)
-        {
-            if (!chLive || chLiveSolo) return;
-            chLiveSolo = true;
-            if (why != null) { chUi.SetStatus(Loc.T(why)); ui.ShowIntro(Loc.T(why), ""); }
-            var waited = liveWait;
-            liveWait = LiveWait.None;
-            switch (waited)
-            {
-                case LiveWait.Start:
-                    BeginTurn();
-                    break;
-                case LiveWait.AfterClash:
-                {
-                    int half = Army.Groups * Army.Soldiers / 2;
-                    if (Total(myLeft) > half && Total(theirLeft) > half) BeginTurn();
-                    else StartBattle();
-                    break;
-                }
-                case LiveWait.Result:
-                    ChallengeEnd();
-                    break;
-            }
-            // A turn being picked: the AI picks for the rival (as offline). A clash or battle playing: it plays on.
-            if (chPhase == ChPhase.Pick && chTheirPick < 0) chBotPickAt = Mathf.Min(chBotPickAt, chTimer - 1f);
         }
 
         /// <summary>The server's word on the match: the result card with its score and trophies.</summary>
         private void FinishLive(LiveNet.Msg m)
         {
             if (m.profile != null && !string.IsNullOrEmpty(m.profile.name)) liveProfile = m.profile;
-            if (chPhase == ChPhase.Done)
-            {
-                // Settled after this side's own end (it played on alone): only the record is brought up to date.
-                if (liveProfile != null) Challenge.Sync(liveProfile);
-                LiveNet.Close();
-                chLive = false;
-                return;
-            }
             liveChange = m.change;
-            chPhase = ChPhase.Wait; // (from the waiting phase to the result)
-            ChallengeFinish(m.outcome, string.IsNullOrEmpty(m.score) ? ScoreText() : m.score);
+            liveRanked = m.ranked;
+            liveLeft = m.left;
+            if (chPhase != ChPhase.Done) ChallengeFinish(m.outcome, string.IsNullOrEmpty(m.score) ? ScoreText() : m.score);
             LiveNet.Close();
         }
 
         // ---------- Playing a friend ----------
 
-        /// <summary>The friend panel's MAKE A CODE (1) or ENTER CODE (2): the online steps, then the code.</summary>
-        private void StartFriend(int kind, string code)
+        /// <summary>The friend panel's MAKE A CODE (1, with the kind and minutes picked) or ENTER CODE (2).</summary>
+        private void StartFriend(int kind, string code, int mode, int minutes)
         {
             if (!Challenge.Open) { chUi.SetFriendStatus(Loc.T("ch.locked")); return; }
             if (!Challenge.Enabled) { chUi.SetFriendStatus(Loc.T("ch.disabled")); return; }
             if (!Challenge.NameChosen) { chUi.HideFriend(); chUi.ShowName(Challenge.PlayerName); return; }
             chFriend = kind;
             chFriendCode = code;
-            chMode = ChMode.Arena;
+            friendMode = mode;
+            friendMinutes = minutes is 3 or 5 or 10 ? minutes : 3;
+            chMode = mode == 1 ? ChMode.Duel : ChMode.Army;
+            chDuelMinutes = friendMinutes;
             chCancelled = false;
             chPhase = ChPhase.Lobby;
             chUi.SetFriendBusy(true);
@@ -294,10 +280,11 @@ namespace SquashBot.Gameplay
         /// <summary>Leaving a live match (or its search): a loss on the server; the connection closes.</summary>
         private void EndLive()
         {
-            if (chLive || LiveNet.Open) LiveNet.Leave();
-            chLive = chLiveSolo = false;
+            if (chLive && chPhase != ChPhase.Done) LiveNet.Leave();
+            else LiveNet.Close();
+            chLive = false;
             liveWait = LiveWait.None;
-            chFriend = 0;
+            hunt.FoeRemote = false;
         }
     }
 }

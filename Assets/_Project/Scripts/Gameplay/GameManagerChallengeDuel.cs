@@ -1,4 +1,3 @@
-using System.Collections;
 using SquashBot.Audio;
 using SquashBot.Core;
 using SquashBot.Data;
@@ -9,116 +8,181 @@ using UnityEngine;
 namespace SquashBot.Gameplay
 {
     /// <summary>
-    /// The challenge's duel after the armies: three rounds, foi against the rival foi, every round played. The armies'
-    /// winner has 1 point, each round 1 more (4 in all; 2-2 is a draw). Between rounds both foi go back to their marks,
-    /// foi's health is full again and a fresh rival foi steps in.
+    /// The challenge's Duel: foi against the rival foi alone in the arena for 3, 5 or 10 minutes. Whoever puts the other
+    /// down scores a point and both start again from their marks in the middle; when time is up the higher score wins
+    /// (level: a draw). Each blow takes 1% of the other's health per point of its weapon's damage (armour takes some
+    /// off). The player is on the left (the south mark, as the camera on the east stand sees it), the rival on the right;
+    /// names float over both.
     /// </summary>
     public partial class GameManager
     {
-        private const int DuelRounds = 3;
+        /// <summary>The duel's length in minutes (3, 5 or 10).</summary>
+        private int chDuelMinutes = 3;
 
-        /// <summary>Hearts each foi has for the whole duel (each fills <see cref="HeartHeal"/> of the health).</summary>
-        private const int DuelHearts = 5;
-        private int chHearts;
+        /// <summary>Knock-downs scored by each side, and the time left (seconds).</summary>
+        private int chDuelMe, chDuelThem;
+        private float chDuelLeft;
+        private NameTag myTag, theirTag;
 
-        /// <summary>The heart button: part of foi's health back (only in a round, and only when some is missing).</summary>
-        private void OnDuelHeart()
+        /// <summary>The marks the two foi start from: either side of the middle, the player's to the south (left on screen).</summary>
+        private (GridPos mine, GridPos theirs) DuelMarks
         {
-            if (!challengeRun || chPhase != ChPhase.Duel || State != GameState.Playing || chHearts <= 0 || health >= 0.999f) return;
-            chHearts--;
-            health = Mathf.Min(1f, health + HeartHeal);
-            RefreshHealthBar();
-            fx.Burst(robot.transform.position + Vector3.up * 0.6f, new Color(1f, 0.35f, 0.45f), new Color(2.4f, 0.6f, 0.8f), 26, 4f);
-            AudioManager.PlaySfx(Sfx.Coin, 0.9f, 1.4f);
-            Haptics.Light();
-            ui.SetDuelHearts(true, chHearts);
-        }
-
-        /// <summary>The round being fought (1..3), and the rounds won by each side so far.</summary>
-        private int chRound, chDuelMe, chDuelThem;
-
-        /// <summary>Where the two foi stand when a round starts: the courtyard's middle, or the stage battle's oval.</summary>
-        private (GridPos mine, GridPos theirs) DuelMarks =>
-            chMode == ChMode.Stages ? (new GridPos(StMid, MidC - 2), new GridPos(StMid, MidC + 2)) : (new GridPos(BoardW / 2, BoardH / 2 - 2), RivalTile);
-
-        /// <summary>The rival foi for a round: its look and weapon, its health and blows from its profile.</summary>
-        private void AddRivalFoe(GridPos at, Transform look, HeldWeapon held)
-        {
-            var w = Armory.Get(rival.weapon);
-            int hp = Mathf.RoundToInt(rival.foiHp / Mathf.Max(0.4f, 1f - rival.armor * 0.8f));
-            float hit = Mathf.Clamp(rival.foiHit * (0.85f + 0.12f * Armory.Damage(w, Mathf.Max(1, rival.weaponLevel))), 0.06f, 0.35f);
-            hunt.FoeBoldness = rival.boldness;
-            hunt.ChallengeBattle = true;
-            hunt.AddChallengeFoe(at, hp, hit, look, held, rival.shield);
-        }
-
-        /// <summary>The duel's first round begins (the score so far: the armies').</summary>
-        private void BeginDuelRounds()
-        {
-            chRound = 1;
-            chDuelMe = chDuelThem = 0;
-            chHearts = DuelHearts;
-            hunt.FoeHearts = DuelHearts;
-            hunt.FoeHeartHeal = HeartHeal;
-            ui.SetDuelHearts(true, chHearts);
-            liveDuelStart = Time.time;
-            chUi.SetClock(ScoreText());
-        }
-
-        /// <summary>A round is over (the rival foi down, or foi's health gone): the next one, or the final score.</summary>
-        private void DuelRoundOver(bool won)
-        {
-            if (!challengeRun || chPhase != ChPhase.Duel) return;
-            if (won) chDuelMe++; else chDuelThem++;
-            if (LiveActive) LiveNet.Duel(chRound, won, Time.time - liveDuelStart);
-            chPhase = ChPhase.Break;
-            hunt.Freeze();
-            ui.SetDuelHearts(chRound < DuelRounds, chHearts);
-            chUi.SetClock(ScoreText());
-            chUi.SetStatus(Loc.F(won ? "ch.roundWon" : "ch.roundLost", chRound));
-            if (colosseum != null) colosseum.Cheer(won ? 0 : 1, 0.9f);
-            AudioManager.PlaySfx(won ? Sfx.Win : Sfx.Warning, 0.8f, 1f);
-            if (won) fx.Burst(robot.transform.position + Vector3.up * 0.6f, Palette.Coin, Palette.CoinGlow, 24, 5f);
-            if (chRound >= DuelRounds)
+            get
             {
-                if (LiveActive) LiveAwaitResult();
-                else ChallengeEnd();
-                return;
+                // A live match: the same arena on both screens — the server's side 0 to the south (left), side 1 to the north.
+                GridPos south = new GridPos(BoardW / 2, BoardH / 2 - 3), north = new GridPos(BoardW / 2, BoardH / 2 + 3);
+                return chLive && liveSide == 1 ? (north, south) : (south, north);
             }
-            cameraRig.StartCoroutine(NextRound());
         }
 
-        private IEnumerator NextRound()
+        /// <summary>The share of a foi's health one blow of this weapon takes: 1% per point of damage, less its armour.</summary>
+        private static float DuelBlow(WeaponDef w, int weaponLevel, float armor) =>
+            0.01f * Armory.Damage(w, Mathf.Max(1, weaponLevel)) * (1f - Mathf.Clamp01(armor));
+
+        /// <summary>The Duel's courtyard: no armies, the two foi on their marks, the clock running.</summary>
+        private void BuildDuelBoard(int world)
         {
-            yield return new WaitForSeconds(2.2f);
-            while (challengeRun && State == GameState.Paused) yield return null;
-            if (!challengeRun || chPhase != ChPhase.Break || State != GameState.Playing) yield break;
-            hunt.RemoveChallengeFoe(); // a rival foi still standing leaves the ring
-            chRound++;
+            BuildCourtyard(world);
+            chDuelMe = chDuelThem = 0;
+            chDuelLeft = chDuelMinutes * 60f;
+            if (army != null) army.Clear();
+            if (rivalLook != null) Destroy(rivalLook.gameObject);
+            rivalLook = null;
+            if (robot.Visual != null) robot.Visual.gameObject.SetActive(true);
+            chUi.ShowBattle();
+            chUi.HideGroups();
+            ui.SetHudTitle(Loc.T("ch.mode.duel"));
+            PlaceDuelists();
+            hunt.Freeze(); // nobody moves while the briefing is read
+            chPhase = ChPhase.Lobby; // the briefing first
+            cameraRig.StartCoroutine(ChallengeBriefing("duel", 3, () => { if (LiveActive) LiveWaitFor(LiveWait.Start); else BeginDuel(); }));
+            AudioManager.PlaySfx(Sfx.Win, 0.6f, 0.9f);
+        }
+
+        private void BeginDuel()
+        {
+            if (!challengeRun) return;
+            chPhase = ChPhase.Duel;
+            duelPan = robot.transform.position - boardCentre; duelPan.y = 0f;
+            hunt.Resume();
+            chUi.SetStatus(Loc.T("ch.duel"));
+            ui.ShowIntro(Loc.T("ch.duel"), Loc.F("ch.duelMinutes", chDuelMinutes));
+            AudioManager.PlaySfx(Sfx.Win, 0.8f, 0.8f);
+            RefreshDuelClock();
+        }
+
+        /// <summary>Both foi on their marks, full health, a fresh rival foi (its look, weapon and health from its profile).</summary>
+        private void PlaceDuelists()
+        {
+            hunt.RemoveChallengeFoe();
             health = 1f;
             RefreshHealthBar();
             var (mine, theirs) = DuelMarks;
-            if (!grid.IsStandable(mine) || grid.IsOccupied(mine)) mine = SafeTileNear(mine, mine);
             robot.Spawn(grid, mine);
-            robot.transform.rotation = Quaternion.identity; // facing the rival across the middle
+            bool north = theirs.y < mine.y;
+            robot.transform.rotation = Quaternion.identity;
+            robot.Visual.rotation = Quaternion.Euler(0f, north ? 180f : 0f, 0f); // facing the rival across the middle
             var look = RivalLook();
             look.position = GridView.ToWorld(theirs) + Vector3.up * GridView.SurfaceY;
-            look.rotation = Quaternion.Euler(0f, 180f, 0f);
-            look.SetParent(null, true);
-            AddRivalFoe(theirs, look, rivalHeld);
-            hunt.Resume();
-            chPhase = ChPhase.Duel;
-            liveDuelStart = Time.time;
-            chUi.SetClock(ScoreText());
-            chUi.SetStatus(Loc.F("ch.round", chRound, DuelRounds));
-            ui.ShowIntro(Loc.F("ch.round", chRound, DuelRounds), Loc.T("ch.duelText"));
-            AudioManager.PlaySfx(Sfx.Win, 0.7f, 0.9f);
+            look.rotation = Quaternion.Euler(0f, north ? 0f : 180f, 0f);
+            hunt.FoeRemote = LiveActive; // a live rival: its own game moves it, the server keeps its health
+            var w = Armory.Get(rival.weapon);
+            hunt.FoeBoldness = rival.boldness;
+            hunt.ChallengeBattle = true;
+            // 100 health points behind its armour; foi's blows take its weapon's damage in points (1% each).
+            int hp = LiveActive ? 100 : Mathf.RoundToInt(100f / Mathf.Max(0.5f, 1f - rival.armor));
+            // The AI swings about once a second while a player swings as fast as the weapon allows: each of its blows
+            // weighs what that weapon does in a second, so it fights as hard as a player with it would.
+            float rate = Mathf.Clamp(1f / Mathf.Max(0.1f, Armory.Cooldown(w, Mathf.Max(1, rival.weaponLevel))), 1f, 5f);
+            hunt.AddChallengeFoe(theirs, hp, DuelBlow(w, rival.weaponLevel, Shop.ArmorShare) * (LiveActive ? 1f : rate), look, rivalHeld, 0);
+            if (myTag == null) myTag = SquashBot.Visual.NameTag.Create(robot.transform, Challenge.PlayerName, ArmyBattle.Mine);
+            if (theirTag != null) Destroy(theirTag.gameObject);
+            theirTag = SquashBot.Visual.NameTag.Create(look, rival.name, ArmyBattle.Theirs);
         }
 
-        /// <summary>The score as the board shows it (mine first): the armies' point and the rounds won.</summary>
+        /// <summary>A knock-down: the one left standing scores, both start again from the middle.</summary>
+        private void DuelKnockdown(bool iWon)
+        {
+            if (!challengeRun || chPhase != ChPhase.Duel) return;
+            if (iWon) chDuelMe++; else chDuelThem++;
+            chPhase = ChPhase.Break;
+            hunt.Freeze();
+            RefreshDuelClock();
+            chUi.SetStatus(Loc.T(iWon ? "ch.koYou" : "ch.koThem"));
+            if (colosseum != null) colosseum.Cheer(iWon ? 0 : 1, 0.9f);
+            AudioManager.PlaySfx(iWon ? Sfx.Win : Sfx.Warning, 0.8f, 1f);
+            if (iWon) fx.Burst(robot.transform.position + Vector3.up * 0.6f, Palette.Coin, Palette.CoinGlow, 24, 5f);
+            cameraRig.StartCoroutine(AfterKnockdown());
+        }
+
+        /// <summary>A live knock-down, as the server tells it: its score; both start again when it says.</summary>
+        private void LiveKnockdown(bool iWon, int mine, int theirs)
+        {
+            if (!challengeRun || (chPhase != ChPhase.Duel && chPhase != ChPhase.Wait)) return;
+            chDuelMe = mine;
+            chDuelThem = theirs;
+            chPhase = ChPhase.Break;
+            hunt.Freeze();
+            if (iWon) hunt.RemoveChallengeFoe(); else { health = 0f; RefreshHealthBar(); robot.Squash(); }
+            RefreshDuelClock();
+            chUi.SetStatus(Loc.T(iWon ? "ch.koYou" : "ch.koThem"));
+            if (colosseum != null) colosseum.Cheer(iWon ? 0 : 1, 0.9f);
+            AudioManager.PlaySfx(iWon ? Sfx.Win : Sfx.Warning, 0.8f, 1f);
+            if (iWon) fx.Burst(robot.transform.position + Vector3.up * 0.6f, Palette.Coin, Palette.CoinGlow, 24, 5f);
+        }
+
+        /// <summary>The server's word to start (again): both on their marks, the clock as it says.</summary>
+        private void LiveDuelGo(float secs)
+        {
+            if (!challengeRun) return;
+            chDuelLeft = secs;
+            PlaceDuelists();
+            hunt.Resume();
+            chPhase = ChPhase.Duel;
+            duelPan = robot.transform.position - boardCentre; duelPan.y = 0f;
+            chUi.SetStatus(Loc.T("ch.duel"));
+            RefreshDuelClock();
+        }
+
+        private System.Collections.IEnumerator AfterKnockdown()
+        {
+            yield return new WaitForSeconds(1.8f);
+            while (challengeRun && State == GameState.Paused) yield return null;
+            if (!challengeRun || chPhase != ChPhase.Break || State != GameState.Playing) yield break;
+            if (chDuelLeft <= 0f) { ChallengeEnd(); yield break; }
+            PlaceDuelists();
+            hunt.Resume();
+            chPhase = ChPhase.Duel;
+            chUi.SetStatus(Loc.T("ch.duel"));
+        }
+
+        /// <summary>Each frame of the duel: the clock (it only runs while the two fight), a knock-down, time up.</summary>
+        private void UpdateDuel(float dt)
+        {
+            chDuelLeft = Mathf.Max(0f, chDuelLeft - dt);
+            RefreshDuelClock();
+            if (LiveActive) return; // the server keeps the score and the clock
+            if (hunt.ChallengeFoeDown) { DuelKnockdown(true); return; }
+            if (chDuelLeft <= 0f) { chPhase = ChPhase.Break; hunt.Freeze(); ChallengeEnd(); }
+        }
+
+        private void RefreshDuelClock()
+        {
+            int s = Mathf.CeilToInt(chDuelLeft);
+            chUi.SetClock(ScoreText() + "   " + s / 60 + ":" + (s % 60).ToString("00"));
+        }
+
+        /// <summary>The score as the board shows it (mine first).</summary>
         private string ScoreText() => ScoreMine + " - " + ScoreTheirs;
 
-        private int ScoreMine => (chLead > 0 ? 1 : 0) + chDuelMe;
-        private int ScoreTheirs => (chLead < 0 ? 1 : 0) + chDuelThem;
+        private int ScoreMine => chMode == ChMode.Duel ? chDuelMe : chArmyMe;
+        private int ScoreTheirs => chMode == ChMode.Duel ? chDuelThem : chArmyThem;
+
+        private void ClearDuel()
+        {
+            if (myTag != null) Destroy(myTag.gameObject);
+            if (theirTag != null) Destroy(theirTag.gameObject);
+            myTag = theirTag = null;
+        }
     }
 }

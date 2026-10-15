@@ -134,7 +134,7 @@ namespace SquashBot.Gameplay
         private const float TunnelChance = 0.7f;
 
         private int World => LevelCatalog.WorldOf(levelIndex);
-        private bool RescueEnabled => World >= RescueFromWorld;
+        private bool RescueEnabled => World >= RescueFromWorld && !challengeRun; // a challenge has no rescues
         private bool HoverEnabled => World >= HoverFromWorld && !arenaRun && !challengeRun; // the arenas walk freely: no hover
 
         private int LevelCount => levelSet.levels.Count;
@@ -326,7 +326,7 @@ namespace SquashBot.Gameplay
             };
             ui.WatchAdPressed += WatchAdForLife;
             ui.ToolPressed += OnToolPressed;
-            input.Ignore = p => ui != null && ui.IsOverTool(p);
+            input.Ignore = p => ui != null && (ui.IsOverTool(p) || (chUi != null && chUi.IsOverControls(p)));
         }
 
         private static void EnsureLight()
@@ -525,7 +525,7 @@ namespace SquashBot.Gameplay
             if (weather != null && weather.gameObject.activeSelf == covered) weather.gameObject.SetActive(!covered);
             if (gridView != null && gridView.enabled == covered) gridView.enabled = !covered;
             UpdateCloseCamera();
-            ui.SetBagVisible(level != null && level.mission == MissionType.Hunt && State == GameState.Playing && roadPhase == RoadPhase.None && !previewing && !runner.Active);
+            ui.SetBagVisible(level != null && level.mission == MissionType.Hunt && State == GameState.Playing && roadPhase == RoadPhase.None && !previewing && !runner.Active && !ChallengeArmyPhase);
             ui.SetAdHealVisible(AdHealOffered && !runner.Active);
         }
 
@@ -1408,7 +1408,7 @@ namespace SquashBot.Gameplay
             }
             ui.SetTpsSwitch(!arenaRun && !challengeRun && level.mission == MissionType.Hunt && roadPhase == RoadPhase.None, tpsOn);
             var command = ArenaActive ? default(InputCommand) : tpsOn ? TpsCommand() : input.Poll(robot.transform.position);
-            if (ChallengeArmyPhase) command = default; // the armies fight: foi waits for its duel
+            if (ChallengeArmyPhase) { ArmyInput(command); command = default; } // the Army Battle: the stick and taps lead the active group
             command = GlassCellGate(command); // foi starts each floor in its glass cell
             UpdateHover(command);
             if (!hovering)
@@ -2196,7 +2196,7 @@ namespace SquashBot.Gameplay
             HideTools();
             if (hovering) { hovering = false; ShowHoverMarker(false); }
 
-            if (challengeRun) { chDuelThem = Mathf.Max(chDuelThem, DuelRounds - chDuelMe); ChallengeEnd(); return; } // foi fell outside a round: the rounds left are lost
+            if (challengeRun) { ChallengeEnd(); return; }
             // Coins picked up are kept even on a loss, so every run feels worth it.
             SaveData.Coins += Earned;
             if (bonusRun)

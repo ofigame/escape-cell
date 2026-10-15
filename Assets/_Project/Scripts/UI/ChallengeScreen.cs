@@ -12,38 +12,27 @@ using Kind = SquashBot.UI.UiFactory.ButtonKind;
 namespace SquashBot.UI
 {
     /// <summary>
-    /// The challenge's screens over the board: the waiting room (the player's card, "looking for a rival…", then the
-    /// rival's card), and in the battle the two names and ranks with their soldiers left, the turn's clock and status,
-    /// and the player's six group buttons (kind, soldiers left; the picked one lit) for the secret pick.
+    /// The challenge's screens: the kinds (Army Battle, Duel and its minutes), playing a friend (a code), the name, the
+    /// waiting room (the player's card, "looking for a rival…", then the rival's card), and over the board the two names
+    /// with their soldiers left, the score and clock, the status line and (the Army Battle) the bar of six groups.
     /// </summary>
     public class ChallengeScreen : MonoBehaviour
     {
+        /// <summary>A group tapped on the Army Battle's bar.</summary>
         public event Action<int> GroupPicked;
         public event Action Leave;
-        /// <summary>A tap on the board (screen point): the game finds the group under it.</summary>
-        public event Action<Vector2> BoardTapped;
-
-        /// <summary>A drag across the board (screen pixels): the view slides over it.</summary>
-        public event Action<Vector2> BoardDragged;
 
         /// <summary>A name typed and confirmed on the name screen; closing it without one.</summary>
         public event Action<string> NameSubmitted;
         public event Action NameClosed;
-        /// <summary>A kind of challenge was picked: 0 the Arena battle, 1 the Meydan (stage) battle.</summary>
-        public event Action<int> ModePicked;
-        /// <summary>The friend panel: make a code (host), enter one (join), or close it.</summary>
-        public event Action FriendHost, FriendClose;
+        /// <summary>A kind picked on the modes screen: 0 the Army Battle, 1 the Duel (with its minutes).</summary>
+        public event Action<int, int> ModePicked;
+        /// <summary>The friend panel's MAKE A CODE: the kind (0 army, 1 duel) and the duel's minutes the maker picked.</summary>
+        public event Action<int, int> FriendHost;
+        public event Action FriendClose;
         public event Action<string> FriendJoin;
         /// <summary>"Change name" in the waiting room.</summary>
         public event Action RenamePressed;
-
-        private class TapArea : MonoBehaviour, UnityEngine.EventSystems.IPointerClickHandler, UnityEngine.EventSystems.IBeginDragHandler, UnityEngine.EventSystems.IDragHandler
-        {
-            public Action<Vector2> tapped, dragged;
-            public void OnPointerClick(UnityEngine.EventSystems.PointerEventData e) { if (!e.dragging) tapped?.Invoke(e.position); }
-            public void OnBeginDrag(UnityEngine.EventSystems.PointerEventData e) { }
-            public void OnDrag(UnityEngine.EventSystems.PointerEventData e) => dragged?.Invoke(e.delta);
-        }
 
         private UiScreen lobby, hud, namePanel;
         private RectTransform pickPanel, pickBar, myBadge, theirBadge;
@@ -59,7 +48,6 @@ namespace SquashBot.UI
         private TextMeshProUGUI lobbyStatus, myBar, theirBar, clock, status;
         private RectTransform searchBar;
         private readonly List<(Button button, TextMeshProUGUI count, Image face, Color colour)> groups = new List<(Button, TextMeshProUGUI, Image, Color)>();
-        private int picked = -1;
         private float searchT;
         private bool searching;
 
@@ -105,16 +93,11 @@ namespace SquashBot.UI
 
             // The battle's overlay.
             hud = UiScreen.Create("ChallengeHud", root, out var h);
-            var tap = UiFactory.Stretch("BoardTap", h);
-            UiFactory.Fill(tap, new Color(0f, 0f, 0f, 0f));
-            var area = tap.gameObject.AddComponent<TapArea>();
-            area.tapped = p => BoardTapped?.Invoke(p);
-            area.dragged = d => BoardDragged?.Invoke(d);
             var top = UiFactory.Rect("Top", h, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -505f), new Vector2(0f, -365f)); // under the HUD's top row and the health bar
             UiFactory.Fill(top, new Color(0.03f, 0.03f, 0.1f, 0.55f)).raycastTarget = false;
-            myBar = UiFactory.TextBox("Me", top, new Vector2(0f, 0.5f), new Vector2(136f, -20f), new Vector2(380f, 120f), "", 32f, ClashSystem.Mine, title: true, align: TextAlignmentOptions.Left);
+            myBar = UiFactory.TextBox("Me", top, new Vector2(0f, 0.5f), new Vector2(136f, -20f), new Vector2(380f, 120f), "", 32f, ArmyBattle.Mine, title: true, align: TextAlignmentOptions.Left);
             myBar.rectTransform.pivot = new Vector2(0f, 0.5f);
-            theirBar = UiFactory.TextBox("Them", top, new Vector2(1f, 0.5f), new Vector2(-136f, -20f), new Vector2(380f, 120f), "", 32f, ClashSystem.Theirs, title: true, align: TextAlignmentOptions.Right);
+            theirBar = UiFactory.TextBox("Them", top, new Vector2(1f, 0.5f), new Vector2(-136f, -20f), new Vector2(380f, 120f), "", 32f, ArmyBattle.Theirs, title: true, align: TextAlignmentOptions.Right);
             theirBar.rectTransform.pivot = new Vector2(1f, 0.5f);
             clock = UiFactory.TextBox("Clock", top, new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(200f, 110f), "", 72f, Color.white, title: true);
             clock.rectTransform.pivot = new Vector2(0.5f, 0.5f);
@@ -124,7 +107,7 @@ namespace SquashBot.UI
             pickPanel = UiFactory.Box("Pick", h, new Vector2(0.5f, 0f), new Vector2(0f, 36f), new Vector2(1050f, 400f));
             pickPanel.pivot = new Vector2(0.5f, 0f);
             UiFactory.Fill(pickPanel, new Color(0.05f, 0.05f, 0.12f, 0.92f), UiSprites.Rounded, 1f);
-            UiFactory.Fill(UiFactory.Stretch("Rim", pickPanel), new Color(ClashSystem.Mine.r, ClashSystem.Mine.g, ClashSystem.Mine.b, 0.8f), UiSprites.Ring, 1f).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Stretch("Rim", pickPanel), new Color(ArmyBattle.Mine.r, ArmyBattle.Mine.g, ArmyBattle.Mine.b, 0.8f), UiSprites.Ring, 1f).raycastTarget = false;
             pickTitle = UiFactory.TextBox("Title", pickPanel, new Vector2(0.5f, 1f), new Vector2(0f, -14f), new Vector2(980f, 56f), Loc.T("ch.pick"), 36f, Palette.UiGold, title: true);
             pickBar = UiFactory.Bar(pickPanel, new Vector2(0.5f, 1f), new Vector2(0f, -78f), new Vector2(900f, 14f), Palette.UiCyan, out pickFill).rectTransform;
             for (int g = 0; g < Army.Groups; g++) GroupButton(pickPanel, g);
@@ -141,8 +124,17 @@ namespace SquashBot.UI
             Flat.Background(m);
             Flat.Label(m, Loc.T("ch.modeTitle"), new Vector2(0.5f, 1f), new Vector2(0f, -110f), new Vector2(960f, 80f), 56f, Flat.Text, TextAlignmentOptions.Center, bold: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            ModeCard(m, 0, new Vector2(0f, 330f), "arena", "ch.mode.arena", "ch.mode.arenaText", new Color(0.62f, 0.45f, 1f));
-            ModeCard(m, 1, new Vector2(0f, -360f), "stages", "ch.mode.stages", "ch.mode.stagesText", new Color(1f, 0.6f, 0.25f));
+            ModeCard(m, 0, new Vector2(0f, 330f), "arena", "ch.mode.army", "ch.mode.armyText", new Color(0.62f, 0.45f, 1f));
+            var duel = ModeCard(m, 1, new Vector2(0f, -360f), "duel", "ch.mode.duel", "ch.mode.duelText", new Color(1f, 0.6f, 0.25f), tappable: false);
+            // The duel's length: each button starts a duel of that many minutes.
+            int[] lengths = { 3, 5, 10 };
+            for (int i = 0; i < lengths.Length; i++)
+            {
+                int minutes = lengths[i];
+                var b = Flat.Button(duel, Loc.F("ch.minutes", minutes), new Vector2(1f, 0f), new Vector2(-40f - (lengths.Length - 1 - i) * 180f, 122f), new Vector2(164f, 72f),
+                    new Color(1f, 0.6f, 0.25f), new Color(0.12f, 0.06f, 0f), () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(1, minutes); }, 32f);
+                ((RectTransform)b.transform).pivot = new Vector2(1f, 0.5f);
+            }
             // Play a friend live (a four-digit code), between the cards and CLOSE.
             var friend = Flat.Button(m, Loc.T("live.friend"), new Vector2(0.5f, 0f), new Vector2(0f, 214f), new Vector2(640f, 100f), Flat.Blue, Flat.Text, ShowFriend, 34f);
             ((RectTransform)friend.transform).pivot = new Vector2(0.5f, 0.5f);
@@ -168,16 +160,25 @@ namespace SquashBot.UI
             hint.rectTransform.pivot = new Vector2(0.5f, 0.5f);
 
             // Making a code: the code, big.
-            var hostCard = Flat.Panel(p, "Host", new Vector2(0.5f, 0.5f), new Vector2(0f, 330f), new Vector2(940f, 330f), Flat.Card);
+            var hostCard = Flat.Panel(p, "Host", new Vector2(0.5f, 0.5f), new Vector2(0f, 380f), new Vector2(940f, 470f), Flat.Card);
             hostCard.pivot = new Vector2(0.5f, 0.5f);
-            friendCode = Flat.Label(hostCard, "", new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(900f, 130f), 110f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
+            // The kind, then (a duel) its minutes.
+            hostKinds[0] = Chip(hostCard, Loc.T("ch.mode.army"), new Vector2(-225f, -64f), new Vector2(420f, 84f), () => SetHostKind(0, hostMinutes));
+            hostKinds[1] = Chip(hostCard, Loc.T("ch.mode.duel"), new Vector2(225f, -64f), new Vector2(420f, 84f), () => SetHostKind(1, hostMinutes));
+            int[] lengths2 = { 3, 5, 10 };
+            for (int i = 0; i < 3; i++)
+            {
+                int minutes = lengths2[i];
+                hostLengths[i] = Chip(hostCard, Loc.F("ch.minutes", minutes), new Vector2((i - 1) * 290f, -164f), new Vector2(270f, 76f), () => SetHostKind(1, minutes));
+            }
+            friendCode = Flat.Label(hostCard, "", new Vector2(0.5f, 1f), new Vector2(0f, -270f), new Vector2(900f, 110f), 96f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
             friendCode.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             friendCode.characterSpacing = 30f;
-            hostButton = Flat.Button(hostCard, Loc.T("live.host"), new Vector2(0.5f, 0f), new Vector2(0f, 80f), new Vector2(560f, 100f), Flat.Blue, Flat.Text, () => FriendHost?.Invoke(), 34f);
+            hostButton = Flat.Button(hostCard, Loc.T("live.host"), new Vector2(0.5f, 0f), new Vector2(0f, 70f), new Vector2(560f, 100f), Flat.Blue, Flat.Text, () => FriendHost?.Invoke(hostKind, hostMinutes), 34f);
             ((RectTransform)hostButton.transform).pivot = new Vector2(0.5f, 0.5f);
 
             // Entering a friend's code.
-            var joinCard = Flat.Panel(p, "Join", new Vector2(0.5f, 0.5f), new Vector2(0f, -60f), new Vector2(940f, 330f), Flat.Card);
+            var joinCard = Flat.Panel(p, "Join", new Vector2(0.5f, 0.5f), new Vector2(0f, -110f), new Vector2(940f, 330f), Flat.Card);
             joinCard.pivot = new Vector2(0.5f, 0.5f);
             var box = UiFactory.Box("Input", joinCard, new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(420f, 120f));
             box.pivot = new Vector2(0.5f, 0.5f);
@@ -208,6 +209,30 @@ namespace SquashBot.UI
             ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 
+        private readonly Button[] hostKinds = new Button[2], hostLengths = new Button[3];
+        private int hostKind, hostMinutes = 3;
+
+        /// <summary>A choice chip: lit when picked.</summary>
+        private Button Chip(RectTransform parent, string text, Vector2 at, Vector2 size, Action onClick)
+        {
+            var b = Flat.Button(parent, text, new Vector2(0.5f, 1f), at, size, Flat.CardHi, Flat.Text, () => { AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.2f); onClick(); }, 30f);
+            ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0.5f);
+            return b;
+        }
+
+        private void SetHostKind(int kind, int minutes)
+        {
+            hostKind = kind;
+            hostMinutes = minutes;
+            for (int i = 0; i < 2; i++) ((Image)hostKinds[i].targetGraphic).color = i == kind ? Flat.Blue : Flat.CardHi;
+            int[] lengths = { 3, 5, 10 };
+            for (int i = 0; i < 3; i++)
+            {
+                ((Image)hostLengths[i].targetGraphic).color = kind == 1 && lengths[i] == minutes ? new Color(1f, 0.6f, 0.25f) : Flat.CardHi;
+                hostLengths[i].gameObject.SetActive(kind == 1);
+            }
+        }
+
         private void Join()
         {
             var code = (codeInput.text ?? "").Trim();
@@ -220,6 +245,7 @@ namespace SquashBot.UI
             AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f);
             modes.Hide(true);
             friendCode.text = "- - - -";
+            SetHostKind(hostKind, hostMinutes);
             codeInput.text = "";
             friendStatus.text = "";
             SetFriendBusy(false);
@@ -236,12 +262,14 @@ namespace SquashBot.UI
         public void SetFriendBusy(bool busy)
         {
             hostButton.interactable = !busy;
+            foreach (var b in hostKinds) b.interactable = !busy;
+            foreach (var b in hostLengths) b.interactable = !busy;
             joinButton.interactable = !busy;
             codeInput.interactable = !busy;
         }
 
         /// <summary>A kind's card: a picture from the game itself, its name and a line about it; tapping it picks it.</summary>
-        private void ModeCard(RectTransform parent, int mode, Vector2 at, string picture, string nameKey, string textKey, Color colour)
+        private RectTransform ModeCard(RectTransform parent, int mode, Vector2 at, string picture, string nameKey, string textKey, Color colour, bool tappable = true)
         {
             var card = UiFactory.Box("Mode" + mode, parent, new Vector2(0.5f, 0.5f), at, new Vector2(960f, 640f));
             card.pivot = new Vector2(0.5f, 0.5f);
@@ -268,10 +296,19 @@ namespace SquashBot.UI
             name.rectTransform.pivot = new Vector2(0f, 0.5f);
             var text = Flat.Label(card, Loc.T(textKey), new Vector2(0f, 0f), new Vector2(Flat.Pad + 8f, 48f), new Vector2(900f, 66f), 26f, Flat.Muted, wrap: true);
             text.rectTransform.pivot = new Vector2(0f, 0.5f);
+            if (!tappable)
+            {
+                // Its own buttons start it (beside its name; the line under them runs the full width).
+                name.rectTransform.sizeDelta = new Vector2(340f, 60f);
+                name.rectTransform.anchoredPosition = new Vector2(Flat.Pad + 8f, 122f);
+                text.rectTransform.anchoredPosition = new Vector2(Flat.Pad + 8f, 40f);
+                return card;
+            }
             var button = card.gameObject.AddComponent<Button>();
             button.targetGraphic = face;
-            button.onClick.AddListener(() => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(mode); });
+            button.onClick.AddListener(() => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(mode, 0); });
             card.gameObject.AddComponent<ButtonPress>();
+            return card;
         }
 
         public void ShowModes()
@@ -300,7 +337,7 @@ namespace SquashBot.UI
             var box = UiFactory.Box("Input", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 110f), new Vector2(780f, 140f));
             box.pivot = new Vector2(0.5f, 0.5f);
             var bg = UiFactory.Fill(box, new Color(1f, 1f, 1f, 0.12f), UiSprites.Rounded, 1.2f);
-            UiFactory.Fill(UiFactory.Stretch("Rim", box), new Color(ClashSystem.Mine.r, ClashSystem.Mine.g, ClashSystem.Mine.b, 0.9f), UiSprites.Ring, 1.2f).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Stretch("Rim", box), new Color(ArmyBattle.Mine.r, ArmyBattle.Mine.g, ArmyBattle.Mine.b, 0.9f), UiSprites.Ring, 1.2f).raycastTarget = false;
             var area = UiFactory.Rect("TextArea", box, Vector2.zero, Vector2.one, new Vector2(36f, 14f), new Vector2(-36f, -14f));
             area.gameObject.AddComponent<RectMask2D>();
             var text = UiFactory.Text(area, "", 56f, Color.white);
@@ -431,7 +468,7 @@ namespace SquashBot.UI
             float s = size;
             bool heavy = Army.Heavy(kind);
             int fam = Army.Family(kind);
-            var team = ClashSystem.Mine;
+            var team = ArmyBattle.Mine;
             var dark = new Color(0.16f, 0.17f, 0.24f);
             var metal = new Color(0.86f, 0.89f, 0.95f);
             var wood = new Color(0.6f, 0.4f, 0.22f);
@@ -481,23 +518,11 @@ namespace SquashBot.UI
             else P(new Vector2(-0.22f * w, -0.02f), new Vector2(0.08f, 0.26f), dark, UiSprites.Rounded);
         }
 
-        /// <summary>A group picked on the board.</summary>
-        public void PickFromBoard(int g)
-        {
-            if (picked >= 0) return;
-            picked = g;
-            AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.2f);
-            pickPanel.gameObject.SetActive(false);
-            GroupPicked?.Invoke(g);
-        }
-
+        /// <summary>A group tapped on the bar: it leads now (the bar stays).</summary>
         private void Pick(int g)
         {
-            if (picked >= 0 || !groups[g].button.interactable) return;
-            picked = g;
+            if (!groups[g].button.interactable) return;
             AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.2f);
-            for (int i = 0; i < groups.Count; i++) groups[i].face.color = i == g ? groups[i].colour : new Color(1f, 1f, 1f, 0.12f);
-            pickPanel.gameObject.SetActive(false);
             GroupPicked?.Invoke(g);
         }
 
@@ -556,6 +581,7 @@ namespace SquashBot.UI
             lobby.Hide(true);
             hud.Hide(true);
             namePanel.Hide(true);
+            armyBar = false;
             if (modes != null) modes.Hide(true);
         }
 
@@ -580,41 +606,56 @@ namespace SquashBot.UI
         }
 
         /// <summary>The pick's clock bar: the share of the ten seconds left.</summary>
-        public void SetPickTime(float left) { if (pickFill != null) UiFactory.SetBar(pickFill, Mathf.Clamp01(left)); }
+        // ---------- The Army Battle's group bar ----------
+
+        private bool armyBar;
+        private readonly int[] barLeft = new int[Army.Groups];
+        private int barActive = -2;
+
+        /// <summary>The Army Battle's bar of six groups at the bottom: soldiers left in each, the one leading lit.</summary>
+        public void ShowArmyBar(int[] left, int active)
+        {
+            if (!armyBar || !pickPanel.gameObject.activeSelf)
+            {
+                armyBar = true;
+                pickPanel.gameObject.SetActive(true);
+                pickPop = 1f;
+                pickPanel.localScale = Vector3.one;
+                pickTitle.gameObject.SetActive(false);
+                pickBar.gameObject.SetActive(false);
+                pickPanel.sizeDelta = new Vector2(1050f, 300f); // only the buttons: a slimmer bar
+                barActive = -2;
+            }
+            bool same = active == barActive;
+            for (int i = 0; i < groups.Count && same; i++) same = barLeft[i] == left[i];
+            if (same) return; // nothing changed: no canvas rebuild
+            barActive = active;
+            for (int i = 0; i < groups.Count; i++)
+            {
+                barLeft[i] = left[i];
+                bool alive = left[i] > 0;
+                var col = groups[i].colour;
+                groups[i].button.interactable = alive;
+                groups[i].count.text = left[i].ToString();
+                groups[i].face.color = i == active ? col : alive ? new Color(col.r, col.g, col.b, 0.3f) : new Color(1f, 1f, 1f, 0.06f);
+            }
+        }
+
+        /// <summary>A finger on the group bar (not the stick or a tap on the field).</summary>
+        public bool IsOverControls(Vector2 screen) =>
+            pickPanel != null && pickPanel.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(pickPanel, screen, null);
 
         public void SetClock(string text) => clock.text = text;
         public void SetStatus(string text) => status.text = text;
 
-        /// <summary>A new turn: the pick card pops up; the groups with soldiers left can be picked.</summary>
-        public void OpenPick(int[] left)
-        {
-            picked = -1;
-            pickPanel.gameObject.SetActive(true);
-            pickPop = 0f;
-            SetPickTime(1f);
-            for (int i = 0; i < groups.Count; i++)
-            {
-                bool alive = left[i] > 0;
-                groups[i].button.interactable = alive;
-                groups[i].count.text = left[i].ToString();
-                groups[i].face.color = alive ? new Color(groups[i].colour.r, groups[i].colour.g, groups[i].colour.b, 0.45f) : new Color(1f, 1f, 1f, 0.06f);
-            }
-        }
-
-        public void ClosePick()
-        {
-            foreach (var g in groups) g.button.interactable = false;
-            pickPanel.gameObject.SetActive(false);
-        }
-
         /// <summary>The duel: the group bar goes away.</summary>
         public void HideGroups()
         {
+            armyBar = false;
             pickPanel.gameObject.SetActive(false);
             clock.text = "";
         }
 
-        public int Picked => picked;
 
         private void Update()
         {

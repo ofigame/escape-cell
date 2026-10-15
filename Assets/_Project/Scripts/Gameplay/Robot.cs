@@ -648,6 +648,9 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>A hammer blow at something on another tile: turn to it and lunge a little that way.</summary>
+        /// <summary>Blows swung so far (a live duel tells the other game, which swings the rival's weapon).</summary>
+        public int Swings { get; private set; }
+
         public bool Strike(Vector3 target)
         {
             if (!IsAlive || anim != Anim.Idle) return false;
@@ -658,6 +661,7 @@ namespace SquashBot.Gameplay
             targetFacing = Quaternion.LookRotation(dir);
             visual.localRotation = targetFacing; // face the target at once, even one behind: no slow turn before a blow
             StartAnim(Anim.Bump, transform.position, transform.position + dir * 0.32f);
+            Swings++;
             return true;
         }
 

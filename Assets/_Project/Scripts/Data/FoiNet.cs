@@ -61,6 +61,8 @@ namespace SquashBot.Data
         {
             public string name;
             public int trophies, rank, wins, played, defWins, defLosses;
+            /// <summary>Matches for the record only: against the AI, against friends.</summary>
+            public int aiWins, aiPlayed, friendWins, friendPlayed;
         }
 
         [Serializable] private class ErrorReply { public string error; }

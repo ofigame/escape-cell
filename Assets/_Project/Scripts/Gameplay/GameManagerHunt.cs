@@ -476,16 +476,7 @@ namespace SquashBot.Gameplay
                 return;
             }
             float dt = Time.unscaledDeltaTime;
-            if (challengeRun && chPhase == ChPhase.StageIntro)
-            {
-                StageIntroPose(out var ipos, out var irot);
-                cameraRig.Chase(ipos, irot, 46f);
-                if (cameraRig.Cam.farClipPlane < 200f) cameraRig.Cam.farClipPlane = 200f;
-                closeCamOn = true;
-                closeCamFocus = robot.transform.position;
-                return;
-            }
-            if (ChallengeArmyPhase || (challengeRun && chPhase == ChPhase.Duel && !StageMode))
+            if (challengeRun && chPhase != ChPhase.Off)
             {
                 // The challenge's army battle: the whole board from above its south end.
                 BoardPose(out var bpos, out var brot);
