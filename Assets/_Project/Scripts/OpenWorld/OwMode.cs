@@ -20,7 +20,7 @@ namespace SquashBot.OpenWorld
     {
         public static bool Active { get; private set; }
 
-        private const float Speed = 5.5f;
+        private const float Speed = 7f;
 
         private OwSave save;
         private OwWorld world;
@@ -73,12 +73,13 @@ namespace SquashBot.OpenWorld
             ui.CameraPressed += () => SetTps(!tps);
             ui.DefencePressed += ShowDefences;
             ui.ArmyPressed += ShowArmy;
-            ui.MapPressed += () => ui.ShowMap(save.regions, OwRegions.N, OwRegions.Of(pos), OwRegions.Of(OwWorld.FarmCentre), OwRegions.Of(OwWorld.CoopAt), OwRegions.Fortress, save.fortressDone);
+            ui.MapPressed += ShowMap;
             ui.Zoom += d => isoDist = Mathf.Clamp(isoDist + d, MinZoom, MaxZoom);
             foiMax = Mathf.Max(100, Challenge.FoiMaxHp);
             foiHp = foiMax;
             save.FeedSoldiers();
             StartCoroutine(OwNotify.Init());
+            StartCoroutine(OwWorld.PrepareMap());
             OwNotify.Clear();
             battle = OwBattle.Create(transform, save, farm, fx, () => pos, HurtFoi);
             battle.Ended += RaidEnded;
@@ -107,7 +108,7 @@ namespace SquashBot.OpenWorld
             foreach (var mb in foi.GetComponentsInChildren<MonoBehaviour>()) mb.enabled = false;
 
             pos = save.px > 0f ? new Vector2(save.px, save.pz) : OwWorld.Arrival;
-            world.Around(pos);
+            world.Around(pos, true);
             SetTps(save.tps);
             ui.SetMoney(save.money);
             ui.SetBarn(save.Stored, save.BarnSize);
@@ -173,6 +174,7 @@ namespace SquashBot.OpenWorld
         {
             Active = false;
             OwIcons.Clear();
+            OwWorld.ForgetMap();
             RenderSettings.fog = false;
             foreach (var c in hiddenCanvases) if (c != null) c.enabled = true;
             foreach (var c in hiddenCameras) if (c != null) c.enabled = true;
@@ -249,8 +251,37 @@ namespace SquashBot.OpenWorld
             ui.SetZoomButtons(false);
             ui.SetMapButton(!battle.Raiding && (camp == null || !camp.Started));
             if (!tps) { PinchAndWheel(); MouseTurn(); }
+            Sky();
             PlaceCamera(p, dt);
             FarmPointer();
+        }
+
+        /// <summary>The sky and the haze: a warm desert dust over the sand, a clear blue-green over the hills.</summary>
+        private void Sky()
+        {
+            float g = OwWorld.Green(pos.x, pos.y);
+            var sky = Color.Lerp(new Color(0.98f, 0.72f, 0.55f), new Color(0.72f, 0.86f, 0.92f), g);
+            cam.backgroundColor = sky;
+            RenderSettings.fogColor = sky;
+        }
+
+        /// <summary>The map: the land's picture, the bandits' land in red, the farm, the co-op, the camps to free, foi.</summary>
+        private void ShowMap()
+        {
+            var marks = new List<OwUi.MapMark>
+            {
+                new OwUi.MapMark { at = OwWorld.CoopAt, icon = world.CoopIcon(), size = 96f },
+                new OwUi.MapMark { at = OwWorld.FarmCentre, icon = farm.HouseIcon(Mathf.Max(1, save.house)), size = 104f, ring = new Color(0.35f, 0.85f, 0.45f) },
+            };
+            for (int x = 0; x < OwRegions.N; x++)
+                for (int y = 0; y < OwRegions.N; y++)
+                {
+                    var r = new Vector2Int(x, y);
+                    if (r == OwRegions.Middle || OwRegions.Get(save, r) != RegionState.Bandit) continue;
+                    bool fort = r == OwRegions.Fortress && !save.fortressDone;
+                    marks.Add(new OwUi.MapMark { at = OwRegions.CampAt(r), icon = BanditIcon(), size = fort ? 92f : 58f, ring = fort ? new Color(1f, 0.25f, 0.2f) : default });
+                }
+            ui.ShowMap(OwWorld.MapTexture(), OwWorld.Size, save.regions, OwRegions.N, pos, marks);
         }
 
         /// <summary>The house that shows the way home: over the farm when it is in view, at the screen's edge the way it lies
@@ -377,6 +408,7 @@ namespace SquashBot.OpenWorld
             farm.Rebuild();
             battle.Garrison();
             pos = OwWorld.FarmCentre + new Vector2(0f, -save.House.land * 0.5f - 4f);
+            world.Around(pos, true);
             streamT = 0f;
             Changed(false);
             ui.Toast(Loc.F("ow.raid.moved", got));

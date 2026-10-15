@@ -242,43 +242,72 @@ namespace SquashBot.OpenWorld
 
         public bool MapOpen => mapPanel != null && mapPanel.gameObject.activeSelf;
 
-        /// <summary>The 7 × 7 regions coloured by who holds them, with foi, the farm, the co-op and the Fortress marked.</summary>
-        public void ShowMap(int[] regions, int n, Vector2Int foi, Vector2Int farm, Vector2Int coop, Vector2Int fortress, bool fortressDone)
+        /// <summary>A picture pinned on the map (in map units), with an optional coloured ring round it.</summary>
+        public struct MapMark { public Vector2 at; public Texture icon; public float size; public Color ring; }
+
+        /// <summary>The land's picture to scale, the bandits' regions washed red (the border ones orange), faint region
+        /// lines, the marks, and foi as a ringed dot.</summary>
+        public void ShowMap(Texture land, float worldSize, int[] regions, int n, Vector2 foi, List<MapMark> marks)
         {
             if (mapPanel != null) Destroy(mapPanel.gameObject);
-            mapPanel = UiFactory.Rect("Map", safe, Vector2.zero, Vector2.one, new Vector2(50f, 140f), new Vector2(-50f, -170f));
+            mapPanel = UiFactory.Rect("Map", safe, Vector2.zero, Vector2.one, new Vector2(30f, 140f), new Vector2(-30f, -170f));
             UiFactory.Fill(mapPanel, new Color(0.06f, 0.07f, 0.12f, 0.97f), UiSprites.Rounded, 1f);
             var title = Flat.Label(mapPanel, Loc.T("ow.map.title"), new Vector2(0.5f, 1f), new Vector2(0f, -60f), new Vector2(800f, 80f), 46f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
             title.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var close = Flat.Button(mapPanel, "X", new Vector2(1f, 1f), new Vector2(-70f, -60f), new Vector2(100f, 90f), Flat.CardHi, Flat.Text, () => mapPanel.gameObject.SetActive(false), 40f);
             ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
-            const float cell = 108f;
-            var grid = UiFactory.Box("Grid", mapPanel, new Vector2(0.5f, 0.5f), new Vector2(0f, 40f), new Vector2(cell * n, cell * n));
+            const float side = 960f;
+            float k = side / worldSize, cell = side / n;
+            var frame = UiFactory.Box("Frame", mapPanel, new Vector2(0.5f, 0.5f), new Vector2(0f, 30f), new Vector2(side + 16f, side + 16f));
+            frame.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(frame, new Color(0.55f, 0.42f, 0.28f), UiSprites.Rounded, 0.5f).raycastTarget = false;
+            var grid = UiFactory.Box("Land", frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(side, side));
             grid.pivot = new Vector2(0.5f, 0.5f);
-            var colours = new[] { new Color(0.35f, 0.72f, 0.4f), new Color(0.9f, 0.75f, 0.3f), new Color(0.85f, 0.25f, 0.2f) };
+            var pic = grid.gameObject.AddComponent<RawImage>();
+            pic.texture = land;
+            pic.raycastTarget = false;
             for (int x = 0; x < n; x++)
                 for (int y = 0; y < n; y++)
                 {
-                    var c = UiFactory.Box("Cell", grid, Vector2.zero, new Vector2((x + 0.5f) * cell, (y + 0.5f) * cell), new Vector2(cell - 6f, cell - 6f));
+                    int state = regions[y * n + x];
+                    if (state == 0) continue;
+                    var c = UiFactory.Box("Region", grid, Vector2.zero, new Vector2((x + 0.5f) * cell, (y + 0.5f) * cell), new Vector2(cell, cell));
                     c.pivot = new Vector2(0.5f, 0.5f);
-                    UiFactory.Fill(c, colours[Mathf.Clamp(regions[y * n + x], 0, 2)], UiSprites.Rounded, 2f).raycastTarget = false;
-                    string mark = null;
-                    if (new Vector2Int(x, y) == fortress && !fortressDone && regions[y * n + x] == 2) mark = "!";
-                    if (new Vector2Int(x, y) == coop) mark = "$";
-                    if (new Vector2Int(x, y) == farm) mark = "F";
-                    if (mark != null)
-                    {
-                        var t = Flat.Label(c, mark, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(cell, cell), 52f, Color.white, TextAlignmentOptions.Center, bold: true);
-                        t.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-                    }
-                    if (new Vector2Int(x, y) == foi)
-                    {
-                        var dot = UiFactory.Box("Foi", c, new Vector2(1f, 0f), new Vector2(-20f, 20f), new Vector2(30f, 30f));
-                        dot.pivot = new Vector2(0.5f, 0.5f);
-                        UiFactory.Fill(dot, Color.white, UiSprites.Circle).raycastTarget = false;
-                    }
+                    UiFactory.Fill(c, state == 2 ? new Color(0.95f, 0.08f, 0.06f, 0.5f) : new Color(1f, 0.6f, 0.15f, 0.22f)).raycastTarget = false;
+                    if (state == 2)
+                        foreach (var (min, max) in new[] { (Vector2.zero, new Vector2(1f, 0f)), (new Vector2(0f, 1f), Vector2.one), (Vector2.zero, new Vector2(0f, 1f)), (new Vector2(1f, 0f), Vector2.one) })
+                            UiFactory.Fill(UiFactory.Rect("Edge", c, min, max, new Vector2(-2f, -2f), new Vector2(2f, 2f)), new Color(1f, 0.15f, 0.1f, 0.85f)).raycastTarget = false;
                 }
-            var legend = Flat.Label(mapPanel, Loc.T("ow.map.legend"), new Vector2(0.5f, 0f), new Vector2(0f, 90f), new Vector2(900f, 130f), 26f, Flat.Muted, TextAlignmentOptions.Center, wrap: true);
+            for (int i = 1; i < n; i++)
+            {
+                var v = UiFactory.Box("Line", grid, Vector2.zero, new Vector2(i * cell, side * 0.5f), new Vector2(2f, side));
+                v.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(v, new Color(1f, 1f, 1f, 0.16f)).raycastTarget = false;
+                var h = UiFactory.Box("Line", grid, Vector2.zero, new Vector2(side * 0.5f, i * cell), new Vector2(side, 2f));
+                h.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(h, new Color(1f, 1f, 1f, 0.16f)).raycastTarget = false;
+            }
+            foreach (var m in marks)
+            {
+                var at = m.at * k;
+                if (m.ring.a > 0f)
+                {
+                    var ring = UiFactory.Box("Ring", grid, Vector2.zero, at, new Vector2(m.size * 1.08f, m.size * 1.08f));
+                    ring.pivot = new Vector2(0.5f, 0.5f);
+                    UiFactory.Fill(ring, new Color(m.ring.r, m.ring.g, m.ring.b, 0.55f), UiSprites.Circle).raycastTarget = false;
+                    UiFactory.Fill(UiFactory.Stretch("Rim", ring), Color.white, UiSprites.Ring, 0.25f).raycastTarget = false;
+                }
+                var icon = UiFactory.Box("Mark", grid, Vector2.zero, at, new Vector2(m.size, m.size));
+                icon.pivot = new Vector2(0.5f, 0.5f);
+                var raw = icon.gameObject.AddComponent<RawImage>();
+                raw.texture = m.icon;
+                raw.raycastTarget = false;
+            }
+            var you = UiFactory.Box("Foi", grid, Vector2.zero, foi * k, new Vector2(40f, 40f));
+            you.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(you, new Color(0.15f, 0.55f, 1f), UiSprites.Circle).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Stretch("Rim", you), Color.white, UiSprites.Ring, 0.3f).raycastTarget = false;
+            var legend = Flat.Label(mapPanel, Loc.T("ow.map.legend"), new Vector2(0.5f, 0f), new Vector2(0f, 80f), new Vector2(940f, 120f), 26f, Flat.Muted, TextAlignmentOptions.Center, wrap: true);
             legend.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             mapPanel.SetAsLastSibling();
         }
