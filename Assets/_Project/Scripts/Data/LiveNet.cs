@@ -24,9 +24,10 @@ namespace SquashBot.Data
         {
             public string t, code, score;
             public long matchId;
-            public int side, seed, mode, min, n, outcome, change, by;
+            public int side, seed, min, outcome, change, by, u, d, f;
             public float secs, mine, theirs;
-            public bool won, even, ranked, left;
+            public bool won, ranked, left;
+            public string from;
             public FoiNet.Rival rival;
             public FoiNet.Profile profile;
             [NonSerialized] public string raw;
@@ -138,27 +139,30 @@ namespace SquashBot.Data
 
         private static string I(float v) => v.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
 
-        public static void Queue(int mode, int minutes) => Send("{\"t\":\"queue\",\"mode\":" + mode + ",\"min\":" + minutes + "}");
-        public static void Host(int mode, int minutes) => Send("{\"t\":\"host\",\"mode\":" + mode + ",\"min\":" + minutes + "}");
+        public static void Queue(int minutes) => Send("{\"t\":\"queue\",\"min\":" + minutes + "}");
+        /// <summary>Makes a code for a friend (<paramref name="invite"/>: a friend's id, who is sent an invitation to it).</summary>
+        public static void Host(int minutes, string invite = null) =>
+            Send("{\"t\":\"host\",\"min\":" + minutes + (string.IsNullOrEmpty(invite) ? "" : ",\"to\":\"" + Clean(invite, 40, true) + "\"") + "}");
         public static void Join(string code) => Send("{\"t\":\"join\",\"code\":\"" + Clean(code) + "\"}");
         public static void Cancel() => Send("{\"t\":\"cancel\"}");
         public static void Ready() => Send("{\"t\":\"ready\"}");
 
-        /// <summary>The duel: where this game's foi is, its facing and the blows it has swung.</summary>
-        public static void DuelState(Vector3 pos, float yaw, int swings) =>
-            Send("{\"t\":\"s\",\"x\":" + I(pos.x) + ",\"z\":" + I(pos.z) + ",\"r\":" + I(yaw) + ",\"w\":" + swings + "}", true);
-
-        /// <summary>The army battle: this game's state (built by the army: its group, soldiers and how many stand).</summary>
-        public static void ArmyState(string body) => Send("{\"t\":\"s\"," + body + "}", true);
+        /// <summary>The duel: where this game's foi is, its facing, the blows it has swung, and its squad (see HuntSystem.SquadState).</summary>
+        public static void DuelState(Vector3 pos, float yaw, int swings, string squad) =>
+            Send("{\"t\":\"s\",\"x\":" + I(pos.x) + ",\"z\":" + I(pos.z) + ",\"r\":" + I(yaw) + ",\"w\":" + swings + ",\"q\":\"" + squad + "\"}", true);
 
         /// <summary>The duel: this game's foi landed a blow on the rival.</summary>
         public static void Hit() => Send("{\"t\":\"hit\"}");
 
-        /// <summary>The army battle: a blow of one of this game's soldiers on one of the rival's (its slot, the damage).</summary>
-        public static void ArmyHit(int unit, float damage) => Send("{\"t\":\"ah\",\"u\":" + unit + ",\"d\":" + I(damage) + "}");
+        /// <summary>A blow on one of the rival's soldiers (its number in its squad, the damage; a foi's blow: it strikes back).</summary>
+        public static void SquadHit(int id, int damage, bool byFoi) => Send("{\"t\":\"ah\",\"u\":" + id + ",\"d\":" + damage + ",\"f\":" + (byFoi ? 1 : 0) + "}");
 
-        /// <summary>The army battle: this side has no soldier left.</summary>
-        public static void Wiped() => Send("{\"t\":\"wiped\"}");
+        /// <summary>One of this game's soldiers landed a blow on the rival foi (health points).</summary>
+        public static void FoeHit(int damage) => Send("{\"t\":\"sh\",\"d\":" + damage + "}");
+
+        /// <summary>A heart (the server heals) and a shield (the server lets it take two blows for three seconds).</summary>
+        public static void Heal() => Send("{\"t\":\"heal\"}");
+        public static void Shield() => Send("{\"t\":\"shield\"}");
 
         /// <summary>Leaves the live match (a loss) and closes the connection.</summary>
         public static void Leave()
@@ -191,10 +195,10 @@ namespace SquashBot.Data
             socket.Dispose();
         }
 
-        private static string Clean(string code)
+        private static string Clean(string code, int max = 6, bool hex = false)
         {
             var sb = new StringBuilder();
-            foreach (char ch in code ?? "") if (ch >= '0' && ch <= '9' && sb.Length < 6) sb.Append(ch);
+            foreach (char ch in code ?? "") if ((ch >= '0' && ch <= '9' || hex && (ch == '-' || ch >= 'a' && ch <= 'f' || ch >= 'A' && ch <= 'F')) && sb.Length < max) sb.Append(ch);
             return sb.ToString();
         }
     }

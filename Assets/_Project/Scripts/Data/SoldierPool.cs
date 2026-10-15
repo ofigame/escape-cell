@@ -1,0 +1,63 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace SquashBot.Data
+{
+    /// <summary>
+    /// The army's soldiers the duels (and later the floors) draw on: thirty in each group. A soldier who falls is gone
+    /// from his group for an hour (counted from his own fall), then he is back. A duel takes up to two of each group
+    /// from what is there; a group with none left stays at home.
+    /// </summary>
+    public static class SoldierPool
+    {
+        /// <summary>How long a fallen soldier is away.</summary>
+        public static readonly TimeSpan Away = TimeSpan.FromMinutes(60);
+
+        /// <summary>Soldiers of each group a duel takes.</summary>
+        public const int PerDuel = 2;
+
+        private const string Key = "sb_pool_";
+
+        /// <summary>When each fallen soldier of a group comes back (UTC ticks), the ones still away.</summary>
+        private static List<long> Returns(int group)
+        {
+            var list = new List<long>();
+            long now = DateTime.UtcNow.Ticks;
+            foreach (var part in PlayerPrefs.GetString(Key + group, "").Split(','))
+                if (long.TryParse(part, out long t) && t > now && t - now <= Away.Ticks + TimeSpan.FromMinutes(5).Ticks) list.Add(t);
+            return list;
+        }
+
+        private static void Save(int group, List<long> list)
+        {
+            PlayerPrefs.SetString(Key + group, string.Join(",", list));
+            PlayerPrefs.Save();
+        }
+
+        /// <summary>Soldiers of a group at home now.</summary>
+        public static int Available(int group) => Mathf.Max(0, Army.Soldiers - Returns(group).Count);
+
+        /// <summary>Soldiers a duel can take from a group (at most two).</summary>
+        public static int ForDuel(int group) => Mathf.Min(PerDuel, Available(group));
+
+        /// <summary>A soldier of a group fell: away for an hour.</summary>
+        public static void Lose(int group)
+        {
+            if (group < 0 || group >= Army.Groups) return;
+            var list = Returns(group);
+            if (list.Count >= Army.Soldiers) return;
+            list.Add((DateTime.UtcNow + Away).Ticks);
+            Save(group, list);
+        }
+
+        /// <summary>Time until the next soldier of a group is back (zero: none away).</summary>
+        public static TimeSpan NextBack(int group)
+        {
+            var list = Returns(group);
+            if (list.Count == 0) return TimeSpan.Zero;
+            list.Sort();
+            return new TimeSpan(Math.Max(0L, list[0] - DateTime.UtcNow.Ticks));
+        }
+    }
+}

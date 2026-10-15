@@ -81,6 +81,9 @@ namespace SquashBot.Gameplay
         /// <summary>How slowly allies swing (1 = their own pace).</summary>
         public float AllyPace = 1f;
 
+        /// <summary>Damage the rival foi's blow does to one of the player's duel soldiers (its weapon's).</summary>
+        public int FoeSoldierDamage = 3;
+
         /// <summary>Damage each ally's blow does (later roads' allies hit harder).</summary>
         public int AllyDamage = 1;
 
@@ -92,6 +95,7 @@ namespace SquashBot.Gameplay
 
         private void UpdateAlly(Guard a, float dt)
         {
+            if (a.squad) { UpdateSquad(a, dt); return; }
             if (a.bar != null && Camera.main != null) a.bar.rotation = Quaternion.LookRotation(Camera.main.transform.forward, Vector3.up);
             if (a.barFill != null) a.barFill.localScale = new Vector3(Mathf.Max(0.001f, a.hp / (float)a.maxHp), 1f, 1f);
             if (a.flash > 0f) a.flash -= dt * 3f;
@@ -213,6 +217,7 @@ namespace SquashBot.Gameplay
             foreach (var a in allies)
             {
                 if (a.dead || !area.Contains(a.pos)) continue;
+                if (a.squad) { HurtSquad(a, by == challengeFoe ? FoeSoldierDamage : dmg + Edge(by, a), by, foiBlow: by == challengeFoe); continue; }
                 a.hp -= dmg + Edge(by, a);
                 a.Flash();
                 if (a.hp <= 0) KillAlly(a);
@@ -222,6 +227,7 @@ namespace SquashBot.Gameplay
         private void KillAlly(Guard a)
         {
             a.dead = true;
+            if (a.squad) SquadFell?.Invoke((int)a.soldierKind);
             fx.Burst(At(a.pos) + Vector3.up * 0.5f, AllyColour, AllyColour * 2f, 30, 5f);
             Shockwave.Create(At(a.pos), 1.2f, AllyColour);
             AudioManager.PlaySfx(Sfx.Impact, 0.6f, 1.3f);

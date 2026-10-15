@@ -102,8 +102,21 @@ namespace SquashBot.Gameplay
                 FortressFloor.FxColour = st.accent;
                 FortressFloor.WallScaleAt = null;
             }
-            FortressFloor.SkipCornerTowers = arenaRun || challengeRun;
-            FortressFloor.SkipWall = trailRun || challengeRun ? (System.Func<GridPos, bool>)(p => true) // the roads: mountains, no ramparts (the challenge: its arena)
+            bool duelWalls = challengeRun && !Stage.colosseum;
+            if (duelWalls)
+            {
+                // A duel stage (not the colosseum): low walls in its own stone, crowned with its flames, ice or light.
+                var ds = Stage;
+                wallHeight = 0.9f;
+                wallThick = 1f;
+                FortressFloor.WallTint = ds.wall;
+                FortressFloor.Fx = (FortressFloor.WallFx)ds.fx;
+                FortressFloor.FxColour = ds.fxColour;
+                FortressFloor.TowerGrow = 1.6f;
+                FortressFloor.WallScaleAt = null;
+            }
+            FortressFloor.SkipCornerTowers = arenaRun || (challengeRun && !duelWalls);
+            FortressFloor.SkipWall = trailRun || (challengeRun && !duelWalls) ? (System.Func<GridPos, bool>)(p => true) // the roads: mountains, no ramparts (the colosseum: its stands)
                 : arenaRun ? (System.Func<GridPos, bool>)(p => BattleArenas.BuildingAt(p.x, p.y)) : null;
             FortressFloor.Detailed = arenaRun;
             FortressFloor.WallThick = wallThick;

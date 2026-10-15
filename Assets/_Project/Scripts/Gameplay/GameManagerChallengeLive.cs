@@ -7,15 +7,15 @@ using UnityEngine;
 namespace SquashBot.Gameplay
 {
     /// <summary>
-    /// Live challenges: the waiting room first looks for a live rival who picked the same kind (and duel length) for a
-    /// while, or waits for a friend's code, and only then takes a rival played by the AI. In a live match each game moves
-    /// its own fighters and sends their state some times a second (the other game shows them; nothing is kept); the
+    /// Live duels: the waiting room first looks for a live rival who picked the same length for a while (or waits for a
+    /// friend's code or invitation), and only then takes a virtual rival. In a live match each game moves its own foi
+    /// and squad and sends their state some times a second (the other game shows them; nothing is kept); the
     /// server checks the blows and keeps the score and the clock. A random live match moves trophies; a friend's does
     /// not. A player who leaves loses at once.
     /// </summary>
     public partial class GameManager
     {
-        /// <summary>Seconds the waiting room looks for a live rival before it takes an AI-played one.</summary>
+        /// <summary>Seconds the waiting room looks for a live rival before it takes a virtual one.</summary>
         private const float LiveWaitSeconds = 20f;
 
         private bool chLive;
@@ -25,7 +25,9 @@ namespace SquashBot.Gameplay
         /// <summary>0: a random rival; 1: making a code for a friend; 2: entering a friend's code.</summary>
         private int chFriend;
         private string chFriendCode;
-        private int friendMode, friendMinutes = 3;
+        private int friendMinutes = 3;
+        /// <summary>The friend invited to the code being made (their id), or null.</summary>
+        private string friendInvite;
 
         private enum LiveWait { None, Start }
         private LiveWait liveWait;
@@ -49,10 +51,9 @@ namespace SquashBot.Gameplay
                 done(null);
                 yield break;
             }
-            int mode = chMode == ChMode.Duel ? 1 : 0;
-            if (chFriend == 1) LiveNet.Host(friendMode, friendMinutes);
+            if (chFriend == 1) LiveNet.Host(friendMinutes, friendInvite);
             else if (chFriend == 2) LiveNet.Join(chFriendCode);
-            else LiveNet.Queue(mode, chDuelMinutes);
+            else LiveNet.Queue(chDuelMinutes);
             float until = Time.realtimeSinceStartup + (chFriend == 0 ? LiveWaitSeconds : 600f);
             while (!LobbyOver(token))
             {
@@ -69,8 +70,15 @@ namespace SquashBot.Gameplay
                             yield break;
                         case "code":
                             chUi.SetFriendCode(m.code);
-                            chUi.SetFriendStatus(Loc.T("live.codeWait"));
+                            chUi.SetFriendStatus(string.IsNullOrEmpty(friendInvite) ? Loc.T("live.codeWait") : Loc.F("friends.inviteWait", invitedName));
                             break;
+                        case "declined":
+                        case "nofriend":
+                            chUi.SetFriendStatus(m.t == "declined" ? Loc.F("friends.declined", invitedName) : Loc.T("friends.err.notfound"));
+                            chUi.SetFriendBusy(false);
+                            LiveNet.Close();
+                            done(null);
+                            yield break;
                         case "nocode":
                             chUi.SetFriendStatus(Loc.T("live.noCode"));
                             chUi.SetFriendBusy(false);
@@ -106,7 +114,6 @@ namespace SquashBot.Gameplay
             liveChange = 0;
             chOnline = true;
             chMatchId = 0;
-            chMode = m.mode == 1 ? ChMode.Duel : ChMode.Army;
             chDuelMinutes = m.min is 3 or 5 or 10 ? m.min : 3;
             rival = Challenge.FromRival(m.rival);
             if (chFriend != 0)
@@ -123,8 +130,7 @@ namespace SquashBot.Gameplay
             yield return new WaitForSecondsRealtime(1.8f);
             if (token != chLobbyToken) { LiveNet.Leave(); chLive = false; yield break; }
             chUi.HideLobby();
-            if (chMode == ChMode.Duel) BuildDuelBoard(world);
-            else BuildArmyBoard(world);
+            BuildDuelBoard(Mathf.Abs(m.seed) % DuelStageCount); // the same stage on both screens
         }
 
         // ---------- The match ----------
@@ -138,23 +144,17 @@ namespace SquashBot.Gameplay
             chUi.SetStatus(Loc.T("live.waiting"));
         }
 
-        [Serializable] private class ArmyHitMsg { public int u; public float d; }
-        [Serializable] private class DuelStateMsg { public float x, z, r; public int w; }
+        [Serializable] private class DuelStateMsg { public float x, z, r; public int w; public string q; }
 
         /// <summary>Each frame of a live match: this game's state goes out, the server's words and the rival's state come in.</summary>
         private void UpdateLive()
         {
             if (!chLive || !challengeRun) return;
-            // This game's own state, some times a second (a duel's foi often, an army's soldiers less).
-            if (chPhase == ChPhase.Duel || chPhase == ChPhase.Army)
+            // This game's own state (foi and its squad), some times a second.
+            if (chPhase == ChPhase.Duel && Time.unscaledTime >= liveStateAt)
             {
-                float every = chPhase == ChPhase.Duel ? 1f / 15f : 1f / 6f;
-                if (Time.unscaledTime >= liveStateAt)
-                {
-                    liveStateAt = Time.unscaledTime + every;
-                    if (chPhase == ChPhase.Duel) LiveNet.DuelState(robot.transform.position, robot.Visual.eulerAngles.y, robot.Swings);
-                    else if (army != null) LiveNet.ArmyState(army.StateBody());
-                }
+                liveStateAt = Time.unscaledTime + 1f / 12f;
+                LiveNet.DuelState(robot.transform.position, robot.Visual.eulerAngles.y, robot.Swings, hunt.SquadState());
             }
             LiveNet.Msg m;
             while ((m = LiveNet.Poll()) != null)
@@ -163,20 +163,22 @@ namespace SquashBot.Gameplay
                 {
                     case "start":
                         liveWait = LiveWait.None;
-                        if (chMode == ChMode.Duel) { chDuelLeft = m.secs; BeginDuel(); }
+                        chDuelLeft = m.secs;
+                        BeginDuel();
                         break;
                     case "resume":
-                        if (chMode == ChMode.Duel) LiveDuelGo(m.secs);
+                        LiveDuelGo(m.secs);
                         break;
                     case "s":
-                        if (chMode == ChMode.Duel)
-                        {
-                            DuelStateMsg s;
-                            try { s = JsonUtility.FromJson<DuelStateMsg>(m.raw); } catch (Exception) { break; }
-                            if (s != null) hunt.RemoteFoeState(new Vector3(s.x, GridView.ToWorld(new Core.GridPos(Mathf.RoundToInt(s.x), Mathf.RoundToInt(s.z))).y, s.z), s.r, s.w);
-                        }
-                        else if (army != null) army.ApplyState(m.raw);
+                    {
+                        DuelStateMsg s;
+                        try { s = JsonUtility.FromJson<DuelStateMsg>(m.raw); } catch (Exception) { break; }
+                        if (s == null) break;
+                        hunt.RemoteFoeState(new Vector3(s.x, GridView.ToWorld(new Core.GridPos(Mathf.RoundToInt(s.x), Mathf.RoundToInt(s.z))).y, s.z), s.r, s.w);
+                        var near = new Core.GridPos(Mathf.RoundToInt(s.x), Mathf.RoundToInt(s.z));
+                        hunt.ApplySquadState(s.q, g => rival.Power(g), near);
                         break;
+                    }
                     case "hp":
                     {
                         // The duel's health as the server keeps it (100 each).
@@ -190,32 +192,20 @@ namespace SquashBot.Gameplay
                             fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(1f, 0.35f, 0.35f), new Color(2.4f, 0.5f, 0.4f), 30, 6f);
                             Haptics.Light();
                         }
+                        else if (health > before + 0.0001f) FloatAt(robot.transform.position, "+" + Mathf.RoundToInt((health - before) * 100f) + "%", new Color(1f, 0.5f, 0.6f));
                         hunt.SetFoeHealth(m.theirs / 100f);
                         break;
                     }
+                    case "shield":
+                        // The rival raised its shield (the server counts its blows): its bubble here for the time.
+                        if (m.by == 0) { hunt.ShieldFoe(DuelShieldHits); rivalShieldUntil = Time.time + DuelShieldSeconds; }
+                        break;
                     case "ko":
                         LiveKnockdown(m.won, Mathf.RoundToInt(m.mine), Mathf.RoundToInt(m.theirs));
                         break;
-                    case "round":
-                        chArmyMe = Mathf.RoundToInt(m.mine);
-                        chArmyThem = Mathf.RoundToInt(m.theirs);
-                        liveWait = LiveWait.None;
-                        chArmyLeft = m.secs;
-                        StartArmyRound(m.n);
-                        chArmyLeft = m.secs;
-                        break;
                     case "ah":
-                    {
-                        if (army == null) break;
-                        ArmyHitMsg h;
-                        try { h = JsonUtility.FromJson<ArmyHitMsg>(m.raw); } catch (Exception) { break; }
-                        if (h != null) army.ApplyHit(h.u, h.d);
-                        break;
-                    }
-                    case "roundEnd":
-                        chArmyMe = Mathf.RoundToInt(m.mine);
-                        chArmyThem = Mathf.RoundToInt(m.theirs);
-                        if (chPhase == ChPhase.Army) ShowArmyRoundEnd(m.won ? 1 : m.even ? 0 : -1);
+                        // The rival's blow on one of my soldiers (its foi's: he strikes back).
+                        hunt.SquadStruckRemote(m.u, m.d, m.f == 1);
                         break;
                     case "result":
                         FinishLive(m);
@@ -248,17 +238,16 @@ namespace SquashBot.Gameplay
 
         // ---------- Playing a friend ----------
 
-        /// <summary>The friend panel's MAKE A CODE (1, with the kind and minutes picked) or ENTER CODE (2).</summary>
-        private void StartFriend(int kind, string code, int mode, int minutes)
+        /// <summary>The friend panel's MAKE A CODE (1, with the minutes picked; an invited friend's id) or ENTER CODE (2).</summary>
+        private void StartFriend(int kind, string code, int minutes, string invite = null)
         {
             if (!Challenge.Open) { chUi.SetFriendStatus(Loc.T("ch.locked")); return; }
             if (!Challenge.Enabled) { chUi.SetFriendStatus(Loc.T("ch.disabled")); return; }
             if (!Challenge.NameChosen) { chUi.HideFriend(); chUi.ShowName(Challenge.PlayerName); return; }
             chFriend = kind;
             chFriendCode = code;
-            friendMode = mode;
+            friendInvite = invite;
             friendMinutes = minutes is 3 or 5 or 10 ? minutes : 3;
-            chMode = mode == 1 ? ChMode.Duel : ChMode.Army;
             chDuelMinutes = friendMinutes;
             chCancelled = false;
             chPhase = ChPhase.Lobby;

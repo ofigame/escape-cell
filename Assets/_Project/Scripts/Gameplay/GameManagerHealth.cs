@@ -27,7 +27,7 @@ namespace SquashBot.Gameplay
         private float hurtCooldown;
 
         // The battle arenas always fight with the health bar (they are played like a bonus, but one blow must not end them).
-        private bool HealthEnabled => arenaRun || (challengeRun && chMode == ChMode.Duel) || (!challengeRun && !bonusRun && levelIndex >= HealthFromLevel);
+        private bool HealthEnabled => arenaRun || challengeRun || (!challengeRun && !bonusRun && levelIndex >= HealthFromLevel);
 
         /// <summary>
         /// The share of the bar one full hit takes: a third at level 21, a sixth around level 150, a tenth at the end
@@ -69,6 +69,7 @@ namespace SquashBot.Gameplay
             float toughness = Mathf.Lerp(1f, 0.74f, levelIndex / (float)(LevelCatalog.LevelCount - 1));
             // The duel: the blow's own share (its weapon, foi's armour already counted), nothing else.
             float damage = challengeRun && chPhase == ChPhase.Duel ? share : share * toughness * (1f - Shop.ArmorShare);
+            damage = Challenge.RankGuard(damage); // the rank reached takes some off (beside the workshop's armour)
             // The duel: foi's health gone ends the round (the next one starts with it full again).
             if (challengeRun && chPhase == ChPhase.Duel && health - damage <= 0.001f)
             {

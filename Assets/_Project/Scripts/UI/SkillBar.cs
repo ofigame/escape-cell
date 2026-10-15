@@ -14,7 +14,8 @@ namespace SquashBot.UI
     /// </summary>
     public class SkillBar : MonoBehaviour
     {
-        private const float Size = 150f, Gap = 64f, IconBase = 92f;
+        private const float Size = 150f, Gap = 64f;
+        public const float IconBase = 92f;
 
         public event Action<PowerUpType> Pressed;
 
@@ -88,7 +89,8 @@ namespace SquashBot.UI
             return s;
         }
 
-        private static void DrawIcon(RectTransform icon, PowerUpType t)
+        /// <summary>A skill's icon drawn into <paramref name="icon"/> (a box <see cref="IconBase"/> across).</summary>
+        public static void DrawIcon(RectTransform icon, PowerUpType t)
         {
             var dark = UiFactory.TextDark;
             var c = new Vector2(0.5f, 0.5f);

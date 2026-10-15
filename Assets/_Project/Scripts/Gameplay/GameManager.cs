@@ -508,6 +508,7 @@ namespace SquashBot.Gameplay
             // The robot is the star of the menu: crisp, close and in the middle of the screen.
             cameraRig.SetMenuFocus(false);
             cameraRig.Showcase(robot.transform, 0.7f);
+            ProfileOnMenu();
         }
 
         // The menu's showroom and the 3D map have their own cameras; the game's camera only draws when neither is up.
@@ -525,7 +526,7 @@ namespace SquashBot.Gameplay
             if (weather != null && weather.gameObject.activeSelf == covered) weather.gameObject.SetActive(!covered);
             if (gridView != null && gridView.enabled == covered) gridView.enabled = !covered;
             UpdateCloseCamera();
-            ui.SetBagVisible(level != null && level.mission == MissionType.Hunt && State == GameState.Playing && roadPhase == RoadPhase.None && !previewing && !runner.Active && !ChallengeArmyPhase);
+            ui.SetBagVisible(level != null && level.mission == MissionType.Hunt && State == GameState.Playing && roadPhase == RoadPhase.None && !previewing && !runner.Active && !challengeRun);
             ui.SetAdHealVisible(AdHealOffered && !runner.Active);
         }
 
@@ -810,6 +811,7 @@ namespace SquashBot.Gameplay
             closeCalls = 0;
             jumpHintShown = false;
             coinsThisRun = 0;
+            ShowLevelTag();
             comboBonus = 0;
             comboStreak = 0;
             comboTimer = 0f;
@@ -1408,12 +1410,11 @@ namespace SquashBot.Gameplay
             }
             ui.SetTpsSwitch(!arenaRun && !challengeRun && level.mission == MissionType.Hunt && roadPhase == RoadPhase.None, tpsOn);
             var command = ArenaActive ? default(InputCommand) : tpsOn ? TpsCommand() : input.Poll(robot.transform.position);
-            if (ChallengeArmyPhase) { ArmyInput(command); command = default; } // the Army Battle: the stick and taps lead the active group
             command = GlassCellGate(command); // foi starts each floor in its glass cell
             UpdateHover(command);
             if (!hovering)
             {
-                if (!tpsOn && !ArenaActive && !ChallengeArmyPhase && level.mission == MissionType.Hunt && InputReader.AttackKey()) KeyStrike(); // computers: space strikes
+                if (!tpsOn && !ArenaActive && level.mission == MissionType.Hunt && InputReader.AttackKey()) KeyStrike(); // computers: space strikes
                 if (command.spin) SpinAttack();
                 else if (command.tap.HasValue && level.mission == MissionType.Hunt && TapStrike(command.tap.Value)) input.CancelTap();
                 else if (command.tap.HasValue && level.mission == MissionType.Hunt && input.StickMode) { KeyStrike(); input.CancelTap(); } // nothing tapped: a blow ahead

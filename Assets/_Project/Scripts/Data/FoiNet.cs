@@ -63,6 +63,8 @@ namespace SquashBot.Data
             public int trophies, rank, wins, played, defWins, defLosses;
             /// <summary>Matches for the record only: against the AI, against friends.</summary>
             public int aiWins, aiPlayed, friendWins, friendPlayed;
+            /// <summary>Days until the name can be changed again (0: now).</summary>
+            public int renameDays;
         }
 
         [Serializable] private class ErrorReply { public string error; }
@@ -258,6 +260,63 @@ namespace SquashBot.Data
             long code = 0; string body = null;
             yield return Send("GET", "/me", null, true, (c, b) => { code = c; body = b; });
             done(code == 200 ? TryParse<Profile>(body) : null);
+        }
+
+        // ---------- Friends ----------
+
+        [Serializable] public class Friend { public string id, name; public int rank, trophies; public bool online; }
+        [Serializable] public class FriendList { public Friend[] friends, incoming, outgoing; }
+        [Serializable] public class Invitation { public string code, from; public int min; }
+        [Serializable] private class FriendBody { public string id; }
+        [Serializable] private class CodeBody { public string code; }
+        [Serializable] private class AddReply { public bool friends; }
+
+        /// <summary>The friends list (friends, requests to answer, requests sent). Null: no network.</summary>
+        public static IEnumerator Friends(Action<FriendList> done)
+        {
+            if (!Registered) { done(null); yield break; }
+            long code = 0; string body = null;
+            yield return Send("GET", "/friends", null, true, (c, b) => { code = c; body = b; });
+            done(code == 200 ? TryParse<FriendList>(body) : null);
+        }
+
+        /// <summary>A friend request by name. Reports null (sent; true: friends at once) or why not: notfound, self, already, limit, offline.</summary>
+        public static IEnumerator AddFriend(string name, Action<string, bool> done)
+        {
+            long code = 0; string body = null;
+            yield return Send("POST", "/friends/add", JsonUtility.ToJson(new NameBody { name = name }), true, (c, b) => { code = c; body = b; });
+            if (code == 200) { done(null, TryParse<AddReply>(body)?.friends ?? false); yield break; }
+            var e = TryParse<ErrorReply>(body);
+            done(code == 0 ? "offline" : e != null && !string.IsNullOrEmpty(e.error) ? e.error : "notfound", false);
+        }
+
+        public static IEnumerator AcceptFriend(string id, Action<bool> done)
+        {
+            long code = 0;
+            yield return Send("POST", "/friends/accept", JsonUtility.ToJson(new FriendBody { id = id }), true, (c, _) => code = c);
+            done(code == 200);
+        }
+
+        public static IEnumerator RemoveFriend(string id, Action<bool> done)
+        {
+            long code = 0;
+            yield return Send("POST", "/friends/remove", JsonUtility.ToJson(new FriendBody { id = id }), true, (c, _) => code = c);
+            done(code == 200);
+        }
+
+        /// <summary>A friend's duel invitation waiting for this player (null: none, or no network).</summary>
+        public static IEnumerator PollInvite(Action<Invitation> done)
+        {
+            if (!Registered) { done(null); yield break; }
+            long code = 0; string body = null;
+            yield return Send("GET", "/friends/invite", null, true, (c, b) => { code = c; body = b; });
+            var inv = code == 200 ? TryParse<Invitation>(body) : null;
+            done(inv != null && !string.IsNullOrEmpty(inv.code) ? inv : null);
+        }
+
+        public static IEnumerator DeclineInvite(string code)
+        {
+            yield return Send("POST", "/friends/decline", JsonUtility.ToJson(new CodeBody { code = code }), true, (c, _) => { });
         }
 
         // ---------- Plumbing ----------

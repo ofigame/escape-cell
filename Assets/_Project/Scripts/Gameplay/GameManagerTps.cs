@@ -229,7 +229,7 @@ namespace SquashBot.Gameplay
             if (strikeCooldown > 0f || !robot.IsAlive || level == null || level.mission != MissionType.Hunt) return;
             strikeCooldown = Armory.Cooldown(w);
             var ray = AimRay();
-            int damage = Armory.Damage(w) * (superLeft > 0f ? 2 : 1);
+            int damage = Challenge.RankBoost(Armory.Damage(w)) * (superLeft > 0f ? 2 : 1); // the rank reached adds its strength
             bool hit = hunt.ShootBlow(ray, w.reach + 1f, damage, out var point);
             var look = point - robot.transform.position;
             look.y = 0f;

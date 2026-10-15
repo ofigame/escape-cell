@@ -18,6 +18,9 @@ namespace SquashBot.Visual
         private const float PodiumH = 1.3f, TierStep = 1.0f, TierRise = 0.62f;
 
         private Vector3 centre;
+        /// <summary>No stand on the east side (where the camera sits: it would look through the tiers).</summary>
+        private bool openEast;
+        private bool Open(Vector3 p) => openEast && p.x - centre.x > hw * 0.75f;
         private float hw, hd, corner, floorY;
 
         // The crowd, in batches by look (body colour × skin), drawn instanced.
@@ -30,7 +33,7 @@ namespace SquashBot.Visual
         private readonly List<(Transform t, float seed)> banners = new List<(Transform, float)>();
         private AudioSource murmur;
 
-        public static Colosseum Build(Transform parent, Vector3 centre, float halfWidth, float halfDepth, float floorY, int seed)
+        public static Colosseum Build(Transform parent, Vector3 centre, float halfWidth, float halfDepth, float floorY, int seed, bool openEast = false)
         {
             var go = new GameObject("Colosseum");
             go.transform.SetParent(parent, false);
@@ -40,6 +43,7 @@ namespace SquashBot.Visual
             c.hd = halfDepth;
             c.corner = 2.5f;
             c.floorY = floorY;
+            c.openEast = openEast;
             c.Make(seed);
             return c;
         }
@@ -110,6 +114,7 @@ namespace SquashBot.Visual
                 for (int i = 0; i < N; i++)
                 {
                     int k = start + i * 2;
+                    if (Open(verts[k]) && Open(verts[k + 2])) continue; // the camera's side: no stand
                     tris[sub].AddRange(new[] { k, k + 2, k + 1, k + 1, k + 2, k + 3 });
                 }
             }
@@ -152,6 +157,7 @@ namespace SquashBot.Visual
             for (int i = 0; i < arches; i++)
             {
                 var p = Loop(i / (float)arches, backOff - 0.02f, out var n);
+                if (Open(p)) continue;
                 var rot = Quaternion.LookRotation(-n);
                 for (int row = 0; row < 2; row++)
                 {
@@ -189,6 +195,7 @@ namespace SquashBot.Visual
             for (int i = 0; i < torches; i++)
             {
                 var p = Loop((i + 0.5f) / torches, 0.3f, out var n);
+                if (Open(p)) continue;
                 if (Mathf.Abs(p.x - centre.x) < 2.2f) continue; // not in front of the gates
                 Shapes.Primitive(PrimitiveType.Cylinder, "Torch", decor, new Vector3(p.x, y0 + PodiumH + 0.2f, p.z) - n * 0.05f, new Vector3(0.08f, 0.25f, 0.08f), wood);
                 var f = Shapes.Primitive(PrimitiveType.Sphere, "Flame", decor, new Vector3(p.x, y0 + PodiumH + 0.55f, p.z) - n * 0.05f, new Vector3(0.22f, 0.32f, 0.22f), fire).transform;
@@ -201,6 +208,7 @@ namespace SquashBot.Visual
             for (int i = 0; i < flags; i++)
             {
                 var p = Loop((i + 0.25f) / flags, backOff + 0.35f, out var n);
+                if (Open(p)) continue;
                 Shapes.Primitive(PrimitiveType.Cylinder, "Pole", decor, new Vector3(p.x, topY + backH + 0.7f, p.z), new Vector3(0.05f, 0.7f, 0.05f), pole);
                 var holder = new GameObject("Banner").transform;
                 holder.SetParent(decor, false);
@@ -258,6 +266,7 @@ namespace SquashBot.Visual
                 {
                     float t = (i + (tier % 2) * 0.5f) / n;
                     var p = Loop(t, seatOff, out var nrm);
+                    if (Open(p)) continue;
                     // Gaps: the gates' fronts and the emperor's box, and here and there an empty seat.
                     if (Mathf.Abs(p.x - centre.x) < 1.8f && tier < 2) continue;
                     if (p.z > centre.z && Mathf.Abs(p.x - centre.x) < 2f && tier >= 1 && tier <= 3) continue;

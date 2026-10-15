@@ -516,11 +516,10 @@ namespace SquashBot.UI
         public void RefreshMenuRank(string defenseLine)
         {
             if (menuRank == null) return;
-            bool open = Data.Challenge.Open;
-            menuRank.gameObject.SetActive(open);
-            menuDefense.gameObject.SetActive(open && !string.IsNullOrEmpty(defenseLine));
+            // The rank card is the profile's door: always there (the name, rank and trophies), from the very start.
+            menuRank.gameObject.SetActive(true);
+            menuDefense.gameObject.SetActive(!string.IsNullOrEmpty(defenseLine));
             menuDefense.text = defenseLine ?? "";
-            if (!open) return;
             int rank = Data.Challenge.Rank;
             int league = Data.Challenge.League;
             if (rank * 100 + league != menuRankShown)
@@ -531,7 +530,7 @@ namespace SquashBot.UI
                 cupBox.SetParent(menuRankBadge, true);
                 menuRankShown = rank * 100 + league;
             }
-            menuRankText.text = Data.Challenge.RankName(rank);
+            menuRankText.text = Data.Challenge.PlayerName + " · " + Data.Challenge.RankName(rank);
             menuRankCups.text = Loc.F("ch.trophies", Data.Challenge.Trophies);
         }
 

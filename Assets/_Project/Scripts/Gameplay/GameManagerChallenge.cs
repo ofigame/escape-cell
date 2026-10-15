@@ -17,12 +17,8 @@ namespace SquashBot.Gameplay
     /// </summary>
     public partial class GameManager
     {
-        private enum ChPhase { Off, Lobby, Army, Duel, Break, Wait, Done }
+        private enum ChPhase { Off, Lobby, Duel, Break, Wait, Done }
 
-        /// <summary>Which kind of challenge is being played: the armies' battle, or the foi's duel.</summary>
-        private enum ChMode { Army, Duel }
-
-        private ChMode chMode = ChMode.Army;
         private Colosseum colosseum;
         private float zoom = 1f;
 
@@ -46,26 +42,34 @@ namespace SquashBot.Gameplay
         private const int BoardW = 25, BoardH = 21;
         private bool liveHooksWired;
 
-        /// <summary>The Army Battle is on (the stick and taps lead the active group, not foi).</summary>
-        private bool ChallengeArmyPhase => challengeRun && chMode == ChMode.Army && chPhase != ChPhase.Off && chPhase != ChPhase.Done;
-
         private void InitChallenge()
         {
             chUi = ChallengeScreen.Create(ui.transform.Find("Canvas/SafeArea") ?? ui.transform.Find("Canvas") ?? ui.transform);
-            chUi.GroupPicked += g => { if (ChallengeArmyPhase && army != null) army.SetActive(0, g); };
-            chUi.FriendHost += (mode, minutes) => StartFriend(1, null, mode, minutes);
-            chUi.FriendJoin += code => StartFriend(2, code, 0, 3);
+            chUi.GroupPicked += ToggleSquad;
+            chUi.HeartPressed += UseDuelHeart;
+            chUi.ShieldPressed += UseDuelShield;
+            chUi.FriendHost += minutes => StartFriend(1, null, minutes);
+            chUi.FriendJoin += code => StartFriend(2, code, 3);
             chUi.FriendClose += CloseFriend;
+            chUi.FriendsPressed += ShowFriends;
             chUi.Leave += () => { chCancelled = true; chUi.HideAll(); };
             chUi.NameSubmitted += OnNameSubmitted;
-            chUi.NameClosed += () => { chCancelled = true; chPhase = ChPhase.Off; chUi.HideAll(); };
+            chUi.NameClosed += () => { profileNaming = false; chCancelled = true; chPhase = ChPhase.Off; chUi.HideAll(); };
             chUi.RenamePressed += () => { chCancelled = true; chPhase = ChPhase.Off; chUi.ShowName(Challenge.PlayerName); };
-            chUi.ModePicked += (m, minutes) => { chMode = m == 1 ? ChMode.Duel : ChMode.Army; chDuelMinutes = minutes; chUi.HideModes(); StartChallenge(false); };
-            if (army != null) Destroy(army.gameObject); // built again after a language change: one board only
-            army = new GameObject("ArmyBattle").AddComponent<ArmyBattle>();
-            army.Init(fx);
-            army.HitRemote += (index, damage) => { if (LiveActive) LiveNet.ArmyHit(index, damage); };
-            if (!liveHooksWired) { liveHooksWired = true; hunt.RemoteFoeStruck += () => { if (LiveActive) LiveNet.Hit(); }; }
+            chUi.ModePicked += (_, minutes) => { chDuelMinutes = minutes is 3 or 5 or 10 ? minutes : 3; chUi.HideModes(); StartChallenge(false); };
+            if (liveHooksWired) return;
+            // The hunt's links (made once: the hunt outlives a language change, the challenge screens do not).
+            liveHooksWired = true;
+            hunt.RemoteFoeStruck += () => { if (LiveActive) LiveNet.Hit(); };
+            hunt.SquadHitRemote += (id, damage, byFoi) => { if (LiveActive) LiveNet.SquadHit(id, damage, byFoi); };
+            hunt.SquadHitFoe += damage => { if (LiveActive) LiveNet.FoeHit(damage); };
+            hunt.SquadFell += group => { if (challengeRun) SoldierPool.Lose(group); };
+            hunt.RivalSentGroup += group =>
+            {
+                if (!challengeRun || chPhase != ChPhase.Duel) return;
+                chUi.SetStatus(Loc.F("ch.rivalSends", rival.name, Loc.T("army.kind." + Army.KindOf(group))));
+                AudioManager.PlaySfx(Sfx.Warning, 0.5f, 1.2f);
+            };
         }
 
         /// <summary>CHALLENGE on the menu.</summary>
@@ -121,6 +125,7 @@ namespace SquashBot.Gameplay
                 Challenge.PlayerName = name;
                 Challenge.NameChosen = true;
                 Challenge.Sync(profile);
+                if (profileNaming) { ProfileNamed(); return; }
                 chUi.HideName();
                 StartChallenge();
             }));
@@ -175,34 +180,8 @@ namespace SquashBot.Gameplay
             return Loc.F("ch.defense", n, held, fell, (change >= 0 ? "+" : "") + change);
         }
 
-        /// <summary>
-        /// While the menu is up, every half minute: is the player's army being fought right now (by whom), and what
-        /// happened to it since last time — shown on the menu under the rank card. The record is refreshed too.
-        /// </summary>
-        private void WatchArmyFromMenu()
-        {
-            if (Time.unscaledTime < menuWatchNext || !ui.MenuVisible || !FoiNet.Registered || !Challenge.Enabled) return;
-            menuWatchNext = Time.unscaledTime + 30f;
-            cameraRig.StartCoroutine(FoiNet.Defense((live, items) =>
-            {
-                string line = null;
-                if (live.Length > 0) line = Loc.F("ch.live", live[0]);
-                else if (items.Length > 0)
-                {
-                    int held = 0, change = 0;
-                    int fell = 0;
-                    foreach (var a in items) { if (a.held) held++; else if (!a.draw) fell++; change += a.change; }
-                    line = Loc.F("ch.defense", items.Length, held, fell, (change >= 0 ? "+" : "") + change);
-                    // Kept as numbers (written out in whatever language is on when it is shown again).
-                    PlayerPrefs.SetString(DefenseNewsKey, items.Length + "|" + held + "|" + fell + "|" + change);
-                }
-                else line = DefenseNews();
-                ui.MenuDefenseLine = line;
-                if (items.Length > 0 || live.Length > 0)
-                    cameraRig.StartCoroutine(FoiNet.Me(p => { Challenge.Sync(p); ui.RefreshMenuRank(ui.MenuDefenseLine); }));
-                else ui.RefreshMenuRank(line);
-            }));
-        }
+        /// <summary>While the menu is up: a friend's duel invitation is looked for now and then (see GameManagerFriends).</summary>
+        private void WatchArmyFromMenu() => WatchInvites();
 
         private const string DefenseNewsKey = "sb_ch_defnews";
 
@@ -284,23 +263,12 @@ namespace SquashBot.Gameplay
             FoiNet.Match match = null;
             if (ok)
             {
-                FoiNet.Attack[] attacks = null;
-                yield return FoiNet.Defense((_, a) => attacks = a);
-                if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
-                chUi.SetLobbyStatus(Loc.T("live.aiRival"));
+                chUi.SetLobbyStatus(Loc.T("ch.searching"));
                 yield return FoiNet.Find(m => match = m);
                 if (match != null)
                 {
                     yield return FoiNet.Me(Challenge.Sync);
                     chUi.SetMyCard(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore), Challenge.Rank);
-                }
-                if (attacks != null && attacks.Length > 0)
-                {
-                    int held = 0, change = 0;
-                    int fell = 0;
-                    foreach (var a in attacks) { if (a.held) held++; else if (!a.draw) fell++; change += a.change; }
-                    chUi.SetLobbyStatus(Loc.F("ch.defense", attacks.Length, held, fell, (change >= 0 ? "+" : "") + change));
-                    yield return new WaitForSecondsRealtime(2.6f);
                 }
             }
             float waited = Time.realtimeSinceStartup - started;
@@ -310,35 +278,40 @@ namespace SquashBot.Gameplay
             chUi.LockLobby();
             chOnline = match != null;
             chMatchId = match != null ? match.matchId : 0;
-            rival = match != null && match.HasRival
-                ? Challenge.FromRival(match.rival)
-                : Challenge.MakeBot(match != null ? match.seed : Random.Range(0, 1000000), Army.EarnedPoints, world, match != null ? match.trophies : -1);
+            // A virtual rival, made from the server's seed (at about the player's trophies): no real player behind it.
+            int seed = match != null ? match.seed : Random.Range(0, 1000000);
+            rival = Challenge.MakeBot(seed, match != null ? match.trophies : -1);
             int rivalPower = 0;
             for (int g = 0; g < Army.Groups; g++) rivalPower += Mathf.RoundToInt(Army.Soldiers * rival.Power(g) * 10f);
             chUi.ShowRival(SideText(rival.name, rival.Rank, rival.trophies, rivalPower), rival.Rank);
-            chUi.SetLobbyStatus(Loc.T(chOnline ? "ch.aiMatch" : "ch.offline"));
+            chUi.SetLobbyStatus(Loc.T(chOnline ? "ch.found" : "ch.offline"));
             yield return new WaitForSecondsRealtime(2.2f);
             if (token != chLobbyToken) yield break;
             chUi.HideLobby();
-            if (chMode == ChMode.Duel) BuildDuelBoard(world);
-            else BuildArmyBoard(world);
+            BuildDuelBoard(Mathf.Abs(seed) % DuelStageCount);
         }
 
-        /// <summary>The mode's name as the waiting room shows it (the duel with its minutes).</summary>
-        private string ModeLabel => chMode == ChMode.Duel ? Loc.T("ch.mode.duel") + " · " + Loc.F("ch.minutes", chDuelMinutes) : Loc.T("ch.mode.army");
+        /// <summary>The duel's name as the waiting room shows it (with its minutes).</summary>
+        private string ModeLabel => Loc.T("ch.mode.duel") + " · " + Loc.F("ch.minutes", chDuelMinutes);
 
-        /// <summary>The courtyard: a plain floor in the world's look, ramparts round it, no crates, no vanG, no cage.</summary>
-        private void BuildCourtyard(int world)
+        /// <summary>
+        /// The duel's floor: the stage's shape cut from the board (the colosseum's square, or a hexagon, octagon, circle,
+        /// diamond or cross), in the look of the stage's world; the colosseum's stands round the first stage, low walls
+        /// crowned with flames, ice or light round the others. No crates, no vanG, no cage.
+        /// </summary>
+        private void BuildCourtyard()
         {
+            var st = Stage;
             var rows = new string[BoardH];
             for (int r = 0; r < BoardH; r++)
             {
                 var row = new char[BoardW];
-                for (int x = 0; x < BoardW; x++) row[x] = '#';
+                int inset = st.shape == BattleArenas.Shape.Square ? 0 : BattleArenas.Inset(st.shape, BoardH, r) + (BoardW - BoardH) / 2;
+                for (int x = 0; x < BoardW; x++) row[x] = x >= inset && x < BoardW - inset ? '#' : '.';
                 if (r == BoardH - 3) row[BoardW / 2] = 'S';
                 rows[r] = new string(row);
             }
-            levelIndex = Mathf.Clamp(world * LevelCatalog.LevelsPerWorld + 5, 0, LevelCount - 1);
+            levelIndex = Mathf.Clamp(st.world * LevelCatalog.LevelsPerWorld + 5, 0, LevelCount - 1);
             var l = levelSet.levels[levelIndex].Clone();
             l.layout = rows;
             l.stageBounds = new[] { 0, 0, BoardW - 1, BoardH - 1 };
@@ -372,9 +345,11 @@ namespace SquashBot.Gameplay
             boardCentre = GridView.ToWorld(new GridPos(BoardW / 2, BoardH / 2)) + Vector3.up * GridView.SurfaceY;
             boardPan = Vector3.zero;
             zoom = 1f;
-            // The arena round the courtyard: tiers, gates, torches, banners and the crowd.
+            // The colosseum round the first stage: tiers, gates, torches, banners and the crowd (none on the camera's side).
             if (colosseum != null) Destroy(colosseum.gameObject);
-            colosseum = Colosseum.Build(transform, GridView.ToWorld(new GridPos(BoardW / 2, BoardH / 2)), BoardW * 0.5f, BoardH * 0.5f, GridView.SurfaceY - 0.02f, rival.name.GetHashCode());
+            colosseum = st.colosseum
+                ? Colosseum.Build(transform, GridView.ToWorld(new GridPos(BoardW / 2, BoardH / 2)), BoardW * 0.5f, BoardH * 0.5f, GridView.SurfaceY - 0.02f, rival.name.GetHashCode(), openEast: true)
+                : null;
         }
 
         /// <summary>A copy of foi in the rival's red, with the rival's weapon, for the rival's foi.</summary>
@@ -390,7 +365,7 @@ namespace SquashBot.Gameplay
             foreach (var r in root.GetComponentsInChildren<Renderer>())
             {
                 var m = r.material;
-                if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", Color.Lerp(m.GetColor("_BaseColor"), ArmyBattle.Theirs, 0.45f));
+                if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", Color.Lerp(m.GetColor("_BaseColor"), ArmyBattleColours.Theirs, 0.45f));
             }
             rivalHeld = HeldWeapon.Attach(copy, Armory.Get(rival.weapon));
             return root;
@@ -398,16 +373,12 @@ namespace SquashBot.Gameplay
 
         private HeldWeapon rivalHeld;
 
-        /// <summary>Each frame of a challenge: the live link, the match being played.</summary>
+        /// <summary>Each frame of a challenge: the live link, the duel being fought.</summary>
         private void UpdateChallenge(float dt)
         {
             UpdateLive();
             if (!challengeRun || State != GameState.Playing) return;
-            switch (chPhase)
-            {
-                case ChPhase.Army: UpdateArmy(dt); break;
-                case ChPhase.Duel: UpdateDuel(dt); break;
-            }
+            if (chPhase == ChPhase.Duel) UpdateDuel(dt);
         }
 
         /// <summary>The match is decided: the final score.</summary>
@@ -424,27 +395,7 @@ namespace SquashBot.Gameplay
             chPhase = ChPhase.Done;
             bool won = outcome > 0, draw = outcome == 0;
             if (colosseum != null) colosseum.Cheer(won ? 0 : draw ? -1 : 1, 1f);
-            if (army != null) army.Halt();
             hunt.Freeze();
-            // Trophies only in a random live match (the server's numbers); against the AI or a friend: the record only.
-            string trophies;
-            if (chLive && liveLost) trophies = Loc.T("live.lost");
-            else if (chLive && liveRanked)
-            {
-                if (liveProfile != null) Challenge.Sync(liveProfile);
-                trophies = (liveChange >= 0 ? "+" : "") + Loc.F("ch.trophies", liveChange);
-            }
-            else if (chLive)
-            {
-                if (liveProfile != null) Challenge.Sync(liveProfile);
-                trophies = Loc.T("ch.friendMatch");
-            }
-            else if (chOnline)
-            {
-                SendChallengeResult(won, draw);
-                trophies = Loc.T("ch.aiMatch");
-            }
-            else trophies = Loc.T("ch.offline");
             int gold = won && (chOnline || chLive) ? Challenge.WinGold : 0; // offline practice pays no prize
             SaveData.Coins += draw ? 0 : gold + Earned;
             State = GameState.Result;
@@ -455,11 +406,45 @@ namespace SquashBot.Gameplay
                 fx.Burst(robot.transform.position + Vector3.up * 0.6f, Palette.Coin, Palette.CoinGlow, 40, 6f);
             }
             chUi.HideAll();
+            cameraRig.StartCoroutine(ShowChallengeResult(won, draw, score, gold));
+        }
+
+        /// <summary>
+        /// The result card, with its trophies: a random live match's from the server (sent with its result), a match
+        /// against a virtual rival's once the server has taken the result (half a live match's), a friend's: none.
+        /// </summary>
+        private IEnumerator ShowChallengeResult(bool won, bool draw, string score, int gold)
+        {
+            string trophies;
+            if (chLive && liveLost) trophies = Loc.T("live.lost");
+            else if (chLive && liveRanked)
+            {
+                if (liveProfile != null) Challenge.Sync(liveProfile);
+                trophies = TrophyLine(liveChange);
+            }
+            else if (chLive)
+            {
+                if (liveProfile != null) Challenge.Sync(liveProfile);
+                trophies = Loc.T("ch.friendMatch");
+            }
+            else if (chOnline && chMatchId != 0)
+            {
+                long id = chMatchId;
+                chMatchId = 0;
+                FoiNet.Result result = null;
+                bool back = false;
+                cameraRig.StartCoroutine(FoiNet.SendResult(id, won, draw, r => { result = r; back = true; }));
+                float until = Time.realtimeSinceStartup + 6f;
+                while (!back && Time.realtimeSinceStartup < until) yield return null;
+                if (result != null) Challenge.Sync(result.profile);
+                trophies = result != null ? TrophyLine(result.change) : Loc.T("ch.resultLater");
+            }
+            else trophies = Loc.T("ch.offline");
             string line = score + "  ·  " + Loc.F(won ? "ch.wonLine" : draw ? "ch.drawLine" : "ch.lostLine", rival.name)
                           + (chLive && liveLeft ? "\n" + Loc.T("live.rivalLeftWin") : "")
                           + "\n" + trophies + (gold > 0 ? " · +" + gold + " " + Loc.T("ch.gold") : "")
                           + "\n" + Challenge.RankName(Challenge.Rank) + " · " + Loc.F("ch.trophies", Challenge.Trophies);
-            StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
+            yield return ShowResultDelayed(new UIController.ResultInfo
             {
                 won = won,
                 bonusRound = true,
@@ -470,10 +455,12 @@ namespace SquashBot.Gameplay
                 challenge = true,
                 subtitle = line,
                 coins = draw ? 0 : gold + Earned,
-            }));
+            });
         }
 
-        /// <summary>A match against the AI goes to the server's record (no trophies there).</summary>
+        private static string TrophyLine(int change) => (change >= 0 ? "+" : "") + Loc.F("ch.trophies", change);
+
+        /// <summary>A match the server knows of goes to its record (a loss when the player leaves).</summary>
         private void SendChallengeResult(bool won, bool draw = false)
         {
             long id = chMatchId;
@@ -492,7 +479,6 @@ namespace SquashBot.Gameplay
             challengeRun = false;
             chPhase = ChPhase.Off;
             ClearDuel();
-            if (army != null) army.Clear();
             if (robot != null && robot.Visual != null) robot.Visual.gameObject.SetActive(true);
             if (chUi != null) chUi.HideAll();
             if (rivalLook != null) Destroy(rivalLook.gameObject);
@@ -503,48 +489,24 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>
-        /// The challenge filmed like a football match: the camera sits high on the east stand at the halfway line (the
-        /// player's side on the left, the rival's on the right). In the Army Battle it follows the player's active group
-        /// (closing in when the two active groups meet); in the Duel it slides gently after foi.
+        /// The duel filmed like a football match: the camera sits high to the east at the halfway line (the player's side
+        /// on the left, the rival's on the right), never turning; it keeps both foi in view (their middle, further back the
+        /// further apart they are), with a still zone round the middle of the view so small steps do not shake it.
         /// </summary>
         private void BoardPose(out Vector3 pos, out Quaternion rot)
         {
             var seat = boardCentre + new Vector3(BoardW * 0.5f + 11f, 12.5f, 0f);
             var look = (boardCentre - seat).normalized;
-            if (chMode == ChMode.Duel)
-            {
-                // Never turning: it keeps both foi in view (their middle, further back the further apart they are), with a
-                // still zone round the middle of the view so small steps do not shake it.
-                var me = robot.transform.position;
-                var foe = hunt.ChallengeFoeAt ?? me;
-                var aim = (me + foe) * 0.5f - boardCentre;
-                aim.y = 0f;
-                var gap = aim - duelPan;
-                if (gap.magnitude > 1f) duelPan += gap.normalized * (gap.magnitude - 1f) * Mathf.Min(1f, Time.deltaTime * 2.5f);
-                float apart = new Vector2(me.x - foe.x, me.z - foe.z).magnitude;
-                duelBack = Mathf.Lerp(duelBack, 17f + Mathf.Clamp(apart - 3f, 0f, 14f) * 1.4f, Time.deltaTime * 2f);
-                pos = boardCentre + duelPan - look * duelBack;
-                rot = Quaternion.LookRotation(look);
-                return;
-            }
-            Vector3 want = boardCentre;
-            bool close = false;
-            if (army != null && chPhase == ChPhase.Army)
-            {
-                var mine = army.GroupCentre(0, army.Active(0));
-                var theirs = army.GroupCentre(1, army.Active(1));
-                close = (mine - theirs).sqrMagnitude < 7f * 7f;
-                want = close ? (mine + theirs) * 0.5f : mine;
-            }
-            var w = want - boardCentre;
-            w = new Vector3(Mathf.Clamp(w.x, -BoardW * 0.45f, BoardW * 0.45f), 0f, Mathf.Clamp(w.z, -BoardH * 0.48f, BoardH * 0.48f));
-            boardPan = Vector3.Lerp(boardPan, w, Time.deltaTime * 1.6f);
-            zoom = Mathf.Lerp(zoom, close ? 0.7f : 0.85f, Time.deltaTime * 1.2f);
-            var focus = boardCentre + boardPan;
-            // The seat slides along the stand only (never into it); closing in is along the line of sight.
-            pos = Vector3.Lerp(seat + new Vector3(0f, 0f, boardPan.z), focus, (1f - zoom) * 0.9f);
-            // Aimed a little short (towards the camera), so the fight sits above the group bar at the bottom.
-            rot = Quaternion.LookRotation(focus + new Vector3(0.9f, 0f, 0f) - pos);
+            var me = robot.transform.position;
+            var foe = hunt.ChallengeFoeAt ?? me;
+            var aim = (me + foe) * 0.5f - boardCentre;
+            aim.y = 0f;
+            var gap = aim - duelPan;
+            if (gap.magnitude > 1f) duelPan += gap.normalized * (gap.magnitude - 1f) * Mathf.Min(1f, Time.deltaTime * 2.5f);
+            float apart = new Vector2(me.x - foe.x, me.z - foe.z).magnitude;
+            duelBack = Mathf.Lerp(duelBack, 22f + Mathf.Clamp(apart - 3f, 0f, 14f) * 1.3f, Time.deltaTime * 2f);
+            pos = boardCentre + duelPan - look * duelBack;
+            rot = Quaternion.LookRotation(look);
         }
     }
 }

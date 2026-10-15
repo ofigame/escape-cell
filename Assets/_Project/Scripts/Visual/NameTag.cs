@@ -31,6 +31,9 @@ namespace SquashBot.Visual
             return tag;
         }
 
+        /// <summary>A new name (the player renamed).</summary>
+        public void SetText(string name) => text.text = name;
+
         /// <summary>Follows another object (the rival foi changes between knock-downs).</summary>
         public void Follow(Transform t) => target = t;
 

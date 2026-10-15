@@ -68,6 +68,14 @@ namespace SquashBot.Gameplay
             /// <summary>A challenge soldier (its kind decides how it fights in the battle).</summary>
             public SoldierModel soldier;
             public GroupKind soldierKind;
+            /// <summary>A duel squad soldier (see HuntSystemSquads): its number in its squad, moved by the other game (live), its
+            /// strength, where the other game last said it was, what it goes for (a soldier, or the rival foi) and until when it
+            /// strikes back at a foi that hit it.</summary>
+            public bool squad, remote, netSeen, aimFoi;
+            public int squadId = -1;
+            public float power = 1f, revengeUntil;
+            public Vector3 netTo;
+            public Guard aim, hitBy;
             public Transform root;
             public bool dead, brute;
             /// <summary>The fortress stage it belongs to, and its rank there (-1 classic, 0 easy … 99 an elite).</summary>
@@ -540,6 +548,14 @@ namespace SquashBot.Gameplay
             {
                 if (g.dead || (g.pos != p && !(g.moveT < 1f && g.prevPos == p))) continue;
                 // An energy shield takes the blow first (any weapon cracks it: one blow, one charge).
+                if (g.squad)
+                {
+                    // A duel soldier: the live rival's goes to its game; this game's takes it and strikes back at foi.
+                    if (g.remote) { g.flash = 1f; g.Flash(); fx.Burst(At(p) + Vector3.up * 0.4f, Palette.UiGold, Palette.CoinGlow, 14, 4f); AudioManager.PlaySfx(Sfx.Impact, 0.6f, 1.25f); SquadHitRemote?.Invoke(g.squadId, damage, true); return true; }
+                    AudioManager.PlaySfx(Sfx.Blocked, 0.8f, 1f);
+                    HurtSquad(g, damage, null, foiBlow: true);
+                    return true;
+                }
                 if (g == challengeFoe && FoeRemote)
                 {
                     // A live rival: the blow goes to the server (it keeps the health); here only the flash.
@@ -899,6 +915,7 @@ namespace SquashBot.Gameplay
             PickEngaged();
             foreach (var g in guards) if (!g.dead) UpdateGuard(g, dt);
             UpdateAllies(dt);
+            UpdateBotOrders();
             UpdateTowers(dt);
             UpdateReinforcements();
             UpdateDrones(dt);
@@ -1007,6 +1024,7 @@ namespace SquashBot.Gameplay
         private void UpdateGuard(Guard g, float dt)
         {
             if (g == challengeFoe && FoeRemote) { UpdateHealthBar(g); UpdateRemoteFoe(g, dt); return; }
+            if (g.squad) { UpdateSquad(g, dt); return; }
             UpdateHealthBar(g);
             UpdateShield(g, dt);
             if (g.flash > 0f) g.flash -= dt * 3f;

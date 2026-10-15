@@ -22,7 +22,7 @@ namespace SquashBot.Gameplay
             if (Time.time < spinReadyAt) return;
             spinReadyAt = Time.time + SpinCooldown;
             var w = weapon ?? Armory.Equipped;
-            int damage = Armory.Damage(w) * (superLeft > 0f ? 2 : 1);
+            int damage = Challenge.RankBoost(Armory.Damage(w)) * (superLeft > 0f ? 2 : 1); // the rank reached adds its strength
             int reach = w.kind == WeaponKind.Whirl ? Mathf.Max(1, w.reach) : 1;
             if (heldWeapon != null) heldWeapon.Spin();
             StartCoroutine(SpinBody(0.32f));
@@ -89,7 +89,7 @@ namespace SquashBot.Gameplay
                 {
                     nextBlow = Time.time + 0.22f;
                     var w = weapon ?? Armory.Equipped;
-                    int damage = Armory.Damage(w) * (superLeft > 0f ? 2 : 1);
+                    int damage = Challenge.RankBoost(Armory.Damage(w)) * (superLeft > 0f ? 2 : 1); // the rank reached adds its strength
                     var centre = robot.transform.position;
                     Shockwave.Create(centre, 3.2f, gold);
                     for (int i = 0; i < 6; i++)

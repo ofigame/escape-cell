@@ -387,7 +387,7 @@ namespace SquashBot.Gameplay
             if (strikeCooldown > 0f || !robot.Strike(GridView.ToWorld(at))) return false;
             strikeCooldown = Armory.Cooldown(w);
             if (crowd && hunt.IsFighter(at)) NoteFightBlow(); // a blow or two into a fight, Fifi teleports in
-            int damage = Armory.Damage(w) * (superLeft > 0f ? 2 : 1);
+            int damage = Challenge.RankBoost(Armory.Damage(w)) * (superLeft > 0f ? 2 : 1); // the rank reached adds its strength
             if (w.kind == WeaponKind.Whirl)
             {
                 WhirlStrike(w, damage);
@@ -478,7 +478,7 @@ namespace SquashBot.Gameplay
             float dt = Time.unscaledDeltaTime;
             if (challengeRun && chPhase != ChPhase.Off)
             {
-                // The challenge's army battle: the whole board from above its south end.
+                // The challenge's duel: filmed from the east, both foi in view.
                 BoardPose(out var bpos, out var brot);
                 cameraRig.Chase(bpos, brot, 46f);
                 if (cameraRig.Cam.farClipPlane < 200f) cameraRig.Cam.farClipPlane = 200f;

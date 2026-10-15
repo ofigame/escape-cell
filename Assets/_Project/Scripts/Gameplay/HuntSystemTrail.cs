@@ -171,6 +171,38 @@ namespace SquashBot.Gameplay
         /// <summary>Where the rival foi stands (null once it has fallen).</summary>
         public Vector3? ChallengeFoeAt => challengeFoe != null && !challengeFoe.dead ? challengeFoe.root.position : (Vector3?)null;
 
+        /// <summary>The rival foi's health as a share of its whole (0 when there is none).</summary>
+        public float ChallengeFoeHealth => challengeFoe != null && !challengeFoe.dead ? challengeFoe.hp / (float)Mathf.Max(1, challengeFoe.maxHp) : 0f;
+
+        /// <summary>The rival foi uses a heart: this share of its health back.</summary>
+        public void HealFoe(float share)
+        {
+            var g = challengeFoe;
+            if (g == null || g.dead) return;
+            g.hp = Mathf.Min(g.maxHp, g.hp + Mathf.RoundToInt(g.maxHp * share));
+            fx.Burst(g.root.position + Vector3.up * 0.6f, new Color(1f, 0.45f, 0.55f), new Color(2.4f, 0.6f, 0.8f), 20, 4f);
+            AudioManager.PlaySfx(Sfx.Shield, 0.7f, 1.6f);
+        }
+
+        /// <summary>The rival foi raises its shield: a bubble that takes <paramref name="hits"/> blows (until EndFoeShield).</summary>
+        public void ShieldFoe(int hits)
+        {
+            var g = challengeFoe;
+            if (g == null || g.dead) return;
+            if (g.bubble == null) AddShield(g);
+            g.shield = Mathf.Max(1, hits);
+            AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.1f);
+        }
+
+        /// <summary>The rival foi's shield is spent (its time is up).</summary>
+        public void EndFoeShield()
+        {
+            var g = challengeFoe;
+            if (g == null) return;
+            g.shield = 0;
+            if (g.bubble != null) { Destroy(g.bubble.gameObject); g.bubble = null; }
+        }
+
         /// <summary>The rival foi has fallen (or there is none).</summary>
         public bool ChallengeFoeDown => challengeFoe == null || challengeFoe.dead;
 

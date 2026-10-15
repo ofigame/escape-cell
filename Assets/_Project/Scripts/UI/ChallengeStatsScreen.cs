@@ -15,6 +15,9 @@ namespace SquashBot.UI
     /// </summary>
     public class ChallengeStatsScreen : MonoBehaviour
     {
+        /// <summary>CHANGE NAME on the profile.</summary>
+        public event System.Action RenamePressed;
+
         private UiScreen screen;
         private RectTransform card, head;
         private readonly List<GameObject> built = new List<GameObject>();
@@ -27,8 +30,10 @@ namespace SquashBot.UI
             UiFactory.Dim(root, new Color(0.02f, 0.02f, 0.07f, 1f));
             c.card = UiFactory.Card("Card", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 1720f));
             c.card.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.TextBox("Title", c.card, new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(900f, 90f), Loc.T("ch.title"), 64f, Palette.UiGold, title: true);
-            var close = UiFactory.MakeButton(c.card, Loc.T("btn.close"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 36f), new Vector2(520f, 110f), () => s.Hide(), 46f);
+            UiFactory.TextBox("Title", c.card, new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(900f, 90f), Loc.T("profile.title"), 64f, Palette.UiGold, title: true);
+            UiFactory.MakeButton(c.card, Loc.T("btn.close"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(240f, 36f), new Vector2(440f, 110f), () => s.Hide(), 44f);
+            // The profile's name can be changed here (once a week).
+            UiFactory.MakeButton(c.card, Loc.T("profile.rename"), Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(-240f, 36f), new Vector2(440f, 110f), () => c.RenamePressed?.Invoke(), 36f);
             return c;
         }
 

@@ -41,6 +41,10 @@ namespace SquashBot.Data
 
         /// <summary>Takes the server's record (it decides trophies; the rank reached is kept).</summary>
         private const string OtherKey = "sb_ch_other";
+        private const string RenameKey = "sb_ch_renameat";
+
+        /// <summary>Days until the name can be changed again (the server's word, last heard; 0: now).</summary>
+        public static int RenameDays => long.TryParse(PlayerPrefs.GetString(RenameKey, "0"), out long t) ? Mathf.Max(0, Mathf.CeilToInt((float)new System.TimeSpan(t - System.DateTime.UtcNow.Ticks).TotalDays)) : 0;
 
         /// <summary>The record outside the ranked matches: won / played against the AI and against friends.</summary>
         public static (int aiWins, int aiPlayed, int friendWins, int friendPlayed) OtherRecord
@@ -64,6 +68,7 @@ namespace SquashBot.Data
             PlayerPrefs.SetString(OtherKey, p.aiWins + "|" + p.aiPlayed + "|" + p.friendWins + "|" + p.friendPlayed);
             PlayerPrefs.SetInt(RankKey, Mathf.Max(PlayerPrefs.GetInt(RankKey, 0), p.rank));
             if (!string.IsNullOrEmpty(p.name)) PlayerPrefs.SetString(NameKey, p.name);
+            PlayerPrefs.SetString(RenameKey, (System.DateTime.UtcNow.Ticks + System.TimeSpan.FromDays(p.renameDays).Ticks).ToString());
             PlayerPrefs.Save();
         }
 
@@ -100,7 +105,7 @@ namespace SquashBot.Data
         public static int Played => PlayerPrefs.GetInt(PlayedKey, 0);
 
         /// <summary>Trophies needed for each rank (Private → Marshal). A rank once reached is kept.</summary>
-        public static readonly int[] RankAt = { 0, 100, 250, 450, 700, 1000, 1350, 1750, 2200, 2700, 3250, 3850, 4500 };
+        public static readonly int[] RankAt = { 0, 150, 375, 675, 1050, 1500, 2025, 2625, 3300, 4050, 4875, 5775, 6750 };
 
         public static int RankFor(int trophies)
         {
@@ -123,13 +128,30 @@ namespace SquashBot.Data
         /// </summary>
         public static float ArmyBonus => BonusFor(Trophies);
         public static float BonusFor(int trophies) => 0.04f * RankFor(trophies);
+
+        /// <summary>
+        /// foi's own strength from the rank reached (kept, like the rank), beside the workshop's weapons and armour: 2% a
+        /// rank more damage and 2% a rank less taken — on the floors and in the duels.
+        /// </summary>
+        public static float FoiBonus => 0.02f * Rank;
+
+        /// <summary>A blow's damage with the rank's strength (the fraction a chance of one more, so small blows gain too).</summary>
+        public static int RankBoost(int damage)
+        {
+            float d = damage * (1f + FoiBonus);
+            int whole = Mathf.FloorToInt(d);
+            return whole + (Random.value < d - whole ? 1 : 0);
+        }
+
+        /// <summary>A share of health a blow takes, less the rank's strength.</summary>
+        public static float RankGuard(float share) => share / (1f + FoiBonus);
         public static string LeagueName(int league) => Loc.T("cup." + Mathf.Clamp(league, 0, RankAt.Length - 1));
 
-        /// <summary>Trophies a result is worth: a win +30 (more against a stronger foe), a loss -20.</summary>
+        /// <summary>Trophies a result is worth: a win +20 (more against a stronger foe), a loss -15 (the server's rule).</summary>
         public static int TrophyChange(bool won, int opponentTrophies)
         {
-            int diff = Mathf.Clamp((opponentTrophies - Trophies) / 25, -8, 8);
-            return won ? 30 + diff : -Mathf.Max(10, 20 + diff);
+            int diff = Mathf.Clamp((opponentTrophies - Trophies) / 30, -5, 5);
+            return won ? 20 + diff : -Mathf.Max(8, 15 + diff);
         }
 
         /// <summary>Records a challenge: trophies (never below zero), wins, the rank reached. Returns the change.</summary>
@@ -176,55 +198,56 @@ namespace SquashBot.Data
             /// <summary>Blows its foi's shield takes before it breaks (0: none).</summary>
             public int shield;
 
+            /// <summary>Soldiers of each group it brings into the duel.</summary>
+            public readonly int[] squad = { SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel };
+
             public float Power(int g) => 1f + points[g] * Army.PerPoint + BonusFor(trophies);
             public int Rank => RankFor(trophies);
         }
 
-        private static readonly string[] BotNames =
+        /// <summary>A made-up user name, like a player's own: a few letters, a dot, digits and maybe letters ("asd.782ss").</summary>
+        public static string BotName(System.Random rng)
         {
-            "GeceKartali", "DemirYumruk", "KumFirtinasi", "BuzKurdu", "AtesTopu", "YildizAvcisi", "GolgeSavasci", "KaplanPence",
-            "SteelFox", "NightHawk", "IronMole", "SkyRider", "RustKnight", "PixelSamurai", "BoltRunner", "MintViper",
-            "LunaBlade", "RoboRex", "TurboTaco", "CometKid", "NovaWolf", "ByteBear", "ZapZebra", "GearGhost",
-        };
+            const string letters = "abcdefghijklmnoprstuvyz", consonants = "bcdfgklmnprstvyz", vowels = "aeiou";
+            var sb = new System.Text.StringBuilder();
+            int head = 3 + rng.Next(4);
+            bool pronounce = rng.Next(2) == 0;
+            for (int i = 0; i < head; i++)
+                sb.Append(pronounce ? (i % 2 == 0 ? consonants[rng.Next(consonants.Length)] : vowels[rng.Next(vowels.Length)]) : letters[rng.Next(letters.Length)]);
+            int style = rng.Next(4);
+            if (style == 3) return sb.Append(rng.Next(10, 1000)).ToString();
+            sb.Append(style == 2 ? '_' : '.');
+            int digits = 2 + rng.Next(3);
+            for (int i = 0; i < digits; i++) sb.Append((char)('0' + rng.Next(10)));
+            int tail = rng.Next(3);
+            for (int i = 0; i < tail; i++) sb.Append(letters[rng.Next(letters.Length)]);
+            return sb.ToString();
+        }
 
-        /// <summary>A bot shaped like the player: trophies close, the same development points spread its own way.</summary>
-        public static Opponent MakeBot(int seed, int playerPoints, int world, int trophies = -1)
+        /// <summary>
+        /// A virtual rival (no real player behind it): a made-up name, the player's own rank, and a little stronger than
+        /// the player — the same weapon (sometimes a level up), a touch more armour, its soldiers a tenth stronger, two
+        /// of every group.
+        /// </summary>
+        public static Opponent MakeBot(int seed, int trophies = -1)
         {
             var rng = new System.Random(seed);
             var o = new Opponent { bot = true };
-            o.name = BotNames[rng.Next(BotNames.Length)] + (rng.Next(3) == 0 ? rng.Next(10, 99).ToString() : "");
-            o.trophies = Mathf.Max(0, Trophies + rng.Next(-120, 121));
-            if (trophies >= 0) o.trophies = trophies; // the server's
-            int pts = Mathf.Max(0, Mathf.RoundToInt(playerPoints * (0.85f + (float)rng.NextDouble() * 0.3f)));
-            // Spread: a favourite group or two, the rest across.
-            int fav = rng.Next(Army.Groups);
-            int left = pts;
-            int toFav = Mathf.RoundToInt(pts * (0.2f + (float)rng.NextDouble() * 0.3f));
-            o.points[fav] += toFav;
-            left -= toFav;
-            while (left > 0)
-            {
-                int g = rng.Next(Army.Groups);
-                int n = Mathf.Min(left, 1 + rng.Next(5));
-                o.points[g] += n;
-                left -= n;
-            }
-            o.foiHp = FoiHpFor(world);
-            o.foiHit = FoiHitFor(world);
+            o.name = BotName(rng);
+            o.trophies = trophies >= 0 ? trophies : Mathf.Max(0, Trophies + rng.Next(-60, 61));
+            for (int g = 0; g < Army.Groups; g++) o.points[g] = Mathf.RoundToInt(Army.GroupPoints(g) * 1.1f) + 5;
+            var w = Armory.Equipped;
+            o.weapon = w.id;
+            o.weaponLevel = Mathf.Min(Armory.MaxLevel, Armory.Level(w) + (rng.Next(10) < 4 ? 1 : 0));
+            o.armor = Mathf.Min(0.5f, Shop.ArmorShare + 0.05f);
             o.boldness = (float)rng.NextDouble();
-            // A bot's foi carries a hand weapon of its stage of the game (one of the better ones open by then) and some armour.
-            int reached = world * LevelCatalog.LevelsPerWorld + LevelCatalog.LevelsPerWorld / 2;
-            var open = Armory.All.FindAll(w => w.kind != WeaponKind.Gun && w.unlockAt <= reached);
-            open.Sort((a, b) => b.damage.CompareTo(a.damage));
-            var pick = open.Count > 0 ? open[Mathf.Min(open.Count - 1, rng.Next(2))] : Armory.All[0];
-            o.weapon = pick.id;
-            o.weaponLevel = 1 + rng.Next(3);
-            o.armor = Mathf.Min(0.5f, world * 0.02f + (float)rng.NextDouble() * 0.1f);
-            o.shield = world >= 3 && rng.Next(3) == 0 ? 1 + rng.Next(2) : 0;
+            o.foiHp = 100;
+            o.foiHit = 0f;
             return o;
         }
 
-        /// <summary>A real player's army, as the server sent it (played by the game's AI).</summary>
+
+        /// <summary>A live rival as the server sent it (its own game plays it).</summary>
         public static Opponent FromRival(FoiNet.Rival r)
         {
             var o = new Opponent { bot = false, name = r.name, trophies = Mathf.Max(0, r.trophies) };
