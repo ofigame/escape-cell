@@ -65,6 +65,93 @@ namespace SquashBot.UI
             return rt;
         }
 
+        // ---------- Turning pictures (the shop's weapon cards) ----------
+
+        private class Live
+        {
+            public string id;
+            public Transform holder;
+            public RenderTexture rt;
+            public float size, phase;
+            public int users;
+        }
+
+        private static readonly Dictionary<string, Live> live = new Dictionary<string, Live>();
+        private static readonly List<Live> liveOrder = new List<Live>();
+        private static int liveNext, liveSlot;
+
+        /// <summary>
+        /// A weapon's picture turning all the way round (360°) on its own little turntable, for as long as a card shows it
+        /// (<see cref="Release"/> when the card goes). A few are drawn each frame, in turn.
+        /// </summary>
+        public static Texture Spinning(WeaponDef w)
+        {
+            Setup();
+            if (live.TryGetValue(w.id, out var l) && l.rt != null && l.rt.IsCreated()) { l.users++; return l.rt; }
+            l = new Live { id = w.id, users = 1, phase = liveSlot * 47f };
+            l.rt = new RenderTexture(384, 384, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Spin " + w.id };
+            l.rt.Create();
+            l.holder = new GameObject("Spin " + w.id).transform;
+            l.holder.SetParent(stage, false);
+            l.holder.localPosition = new Vector3(10f + 6f * (liveSlot++ % 64), 0f, 0f);
+            var model = WeaponModels.Build(l.holder, w, 1f);
+            float length = w.kind == WeaponKind.Spear ? 1.05f : w.kind == WeaponKind.Gun ? 0.7f : 0.85f;
+            // Centred on the turntable: a blade stands up (its middle at the centre), a gun lies level.
+            model.localPosition = w.kind == WeaponKind.Gun ? new Vector3(0f, -0.02f, -0.12f) : new Vector3(0f, -length * 0.5f, 0f);
+            if (w.kind == WeaponKind.Gun) model.localScale *= 1.15f;
+            l.size = length * (w.kind == WeaponKind.Gun ? 0.6f : 0.5f);
+            live[w.id] = l;
+            liveOrder.Add(l);
+            Draw(l);
+            return l.rt;
+        }
+
+        /// <summary>A card showing a turning picture is gone: its turntable goes when no card shows it.</summary>
+        public static void Release(string id)
+        {
+            if (!live.TryGetValue(id, out var l) || --l.users > 0) return;
+            live.Remove(id);
+            liveOrder.Remove(l);
+            if (l.holder != null) Object.Destroy(l.holder.gameObject);
+            if (l.rt != null) { l.rt.Release(); Object.Destroy(l.rt); }
+        }
+
+        private static void Draw(Live l)
+        {
+            // A slow turn round the upright, tipped a little towards the camera so the top shows too.
+            l.holder.localRotation = Quaternion.Euler(14f, Time.unscaledTime * 75f + l.phase, 0f);
+            var camPos = l.holder.localPosition + new Vector3(0f, 0f, -4f);
+            cam.transform.localPosition = camPos;
+            cam.orthographicSize = l.size;
+            cam.targetTexture = l.rt;
+            cam.Render();
+            cam.targetTexture = null;
+            cam.transform.localPosition = new Vector3(0f, 0f, -4f);
+        }
+
+        /// <summary>Draws a few of the turning pictures each frame (all of them in turn).</summary>
+        private class Spinner : MonoBehaviour
+        {
+            private void LateUpdate()
+            {
+                int n = Mathf.Min(4, liveOrder.Count);
+                for (int i = 0; i < n; i++)
+                {
+                    liveNext = (liveNext + 1) % liveOrder.Count;
+                    var l = liveOrder[liveNext];
+                    if (l.holder == null || l.rt == null) continue;
+                    Draw(l);
+                }
+            }
+        }
+
+        /// <summary>Put on a card's picture: tells the turntable when the card is gone.</summary>
+        public class Lease : MonoBehaviour
+        {
+            public string id;
+            private void OnDestroy() { if (!string.IsNullOrEmpty(id)) Release(id); }
+        }
+
         private static void Setup()
         {
             if (cam != null) return;
@@ -85,11 +172,12 @@ namespace SquashBot.UI
             cam.farClipPlane = 10f;
             cam.enabled = false;
             var key = new GameObject("Key").AddComponent<Light>();
-            key.transform.SetParent(root.transform, false);
+            key.transform.SetParent(camGo.transform, false);
             key.type = LightType.Point;
             key.range = 8f;
             key.intensity = 3f;
-            key.transform.localPosition = new Vector3(-1.5f, 1.5f, -2.5f);
+            key.transform.localPosition = new Vector3(-1.5f, 1.5f, 1.5f); // beside the camera (it moves from turntable to turntable)
+            root.AddComponent<Spinner>();
         }
     }
 }

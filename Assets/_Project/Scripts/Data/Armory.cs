@@ -21,6 +21,9 @@ namespace SquashBot.Data
         public int price;
         /// <summary>The level (0-based index) from which it can be bought.</summary>
         public int unlockAt;
+        /// <summary>A gun that fires a burst of energy balls a tap (automatic), and how many; else one ball a tap.</summary>
+        public bool auto;
+        public int burst = 1;
     }
 
     /// <summary>
@@ -57,7 +60,41 @@ namespace SquashBot.Data
             new WeaponDef { id = "twinBlaster", kind = WeaponKind.Gun, tier = 4, damage = 5, reach = 9, cooldown = 0.2f, price = 7200, unlockAt = 99 },
             new WeaponDef { id = "stormCannon", kind = WeaponKind.Gun, tier = 5, damage = 7, reach = 10, cooldown = 0.45f, price = 12500, unlockAt = 149 },
             new WeaponDef { id = "novaCannon", kind = WeaponKind.Gun, tier = 6, damage = 9, reach = 11, cooldown = 0.4f, price = 24000, unlockAt = 199 },
+            // More of every kind (the workshop's bigger shelves): an early wooden sword and spiked club, a katana, a
+            // double axe, a trident, a thunder maul, a halberd and a dragon axe.
+            new WeaponDef { id = "woodSword", kind = WeaponKind.Sword, tier = 1, damage = 1, reach = 2, cooldown = 0.16f, price = 150, unlockAt = 2 },
+            new WeaponDef { id = "spikedClub", kind = WeaponKind.Mace, tier = 1, damage = 2, reach = 2, cooldown = 0.3f, price = 600, unlockAt = 7 },
+            new WeaponDef { id = "katana", kind = WeaponKind.Sword, tier = 3, damage = 3, reach = 2, cooldown = 0.11f, price = 3400, unlockAt = 60 },
+            new WeaponDef { id = "doubleAxe", kind = WeaponKind.Axe, tier = 3, damage = 4, reach = 2, cooldown = 0.29f, price = 3800, unlockAt = 80 },
+            new WeaponDef { id = "trident", kind = WeaponKind.Spear, tier = 3, damage = 3, reach = 2, cooldown = 0.19f, price = 3200, unlockAt = 85 },
+            new WeaponDef { id = "thunderMaul", kind = WeaponKind.Hammer, tier = 4, damage = 5, reach = 2, cooldown = 0.26f, price = 9000, unlockAt = 140 },
+            new WeaponDef { id = "halberd", kind = WeaponKind.Spear, tier = 5, damage = 6, reach = 2, cooldown = 0.2f, price = 14000, unlockAt = 185 },
+            new WeaponDef { id = "dragonAxe", kind = WeaponKind.Axe, tier = 5, damage = 7, reach = 2, cooldown = 0.28f, price = 15000, unlockAt = 190 },
+            // Automatic guns (a burst of energy balls a tap) and a long-range rail sniper.
+            new WeaponDef { id = "bubbleSmg", kind = WeaponKind.Gun, tier = 2, damage = 1, reach = 7, cooldown = 0.5f, price = 1600, unlockAt = 24, auto = true, burst = 4 },
+            new WeaponDef { id = "ionRifle", kind = WeaponKind.Gun, tier = 3, damage = 2, reach = 8, cooldown = 0.6f, price = 4400, unlockAt = 74, auto = true, burst = 4 },
+            new WeaponDef { id = "railSniper", kind = WeaponKind.Gun, tier = 4, damage = 8, reach = 13, cooldown = 0.9f, price = 9500, unlockAt = 129 },
+            new WeaponDef { id = "gatling", kind = WeaponKind.Gun, tier = 5, damage = 3, reach = 9, cooldown = 0.7f, price = 14500, unlockAt = 179, auto = true, burst = 6 },
+            new WeaponDef { id = "photonSmg", kind = WeaponKind.Gun, tier = 6, damage = 5, reach = 10, cooldown = 0.55f, price = 26000, unlockAt = 225, auto = true, burst = 5 },
         };
+
+        /// <summary>The shop's shelves: 0 guns, 1 swords (and whirl blades), 2 axes and maces, 3 spears, 4 hammers.</summary>
+        public static int Category(WeaponDef w)
+        {
+            switch (w.kind)
+            {
+                case WeaponKind.Gun: return 0;
+                case WeaponKind.Sword: case WeaponKind.Whirl: return 1;
+                case WeaponKind.Axe: case WeaponKind.Mace: return 2;
+                case WeaponKind.Spear: return 3;
+                default: return 4;
+            }
+        }
+
+        public const int Categories = 5;
+
+        /// <summary>Energy balls a gun carries into a floor (a single-shot gun fewer, an automatic many).</summary>
+        public static int Ammo(WeaponDef w) => w.auto ? 80 + w.tier * 20 : 30 + w.tier * 5;
 
         private const string EquipKey = "sb_weapon";
 

@@ -82,14 +82,22 @@ namespace SquashBot.Gameplay
             // The ramparts rise and thicken further into the campaign, and stage by stage inside a level (each
             // stage's walls higher and thicker than the one before), in a stone tinted by the world.
             float camp = Mathf.InverseLerp(0f, 24f, World);
-            float wallHeight = Mathf.Lerp(1.15f, 3.0f, camp);
-            float wallThick = Mathf.Lerp(1.0f, 1.9f, camp);
-            FortressFloor.WallScaleAt = level.fortressStages > 1 ? p => 1f + 0.22f * StageAt(p) : (System.Func<GridPos, float>)null;
+            // Low walls like the first floor's everywhere (user asked); the corner towers are what grows, world by world.
+            float wallHeight = 1.15f;
+            float wallThick = Mathf.Lerp(1.0f, 1.3f, camp);
+            FortressFloor.WallScaleAt = null;
             // The ramparts: the world's colour in a mid-dark tone (dark, never very dark), the floor its lightest tone.
             Color.RGBToHSV(WorldTheme.Current.accent, out float wh, out _, out _);
             FortressFloor.WallTint = Color.HSVToRGB(wh, 0.22f, Mathf.Lerp(0.6f, 0.48f, camp));
             FortressFloor.Fx = FortressFloor.WallFx.None;
-            FortressFloor.TowerGrow = Mathf.Lerp(1f, 1.9f, Mathf.InverseLerp(0f, 24f, World)); // the corner towers grow world by world
+            FortressFloor.TowerGrow = Mathf.Lerp(1f, 2.6f, Mathf.InverseLerp(0f, 24f, World)); // the corner towers grow world by world
+            // The walls' crown, end to end: ice swords on the frozen worlds, lasers on the space worlds, fire elsewhere.
+            string wk = WorldTheme.Current.key;
+            FortressFloor.Crown = arenaRun || challengeRun || trailRun ? (WallFxRenderer.Kind?)null
+                : wk == "world.aurora" || wk == "world.snow" || wk == "world.ice" ? WallFxRenderer.Kind.Ice
+                : wk == "world.lavender" || wk == "world.galaxy" || wk == "world.heart" || wk == "world.cyber" ? WallFxRenderer.Kind.Lasers
+                : WallFxRenderer.Kind.Flames;
+            if (FortressFloor.Crown == WallFxRenderer.Kind.Lasers) FortressFloor.FxColour = WorldTheme.Current.accent;
             if (arenaRun)
             {
                 // The arenas: high ramparts and towering corner towers round a huge courtyard.
@@ -117,7 +125,8 @@ namespace SquashBot.Gameplay
             }
             FortressFloor.SkipCornerTowers = arenaRun || (challengeRun && !duelWalls);
             FortressFloor.SkipWall = trailRun || (challengeRun && !duelWalls) ? (System.Func<GridPos, bool>)(p => true) // the roads: mountains, no ramparts (the colosseum: its stands)
-                : arenaRun ? (System.Func<GridPos, bool>)(p => BattleArenas.BuildingAt(p.x, p.y)) : null;
+                : arenaRun ? (System.Func<GridPos, bool>)(p => BattleArenas.BuildingAt(p.x, p.y))
+                : (System.Func<GridPos, bool>)(p => p.x >= grid.Width - 1); // the floors: no wall on the stand's side (the stand meets the floor)
             FortressFloor.Detailed = arenaRun;
             FortressFloor.WallThick = wallThick;
             fortressFloor = FortressFloor.Build(grid, gridView.transform, stage, WorldTheme.Current.accent, robot.Position, gridView.Surface, FortressRects(), wallHeight);
@@ -128,9 +137,9 @@ namespace SquashBot.Gameplay
             floorStand = null;
             if (!arenaRun && !trailRun && !challengeRun)
             {
-                float x0 = GridView.ToWorld(new GridPos(grid.Width - 1, 0)).x + 0.5f + wallThick + 0.35f;
+                float x0 = GridView.ToWorld(new GridPos(grid.Width - 1, 0)).x + 0.55f; // right at the floor's edge (no wall between)
                 float z0 = GridView.ToWorld(new GridPos(0, 0)).z - 1f, z1 = GridView.ToWorld(new GridPos(0, grid.Height - 1)).z + 1f;
-                floorStand = FloorStand.Build(fortressFloor, x0, z0, z1, GridView.SurfaceY + wallHeight + 0.1f, 3 + Mathf.Max(1, level.fortressStages),
+                floorStand = FloorStand.Build(fortressFloor, x0, z0, z1, GridView.SurfaceY + 0.05f, 3 + Mathf.Max(1, level.fortressStages),
                     Color.Lerp(FortressFloor.WallTint ?? new Color(0.7f, 0.66f, 0.6f), Color.white, 0.35f), levelIndex * 31 + 7);
             }
             // The fortress never moves: its thousands of pieces are merged into a few big meshes (far fewer draw calls).

@@ -117,7 +117,62 @@ namespace SquashBot.Visual
                                 .transform.localRotation = Quaternion.Euler(0f, 0f, s * 30f);
                     break;
             }
+            Details(root, w, wood, grip, gold, metal);
             return root;
+        }
+
+        /// <summary>The newer weapons' own touches on top of their kind's build.</summary>
+        private static void Details(Transform root, WeaponDef w, Material wood, Material grip, Material gold, Material metal)
+        {
+            switch (w.id)
+            {
+                case "woodSword":
+                    foreach (var r in root.GetComponentsInChildren<Renderer>()) if (r.name == "Blade" || r.name == "Tip") r.sharedMaterial = wood;
+                    break;
+                case "katana":
+                    // A long thin curved blade and a round guard.
+                    foreach (Transform c in root) if (c.name == "Blade" || c.name == "Tip" || c.name == "Fuller" || c.name == "Guard") c.gameObject.SetActive(false);
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Tsuba", root, new Vector3(0f, 0.16f, 0f), new Vector3(0.14f, 0.012f, 0.14f), gold);
+                    for (int i = 0; i < 5; i++)
+                        Shapes.Rounded("Blade", root, new Vector3(-0.012f * i * i, 0.24f + i * 0.14f, 0f), new Vector3(0.05f, 0.16f, 0.018f), 0.008f, metal)
+                            .transform.localRotation = Quaternion.Euler(0f, 0f, 3f * i);
+                    break;
+                case "spikedClub":
+                    foreach (var r in root.GetComponentsInChildren<Renderer>()) if (r.name == "Head" || r.name == "Haft") r.sharedMaterial = wood;
+                    break;
+                case "trident":
+                    foreach (Transform c in root) if (c.name == "Point") c.gameObject.SetActive(false);
+                    foreach (float s in new[] { -1f, 0f, 1f })
+                        Shapes.Rounded("Prong", root, new Vector3(s * 0.07f, 0.96f - Mathf.Abs(s) * 0.03f, 0f), new Vector3(0.025f, 0.2f, 0.025f), 0.01f, metal);
+                    Shapes.Rounded("Bar", root, new Vector3(0f, 0.86f, 0f), new Vector3(0.17f, 0.03f, 0.03f), 0.01f, metal);
+                    break;
+                case "halberd":
+                    Shapes.Primitive(PrimitiveType.Cylinder, "AxeBlade", root, new Vector3(0.09f, 0.78f, 0f), new Vector3(0.2f, 0.015f, 0.2f), metal)
+                        .transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                    Shapes.Rounded("Hook", root, new Vector3(-0.06f, 0.8f, 0f), new Vector3(0.08f, 0.03f, 0.02f), 0.01f, metal);
+                    break;
+                case "bubbleSmg":
+                case "ionRifle":
+                case "photonSmg":
+                    // An automatic: a longer body, a magazine under it and a stock behind.
+                    Shapes.Rounded("Magazine", root, new Vector3(0f, -0.09f, 0.12f), new Vector3(0.05f, 0.14f, 0.06f), 0.015f, grip);
+                    Shapes.Rounded("Stock", root, new Vector3(0f, 0f, -0.12f), new Vector3(0.06f, 0.08f, 0.14f), 0.02f, metal);
+                    break;
+                case "railSniper":
+                    // A long rail barrel and a scope.
+                    Shapes.Rounded("Rail", root, new Vector3(0f, 0.035f, 0.45f), new Vector3(0.04f, 0.04f, 0.5f), 0.012f, metal);
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Scope", root, new Vector3(0f, 0.12f, 0.1f), new Vector3(0.05f, 0.1f, 0.05f), grip)
+                        .transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                    break;
+                case "gatling":
+                    // A ring of six barrels.
+                    for (int i = 0; i < 6; i++)
+                    {
+                        float a = i * Mathf.PI / 3f;
+                        Shapes.Rounded("Barrel" + i, root, new Vector3(Mathf.Cos(a) * 0.045f, 0.035f + Mathf.Sin(a) * 0.045f, 0.34f), new Vector3(0.025f, 0.025f, 0.3f), 0.008f, grip);
+                    }
+                    break;
+            }
         }
     }
 

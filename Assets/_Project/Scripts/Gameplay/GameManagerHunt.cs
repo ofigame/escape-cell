@@ -118,6 +118,7 @@ namespace SquashBot.Gameplay
             adHealUsed = false;
             weapon = Armory.Equipped;
             gun = arenaRun ? Armory.EquippedGun : null;
+            SetupFloorGun();
             if (heldWeapon != null) Destroy(heldWeapon.gameObject);
             heldWeapon = null;
             ShowHeld(gun ?? weapon);
@@ -272,7 +273,7 @@ namespace SquashBot.Gameplay
             State = GameState.Paused;
             Time.timeScale = 0f;
             cameraRig.SetMenuFocus(true);
-            ui.WeaponBag.Show(arenaRun);
+            ui.WeaponBag.Show(true); // guns on the floors too (fired at what is out of the blade's reach)
         }
 
         /// <summary>The weapon model in foi's hand (rebuilt only when it changes: the arenas switch blade and gun).</summary>
@@ -289,7 +290,7 @@ namespace SquashBot.Gameplay
         private void TakeWeapon(WeaponDef w)
         {
             Armory.Equip(w);
-            if (w.kind == WeaponKind.Gun) gun = w; else weapon = w;
+            if (w.kind == WeaponKind.Gun) { if (arenaRun) gun = w; else TakeFloorGun(w); } else weapon = w;
             ShowHeld(w);
             heldWeapon.Swing();
             CloseBag();
@@ -356,6 +357,8 @@ namespace SquashBot.Gameplay
             TapMarker.Create(GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY, inReach ? new Color(1f, 0.82f, 0.3f) : new Color(0.6f, 0.9f, 1f));
             if (!inReach)
             {
+                // Out of the blade's reach: the gun, when foi carries one with energy balls left and the target is in its range.
+                if (crowd && TryFireFloorGun(at)) return true;
                 // Too far: a swing that way all the same (a tap is always a blow, never a step).
                 var way = GridView.ToWorld(at) - GridView.ToWorld(robot.Position);
                 way.y = 0f;
@@ -403,6 +406,7 @@ namespace SquashBot.Gameplay
         {
             var w = weapon ?? Armory.Equipped;
             if (strikeCooldown > 0f || !robot.Strike(GridView.ToWorld(at))) return false;
+            if (heldShown != null && heldShown.kind == WeaponKind.Gun && !arenaRun) ShowHeld(w); // the blade back in hand
             strikeCooldown = Armory.Cooldown(w);
             if (crowd && hunt.IsFighter(at)) NoteFightBlow(); // a blow or two into a fight, Fifi teleports in
             int damage = Challenge.RankBoost(Armory.Damage(w)) * (superLeft > 0f ? 2 : 1); // the rank reached adds its strength

@@ -313,6 +313,7 @@ namespace SquashBot.Gameplay
             ui.AdHealPressed += OnAdHealPressed;
             ui.HeroPicker.Picked += OnHeroPicked;
             ui.WeaponBag.Picked += TakeWeapon;
+            ui.AmmoPressed += BuyAmmo;
             ui.WeaponBag.Closed += CloseBag;
             ui.ResumePressed += Resume;
             ui.SettingToggled += OnSettingToggled;

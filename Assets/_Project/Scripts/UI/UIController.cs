@@ -1287,6 +1287,31 @@ namespace SquashBot.UI
 
         /// <summary>Rescue charges; hidden in worlds where they are not unlocked yet.</summary>
         /// <summary>The health bar: <paramref name="value"/> 0-1, colour from green to red; armor shown in the label.</summary>
+        private RectTransform ammoPill;
+        private TextMeshProUGUI ammoText;
+        /// <summary>The ammo pill tapped (with no energy balls left: a refill for gold).</summary>
+        public event Action AmmoPressed;
+
+        /// <summary>The gun's energy balls left on a floor, under the health bar (empty: the refill's price).</summary>
+        public void SetAmmo(bool show, int ammo, int price)
+        {
+            if (ammoPill == null)
+            {
+                if (!show) return;
+                ammoPill = UiFactory.Pill("Ammo", healthPill.parent, new Vector2(0f, 1f), Vector2.zero, new Vector2(250f, 74f), new Color(0.55f, 0.9f, 1f));
+                ammoPill.pivot = new Vector2(0f, 1f);
+                ammoPill.anchoredPosition = healthPill.anchoredPosition + new Vector2(0f, -healthPill.rect.height - 18f);
+                ammoText = UiFactory.TextBox("Text", ammoPill, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(240f, 64f), "", 30f, UiFactory.TextDark, title: true);
+                ammoText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                var b = ammoPill.gameObject.AddComponent<Button>();
+                b.targetGraphic = ammoPill.GetComponentInChildren<Image>();
+                b.onClick.AddListener(() => AmmoPressed?.Invoke());
+            }
+            ammoPill.gameObject.SetActive(show);
+            if (!show) return;
+            ammoText.text = ammo > 0 ? Loc.F("gun.ammo", ammo) : Loc.F("gun.refill", price);
+        }
+
         public void SetHealth(bool enabled, float value, float armor)
         {
             if (healthPill.gameObject.activeSelf != enabled) healthPill.gameObject.SetActive(enabled);

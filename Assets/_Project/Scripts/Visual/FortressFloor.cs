@@ -44,6 +44,7 @@ namespace SquashBot.Visual
             LastStage = stage;
             var root = new GameObject("Fortress").transform;
             root.SetParent(parent, false);
+            crown = Crown.HasValue ? WallFxRenderer.Attach(root, Crown.Value, FxColour) : null;
             var k = new Kit
             {
                 stone = M(new Color(0.42f, 0.42f, 0.47f)), stoneDark = M(new Color(0.26f, 0.26f, 0.31f)), stoneLight = M(new Color(0.55f, 0.55f, 0.6f)),
@@ -196,6 +197,7 @@ namespace SquashBot.Visual
                 AddLight(root, GridView.ToWorld(p) + new Vector3(o.x, 0f, o.y) * 1.8f + Vector3.up * 0.4f, new Color(1f, 0.55f, 0.2f), 4f, 2.4f);
             }
             for (int i = 0; i < Mathf.Min(4, lightSpots.Count); i++) AddLight(root, lightSpots[i], k.lightColour, 3.5f, 1.6f);
+            if (crown != null) { crown.Finish(); crown = null; }
             return root;
         }
 
@@ -219,6 +221,9 @@ namespace SquashBot.Visual
         /// <summary>What crowns the ramparts: nothing, fire all along them, ice (see-through blocks), a glowing edge.</summary>
         public enum WallFx { None, Flames, Ice, Glow }
         public static WallFx Fx;
+        /// <summary>What crowns the walls all along (the floors; null: none, or the arenas' own <see cref="Fx"/>).</summary>
+        public static WallFxRenderer.Kind? Crown;
+        private static WallFxRenderer crown;
         /// <summary>The ramparts' own colour (null: from the floor), and the colour of their glow.</summary>
         public static Color? WallTint;
         public static Color FxColour = new Color(1f, 0.55f, 0.2f);
@@ -322,7 +327,12 @@ namespace SquashBot.Visual
                 Box("Rampart", root, mid, S(1.04f, h, thick), Aged(k.stoneDark, h), 0.12f);
                 bool grand = WallThick * scale > 1.45f;
                 Box("Cap", root, new Vector3(at.x, bottom + h + 0.03f, at.z) + o, S(1.06f, 0.1f, thick + 0.06f), grand || WallTint.HasValue ? k.stoneLight : stage == 1 ? k.copper : k.stone, 0.04f);
-                if (Fx == WallFx.Flames && i % 2 == 0 && flamesLeft-- > 0) // a capped number of fires (phones)
+                if (crown != null)
+                {
+                    // The floors' crown: fires, ice swords or lasers all along the walls (drawn cheaply, see WallFxRenderer).
+                    if (i % 2 == 0) crown.Add(new Vector3(at.x, bottom + h + 0.08f, at.z) + o, 0.9f + thick * 0.2f);
+                }
+                else                 if (Fx == WallFx.Flames && i % 2 == 0 && flamesLeft-- > 0) // a capped number of fires (phones)
                 {
                     // Fire all along the top of the ramparts.
                     var fl = Flames.Create(root);

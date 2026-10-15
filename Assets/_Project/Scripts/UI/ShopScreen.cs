@@ -32,7 +32,7 @@ namespace SquashBot.UI
 
         public UiScreen Screen => screen;
 
-        private enum Item { Shield, Magnet, Hover, Lives, Rescue, Armor, StartShield, ExtraRescue, StartHammer, DoubleCoins, CoinMagnet, TunnelBoost, Life, Tunnel }
+        private enum Item { Shield, Magnet, Hover, Lives, Rescue, Armor, Helmet, StartShield, ExtraRescue, StartHammer, DoubleCoins, CoinMagnet, TunnelBoost, Life, Tunnel }
 
         private enum Tab { Weapons, Tools, Defense, Upgrades, Counter }
 
@@ -111,9 +111,10 @@ namespace SquashBot.UI
             switch (tab)
             {
                 case Tab.Weapons:
-                    PackCell();
-                    BombCell();
-                    foreach (var w in Armory.All) WeaponCell(w);
+                    // The weapons by kind: guns, swords, axes and maces, spears, hammers (chips across the top).
+                    WeaponChips();
+                    if (weaponCat == 0) { PackCell(); BombCell(); }
+                    foreach (var w in Armory.All) if (Armory.Category(w) == weaponCat) WeaponCell(w);
                     break;
                 case Tab.Tools:
                     PackCell();
@@ -124,7 +125,7 @@ namespace SquashBot.UI
                     foreach (var k in Defenses.All) { DefensePackCell(k); DefenseStepCell(k); }
                     break;
                 case Tab.Upgrades:
-                    foreach (var item in new[] { Item.Shield, Item.Armor, Item.Rescue, Item.Magnet, Item.Hover, Item.Lives }) ItemCell(item);
+                    foreach (var item in new[] { Item.Armor, Item.Shield, Item.Helmet, Item.Rescue, Item.Hover, Item.Lives }) ItemCell(item); // (the coin magnet is no longer sold)
                     PaintCell();
                     break;
                 default:
@@ -135,7 +136,7 @@ namespace SquashBot.UI
                     break;
             }
             int rows = (cells + 1) / 2;
-            content.sizeDelta = new Vector2(0f, rows * (CellH + Gap) + 60f);
+            content.sizeDelta = new Vector2(0f, rows * (CellH + Gap) + (tab == Tab.Weapons ? 180f : 60f));
         }
 
         // ---------- Cards ----------
@@ -145,7 +146,7 @@ namespace SquashBot.UI
         {
             int i = cells++;
             float x = (i % 2 == 0 ? -1f : 1f) * (CellW + Gap) * 0.5f;
-            float y = -30f - (i / 2) * (CellH + Gap);
+            float y = -(tab == Tab.Weapons ? 150f : 30f) - (i / 2) * (CellH + Gap);
             var card = UiFactory.Card(name, content, new Vector2(0.5f, 1f), new Vector2(x, y), new Vector2(CellW, CellH));
             card.pivot = new Vector2(0.5f, 1f);
             // The picture sits on a soft glow of the item's colour.
@@ -222,12 +223,37 @@ namespace SquashBot.UI
 
         private void Pop(RectTransform card) => card.localScale = Vector3.one * 1.05f;
 
+        /// <summary>The weapons shelf's kind (0 guns, 1 swords, 2 axes and maces, 3 spears, 4 hammers).</summary>
+        private int weaponCat = 1;
+
+        /// <summary>The chips across the top of the weapons shelf, one per kind (the open one lit).</summary>
+        private void WeaponChips()
+        {
+            float w = 196f, gap = 12f, x0 = -(Armory.Categories - 1) * (w + gap) * 0.5f;
+            for (int c = 0; c < Armory.Categories; c++)
+            {
+                int cat = c;
+                var b = UiFactory.MakeButton(content, Loc.T("ws.cat." + c), Kind.Secondary, new Vector2(0.5f, 1f), new Vector2(x0 + c * (w + gap), -70f), new Vector2(w, 86f), () =>
+                {
+                    if (weaponCat == cat) return;
+                    AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.2f);
+                    weaponCat = cat;
+                    Populate();
+                    Refresh();
+                    content.anchoredPosition = Vector2.zero;
+                }, 24f);
+                ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0.5f);
+                b.targetGraphic.color = c == weaponCat ? UiFactory.CyanStyle.face : UiFactory.PurpleStyle.face;
+            }
+        }
+
         /// <summary>A weapon: its picture, how it hits, buy it (opens at its level) or take it in hand.</summary>
         private void WeaponCell(WeaponDef w)
         {
             var card = Cell(w.id, WeaponModels.Glow(w.tier), out var picture);
             var image = picture.gameObject.AddComponent<RawImage>();
-            image.texture = ItemPreview.Weapon(w);
+            image.texture = ItemPreview.Spinning(w); // turning all the way round while the card shows
+            picture.gameObject.AddComponent<ItemPreview.Lease>().id = w.id;
             image.raycastTarget = false;
             CardName(card, Loc.T("weapon." + w.id));
             var desc = CardDesc(card);
@@ -307,7 +333,7 @@ namespace SquashBot.UI
                 int dmg = Armory.Damage(w);
                 float cd = Armory.Cooldown(w);
                 desc.text = Loc.F("weapon.line", dmg, w.reach, Loc.T(cd <= 0.16f ? "weapon.fast" : cd >= 0.3f ? "weapon.slow" : "weapon.normal"))
-                            + "\n" + Loc.T("weapon.kind." + w.kind) + "  ·  " + Loc.F("pack.weight", Backpack.Weight(w))
+                            + "\n" + (w.kind == WeaponKind.Gun ? Loc.T(w.auto ? "weapon.auto" : "weapon.single") + (w.auto ? " ×" + w.burst : "") : Loc.T("weapon.kind." + w.kind)) + "  ·  " + Loc.F("pack.weight", Backpack.Weight(w))
                             + (owned && lv < Armory.MaxLevel ? "  ·  " + Loc.F("weapon.nextLevel", Armory.Damage(w, lv + 1)) : "");
                 SetPips(pips, owned ? lv : 0);
                 veil.SetActive(!unlocked);
@@ -858,7 +884,7 @@ namespace SquashBot.UI
             var open = UiFactory.MakeButton(card, Loc.T("ws.paintOpen"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 34f), new Vector2(410f, 92f), () => PaintPressed?.Invoke(), 40f);
         }
 
-        private static bool IsUpgrade(Item item) => item <= Item.Armor;
+        private static bool IsUpgrade(Item item) => item <= Item.Helmet;
         private static bool IsBoost(Item item) => item >= Item.StartShield && item <= Item.TunnelBoost;
         private static Boost ToBoost(Item item) => (Boost)(item - Item.StartShield);
         private static Upgrade ToUpgrade(Item item) => (Upgrade)(int)item;
@@ -894,6 +920,8 @@ namespace SquashBot.UI
                     return Loc.F("shop.Lives.now", Shop.MaxLives);
                 case Item.Armor:
                     return Shop.Level(Upgrade.Armor) > 0 ? Loc.F("shop.Armor.now", Mathf.RoundToInt(Shop.ArmorShare * 100f)) : Loc.T("shop.Armor.desc");
+                case Item.Helmet:
+                    return Shop.Level(Upgrade.Helmet) > 0 ? Loc.F("shop.Helmet.now", Mathf.RoundToInt(Shop.HelmetShare * 100f)) : Loc.T("shop.Helmet.desc");
                 case Item.Rescue:
                     return Shop.Level(Upgrade.Rescue) > 0 ? Loc.F("shop.Rescue.now", Shop.MaxRescues) : Loc.T("shop.Rescue.desc");
                 default:
@@ -996,6 +1024,7 @@ namespace SquashBot.UI
                 case Item.Shield:
                 case Item.StartShield: return new Color(0.45f, 0.75f, 1f);
                 case Item.Armor: return new Color(0.75f, 0.8f, 0.9f);
+                case Item.Helmet: return new Color(1f, 0.78f, 0.4f);
                 case Item.Magnet:
                 case Item.CoinMagnet: return new Color(1f, 0.55f, 0.55f);
                 case Item.Hover: return new Color(0.55f, 0.9f, 0.75f);
@@ -1024,6 +1053,20 @@ namespace SquashBot.UI
                     var core = UiFactory.Box("Core", icon, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(30f, 30f));
                     core.pivot = new Vector2(0.5f, 0.5f);
                     UiFactory.Fill(core, dark, UiSprites.Circle).raycastTarget = false;
+                    break;
+                }
+                case Item.Helmet:
+                {
+                    // A helmet: a dome with a visor slit and a crest.
+                    var dome = UiFactory.Box("Dome", icon, new Vector2(0.5f, 0.5f), new Vector2(0f, 4f), new Vector2(76f, 66f));
+                    dome.pivot = new Vector2(0.5f, 0.5f);
+                    UiFactory.Fill(dome, dark, UiSprites.Rounded, 2.2f).raycastTarget = false;
+                    var slit = UiFactory.Box("Visor", icon, new Vector2(0.5f, 0.5f), new Vector2(0f, -2f), new Vector2(54f, 12f));
+                    slit.pivot = new Vector2(0.5f, 0.5f);
+                    UiFactory.Fill(slit, new Color(1f, 1f, 1f, 0.85f), UiSprites.Rounded, 8f).raycastTarget = false;
+                    var crest = UiFactory.Box("Crest", icon, new Vector2(0.5f, 0.5f), new Vector2(0f, 44f), new Vector2(14f, 26f));
+                    crest.pivot = new Vector2(0.5f, 0.5f);
+                    UiFactory.Fill(crest, dark, UiSprites.Rounded, 6f).raycastTarget = false;
                     break;
                 }
                 case Item.Magnet:

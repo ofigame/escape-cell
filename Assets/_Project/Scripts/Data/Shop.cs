@@ -16,7 +16,9 @@ namespace SquashBot.Data
         /// <summary>Kurtarma hakkı: more rescue charges can be banked in a level (the spare battery, from level 11).</summary>
         Rescue,
         /// <summary>Zırh: every hit takes a smaller share of the health bar (from level 21).</summary>
-        Armor
+        Armor,
+        /// <summary>Kask: a helmet that takes a little more off every hit (beside the armour).</summary>
+        Helmet
     }
 
     /// <summary>One-use items from Bip's daily counter: bought ahead, picked before a level.</summary>
@@ -53,8 +55,9 @@ namespace SquashBot.Data
             new[] { 300, 700, 1500 },      // Magnet: range 2, 3, 4
             new[] { 300, 600, 1000 },      // Hover: +0.5 s each
             new[] { 1200, 2500 },          // Lives: 6, 7
-            new[] { 400, 1000 },           // Rescue: 4, 5 charges
+            new[] { 20000, 35000 },        // Rescue: 4, 5 charges (dear: a rescue is a second life)
             new[] { 400, 900, 1600, 2600 }, // Armor: 10%, 20%, 30%, 40% off every hit
+            new[] { 800, 2400, 6000 },     // Helmet: 6%, 12%, 18% more off every hit
         };
 
         private static readonly int[] BoostPrices = { 60, 80, 100, 120, 70, 90 };
@@ -65,7 +68,7 @@ namespace SquashBot.Data
         public static int NextPrice(Upgrade u) => IsMaxed(u) ? 0 : UpgradePrices[(int)u][Level(u)];
 
         /// <summary>The level (0-based index) from which the story unlocks the upgrade.</summary>
-        public static int UnlockLevel(Upgrade u) => u == Upgrade.Magnet ? 90 : u == Upgrade.Rescue ? Tools.FromLevel : u == Upgrade.Armor ? 20 : 0;
+        public static int UnlockLevel(Upgrade u) => u == Upgrade.Magnet ? 90 : u == Upgrade.Rescue ? Tools.FromLevel : u == Upgrade.Armor ? 20 : u == Upgrade.Helmet ? 30 : 0;
 
         public static bool Unlocked(Upgrade u) => Level(u) > 0 || SaveData.UnlockedLevel >= UnlockLevel(u);
 
@@ -145,6 +148,9 @@ namespace SquashBot.Data
         public static int MaxRescues => 3 + Level(Upgrade.Rescue);
 
         /// <summary>The share of every hit the armor takes off (0.1 per level).</summary>
-        public static float ArmorShare => 0.1f * Level(Upgrade.Armor);
+        public static float ArmorShare => Mathf.Min(0.6f, 0.1f * Level(Upgrade.Armor) + HelmetShare);
+
+        /// <summary>The share of every hit the helmet takes off (0.06 per level), counted in <see cref="ArmorShare"/>.</summary>
+        public static float HelmetShare => 0.06f * Level(Upgrade.Helmet);
     }
 }
