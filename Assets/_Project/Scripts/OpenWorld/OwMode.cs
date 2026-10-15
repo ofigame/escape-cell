@@ -73,6 +73,7 @@ namespace SquashBot.OpenWorld
             ui.CameraPressed += () => SetTps(!tps);
             ui.DefencePressed += ShowDefences;
             ui.ArmyPressed += ShowArmy;
+            ui.Zoom += d => isoDist = Mathf.Clamp(isoDist + d, MinZoom, MaxZoom);
             foiMax = Mathf.Max(100, Challenge.FoiMaxHp);
             foiHp = foiMax;
             save.FeedSoldiers();
@@ -142,6 +143,7 @@ namespace SquashBot.OpenWorld
             save.pz = pos.y;
             save.tps = tps;
             save.Save();
+            OwSync.Upload();
             Destroy(gameObject);
         }
 
@@ -150,7 +152,7 @@ namespace SquashBot.OpenWorld
 
         /// <summary>Closing the app (or sending it away) keeps where foi stood.</summary>
         private void OnApplicationQuit() { quitting = true; KeepPlace(); }
-        private void OnApplicationPause(bool paused) { if (paused) KeepPlace(); }
+        private void OnApplicationPause(bool paused) { if (paused) { KeepPlace(); OwSync.Upload(); } }
 
         private void KeepPlace()
         {
@@ -162,6 +164,7 @@ namespace SquashBot.OpenWorld
         private void OnDestroy()
         {
             Active = false;
+            OwIcons.Clear();
             RenderSettings.fog = false;
             foreach (var c in hiddenCanvases) if (c != null) c.enabled = true;
             foreach (var c in hiddenCameras) if (c != null) c.enabled = true;
@@ -229,9 +232,42 @@ namespace SquashBot.OpenWorld
             if (nearT <= 0f) { nearT = 0.15f; RefreshAction(); }
             strikeCd -= dt;
             raidT -= dt;
+            syncT -= dt;
+            if (syncT <= 0f) { syncT = 45f; OwSync.Upload(); }
             if (raidT <= 0f) { raidT = 1f; RaidClock(); }
             ui.SetFarmButtons(!battle.Raiding && (pos - OwWorld.FarmCentre).magnitude < OwBattleData.Reach(save.House.land) + 6f);
+            ui.SetZoomButtons(!tps);
+            if (!tps) PinchAndWheel();
             PlaceCamera(p, dt);
+        }
+
+        private const float MinZoom = 7f, MaxZoom = 42f;
+        private float isoDist = 13f, pinchLast = -1f;
+        private float syncT = 45f;
+
+        /// <summary>Two fingers apart or together (when not walking), or the mouse wheel: the isometric zoom.</summary>
+        private void PinchAndWheel()
+        {
+            var mouse = Mouse.current;
+            if (mouse != null)
+            {
+                float s = mouse.scroll.ReadValue().y;
+                if (Mathf.Abs(s) > 0.01f) isoDist = Mathf.Clamp(isoDist - Mathf.Sign(s) * 1.5f, MinZoom, MaxZoom);
+            }
+            var touch = Touchscreen.current;
+            if (touch == null || ui.Move.sqrMagnitude > 0.001f) { pinchLast = -1f; return; }
+            int down = 0;
+            Vector2 a = Vector2.zero, b = Vector2.zero;
+            foreach (var t in touch.touches)
+            {
+                if (!t.press.isPressed) continue;
+                if (down == 0) a = t.position.ReadValue(); else if (down == 1) b = t.position.ReadValue();
+                down++;
+            }
+            if (down < 2) { pinchLast = -1f; return; }
+            float gap = (a - b).magnitude / Mathf.Max(1f, Screen.height);
+            if (pinchLast > 0f) isoDist = Mathf.Clamp(isoDist - (gap - pinchLast) * 40f, MinZoom, MaxZoom);
+            pinchLast = gap;
         }
 
         // ---------- Raids ----------
@@ -259,9 +295,9 @@ namespace SquashBot.OpenWorld
             long half = save.FarmValue() / 2;
             var rows = new List<OwRow>
             {
-                new OwRow { text = Loc.T("ow.raid.fight"), sub = Loc.F("ow.raid.fightLine", battle.RaidSize), swatch = new Color(1f, 0.35f, 0.3f), button = Loc.T("ow.raid.fightButton"),
+                new OwRow { text = Loc.T("ow.raid.fight"), sub = Loc.F("ow.raid.fightLine", battle.RaidSize), icon = BanditIcon(), button = Loc.T("ow.raid.fightButton"),
                     onClick = () => { choosing = false; ui.CloseList(); foiHp = foiMax; battle.StartRaid(); } },
-                new OwRow { text = Loc.T("ow.raid.move"), sub = Loc.F("ow.raid.moveLine", half), swatch = new Color(0.45f, 0.8f, 0.45f), button = Loc.T("ow.raid.moveButton"),
+                new OwRow { text = Loc.T("ow.raid.move"), sub = Loc.F("ow.raid.moveLine", half), icon = farm.HouseIcon(save.house), button = Loc.T("ow.raid.moveButton"),
                     onClick = () => { choosing = false; ui.CloseList(); SellAndMove(); } },
             };
             ui.ShowList(Loc.T("ow.raid.title"), rows);
@@ -347,7 +383,7 @@ namespace SquashBot.OpenWorld
                 {
                     text = Loc.T("ow.def." + def.kind),
                     sub = !open ? Loc.F("ow.needsHouse", Loc.T("ow.house." + def.house)) : !fits ? Loc.T("ow.def.noRoom") : Loc.T("ow.def.line." + def.kind),
-                    swatch = def.kind == DefenceKind.Fence || def.kind == DefenceKind.Gate ? new Color(0.5f, 0.34f, 0.2f) : def.damage > 0 ? new Color(1f, 0.5f, 0.2f) : new Color(0.62f, 0.58f, 0.52f),
+                    icon = farm.IconOf(def.kind),
                     button = def.price.ToString(),
                     enabled = open && fits,
                     onClick = () =>
@@ -378,7 +414,7 @@ namespace SquashBot.OpenWorld
                 {
                     text = Loc.T("army.kind." + kind) + "  ×" + save.soldiers[g],
                     sub = Loc.F("ow.army.line", st.hp, st.hit.ToString("0.#"), cap),
-                    swatch = Army.Family(kind) == 0 ? new Color(0.85f, 0.35f, 0.3f) : Army.Family(kind) == 1 ? new Color(0.3f, 0.7f, 0.55f) : new Color(0.75f, 0.6f, 0.3f),
+                    icon = SoldierIcon(group),
                     button = "+1 (" + OwData.SoldierPrice + ")",
                     enabled = room,
                     onClick = () =>
@@ -393,10 +429,18 @@ namespace SquashBot.OpenWorld
                     },
                 });
             }
-            if (save.hungry) rows.Insert(0, new OwRow { text = Loc.T("ow.army.hungry"), sub = Loc.T("ow.army.hungryLine"), swatch = new Color(1f, 0.4f, 0.3f) });
-            else rows.Insert(0, new OwRow { text = Loc.F("ow.army.food", save.SoldierCount), sub = Loc.T("ow.army.foodLine"), swatch = new Color(0.95f, 0.8f, 0.35f) });
+            if (save.hungry) rows.Insert(0, new OwRow { text = Loc.T("ow.army.hungry"), sub = Loc.T("ow.army.hungryLine"), icon = farm.IconOf(Item.Wheat) });
+            else rows.Insert(0, new OwRow { text = Loc.F("ow.army.food", save.SoldierCount), sub = Loc.T("ow.army.foodLine"), icon = farm.IconOf(Item.Milk) });
             ui.ShowList(Loc.T("ow.army"), rows);
         }
+
+        private static Texture SoldierIcon(int group) => OwIcons.Get("soldier" + group, t =>
+        {
+            var kind = Army.KindOf(group);
+            SoldierModel.Build(t, kind, Army.Heavy(kind) ? new Color(0.25f, 0.5f, 1f) : new Color(0.45f, 0.65f, 1f));
+        });
+
+        private static Texture BanditIcon() => OwIcons.Get("bandit", t => HumanoidBot.Build(t, new Color(0.85f, 0.5f, 0.2f)));
 
         private int MaxHp(DefenceState d) => Mathf.RoundToInt(OwBattleData.Of((DefenceKind)d.kind).hp * OwBattleData.LevelScale(d.level));
 
@@ -431,7 +475,12 @@ namespace SquashBot.OpenWorld
             else
             {
                 lookAt = p + Vector3.up * 0.6f;
-                want = lookAt + Quaternion.Euler(0f, 45f, 0f) * new Vector3(0f, 0f, -1f) * 9f + Vector3.up * 9.5f;
+                // Further out the view climbs: from a low three-quarter look to nearly straight down.
+                float k = Mathf.InverseLerp(MinZoom, MaxZoom, isoDist);
+                float a = Mathf.Lerp(46f, 70f, k) * Mathf.Deg2Rad;
+                want = lookAt + Quaternion.Euler(0f, 45f, 0f) * new Vector3(0f, 0f, -Mathf.Cos(a) * isoDist) + Vector3.up * Mathf.Sin(a) * isoDist;
+                RenderSettings.fogStartDistance = 70f + isoDist * 2f;
+                RenderSettings.fogEndDistance = 130f + isoDist * 3f;
                 cam.fieldOfView = CameraFit.Fov(46f, cam.aspect);
             }
             cam.transform.position = Vector3.Lerp(cam.transform.position, want, 1f - Mathf.Exp(-dt * 10f));
@@ -660,7 +709,7 @@ namespace SquashBot.OpenWorld
                 {
                     text = Name(def.item),
                     sub = open ? Loc.F("ow.sow.line", Dur(def.seconds), def.yield, def.price) : Loc.F("ow.needsHouse", Loc.T("ow.house." + def.house)),
-                    swatch = def.item == Item.Wheat ? OwData.ColourOf(def.item) : OwData.ColourOf(def.item),
+                    icon = farm.IconOf(def.item),
                     button = open ? Loc.F("ow.sow.button", def.seed) : "—",
                     enabled = open,
                     onClick = () =>
@@ -686,7 +735,7 @@ namespace SquashBot.OpenWorld
             {
                 text = Loc.T("ow.build.plot"),
                 sub = Loc.F("ow.build.count", save.plots.Count, h.plots),
-                swatch = new Color(0.46f, 0.3f, 0.18f),
+                icon = farm.PlotIcon(),
                 button = plotPrice.ToString(),
                 enabled = save.plots.Count < h.plots,
                 onClick = () =>
@@ -705,7 +754,7 @@ namespace SquashBot.OpenWorld
                 {
                     text = Loc.T("ow.tree." + def.kind),
                     sub = def.house > save.house ? Loc.F("ow.needsHouse", Loc.T("ow.house." + def.house)) : Loc.F("ow.tree.line", Dur(def.growSeconds), def.yield, Name(def.item), Dur(def.fruitSeconds)),
-                    swatch = def.colour,
+                    icon = farm.IconOf(def.kind),
                     button = def.sapling.ToString(),
                     enabled = open,
                     onClick = () =>
@@ -726,7 +775,7 @@ namespace SquashBot.OpenWorld
                 {
                     text = Loc.T("ow.b." + def.kind),
                     sub = def.house > save.house ? Loc.F("ow.needsHouse", Loc.T("ow.house." + def.house)) : !room ? Loc.T("ow.build.noRoom") : Loc.F("ow.b.line", Name(def.product), Dur(def.seconds)),
-                    swatch = def.colour,
+                    icon = farm.IconOf(def.kind),
                     button = def.price.ToString(),
                     enabled = open,
                     onClick = () =>
@@ -751,7 +800,7 @@ namespace SquashBot.OpenWorld
                 {
                     text = Loc.F("ow.barn.upgrade", OwData.BarnSizes[save.barn + 1]),
                     sub = Loc.F("ow.barn.now", save.Stored, save.BarnSize),
-                    swatch = new Color(0.7f, 0.18f, 0.14f),
+                    icon = farm.BarnIcon(),
                     button = price.ToString(),
                     enabled = save.money >= price,
                     onClick = () => { if (!save.Spend(price)) { NoMoney(); return; } save.barn++; Changed(true); ShowBarn(); },
@@ -774,7 +823,7 @@ namespace SquashBot.OpenWorld
             {
                 int n = save.Count(i);
                 if (n <= 0) continue;
-                rows.Add(new OwRow { text = Name(i) + "  ×" + n, sub = Loc.F("ow.barn.worth", save.PriceToday(i)), swatch = OwData.ColourOf(i) });
+                rows.Add(new OwRow { text = Name(i) + "  ×" + n, sub = Loc.F("ow.barn.worth", save.PriceToday(i)), icon = farm.IconOf(i) });
             }
             ui.ShowList(Loc.T("ow.barn.title"), rows);
         }
@@ -791,7 +840,7 @@ namespace SquashBot.OpenWorld
                 {
                     text = want,
                     sub = order.done ? Loc.T("ow.order.done") : Loc.F("ow.order.reward", order.reward),
-                    swatch = new Color(1f, 0.78f, 0.3f),
+                    icon = farm.IconOf((Item)order.item),
                     button = order.done ? "✓" : Loc.T("ow.order.give"),
                     enabled = save.CanFill(order),
                     onClick = () => { if (save.Fill(order)) { AudioManager.PlaySfx(Sfx.Win, 0.8f, 1.2f); ui.Toast("+" + order.reward); Changed(false); ShowCoop(); } },
@@ -808,7 +857,7 @@ namespace SquashBot.OpenWorld
                 {
                     text = Name(item) + "  ×" + n,
                     sub = Loc.F("ow.coop.price", save.PriceToday(item)),
-                    swatch = OwData.ColourOf(item),
+                    icon = farm.IconOf(item),
                     button = Loc.F("ow.coop.sellAll", all),
                     onClick = () => { long made = save.Sell(item, save.Count(item)); AudioManager.PlaySfx(Sfx.Coin, 1f, 1.1f); ui.Toast("+" + made); Changed(false); ShowCoop(); },
                 });

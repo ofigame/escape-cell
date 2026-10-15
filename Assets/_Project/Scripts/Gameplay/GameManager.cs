@@ -321,7 +321,12 @@ namespace SquashBot.Gameplay
             ui.PausePressed += Pause;
             ui.BagPressed += OpenBag;
             ui.BombPressed += ThrowBomb;
-            ui.OpenWorldPressed += () => { if (!OpenWorld.OwMode.Active) OpenWorld.OwMode.Enter(robot.Visual, ShowMenu); };
+            ui.OpenWorldPressed += () =>
+            {
+                if (OpenWorld.OwMode.Active) return;
+                if (!OpenWorld.OwMode.Open(LevelCount)) { ui.ShowIntro(Loc.T("ow.locked.title"), Loc.T("ow.locked.text")); return; }
+                OpenWorld.OwSync.Then(() => { if (!OpenWorld.OwMode.Active && State == GameState.Menu) OpenWorld.OwMode.Enter(robot.Visual, ShowMenu); });
+            };
             ui.IntroPressed += () => { if (!IntroCinematic.Playing) IntroCinematic.Play(robot.Visual, fx, true); };
             ui.BombSwitchPressed += () => NextBombKind();
             WireDefenseUi();

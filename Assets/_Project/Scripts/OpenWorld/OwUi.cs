@@ -15,6 +15,8 @@ namespace SquashBot.OpenWorld
     {
         public string text, sub, button;
         public Color swatch = Color.clear;
+        /// <summary>The thing itself, drawn from its model (in place of the colour swatch).</summary>
+        public Texture icon;
         public bool enabled = true;
         /// <summary>A long text (a report): a tall row, the words wrapping.</summary>
         public bool tall;
@@ -175,6 +177,25 @@ namespace SquashBot.OpenWorld
         public event Action DefencePressed, ArmyPressed;
         private Button defenceButton, armyButton;
 
+        /// <summary>The isometric view's zoom (+ nearer, − further and higher).</summary>
+        public event Action<float> Zoom;
+        private RectTransform zoomBox;
+
+        public void SetZoomButtons(bool on)
+        {
+            if (zoomBox == null)
+            {
+                zoomBox = UiFactory.Box("Zoom", safe, new Vector2(1f, 0.5f), new Vector2(-70f, 120f), new Vector2(110f, 230f));
+                zoomBox.pivot = new Vector2(0.5f, 0.5f);
+                var plus = Flat.Button(zoomBox, "+", new Vector2(0.5f, 1f), new Vector2(0f, -52f), new Vector2(100f, 100f), Flat.CardHi, Flat.Text, () => Zoom?.Invoke(-4f), 56f);
+                ((RectTransform)plus.transform).pivot = new Vector2(0.5f, 0.5f);
+                var minus = Flat.Button(zoomBox, "−", new Vector2(0.5f, 0f), new Vector2(0f, 52f), new Vector2(100f, 100f), Flat.CardHi, Flat.Text, () => Zoom?.Invoke(4f), 56f);
+                ((RectTransform)minus.transform).pivot = new Vector2(0.5f, 0.5f);
+            }
+            on &= !ListOpen;
+            if (zoomBox.gameObject.activeSelf != on) zoomBox.gameObject.SetActive(on);
+        }
+
         /// <summary>DEFENCE and ARMY show near the farm (not over a list).</summary>
         public void SetFarmButtons(bool on)
         {
@@ -219,7 +240,16 @@ namespace SquashBot.OpenWorld
                     continue;
                 }
                 float x = 24f;
-                if (r.swatch.a > 0f)
+                if (r.icon != null)
+                {
+                    var pic = UiFactory.Box("Icon", row, new Vector2(0f, 0.5f), new Vector2(64f, 0f), new Vector2(104f, 104f));
+                    pic.pivot = new Vector2(0.5f, 0.5f);
+                    var raw = pic.gameObject.AddComponent<RawImage>();
+                    raw.texture = r.icon;
+                    raw.raycastTarget = false;
+                    x = 128f;
+                }
+                else if (r.swatch.a > 0f)
                 {
                     var sw = UiFactory.Box("Swatch", row, new Vector2(0f, 0.5f), new Vector2(60f, 0f), new Vector2(64f, 64f));
                     sw.pivot = new Vector2(0.5f, 0.5f);

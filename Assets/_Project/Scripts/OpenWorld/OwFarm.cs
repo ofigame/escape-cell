@@ -369,6 +369,106 @@ namespace SquashBot.OpenWorld
             return true;
         }
 
+        // ---------- Pictures for the lists ----------
+
+        public Texture IconOf(Item i) => OwIcons.Get("item" + i, t => ProduceModel(t, i));
+        public Texture IconOf(TreeKind k) => OwIcons.Get("tree" + k, t => TreeModel(t, k));
+        public Texture IconOf(BuildingKind k) => OwIcons.Get("b" + k, t => BuildingModel(t, OwData.Of(k), k == BuildingKind.Hive ? 0 : 2));
+        public Texture IconOf(DefenceKind k) => OwIcons.Get("d" + k, t => DefenceModel(t, k, 1));
+
+        public Texture PlotIcon() => OwIcons.Get("plot", t =>
+        {
+            Shapes.Rounded("Soil", t, new Vector3(0f, 0.05f, 0f), new Vector3(1.8f, 0.12f, 1.8f), 0.04f, soil);
+            for (int i = 0; i < 4; i++)
+                Shapes.Primitive(PrimitiveType.Sphere, "Plant", t, new Vector3((i % 2 - 0.5f) * 0.8f, 0.3f, (i / 2 - 0.5f) * 0.8f), new Vector3(0.5f, 0.6f, 0.5f), sprout);
+        });
+
+        public Texture HouseIcon(int level) => OwIcons.Get("house" + level, t => world.HouseModel(t, Vector3.zero, 0.8f + level * 0.25f, world.Wall, world.Roof));
+
+        public Texture BarnIcon() => OwIcons.Get("barn", t =>
+        {
+            Shapes.Rounded("Body", t, new Vector3(0f, 1.5f, 0f), new Vector3(3.6f, 3f, 3.6f), 0.05f, world.BarnRed);
+            Shapes.Rounded("Roof", t, new Vector3(0f, 3.2f, 0f), new Vector3(4f, 0.5f, 4f), 0.05f, world.Wood);
+            Shapes.Rounded("Door", t, new Vector3(0f, 1f, -1.82f), new Vector3(1.6f, 2f, 0.06f), 0.03f, world.Wall);
+        });
+
+        private void TreeModel(Transform t, TreeKind kind)
+        {
+            Shapes.Primitive(PrimitiveType.Cylinder, "Trunk", t, new Vector3(0f, 0.7f, 0f), new Vector3(0.28f, 0.7f, 0.28f), world.Wood);
+            Shapes.Primitive(PrimitiveType.Sphere, "Leaves", t, new Vector3(0f, 1.9f, 0f), Vector3.one * 1.7f, world.Leaf);
+            var fm = CropMat((int)OwData.Of(kind).item);
+            for (int i = 0; i < 6; i++)
+            {
+                float a = i * Mathf.PI / 3f;
+                Shapes.Primitive(PrimitiveType.Sphere, "Fruit", t, new Vector3(Mathf.Cos(a) * 0.75f, 1.7f + (i % 2) * 0.4f, Mathf.Sin(a) * 0.75f), Vector3.one * 0.26f, fm);
+            }
+        }
+
+        /// <summary>What a harvest looks like: a sheaf of wheat, a cob, a carrot, a jar of honey, a bottle of milk...</summary>
+        private void ProduceModel(Transform t, Item i)
+        {
+            var c = CropMat((int)i);
+            switch (i)
+            {
+                case Item.Wheat:
+                    for (int k = 0; k < 7; k++)
+                    {
+                        float a = k * Mathf.PI * 2f / 7f;
+                        var stalk = Shapes.Primitive(PrimitiveType.Cylinder, "Stalk", t, new Vector3(Mathf.Cos(a) * 0.08f, 0.5f, Mathf.Sin(a) * 0.08f), new Vector3(0.05f, 0.5f, 0.05f), c).transform;
+                        stalk.localRotation = Quaternion.Euler(Mathf.Sin(a) * 10f, 0f, Mathf.Cos(a) * 10f);
+                        Shapes.Primitive(PrimitiveType.Sphere, "Ear", t, new Vector3(Mathf.Cos(a) * 0.2f, 1.05f, Mathf.Sin(a) * 0.2f), new Vector3(0.1f, 0.3f, 0.1f), c);
+                    }
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Band", t, new Vector3(0f, 0.5f, 0f), new Vector3(0.24f, 0.05f, 0.24f), world.Roof);
+                    break;
+                case Item.Corn:
+                    Shapes.Primitive(PrimitiveType.Sphere, "Cob", t, new Vector3(0f, 0.5f, 0f), new Vector3(0.3f, 0.6f, 0.3f), c);
+                    foreach (float s in new[] { -1f, 1f })
+                        Shapes.Rounded("Husk", t, new Vector3(s * 0.15f, 0.35f, 0f), new Vector3(0.08f, 0.6f, 0.25f), 0.04f, sprout).transform.localRotation = Quaternion.Euler(0f, 0f, s * 20f);
+                    break;
+                case Item.Carrot:
+                    Shapes.Primitive(PrimitiveType.Sphere, "Root", t, new Vector3(0f, 0.4f, 0f), new Vector3(0.22f, 0.7f, 0.22f), c).transform.localRotation = Quaternion.Euler(0f, 0f, 20f);
+                    for (int k = 0; k < 3; k++)
+                        Shapes.Rounded("Leaf", t, new Vector3(-0.15f + k * 0.06f, 0.85f, 0f), new Vector3(0.05f, 0.35f, 0.05f), 0.02f, sprout).transform.localRotation = Quaternion.Euler(0f, 0f, 30f - k * 15f);
+                    break;
+                case Item.Sunflower:
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Stem", t, new Vector3(0f, 0.4f, 0f), new Vector3(0.06f, 0.4f, 0.06f), sprout);
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Petals", t, new Vector3(0f, 0.9f, 0f), new Vector3(0.6f, 0.03f, 0.6f), c).transform.localRotation = Quaternion.Euler(80f, 0f, 0f);
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Seeds", t, new Vector3(0f, 0.9f, -0.03f), new Vector3(0.3f, 0.03f, 0.3f), brown).transform.localRotation = Quaternion.Euler(80f, 0f, 0f);
+                    break;
+                case Item.Egg:
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Nest", t, new Vector3(0f, 0.08f, 0f), new Vector3(0.8f, 0.08f, 0.8f), brown);
+                    for (int k = 0; k < 3; k++)
+                        Shapes.Primitive(PrimitiveType.Sphere, "Egg", t, new Vector3((k - 1) * 0.2f, 0.25f, (k % 2) * 0.1f), new Vector3(0.18f, 0.24f, 0.18f), c);
+                    break;
+                case Item.Milk:
+                case Item.GoatMilk:
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Bottle", t, new Vector3(0f, 0.35f, 0f), new Vector3(0.32f, 0.35f, 0.32f), white);
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Neck", t, new Vector3(0f, 0.8f, 0f), new Vector3(0.16f, 0.12f, 0.16f), white);
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Cap", t, new Vector3(0f, 0.95f, 0f), new Vector3(0.18f, 0.04f, 0.18f), i == Item.Milk ? world.Roof : flagMat);
+                    break;
+                case Item.Wool:
+                    for (int k = 0; k < 5; k++)
+                        Shapes.Primitive(PrimitiveType.Sphere, "Puff", t, new Vector3(Mathf.Cos(k) * 0.2f, 0.25f + (k % 2) * 0.15f, Mathf.Sin(k) * 0.2f), Vector3.one * 0.35f, wool);
+                    break;
+                case Item.Honey:
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Jar", t, new Vector3(0f, 0.3f, 0f), new Vector3(0.4f, 0.3f, 0.4f), c);
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Lid", t, new Vector3(0f, 0.63f, 0f), new Vector3(0.42f, 0.05f, 0.42f), world.Roof);
+                    break;
+                case Item.Olive:
+                case Item.Walnut:
+                    for (int k = 0; k < 3; k++)
+                        Shapes.Primitive(PrimitiveType.Sphere, "Nut", t, new Vector3((k - 1) * 0.22f, 0.15f + (k == 1 ? 0.15f : 0f), 0f), i == Item.Olive ? new Vector3(0.18f, 0.24f, 0.18f) : Vector3.one * 0.26f, c);
+                    break;
+                default: // round fruit: tomato, cactus fruit, pumpkin, apple, orange
+                    float w = i == Item.Pumpkin ? 0.7f : 0.45f;
+                    Shapes.Primitive(PrimitiveType.Sphere, "Fruit", t, new Vector3(0f, w * 0.4f, 0f), new Vector3(w, w * (i == Item.Pumpkin ? 0.7f : 0.9f), w), c);
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Stem", t, new Vector3(0f, w * 0.8f, 0f), new Vector3(0.05f, 0.08f, 0.05f), i == Item.Pumpkin ? brown : sprout);
+                    break;
+            }
+        }
+
+        private Material flagMat => flag != null ? flag : (flag = M(new Color(0.3f, 0.55f, 1f)));
+
         // ---------- Growing ----------
 
         /// <summary>A plot's share grown (0 none … 1 ready); -1: nothing sown.</summary>

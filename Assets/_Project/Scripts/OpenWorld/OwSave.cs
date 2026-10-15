@@ -80,13 +80,70 @@ namespace SquashBot.OpenWorld
             if (soldiers == null || soldiers.Length != 6) soldiers = new int[6];
         }
 
+        /// <summary>Goes up with every save: the server keeps the highest (a new phone takes it).</summary>
+        public long version;
+
+        /// <summary>Saved since the server last had a copy.</summary>
+        public static bool Dirty;
+
         public void Save()
         {
+            version++;
+            Dirty = true;
             PlayerPrefs.SetString(Key, JsonUtility.ToJson(this));
             PlayerPrefs.Save();
         }
 
-        public static long Now => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        public string Json => JsonUtility.ToJson(this);
+
+        /// <summary>Takes the server's copy in place of this phone's (it was newer).</summary>
+        public static void Replace(string json)
+        {
+            var s = JsonUtility.FromJson<OwSave>(json);
+            if (s == null) return;
+            s.Fix();
+            current = s;
+            PlayerPrefs.SetString(Key, json);
+            PlayerPrefs.Save();
+            Dirty = false;
+        }
+
+        // ---------- The clock ----------
+
+        private const string OffsetKey = "sb_ow_offset";
+        private static long lastNow;
+
+        /// <summary>The server's clock minus the phone's (seconds), learnt when the open world opens; kept for offline play.</summary>
+        public static long Offset
+        {
+            get => long.TryParse(PlayerPrefs.GetString(OffsetKey, "0"), out var v) ? v : 0;
+            set { PlayerPrefs.SetString(OffsetKey, value.ToString()); PlayerPrefs.Save(); }
+        }
+
+        private static long offsetCache = long.MinValue;
+
+        /// <summary>The open world's time (UTC seconds): the server's clock, never going backwards — setting the phone's clock
+        /// on does not ripen crops or fast-forward the animals.</summary>
+        public static long Now
+        {
+            get
+            {
+                if (offsetCache == long.MinValue) offsetCache = Offset;
+                long n = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + offsetCache;
+                if (n < lastNow) n = lastNow;
+                lastNow = n;
+                return n;
+            }
+        }
+
+        /// <summary>The server said what time it is.</summary>
+        public static void SetServerTime(long serverNow)
+        {
+            if (serverNow <= 0) return;
+            offsetCache = serverNow - DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            Offset = offsetCache;
+            lastNow = 0;
+        }
 
         // ---------- Money and the barn ----------
 

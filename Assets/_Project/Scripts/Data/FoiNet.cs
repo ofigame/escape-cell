@@ -242,6 +242,46 @@ namespace SquashBot.Data
         /// Deletes the online profile (name, army, every challenge) from the server and forgets it here, along with the
         /// challenge record. Reports whether it is gone (false: no network, nothing changed).
         /// </summary>
+        // ---------- The open world ----------
+
+        [Serializable] private class WorldTimeBody { public long now; }
+        [Serializable] public class WorldBody { public long version; public string json; public long now; }
+        [Serializable] private class WorldPut { public long version; public string json; }
+
+        /// <summary>The server's clock (UTC seconds), or 0 with no network.</summary>
+        public static IEnumerator WorldTime(Action<long> done)
+        {
+            long code = 0; string body = null;
+            yield return Send("GET", "/world/time", null, false, (c, b) => { code = c; body = b; });
+            long now = 0;
+            if (code == 200 && body != null) { try { now = JsonUtility.FromJson<WorldTimeBody>(body).now; } catch { now = 0; } }
+            done(now);
+        }
+
+        /// <summary>The open world's copy kept on the server (null: none, or no network).</summary>
+        public static IEnumerator GetWorld(Action<WorldBody> done)
+        {
+            bool ok = Registered;
+            if (!ok) yield return EnsurePlayer(r => ok = r);
+            if (!ok) { done(null); yield break; }
+            long code = 0; string body = null;
+            yield return Send("GET", "/world", null, true, (c, b) => { code = c; body = b; });
+            WorldBody w = null;
+            if (code == 200 && body != null) { try { w = JsonUtility.FromJson<WorldBody>(body); } catch { w = null; } }
+            done(w);
+        }
+
+        /// <summary>Sends the open world's copy (a newer version than the server's; an older one is refused).</summary>
+        public static IEnumerator PutWorld(long version, string json, Action<bool> done)
+        {
+            bool ok = Registered;
+            if (!ok) yield return EnsurePlayer(r => ok = r);
+            if (!ok) { done(false); yield break; }
+            long code = 0;
+            yield return Send("PUT", "/world", JsonUtility.ToJson(new WorldPut { version = version, json = json }), true, (c, b) => code = c);
+            done(code == 200);
+        }
+
         public static IEnumerator DeleteMe(Action<bool> done)
         {
             if (!Registered) { Challenge.ResetLocal(); done(true); yield break; }
