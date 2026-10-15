@@ -856,6 +856,7 @@ PlayerSettings:
   webProgressiveAssetLoading: 0
   scriptingDefineSymbols:
     Android: 
+    iPhone: TEST_TOOLS
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
