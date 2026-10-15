@@ -72,6 +72,8 @@ namespace SquashBot.Data
             ["btn.close"] = "닫기",
             ["result.win"] = "레벨 클리어!",
             ["float.moreTime"] = "+{0}초!",
+            ["intro.skip"] = "건너뛰기",
+            ["settings.intro"] = "오프닝 보기",
             ["bomb.ice.name"] = "얼음 폭탄",
             ["bomb.ice.desc"] = "층마다 {0}개: 떨어진 곳의 적이 {1}초 동안 얼어붙음",
             ["bomb.fire.name"] = "화염 폭탄",

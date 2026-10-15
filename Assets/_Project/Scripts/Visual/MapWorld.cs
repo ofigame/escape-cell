@@ -167,6 +167,15 @@ namespace SquashBot.Visual
                 islandLocked[w] = locked;
             }
 
+            // Beyond the last level: the Red Desert, the open world (dim until the escape is complete).
+            bool desertOpen = unlocked >= levelCount || openAll;
+            if (desert == null || desertWasOpen != desertOpen)
+            {
+                if (desert != null) Destroy(desert.gameObject);
+                desert = BuildDesert(desertOpen);
+                desertWasOpen = desertOpen;
+            }
+
             // The dots between the stones: merged into two meshes (walked, still ahead), two draws for a thousand dots.
             var dotDone = Shared("dotDone", new Color(1f, 0.95f, 0.8f), new Color(1.6f, 1.4f, 0.9f));
             var dotLocked = Shared("dotLocked", new Color(0.35f, 0.33f, 0.5f), Color.black);
@@ -200,7 +209,7 @@ namespace SquashBot.Visual
             robotHolder.localScale = Vector3.one * 1.6f;
 
             minHeight = NodePosition(0).y - Origin.y - 1f;
-            maxHeight = NodePosition(levelCount - 1).y - Origin.y;
+            maxHeight = NodePosition(levelCount - 1).y - Origin.y + 5.5f; // up to the Red Desert above the last level
         }
 
         /// <summary>Many small pieces of one material as a single mesh (destroyed with its object).</summary>
@@ -256,6 +265,76 @@ namespace SquashBot.Visual
         /// as in play), and on it the world's own bugs, guard robot, enforcer, crate and end monster, in their real
         /// looks. Locked worlds show it too (a peek at what is ahead), under a dimmer light.
         /// </summary>
+        private Transform desert;
+        private bool desertWasOpen;
+
+        /// <summary>Where the Red Desert lies: above the last level, set back behind the path like the islands.</summary>
+        private Vector3 DesertPosition => new Vector3(Origin.x, NodePosition(levelCount - 1).y + 5f, Origin.z + 4.5f);
+
+        /// <summary>
+        /// The open world on the map: a wide plateau of red sand with scrap heaps and fallen robots in front, green farmland
+        /// with red-roofed houses and trees behind, two moons over it. Dim and quiet until level 250 is won.
+        /// </summary>
+        private Transform BuildDesert(bool open)
+        {
+            var land = new GameObject("RedDesert").transform;
+            land.SetParent(transform, false);
+            land.position = DesertPosition;
+            float dim = open ? 1f : 0.55f;
+            Material Mat(string key, Color c, float glow = 0f) => Shared("desert_" + key + (open ? "" : "_dim"), c * dim, c * glow * dim);
+            var sand = Mat("sand", new Color(0.86f, 0.42f, 0.26f));
+            var rockM = Mat("rock", new Color(0.5f, 0.24f, 0.16f));
+            var rust = Mat("rust", new Color(0.42f, 0.24f, 0.16f));
+            var metal = Mat("metal", new Color(0.5f, 0.48f, 0.46f));
+            var grass = Mat("grass", new Color(0.42f, 0.66f, 0.3f));
+            var wall = Mat("wall", new Color(0.95f, 0.92f, 0.85f));
+            var roof = Mat("roof", new Color(0.78f, 0.24f, 0.18f));
+            var leaf = Mat("leaf", new Color(0.3f, 0.58f, 0.26f));
+            var wood = Mat("wood", new Color(0.5f, 0.34f, 0.2f));
+            var moon = Mat("moon", new Color(1f, 0.92f, 0.82f), open ? 1.4f : 0.3f);
+            var rng = new System.Random(250);
+            float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
+
+            // The plateau: red sand in front, green land behind, rock underneath.
+            Shapes.Rounded("Sand", land, new Vector3(0f, -0.2f, -1.2f), new Vector3(15f, 0.5f, 5f), 0.2f, sand);
+            Shapes.Rounded("Green", land, new Vector3(0f, -0.15f, 3.2f), new Vector3(15f, 0.5f, 4f), 0.2f, grass);
+            Shapes.Primitive(PrimitiveType.Sphere, "Underside", land, new Vector3(0f, -1.4f, 0.8f), new Vector3(14f, 2.6f, 8.6f), rockM);
+            for (int i = 0; i < 4; i++)
+                Shapes.Primitive(PrimitiveType.Sphere, "Drip", land, new Vector3(R(-5f, 5f), R(-2.6f, -2f), R(-1f, 2f)), new Vector3(R(2f, 3.4f), R(1.4f, 2.2f), R(1.6f, 2.6f)), rockM);
+            // Scrap heaps and a toppled robot on the sand.
+            for (int i = 0; i < 9; i++)
+            {
+                var heap = new GameObject("Scrap").transform;
+                heap.SetParent(land, false);
+                heap.localPosition = new Vector3(R(-6.5f, 6.5f), 0.05f, R(-3.2f, 0.4f));
+                for (int p = 0; p < 4; p++)
+                    Shapes.Rounded("Part", heap, new Vector3(R(-0.3f, 0.3f), R(0.05f, 0.25f), R(-0.3f, 0.3f)), new Vector3(R(0.2f, 0.6f), R(0.15f, 0.4f), R(0.2f, 0.5f)), 0.03f, p % 2 == 0 ? rust : metal)
+                        .transform.localRotation = Quaternion.Euler(R(-25f, 25f), R(0f, 90f), R(-25f, 25f));
+            }
+            var wreck = Shapes.Rounded("Wreck", land, new Vector3(3.6f, 0.35f, -0.6f), new Vector3(0.9f, 0.7f, 0.7f), 0.1f, rust).transform;
+            wreck.localRotation = Quaternion.Euler(0f, 30f, 24f);
+            Shapes.Rounded("WreckHead", wreck, new Vector3(0.1f, 0.7f, 0f), new Vector3(0.6f, 0.45f, 0.5f), 0.08f, metal);
+            // Farms on the green: houses with red roofs, trees.
+            foreach (float x in new[] { -5f, -1.5f, 2.5f, 5.6f })
+            {
+                var house = new GameObject("Farm").transform;
+                house.SetParent(land, false);
+                house.localPosition = new Vector3(x, 0.1f, R(2.4f, 4.2f));
+                Shapes.Rounded("House", house, new Vector3(0f, 0.3f, 0f), new Vector3(0.9f, 0.6f, 0.7f), 0.03f, wall);
+                Shapes.Rounded("Roof", house, new Vector3(0f, 0.68f, 0f), new Vector3(1f, 0.18f, 0.8f), 0.03f, roof);
+                for (int t = 0; t < 2; t++)
+                {
+                    var at = new Vector3(R(-1.4f, 1.4f), 0f, R(-0.6f, 0.8f));
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Trunk", house, at + new Vector3(0f, 0.2f, 0f), new Vector3(0.1f, 0.2f, 0.1f), wood);
+                    Shapes.Primitive(PrimitiveType.Sphere, "Leaves", house, at + new Vector3(0f, 0.55f, 0f), Vector3.one * R(0.45f, 0.65f), leaf);
+                }
+            }
+            // Two moons above.
+            Shapes.Primitive(PrimitiveType.Sphere, "MoonA", land, new Vector3(-4f, 5.5f, 6f), Vector3.one * 2.4f, moon);
+            Shapes.Primitive(PrimitiveType.Sphere, "MoonB", land, new Vector3(3.6f, 4.2f, 6.5f), Vector3.one * 1.1f, moon);
+            return land;
+        }
+
         private Transform BuildIsland(int world, bool locked)
         {
             var theme = WorldTheme.ForWorld(world).Realm(world);
@@ -455,7 +534,7 @@ namespace SquashBot.Visual
             // The sky shifts with the world the camera is in.
             int world = Mathf.Clamp(Mathf.FloorToInt((height - WorldGap) / (Step * LevelCatalog.LevelsPerWorld + WorldGap)), 0, Mathf.Max(0, (levelCount - 1) / LevelCatalog.LevelsPerWorld));
             var theme = WorldTheme.ForWorld(world);
-            Cam.backgroundColor = Color.Lerp(Cam.backgroundColor, Color.Lerp(theme.bgBottom, theme.bgTop, 0.5f) * 0.55f, Time.unscaledDeltaTime * 2f);
+            Cam.backgroundColor = Color.Lerp(Cam.backgroundColor, height > NodePosition(levelCount - 1).y - Origin.y + 2.5f ? new Color(0.62f, 0.38f, 0.3f) : Color.Lerp(theme.bgBottom, theme.bgTop, 0.5f) * 0.55f, Time.unscaledDeltaTime * 2f); // (the Red Desert's dusky sky at the top)
         }
     }
 }

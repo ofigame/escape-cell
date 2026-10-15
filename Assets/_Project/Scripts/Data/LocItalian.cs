@@ -72,6 +72,8 @@ namespace SquashBot.Data
             ["btn.close"] = "CHIUDI",
             ["result.win"] = "LIVELLO SUPERATO!",
             ["float.moreTime"] = "+{0} SECONDI!",
+            ["intro.skip"] = "SALTA",
+            ["settings.intro"] = "GUARDA L'INTRO",
             ["bomb.ice.name"] = "Bombe di ghiaccio",
             ["bomb.ice.desc"] = "{0} per piano: i nemici dove cade si congelano per {1} s",
             ["bomb.fire.name"] = "Bombe incendiarie",

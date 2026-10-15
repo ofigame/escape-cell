@@ -72,6 +72,8 @@ namespace SquashBot.Data
             ["btn.close"] = "إغلاق",
             ["result.win"] = "اجتزت المرحلة!",
             ["float.moreTime"] = "+{0} ثانية!",
+            ["intro.skip"] = "تخطي",
+            ["settings.intro"] = "شاهد المقدمة",
             ["bomb.ice.name"] = "قنابل الجليد",
             ["bomb.ice.desc"] = "{0} في كل طابق: يتجمد الأعداء حيث تسقط لمدة {1} ث",
             ["bomb.fire.name"] = "قنابل النار",

@@ -72,6 +72,8 @@ namespace SquashBot.Data
             ["btn.close"] = "ZU",
             ["result.win"] = "GESCHAFFT!",
             ["float.moreTime"] = "+{0} SEKUNDEN!",
+            ["intro.skip"] = "ÜBERSPRINGEN",
+            ["settings.intro"] = "INTRO ANSEHEN",
             ["bomb.ice.name"] = "Eisbomben",
             ["bomb.ice.desc"] = "{0} pro Etage: Gegner am Einschlagsort frieren {1} s ein",
             ["bomb.fire.name"] = "Feuerbomben",

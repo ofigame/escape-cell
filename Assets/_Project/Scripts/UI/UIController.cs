@@ -69,6 +69,8 @@ namespace SquashBot.UI
             }
         }
         public event Action BombPressed;
+        /// <summary>Settings: watch the opening scene again.</summary>
+        public event Action IntroPressed;
         /// <summary>The "watch an ad, fill your health" button was pressed (shown when health runs low).</summary>
         public event Action AdHealPressed;
         public event Action ResumePressed;
@@ -975,9 +977,11 @@ namespace SquashBot.UI
             // Under the last row: deleting the online profile, then (where the consent form applies) the ad privacy choice.
             float underRows = -200f - rows.Length * 120f - 40f;
             // The card fits its rows: under them the account buttons (each in a row of its own), then CLOSE — nothing overlaps.
-            card.sizeDelta = new Vector2(860f, rows.Length * 120f + 600f);
+            card.sizeDelta = new Vector2(860f, rows.Length * 120f + 700f);
             privacyButton = UiFactory.MakeButton(card, Loc.T("settings.privacy"), Kind.Secondary, Top, new Vector2(0f, underRows - 100f), new Vector2(560f, 74f),
                 Monetization.AdMob.ShowPrivacyOptions, 34f).gameObject;
+            // The opening scene again (it plays whole only on the first start).
+            UiFactory.MakeButton(card, Loc.T("settings.intro"), Kind.Secondary, Top, new Vector2(0f, underRows - 200f), new Vector2(560f, 74f), () => { HideSettings(); IntroPressed?.Invoke(); }, 34f);
             // A plain button of its own (red words on a dark face), in its own row under the settings.
             deleteOnlineButton = Flat.Button(card, Loc.T("settings.deleteOnline"), Top, new Vector2(0f, underRows), new Vector2(640f, 84f), new Color(0.2f, 0.08f, 0.1f, 0.9f), new Color(1f, 0.55f, 0.58f),
                 DeleteOnlinePressed, 30f);

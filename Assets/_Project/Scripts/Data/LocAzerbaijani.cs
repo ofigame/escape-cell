@@ -72,6 +72,8 @@ namespace SquashBot.Data
             ["btn.close"] = "BAĞLA",
             ["result.win"] = "SƏVİYYƏ KEÇİLDİ!",
             ["float.moreTime"] = "+{0} SANİYƏ!",
+            ["intro.skip"] = "KEÇ",
+            ["settings.intro"] = "GİRİŞ SƏHNƏSİNƏ BAX",
             ["bomb.ice.name"] = "Buz bombası",
             ["bomb.ice.desc"] = "Hər mərtəbədə {0} ədəd: düşdüyü yerdəki düşmənlər {1} san donur",
             ["bomb.fire.name"] = "Od bombası",
