@@ -60,16 +60,27 @@ namespace SquashBot.OpenWorld
             foreach (var c in FindObjectsByType<Camera>(FindObjectsSortMode.None))
                 if (c.enabled) { c.enabled = false; hiddenCameras.Add(c); }
 
+            OwWorld.Site = save.site;
             world = OwWorld.Create(transform);
             farm = OwFarm.Create(transform, world, save);
+            fx = new GameObject("OwFx").AddComponent<FxSystem>();
+            fx.transform.SetParent(transform, false);
             ui = OwUi.Create();
             ui.transform.SetParent(transform, false);
             ui.ActionPressed += () => Act(false);
             ui.Action2Pressed += () => Act(true);
             ui.BackPressed += Leave;
             ui.CameraPressed += () => SetTps(!tps);
+            ui.DefencePressed += ShowDefences;
+            ui.ArmyPressed += ShowArmy;
+            foiMax = Mathf.Max(100, Challenge.FoiMaxHp);
+            foiHp = foiMax;
+            save.FeedSoldiers();
+            battle = OwBattle.Create(transform, save, farm, fx, () => pos, HurtFoi);
+            battle.Ended += RaidEnded;
 
             var camGo = new GameObject("OwCamera");
+            camGo.tag = "MainCamera";
             camGo.transform.SetParent(transform, false);
             cam = camGo.AddComponent<Camera>();
             cam.clearFlags = CameraClearFlags.SolidColor;
@@ -104,6 +115,25 @@ namespace SquashBot.OpenWorld
                 ui.Toast(Loc.F("ow.converted", gold, money));
             }
             else ui.Toast(Loc.T("ow.welcome"));
+
+            // A raid that came while away is fought out by the farm alone; its report is shown now.
+            if (save.raidAt > 0 && OwSave.Now >= save.raidAt) RaidWhileAway();
+            save.PlanRaid();
+        }
+
+        private FxSystem fx;
+        private OwBattle battle;
+        private float foiHp, foiMax, strikeCd, raidT;
+        private bool choosing;
+
+        private void HurtFoi(float damage)
+        {
+            if (foiHp <= 0f) return;
+            foiHp -= damage;
+            if (foiHp > 0f) return;
+            foiHp = 0f;
+            ui.Toast(Loc.T("ow.raid.foiDown"));
+            battle.FoiDown();
         }
 
         private void Leave()
@@ -116,6 +146,19 @@ namespace SquashBot.OpenWorld
         }
 
 
+        private bool quitting;
+
+        /// <summary>Closing the app (or sending it away) keeps where foi stood.</summary>
+        private void OnApplicationQuit() { quitting = true; KeepPlace(); }
+        private void OnApplicationPause(bool paused) { if (paused) KeepPlace(); }
+
+        private void KeepPlace()
+        {
+            if (save == null) return;
+            save.px = pos.x; save.pz = pos.y; save.tps = tps;
+            save.Save();
+        }
+
         private void OnDestroy()
         {
             Active = false;
@@ -123,7 +166,7 @@ namespace SquashBot.OpenWorld
             foreach (var c in hiddenCanvases) if (c != null) c.enabled = true;
             foreach (var c in hiddenCameras) if (c != null) c.enabled = true;
             Screen.orientation = ScreenOrientation.Portrait;
-            left?.Invoke();
+            if (!quitting) left?.Invoke();
         }
 
         private void SetTps(bool on)
@@ -184,8 +227,180 @@ namespace SquashBot.OpenWorld
             }
             nearT -= dt;
             if (nearT <= 0f) { nearT = 0.15f; RefreshAction(); }
+            strikeCd -= dt;
+            raidT -= dt;
+            if (raidT <= 0f) { raidT = 1f; RaidClock(); }
+            ui.SetFarmButtons(!battle.Raiding && (pos - OwWorld.FarmCentre).magnitude < OwBattleData.Reach(save.House.land) + 6f);
             PlaceCamera(p, dt);
         }
+
+        // ---------- Raids ----------
+
+        /// <summary>Once a second: the warning before a raid, the raid when its time comes, the bar during one.</summary>
+        private void RaidClock()
+        {
+            if (battle.Raiding)
+            {
+                int t = Mathf.CeilToInt(battle.TimeLeft);
+                ui.SetHint(Loc.F("ow.raid.bar", battle.Left, t / 60, (t % 60).ToString("00"), Mathf.CeilToInt(foiHp), Mathf.CeilToInt(foiMax)), true);
+                return;
+            }
+            long now = OwSave.Now;
+            if (save.raidAt <= 0) return;
+            long left = save.raidAt - now;
+            if (left <= 0 && !choosing) { RaidChoice(); return; }
+            if (left > 0 && left < save.WarningHours * 3600 && !ui.ListOpen) ui.SetHint(Loc.F("ow.raid.warning", Dur(left)), true);
+        }
+
+        /// <summary>The bandits are here: stay and fight, or sell everything at half its worth and move to a safe spot.</summary>
+        private void RaidChoice()
+        {
+            choosing = true;
+            long half = save.FarmValue() / 2;
+            var rows = new List<OwRow>
+            {
+                new OwRow { text = Loc.T("ow.raid.fight"), sub = Loc.F("ow.raid.fightLine", battle.RaidSize), swatch = new Color(1f, 0.35f, 0.3f), button = Loc.T("ow.raid.fightButton"),
+                    onClick = () => { choosing = false; ui.CloseList(); foiHp = foiMax; battle.StartRaid(); } },
+                new OwRow { text = Loc.T("ow.raid.move"), sub = Loc.F("ow.raid.moveLine", half), swatch = new Color(0.45f, 0.8f, 0.45f), button = Loc.T("ow.raid.moveButton"),
+                    onClick = () => { choosing = false; ui.CloseList(); SellAndMove(); } },
+            };
+            ui.ShowList(Loc.T("ow.raid.title"), rows);
+            AudioManager.PlaySfx(Sfx.Warning, 1f, 0.9f);
+        }
+
+        private void SellAndMove()
+        {
+            long got = save.SellAndMove();
+            OwWorld.Site = save.site;
+            world.Reload();
+            farm.Rebuild();
+            battle.Garrison();
+            pos = OwWorld.FarmCentre + new Vector2(0f, -save.House.land * 0.5f - 4f);
+            streamT = 0f;
+            Changed(false);
+            ui.Toast(Loc.F("ow.raid.moved", got));
+        }
+
+        private void RaidEnded(bool won)
+        {
+            string report;
+            if (won)
+            {
+                save.money += battle.Reward;
+                report = Loc.F("ow.raid.won", battle.Kills, battle.Reward);
+                AudioManager.PlaySfx(Sfx.Win, 1f, 1f);
+            }
+            else
+            {
+                var (items, crops) = save.Loot(new System.Random());
+                report = Loc.F("ow.raid.lost", battle.Kills, items + battle.Stolen, crops);
+                AudioManager.PlaySfx(Sfx.Warning, 0.8f, 0.7f);
+            }
+            save.RaidDone();
+            foiHp = foiMax;
+            battle.Garrison();
+            Changed(true);
+            ShowReport(report);
+        }
+
+        private void RaidWhileAway()
+        {
+            var (won, kills, count) = OwBattle.Simulate(save, (int)(save.raidAt % 100000));
+            string report;
+            if (won)
+            {
+                long reward = kills * 15;
+                save.money += reward;
+                report = Loc.F("ow.raid.awayWon", count, reward);
+            }
+            else
+            {
+                var (items, crops) = save.Loot(new System.Random((int)(save.raidAt % 9999)));
+                int fallen = 0;
+                for (int g = 0; g < save.soldiers.Length; g++) { int k = save.soldiers[g] / 3; save.soldiers[g] -= k; fallen += k; }
+                report = Loc.F("ow.raid.awayLost", count, kills, items, crops, fallen);
+            }
+            save.RaidDone();
+            Changed(true);
+            battle.Garrison();
+            ShowReport(report);
+        }
+
+        private void ShowReport(string report)
+        {
+            ui.ShowList(Loc.T("ow.raid.report"), new List<OwRow> { new OwRow { text = report, button = Loc.T("ow.ok"), onClick = ui.CloseList, tall = true } });
+        }
+
+        // ---------- Defences and the army ----------
+
+        private void ShowDefences()
+        {
+            var rows = new List<OwRow>();
+            var dir = Quaternion.Euler(0f, facing, 0f) * Vector3.forward;
+            var spot = pos + new Vector2(dir.x, dir.z) * 2.6f;
+            foreach (var d in OwBattleData.Defences)
+            {
+                var def = d;
+                bool open = def.house <= save.house;
+                bool fits = farm.DefenceFits(spot, def.kind);
+                rows.Add(new OwRow
+                {
+                    text = Loc.T("ow.def." + def.kind),
+                    sub = !open ? Loc.F("ow.needsHouse", Loc.T("ow.house." + def.house)) : !fits ? Loc.T("ow.def.noRoom") : Loc.T("ow.def.line." + def.kind),
+                    swatch = def.kind == DefenceKind.Fence || def.kind == DefenceKind.Gate ? new Color(0.5f, 0.34f, 0.2f) : def.damage > 0 ? new Color(1f, 0.5f, 0.2f) : new Color(0.62f, 0.58f, 0.52f),
+                    button = def.price.ToString(),
+                    enabled = open && fits,
+                    onClick = () =>
+                    {
+                        if (!save.Spend(def.price)) { NoMoney(); return; }
+                        float rot = Mathf.Round(facing / 45f) * 45f + (def.blocks ? 0f : 180f);
+                        save.defences.Add(new DefenceState { kind = (int)def.kind, x = spot.x, z = spot.y, rot = rot, level = 1, hp = def.hp });
+                        ui.CloseList();
+                        AudioManager.PlaySfx(Sfx.Coin, 0.8f, 1f);
+                        Changed(true);
+                    },
+                });
+            }
+            ui.ShowList(Loc.T("ow.defence"), rows);
+        }
+
+        private void ShowArmy()
+        {
+            var rows = new List<OwRow>();
+            int cap = save.SoldierCap;
+            for (int g = 0; g < Army.Groups; g++)
+            {
+                int group = g;
+                var kind = Army.KindOf(g);
+                var st = Army.StatsOf(g);
+                bool room = save.soldiers[g] < cap;
+                rows.Add(new OwRow
+                {
+                    text = Loc.T("army.kind." + kind) + "  ×" + save.soldiers[g],
+                    sub = Loc.F("ow.army.line", st.hp, st.hit.ToString("0.#"), cap),
+                    swatch = Army.Family(kind) == 0 ? new Color(0.85f, 0.35f, 0.3f) : Army.Family(kind) == 1 ? new Color(0.3f, 0.7f, 0.55f) : new Color(0.75f, 0.6f, 0.3f),
+                    button = "+1 (" + OwData.SoldierPrice + ")",
+                    enabled = room,
+                    onClick = () =>
+                    {
+                        if (save.soldiers[group] >= cap) return;
+                        if (!save.Spend(OwData.SoldierPrice)) { NoMoney(); return; }
+                        save.soldiers[group]++;
+                        AudioManager.PlaySfx(Sfx.Coin, 0.8f, 1.2f);
+                        Changed(false);
+                        battle.Garrison();
+                        ShowArmy();
+                    },
+                });
+            }
+            if (save.hungry) rows.Insert(0, new OwRow { text = Loc.T("ow.army.hungry"), sub = Loc.T("ow.army.hungryLine"), swatch = new Color(1f, 0.4f, 0.3f) });
+            else rows.Insert(0, new OwRow { text = Loc.F("ow.army.food", save.SoldierCount), sub = Loc.T("ow.army.foodLine"), swatch = new Color(0.95f, 0.8f, 0.35f) });
+            ui.ShowList(Loc.T("ow.army"), rows);
+        }
+
+        private int MaxHp(DefenceState d) => Mathf.RoundToInt(OwBattleData.Of((DefenceKind)d.kind).hp * OwBattleData.LevelScale(d.level));
+
+        private int RepairPrice(DefenceState d) => Mathf.CeilToInt(OwBattleData.Of((DefenceKind)d.kind).price * d.level * 0.5f * (1f - d.hp / (float)MaxHp(d)));
 
         private Vector2 Collide(Vector2 to)
         {
@@ -279,17 +494,67 @@ namespace SquashBot.OpenWorld
                 case TargetKind.Barn: main = Loc.T("ow.act.barn"); break;
                 case TargetKind.Coop: main = Loc.T("ow.act.coop"); break;
                 case TargetKind.Empty: main = Loc.T("ow.act.build"); break;
+                case TargetKind.Defence:
+                {
+                    var d = save.defences[target.index];
+                    var def = OwBattleData.Of((DefenceKind)d.kind);
+                    if (d.hp < MaxHp(d)) main = Loc.F("ow.act.repair", RepairPrice(d));
+                    else if (d.level < OwBattleData.MaxLevel) main = Loc.F("ow.act.upgradeDef", OwBattleData.UpgradePrice(def, d.level), d.level + 1);
+                    else { main = Loc.T("ow.def." + def.kind) + " · " + Loc.T("shop.max"); enabled = false; }
+                    second = Loc.F("ow.act.remove", def.price * d.level / 2);
+                    break;
+                }
             }
+            // In a raid the big button strikes when a bandit is near.
+            if (battle != null && battle.Raiding && battle.BanditNear(pos, 3.2f)) { main = Loc.T("ow.act.strike"); enabled = true; second = null; }
             ui.SetAction(main, main != null, enabled);
             ui.SetAction2(second);
-            ui.SetHint(target.kind == TargetKind.None && Vector2.Distance(pos, OwWorld.FarmCentre) > 30f ? Loc.T("ow.hint.farm") : null);
+            if (battle == null || !battle.Raiding) ui.SetHint(target.kind == TargetKind.None && Vector2.Distance(pos, OwWorld.FarmCentre) > 30f ? Loc.T("ow.hint.farm") : null);
         }
 
         private void Act(bool second)
         {
             if (ui.ListOpen) return;
+            if (!second && battle.Raiding && battle.BanditNear(pos, 3.2f))
+            {
+                if (strikeCd > 0f) return;
+                var w = Armory.Equipped;
+                strikeCd = Armory.Cooldown(w) * 2f;
+                var dir = Quaternion.Euler(0f, facing, 0f) * Vector3.forward;
+                int hits = battle.Strike(pos, new Vector2(dir.x, dir.z), Armory.Damage(w) * 1.5f);
+                SlashFx.Create(foi.position, foi.position + dir * 2f, WeaponModels.GlowOf(w), 1.2f);
+                AudioManager.PlaySfx(Sfx.Impact, hits > 0 ? 0.9f : 0.4f, 1f);
+                return;
+            }
             switch (target.kind)
             {
+                case TargetKind.Defence:
+                {
+                    var d = save.defences[target.index];
+                    var def = OwBattleData.Of((DefenceKind)d.kind);
+                    if (second)
+                    {
+                        save.money += def.price * d.level / 2;
+                        save.defences.RemoveAt(target.index);
+                        Changed(true);
+                        break;
+                    }
+                    if (d.hp < MaxHp(d))
+                    {
+                        if (!save.Spend(RepairPrice(d))) { NoMoney(); break; }
+                        d.hp = MaxHp(d);
+                        Changed(true);
+                    }
+                    else if (d.level < OwBattleData.MaxLevel)
+                    {
+                        if (!save.Spend(OwBattleData.UpgradePrice(def, d.level))) { NoMoney(); break; }
+                        d.level++;
+                        d.hp = MaxHp(d);
+                        AudioManager.PlaySfx(Sfx.Win, 0.7f, 1.2f);
+                        Changed(true);
+                    }
+                    break;
+                }
                 case TargetKind.Plot:
                 {
                     var pl = save.plots[target.index];
@@ -492,6 +757,9 @@ namespace SquashBot.OpenWorld
                     onClick = () => { if (!save.Spend(price)) { NoMoney(); return; } save.barn++; Changed(true); ShowBarn(); },
                 });
             }
+            if (SaveData.TestMode)
+                rows.Add(new OwRow { text = Loc.T("ow.test.raid"), swatch = new Color(1f, 0.3f, 0.3f), button = Loc.T("ow.raid.fightButton"),
+                    onClick = () => { save.raidAt = OwSave.Now; ui.CloseList(); raidT = 0f; } });
             int coins = SaveData.Coins;
             rows.Add(new OwRow
             {

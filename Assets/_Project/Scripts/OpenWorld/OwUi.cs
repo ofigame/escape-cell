@@ -16,6 +16,8 @@ namespace SquashBot.OpenWorld
         public string text, sub, button;
         public Color swatch = Color.clear;
         public bool enabled = true;
+        /// <summary>A long text (a report): a tall row, the words wrapping.</summary>
+        public bool tall;
         public Action onClick;
     }
 
@@ -99,6 +101,11 @@ namespace SquashBot.OpenWorld
             action2Rect.pivot = new Vector2(0.5f, 0.5f);
             action2Text = action2Button.GetComponentInChildren<TextMeshProUGUI>();
             action2Text.enableAutoSizing = true; action2Text.fontSizeMin = 20f; action2Text.fontSizeMax = 32f;
+            // DEFENCE and ARMY (near the farm), under the top bar on the left.
+            defenceButton = Flat.Button(safe, Loc.T("ow.defence"), new Vector2(0f, 1f), new Vector2(150f, -230f), new Vector2(250f, 90f), new Color(0.75f, 0.45f, 0.2f), Color.white, () => { AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.1f); DefencePressed?.Invoke(); }, 28f);
+            ((RectTransform)defenceButton.transform).pivot = new Vector2(0.5f, 0.5f);
+            armyButton = Flat.Button(safe, Loc.T("ow.army"), new Vector2(0f, 1f), new Vector2(150f, -335f), new Vector2(250f, 90f), new Color(0.3f, 0.45f, 0.85f), Color.white, () => { AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.1f); ArmyPressed?.Invoke(); }, 28f);
+            ((RectTransform)armyButton.transform).pivot = new Vector2(0.5f, 0.5f);
             hint = Flat.Label(safe, "", new Vector2(0.5f, 1f), new Vector2(0f, -200f), new Vector2(900f, 60f), 32f, Color.white, TextAlignmentOptions.Center, bold: true);
             hint.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             SetAction(null, false);
@@ -159,7 +166,22 @@ namespace SquashBot.OpenWorld
             if (show) action2Text.text = text;
         }
 
-        public void SetHint(string text) => hint.text = text ?? "";
+        public void SetHint(string text, bool alarm = false)
+        {
+            hint.text = text ?? "";
+            hint.color = alarm ? new Color(1f, 0.45f, 0.4f) : Color.white;
+        }
+
+        public event Action DefencePressed, ArmyPressed;
+        private Button defenceButton, armyButton;
+
+        /// <summary>DEFENCE and ARMY show near the farm (not over a list).</summary>
+        public void SetFarmButtons(bool on)
+        {
+            on &= !ListOpen;
+            if (defenceButton.gameObject.activeSelf != on) defenceButton.gameObject.SetActive(on);
+            if (armyButton.gameObject.activeSelf != on) armyButton.gameObject.SetActive(on);
+        }
 
         public void Toast(string text)
         {
@@ -174,15 +196,28 @@ namespace SquashBot.OpenWorld
         {
             listTitle.text = title;
             for (int i = listContent.childCount - 1; i >= 0; i--) Destroy(listContent.GetChild(i).gameObject);
-            const float h = 120f;
+            float y = 0f;
             for (int i = 0; i < rows.Count; i++)
             {
                 var r = rows[i];
-                var row = Flat.Panel(listContent, "Row", new Vector2(0.5f, 1f), new Vector2(0f, -i * h - 6f), new Vector2(0f, h - 12f), Flat.Card);
+                float h = r.tall ? 330f : 120f;
+                var row = Flat.Panel(listContent, "Row", new Vector2(0.5f, 1f), new Vector2(0f, -y - 6f), new Vector2(0f, h - 12f), Flat.Card);
                 row.anchorMin = new Vector2(0f, 1f); row.anchorMax = new Vector2(1f, 1f);
                 row.pivot = new Vector2(0.5f, 1f);
                 row.offsetMin = new Vector2(0f, row.offsetMin.y); row.offsetMax = new Vector2(0f, row.offsetMax.y);
                 row.sizeDelta = new Vector2(0f, h - 12f);
+                y += h;
+                if (r.tall)
+                {
+                    // A report: the words over the row, the button under them.
+                    var words = Flat.Label(row, r.text, new Vector2(0.5f, 1f), new Vector2(0f, -20f), new Vector2(760f, 200f), 32f, Flat.Text, TextAlignmentOptions.Top, bold: true, wrap: true);
+                    words.rectTransform.pivot = new Vector2(0.5f, 1f);
+                    words.enableAutoSizing = true; words.fontSizeMin = 20f; words.fontSizeMax = 32f;
+                    var click = r.onClick;
+                    var ok = Flat.Button(row, r.button ?? "OK", new Vector2(0.5f, 0f), new Vector2(0f, 60f), new Vector2(300f, 84f), new Color(0.3f, 0.75f, 0.4f), Flat.Text, () => { AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.2f); click?.Invoke(); }, 30f);
+                    ((RectTransform)ok.transform).pivot = new Vector2(0.5f, 0.5f);
+                    continue;
+                }
                 float x = 24f;
                 if (r.swatch.a > 0f)
                 {
@@ -207,7 +242,7 @@ namespace SquashBot.OpenWorld
                     bt.enableAutoSizing = true; bt.fontSizeMin = 16f; bt.fontSizeMax = 28f;
                 }
             }
-            listContent.sizeDelta = new Vector2(0f, rows.Count * h + 12f);
+            listContent.sizeDelta = new Vector2(0f, y + 12f);
             listContent.anchoredPosition = Vector2.zero;
             listPanel.gameObject.SetActive(true);
             listPanel.SetAsLastSibling();

@@ -20,7 +20,16 @@ namespace SquashBot.OpenWorld
         public static readonly Vector2 Centre = new Vector2(Size * 0.5f, Size * 0.5f);
 
         /// <summary>The player's farm (its land's middle) and the co-op, in map units.</summary>
-        public static readonly Vector2 FarmCentre = new Vector2(Size * 0.5f, Size * 0.5f + 66f);
+        /// <summary>The safe spots a farm can stand on (north, east, west, south of the middle, out on the green).</summary>
+        public static readonly Vector2[] Sites =
+        {
+            new Vector2(Size * 0.5f, Size * 0.5f + 66f), new Vector2(Size * 0.5f + 66f, Size * 0.5f),
+            new Vector2(Size * 0.5f - 66f, Size * 0.5f), new Vector2(Size * 0.5f, Size * 0.5f - 68f),
+        };
+
+        /// <summary>The farm's site now (set from the save before the world is built).</summary>
+        public static int Site;
+        public static Vector2 FarmCentre => Sites[Mathf.Clamp(Site, 0, Sites.Length - 1)];
         public static readonly Vector2 CoopAt = new Vector2(Size * 0.5f, Size * 0.5f + 14f);
         public static readonly Vector2 Arrival = new Vector2(Size * 0.5f, Size * 0.5f - 6f);
 
@@ -129,6 +138,15 @@ namespace SquashBot.OpenWorld
         }
 
         // ---------- Streaming ----------
+
+        /// <summary>Drops every region (the farm moved: the land is levelled somewhere else now).</summary>
+        public void Reload()
+        {
+            foreach (var kv in loaded) if (kv.Value != null) Destroy(kv.Value.gameObject);
+            loaded.Clear();
+            regionBlockers.Clear();
+            Blockers.Clear();
+        }
 
         /// <summary>Builds the regions round a map point and drops the far ones.</summary>
         public void Around(Vector2 p)

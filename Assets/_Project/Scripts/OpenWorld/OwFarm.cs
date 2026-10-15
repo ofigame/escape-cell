@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SquashBot.OpenWorld
 {
-    public enum TargetKind { None, Plot, Tree, Building, House, Barn, Coop, Empty }
+    public enum TargetKind { None, Plot, Tree, Building, House, Barn, Coop, Empty, Defence }
 
     /// <summary>Something foi can act on: what it is, which one, and where.</summary>
     public struct Target
@@ -188,6 +188,27 @@ namespace SquashBot.OpenWorld
                 }
                 treeFruit.Add(fruit);
             }
+            // Defences, where foi raised them (a broken one lies in rubble until it is repaired).
+            defenceRoots.Clear();
+            foreach (var d in save.defences)
+            {
+                var dt = new GameObject("Defence").transform;
+                dt.SetParent(root, false);
+                dt.localPosition = new Vector3(d.x, OwWorld.Height(d.x, d.z), d.z);
+                dt.localRotation = Quaternion.Euler(0f, d.rot, 0f);
+                var whole = new GameObject("Whole").transform;
+                whole.SetParent(dt, false);
+                DefenceModel(whole, (DefenceKind)d.kind, d.level);
+                var rubble = new GameObject("Rubble").transform;
+                rubble.SetParent(dt, false);
+                for (int i = 0; i < 4; i++)
+                    Shapes.Rounded("Stone", rubble, new Vector3((i % 2 - 0.5f) * 0.9f, 0.18f, (i / 2 - 0.5f) * 0.7f), new Vector3(0.6f, 0.36f, 0.5f), 0.06f, world.Dark)
+                        .transform.localRotation = Quaternion.Euler(0f, i * 37f, i * 9f);
+                whole.gameObject.SetActive(d.hp > 0);
+                rubble.gameObject.SetActive(d.hp <= 0);
+                defenceRoots.Add(dt);
+            }
+
             // Animal buildings.
             foreach (var bd in save.buildings)
             {
@@ -259,6 +280,93 @@ namespace SquashBot.OpenWorld
                         Shapes.Rounded("Horn", a, new Vector3(s, 0.85f, -0.38f), new Vector3(0.04f, 0.18f, 0.04f), 0.02f, wool);
                     break;
             }
+        }
+
+        // ---------- Defences ----------
+
+        private readonly List<Transform> defenceRoots = new List<Transform>();
+        private Material stone, iron, flag, fire;
+
+        /// <summary>A defence was hit: if it broke, its rubble shows.</summary>
+        public void DefenceHit(int i, bool broken)
+        {
+            if (i < 0 || i >= defenceRoots.Count || defenceRoots[i] == null) return;
+            var t = defenceRoots[i];
+            var whole = t.Find("Whole");
+            var rubble = t.Find("Rubble");
+            if (whole != null) whole.gameObject.SetActive(!broken);
+            if (rubble != null) rubble.gameObject.SetActive(broken);
+        }
+
+        private void DefenceModel(Transform t, DefenceKind kind, int level)
+        {
+            if (stone == null)
+            {
+                stone = M(new Color(0.62f, 0.58f, 0.52f));
+                iron = M(new Color(0.2f, 0.2f, 0.24f));
+                flag = M(new Color(0.3f, 0.55f, 1f));
+                fire = M(new Color(1f, 0.55f, 0.15f), 2.4f);
+            }
+            float s = 1f + (level - 1) * 0.12f;
+            switch (kind)
+            {
+                case DefenceKind.Fence:
+                    foreach (float x in new[] { -0.9f, 0.9f }) Shapes.Rounded("Post", t, new Vector3(x, 0.5f, 0f), new Vector3(0.16f, 1f, 0.16f), 0.03f, world.Wood);
+                    foreach (float y in new[] { 0.35f, 0.75f }) Shapes.Rounded("Rail", t, new Vector3(0f, y, 0f), new Vector3(2f, 0.12f, 0.1f), 0.03f, world.Wood);
+                    break;
+                case DefenceKind.Wall:
+                    Shapes.Rounded("Wall", t, new Vector3(0f, 0.9f * s, 0f), new Vector3(2f, 1.8f * s, 0.9f), 0.06f, stone);
+                    for (int i = 0; i < 3; i++) Shapes.Rounded("Merlon", t, new Vector3(-0.7f + i * 0.7f, 1.95f * s, 0f), new Vector3(0.45f, 0.4f, 0.9f), 0.05f, stone);
+                    break;
+                case DefenceKind.Gate:
+                    foreach (float x in new[] { -1.2f, 1.2f }) Shapes.Rounded("Pillar", t, new Vector3(x, 1.2f, 0f), new Vector3(0.6f, 2.4f, 0.9f), 0.06f, stone);
+                    Shapes.Rounded("Doors", t, new Vector3(0f, 0.9f, 0f), new Vector3(1.8f, 1.8f, 0.2f), 0.05f, world.Wood);
+                    Shapes.Rounded("Beam", t, new Vector3(0f, 2.3f, 0f), new Vector3(3f, 0.3f, 0.9f), 0.05f, world.Wood);
+                    break;
+                case DefenceKind.ArcherTower:
+                    foreach (float x in new[] { -0.6f, 0.6f }) foreach (float z in new[] { -0.6f, 0.6f })
+                        Shapes.Rounded("Leg", t, new Vector3(x, 1.4f * s, z), new Vector3(0.2f, 2.8f * s, 0.2f), 0.04f, world.Wood);
+                    Shapes.Rounded("Deck", t, new Vector3(0f, 2.9f * s, 0f), new Vector3(1.8f, 0.2f, 1.8f), 0.04f, world.Wood);
+                    Shapes.Rounded("Roof", t, new Vector3(0f, 3.9f * s, 0f), new Vector3(2f, 0.25f, 2f), 0.04f, world.Roof);
+                    Shapes.Primitive(PrimitiveType.Sphere, "Archer", t, new Vector3(0f, 3.3f * s, 0f), new Vector3(0.45f, 0.6f, 0.45f), flag);
+                    break;
+                case DefenceKind.FireTower:
+                    Shapes.Rounded("Tower", t, new Vector3(0f, 1.5f * s, 0f), new Vector3(1.4f, 3f * s, 1.4f), 0.1f, stone);
+                    Shapes.Rounded("Brazier", t, new Vector3(0f, 3.15f * s, 0f), new Vector3(1.1f, 0.3f, 1.1f), 0.08f, iron);
+                    Shapes.Primitive(PrimitiveType.Sphere, "Flame", t, new Vector3(0f, 3.5f * s, 0f), new Vector3(0.8f, 0.7f, 0.8f), fire);
+                    break;
+                case DefenceKind.Cannon:
+                case DefenceKind.HeavyCannon:
+                {
+                    float c = kind == DefenceKind.HeavyCannon ? 1.4f : 1f;
+                    Shapes.Rounded("Base", t, new Vector3(0f, 0.35f, 0f), new Vector3(1.2f, 0.4f, 1.4f) * c, 0.06f, world.Wood);
+                    var barrel = Shapes.Primitive(PrimitiveType.Cylinder, "Barrel", t, new Vector3(0f, 0.8f * c, 0.3f * c), new Vector3(0.45f, 0.75f, 0.45f) * c, iron).transform;
+                    barrel.localRotation = Quaternion.Euler(70f, 0f, 0f);
+                    foreach (float x in new[] { -0.65f, 0.65f })
+                        Shapes.Primitive(PrimitiveType.Cylinder, "Wheel", t, new Vector3(x * c, 0.45f * c, 0f), new Vector3(0.8f, 0.08f, 0.8f) * c, world.Wood).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                    break;
+                }
+                case DefenceKind.Watchtower:
+                    Shapes.Rounded("Shaft", t, new Vector3(0f, 2.5f, 0f), new Vector3(0.9f, 5f, 0.9f), 0.06f, world.Wood);
+                    Shapes.Rounded("Lookout", t, new Vector3(0f, 5.1f, 0f), new Vector3(1.6f, 0.8f, 1.6f), 0.06f, world.Wood);
+                    Shapes.Rounded("Pole", t, new Vector3(0f, 6.1f, 0f), new Vector3(0.08f, 1.4f, 0.08f), 0.02f, iron);
+                    Shapes.Rounded("Flag", t, new Vector3(0.4f, 6.5f, 0f), new Vector3(0.8f, 0.5f, 0.04f), 0.02f, flag);
+                    break;
+            }
+        }
+
+        /// <summary>Whether a defence fits at a map point: inside the reach round the farm, clear of the house, the barn,
+        /// the land and the other defences.</summary>
+        public bool DefenceFits(Vector2 p, DefenceKind kind)
+        {
+            float r = OwBattleData.Of(kind).radius;
+            if ((p - OwWorld.FarmCentre).magnitude > OwBattleData.Reach(save.House.land)) return false;
+            if ((p - HouseAt).magnitude < r + 3f || (p - BarnAt).magnitude < r + 2.6f) return false;
+            float half = save.House.land * 0.5f;
+            if (Mathf.Abs(p.x - OwWorld.FarmCentre.x) < half + r && Mathf.Abs(p.y - OwWorld.FarmCentre.y) < half + r) return false;
+            foreach (var d in save.defences)
+                if ((new Vector2(d.x, d.z) - p).magnitude < r + OwBattleData.Of((DefenceKind)d.kind).radius - 0.2f) return false;
+            return true;
         }
 
         // ---------- Growing ----------
@@ -338,6 +446,7 @@ namespace SquashBot.OpenWorld
             for (int i = 0; i < save.plots.Count; i++) Try(TargetKind.Plot, i, CellCentre(new Vector2Int(save.plots[i].x, save.plots[i].z)), 0.6f);
             for (int i = 0; i < save.trees.Count; i++) Try(TargetKind.Tree, i, CellCentre(new Vector2Int(save.trees[i].x, save.trees[i].z)), 0.8f);
             for (int i = 0; i < save.buildings.Count; i++) Try(TargetKind.Building, i, CellCentre(new Vector2Int(save.buildings[i].x, save.buildings[i].z)) + Vector2.one * Cell * 0.5f, 1.8f);
+            for (int i = 0; i < save.defences.Count; i++) Try(TargetKind.Defence, i, new Vector2(save.defences[i].x, save.defences[i].z), OwBattleData.Of((DefenceKind)save.defences[i].kind).radius);
             Try(TargetKind.House, 0, HouseAt, 2.6f);
             Try(TargetKind.Barn, 0, BarnAt, 2.4f);
             Try(TargetKind.Coop, 0, OwWorld.CoopAt + new Vector2(0f, -3f), 4.5f);
@@ -354,6 +463,8 @@ namespace SquashBot.OpenWorld
         {
             into.Add(new Vector3(HouseAt.x, HouseAt.y, 2.4f + save.house * 0.3f));
             into.Add(new Vector3(BarnAt.x, BarnAt.y, 2.2f));
+            foreach (var d in save.defences)
+                if (d.hp > 0 && d.kind != (int)DefenceKind.Gate && d.kind != (int)DefenceKind.Fence) into.Add(new Vector3(d.x, d.z, OwBattleData.Of((DefenceKind)d.kind).radius * 0.8f));
             foreach (var b in save.buildings)
             {
                 var c = CellCentre(new Vector2Int(b.x, b.z)) + Vector2.one * Cell * 0.5f + new Vector2(0f, 1.1f);

@@ -9,6 +9,7 @@ namespace SquashBot.OpenWorld
     [Serializable] public class TreeState { public int x, z; public int kind; public long planted; public long picked; }
     [Serializable] public class BuildingState { public int x, z; public int kind; public int animals; public long fed; }
     [Serializable] public class Order { public int item, count, item2, count2, reward; public bool done; }
+    [Serializable] public class DefenceState { public int kind; public float x, z, rot; public int level = 1; public int hp; }
 
     /// <summary>
     /// The open world's save: money, the house, every plot, tree and building on the farm, the barn and the co-op's
@@ -37,6 +38,20 @@ namespace SquashBot.OpenWorld
         /// <summary>Where foi stood when it left (world units; 0,0 = never been).</summary>
         public float px, pz;
 
+        /// <summary>Defences raised round the farm.</summary>
+        public List<DefenceState> defences = new List<DefenceState>();
+        /// <summary>Soldiers of each army group stationed at the farm (bought with money), and the last day they were fed.</summary>
+        public int[] soldiers = new int[6];
+        public int fedDay;
+        public bool hungry;
+        /// <summary>The next raid (UTC seconds; 0: none planned), safe until, raids today.</summary>
+        public long raidAt, protectedUntil, firstEntry;
+        public int raidDay, raidsToday;
+        /// <summary>Which of the farm sites the farm stands on (moving after selling up changes it).</summary>
+        public int site;
+        /// <summary>The last raid's report, shown once.</summary>
+        public string report;
+
         private static OwSave current;
 
         public static OwSave Current
@@ -61,6 +76,8 @@ namespace SquashBot.OpenWorld
             trees ??= new List<TreeState>();
             buildings ??= new List<BuildingState>();
             orders ??= new List<Order>();
+            defences ??= new List<DefenceState>();
+            if (soldiers == null || soldiers.Length != 6) soldiers = new int[6];
         }
 
         public void Save()
@@ -134,6 +151,113 @@ namespace SquashBot.OpenWorld
             SaveData.Coins = gold - (int)(m * OwData.LaterRate);
             Save();
             return ((int)(m * OwData.LaterRate), m);
+        }
+
+        // ---------- Soldiers ----------
+
+        public int SoldierCap => 30 + house * 10;
+
+        public int SoldierCount { get { int n = 0; foreach (var s in soldiers) n += s; return n; } }
+
+        /// <summary>Each day every soldier eats a wheat and an egg or milk; short of food they fight at 60%.</summary>
+        public void FeedSoldiers()
+        {
+            int today = Today;
+            if (fedDay == today) return;
+            int days = 1;
+            if (fedDay != 0)
+                days = Mathf.Clamp((int)(DateTime.ParseExact(today.ToString(), "yyyyMMdd", null) - DateTime.ParseExact(fedDay.ToString(), "yyyyMMdd", null)).TotalDays, 1, 7);
+            fedDay = today;
+            int need = SoldierCount * days;
+            if (need == 0) { hungry = false; return; }
+            int wheat = Mathf.Min(need, items[(int)Item.Wheat]);
+            items[(int)Item.Wheat] -= wheat;
+            int other = need;
+            foreach (var i in new[] { Item.Egg, Item.Milk, Item.GoatMilk })
+            {
+                int k = Mathf.Min(other, items[(int)i]);
+                items[(int)i] -= k;
+                other -= k;
+            }
+            hungry = wheat < need || other > 0;
+            Save();
+        }
+
+        // ---------- Raids ----------
+
+        /// <summary>Plans the next raid if none is: a few hours on, never inside the protection, at most two a day; the
+        /// first one only half a day after foi first came.</summary>
+        public void PlanRaid()
+        {
+            long now = Now;
+            if (firstEntry == 0) firstEntry = now;
+            if (raidAt > now) return;
+            if (raidDay != Today) { raidDay = Today; raidsToday = 0; }
+            var rng = new System.Random((int)(now % 100000));
+            long at = now + 3 * 3600 + rng.Next(6 * 3600);
+            at = Math.Max(at, protectedUntil);
+            at = Math.Max(at, firstEntry + 12 * 3600);
+            if (raidsToday >= OwBattleData.RaidsPerDay) at = Math.Max(at, new DateTimeOffset(DateTime.UtcNow.Date.AddDays(1)).ToUnixTimeSeconds() + rng.Next(4 * 3600));
+            raidAt = at;
+            Save();
+        }
+
+        public void RaidDone()
+        {
+            if (raidDay != Today) { raidDay = Today; raidsToday = 0; }
+            raidsToday++;
+            protectedUntil = Now + (long)(OwBattleData.ProtectHours * 3600);
+            raidAt = 0;
+            PlanRaid();
+        }
+
+        public float WarningHours => OwBattleData.WarningHours + (defences.Exists(d => d.kind == (int)DefenceKind.Watchtower) ? OwBattleData.WatchtowerExtra : 0f);
+
+        /// <summary>The bandits take their share: part of the barn, the crops in the ground, and wear on the defences.</summary>
+        public (int items, int crops) Loot(System.Random rng)
+        {
+            int taken = 0, crops = 0;
+            for (int i = 0; i < items.Length; i++)
+            {
+                int k = Mathf.FloorToInt(items[i] * OwBattleData.LootShare);
+                items[i] -= k;
+                taken += k;
+            }
+            foreach (var p in plots) if (p.crop >= 0 && rng.NextDouble() < 0.6) { p.crop = -1; crops++; }
+            foreach (var d in defences) d.hp = Mathf.Max(1, d.hp - Mathf.RoundToInt(OwBattleData.Of((DefenceKind)d.kind).hp * 0.3f));
+            return (taken, crops);
+        }
+
+        /// <summary>What everything on the farm is worth (the house, its buildings and animals, plots, trees, defences, the
+        /// barn and what is in it).</summary>
+        public long FarmValue()
+        {
+            long v = 0;
+            for (int h = 1; h <= house; h++) v += OwData.Houses[h].price;
+            for (int b = 1; b <= barn; b++) v += OwData.BarnPrices[b];
+            foreach (var b in buildings) { var d = OwData.Of((BuildingKind)b.kind); v += d.price + d.animalPrice * b.animals; }
+            v += plots.Count * 10;
+            foreach (var t in trees) v += OwData.Of((TreeKind)t.kind).sapling;
+            foreach (var d in defences) v += (long)OwBattleData.Of((DefenceKind)d.kind).price * d.level;
+            for (int i = 0; i < items.Length; i++) v += (long)items[i] * OwData.Price((Item)i);
+            return v;
+        }
+
+        /// <summary>Sells up at half the value and starts again in another safe spot (the soldiers come along).</summary>
+        public long SellAndMove()
+        {
+            long got = FarmValue() / 2;
+            money += got;
+            house = 0; barn = 0;
+            plots.Clear(); trees.Clear(); buildings.Clear(); defences.Clear();
+            for (int i = 0; i < items.Length; i++) items[i] = 0;
+            site = (site + 1) % OwWorld.Sites.Length;
+            px = 0f; pz = 0f;
+            raidAt = 0;
+            protectedUntil = Now + 12 * 3600;
+            PlanRaid();
+            Save();
+            return got;
         }
 
         // ---------- The co-op ----------
