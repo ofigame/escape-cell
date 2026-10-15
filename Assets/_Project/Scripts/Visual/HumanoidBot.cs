@@ -24,6 +24,7 @@ namespace SquashBot.Visual
             h.menace = menace;
             h.Make(root, menace > 0 ? new Color(1f, 0.15f, 0.1f) : accent);
             if (menace > 0) h.Warlord();
+            OwnedMaterials.OwnAllUnder(root.gameObject); // its materials go with it
             return h;
         }
 

@@ -38,7 +38,7 @@ namespace SquashBot.Gameplay
             g.spitter = spitter;
             g.home = home;
             g.chestId = chestId;
-            if (spitter) { g.hp = g.maxHp = level.robotHp * 3 + 3; g.cooldown = 1.5f; }
+            if (spitter) { g.hp = g.maxHp = Mathf.Max(g.maxHp * 2, Mathf.RoundToInt((level.robotHp * 3 + 3) * HpBase)); g.cooldown = 1.5f; }
             Total++;
         }
 
@@ -49,6 +49,7 @@ namespace SquashBot.Gameplay
         public void AddChestBoss(GridPos p, GridPos home, int chestId, int hp)
         {
             if (CreateMonster == null || !grid.IsStandable(p) || grid.IsOccupied(p)) return;
+            hp = Mathf.Max(1, Mathf.RoundToInt(hp * HpBase)); // (in health points)
             var g = new Guard { pos = p, brute = true, rank = 99, hp = hp, maxHp = hp, home = home, chestId = chestId, step = 0.5f, cooldown = 1.5f };
             g.root = new GameObject("ChestVanG").transform;
             g.root.SetParent(transform, false);

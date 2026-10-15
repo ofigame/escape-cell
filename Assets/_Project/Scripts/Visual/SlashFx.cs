@@ -8,6 +8,9 @@ namespace SquashBot.Visual
     /// </summary>
     public class SlashFx : MonoBehaviour
     {
+        /// <summary>Its materials (made for it alone) go with it.</summary>
+        private void Start() => OwnedMaterials.OwnAllUnder(gameObject);
+
         private const float Life = 0.32f;
         private Transform arc, flash;
         private Material arcMat, flashMat;

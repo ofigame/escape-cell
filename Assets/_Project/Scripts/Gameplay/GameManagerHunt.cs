@@ -134,6 +134,11 @@ namespace SquashBot.Gameplay
             SetupCage();
             hunt.NoMonster = trailRun || challengeRun;
             hunt.RedFoes = arenaRun || challengeRun; // the open world's roads: no vanG
+            // The robots: the roster of this world (an arena: its own world's, at full strength), their blows off foi's health points.
+            hunt.FoiHp = Challenge.FoiMaxHp;
+            hunt.HpBase = 10f;
+            hunt.RosterWorld = challengeRun ? -1 : Mathf.Clamp(arenaRun ? arenaIndex : World, 0, EnemyRoster.Worlds - 1);
+            hunt.RosterFloor = arenaRun ? 9 : levelIndex % LevelCatalog.LevelsPerWorld;
             hunt.Begin(grid, level, World, levelIndex * 31 + 7);
             ResetScore();
             introPending = true; // the opening shot over the whole floor
@@ -294,7 +299,7 @@ namespace SquashBot.Gameplay
             ShowHeld(w);
             heldWeapon.Swing();
             CloseBag();
-            FloatAt(robot.transform.position + Vector3.up * 0.6f, Loc.T("weapon." + w.id), WeaponModels.Glow(w.tier));
+            FloatAt(robot.transform.position + Vector3.up * 0.6f, Loc.T("weapon." + w.id), WeaponModels.GlowOf(w));
             AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.3f);
         }
 
@@ -418,17 +423,18 @@ namespace SquashBot.Gameplay
             if (heldWeapon != null) heldWeapon.Swing();
             if (w.kind == WeaponKind.Gun) GunShotFx(GridView.ToWorld(at) + Vector3.up * 0.6f, w);
             // A blow you can see: a crescent of the weapon's colour sweeping through the target.
-            else SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.Glow(w.tier), 1f + 0.15f * Armory.Damage(w));
+            else SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.GlowOf(w), 1f + 0.015f * Armory.Damage(w));
             LeanTowardsBlow(GridView.ToWorld(at));
-            cameraRig.Shake(0.15f + 0.08f * damage);
+            cameraRig.Shake(0.15f + 0.008f * damage);
             if (crowd)
             {
                 // The target slipped off the tile mid-swing: the blow lands on whatever is in reach that way.
-                if (!hunt.Strike(at, damage))
+                if (hunt.Strike(at, damage)) SpecialHit(w, at, damage);
+                else
                 {
                     var swing = GridView.ToWorld(at) - GridView.ToWorld(robot.Position);
                     swing.y = 0f;
-                    if (hunt.BestInReach(robot.Position, StrikeReach, swing.normalized, 0.5f, out var other)) hunt.Strike(other, damage);
+                    if (hunt.BestInReach(robot.Position, StrikeReach, swing.normalized, 0.5f, out var other) && hunt.Strike(other, damage)) SpecialHit(w, other, damage);
                 }
             }
             else if (hazards.Shatter(at))
@@ -442,7 +448,7 @@ namespace SquashBot.Gameplay
         /// <summary>A gun fires: a streak of light from its muzzle to <paramref name="to"/>, a flash, a crack.</summary>
         private void GunShotFx(Vector3 to, WeaponDef w)
         {
-            var glow = WeaponModels.Glow(w.tier);
+            var glow = WeaponModels.GlowOf(w);
             var muzzle = heldWeapon != null ? heldWeapon.transform.position + heldWeapon.transform.forward * 0.55f : robot.transform.position + Vector3.up * 0.6f;
             Tracer.Create(muzzle, to, glow);
             if (w.id == "twinBlaster") Tracer.Create(muzzle + Vector3.up * 0.08f, to + Vector3.up * 0.08f, glow);
@@ -498,9 +504,9 @@ namespace SquashBot.Gameplay
                 return;
             }
             float dt = Time.unscaledDeltaTime;
-            if (challengeRun && chPhase != ChPhase.Off)
+            if (challengeRun && chPhase != ChPhase.Off && !TpsActive)
             {
-                // The challenge's duel: filmed from the east, both foi in view.
+                // The challenge's duel: filmed from the east, both foi in view (or over foi's shoulder, in TPS).
                 BoardPose(out var bpos, out var brot);
                 cameraRig.Chase(bpos, brot, 46f);
                 if (cameraRig.Cam.farClipPlane < 200f) cameraRig.Cam.farClipPlane = 200f;

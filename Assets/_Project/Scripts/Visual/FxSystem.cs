@@ -24,7 +24,7 @@ namespace SquashBot.Visual
         {
             for (int i = 0; i < count; i++)
             {
-                var shard = pool.Count > 0 ? pool.Pop() : CreateShard();
+                var shard = NextShard();
                 shard.transform.gameObject.SetActive(true);
                 shard.transform.position = position + Random.insideUnitSphere * 0.2f;
                 shard.transform.rotation = Random.rotation;
@@ -45,7 +45,7 @@ namespace SquashBot.Visual
         {
             for (int i = 0; i < count; i++)
             {
-                var shard = pool.Count > 0 ? pool.Pop() : CreateShard();
+                var shard = NextShard();
                 shard.transform.gameObject.SetActive(true);
                 float a = (i + Random.value * 0.5f) * Mathf.PI * 2f / count;
                 var dir = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
@@ -59,6 +59,20 @@ namespace SquashBot.Visual
                 shard.size = Random.Range(0.05f, 0.09f);
                 active.Add(shard);
             }
+        }
+
+        /// <summary>The most shards there ever are: past it the oldest flying one is taken (a big blast stays cheap: every shard
+        /// is a draw call and a material).</summary>
+        private const int MaxShards = 180;
+        private int made;
+
+        private Shard NextShard()
+        {
+            if (pool.Count > 0) return pool.Pop();
+            if (made < MaxShards || active.Count == 0) { made++; return CreateShard(); }
+            var oldest = active[0];
+            active.RemoveAt(0);
+            return oldest;
         }
 
         private Shard CreateShard()

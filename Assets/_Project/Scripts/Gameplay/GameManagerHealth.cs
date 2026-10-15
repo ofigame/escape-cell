@@ -68,7 +68,8 @@ namespace SquashBot.Gameplay
             // armour comes on top: the enemies grow too, so the shop still matters.
             float toughness = Mathf.Lerp(1f, 0.74f, levelIndex / (float)(LevelCatalog.LevelCount - 1));
             // The duel: the blow's own share (its weapon, foi's armour already counted), nothing else.
-            float damage = challengeRun && chPhase == ChPhase.Duel ? share : share * toughness * (1f - Shop.ArmorShare);
+            // A robot's or vanG's blow is already its points over foi's health (no extra toughness); the floor's own dangers still ease off.
+            float damage = challengeRun && chPhase == ChPhase.Duel ? share : share * (hitShareOverride >= 0f ? 1f : toughness) * (1f - Shop.ArmorShare);
             damage = Challenge.RankGuard(damage); // the rank reached takes some off (beside the workshop's armour)
             // The duel: foi's health gone ends the round (the next one starts with it full again).
             if (challengeRun && chPhase == ChPhase.Duel && health - damage <= 0.001f)

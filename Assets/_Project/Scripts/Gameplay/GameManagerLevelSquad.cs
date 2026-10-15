@@ -9,7 +9,7 @@ namespace SquashBot.Gameplay
     /// <summary>
     /// The army's soldiers on the floors: picked on the card before a level (BRING SOLDIERS: how many of each group,
     /// and the stage each group joins foi in), they appear beside foi when it first sets foot in their stage and fight
-    /// the robots as foi's allies. One who falls is gone from the pool for an hour.
+    /// the robots as foi's allies. One who falls is gone from the pool for a while. Four may come in the first world, two more in each next one.
     /// </summary>
     public partial class GameManager
     {
@@ -25,13 +25,16 @@ namespace SquashBot.Gameplay
                 squadPick.Closed += () => ui.RefreshPrelevelSquad(true);
             }
             int i = Mathf.Clamp(index, 0, LevelCount - 1);
+            LevelSquad.Limit = LevelSquad.LimitFor(LevelCatalog.WorldOf(i));
             squadPick.Show(Mathf.Max(1, levelSet.levels[i].fortressStages));
         }
 
-        /// <summary>A floor starts: its soldiers are waiting for foi in their stages (none in the arenas, roads, duels).</summary>
+        /// <summary>A floor starts: its soldiers are waiting for foi in their stages, at the army's strength (on the floors and in
+        /// the free-battle arenas; not on the roads or in the duels, which have their own). The world sets how many may come.</summary>
         private void PrepareLevelSquad()
         {
-            bool floor = level != null && level.mission == MissionType.Hunt && !arenaRun && !challengeRun && !trailRun && !bonusRun;
+            LevelSquad.Limit = LevelSquad.LimitFor(arenaRun ? arenaIndex : World);
+            bool floor = level != null && level.mission == MissionType.Hunt && !challengeRun && !trailRun;
             squadDeployed = floor && LevelSquad.Total > 0 ? new bool[Mathf.Max(1, level.fortressStages)] : null;
         }
 
@@ -49,7 +52,7 @@ namespace SquashBot.Gameplay
                 if (LevelSquad.Stage(g, squadDeployed.Length) != s) continue;
                 int n = LevelSquad.Count(g);
                 for (int k = 0; k < n; k++)
-                    if (hunt.AddLevelSoldier(g, robot.Position + new GridPos(k % 3 - 1, -1 - k / 3), Army.ArmorPower(g), Army.AttackPower(g))) came++;
+                    if (hunt.AddLevelSoldier(g, robot.Position + new GridPos(k % 3 - 1, -1 - k / 3), Army.StatsOf(g))) came++;
             }
             if (came > 0)
             {

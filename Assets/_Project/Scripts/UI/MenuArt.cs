@@ -13,7 +13,7 @@ namespace SquashBot.UI
     /// </summary>
     public static class MenuArt
     {
-        public enum Icon { Garage, Shop, Map, Guide, Chest, Swords }
+        public enum Icon { Garage, Shop, Map, Guide, Chest, Swords, Friends }
 
         /// <summary>
         /// The logo: "foi" big in the display font (a dark extruded back, a bright gradient face with a thick outline),
@@ -187,6 +187,13 @@ namespace SquashBot.UI
                     Part(box, c, new Vector2(-s * 0.21f, -s * 0.06f), new Vector2(s * 0.24f, s * 0.05f), dark, UiSprites.Rounded);
                     Part(box, c, new Vector2(s * 0.21f, s * 0.08f), new Vector2(s * 0.24f, s * 0.05f), dark, UiSprites.Rounded);
                     Part(box, c, new Vector2(s * 0.21f, -s * 0.06f), new Vector2(s * 0.24f, s * 0.05f), dark, UiSprites.Rounded);
+                    break;
+                case Icon.Friends:
+                    // Two friends side by side: heads and shoulders, the one in front a touch bigger.
+                    Part(box, c, new Vector2(s * 0.18f, s * 0.16f), new Vector2(s * 0.26f, s * 0.26f), new Color(0.75f, 0.85f, 1f), UiSprites.Circle);
+                    Part(box, c, new Vector2(s * 0.18f, -s * 0.2f), new Vector2(s * 0.42f, s * 0.3f), new Color(0.75f, 0.85f, 1f), UiSprites.Rounded);
+                    Part(box, c, new Vector2(-s * 0.12f, s * 0.12f), new Vector2(s * 0.3f, s * 0.3f), Color.white, UiSprites.Circle);
+                    Part(box, c, new Vector2(-s * 0.12f, -s * 0.24f), new Vector2(s * 0.5f, s * 0.34f), Color.white, UiSprites.Rounded);
                     break;
                 case Icon.Chest:
                     // A treasure chest with a gold lock.

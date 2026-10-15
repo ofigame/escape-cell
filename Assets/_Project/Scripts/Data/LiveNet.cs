@@ -16,7 +16,9 @@ namespace SquashBot.Data
     /// </summary>
     public static class LiveNet
     {
-        private static string Url => FoiNet.DevServer != null ? FoiNet.DevServer.Replace("https://", "wss://").Replace("http://", "ws://") + "/v1/live" : "wss://apifoi.ofigame.com/v1/live";
+        /// <summary>The live protocol this game speaks (the server turns older ones away).</summary>
+        private const int Protocol = 3;
+        private static string Url => (FoiNet.DevServer != null ? FoiNet.DevServer.Replace("https://", "wss://").Replace("http://", "ws://") + "/v1/live" : "wss://apifoi.ofigame.com/v1/live") + "?v=" + Protocol;
 
         /// <summary>A message from the server (only the fields its kind uses are set; <see cref="raw"/> is the text itself).</summary>
         [Serializable]

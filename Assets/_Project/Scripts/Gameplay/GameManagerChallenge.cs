@@ -19,6 +19,9 @@ namespace SquashBot.Gameplay
     {
         private enum ChPhase { Off, Lobby, Duel, Break, Wait, Done }
 
+        /// <summary>The duel under way (fighting, or the countdown after a knock-down): it may be fought in TPS.</summary>
+        private bool DuelTps => challengeRun && (chPhase == ChPhase.Duel || chPhase == ChPhase.Break);
+
         private Colosseum colosseum;
         private float zoom = 1f;
 
@@ -45,7 +48,7 @@ namespace SquashBot.Gameplay
         private void InitChallenge()
         {
             chUi = ChallengeScreen.Create(ui.transform.Find("Canvas/SafeArea") ?? ui.transform.Find("Canvas") ?? ui.transform);
-            chUi.GroupPicked += ToggleSquad;
+            // (No group tags in the duel: the soldiers all fight from the start and are never called back.)
             chUi.HeartPressed += UseDuelHeart;
             chUi.ShieldPressed += UseDuelShield;
             chUi.FriendHost += minutes => StartFriend(1, null, minutes);
@@ -104,6 +107,7 @@ namespace SquashBot.Gameplay
                 chUi.ShowModes();
                 return;
             }
+            Armory.RevokeLostRanks(); // a rank weapon whose rank fell is gone before the duel is built
             chCancelled = false;
             chFriend = 0;
             chPhase = ChPhase.Lobby;
@@ -240,7 +244,7 @@ namespace SquashBot.Gameplay
             {
                 var points = new int[Army.Groups];
                 for (int g = 0; g < Army.Groups; g++) points[g] = Army.GroupPoints(g);
-                yield return FoiNet.PutArmy(points, Army.EarnedPoints, world, Challenge.FoiHpFor(world), Challenge.FoiHitFor(world), 0.5f,
+                yield return FoiNet.PutArmy(points, Army.EarnedPoints, world, Challenge.FoiMaxHp, Challenge.FoiHitFor(world), 0.5f,
                     Armory.Equipped.id, Armory.Level(Armory.Equipped), Shop.ArmorShare, Shop.Level(Upgrade.Shield) > 0 ? Shop.ShieldHits : 0, r => ok = r);
                 if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
             }
@@ -392,6 +396,7 @@ namespace SquashBot.Gameplay
         {
             if (chPhase == ChPhase.Done) return;
             chPhase = ChPhase.Done;
+            if (levelTps) { levelTps = false; ExitTps(); } // the result card upright
             bool won = outcome > 0, draw = outcome == 0;
             if (colosseum != null) colosseum.Cheer(won ? 0 : draw ? -1 : 1, 1f);
             hunt.Freeze();
@@ -460,19 +465,21 @@ namespace SquashBot.Gameplay
         private static string TrophyLine(int change) => (change >= 0 ? "+" : "") + Loc.F("ch.trophies", change);
 
         /// <summary>A match the server knows of goes to its record (a loss when the player leaves).</summary>
-        private void SendChallengeResult(bool won, bool draw = false)
+        private void SendChallengeResult(bool won, bool draw = false, bool left = false)
         {
             long id = chMatchId;
             chMatchId = 0;
             if (id == 0) return;
-            cameraRig.StartCoroutine(FoiNet.SendResult(id, won, draw, r => { if (r != null) Challenge.Sync(r.profile); }));
+            cameraRig.StartCoroutine(FoiNet.SendResult(id, won, draw, r => { if (r != null) Challenge.Sync(r.profile); }, left));
         }
 
         /// <summary>Leaving a challenge (the menu): the board and its screens go; a match the server knows of is lost.</summary>
         private void EndChallenge()
         {
-            if (chMatchId != 0 && chPhase != ChPhase.Done) SendChallengeResult(false);
+            // Walked out of a duel under way: the leaver's penalty (rank points); before it began, a plain loss.
+            if (chMatchId != 0 && chPhase != ChPhase.Done) SendChallengeResult(false, left: chPhase == ChPhase.Duel || chPhase == ChPhase.Break);
             chLobbyToken++; // a waiting room still searching stops there
+            if (levelTps) { levelTps = false; ExitTps(); }
             EndLive();
             if (!challengeRun && chPhase == ChPhase.Off) return;
             challengeRun = false;

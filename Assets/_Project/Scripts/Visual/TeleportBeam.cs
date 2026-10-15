@@ -8,6 +8,9 @@ namespace SquashBot.Visual
     /// </summary>
     public class TeleportBeam : MonoBehaviour
     {
+        /// <summary>Its materials (made for it alone) go with it.</summary>
+        private void Start() => OwnedMaterials.OwnAllUnder(gameObject);
+
         private const float Life = 0.6f;
         private Material outer, core;
         private Transform column, inner;

@@ -163,7 +163,7 @@ namespace SquashBot.Gameplay
             Shockwave.Create(GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY, 0.9f, FifiZap);
             fifi.Cheer();
             AudioManager.PlaySfx(Sfx.Shield, 0.55f, 1.8f);
-            hunt.Strike(at, FifiUpgrades.ZapDamage);
+            hunt.Strike(at, FifiUpgrades.ZapDamage * 4);
         }
 
         /// <summary>Fifi comes down from the sky onto a tile by foi.</summary>
@@ -209,7 +209,7 @@ namespace SquashBot.Gameplay
             Haptics.Medium();
             for (int x = -1; x <= 1; x++)
                 for (int y = -1; y <= 1; y++)
-                    if (x != 0 || y != 0) hunt.Strike(fifiTile + new GridPos(x, y), FifiUpgrades.ZapDamage);
+                    if (x != 0 || y != 0) hunt.Strike(fifiTile + new GridPos(x, y), FifiUpgrades.ZapDamage * 4);
             FloatAt(fifiDropTo + Vector3.up * 0.9f, Loc.T("float.fifiHere"), FifiZap);
         }
 

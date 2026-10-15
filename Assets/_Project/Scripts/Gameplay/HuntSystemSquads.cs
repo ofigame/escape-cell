@@ -51,9 +51,6 @@ namespace SquashBot.Gameplay
             { 7f, 2.4f, 2.8f, 4f, 1.3f },  // heavy bows
         };
 
-        /// <summary>The most a soldier's blow takes off a foi (health points, 1% each).</summary>
-        private const float SoldierMaxOnFoi = 3f;
-
         public static readonly Color MineColour = new Color(0.3f, 0.62f, 1f), TheirsColour = new Color(1f, 0.32f, 0.3f);
 
         /// <summary>
@@ -61,23 +58,19 @@ namespace SquashBot.Gameplay
         /// <paramref name="id"/> its number in its squad (group × 2 + slot); <paramref name="remote"/> moved by the other
         /// game (the live rival's).
         /// </summary>
-        public void AddSquadSoldier(bool mine, int id, GridPos near, float power, bool remote = false, float hpShare = 1f, float hitPower = -1f)
+        public void AddSquadSoldier(bool mine, int id, GridPos near, Army.Stats stats, bool remote = false, float hpShare = 1f)
         {
             int group = Mathf.Clamp(id / SoldierPool.PerDuel, 0, Army.Groups - 1);
-            // A group's strength counts by its square root here (a group of all the points would otherwise be untouchable).
-            if (hitPower < 0f) hitPower = power; // one strength for both (the rival's, sent as one)
-            power = Mathf.Sqrt(Mathf.Max(1f, power));
-            hitPower = Mathf.Sqrt(Mathf.Max(1f, hitPower));
             var kind = Army.KindOf(group);
             var tile = FreeNear(near);
             if (!tile.HasValue) return;
             var model = SoldierModel.Build(transform, kind, Army.Heavy(kind) ? (mine ? MineColour : TheirsColour) : Color.Lerp(mine ? MineColour : TheirsColour, Color.white, 0.3f));
-            model.transform.localScale = Vector3.one * Mathf.Max(0.4f, FoiHeight * 0.62f) * (Army.Heavy(kind) ? 1.12f : 1f);
-            int hp = Mathf.Max(1, Mathf.RoundToInt(SquadStats[group, 0] * power));
+            model.transform.localScale = Vector3.one * Mathf.Max(0.4f, FoiHeight * 0.62f) * (Army.Heavy(kind) ? 1.12f : 1f) * Army.SizeFor(group, stats); // trained soldiers stand taller
+            int hp = Mathf.Max(1, stats.hp);
             var s = new Guard
             {
                 pos = tile.Value, hp = Mathf.Max(1, Mathf.RoundToInt(hp * Mathf.Clamp01(hpShare))), maxHp = hp, rank = mine ? -1 : 1, ally = mine,
-                squad = true, squadId = id, remote = remote, power = hitPower, cooldown = (float)rng.NextDouble(), soldier = model, soldierKind = kind,
+                squad = true, squadId = id, remote = remote, power = stats.hit, armorShare = stats.armor, cooldown = (float)rng.NextDouble(), soldier = model, soldierKind = kind,
             };
             s.root = model.transform;
             s.root.SetParent(transform, true);
@@ -158,11 +151,8 @@ namespace SquashBot.Gameplay
                     s.windup = -1f;
                     s.aim = null;
                     s.revengeUntil = 0f;
-                    s.hp = s.maxHp; // a breather between rounds: the soldiers left stand up whole
-                    s.barHp = -1;
                     s.SetRaise(0f);
                 }
-            for (int t = 0; t < 2; t++) for (int g = 0; g < Army.Groups; g++) squadAttack[t, g] = false;
         }
 
         // ---------- Each frame ----------
@@ -181,11 +171,11 @@ namespace SquashBot.Gameplay
             if (back.sqrMagnitude < 0.01f) back = new Vector2(0f, s.ally ? -1f : 1f);
             back.Normalize();
             var side = new Vector2(-back.y, back.x);
-            int group = (int)s.soldierKind, slot = s.squadId % SoldierPool.PerDuel;
-            bool bow = Army.Family(s.soldierKind) == 2;
-            float row = bow ? 3.2f : 2f;
-            float lat = bow ? (group - 4) * 2 + slot - 1.5f : group * 2 + slot - 3.5f;
-            var p = new Vector2(own.x, own.y) + back * row + side * lat * 0.9f;
+            // Rows of six behind the foi, in the groups' order: swords nearest, spears, then the archers furthest back.
+            int i = s.squadId;
+            float row = 2f + (i / 6) * 0.9f;
+            float lat = i % 6 - 2.5f;
+            var p = new Vector2(own.x, own.y) + back * row + side * lat;
             return new GridPos(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.y));
         }
 
@@ -302,8 +292,7 @@ namespace SquashBot.Gameplay
         /// <summary>The damage of a soldier's blow (its kind and power; the fraction a chance of one more).</summary>
         private int SquadDamage(Guard s, Guard target)
         {
-            float d = SquadStats[(int)s.soldierKind, 1] * s.power * (0.85f + (float)rng.NextDouble() * 0.3f);
-            if (target == null) d = Mathf.Min(d * 0.4f, SoldierMaxOnFoi); // on a foi: never more than this (the server holds to it too)
+            float d = s.power * (0.85f + (float)rng.NextDouble() * 0.3f); // its own blow (the army's table)
             if (target != null && target.soldier != null)
             {
                 int edge = Army.Edge(s.soldierKind, target.soldierKind);
@@ -328,7 +317,7 @@ namespace SquashBot.Gameplay
                     if (FoeRemote) { SquadHitFoe?.Invoke(dmg); challengeFoe.flash = 1f; challengeFoe.Flash(); }
                     else SquadOnFoe(dmg);
                 }
-                else Hit?.Invoke(robot.Position, dmg * 0.01f * (1f - Shop.ArmorShare)); // the AI's soldier on foi: a point is 1% of foi's health, less its armour
+                else Hit?.Invoke(robot.Position, dmg * (1f - Shop.ArmorShare) / Mathf.Max(1, FoiHp)); // the AI's soldier on foi: its blow off foi's health points, less its armour
                 return;
             }
             var t = s.aim;
@@ -358,7 +347,7 @@ namespace SquashBot.Gameplay
         private void HurtSquad(Guard t, int damage, Guard by, bool foiBlow = false)
         {
             if (t.dead) return;
-            t.hp -= damage;
+            t.hp -= Mathf.Max(1, Mathf.RoundToInt(damage * (1f - t.armorShare))); // its armour takes its share off
             t.flash = 1f;
             t.Flash();
             var c = t.ally ? MineColour : TheirsColour;
@@ -415,9 +404,6 @@ namespace SquashBot.Gameplay
                     if (theirs[g] > 0 && !squadAttack[1, g]) { squadAttack[1, g] = true; RivalSentGroup?.Invoke(g); break; }
                 }
             }
-            // A group down to its last soldier with none of the player's near: back to guard.
-            for (int g = 0; g < Army.Groups; g++)
-                if (squadAttack[1, g] && theirs[g] == 1 && threat.Count == 0 && rng.Next(3) == 0) squadAttack[1, g] = false;
         }
 
         /// <summary>
@@ -425,17 +411,17 @@ namespace SquashBot.Gameplay
         /// group's armour and attack), fighting the floor's robots like foi's other allies. Its fall costs the army's
         /// pool a soldier for an hour.
         /// </summary>
-        public bool AddLevelSoldier(int group, GridPos near, float armorPower, float attackPower)
+        public bool AddLevelSoldier(int group, GridPos near, Army.Stats stats)
         {
             var tile = FreeNear(near);
             if (!tile.HasValue) return false;
             var kind = Army.KindOf(group);
             var model = SoldierModel.Build(transform, kind, Army.Heavy(kind) ? MineColour : Color.Lerp(MineColour, Color.white, 0.3f));
-            model.transform.localScale = Vector3.one * Mathf.Max(0.4f, FoiHeight * 0.62f) * (Army.Heavy(kind) ? 1.12f : 1f);
+            model.transform.localScale = Vector3.one * Mathf.Max(0.4f, FoiHeight * 0.62f) * (Army.Heavy(kind) ? 1.12f : 1f) * Army.SizeFor(group, stats); // trained soldiers stand taller
             // Its health in the floor robots' blows, its blow in theirs (robots take a few).
-            int hp = Mathf.Max(2, Mathf.RoundToInt(SquadStats[group, 0] * 0.5f * Mathf.Sqrt(Mathf.Max(1f, armorPower))));
-            int hit = Mathf.Max(1, Mathf.RoundToInt(SquadStats[group, 1] * 0.6f * Mathf.Sqrt(Mathf.Max(1f, attackPower))));
-            var a = new Guard { pos = tile.Value, hp = hp, maxHp = hp, rank = -1, step = 0.2f + (float)rng.NextDouble() * 0.4f, ally = true, poolGroup = group, allyHit = hit, soldier = model, soldierKind = kind };
+            int hp = Mathf.Max(1, stats.hp);
+            int hit = Mathf.Max(1, Mathf.RoundToInt(stats.hit));
+            var a = new Guard { pos = tile.Value, hp = hp, maxHp = hp, rank = -1, step = 0.2f + (float)rng.NextDouble() * 0.4f, ally = true, poolGroup = group, allyHit = hit, armorShare = stats.armor, soldier = model, soldierKind = kind };
             a.root = model.transform;
             a.root.SetParent(transform, true);
             a.root.position = At(tile.Value);
@@ -473,7 +459,7 @@ namespace SquashBot.Gameplay
         /// The other game's squad as it says now: each soldier moves after its word (a new one shows up, one no longer in
         /// the list has fallen). <paramref name="power"/>: the rival's soldiers' strength (their health bars).
         /// </summary>
-        public void ApplySquadState(string body, Func<int, float> power, GridPos near)
+        public void ApplySquadState(string body, Func<int, Army.Stats> stats, GridPos near)
         {
             if (body == null) return;
             var seen = new HashSet<int>();
@@ -496,7 +482,7 @@ namespace SquashBot.Gameplay
                 {
                     if (fallenRemote.Contains(id)) continue; // fell already: never back this duel
                     var tile = new GridPos(Mathf.RoundToInt(x / 10f), Mathf.RoundToInt(z / 10f));
-                    AddSquadSoldier(false, id, grid.IsStandable(tile) ? tile : near, power(id / SoldierPool.PerDuel), remote: true, hpShare: h / 10f);
+                    AddSquadSoldier(false, id, grid.IsStandable(tile) ? tile : near, stats(id / SoldierPool.PerDuel), remote: true, hpShare: h / 10f);
                     continue;
                 }
                 if (s.dead) continue;

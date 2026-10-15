@@ -155,9 +155,10 @@ namespace SquashBot.UI
             float y = -10f;
             void Header(string text)
             {
-                var l = Flat.Label(content, text, new Vector2(0.5f, 1f), new Vector2(0f, y - 30f), new Vector2(980f, 50f), 30f, Flat.Muted, TextAlignmentOptions.Left, bold: true);
-                l.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-                y -= 64f;
+                var l = Flat.Label(content, text, new Vector2(0.5f, 1f), new Vector2(0f, y - 6f), new Vector2(980f, 50f), 30f, Flat.Muted, TextAlignmentOptions.Left, bold: true);
+                l.rectTransform.pivot = new Vector2(0.5f, 1f);
+                l.rectTransform.anchoredPosition = new Vector2(0f, y - 6f);
+                y -= 76f; // the rows start well under the heading
             }
             if (list.incoming != null && list.incoming.Length > 0)
             {

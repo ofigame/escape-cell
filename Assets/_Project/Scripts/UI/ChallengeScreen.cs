@@ -138,10 +138,8 @@ namespace SquashBot.UI
                     new Color(1f, 0.6f, 0.25f), new Color(0.12f, 0.06f, 0f), () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(1, minutes); }, 40f);
                 ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0.5f);
             }
-            // Friends (the list, invitations) and playing a friend by code, between the lengths and CLOSE.
-            var friends = Flat.Button(m, Loc.T("friends.title"), new Vector2(0.5f, 0f), new Vector2(-250f, 230f), new Vector2(470f, 100f), Flat.CardHi, Flat.Text, () => FriendsPressed?.Invoke(), 34f);
-            ((RectTransform)friends.transform).pivot = new Vector2(0.5f, 0.5f);
-            var friend = Flat.Button(m, Loc.T("live.friend"), new Vector2(0.5f, 0f), new Vector2(250f, 230f), new Vector2(470f, 100f), Flat.Blue, Flat.Text, ShowFriend, 34f);
+            // Playing a friend by code, between the lengths and CLOSE (the friends list is on the main menu).
+            var friend = Flat.Button(m, Loc.T("live.friend"), new Vector2(0.5f, 0f), new Vector2(0f, 230f), new Vector2(640f, 100f), Flat.Blue, Flat.Text, ShowFriend, 34f);
             ((RectTransform)friend.transform).pivot = new Vector2(0.5f, 0.5f);
             var back = Flat.Button(m, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, 90f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => modes.Hide(true), 34f);
             ((RectTransform)back.transform).pivot = new Vector2(0.5f, 0.5f);
@@ -330,13 +328,13 @@ namespace SquashBot.UI
         {
             namePanel = UiScreen.Create("ChallengeName", root, out var n);
             UiFactory.Dim(n, new Color(0.03f, 0.03f, 0.1f, 1f)).gameObject.AddComponent<IgnoreSafeArea>();
-            UiFactory.TextBox("Title", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 360f), new Vector2(900f, 110f), Loc.T("ch.nameTitle"), 72f, Palette.UiGold, title: true)
+            UiFactory.TextBox("Title", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 760f), new Vector2(900f, 110f), Loc.T("ch.nameTitle"), 72f, Palette.UiGold, title: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var hint = UiFactory.TextBox("Hint", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 250f), new Vector2(900f, 90f), Loc.T("ch.nameHint"), 34f, new Color(1f, 1f, 1f, 0.75f));
+            var hint = UiFactory.TextBox("Hint", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 650f), new Vector2(900f, 90f), Loc.T("ch.nameHint"), 34f, new Color(1f, 1f, 1f, 0.75f));
             hint.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             hint.textWrappingMode = TextWrappingModes.Normal;
 
-            var box = UiFactory.Box("Input", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 110f), new Vector2(780f, 140f));
+            var box = UiFactory.Box("Input", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 510f), new Vector2(780f, 140f));
             box.pivot = new Vector2(0.5f, 0.5f);
             var bg = UiFactory.Fill(box, new Color(1f, 1f, 1f, 0.12f), UiSprites.Rounded, 1.2f);
             UiFactory.Fill(UiFactory.Stretch("Rim", box), new Color(ArmyBattleColours.Mine.r, ArmyBattleColours.Mine.g, ArmyBattleColours.Mine.b, 0.9f), UiSprites.Ring, 1.2f).raycastTarget = false;
@@ -358,11 +356,11 @@ namespace SquashBot.UI
             nameInput.onSubmit.AddListener(_ => SubmitName());
             nameInput.onValueChanged.AddListener(_ => nameError.text = "");
 
-            nameError = UiFactory.TextBox("Error", n, new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(900f, 70f), "", 34f, new Color(1f, 0.45f, 0.5f), title: true);
+            nameError = UiFactory.TextBox("Error", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 390f), new Vector2(900f, 70f), "", 34f, new Color(1f, 0.45f, 0.5f), title: true);
             nameError.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            nameOk = UiFactory.MakeButton(n, Loc.T("ch.nameOk"), Kind.Primary, new Vector2(0.5f, 0.5f), new Vector2(0f, -150f), new Vector2(460f, 130f), SubmitName, 48f);
+            nameOk = UiFactory.MakeButton(n, Loc.T("ch.nameOk"), Kind.Primary, new Vector2(0.5f, 0.5f), new Vector2(0f, 250f), new Vector2(460f, 130f), SubmitName, 48f);
             ((RectTransform)nameOk.transform).pivot = new Vector2(0.5f, 0.5f);
-            var back = UiFactory.MakeButton(n, Loc.T("btn.close"), Kind.Secondary, new Vector2(0.5f, 0.5f), new Vector2(0f, -300f), new Vector2(360f, 100f), () => NameClosed?.Invoke(), 38f);
+            var back = UiFactory.MakeButton(n, Loc.T("btn.close"), Kind.Secondary, new Vector2(0.5f, 0.5f), new Vector2(0f, 100f), new Vector2(360f, 100f), () => NameClosed?.Invoke(), 38f);
             ((RectTransform)back.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 
@@ -610,50 +608,31 @@ namespace SquashBot.UI
         // ---------- The duel's squad bar ----------
 
         private bool armyBar;
-        private readonly int[] barLeft = new int[Army.Groups];
-        private readonly bool[] barOrder = new bool[Army.Groups];
         private int barHearts = -1, barShields = -1;
         private Button heartButton, shieldButton;
         private TextMeshProUGUI heartText, shieldText;
 
         /// <summary>
-        /// The duel's bar at the bottom: the six groups' tags (soldiers left in each; lit while sent to attack, dim on
-        /// guard, grey when none is left) and, over them, the heart and shield buttons with what is left of each.
+        /// The duel's power buttons: the heart and the shield with what is left of each. The soldiers all fight from the
+        /// start and are never called back, so there are no group tags (each side's soldiers left show at the top).
         /// </summary>
         public void ShowSquadBar(int[] left, bool[] attacking, int hearts, int shields)
         {
-            if (!armyBar || !pickPanel.gameObject.activeSelf)
+            if (!armyBar)
             {
                 armyBar = true;
-                pickPanel.gameObject.SetActive(true);
-                pickPop = 1f;
-                pickPanel.localScale = Vector3.one;
-                pickTitle.gameObject.SetActive(false);
-                pickBar.gameObject.SetActive(false);
-                pickPanel.sizeDelta = new Vector2(1050f, 300f);
+                pickPanel.gameObject.SetActive(false);
                 if (heartButton == null) BuildPowerButtons();
+                sideways = !IsSideways; // lay them out for the screen as it is now
+                Layout();
                 barHearts = barShields = -1;
-                for (int i = 0; i < barLeft.Length; i++) barLeft[i] = -1;
             }
             if (hearts != barHearts) { barHearts = hearts; heartText.text = hearts.ToString(); heartButton.interactable = hearts > 0; }
             if (shields != barShields) { barShields = shields; shieldText.text = shields.ToString(); shieldButton.interactable = shields > 0; }
-            bool same = true;
-            for (int i = 0; i < groups.Count && same; i++) same = barLeft[i] == left[i] && barOrder[i] == attacking[i];
-            if (same) return; // nothing changed: no canvas rebuild
-            for (int i = 0; i < groups.Count; i++)
-            {
-                barLeft[i] = left[i];
-                barOrder[i] = attacking[i];
-                bool alive = left[i] > 0;
-                var col = groups[i].colour;
-                groups[i].button.interactable = alive;
-                groups[i].count.text = left[i].ToString();
-                groups[i].face.color = !alive ? new Color(1f, 1f, 1f, 0.06f) : attacking[i] ? col : new Color(col.r, col.g, col.b, 0.3f);
-            }
         }
 
         /// <summary>The heart and shield: round buttons like the floors' skills (icon, a badge with what is left), at the
-        /// right edge over the squad bar.</summary>
+        /// right edge.</summary>
         private void BuildPowerButtons()
         {
             heartButton = PowerButton(PowerUpType.Heart, new Vector2(-100f, 540f), () => HeartPressed?.Invoke(), out heartText);
@@ -682,18 +661,37 @@ namespace SquashBot.UI
             return button;
         }
 
-        /// <summary>A finger on the squad bar or the heart and shield (not a move or a tap on the field).</summary>
+        /// <summary>A finger on the heart and shield (not a move or a tap on the field).</summary>
         public bool IsOverControls(Vector2 screen) =>
-            pickPanel != null && pickPanel.gameObject.activeInHierarchy && (RectTransformUtility.RectangleContainsScreenPoint(pickPanel, screen, null)
-            || heartButton != null && RectTransformUtility.RectangleContainsScreenPoint((RectTransform)heartButton.transform, screen, null)
-            || shieldButton != null && RectTransformUtility.RectangleContainsScreenPoint((RectTransform)shieldButton.transform, screen, null));
+            pickPanel != null && pickPanel.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(pickPanel, screen, null)
+            || heartButton != null && heartButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint((RectTransform)heartButton.transform, screen, null)
+            || shieldButton != null && shieldButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint((RectTransform)shieldButton.transform, screen, null);
 
         public void SetClock(string text) => clock.text = text;
         public void SetStatus(string text) => status.text = text;
 
+        private static bool IsSideways => Screen.width > Screen.height;
+        private bool sideways;
+
+        /// <summary>Upright or sideways (the duel fought in TPS): the top bar, the status line and the heart and shield
+        /// move to fit the short screen and keep clear of the TPS stick and buttons.</summary>
+        private void Layout()
+        {
+            bool now = IsSideways;
+            if (now == sideways || clock == null) return;
+            sideways = now;
+            var top = (RectTransform)clock.rectTransform.parent.parent; // (the text sits in its own box)
+            top.offsetMin = new Vector2(now ? 380f : 0f, now ? -290f : -505f);
+            top.offsetMax = new Vector2(now ? -380f : 0f, now ? -150f : -365f);
+            status.rectTransform.anchoredPosition = now ? new Vector2(0f, 330f) : new Vector2(-60f, 380f);
+            if (heartButton == null) return;
+            ((RectTransform)heartButton.transform).anchoredPosition = now ? new Vector2(-100f, 520f) : new Vector2(-100f, 540f);
+            ((RectTransform)shieldButton.transform).anchoredPosition = now ? new Vector2(-100f, 690f) : new Vector2(-100f, 720f);
+        }
 
         private void Update()
         {
+            if (hud != null && hud.gameObject.activeInHierarchy) Layout();
             if (pickPanel != null && pickPanel.gameObject.activeSelf && pickPop < 1f)
             {
                 pickPop = Mathf.Min(1f, pickPop + Time.unscaledDeltaTime / 0.25f);

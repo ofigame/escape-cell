@@ -101,7 +101,8 @@ namespace SquashBot.Gameplay
             l.bugs = Mathf.RoundToInt(Mathf.Lerp(10f, 40f, d));
             l.robotHp = Mathf.RoundToInt(Mathf.Lerp(1f, 5f, d));
             l.robotStep = Mathf.Lerp(1.05f, 0.5f, d);
-            l.monsterHp = Mathf.RoundToInt(Mathf.Lerp(18f, 130f, d));
+            l.monsterHp = EnemyRoster.VanGHp(i, 9); // the arena's world's vanG at its strongest
+            l.armor = 0; // (the robots' own armour from the roster)
             Calm(l);
             return l;
         }

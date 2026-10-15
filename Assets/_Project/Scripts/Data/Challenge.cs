@@ -145,6 +145,28 @@ namespace SquashBot.Data
 
         /// <summary>A share of health a blow takes, less the rank's strength.</summary>
         public static float RankGuard(float share) => share / (1f + FoiBonus);
+
+        // ---------- foi's health points ----------
+
+        /// <summary>
+        /// foi's health in points: 100 at the start, one more for every floor won, 15 for every level of an upgrade
+        /// bought in the workshop and 20 for every rank reached. Blows take their damage off it (a share of it on the bar).
+        /// </summary>
+        public static int FoiMaxHp => FoiHpFor(SaveData.UnlockedLevel, UpgradeLevels, Rank);
+
+        public static int FoiHpFor(int floorsWon, int upgradeLevels, int rank) =>
+            100 + Mathf.Clamp(floorsWon, 0, LevelCatalog.LevelCount) + 15 * Mathf.Max(0, upgradeLevels) + 20 * Mathf.Clamp(rank, 0, RankAt.Length - 1);
+
+        /// <summary>Every level of every workshop upgrade bought.</summary>
+        public static int UpgradeLevels
+        {
+            get
+            {
+                int n = 0;
+                foreach (Upgrade u in System.Enum.GetValues(typeof(Upgrade))) n += Shop.Level(u);
+                return n;
+            }
+        }
         public static string LeagueName(int league) => Loc.T("cup." + Mathf.Clamp(league, 0, RankAt.Length - 1));
 
         /// <summary>Trophies a result is worth: a win +20 (more against a stronger foe), a loss -15 (the server's rule).</summary>
@@ -241,7 +263,7 @@ namespace SquashBot.Data
             o.weaponLevel = Mathf.Min(Armory.MaxLevel, Armory.Level(w) + (rng.Next(10) < 4 ? 1 : 0));
             o.armor = Mathf.Min(0.5f, Shop.ArmorShare + 0.05f);
             o.boldness = (float)rng.NextDouble();
-            o.foiHp = 100;
+            o.foiHp = Mathf.RoundToInt(FoiMaxHp * 1.05f); // a touch tougher than the player
             o.foiHit = 0f;
             return o;
         }
@@ -254,7 +276,7 @@ namespace SquashBot.Data
             var parts = (r.army ?? "").Split(',');
             for (int g = 0; g < Army.Groups && g < parts.Length; g++)
                 o.points[g] = int.TryParse(parts[g], out int v) ? Mathf.Clamp(v, 0, 2500) : 0;
-            o.foiHp = r.foiHp > 0 ? Mathf.Clamp(r.foiHp, 10, FoiHpFor(24)) : FoiHpFor(r.world);
+            o.foiHp = r.foiHp >= 100 ? Mathf.Clamp(r.foiHp, 100, 1500) : 100 + r.world * 10; // its health points (an old profile: about right for its world)
             o.foiHit = r.foiHit > 0f ? Mathf.Clamp(r.foiHit, 0.05f, 0.15f) : FoiHitFor(r.world);
             o.boldness = Mathf.Clamp01(r.boldness);
             var w = string.IsNullOrEmpty(r.weapon) ? null : Armory.All.Find(x => x.id == r.weapon && x.kind != WeaponKind.Gun);

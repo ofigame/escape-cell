@@ -177,7 +177,7 @@ namespace SquashBot.Gameplay
                         if (s == null) break;
                         hunt.RemoteFoeState(new Vector3(s.x, GridView.ToWorld(new Core.GridPos(Mathf.RoundToInt(s.x), Mathf.RoundToInt(s.z))).y, s.z), s.r, s.w);
                         var near = new Core.GridPos(Mathf.RoundToInt(s.x), Mathf.RoundToInt(s.z));
-                        hunt.ApplySquadState(s.q, g => rival.Power(g), near);
+                        hunt.ApplySquadState(s.q, g => Army.StatsFromTotal(g, rival.points[g]), near);
                         break;
                     }
                     case "hp":

@@ -247,15 +247,41 @@ namespace SquashBot.UI
         private TMPro.TextMeshProUGUI bombCount;
 
         /// <summary>The bomb button: hidden with none left this floor, else showing how many.</summary>
-        public void SetBombs(int left, bool show)
+        public void SetBombs(int left, bool show, Data.BombKind kind, bool canSwitch)
         {
             if (bombButton == null) return;
             bool on = show && left > 0 && !challengeHud;
             if (bombButton.gameObject.activeSelf != on) bombButton.gameObject.SetActive(on);
-            if (on) bombCount.text = left.ToString();
+            bool sw = on && canSwitch;
+            if (bombSwitch.gameObject.activeSelf != sw) bombSwitch.gameObject.SetActive(sw);
+            if (!on) return;
+            bombCount.text = left.ToString();
+            var c = Data.Bombs.ColourOf(kind);
+            bombFaceImg.color = c;
+            bombBodyImg.color = kind == Data.BombKind.Blast ? new Color(0.12f, 0.1f, 0.14f) : kind == Data.BombKind.Ice ? new Color(0.75f, 0.93f, 1f) : new Color(0.75f, 0.18f, 0.08f);
+            bombSparkImg.color = kind == Data.BombKind.Ice ? new Color(0.85f, 0.97f, 1f) : new Color(1f, 0.85f, 0.3f);
         }
 
-        private bool IsOverBomb(Vector2 screen) => bombButton != null && bombButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(bombButton, screen, null);
+        private UnityEngine.UI.Image bombFaceImg, bombBodyImg, bombSparkImg;
+        private RectTransform fireButton;
+        private UnityEngine.UI.Image fireFace;
+        /// <summary>The FIRE button (a gun on a floor): fires at the target in the gun's sight.</summary>
+        public event Action FirePressed;
+
+        /// <summary>The FIRE button: shown while foi has a gun on a floor; bright with a target in sight and balls left.</summary>
+        public void SetFire(bool show, bool ready)
+        {
+            if (fireButton == null) return;
+            show &= !challengeHud;
+            if (fireButton.gameObject.activeSelf != show) fireButton.gameObject.SetActive(show);
+            if (show) fireFace.color = ready ? new Color(0.95f, 0.3f, 0.25f) : new Color(0.5f, 0.45f, 0.5f);
+        }
+        private RectTransform bombSwitch;
+        public event Action BombSwitchPressed;
+
+        private bool IsOverBomb(Vector2 screen) => (fireButton != null && fireButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(fireButton, screen, null))
+            || (bombButton != null && bombButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(bombButton, screen, null))
+            || (bombSwitch != null && bombSwitch.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(bombSwitch, screen, null));
 
         public bool IsOverBag(Vector2 screen) => bagButton != null && bagButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(bagButton, screen, null);
         public GarageScreen Garage { get; private set; }
@@ -409,6 +435,10 @@ namespace SquashBot.UI
             UiFactory.Fill(aPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
             UiFactory.Text(aPing, "!", 32f, Color.white);
             armyPing = aPing.gameObject;
+
+            // Friends: under the army (add a friend, invite one to a duel).
+            var friends = MenuArt.DockButton(t, Loc.T("friends.button"), MenuArt.Icon.Friends, new Color(0.4f, 0.75f, 1f), TopLeft, new Vector2(110f, -740f), 120f, () => FriendsPressed?.Invoke());
+            ((RectTransform)friends.transform).pivot = new Vector2(0.5f, 0.5f);
 
             // The battle arenas: top right, under the settings.
             var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopRight, new Vector2(-110f, -400f), 120f, () => ArenasPressed?.Invoke());
@@ -740,6 +770,7 @@ namespace SquashBot.UI
             preBoostsLabel.text = Loc.T(boostsAllowed ? "pre.boosts" : "pre.noBoosts");
             for (int i = 0; i < shown.Count; i++)
                 ((RectTransform)shown[i].root.transform).anchoredPosition = new Vector2((i - (shown.Count - 1) * 0.5f) * 270f, -500f);
+            Data.LevelSquad.Limit = Data.LevelSquad.LimitFor(Data.LevelCatalog.WorldOf(levelIndex));
             RefreshPrelevelSquad(levelIndex >= 4);
             RefreshBoosts();
             prelevel.Show();
@@ -750,6 +781,8 @@ namespace SquashBot.UI
         private TextMeshProUGUI preSquadText;
         /// <summary>BRING SOLDIERS on the card before a level (its index).</summary>
         public event Action<int> SquadPressed;
+        /// <summary>FRIENDS on the menu.</summary>
+        public event Action FriendsPressed;
 
         /// <summary>The card's soldiers button: how many come along (hidden on the first floors).</summary>
         public void RefreshPrelevelSquad(bool show)
@@ -1085,14 +1118,16 @@ namespace SquashBot.UI
             var bombFace = UiFactory.Chunky(bombButton, UiFactory.StyleOf(new Color(0.95f, 0.45f, 0.25f)), 1f, 0f, UiSprites.Circle);
             var bombBody = UiFactory.Box("Body", bombButton, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(84f, 84f));
             bombBody.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(bombBody, new Color(0.12f, 0.1f, 0.14f), UiSprites.Circle).raycastTarget = false;
+            bombBodyImg = UiFactory.Fill(bombBody, new Color(0.12f, 0.1f, 0.14f), UiSprites.Circle);
+            bombBodyImg.raycastTarget = false;
             var fuse = UiFactory.Box("Fuse", bombButton, new Vector2(0.5f, 0.5f), new Vector2(26f, 44f), new Vector2(14f, 30f));
             fuse.pivot = new Vector2(0.5f, 0.5f);
             fuse.localRotation = Quaternion.Euler(0f, 0f, -30f);
             UiFactory.Fill(fuse, new Color(0.85f, 0.7f, 0.45f), UiSprites.Rounded, 4f).raycastTarget = false;
             var spark = UiFactory.Box("Spark", bombButton, new Vector2(0.5f, 0.5f), new Vector2(36f, 60f), new Vector2(24f, 24f));
             spark.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(spark, new Color(1f, 0.85f, 0.3f), UiSprites.Circle).raycastTarget = false;
+            bombSparkImg = UiFactory.Fill(spark, new Color(1f, 0.85f, 0.3f), UiSprites.Circle);
+            bombSparkImg.raycastTarget = false;
             bombCount = UiFactory.OutlinedText("Count", bombButton, new Vector2(0.5f, 0f), new Vector2(0f, -16f), new Vector2(180f, 44f), "3", 32f, new Color(0.25f, 0.08f, 0.02f));
             bombCount.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var bombBtn = bombButton.gameObject.AddComponent<Button>();
@@ -1100,6 +1135,37 @@ namespace SquashBot.UI
             bombBtn.onClick.AddListener(() => BombPressed?.Invoke());
             bombButton.gameObject.AddComponent<ButtonPress>();
             bombButton.gameObject.SetActive(false);
+            bombFaceImg = bombFace as UnityEngine.UI.Image;
+            // The kind switch (blast, ice, fire): a small round button at the bomb's bottom left, shown with two kinds or more.
+            bombSwitch = UiFactory.Box("BombSwitch", t, new Vector2(1f, 0f), new Vector2(-300f, 290f), new Vector2(84f, 84f));
+            var swFace = UiFactory.Chunky(bombSwitch, UiFactory.StyleOf(new Color(0.3f, 0.32f, 0.42f)), 1f, 0f, UiSprites.Circle);
+            var swText = UiFactory.OutlinedText("Label", bombSwitch, new Vector2(0.5f, 0.5f), new Vector2(0f, 4f), new Vector2(84f, 60f), "<>", 30f, Color.white);
+            swText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var swBtn = bombSwitch.gameObject.AddComponent<Button>();
+            swBtn.targetGraphic = swFace;
+            swBtn.onClick.AddListener(() => BombSwitchPressed?.Invoke());
+            bombSwitch.gameObject.AddComponent<ButtonPress>();
+            bombSwitch.gameObject.SetActive(false);
+
+            // FIRE (a gun on a floor): up and left of the bomb, a red round button with a sight on it.
+            fireButton = UiFactory.Box("Fire", t, new Vector2(1f, 0f), new Vector2(-350f, 470f), new Vector2(150f, 150f));
+            fireFace = UiFactory.Chunky(fireButton, UiFactory.StyleOf(new Color(0.95f, 0.3f, 0.25f)), 1f, 0f, UiSprites.Circle);
+            var sightRing = UiFactory.Box("Ring", fireButton, new Vector2(0.5f, 0.5f), new Vector2(0f, 8f), new Vector2(70f, 70f));
+            sightRing.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(sightRing, new Color(1f, 1f, 1f, 0.9f), UiSprites.Circle).raycastTarget = false;
+            var sightHole = UiFactory.Box("Hole", fireButton, new Vector2(0.5f, 0.5f), new Vector2(0f, 8f), new Vector2(50f, 50f));
+            sightHole.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(sightHole, new Color(0.55f, 0.1f, 0.08f), UiSprites.Circle).raycastTarget = false;
+            var sightDot = UiFactory.Box("Dot", fireButton, new Vector2(0.5f, 0.5f), new Vector2(0f, 8f), new Vector2(16f, 16f));
+            sightDot.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(sightDot, Color.white, UiSprites.Circle).raycastTarget = false;
+            var fireLabel = UiFactory.OutlinedText("Label", fireButton, new Vector2(0.5f, 0f), new Vector2(0f, -16f), new Vector2(200f, 44f), Loc.T("gun.fire"), 28f, new Color(0.3f, 0.04f, 0.02f));
+            fireLabel.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var fireBtn = fireButton.gameObject.AddComponent<Button>();
+            fireBtn.targetGraphic = fireFace;
+            fireBtn.onClick.AddListener(() => FirePressed?.Invoke());
+            fireButton.gameObject.AddComponent<ButtonPress>();
+            fireButton.gameObject.SetActive(false);
 
             // Low on health: watch an ad and fill the bar (above the bag, pulsing; once a level).
             adHealButton = UiFactory.Box("AdHeal", t, new Vector2(0f, 0f), new Vector2(210f, 480f), new Vector2(150f, 150f)); // beside the bag, not on it

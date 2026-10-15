@@ -8,6 +8,9 @@ namespace SquashBot.Visual
     /// </summary>
     public class ZapFx : MonoBehaviour
     {
+        /// <summary>Its materials (made for it alone) go with it.</summary>
+        private void Start() => OwnedMaterials.OwnAllUnder(gameObject);
+
         private const float Life = 0.32f;
         private const int Segments = 6;
         private Material core, glow;

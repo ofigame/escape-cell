@@ -8,6 +8,9 @@ namespace SquashBot.Visual
     /// </summary>
     public class BloodSplat : MonoBehaviour
     {
+        /// <summary>Its materials (made for it alone) go with it.</summary>
+        private void Start() => OwnedMaterials.OwnAllUnder(gameObject);
+
         private const float Life = 4.5f;
         private Material mat;
         private Transform[] drops;

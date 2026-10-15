@@ -42,6 +42,38 @@ namespace SquashBot.Gameplay
 
         private void RefreshAmmo() => ui.SetAmmo(floorGun != null && State == GameState.Playing, gunAmmo, AmmoPrice);
 
+        private GunReticle gunSight;
+        private bool sightOn;
+        private GridPos sightAt;
+
+        /// <summary>Each frame of a floor with a gun: the sight on the nearest enemy in range, and the FIRE button.</summary>
+        private void UpdateGunSight()
+        {
+            bool can = floorGun != null && State == GameState.Playing && level != null && level.mission == MissionType.Hunt
+                && roadPhase == RoadPhase.None && robot.IsAlive && (glassCell == null || glassCell.Broken) && !previewing && !tpsOn; // (TPS aims with its own crosshair)
+            sightOn = can && hunt.GunTarget(robot.Position, floorGun.reach, out sightAt);
+            if (sightOn)
+            {
+                if (gunSight == null) gunSight = GunReticle.Create(transform);
+                gunSight.Show(GridView.ToWorld(sightAt) + Vector3.up * GridView.SurfaceY, gunAmmo > 0 && Time.time >= gunReadyAt);
+            }
+            else if (gunSight != null) gunSight.Hide();
+            ui.SetFire(can, sightOn && gunAmmo > 0);
+        }
+
+        /// <summary>The FIRE button: the gun at the target in its sight (with no target or no balls, a word why).</summary>
+        private void FireAtSight()
+        {
+            if (floorGun == null || State != GameState.Playing) return;
+            if (!sightOn)
+            {
+                FloatAt(robot.transform.position + Vector3.up * 1.1f, Loc.T("gun.noTarget"), Palette.UiGold);
+                AudioManager.PlaySfx(Sfx.Bump, 0.5f);
+                return;
+            }
+            if (!TryFireFloorGun(sightAt)) AudioManager.PlaySfx(Sfx.Bump, 0.5f);
+        }
+
         /// <summary>The ammo pill tapped with no energy balls left: a refill for gold.</summary>
         private void BuyAmmo()
         {
@@ -85,7 +117,7 @@ namespace SquashBot.Gameplay
                 var muzzle = heldWeapon != null ? heldWeapon.transform.position + heldWeapon.transform.forward * 0.45f : robot.transform.position + Vector3.up * 0.6f;
                 var end = GridView.ToWorld(target) + Vector3.up * 0.6f;
                 int damage = Challenge.RankBoost(Armory.Damage(w)) * (superLeft > 0f ? 2 : 1);
-                var glow = WeaponModels.Glow(w.tier);
+                var glow = WeaponModels.GlowOf(w);
                 if (heldWeapon != null) heldWeapon.Swing();
                 AudioManager.PlaySfx(Sfx.Impact, 0.4f, 1.8f + 0.08f * w.tier + Random.Range(-0.05f, 0.05f));
                 EnergyBall.Fly(transform, muzzle, end, glow, w.auto ? 0.14f : 0.2f + 0.02f * w.tier, fx, () =>
@@ -93,7 +125,7 @@ namespace SquashBot.Gameplay
                     if (State != GameState.Playing) return;
                     var hitAt = target;
                     if (!hunt.HasTargetAt(hitAt) && hunt.TargetNear(hitAt, out var now)) hitAt = now;
-                    hunt.Strike(hitAt, damage);
+                    if (hunt.Strike(hitAt, damage)) SpecialHit(w, hitAt, damage);
                 });
                 if (i + 1 < shots) yield return new WaitForSeconds(0.09f);
             }

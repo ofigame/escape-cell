@@ -5,6 +5,10 @@ namespace SquashBot.Data
 {
     public enum WeaponKind { Hammer, Sword, Axe, Mace, Spear, Whirl, Gun }
 
+    /// <summary>What a rank weapon does besides its blow: burns, freezes, jumps to the next enemies, shakes the ground,
+    /// cuts wide or goes through.</summary>
+    public enum SpecialFx { None, Burn, Freeze, Chain, Quake, Cleave, Pierce }
+
     /// <summary>One weapon of the armory: what it is, how it hits, what it costs and from which level it is sold.</summary>
     public class WeaponDef
     {
@@ -24,6 +28,11 @@ namespace SquashBot.Data
         /// <summary>A gun that fires a burst of energy balls a tap (automatic), and how many; else one ball a tap.</summary>
         public bool auto;
         public int burst = 1;
+        /// <summary>A rank weapon: the trophy rank (league) it needs (-1: an ordinary weapon), its effect and its size.</summary>
+        public int rank = -1;
+        public SpecialFx fx;
+        public float size = 1f;
+        public bool Special => rank >= 0;
     }
 
     /// <summary>
@@ -35,47 +44,65 @@ namespace SquashBot.Data
     {
         public static readonly List<WeaponDef> All = new List<WeaponDef>
         {
-            new WeaponDef { id = "mallet", kind = WeaponKind.Hammer, tier = 1, damage = 1, reach = 2, cooldown = 0.24f, price = 0, unlockAt = 0 },
-            new WeaponDef { id = "ironSword", kind = WeaponKind.Sword, tier = 2, damage = 2, reach = 2, cooldown = 0.13f, price = 400, unlockAt = 4 },
-            new WeaponDef { id = "stoneAxe", kind = WeaponKind.Axe, tier = 1, damage = 3, reach = 2, cooldown = 0.3f, price = 900, unlockAt = 11 },
-            new WeaponDef { id = "steelHammer", kind = WeaponKind.Hammer, tier = 2, damage = 3, reach = 2, cooldown = 0.22f, price = 1500, unlockAt = 22 },
-            new WeaponDef { id = "spear", kind = WeaponKind.Spear, tier = 2, damage = 2, reach = 2, cooldown = 0.2f, price = 1800, unlockAt = 32 },
+            new WeaponDef { id = "mallet", kind = WeaponKind.Hammer, tier = 1, damage = 5, reach = 2, cooldown = 0.24f, price = 0, unlockAt = 0 },
+            new WeaponDef { id = "ironSword", kind = WeaponKind.Sword, tier = 2, damage = 8, reach = 2, cooldown = 0.13f, price = 400, unlockAt = 4 },
+            new WeaponDef { id = "stoneAxe", kind = WeaponKind.Axe, tier = 1, damage = 12, reach = 2, cooldown = 0.3f, price = 900, unlockAt = 11 },
+            new WeaponDef { id = "steelHammer", kind = WeaponKind.Hammer, tier = 2, damage = 12, reach = 2, cooldown = 0.22f, price = 1500, unlockAt = 22 },
+            new WeaponDef { id = "spear", kind = WeaponKind.Spear, tier = 2, damage = 10, reach = 2, cooldown = 0.2f, price = 1800, unlockAt = 32 },
             // The whirl blades: every blow is a full turn that hits everything around foi at once (weaker, slower blows).
-            new WeaponDef { id = "whirlBlade", kind = WeaponKind.Whirl, tier = 3, damage = 2, reach = 2, cooldown = 0.5f, price = 2600, unlockAt = 40 },
-            new WeaponDef { id = "mace", kind = WeaponKind.Mace, tier = 3, damage = 4, reach = 2, cooldown = 0.34f, price = 3000, unlockAt = 50 },
-            new WeaponDef { id = "crystalSword", kind = WeaponKind.Sword, tier = 4, damage = 3, reach = 2, cooldown = 0.12f, price = 4200, unlockAt = 70 },
-            new WeaponDef { id = "battleAxe", kind = WeaponKind.Axe, tier = 4, damage = 5, reach = 2, cooldown = 0.27f, price = 6000, unlockAt = 95 },
-            new WeaponDef { id = "stormSpear", kind = WeaponKind.Spear, tier = 4, damage = 4, reach = 2, cooldown = 0.18f, price = 8000, unlockAt = 125 },
-            new WeaponDef { id = "stormWhirl", kind = WeaponKind.Whirl, tier = 5, damage = 4, reach = 2, cooldown = 0.45f, price = 11000, unlockAt = 150 },
-            new WeaponDef { id = "starHammer", kind = WeaponKind.Hammer, tier = 5, damage = 6, reach = 2, cooldown = 0.23f, price = 12000, unlockAt = 165 },
-            new WeaponDef { id = "flameSword", kind = WeaponKind.Sword, tier = 5, damage = 5, reach = 2, cooldown = 0.11f, price = 16000, unlockAt = 205 },
+            new WeaponDef { id = "whirlBlade", kind = WeaponKind.Whirl, tier = 3, damage = 8, reach = 2, cooldown = 0.5f, price = 2600, unlockAt = 40 },
+            new WeaponDef { id = "mace", kind = WeaponKind.Mace, tier = 3, damage = 16, reach = 2, cooldown = 0.34f, price = 3000, unlockAt = 50 },
+            new WeaponDef { id = "crystalSword", kind = WeaponKind.Sword, tier = 4, damage = 18, reach = 2, cooldown = 0.12f, price = 4200, unlockAt = 70 },
+            new WeaponDef { id = "battleAxe", kind = WeaponKind.Axe, tier = 4, damage = 22, reach = 2, cooldown = 0.27f, price = 6000, unlockAt = 95 },
+            new WeaponDef { id = "stormSpear", kind = WeaponKind.Spear, tier = 4, damage = 20, reach = 2, cooldown = 0.18f, price = 8000, unlockAt = 125 },
+            new WeaponDef { id = "stormWhirl", kind = WeaponKind.Whirl, tier = 5, damage = 16, reach = 2, cooldown = 0.45f, price = 11000, unlockAt = 150 },
+            new WeaponDef { id = "starHammer", kind = WeaponKind.Hammer, tier = 5, damage = 30, reach = 2, cooldown = 0.23f, price = 12000, unlockAt = 165 },
+            new WeaponDef { id = "flameSword", kind = WeaponKind.Sword, tier = 5, damage = 34, reach = 2, cooldown = 0.11f, price = 16000, unlockAt = 205 },
             // The utopian worlds' gear (the last floors' armour needs it): plasma blade and nova mace.
-            new WeaponDef { id = "plasmaBlade", kind = WeaponKind.Sword, tier = 6, damage = 7, reach = 2, cooldown = 0.11f, price = 22000, unlockAt = 212 },
-            new WeaponDef { id = "novaMace", kind = WeaponKind.Mace, tier = 6, damage = 9, reach = 2, cooldown = 0.24f, price = 30000, unlockAt = 232 },
+            new WeaponDef { id = "plasmaBlade", kind = WeaponKind.Sword, tier = 6, damage = 42, reach = 2, cooldown = 0.11f, price = 22000, unlockAt = 212 },
+            new WeaponDef { id = "novaMace", kind = WeaponKind.Mace, tier = 6, damage = 50, reach = 2, cooldown = 0.24f, price = 30000, unlockAt = 232 },
             // The guns: fired over foi's shoulder at the crosshair in the arenas (aimed with the right thumb), at a tapped
             // robot on the floors. Reach is their range in tiles; they hit as hard as the blades of their time.
-            new WeaponDef { id = "waterPistol", kind = WeaponKind.Gun, tier = 1, damage = 2, reach = 7, cooldown = 0.35f, price = 350, unlockAt = 9 },
-            new WeaponDef { id = "laserPistol", kind = WeaponKind.Gun, tier = 2, damage = 3, reach = 8, cooldown = 0.3f, price = 1400, unlockAt = 29 },
-            new WeaponDef { id = "plasmaRifle", kind = WeaponKind.Gun, tier = 3, damage = 4, reach = 10, cooldown = 0.42f, price = 3600, unlockAt = 59 },
-            new WeaponDef { id = "twinBlaster", kind = WeaponKind.Gun, tier = 4, damage = 5, reach = 9, cooldown = 0.2f, price = 7200, unlockAt = 99 },
-            new WeaponDef { id = "stormCannon", kind = WeaponKind.Gun, tier = 5, damage = 7, reach = 10, cooldown = 0.45f, price = 12500, unlockAt = 149 },
-            new WeaponDef { id = "novaCannon", kind = WeaponKind.Gun, tier = 6, damage = 9, reach = 11, cooldown = 0.4f, price = 24000, unlockAt = 199 },
+            new WeaponDef { id = "waterPistol", kind = WeaponKind.Gun, tier = 1, damage = 5, reach = 7, cooldown = 0.35f, price = 350, unlockAt = 9 },
+            new WeaponDef { id = "laserPistol", kind = WeaponKind.Gun, tier = 2, damage = 8, reach = 8, cooldown = 0.3f, price = 1400, unlockAt = 29 },
+            new WeaponDef { id = "plasmaRifle", kind = WeaponKind.Gun, tier = 3, damage = 12, reach = 10, cooldown = 0.42f, price = 3600, unlockAt = 59 },
+            new WeaponDef { id = "twinBlaster", kind = WeaponKind.Gun, tier = 4, damage = 14, reach = 9, cooldown = 0.2f, price = 7200, unlockAt = 99 },
+            new WeaponDef { id = "stormCannon", kind = WeaponKind.Gun, tier = 5, damage = 22, reach = 10, cooldown = 0.45f, price = 12500, unlockAt = 149 },
+            new WeaponDef { id = "novaCannon", kind = WeaponKind.Gun, tier = 6, damage = 32, reach = 11, cooldown = 0.4f, price = 24000, unlockAt = 199 },
             // More of every kind (the workshop's bigger shelves): an early wooden sword and spiked club, a katana, a
             // double axe, a trident, a thunder maul, a halberd and a dragon axe.
-            new WeaponDef { id = "woodSword", kind = WeaponKind.Sword, tier = 1, damage = 1, reach = 2, cooldown = 0.16f, price = 150, unlockAt = 2 },
-            new WeaponDef { id = "spikedClub", kind = WeaponKind.Mace, tier = 1, damage = 2, reach = 2, cooldown = 0.3f, price = 600, unlockAt = 7 },
-            new WeaponDef { id = "katana", kind = WeaponKind.Sword, tier = 3, damage = 3, reach = 2, cooldown = 0.11f, price = 3400, unlockAt = 60 },
-            new WeaponDef { id = "doubleAxe", kind = WeaponKind.Axe, tier = 3, damage = 4, reach = 2, cooldown = 0.29f, price = 3800, unlockAt = 80 },
-            new WeaponDef { id = "trident", kind = WeaponKind.Spear, tier = 3, damage = 3, reach = 2, cooldown = 0.19f, price = 3200, unlockAt = 85 },
-            new WeaponDef { id = "thunderMaul", kind = WeaponKind.Hammer, tier = 4, damage = 5, reach = 2, cooldown = 0.26f, price = 9000, unlockAt = 140 },
-            new WeaponDef { id = "halberd", kind = WeaponKind.Spear, tier = 5, damage = 6, reach = 2, cooldown = 0.2f, price = 14000, unlockAt = 185 },
-            new WeaponDef { id = "dragonAxe", kind = WeaponKind.Axe, tier = 5, damage = 7, reach = 2, cooldown = 0.28f, price = 15000, unlockAt = 190 },
+            new WeaponDef { id = "woodSword", kind = WeaponKind.Sword, tier = 1, damage = 6, reach = 2, cooldown = 0.16f, price = 150, unlockAt = 2 },
+            new WeaponDef { id = "spikedClub", kind = WeaponKind.Mace, tier = 1, damage = 9, reach = 2, cooldown = 0.3f, price = 600, unlockAt = 7 },
+            new WeaponDef { id = "katana", kind = WeaponKind.Sword, tier = 3, damage = 14, reach = 2, cooldown = 0.11f, price = 3400, unlockAt = 60 },
+            new WeaponDef { id = "doubleAxe", kind = WeaponKind.Axe, tier = 3, damage = 18, reach = 2, cooldown = 0.29f, price = 3800, unlockAt = 80 },
+            new WeaponDef { id = "trident", kind = WeaponKind.Spear, tier = 3, damage = 15, reach = 2, cooldown = 0.19f, price = 3200, unlockAt = 85 },
+            new WeaponDef { id = "thunderMaul", kind = WeaponKind.Hammer, tier = 4, damage = 28, reach = 2, cooldown = 0.26f, price = 9000, unlockAt = 140 },
+            new WeaponDef { id = "halberd", kind = WeaponKind.Spear, tier = 5, damage = 32, reach = 2, cooldown = 0.2f, price = 14000, unlockAt = 185 },
+            new WeaponDef { id = "dragonAxe", kind = WeaponKind.Axe, tier = 5, damage = 36, reach = 2, cooldown = 0.28f, price = 15000, unlockAt = 190 },
             // Automatic guns (a burst of energy balls a tap) and a long-range rail sniper.
-            new WeaponDef { id = "bubbleSmg", kind = WeaponKind.Gun, tier = 2, damage = 1, reach = 7, cooldown = 0.5f, price = 1600, unlockAt = 24, auto = true, burst = 4 },
-            new WeaponDef { id = "ionRifle", kind = WeaponKind.Gun, tier = 3, damage = 2, reach = 8, cooldown = 0.6f, price = 4400, unlockAt = 74, auto = true, burst = 4 },
-            new WeaponDef { id = "railSniper", kind = WeaponKind.Gun, tier = 4, damage = 8, reach = 13, cooldown = 0.9f, price = 9500, unlockAt = 129 },
-            new WeaponDef { id = "gatling", kind = WeaponKind.Gun, tier = 5, damage = 3, reach = 9, cooldown = 0.7f, price = 14500, unlockAt = 179, auto = true, burst = 6 },
-            new WeaponDef { id = "photonSmg", kind = WeaponKind.Gun, tier = 6, damage = 5, reach = 10, cooldown = 0.55f, price = 26000, unlockAt = 225, auto = true, burst = 5 },
+            new WeaponDef { id = "bubbleSmg", kind = WeaponKind.Gun, tier = 2, damage = 3, reach = 7, cooldown = 0.5f, price = 1600, unlockAt = 24, auto = true, burst = 4 },
+            new WeaponDef { id = "ionRifle", kind = WeaponKind.Gun, tier = 3, damage = 6, reach = 8, cooldown = 0.6f, price = 4400, unlockAt = 74, auto = true, burst = 4 },
+            new WeaponDef { id = "railSniper", kind = WeaponKind.Gun, tier = 4, damage = 30, reach = 13, cooldown = 0.9f, price = 9500, unlockAt = 129 },
+            new WeaponDef { id = "gatling", kind = WeaponKind.Gun, tier = 5, damage = 8, reach = 9, cooldown = 0.7f, price = 14500, unlockAt = 179, auto = true, burst = 6 },
+            new WeaponDef { id = "photonSmg", kind = WeaponKind.Gun, tier = 6, damage = 12, reach = 10, cooldown = 0.55f, price = 26000, unlockAt = 225, auto = true, burst = 5 },
+
+            // The rank weapons: three a shelf, opened by the trophy rank (Staff sergeant, Captain, Marshal), bought with gold
+            // and lost when the rank falls below them. Big, and each with an effect of its own.
+            new WeaponDef { id = "sunLance", kind = WeaponKind.Gun, tier = 6, damage = 22, reach = 11, cooldown = 0.5f, price = 18000, rank = 3, fx = SpecialFx.Pierce, size = 1.3f },
+            new WeaponDef { id = "thunderRail", kind = WeaponKind.Gun, tier = 6, damage = 34, reach = 12, cooldown = 0.6f, price = 36000, rank = 7, fx = SpecialFx.Chain, size = 1.4f },
+            new WeaponDef { id = "starBreaker", kind = WeaponKind.Gun, tier = 6, damage = 18, reach = 11, cooldown = 0.7f, price = 60000, rank = 12, fx = SpecialFx.Quake, size = 1.5f, auto = true, burst = 4 },
+            new WeaponDef { id = "emberBlade", kind = WeaponKind.Sword, tier = 6, damage = 30, reach = 2, cooldown = 0.13f, price = 18000, rank = 3, fx = SpecialFx.Burn, size = 1.35f },
+            new WeaponDef { id = "frostEdge", kind = WeaponKind.Sword, tier = 6, damage = 44, reach = 2, cooldown = 0.12f, price = 36000, rank = 7, fx = SpecialFx.Freeze, size = 1.5f },
+            new WeaponDef { id = "kingsBlade", kind = WeaponKind.Sword, tier = 6, damage = 60, reach = 2, cooldown = 0.12f, price = 60000, rank = 12, fx = SpecialFx.Cleave, size = 1.7f },
+            new WeaponDef { id = "lavaAxe", kind = WeaponKind.Axe, tier = 6, damage = 38, reach = 2, cooldown = 0.28f, price = 18000, rank = 3, fx = SpecialFx.Burn, size = 1.35f },
+            new WeaponDef { id = "quakeMace", kind = WeaponKind.Mace, tier = 6, damage = 54, reach = 2, cooldown = 0.3f, price = 36000, rank = 7, fx = SpecialFx.Quake, size = 1.5f },
+            new WeaponDef { id = "titanAxe", kind = WeaponKind.Axe, tier = 6, damage = 75, reach = 2, cooldown = 0.28f, price = 60000, rank = 12, fx = SpecialFx.Cleave, size = 1.7f },
+            new WeaponDef { id = "lightningPike", kind = WeaponKind.Spear, tier = 6, damage = 30, reach = 2, cooldown = 0.18f, price = 18000, rank = 3, fx = SpecialFx.Chain, size = 1.35f },
+            new WeaponDef { id = "frostLance", kind = WeaponKind.Spear, tier = 6, damage = 44, reach = 2, cooldown = 0.18f, price = 36000, rank = 7, fx = SpecialFx.Freeze, size = 1.5f },
+            new WeaponDef { id = "dragonPike", kind = WeaponKind.Spear, tier = 6, damage = 62, reach = 2, cooldown = 0.17f, price = 60000, rank = 12, fx = SpecialFx.Pierce, size = 1.7f },
+            new WeaponDef { id = "meteorHammer", kind = WeaponKind.Hammer, tier = 6, damage = 40, reach = 2, cooldown = 0.25f, price = 18000, rank = 3, fx = SpecialFx.Quake, size = 1.35f },
+            new WeaponDef { id = "glacierMaul", kind = WeaponKind.Hammer, tier = 6, damage = 56, reach = 2, cooldown = 0.25f, price = 36000, rank = 7, fx = SpecialFx.Freeze, size = 1.5f },
+            new WeaponDef { id = "worldbreaker", kind = WeaponKind.Hammer, tier = 6, damage = 80, reach = 2, cooldown = 0.26f, price = 60000, rank = 12, fx = SpecialFx.Quake, size = 1.7f },
         };
 
         /// <summary>The shop's shelves: 0 guns, 1 swords (and whirl blades), 2 axes and maces, 3 spears, 4 hammers.</summary>
@@ -102,7 +129,30 @@ namespace SquashBot.Data
 
         public static bool Owned(WeaponDef w) => w.price == 0 || PlayerPrefs.GetInt("sb_weapon_own_" + w.id, 0) == 1;
 
-        public static bool Unlocked(WeaponDef w) => Owned(w) || SaveData.UnlockedLevel >= w.unlockAt;
+        /// <summary>Sold to the player: an ordinary weapon from its level on; a rank weapon while the trophy rank is high enough.</summary>
+        public static bool Unlocked(WeaponDef w) => w.Special ? Challenge.League >= w.rank : Owned(w) || SaveData.UnlockedLevel >= w.unlockAt;
+
+        /// <summary>Why a weapon is not for sale yet: its level, or (a rank weapon) the rank it needs.</summary>
+        public static string LockText(WeaponDef w) => w.Special ? Loc.F("special.needRank", Loc.T("rank." + w.rank)) : Loc.F("ws.lockedAt", w.unlockAt + 1);
+
+        /// <summary>
+        /// The rank weapons whose rank the player no longer holds are taken away (with their levels); the hand and the gun
+        /// slot fall back to what is left. Returns their ids (empty: none lost).
+        /// </summary>
+        public static List<string> RevokeLostRanks()
+        {
+            var lost = new List<string>();
+            int league = Challenge.League;
+            foreach (var w in All)
+            {
+                if (!w.Special || league >= w.rank || PlayerPrefs.GetInt("sb_weapon_own_" + w.id, 0) != 1) continue;
+                PlayerPrefs.DeleteKey("sb_weapon_own_" + w.id);
+                PlayerPrefs.DeleteKey("sb_weapon_lv_" + w.id);
+                lost.Add(w.id);
+            }
+            if (lost.Count > 0) PlayerPrefs.Save();
+            return lost;
+        }
 
         private const string GunKey = "sb_gun";
 
@@ -154,8 +204,11 @@ namespace SquashBot.Data
         /// <summary>A weapon's level in the workshop: every weapon starts at 1 (with its own strength) and grows to 3.</summary>
         public static int Level(WeaponDef w) => Owned(w) ? Mathf.Clamp(PlayerPrefs.GetInt("sb_weapon_lv_" + w.id, 1), 1, MaxLevel) : 1;
 
-        /// <summary>Damage of one blow at a level: each level adds about two fifths of the weapon's own damage.</summary>
-        public static int Damage(WeaponDef w, int level) => w.damage + (level - 1) * Mathf.Max(1, Mathf.RoundToInt(w.damage * 0.4f));
+        /// <summary>
+        /// Damage of one blow at a level, in health points: each level adds two fifths of the weapon's own. A first
+        /// world's basic robot has 20, foi starts with 100.
+        /// </summary>
+        public static int Damage(WeaponDef w, int level) => Mathf.RoundToInt(w.damage * (1f + 0.4f * (Mathf.Clamp(level, 1, MaxLevel) - 1)));
 
         /// <summary>Seconds between blows at a level: a tenth quicker each level.</summary>
         public static float Cooldown(WeaponDef w, int level) => w.cooldown * (1f - 0.1f * (level - 1));

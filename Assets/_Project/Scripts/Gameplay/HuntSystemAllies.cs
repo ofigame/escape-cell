@@ -37,6 +37,7 @@ namespace SquashBot.Gameplay
                         if (r >= 2 && grid.IsStandable(q) && !grid.IsOccupied(q) && !AllyAt(q) && !grid.IsGap(q)) { p = q; found = true; } // not right on foi
                     }
             if (!found) return false;
+            hp = Mathf.Max(1, Mathf.RoundToInt(hp * HpBase)); // (in health points)
             var a = new Guard { pos = p, hp = Mathf.Max(1, hp), maxHp = Mathf.Max(1, hp), step = 0.3f, rank = -1, ally = true };
             a.root = new GameObject("Ally").transform;
             a.root.SetParent(transform, false);
@@ -133,7 +134,7 @@ namespace SquashBot.Gameplay
                 if (IsArcher(a)) ArrowFx(a.root.position, At(a.target));
                 else Shockwave.Create(At(a.target), 0.9f, AllyColour);
                 AudioManager.PlaySfx(Sfx.Impact, 0.45f, 1.1f);
-                if (MonsterUp && MonsterAwake && a.target == monsterPos) { HitMonster(AllyDamage); return; }
+                if (MonsterUp && MonsterAwake && a.target == monsterPos) { HitMonster(a.allyHit > 0 ? a.allyHit : Mathf.RoundToInt(AllyDamage * HpBase)); return; }
                 foreach (var g in guards)
                     if (!g.dead && (g.pos == a.target || (g.moveT < 1f && g.prevPos == a.target))) { AllyHit(g, a); break; }
                 return;
@@ -186,7 +187,8 @@ namespace SquashBot.Gameplay
         {
             RaiseAlarm(g);
             if (g.shield > 0) { HitShield(g, g.pos); return; }
-            g.hp -= (by.allyHit > 0 ? by.allyHit : AllyDamage) + Edge(by, g);
+            int dealt = Mathf.RoundToInt((by.allyHit > 0 ? by.allyHit : AllyDamage * HpBase) * (Edge(by, g) > 0 ? 1.3f : 1f));
+            g.hp -= Mathf.Max(1, Mathf.RoundToInt(dealt * (1f - g.armorShare)));
             g.flash = 1f;
             g.Flash();
             fx.Burst(At(g.pos) + Vector3.up * 0.4f, AllyColour, AllyColour * 1.8f, 16, 4f);
@@ -213,12 +215,13 @@ namespace SquashBot.Gameplay
         /// <summary>An enemy's slam landed on these tiles: allies there take blows (a warlord's more).</summary>
         private void HurtAllies(Guard by, List<GridPos> area)
         {
-            int dmg = by.rank >= 99 ? 3 : by.brute ? 2 : 1;
+            // A roster robot's own blow; an old one's in health points.
+            int dmg = by.blow > 0 ? by.blow : Mathf.RoundToInt((by.rank >= 99 ? 3 : by.brute ? 2 : 1) * HpBase * 0.4f);
             foreach (var a in allies)
             {
                 if (a.dead || !area.Contains(a.pos)) continue;
                 if (a.squad) { HurtSquad(a, by == challengeFoe ? FoeSoldierDamage : dmg + Edge(by, a), by, foiBlow: by == challengeFoe); continue; }
-                a.hp -= dmg + Edge(by, a);
+                a.hp -= Mathf.Max(1, Mathf.RoundToInt(dmg * (Edge(by, a) > 0 ? 1.3f : 1f) * (1f - a.armorShare)));
                 a.Flash();
                 if (a.hp <= 0) KillAlly(a);
             }

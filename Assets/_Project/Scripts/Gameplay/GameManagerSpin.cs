@@ -26,13 +26,13 @@ namespace SquashBot.Gameplay
             int reach = w.kind == WeaponKind.Whirl ? Mathf.Max(1, w.reach) : 1;
             if (heldWeapon != null) heldWeapon.Spin();
             StartCoroutine(SpinBody(0.32f));
-            var glow = WeaponModels.Glow(w.tier);
+            var glow = WeaponModels.GlowOf(w);
             var centre = robot.transform.position;
             Shockwave.Create(centre, 1.4f + reach * 0.9f, glow);
             for (int i = 0; i < 8; i++)
             {
                 float a = i * Mathf.PI / 4f;
-                SlashFx.Create(centre, centre + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * (0.8f + reach * 0.8f), glow, 1f + 0.1f * damage);
+                SlashFx.Create(centre, centre + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * (0.8f + reach * 0.8f), glow, 1f + 0.01f * damage);
             }
             AudioManager.PlaySfx(Sfx.Hop, 0.9f, 0.55f);
             int hits = 0;

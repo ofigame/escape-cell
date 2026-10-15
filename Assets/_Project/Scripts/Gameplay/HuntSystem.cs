@@ -78,6 +78,12 @@ namespace SquashBot.Gameplay
             public Guard aim, hitBy;
             /// <summary>One of the army's soldiers brought onto a floor: its group (its fall costs the pool one), its blow.</summary>
             public int poolGroup = -1, allyHit;
+            /// <summary>Its blow in health points (0: the old share of foi's bar), and its armour: the share of a blow it takes off.</summary>
+            public int blow;
+            public float armorShare;
+            /// <summary>The ice bomb: until when it stands frozen, and its block of ice.</summary>
+            public float iceUntil;
+            public Transform ice;
             public Transform root;
             public bool dead, brute;
             /// <summary>The fortress stage it belongs to, and its rank there (-1 classic, 0 easy … 99 an elite).</summary>
@@ -183,6 +189,13 @@ namespace SquashBot.Gameplay
         }
         /// <summary>How big the guards and enforcers stand (they grow with the campaign).</summary>
         public float EnemyScale = 1f;
+        /// <summary>The world whose roster of robots this floor draws on (-1: none, the old robots: the duel, the roads), and
+        /// the floor within that world (0..9).</summary>
+        public int RosterWorld = -1, RosterFloor;
+        /// <summary>foi's health points (a robot's blow takes its points off them: their share of the bar).</summary>
+        public int FoiHp = 100;
+        /// <summary>Health points of an old-style robot (no roster) for each point of its strength.</summary>
+        public float HpBase = 10f;
         /// <summary>foi's height (world units, measured at its size): every robot is sized against it.</summary>
         public float FoiHeight;
 
@@ -334,11 +347,25 @@ namespace SquashBot.Gameplay
         /// world's build; 99 an elite enforcer (hard floors' last stage). -1 the classic guard.</param>
         private void AddGuard(GridPos p, bool brute = false, int rank = -1)
         {
-            int hp = brute ? level.robotHp * 2 + 2 : level.robotHp;
-            if (rank >= 99) hp = level.robotHp * 3 + 4;
-            else if (rank == 0 && !brute) hp = 1;
-            else if (rank > 0 && !brute) hp = Mathf.Max(1, level.robotHp / 2) + rank;
+            // Health points, blow and armour: from the world's roster (a robot of this world or an earlier one; the enforcers
+            // and warlords half again or twice an advanced one), or the old robots' health (no roster).
+            var type = new EnemyRoster.Type { world = Mathf.Max(0, RosterWorld), advanced = false };
+            var stats = new EnemyRoster.Stats { hp = Mathf.Max(1, Mathf.RoundToInt(HpBase * (rank >= 99 ? 3.5f : brute ? 2.2f : rank == 0 ? 0.6f : 1f))) };
+            if (RosterWorld >= 0)
+            {
+                if (rank >= 99) stats = EnemyRoster.Special(RosterWorld, RosterFloor, 2.2f);
+                else if (brute) stats = EnemyRoster.Special(RosterWorld, RosterFloor);
+                else
+                {
+                    type = EnemyRoster.Pick(rng, RosterWorld, RosterFloor);
+                    stats = EnemyRoster.For(type, RosterWorld, RosterFloor);
+                    if (rank > 0) { stats.hp = Mathf.RoundToInt(stats.hp * (1f + 0.05f * rank)); stats.damage = Mathf.RoundToInt(stats.damage * (1f + 0.05f * rank)); }
+                }
+            }
+            int hp = Mathf.Max(1, stats.hp);
             var g = new Guard { pos = p, brute = brute, rank = rank, stage = StageOf(p), hp = hp, step = level.robotStep * (rank == 0 ? 1.25f : 1f) * (0.8f + (float)rng.NextDouble() * 0.4f) };
+            g.blow = RosterWorld >= 0 ? stats.damage : 0;
+            g.armorShare = RosterWorld >= 0 ? stats.armor : 0f;
             g.root = new GameObject(brute ? "Enforcer" : "GuardRobot").transform;
             g.root.SetParent(transform, false);
             var accent = RedFoes ? new Color(1f, 0.22f, 0.18f) : Color.HSVToRGB(Mathf.Repeat(world * 0.21f + 0.55f, 1f), 0.75f, 1f);
@@ -353,7 +380,8 @@ namespace SquashBot.Gameplay
                 // A new build of guard every world, in that world's colour.
                 // In the perfect city: pearl and gold guards lit in the floor's colour.
                 int build = rank < 0 ? world : Mathf.Max(0, world - 2 + rank * 2); // the easy ones an older build, each rank a newer one
-                g.bot = level.utopia ? GuardBot.Build(g.root, Color.HSVToRGB(Mathf.Repeat(world * 0.21f + 0.5f, 1f), 0.6f, 1f), build, utopian: true)
+                g.bot = RosterWorld >= 0 ? GuardBot.Build(g.root, Color.Lerp(RedFoes ? accent : EnemyRoster.Plate(type.world), new Color(0.3f, 0.3f, 0.35f), 0.3f), 0, false, type.Style)
+                    : level.utopia ? GuardBot.Build(g.root, Color.HSVToRGB(Mathf.Repeat(world * 0.21f + 0.5f, 1f), 0.6f, 1f), build, utopian: true)
                     : GuardBot.Build(g.root, Color.Lerp(accent, new Color(0.3f, 0.3f, 0.35f), 0.35f), build);
                 g.bot.transform.localScale = Vector3.one * (rank == 0 ? 0.55f : 0.62f + Mathf.Max(0, rank) * 0.02f) * EnemyScale;
             }
@@ -439,7 +467,7 @@ namespace SquashBot.Gameplay
             foreach (var g in guards)
             {
                 if (g.dead || g.pos != p) continue;
-                g.hp = Mathf.Max(1, g.hp - 1);
+                g.hp = Mathf.Max(1, g.hp - Mathf.Max(1, g.maxHp / 10));
                 g.flash = 1f;
                 g.Flash();
                 g.windup = -1f;
@@ -571,7 +599,7 @@ namespace SquashBot.Gameplay
                 }
                 RaiseAlarm(g);
                 if (g.shield > 0) { HitShield(g, p); return true; }
-                g.hp -= ThroughArmor(p, damage);
+                g.hp -= g.armorShare > 0f ? Mathf.Max(1, Mathf.RoundToInt(damage * (1f - g.armorShare))) : ThroughArmor(p, damage);
                 g.flash = 1f;
                 g.Flash();
                 g.windup = -1f;
@@ -998,8 +1026,10 @@ namespace SquashBot.Gameplay
             g.bar.SetParent(g.root, false);
             g.bar.localPosition = new Vector3(0f, top + 0.28f, 0f);
             float w = g.brute ? 1.05f : 0.8f;
-            Shapes.Rounded("Back", g.bar, Vector3.zero, new Vector3(w + 0.08f, 0.15f, 0.03f), 0.05f, MaterialFactory.Create(new Color(0.08f, 0.06f, 0.12f), Color.black));
+            if (barBackMat == null) barBackMat = MaterialFactory.Create(new Color(0.08f, 0.06f, 0.12f), Color.black);
+            Shapes.Rounded("Back", g.bar, Vector3.zero, new Vector3(w + 0.08f, 0.15f, 0.03f), 0.05f, barBackMat);
             g.barMat = MaterialFactory.Create(new Color(0.4f, 1f, 0.45f), new Color(0.4f, 1.5f, 0.45f));
+            OwnedMaterials.Own(g.bar.gameObject, g.barMat); // (the fill's own colour: gone with the bar)
             g.barFill = new GameObject("Fill").transform;
             g.barFill.SetParent(g.bar, false);
             g.barFill.localPosition = new Vector3(-w * 0.5f, 0f, -0.025f);
@@ -1007,8 +1037,11 @@ namespace SquashBot.Gameplay
             // Notches: one per point of health, so it reads how many blows are left.
             if (g.maxHp > 1 && g.maxHp <= 12)
                 for (int i = 1; i < g.maxHp; i++)
-                    Shapes.Rounded("Notch", g.bar, new Vector3(-w * 0.5f + w * i / g.maxHp, 0f, -0.04f), new Vector3(0.02f, 0.12f, 0.02f), 0.008f, MaterialFactory.Create(new Color(0.08f, 0.06f, 0.12f), Color.black));
+                    Shapes.Rounded("Notch", g.bar, new Vector3(-w * 0.5f + w * i / g.maxHp, 0f, -0.04f), new Vector3(0.02f, 0.12f, 0.02f), 0.008f, barBackMat);
         }
+
+        /// <summary>The dark back of every health bar (and its notches): one material for all.</summary>
+        private static Material barBackMat;
 
         private Camera barCam;
 
@@ -1030,6 +1063,7 @@ namespace SquashBot.Gameplay
             if (g == challengeFoe && FoeRemote) { UpdateHealthBar(g); UpdateRemoteFoe(g, dt); return; }
             if (g.squad) { UpdateSquad(g, dt); return; }
             UpdateHealthBar(g);
+            if (Iced(g)) return;
             UpdateShield(g, dt);
             if (g.flash > 0f) g.flash -= dt * 3f;
             g.cooldown -= dt;
@@ -1263,9 +1297,9 @@ namespace SquashBot.Gameplay
         /// <summary>How terrifying the warlords look on this floor (1 early … 4 from level 180).</summary>
         private int Menace => Mathf.Clamp(1 + level.number / 60, 1, 4);
 
-        private static float ShareOf(Guard g) => g.share >= 0f ? g.share : g.rank >= 99 ? 0.55f : g.brute ? BruteHitShare : g.rank == 0 ? 0.12f : g.rank > 0 ? Mathf.Min(0.3f, 0.16f + g.rank * 0.025f) : GuardHitShare;
+        private float ShareOf(Guard g) => g.share >= 0f ? g.share : g.blow > 0 ? g.blow / (float)Mathf.Max(1, FoiHp) : g.rank >= 99 ? 0.55f : g.brute ? BruteHitShare : g.rank == 0 ? 0.12f : g.rank > 0 ? Mathf.Min(0.3f, 0.16f + g.rank * 0.025f) : GuardHitShare;
         /// <summary>The monster's blows hurt more on later floors.</summary>
-        private float MonsterHitShare => Mathf.Lerp(0.36f, 0.6f, level.score / 100f);
+        private float MonsterHitShare => RosterWorld >= 0 ? EnemyRoster.VanGDamage(RosterWorld, RosterFloor) / (float)Mathf.Max(1, FoiHp) : Mathf.Lerp(0.36f, 0.6f, level.score / 100f);
 
         /// <summary>Blows still to come in the monster's current combo (later floors chain two or three).</summary>
         private int comboLeft;

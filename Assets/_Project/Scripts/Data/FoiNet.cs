@@ -117,7 +117,7 @@ namespace SquashBot.Data
             public int shield;
         }
 
-        [Serializable] private class ResultBody { public bool won, draw; }
+        [Serializable] private class ResultBody { public bool won, draw, left; }
 
         // ---------- Calls ----------
 
@@ -180,13 +180,14 @@ namespace SquashBot.Data
         }
 
         /// <summary>Sends a challenge's result. Null: not taken (no network: the server counts it lost later).</summary>
-        public static IEnumerator SendResult(long matchId, bool won, bool draw, Action<Result> done)
+        /// <param name="left">The player walked out of the duel: the leaver's penalty (rank points), not a plain loss.</param>
+        public static IEnumerator SendResult(long matchId, bool won, bool draw, Action<Result> done, bool left = false)
         {
             // Kept on the phone until the server has it: a lost connection sends it again before the next search.
-            PlayerPrefs.SetString(PendingKey, matchId + "," + (won ? 1 : 0) + "," + (draw ? 1 : 0));
+            PlayerPrefs.SetString(PendingKey, matchId + "," + (won ? 1 : 0) + "," + (draw ? 1 : 0) + "," + (left ? 1 : 0));
             PlayerPrefs.Save();
             long code = 0; string body = null;
-            yield return Send("POST", "/match/" + matchId + "/result", JsonUtility.ToJson(new ResultBody { won = won && !draw, draw = draw }), true, (c, b) => { code = c; body = b; });
+            yield return Send("POST", "/match/" + matchId + "/result", JsonUtility.ToJson(new ResultBody { won = won && !draw && !left, draw = draw && !left, left = left }), true, (c, b) => { code = c; body = b; });
             // 200 taken, 4xx settled or unknown already: either way nothing more to send.
             if (code >= 200 && code < 500 && PlayerPrefs.GetString(PendingKey, "").StartsWith(matchId + ","))
             {
@@ -202,8 +203,8 @@ namespace SquashBot.Data
         public static IEnumerator SendPending(Action<Result> done)
         {
             var parts = PlayerPrefs.GetString(PendingKey, "").Split(',');
-            if (parts.Length != 3 || !long.TryParse(parts[0], out long id) || id <= 0) { PlayerPrefs.DeleteKey(PendingKey); done(null); yield break; }
-            yield return SendResult(id, parts[1] == "1", parts[2] == "1", done);
+            if ((parts.Length != 3 && parts.Length != 4) || !long.TryParse(parts[0], out long id) || id <= 0) { PlayerPrefs.DeleteKey(PendingKey); done(null); yield break; }
+            yield return SendResult(id, parts[1] == "1", parts[2] == "1", done, parts.Length == 4 && parts[3] == "1");
         }
 
         /// <summary>

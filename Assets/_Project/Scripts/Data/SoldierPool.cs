@@ -6,16 +6,16 @@ namespace SquashBot.Data
 {
     /// <summary>
     /// The army's soldiers the duels (and later the floors) draw on: thirty in each group. A soldier who falls is gone
-    /// from his group for an hour (counted from his own fall), then he is back. A duel takes up to two of each group
+    /// from his group for twenty minutes (counted from his own fall), then he is back. A duel takes up to five of each group
     /// from what is there; a group with none left stays at home.
     /// </summary>
     public static class SoldierPool
     {
         /// <summary>How long a fallen soldier is away.</summary>
-        public static readonly TimeSpan Away = TimeSpan.FromMinutes(60);
+        public static readonly TimeSpan Away = TimeSpan.FromMinutes(20);
 
-        /// <summary>Soldiers of each group a duel takes.</summary>
-        public const int PerDuel = 2;
+        /// <summary>Soldiers of each group a duel takes (all of them charge from the start).</summary>
+        public const int PerDuel = 5;
 
         private const string Key = "sb_pool_";
 
@@ -38,10 +38,10 @@ namespace SquashBot.Data
         /// <summary>Soldiers of a group at home now.</summary>
         public static int Available(int group) => Mathf.Max(0, Army.Soldiers - Returns(group).Count);
 
-        /// <summary>Soldiers a duel can take from a group (at most two).</summary>
+        /// <summary>Soldiers a duel can take from a group (at most five).</summary>
         public static int ForDuel(int group) => Mathf.Min(PerDuel, Available(group));
 
-        /// <summary>A soldier of a group fell: away for an hour.</summary>
+        /// <summary>A soldier of a group fell: away for twenty minutes.</summary>
         public static void Lose(int group)
         {
             if (group < 0 || group >= Army.Groups) return;

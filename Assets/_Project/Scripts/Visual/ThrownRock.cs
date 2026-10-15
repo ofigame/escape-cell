@@ -5,6 +5,9 @@ namespace SquashBot.Visual
     /// <summary>A boulder hurled by a monster: it arcs high and lands on its target at the given moment, spinning.</summary>
     public class ThrownRock : MonoBehaviour
     {
+        /// <summary>Its materials (made for it alone) go with it.</summary>
+        private void Start() => OwnedMaterials.OwnAllUnder(gameObject);
+
         private Vector3 from, to;
         private float duration, t, height;
         private Transform rock, shadow;

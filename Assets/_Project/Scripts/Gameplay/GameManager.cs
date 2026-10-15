@@ -308,12 +308,14 @@ namespace SquashBot.Gameplay
             ui.PausePressed += Pause;
             ui.BagPressed += OpenBag;
             ui.BombPressed += ThrowBomb;
+            ui.BombSwitchPressed += () => NextBombKind();
             WireDefenseUi();
             WireArenaUi();
             ui.AdHealPressed += OnAdHealPressed;
             ui.HeroPicker.Picked += OnHeroPicked;
             ui.WeaponBag.Picked += TakeWeapon;
             ui.AmmoPressed += BuyAmmo;
+            ui.FirePressed += FireAtSight;
             ui.WeaponBag.Closed += CloseBag;
             ui.ResumePressed += Resume;
             ui.SettingToggled += OnSettingToggled;
@@ -496,6 +498,14 @@ namespace SquashBot.Gameplay
         private void ShowMenu()
         {
             EndChallenge();
+            // A rank weapon whose rank was lost (trophies fell) goes from the armory.
+            var lostRank = Armory.RevokeLostRanks();
+            if (lostRank.Count > 0)
+            {
+                var names = new System.Collections.Generic.List<string>();
+                foreach (var id in lostRank) names.Add(Loc.T("weapon." + id));
+                ui.ShowIntro(Loc.T("special.lostTitle"), Loc.F("special.lost", string.Join(", ", names)));
+            }
             ui.SetAmmo(false, 0, 0);
             robot.transform.rotation = Quaternion.identity; // turned round in the garage: facing ahead again
             if (arenaMode) KeepAllies(0); // left the battle arena: the allies are gone (they never come back with a new start)
@@ -1365,11 +1375,12 @@ namespace SquashBot.Gameplay
             if (hitStopLeft > 0f && State == GameState.Playing) Time.timeScale = Mathf.Min(Time.timeScale, 0.08f); // the hit-stop of a knock-out
             if (blowSlowLeft > 0f) { blowSlowLeft -= Time.unscaledDeltaTime; Time.timeScale = Mathf.Min(Time.timeScale, 0.3f); } // the monster's last blow
 
-            if (State != GameState.Playing) { if (tpsOn && !arenaRun && State != GameState.Paused) ExitTps(); return; }
+            if (State != GameState.Playing) { if (tpsOn && !arenaRun && State != GameState.Paused) ExitTps(); if (State != GameState.Paused) ui.SetFire(false, false); return; }
 
             if (roadPhase == RoadPhase.Walk)
             {
                 if (tpsOn && !arenaRun) ExitTps();
+                ui.SetFire(false, false);
                 AudioManager.SetDanger(0f);
                 UpdateRoadWalk();
                 return;
@@ -1378,6 +1389,7 @@ namespace SquashBot.Gameplay
             if (runner.Active)
             {
                 ui.ShowStick(false, default, default); // the tunnels have no stick
+                ui.SetFire(false, false);
                 // The tunnel runs itself (input, robot, camera); just keep the HUD current.
                 AudioManager.SetTension(0.55f + 0.4f * runner.Progress);
                 AudioManager.SetDanger(0f);
@@ -1400,6 +1412,7 @@ namespace SquashBot.Gameplay
             UpdateAlly(Time.deltaTime);
             UpdateChallenge(Time.deltaTime);
             UpdateLevelSquad();
+            UpdateGunSight();
             AudioManager.SetTension(Tension());
             // The hard-rock fight layer: as loud as the fight around foi (and louder when its health runs low).
             AudioManager.SetDanger(level.mission == MissionType.Hunt && roadPhase == RoadPhase.None ? Mathf.Clamp01(hunt.Danger(robot.Position) + (HealthEnabled && health < 0.4f ? 0.2f : 0f)) : 0f);
@@ -1416,12 +1429,13 @@ namespace SquashBot.Gameplay
             // and the monster duel keep their own.
             if (!arenaRun && level.mission == MissionType.Hunt)
             {
-                bool want = LevelTps && roadPhase == RoadPhase.None && robot.IsAlive;
+                // (In the duel it stays on through a knock-down and the countdown: the phone is not turned back and forth.)
+                bool want = LevelTps && roadPhase == RoadPhase.None && (robot.IsAlive || DuelTps);
                 if (want && !tpsOn) EnterTps();
                 else if (!want && tpsOn) ExitTps();
                 if (tpsOn) tps.Show(!ArenaActive);
             }
-            ui.SetTpsSwitch(!arenaRun && !challengeRun && level.mission == MissionType.Hunt && roadPhase == RoadPhase.None, tpsOn);
+            ui.SetTpsSwitch(!arenaRun && (!challengeRun || DuelTps) && level.mission == MissionType.Hunt && roadPhase == RoadPhase.None, tpsOn);
             var command = ArenaActive ? default(InputCommand) : tpsOn ? TpsCommand() : input.Poll(robot.transform.position);
             command = GlassCellGate(command); // foi starts each floor in its glass cell
             UpdateHover(command);

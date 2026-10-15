@@ -113,8 +113,11 @@ namespace SquashBot.UI
                 case Tab.Weapons:
                     // The weapons by kind: guns, swords, axes and maces, spears, hammers (chips across the top).
                     WeaponChips();
-                    if (weaponCat == 0) { PackCell(); BombCell(); }
-                    foreach (var w in Armory.All) if (Armory.Category(w) == weaponCat) WeaponCell(w);
+                    if (weaponCat == 0) { PackCell(); BombCell(); KindBombCell(BombKind.Ice); KindBombCell(BombKind.Fire); }
+                    // Weakest first, strongest last (by the damage of a blow, a burst counted whole).
+                    var shelf = Armory.All.FindAll(x => Armory.Category(x) == weaponCat);
+                    shelf.Sort((a, b) => a.damage * a.burst != b.damage * b.burst ? (a.damage * a.burst).CompareTo(b.damage * b.burst) : a.unlockAt.CompareTo(b.unlockAt));
+                    foreach (var w in shelf) WeaponCell(w);
                     break;
                 case Tab.Tools:
                     PackCell();
@@ -250,7 +253,7 @@ namespace SquashBot.UI
         /// <summary>A weapon: its picture, how it hits, buy it (opens at its level) or take it in hand.</summary>
         private void WeaponCell(WeaponDef w)
         {
-            var card = Cell(w.id, WeaponModels.Glow(w.tier), out var picture);
+            var card = Cell(w.id, WeaponModels.GlowOf(w), out var picture);
             var image = picture.gameObject.AddComponent<RawImage>();
             image.texture = ItemPreview.Spinning(w); // turning all the way round while the card shows
             picture.gameObject.AddComponent<ItemPreview.Lease>().id = w.id;
@@ -335,9 +338,10 @@ namespace SquashBot.UI
                 desc.text = Loc.F("weapon.line", dmg, w.reach, Loc.T(cd <= 0.16f ? "weapon.fast" : cd >= 0.3f ? "weapon.slow" : "weapon.normal"))
                             + "\n" + (w.kind == WeaponKind.Gun ? Loc.T(w.auto ? "weapon.auto" : "weapon.single") + (w.auto ? " ×" + w.burst : "") : Loc.T("weapon.kind." + w.kind)) + "  ·  " + Loc.F("pack.weight", Backpack.Weight(w))
                             + (owned && lv < Armory.MaxLevel ? "  ·  " + Loc.F("weapon.nextLevel", Armory.Damage(w, lv + 1)) : "");
+                if (w.Special) desc.text = "<color=#FFD25A>" + Loc.F("special.line", Loc.T("rank." + w.rank)) + " · " + Loc.T("special.fx." + w.fx) + "</color>\n" + desc.text;
                 SetPips(pips, owned ? lv : 0);
                 veil.SetActive(!unlocked);
-                lockText.text = Loc.F("ws.lockedAt", w.unlockAt + 1);
+                lockText.text = Armory.LockText(w);
                 image.color = unlocked ? Color.white : new Color(1f, 1f, 1f, 0.35f);
                 bool fits = Backpack.Fits(Backpack.Weight(w));
                 equip.gameObject.SetActive(owned);
@@ -358,7 +362,7 @@ namespace SquashBot.UI
                 }
                 else
                 {
-                    label.text = !unlocked ? Loc.F("ws.lockedAt", w.unlockAt + 1)
+                    label.text = !unlocked ? Armory.LockText(w)
                         : fits ? w.price.ToString() : Loc.F("pack.needs", Backpack.LevelNeeded(Backpack.Weight(w)));
                     Afford(buy, unlocked, fits && SaveData.Coins >= w.price);
                     buy.interactable = unlocked; // a tap on a full backpack still says why
@@ -410,9 +414,62 @@ namespace SquashBot.UI
                 SetPips(pips, Bombs.Level);
                 veil.SetActive(!Bombs.Unlocked);
                 lockText.text = Loc.F("ws.lockedAt", Bombs.FromLevel + 1);
-                desc.text = Loc.F("bomb.desc", Bombs.PerFloor, Bombs.Owned ? Bombs.Damage : 6);
+                desc.text = Loc.F("bomb.desc", Bombs.PerFloor, Bombs.Damage * 4);
                 label.text = !Bombs.Unlocked ? Loc.F("ws.lockedAt", Bombs.FromLevel + 1) : Bombs.IsMaxed ? Loc.T("shop.max") : Bombs.NextPrice.ToString();
                 Afford(buy, Bombs.Unlocked && !Bombs.IsMaxed, SaveData.Coins >= Bombs.NextPrice);
+            });
+        }
+
+        /// <summary>The ice and fire bombs: bought once, three of each ride along to every floor beside the blast's.</summary>
+        private void KindBombCell(BombKind k)
+        {
+            var colour = Bombs.ColourOf(k);
+            var card = Cell("Bombs" + k, colour, out var picture);
+            var disc = UiFactory.Box("Bomb", picture, new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(200f, 200f));
+            disc.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(disc, k == BombKind.Ice ? new Color(0.7f, 0.9f, 1f) : new Color(0.7f, 0.16f, 0.07f), UiSprites.Circle).raycastTarget = false;
+            var core = UiFactory.Box("Core", picture, new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(110f, 110f));
+            core.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(core, k == BombKind.Ice ? new Color(0.35f, 0.7f, 1f) : new Color(1f, 0.6f, 0.12f), UiSprites.Circle).raycastTarget = false;
+            var shine = UiFactory.Box("Shine", picture, new Vector2(0.5f, 0.5f), new Vector2(-45f, 35f), new Vector2(50f, 50f));
+            shine.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(shine, new Color(1f, 1f, 1f, 0.35f), UiSprites.Circle).raycastTarget = false;
+            var fuse = UiFactory.Box("Fuse", picture, new Vector2(0.5f, 0.5f), new Vector2(55f, 100f), new Vector2(26f, 60f));
+            fuse.pivot = new Vector2(0.5f, 0.5f);
+            fuse.localRotation = Quaternion.Euler(0f, 0f, -30f);
+            UiFactory.Fill(fuse, new Color(0.85f, 0.7f, 0.45f), UiSprites.Rounded, 8f).raycastTarget = false;
+            string key = k == BombKind.Ice ? "bomb.ice" : "bomb.fire";
+            CardName(card, Loc.T(key + ".name"));
+            var desc = CardDesc(card);
+            var lockText = LockVeil(card, out var veil);
+            var buy = BuyButton(card, () =>
+            {
+                if (Bombs.TryBuy(k))
+                {
+                    AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
+                    Haptics.Medium();
+                    Pop(card);
+                    bip.Queue(Loc.T("bomb.bip"));
+                    Purchased?.Invoke();
+                }
+                else
+                {
+                    AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                    if (Bombs.KindUnlocked(k) && !Bombs.Has(k)) WorkshopTalk.Poor(bip);
+                }
+                Refresh();
+            });
+            var label = buy.GetComponentInChildren<TextMeshProUGUI>();
+            refreshers.Add(() =>
+            {
+                bool open = Bombs.KindUnlocked(k), has = Bombs.Has(k);
+                veil.SetActive(!open);
+                lockText.text = Loc.F("ws.lockedAt", Bombs.UnlockAt(k) + 1);
+                desc.text = k == BombKind.Ice
+                    ? Loc.F(key + ".desc", Bombs.PerFloor, Mathf.RoundToInt(Bombs.FreezeSeconds))
+                    : Loc.F(key + ".desc", Bombs.PerFloor, Mathf.RoundToInt(Bombs.BurnSeconds));
+                label.text = !open ? Loc.F("ws.lockedAt", Bombs.UnlockAt(k) + 1) : has ? Loc.T("shop.max") : Bombs.Price(k).ToString();
+                Afford(buy, open && !has, SaveData.Coins >= Bombs.Price(k));
             });
         }
 

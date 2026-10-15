@@ -77,29 +77,70 @@ namespace SquashBot.Data
             }
         }
 
-        // ---------- Groups: armour and attack ----------
+        // ---------- Groups: power, hit and armour ----------
+
+        /// <summary>The three things a group's development points go into.</summary>
+        public enum Track { Power, Hit, Armor }
 
         /// <summary>
-        /// A group's points: armour (health, and blows it takes off) and attack (its blows), spent separately. Points
-        /// spent before the split are shared out once, half each.
+        /// Each kind's soldier (the user's table): power (health points) from → to, its blow from → to, the share of a
+        /// blow its armour takes off from → to. A development point adds 1 power, 0.1 to the blow or half a per cent of armour.
         /// </summary>
-        public static int ArmorPoints(int group) { Migrate(group); return PlayerPrefs.GetInt(ArmorKey + group, 0); }
-        public static int AttackPoints(int group) { Migrate(group); return PlayerPrefs.GetInt(AttackKey + group, 0); }
-
-        private const string ArmorKey = "sb_army_a_", AttackKey = "sb_army_h_";
-
-        private static void Migrate(int group)
+        private static readonly float[,] Table =
         {
-            if (!PlayerPrefs.HasKey(GroupKey + group)) return;
-            int old = PlayerPrefs.GetInt(GroupKey + group, 0);
-            PlayerPrefs.DeleteKey(GroupKey + group);
-            PlayerPrefs.SetInt(ArmorKey + group, PlayerPrefs.GetInt(ArmorKey + group, 0) + (old + 1) / 2);
-            PlayerPrefs.SetInt(AttackKey + group, PlayerPrefs.GetInt(AttackKey + group, 0) + old / 2);
+            // power, max, hit, max, armour, max
+            { 20f, 110f, 2f, 8f, 0.15f, 0.40f },   // light swords
+            { 25f, 140f, 3f, 10f, 0.15f, 0.40f },  // heavy swords
+            { 18f, 100f, 1.5f, 7f, 0.15f, 0.40f }, // light spears
+            { 22f, 130f, 2.5f, 9f, 0.15f, 0.40f }, // heavy spears
+            { 15f, 90f, 1f, 6f, 0.10f, 0.30f },    // light bows
+            { 20f, 120f, 2f, 8f, 0.10f, 0.30f },   // heavy bows
+        };
+
+        private static readonly float[] PerPointOf = { 1f, 0.1f, 0.005f };
+        private const string PowerKey = "sb_army_p_", HitKey = "sb_army_h_", ArmorKey = "sb_army_a_", VersionKey = "sb_army_v3";
+
+        private static string KeyOf(Track t) => t == Track.Power ? PowerKey : t == Track.Hit ? HitKey : ArmorKey;
+
+        /// <summary>The most points a group's track takes (from its start to its top).</summary>
+        public static int MaxPoints(int group, Track t)
+        {
+            int c = (int)t * 2;
+            return Mathf.RoundToInt((Table[group, c + 1] - Table[group, c]) / PerPointOf[(int)t]);
+        }
+
+        /// <summary>Points in a group's track (never more than it takes).</summary>
+        public static int Points(int group, Track t)
+        {
+            Migrate();
+            return Mathf.Clamp(PlayerPrefs.GetInt(KeyOf(t) + group, 0), 0, MaxPoints(group, t));
+        }
+
+        /// <summary>
+        /// Points spent before the three tracks: the old single points shared out three ways, the old armour (health)
+        /// points into power and the old attack points into the blow.
+        /// </summary>
+        private static bool migrated;
+        private static void Migrate()
+        {
+            if (migrated) return;
+            migrated = true;
+            if (PlayerPrefs.GetInt(VersionKey, 0) == 3) return;
+            for (int g = 0; g < Groups; g++)
+            {
+                int old = PlayerPrefs.GetInt(GroupKey + g, 0);
+                int oldArmor = PlayerPrefs.GetInt(ArmorKey + g, 0), oldAttack = PlayerPrefs.GetInt(HitKey + g, 0);
+                PlayerPrefs.DeleteKey(GroupKey + g);
+                PlayerPrefs.SetInt(PowerKey + g, oldArmor + old / 3);
+                PlayerPrefs.SetInt(HitKey + g, oldAttack + old / 3);
+                PlayerPrefs.SetInt(ArmorKey + g, old - 2 * (old / 3));
+            }
+            PlayerPrefs.SetInt(VersionKey, 3);
             PlayerPrefs.Save();
         }
 
-        /// <summary>All the points in a group (armour and attack).</summary>
-        public static int GroupPoints(int group) => ArmorPoints(group) + AttackPoints(group);
+        /// <summary>All the points in a group.</summary>
+        public static int GroupPoints(int group) => Points(group, Track.Power) + Points(group, Track.Hit) + Points(group, Track.Armor);
 
         public static int SpentPoints
         {
@@ -113,26 +154,23 @@ namespace SquashBot.Data
 
         public static int FreePoints => Mathf.Max(0, EarnedPoints - SpentPoints);
 
-        /// <summary>Puts <paramref name="amount"/> free points into a group's armour (or attack).</summary>
-        public static bool Spend(int group, int amount, bool armor)
+        /// <summary>Puts up to <paramref name="amount"/> free points into a group's track (never past its top).</summary>
+        public static bool Spend(int group, int amount, Track t)
         {
-            amount = Mathf.Min(amount, FreePoints);
+            int have = Points(group, t);
+            amount = Mathf.Min(amount, Mathf.Min(FreePoints, MaxPoints(group, t) - have));
             if (amount <= 0) return false;
-            string key = (armor ? ArmorKey : AttackKey) + group;
-            Migrate(group);
-            PlayerPrefs.SetInt(key, PlayerPrefs.GetInt(key, 0) + amount);
+            PlayerPrefs.SetInt(KeyOf(t) + group, have + amount);
             PlayerPrefs.Save();
             return true;
         }
 
-        /// <summary>Takes up to <paramref name="amount"/> points back off a group's armour (or attack): free to spend again.</summary>
-        public static bool Take(int group, int amount, bool armor)
+        /// <summary>Takes up to <paramref name="amount"/> points back off a group's track (free to spend again).</summary>
+        public static bool Take(int group, int amount, Track t)
         {
-            string key = (armor ? ArmorKey : AttackKey) + group;
-            Migrate(group);
-            int have = PlayerPrefs.GetInt(key, 0);
+            int have = Points(group, t);
             if (have <= 0) return false;
-            PlayerPrefs.SetInt(key, Mathf.Max(0, have - amount));
+            PlayerPrefs.SetInt(KeyOf(t) + group, Mathf.Max(0, have - amount));
             PlayerPrefs.Save();
             return true;
         }
@@ -143,21 +181,51 @@ namespace SquashBot.Data
         public static bool TryReset()
         {
             if (SpentPoints <= 0 || !Shop.Spend(ResetPrice)) return false;
-            for (int g = 0; g < Groups; g++) { PlayerPrefs.DeleteKey(GroupKey + g); PlayerPrefs.DeleteKey(ArmorKey + g); PlayerPrefs.DeleteKey(AttackKey + g); }
+            for (int g = 0; g < Groups; g++) foreach (var k in new[] { GroupKey, PowerKey, HitKey, ArmorKey }) PlayerPrefs.DeleteKey(k + g);
             PlayerPrefs.SetInt(ResetCountKey, PlayerPrefs.GetInt(ResetCountKey, 0) + 1);
             PlayerPrefs.Save();
             return true;
         }
 
-        /// <summary>Strength each armour / attack point adds to its side of a group.</summary>
-        public const float PerSidePoint = 0.03f;
+        /// <summary>A soldier's strengths: health points, blow (health points off a foe) and armour (share taken off a blow).</summary>
+        public struct Stats
+        {
+            public int hp;
+            public float hit, armor;
+        }
 
-        /// <summary>A group's toughness (health) and its blows' strength: their points, plus the army's rank strength.</summary>
-        public static float ArmorPower(int group) => 1f + ArmorPoints(group) * PerSidePoint + Challenge.ArmyBonus;
-        public static float AttackPower(int group) => 1f + AttackPoints(group) * PerSidePoint + Challenge.ArmyBonus;
+        /// <summary>A soldier of a group with these points in its three tracks.</summary>
+        public static Stats StatsFor(int group, int power, int hit, int armor)
+        {
+            group = Mathf.Clamp(group, 0, Groups - 1);
+            return new Stats
+            {
+                hp = Mathf.RoundToInt(Mathf.Min(Table[group, 1], Table[group, 0] + Mathf.Max(0, power) * PerPointOf[0])),
+                hit = Mathf.Min(Table[group, 3], Table[group, 2] + Mathf.Max(0, hit) * PerPointOf[1]),
+                armor = Mathf.Min(Table[group, 5], Table[group, 4] + Mathf.Max(0, armor) * PerPointOf[2]),
+            };
+        }
 
-        /// <summary>A group's overall strength (the average of the two; for matching and the rival's cards).</summary>
-        public static float Power(int group) => (ArmorPower(group) + AttackPower(group)) * 0.5f;
+        /// <summary>The player's soldier of a group.</summary>
+        public static Stats StatsOf(int group) => StatsFor(group, Points(group, Track.Power), Points(group, Track.Hit), Points(group, Track.Armor));
+
+        /// <summary>A rival's soldier from its group's points (shared out over the three tracks, a third each).</summary>
+        public static Stats StatsFromTotal(int group, int total) => StatsFor(group, total / 3, total / 3, total - 2 * (total / 3));
+
+        /// <summary>A group's strength as a multiplier of its plain soldier's power (for the rival cards and matching).</summary>
+        public static float Power(int group) => StatsOf(group).hp / Table[Mathf.Clamp(group, 0, Groups - 1), 0];
+
+        /// <summary>How far a group's soldiers have grown (0 untrained … 1 every track full): the three tracks' shares, averaged.
+        /// Their models grow with it.</summary>
+        public static float Growth(int group, Stats s)
+        {
+            int g = Mathf.Clamp(group, 0, Groups - 1);
+            float Share(float v, int c) => Mathf.Clamp01((v - Table[g, c]) / Mathf.Max(0.0001f, Table[g, c + 1] - Table[g, c]));
+            return (Share(s.hp, 0) + Share(s.hit, 2) + Share(s.armor, 4)) / 3f;
+        }
+
+        /// <summary>A soldier's model size for its growth: up to half as big again when fully trained.</summary>
+        public static float SizeFor(int group, Stats s) => 1f + 0.5f * Growth(group, s);
 
         /// <summary>The look tier of a group (0 plain, one more every 25 points).</summary>
         public static int Tier(int group) => GroupPoints(group) / TierStep;

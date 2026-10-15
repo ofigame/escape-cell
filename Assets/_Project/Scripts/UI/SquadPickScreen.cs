@@ -17,7 +17,7 @@ namespace SquashBot.UI
 
         private UiScreen screen;
         private RectTransform list;
-        private TextMeshProUGUI total;
+        private TextMeshProUGUI total, hint;
         private int stages = 1;
         private const float RowH = 190f;
 
@@ -34,12 +34,12 @@ namespace SquashBot.UI
             Flat.Background(root);
             Flat.Label(root, Loc.T("squad.title"), new Vector2(0.5f, 1f), new Vector2(0f, -110f), new Vector2(960f, 80f), 52f, Flat.Text, TextAlignmentOptions.Center, bold: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var hint = Flat.Label(root, Loc.T("squad.hint"), new Vector2(0.5f, 1f), new Vector2(0f, -190f), new Vector2(940f, 90f), 26f, Flat.Muted, TextAlignmentOptions.Center, wrap: true);
+            var hint = s.hint = Flat.Label(root, "", new Vector2(0.5f, 1f), new Vector2(0f, -190f), new Vector2(940f, 90f), 26f, Flat.Muted, TextAlignmentOptions.Center, wrap: true);
             hint.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             s.list = UiFactory.Rect("List", root, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -260f - Army.Groups * RowH), new Vector2(0f, -260f));
-            s.total = Flat.Label(root, "", new Vector2(0.5f, 0f), new Vector2(0f, 230f), new Vector2(940f, 60f), 32f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
+            s.total = Flat.Label(root, "", new Vector2(0.5f, 0f), new Vector2(0f, 360f), new Vector2(940f, 60f), 32f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
             s.total.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var ok = Flat.Button(root, Loc.T("squad.ok"), new Vector2(0.5f, 0f), new Vector2(0f, 110f), new Vector2(520f, 110f), Flat.Blue, Flat.Text, () => { s.screen.Hide(true); s.Closed?.Invoke(); }, 40f);
+            var ok = Flat.Button(root, Loc.T("squad.ok"), new Vector2(0.5f, 0f), new Vector2(0f, 240f), new Vector2(520f, 110f), Flat.Blue, Flat.Text, () => { s.screen.Hide(true); s.Closed?.Invoke(); }, 40f);
             ((RectTransform)ok.transform).pivot = new Vector2(0.5f, 0.5f);
             return s;
         }
@@ -57,7 +57,8 @@ namespace SquashBot.UI
         {
             for (int i = list.childCount - 1; i >= 0; i--) Destroy(list.GetChild(i).gameObject);
             for (int g = 0; g < Army.Groups; g++) Row(g);
-            total.text = Loc.F("squad.total", LevelSquad.Total);
+            hint.text = Loc.F("squad.hint", LevelSquad.Limit);
+            total.text = Loc.F("squad.total", LevelSquad.Total) + " / " + LevelSquad.Limit;
         }
 
         private void Row(int g)
@@ -84,7 +85,7 @@ namespace SquashBot.UI
                 return b;
             }
             float y = stages > 1 ? 36f : 0f;
-            B("+", new Vector2(-20f, y), new Vector2(80f, 70f), colour, () => { LevelSquad.SetCount(g, Mathf.Min(n + 1, Mathf.Min(LevelSquad.MaxPerGroup, home))); Build(); }).interactable = n < Mathf.Min(LevelSquad.MaxPerGroup, home);
+            B("+", new Vector2(-20f, y), new Vector2(80f, 70f), colour, () => { if (LevelSquad.Room > 0) LevelSquad.SetCount(g, Mathf.Min(n + 1, Mathf.Min(LevelSquad.MaxPerGroup, home))); Build(); }).interactable = n < Mathf.Min(LevelSquad.MaxPerGroup, home) && LevelSquad.Room > 0;
             var count = Flat.Label(row, n.ToString(), right, new Vector2(-110f, y), new Vector2(80f, 70f), 40f, Flat.Text, TextAlignmentOptions.Center, bold: true);
             count.rectTransform.pivot = new Vector2(1f, 0.5f);
             B("-", new Vector2(-200f, y), new Vector2(80f, 70f), Flat.CardHi, () => { LevelSquad.SetCount(g, n - 1); Build(); }).interactable = n > 0;

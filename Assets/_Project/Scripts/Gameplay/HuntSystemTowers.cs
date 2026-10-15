@@ -149,7 +149,8 @@ namespace SquashBot.Gameplay
 
         private void AddTower(GridPos p, bool reactor = false)
         {
-            int hp = reactor ? ReactorHp : level.towerHp;
+            // Health points: two and a half (the reactor five) times an advanced robot of the world on a roster floor.
+            int hp = RosterWorld >= 0 ? EnemyRoster.Special(RosterWorld, RosterFloor, reactor ? 5f : 2.5f).hp : Mathf.RoundToInt((reactor ? ReactorHp : level.towerHp) * HpBase);
             var t = new Tower { pos = p, hp = hp, maxHp = Mathf.Max(1, hp), cooldown = 1.5f + (float)rng.NextDouble(), reactor = reactor };
             t.root = new GameObject("GuardTower").transform;
             t.root.SetParent(transform, false);
@@ -211,7 +212,7 @@ namespace SquashBot.Gameplay
                     t.model.SetCharge(0f);
                     t.model.Flash();
                     var colour = t.model.BoltColour;
-                    float share = t.reactor ? ReactorHitShare : TowerHitShare;
+                    float share = RosterWorld >= 0 ? EnemyRoster.Special(RosterWorld, RosterFloor, t.reactor ? 2f : 1f).damage / (float)Mathf.Max(1, FoiHp) : t.reactor ? ReactorHitShare : TowerHitShare;
                     AudioManager.PlaySfx(Sfx.Blocked, 0.7f, t.reactor ? 1.1f : 1.6f);
                     if (t.reactor) rig.Shake(0.4f);
                     foreach (var a in t.area)

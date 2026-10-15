@@ -138,8 +138,19 @@ namespace SquashBot.Gameplay
             if (!arenaRun && !trailRun && !challengeRun)
             {
                 float x0 = GridView.ToWorld(new GridPos(grid.Width - 1, 0)).x + 0.55f; // right at the floor's edge (no wall between)
-                float z0 = GridView.ToWorld(new GridPos(0, 0)).z - 1f, z1 = GridView.ToWorld(new GridPos(0, grid.Height - 1)).z + 1f;
-                floorStand = FloorStand.Build(fortressFloor, x0, z0, z1, GridView.SurfaceY + 0.05f, 3 + Mathf.Max(1, level.fortressStages),
+                // In sections at the height of the floor beside them: on a floor of stages the stand climbs with each stage.
+                var sections = new System.Collections.Generic.List<Vector3>();
+                for (int y = 0; y < grid.Height;)
+                {
+                    float h = GridView.ToWorld(new GridPos(grid.Width - 1, y)).y;
+                    int end = y;
+                    while (end + 1 < grid.Height && Mathf.Approximately(GridView.ToWorld(new GridPos(grid.Width - 1, end + 1)).y, h)) end++;
+                    float zs = y == 0 ? GridView.ToWorld(new GridPos(0, 0)).z - 1f : y - 0.5f;
+                    float ze = end == grid.Height - 1 ? GridView.ToWorld(new GridPos(0, grid.Height - 1)).z + 1f : end + 0.5f;
+                    sections.Add(new Vector3(zs, ze, h + GridView.SurfaceY + 0.05f));
+                    y = end + 1;
+                }
+                floorStand = FloorStand.Build(fortressFloor, x0, sections, 3 + Mathf.Max(1, level.fortressStages),
                     Color.Lerp(FortressFloor.WallTint ?? new Color(0.7f, 0.66f, 0.6f), Color.white, 0.35f), levelIndex * 31 + 7);
             }
             // The fortress never moves: its thousands of pieces are merged into a few big meshes (far fewer draw calls).

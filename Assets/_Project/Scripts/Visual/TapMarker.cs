@@ -8,6 +8,9 @@ namespace SquashBot.Visual
     /// </summary>
     public class TapMarker : MonoBehaviour
     {
+        /// <summary>Its materials (made for it alone) go with it.</summary>
+        private void Start() => OwnedMaterials.OwnAllUnder(gameObject);
+
         private const float Life = 0.45f;
         private Material mat;
         private Transform ring, arrow;

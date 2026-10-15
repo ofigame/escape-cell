@@ -5,6 +5,9 @@ namespace SquashBot.Visual
     /// <summary>A flat ring of force racing out over the floor from a slam, fading as it grows.</summary>
     public class Shockwave : MonoBehaviour
     {
+        /// <summary>Its materials (made for it alone) go with it.</summary>
+        private void Start() => OwnedMaterials.OwnAllUnder(gameObject);
+
         private const float Duration = 0.4f;
         private Transform ring, inner;
         private Material mat;

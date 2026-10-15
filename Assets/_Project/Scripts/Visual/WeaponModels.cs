@@ -37,7 +37,37 @@ namespace SquashBot.Visual
             }
         }
 
+        /// <summary>A rank weapon's colour: its effect's (fire, ice, lightning, earth, royal gold, sun).</summary>
+        public static Color FxColour(SpecialFx fx)
+        {
+            switch (fx)
+            {
+                case SpecialFx.Burn: return new Color(1f, 0.45f, 0.15f);
+                case SpecialFx.Freeze: return new Color(0.5f, 0.85f, 1f);
+                case SpecialFx.Chain: return new Color(0.75f, 0.6f, 1f);
+                case SpecialFx.Quake: return new Color(0.95f, 0.7f, 0.35f);
+                case SpecialFx.Cleave: return new Color(1f, 0.85f, 0.3f);
+                case SpecialFx.Pierce: return new Color(1f, 0.95f, 0.55f);
+                default: return Glow(6);
+            }
+        }
+
+        /// <summary>The glow of a weapon's blows: a rank weapon's effect colour, else its tier's.</summary>
+        public static Color GlowOf(WeaponDef w) => w.Special ? FxColour(w.fx) : Glow(w.tier);
+
+        /// <summary>A weapon's model; a rank weapon is bigger, made of its effect's glowing metal, with a glowing orb set in it.</summary>
         public static Transform Build(Transform parent, WeaponDef w, float scale = 1f)
+        {
+            var root = BuildPlain(parent, w, w.Special ? scale * w.size : scale);
+            if (!w.Special) return root;
+            var c = FxColour(w.fx);
+            var orbMat = MaterialFactory.Create(c, c * 3f);
+            float y = w.kind == WeaponKind.Gun ? 0.14f : w.kind == WeaponKind.Spear ? 1.05f : 0.2f;
+            Shapes.Primitive(PrimitiveType.Sphere, "Orb", root, new Vector3(0f, y, w.kind == WeaponKind.Gun ? 0.1f : 0.04f), Vector3.one * 0.1f, orbMat);
+            return root;
+        }
+
+        private static Transform BuildPlain(Transform parent, WeaponDef w, float scale)
         {
             if (w.kind == WeaponKind.Hammer) return HammerModels.Build(parent, Mathf.Clamp(w.tier, 1, 5), scale);
             var root = new GameObject(w.id).transform;
@@ -46,7 +76,7 @@ namespace SquashBot.Visual
             var wood = MaterialFactory.Create(new Color(0.45f, 0.28f, 0.16f), Color.black);
             var grip = MaterialFactory.Create(new Color(0.2f, 0.15f, 0.12f), Color.black);
             var gold = MaterialFactory.Create(new Color(1f, 0.8f, 0.3f), new Color(0.3f, 0.2f, 0.02f));
-            var metal = Metal(w.tier);
+            var metal = w.Special ? MaterialFactory.Create(FxColour(w.fx), FxColour(w.fx) * 1.6f) : Metal(w.tier);
             switch (w.kind)
             {
                 case WeaponKind.Sword:

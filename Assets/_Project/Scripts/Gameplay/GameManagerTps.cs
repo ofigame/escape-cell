@@ -185,7 +185,7 @@ namespace SquashBot.Gameplay
                 strikeCooldown = 0.25f;
                 var w = weapon ?? Armory.Equipped;
                 if (heldWeapon != null) heldWeapon.Swing();
-                SlashFx.Create(robot.transform.position, robot.transform.position + fwd * 1.6f, WeaponModels.Glow(w.tier), 1f);
+                SlashFx.Create(robot.transform.position, robot.transform.position + fwd * 1.6f, WeaponModels.GlowOf(w), 1f);
                 AudioManager.PlaySfx(Sfx.Hop, 0.5f, 1.6f);
             }
         }
@@ -236,7 +236,7 @@ namespace SquashBot.Gameplay
             if (look.sqrMagnitude > 0.01f) robot.ArenaFace(look);
             if (heldWeapon != null) heldWeapon.Swing();
             GunShotFx(point, w);
-            cameraRig.Shake(0.05f + 0.03f * damage);
+            cameraRig.Shake(0.05f + 0.003f * damage);
             if (hit) lastStrikeTap = Time.time;
         }
 
@@ -285,20 +285,18 @@ namespace SquashBot.Gameplay
         /// </summary>
         private void Toughen(LevelData l)
         {
-            // Fewer robots on the floor at once (2 to 5; user asked), each a little tougher; the crowd a bit smaller.
-            if (l.robotsAtOnce > 0) l.robotsAtOnce = Mathf.Clamp(Mathf.RoundToInt(l.robotsAtOnce * 0.75f), 2, 5);
-            l.robots = Mathf.CeilToInt(l.robots * 0.65f);
-            if (LevelCatalog.WorldOf(levelIndex) >= 2) l.robotHp += 1;
-            if (LevelCatalog.WorldOf(levelIndex) >= 5) l.robotHp += 1;
-            // More of the hard ones (user asked): enforcers and warlords.
-            l.elites = Mathf.CeilToInt(l.elites * 1.6f) + (LevelCatalog.WorldOf(levelIndex) >= 1 ? 1 : 0);
-            l.brutes = Mathf.CeilToInt(l.brutes * 1.5f) + (LevelCatalog.WorldOf(levelIndex) >= 1 ? 1 : 0);
-            // vanG: never a pushover, whatever foi carries — at least 10 (first floors) to 30 (last floors) of foi's own
-            // best blows, and it attacks more often.
-            float far = levelIndex / (float)Mathf.Max(1, LevelCount - 1);
-            int blow = Mathf.Max(1, Challenge.RankBoost(Armory.Damage(Armory.Equipped)) - l.armor);
-            l.monsterHp = Mathf.Max(Mathf.CeilToInt(l.monsterHp * 2.5f), Mathf.CeilToInt(blow * Mathf.Lerp(10f, 30f, far)));
-            l.monsterAttack *= 0.8f;
+            // Fewer robots on the floor at once (2 to 5); the crowd grows floor by floor through a world (the first floor
+            // of a world four fifths of the old count, the tenth about a third more).
+            int world = LevelCatalog.WorldOf(levelIndex), inWorld = levelIndex % LevelCatalog.LevelsPerWorld;
+            if (l.robotsAtOnce > 0) l.robotsAtOnce = Mathf.Clamp(Mathf.RoundToInt(l.robotsAtOnce * 0.75f) + inWorld / 4, 2, 5);
+            l.robots = Mathf.CeilToInt(l.robots * 0.65f * (0.8f + 0.06f * inWorld));
+            l.elites = Mathf.CeilToInt(l.elites * 1.6f) + (world >= 1 ? 1 : 0);
+            l.brutes = Mathf.CeilToInt(l.brutes * 1.5f) + (world >= 1 ? 1 : 0);
+            // The robots' armour is their own now (the roster's share of a blow), not the floor's.
+            l.armor = 0;
+            // vanG: the world's strongest, 100 health points in the first world up to 1500 in the last, more every floor.
+            l.monsterHp = EnemyRoster.VanGHp(world, inWorld);
+            l.monsterAttack *= Mathf.Lerp(0.9f, 0.75f, inWorld / 9f);
         }
     }
 }

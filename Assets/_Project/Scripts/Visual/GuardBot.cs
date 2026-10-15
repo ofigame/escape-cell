@@ -17,20 +17,39 @@ namespace SquashBot.Visual
         private Material core;
         private float raise, flash;
         private int variant;
+        /// <summary>The parts: legs (0 legs, 1 treads, 4 jets, 5 spider legs, 6 a ball wheel), head (0..6), arms (0 clamps,
+        /// 3 drills, 1 blades, 2 cannons, 4 shields), trim (0 antenna, 1 horns, 2 a crest, 3 a back tank); advanced: armour plates.</summary>
+        private int legs, head, arms, trim = -1;
+        private bool advanced;
         private bool utopian;
         private Color coreColour = new Color(1f, 0.45f, 0.2f), coreGlow = new Color(2.4f, 0.8f, 0.25f);
 
         /// <param name="utopian">The perfect city's guards (level 101 on): pearl and gold, floating on a glowing ring;
         /// <paramref name="plates"/> is then the colour of their light.</param>
-        public static GuardBot Build(Transform parent, Color? plates = null, int variant = 0, bool utopian = false)
+        /// <param name="style">A world's own robot (world × 2, +1 the advanced one): its legs, head, arms and trim picked
+        /// from the parts below, so each of the fifty looks its own; -1: one of the five classic builds.</param>
+        public static GuardBot Build(Transform parent, Color? plates = null, int variant = 0, bool utopian = false, int style = -1)
         {
             var root = new GameObject("GuardBot").transform;
             root.SetParent(parent, false);
             var g = root.gameObject.AddComponent<GuardBot>();
             g.variant = ((variant % Variants) + Variants) % Variants;
+            g.legs = g.head = g.variant;
+            g.arms = g.variant == 3 ? 3 : 0; // the classic builds keep their clamps (the brawler its drills)
+            if (style >= 0)
+            {
+                int w = style / 2;
+                g.advanced = style % 2 == 1;
+                g.legs = new[] { 0, 1, 4, 5, 6 }[(w * 3 + (g.advanced ? 2 : 0)) % 5];
+                g.head = (w * 2 + (g.advanced ? 3 : 0)) % 7;
+                g.arms = (w + (g.advanced ? 2 : 0)) % 5;
+                g.trim = (w * 5 + style) % 4;
+                g.variant = g.legs == 4 ? 4 : g.head == 1 ? 1 : 0; // (the hover follows the jets)
+            }
             g.utopian = utopian;
             if (utopian) g.MakeUtopian(root, plates ?? new Color(0.4f, 0.9f, 1f));
             else g.Make(root, plates ?? new Color(0.55f, 0.2f, 0.18f));
+            OwnedMaterials.OwnAllUnder(root.gameObject); // its materials go with it
             return g;
         }
 
@@ -95,8 +114,8 @@ namespace SquashBot.Visual
             var red = MaterialFactory.Create(new Color(1f, 0.25f, 0.18f), new Color(2.6f, 0.4f, 0.2f));
             core = MaterialFactory.Create(new Color(1f, 0.45f, 0.2f), new Color(2.4f, 0.8f, 0.25f));
 
-            // Lower body: legs, treads or jets.
-            switch (variant)
+            // Lower body: legs, treads, jets, spider legs or a ball wheel.
+            switch (legs)
             {
                 case 1:
                     foreach (float s in new[] { -1f, 1f })
@@ -113,6 +132,20 @@ namespace SquashBot.Visual
                         Shapes.Primitive(PrimitiveType.Cylinder, "Jet", root, new Vector3(s * 0.15f, 0.2f, -0.05f), new Vector3(0.12f, 0.08f, 0.12f), dark);
                         Shapes.Primitive(PrimitiveType.Sphere, "Flame", root, new Vector3(s * 0.15f, 0.1f, -0.05f), new Vector3(0.1f, 0.14f, 0.1f), core);
                     }
+                    break;
+                case 5:
+                    for (int i = 0; i < 4; i++)
+                    {
+                        float a = (i + 0.5f) * Mathf.PI / 2f;
+                        var leg = Shapes.Rounded("SpiderLeg", root, new Vector3(Mathf.Cos(a) * 0.24f, 0.12f, Mathf.Sin(a) * 0.24f), new Vector3(0.08f, 0.26f, 0.08f), 0.03f, dark).transform;
+                        leg.localRotation = Quaternion.LookRotation(new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a))) * Quaternion.Euler(35f, 0f, 0f);
+                        Shapes.Primitive(PrimitiveType.Sphere, "Toe", root, new Vector3(Mathf.Cos(a) * 0.33f, 0.03f, Mathf.Sin(a) * 0.33f), Vector3.one * 0.08f, metal);
+                    }
+                    break;
+                case 6:
+                    Shapes.Primitive(PrimitiveType.Sphere, "Ball", root, new Vector3(0f, 0.16f, 0f), Vector3.one * 0.32f, dark);
+                    Shapes.Primitive(PrimitiveType.Cylinder, "BallBand", root, new Vector3(0f, 0.16f, 0f), new Vector3(0.34f, 0.02f, 0.34f), plate)
+                        .transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
                     break;
                 default:
                     foreach (float s in new[] { -1f, 1f })
@@ -131,8 +164,25 @@ namespace SquashBot.Visual
             Shapes.Primitive(PrimitiveType.Sphere, "Core", body, new Vector3(0f, 0.28f, 0.22f), Vector3.one * 0.13f, core);
 
             // Head.
-            switch (variant)
+            switch (head)
             {
+                case 5:
+                    // Twin round eyes on a wide head.
+                    Shapes.Rounded("Head", body, new Vector3(0f, 0.62f, 0.02f), new Vector3(0.46f, 0.22f, 0.32f), 0.09f, plate);
+                    foreach (float s in new[] { -1f, 1f })
+                        Shapes.Primitive(PrimitiveType.Sphere, "Eye", body, new Vector3(s * 0.1f, 0.63f, 0.17f), Vector3.one * 0.1f, red);
+                    break;
+                case 6:
+                    // A tall bucket helm with a slit.
+                    Shapes.Rounded("Helm", body, new Vector3(0f, 0.68f, 0.02f), new Vector3(0.3f, 0.36f, 0.3f), 0.05f, plate);
+                    Shapes.Rounded("Slit", body, new Vector3(0f, 0.7f, 0.17f), new Vector3(0.22f, 0.04f, 0.02f), 0.01f, red);
+                    break;
+                case 3:
+                    // A low wedge with three eyes.
+                    Shapes.Rounded("Head", body, new Vector3(0f, 0.6f, 0.04f), new Vector3(0.4f, 0.18f, 0.36f), 0.06f, metal);
+                    for (int e = -1; e <= 1; e++)
+                        Shapes.Primitive(PrimitiveType.Sphere, "Eye", body, new Vector3(e * 0.1f, 0.61f, 0.21f), Vector3.one * 0.07f, red);
+                    break;
                 case 1:
                     Shapes.Primitive(PrimitiveType.Sphere, "Dome", body, new Vector3(0f, 0.62f, 0f), new Vector3(0.4f, 0.3f, 0.38f), plate);
                     Shapes.Rounded("Visor", body, new Vector3(0f, 0.62f, 0.17f), new Vector3(0.28f, 0.07f, 0.04f), 0.02f, red);
@@ -163,22 +213,70 @@ namespace SquashBot.Visual
             {
                 var pauldron = Shapes.Rounded("Pauldron", body, new Vector3(s * 0.36f, 0.48f, 0f), new Vector3(0.2f, 0.12f, 0.3f), 0.05f, plate);
                 pauldron.transform.localRotation = Quaternion.Euler(0f, 0f, -s * 18f);
-                if (variant == 3)
+                if (arms == 3 || advanced)
                     for (int k = 0; k < 3; k++)
                         Shapes.Primitive(PrimitiveType.Cylinder, "Spike", body, new Vector3(s * (0.38f + k * 0.02f), 0.58f, -0.1f + k * 0.1f), new Vector3(0.04f, 0.07f, 0.04f), metal)
                             .transform.localRotation = Quaternion.Euler(0f, 0f, -s * 30f);
             }
 
-            ArmL = Arm(body, -1f, metal, dark, plate, variant);
-            ArmR = Arm(body, 1f, metal, dark, plate, variant);
+            ArmL = Arm(body, -1f, metal, dark, plate, arms, red);
+            ArmR = Arm(body, 1f, metal, dark, plate, arms, red);
+            Trim(metal, dark, plate, red);
         }
 
-        private static Transform Arm(Transform body, float side, Material metal, Material dark, Material plate, int variant)
+        /// <summary>A world's robot's own trim, and an advanced one's armour plates.</summary>
+        private void Trim(Material metal, Material dark, Material plate, Material red)
+        {
+            switch (trim)
+            {
+                case 1:
+                    foreach (float s in new[] { -1f, 1f })
+                        Shapes.Primitive(PrimitiveType.Cylinder, "Horn", body, new Vector3(s * 0.16f, 0.84f, 0f), new Vector3(0.05f, 0.11f, 0.05f), plate)
+                            .transform.localRotation = Quaternion.Euler(0f, 0f, -s * 28f);
+                    break;
+                case 2:
+                    Shapes.Rounded("Crest", body, new Vector3(0f, 0.86f, -0.02f), new Vector3(0.04f, 0.14f, 0.3f), 0.02f, red);
+                    break;
+                case 3:
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Tank", body, new Vector3(0f, 0.3f, -0.28f), new Vector3(0.2f, 0.16f, 0.2f), plate);
+                    Shapes.Primitive(PrimitiveType.Sphere, "TankCap", body, new Vector3(0f, 0.47f, -0.28f), Vector3.one * 0.1f, red);
+                    break;
+            }
+            if (!advanced) return;
+            // The advanced robot: a chest plate, a belt of studs and a glowing band.
+            Shapes.Rounded("ChestPlate", body, new Vector3(0f, 0.32f, 0.23f), new Vector3(0.5f, 0.3f, 0.06f), 0.04f, plate);
+            for (int i = -2; i <= 2; i++)
+                Shapes.Primitive(PrimitiveType.Sphere, "Stud", body, new Vector3(i * 0.1f, 0.1f, 0.21f), Vector3.one * 0.05f, metal);
+            Shapes.Rounded("Band", body, new Vector3(0f, 0.2f, 0.25f), new Vector3(0.44f, 0.03f, 0.02f), 0.01f, red);
+        }
+
+        private static Transform Arm(Transform body, float side, Material metal, Material dark, Material plate, int variant, Material red = null)
         {
             var pivot = new GameObject("Arm").transform;
             pivot.SetParent(body, false);
             pivot.localPosition = new Vector3(side * 0.4f, 0.42f, 0f);
             Shapes.Rounded("Upper", pivot, new Vector3(0f, -0.16f, 0f), new Vector3(0.12f, 0.3f, 0.14f), 0.04f, dark);
+            if (variant == 1)
+            {
+                // A blade arm.
+                Shapes.Rounded("Blade", pivot, new Vector3(0f, -0.46f, 0.08f), new Vector3(0.04f, 0.36f, 0.12f), 0.01f, plate);
+                return pivot;
+            }
+            if (variant == 2)
+            {
+                // A cannon arm with a glowing muzzle.
+                Shapes.Primitive(PrimitiveType.Cylinder, "Cannon", pivot, new Vector3(0f, -0.42f, 0.04f), new Vector3(0.14f, 0.14f, 0.14f), metal);
+                Shapes.Primitive(PrimitiveType.Sphere, "Muzzle", pivot, new Vector3(0f, -0.56f, 0.04f), Vector3.one * 0.09f, red ?? plate);
+                return pivot;
+            }
+            if (variant == 4)
+            {
+                // A round shield on the arm.
+                Shapes.Rounded("Fist", pivot, new Vector3(0f, -0.36f, 0.04f), new Vector3(0.16f, 0.14f, 0.18f), 0.05f, metal);
+                Shapes.Primitive(PrimitiveType.Cylinder, "Shield", pivot, new Vector3(side * 0.08f, -0.34f, 0.1f), new Vector3(0.3f, 0.02f, 0.3f), plate)
+                    .transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                return pivot;
+            }
             if (variant == 3)
             {
                 // A drill fist.

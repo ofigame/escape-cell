@@ -10,6 +10,9 @@ namespace SquashBot.Visual
     /// </summary>
     public class GlassCell : MonoBehaviour
     {
+        /// <summary>Its materials (made for it alone) go with it.</summary>
+        private void Start() => OwnedMaterials.OwnAllUnder(gameObject);
+
         private const float Size = 1.25f, Height = 1.7f;
         private Material glass, frame;
         private readonly List<Transform> panes = new List<Transform>();
@@ -71,6 +74,7 @@ namespace SquashBot.Visual
             foreach (var p in panes) p.gameObject.SetActive(false);
             foreach (Transform c in transform) if (c.name.StartsWith("Edge")) c.gameObject.SetActive(false);
             shardMat = MaterialFactory.CreateTransparent(new Color(0.6f, 0.9f, 1f, 0.7f), new Color(0.6f, 1.6f, 2.4f));
+            OwnedMaterials.Own(gameObject, shardMat); // (made after Start: owned here)
             var rng = new System.Random(Mathf.RoundToInt(transform.position.x * 31f + transform.position.z * 17f));
             float R() => (float)rng.NextDouble();
             for (int i = 0; i < 34; i++)

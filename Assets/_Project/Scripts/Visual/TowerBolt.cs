@@ -6,6 +6,9 @@ namespace SquashBot.Visual
     /// <summary>A tower's shot: a glowing bolt with a short trail flying in a low arc to its tile, then a small burst.</summary>
     public class TowerBolt : MonoBehaviour
     {
+        /// <summary>Its materials (made for it alone) go with it.</summary>
+        private void Start() => OwnedMaterials.OwnAllUnder(gameObject);
+
         private Vector3 from, to;
         private float t, duration;
         private Action landed;

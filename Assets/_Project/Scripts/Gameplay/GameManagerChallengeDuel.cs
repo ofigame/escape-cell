@@ -75,9 +75,9 @@ namespace SquashBot.Gameplay
             }
         }
 
-        /// <summary>The share of a foi's health one blow of this weapon takes: 1% per point of damage, less its armour.</summary>
+        /// <summary>The share of foi's health one blow of this weapon takes: its damage (health points), less foi's armour, over foi's health points.</summary>
         private static float DuelBlow(WeaponDef w, int weaponLevel, float armor) =>
-            0.01f * Armory.Damage(w, Mathf.Max(1, weaponLevel)) * (1f - Mathf.Clamp01(armor));
+            Armory.Damage(w, Mathf.Max(1, weaponLevel)) * (1f - Mathf.Clamp01(armor)) / Mathf.Max(1f, Challenge.FoiMaxHp);
 
         /// <summary>The Duel's board: the stage, the two foi on their marks with their squads, the clock.</summary>
         private void BuildDuelBoard(int stage)
@@ -141,7 +141,8 @@ namespace SquashBot.Gameplay
             hunt.ChallengeBattle = true;
             hunt.FoeSoldierDamage = Armory.Damage(w, Mathf.Max(1, rival.weaponLevel));
             // 100 health points behind its armour; foi's blows take its weapon's damage in points (1% each).
-            int hp = LiveActive ? 100 : Mathf.RoundToInt(100f / Mathf.Max(0.5f, 1f - rival.armor));
+            // Its own health points (live: a share of 100, the server keeps the points), its armour taking its share off foi's blows.
+            int hp = LiveActive ? 100 : Mathf.RoundToInt(Mathf.Max(100, rival.foiHp) / Mathf.Max(0.5f, 1f - rival.armor));
             // Its blows weigh what the player's own would (its flurries of quick blows make up for its slower swings).
             const float rate = 1f;
             hunt.AddChallengeFoe(theirs, hp, DuelBlow(w, rival.weaponLevel, Shop.ArmorShare) * (LiveActive ? 1f : rate), look, rivalHeld, 0);
@@ -156,12 +157,16 @@ namespace SquashBot.Gameplay
                 for (int g = 0; g < Army.Groups; g++)
                 {
                     int n = SoldierPool.ForDuel(g);
-                    for (int s = 0; s < n; s++) hunt.AddSquadSoldier(true, g * SoldierPool.PerDuel + s, mine + new GridPos(g - 2, back * (2 + s)), Army.ArmorPower(g), hitPower: Army.AttackPower(g));
+                    for (int s = 0; s < n; s++) hunt.AddSquadSoldier(true, g * SoldierPool.PerDuel + s, mine + new GridPos(g - 2, back * (2 + s)), Army.StatsOf(g));
                     if (LiveActive) continue; // the live rival's soldiers come with its state
-                    for (int s = 0; s < rival.squad[g]; s++) hunt.AddSquadSoldier(false, g * SoldierPool.PerDuel + s, theirs + new GridPos(g - 2, -back * (2 + s)), rival.Power(g));
+                    for (int s = 0; s < rival.squad[g]; s++) hunt.AddSquadSoldier(false, g * SoldierPool.PerDuel + s, theirs + new GridPos(g - 2, -back * (2 + s)), Army.StatsFromTotal(g, rival.points[g]));
                 }
+                // Every group charges from the start (a tag tapped calls its group back to guard, tapped again: back in).
+                for (int g = 0; g < Army.Groups; g++) { hunt.SetSquadOrder(true, g, true); hunt.SetSquadOrder(false, g, true); }
             }
-            else { hunt.RegroupSquads(); hunt.DelayBotOrders(6f + Random.value * 6f); }
+            // After a knock-down the soldiers left line up behind their foi again (no new ones and no healing until the duel is over).
+            else hunt.RegroupSquads();
+
             RefreshSquadBar();
         }
 
@@ -202,23 +207,41 @@ namespace SquashBot.Gameplay
             if (!challengeRun) return;
             chDuelLeft = secs;
             PlaceDuelists(first: false);
+            duelPan = robot.transform.position - boardCentre; duelPan.y = 0f;
+            RefreshDuelClock();
+            // 3, 2, 1: the server holds the blows and its clock for the same 2.4 s (Rules.DuelCountdown).
+            cameraRig.StartCoroutine(CountdownThenGo());
+        }
+
+        /// <summary>3, 2, 1 over the two foi on their marks (everything still), then the duel goes on.</summary>
+        private System.Collections.IEnumerator CountdownThenGo()
+        {
+            hunt.Freeze();
+            chPhase = ChPhase.Break;
+            for (int i = 3; i >= 1; i--)
+            {
+                if (!challengeRun || chPhase == ChPhase.Done) yield break;
+                chUi.SetStatus(i.ToString());
+                ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.6f), i.ToString(), Palette.UiGold, 220f);
+                AudioManager.PlaySfx(Sfx.Click, 1f, 0.8f + 0.1f * (3 - i));
+                yield return new WaitForSeconds(0.8f);
+                while (challengeRun && State == GameState.Paused) yield return null;
+            }
+            if (!challengeRun || chPhase == ChPhase.Done || State != GameState.Playing) yield break;
             hunt.Resume();
             chPhase = ChPhase.Duel;
-            duelPan = robot.transform.position - boardCentre; duelPan.y = 0f;
             chUi.SetStatus(Loc.T("ch.duel"));
-            RefreshDuelClock();
+            AudioManager.PlaySfx(Sfx.Win, 0.8f, 1.1f);
         }
 
         private System.Collections.IEnumerator AfterKnockdown()
         {
-            yield return new WaitForSeconds(1.8f);
+            yield return new WaitForSeconds(1.2f);
             while (challengeRun && State == GameState.Paused) yield return null;
             if (!challengeRun || chPhase != ChPhase.Break || State != GameState.Playing) yield break;
             if (chDuelLeft <= 0f) { ChallengeEnd(); yield break; }
             PlaceDuelists(first: false);
-            hunt.Resume();
-            chPhase = ChPhase.Duel;
-            chUi.SetStatus(Loc.T("ch.duel"));
+            yield return CountdownThenGo();
         }
 
         /// <summary>Each frame of the duel: the clock (it only runs while the two fight), a knock-down, time up.</summary>
@@ -279,16 +302,6 @@ namespace SquashBot.Gameplay
             robot.GiveShield(DuelShieldSeconds, DuelShieldHits);
             if (LiveActive) LiveNet.Shield();
             AudioManager.PlaySfx(Sfx.Shield, 1f, 1.1f);
-            RefreshSquadBar();
-        }
-
-        /// <summary>A group's tag tapped: sent at the rival foi, or (again) back to guard foi.</summary>
-        private void ToggleSquad(int group)
-        {
-            if (!challengeRun || hunt.SquadAlive(true, group) == 0) return;
-            bool attack = !hunt.SquadOrder(true, group);
-            hunt.SetSquadOrder(true, group, attack);
-            chUi.SetStatus(Loc.F(attack ? "ch.squadGo" : "ch.squadBack", Loc.T("army.kind." + Army.KindOf(group))));
             RefreshSquadBar();
         }
 

@@ -60,7 +60,7 @@ namespace SquashBot.Gameplay
             if (State != GameState.Playing || !grid.InBounds(p)) return;
             if (hunt.MonsterUp && p == hunt.MonsterTile) return; // vanG is foi's fight
             defenseStrike = true;
-            hunt.Strike(p, damage);
+            hunt.Strike(p, damage * 4); // (health points: four a point of the defence's strength)
             defenseStrike = false;
         }
 

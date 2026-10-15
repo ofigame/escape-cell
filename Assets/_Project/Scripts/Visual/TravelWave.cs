@@ -5,6 +5,9 @@ namespace SquashBot.Visual
     /// <summary>A glowing crescent of energy sweeping over the floor along a direction (a monster's swipe).</summary>
     public class TravelWave : MonoBehaviour
     {
+        /// <summary>Its materials (made for it alone) go with it.</summary>
+        private void Start() => OwnedMaterials.OwnAllUnder(gameObject);
+
         private const float Duration = 0.32f;
         private Vector3 from, dir;
         private float length, t;
