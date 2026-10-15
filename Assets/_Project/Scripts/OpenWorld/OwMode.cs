@@ -77,6 +77,8 @@ namespace SquashBot.OpenWorld
             foiMax = Mathf.Max(100, Challenge.FoiMaxHp);
             foiHp = foiMax;
             save.FeedSoldiers();
+            StartCoroutine(OwNotify.Init());
+            OwNotify.Clear();
             battle = OwBattle.Create(transform, save, farm, fx, () => pos, HurtFoi);
             battle.Ended += RaidEnded;
 
@@ -144,6 +146,7 @@ namespace SquashBot.OpenWorld
             save.tps = tps;
             save.Save();
             OwSync.Upload();
+            OwNotify.Schedule(save);
             Destroy(gameObject);
         }
 
@@ -151,8 +154,8 @@ namespace SquashBot.OpenWorld
         private bool quitting;
 
         /// <summary>Closing the app (or sending it away) keeps where foi stood.</summary>
-        private void OnApplicationQuit() { quitting = true; KeepPlace(); }
-        private void OnApplicationPause(bool paused) { if (paused) { KeepPlace(); OwSync.Upload(); } }
+        private void OnApplicationQuit() { quitting = true; KeepPlace(); OwNotify.Schedule(save); }
+        private void OnApplicationPause(bool paused) { if (paused) { KeepPlace(); OwSync.Upload(); OwNotify.Schedule(save); } else OwNotify.Clear(); }
 
         private void KeepPlace()
         {
