@@ -81,13 +81,15 @@ namespace SquashBot.Data
             if (count >= Max) return;
 
             var now = DateTime.UtcNow;
-            var since = Since;
+            var stored = Since;
+            var since = stored;
             if (since > now) since = now; // clock moved backwards: restart the countdown instead of granting lives
 
             int gained = (int)((now - since).Ticks / Regen.Ticks);
             if (gained <= 0)
             {
-                Since = since;
+                // Written only when it changed (this runs twice a second on every screen: a write is a disk write).
+                if (since != stored || !Prefs.HasKey(TimeKey)) Since = since;
                 return;
             }
 

@@ -159,10 +159,10 @@ namespace SquashBot.Gameplay
             FramePacer.Install();
             CloudSave.Install();
             FramePacer.Busy = () => State == GameState.Playing || IntroCinematic.Playing || (OpenWorld.OwMode.Active && OpenWorld.OwMode.Busy);
+            FramePacer.KeepAwake = () => State == GameState.Playing || IntroCinematic.Playing || (OpenWorld.OwMode.Active && OpenWorld.OwMode.Busy);
             Application.lowMemory += OnLowMemory;
             if (Debug.isDebugBuild) gameObject.AddComponent<DevStats>(); // test builds: FPS and memory in the corner
             QualitySettings.vSyncCount = 0;
-            Screen.sleepTimeout = SleepTimeout.NeverSleep;
             LockPortrait();
             if (levelSet == null || levelSet.levels.Count == 0) levelSet = LevelSet.LoadOrDefault();
 
@@ -477,6 +477,8 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>The phone is running out of memory: drop the heavy extras (shadows) and free what is unused.</summary>
+        private int floorsSinceSweep;
+
         private void OnLowMemory()
         {
             lowMemoryMode = true;
@@ -843,10 +845,9 @@ namespace SquashBot.Gameplay
             if (!trailRun) ClearTrail(); // never a road left standing under another floor
             ClearGunPosts();
             ResetRun();
-            // A fresh floor: let go of the last floor's materials and meshes (built from code, they pile up otherwise
-            // and long sessions run phones out of memory).
-            Resources.UnloadUnusedAssets();
-            System.GC.Collect();
+            // Every few floors (or short of memory): let go of the last floors' materials and meshes (built from code, they pile
+            // up otherwise and long sessions run phones out of memory). Not every floor: the sweep is a long frame at the start.
+            if (++floorsSinceSweep >= 3 || lowMemoryMode) { floorsSinceSweep = 0; Resources.UnloadUnusedAssets(); }
             continued = false;
             closeCalls = 0;
             jumpHintShown = false;
@@ -3167,11 +3168,14 @@ namespace SquashBot.Gameplay
             TryEnterArena(); // walking into the monster starts the fight too
         }
 
+        private float orbRetryAt;
+
         private void UpdateMonster(float dt)
         {
             if (monster == null || monster.Dead) return;
             if (orb != null && (!grid.IsStandable(orbPos) || hazards.IsThreatened(orbPos))) SpawnOrb();
-            if (orb == null && hammerAmmo < Data.Weapons.MaxAmmo) SpawnOrb();
+            // (No tile for it: tried again in a moment, not every frame.)
+            if (orb == null && hammerAmmo < Data.Weapons.MaxAmmo && Time.time >= orbRetryAt) { SpawnOrb(); if (orb == null) orbRetryAt = Time.time + 0.5f; }
             if (orb != null && !previewing)
             {
                 // Every second: if the way to the orb got cut off, it moves at once; otherwise it moves when its time is up.

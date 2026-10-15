@@ -74,6 +74,8 @@ namespace SquashBot.UI
             public RenderTexture rt;
             public float size, phase;
             public int users;
+            /// <summary>Cards showing it now (a hidden shop's cards are not drawn for).</summary>
+            public int visible;
         }
 
         private static readonly Dictionary<string, Live> live = new Dictionary<string, Live>();
@@ -140,13 +142,15 @@ namespace SquashBot.UI
         {
             private void LateUpdate()
             {
-                int n = Mathf.Min(4, liveOrder.Count);
-                for (int i = 0; i < n; i++)
+                // Only the ones a card on screen shows: a closed shop costs nothing.
+                int drawn = 0;
+                for (int i = 0; i < liveOrder.Count && drawn < 4; i++)
                 {
                     liveNext = (liveNext + 1) % liveOrder.Count;
                     var l = liveOrder[liveNext];
-                    if (l.holder == null || l.rt == null) continue;
+                    if (l.holder == null || l.rt == null || l.visible <= 0) continue;
                     Draw(l);
+                    drawn++;
                 }
             }
         }
@@ -155,7 +159,18 @@ namespace SquashBot.UI
         public class Lease : MonoBehaviour
         {
             public string id;
+            private bool counted;
+            private void OnEnable() => Count(true);
+            private void Start() => Count(true); // (the id is set just after the lease is put on)
+            private void OnDisable() => Count(false);
             private void OnDestroy() { if (!string.IsNullOrEmpty(id)) Release(id); }
+
+            private void Count(bool on)
+            {
+                if (on == counted || string.IsNullOrEmpty(id) || !live.TryGetValue(id, out var l)) return;
+                counted = on;
+                l.visible += on ? 1 : -1;
+            }
         }
 
         private static void Setup()

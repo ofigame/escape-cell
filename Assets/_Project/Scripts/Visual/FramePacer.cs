@@ -20,7 +20,15 @@ namespace SquashBot.Visual
         /// <summary>When the rate last changed (the frame governor does not judge the frames round a change).</summary>
         public static float ChangedAt { get; private set; } = -100f;
 
+        /// <summary>The game says whether the screen must stay on (a level being played): otherwise the phone's own sleep applies.</summary>
+        public static Func<bool> KeepAwake;
+
+        /// <summary>How long since a finger (or the mouse, or a key) last touched the game.</summary>
+        public static float IdleSeconds => Time.unscaledTime - lastTouchStatic;
+
+        private static float lastTouchStatic;
         private float lastTouch = -100f;
+        private int awake = -1;
 
         public static void Install()
         {
@@ -34,7 +42,13 @@ namespace SquashBot.Visual
         private void Update()
         {
             float now = Time.unscaledTime;
-            if (Touched()) lastTouch = now;
+            if (Touched()) lastTouch = lastTouchStatic = now;
+            int keep = KeepAwake?.Invoke() ?? true ? 1 : 0;
+            if (keep != awake)
+            {
+                awake = keep;
+                Screen.sleepTimeout = keep == 1 ? SleepTimeout.NeverSleep : SleepTimeout.SystemSetting;
+            }
             bool busy = now - lastTouch < Linger || (Busy?.Invoke() ?? true);
             int want = busy ? Smooth : Calm;
             if (Application.targetFrameRate == want) return;

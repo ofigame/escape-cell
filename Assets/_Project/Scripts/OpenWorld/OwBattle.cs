@@ -399,6 +399,8 @@ namespace SquashBot.OpenWorld
             foreach (var s in soldiers)
             {
                 if (s.dead) continue;
+                // No raid and home: nothing to do (the land's height is not asked for two dozen soldiers every frame).
+                if (!Raiding && (s.home - s.pos).sqrMagnitude < 0.04f) continue;
                 s.cd -= dt;
                 Bandit best = null; float bd = 26f;
                 if (Raiding) foreach (var b in bandits) if (!b.dead) { float d = (b.pos - s.pos).magnitude; if (d < bd && (b.pos - OwWorld.FarmCentre).magnitude < 40f) { bd = d; best = b; } }
@@ -463,7 +465,7 @@ namespace SquashBot.OpenWorld
             foreach (var b in bandits) if (!b.dead && b.root != null) Destroy(b.root.gameObject);
             bandits.Clear();
             shells.Clear();
-            foreach (var s in soldiers) if (!s.dead) { s.pos = s.home; s.hp = s.maxHp; }
+            foreach (var s in soldiers) if (!s.dead) { s.pos = s.home; s.hp = s.maxHp; Place(s.root, s.home, Vector2.down); }
             Ended?.Invoke(won);
         }
 

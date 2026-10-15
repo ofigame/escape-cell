@@ -96,7 +96,7 @@ namespace SquashBot.OpenWorld
             cam.farClipPlane = 220f;
             var data = camGo.AddComponent<UniversalAdditionalCameraData>();
             data.renderPostProcessing = true;
-            data.antialiasing = AntialiasingMode.FastApproximateAntialiasing;
+            data.antialiasing = Application.isMobilePlatform ? AntialiasingMode.None : AntialiasingMode.FastApproximateAntialiasing; // (phones: MSAA is enough)
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.Linear;
             RenderSettings.fogColor = cam.backgroundColor;
@@ -177,7 +177,6 @@ namespace SquashBot.OpenWorld
             Active = false;
             Busy = false;
             OwIcons.Clear();
-            OwWorld.ForgetMap();
             RenderSettings.fog = false;
             foreach (var c in hiddenCanvases) if (c != null) c.enabled = true;
             foreach (var c in hiddenCameras) if (c != null) c.enabled = true;
@@ -290,6 +289,9 @@ namespace SquashBot.OpenWorld
 
         /// <summary>The house that shows the way home: over the farm when it is in view, at the screen's edge the way it lies
         /// when not; gone at the farm.</summary>
+        private Texture pointerIcon;
+        private int pointerHouse = -1;
+
         private void FarmPointer()
         {
             bool far = (pos - OwWorld.FarmCentre).magnitude > save.House.land * 0.5f + 8f;
@@ -309,7 +311,8 @@ namespace SquashBot.OpenWorld
                 float s = Mathf.Min(rect.width * 0.5f / Mathf.Max(0.001f, Mathf.Abs(d.x)), rect.height * 0.5f / Mathf.Max(0.001f, Mathf.Abs(d.y)));
                 p2 = c + d * Mathf.Min(1f, s);
             }
-            ui.SetFarmPointer(true, p2, farm.HouseIcon(Mathf.Max(1, save.house)));
+            if (pointerIcon == null || pointerHouse != save.house) { pointerHouse = save.house; pointerIcon = farm.HouseIcon(Mathf.Max(1, save.house)); }
+            ui.SetFarmPointer(true, p2, pointerIcon);
         }
 
         private const float MinZoom = 7f, MaxZoom = 42f;
@@ -485,6 +488,8 @@ namespace SquashBot.OpenWorld
                 if ((pos - camp.Middle).magnitude > 60f) { Destroy(camp.gameObject); camp = null; ui.Toast(Loc.T("ow.op.left")); }
                 return;
             }
+            // A camp standing is kept until foi is well away (built at 48, gone past 60: no building it again and again on the line).
+            if (camp != null && (pos - camp.Middle).magnitude < 60f) return;
             Vector2Int? want = null; float best = 48f;
             var here = OwRegions.Of(pos);
             for (int dx = -1; dx <= 1; dx++)

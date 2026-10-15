@@ -314,10 +314,13 @@ namespace SquashBot.Gameplay
             sign.rectTransform.sizeDelta = new Vector2(9f, 2.5f);
         }
 
+        private static Material poisonMat;
+
         private void OnPoisoned(List<GridPos> tiles)
         {
             if (!trailRun) return;
-            var mat = MaterialFactory.Create(new Color(0.35f, 0.85f, 0.25f), new Color(0.3f, 1.2f, 0.2f));
+            if (poisonMat == null) poisonMat = MaterialFactory.Create(new Color(0.35f, 0.85f, 0.25f), new Color(0.3f, 1.2f, 0.2f)); // one for every spit
+            var mat = poisonMat;
             foreach (var t in tiles)
             {
                 var body = Shapes.Primitive(PrimitiveType.Cylinder, "Poison", trailRoot, GridView.ToWorld(t) + Vector3.up * (GridView.SurfaceY + 0.03f), new Vector3(0.95f, 0.02f, 0.95f), mat).transform;

@@ -21,7 +21,7 @@ namespace SquashBot.OpenWorld
         {
             if (cache.TryGetValue(key, out var rt) && rt != null && rt.IsCreated()) return rt;
             Setup();
-            rt = new RenderTexture(192, 192, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "OwIcon " + key };
+            rt = new RenderTexture(192, 192, 16, RenderTextureFormat.ARGB32) { antiAliasing = 2, name = "OwIcon " + key }; // (kept while in the open world: light on memory)
             rt.Create();
             var holder = new GameObject("Icon").transform;
             holder.SetParent(stage, false);

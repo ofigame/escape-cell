@@ -94,8 +94,9 @@ namespace SquashBot.Visual
         {
             material.SetColor(BaseColorId, color);
             material.SetColor(ColorId, color);
-            material.EnableKeyword("_EMISSION");
-            material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+            // (Called every frame by glowing things: the keyword and flags only when not already so.)
+            if (!material.IsKeywordEnabled("_EMISSION")) material.EnableKeyword("_EMISSION");
+            if (material.globalIlluminationFlags != MaterialGlobalIlluminationFlags.None) material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
             material.SetColor(EmissionId, emission);
         }
     }

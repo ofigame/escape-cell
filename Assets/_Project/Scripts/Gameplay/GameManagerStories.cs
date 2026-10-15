@@ -398,7 +398,7 @@ namespace SquashBot.Gameplay
             if (buddy == null) return 0f;
             if (EscortTimed) return Mathf.Clamp01(elapsed / level.escortSeconds);
             if (buddyHome && stopsLeft <= 1) return 1f;
-            var dist = WalkDistances(doorPos);
+            var dist = DoorDistances();
             int left = dist.TryGetValue(buddyPos, out int s) ? s : escortStart;
             float leg = Mathf.Clamp01(1f - left / (float)escortStart);
             return (objectivesDone + leg) / Mathf.Max(1, objectivesTotal);
@@ -407,8 +407,24 @@ namespace SquashBot.Gameplay
         private int EscortStepsLeft()
         {
             if (EscortTimed) return Mathf.CeilToInt(Mathf.Max(0f, level.escortSeconds - elapsed));
-            var dist = WalkDistances(doorPos);
+            var dist = DoorDistances();
             return dist.TryGetValue(buddyPos, out int s) ? s : 0;
+        }
+
+        // The walk to the door, once a frame for the progress bar, the HUD, the weather and the tension (each asked for it).
+        private Dictionary<GridPos, int> doorDist;
+        private int doorDistFrame = -1;
+        private GridPos doorDistFrom;
+
+        private Dictionary<GridPos, int> DoorDistances()
+        {
+            if (doorDist == null || doorDistFrame != Time.frameCount || !doorDistFrom.Equals(doorPos))
+            {
+                doorDist = WalkDistances(doorPos);
+                doorDistFrame = Time.frameCount;
+                doorDistFrom = doorPos;
+            }
+            return doorDist;
         }
 
         private void ClearEscort()

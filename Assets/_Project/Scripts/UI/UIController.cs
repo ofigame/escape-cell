@@ -648,6 +648,7 @@ namespace SquashBot.UI
             float phase = arenaTipClock % 25f;
             bool show = can && phase > 2f && phase < 8f;
             arenaTipGroup.alpha = Mathf.MoveTowards(arenaTipGroup.alpha, show ? 1f : 0f, dt * 3f);
+            if (arenaTipGroup.alpha <= 0f) return; // unseen: not moved (every move redraws the canvas)
             float bob = Mathf.Sin(Time.unscaledTime * 3f) * 6f;
             arenaTip.anchoredPosition = new Vector2(-430f + bob, -400f);
         }

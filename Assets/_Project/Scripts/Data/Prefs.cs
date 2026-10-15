@@ -21,19 +21,19 @@ namespace SquashBot.Data
 
         public static int GetInt(string key, int fallback = 0)
         {
-            if (PlayerPrefs.HasKey(key)) Note(key, 'i');
+            if (Unlisted(key) && PlayerPrefs.HasKey(key)) Note(key, 'i');
             return PlayerPrefs.GetInt(key, fallback);
         }
 
         public static string GetString(string key, string fallback = "")
         {
-            if (PlayerPrefs.HasKey(key)) Note(key, 's');
+            if (Unlisted(key) && PlayerPrefs.HasKey(key)) Note(key, 's');
             return PlayerPrefs.GetString(key, fallback);
         }
 
         public static float GetFloat(string key, float fallback = 0f)
         {
-            if (PlayerPrefs.HasKey(key)) Note(key, 'f');
+            if (Unlisted(key) && PlayerPrefs.HasKey(key)) Note(key, 'f');
             return PlayerPrefs.GetFloat(key, fallback);
         }
 
@@ -57,6 +57,9 @@ namespace SquashBot.Data
             PlayerPrefs.SetFloat(key, value);
             Note(key, 'f');
         }
+
+        /// <summary>Not on the list yet (a listed key is read without asking PlayerPrefs whether it exists: reads run every frame).</summary>
+        private static bool Unlisted(string key) { Load(); return !index.ContainsKey(key); }
 
         public static bool HasKey(string key) => PlayerPrefs.HasKey(key);
 

@@ -110,9 +110,13 @@ namespace SquashBot.Gameplay
                 wearMat = MaterialFactory.CreateSurface(FortressStone * 0.55f, Color.black, 0.1f, 0f);
                 boltMat = MaterialFactory.CreateSurface(new Color(0.62f, 0.64f, 0.7f), Color.black, 0.75f, 0.85f);
             }
+            // The flat tile pieces never cast a shadow anyone could see (they lie on the floor): only the pillars do. Thousands
+            // fewer things drawn again for the shadow every frame.
+            bool castWanted = Shapes.CastShadows;
             foreach (var p in grid.AllPositions())
             {
                 if (!grid.Exists(p)) continue; // shaped platforms leave some cells empty
+                Shapes.CastShadows = false;
 
                 var root = new GameObject($"Tile {p}");
                 root.transform.SetParent(transform, false);
@@ -204,6 +208,7 @@ namespace SquashBot.Gameplay
                     Shapes.Rounded("Top", tile.transform, new Vector3(0f, 0f, 0f), new Vector3(0.78f, 0.1f, 0.78f), 0.045f, top);
                 }
                 if (grid.IsLava(p)) tile.SetActive(false); // the fortress's burning stairs: dressed by FortressFloor
+                Shapes.CastShadows = castWanted;
 
                 if (grid.IsWall(p) && lowWalls)
                 {

@@ -359,6 +359,15 @@ namespace SquashBot.UI
     /// <summary>Gentle breathing scale for the "play me next" node.</summary>
     public class Pulse : MonoBehaviour
     {
+        // Its own little canvas: the breathing redraws only this button, not the whole screen it sits on.
+        private void Awake()
+        {
+            // (Not inside a clipped view: a canvas of its own would not be clipped with the rest.)
+            if (GetComponent<Canvas>() != null || GetComponentInParent<RectMask2D>(true) != null || GetComponentInParent<Mask>(true) != null) return;
+            gameObject.AddComponent<Canvas>();
+            gameObject.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+        }
+
         private void Update()
         {
             float s = 1f + Mathf.Sin(Time.unscaledTime * 4f) * 0.06f;

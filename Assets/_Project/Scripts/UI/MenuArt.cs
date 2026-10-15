@@ -57,13 +57,21 @@ namespace SquashBot.UI
             return t;
         }
 
+        // One outlined material per look, shared (one each per label was never let go, and drew each label on its own).
+        private static readonly System.Collections.Generic.Dictionary<(Material, Color, float), Material> outlines = new System.Collections.Generic.Dictionary<(Material, Color, float), Material>();
+
         private static void Outline(TextMeshProUGUI t, Color color, float width)
         {
-            var m = new Material(t.fontSharedMaterial);
-            m.EnableKeyword("OUTLINE_ON");
-            m.SetColor("_OutlineColor", color);
-            m.SetFloat("_OutlineWidth", width);
-            m.SetFloat("_FaceDilate", 0.1f);
+            var key = (t.fontSharedMaterial, color, width);
+            if (!outlines.TryGetValue(key, out var m) || m == null)
+            {
+                m = new Material(t.fontSharedMaterial);
+                m.EnableKeyword("OUTLINE_ON");
+                m.SetColor("_OutlineColor", color);
+                m.SetFloat("_OutlineWidth", width);
+                m.SetFloat("_FaceDilate", 0.1f);
+                outlines[key] = m;
+            }
             t.fontSharedMaterial = m;
         }
 

@@ -91,7 +91,9 @@ namespace SquashBot.Gameplay
         {
             if (inviteLooking || Time.unscaledTime < inviteLookAt || !ui.MenuVisible || challengeRun || !FoiNet.Registered || !Challenge.Enabled || !Challenge.NameChosen) return;
             if (chUi != null && (chUi.FriendOpen || chPhase != ChPhase.Off)) return; // already playing or waiting for a friend
-            inviteLookAt = Time.unscaledTime + 8f;
+            // Every 15 s, and not at all once the phone has lain untouched a few minutes (the radio can rest).
+            if (SquashBot.Visual.FramePacer.IdleSeconds > 180f) return;
+            inviteLookAt = Time.unscaledTime + 15f;
             inviteLooking = true;
             cameraRig.StartCoroutine(FoiNet.PollInvite(inv =>
             {

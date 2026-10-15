@@ -43,6 +43,7 @@ namespace SquashBot.Gameplay
         public event Action<Direction> Shove;
 
         private readonly List<Enemy> enemies = new List<Enemy>();
+        private readonly List<Enemy> pass = new List<Enemy>();
         private GridModel grid;
         private LevelData level;
         private Robot robot;
@@ -235,7 +236,10 @@ namespace SquashBot.Gameplay
             if (!running) return;
             float dt = Time.deltaTime;
             time += dt;
-            foreach (var e in enemies.ToArray())
+            // (A copy, as the loop may remove some: one list kept, not a new array a frame.)
+            pass.Clear();
+            pass.AddRange(enemies);
+            foreach (var e in pass)
             {
                 if (e.hopT < 1f)
                 {

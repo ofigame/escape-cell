@@ -58,10 +58,12 @@ namespace SquashBot.Visual
         {
             var tier = GraphicsQuality.Current;
             float longSide = Mathf.Max(Screen.width, Screen.height, 1);
-            float maxPixels = tier == GraphicsTier.High ? 3200f : tier == GraphicsTier.Medium ? 2400f : 2000f;
+            // (Phones: High stops at 2600 pixels on the long side, past which the eye gains nothing and the phone heats.)
+            float maxPixels = tier == GraphicsTier.High ? (adaptive ? 2600f : 3200f) : tier == GraphicsTier.Medium ? 2400f : 2000f;
             maxScale = Mathf.Clamp(maxPixels / longSide, 0.8f, 1f);
             // High never trades sharpness for speed (the glow and weather give way instead); the others only a little.
-            minScale = tier == GraphicsTier.High ? maxScale : Mathf.Min(maxScale, tier == GraphicsTier.Medium ? 0.85f : 0.8f);
+            // A hot phone on High may step down a little too (it has nothing else left to give back).
+            minScale = tier == GraphicsTier.High ? (adaptive ? Mathf.Min(maxScale, 0.9f) : maxScale) : Mathf.Min(maxScale, tier == GraphicsTier.Medium ? 0.85f : 0.8f);
             // FSR's extra full-size pass pays off on the stronger tiers; the weak one takes a plain, cheap upscale.
             urp.upscalingFilter = tier == GraphicsTier.Low ? UpscalingFilterSelection.Linear : UpscalingFilterSelection.FSR;
             scale = maxScale;

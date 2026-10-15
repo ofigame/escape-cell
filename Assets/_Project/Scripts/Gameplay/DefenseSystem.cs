@@ -196,6 +196,10 @@ namespace SquashBot.Gameplay
             }
         }
 
+        /// <summary>The shots' materials, made once (a new one a shot piled up through a long defence).</summary>
+        private static readonly Material[] shotMats = new Material[6];
+        private static Material Mat(int i, Color c, Color glow) => shotMats[i] != null ? shotMats[i] : shotMats[i] = MaterialFactory.Create(c, glow);
+
         private Transform Projectile(DefenseKind kind, int tier)
         {
             var t = new GameObject("Shot").transform;
@@ -204,14 +208,14 @@ namespace SquashBot.Gameplay
             {
                 case DefenseKind.Archer:
                     Shapes.Rounded("Arrow", t, Vector3.zero, new Vector3(0.03f, 0.03f, 0.42f), 0.01f,
-                        tier >= 2 ? MaterialFactory.Create(new Color(0.6f, 0.95f, 1f), new Color(0.8f, 2.2f, 3f)) : MaterialFactory.Create(new Color(0.75f, 0.6f, 0.4f), Color.black));
+                        tier >= 2 ? Mat(0, new Color(0.6f, 0.95f, 1f), new Color(0.8f, 2.2f, 3f)) : Mat(1, new Color(0.75f, 0.6f, 0.4f), Color.black));
                     break;
                 case DefenseKind.Cannon:
                     Shapes.Primitive(PrimitiveType.Sphere, "Shell", t, Vector3.zero, Vector3.one * (0.18f + tier * 0.03f),
-                        MaterialFactory.Create(new Color(0.2f, 0.2f, 0.24f), tier >= 2 ? new Color(1.6f, 0.6f, 0.2f) : Color.black));
+                        tier >= 2 ? Mat(2, new Color(0.2f, 0.2f, 0.24f), new Color(1.6f, 0.6f, 0.2f)) : Mat(3, new Color(0.2f, 0.2f, 0.24f), Color.black));
                     break;
                 default:
-                    Shapes.Primitive(PrimitiveType.Sphere, "Bolt", t, Vector3.zero, Vector3.one * 0.16f, MaterialFactory.Create(new Color(0.6f, 0.95f, 1f), new Color(1f, 2.6f, 3.4f)));
+                    Shapes.Primitive(PrimitiveType.Sphere, "Bolt", t, Vector3.zero, Vector3.one * 0.16f, Mat(4, new Color(0.6f, 0.95f, 1f), new Color(1f, 2.6f, 3.4f)));
                     break;
             }
             return t;
@@ -221,7 +225,7 @@ namespace SquashBot.Gameplay
         {
             var mid = (from + to) * 0.5f;
             var len = Vector3.Distance(from, to);
-            var go = Shapes.Rounded("Beam", transform, Vector3.zero, new Vector3(width, width, len), width * 0.45f, MaterialFactory.Create(c, c * 3f));
+            var go = Shapes.Rounded("Beam", transform, Vector3.zero, new Vector3(width, width, len), width * 0.45f, Mat(5, c, c * 3f));
             go.transform.position = mid;
             go.transform.rotation = Quaternion.LookRotation(to - from);
             return go;

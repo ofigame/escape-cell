@@ -1026,6 +1026,8 @@ namespace SquashBot.Gameplay
             g.bar.SetParent(g.root, false);
             g.bar.localPosition = new Vector3(0f, top + 0.28f, 0f);
             float w = g.brute ? 1.05f : 0.8f;
+            bool cast = Shapes.CastShadows;
+            Shapes.CastShadows = false; // a bar's shadow is only a cost
             if (barBackMat == null) barBackMat = MaterialFactory.Create(new Color(0.08f, 0.06f, 0.12f), Color.black);
             Shapes.Rounded("Back", g.bar, Vector3.zero, new Vector3(w + 0.08f, 0.15f, 0.03f), 0.05f, barBackMat);
             g.barMat = MaterialFactory.Create(new Color(0.4f, 1f, 0.45f), new Color(0.4f, 1.5f, 0.45f));
@@ -1038,6 +1040,7 @@ namespace SquashBot.Gameplay
             if (g.maxHp > 1 && g.maxHp <= 12)
                 for (int i = 1; i < g.maxHp; i++)
                     Shapes.Rounded("Notch", g.bar, new Vector3(-w * 0.5f + w * i / g.maxHp, 0f, -0.04f), new Vector3(0.02f, 0.12f, 0.02f), 0.008f, barBackMat);
+            Shapes.CastShadows = cast;
         }
 
         /// <summary>The dark back of every health bar (and its notches): one material for all.</summary>

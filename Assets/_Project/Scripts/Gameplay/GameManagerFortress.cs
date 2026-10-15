@@ -35,7 +35,7 @@ namespace SquashBot.Gameplay
             GridView.FortressStone = arenaRun ? BattleArenas.Style(arenaIndex).floor : FortressStoneFor(world, theme.accent);
             GridView.Marble = true;
             GridView.FortressMetal = false;
-            // Real shadows cost: soft on strong phones, hard on middling ones, none on the weakest (the rest of the look stays).
+            // Real shadows cost: hard ones on strong and middling phones, none on the weakest (the rest of the look stays).
             var tier = Data.GraphicsQuality.Current;
             bool shadows = on && tier != Data.GraphicsTier.Low && !lowMemoryMode;
             Shapes.CastShadows = shadows;
@@ -44,7 +44,7 @@ namespace SquashBot.Gameplay
                 if (l.type == LightType.Directional) { key = l; break; }
             if (key != null)
             {
-                key.shadows = !shadows ? LightShadows.None : tier == Data.GraphicsTier.High ? LightShadows.Soft : LightShadows.Hard;
+                key.shadows = !shadows ? LightShadows.None : LightShadows.Hard; // (soft shadows: several times the work for a hardly seen edge)
                 key.shadowStrength = 0.75f;
                 key.color = on ? new Color(1f, 0.9f, 0.8f) : Color.white;
                 key.intensity = on ? Mathf.Lerp(1.15f, 1.5f, 1f - Mathf.Clamp01(GridView.FortressStone.grayscale / 0.6f)) : 1f; // dark decks need a stronger sun for their sheen
@@ -154,7 +154,8 @@ namespace SquashBot.Gameplay
                     Color.Lerp(FortressFloor.WallTint ?? new Color(0.7f, 0.66f, 0.6f), Color.white, 0.35f), levelIndex * 31 + 7);
             }
             // The fortress never moves: its thousands of pieces are merged into a few big meshes (far fewer draw calls).
-            if (fortressFloor.GetComponentsInChildren<MeshRenderer>().Length < 6000) StaticBatchingUtility.Combine(fortressFloor.gameObject); // never on a huge one (memory)
+            // Never on a huge one (memory); the flames stay out of it (merged, they would stand still).
+            StaticMerge.Combine(fortressFloor.gameObject, t => t.GetComponentInParent<Flames>() != null);
             // Craft crossing the sky over the later fortresses.
             if (stage >= 1 && !challengeRun) // (not over the challenge board)
                 SkyTraffic.Create(fortressFloor, () => robot != null ? robot.transform.position : Vector3.zero,

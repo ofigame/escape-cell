@@ -231,18 +231,53 @@ namespace SquashBot.OpenWorld
         }
 
         /// <summary>How far a point is from the nearest road.</summary>
-        public static float RoadDist(Vector2 p)
+        public static float RoadDist(Vector2 p) => RoadDist(p, All);
+
+        private static float RoadDist(Vector2 p, Near near)
         {
             float d = Mathf.Abs(Vector2.Distance(p, Centre) - RingRoad);
-            foreach (var r in Roads) d = Mathf.Min(d, SegDist(p, r.a, r.b));
+            foreach (var r in near.roads) d = Mathf.Min(d, SegDist(p, r.a, r.b));
             return d;
         }
 
+        /// <summary>The roads and neighbours' farms that reach into a stretch of land (a region's ground is coloured pixel by
+        /// pixel: each pixel asks only these, not all of them).</summary>
+        private class Near
+        {
+            public readonly List<(Vector2 a, Vector2 b)> roads = new List<(Vector2, Vector2)>();
+            public readonly List<Farmstead> farms = new List<Farmstead>();
+        }
+
+        private static Near all;
+        private static Near All
+        {
+            get
+            {
+                if (all != null) return all;
+                all = new Near();
+                all.roads.AddRange(Roads);
+                all.farms.AddRange(Neighbours);
+                return all;
+            }
+        }
+
+        private static Near NearOf(float x0, float z0, float size)
+        {
+            var n = new Near();
+            var mid = new Vector2(x0 + size * 0.5f, z0 + size * 0.5f);
+            float reach = size * 0.75f + 40f;
+            foreach (var r in Roads) if (SegDist(mid, r.a, r.b) < reach) n.roads.Add(r);
+            foreach (var f in Neighbours) if (Vector2.Distance(mid, f.at) < reach) n.farms.Add(f);
+            return n;
+        }
+
         /// <summary>Where a point lies on a neighbour's farm: 0 not on one, 1 its yard, 2 its fields (crop = which).</summary>
-        private static int OnFarmstead(Vector2 p, out float u, out float v, out int crop)
+        private static int OnFarmstead(Vector2 p, out float u, out float v, out int crop) => OnFarmstead(p, All, out u, out v, out crop);
+
+        private static int OnFarmstead(Vector2 p, Near near, out float u, out float v, out int crop)
         {
             u = v = 0f; crop = 0;
-            foreach (var n in Neighbours)
+            foreach (var n in near.farms)
             {
                 var d = p - n.at;
                 if (d.sqrMagnitude > 34f * 34f) continue;
@@ -268,7 +303,9 @@ namespace SquashBot.OpenWorld
 
         /// <summary>The ground's colour: sand with ripples, grass in patches (meadow, lush, clover) with a fine grain,
         /// dirt roads, the town's cobbles, the neighbours' fields in rows.</summary>
-        public static Color GroundColour(float x, float z)
+        public static Color GroundColour(float x, float z) => GroundColour(x, z, All);
+
+        private static Color GroundColour(float x, float z, Near near)
         {
             var p = new Vector2(x, z);
             float g = Green(x, z);
@@ -292,7 +329,7 @@ namespace SquashBot.OpenWorld
             c = new Color(c.r + grain, c.g + grain, c.b + grain * 0.6f);
 
             // The neighbours' fields in rows, their trodden yards.
-            int on = OnFarmstead(p, out float u, out float v, out int cropKind);
+            int on = OnFarmstead(p, near, out float u, out float v, out int cropKind);
             if (on == 2)
             {
                 float row = Mathf.SmoothStep(0f, 1f, 0.5f + 0.9f * Mathf.Cos(v / 3.2f * Mathf.PI * 2f));
@@ -303,7 +340,7 @@ namespace SquashBot.OpenWorld
             else if (on == 1) c = Color.Lerp(c, Dirt, 0.45f);
 
             // Roads, the square.
-            float rd = RoadDist(p);
+            float rd = RoadDist(p, near);
             bool inTown = Vector2.Distance(p, TownAt) < TownFlat + 4f;
             float plaza = Vector2.Distance(p, Plaza);
             if (inTown && plaza < 12f) rd = 0f;
@@ -337,16 +374,18 @@ namespace SquashBot.OpenWorld
             var at = OwRegions.Of(p);
             bool changed = false;
             var keep = new HashSet<Vector2Int>();
-            if (!loaded.ContainsKey(at) || (building != null && buildingAt == at)) { StopBuilding(); BuildNow(at); changed = true; }
+            // foi's own region at once (one half built goes on being built: foi stands on the land's height, not its mesh).
+            if (!loaded.ContainsKey(at)) { BuildNow(at); changed = true; }
+            if (all) warmUntil = Time.unscaledTime + 5f;
             for (int dx = -1; dx <= 1; dx++)
                 for (int dz = -1; dz <= 1; dz++)
                 {
                     var r = new Vector2Int(at.x + dx, at.y + dz);
                     if (r.x < 0 || r.y < 0 || r.x >= Regions || r.y >= Regions) continue;
                     keep.Add(r);
-                    if (all && building != null && buildingAt == r) StopBuilding();
                     if (loaded.ContainsKey(r)) continue;
-                    if (all) { BuildNow(r); changed = true; }
+                    // Entering: the regions foi could see at once are built at once too; the far ones a slice a frame.
+                    if (all && NearRect(p, r) < 45f) { if (building != null && buildingAt == r) StopBuilding(); BuildNow(r); changed = true; }
                     else if (building == null) { buildingAt = r; building = StartCoroutine(BuildLater(r)); }
                 }
             var drop = new List<Vector2Int>();
@@ -367,7 +406,16 @@ namespace SquashBot.OpenWorld
         private const double SliceMs = 4.0;
 
         /// <summary>A region built a slice a frame has used its time this frame.</summary>
-        private bool Over() => !buildingNow && clock.Elapsed.TotalMilliseconds > SliceMs;
+        private bool Over() => !buildingNow && clock.Elapsed.TotalMilliseconds > (Time.unscaledTime < warmUntil ? 12.0 : SliceMs);
+        private float warmUntil;
+
+        private static float NearRect(Vector2 p, Vector2Int r)
+        {
+            float x0 = r.x * RegionSize, z0 = r.y * RegionSize;
+            float dx = Mathf.Max(0f, Mathf.Max(x0 - p.x, p.x - (x0 + RegionSize)));
+            float dz = Mathf.Max(0f, Mathf.Max(z0 - p.y, p.y - (z0 + RegionSize)));
+            return Mathf.Sqrt(dx * dx + dz * dz);
+        }
 
         private void RefreshBlockers()
         {
@@ -453,12 +501,13 @@ namespace SquashBot.OpenWorld
                 }
             var mesh = new Mesh { vertices = verts, uv = uv, triangles = tris };
             mesh.RecalculateNormals();
-            int tex = Low ? 192 : 256;
+            int tex = SquashBot.Data.GraphicsQuality.Current == SquashBot.Data.GraphicsTier.High ? 256 : 192;
+            var near = NearOf(x0, z0, RegionSize);
             var colours = new Color[tex * tex];
             for (int z = 0; z < tex; z++)
             {
                 for (int x = 0; x < tex; x++)
-                    colours[z * tex + x] = GroundColour(x0 + (x + 0.5f) / tex * RegionSize, z0 + (z + 0.5f) / tex * RegionSize);
+                    colours[z * tex + x] = GroundColour(x0 + (x + 0.5f) / tex * RegionSize, z0 + (z + 0.5f) / tex * RegionSize, near);
                 if (Over()) yield return null;
             }
             var texture = new Texture2D(tex, tex, TextureFormat.RGB24, true) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Trilinear, anisoLevel = 4 };
@@ -470,7 +519,9 @@ namespace SquashBot.OpenWorld
             var ground = new GameObject("Ground");
             ground.transform.SetParent(root, false);
             ground.AddComponent<MeshFilter>().sharedMesh = mesh;
-            ground.AddComponent<MeshRenderer>().sharedMaterial = groundMat;
+            var groundRenderer = ground.AddComponent<MeshRenderer>();
+            groundRenderer.sharedMaterial = groundMat;
+            groundRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; // (it takes shadows; it never casts one anyone sees)
             ground.AddComponent<OwnedMesh>().mesh = mesh;
             ground.AddComponent<RegionOwned>().Set(groundMat, texture);
 
@@ -561,6 +612,7 @@ namespace SquashBot.OpenWorld
             float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
             if (Green(x0 + RegionSize * 0.5f, z0 + RegionSize * 0.5f) < 0.2f && Green(x0, z0) < 0.3f && Green(x0 + RegionSize, z0 + RegionSize) < 0.3f) yield break;
             var lists = new[] { new List<Vector3>(), new List<Vector3>(), new List<Vector3>() };
+            var nearGrass = NearOf(x0, z0, RegionSize);
             int tufts = Low ? 1400 : SquashBot.Data.GraphicsQuality.Current == SquashBot.Data.GraphicsTier.Medium ? 2400 : 3400;
             for (int i = 0; i < tufts; i++)
             {
@@ -569,7 +621,7 @@ namespace SquashBot.OpenWorld
                 float g = Green(x, z);
                 if (g < 0.5f + (float)rng.NextDouble() * 0.15f) continue;
                 var p = new Vector2(x, z);
-                if (Vector2.Distance(p, FarmCentre) < 18f || RoadDist(p) < RoadHalf + 0.4f || OnFarmstead(p, out _, out _, out _) == 2) continue;
+                if (Vector2.Distance(p, FarmCentre) < 18f || RoadDist(p, nearGrass) < RoadHalf + 0.4f || OnFarmstead(p, nearGrass, out _, out _, out _) == 2) continue;
                 if (Vector2.Distance(p, Plaza) < 13f) continue;
                 int kind = g < 0.72f ? 0 : rng.NextDouble() < 0.5 ? 1 : 2;
                 var list = lists[kind];
@@ -614,6 +666,8 @@ namespace SquashBot.OpenWorld
             }
         }
 
+        private static float Step(float v, float step) => Mathf.Max(step, Mathf.Round(v / step) * step);
+
         private void Scrap(Transform parent, Vector3 at, System.Random rng, List<Vector3> blockers)
         {
             float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
@@ -624,7 +678,8 @@ namespace SquashBot.OpenWorld
             int parts = rng.Next(4, 9);
             for (int p = 0; p < parts; p++)
             {
-                var size = new Vector3(R(0.8f, 2.6f), R(0.5f, 1.8f), R(0.8f, 2.4f));
+                // (Sizes in steps: a rounded box is made once per size and kept, so endless random sizes would pile up meshes.)
+                var size = new Vector3(Step(R(0.8f, 2.6f), 0.45f), Step(R(0.5f, 1.8f), 0.4f), Step(R(0.8f, 2.4f), 0.45f));
                 Shapes.Rounded("Part", heap, new Vector3(R(-1.2f, 1.2f), size.y * 0.35f, R(-1.2f, 1.2f)), size, 0.08f, p % 3 == 0 ? metal : p % 2 == 0 ? dark : rust)
                     .transform.localRotation = Quaternion.Euler(R(-25f, 25f), R(0f, 90f), R(-25f, 25f));
             }
@@ -634,7 +689,8 @@ namespace SquashBot.OpenWorld
         private void Rock(Transform parent, Vector3 at, System.Random rng, float size, List<Vector3> blockers)
         {
             float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
-            Shapes.Rounded("Rock", parent, at + Vector3.up * size * 0.3f, new Vector3(size * R(0.8f, 1.4f), size * R(0.5f, 1f), size * R(0.8f, 1.4f)), Mathf.Min(0.4f, size * 0.2f), rock)
+            size = Step(size, 0.5f);
+            Shapes.Rounded("Rock", parent, at + Vector3.up * size * 0.3f, new Vector3(Step(size * R(0.8f, 1.4f), 0.4f), Step(size * R(0.5f, 1f), 0.3f), Step(size * R(0.8f, 1.4f), 0.4f)), Mathf.Min(0.4f, size * 0.2f), rock)
                 .transform.localRotation = Quaternion.Euler(R(-10f, 10f), R(0f, 90f), R(-10f, 10f));
             if (size > 1.2f) blockers.Add(new Vector3(at.x, at.z, size * 0.6f));
         }

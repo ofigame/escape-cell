@@ -226,7 +226,11 @@ namespace SquashBot.Visual
             foreach (int s in new[] { -1, 1 }) Shapes.Primitive(PrimitiveType.Cylinder, "Column", decor, boxAt + new Vector3(s * 1.5f, 1.4f, -0.7f), new Vector3(0.12f, 0.7f, 0.12f), gold);
             Shapes.Rounded("Canopy", decor, boxAt + new Vector3(0f, 2.15f, -0.2f), new Vector3(3.5f, 0.12f, 1.9f), 0.04f, red);
             Shapes.Rounded("Throne", decor, boxAt + new Vector3(0f, 0.95f, 0.2f), new Vector3(0.6f, 0.5f, 0.5f), 0.05f, gold);
-            if (decor.GetComponentsInChildren<MeshRenderer>().Length < 6000) StaticBatchingUtility.Combine(decor.gameObject);
+            // The torches' flames and the banners move: left out of the merge.
+            var moving = new HashSet<Transform>();
+            foreach (var (t, _) in flames) if (t != null) moving.Add(t);
+            foreach (var (t, _) in banners) if (t != null) moving.Add(t);
+            StaticMerge.Combine(decor.gameObject, t => StaticMerge.Under(t, moving));
             foreach (var r in decor.GetComponentsInChildren<MeshRenderer>()) r.shadowCastingMode = ShadowCastingMode.Off;
 
             MakeCrowd(rng, top: topY);

@@ -14,8 +14,16 @@ namespace SquashBot.Visual
         private Color color;
         private float radius, t;
 
+        /// <summary>How many are on screen: a burst of blows (a stomp over two dozen tiles) adds no more past a dozen.</summary>
+        private static int live;
+        private const int MaxLive = 12;
+
+        private void OnDestroy() => live--;
+
         public static void Create(Vector3 at, float radius, Color color)
         {
+            if (live >= MaxLive) return;
+            live++;
             var go = new GameObject("Shockwave");
             go.transform.position = at + Vector3.up * 0.04f;
             var s = go.AddComponent<Shockwave>();

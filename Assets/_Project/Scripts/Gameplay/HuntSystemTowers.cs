@@ -168,12 +168,15 @@ namespace SquashBot.Gameplay
             t.bar.SetParent(t.root, false);
             t.bar.localPosition = new Vector3(0f, top + 0.3f, 0f);
             float w = reactor ? 1.6f : 1f;
+            bool cast = Shapes.CastShadows;
+            Shapes.CastShadows = false; // a bar's shadow is only a cost
             Shapes.Rounded("Back", t.bar, Vector3.zero, new Vector3(w + 0.08f, 0.15f, 0.03f), 0.05f, MaterialFactory.Create(new Color(0.08f, 0.06f, 0.12f), Color.black));
             t.barMat = MaterialFactory.Create(new Color(1f, 0.75f, 0.3f), new Color(1.5f, 1f, 0.4f));
             t.barFill = new GameObject("Fill").transform;
             t.barFill.SetParent(t.bar, false);
             t.barFill.localPosition = new Vector3(-w * 0.5f, 0f, -0.025f);
             Shapes.Rounded("Fill", t.barFill, new Vector3(w * 0.5f, 0f, 0f), new Vector3(w, 0.09f, 0.02f), 0.04f, t.barMat);
+            Shapes.CastShadows = cast;
             towers.Add(t);
             if (level.repairDrones) for (int i = 0; i < (reactor ? 2 : 1); i++) AddDrone(t);
         }

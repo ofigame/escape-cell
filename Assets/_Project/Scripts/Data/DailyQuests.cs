@@ -108,7 +108,7 @@ namespace SquashBot.Data
                 if (p >= q.target) finished = true;
                 changed = true;
             }
-            if (changed) Prefs.Save();
+            if (finished) Prefs.Save(); // (a step on the way is written with the rest at the next pause, not a disk write a kill)
             return finished;
         }
 

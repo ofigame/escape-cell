@@ -220,7 +220,7 @@ namespace SquashBot.Visual
             main.startColor = color;
             main.gravityModifier = gravity;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
-            main.maxParticles = 3000;
+            main.maxParticles = 1800; // (more than a phone screen needs: past this they only heat it)
             main.prewarm = true;
             var emission = ps.emission;
             emission.rateOverTime = rate;
