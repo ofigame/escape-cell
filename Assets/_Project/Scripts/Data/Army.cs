@@ -77,9 +77,29 @@ namespace SquashBot.Data
             }
         }
 
-        // ---------- Groups ----------
+        // ---------- Groups: armour and attack ----------
 
-        public static int GroupPoints(int group) => PlayerPrefs.GetInt(GroupKey + group, 0);
+        /// <summary>
+        /// A group's points: armour (health, and blows it takes off) and attack (its blows), spent separately. Points
+        /// spent before the split are shared out once, half each.
+        /// </summary>
+        public static int ArmorPoints(int group) { Migrate(group); return PlayerPrefs.GetInt(ArmorKey + group, 0); }
+        public static int AttackPoints(int group) { Migrate(group); return PlayerPrefs.GetInt(AttackKey + group, 0); }
+
+        private const string ArmorKey = "sb_army_a_", AttackKey = "sb_army_h_";
+
+        private static void Migrate(int group)
+        {
+            if (!PlayerPrefs.HasKey(GroupKey + group)) return;
+            int old = PlayerPrefs.GetInt(GroupKey + group, 0);
+            PlayerPrefs.DeleteKey(GroupKey + group);
+            PlayerPrefs.SetInt(ArmorKey + group, PlayerPrefs.GetInt(ArmorKey + group, 0) + (old + 1) / 2);
+            PlayerPrefs.SetInt(AttackKey + group, PlayerPrefs.GetInt(AttackKey + group, 0) + old / 2);
+            PlayerPrefs.Save();
+        }
+
+        /// <summary>All the points in a group (armour and attack).</summary>
+        public static int GroupPoints(int group) => ArmorPoints(group) + AttackPoints(group);
 
         public static int SpentPoints
         {
@@ -93,23 +113,26 @@ namespace SquashBot.Data
 
         public static int FreePoints => Mathf.Max(0, EarnedPoints - SpentPoints);
 
-        /// <summary>Puts <paramref name="amount"/> free points into a group.</summary>
-        public static bool Spend(int group, int amount)
+        /// <summary>Puts <paramref name="amount"/> free points into a group's armour (or attack).</summary>
+        public static bool Spend(int group, int amount, bool armor)
         {
             amount = Mathf.Min(amount, FreePoints);
             if (amount <= 0) return false;
-            PlayerPrefs.SetInt(GroupKey + group, GroupPoints(group) + amount);
+            string key = (armor ? ArmorKey : AttackKey) + group;
+            Migrate(group);
+            PlayerPrefs.SetInt(key, PlayerPrefs.GetInt(key, 0) + amount);
             PlayerPrefs.Save();
             return true;
         }
 
-        /// <summary>Gold to take every spent point back (grows with each reset, so it is a choice, not a habit).</summary>
-        /// <summary>Takes up to <paramref name="amount"/> points back off a group (they are free to spend again).</summary>
-        public static bool Take(int group, int amount)
+        /// <summary>Takes up to <paramref name="amount"/> points back off a group's armour (or attack): free to spend again.</summary>
+        public static bool Take(int group, int amount, bool armor)
         {
-            int have = GroupPoints(group);
+            string key = (armor ? ArmorKey : AttackKey) + group;
+            Migrate(group);
+            int have = PlayerPrefs.GetInt(key, 0);
             if (have <= 0) return false;
-            PlayerPrefs.SetInt(GroupKey + group, Mathf.Max(0, have - amount));
+            PlayerPrefs.SetInt(key, Mathf.Max(0, have - amount));
             PlayerPrefs.Save();
             return true;
         }
@@ -120,15 +143,21 @@ namespace SquashBot.Data
         public static bool TryReset()
         {
             if (SpentPoints <= 0 || !Shop.Spend(ResetPrice)) return false;
-            for (int g = 0; g < Groups; g++) PlayerPrefs.DeleteKey(GroupKey + g);
+            for (int g = 0; g < Groups; g++) { PlayerPrefs.DeleteKey(GroupKey + g); PlayerPrefs.DeleteKey(ArmorKey + g); PlayerPrefs.DeleteKey(AttackKey + g); }
             PlayerPrefs.SetInt(ResetCountKey, PlayerPrefs.GetInt(ResetCountKey, 0) + 1);
             PlayerPrefs.Save();
             return true;
         }
 
-        /// <summary>A group's strength multiplier (1 at no points).</summary>
-        /// <summary>A group's strength: its development points, plus the whole army's rank strength from the challenges.</summary>
-        public static float Power(int group) => 1f + GroupPoints(group) * PerPoint + Challenge.ArmyBonus;
+        /// <summary>Strength each armour / attack point adds to its side of a group.</summary>
+        public const float PerSidePoint = 0.03f;
+
+        /// <summary>A group's toughness (health) and its blows' strength: their points, plus the army's rank strength.</summary>
+        public static float ArmorPower(int group) => 1f + ArmorPoints(group) * PerSidePoint + Challenge.ArmyBonus;
+        public static float AttackPower(int group) => 1f + AttackPoints(group) * PerSidePoint + Challenge.ArmyBonus;
+
+        /// <summary>A group's overall strength (the average of the two; for matching and the rival's cards).</summary>
+        public static float Power(int group) => (ArmorPower(group) + AttackPower(group)) * 0.5f;
 
         /// <summary>The look tier of a group (0 plain, one more every 25 points).</summary>
         public static int Tier(int group) => GroupPoints(group) / TierStep;

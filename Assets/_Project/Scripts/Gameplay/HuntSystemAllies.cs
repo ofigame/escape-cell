@@ -186,7 +186,7 @@ namespace SquashBot.Gameplay
         {
             RaiseAlarm(g);
             if (g.shield > 0) { HitShield(g, g.pos); return; }
-            g.hp -= AllyDamage + Edge(by, g);
+            g.hp -= (by.allyHit > 0 ? by.allyHit : AllyDamage) + Edge(by, g);
             g.flash = 1f;
             g.Flash();
             fx.Burst(At(g.pos) + Vector3.up * 0.4f, AllyColour, AllyColour * 1.8f, 16, 4f);
@@ -227,7 +227,7 @@ namespace SquashBot.Gameplay
         private void KillAlly(Guard a)
         {
             a.dead = true;
-            if (a.squad) SquadFell?.Invoke((int)a.soldierKind);
+            if (a.squad || a.poolGroup >= 0) SquadFell?.Invoke((int)a.soldierKind);
             fx.Burst(At(a.pos) + Vector3.up * 0.5f, AllyColour, AllyColour * 2f, 30, 5f);
             Shockwave.Create(At(a.pos), 1.2f, AllyColour);
             AudioManager.PlaySfx(Sfx.Impact, 0.6f, 1.3f);

@@ -63,7 +63,6 @@ namespace SquashBot.Gameplay
             hunt.RemoteFoeStruck += () => { if (LiveActive) LiveNet.Hit(); };
             hunt.SquadHitRemote += (id, damage, byFoi) => { if (LiveActive) LiveNet.SquadHit(id, damage, byFoi); };
             hunt.SquadHitFoe += damage => { if (LiveActive) LiveNet.FoeHit(damage); };
-            hunt.SquadFell += group => { if (challengeRun) SoldierPool.Lose(group); };
             hunt.RivalSentGroup += group =>
             {
                 if (!challengeRun || chPhase != ChPhase.Duel) return;

@@ -76,6 +76,8 @@ namespace SquashBot.Gameplay
             public float power = 1f, revengeUntil;
             public Vector3 netTo;
             public Guard aim, hitBy;
+            /// <summary>One of the army's soldiers brought onto a floor: its group (its fall costs the pool one), its blow.</summary>
+            public int poolGroup = -1, allyHit;
             public Transform root;
             public bool dead, brute;
             /// <summary>The fortress stage it belongs to, and its rank there (-1 classic, 0 easy … 99 an elite).</summary>
@@ -119,6 +121,8 @@ namespace SquashBot.Gameplay
         public event Action MonsterDefeated;
         /// <summary>A bug or robot was finished (its tile), for coins and combos.</summary>
         public event Action<GridPos, bool> Finished;
+        /// <summary>A bug was squashed (its tile): it may leave a skill behind.</summary>
+        public event Action<GridPos> BugSquashed;
         /// <summary>What was just knocked out (a robot, a tower, a bug), for the daily quests.</summary>
         public event Action<DailyGoal> Felled;
 
@@ -171,7 +175,6 @@ namespace SquashBot.Gameplay
             get
             {
                 int n = 0;
-                foreach (var b in bugs) if (!b.dead) n++;
                 foreach (var g in guards) if (!g.dead) n++;
                 n += TowersLeft;
                 n += guardsToCome;
@@ -226,7 +229,7 @@ namespace SquashBot.Gameplay
             SetupStages();
             if (stageCount > 1) SpawnStages();
             else SpawnClassic();
-            Total = bugs.Count + guards.Count + towers.Count + guardsToCome;
+            Total = guards.Count + towers.Count + guardsToCome; // the bugs are optional (they leave gold and skills)
             MonsterAwake = false;
             if (NoMonster) { }
             else if (MonsterSpot.HasValue) RaiseMonster(asleep: Total > 0);
@@ -789,6 +792,7 @@ namespace SquashBot.Gameplay
             Destroy(b.model.gameObject, 0.9f);
             BloodSplat.Create(b.model.transform.position, b.model.Blood, rng.Next());
             fx.Burst(At(b.pos) + Vector3.up * 0.08f, b.model.Blood, b.model.Blood * 0.6f, 10, 2f);
+            BugSquashed?.Invoke(b.pos);
             AudioManager.PlaySfx(Sfx.Squash, 0.6f, 1.6f);
             Finished?.Invoke(b.pos, false);
             Felled?.Invoke(DailyGoal.Bugs);
@@ -1261,7 +1265,7 @@ namespace SquashBot.Gameplay
 
         private static float ShareOf(Guard g) => g.share >= 0f ? g.share : g.rank >= 99 ? 0.55f : g.brute ? BruteHitShare : g.rank == 0 ? 0.12f : g.rank > 0 ? Mathf.Min(0.3f, 0.16f + g.rank * 0.025f) : GuardHitShare;
         /// <summary>The monster's blows hurt more on later floors.</summary>
-        private float MonsterHitShare => Mathf.Lerp(0.3f, 0.5f, level.score / 100f);
+        private float MonsterHitShare => Mathf.Lerp(0.36f, 0.6f, level.score / 100f);
 
         /// <summary>Blows still to come in the monster's current combo (later floors chain two or three).</summary>
         private int comboLeft;

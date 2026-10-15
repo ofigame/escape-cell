@@ -69,6 +69,8 @@ namespace SquashBot.Gameplay
             };
             hunt.Finished += OnHuntFinished;
             hunt.SleepingHit += OnSleepingHit;
+            hunt.BugSquashed += OnBugSquashed;
+            hunt.SquadFell += SoldierPool.Lose; // a soldier of the army fell (a duel's or a floor's): an hour away
             InitStages();
             InitDefense();
             InitFifi();
@@ -154,12 +156,28 @@ namespace SquashBot.Gameplay
         private void OnHuntFinished(GridPos p, bool robotKind)
         {
             if (robotKind && !defenseStrike && !hunt.AllyKill) { hitStopLeft = 0.06f; cameraRig.Punch(0.35f); CountStreak(p); }
-            int reward = robotKind ? 3 : 1;
+            // A robot: 3 gold, and more the longer the streak of kills (up to 11); a bug: 1.
+            int reward = robotKind ? 3 + Mathf.Clamp(killStreak - 1, 0, 8) : 1;
             if (floorStand != null && robotKind) floorStand.Cheer(0.55f);
             if (defenseStrike) reward /= 2; // felled by a defence: half the coins
             coinsThisRun += reward;
             comboTimer = ComboWindow;
             FloatAt(GridView.ToWorld(p) + Vector3.up * 0.7f, "+" + reward, Palette.UiGold);
+        }
+
+        /// <summary>
+        /// A squashed bug: one in three leaves a skill on its tile — a heart when foi is hurt, a shield, and later a freeze,
+        /// a blast, now and then the super skill — the floors' only skills now that nothing falls from the sky.
+        /// </summary>
+        private void OnBugSquashed(GridPos p)
+        {
+            if (arenaRun || challengeRun || Random.value > 0.34f) return;
+            var pool = new System.Collections.Generic.List<PowerUpType> { PowerUpType.Shield };
+            if (HealthEnabled && health < 0.85f) { pool.Add(PowerUpType.Heart); pool.Add(PowerUpType.Heart); }
+            if (World >= 2) pool.Add(PowerUpType.Freeze);
+            if (World >= 5) pool.Add(PowerUpType.Blast);
+            if (World >= 8 && Random.value < 0.15f) pool.Add(PowerUpType.Super);
+            powerUps.Drop(pool[Random.Range(0, pool.Count)], p);
         }
 
         private void OnHuntWon()

@@ -131,11 +131,11 @@ namespace SquashBot.Gameplay
                 var far = freeIn[s].FindAll(p => Chebyshev(p, robot.Position) >= 4);
                 for (int i = 0; i < here && far.Count > 0; i++) { var p = Take(far); freeIn[s].Remove(p); AddGuard(p, brute: true, rank: 99); elitesLeft--; }
             }
-            // Towers in the stages after the first (all in the first on a one-stage floor), and the reactor in the last.
+            // Towers right and left of vanG's cage (the last stage), and the reactor in the last.
             for (int s = 0; s < stageCount; s++)
             {
                 if (stageCount > 1 && s == 0) continue;
-                int towersHere = stageCount == 1 ? level.towers : Mathf.CeilToInt(level.towers * s / (float)Mathf.Max(1, shares - 1));
+                int towersHere = stageCount == 1 || s == last ? level.towers : 0; // all by vanG's cage (in the last stage)
                 var far = freeIn[s].FindAll(p => Chebyshev(p, robot.Position) >= 4);
                 if (level.reactor && s == last && far.Count > 0) { var rp = NearestCentre(far); far.Remove(rp); freeIn[s].Remove(rp); AddTower(rp, reactor: true); }
                 foreach (var tp in TowerSpots(far, towersHere)) { far.Remove(tp); freeIn[s].Remove(tp); AddTower(tp); }
@@ -179,7 +179,6 @@ namespace SquashBot.Gameplay
         private int StageLeft(int s)
         {
             int n = stageToCome[s];
-            foreach (var b in bugs) if (!b.dead && b.stage == s) n++;
             foreach (var g in guards) if (!g.dead && g.stage == s) n++;
             foreach (var t in towers) if (!t.dead && StageOf(t.pos) == s) n++;
             return n;

@@ -89,12 +89,12 @@ namespace SquashBot.UI
 
             // The words: name, what it beats, points and strength, tier stars.
             const float textX = 30f + 150f + Flat.Pad;
-            const float textW = 960f - textX - 220f - Flat.Pad;
+            const float textW = 960f - textX - 380f - Flat.Pad;
             var name = Flat.Label(row, Loc.T("army.kind." + kind), new Vector2(0f, 1f), new Vector2(textX, -22f), new Vector2(textW, 48f), 36f, Flat.Text, bold: true);
             name.rectTransform.pivot = new Vector2(0f, 1f);
-            var beats = Flat.Label(row, "", new Vector2(0f, 1f), new Vector2(textX, -74f), new Vector2(textW, 34f), 24f, Flat.Muted);
+            var beats = Flat.Label(row, "", new Vector2(0f, 1f), new Vector2(textX, -74f), new Vector2(textW, 34f), 20f, Flat.Muted);
             beats.rectTransform.pivot = new Vector2(0f, 1f);
-            var stats = Flat.Label(row, "", new Vector2(0f, 1f), new Vector2(textX, -112f), new Vector2(textW, 38f), 28f, Flat.Gold, bold: true);
+            var stats = Flat.Label(row, "", new Vector2(0f, 1f), new Vector2(textX, -112f), new Vector2(textW, 38f), 22f, Flat.Gold, bold: true);
             stats.rectTransform.pivot = new Vector2(0f, 1f);
             var stars = new List<Image>();
             for (int s = 0; s < 4; s++)
@@ -105,45 +105,51 @@ namespace SquashBot.UI
                 stars.Add(img);
             }
 
-            // The buttons: +1 +5 over −1 −5, on the right.
+            // The buttons on the right: armour (top row) and attack (bottom row), each − +1 +5.
             var pad = new Vector2(1f, 0.5f);
             Button B(string t, float x, float y, Color face, Color text, Action a)
             {
-                var b = Flat.Button(row, t, pad, new Vector2(x, y), new Vector2(98f, 76f), face, text, a, 32f);
+                var b = Flat.Button(row, t, pad, new Vector2(x, y), new Vector2(66f, 70f), face, text, a, 28f);
                 ((RectTransform)b.transform).pivot = new Vector2(1f, 0.5f);
                 return b;
             }
-            var plus5 = B("+5", -Flat.Pad, 44f, colour, new Color(0.1f, 0.08f, 0.15f), () => Add(g, 5));
-            var plus1 = B("+1", -Flat.Pad - 110f, 44f, colour, new Color(0.1f, 0.08f, 0.15f), () => Add(g, 1));
-            var minus5 = B("-5", -Flat.Pad, -44f, Flat.CardHi, Flat.Text, () => Take(g, 5));
-            var minus1 = B("-1", -Flat.Pad - 110f, -44f, Flat.CardHi, Flat.Text, () => Take(g, 1));
+            var dark = new Color(0.1f, 0.08f, 0.15f);
+            var armor5 = B("+5", -Flat.Pad, 42f, colour, dark, () => Add(g, 5, true));
+            var armor1 = B("+1", -Flat.Pad - 74f, 42f, colour, dark, () => Add(g, 1, true));
+            var armorBack = B("-", -Flat.Pad - 148f, 42f, Flat.CardHi, Flat.Text, () => Take(g, 1, true));
+            var hit5 = B("+5", -Flat.Pad, -42f, colour, dark, () => Add(g, 5, false));
+            var hit1 = B("+1", -Flat.Pad - 74f, -42f, colour, dark, () => Add(g, 1, false));
+            var hitBack = B("-", -Flat.Pad - 148f, -42f, Flat.CardHi, Flat.Text, () => Take(g, 1, false));
+            var armorLabel = Flat.Label(row, Loc.T("army.armor"), pad, new Vector2(-Flat.Pad - 226f, 42f), new Vector2(120f, 40f), 24f, Flat.Muted, TextAlignmentOptions.Right, bold: true);
+            armorLabel.rectTransform.pivot = new Vector2(1f, 0.5f);
+            var hitLabel = Flat.Label(row, Loc.T("army.attack"), pad, new Vector2(-Flat.Pad - 226f, -42f), new Vector2(120f, 40f), 24f, Flat.Muted, TextAlignmentOptions.Right, bold: true);
+            hitLabel.rectTransform.pivot = new Vector2(1f, 0.5f);
 
             refreshers.Add(() =>
             {
-                int pts = Army.GroupPoints(g);
-                stats.text = Loc.F("army.stats", pts, Mathf.RoundToInt((Army.Power(g) - 1f) * 100f));
+                int a = Army.ArmorPoints(g), h = Army.AttackPoints(g);
+                stats.text = Loc.F("army.stats2", a, Mathf.RoundToInt((Army.ArmorPower(g) - 1f) * 100f), h, Mathf.RoundToInt((Army.AttackPower(g) - 1f) * 100f));
                 var beatKind = (GroupKind)(((Army.Family(kind) + 2) % 3) * 2); // the family this one beats
-                beats.text = Loc.F("army.beats", Loc.T("army.family." + Army.Family(beatKind)));
+                beats.text = Loc.F("army.beats", Loc.T("army.family." + Army.Family(beatKind))) + "  ·  " + Loc.F("army.pool", SoldierPool.Available(g), Army.Soldiers);
                 int tier = Army.Tier(g);
                 for (int s = 0; s < stars.Count; s++) stars[s].color = s < tier ? Flat.Gold : new Color(1f, 1f, 1f, 0.12f);
                 bool any = Army.FreePoints > 0;
-                plus1.interactable = any;
-                plus5.interactable = any;
-                minus1.interactable = pts > 0;
-                minus5.interactable = pts > 0;
+                armor1.interactable = armor5.interactable = hit1.interactable = hit5.interactable = any;
+                armorBack.interactable = a > 0;
+                hitBack.interactable = h > 0;
             });
         }
 
-        private void Take(int g, int n)
+        private void Take(int g, int n, bool armor)
         {
-            if (Army.Take(g, n)) AudioManager.PlaySfx(Sfx.Click, 0.9f, 0.9f);
+            if (Army.Take(g, n, armor)) AudioManager.PlaySfx(Sfx.Click, 0.9f, 0.9f);
             else AudioManager.PlaySfx(Sfx.Bump, 0.6f);
             Refresh();
         }
 
-        private void Add(int g, int n)
+        private void Add(int g, int n, bool armor)
         {
-            if (Army.Spend(g, n)) AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.3f);
+            if (Army.Spend(g, n, armor)) AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.3f);
             else AudioManager.PlaySfx(Sfx.Bump, 0.6f);
             Refresh();
         }

@@ -144,7 +144,7 @@ namespace SquashBot.Gameplay
                 p.go.SetActive(p.lifeLeft > 1.5f || Mathf.Repeat(p.lifeLeft, 0.25f) > 0.1f);
             }
 
-            if (!running) return;
+            if (!running || NoTimed) return;
             timer -= dt;
             if (timer > 0f) return;
             timer = level.powerUpInterval;
@@ -222,6 +222,16 @@ namespace SquashBot.Gameplay
             return pool[UnityEngine.Random.Range(0, pool.Count)];
         }
 
+        /// <summary>No skills appear by themselves on this floor (some bugs leave one when squashed: <see cref="Drop"/>).</summary>
+        public bool NoTimed;
+
+        /// <summary>A skill left on a tile (a squashed bug's).</summary>
+        public void Drop(PowerUpType type, GridPos pos)
+        {
+            if (grid == null || !grid.IsStandable(pos)) return;
+            Make(type, pos);
+        }
+
         private void Spawn(PowerUpType type)
         {
             var options = new List<GridPos>();
@@ -234,6 +244,11 @@ namespace SquashBot.Gameplay
             if (options.Count == 0) return;
 
             var pos = options[UnityEngine.Random.Range(0, options.Count)];
+            Make(type, pos);
+        }
+
+        private void Make(PowerUpType type, GridPos pos)
+        {
             var go = new GameObject("PowerUp " + type);
             go.transform.SetParent(transform, false);
             int t = (int)type;

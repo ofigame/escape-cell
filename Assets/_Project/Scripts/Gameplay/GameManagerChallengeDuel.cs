@@ -152,7 +152,7 @@ namespace SquashBot.Gameplay
                 for (int g = 0; g < Army.Groups; g++)
                 {
                     int n = SoldierPool.ForDuel(g);
-                    for (int s = 0; s < n; s++) hunt.AddSquadSoldier(true, g * SoldierPool.PerDuel + s, mine + new GridPos(g - 2, back * (2 + s)), Army.Power(g));
+                    for (int s = 0; s < n; s++) hunt.AddSquadSoldier(true, g * SoldierPool.PerDuel + s, mine + new GridPos(g - 2, back * (2 + s)), Army.ArmorPower(g), hitPower: Army.AttackPower(g));
                     if (LiveActive) continue; // the live rival's soldiers come with its state
                     for (int s = 0; s < rival.squad[g]; s++) hunt.AddSquadSoldier(false, g * SoldierPool.PerDuel + s, theirs + new GridPos(g - 2, -back * (2 + s)), rival.Power(g));
                 }

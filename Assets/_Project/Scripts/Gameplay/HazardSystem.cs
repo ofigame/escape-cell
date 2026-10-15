@@ -213,12 +213,15 @@ namespace SquashBot.Gameplay
         private float PaceMultiplier => (1f + level.rampUp * Mathf.Clamp01(progress())) * PaceBoost;
         private float CurrentWarning => level.warningTime / (1f + (PaceMultiplier - 1f) * 0.5f);
 
+        /// <summary>Nothing falls from the sky on this floor (the floors: no crates, no bombs; user decision).</summary>
+        public bool NoFalls;
+
         private void Update()
         {
             if (grid == null) return;
             float dt = Time.deltaTime;
 
-            if (running)
+            if (running && !NoFalls)
             {
                 UpdateRhythm(dt);
                 if (!calm) spawnTimer -= dt;

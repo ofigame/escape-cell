@@ -23,6 +23,7 @@ namespace SquashBot.Gameplay
             {
                 profileWired = true;
                 ui.ChallengeStats.RenamePressed += RenameProfile;
+                ui.SquadPressed += ShowSquadPick;
             }
             if (levelTag != null) levelTag.gameObject.SetActive(false);
             if (profilePrompted || Challenge.NameChosen) return;

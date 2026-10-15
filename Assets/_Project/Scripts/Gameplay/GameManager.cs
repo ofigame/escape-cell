@@ -852,6 +852,12 @@ namespace SquashBot.Gameplay
             levelEvents.Begin(grid, level, levelIndex);
             coins.Begin(grid, level);
             powerUps.Begin(grid, level, LevelCatalog.WorldOf(levelIndex));
+            // The floors: nothing falls from the sky and nothing appears by itself — gold and skills come from what is beaten.
+            bool floorHunt = level.mission == MissionType.Hunt && !arenaRun && !challengeRun && !trailRun;
+            hazards.NoFalls = floorHunt;
+            PrepareLevelSquad();
+            coins.NoTimed = floorHunt;
+            powerUps.NoTimed = floorHunt;
 
             starGoals = StarRules.For(level, grid.FloorCount);
             SetupTools();
@@ -1387,6 +1393,7 @@ namespace SquashBot.Gameplay
             UpdateBip(Time.deltaTime);
             UpdateAlly(Time.deltaTime);
             UpdateChallenge(Time.deltaTime);
+            UpdateLevelSquad();
             AudioManager.SetTension(Tension());
             // The hard-rock fight layer: as loud as the fight around foi (and louder when its health runs low).
             AudioManager.SetDanger(level.mission == MissionType.Hunt && roadPhase == RoadPhase.None ? Mathf.Clamp01(hunt.Danger(robot.Position) + (HealthEnabled && health < 0.4f ? 0.2f : 0f)) : 0f);

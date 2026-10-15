@@ -45,7 +45,7 @@ namespace SquashBot.Gameplay
             fx.Burst(robot.transform.position + Vector3.up * 0.8f, colour, colour * 2.4f, 30 + n * 2, 6f);
             AudioManager.PlaySfx(Sfx.Win, 0.55f, 1.1f + Mathf.Min(n, 16) * 0.03f);
             Haptics.Medium();
-            int bonus = n;
+            int bonus = n * 2; // a streak called out pays double its length
             coinsThisRun += bonus;
             FloatAt(robot.transform.position + Vector3.up * 1.3f, "+" + bonus, Palette.UiGold);
             if (n >= 5) QuestProgress(DailyGoal.Streak);

@@ -628,7 +628,7 @@ namespace SquashBot.UI
         {
             prelevel = UiScreen.Create("Prelevel", root, out var t);
             UiFactory.Dim(t, new Color(0.06f, 0.05f, 0.18f, 0.55f));
-            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1000f));
+            var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1140f));
             prelevel.SetPopTarget(card);
 
             UiFactory.MakeButton(card, "X", Kind.Icon, TopRight, new Vector2(-24f, -24f), new Vector2(100f, 100f), () =>
@@ -651,7 +651,10 @@ namespace SquashBot.UI
             preBoostsLabel = UiFactory.TextBox("Boosts", card, Top, new Vector2(0f, -420f), new Vector2(780f, 56f), Loc.T("pre.boosts"), 36f, Palette.UiText);
             foreach (var b in new[] { Boost.StartShield, Boost.StartHammer, Boost.CoinMagnet, Boost.DoubleCoins }) preBoosts.Add(BoostTile(card, new Vector2(0f, -500f), b));
 
-            UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(0f, 46f), new Vector2(620f, 160f),
+            // The soldiers to bring along (how many, and where they join foi).
+            preSquad = UiFactory.MakeButton(card, "", Kind.Secondary, Bottom, new Vector2(0f, 214f), new Vector2(620f, 96f), () => SquadPressed?.Invoke(preLevel), 34f);
+            preSquadText = preSquad.GetComponentInChildren<TextMeshProUGUI>();
+            UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(0f, 30f), new Vector2(620f, 160f),
                 () => PrelevelPlay?.Invoke(preLevel, preBoosts.FindAll(v => v.on).ConvertAll(v => v.boost)), 84f);
 
         }
@@ -737,9 +740,23 @@ namespace SquashBot.UI
             preBoostsLabel.text = Loc.T(boostsAllowed ? "pre.boosts" : "pre.noBoosts");
             for (int i = 0; i < shown.Count; i++)
                 ((RectTransform)shown[i].root.transform).anchoredPosition = new Vector2((i - (shown.Count - 1) * 0.5f) * 270f, -500f);
+            RefreshPrelevelSquad(levelIndex >= 4);
             RefreshBoosts();
             prelevel.Show();
             prelevel.transform.SetAsLastSibling();
+        }
+
+        private Button preSquad;
+        private TextMeshProUGUI preSquadText;
+        /// <summary>BRING SOLDIERS on the card before a level (its index).</summary>
+        public event Action<int> SquadPressed;
+
+        /// <summary>The card's soldiers button: how many come along (hidden on the first floors).</summary>
+        public void RefreshPrelevelSquad(bool show)
+        {
+            if (preSquad == null) return;
+            preSquad.gameObject.SetActive(show);
+            preSquadText.text = Loc.F("pre.squad", Data.LevelSquad.Total);
         }
 
         public void HidePrelevel() => prelevel.Hide(true);

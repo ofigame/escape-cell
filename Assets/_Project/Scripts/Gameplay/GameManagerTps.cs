@@ -285,14 +285,20 @@ namespace SquashBot.Gameplay
         /// </summary>
         private void Toughen(LevelData l)
         {
-            if (l.robotsAtOnce > 0) l.robotsAtOnce = Mathf.CeilToInt(l.robotsAtOnce * 1.5f);
-            l.robots = Mathf.CeilToInt(l.robots * 1.25f);
-            l.elites = Mathf.CeilToInt(l.elites * 1.2f);
+            // Fewer robots on the floor at once (2 to 5; user asked), each a little tougher; the crowd a bit smaller.
+            if (l.robotsAtOnce > 0) l.robotsAtOnce = Mathf.Clamp(Mathf.RoundToInt(l.robotsAtOnce * 0.75f), 2, 5);
+            l.robots = Mathf.CeilToInt(l.robots * 0.65f);
             if (LevelCatalog.WorldOf(levelIndex) >= 2) l.robotHp += 1;
-            // More of the hard ones (user asked): enforcers and warlords, and a vanG that takes far more beating.
-            l.elites = Mathf.CeilToInt(l.elites * 1.35f) + (LevelCatalog.WorldOf(levelIndex) >= 1 ? 1 : 0);
+            if (LevelCatalog.WorldOf(levelIndex) >= 5) l.robotHp += 1;
+            // More of the hard ones (user asked): enforcers and warlords.
+            l.elites = Mathf.CeilToInt(l.elites * 1.6f) + (LevelCatalog.WorldOf(levelIndex) >= 1 ? 1 : 0);
             l.brutes = Mathf.CeilToInt(l.brutes * 1.5f) + (LevelCatalog.WorldOf(levelIndex) >= 1 ? 1 : 0);
-            l.monsterHp = Mathf.CeilToInt(l.monsterHp * 1.8f);
+            // vanG: never a pushover, whatever foi carries — at least 10 (first floors) to 30 (last floors) of foi's own
+            // best blows, and it attacks more often.
+            float far = levelIndex / (float)Mathf.Max(1, LevelCount - 1);
+            int blow = Mathf.Max(1, Challenge.RankBoost(Armory.Damage(Armory.Equipped)) - l.armor);
+            l.monsterHp = Mathf.Max(Mathf.CeilToInt(l.monsterHp * 2.5f), Mathf.CeilToInt(blow * Mathf.Lerp(10f, 30f, far)));
+            l.monsterAttack *= 0.8f;
         }
     }
 }

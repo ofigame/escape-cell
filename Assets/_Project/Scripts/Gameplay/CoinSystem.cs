@@ -46,6 +46,9 @@ namespace SquashBot.Gameplay
             rimMaterial = MaterialFactory.Create(Palette.CoinRim, Palette.CoinGlow * 0.4f);
         }
 
+        /// <summary>No coins appear by themselves on this floor (they come from the enemies beaten).</summary>
+        public bool NoTimed;
+
         public void Begin(GridModel model, LevelData data)
         {
             Stop();
@@ -164,7 +167,7 @@ namespace SquashBot.Gameplay
                 c.go.SetActive(c.lifeLeft > 1.5f || Mathf.Repeat(c.lifeLeft, 0.25f) > 0.1f);
             }
 
-            if (!running) return;
+            if (!running || NoTimed) return;
             timer -= dt;
             if (timer > 0f) return;
             timer = level.coinInterval / Mathf.Max(0.1f, SpawnBoost);

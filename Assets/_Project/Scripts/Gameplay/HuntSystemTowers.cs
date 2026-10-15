@@ -68,6 +68,33 @@ namespace SquashBot.Gameplay
         {
             var chosen = new List<GridPos>();
             if (count <= 0 || far.Count == 0) return chosen;
+            // Beside vanG's cage: right and left of it in turn, each pair a little further out and further in.
+            if (grid.CageTiles.Count > 0)
+            {
+                int cx0 = int.MaxValue, cx1 = int.MinValue; float cy = 0f;
+                foreach (var c in grid.CageTiles) { cx0 = Mathf.Min(cx0, c.x); cx1 = Mathf.Max(cx1, c.x); cy += c.y; }
+                cy /= grid.CageTiles.Count;
+                int inward = grid.Height / 2 >= cy ? 1 : -1;
+                for (int k = 0; k < count * 3 && chosen.Count < count; k++)
+                {
+                    int ring = k / 2;
+                    float tx = k % 2 == 0 ? cx0 - 2.5f - ring * 2.5f : cx1 + 2.5f + ring * 2.5f;
+                    float ty = cy + inward * (ring / 2) * 2.5f;
+                    GridPos? best = null;
+                    float bestD = 2.6f;
+                    foreach (var p in far)
+                    {
+                        if (chosen.Contains(p)) continue;
+                        float d = Vector2.Distance(new Vector2(tx, ty), new Vector2(p.x, p.y));
+                        bool apart = true;
+                        foreach (var c in chosen) if (Chebyshev(c, p) < 2) apart = false;
+                        foreach (var c in grid.CageTiles) if (Chebyshev(c, p) < 2) apart = false;
+                        if (apart && d < bestD) { bestD = d; best = p; }
+                    }
+                    if (best.HasValue) chosen.Add(best.Value);
+                }
+                if (chosen.Count >= count) return chosen;
+            }
             int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
             foreach (var p in grid.AllPositions())
             {

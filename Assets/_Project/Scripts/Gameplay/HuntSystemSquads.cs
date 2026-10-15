@@ -61,11 +61,13 @@ namespace SquashBot.Gameplay
         /// <paramref name="id"/> its number in its squad (group × 2 + slot); <paramref name="remote"/> moved by the other
         /// game (the live rival's).
         /// </summary>
-        public void AddSquadSoldier(bool mine, int id, GridPos near, float power, bool remote = false, float hpShare = 1f)
+        public void AddSquadSoldier(bool mine, int id, GridPos near, float power, bool remote = false, float hpShare = 1f, float hitPower = -1f)
         {
             int group = Mathf.Clamp(id / SoldierPool.PerDuel, 0, Army.Groups - 1);
             // A group's strength counts by its square root here (a group of all the points would otherwise be untouchable).
+            if (hitPower < 0f) hitPower = power; // one strength for both (the rival's, sent as one)
             power = Mathf.Sqrt(Mathf.Max(1f, power));
+            hitPower = Mathf.Sqrt(Mathf.Max(1f, hitPower));
             var kind = Army.KindOf(group);
             var tile = FreeNear(near);
             if (!tile.HasValue) return;
@@ -75,7 +77,7 @@ namespace SquashBot.Gameplay
             var s = new Guard
             {
                 pos = tile.Value, hp = Mathf.Max(1, Mathf.RoundToInt(hp * Mathf.Clamp01(hpShare))), maxHp = hp, rank = mine ? -1 : 1, ally = mine,
-                squad = true, squadId = id, remote = remote, power = power, cooldown = (float)rng.NextDouble(), soldier = model, soldierKind = kind,
+                squad = true, squadId = id, remote = remote, power = hitPower, cooldown = (float)rng.NextDouble(), soldier = model, soldierKind = kind,
             };
             s.root = model.transform;
             s.root.SetParent(transform, true);
@@ -416,6 +418,33 @@ namespace SquashBot.Gameplay
             // A group down to its last soldier with none of the player's near: back to guard.
             for (int g = 0; g < Army.Groups; g++)
                 if (squadAttack[1, g] && theirs[g] == 1 && threat.Count == 0 && rng.Next(3) == 0) squadAttack[1, g] = false;
+        }
+
+        /// <summary>
+        /// One of the army's soldiers brought onto a floor: an ally of its group near foi (its kind's own strengths, its
+        /// group's armour and attack), fighting the floor's robots like foi's other allies. Its fall costs the army's
+        /// pool a soldier for an hour.
+        /// </summary>
+        public bool AddLevelSoldier(int group, GridPos near, float armorPower, float attackPower)
+        {
+            var tile = FreeNear(near);
+            if (!tile.HasValue) return false;
+            var kind = Army.KindOf(group);
+            var model = SoldierModel.Build(transform, kind, Army.Heavy(kind) ? MineColour : Color.Lerp(MineColour, Color.white, 0.3f));
+            model.transform.localScale = Vector3.one * Mathf.Max(0.4f, FoiHeight * 0.62f) * (Army.Heavy(kind) ? 1.12f : 1f);
+            // Its health in the floor robots' blows, its blow in theirs (robots take a few).
+            int hp = Mathf.Max(2, Mathf.RoundToInt(SquadStats[group, 0] * 0.5f * Mathf.Sqrt(Mathf.Max(1f, armorPower))));
+            int hit = Mathf.Max(1, Mathf.RoundToInt(SquadStats[group, 1] * 0.6f * Mathf.Sqrt(Mathf.Max(1f, attackPower))));
+            var a = new Guard { pos = tile.Value, hp = hp, maxHp = hp, rank = -1, step = 0.2f + (float)rng.NextDouble() * 0.4f, ally = true, poolGroup = group, allyHit = hit, soldier = model, soldierKind = kind };
+            a.root = model.transform;
+            a.root.SetParent(transform, true);
+            a.root.position = At(tile.Value);
+            a.from = a.to = a.root.position;
+            AddHealthBar(a);
+            MaterialFactory.SetColors(a.barMat, MineColour, MineColour * 1.6f);
+            allies.Add(a);
+            fx.Burst(At(tile.Value) + Vector3.up * 0.5f, MineColour, MineColour * 2f, 14, 3.5f);
+            return true;
         }
 
         // ---------- Live: the squads' state ----------
