@@ -496,6 +496,7 @@ namespace SquashBot.Gameplay
         private void ShowMenu()
         {
             EndChallenge();
+            ui.SetAmmo(false, 0, 0);
             robot.transform.rotation = Quaternion.identity; // turned round in the garage: facing ahead again
             if (arenaMode) KeepAllies(0); // left the battle arena: the allies are gone (they never come back with a new start)
             ExitTps();
@@ -867,6 +868,7 @@ namespace SquashBot.Gameplay
             SetupTools();
             SetupHealth();
             State = GameState.Playing;
+            RefreshAmmo(); // (set up before the floor was on: shown now)
             AudioManager.PlayMusic(LevelMusic());
             ui.ShowHud(bonusRun ? -1 : levelIndex);
             // The battle arena mode: the arena (or the road to it) and its world, not BONUS.

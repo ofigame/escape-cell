@@ -97,13 +97,17 @@ namespace SquashBot.Gameplay
             RefreshSquadBar();
             hunt.Freeze(); // nobody moves while the briefing is read
             chPhase = ChPhase.Lobby; // the briefing first
-            cameraRig.StartCoroutine(ChallengeBriefing("duel", 3, () => { if (LiveActive) LiveWaitFor(LiveWait.Start); else BeginDuel(); }));
+            cameraRig.StartCoroutine(ChallengeBriefing("duel", 3, () =>
+            {
+                if (chPhase != ChPhase.Lobby) return; // the server started it meanwhile, or it is over (the rival left)
+                if (LiveActive) LiveWaitFor(LiveWait.Start); else BeginDuel();
+            }));
             AudioManager.PlaySfx(Sfx.Win, 0.6f, 0.9f);
         }
 
         private void BeginDuel()
         {
-            if (!challengeRun) return;
+            if (!challengeRun || chPhase == ChPhase.Done || chPhase == ChPhase.Duel) return;
             hunt.DelayBotOrders(10f + Random.value * 8f);
             chPhase = ChPhase.Duel;
             duelPan = robot.transform.position - boardCentre; duelPan.y = 0f;

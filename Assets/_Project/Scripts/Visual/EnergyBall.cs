@@ -15,14 +15,21 @@ namespace SquashBot.Visual
         private Color colour;
         private FxSystem fx;
         private float sparkAt;
+        private static readonly System.Collections.Generic.Dictionary<Color, (Material core, Material halo)> mats = new System.Collections.Generic.Dictionary<Color, (Material, Material)>();
 
         public static void Fly(Transform parent, Vector3 from, Vector3 to, Color colour, float size, FxSystem fx, Action arrived)
         {
             var go = new GameObject("EnergyBall");
             go.transform.SetParent(parent, false);
             go.transform.position = from;
-            var core = MaterialFactory.Create(Color.Lerp(colour, Color.white, 0.55f), colour * 3f);
-            var halo = MaterialFactory.CreateTransparent(new Color(colour.r, colour.g, colour.b, 0.4f), colour * 1.6f);
+            // One pair of materials per colour, shared by every ball (an automatic fires hundreds).
+            if (!mats.TryGetValue(colour, out var pair) || pair.core == null)
+            {
+                pair = (MaterialFactory.Create(Color.Lerp(colour, Color.white, 0.55f), colour * 3f), MaterialFactory.CreateTransparent(new Color(colour.r, colour.g, colour.b, 0.4f), colour * 1.6f));
+                mats[colour] = pair;
+            }
+            var core = pair.core;
+            var halo = pair.halo;
             Shapes.Primitive(PrimitiveType.Sphere, "Core", go.transform, Vector3.zero, Vector3.one * size, core);
             Shapes.Primitive(PrimitiveType.Sphere, "Halo", go.transform, Vector3.zero, Vector3.one * size * 2.1f, halo);
             var b = go.AddComponent<EnergyBall>();

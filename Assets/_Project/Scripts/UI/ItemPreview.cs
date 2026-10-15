@@ -87,7 +87,13 @@ namespace SquashBot.UI
         public static Texture Spinning(WeaponDef w)
         {
             Setup();
-            if (live.TryGetValue(w.id, out var l) && l.rt != null && l.rt.IsCreated()) { l.users++; return l.rt; }
+            if (live.TryGetValue(w.id, out var l) && l.rt != null && l.holder != null)
+            {
+                // Already turning (its texture may have been lost: made again in place, the cards keep it).
+                if (!l.rt.IsCreated()) { l.rt.Create(); Draw(l); }
+                l.users++;
+                return l.rt;
+            }
             l = new Live { id = w.id, users = 1, phase = liveSlot * 47f };
             l.rt = new RenderTexture(384, 384, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Spin " + w.id };
             l.rt.Create();

@@ -138,6 +138,7 @@ namespace SquashBot.Gameplay
         /// <summary>This side is ready (the briefing read): the server starts the match when both are.</summary>
         private void LiveWaitFor(LiveWait kind)
         {
+            if (chPhase != ChPhase.Lobby) return; // already started (or over)
             liveWait = kind;
             chPhase = ChPhase.Wait;
             LiveNet.Ready();

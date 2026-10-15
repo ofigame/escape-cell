@@ -67,6 +67,9 @@ namespace SquashBot.Data
             }
             ws = socket;
             cts = source;
+            // A fresh send lock for each connection: a send stuck on an old one never holds up the new one.
+            sendLock = new SemaphoreSlim(1, 1);
+            sending = 0;
             pingAt = Time.realtimeSinceStartup + 20f;
             _ = Receive(socket, source.Token);
             return true;
@@ -119,22 +122,26 @@ namespace SquashBot.Data
         {
             var socket = ws;
             if (socket == null || socket.State != WebSocketState.Open) return;
-            _ = SendAsync(socket, Encoding.UTF8.GetBytes(json), state);
+            _ = SendAsync(socket, sendLock, Encoding.UTF8.GetBytes(json), state);
         }
 
         // One send at a time on a socket (a WebSocket takes no overlapping sends).
-        private static readonly SemaphoreSlim sendLock = new SemaphoreSlim(1, 1);
+        private static SemaphoreSlim sendLock = new SemaphoreSlim(1, 1);
         private static int sending;
 
-        private static async Task SendAsync(ClientWebSocket socket, byte[] bytes, bool state)
+        private static async Task SendAsync(ClientWebSocket socket, SemaphoreSlim gate, byte[] bytes, bool state)
         {
             // A state while another message is still on its way: dropped (the next state says it all again).
             if (state && Volatile.Read(ref sending) > 0) return;
             Interlocked.Increment(ref sending);
-            await sendLock.WaitAsync();
-            try { await socket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None); }
+            await gate.WaitAsync();
+            try
+            {
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10)); // a stalled connection gives up the send
+                await socket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, timeout.Token);
+            }
             catch (Exception) { }
-            finally { sendLock.Release(); Interlocked.Decrement(ref sending); }
+            finally { gate.Release(); Interlocked.Decrement(ref sending); }
         }
 
         private static string I(float v) => v.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
@@ -178,20 +185,24 @@ namespace SquashBot.Data
             ws = null;
             try { cts?.Cancel(); } catch (Exception) { }
             cts = null;
-            _ = CloseAsync(socket);
+            _ = CloseAsync(socket, sendLock);
         }
 
-        private static async Task CloseAsync(ClientWebSocket socket)
+        private static async Task CloseAsync(ClientWebSocket socket, SemaphoreSlim gate)
         {
-            // After whatever is still being sent (a leave).
-            await sendLock.WaitAsync();
+            // After whatever is still being sent (a leave) — but never stuck behind a stalled send: then it is cut off.
+            bool got = await gate.WaitAsync(TimeSpan.FromSeconds(3));
             try
             {
-                if (socket.State == WebSocketState.Open)
-                    await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "bye", CancellationToken.None);
+                if (got && socket.State == WebSocketState.Open)
+                {
+                    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+                    await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "bye", timeout.Token);
+                }
+                else socket.Abort();
             }
             catch (Exception) { }
-            finally { sendLock.Release(); }
+            finally { if (got) gate.Release(); }
             socket.Dispose();
         }
 
