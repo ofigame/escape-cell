@@ -20,8 +20,8 @@ namespace SquashBot.Data
         /// <summary>The phone's notification token (null until Firebase has given one).</summary>
         public static string Token
         {
-            get { var t = PlayerPrefs.GetString(TokenKey, ""); return t.Length > 0 ? t : null; }
-            private set { PlayerPrefs.SetString(TokenKey, value ?? ""); PlayerPrefs.Save(); }
+            get { var t = Prefs.GetString(TokenKey, ""); return t.Length > 0 ? t : null; }
+            private set { Prefs.SetString(TokenKey, value ?? ""); Prefs.Save(); }
         }
 
         private static Action<string> onToken;
@@ -33,10 +33,10 @@ namespace SquashBot.Data
             if (!Configured) return;
             onToken = tokenReady;
             const string Permission = "android.permission.POST_NOTIFICATIONS";
-            if (PlayerPrefs.GetInt(AskedKey, 0) == 0 && !UnityEngine.Android.Permission.HasUserAuthorizedPermission(Permission))
+            if (Prefs.GetInt(AskedKey, 0) == 0 && !UnityEngine.Android.Permission.HasUserAuthorizedPermission(Permission))
             {
-                PlayerPrefs.SetInt(AskedKey, 1);
-                PlayerPrefs.Save();
+                Prefs.SetInt(AskedKey, 1);
+                Prefs.Save();
                 UnityEngine.Android.Permission.RequestUserPermission(Permission);
             }
             Start();

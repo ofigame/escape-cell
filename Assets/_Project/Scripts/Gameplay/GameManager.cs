@@ -156,7 +156,9 @@ namespace SquashBot.Gameplay
                 return;
             }
 
-            Application.targetFrameRate = 60;
+            FramePacer.Install();
+            CloudSave.Install();
+            FramePacer.Busy = () => State == GameState.Playing || IntroCinematic.Playing || (OpenWorld.OwMode.Active && OpenWorld.OwMode.Busy);
             Application.lowMemory += OnLowMemory;
             if (Debug.isDebugBuild) gameObject.AddComponent<DevStats>(); // test builds: FPS and memory in the corner
             QualitySettings.vSyncCount = 0;
@@ -227,7 +229,7 @@ namespace SquashBot.Gameplay
             CreateUi();
             ShowMenu();
             // Closed on a road last time: the menu comes first, PLAY goes back onto the road.
-            if (PendingRoad >= LevelCount) PlayerPrefs.DeleteKey(RoadLevelKey);
+            if (PendingRoad >= LevelCount) Prefs.DeleteKey(RoadLevelKey);
             FrameGovernor.Install(); // picture quality for this device (after the camera's post-processing exists)
             AdMob.Start(); // consent form where required, then AdMob (phones only)
             FifiUpgrades.RefundOnce(); // Fifi has left the game: its levels' coins back, once
@@ -328,6 +330,7 @@ namespace SquashBot.Gameplay
                 OpenWorld.OwSync.Then(() => { if (!OpenWorld.OwMode.Active && State == GameState.Menu) OpenWorld.OwMode.Enter(robot.Visual, ShowMenu); });
             };
             ui.IntroPressed += () => { if (!IntroCinematic.Playing) IntroCinematic.Play(robot.Visual, fx, true); };
+            ui.CloudRestored += () => UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
             ui.BombSwitchPressed += () => NextBombKind();
             WireDefenseUi();
             WireArenaUi();
@@ -701,7 +704,7 @@ namespace SquashBot.Gameplay
                 return;
             }
 
-            if (PendingRoad >= 0) PlayerPrefs.DeleteKey(RoadLevelKey); // another level was chosen: that road is given up
+            if (PendingRoad >= 0) Prefs.DeleteKey(RoadLevelKey); // another level was chosen: that road is given up
             bonusRun = false;
             arenaRun = false;
             dailyRun = false;
@@ -1013,7 +1016,7 @@ namespace SquashBot.Gameplay
             StopAllCoroutines();
             // The loss already banked the coins and counted a fail; this run goes on instead.
             SaveData.Coins -= Earned;
-            PlayerPrefs.SetInt(FailKey(levelIndex), Mathf.Max(0, PlayerPrefs.GetInt(FailKey(levelIndex), 0) - 1));
+            Prefs.SetInt(FailKey(levelIndex), Mathf.Max(0, Prefs.GetInt(FailKey(levelIndex), 0) - 1));
 
             // A run lost to the clock gets time back, or it would end again at once.
             bool timed = level.mission == MissionType.CoinRain;
@@ -1311,7 +1314,7 @@ namespace SquashBot.Gameplay
         /// <summary>After several failed attempts in a row, the level eases off a little so nobody gets stuck.</summary>
         private bool ApplyAssist(LevelData data)
         {
-            if (PlayerPrefs.GetInt(FailKey(levelIndex), 0) < FailsForAssist) return false;
+            if (Prefs.GetInt(FailKey(levelIndex), 0) < FailsForAssist) return false;
             data.warningTime *= 1.15f;
             data.spawnInterval *= 1.12f;
             data.blocksPerWave = Mathf.Max(1, data.blocksPerWave - 1);
@@ -1354,21 +1357,21 @@ namespace SquashBot.Gameplay
 
             if (briefedNow && feature == null && !assisted)
             {
-                PlayerPrefs.SetInt("sb_seen_feature.mission." + level.mission, 1);
+                Prefs.SetInt("sb_seen_feature.mission." + level.mission, 1);
                 return;
             }
 
             string missionKey = "mission." + level.mission;
             if (feature == null && level.mission != MissionType.CollectCoins && level.mission != MissionType.Survive && !Seen(missionKey))
             {
-                PlayerPrefs.SetInt("sb_seen_feature." + missionKey, 1);
+                Prefs.SetInt("sb_seen_feature." + missionKey, 1);
                 ui.ShowIntro(Loc.T("feature.newMission"), MissionText(level, upper: true));
                 return;
             }
 
             if (feature != null)
             {
-                PlayerPrefs.SetInt("sb_seen_" + feature, 1);
+                Prefs.SetInt("sb_seen_" + feature, 1);
                 ui.ShowIntro(Loc.T("feature.new"), Loc.T(feature));
             }
             else if (assisted)
@@ -1380,7 +1383,7 @@ namespace SquashBot.Gameplay
                 ui.ShowIntro(Loc.F("level", levelIndex + 1), MissionText(level, upper: true));
             }
 
-            bool Seen(string key) => PlayerPrefs.GetInt("sb_seen_feature." + key, 0) == 1;
+            bool Seen(string key) => Prefs.GetInt("sb_seen_feature." + key, 0) == 1;
         }
 
         private void Update()
@@ -1751,9 +1754,9 @@ namespace SquashBot.Gameplay
         {
             if (State == GameState.Playing && level != null && level.mission == MissionType.Escort && p == buddyPos) DazeBuddy(p);
             const string key = "sb_jump_hints";
-            if (jumpHintShown || State != GameState.Playing || PlayerPrefs.GetInt(key, 0) >= 3) return;
+            if (jumpHintShown || State != GameState.Playing || Prefs.GetInt(key, 0) >= 3) return;
             jumpHintShown = true;
-            PlayerPrefs.SetInt(key, PlayerPrefs.GetInt(key, 0) + 1);
+            Prefs.SetInt(key, Prefs.GetInt(key, 0) + 1);
             ui.ShowIntro(Loc.T("hint.title"), Loc.T("hint.jump"));
         }
 
@@ -1935,9 +1938,9 @@ namespace SquashBot.Gameplay
                 toolLevel[s] = Tools.Level(t.Value);
                 toolCharges[s] = Tools.Charges(toolLevel[s]);
                 // The first level with a tool in the bag: Bip says what its button does.
-                if (PlayerPrefs.GetInt("sb_seen_toolhint." + t.Value, 0) == 0)
+                if (Prefs.GetInt("sb_seen_toolhint." + t.Value, 0) == 0)
                 {
-                    PlayerPrefs.SetInt("sb_seen_toolhint." + t.Value, 1);
+                    Prefs.SetInt("sb_seen_toolhint." + t.Value, 1);
                     ui.Bip.Queue(Loc.F("bip.toolHint", Loc.T("tool." + t.Value), Loc.T("tool." + t.Value + ".desc")));
                 }
             }
@@ -2128,7 +2131,7 @@ namespace SquashBot.Gameplay
                 if (arenaRun) EndArena(true); else ShowBonusResult();
                 return;
             }
-            PlayerPrefs.DeleteKey(FailKey(levelIndex));
+            Prefs.DeleteKey(FailKey(levelIndex));
             Defenses.ConsumeOnWin(levelIndex); // the defences that stood in it are used up
 
             // Stars: how well the level went.
@@ -2139,10 +2142,10 @@ namespace SquashBot.Gameplay
             // until then it is saved as "on the road", so quitting there brings the player back onto the road.
             if (RoadAhead)
             {
-                PlayerPrefs.SetInt(RoadLevelKey, levelIndex);
-                PlayerPrefs.SetInt(RoadStarsKey, stars);
-                PlayerPrefs.SetInt(RoadCoinsKey, Earned);
-                PlayerPrefs.Save();
+                Prefs.SetInt(RoadLevelKey, levelIndex);
+                Prefs.SetInt(RoadStarsKey, stars);
+                Prefs.SetInt(RoadCoinsKey, Earned);
+                Prefs.Save();
                 // Not right now: the win can come from inside the robot's own step (the last coin), which must finish first.
                 StartCoroutine(OpenRoadSoon());
                 return;
@@ -2255,7 +2258,7 @@ namespace SquashBot.Gameplay
                 return;
             }
 
-            PlayerPrefs.SetInt(FailKey(levelIndex), PlayerPrefs.GetInt(FailKey(levelIndex), 0) + 1);
+            Prefs.SetInt(FailKey(levelIndex), Prefs.GetInt(FailKey(levelIndex), 0) + 1);
             if (!dailyRun) Lives.TryConsume(); // the loss itself costs the life (not starting the level)
             StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
             {
@@ -2654,7 +2657,7 @@ namespace SquashBot.Gameplay
 
         // A level won but whose road is not walked yet (-1: none), with the stars and coins it earned.
         private const string RoadLevelKey = "sb_road_level", RoadStarsKey = "sb_road_stars", RoadCoinsKey = "sb_road_coins";
-        private static int PendingRoad => PlayerPrefs.GetInt(RoadLevelKey, -1);
+        private static int PendingRoad => Prefs.GetInt(RoadLevelKey, -1);
 
         /// <summary>A road follows every level except bonus rounds and the very last level.</summary>
         private bool RoadAhead => !bonusRun && (levelIndex + 1 < LevelCount || level.final);
@@ -2674,7 +2677,7 @@ namespace SquashBot.Gameplay
             comboBonus = 0;
             levelIndex = Mathf.Clamp(index, 0, LevelCount - 1);
             level = levelSet.levels[levelIndex].Clone();
-            coinsThisRun = PlayerPrefs.GetInt(RoadCoinsKey, 0);
+            coinsThisRun = Prefs.GetInt(RoadCoinsKey, 0);
             elapsed = 0f;
             ApplyTheme(levelIndex);
             grid = BuildGrid(level);
@@ -2866,9 +2869,9 @@ namespace SquashBot.Gameplay
             DropBip();
             SaveData.Coins += runner.Coins;
             // Only now is the level beaten: the next one opens and the stars are banked.
-            var info = CommitWin(PlayerPrefs.GetInt(RoadStarsKey, 1), PlayerPrefs.GetInt(RoadCoinsKey, 0) + runner.Coins);
-            PlayerPrefs.DeleteKey(RoadLevelKey);
-            PlayerPrefs.Save();
+            var info = CommitWin(Prefs.GetInt(RoadStarsKey, 1), Prefs.GetInt(RoadCoinsKey, 0) + runner.Coins);
+            Prefs.DeleteKey(RoadLevelKey);
+            Prefs.Save();
             info.subtitle = Loc.T("road.arrived");
             if (level.final) ui.ShowIntro(Loc.T("road.finalDone"), "");
             else ui.ShowIntro(Loc.T("road.doneTitle"), Loc.T("road.doneText"));

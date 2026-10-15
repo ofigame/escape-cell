@@ -208,6 +208,7 @@ namespace SquashBot.OpenWorld
                 pic.pivot = new Vector2(0.5f, 0.5f);
                 farmPointerIcon = pic.gameObject.AddComponent<RawImage>();
                 farmPointerIcon.raycastTarget = false;
+                farmPointer.gameObject.AddComponent<Canvas>(); // its own: the blinking redraws only this, not the whole bar
                 farmPointerGroup = farmPointer.gameObject.AddComponent<CanvasGroup>();
                 farmPointerGroup.blocksRaycasts = false;
                 farmPointer.SetAsFirstSibling();

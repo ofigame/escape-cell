@@ -181,7 +181,7 @@ namespace SquashBot.Data
         /// <summary>The free paint tube Bip hands over on the first workshop visit.</summary>
         public const string GiftId = "color.mint";
 
-        private static bool Bought(Cosmetic c) => PlayerPrefs.GetInt("sb_cos_" + c.id, 0) == 1;
+        private static bool Bought(Cosmetic c) => Prefs.GetInt("sb_cos_" + c.id, 0) == 1;
 
         /// <summary>How many of the set's three pieces are owned.</summary>
         public static int SetOwned(string set) => All.FindAll(c => c.set == set && !c.reward && Bought(c)).Count;
@@ -203,8 +203,8 @@ namespace SquashBot.Data
         {
             var pieces = All.FindAll(c => c.set == set && !c.reward && !Bought(c));
             if (pieces.Count == 0 || reachedWorld < pieces[0].world || !Shop.Spend(SetPrice(set))) return false;
-            foreach (var c in pieces) PlayerPrefs.SetInt("sb_cos_" + c.id, 1);
-            PlayerPrefs.Save();
+            foreach (var c in pieces) Prefs.SetInt("sb_cos_" + c.id, 1);
+            Prefs.Save();
             return true;
         }
 
@@ -220,30 +220,30 @@ namespace SquashBot.Data
 
         public static Cosmetic Equipped(Slot slot)
         {
-            var c = Find(PlayerPrefs.GetString("sb_eq_" + slot, ""));
+            var c = Find(Prefs.GetString("sb_eq_" + slot, ""));
             return c != null && c.slot == slot && Owns(c) ? c : InSlot(slot)[0];
         }
 
         public static void Equip(Cosmetic c)
         {
             if (!Owns(c)) return;
-            PlayerPrefs.SetString("sb_eq_" + c.slot, c.id);
-            PlayerPrefs.Save();
+            Prefs.SetString("sb_eq_" + c.slot, c.id);
+            Prefs.Save();
         }
 
         public static bool TryBuy(Cosmetic c, int reachedWorld)
         {
             if (c.reward || c.storyLevel > 0 || Owns(c) || reachedWorld < c.world || !Shop.Spend(c.price)) return false;
-            PlayerPrefs.SetInt("sb_cos_" + c.id, 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt("sb_cos_" + c.id, 1);
+            Prefs.Save();
             return true;
         }
 
         /// <summary>A present: owned without paying.</summary>
         public static void Give(string id)
         {
-            PlayerPrefs.SetInt("sb_cos_" + id, 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt("sb_cos_" + id, 1);
+            Prefs.Save();
         }
 
         /// <summary>The full outfit: what is equipped, with an optional preview piece swapped in.</summary>

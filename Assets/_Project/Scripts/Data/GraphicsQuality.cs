@@ -19,13 +19,13 @@ namespace SquashBot.Data
         {
             get
             {
-                int v = PlayerPrefs.GetInt(Key, -1);
+                int v = Prefs.GetInt(Key, -1);
                 return v < 0 || v > (int)GraphicsTier.High ? (GraphicsTier?)null : (GraphicsTier)v;
             }
             set
             {
-                PlayerPrefs.SetInt(Key, value.HasValue ? (int)value.Value : -1);
-                PlayerPrefs.Save();
+                Prefs.SetInt(Key, value.HasValue ? (int)value.Value : -1);
+                Prefs.Save();
                 Changed?.Invoke();
             }
         }

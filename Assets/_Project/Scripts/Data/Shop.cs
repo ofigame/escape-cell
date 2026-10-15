@@ -62,7 +62,7 @@ namespace SquashBot.Data
 
         private static readonly int[] BoostPrices = { 60, 80, 100, 120, 70, 90 };
 
-        public static int Level(Upgrade u) => Mathf.Min(PlayerPrefs.GetInt("sb_up_" + u, 0), MaxLevel(u));
+        public static int Level(Upgrade u) => Mathf.Min(Prefs.GetInt("sb_up_" + u, 0), MaxLevel(u));
         public static int MaxLevel(Upgrade u) => UpgradePrices[(int)u].Length;
         public static bool IsMaxed(Upgrade u) => Level(u) >= MaxLevel(u);
         public static int NextPrice(Upgrade u) => IsMaxed(u) ? 0 : UpgradePrices[(int)u][Level(u)];
@@ -75,18 +75,18 @@ namespace SquashBot.Data
         public static bool TryBuy(Upgrade u)
         {
             if (IsMaxed(u) || !Unlocked(u) || !Spend(NextPrice(u))) return false;
-            PlayerPrefs.SetInt("sb_up_" + u, Level(u) + 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt("sb_up_" + u, Level(u) + 1);
+            Prefs.Save();
             return true;
         }
 
-        public static int Owned(Boost b) => PlayerPrefs.GetInt("sb_boost_" + b, 0);
+        public static int Owned(Boost b) => Prefs.GetInt("sb_boost_" + b, 0);
 
         /// <summary>A boost given (a chest's gift), up to what can be carried.</summary>
         public static void Give(Boost b, int n = 1)
         {
-            PlayerPrefs.SetInt("sb_boost_" + b, Mathf.Min(MaxCarried, Owned(b) + n));
-            PlayerPrefs.Save();
+            Prefs.SetInt("sb_boost_" + b, Mathf.Min(MaxCarried, Owned(b) + n));
+            Prefs.Save();
         }
         public static int Price(Boost b) => BoostPrices[(int)b];
         public static bool Full(Boost b) => Owned(b) >= MaxCarried;
@@ -94,16 +94,16 @@ namespace SquashBot.Data
         public static bool TryBuy(Boost b)
         {
             if (Full(b) || !Spend(Price(b))) return false;
-            PlayerPrefs.SetInt("sb_boost_" + b, Owned(b) + 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt("sb_boost_" + b, Owned(b) + 1);
+            Prefs.Save();
             return true;
         }
 
         public static bool TryUse(Boost b)
         {
             if (Owned(b) <= 0) return false;
-            PlayerPrefs.SetInt("sb_boost_" + b, Owned(b) - 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt("sb_boost_" + b, Owned(b) - 1);
+            Prefs.Save();
             return true;
         }
 

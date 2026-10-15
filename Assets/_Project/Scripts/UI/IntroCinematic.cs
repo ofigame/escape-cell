@@ -25,8 +25,8 @@ namespace SquashBot.UI
         /// <summary>Whether the full opening has been seen (later starts show the short one).</summary>
         public static bool Seen
         {
-            get => PlayerPrefs.GetInt(SeenKey, 0) == 1;
-            set { PlayerPrefs.SetInt(SeenKey, value ? 1 : 0); PlayerPrefs.Save(); }
+            get => Prefs.GetInt(SeenKey, 0) == 1;
+            set { Prefs.SetInt(SeenKey, value ? 1 : 0); Prefs.Save(); }
         }
 
         /// <summary>Set while it plays (the game holds its own music and prompts back).</summary>

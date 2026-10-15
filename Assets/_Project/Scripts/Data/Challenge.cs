@@ -14,21 +14,21 @@ namespace SquashBot.Data
             DefWinsKey = "sb_ch_defwins", DefLossesKey = "sb_ch_deflosses", EnabledKey = "sb_ch_enabled";
 
         /// <summary>The defence record (the server's): attacks on the player's army held, and lost.</summary>
-        public static int DefWins => PlayerPrefs.GetInt(DefWinsKey, 0);
-        public static int DefLosses => PlayerPrefs.GetInt(DefLossesKey, 0);
+        public static int DefWins => Prefs.GetInt(DefWinsKey, 0);
+        public static int DefLosses => Prefs.GetInt(DefLossesKey, 0);
 
         /// <summary>Challenges on (the default) or turned off in the settings: off, nobody fights the player's army and the mode is closed.</summary>
         public static bool Enabled
         {
-            get => PlayerPrefs.GetInt(EnabledKey, 1) == 1;
-            set { PlayerPrefs.SetInt(EnabledKey, value ? 1 : 0); PlayerPrefs.Save(); }
+            get => Prefs.GetInt(EnabledKey, 1) == 1;
+            set { Prefs.SetInt(EnabledKey, value ? 1 : 0); Prefs.Save(); }
         }
 
         /// <summary>Whether the player has picked their name (asked on the first challenge).</summary>
         public static bool NameChosen
         {
-            get => PlayerPrefs.GetInt(ChosenKey, 0) == 1;
-            set { PlayerPrefs.SetInt(ChosenKey, value ? 1 : 0); PlayerPrefs.Save(); }
+            get => Prefs.GetInt(ChosenKey, 0) == 1;
+            set { Prefs.SetInt(ChosenKey, value ? 1 : 0); Prefs.Save(); }
         }
 
         /// <summary>Why a name cannot be used here (null: it can): 3–16 letters, digits or _ (the server checks the rest).</summary>
@@ -44,14 +44,14 @@ namespace SquashBot.Data
         private const string RenameKey = "sb_ch_renameat";
 
         /// <summary>Days until the name can be changed again (the server's word, last heard; 0: now).</summary>
-        public static int RenameDays => long.TryParse(PlayerPrefs.GetString(RenameKey, "0"), out long t) ? Mathf.Max(0, Mathf.CeilToInt((float)new System.TimeSpan(t - System.DateTime.UtcNow.Ticks).TotalDays)) : 0;
+        public static int RenameDays => long.TryParse(Prefs.GetString(RenameKey, "0"), out long t) ? Mathf.Max(0, Mathf.CeilToInt((float)new System.TimeSpan(t - System.DateTime.UtcNow.Ticks).TotalDays)) : 0;
 
         /// <summary>The record outside the ranked matches: won / played against the AI and against friends.</summary>
         public static (int aiWins, int aiPlayed, int friendWins, int friendPlayed) OtherRecord
         {
             get
             {
-                var p = PlayerPrefs.GetString(OtherKey, "").Split('|');
+                var p = Prefs.GetString(OtherKey, "").Split('|');
                 int V(int i) => p.Length == 4 && int.TryParse(p[i], out int v) ? v : 0;
                 return (V(0), V(1), V(2), V(3));
             }
@@ -60,23 +60,23 @@ namespace SquashBot.Data
         public static void Sync(FoiNet.Profile p)
         {
             if (p == null) return;
-            PlayerPrefs.SetInt(TrophyKey, Mathf.Max(0, p.trophies));
-            PlayerPrefs.SetInt(WinsKey, p.wins);
-            PlayerPrefs.SetInt(PlayedKey, p.played);
-            PlayerPrefs.SetInt(DefWinsKey, p.defWins);
-            PlayerPrefs.SetInt(DefLossesKey, p.defLosses);
-            PlayerPrefs.SetString(OtherKey, p.aiWins + "|" + p.aiPlayed + "|" + p.friendWins + "|" + p.friendPlayed);
-            PlayerPrefs.SetInt(RankKey, Mathf.Max(PlayerPrefs.GetInt(RankKey, 0), p.rank));
-            if (!string.IsNullOrEmpty(p.name)) PlayerPrefs.SetString(NameKey, p.name);
-            PlayerPrefs.SetString(RenameKey, (System.DateTime.UtcNow.Ticks + System.TimeSpan.FromDays(p.renameDays).Ticks).ToString());
-            PlayerPrefs.Save();
+            Prefs.SetInt(TrophyKey, Mathf.Max(0, p.trophies));
+            Prefs.SetInt(WinsKey, p.wins);
+            Prefs.SetInt(PlayedKey, p.played);
+            Prefs.SetInt(DefWinsKey, p.defWins);
+            Prefs.SetInt(DefLossesKey, p.defLosses);
+            Prefs.SetString(OtherKey, p.aiWins + "|" + p.aiPlayed + "|" + p.friendWins + "|" + p.friendPlayed);
+            Prefs.SetInt(RankKey, Mathf.Max(Prefs.GetInt(RankKey, 0), p.rank));
+            if (!string.IsNullOrEmpty(p.name)) Prefs.SetString(NameKey, p.name);
+            Prefs.SetString(RenameKey, (System.DateTime.UtcNow.Ticks + System.TimeSpan.FromDays(p.renameDays).Ticks).ToString());
+            Prefs.Save();
         }
 
         /// <summary>Forgets the challenge record and the name (the online profile was deleted).</summary>
         public static void ResetLocal()
         {
-            foreach (var k in new[] { NameKey, TrophyKey, RankKey, WinsKey, PlayedKey, ChosenKey, DefWinsKey, DefLossesKey, OtherKey }) PlayerPrefs.DeleteKey(k);
-            PlayerPrefs.Save();
+            foreach (var k in new[] { NameKey, TrophyKey, RankKey, WinsKey, PlayedKey, ChosenKey, DefWinsKey, DefLossesKey, OtherKey }) Prefs.DeleteKey(k);
+            Prefs.Save();
         }
 
         /// <summary>foi's strength in the duel for a player who has reached <paramref name="world"/>.</summary>
@@ -90,19 +90,19 @@ namespace SquashBot.Data
         {
             get
             {
-                string n = PlayerPrefs.GetString(NameKey, "");
+                string n = Prefs.GetString(NameKey, "");
                 if (n.Length > 0) return n;
                 n = "foi" + Random.Range(1000, 10000);
-                PlayerPrefs.SetString(NameKey, n);
-                PlayerPrefs.Save();
+                Prefs.SetString(NameKey, n);
+                Prefs.Save();
                 return n;
             }
-            set { PlayerPrefs.SetString(NameKey, value); PlayerPrefs.Save(); }
+            set { Prefs.SetString(NameKey, value); Prefs.Save(); }
         }
 
-        public static int Trophies => PlayerPrefs.GetInt(TrophyKey, 0);
-        public static int Wins => PlayerPrefs.GetInt(WinsKey, 0);
-        public static int Played => PlayerPrefs.GetInt(PlayedKey, 0);
+        public static int Trophies => Prefs.GetInt(TrophyKey, 0);
+        public static int Wins => Prefs.GetInt(WinsKey, 0);
+        public static int Played => Prefs.GetInt(PlayedKey, 0);
 
         /// <summary>Trophies needed for each rank (Private → Marshal). A rank once reached is kept.</summary>
         public static readonly int[] RankAt = { 0, 150, 375, 675, 1050, 1500, 2025, 2625, 3300, 4050, 4875, 5775, 6750 };
@@ -115,7 +115,7 @@ namespace SquashBot.Data
         }
 
         /// <summary>The player's rank: the highest reached (trophies may drop, the rank stays).</summary>
-        public static int Rank => Mathf.Max(PlayerPrefs.GetInt(RankKey, 0), RankFor(Trophies));
+        public static int Rank => Mathf.Max(Prefs.GetInt(RankKey, 0), RankFor(Trophies));
 
         public static string RankName(int rank) => Loc.T("rank." + Mathf.Clamp(rank, 0, RankAt.Length - 1));
 
@@ -181,19 +181,19 @@ namespace SquashBot.Data
         {
             int change = TrophyChange(won, opponentTrophies);
             int t = Mathf.Max(0, Trophies + change);
-            PlayerPrefs.SetInt(TrophyKey, t);
-            PlayerPrefs.SetInt(PlayedKey, Played + 1);
-            if (won) PlayerPrefs.SetInt(WinsKey, Wins + 1);
-            PlayerPrefs.SetInt(RankKey, Mathf.Max(PlayerPrefs.GetInt(RankKey, 0), RankFor(t)));
-            PlayerPrefs.Save();
+            Prefs.SetInt(TrophyKey, t);
+            Prefs.SetInt(PlayedKey, Played + 1);
+            if (won) Prefs.SetInt(WinsKey, Wins + 1);
+            Prefs.SetInt(RankKey, Mathf.Max(Prefs.GetInt(RankKey, 0), RankFor(t)));
+            Prefs.Save();
             return change;
         }
 
         /// <summary>A drawn challenge (1-1): played, nothing gained or lost. Returns the change (none).</summary>
         public static int RecordDraw()
         {
-            PlayerPrefs.SetInt(PlayedKey, Played + 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt(PlayedKey, Played + 1);
+            Prefs.Save();
             return 0;
         }
 

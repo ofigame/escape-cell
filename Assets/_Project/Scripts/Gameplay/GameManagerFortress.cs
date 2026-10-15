@@ -212,10 +212,10 @@ namespace SquashBot.Gameplay
             if (command.IsEmpty && Time.time - glassSince < 2f) return default;
             // foi breaks out: a punch, a white flash in the glass, the shards fly; the floor comes alive.
             glassCell.Shatter();
-            if (levelIndex >= 2 && PlayerPrefs.GetInt("sb_spin_tip", 0) == 0)
+            if (levelIndex >= 2 && Prefs.GetInt("sb_spin_tip", 0) == 0)
             {
                 // Once, from level 3: how to spin.
-                PlayerPrefs.SetInt("sb_spin_tip", 1);
+                Prefs.SetInt("sb_spin_tip", 1);
                 ui.ShowIntro(Loc.T("spin.tipTitle"), Loc.T("spin.tip"));
             }
             hunt.Resume();

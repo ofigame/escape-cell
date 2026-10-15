@@ -20,12 +20,12 @@ namespace SquashBot.UI
         /// <summary>Levels beaten so far (the 0-based index of the next level).</summary>
         private static int Reached => SaveData.UnlockedLevel;
 
-        public static bool IntroDue => Reached >= OpensAt && PlayerPrefs.GetInt(IntroKey, 0) == 0;
+        public static bool IntroDue => Reached >= OpensAt && Prefs.GetInt(IntroKey, 0) == 0;
 
         /// <summary>The first visit: Bip shows the hidden workshop, explains the gold and hands over a paint tube.</summary>
         public static void Welcome(BipTip tip)
         {
-            PlayerPrefs.SetInt(IntroKey, 1);
+            Prefs.SetInt(IntroKey, 1);
             Cosmetics.Give(Cosmetics.GiftId);
             tip.Queue(Loc.T("ws.bip.welcome"));
             tip.Queue(Loc.T("ws.bip.gold"));

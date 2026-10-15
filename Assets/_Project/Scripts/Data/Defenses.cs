@@ -37,7 +37,7 @@ namespace SquashBot.Data
         // ---------- Strength ----------
 
         /// <summary>The strength bought for good (1..3; step 1 comes free once the kind opens).</summary>
-        public static int Step(DefenseKind k) => Mathf.Clamp(PlayerPrefs.GetInt(LevelKey + k, 1), 1, MaxStep);
+        public static int Step(DefenseKind k) => Mathf.Clamp(Prefs.GetInt(LevelKey + k, 1), 1, MaxStep);
 
         /// <summary>How strong it fights in a level: simple archers (0) before level 30, the bought step after.</summary>
         public static int Tier(DefenseKind k, int levelIndex) => levelIndex < 29 ? 0 : Step(k);
@@ -49,15 +49,15 @@ namespace SquashBot.Data
         public static bool TryUpgrade(DefenseKind k)
         {
             if (!NextStepOpen(k) || !Shop.Spend(NextStepPrice(k))) return false;
-            PlayerPrefs.SetInt(LevelKey + k, Step(k) + 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt(LevelKey + k, Step(k) + 1);
+            Prefs.Save();
             return true;
         }
 
         // ---------- Stock ----------
 
         /// <summary>All of this kind the player has (placed ones included).</summary>
-        public static int Stock(DefenseKind k) => PlayerPrefs.GetInt(StockKey + k, 0);
+        public static int Stock(DefenseKind k) => Prefs.GetInt(StockKey + k, 0);
         /// <summary>Ready to place: the stock minus the ones waiting in levels.</summary>
         public static int Available(DefenseKind k) => Mathf.Max(0, Stock(k) - Reserved(k));
 
@@ -70,15 +70,15 @@ namespace SquashBot.Data
 
         public static void AddStock(DefenseKind k, int n)
         {
-            PlayerPrefs.SetInt(StockKey + k, Mathf.Max(0, Stock(k) + n));
-            PlayerPrefs.Save();
+            Prefs.SetInt(StockKey + k, Mathf.Max(0, Stock(k) + n));
+            Prefs.Save();
         }
 
         /// <summary>The first archers are a gift (once), so placing them is learned on level 1.</summary>
         public static bool GrantStarterOnce()
         {
-            if (PlayerPrefs.GetInt(FreeKey, 0) == 1) return false;
-            PlayerPrefs.SetInt(FreeKey, 1);
+            if (Prefs.GetInt(FreeKey, 0) == 1) return false;
+            Prefs.SetInt(FreeKey, 1);
             AddStock(DefenseKind.Archer, PackSize);
             return true;
         }
@@ -100,7 +100,7 @@ namespace SquashBot.Data
         public static List<Placement> Placed(int levelIndex)
         {
             var list = new List<Placement>();
-            foreach (var part in PlayerPrefs.GetString(PlaceKey + levelIndex, "").Split(';'))
+            foreach (var part in Prefs.GetString(PlaceKey + levelIndex, "").Split(';'))
             {
                 var f = part.Split(':');
                 if (f.Length < 3 || !int.TryParse(f[0], out int k) || !int.TryParse(f[1], out int x) || !int.TryParse(f[2], out int y)) continue;
@@ -114,11 +114,11 @@ namespace SquashBot.Data
         {
             var parts = new List<string>();
             foreach (var p in list) parts.Add($"{(int)p.kind}:{p.x}:{p.y}:{p.dx}:{p.dy}:{(p.paid ? 1 : 0)}");
-            PlayerPrefs.SetString(PlaceKey + levelIndex, string.Join(";", parts));
+            Prefs.SetString(PlaceKey + levelIndex, string.Join(";", parts));
             var levels = Levels();
             if (list.Count > 0) levels.Add(levelIndex); else levels.Remove(levelIndex);
-            PlayerPrefs.SetString(LevelsKey, string.Join(",", levels));
-            PlayerPrefs.Save();
+            Prefs.SetString(LevelsKey, string.Join(",", levels));
+            Prefs.Save();
         }
 
         /// <summary>
@@ -168,7 +168,7 @@ namespace SquashBot.Data
         private static HashSet<int> Levels()
         {
             var set = new HashSet<int>();
-            foreach (var s in PlayerPrefs.GetString(LevelsKey, "").Split(',')) if (int.TryParse(s, out int v)) set.Add(v);
+            foreach (var s in Prefs.GetString(LevelsKey, "").Split(',')) if (int.TryParse(s, out int v)) set.Add(v);
             return set;
         }
 

@@ -18,7 +18,7 @@ namespace SquashBot.Data
         /// <summary>The price of reaching each level (level 1 comes with the game).</summary>
         private static readonly int[] Prices = { 0, 900, 2200, 4800, 9500 };
 
-        public static int Level => Mathf.Clamp(PlayerPrefs.GetInt(Key, 1), 1, MaxLevel);
+        public static int Level => Mathf.Clamp(Prefs.GetInt(Key, 1), 1, MaxLevel);
         public static bool IsMaxed => Level >= MaxLevel;
         public static int NextPrice => IsMaxed ? 0 : Prices[Level];
 
@@ -39,20 +39,20 @@ namespace SquashBot.Data
         /// </summary>
         public static void RefundOnce()
         {
-            if (PlayerPrefs.GetInt(RefundKey, 0) == 1) return;
+            if (Prefs.GetInt(RefundKey, 0) == 1) return;
             int spent = 0;
             for (int l = 1; l < Level; l++) spent += Prices[l];
             if (spent > 0) SaveData.Coins += spent;
-            PlayerPrefs.SetInt(Key, 1);
-            PlayerPrefs.SetInt(RefundKey, 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt(Key, 1);
+            Prefs.SetInt(RefundKey, 1);
+            Prefs.Save();
         }
 
         public static bool TryUpgrade()
         {
             if (IsMaxed || !Shop.Spend(NextPrice)) return false;
-            PlayerPrefs.SetInt(Key, Level + 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt(Key, Level + 1);
+            Prefs.Save();
             return true;
         }
     }

@@ -393,7 +393,7 @@ namespace SquashBot.Gameplay
         {
             return; // (the defences are gone)
 #pragma warning disable CS0162
-            if (index != levelIndex || archerAdLevel == index || !Monetization.Ads.Rewarded.IsReady || PlayerPrefs.GetInt(FailKey(index), 0) <= 0) return;
+            if (index != levelIndex || archerAdLevel == index || !Monetization.Ads.Rewarded.IsReady || Prefs.GetInt(FailKey(index), 0) <= 0) return;
             archerAdLevel = index;
             ui.AdOffer.Show(Loc.T("def.adTitle"), Loc.T("def.adBody"), () =>
             {

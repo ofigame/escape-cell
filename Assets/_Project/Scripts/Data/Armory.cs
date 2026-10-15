@@ -127,7 +127,7 @@ namespace SquashBot.Data
 
         public static WeaponDef Get(string id) => All.Find(w => w.id == id) ?? All[0];
 
-        public static bool Owned(WeaponDef w) => w.price == 0 || PlayerPrefs.GetInt("sb_weapon_own_" + w.id, 0) == 1;
+        public static bool Owned(WeaponDef w) => w.price == 0 || Prefs.GetInt("sb_weapon_own_" + w.id, 0) == 1;
 
         /// <summary>Sold to the player: an ordinary weapon from its level on; a rank weapon while the trophy rank is high enough.</summary>
         public static bool Unlocked(WeaponDef w) => w.Special ? Challenge.League >= w.rank : Owned(w) || SaveData.UnlockedLevel >= w.unlockAt;
@@ -145,12 +145,12 @@ namespace SquashBot.Data
             int league = Challenge.League;
             foreach (var w in All)
             {
-                if (!w.Special || league >= w.rank || PlayerPrefs.GetInt("sb_weapon_own_" + w.id, 0) != 1) continue;
-                PlayerPrefs.DeleteKey("sb_weapon_own_" + w.id);
-                PlayerPrefs.DeleteKey("sb_weapon_lv_" + w.id);
+                if (!w.Special || league >= w.rank || Prefs.GetInt("sb_weapon_own_" + w.id, 0) != 1) continue;
+                Prefs.DeleteKey("sb_weapon_own_" + w.id);
+                Prefs.DeleteKey("sb_weapon_lv_" + w.id);
                 lost.Add(w.id);
             }
-            if (lost.Count > 0) PlayerPrefs.Save();
+            if (lost.Count > 0) Prefs.Save();
             return lost;
         }
 
@@ -161,7 +161,7 @@ namespace SquashBot.Data
         {
             get
             {
-                var w = Get(PlayerPrefs.GetString(EquipKey, All[0].id));
+                var w = Get(Prefs.GetString(EquipKey, All[0].id));
                 return Owned(w) && w.kind != WeaponKind.Gun ? w : All[0];
             }
         }
@@ -171,8 +171,8 @@ namespace SquashBot.Data
         {
             get
             {
-                string id = PlayerPrefs.GetString(GunKey, "");
-                if (id == "") id = PlayerPrefs.GetString(EquipKey, ""); // a gun picked before guns had their own slot
+                string id = Prefs.GetString(GunKey, "");
+                if (id == "") id = Prefs.GetString(EquipKey, ""); // a gun picked before guns had their own slot
                 var w = All.Find(x => x.id == id);
                 return w != null && w.kind == WeaponKind.Gun && Owned(w) ? w : null;
             }
@@ -182,8 +182,8 @@ namespace SquashBot.Data
         public static void Equip(WeaponDef w)
         {
             if (!Owned(w)) return;
-            PlayerPrefs.SetString(w.kind == WeaponKind.Gun ? GunKey : EquipKey, w.id);
-            PlayerPrefs.Save();
+            Prefs.SetString(w.kind == WeaponKind.Gun ? GunKey : EquipKey, w.id);
+            Prefs.Save();
         }
 
         public static bool IsEquipped(WeaponDef w) => w == Equipped || w == EquippedGun;
@@ -192,7 +192,7 @@ namespace SquashBot.Data
         public static bool TryBuy(WeaponDef w)
         {
             if (Owned(w) || !Unlocked(w) || !Backpack.Fits(Backpack.Weight(w)) || !Shop.Spend(w.price)) return false;
-            PlayerPrefs.SetInt("sb_weapon_own_" + w.id, 1);
+            Prefs.SetInt("sb_weapon_own_" + w.id, 1);
             Equip(w);
             return true;
         }
@@ -202,7 +202,7 @@ namespace SquashBot.Data
         public const int MaxLevel = 3;
 
         /// <summary>A weapon's level in the workshop: every weapon starts at 1 (with its own strength) and grows to 3.</summary>
-        public static int Level(WeaponDef w) => Owned(w) ? Mathf.Clamp(PlayerPrefs.GetInt("sb_weapon_lv_" + w.id, 1), 1, MaxLevel) : 1;
+        public static int Level(WeaponDef w) => Owned(w) ? Mathf.Clamp(Prefs.GetInt("sb_weapon_lv_" + w.id, 1), 1, MaxLevel) : 1;
 
         /// <summary>
         /// Damage of one blow at a level, in health points: each level adds two fifths of the weapon's own. A first
@@ -227,8 +227,8 @@ namespace SquashBot.Data
         public static bool TryUpgrade(WeaponDef w)
         {
             if (!Owned(w) || Level(w) >= MaxLevel || !Shop.Spend(UpgradePrice(w))) return false;
-            PlayerPrefs.SetInt("sb_weapon_lv_" + w.id, Level(w) + 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt("sb_weapon_lv_" + w.id, Level(w) + 1);
+            Prefs.Save();
             return true;
         }
 
@@ -252,11 +252,11 @@ namespace SquashBot.Data
             if (!CanSell(w)) return false;
             int coins = SellPrice(w);
             bool inHand = Equipped == w;
-            PlayerPrefs.DeleteKey("sb_weapon_own_" + w.id);
-            PlayerPrefs.DeleteKey("sb_weapon_lv_" + w.id);
-            if (inHand) PlayerPrefs.SetString(EquipKey, All[0].id);
+            Prefs.DeleteKey("sb_weapon_own_" + w.id);
+            Prefs.DeleteKey("sb_weapon_lv_" + w.id);
+            if (inHand) Prefs.SetString(EquipKey, All[0].id);
             SaveData.Coins += coins;
-            PlayerPrefs.Save();
+            Prefs.Save();
             return true;
         }
 

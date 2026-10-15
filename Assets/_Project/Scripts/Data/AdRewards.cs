@@ -20,16 +20,16 @@ namespace SquashBot.Data
         private static string Today => GameClock.Today;
 
         /// <summary>Workshop coin ads left today.</summary>
-        public static int ShopAdsLeft => PlayerPrefs.GetString(DayKey, "") == Today ? Mathf.Max(0, ShopAdsPerDay - PlayerPrefs.GetInt(CountKey, 0)) : ShopAdsPerDay;
+        public static int ShopAdsLeft => Prefs.GetString(DayKey, "") == Today ? Mathf.Max(0, ShopAdsPerDay - Prefs.GetInt(CountKey, 0)) : ShopAdsPerDay;
 
         /// <summary>A workshop ad was watched to the end: the coins go in and today's count goes up.</summary>
         public static void GrantShopCoins()
         {
-            int used = PlayerPrefs.GetString(DayKey, "") == Today ? PlayerPrefs.GetInt(CountKey, 0) : 0;
-            PlayerPrefs.SetString(DayKey, Today);
-            PlayerPrefs.SetInt(CountKey, used + 1);
+            int used = Prefs.GetString(DayKey, "") == Today ? Prefs.GetInt(CountKey, 0) : 0;
+            Prefs.SetString(DayKey, Today);
+            Prefs.SetInt(CountKey, used + 1);
             SaveData.Coins += ShopCoins;
-            PlayerPrefs.Save();
+            Prefs.Save();
         }
     }
 }

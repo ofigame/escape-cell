@@ -23,42 +23,42 @@ namespace SquashBot.Data
         /// <summary>Highest level index (0-based) the player may start. Lower levels count as completed.</summary>
         public static int UnlockedLevel
         {
-            get => PlayerPrefs.GetInt(UnlockedKey, 0);
-            set { PlayerPrefs.SetInt(UnlockedKey, value); PlayerPrefs.Save(); }
+            get => Prefs.GetInt(UnlockedKey, 0);
+            set { Prefs.SetInt(UnlockedKey, value); Prefs.Save(); }
         }
 
         public static int Coins
         {
-            get => PlayerPrefs.GetInt(CoinsKey, 0);
-            set { PlayerPrefs.SetInt(CoinsKey, value); PlayerPrefs.Save(); }
+            get => Prefs.GetInt(CoinsKey, 0);
+            set { Prefs.SetInt(CoinsKey, value); Prefs.Save(); }
         }
 
         /// <summary>Which of foi's four builds the player plays (0 Classic, 1 Volt, 2 Kaya, 3 Zip).</summary>
         public static int Hero
         {
-            get => PlayerPrefs.GetInt("sb_hero", 0);
-            set { PlayerPrefs.SetInt("sb_hero", value); PlayerPrefs.Save(); }
+            get => Prefs.GetInt("sb_hero", 0);
+            set { Prefs.SetInt("sb_hero", value); Prefs.Save(); }
         }
 
         /// <summary>The build was picked at the very first start (the picker never opens by itself again).</summary>
         public static bool HeroChosen
         {
-            get => PlayerPrefs.GetInt("sb_hero_chosen", 0) == 1;
-            set { PlayerPrefs.SetInt("sb_hero_chosen", value ? 1 : 0); PlayerPrefs.Save(); }
+            get => Prefs.GetInt("sb_hero_chosen", 0) == 1;
+            set { Prefs.SetInt("sb_hero_chosen", value ? 1 : 0); Prefs.Save(); }
         }
 
         /// <summary>How far the play camera stands from the robot: 0 near … 3 far (default 2).</summary>
         /// <summary>The camera drops lower and closer while foi fights robots or vanG (not for bugs).</summary>
         public static bool CombatCamera
         {
-            get => PlayerPrefs.GetInt("sb_combat_cam", 1) == 1;
-            set { PlayerPrefs.SetInt("sb_combat_cam", value ? 1 : 0); PlayerPrefs.Save(); }
+            get => Prefs.GetInt("sb_combat_cam", 1) == 1;
+            set { Prefs.SetInt("sb_combat_cam", value ? 1 : 0); Prefs.Save(); }
         }
 
         public static int CameraDistance
         {
-            get => Mathf.Clamp(PlayerPrefs.GetInt("sb_cam_distance4", 0), 0, 3); // NEAR by default (a fresh key: everyone starts near)
-            set { PlayerPrefs.SetInt("sb_cam_distance4", Mathf.Clamp(value, 0, 3)); PlayerPrefs.Save(); }
+            get => Mathf.Clamp(Prefs.GetInt("sb_cam_distance4", 0), 0, 3); // NEAR by default (a fresh key: everyone starts near)
+            set { Prefs.SetInt("sb_cam_distance4", Mathf.Clamp(value, 0, 3)); Prefs.Save(); }
         }
 
         public static bool PerspectiveView
@@ -98,16 +98,16 @@ namespace SquashBot.Data
 
         public static Language Language
         {
-            get => (Language)PlayerPrefs.GetInt(LanguageKey, (int)Loc.SystemDefault);
-            set { PlayerPrefs.SetInt(LanguageKey, (int)value); PlayerPrefs.Save(); }
+            get => (Language)Prefs.GetInt(LanguageKey, (int)Loc.SystemDefault);
+            set { Prefs.SetInt(LanguageKey, (int)value); Prefs.Save(); }
         }
 
-        private static bool GetBool(string key, bool fallback) => PlayerPrefs.GetInt(key, fallback ? 1 : 0) == 1;
+        private static bool GetBool(string key, bool fallback) => Prefs.GetInt(key, fallback ? 1 : 0) == 1;
 
         private static void SetBool(string key, bool value)
         {
-            PlayerPrefs.SetInt(key, value ? 1 : 0);
-            PlayerPrefs.Save();
+            Prefs.SetInt(key, value ? 1 : 0);
+            Prefs.Save();
         }
     }
 }

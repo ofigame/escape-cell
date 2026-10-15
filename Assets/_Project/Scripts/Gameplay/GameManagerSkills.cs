@@ -25,13 +25,13 @@ namespace SquashBot.Gameplay
         private void OnPowerUpCollected(PowerUpType type, GridPos p)
         {
             // The first time a skill is picked up, a banner says what it does (and that it waits in the bag).
-            if (PlayerPrefs.GetInt("sb_seen_skill." + type, 0) == 0)
+            if (Prefs.GetInt("sb_seen_skill." + type, 0) == 0)
             {
-                PlayerPrefs.SetInt("sb_seen_skill." + type, 1);
+                Prefs.SetInt("sb_seen_skill." + type, 1);
                 ui.ShowIntro(Loc.T("skill.title"), Loc.T("skillIntro." + type));
-                if (SkillBag.Bagged(type) && PlayerPrefs.GetInt("sb_seen_skillbag", 0) == 0)
+                if (SkillBag.Bagged(type) && Prefs.GetInt("sb_seen_skillbag", 0) == 0)
                 {
-                    PlayerPrefs.SetInt("sb_seen_skillbag", 1);
+                    Prefs.SetInt("sb_seen_skillbag", 1);
                     ui.Bip.Queue(Loc.T("bip.skillBag"));
                 }
             }

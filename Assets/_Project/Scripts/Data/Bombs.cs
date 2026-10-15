@@ -34,7 +34,7 @@ namespace SquashBot.Data
         private static readonly int[] Damages = { 10, 15, 22 }; // (points: four health points each)
 
         /// <summary>The blast's level: 0 = not bought; 1..3.</summary>
-        public static int Level => Mathf.Clamp(PlayerPrefs.GetInt(Key, 0), 0, MaxLevel);
+        public static int Level => Mathf.Clamp(Prefs.GetInt(Key, 0), 0, MaxLevel);
         public static bool Owned => Level > 0;
         public static bool Unlocked => Owned || SaveData.UnlockedLevel >= FromLevel;
         public static bool IsMaxed => Level >= MaxLevel;
@@ -48,8 +48,8 @@ namespace SquashBot.Data
         public static bool TryBuy()
         {
             if (IsMaxed || !Unlocked || !Shop.Spend(NextPrice)) return false;
-            PlayerPrefs.SetInt(Key, Level + 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt(Key, Level + 1);
+            Prefs.Save();
             return true;
         }
 
@@ -60,7 +60,7 @@ namespace SquashBot.Data
 
         public static bool KindUnlocked(BombKind k) => Has(k) || SaveData.UnlockedLevel >= UnlockAt(k);
 
-        public static bool Has(BombKind k) => k == BombKind.Blast ? Owned : PlayerPrefs.GetInt(Key + "_" + k, 0) == 1;
+        public static bool Has(BombKind k) => k == BombKind.Blast ? Owned : Prefs.GetInt(Key + "_" + k, 0) == 1;
 
         /// <summary>What the kind costs (the blast: its next level).</summary>
         public static int Price(BombKind k) => k == BombKind.Blast ? NextPrice : k == BombKind.Ice ? 2500 : 4000;
@@ -69,8 +69,8 @@ namespace SquashBot.Data
         {
             if (k == BombKind.Blast) return TryBuy();
             if (Has(k) || !KindUnlocked(k) || !Shop.Spend(Price(k))) return false;
-            PlayerPrefs.SetInt(Key + "_" + k, 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt(Key + "_" + k, 1);
+            Prefs.Save();
             return true;
         }
 

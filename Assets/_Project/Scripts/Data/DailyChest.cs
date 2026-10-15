@@ -10,14 +10,14 @@ namespace SquashBot.Data
 
         private static string Today => GameClock.Today;
 
-        public static bool Ready => PlayerPrefs.GetString(Key, "") != Today;
+        public static bool Ready => Prefs.GetString(Key, "") != Today;
 
         /// <summary>Opens today's chest: returns the coins it held (already added), or 0 if it was opened already.</summary>
         public static int Claim()
         {
             if (!Ready) return 0;
             int coins = UnityEngine.Random.Range(30, 81);
-            PlayerPrefs.SetString(Key, Today);
+            Prefs.SetString(Key, Today);
             SaveData.Coins += coins;
             return coins;
         }

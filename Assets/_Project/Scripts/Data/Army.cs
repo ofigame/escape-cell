@@ -38,7 +38,7 @@ namespace SquashBot.Data
 
         // ---------- Floor scores ----------
 
-        public static int BestScore(int level) => PlayerPrefs.GetInt(ScoreKey + level, 0);
+        public static int BestScore(int level) => Prefs.GetInt(ScoreKey + level, 0);
 
         /// <summary>Keeps a floor's score if it beats the best; returns the points it added to the world's total.</summary>
         public static int RecordScore(int level, int score)
@@ -46,8 +46,8 @@ namespace SquashBot.Data
             score = Mathf.Clamp(score, 0, 100);
             int best = BestScore(level);
             if (score <= best) return 0;
-            PlayerPrefs.SetInt(ScoreKey + level, score);
-            PlayerPrefs.Save();
+            Prefs.SetInt(ScoreKey + level, score);
+            Prefs.Save();
             return score - best;
         }
 
@@ -113,7 +113,7 @@ namespace SquashBot.Data
         public static int Points(int group, Track t)
         {
             Migrate();
-            return Mathf.Clamp(PlayerPrefs.GetInt(KeyOf(t) + group, 0), 0, MaxPoints(group, t));
+            return Mathf.Clamp(Prefs.GetInt(KeyOf(t) + group, 0), 0, MaxPoints(group, t));
         }
 
         /// <summary>
@@ -125,18 +125,18 @@ namespace SquashBot.Data
         {
             if (migrated) return;
             migrated = true;
-            if (PlayerPrefs.GetInt(VersionKey, 0) == 3) return;
+            if (Prefs.GetInt(VersionKey, 0) == 3) return;
             for (int g = 0; g < Groups; g++)
             {
-                int old = PlayerPrefs.GetInt(GroupKey + g, 0);
-                int oldArmor = PlayerPrefs.GetInt(ArmorKey + g, 0), oldAttack = PlayerPrefs.GetInt(HitKey + g, 0);
-                PlayerPrefs.DeleteKey(GroupKey + g);
-                PlayerPrefs.SetInt(PowerKey + g, oldArmor + old / 3);
-                PlayerPrefs.SetInt(HitKey + g, oldAttack + old / 3);
-                PlayerPrefs.SetInt(ArmorKey + g, old - 2 * (old / 3));
+                int old = Prefs.GetInt(GroupKey + g, 0);
+                int oldArmor = Prefs.GetInt(ArmorKey + g, 0), oldAttack = Prefs.GetInt(HitKey + g, 0);
+                Prefs.DeleteKey(GroupKey + g);
+                Prefs.SetInt(PowerKey + g, oldArmor + old / 3);
+                Prefs.SetInt(HitKey + g, oldAttack + old / 3);
+                Prefs.SetInt(ArmorKey + g, old - 2 * (old / 3));
             }
-            PlayerPrefs.SetInt(VersionKey, 3);
-            PlayerPrefs.Save();
+            Prefs.SetInt(VersionKey, 3);
+            Prefs.Save();
         }
 
         /// <summary>All the points in a group.</summary>
@@ -160,8 +160,8 @@ namespace SquashBot.Data
             int have = Points(group, t);
             amount = Mathf.Min(amount, Mathf.Min(FreePoints, MaxPoints(group, t) - have));
             if (amount <= 0) return false;
-            PlayerPrefs.SetInt(KeyOf(t) + group, have + amount);
-            PlayerPrefs.Save();
+            Prefs.SetInt(KeyOf(t) + group, have + amount);
+            Prefs.Save();
             return true;
         }
 
@@ -170,20 +170,20 @@ namespace SquashBot.Data
         {
             int have = Points(group, t);
             if (have <= 0) return false;
-            PlayerPrefs.SetInt(KeyOf(t) + group, Mathf.Max(0, have - amount));
-            PlayerPrefs.Save();
+            Prefs.SetInt(KeyOf(t) + group, Mathf.Max(0, have - amount));
+            Prefs.Save();
             return true;
         }
 
-        public static int ResetPrice => 500 + 500 * PlayerPrefs.GetInt(ResetCountKey, 0);
+        public static int ResetPrice => 500 + 500 * Prefs.GetInt(ResetCountKey, 0);
 
         /// <summary>Takes every spent point back for gold.</summary>
         public static bool TryReset()
         {
             if (SpentPoints <= 0 || !Shop.Spend(ResetPrice)) return false;
-            for (int g = 0; g < Groups; g++) foreach (var k in new[] { GroupKey, PowerKey, HitKey, ArmorKey }) PlayerPrefs.DeleteKey(k + g);
-            PlayerPrefs.SetInt(ResetCountKey, PlayerPrefs.GetInt(ResetCountKey, 0) + 1);
-            PlayerPrefs.Save();
+            for (int g = 0; g < Groups; g++) foreach (var k in new[] { GroupKey, PowerKey, HitKey, ArmorKey }) Prefs.DeleteKey(k + g);
+            Prefs.SetInt(ResetCountKey, Prefs.GetInt(ResetCountKey, 0) + 1);
+            Prefs.Save();
             return true;
         }
 

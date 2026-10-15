@@ -41,7 +41,7 @@ namespace SquashBot.Data
 
         public static Tool[] All => (Tool[])System.Enum.GetValues(typeof(Tool));
 
-        public static int Level(Tool t) => PlayerPrefs.GetInt("sb_tool_" + t, 0);
+        public static int Level(Tool t) => Prefs.GetInt("sb_tool_" + t, 0);
         public static bool Owned(Tool t) => Level(t) > 0;
         public static bool IsMaxed(Tool t) => Level(t) >= MaxLevel;
 
@@ -55,9 +55,9 @@ namespace SquashBot.Data
         {
             if (IsMaxed(t) || !Unlocked(t) || !Backpack.Fits(Backpack.Weight(t)) || !Shop.Spend(NextPrice(t))) return false;
             bool first = !Owned(t);
-            PlayerPrefs.SetInt("sb_tool_" + t, Level(t) + 1);
+            Prefs.SetInt("sb_tool_" + t, Level(t) + 1);
             if (first && Equipped(0) == null) SetSlot(0, t); // a first tool goes straight into the bag
-            PlayerPrefs.Save();
+            Prefs.Save();
             return true;
         }
 
@@ -71,34 +71,34 @@ namespace SquashBot.Data
             SaveData.Coins += SellPrice(t);
             int level = Level(t) - 1;
             if (level <= 0 && IsEquipped(t)) ToggleEquip(t);
-            PlayerPrefs.SetInt("sb_tool_" + t, level);
-            PlayerPrefs.Save();
+            Prefs.SetInt("sb_tool_" + t, level);
+            Prefs.Save();
             return true;
         }
 
         // ---------- Bag ----------
 
-        public static int Slots => PlayerPrefs.GetInt("sb_tool_slot2", 0) == 1 ? 2 : 1;
+        public static int Slots => Prefs.GetInt("sb_tool_slot2", 0) == 1 ? 2 : 1;
 
         public static bool TryBuySecondSlot()
         {
             if (Slots >= 2 || !Shop.Spend(SecondSlotPrice)) return false;
-            PlayerPrefs.SetInt("sb_tool_slot2", 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt("sb_tool_slot2", 1);
+            Prefs.Save();
             return true;
         }
 
         public static Tool? Equipped(int slot)
         {
             if (slot >= Slots) return null;
-            int v = PlayerPrefs.GetInt("sb_tool_bag" + slot, -1);
+            int v = Prefs.GetInt("sb_tool_bag" + slot, -1);
             return v >= 0 && Owned((Tool)v) ? (Tool?)(Tool)v : null;
         }
 
         private static void SetSlot(int slot, Tool? t)
         {
-            PlayerPrefs.SetInt("sb_tool_bag" + slot, t.HasValue ? (int)t.Value : -1);
-            PlayerPrefs.Save();
+            Prefs.SetInt("sb_tool_bag" + slot, t.HasValue ? (int)t.Value : -1);
+            Prefs.Save();
         }
 
         public static bool IsEquipped(Tool t) => Equipped(0) == t || Equipped(1) == t;
@@ -116,12 +116,12 @@ namespace SquashBot.Data
 
         // ---------- Trials ----------
 
-        public static bool TrialUsed(Tool t) => PlayerPrefs.GetInt("sb_tool_trial_" + t, 0) == 1;
+        public static bool TrialUsed(Tool t) => Prefs.GetInt("sb_tool_trial_" + t, 0) == 1;
 
         public static void MarkTrial(Tool t)
         {
-            PlayerPrefs.SetInt("sb_tool_trial_" + t, 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt("sb_tool_trial_" + t, 1);
+            Prefs.Save();
         }
 
         /// <summary>A tool the player has neither bought nor tried yet, to offer as a free trial.</summary>

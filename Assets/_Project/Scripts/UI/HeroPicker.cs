@@ -18,6 +18,9 @@ namespace SquashBot.UI
 
         /// <summary>A build was picked (and paid for, when switching).</summary>
         public event Action<int> Picked;
+        /// <summary>The first pick's "I have a recovery code".</summary>
+        public event Action RestorePressed;
+        private GameObject restoreButton;
 
         private UiScreen screen;
         private RectTransform grid;
@@ -47,6 +50,10 @@ namespace SquashBot.UI
             var close = UiFactory.MakeButton(root, Loc.T("btn.close"), Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(0f, 110f), new Vector2(480f, 110f), () => screen.Hide(), 48f);
             ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
             closeButton = close.gameObject;
+            // A new phone: the game played before comes back with its recovery code.
+            var restore = UiFactory.MakeButton(root, Loc.T("hero.haveCode"), Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(0f, 110f), new Vector2(620f, 100f), () => RestorePressed?.Invoke(), 34f);
+            ((RectTransform)restore.transform).pivot = new Vector2(0.5f, 0.5f);
+            restoreButton = restore.gameObject;
         }
 
         /// <param name="switching">From the garage: changing costs <see cref="SwitchPrice"/> coins; otherwise the free first pick.</param>
@@ -56,6 +63,7 @@ namespace SquashBot.UI
             title.text = Loc.T(switching ? "hero.switchTitle" : "hero.title");
             sub.text = switching ? Loc.F("hero.switchSub", SwitchPrice) : Loc.T("hero.sub");
             closeButton.SetActive(switching);
+            restoreButton.SetActive(!switching);
             for (int i = grid.childCount - 1; i >= 0; i--) Destroy(grid.GetChild(i).gameObject);
             const float w = 470f, h = 640f, gap = 30f;
             for (int i = 0; i < HeroModels.Count; i++)

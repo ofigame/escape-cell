@@ -20,7 +20,7 @@ namespace SquashBot.Data
         {
             if (loaded) return;
             loaded = true;
-            var p = PlayerPrefs.GetString(Key, "").Split(',');
+            var p = Prefs.GetString(Key, "").Split(',');
             for (int g = 0; g < Army.Groups; g++)
             {
                 if (p.Length > g * 2 + 1 && int.TryParse(p[g * 2], out int c) && int.TryParse(p[g * 2 + 1], out int s)) { count[g] = c; stage[g] = s; }
@@ -31,8 +31,8 @@ namespace SquashBot.Data
         {
             var parts = new string[Army.Groups * 2];
             for (int g = 0; g < Army.Groups; g++) { parts[g * 2] = count[g].ToString(); parts[g * 2 + 1] = stage[g].ToString(); }
-            PlayerPrefs.SetString(Key, string.Join(",", parts));
-            PlayerPrefs.Save();
+            Prefs.SetString(Key, string.Join(",", parts));
+            Prefs.Save();
         }
 
         /// <summary>How many soldiers foi may bring in a world (0-based): four in the first, two more in each next one.</summary>

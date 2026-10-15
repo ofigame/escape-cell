@@ -63,7 +63,7 @@ namespace SquashBot.OpenWorld
             get
             {
                 if (current != null) return current;
-                var json = PlayerPrefs.GetString(Key, "");
+                var json = Prefs.GetString(Key, "");
                 current = string.IsNullOrEmpty(json) ? new OwSave() : JsonUtility.FromJson<OwSave>(json) ?? new OwSave();
                 current.Fix();
                 return current;
@@ -94,8 +94,8 @@ namespace SquashBot.OpenWorld
         {
             version++;
             Dirty = true;
-            PlayerPrefs.SetString(Key, JsonUtility.ToJson(this));
-            PlayerPrefs.Save();
+            Prefs.SetString(Key, JsonUtility.ToJson(this));
+            Prefs.Save();
         }
 
         public string Json => JsonUtility.ToJson(this);
@@ -107,8 +107,8 @@ namespace SquashBot.OpenWorld
             if (s == null) return;
             s.Fix();
             current = s;
-            PlayerPrefs.SetString(Key, json);
-            PlayerPrefs.Save();
+            Prefs.SetString(Key, json);
+            Prefs.Save();
             Dirty = false;
         }
 
@@ -120,8 +120,8 @@ namespace SquashBot.OpenWorld
         /// <summary>The server's clock minus the phone's (seconds), learnt when the open world opens; kept for offline play.</summary>
         public static long Offset
         {
-            get => long.TryParse(PlayerPrefs.GetString(OffsetKey, "0"), out var v) ? v : 0;
-            set { PlayerPrefs.SetString(OffsetKey, value.ToString()); PlayerPrefs.Save(); }
+            get => long.TryParse(Prefs.GetString(OffsetKey, "0"), out var v) ? v : 0;
+            set { Prefs.SetString(OffsetKey, value.ToString()); Prefs.Save(); }
         }
 
         private static long offsetCache = long.MinValue;

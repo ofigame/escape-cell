@@ -177,7 +177,7 @@ namespace SquashBot.Gameplay
         /// <summary>The last defence news, in the current language (empty when there is none).</summary>
         private static string DefenseNews()
         {
-            var p = PlayerPrefs.GetString(DefenseNewsKey, "").Split('|');
+            var p = Prefs.GetString(DefenseNewsKey, "").Split('|');
             if (p.Length != 4 || !int.TryParse(p[0], out int n) || !int.TryParse(p[1], out int held) || !int.TryParse(p[2], out int fell) || !int.TryParse(p[3], out int change))
                 return ""; // none yet, or an old text-shaped entry (in the language of its day)
             return Loc.F("ch.defense", n, held, fell, (change >= 0 ? "+" : "") + change);
@@ -191,7 +191,7 @@ namespace SquashBot.Gameplay
         /// <summary>The rank card was tapped: the challenge's overall results (the server's numbers first, if it answers).</summary>
         private void ShowChallengeStats()
         {
-            PlayerPrefs.DeleteKey(DefenseNewsKey); // the news has been seen
+            Prefs.DeleteKey(DefenseNewsKey); // the news has been seen
             ui.MenuDefenseLine = null;
             ui.RefreshMenuRank(null);
             if (!FoiNet.Registered) { ui.ChallengeStats.Show(); return; }

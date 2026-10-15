@@ -29,18 +29,18 @@ namespace SquashBot.OpenWorld
             ready = true;
 #if UNITY_ANDROID && !UNITY_EDITOR
             AndroidNotificationCenter.RegisterNotificationChannel(new AndroidNotificationChannel(Channel, Loc.T("ow.notif.channel"), Loc.T("ow.notif.channelLine"), Importance.Default));
-            if (PlayerPrefs.GetInt(AskedKey, 0) == 0)
+            if (Prefs.GetInt(AskedKey, 0) == 0)
             {
-                PlayerPrefs.SetInt(AskedKey, 1);
-                PlayerPrefs.Save();
+                Prefs.SetInt(AskedKey, 1);
+                Prefs.Save();
                 var request = new PermissionRequest();
                 while (request.Status == PermissionStatus.RequestPending) yield return null;
             }
 #elif UNITY_IOS && !UNITY_EDITOR
-            if (PlayerPrefs.GetInt(AskedKey, 0) == 0)
+            if (Prefs.GetInt(AskedKey, 0) == 0)
             {
-                PlayerPrefs.SetInt(AskedKey, 1);
-                PlayerPrefs.Save();
+                Prefs.SetInt(AskedKey, 1);
+                Prefs.Save();
                 using var req = new AuthorizationRequest(AuthorizationOption.Alert | AuthorizationOption.Badge | AuthorizationOption.Sound, false);
                 while (!req.IsFinished) yield return null;
             }

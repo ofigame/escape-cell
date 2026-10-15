@@ -11,14 +11,14 @@ namespace SquashBot.Data
     {
         private const string Key = "sb_goal";
 
-        public static string Id => PlayerPrefs.GetString(Key, "");
+        public static string Id => Prefs.GetString(Key, "");
 
         public static bool Is(string id) => Id == id;
 
         public static void Toggle(string id)
         {
-            PlayerPrefs.SetString(Key, Is(id) ? "" : id);
-            PlayerPrefs.Save();
+            Prefs.SetString(Key, Is(id) ? "" : id);
+            Prefs.Save();
         }
 
         public static string ForUpgrade(Upgrade u) => "up:" + u;

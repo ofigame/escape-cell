@@ -1,4 +1,5 @@
 using System;
+using SquashBot.Data;
 using UnityEngine;
 
 namespace SquashBot.Monetization
@@ -32,8 +33,8 @@ namespace SquashBot.Monetization
         {
             var asks = Asks();
             asks.Add(Today);
-            PlayerPrefs.SetString(AsksKey, string.Join(",", asks));
-            PlayerPrefs.Save();
+            Prefs.SetString(AsksKey, string.Join(",", asks));
+            Prefs.Save();
             Debug.Log("RatePrompt: asking for a rating now");
 #if UNITY_IOS && !UNITY_EDITOR
             UnityEngine.iOS.Device.RequestStoreReview();
@@ -62,7 +63,7 @@ namespace SquashBot.Monetization
         {
             var list = new System.Collections.Generic.List<int>();
             int today = Today;
-            foreach (var s in PlayerPrefs.GetString(AsksKey, "").Split(','))
+            foreach (var s in Prefs.GetString(AsksKey, "").Split(','))
                 if (int.TryParse(s, out int d) && today - d < 365) list.Add(d);
             return list;
         }

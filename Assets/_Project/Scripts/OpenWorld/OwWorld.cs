@@ -322,58 +322,126 @@ namespace SquashBot.OpenWorld
         /// <summary>Drops every region (the farm moved: the land is levelled somewhere else now).</summary>
         public void Reload()
         {
+            if (building != null) { StopCoroutine(building); building = null; }
             foreach (var kv in loaded) if (kv.Value != null) Destroy(kv.Value.gameObject);
             loaded.Clear();
             regionBlockers.Clear();
             Blockers.Clear();
         }
 
-        /// <summary>Builds the regions round a map point (foi's own at once, the others one a call unless all) and drops the
-        /// far ones.</summary>
+        /// <summary>Builds the regions round a map point and drops the far ones. foi's own region (and all of them when
+        /// asked: entering, moving the farm) is built at once; the others one at a time, a few milliseconds a frame, so
+        /// walking never stutters.</summary>
         public void Around(Vector2 p, bool all = false)
         {
             var at = OwRegions.Of(p);
-            bool changed = false, built = false;
+            bool changed = false;
             var keep = new HashSet<Vector2Int>();
-            if (!loaded.ContainsKey(at)) { loaded[at] = BuildRegion(at); changed = built = true; }
+            if (!loaded.ContainsKey(at) || (building != null && buildingAt == at)) { StopBuilding(); BuildNow(at); changed = true; }
             for (int dx = -1; dx <= 1; dx++)
                 for (int dz = -1; dz <= 1; dz++)
                 {
                     var r = new Vector2Int(at.x + dx, at.y + dz);
                     if (r.x < 0 || r.y < 0 || r.x >= Regions || r.y >= Regions) continue;
                     keep.Add(r);
-                    if (loaded.ContainsKey(r) || (built && !all)) continue;
-                    loaded[r] = BuildRegion(r);
-                    changed = built = true;
+                    if (all && building != null && buildingAt == r) StopBuilding();
+                    if (loaded.ContainsKey(r)) continue;
+                    if (all) { BuildNow(r); changed = true; }
+                    else if (building == null) { buildingAt = r; building = StartCoroutine(BuildLater(r)); }
                 }
             var drop = new List<Vector2Int>();
             foreach (var kv in loaded) if (!keep.Contains(kv.Key)) drop.Add(kv.Key);
-            foreach (var r in drop) { Destroy(loaded[r].gameObject); loaded.Remove(r); regionBlockers.Remove(r); changed = true; }
-            if (!changed) return;
+            foreach (var r in drop)
+            {
+                if (building != null && buildingAt == r) StopBuilding();
+                else { if (loaded[r] != null) Destroy(loaded[r].gameObject); loaded.Remove(r); regionBlockers.Remove(r); }
+                changed = true;
+            }
+            if (changed || blockersDirty) RefreshBlockers();
+        }
+
+        private Coroutine building;
+        private Vector2Int buildingAt;
+        private bool blockersDirty, buildingNow;
+        private readonly System.Diagnostics.Stopwatch clock = new System.Diagnostics.Stopwatch();
+        private const double SliceMs = 4.0;
+
+        /// <summary>A region built a slice a frame has used its time this frame.</summary>
+        private bool Over() => !buildingNow && clock.Elapsed.TotalMilliseconds > SliceMs;
+
+        private void RefreshBlockers()
+        {
+            blockersDirty = false;
             Blockers.Clear();
             foreach (var kv in regionBlockers) Blockers.AddRange(kv.Value);
         }
 
-        private Transform BuildRegion(Vector2Int r)
+        /// <summary>Stops the region being built bit by bit and drops what it had made.</summary>
+        private void StopBuilding()
+        {
+            if (building == null) return;
+            StopCoroutine(building);
+            building = null;
+            if (loaded.TryGetValue(buildingAt, out var root) && root != null) Destroy(root.gameObject);
+            loaded.Remove(buildingAt);
+            regionBlockers.Remove(buildingAt);
+        }
+
+        private void BuildNow(Vector2Int r)
+        {
+            buildingNow = true;
+            var stack = new Stack<System.Collections.IEnumerator>();
+            stack.Push(BuildRegion(r));
+            while (stack.Count > 0)
+            {
+                var e = stack.Peek();
+                if (!e.MoveNext()) stack.Pop();
+                else if (e.Current is System.Collections.IEnumerator inner) stack.Push(inner);
+            }
+            buildingNow = false;
+        }
+
+        private System.Collections.IEnumerator BuildLater(Vector2Int r)
+        {
+            var stack = new Stack<System.Collections.IEnumerator>();
+            stack.Push(BuildRegion(r));
+            clock.Restart();
+            while (stack.Count > 0)
+            {
+                var e = stack.Peek();
+                if (!e.MoveNext()) { stack.Pop(); continue; }
+                if (e.Current is System.Collections.IEnumerator inner) { stack.Push(inner); continue; }
+                yield return null;
+                clock.Restart();
+            }
+            building = null;
+            blockersDirty = true;
+        }
+
+        private System.Collections.IEnumerator BuildRegion(Vector2Int r)
         {
             var root = new GameObject("Region " + r.x + "," + r.y).transform;
             root.SetParent(transform, false);
+            loaded[r] = root;
             float x0 = r.x * RegionSize, z0 = r.y * RegionSize;
             var blockers = new List<Vector3>();
             regionBlockers[r] = blockers;
 
-            // The ground: 55 × 55 points (2 units apart), its colour from a 192 × 192 texture over it.
+            // The ground: 55 × 55 points (2 units apart), its colour from its own texture over it (256 × 256; 192 on the low tier).
             const int n = 55;
             float step = RegionSize / (n - 1);
             var verts = new Vector3[n * n];
             var uv = new Vector2[n * n];
             for (int z = 0; z < n; z++)
+            {
                 for (int x = 0; x < n; x++)
                 {
                     float wx = x0 + x * step, wz = z0 + z * step;
                     verts[z * n + x] = new Vector3(wx, Height(wx, wz), wz);
                     uv[z * n + x] = new Vector2(x / (float)(n - 1), z / (float)(n - 1));
                 }
+                if (Over()) yield return null;
+            }
             var tris = new int[(n - 1) * (n - 1) * 6];
             int t = 0;
             for (int z = 0; z < n - 1; z++)
@@ -385,11 +453,14 @@ namespace SquashBot.OpenWorld
                 }
             var mesh = new Mesh { vertices = verts, uv = uv, triangles = tris };
             mesh.RecalculateNormals();
-            const int tex = 256;
+            int tex = Low ? 192 : 256;
             var colours = new Color[tex * tex];
             for (int z = 0; z < tex; z++)
+            {
                 for (int x = 0; x < tex; x++)
                     colours[z * tex + x] = GroundColour(x0 + (x + 0.5f) / tex * RegionSize, z0 + (z + 0.5f) / tex * RegionSize);
+                if (Over()) yield return null;
+            }
             var texture = new Texture2D(tex, tex, TextureFormat.RGB24, true) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Trilinear, anisoLevel = 4 };
             texture.SetPixels(colours);
             texture.Apply(true, true);
@@ -405,14 +476,18 @@ namespace SquashBot.OpenWorld
 
             var rng = new System.Random(r.x * 97 + r.y * 13 + 7);
             float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
-            Grass(root, x0, z0, rng);
+            yield return Grass(root, x0, z0, rng);
 
             // Its props: scrap and rocks in the desert, woods (thicker where the land says so), lone trees and bushes on
             // the green.
-            var props = new GameObject("Props").transform;
-            props.SetParent(root, false);
+            // (In groups, each merged on its own: one merge of a whole region is a long frame.)
+            var groups = new List<Transform>();
+            Transform Group(string name) { var g = new GameObject(name).transform; g.SetParent(root, false); groups.Add(g); return g; }
+            var props = Group("Props");
             for (int i = 0; i < 260; i++)
             {
+                if (i % 65 == 64) props = Group("Props");
+                if (Over()) yield return null;
                 float x = x0 + R(1f, RegionSize - 1f), z = z0 + R(1f, RegionSize - 1f);
                 if (Reserved(x, z)) continue;
                 float g = Green(x, z);
@@ -448,14 +523,21 @@ namespace SquashBot.OpenWorld
                     blockers.Add(new Vector3(x, z, 1.6f));
                 }
             // The co-op, the town, the neighbours' farms.
+            props = Group("Town");
             if (Inside(CoopAt, x0, z0)) Coop(root, blockers);
             if (Inside(Plaza, x0, z0)) Square(props, blockers);
             foreach (var h in Houses) if (Inside(h.at, x0, z0)) TownHouseModel(props, h, blockers);
             foreach (var l in Lamps) if (Inside(l, x0, z0)) Lamp(props, l);
-            foreach (var nb in Neighbours) if (Inside(nb.at, x0, z0)) NeighbourFarm(props, nb, blockers);
-            StaticBatchingUtility.Combine(props.gameObject);
-            return root;
+            foreach (var nb in Neighbours) if (Inside(nb.at, x0, z0)) { NeighbourFarm(Group("Farm"), nb, blockers); if (Over()) yield return null; }
+            foreach (var g in groups)
+            {
+                if (g.childCount > 0) StaticBatchingUtility.Combine(g.gameObject);
+                if (Over()) yield return null;
+            }
+            blockersDirty = true;
         }
+
+        private static bool Low => SquashBot.Data.GraphicsQuality.Current == SquashBot.Data.GraphicsTier.Low;
 
         private static bool Inside(Vector2 p, float x0, float z0) => p.x >= x0 && p.x < x0 + RegionSize && p.y >= z0 && p.y < z0 + RegionSize;
 
@@ -474,13 +556,15 @@ namespace SquashBot.OpenWorld
 
         /// <summary>Tufts of grass over the green (three blades each, lit as the ground is), in dry, light and dark greens;
         /// none on the roads, the fields, the farm.</summary>
-        private void Grass(Transform root, float x0, float z0, System.Random rng)
+        private System.Collections.IEnumerator Grass(Transform root, float x0, float z0, System.Random rng)
         {
             float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
-            if (Green(x0 + RegionSize * 0.5f, z0 + RegionSize * 0.5f) < 0.2f && Green(x0, z0) < 0.3f && Green(x0 + RegionSize, z0 + RegionSize) < 0.3f) return;
+            if (Green(x0 + RegionSize * 0.5f, z0 + RegionSize * 0.5f) < 0.2f && Green(x0, z0) < 0.3f && Green(x0 + RegionSize, z0 + RegionSize) < 0.3f) yield break;
             var lists = new[] { new List<Vector3>(), new List<Vector3>(), new List<Vector3>() };
-            for (int i = 0; i < 3400; i++)
+            int tufts = Low ? 1400 : SquashBot.Data.GraphicsQuality.Current == SquashBot.Data.GraphicsTier.Medium ? 2400 : 3400;
+            for (int i = 0; i < tufts; i++)
             {
+                if (i % 200 == 199 && Over()) yield return null;
                 float x = x0 + R(0f, RegionSize), z = z0 + R(0f, RegionSize);
                 float g = Green(x, z);
                 if (g < 0.5f + (float)rng.NextDouble() * 0.15f) continue;
@@ -746,10 +830,17 @@ namespace SquashBot.OpenWorld
         private static int mapRow;
         private const int MapPx = 300;
 
-        /// <summary>Draws the map's picture a few rows a frame from entering the open world, so it is ready when asked for.</summary>
+        /// <summary>Draws the map's picture a little each frame (a couple of milliseconds) after entering, so it is ready when asked for.</summary>
         public static System.Collections.IEnumerator PrepareMap()
         {
-            while (map == null) { MapRows(8); yield return null; }
+            yield return new WaitForSecondsRealtime(2f);
+            var sw = new System.Diagnostics.Stopwatch();
+            while (map == null)
+            {
+                sw.Restart();
+                while (map == null && sw.Elapsed.TotalMilliseconds < 2.5) MapRows(1);
+                yield return null;
+            }
         }
 
         /// <summary>The whole land seen from above: the ground's colours shaded by its hills, the woods, scrap in the
@@ -772,19 +863,14 @@ namespace SquashBot.OpenWorld
                 mapRow = -1;
             }
             var c = mapPixels;
-            // Row -1: the heights at the pixels' corners (shading from them, not three lookups a pixel).
-            if (mapRow < 0)
-            {
-                for (int j = 0; j <= px; j++)
-                    for (int i = 0; i <= px; i++)
-                        mapHeights[j * (px + 1) + i] = Height(i * unit, j * unit);
-                mapRow = 0;
-                return;
-            }
+            // The heights at the pixels' corners, a row ahead of the colours (shading from them, not three lookups a pixel).
+            void HeightRow(int j) { for (int i = 0; i <= px; i++) mapHeights[j * (px + 1) + i] = Height(i * unit, j * unit); }
+            if (mapRow < 0) { HeightRow(0); mapRow = 0; }
             var light = new Vector3(-0.6f, 0.75f, 0.5f).normalized;
             for (int end = Mathf.Min(px, mapRow + rows); mapRow < end; mapRow++)
             {
                 int j = mapRow;
+                HeightRow(j + 1);
                 for (int i = 0; i < px; i++)
                 {
                     float x = (i + 0.5f) * unit, z = (j + 0.5f) * unit;

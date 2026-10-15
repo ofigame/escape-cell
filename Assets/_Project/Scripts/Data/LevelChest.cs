@@ -34,7 +34,7 @@ namespace SquashBot.Data
         private const string MeterKey = "sb_chest_meter";
 
         /// <summary>Coins banked toward the next chest.</summary>
-        public static int Meter => PlayerPrefs.GetInt(MeterKey, 0);
+        public static int Meter => Prefs.GetInt(MeterKey, 0);
 
         /// <summary>How many coins fill the meter (a little more further in).</summary>
         public static int Cost(int levelIndex) => 120 + Mathf.RoundToInt(levelIndex * 0.8f);
@@ -45,8 +45,8 @@ namespace SquashBot.Data
             int meter = Meter + Mathf.Max(0, coins);
             int cost = Cost(levelIndex);
             bool full = meter >= cost;
-            PlayerPrefs.SetInt(MeterKey, full ? Mathf.Min(meter - cost, cost - 1) : meter);
-            PlayerPrefs.Save();
+            Prefs.SetInt(MeterKey, full ? Mathf.Min(meter - cost, cost - 1) : meter);
+            Prefs.Save();
             return full;
         }
 

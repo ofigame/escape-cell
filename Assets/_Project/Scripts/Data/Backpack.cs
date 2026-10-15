@@ -22,7 +22,7 @@ namespace SquashBot.Data
 
         public static int MaxLevel => Capacities.Length;
 
-        public static int Level => Mathf.Clamp(PlayerPrefs.GetInt(LevelKey, 1), 1, MaxLevel);
+        public static int Level => Mathf.Clamp(Prefs.GetInt(LevelKey, 1), 1, MaxLevel);
 
         public static bool IsMaxed => Level >= MaxLevel;
 
@@ -88,8 +88,8 @@ namespace SquashBot.Data
         public static bool TryUpgrade()
         {
             if (IsMaxed || !Shop.Spend(NextPrice)) return false;
-            PlayerPrefs.SetInt(LevelKey, Level + 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt(LevelKey, Level + 1);
+            Prefs.Save();
             return true;
         }
     }

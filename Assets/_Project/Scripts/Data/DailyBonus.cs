@@ -18,56 +18,56 @@ namespace SquashBot.Data
         private static void Roll()
         {
             string today = GameClock.Today;
-            string day = PlayerPrefs.GetString(DayKey, "");
+            string day = Prefs.GetString(DayKey, "");
             // A day stored in another shape (an old non-Gregorian calendar's date) is not a "future" day: roll.
             bool valid = day.Length == 8 && long.TryParse(day, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out long d) && d >= 20250101;
             if (valid && string.CompareOrdinal(today, day) <= 0) return;
-            PlayerPrefs.SetString(DayKey, today);
-            PlayerPrefs.SetInt(UsedKey, 0);
-            PlayerPrefs.SetInt(AdKey, 0);
-            PlayerPrefs.SetInt(ExtraKey, 0);
-            PlayerPrefs.Save();
+            Prefs.SetString(DayKey, today);
+            Prefs.SetInt(UsedKey, 0);
+            Prefs.SetInt(AdKey, 0);
+            Prefs.SetInt(ExtraKey, 0);
+            Prefs.Save();
         }
 
-        public static int Used { get { Roll(); return PlayerPrefs.GetInt(UsedKey, 0); } }
+        public static int Used { get { Roll(); return Prefs.GetInt(UsedKey, 0); } }
 
         /// <summary>Free plays left today (the ad play is counted separately).</summary>
         public static int FreeLeft => Mathf.Max(0, FreePlays - Used);
 
-        public static bool AdPlayWaiting { get { Roll(); return PlayerPrefs.GetInt(ExtraKey, 0) > 0; } }
+        public static bool AdPlayWaiting { get { Roll(); return Prefs.GetInt(ExtraKey, 0) > 0; } }
 
         public static int Left => FreeLeft + (AdPlayWaiting ? 1 : 0);
 
         /// <summary>The ad button shows once the free plays are gone, and only once a day.</summary>
-        public static bool CanWatchAd { get { Roll(); return FreeLeft == 0 && !AdPlayWaiting && PlayerPrefs.GetInt(AdKey, 0) == 0; } }
+        public static bool CanWatchAd { get { Roll(); return FreeLeft == 0 && !AdPlayWaiting && Prefs.GetInt(AdKey, 0) == 0; } }
 
-        public static bool AdUsedToday { get { Roll(); return PlayerPrefs.GetInt(AdKey, 0) == 1; } }
+        public static bool AdUsedToday { get { Roll(); return Prefs.GetInt(AdKey, 0) == 1; } }
 
         /// <summary>The ad was watched to the end: one extra play today.</summary>
         public static void GrantAdPlay()
         {
             Roll();
-            PlayerPrefs.SetInt(AdKey, 1);
-            PlayerPrefs.SetInt(ExtraKey, 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt(AdKey, 1);
+            Prefs.SetInt(ExtraKey, 1);
+            Prefs.Save();
         }
 
         /// <summary>Spends a play; false when none is left.</summary>
         public static bool Use()
         {
             Roll();
-            if (FreeLeft > 0) PlayerPrefs.SetInt(UsedKey, Used + 1);
-            else if (AdPlayWaiting) PlayerPrefs.SetInt(ExtraKey, 0);
+            if (FreeLeft > 0) Prefs.SetInt(UsedKey, Used + 1);
+            else if (AdPlayWaiting) Prefs.SetInt(ExtraKey, 0);
             else return false;
-            PlayerPrefs.Save();
+            Prefs.Save();
             return true;
         }
 
         // ---------- Which games ----------
 
-        public static void MarkSeen(BonusGame g) => PlayerPrefs.SetInt(SeenKey + g, 1);
+        public static void MarkSeen(BonusGame g) => Prefs.SetInt(SeenKey + g, 1);
 
-        public static bool Seen(BonusGame g) => SaveData.TestMode || PlayerPrefs.GetInt(SeenKey + g, 0) == 1;
+        public static bool Seen(BonusGame g) => SaveData.TestMode || Prefs.GetInt(SeenKey + g, 0) == 1;
 
         /// <summary>The bonus games met so far; a fresh player starts with the air duct and the treasure room.</summary>
         public static List<BonusGame> SeenGames()

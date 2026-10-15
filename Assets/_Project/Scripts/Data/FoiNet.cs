@@ -39,17 +39,17 @@ namespace SquashBot.Data
         private static string NameSyncedKey => "sb_net_named" + Dev;
         private const int Timeout = 8;
 
-        public static bool Registered => PlayerPrefs.GetString(IdKey, "").Length > 0;
+        public static bool Registered => Prefs.GetString(IdKey, "").Length > 0;
 
         /// <summary>The player's id and key, for the live connection's headers.</summary>
-        internal static string AuthId => PlayerPrefs.GetString(IdKey, "");
-        internal static string AuthKey => PlayerPrefs.GetString(SecretKey, "");
+        internal static string AuthId => Prefs.GetString(IdKey, "");
+        internal static string AuthKey => Prefs.GetString(SecretKey, "");
 
         /// <summary>The name the server holds for this player (empty: none sent yet).</summary>
         public static string SyncedName
         {
-            get => PlayerPrefs.GetString(NameSyncedKey, "");
-            private set { PlayerPrefs.SetString(NameSyncedKey, value); PlayerPrefs.Save(); }
+            get => Prefs.GetString(NameSyncedKey, "");
+            private set { Prefs.SetString(NameSyncedKey, value); Prefs.Save(); }
         }
 
         // ---------- Replies ----------
@@ -130,9 +130,9 @@ namespace SquashBot.Data
             if (code != 200) { done(false); yield break; }
             var r = JsonUtility.FromJson<RegisterReply>(body);
             if (r == null || string.IsNullOrEmpty(r.id) || string.IsNullOrEmpty(r.key)) { done(false); yield break; }
-            PlayerPrefs.SetString(IdKey, r.id);
-            PlayerPrefs.SetString(SecretKey, r.key);
-            PlayerPrefs.Save();
+            Prefs.SetString(IdKey, r.id);
+            Prefs.SetString(SecretKey, r.key);
+            Prefs.Save();
             done(true);
         }
 
@@ -184,15 +184,15 @@ namespace SquashBot.Data
         public static IEnumerator SendResult(long matchId, bool won, bool draw, Action<Result> done, bool left = false)
         {
             // Kept on the phone until the server has it: a lost connection sends it again before the next search.
-            PlayerPrefs.SetString(PendingKey, matchId + "," + (won ? 1 : 0) + "," + (draw ? 1 : 0) + "," + (left ? 1 : 0));
-            PlayerPrefs.Save();
+            Prefs.SetString(PendingKey, matchId + "," + (won ? 1 : 0) + "," + (draw ? 1 : 0) + "," + (left ? 1 : 0));
+            Prefs.Save();
             long code = 0; string body = null;
             yield return Send("POST", "/match/" + matchId + "/result", JsonUtility.ToJson(new ResultBody { won = won && !draw && !left, draw = draw && !left, left = left }), true, (c, b) => { code = c; body = b; });
             // 200 taken, 4xx settled or unknown already: either way nothing more to send.
-            if (code >= 200 && code < 500 && PlayerPrefs.GetString(PendingKey, "").StartsWith(matchId + ","))
+            if (code >= 200 && code < 500 && Prefs.GetString(PendingKey, "").StartsWith(matchId + ","))
             {
-                PlayerPrefs.DeleteKey(PendingKey);
-                PlayerPrefs.Save();
+                Prefs.DeleteKey(PendingKey);
+                Prefs.Save();
             }
             done(code == 200 ? TryParse<Result>(body) : null);
         }
@@ -202,8 +202,8 @@ namespace SquashBot.Data
         /// <summary>A result that never reached the server (no network then) goes up now. Reports the server's answer or null.</summary>
         public static IEnumerator SendPending(Action<Result> done)
         {
-            var parts = PlayerPrefs.GetString(PendingKey, "").Split(',');
-            if ((parts.Length != 3 && parts.Length != 4) || !long.TryParse(parts[0], out long id) || id <= 0) { PlayerPrefs.DeleteKey(PendingKey); done(null); yield break; }
+            var parts = Prefs.GetString(PendingKey, "").Split(',');
+            if ((parts.Length != 3 && parts.Length != 4) || !long.TryParse(parts[0], out long id) || id <= 0) { Prefs.DeleteKey(PendingKey); done(null); yield break; }
             yield return SendResult(id, parts[1] == "1", parts[2] == "1", done, parts.Length == 4 && parts[3] == "1");
         }
 
@@ -282,15 +282,75 @@ namespace SquashBot.Data
             done(code == 200);
         }
 
+        // ---------- The whole game's copy and its recovery code ----------
+
+        [Serializable] public class SaveBody { public long version; public string json; }
+        [Serializable] public class RecoverBody { public string id; public string key; public string name; public long version; public string json; }
+        [Serializable] private class RecoveryCode { public string code; }
+        [Serializable] private class ConflictBody { public long version; }
+
+        /// <summary>The game's copy on the server (null: none reachable).</summary>
+        public static IEnumerator GetSave(Action<SaveBody> done)
+        {
+            bool ok = Registered;
+            if (!ok) yield return EnsurePlayer(r => ok = r);
+            if (!ok) { done(null); yield break; }
+            long code = 0; string body = null;
+            yield return Send("GET", "/save", null, true, (c, b) => { code = c; body = b; });
+            done(code == 200 ? TryParse<SaveBody>(body) : null);
+        }
+
+        /// <summary>Sends the game's copy. Done with 200 (kept), 409 and the server's newer version, or 0 (no network).</summary>
+        public static IEnumerator PutSave(long version, string json, Action<long, long> done)
+        {
+            bool ok = Registered;
+            if (!ok) yield return EnsurePlayer(r => ok = r);
+            if (!ok) { done(0, 0); yield break; }
+            long code = 0; string body = null;
+            yield return Send("PUT", "/save", JsonUtility.ToJson(new WorldPut { version = version, json = json }), true, (c, b) => { code = c; body = b; });
+            long theirs = code == 409 ? (TryParse<ConflictBody>(body)?.version ?? 0) : 0;
+            done(code, theirs);
+        }
+
+        /// <summary>A new recovery code for this player (the old one stops working); null with no network.</summary>
+        public static IEnumerator NewRecoveryCode(Action<string> done)
+        {
+            bool ok = Registered;
+            if (!ok) yield return EnsurePlayer(r => ok = r);
+            if (!ok) { done(null); yield break; }
+            long code = 0; string body = null;
+            yield return Send("POST", "/recovery", "{}", true, (c, b) => { code = c; body = b; });
+            done(code == 200 ? TryParse<RecoveryCode>(body)?.code : null);
+        }
+
+        /// <summary>A recovery code typed in: the player it belongs to becomes this phone's (its id and a new key), and its
+        /// game's copy comes back. Done with the copy, or null and why ("code": no such code, "net": no network).</summary>
+        public static IEnumerator Recover(string typed, Action<RecoverBody, string> done)
+        {
+            long code = 0; string body = null;
+            yield return Send("POST", "/recover", JsonUtility.ToJson(new CodeBody { code = typed }), false, (c, b) => { code = c; body = b; });
+            if (code == 400 || code == 404) { done(null, "code"); yield break; }
+            if (code == 429) { done(null, "wait"); yield break; }
+            var r = code == 200 ? TryParse<RecoverBody>(body) : null;
+            if (r == null || string.IsNullOrEmpty(r.id) || string.IsNullOrEmpty(r.key)) { done(null, "net"); yield break; }
+            Prefs.SetString(IdKey, r.id);
+            Prefs.SetString(SecretKey, r.key);
+            if (!string.IsNullOrEmpty(r.name)) Prefs.SetString(NameSyncedKey, r.name);
+            else Prefs.DeleteKey(NameSyncedKey);
+            Prefs.DeleteKey(PendingKey);
+            Prefs.Save();
+            done(r, null);
+        }
+
         public static IEnumerator DeleteMe(Action<bool> done)
         {
             if (!Registered) { Challenge.ResetLocal(); done(true); yield break; }
             long code = 0;
             yield return Send("DELETE", "/me", null, true, (c, _) => code = c);
             if (code != 200 && code != 401) { done(false); yield break; } // 401: already gone on the server
-            PlayerPrefs.DeleteKey(IdKey);
-            PlayerPrefs.DeleteKey(SecretKey);
-            PlayerPrefs.DeleteKey(NameSyncedKey);
+            Prefs.DeleteKey(IdKey);
+            Prefs.DeleteKey(SecretKey);
+            Prefs.DeleteKey(NameSyncedKey);
             Challenge.ResetLocal();
             done(true);
         }
@@ -382,8 +442,8 @@ namespace SquashBot.Data
             req.timeout = Timeout;
             if (auth)
             {
-                req.SetRequestHeader("X-Foi-Id", PlayerPrefs.GetString(IdKey, ""));
-                req.SetRequestHeader("X-Foi-Key", PlayerPrefs.GetString(SecretKey, ""));
+                req.SetRequestHeader("X-Foi-Id", Prefs.GetString(IdKey, ""));
+                req.SetRequestHeader("X-Foi-Key", Prefs.GetString(SecretKey, ""));
             }
             yield return req.SendWebRequest();
             if (req.result == UnityWebRequest.Result.ConnectionError || req.result == UnityWebRequest.Result.DataProcessingError)
@@ -394,11 +454,11 @@ namespace SquashBot.Data
             if (auth && req.responseCode == 401 && path != "/me")
             {
                 // The server no longer knows this player (deleted, or its key lost): register afresh next time.
-                PlayerPrefs.DeleteKey(IdKey);
-                PlayerPrefs.DeleteKey(SecretKey);
-                PlayerPrefs.DeleteKey(NameSyncedKey);
-                PlayerPrefs.DeleteKey(PendingKey);
-                PlayerPrefs.Save();
+                Prefs.DeleteKey(IdKey);
+                Prefs.DeleteKey(SecretKey);
+                Prefs.DeleteKey(NameSyncedKey);
+                Prefs.DeleteKey(PendingKey);
+                Prefs.Save();
             }
             done(req.responseCode, req.downloadHandler.text);
         }

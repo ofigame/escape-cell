@@ -31,11 +31,11 @@ namespace SquashBot.Data
             Roll();
             return new Quest
             {
-                goal = (DailyGoal)PlayerPrefs.GetInt(K("goal", i), 0),
-                target = PlayerPrefs.GetInt(K("target", i), 1),
-                progress = PlayerPrefs.GetInt(K("prog", i), 0),
-                reward = PlayerPrefs.GetInt(K("reward", i), 100),
-                claimed = PlayerPrefs.GetInt(K("claim", i), 0) == 1,
+                goal = (DailyGoal)Prefs.GetInt(K("goal", i), 0),
+                target = Prefs.GetInt(K("target", i), 1),
+                progress = Prefs.GetInt(K("prog", i), 0),
+                reward = Prefs.GetInt(K("reward", i), 100),
+                claimed = Prefs.GetInt(K("claim", i), 0) == 1,
             };
         }
 
@@ -53,8 +53,8 @@ namespace SquashBot.Data
         private static void Roll()
         {
             string today = GameClock.Today;
-            if (PlayerPrefs.GetString(DayKey, "") == today) return;
-            PlayerPrefs.SetString(DayKey, today);
+            if (Prefs.GetString(DayKey, "") == today) return;
+            Prefs.SetString(DayKey, today);
             int reached = SaveData.UnlockedLevel;
             var pool = new List<DailyGoal> { DailyGoal.Robots, DailyGoal.Bugs, DailyGoal.Wins };
             if (reached >= 15) pool.Add(DailyGoal.Towers);
@@ -86,13 +86,13 @@ namespace SquashBot.Data
                     _ => 12,
                 };
                 float weight = g == DailyGoal.Robots || g == DailyGoal.Wins ? 1.5f : 1f;
-                PlayerPrefs.SetInt(K("goal", i), (int)g);
-                PlayerPrefs.SetInt(K("target", i), target);
-                PlayerPrefs.SetInt(K("prog", i), 0);
-                PlayerPrefs.SetInt(K("reward", i), Mathf.RoundToInt(baseReward * weight / 10f) * 10);
-                PlayerPrefs.SetInt(K("claim", i), 0);
+                Prefs.SetInt(K("goal", i), (int)g);
+                Prefs.SetInt(K("target", i), target);
+                Prefs.SetInt(K("prog", i), 0);
+                Prefs.SetInt(K("reward", i), Mathf.RoundToInt(baseReward * weight / 10f) * 10);
+                Prefs.SetInt(K("claim", i), 0);
             }
-            PlayerPrefs.Save();
+            Prefs.Save();
         }
 
         /// <summary>Something counting towards today's quests happened; true when it finished one just now.</summary>
@@ -104,11 +104,11 @@ namespace SquashBot.Data
                 var q = Get(i);
                 if (q.goal != goal || q.claimed || q.Done) continue;
                 int p = Mathf.Min(q.target, q.progress + amount);
-                PlayerPrefs.SetInt(K("prog", i), p);
+                Prefs.SetInt(K("prog", i), p);
                 if (p >= q.target) finished = true;
                 changed = true;
             }
-            if (changed) PlayerPrefs.Save();
+            if (changed) Prefs.Save();
             return finished;
         }
 
@@ -117,9 +117,9 @@ namespace SquashBot.Data
         {
             var q = Get(i);
             if (!q.Done || q.claimed) return false;
-            PlayerPrefs.SetInt(K("claim", i), 1);
+            Prefs.SetInt(K("claim", i), 1);
             SaveData.Coins += q.reward;
-            PlayerPrefs.Save();
+            Prefs.Save();
             return true;
         }
     }

@@ -53,11 +53,11 @@ namespace SquashBot.Gameplay
         private int AllyHp => 3 + arenaIndex / 3;
 
         /// <summary>The allies foi has with it (carried from road to arena and on, kept between sessions).</summary>
-        private int AlliesKept => PlayerPrefs.GetInt(AlliesKey, 0);
+        private int AlliesKept => Prefs.GetInt(AlliesKey, 0);
 
         private void KeepAllies(int n)
         {
-            if (n != AlliesKept) PlayerPrefs.SetInt(AlliesKey, Mathf.Clamp(n, 0, MaxAllies));
+            if (n != AlliesKept) Prefs.SetInt(AlliesKey, Mathf.Clamp(n, 0, MaxAllies));
         }
 
         /// <summary>A new road or arena: the allies foi brought along stand round it.</summary>

@@ -75,14 +75,14 @@ namespace SquashBot.Data
 
         public static bool Unlocked(int i) => SaveData.UnlockedLevel >= UnlockAt(i) || SaveData.TestMode; // test builds: every arena
 
-        public static int BestStreak(int i) => PlayerPrefs.GetInt("sb_arena_best_" + i, 0);
-        public static int Wins(int i) => PlayerPrefs.GetInt("sb_arena_wins_" + i, 0);
+        public static int BestStreak(int i) => Prefs.GetInt("sb_arena_best_" + i, 0);
+        public static int Wins(int i) => Prefs.GetInt("sb_arena_wins_" + i, 0);
 
         public static void Record(int i, int streak, bool won)
         {
-            if (streak > BestStreak(i)) PlayerPrefs.SetInt("sb_arena_best_" + i, streak);
-            if (won) PlayerPrefs.SetInt("sb_arena_wins_" + i, Wins(i) + 1);
-            PlayerPrefs.Save();
+            if (streak > BestStreak(i)) Prefs.SetInt("sb_arena_best_" + i, streak);
+            if (won) Prefs.SetInt("sb_arena_wins_" + i, Wins(i) + 1);
+            Prefs.Save();
         }
 
         /// <summary>Coins for clearing an arena (the first win pays triple).</summary>

@@ -23,7 +23,7 @@ namespace SquashBot.Data
         /// <summary>The level (0-based index) from which each hammer can be bought.</summary>
         private static readonly int[] UnlockAt = { 0, 10, 40, 90, 150 };
 
-        public static int Level => Mathf.Clamp(PlayerPrefs.GetInt(Key, 1), 1, MaxLevel);
+        public static int Level => Mathf.Clamp(Prefs.GetInt(Key, 1), 1, MaxLevel);
         public static bool IsMaxed => Level >= MaxLevel;
         public static int NextPrice => IsMaxed ? 0 : Prices[Level];
         public static int NextUnlockLevel => IsMaxed ? 0 : UnlockAt[Level];
@@ -37,8 +37,8 @@ namespace SquashBot.Data
         public static bool TryUpgrade()
         {
             if (IsMaxed || !NextUnlocked || !Shop.Spend(NextPrice)) return false;
-            PlayerPrefs.SetInt(Key, Level + 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt(Key, Level + 1);
+            Prefs.Save();
             return true;
         }
     }

@@ -24,15 +24,15 @@ namespace SquashBot.Data
         {
             var list = new List<long>();
             long now = DateTime.UtcNow.Ticks;
-            foreach (var part in PlayerPrefs.GetString(Key + group, "").Split(','))
+            foreach (var part in Prefs.GetString(Key + group, "").Split(','))
                 if (long.TryParse(part, out long t) && t > now && t - now <= Away.Ticks + TimeSpan.FromMinutes(5).Ticks) list.Add(t);
             return list;
         }
 
         private static void Save(int group, List<long> list)
         {
-            PlayerPrefs.SetString(Key + group, string.Join(",", list));
-            PlayerPrefs.Save();
+            Prefs.SetString(Key + group, string.Join(",", list));
+            Prefs.Save();
         }
 
         /// <summary>Soldiers of a group at home now.</summary>

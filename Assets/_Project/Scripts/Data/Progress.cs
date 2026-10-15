@@ -14,7 +14,7 @@ namespace SquashBot.Data
         private const string MeterKey = "sb_bonus_meter";
         private const string TokensKey = "sb_bonus_tokens";
 
-        public static int Stars(int level) => PlayerPrefs.GetInt(StarsKey + level, 0);
+        public static int Stars(int level) => Prefs.GetInt(StarsKey + level, 0);
 
         public static int TotalStars(int levelCount)
         {
@@ -24,7 +24,7 @@ namespace SquashBot.Data
         }
 
         /// <summary>Stars banked toward the next bonus round (0..StarsPerBonus-1).</summary>
-        public static int Meter => PlayerPrefs.GetInt(MeterKey, 0);
+        public static int Meter => Prefs.GetInt(MeterKey, 0);
 
         /// <summary>Bonus rounds waiting to be played.</summary>
         public static int BonusTokens
@@ -40,8 +40,8 @@ namespace SquashBot.Data
             newStars = Mathf.Max(0, stars - best);
             if (newStars == 0) return 0;
 
-            PlayerPrefs.SetInt(StarsKey + level, stars);
-            PlayerPrefs.Save();
+            Prefs.SetInt(StarsKey + level, stars);
+            Prefs.Save();
             return 0;
         }
     }

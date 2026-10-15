@@ -93,12 +93,12 @@ namespace SquashBot.Data
         // A new story: scenes seen in the old one (the prison tower) play again.
         private const string StoryKey = "sb_story2_";
 
-        public static bool Seen(int scene) => PlayerPrefs.GetInt(StoryKey + scene, 0) == 1;
+        public static bool Seen(int scene) => Prefs.GetInt(StoryKey + scene, 0) == 1;
 
         public static void MarkSeen(int scene)
         {
-            PlayerPrefs.SetInt(StoryKey + scene, 1);
-            PlayerPrefs.Save();
+            Prefs.SetInt(StoryKey + scene, 1);
+            Prefs.Save();
         }
 
         /// <summary>A random vanG taunt for the result card after a loss.</summary>

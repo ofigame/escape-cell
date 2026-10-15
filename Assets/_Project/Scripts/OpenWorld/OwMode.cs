@@ -19,6 +19,8 @@ namespace SquashBot.OpenWorld
     public class OwMode : MonoBehaviour
     {
         public static bool Active { get; private set; }
+        /// <summary>Something moves that needs every frame (foi walking, a raid, an operation).</summary>
+        public static bool Busy { get; private set; }
 
         private const float Speed = 7f;
 
@@ -91,7 +93,7 @@ namespace SquashBot.OpenWorld
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color(0.98f, 0.72f, 0.55f);
             cam.nearClipPlane = 0.2f;
-            cam.farClipPlane = 260f;
+            cam.farClipPlane = 220f;
             var data = camGo.AddComponent<UniversalAdditionalCameraData>();
             data.renderPostProcessing = true;
             data.antialiasing = AntialiasingMode.FastApproximateAntialiasing;
@@ -173,6 +175,7 @@ namespace SquashBot.OpenWorld
         private void OnDestroy()
         {
             Active = false;
+            Busy = false;
             OwIcons.Clear();
             OwWorld.ForgetMap();
             RenderSettings.fog = false;
@@ -215,6 +218,7 @@ namespace SquashBot.OpenWorld
                 if (km.sqrMagnitude > 0f) move = km.normalized;
                 if (k.spaceKey.wasPressedThisFrame || k.eKey.wasPressedThisFrame) Act(false);
             }
+            Busy = move.sqrMagnitude > 0.01f || battle.Raiding || (camp != null && camp.Started);
             float camYaw = tps ? yaw : isoYaw;
             if (move.sqrMagnitude > 0.01f)
             {
@@ -341,7 +345,7 @@ namespace SquashBot.OpenWorld
                 isoDist = Mathf.Clamp(isoDist - (gap - pinchLast) * 40f, MinZoom, MaxZoom);
                 var move = mid - pinchMid;
                 isoYaw += move.x * 220f;
-                isoTilt = Mathf.Clamp(isoTilt - move.y * 90f, -34f, 16f);
+                isoTilt = Mathf.Clamp(isoTilt - move.y * 90f, -62f, 30f);
             }
             pinchLast = gap;
             pinchMid = mid;
@@ -357,7 +361,7 @@ namespace SquashBot.OpenWorld
             if (mouse == null || !mouse.rightButton.isPressed) return;
             var d = mouse.delta.ReadValue() / Mathf.Max(1f, Screen.height);
             isoYaw += d.x * 220f;
-            isoTilt = Mathf.Clamp(isoTilt - d.y * 90f, -34f, 16f);
+            isoTilt = Mathf.Clamp(isoTilt - d.y * 90f, -62f, 30f);
         }
 
         // ---------- Raids ----------
@@ -633,7 +637,7 @@ namespace SquashBot.OpenWorld
                 lookAt = p + Vector3.up * 0.6f;
                 // Further out the view climbs: from a low three-quarter look to nearly straight down.
                 float k = Mathf.InverseLerp(MinZoom, MaxZoom, isoDist);
-                float a = Mathf.Clamp(Mathf.Lerp(46f, 70f, k) + isoTilt, 14f, 82f) * Mathf.Deg2Rad;
+                float a = Mathf.Clamp(Mathf.Lerp(46f, 70f, k) + isoTilt, 6f, 88f) * Mathf.Deg2Rad;
                 want = lookAt + Quaternion.Euler(0f, isoYaw, 0f) * new Vector3(0f, 0f, -Mathf.Cos(a) * isoDist) + Vector3.up * Mathf.Sin(a) * isoDist;
                 // Never under the ground when tilted low.
                 float floor = OwWorld.Height(want.x - OwWorld.Origin.x, want.z - OwWorld.Origin.z) + OwWorld.Origin.y + 0.8f;

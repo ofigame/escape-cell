@@ -82,6 +82,8 @@ namespace SquashBot.Visual
             if (!adaptive || Time.timeScale <= 0f) return;
             // A long frame is a load (a floor or the map being built), not a slow GPU: start the count again after it.
             if (Time.unscaledDeltaTime > 0.2f) { time = 0f; frames = 0; return; }
+            // The frame rate just changed (the pacer): the frames round it judge nothing.
+            if (Time.unscaledTime - FramePacer.ChangedAt < 1f) { time = 0f; frames = 0; return; }
             time += Time.unscaledDeltaTime;
             frames++;
             if (time < Window) return;

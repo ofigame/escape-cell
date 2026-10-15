@@ -17,12 +17,12 @@ namespace SquashBot.Data
         {
             get
             {
-                if (max < 0) long.TryParse(PlayerPrefs.GetString(Key, "0"), out max);
+                if (max < 0) long.TryParse(Prefs.GetString(Key, "0"), out max);
                 long real = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                 if (real > max)
                 {
                     max = real;
-                    PlayerPrefs.SetString(Key, max.ToString());
+                    Prefs.SetString(Key, max.ToString());
                 }
                 return max;
             }

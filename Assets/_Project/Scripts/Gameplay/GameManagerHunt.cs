@@ -218,7 +218,7 @@ namespace SquashBot.Gameplay
                     return;
                 }
             }
-            int fails = PlayerPrefs.GetInt(FailKey(levelIndex), 0);
+            int fails = Prefs.GetInt(FailKey(levelIndex), 0);
             if (fails < 1) return; // after every loss: what would help, from the shop
             bool crushed = reason != null && reason.StartsWith(Loc.T("lose.block"));
             var current = Armory.Equipped;

@@ -23,7 +23,7 @@ namespace SquashBot.Data
             get
             {
                 Update();
-                return Mathf.Min(PlayerPrefs.GetInt(CountKey, Max), Max); // (an old save may hold more than today's max)
+                return Mathf.Min(Prefs.GetInt(CountKey, Max), Max); // (an old save may hold more than today's max)
             }
         }
 
@@ -35,7 +35,7 @@ namespace SquashBot.Data
             get
             {
                 Update();
-                if (PlayerPrefs.GetInt(CountKey, Max) >= Max) return TimeSpan.Zero;
+                if (Prefs.GetInt(CountKey, Max) >= Max) return TimeSpan.Zero;
                 var left = Since + Regen - DateTime.UtcNow;
                 return left > TimeSpan.Zero ? left : TimeSpan.Zero;
             }
@@ -77,7 +77,7 @@ namespace SquashBot.Data
 
         private static void Update()
         {
-            int count = PlayerPrefs.GetInt(CountKey, Max);
+            int count = Prefs.GetInt(CountKey, Max);
             if (count >= Max) return;
 
             var now = DateTime.UtcNow;
@@ -100,20 +100,20 @@ namespace SquashBot.Data
         {
             get
             {
-                string raw = PlayerPrefs.GetString(TimeKey, "");
+                string raw = Prefs.GetString(TimeKey, "");
                 return long.TryParse(raw, out long ticks) ? new DateTime(ticks, DateTimeKind.Utc) : DateTime.UtcNow;
             }
             set
             {
-                PlayerPrefs.SetString(TimeKey, value.Ticks.ToString());
-                PlayerPrefs.Save();
+                Prefs.SetString(TimeKey, value.Ticks.ToString());
+                Prefs.Save();
             }
         }
 
         private static void Set(int count)
         {
-            PlayerPrefs.SetInt(CountKey, Mathf.Clamp(count, 0, Max));
-            PlayerPrefs.Save();
+            Prefs.SetInt(CountKey, Mathf.Clamp(count, 0, Max));
+            Prefs.Save();
         }
     }
 }
