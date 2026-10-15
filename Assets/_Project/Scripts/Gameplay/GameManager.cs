@@ -477,6 +477,9 @@ namespace SquashBot.Gameplay
 #endif
             if (ui.Guide.Visible) return; // the guide closes itself
             if (defenseEditing) { LeaveDefenseEditor(); return; }
+            if (State != GameState.Playing && squadPick != null && squadPick.IsOpen) { squadPick.Hide(); ui.RefreshPrelevelSquad(true); return; }
+            if (State != GameState.Playing && friendsUi != null && friendsUi.InviteOpen) { friendsUi.HideInvite(); return; }
+            if (State != GameState.Playing && friendsUi != null && friendsUi.IsOpen) { friendsUi.Hide(); return; }
             if (State != GameState.Playing && ui.CloseTopModal()) return; // a card on top closes first
             switch (State)
             {
