@@ -158,8 +158,8 @@ namespace SquashBot.Gameplay
 
             FramePacer.Install();
             CloudSave.Install();
-            FramePacer.Busy = () => State == GameState.Playing || IntroCinematic.Playing || (OpenWorld.OwMode.Active && OpenWorld.OwMode.Busy);
-            FramePacer.KeepAwake = () => State == GameState.Playing || IntroCinematic.Playing || (OpenWorld.OwMode.Active && OpenWorld.OwMode.Busy);
+            FramePacer.Busy = () => State == GameState.Playing || IntroCinematic.Playing || (OpenWorld.OwMode.Active && OpenWorld.OwMode.Busy) || (Kingdom.KmMode.Active && Kingdom.KmMode.Busy);
+            FramePacer.KeepAwake = () => State == GameState.Playing || IntroCinematic.Playing || (OpenWorld.OwMode.Active && OpenWorld.OwMode.Busy) || (Kingdom.KmMode.Active && Kingdom.KmMode.Busy);
             Application.lowMemory += OnLowMemory;
             if (Debug.isDebugBuild) gameObject.AddComponent<DevStats>(); // test builds: FPS and memory in the corner
             QualitySettings.vSyncCount = 0;
@@ -325,9 +325,10 @@ namespace SquashBot.Gameplay
             ui.BombPressed += ThrowBomb;
             ui.OpenWorldPressed += () =>
             {
-                if (OpenWorld.OwMode.Active) return;
-                if (!OpenWorld.OwMode.Open(LevelCount)) { ui.ShowIntro(Loc.T("ow.locked.title"), Loc.T("ow.locked.text")); return; }
-                OpenWorld.OwSync.Then(() => { if (!OpenWorld.OwMode.Active && State == GameState.Menu) OpenWorld.OwMode.Enter(robot.Visual, ShowMenu); });
+                // foi's kingdom (Age of Empires style), open from level 10.
+                if (Kingdom.KmMode.Active || OpenWorld.OwMode.Active) return;
+                if (!Kingdom.KmMode.Open) { ui.ShowIntro(Loc.T("km.locked.title"), Loc.T("km.locked.text")); return; }
+                if (State == GameState.Menu) Kingdom.KmMode.Enter(robot.Visual, ShowMenu);
             };
             ui.IntroPressed += () => { if (!IntroCinematic.Playing) IntroCinematic.Play(robot.Visual, fx, true); };
             ui.CloudRestored += () => UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
@@ -540,7 +541,7 @@ namespace SquashBot.Gameplay
             AudioManager.SetDanger(0f);
             ResetRun();
             State = GameState.Menu;
-            ui.SetOpenWorldButton(OpenWorld.OwMode.Open(LevelCount));
+            ui.SetOpenWorldButton(Kingdom.KmMode.Open);
             ShowBackdrop(NextLevel);
             ui.ShowMenu(NextLevel, SaveData.Coins, LevelCatalog.WorldName(NextLevel),
                 PendingRoad >= 0 ? Loc.T("menu.roadPending") : MissionText(levelSet.levels[NextLevel]));
@@ -558,7 +559,7 @@ namespace SquashBot.Gameplay
         private void LateUpdate()
         {
             if (ui == null) return;
-            if (OpenWorld.OwMode.Active) return; // the open world films itself (the game's cameras stay off)
+            if (OpenWorld.OwMode.Active || Kingdom.KmMode.Active) return; // the open world and the kingdom film themselves (the game's cameras stay off)
             // The splash waits for the menu to stand (a few frames in, when the lobby has drawn).
             if (!SplashScreen.Ready && Time.frameCount > 5) SplashScreen.Ready = true;
             if (lobby != null && lobby.IsOpen && !ui.MenuVisible) lobby.Close();

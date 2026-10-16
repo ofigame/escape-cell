@@ -476,7 +476,7 @@ namespace SquashBot.UI
             ((RectTransform)friends.transform).pivot = new Vector2(0.5f, 0.5f);
 
             // The open world (once the escape is complete): top right, under the daily bonus.
-            openWorldButton = MenuArt.DockButton(t, Loc.T("ow.button"), MenuArt.Icon.House, new Color(0.35f, 0.75f, 0.4f), TopRight, new Vector2(-110f, -740f), 120f, () => OpenWorldPressed?.Invoke());
+            openWorldButton = MenuArt.DockButton(t, Loc.T("km.button"), MenuArt.Icon.House, new Color(0.35f, 0.75f, 0.4f), TopRight, new Vector2(-110f, -740f), 120f, () => OpenWorldPressed?.Invoke());
             ((RectTransform)openWorldButton.transform).pivot = new Vector2(0.5f, 0.5f);
             openWorldButton.gameObject.SetActive(false);
 
