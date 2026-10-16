@@ -136,21 +136,30 @@ namespace SquashBot.UI
             // The competitions: the season, the leaderboards, the weekend cup, the clan, the quests.
             competitions = CompetitionScreen.Create(root);
             competitions.CoinsChanged += () => CoinsChanged?.Invoke();
-            var comp = Flat.Button(m, Loc.T("comp.button"), new Vector2(0.5f, 1f), new Vector2(0f, -215f), new Vector2(640f, 96f), new Color(0.75f, 0.45f, 1f), Flat.Text, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); competitions.Show(); }, 32f);
+            var comp = Flat.Button(m, Loc.T("comp.button"), new Vector2(0.5f, 1f), new Vector2(0f, -265f), new Vector2(640f, 96f), new Color(0.75f, 0.45f, 1f), Flat.Text, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); competitions.Show(); }, 32f);
             ((RectTransform)comp.transform).pivot = new Vector2(0.5f, 0.5f);
-            ModeCard(m, 1, new Vector2(0f, 120f), "duel", "ch.mode.duel", "ch.mode.duelText", new Color(1f, 0.6f, 0.25f), tappable: false);
+            ModeCard(m, 1, new Vector2(0f, 160f), "duel", "ch.mode.duel", "ch.mode.duelText", new Color(1f, 0.6f, 0.25f), tappable: false);
             // With squads or foi against foi alone (kept for next time), then the length.
-            squadsOn = Flat.Button(m, Loc.T("duel.squads"), new Vector2(0.5f, 0.5f), new Vector2(-230f, -150f), new Vector2(430f, 104f), Flat.CardHi, Flat.Text, () => PickSquads(true), 34f);
+            squadsOn = Flat.Button(m, Loc.T("duel.squads"), new Vector2(0.5f, 0.5f), new Vector2(-230f, -215f), new Vector2(430f, 104f), Flat.CardHi, Flat.Text, () => PickSquads(true), 34f);
             ((RectTransform)squadsOn.transform).pivot = new Vector2(0.5f, 0.5f);
-            squadsOff = Flat.Button(m, Loc.T("duel.solo"), new Vector2(0.5f, 0.5f), new Vector2(230f, -150f), new Vector2(430f, 104f), Flat.CardHi, Flat.Text, () => PickSquads(false), 34f);
+            squadsOff = Flat.Button(m, Loc.T("duel.solo"), new Vector2(0.5f, 0.5f), new Vector2(230f, -215f), new Vector2(430f, 104f), Flat.CardHi, Flat.Text, () => PickSquads(false), 34f);
             ((RectTransform)squadsOff.transform).pivot = new Vector2(0.5f, 0.5f);
             PickSquads(Challenge.DuelSquads, false);
+            // The squad's formation (with squads).
+            string[] forms = { "duel.form.0", "duel.form.1", "duel.form.2" };
+            for (int i = 0; i < 3; i++)
+            {
+                int k = i;
+                formButtons[i] = Flat.Button(m, Loc.T(forms[i]), new Vector2(0.5f, 0.5f), new Vector2((i - 1) * 300f, -322f), new Vector2(285f, 84f), Flat.CardHi, Flat.Text, () => PickFormation(k), 28f);
+                ((RectTransform)formButtons[i].transform).pivot = new Vector2(0.5f, 0.5f);
+            }
+            PickFormation(Challenge.DuelFormation, false);
             // The duel's length: each button starts a duel of that many minutes.
             int[] lengths = { 3, 5, 10 };
             for (int i = 0; i < lengths.Length; i++)
             {
                 int minutes = lengths[i];
-                var b = Flat.Button(m, Loc.F("ch.minutes", minutes), new Vector2(0.5f, 0.5f), new Vector2((i - 1) * 310f, -310f), new Vector2(290f, 120f),
+                var b = Flat.Button(m, Loc.F("ch.minutes", minutes), new Vector2(0.5f, 0.5f), new Vector2((i - 1) * 310f, -452f), new Vector2(290f, 120f),
                     new Color(1f, 0.6f, 0.25f), new Color(0.12f, 0.06f, 0f), () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(1, minutes); }, 40f);
                 ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0.5f);
             }
@@ -163,6 +172,20 @@ namespace SquashBot.UI
         }
 
         private Button squadsOn, squadsOff;
+        private readonly Button[] formButtons = new Button[3];
+
+        /// <summary>A formation picked (lit); shown only with squads.</summary>
+        private void PickFormation(int k, bool sound = true)
+        {
+            if (sound) AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.2f);
+            Challenge.DuelFormation = k;
+            for (int i = 0; i < 3; i++)
+            {
+                if (formButtons[i] == null) continue;
+                ((Image)formButtons[i].targetGraphic).color = i == k ? new Color(1f, 0.6f, 0.25f) : Flat.CardHi;
+                formButtons[i].gameObject.SetActive(Challenge.DuelSquads);
+            }
+        }
 
         /// <summary>Squads or foi alone: the picked one lit.</summary>
         private void PickSquads(bool on, bool sound = true)
@@ -171,6 +194,7 @@ namespace SquashBot.UI
             Challenge.DuelSquads = on;
             ((Image)squadsOn.targetGraphic).color = on ? new Color(0.3f, 0.62f, 1f) : Flat.CardHi;
             ((Image)squadsOff.targetGraphic).color = on ? Flat.CardHi : new Color(0.3f, 0.62f, 1f);
+            foreach (var b in formButtons) if (b != null) b.gameObject.SetActive(on);
         }
 
         // ---------- Playing a friend ----------

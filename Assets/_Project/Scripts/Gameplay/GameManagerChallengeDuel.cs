@@ -160,20 +160,47 @@ namespace SquashBot.Gameplay
             {
                 hunt.ClearSquads();
                 hunt.ResetRemoteSquad();
+                int myForm = Challenge.DuelFormation, theirForm = Mathf.Abs(rival.name.GetHashCode()) % 3;
                 for (int g = 0; g < Army.Groups && chDuelSquads; g++) // foi against foi: no squads at all
                 {
                     int n = SoldierPool.ForDuel(g);
-                    for (int s = 0; s < n; s++) hunt.AddSquadSoldier(true, g * SoldierPool.PerDuel + s, mine + new GridPos((g - 3) * 2 + s, back), Army.StatsOf(g)); // (a row behind foi)
+                    for (int s = 0; s < n; s++) hunt.AddSquadSoldier(true, g * SoldierPool.PerDuel + s, mine + FormationSpot(myForm, g, s, back), Army.StatsOf(g));
                     if (LiveActive) continue; // the live rival's soldiers come with its state
-                    for (int s = 0; s < rival.squad[g]; s++) hunt.AddSquadSoldier(false, g * SoldierPool.PerDuel + s, theirs + new GridPos((g - 3) * 2 + s, -back), Army.StatsFromTotal(g, rival.points[g]));
+                    for (int s = 0; s < rival.squad[g]; s++) hunt.AddSquadSoldier(false, g * SoldierPool.PerDuel + s, theirs + FormationSpot(theirForm, g, s, -back), Army.StatsFromTotal(g, rival.points[g]));
                 }
                 // Every group charges from the start (a tag tapped calls its group back to guard, tapped again: back in).
-                for (int g = 0; g < Army.Groups; g++) { hunt.SetSquadOrder(true, g, true); hunt.SetSquadOrder(false, g, true); }
+                // (A guarding squad stays by its foi until a tag sends it in.)
+                for (int g = 0; g < Army.Groups; g++) { hunt.SetSquadOrder(true, g, myForm != 1); hunt.SetSquadOrder(false, g, theirForm != 1); }
             }
             // After a knock-down the soldiers left line up behind their foi again (no new ones and no healing until the duel is over).
             else hunt.RegroupSquads();
 
             RefreshSquadBar();
+        }
+
+        /// <summary>
+        /// Where soldier <paramref name="s"/> of group <paramref name="g"/> starts, from its foi (<paramref name="back"/>: the
+        /// way away from the rival): attack, a row in front; guard, a ring round foi; flanks, two wings at its sides.
+        /// </summary>
+        private static GridPos FormationSpot(int form, int g, int s, int back)
+        {
+            int i = g * 2 + s; // 0..11
+            switch (form)
+            {
+                case 1:
+                {
+                    var ring = new[] { new GridPos(-1, 0), new GridPos(1, 0), new GridPos(0, back), new GridPos(0, -back), new GridPos(-1, back), new GridPos(1, back),
+                                       new GridPos(-1, -back), new GridPos(1, -back), new GridPos(-2, 0), new GridPos(2, 0), new GridPos(-2, back), new GridPos(2, back) };
+                    return ring[i % ring.Length];
+                }
+                case 2:
+                {
+                    int side = i % 2 == 0 ? -1 : 1, k = i / 2;
+                    return new GridPos(side * (3 + k % 3), -back * (k / 3));
+                }
+                default:
+                    return new GridPos((g - 3) * 2 + s, -back);
+            }
         }
 
         /// <summary>A knock-down: the one left standing scores, both start again from the middle.</summary>

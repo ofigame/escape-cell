@@ -24,6 +24,14 @@ namespace SquashBot.Data
             set { Prefs.SetInt(EnabledKey, value ? 1 : 0); Prefs.Save(); }
         }
 
+        /// <summary>How the squad stands at a duel's start: 0 attack (a row in front, charging), 1 guard (a ring round foi,
+        /// guarding it), 2 flanks (two wings at foi's sides, charging round the rival).</summary>
+        public static int DuelFormation
+        {
+            get => Mathf.Clamp(Prefs.GetInt("sb_duel_formation", 0), 0, 2);
+            set { Prefs.SetInt("sb_duel_formation", Mathf.Clamp(value, 0, 2)); Prefs.Save(); }
+        }
+
         /// <summary>Duels with each side's squad behind its foi (true, the default) or foi against foi alone.</summary>
         public static bool DuelSquads
         {
