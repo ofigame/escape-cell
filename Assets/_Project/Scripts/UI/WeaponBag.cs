@@ -16,6 +16,8 @@ namespace SquashBot.UI
     public class WeaponBag : MonoBehaviour
     {
         public event Action<WeaponDef> Picked;
+        /// <summary>The gun in hand tapped again: put it down.</summary>
+        public event Action<WeaponDef> Dropped;
         public event Action Closed;
 
         private UiScreen screen;
@@ -102,6 +104,10 @@ namespace SquashBot.UI
                 if (inHand)
                     UiFactory.TextBox("InHandLabel", card, new Vector2(0.5f, 1f), new Vector2(0f, -22f), new Vector2(280f, 40f), Loc.T("weapon.equipped"), 24f, new Color(0.4f, 1f, 0.6f), title: true)
                         .rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                bool dropGun = inHand && weapon.kind == WeaponKind.Gun && gunsAllowed;
+                if (dropGun)
+                    UiFactory.TextBox("DropLabel", card, new Vector2(0.5f, 0f), new Vector2(0f, 14f), new Vector2(300f, 34f), Loc.T("bag.dropGun"), 22f, new Color(1f, 0.75f, 0.45f), title: true)
+                        .rectTransform.pivot = new Vector2(0.5f, 0.5f);
                 if (!usable)
                 {
                     // A gun on the floors: shown, not taken (the battle arenas only).
@@ -116,6 +122,7 @@ namespace SquashBot.UI
                 {
                     Audio.AudioManager.PlaySfx(Audio.Sfx.Click, 0.8f, 1.2f);
                     screen.Hide();
+                    if (dropGun) { Dropped?.Invoke(weapon); return; }
                     Picked?.Invoke(weapon);
                 });
                 card.gameObject.AddComponent<ButtonPress>();

@@ -20,6 +20,8 @@ namespace SquashBot.Gameplay
         private const float HeartHeal = 0.3f;
         /// <summary>After a hit the robot can't be hurt again for a moment.</summary>
         private const float HurtGrace = 1.3f;
+        /// <summary>The blink after a robot's or soldier's blow on the floors: short, so a crowd that keeps swinging keeps hurting.</summary>
+        private const float FoeHurtGrace = 0.75f;
 
         private float health = 1f;
         /// <summary>A share of health the next hit takes instead of the usual (set around a robot's blow).</summary>
@@ -90,13 +92,14 @@ namespace SquashBot.Gameplay
             hitsTaken++;
             // The challenge's duel: blows come in flurries — no long blink, no knock to another tile, every blow counts.
             bool duel = challengeRun && chPhase == ChPhase.Duel;
-            hurtCooldown = duel ? 0.12f : HurtGrace;
+            float grace = hitShareOverride >= 0f ? FoeHurtGrace : HurtGrace;
+            hurtCooldown = duel ? 0.12f : grace;
             ui.Flash(new Color(1f, 0.15f, 0.15f), 0.3f);
             BreakCombo();
 
             if (crushed) hazards.Shatter(p);
             else if (!duel) robot.RescueTo(SafeTileNear(robot.LastLeftTile, p));
-            if (!duel) robot.GiveShield(HurtGrace); // the blink: nothing hurts for a moment
+            if (!duel) robot.GiveShield(grace); // the blink: nothing hurts for a moment
 
             cameraRig.Shake(0.9f);
             cameraRig.Punch(0.7f);

@@ -136,6 +136,8 @@ namespace SquashBot.Gameplay
             hunt.RedFoes = arenaRun || challengeRun; // the open world's roads: no vanG
             // The robots: the roster of this world (an arena: its own world's, at full strength), their blows off foi's health points.
             hunt.FoiHp = Challenge.FoiMaxHp;
+            // The floors' blows grow with the campaign (foi's health does too): three times the table early, nine by the last world.
+            hunt.FoeHitScale = challengeRun ? 1f : Mathf.Lerp(3f, 9f, Mathf.Clamp01((arenaRun ? arenaIndex : World) / (float)(EnemyRoster.Worlds - 1)));
             hunt.HpBase = 10f;
             hunt.RosterWorld = challengeRun ? -1 : Mathf.Clamp(arenaRun ? arenaIndex : World, 0, EnemyRoster.Worlds - 1);
             hunt.RosterFloor = arenaRun ? 9 : levelIndex % LevelCatalog.LevelsPerWorld;
@@ -301,6 +303,22 @@ namespace SquashBot.Gameplay
             CloseBag();
             FloatAt(robot.transform.position + Vector3.up * 0.6f, Loc.T("weapon." + w.id), WeaponModels.GlowOf(w));
             AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.3f);
+        }
+
+        /// <summary>The gun put down from the bag: back to the blade alone (the ammo pill and the sight go).</summary>
+        private void DropWeaponGun(WeaponDef w)
+        {
+            Armory.DropGun();
+            if (arenaRun) gun = null;
+            floorGun = null;
+            gunAmmo = 0;
+            RefreshAmmo();
+            if (gunSight != null) gunSight.Hide();
+            ShowHeld(weapon ?? Armory.Equipped);
+            heldWeapon.Swing();
+            CloseBag();
+            FloatAt(robot.transform.position + Vector3.up * 0.6f, Loc.T("bag.gunDropped"), new Color(1f, 0.75f, 0.45f));
+            AudioManager.PlaySfx(Sfx.Click, 0.9f, 0.8f);
         }
 
         private void CloseBag()
@@ -504,11 +522,11 @@ namespace SquashBot.Gameplay
                 return;
             }
             float dt = Time.unscaledDeltaTime;
-            if (challengeRun && chPhase != ChPhase.Off && !TpsActive)
+            if (challengeRun && chPhase != ChPhase.Off && (!TpsActive || SlowCamOn))
             {
                 // The challenge's duel: filmed from the east, both foi in view (or over foi's shoulder, in TPS).
                 BoardPose(out var bpos, out var brot);
-                cameraRig.Chase(bpos, brot, 46f);
+                cameraRig.Chase(bpos, brot, Mathf.Lerp(46f, 52f, slowCamWeight)); // (a big moment: circling close, a little wider)
                 if (cameraRig.Cam.farClipPlane < 200f) cameraRig.Cam.farClipPlane = 200f;
                 closeCamOn = true;
                 closeCamFocus = robot.transform.position;

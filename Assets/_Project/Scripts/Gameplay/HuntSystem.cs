@@ -194,6 +194,9 @@ namespace SquashBot.Gameplay
         public int RosterWorld = -1, RosterFloor;
         /// <summary>foi's health points (a robot's blow takes its points off them: their share of the bar).</summary>
         public int FoiHp = 100;
+        /// <summary>The floors' robots and soldiers hit this many times their table's blow (foi's health grows a lot along
+        /// the campaign: without it the late floors barely scratch it). 1 in the challenge's duel.</summary>
+        public float FoeHitScale = 1f;
         /// <summary>Health points of an old-style robot (no roster) for each point of its strength.</summary>
         public float HpBase = 10f;
         /// <summary>foi's height (world units, measured at its size): every robot is sized against it.</summary>
@@ -1009,7 +1012,7 @@ namespace SquashBot.Gameplay
         /// <summary>Tiles a second a robot walks: nearly foi's own pace (a touch slower), quicker on harder floors and when roused.</summary>
         private float GuardSpeed(Guard g)
         {
-            float v = Mathf.Lerp(3.0f, 4.2f, level.score / 100f);
+            float v = ChallengeBattle ? Mathf.Lerp(3.0f, 4.2f, level.score / 100f) : Mathf.Lerp(3.3f, 4.6f, level.score / 100f);
             if (g.mon != null) v *= 0.8f;
             else if (g.brute) v *= g.rank >= 99 ? 0.85f : 0.9f;
             else if (g.rank == 0) v *= 0.92f;
@@ -1093,7 +1096,9 @@ namespace SquashBot.Gameplay
                 if (k >= 1f)
                 {
                     g.windup = -1f;
-                    g.cooldown = g.brute ? 1.3f : g.soldier != null ? 0.6f + (float)rng.NextDouble() * 0.3f : 0.55f;
+                    g.cooldown = ChallengeBattle
+                        ? (g.brute ? 1.3f : g.soldier != null ? 0.6f + (float)rng.NextDouble() * 0.3f : 0.55f)
+                        : (g.brute ? 1.0f : g.soldier != null ? 0.45f + (float)rng.NextDouble() * 0.25f : 0.38f); // the floors: they keep at it
                     FoeStruck(g);
                     if (g.held != null) g.held.Swing();
                     g.SetRaise(0f);
@@ -1219,8 +1224,8 @@ namespace SquashBot.Gameplay
         /// <summary>How far off the waiting robots hold.</summary>
         private const int WaitRing = 4;
 
-        /// <summary>How many robots may fight foi at once: three at first, up to six on the late floors.</summary>
-        private int MaxEngaged => ChallengeBattle ? 999 : Mathf.Clamp(3 + world / 6, 3, 6);
+        /// <summary>How many robots may fight foi at once: four at first, up to nine on the late floors.</summary>
+        private int MaxEngaged => ChallengeBattle ? 999 : Mathf.Clamp(4 + world / 4, 4, 9);
 
         /// <summary>The challenge's battle: every robot fights at once (no waiting ring), archers shoot from afar.</summary>
         public bool ChallengeBattle;
@@ -1295,17 +1300,17 @@ namespace SquashBot.Gameplay
             return true;
         }
 
-        private float WindTime => Mathf.Lerp(0.7f, 0.45f, level.score / 100f);
-        private float BruteWindTime => Mathf.Lerp(0.95f, 0.7f, level.score / 100f);
+        private float WindTime => ChallengeBattle ? Mathf.Lerp(0.7f, 0.45f, level.score / 100f) : Mathf.Lerp(0.58f, 0.36f, level.score / 100f);
+        private float BruteWindTime => ChallengeBattle ? Mathf.Lerp(0.95f, 0.7f, level.score / 100f) : Mathf.Lerp(0.82f, 0.58f, level.score / 100f);
         /// <summary>Health shares a guard's slam and an enforcer's smash take.</summary>
         private const float GuardHitShare = 0.2f, BruteHitShare = 0.45f;
         /// <summary>A fortress robot's slam: the easy ones barely sting, each rank a little more, an elite most of all.</summary>
         /// <summary>How terrifying the warlords look on this floor (1 early … 4 from level 180).</summary>
         private int Menace => Mathf.Clamp(1 + level.number / 60, 1, 4);
 
-        private float ShareOf(Guard g) => g.share >= 0f ? g.share : g.blow > 0 ? g.blow / (float)Mathf.Max(1, FoiHp) : g.rank >= 99 ? 0.55f : g.brute ? BruteHitShare : g.rank == 0 ? 0.12f : g.rank > 0 ? Mathf.Min(0.3f, 0.16f + g.rank * 0.025f) : GuardHitShare;
+        private float ShareOf(Guard g) => g.share >= 0f ? g.share : g.blow > 0 ? g.blow * FoeHitScale / (float)Mathf.Max(1, FoiHp) : g.rank >= 99 ? 0.55f : g.brute ? BruteHitShare : g.rank == 0 ? 0.12f : g.rank > 0 ? Mathf.Min(0.3f, 0.16f + g.rank * 0.025f) : GuardHitShare;
         /// <summary>The monster's blows hurt more on later floors.</summary>
-        private float MonsterHitShare => RosterWorld >= 0 ? EnemyRoster.VanGDamage(RosterWorld, RosterFloor) / (float)Mathf.Max(1, FoiHp) : Mathf.Lerp(0.36f, 0.6f, level.score / 100f);
+        private float MonsterHitShare => RosterWorld >= 0 ? EnemyRoster.VanGDamage(RosterWorld, RosterFloor) * Mathf.Max(1f, FoeHitScale * 0.8f) / (float)Mathf.Max(1, FoiHp) : Mathf.Lerp(0.36f, 0.6f, level.score / 100f);
 
         /// <summary>Blows still to come in the monster's current combo (later floors chain two or three).</summary>
         private int comboLeft;

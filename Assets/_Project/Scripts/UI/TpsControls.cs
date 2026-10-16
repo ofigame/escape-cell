@@ -13,7 +13,7 @@ namespace SquashBot.UI
     /// </summary>
     public class TpsControls : MonoBehaviour
     {
-        public const float StickRadius = 130f;
+        public const float StickRadius = 100f;
 
         public Vector2 Move { get; private set; }
         /// <summary>The strike button is held (a gun post fires while it is).</summary>
@@ -209,7 +209,7 @@ namespace SquashBot.UI
         {
             private TpsControls owner;
             private RectTransform area, baseRect, knob;
-            private Vector2 home = new Vector2(240f, 240f);
+            private Vector2 home = new Vector2(200f, 200f);
             private int pointer = int.MinValue;
 
             public void Build(TpsControls c)

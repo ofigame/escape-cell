@@ -186,6 +186,13 @@ namespace SquashBot.Data
             Prefs.Save();
         }
 
+        /// <summary>Puts the gun down: foi goes on with its blade alone (until a gun is taken again).</summary>
+        public static void DropGun()
+        {
+            Prefs.SetString(GunKey, "-"); // (not empty: an empty slot would fall back on an old save's hand weapon)
+            Prefs.Save();
+        }
+
         public static bool IsEquipped(WeaponDef w) => w == Equipped || w == EquippedGun;
 
         /// <summary>Buys the weapon (and puts it in the robot's hand).</summary>

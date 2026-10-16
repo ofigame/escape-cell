@@ -736,8 +736,8 @@ namespace SquashBot.UI
             top.offsetMax = new Vector2(now ? -380f : 0f, now ? -150f : -365f);
             status.rectTransform.anchoredPosition = now ? new Vector2(0f, 330f) : new Vector2(-60f, 380f);
             if (heartButton == null) return;
-            ((RectTransform)heartButton.transform).anchoredPosition = now ? new Vector2(-75f, 500f) : new Vector2(-75f, 520f);
-            ((RectTransform)shieldButton.transform).anchoredPosition = now ? new Vector2(-75f, 625f) : new Vector2(-75f, 645f);
+            ((RectTransform)heartButton.transform).anchoredPosition = now ? new Vector2(-75f, 380f) : new Vector2(-75f, 520f);
+            ((RectTransform)shieldButton.transform).anchoredPosition = now ? new Vector2(-75f, 495f) : new Vector2(-75f, 645f);
         }
 
         private void Update()

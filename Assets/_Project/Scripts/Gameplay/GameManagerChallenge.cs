@@ -195,8 +195,10 @@ namespace SquashBot.Gameplay
             Prefs.DeleteKey(DefenseNewsKey); // the news has been seen
             ui.MenuDefenseLine = null;
             ui.RefreshMenuRank(null);
-            if (!FoiNet.Registered) { ui.ChallengeStats.Show(); return; }
-            cameraRig.StartCoroutine(FoiNet.Me(p => { Challenge.Sync(p); ui.ChallengeStats.Show(); }));
+            // At once with what the phone knows; the server's word (if it answers) refreshes it.
+            ui.ChallengeStats.Show();
+            if (!FoiNet.Registered) return;
+            cameraRig.StartCoroutine(FoiNet.Me(p => { if (p == null) return; Challenge.Sync(p); if (ui.ChallengeStats.IsOpen) ui.ChallengeStats.Refresh(); }));
         }
 
         /// <summary>
@@ -550,6 +552,51 @@ namespace SquashBot.Gameplay
             duelBack = Mathf.Lerp(duelBack, ultimateOn ? 13f : 29f + Mathf.Clamp(apart - 3f, 0f, 14f) * 1.2f, Time.unscaledDeltaTime * (ultimateOn ? 5f : 2f)); // (the ultimate: close in)
             pos = boardCentre + duelPan - look * duelBack;
             rot = Quaternion.LookRotation(look);
+            OrbitPose(ref pos, ref rot, me, foe);
+        }
+
+        // ---------- The slow-motion camera ----------
+
+        /// <summary>Until when (unscaled time) a big moment's slow motion is filmed close, and round what.</summary>
+        private float slowCamUntil, slowCamWeight, slowCamAngle;
+        private Vector3 slowCamCentre;
+
+        /// <summary>The camera goes in close and circles the two foi while the duel is in slow motion (a big blow, the ultimate).</summary>
+        private bool SlowCamOn => challengeRun && (ultimateOn || Time.unscaledTime < slowCamUntil || slowCamWeight > 0f);
+
+        /// <summary>A big moment: film it close, circling <paramref name="centre"/>, for <paramref name="seconds"/>.</summary>
+        private void SlowCam(Vector3 centre, float seconds)
+        {
+            slowCamCentre = centre;
+            slowCamUntil = Mathf.Max(slowCamUntil, Time.unscaledTime + seconds);
+        }
+
+        /// <summary>Blends the board's view into the circling close one (and back out) while the slow motion lasts.</summary>
+        private void OrbitPose(ref Vector3 pos, ref Quaternion rot, Vector3 me, Vector3 foe)
+        {
+            float dt = Time.unscaledDeltaTime;
+            bool on = ultimateOn || Time.unscaledTime < slowCamUntil;
+            var centre = Time.unscaledTime < slowCamUntil ? Vector3.Lerp(slowCamCentre, (me + foe) * 0.5f, 0.35f) : (me + foe) * 0.5f;
+            if (slowCamWeight <= 0f && on)
+            {
+                // It starts circling from where the board's camera stands.
+                var from = pos - centre;
+                slowCamAngle = Mathf.Atan2(from.z, from.x) * Mathf.Rad2Deg;
+            }
+            slowCamWeight = Mathf.MoveTowards(slowCamWeight, on ? 1f : 0f, dt * (on ? 2.6f : 1.8f));
+            if (slowCamWeight <= 0f) return;
+            slowCamAngle += dt * 70f;
+            float a = slowCamAngle * Mathf.Deg2Rad;
+            float apart = Mathf.Clamp(new Vector2(me.x - foe.x, me.z - foe.z).magnitude, 0f, 6f);
+            float radius = 4.2f + apart * 0.4f;
+            var orbit = centre + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * radius + Vector3.up * (3.3f + apart * 0.2f);
+            // Never into the stands: it keeps over the floor (the stands rise along its long sides).
+            orbit.x = Mathf.Clamp(orbit.x, boardCentre.x - BoardW * 0.5f, boardCentre.x + BoardW * 0.5f);
+            orbit.z = Mathf.Clamp(orbit.z, boardCentre.z - BoardH * 0.5f + 0.5f, boardCentre.z + BoardH * 0.5f - 0.5f);
+            var orbitRot = Quaternion.LookRotation(centre + Vector3.up * 0.55f - orbit);
+            float w = Mathf.SmoothStep(0f, 1f, slowCamWeight);
+            pos = Vector3.Lerp(pos, orbit, w);
+            rot = Quaternion.Slerp(rot, orbitRot, w);
         }
     }
 }

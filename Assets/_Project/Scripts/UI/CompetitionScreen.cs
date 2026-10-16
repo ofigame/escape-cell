@@ -61,9 +61,9 @@ namespace SquashBot.UI
             }
             subBar = UiFactory.Box("Sub", p, new Vector2(0.5f, 1f), new Vector2(0f, -335f), new Vector2(1000f, 90f));
             subBar.pivot = new Vector2(0.5f, 0.5f);
-            status = Flat.Label(p, "", new Vector2(0.5f, 0f), new Vector2(0f, 200f), new Vector2(940f, 60f), 28f, Flat.Gold, TextAlignmentOptions.Center, wrap: true);
+            status = Flat.Label(p, "", new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 150f), new Vector2(940f, 60f), 28f, Flat.Gold, TextAlignmentOptions.Center, wrap: true);
             status.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var viewport = UiFactory.Rect("Viewport", p, Vector2.zero, Vector2.one, new Vector2(40f, 240f), new Vector2(-40f, -390f));
+            var viewport = UiFactory.Rect("Viewport", p, Vector2.zero, Vector2.one, new Vector2(40f, Monetization.Ads.BannerReserve + 190f), new Vector2(-40f, -390f));
             viewport.gameObject.AddComponent<RectMask2D>();
             UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
@@ -74,7 +74,7 @@ namespace SquashBot.UI
             scroll.horizontal = false;
             scroll.decelerationRate = 0.12f;
             scroll.scrollSensitivity = 60f;
-            var close = Flat.Button(p, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, 100f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => screen.Hide(), 34f);
+            var close = Flat.Button(p, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 70f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => screen.Hide(), 34f);
             ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 
@@ -171,18 +171,23 @@ namespace SquashBot.UI
                 var r = Card(150f, new Color(0.35f, 0.25f, 0.08f));
                 int rm = s.reward.season % 12 + 1;
                 Text(r, Loc.F("comp.reward", Loc.T("month." + rm), Challenge.RankName(s.reward.rank), s.reward.coins), new Vector2(0f, 0.5f), new Vector2(30f, 0f), new Vector2(680f, 130f), 30f, Flat.Text, bold: true);
-                SmallButton(r, Loc.T("comp.claim"), new Color(1f, 0.7f, 0.2f), () => StartCoroutine(ClaimSeason()));
+                int cupRank = s.reward.rank;
+                SmallButton(r, Loc.T("comp.claim"), new Color(1f, 0.7f, 0.2f), () => StartCoroutine(ClaimSeason(cupRank)));
             }
             var info = Card(220f, Flat.Card);
             Text(info, Loc.T("comp.seasonHelp"), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(920f, 200f), 27f, Flat.Muted, TextAlignmentOptions.Center);
             Fit();
         }
 
-        private IEnumerator ClaimSeason()
+        private IEnumerator ClaimSeason(int rank)
         {
             int coins = 0;
             yield return FoiNet.ClaimSeason(c => coins = c);
-            if (coins > 0) { SaveData.Coins += coins; CoinsChanged?.Invoke(); AudioManager.PlaySfx(Sfx.Coin, 1f, 1f); }
+            if (coins > 0)
+            {
+                TrophyCase.AddSeason(rank); // the cup into the profile's trophy case
+                SaveData.Coins += coins; CoinsChanged?.Invoke(); AudioManager.PlaySfx(Sfx.Coin, 1f, 1f);
+            }
             Open(Tab.Season);
             if (coins > 0) status.text = Loc.F("comp.got", coins);
         }
@@ -255,7 +260,11 @@ namespace SquashBot.UI
         {
             int coins = 0;
             yield return FoiNet.ClaimCup(step, c => coins = c);
-            if (coins > 0) { SaveData.Coins += coins; CoinsChanged?.Invoke(); AudioManager.PlaySfx(Sfx.Coin, 1f, 1f); }
+            if (coins > 0)
+            {
+                TrophyCase.AddWeek(step); // the cup into the profile's trophy case
+                SaveData.Coins += coins; CoinsChanged?.Invoke(); AudioManager.PlaySfx(Sfx.Coin, 1f, 1f);
+            }
             Open(Tab.Cup);
             if (coins > 0) status.text = Loc.F("comp.got", coins);
         }

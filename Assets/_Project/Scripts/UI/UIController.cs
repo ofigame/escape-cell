@@ -69,8 +69,6 @@ namespace SquashBot.UI
             }
         }
         public event Action BombPressed;
-        /// <summary>Settings: watch the opening scene again.</summary>
-        public event Action IntroPressed;
         /// <summary>A game came back from its recovery code: the game starts again on it.</summary>
         public event Action CloudRestored;
         private CloudScreen cloud;
@@ -160,6 +158,8 @@ namespace SquashBot.UI
 
         // Settings
         private UiScreen settings;
+        private RectTransform settingsCard;
+        private TextMeshProUGUI menuProfileName;
         private readonly Dictionary<SettingKind, TextMeshProUGUI> settingValues = new Dictionary<SettingKind, TextMeshProUGUI>();
         private readonly Dictionary<SettingKind, Image> settingFaces = new Dictionary<SettingKind, Image>();
 
@@ -171,6 +171,7 @@ namespace SquashBot.UI
         private RectTransform rescuePill, hoverPill;
         private RectTransform healthPill;
         private GameObject privacyButton;
+        private RectTransform cloudButton;
         // "Delete my online profile": the first tap asks, the second deletes.
         private Button deleteOnlineButton;
         private TextMeshProUGUI deleteOnlineText;
@@ -384,6 +385,7 @@ namespace SquashBot.UI
             Chest = ChestCard.Create(root);
             ArmyView = ArmyScreen.Create(root);
             ChallengeStats = ChallengeStatsScreen.Create(root);
+            ChallengeStats.SettingsPressed += ShowSettings;
             Quests = QuestsScreen.Create(root);
             Quests.Claimed += () => { RefreshMenuCoins(); RefreshQuests(); };
             Garage.HeroPressed += () => HeroPicker.Show(true);
@@ -413,8 +415,14 @@ namespace SquashBot.UI
             menuStars = UiFactory.TextBox("Value", stars, new Vector2(0f, 0.5f), new Vector2(96f, 0f), new Vector2(120f, 90f),
                 "0", 44f, Palette.UiGold, align: TextAlignmentOptions.Left);
 
-            var gear = UiFactory.MakeButton(t, "", Kind.Icon, TopRight, new Vector2(-40f, -40f), new Vector2(110f, 110f), ShowSettings);
-            SettingsIcon(gear.transform);
+            // The profile (in the settings' old place; the settings open from it), the player's name under it.
+            var profile = MenuArt.DockButton(t, "", MenuArt.Icon.Profile, new Color(0.62f, 0.42f, 1f), TopRight, new Vector2(-110f, -110f), 120f, () => ChallengeStatsPressed?.Invoke());
+            ((RectTransform)profile.transform).pivot = new Vector2(0.5f, 0.5f);
+            menuProfileName = profile.transform.Find("Label").GetComponentInChildren<TextMeshProUGUI>();
+            menuProfileName.enableAutoSizing = true;
+            menuProfileName.fontSizeMin = 18f;
+            menuProfileName.fontSizeMax = 30f;
+            menuProfileName.text = string.IsNullOrEmpty(Data.Challenge.PlayerName) ? Loc.T("profile.title") : Data.Challenge.PlayerName;
 
             // Logo up top; the robot stands on its lit pedestal in the middle (the lobby stage behind the menu).
             MenuArt.Logo(t, Top, new Vector2(0f, -150f));
@@ -571,6 +579,7 @@ namespace SquashBot.UI
                 menuRankShown = rank * 100 + league;
             }
             menuRankText.text = Data.Challenge.PlayerName + " · " + Data.Challenge.RankName(rank);
+            if (menuProfileName != null) menuProfileName.text = string.IsNullOrEmpty(Data.Challenge.PlayerName) ? Loc.T("profile.title") : Data.Challenge.PlayerName;
             menuRankCups.text = Loc.F("ch.trophies", Data.Challenge.Trophies);
         }
 
@@ -946,6 +955,7 @@ namespace SquashBot.UI
             settings = UiScreen.Create("Settings", root, out var t);
             UiFactory.Dim(t, new Color(0.06f, 0.05f, 0.18f, 0.5f));
             var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1590f));
+            settingsCard = card;
             UiFactory.TextBox("Title", card, Top, new Vector2(0f, -50f), new Vector2(800f, 120f), Loc.T("settings.title"), 90f, Palette.UiText, title: true);
 
             var rows = new[]
@@ -986,13 +996,11 @@ namespace SquashBot.UI
             // Under the last row: deleting the online profile, then (where the consent form applies) the ad privacy choice.
             float underRows = -200f - rows.Length * 120f - 40f;
             // The card fits its rows: under them the account buttons (each in a row of its own), then CLOSE — nothing overlaps.
-            card.sizeDelta = new Vector2(860f, rows.Length * 120f + 800f);
+            card.sizeDelta = new Vector2(860f, rows.Length * 120f + 700f);
             privacyButton = UiFactory.MakeButton(card, Loc.T("settings.privacy"), Kind.Secondary, Top, new Vector2(0f, underRows - 100f), new Vector2(560f, 74f),
                 Monetization.AdMob.ShowPrivacyOptions, 34f).gameObject;
-            // The opening scene again (it plays whole only on the first start).
-            UiFactory.MakeButton(card, Loc.T("settings.intro"), Kind.Secondary, Top, new Vector2(0f, underRows - 200f), new Vector2(560f, 74f), () => { HideSettings(); IntroPressed?.Invoke(); }, 34f);
             // The recovery code (the game kept online, brought back on a new phone).
-            UiFactory.MakeButton(card, Loc.T("settings.cloud"), Kind.Secondary, Top, new Vector2(0f, underRows - 300f), new Vector2(560f, 74f), () => { HideSettings(); cloud.Show(); }, 34f);
+            cloudButton = (RectTransform)UiFactory.MakeButton(card, Loc.T("settings.cloud"), Kind.Secondary, Top, new Vector2(0f, underRows - 200f), new Vector2(560f, 74f), () => { HideSettings(); cloud.Show(); cloud.transform.SetAsLastSibling(); }, 34f).transform;
             // A plain button of its own (red words on a dark face), in its own row under the settings.
             deleteOnlineButton = Flat.Button(card, Loc.T("settings.deleteOnline"), Top, new Vector2(0f, underRows), new Vector2(640f, 84f), new Color(0.2f, 0.08f, 0.1f, 0.9f), new Color(1f, 0.55f, 0.58f),
                 DeleteOnlinePressed, 30f);
@@ -1031,6 +1039,8 @@ namespace SquashBot.UI
         public void RefreshSettings()
         {
             if (privacyButton != null) privacyButton.SetActive(Monetization.AdMob.PrivacyOptionsRequired);
+            // The recovery code's button moves up into the privacy choice's row where that one is not shown.
+            if (cloudButton != null && privacyButton != null) cloudButton.anchoredPosition = new Vector2(0f, ((RectTransform)privacyButton.transform).anchoredPosition.y - (privacyButton.activeSelf ? 100f : 0f));
             if (deleteOnlineButton != null && !deleteInFlight) // a delete on its way keeps its "wait" until the answer
             {
                 // Only once there is something online to delete.
@@ -1069,6 +1079,13 @@ namespace SquashBot.UI
         public void ShowSettings()
         {
             RefreshSettings();
+            // The card fits above the banner on every phone (shrunk a little on the short ones), CLOSE never under the ad.
+            var area = ((RectTransform)settingsCard.parent).rect.height;
+            float room = area - Monetization.Ads.BannerReserve - 60f;
+            float k = Mathf.Min(1f, room / Mathf.Max(1f, settingsCard.sizeDelta.y));
+            settingsCard.localScale = new Vector3(k, k, 1f);
+            settingsCard.anchoredPosition = new Vector2(0f, Monetization.Ads.BannerReserve * 0.5f);
+            settings.transform.SetAsLastSibling(); // (over the profile it opens from)
             settings.Show();
         }
 

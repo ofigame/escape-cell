@@ -29,7 +29,16 @@ namespace SquashBot.Gameplay
         private bool specialStrike, ultimateOn, finishing, moveBusy;
         private int rivalHero;
 
-        private const float MeterGain = 0.22f, MeterHurt = 0.12f, ComboGap = 1.4f, ComboMoveTime = 2.6f;
+        private const float MeterGain = 0.07f, MeterHurt = 0.04f, ComboGap = 1.4f, ComboMoveTime = 2.6f;
+        /// <summary>Blows in a row for the power hit and the knockdown — as the server's Rules.</summary>
+        private const int HeavyCombo = 5, UpperCombo = 8;
+
+        /// <summary>A blow's share of the bar by its weapon's pace (a quick blade's many blows fill it no faster than a
+        /// slow hammer's few) — as the server's Rules.MeterPace.</summary>
+        private static float MeterPace(float cooldown) => Mathf.Clamp(cooldown / 0.25f, 0.45f, 1.3f);
+
+        private float MyPace => MeterPace(Armory.Cooldown(weapon ?? Armory.Equipped));
+        private float RivalPace => MeterPace(Armory.Cooldown(Armory.Get(rival.weapon), Mathf.Max(1, rival.weaponLevel)));
         /// <summary>What each move takes off (times one of the mover's own blows) — as the server's Rules.</summary>
         private const float SpecialTimes = 1.8f, HeavyHit = 1.8f, UpperHit = 2.5f, UltimateHit = 6f;
 
@@ -71,6 +80,7 @@ namespace SquashBot.Gameplay
             skillBar = null;
             moveBusy = false;
             if (ultimateOn || Time.timeScale < 0.99f) { ultimateOn = false; if (State == GameState.Playing) Time.timeScale = 1f; }
+            slowCamUntil = slowCamWeight = 0f;
         }
 
         // ---------- Blows landing ----------
@@ -79,14 +89,14 @@ namespace SquashBot.Gameplay
         private void OnFoeStruck()
         {
             if (specialStrike || !challengeRun || chPhase != ChPhase.Duel) return;
-            myMeter = Mathf.Min(3f, myMeter + MeterGain);
-            if (!LiveActive) rivalMeter = Mathf.Min(3f, rivalMeter + MeterHurt);
+            myMeter = Mathf.Min(3f, myMeter + MeterGain * MyPace);
+            if (!LiveActive) rivalMeter = Mathf.Min(3f, rivalMeter + MeterHurt * MyPace);
             myCombo = Time.time - myComboAt < ComboGap ? myCombo + 1 : 1;
             myComboAt = Time.time;
             rivalCombo = 0;
             if (skillBar != null) skillBar.ShowCombo(myCombo);
-            if (myCombo == 3 || myCombo == 5) { myComboMove = myCombo; comboMoveUntil = Time.time + ComboMoveTime; }
-            if (myCombo == 5) ChallengeQuests.Report(DuelGoal.Combo5);
+            if (myCombo == HeavyCombo || myCombo == UpperCombo) { myComboMove = myCombo; comboMoveUntil = Time.time + ComboMoveTime; }
+            if (myCombo == HeavyCombo) ChallengeQuests.Report(DuelGoal.Combo5); // (a five-hit combo)
             if (colosseum != null && myCombo >= 3) colosseum.Cheer(0, 0.4f + myCombo * 0.08f);
         }
 
@@ -94,8 +104,8 @@ namespace SquashBot.Gameplay
         private void OnFoiStruck()
         {
             if (!challengeRun || chPhase != ChPhase.Duel) return;
-            myMeter = Mathf.Min(3f, myMeter + MeterHurt);
-            if (!LiveActive) rivalMeter = Mathf.Min(3f, rivalMeter + MeterGain);
+            myMeter = Mathf.Min(3f, myMeter + MeterHurt * RivalPace);
+            if (!LiveActive) rivalMeter = Mathf.Min(3f, rivalMeter + MeterGain * RivalPace);
             rivalCombo = Time.time - rivalComboAt < ComboGap ? rivalCombo + 1 : 1;
             rivalComboAt = Time.time;
             myCombo = 0;
@@ -117,8 +127,8 @@ namespace SquashBot.Gameplay
             else if (chPhase == ChPhase.Duel && !moveBusy)
             {
                 if (rivalCombo >= 2 && myMeter >= 1f) ctx = DuelSkillBar.Move.Breaker;
-                else if (myComboMove == 5) ctx = DuelSkillBar.Move.Upper;
-                else if (myComboMove == 3) ctx = DuelSkillBar.Move.Heavy;
+                else if (myComboMove == UpperCombo) ctx = DuelSkillBar.Move.Upper;
+                else if (myComboMove == HeavyCombo) ctx = DuelSkillBar.Move.Heavy;
             }
             skillBar.SetContext(ctx);
             skillBar.SetMeters(myMeter, rivalMeter);
@@ -321,6 +331,7 @@ namespace SquashBot.Gameplay
             if (!meStruck) hunt.StunFoe(1.2f);
             float was = Time.timeScale;
             Time.timeScale = 0.25f;
+            SlowCam(model.position, 1.9f); // the camera goes in close and circles them
             var dbl = StuntDouble.Make(model);
             fx.Burst(model.position + Vector3.up * 0.5f, new Color(1f, 0.85f, 0.4f), new Color(3f, 2.4f, 0.8f), 26, 5f);
             AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.6f);
@@ -461,7 +472,7 @@ namespace SquashBot.Gameplay
                 skillBar?.Shout(Loc.T("duel.broken"), new Color(1f, 0.45f, 0.4f));
                 return;
             }
-            if (rivalCombo >= 3 && dist <= 2.2f && Random.value < 0.5f)
+            if (rivalCombo >= HeavyCombo && dist <= 2.2f && Random.value < 0.5f)
             {
                 rivalCombo = 0;
                 SlashFx.Create(foeAt, robot.transform.position, new Color(1f, 0.35f, 0.3f), 1.8f);

@@ -132,6 +132,13 @@ namespace SquashBot.Data
         /// <summary>The player's rank: the highest reached (trophies may drop, the rank stays).</summary>
         public static int Rank => Mathf.Max(Prefs.GetInt(RankKey, 0), RankFor(Trophies));
 
+        /// <summary>
+        /// Both foi's health in a duel, times this by the match's level (the higher rank of the two): twice up to
+        /// Başçavuş, five times up to Binbaşı, ten times above — so a strong weapon does not end a round in a few blows.
+        /// As the server's Rules.DuelHpTimes.
+        /// </summary>
+        public static int DuelHpTimes(int rank) => rank <= 3 ? 2 : rank <= 8 ? 5 : 10;
+
         public static string RankName(int rank) => Loc.T("rank." + Mathf.Clamp(rank, 0, RankAt.Length - 1));
 
         /// <summary>The trophy league of the trophies held now (it falls with them, unlike the rank).</summary>

@@ -24,6 +24,9 @@ namespace SquashBot.UI
         private RectTransform emotes;
 
         private RectTransform root;
+        /// <summary>The pieces that move when the phone turns sideways (TPS): the bars, the right-hand buttons, the GG.</summary>
+        private RectTransform meterRect, rivalMeterRect, talkRect;
+        private bool sideways;
         private Image[] parts, rivalParts;
         private Image[] partFill;
         private Button special, ultimate, context;
@@ -53,6 +56,7 @@ namespace SquashBot.UI
             // The power bar: three parts, bottom left.
             var meter = UiFactory.Box("Power", root, new Vector2(0f, 0f), new Vector2(40f, 250f), new Vector2(420f, 54f));
             meter.pivot = new Vector2(0f, 0.5f);
+            meterRect = meter;
             parts = new Image[3];
             partFill = new Image[3];
             for (int i = 0; i < 3; i++)
@@ -70,6 +74,7 @@ namespace SquashBot.UI
             // The rival's bar: thin, under the top bar on the right.
             var rivalMeter = UiFactory.Box("RivalPower", root, new Vector2(1f, 1f), new Vector2(-40f, -540f), new Vector2(300f, 18f));
             rivalMeter.pivot = new Vector2(1f, 0.5f);
+            rivalMeterRect = rivalMeter;
             rivalParts = new Image[3];
             for (int i = 0; i < 3; i++)
             {
@@ -100,6 +105,7 @@ namespace SquashBot.UI
             // Emotes: a small button above the power bar opens a row of six.
             var talk = UiFactory.Box("Talk", root, new Vector2(0f, 0f), new Vector2(85f, 360f), new Vector2(96f, 96f));
             talk.pivot = new Vector2(0.5f, 0.5f);
+            talkRect = talk;
             var talkFace = UiFactory.Chunky(talk, UiFactory.StyleOf(new Color(0.3f, 0.75f, 0.55f)), 1f, 0f, UiSprites.Circle);
             var talkText = UiFactory.OutlinedText("Text", talk, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(90f, 60f), "GG", 30f, new Color(0.05f, 0.2f, 0.12f));
             talkText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
@@ -124,6 +130,30 @@ namespace SquashBot.UI
             comboGroup = comboText.gameObject.AddComponent<CanvasGroup>();
             comboGroup.alpha = 0f;
             comboGroup.blocksRaycasts = false;
+        }
+
+        /// <summary>
+        /// Sideways (TPS, landscape): the right-hand column comes down (clear of the 2D button), the power bar goes up
+        /// under foi's health bar (clear of the stick), the rival's bar under the scoreboard and the GG under the power bar.
+        /// </summary>
+        private void Layout()
+        {
+            bool now = Screen.width > Screen.height;
+            if (now == sideways || meterRect == null) return;
+            sideways = now;
+            Place(meterRect, now ? new Vector2(0f, 1f) : Vector2.zero, now ? new Vector2(40f, -410f) : new Vector2(40f, 250f));
+            Place(rivalMeterRect, Vector2.one, now ? new Vector2(-300f, -310f) : new Vector2(-40f, -540f));
+            Place(talkRect, now ? new Vector2(0f, 1f) : Vector2.zero, now ? new Vector2(85f, -520f) : new Vector2(85f, 360f));
+            Place(emotes, now ? new Vector2(0f, 1f) : Vector2.zero, now ? new Vector2(150f, -520f) : new Vector2(40f, 470f));
+            ((RectTransform)special.transform).anchoredPosition = now ? new Vector2(-75f, 610f) : new Vector2(-75f, 770f);
+            ((RectTransform)ultimate.transform).anchoredPosition = now ? new Vector2(-75f, 725f) : new Vector2(-75f, 895f);
+        }
+
+        private static void Place(RectTransform r, Vector2 anchor, Vector2 at)
+        {
+            if (r == null) return;
+            r.anchorMin = r.anchorMax = anchor;
+            r.anchoredPosition = at;
         }
 
         private Button Round(string name, Vector2 at, Color colour, string text, Action onClick, out TextMeshProUGUI label)
@@ -204,6 +234,7 @@ namespace SquashBot.UI
 
         private void Update()
         {
+            Layout();
             float dt = Time.unscaledDeltaTime;
             if (comboShow > 0f)
             {

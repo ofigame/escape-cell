@@ -158,9 +158,9 @@ namespace SquashBot.Gameplay
 
             FramePacer.Install();
             CloudSave.Install();
-            Prefs.DeleteKey("sb_ow"); Prefs.DeleteKey("sb_km"); // the removed open world and kingdom: test phones' leftovers
-            FramePacer.Busy = () => State == GameState.Playing || IntroCinematic.Playing;
-            FramePacer.KeepAwake = () => State == GameState.Playing || IntroCinematic.Playing;
+            Prefs.DeleteKey("sb_ow"); Prefs.DeleteKey("sb_km"); Prefs.DeleteKey("sb_intro_seen"); // the removed open world and kingdom: test phones' leftovers
+            FramePacer.Busy = () => State == GameState.Playing;
+            FramePacer.KeepAwake = () => State == GameState.Playing;
             Application.lowMemory += OnLowMemory;
             if (Debug.isDebugBuild) gameObject.AddComponent<DevStats>(); // test builds: FPS and memory in the corner
             QualitySettings.vSyncCount = 0;
@@ -235,24 +235,11 @@ namespace SquashBot.Gameplay
             AdMob.Start(); // consent form where required, then AdMob (phones only)
             FifiUpgrades.RefundOnce(); // Fifi has left the game: its levels' coins back, once
             SplashScreen.Show(); // OFIGAME studio logo over the menu, fading out
-            cameraRig.StartCoroutine(IntroAfterSplash());
             StartFortressViewIfAsked(); // -arena: the sample fortress battlefield to look around
             // Developer tool: -sbExport <folder> writes every model as PNG + OBJ (see AssetExporter), then quits.
             var exportFolder = AssetExporter.RequestedFolder();
             if (exportFolder != null) cameraRig.StartCoroutine(AssetExporter.Run(exportFolder, robot));
             if (!SaveData.HeroChosen) cameraRig.StartCoroutine(FirstHeroPick());
-        }
-
-        /// <summary>The opening scene once the studio logo is gone: whole on the first start, the short desert and logo after.
-        /// Never under the developer tools (screenshots, exports, test arenas).</summary>
-        private System.Collections.IEnumerator IntroAfterSplash()
-        {
-            foreach (var a in System.Environment.GetCommandLineArgs())
-                if (a == "-noIntro" || a.StartsWith("-sb") || a == "-arena" || a == "-renderIcon") yield break;
-            yield return null;
-            while (FindFirstObjectByType<SplashScreen>() != null) yield return null;
-            if (robot == null || robot.Visual == null) yield break;
-            IntroCinematic.Play(robot.Visual, fx, !IntroCinematic.Seen);
         }
 
         private void CreateUi()
@@ -326,7 +313,6 @@ namespace SquashBot.Gameplay
             ui.PausePressed += Pause;
             ui.BagPressed += OpenBag;
             ui.BombPressed += ThrowBomb;
-            ui.IntroPressed += () => { if (!IntroCinematic.Playing) IntroCinematic.Play(robot.Visual, fx, true); };
             ui.CloudRestored += () => UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
             ui.BombSwitchPressed += () => NextBombKind();
             WireDefenseUi();
@@ -334,6 +320,7 @@ namespace SquashBot.Gameplay
             ui.AdHealPressed += OnAdHealPressed;
             ui.HeroPicker.Picked += OnHeroPicked;
             ui.WeaponBag.Picked += TakeWeapon;
+            ui.WeaponBag.Dropped += DropWeaponGun;
             ui.AmmoPressed += BuyAmmo;
             ui.FirePressed += FireAtSight;
             ui.WeaponBag.Closed += CloseBag;

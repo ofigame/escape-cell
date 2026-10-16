@@ -148,10 +148,14 @@ namespace SquashBot.Gameplay
             hunt.FoeSoldierDamage = Armory.Damage(w, Mathf.Max(1, rival.weaponLevel));
             // 100 health points behind its armour; foi's blows take its weapon's damage in points (1% each).
             // Its own health points (live: a share of 100, the server keeps the points), its armour taking its share off foi's blows.
+            // Both sides' health times the match's level (live: the server does the same).
+            int times = Challenge.DuelHpTimes(Mathf.Max(Challenge.Rank, rival.Rank));
+            hunt.FoiHp = Challenge.FoiMaxHp * times; // the rival's soldiers' blows off foi's (bigger) health
             int hp = LiveActive ? 100 : Mathf.RoundToInt(Mathf.Max(100, rival.foiHp) / Mathf.Max(0.5f, 1f - rival.armor));
+            if (!LiveActive) hp *= times;
             // Its blows weigh what the player's own would (its flurries of quick blows make up for its slower swings).
             const float rate = 1f;
-            hunt.AddChallengeFoe(theirs, hp, DuelBlow(w, rival.weaponLevel, Shop.ArmorShare) * (LiveActive ? 1f : rate), look, rivalHeld, 0);
+            hunt.AddChallengeFoe(theirs, hp, DuelBlow(w, rival.weaponLevel, Shop.ArmorShare) * (LiveActive ? 1f : rate) / times, look, rivalHeld, 0);
             if (myTag == null) myTag = SquashBot.Visual.NameTag.Create(robot.transform, Challenge.PlayerName, ArmyBattleColours.Mine);
             if (theirTag != null) Destroy(theirTag.gameObject);
             theirTag = SquashBot.Visual.NameTag.Create(look, rival.name, ArmyBattleColours.Theirs);

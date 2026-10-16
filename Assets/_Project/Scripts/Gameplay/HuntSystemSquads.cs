@@ -317,7 +317,7 @@ namespace SquashBot.Gameplay
                     if (FoeRemote) { SquadHitFoe?.Invoke(dmg); challengeFoe.flash = 1f; challengeFoe.Flash(); }
                     else SquadOnFoe(dmg);
                 }
-                else Hit?.Invoke(robot.Position, dmg * (1f - Shop.ArmorShare) / Mathf.Max(1, FoiHp)); // the AI's soldier on foi: its blow off foi's health points, less its armour
+                else Hit?.Invoke(robot.Position, dmg * FoeHitScale * (1f - Shop.ArmorShare) / Mathf.Max(1, FoiHp)); // the AI's soldier on foi: its blow off foi's health points, less its armour
                 return;
             }
             var t = s.aim;
