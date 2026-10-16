@@ -34,6 +34,9 @@ namespace SquashBot.Gameplay
         private int liveChange;
         private FoiNet.Profile liveProfile;
         private float liveStateAt;
+        /// <summary>The live match's id (to come back to it if the connection drops), the last one over (for a rematch).</summary>
+        private long liveMatchId, rematchMatch;
+        private bool liveRejoining;
 
         /// <summary>A live match being played (the other game is there).</summary>
         private bool LiveActive => chLive && challengeRun && chPhase != ChPhase.Done;
@@ -53,13 +56,15 @@ namespace SquashBot.Gameplay
             }
             if (chFriend == 1) LiveNet.Host(friendMinutes, friendInvite);
             else if (chFriend == 2) LiveNet.Join(chFriendCode);
+            else if (chFriend == 3) LiveNet.Rematch(rematchMatch);
             else LiveNet.Queue(chDuelMinutes);
-            float until = Time.realtimeSinceStartup + (chFriend == 0 ? LiveWaitSeconds : 600f);
+            float until = Time.realtimeSinceStartup + (chFriend == 0 ? LiveWaitSeconds : chFriend == 3 ? 32f : 600f);
             while (!LobbyOver(token))
             {
                 float left = until - Time.realtimeSinceStartup;
                 if (left <= 0f) break;
                 if (chFriend == 0) chUi.SetLobbyStatus(Loc.F("live.searching", Mathf.CeilToInt(left)));
+                else if (chFriend == 3) chUi.SetLobbyStatus(Loc.F("live.rematchWait", Mathf.CeilToInt(left)));
                 var m = LiveNet.Poll();
                 if (m != null)
                 {
@@ -79,6 +84,10 @@ namespace SquashBot.Gameplay
                             LiveNet.Close();
                             done(null);
                             yield break;
+                        case "norematch":
+                            LiveNet.Close();
+                            done(null);
+                            yield break;
                         case "nocode":
                             chUi.SetFriendStatus(Loc.T("live.noCode"));
                             chUi.SetFriendBusy(false);
@@ -87,7 +96,7 @@ namespace SquashBot.Gameplay
                             yield break;
                         case "closed":
                         case "error":
-                            if (chFriend != 0) { chUi.SetFriendStatus(Loc.T("live.offline")); chUi.SetFriendBusy(false); }
+                            if (chFriend == 1 || chFriend == 2) { chUi.SetFriendStatus(Loc.T("live.offline")); chUi.SetFriendBusy(false); }
                             LiveNet.Close();
                             done(null);
                             yield break;
@@ -97,7 +106,7 @@ namespace SquashBot.Gameplay
             }
             LiveNet.Cancel();
             LiveNet.Close();
-            if (chFriend != 0 && !LobbyOver(token)) { chUi.SetFriendStatus(Loc.T("live.codeExpired")); chUi.SetFriendBusy(false); }
+            if ((chFriend == 1 || chFriend == 2) && !LobbyOver(token)) { chUi.SetFriendStatus(Loc.T("live.codeExpired")); chUi.SetFriendBusy(false); }
             done(null);
         }
 
@@ -106,6 +115,8 @@ namespace SquashBot.Gameplay
         {
             chLive = true;
             liveSide = m.side == 1 ? 1 : 0;
+            liveMatchId = m.matchId;
+            rematchMatch = 0;
             liveRanked = m.ranked;
             liveLeft = false;
             liveLost = false;
@@ -117,7 +128,7 @@ namespace SquashBot.Gameplay
             chDuelMinutes = m.min is 3 or 5 or 10 ? m.min : 3;
             if (m.sq >= 0) chDuelSquads = m.sq == 1; // a friend's code: the maker's choice
             rival = Challenge.FromRival(m.rival);
-            if (chFriend != 0)
+            if (chFriend == 1 || chFriend == 2)
             {
                 chUi.HideFriend();
                 chUi.ShowLobby(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore), Challenge.Rank, ModeLabel);
@@ -152,6 +163,7 @@ namespace SquashBot.Gameplay
         private void UpdateLive()
         {
             if (!chLive || !challengeRun) return;
+            if (liveRejoining) return; // coming back after a drop: its own loop reads the server
             // This game's own state (foi and its squad), some times a second.
             if (chPhase == ChPhase.Duel && Time.unscaledTime >= liveStateAt)
             {
@@ -203,6 +215,15 @@ namespace SquashBot.Gameplay
                         // The rival raised its shield (the server counts its blows): its bubble here for the time.
                         if (m.by == 0) { hunt.ShieldFoe(DuelShieldHits); rivalShieldUntil = Time.time + DuelShieldSeconds; }
                         break;
+                    case "hold":
+                        chUi.SetStatus(Loc.T("live.rivalDropped"));
+                        break;
+                    case "back":
+                        chUi.SetStatus(Loc.T("ch.duel"));
+                        break;
+                    case "em":
+                        ShowEmote(false, m.e);
+                        break;
                     case "sp":
                         LiveRivalMove(m.k);
                         break;
@@ -218,8 +239,10 @@ namespace SquashBot.Gameplay
                         break;
                     case "closed":
                     case "error":
-                        // This game lost the server: the match is over here (the server counts it as left).
+                        // This game lost the server: it tries to come back to the match (the server waits a moment);
+                        // if it can't, the match is over here (the server counts it as left).
                         if (chPhase == ChPhase.Done) { chLive = false; break; }
+                        if (liveMatchId != 0) { cameraRig.StartCoroutine(LiveRejoin()); return; }
                         liveRanked = false;
                         liveLost = true;
                         liveChange = 0;
@@ -238,8 +261,76 @@ namespace SquashBot.Gameplay
             liveChange = m.change;
             liveRanked = m.ranked;
             liveLeft = m.left;
+            rematchMatch = liveLost || m.left ? 0 : liveMatchId; // a rematch can be asked for (not after a walk-out)
+            liveMatchId = 0;
             if (chPhase != ChPhase.Done) ChallengeFinish(m.outcome, string.IsNullOrEmpty(m.score) ? ScoreText() : m.score);
             LiveNet.Close();
+        }
+
+        /// <summary>
+        /// The connection dropped mid-match: back for it (the server waits 15 s), a few tries; the match carries on where
+        /// it was. Not back: the match is lost here.
+        /// </summary>
+        private IEnumerator LiveRejoin()
+        {
+            liveRejoining = true;
+            long id = liveMatchId;
+            chUi.SetStatus(Loc.T("live.reconnecting"));
+            hunt.Freeze();
+            float until = Time.realtimeSinceStartup + 13f;
+            bool back = false;
+            while (!back && Time.realtimeSinceStartup < until && challengeRun)
+            {
+                var connect = LiveNet.Connect();
+                while (!connect.IsCompleted) yield return null;
+                if (connect.Result)
+                {
+                    LiveNet.Rejoin(id);
+                    float wait = Time.realtimeSinceStartup + 3f;
+                    while (Time.realtimeSinceStartup < wait && !back)
+                    {
+                        var m = LiveNet.Poll();
+                        if (m != null && m.t == "rejoined")
+                        {
+                            back = true;
+                            liveSide = m.side == 1 ? 1 : 0;
+                            chDuelMe = Mathf.RoundToInt(m.mine);
+                            chDuelThem = Mathf.RoundToInt(m.theirs);
+                            chDuelLeft = m.secs;
+                        }
+                        else if (m != null && m.t == "norejoin") { until = 0f; break; }
+                        yield return null;
+                    }
+                }
+                if (!back) yield return new WaitForSecondsRealtime(1f);
+            }
+            liveRejoining = false;
+            if (back && challengeRun)
+            {
+                hunt.Resume();
+                if (chPhase == ChPhase.Break) chPhase = ChPhase.Duel;
+                RefreshDuelClock();
+                chUi.SetStatus(Loc.T("live.back"));
+                yield break;
+            }
+            if (!challengeRun || chPhase == ChPhase.Done) yield break;
+            liveRanked = false;
+            liveLost = true;
+            liveChange = 0;
+            liveMatchId = 0;
+            chUi.SetStatus(Loc.T("live.lost"));
+            ChallengeFinish(-1, ScoreText());
+            chLive = false;
+        }
+
+        /// <summary>The result card's REMATCH: the same rival asked again (both must ask within half a minute).</summary>
+        private void StartRematch(long matchId)
+        {
+            rematchMatch = matchId;
+            chFriend = 3;
+            chCancelled = false;
+            chPhase = ChPhase.Lobby;
+            cameraRig.StartCoroutine(Lobby());
         }
 
         // ---------- Playing a friend ----------

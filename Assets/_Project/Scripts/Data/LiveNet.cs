@@ -31,6 +31,8 @@ namespace SquashBot.Data
             public int sq = -1;
             /// <summary>A move (the duel's specials: 1 special, 2 power hit, 3 knockdown, 4 ultimate, 5 breaker, 6 finish).</summary>
             public int k;
+            /// <summary>An emote (0..5).</summary>
+            public int e;
             /// <summary>The two power bars (0..3) with the health; -1: not sent.</summary>
             public float mm = -1f, tm = -1f;
             public float secs, mine, theirs;
@@ -160,6 +162,12 @@ namespace SquashBot.Data
             Send("{\"t\":\"host\",\"min\":" + minutes + ",\"sq\":" + (Challenge.DuelSquads ? 1 : 0) + (string.IsNullOrEmpty(invite) ? "" : ",\"to\":\"" + Clean(invite, 40, true) + "\"") + "}");
         public static void Join(string code) => Send("{\"t\":\"join\",\"code\":\"" + Clean(code) + "\"}");
         public static void Cancel() => Send("{\"t\":\"cancel\"}");
+        /// <summary>Back for a match after the connection dropped.</summary>
+        public static void Rejoin(long matchId) => Send("{\"t\":\"rejoin\",\"match\":" + matchId + "}");
+        /// <summary>A rematch of a live match just over (both must ask).</summary>
+        public static void Rematch(long matchId) => Send("{\"t\":\"rematch\",\"match\":" + matchId + "}");
+        /// <summary>An emote for the rival.</summary>
+        public static void Emote(int e) => Send("{\"t\":\"em\",\"e\":" + e + "}");
         public static void Ready() => Send("{\"t\":\"ready\"}");
 
         /// <summary>The duel: where this game's foi is, its facing, the blows it has swung, and its squad (see HuntSystem.SquadState).</summary>

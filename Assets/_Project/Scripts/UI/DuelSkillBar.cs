@@ -19,6 +19,9 @@ namespace SquashBot.UI
     {
         public enum Move { Special, Heavy, Upper, Ultimate, Breaker, Finish }
         public event Action<Move> Pressed;
+        /// <summary>An emote picked (0..5).</summary>
+        public event Action<int> Emoted;
+        private RectTransform emotes;
 
         private RectTransform root;
         private Image[] parts, rivalParts;
@@ -93,6 +96,26 @@ namespace SquashBot.UI
             ctx.gameObject.AddComponent<ButtonPress>();
             contextGroup = ctx.gameObject.AddComponent<CanvasGroup>();
             ctx.gameObject.SetActive(false);
+
+            // Emotes: a small button above the power bar opens a row of six.
+            var talk = UiFactory.Box("Talk", root, new Vector2(0f, 0f), new Vector2(85f, 360f), new Vector2(96f, 96f));
+            talk.pivot = new Vector2(0.5f, 0.5f);
+            var talkFace = UiFactory.Chunky(talk, UiFactory.StyleOf(new Color(0.3f, 0.75f, 0.55f)), 1f, 0f, UiSprites.Circle);
+            var talkText = UiFactory.OutlinedText("Text", talk, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(90f, 60f), "GG", 30f, new Color(0.05f, 0.2f, 0.12f));
+            talkText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var talkButton = talk.gameObject.AddComponent<Button>();
+            talkButton.targetGraphic = talkFace;
+            talkButton.onClick.AddListener(() => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.3f); emotes.gameObject.SetActive(!emotes.gameObject.activeSelf); });
+            talk.gameObject.AddComponent<ButtonPress>();
+            emotes = UiFactory.Box("Emotes", root, new Vector2(0f, 0f), new Vector2(40f, 470f), new Vector2(760f, 84f));
+            emotes.pivot = new Vector2(0f, 0.5f);
+            for (int i = 0; i < 6; i++)
+            {
+                int e = i;
+                var chip = Flat.Button(emotes, Loc.T("duel.em." + i), new Vector2(0f, 0.5f), new Vector2(62f + i * 126f, 0f), new Vector2(118f, 76f), Flat.CardHi, Flat.Text, () => { emotes.gameObject.SetActive(false); Emoted?.Invoke(e); }, 24f);
+                ((RectTransform)chip.transform).pivot = new Vector2(0.5f, 0.5f);
+            }
+            emotes.gameObject.SetActive(false);
 
             // The combo count, big in the middle.
             comboText = UiFactory.OutlinedText("Combo", root, new Vector2(0.5f, 0.5f), new Vector2(0f, 260f), new Vector2(900f, 140f), "", 96f, new Color(0.35f, 0.08f, 0f));

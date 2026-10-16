@@ -182,6 +182,7 @@ namespace SquashBot.Gameplay
             if (!challengeRun || chPhase != ChPhase.Duel) return;
             if (iWon) chDuelMe++; else chDuelThem++;
             if (iWon) OfferFinish(lastFoeAt);
+            cameraRig.StartCoroutine(RivalEmote(!iWon));
             chPhase = ChPhase.Break;
             hunt.Freeze();
             RefreshDuelClock();

@@ -210,7 +210,7 @@ namespace SquashBot.Gameplay
             chOnline = false;
             chLive = false;
             // (Playing a friend, the friend panel stays up until the friend is there.)
-            if (chFriend == 0) chUi.ShowLobby(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore), Challenge.Rank, ModeLabel);
+            if (chFriend == 0 || chFriend == 3) chUi.ShowLobby(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore), Challenge.Rank, ModeLabel);
             float started = Time.realtimeSinceStartup;
             int world = LevelCatalog.WorldOf(Mathf.Max(0, SaveData.UnlockedLevel - 1));
 
@@ -256,6 +256,17 @@ namespace SquashBot.Gameplay
                 yield return LiveSearch(token, m => matched = m);
                 if (LobbyOver(token)) { LiveNet.Close(); chPhase = ChPhase.Off; yield break; }
                 if (matched != null) { yield return StartLive(matched, world, token); yield break; }
+            }
+            if (chFriend == 3)
+            {
+                // The rival did not come back for the rematch: back to the menu.
+                chUi.SetLobbyStatus(Loc.T("live.noRematch"));
+                yield return new WaitForSecondsRealtime(1.8f);
+                chUi.HideLobby();
+                chFriend = 0;
+                chPhase = ChPhase.Off;
+                ShowMenu();
+                yield break;
             }
             if (chFriend != 0)
             {
@@ -484,6 +495,7 @@ namespace SquashBot.Gameplay
                 challenge = true,
                 subtitle = line,
                 coins = draw ? 0 : gold + Earned,
+                rematch = chLive && rematchMatch != 0,
             });
         }
 

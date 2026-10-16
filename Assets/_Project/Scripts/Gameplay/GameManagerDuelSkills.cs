@@ -55,6 +55,7 @@ namespace SquashBot.Gameplay
             if (skillBar != null) Destroy(skillBar.gameObject);
             skillBar = DuelSkillBar.Create(chUi.BattleHud, Loc.T("duel.sp." + Mathf.Clamp(SaveData.Hero, 0, 3)));
             skillBar.Pressed += OnSkill;
+            skillBar.Emoted += e => { ShowEmote(true, e); if (LiveActive) LiveNet.Emote(e); };
             skillBar.SetMeters(0f, 0f);
         }
 
@@ -408,6 +409,30 @@ namespace SquashBot.Gameplay
                 yield return new WaitForSeconds(0.18f);
             }
             finishing = false;
+        }
+
+        // ---------- Emotes ----------
+
+        private float emoteAt;
+
+        /// <summary>An emote over a foi's head (the player's in blue, the rival's in red), now and then, not a flood.</summary>
+        private void ShowEmote(bool mine, int e)
+        {
+            if (mine && Time.unscaledTime < emoteAt) return;
+            if (mine) emoteAt = Time.unscaledTime + 1.5f;
+            var at = mine ? robot.transform.position : hunt.ChallengeFoeAt ?? lastFoeAt;
+            FloatAt(at + Vector3.up * 1.3f, Loc.T("duel.em." + Mathf.Clamp(e, 0, 5)), mine ? new Color(0.45f, 0.75f, 1f) : new Color(1f, 0.5f, 0.45f));
+            AudioManager.PlaySfx(Sfx.Click, 0.7f, mine ? 1.5f : 1.2f);
+        }
+
+        /// <summary>The AI rival's word after a knock-down (now and then): a laugh when it scored, a growl when it fell.</summary>
+        private IEnumerator RivalEmote(bool rivalScored)
+        {
+            if (LiveActive || Random.value > 0.55f) yield break;
+            yield return new WaitForSeconds(0.6f);
+            if (!challengeRun) yield break;
+            int[] pick = rivalScored ? new[] { 1, 0, 3 } : new[] { 4, 2 };
+            ShowEmote(false, pick[Random.Range(0, pick.Length)]);
         }
 
         // ---------- The AI rival's moves ----------

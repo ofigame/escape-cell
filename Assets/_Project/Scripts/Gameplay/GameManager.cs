@@ -275,7 +275,9 @@ namespace SquashBot.Gameplay
             ui.RetryPressed += () =>
             {
                 // The battle arena mode starts again at the foot of its road (new chests, new allies).
-                if (challengeRun || chPhase == ChPhase.Done) { ui.HidePause(); Time.timeScale = 1f; EndChallenge(); StartChallenge(false); }
+                // A live match over: the result card's REMATCH asks the same rival again.
+                if (chPhase == ChPhase.Done && rematchMatch != 0 && State == GameState.Result) { long id = rematchMatch; ui.HidePause(); Time.timeScale = 1f; EndChallenge(); StartRematch(id); }
+                else if (challengeRun || chPhase == ChPhase.Done) { ui.HidePause(); Time.timeScale = 1f; EndChallenge(); StartChallenge(false); }
                 else if (arenaMode) { ui.HidePause(); Time.timeScale = 1f; ExitTps(); StartTrail(TrailResumeTarget()); }
                 else ShowPrelevel(levelIndex);
             };

@@ -108,6 +108,8 @@ namespace SquashBot.UI
             public bool won, bonusRound, hasNext, bonusAvailable, canContinue, canBuyContinue, canDouble, arena;
             /// <summary>A challenge's end: only MENU, and the summary large.</summary>
             public bool challenge;
+            /// <summary>A live match over: the retry button asks the same rival for a rematch.</summary>
+            public bool rematch;
             public int continuePrice;
             public string subtitle, note, goalText;
             public float goalProgress;
@@ -1680,7 +1682,8 @@ namespace SquashBot.UI
             ((RectTransform)resultContinueCoins.transform).anchoredPosition = new Vector2(contAd ? 160f : 0f, -795f);
             resultContinueCoinsLabel.text = Loc.F("btn.continueCoins", info.continuePrice);
             resultContinue.GetComponentInChildren<TextMeshProUGUI>().text = Loc.T(contCoins ? "btn.continueAdShort" : "btn.continue");
-            resultRetry.gameObject.SetActive((retryTop || cont) && !info.challenge);
+            resultRetry.gameObject.SetActive(((retryTop || cont) && !info.challenge) || info.rematch);
+            resultRetry.GetComponentInChildren<TextMeshProUGUI>().text = Loc.T(info.rematch ? "duel.rematch" : "btn.retry");
             ((RectTransform)resultRetry.transform).anchoredPosition = new Vector2(0f, retryTop ? -795f : -965f);
             resultDouble.gameObject.SetActive(ended && info.canDouble && info.coins > 0 && !info.challenge);
             // The battle arena mode: no map (MENU alone, in the middle of the bottom row).
