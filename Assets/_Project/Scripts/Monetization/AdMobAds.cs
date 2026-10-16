@@ -32,6 +32,16 @@ namespace SquashBot.Monetization
             MobileAds.RaiseAdEventsOnUnityMainThread = true;
             if (AdIds.AreTestIds) Debug.Log("[Ads] AdMob runs with Google's TEST ad ids.");
             Status = "consent: asking";
+            // Whatever the consent step does (no answer, an exception on some phones), AdMob starts within 12 s: without
+            // a consent answer Google itself serves only limited, non-personalised ads where consent is required.
+            MainThread.After(12f, () =>
+            {
+                if (initialized) return;
+                Status += " · no answer in 12 s";
+                Initialize();
+            });
+            try
+            {
             var request = new ConsentRequestParameters();
             // The consent step answers on another thread on iOS: everything it says is handled back on Unity's main thread.
             ConsentInformation.Update(request, updateError => MainThread.Run(() =>
@@ -46,15 +56,15 @@ namespace SquashBot.Monetization
                     if (ConsentInformation.CanRequestAds()) Initialize();
                 }));
             }));
-            // No answer after a while (it never came back on some phones): start anyway where ads may be asked for.
-            MainThread.After(12f, () =>
-            {
-                if (initialized) return;
-                Status += " · no answer in 12 s";
-                if (ConsentInformation.CanRequestAds()) Initialize();
-            });
             // A returning player who already answered can get ads at once.
             if (ConsentInformation.CanRequestAds()) Initialize();
+            }
+            catch (Exception e)
+            {
+                Status = "consent exception: " + e.GetType().Name + ": " + e.Message;
+                Debug.LogWarning("[Ads] " + Status);
+                Initialize();
+            }
 #endif
         }
 
@@ -65,6 +75,8 @@ namespace SquashBot.Monetization
             Status += " · initialising";
             // Ads fit for a cartoon game played by all ages: nothing above PG (parental guidance); never marked as
             // child-directed or under the age of consent (the game is not aimed at children only).
+            try
+            {
             MobileAds.SetRequestConfiguration(new RequestConfiguration
             {
                 MaxAdContentRating = MaxAdContentRating.PG,
@@ -85,6 +97,12 @@ namespace SquashBot.Monetization
                 if (Ads.BannerWanted) banner.Show();
                 Ads.RaiseBannerChanged(); // the placeholder strip goes
             }));
+            }
+            catch (Exception e)
+            {
+                Status += " · AdMob exception: " + e.GetType().Name + ": " + e.Message;
+                Debug.LogWarning("[Ads] " + Status);
+            }
         }
 
         /// <summary>The privacy options entry (settings screen) is required where the consent form applies.</summary>
