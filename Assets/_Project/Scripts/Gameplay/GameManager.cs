@@ -158,6 +158,7 @@ namespace SquashBot.Gameplay
 
             FramePacer.Install();
             CloudSave.Install();
+            OldNotes.Clear(); // the removed open world's farm notes still waiting on the phones that had it
             Prefs.DeleteKey("sb_ow"); Prefs.DeleteKey("sb_km"); Prefs.DeleteKey("sb_intro_seen"); // the removed open world and kingdom: test phones' leftovers
             FramePacer.Busy = () => State == GameState.Playing;
             FramePacer.KeepAwake = () => State == GameState.Playing;

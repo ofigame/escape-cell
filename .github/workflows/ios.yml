@@ -1,22 +1,32 @@
-# Builds an unsigned iPhone app (.ipa) in the cloud, no Mac needed.
+# Builds the iPhone app in the cloud, no Mac needed.
 #   1. Linux runner: Unity (GameCI Docker image) exports the iOS Xcode project.
-#   2. macOS runner: Xcode compiles it into an .ipa without code signing.
-# Install the .ipa with Sideloadly (free Apple ID, re-sign every 7 days) or switch to TestFlight later.
+#   2. macOS runner: Xcode compiles it.
+# Two kinds, by the tag pushed:
+#   ios-*                     a test build: unsigned .ipa (test ads, test tools) for Sideloadly.
+#   appstore-<version>        the store build (e.g. appstore-1.0): live ads, no test tools, signed for the App Store
+#                             and uploaded to App Store Connect (TestFlight first, then submitted from there).
+#                             The build number is the run number.
 #
 # Required repository secrets (Settings > Secrets and variables > Actions):
 #   UNITY_EMAIL, UNITY_PASSWORD  - the Unity account that owns the license
 #   UNITY_LICENSE                - contents of the Unity license file (Unity_lic.ulf)
+# For the store build also (App Store Connect > Users and Access > Integrations > Team Keys, role Admin):
+#   APPLE_TEAM_ID                - the Apple Developer team id (10 characters, Membership details)
+#   APPSTORE_API_KEY_ID          - the API key's Key ID
+#   APPSTORE_API_ISSUER_ID       - the Issuer ID shown above the keys
+#   APPSTORE_API_KEY             - the contents of the downloaded AuthKey_XXXX.p8 file
 
 name: iOS build
 
 on:
   workflow_dispatch:
   push:
-    tags: ['ios-*']
+    tags: ['ios-*', 'appstore-*']
 
-# A newer iOS build cancels one still running (only the latest push matters).
+# A newer iOS build cancels one still running of the same kind (only the latest push matters); a store build and a
+# test build do not cancel each other.
 concurrency:
-  group: ios-build
+  group: ios-build-${{ startsWith(github.ref_name, 'appstore-') && 'store' || 'test' }}
   cancel-in-progress: true
 
 jobs:
@@ -98,6 +108,17 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      # The store build: live ads instead of the test units and tools, the version from the tag, the run as the build.
+      - name: Store build settings
+        if: startsWith(github.ref_name, 'appstore-')
+        run: |
+          VERSION="${GITHUB_REF_NAME#appstore-}"
+          sed -i "s/^    iPhone: TEST_TOOLS$/    iPhone: REAL_ADS/" ProjectSettings/ProjectSettings.asset
+          sed -i "s/^  bundleVersion: .*/  bundleVersion: $VERSION/" ProjectSettings/ProjectSettings.asset
+          sed -i "/^  buildNumber:/,/^  [a-zA-Z]/ s/^    iPhone: .*/    iPhone: $GITHUB_RUN_NUMBER/" ProjectSettings/ProjectSettings.asset
+          grep -n "iPhone: REAL_ADS" ProjectSettings/ProjectSettings.asset || { echo "::error::define not set"; exit 1; }
+          grep -n "bundleVersion\|    iPhone: $GITHUB_RUN_NUMBER" ProjectSettings/ProjectSettings.asset
+
       - name: Cache Unity Library
         uses: actions/cache@v4
         with:
@@ -167,7 +188,7 @@ jobs:
           retention-days: 2
 
   xcode:
-    name: Xcode → unsigned .ipa
+    name: Xcode → .ipa (test) or App Store Connect (store)
     needs: unity
     runs-on: macos-latest
     timeout-minutes: 60
@@ -186,7 +207,56 @@ jobs:
         run: |
           if [ -f Podfile ]; then pod install --repo-update; else echo "No Podfile"; fi
 
+      # No custom encryption (only HTTPS): the export compliance question is answered in the app itself.
+      - name: Export compliance
+        working-directory: xcode
+        run: /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" Info.plist || /usr/libexec/PlistBuddy -c "Set :ITSAppUsesNonExemptEncryption false" Info.plist
+
+      # ---------- The store build: archived unsigned, then signed by Apple's cloud signing (the API key, automatic
+      # signing: no certificate kept here) while it is exported and uploaded ----------
+
+      - name: Archive and upload to App Store Connect
+        if: startsWith(github.ref_name, 'appstore-')
+        working-directory: xcode
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          API_KEY: ${{ secrets.APPSTORE_API_KEY }}
+        run: |
+          set -o pipefail
+          if [ -z "$TEAM_ID" ] || [ -z "$KEY_ID" ] || [ -z "$ISSUER_ID" ] || [ -z "$API_KEY" ]; then
+            echo "::error::Add the APPLE_TEAM_ID, APPSTORE_API_KEY_ID, APPSTORE_API_ISSUER_ID and APPSTORE_API_KEY secrets"; exit 1
+          fi
+          KEY="$RUNNER_TEMP/AuthKey.p8"
+          printf '%s' "$API_KEY" > "$KEY"
+          AUTH="-allowProvisioningUpdates -authenticationKeyPath $KEY -authenticationKeyID $KEY_ID -authenticationKeyIssuerID $ISSUER_ID"
+          if [ -d Unity-iPhone.xcworkspace ]; then TARGET="-workspace Unity-iPhone.xcworkspace"; else TARGET="-project Unity-iPhone.xcodeproj"; fi
+          xcodebuild $TARGET -scheme Unity-iPhone -configuration Release -destination generic/platform=iOS \
+            -archivePath "$PWD/out/EscapeCell.xcarchive" $AUTH \
+            DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_STYLE=Automatic \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            archive | tail -n 60
+          cat > ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$TEAM_ID</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          EOF
+          xcodebuild -exportArchive -archivePath "$PWD/out/EscapeCell.xcarchive" -exportOptionsPlist ExportOptions.plist \
+            -exportPath "$PWD/out/export" $AUTH | tail -n 40
+          rm -f "$KEY"
+
+      # ---------- The test build: unsigned, for Sideloadly ----------
+
       - name: Compile without signing
+        if: ${{ !startsWith(github.ref_name, 'appstore-') }}
         working-directory: xcode
         run: |
           if [ -d Unity-iPhone.xcworkspace ]; then TARGET="-workspace Unity-iPhone.xcworkspace -scheme Unity-iPhone"; else TARGET="-project Unity-iPhone.xcodeproj -target Unity-iPhone"; fi
@@ -199,6 +269,7 @@ jobs:
       # unsigned; installers like Sideloadly then fail with ApplicationVerificationFailed (0xe8008001).
       # Strip every signature and ad-hoc sign the whole bundle so it can be re-signed consistently.
       - name: Ad-hoc sign
+        if: ${{ !startsWith(github.ref_name, 'appstore-') }}
         working-directory: xcode
         run: |
           APP=$(ls -d out/Release-iphoneos/*.app)
@@ -210,6 +281,7 @@ jobs:
           codesign --verify --deep --strict --verbose=2 "$APP"
 
       - name: Package .ipa
+        if: ${{ !startsWith(github.ref_name, 'appstore-') }}
         working-directory: xcode
         run: |
           mkdir Payload
@@ -217,6 +289,7 @@ jobs:
           zip -qry ../EscapeCell-unsigned.ipa Payload
 
       - uses: actions/upload-artifact@v4
+        if: ${{ !startsWith(github.ref_name, 'appstore-') }}
         with:
           name: EscapeCell-unsigned-ipa
           path: EscapeCell-unsigned.ipa
