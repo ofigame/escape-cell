@@ -28,9 +28,6 @@ namespace SquashBot.EditorTools
         public static void Setup()
         {
             EnsureFolders();
-            // Phone notifications: iOS asks only on the first visit to the open world (OwNotify), never at launch.
-            if (Unity.Notifications.NotificationSettings.iOSSettings.RequestAuthorizationOnAppLaunch)
-                Unity.Notifications.NotificationSettings.iOSSettings.RequestAuthorizationOnAppLaunch = false;
             ImportTextMeshProEssentials();
             SetupRenderPipeline();
             CreateBaseMaterial();

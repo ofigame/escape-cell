@@ -77,11 +77,10 @@ namespace SquashBot.Data
             PlayerPrefs.Save();
         }
 
-        /// <summary>Keys that belong to this phone only and never go into the copy: who the player is to the server, the
-        /// open world (it has a copy of its own), the copy's own bookkeeping, the list itself.</summary>
+        /// <summary>Keys that belong to this phone only and never go into the copy: who the player is to the server, the copy's own bookkeeping, the list itself.</summary>
         public static bool Local(string key) =>
             key == IndexKey || key.StartsWith("sb_net_", StringComparison.Ordinal) || key.StartsWith("sb_cloud_", StringComparison.Ordinal)
-            || key == "sb_ow" || key == "sb_test_mode" || key == "sb_gfx";
+            || key == "sb_test_mode" || key == "sb_gfx";
 
         /// <summary>Every key the copy holds, with its kind ('i', 's' or 'f').</summary>
         public static IEnumerable<KeyValuePair<string, char>> Keys

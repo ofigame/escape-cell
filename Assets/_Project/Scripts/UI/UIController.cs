@@ -227,33 +227,6 @@ namespace SquashBot.UI
         public DefenseEditorScreen DefenseEditor { get; private set; }
         public BattleArenaScreen Arenas { get; private set; }
         public event Action ArenasPressed;
-        /// <summary>The menu's OPEN WORLD button.</summary>
-        public event Action OpenWorldPressed;
-        private Button openWorldButton;
-        private Image[] owImages;
-        private Color[] owColours;
-        private TMPro.TMP_Text[] owTexts;
-
-        /// <summary>The OPEN WORLD button: always there, grey until the escape is complete (a tap then says how it opens).</summary>
-        public void SetOpenWorldButton(bool open)
-        {
-            if (openWorldButton == null) return;
-            if (!openWorldButton.gameObject.activeSelf) openWorldButton.gameObject.SetActive(true);
-            if (owImages == null)
-            {
-                owImages = openWorldButton.GetComponentsInChildren<Image>(true);
-                owColours = new Color[owImages.Length];
-                for (int i = 0; i < owImages.Length; i++) owColours[i] = owImages[i].color;
-                owTexts = openWorldButton.GetComponentsInChildren<TMPro.TMP_Text>(true);
-            }
-            for (int i = 0; i < owImages.Length; i++)
-            {
-                var c = owColours[i];
-                float g = c.grayscale * 0.75f;
-                owImages[i].color = open ? c : new Color(g, g, g, c.a);
-            }
-            foreach (var t in owTexts) t.alpha = open ? 1f : 0.55f;
-        }
         public TipCard Tip { get; private set; }
         public WeaponBag WeaponBag { get; private set; }
         public HeroPicker HeroPicker { get; private set; }
@@ -474,11 +447,6 @@ namespace SquashBot.UI
             // Friends: under the army (add a friend, invite one to a duel).
             var friends = MenuArt.DockButton(t, Loc.T("friends.button"), MenuArt.Icon.Friends, new Color(0.4f, 0.75f, 1f), TopLeft, new Vector2(110f, -740f), 120f, () => FriendsPressed?.Invoke());
             ((RectTransform)friends.transform).pivot = new Vector2(0.5f, 0.5f);
-
-            // The open world (once the escape is complete): top right, under the daily bonus.
-            openWorldButton = MenuArt.DockButton(t, Loc.T("km.button"), MenuArt.Icon.House, new Color(0.35f, 0.75f, 0.4f), TopRight, new Vector2(-110f, -740f), 120f, () => OpenWorldPressed?.Invoke());
-            ((RectTransform)openWorldButton.transform).pivot = new Vector2(0.5f, 0.5f);
-            openWorldButton.gameObject.SetActive(false);
 
             // The battle arenas: top right, under the settings.
             var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopRight, new Vector2(-110f, -400f), 120f, () => ArenasPressed?.Invoke());

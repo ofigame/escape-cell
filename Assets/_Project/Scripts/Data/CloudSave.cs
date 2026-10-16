@@ -10,7 +10,7 @@ namespace SquashBot.Data
     /// The whole game kept on the server too, so it survives the game being deleted or the phone changed: every saved
     /// value (<see cref="Prefs"/>) but this phone's own goes up as one copy a minute after a change, and when the game
     /// goes to the background. A recovery code (made on the server, written down by the player) brings the player and
-    /// the copy back on a new phone. The open world keeps a copy of its own (OwSync), found again by the same player.
+    /// the copy back on a new phone.
     /// </summary>
     public static class CloudSave
     {
@@ -135,7 +135,6 @@ namespace SquashBot.Data
             if (string.IsNullOrEmpty(r.json) || !Apply(r.json)) { Version = r.version; Prefs.Save(); done("empty"); yield break; }
             Version = r.version;
             Prefs.SetString(CodeKey, typed.Trim().ToUpperInvariant());
-            Prefs.DeleteKey("sb_ow"); // the open world comes down from its own copy on entry
             Prefs.Save();
             done(null);
         }
