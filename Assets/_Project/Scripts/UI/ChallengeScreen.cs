@@ -29,6 +29,9 @@ namespace SquashBot.UI
         public event Action NameClosed;
         /// <summary>A kind picked on the modes screen: 0 the Army Battle, 1 the Duel (with its minutes).</summary>
         public event Action<int, int> ModePicked;
+        /// <summary>A competition's reward was taken (the menu's coins).</summary>
+        public event Action CoinsChanged;
+        private CompetitionScreen competitions;
         /// <summary>The friend panel's MAKE A CODE: the duel's minutes the maker picked.</summary>
         public event Action<int> FriendHost;
         public event Action FriendClose;
@@ -130,6 +133,11 @@ namespace SquashBot.UI
             Flat.Background(m);
             Flat.Label(m, Loc.T("ch.modeTitle"), new Vector2(0.5f, 1f), new Vector2(0f, -110f), new Vector2(960f, 80f), 56f, Flat.Text, TextAlignmentOptions.Center, bold: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            // The competitions: the season, the leaderboards, the weekend cup, the clan, the quests.
+            competitions = CompetitionScreen.Create(root);
+            competitions.CoinsChanged += () => CoinsChanged?.Invoke();
+            var comp = Flat.Button(m, Loc.T("comp.button"), new Vector2(0.5f, 1f), new Vector2(0f, -215f), new Vector2(640f, 96f), new Color(0.75f, 0.45f, 1f), Flat.Text, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); competitions.Show(); }, 32f);
+            ((RectTransform)comp.transform).pivot = new Vector2(0.5f, 0.5f);
             ModeCard(m, 1, new Vector2(0f, 120f), "duel", "ch.mode.duel", "ch.mode.duelText", new Color(1f, 0.6f, 0.25f), tappable: false);
             // With squads or foi against foi alone (kept for next time), then the length.
             squadsOn = Flat.Button(m, Loc.T("duel.squads"), new Vector2(0.5f, 0.5f), new Vector2(-230f, -150f), new Vector2(430f, 104f), Flat.CardHi, Flat.Text, () => PickSquads(true), 34f);

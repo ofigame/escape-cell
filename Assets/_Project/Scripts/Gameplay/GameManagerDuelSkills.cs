@@ -85,6 +85,7 @@ namespace SquashBot.Gameplay
             rivalCombo = 0;
             if (skillBar != null) skillBar.ShowCombo(myCombo);
             if (myCombo == 3 || myCombo == 5) { myComboMove = myCombo; comboMoveUntil = Time.time + ComboMoveTime; }
+            if (myCombo == 5) ChallengeQuests.Report(DuelGoal.Combo5);
             if (colosseum != null && myCombo >= 3) colosseum.Cheer(0, 0.4f + myCombo * 0.08f);
         }
 
@@ -247,6 +248,7 @@ namespace SquashBot.Gameplay
         private IEnumerator SpecialMove(bool mine)
         {
             moveBusy = true;
+            if (mine) ChallengeQuests.Report(DuelGoal.Special);
             int hero = mine ? Mathf.Clamp(SaveData.Hero, 0, 3) : rivalHero;
             if (mine) hunt.StunFoe(1.6f);
             strikeCooldown = Mathf.Max(strikeCooldown, mine ? 0.9f : 1.4f);
@@ -341,6 +343,7 @@ namespace SquashBot.Gameplay
             if (colosseum != null) colosseum.Cheer(mine ? 0 : 1, 1f);
             if (mine) hunt.StunFoe(4f);
             strikeCooldown = Mathf.Max(strikeCooldown, mine ? 0.5f : 2.5f);
+            if (mine) ChallengeQuests.Report(DuelGoal.Ultimate);
             if (leap) yield return LeapTo(mine, mine ? Mathf.Clamp(SaveData.Hero, 0, 3) : rivalHero);
             if (mine && LiveActive) LiveNet.Special(4);
             Time.timeScale = 0.35f;
@@ -385,6 +388,7 @@ namespace SquashBot.Gameplay
             if (Time.time > finishUntil || finishing) return;
             finishUntil = 0f;
             if (LiveActive) LiveNet.Special(6);
+            ChallengeQuests.Report(DuelGoal.Finish);
             cameraRig.StartCoroutine(Finisher(finishAt, true));
         }
 

@@ -101,7 +101,7 @@ namespace SquashBot.Data
 
         [Serializable] private class DefenseReply { public LiveAttack[] live; public Attack[] items; }
 
-        [Serializable] private class SettingsBody { public bool enabled; public string pushToken; public string lang; }
+        [Serializable] private class SettingsBody { public bool enabled; public string pushToken; public string lang; public string country; }
 
         [Serializable] private class NameBody { public string name; }
 
@@ -227,7 +227,7 @@ namespace SquashBot.Data
         {
             if (!Registered) { done(false); yield break; }
             long code = 0;
-            yield return Send("PUT", "/settings", JsonUtility.ToJson(new SettingsBody { enabled = enabled, pushToken = pushToken, lang = lang }), true, (c, _) => code = c);
+            yield return Send("PUT", "/settings", JsonUtility.ToJson(new SettingsBody { enabled = enabled, pushToken = pushToken, lang = lang, country = Country }), true, (c, _) => code = c);
             done(code == 200);
         }
 
@@ -301,6 +301,117 @@ namespace SquashBot.Data
             Prefs.DeleteKey(PendingKey);
             Prefs.Save();
             done(r, null);
+        }
+
+        /// <summary>The phone's country (two letters) for the country leaderboard; "" when unknown.</summary>
+        private static string Country
+        {
+            get
+            {
+                try { var c = System.Globalization.RegionInfo.CurrentRegion.TwoLetterISORegionName; return c != null && c.Length == 2 ? c : ""; }
+                catch (Exception) { return ""; }
+            }
+        }
+
+        // ---------- Seasons, leaderboards, the weekend cup, clans ----------
+
+        [Serializable] public class SeasonReward { public int season, rank, coins; }
+        [Serializable] public class SeasonInfo { public int season; public long endsAt; public int best, bestRank, trophies; public SeasonReward reward; }
+        [Serializable] public class TopEntry { public string name; public int trophies, rank, wins, score, size, badge; public bool me; public string id; }
+        [Serializable] public class TopList { public TopEntry[] list; public int place; }
+        [Serializable] public class CupInfo { public bool open; public long endsAt; public int wins, claimed; public int[] steps, coins; public TopEntry[] list; }
+        [Serializable] public class ClanMember { public string name; public int trophies, rank; public bool leader, me; }
+        [Serializable] public class ClanInfo { public string id, name; public int badge, score, size; public bool mine; public ClanMember[] members; }
+        [Serializable] private class ClanBody { public ClanInfo clan; }
+        [Serializable] private class CoinsBody { public int coins; }
+        [Serializable] private class ErrorBody { public string error; }
+        [Serializable] private class StepBody { public int step; }
+        [Serializable] private class ClanCreate { public string name; public int badge; }
+        [Serializable] private class ClanJoin { public string id; }
+
+        private static IEnumerator Authed(string method, string path, string json, Action<long, string> done)
+        {
+            bool ok = Registered;
+            if (!ok) yield return EnsurePlayer(r => ok = r);
+            if (!ok) { done(0, null); yield break; }
+            yield return Send(method, path, json, true, done);
+        }
+
+        public static IEnumerator Season(Action<SeasonInfo> done)
+        {
+            long code = 0; string body = null;
+            yield return Authed("GET", "/season", null, (c, b) => { code = c; body = b; });
+            done(code == 200 ? TryParse<SeasonInfo>(body) : null);
+        }
+
+        /// <summary>Takes the last season's reward: its coins (0: none, or no network).</summary>
+        public static IEnumerator ClaimSeason(Action<int> done)
+        {
+            long code = 0; string body = null;
+            yield return Authed("POST", "/season/claim", "{}", (c, b) => { code = c; body = b; });
+            done(code == 200 ? TryParse<CoinsBody>(body)?.coins ?? 0 : 0);
+        }
+
+        /// <summary>A leaderboard: "world", "country", "friends" or "clans".</summary>
+        public static IEnumerator Top(string scope, Action<TopList> done)
+        {
+            long code = 0; string body = null;
+            yield return Authed("GET", "/top?scope=" + scope, null, (c, b) => { code = c; body = b; });
+            done(code == 200 ? TryParse<TopList>(body) : null);
+        }
+
+        public static IEnumerator Cup(Action<CupInfo> done)
+        {
+            long code = 0; string body = null;
+            yield return Authed("GET", "/cup", null, (c, b) => { code = c; body = b; });
+            done(code == 200 ? TryParse<CupInfo>(body) : null);
+        }
+
+        public static IEnumerator ClaimCup(int step, Action<int> done)
+        {
+            long code = 0; string body = null;
+            yield return Authed("POST", "/cup/claim", JsonUtility.ToJson(new StepBody { step = step }), (c, b) => { code = c; body = b; });
+            done(code == 200 ? TryParse<CoinsBody>(body)?.coins ?? 0 : 0);
+        }
+
+        /// <summary>The clans (the best, or the ones whose name holds a search).</summary>
+        public static IEnumerator Clans(string search, Action<TopList> done)
+        {
+            long code = 0; string body = null;
+            yield return Send("GET", "/clans" + (string.IsNullOrWhiteSpace(search) ? "" : "?q=" + UnityEngine.Networking.UnityWebRequest.EscapeURL(search.Trim())), null, false, (c, b) => { code = c; body = b; });
+            done(code == 200 ? TryParse<TopList>(body) : null);
+        }
+
+        /// <summary>A clan (null id: the player's own). Done with null for no clan (or no network: ok false).</summary>
+        public static IEnumerator Clan(string id, Action<ClanInfo, bool> done)
+        {
+            long code = 0; string body = null;
+            yield return Authed("GET", "/clan" + (string.IsNullOrEmpty(id) ? "" : "?id=" + id), null, (c, b) => { code = c; body = b; });
+            var info = code == 200 ? TryParse<ClanBody>(body)?.clan : null;
+            if (info != null && string.IsNullOrEmpty(info.id)) info = null;
+            done(info, code == 200);
+        }
+
+        /// <summary>Founds a clan; done with null, or why not ("taken", "inclan", a name problem, "net").</summary>
+        public static IEnumerator CreateClan(string name, int badge, Action<string> done)
+        {
+            long code = 0; string body = null;
+            yield return Authed("POST", "/clans/create", JsonUtility.ToJson(new ClanCreate { name = name, badge = badge }), (c, b) => { code = c; body = b; });
+            done(code == 200 ? null : code == 0 ? "net" : TryParse<ErrorBody>(body)?.error ?? "net");
+        }
+
+        public static IEnumerator JoinClan(string id, Action<string> done)
+        {
+            long code = 0; string body = null;
+            yield return Authed("POST", "/clans/join", JsonUtility.ToJson(new ClanJoin { id = id }), (c, b) => { code = c; body = b; });
+            done(code == 200 ? null : code == 0 ? "net" : TryParse<ErrorBody>(body)?.error ?? "net");
+        }
+
+        public static IEnumerator LeaveClan(Action<bool> done)
+        {
+            long code = 0;
+            yield return Authed("POST", "/clans/leave", "{}", (c, _) => code = c);
+            done(code == 200);
         }
 
         public static IEnumerator DeleteMe(Action<bool> done)

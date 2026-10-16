@@ -48,6 +48,7 @@ namespace SquashBot.Gameplay
         private void InitChallenge()
         {
             chUi = ChallengeScreen.Create(ui.transform.Find("Canvas/SafeArea") ?? ui.transform.Find("Canvas") ?? ui.transform);
+            chUi.CoinsChanged += ui.RefreshMenuCoins;
             // (No group tags in the duel: the soldiers all fight from the start and are never called back.)
             chUi.HeartPressed += UseDuelHeart;
             chUi.ShieldPressed += UseDuelShield;
@@ -419,6 +420,9 @@ namespace SquashBot.Gameplay
             chPhase = ChPhase.Done;
             if (levelTps) { levelTps = false; ExitTps(); } // the result card upright
             bool won = outcome > 0, draw = outcome == 0;
+            // The challenge's quests: a duel played, won, won alone or against a live rival.
+            ChallengeQuests.Report(DuelGoal.Play);
+            if (won) { ChallengeQuests.Report(DuelGoal.Win); if (!chDuelSquads) ChallengeQuests.Report(DuelGoal.SoloWin); if (chLive) ChallengeQuests.Report(DuelGoal.LiveWin); }
             if (colosseum != null) colosseum.Cheer(won ? 0 : draw ? -1 : 1, 1f);
             hunt.Freeze();
             int gold = won && (chOnline || chLive) ? Challenge.WinGold : 0; // offline practice pays no prize
