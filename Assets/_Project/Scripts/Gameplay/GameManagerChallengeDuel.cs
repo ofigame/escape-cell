@@ -61,7 +61,7 @@ namespace SquashBot.Gameplay
             new DuelStage { key = "duel.stage.2", world = 0, shape = BattleArenas.Shape.Octagon, fx = 1, theme = DuelStands.Theme.Volcano, wall = new Color(0.36f, 0.2f, 0.18f), fxColour = new Color(1f, 0.45f, 0.1f) },                   // the lava pit
             new DuelStage { key = "duel.stage.3", world = 23, shape = BattleArenas.Shape.Round, fx = 3, theme = DuelStands.Theme.Space, wall = new Color(0.3f, 0.32f, 0.42f), fxColour = new Color(0.4f, 0.9f, 1f) },                     // the space platform
             new DuelStage { key = "duel.stage.4", world = 2, shape = BattleArenas.Shape.Diamond, fx = 0, theme = DuelStands.Theme.Forest, wall = new Color(0.5f, 0.56f, 0.4f), fxColour = new Color(0.6f, 1f, 0.4f) },                     // the forest temple
-            new DuelStage { key = "duel.stage.5", world = 5, shape = BattleArenas.Shape.Cross, fx = 1, theme = DuelStands.Theme.Desert, wall = new Color(0.86f, 0.66f, 0.42f), fxColour = new Color(1f, 0.7f, 0.25f) },                    // the desert city
+            new DuelStage { key = "duel.stage.5", world = 5, shape = BattleArenas.Shape.Octagon, fx = 1, theme = DuelStands.Theme.Desert, wall = new Color(0.86f, 0.66f, 0.42f), fxColour = new Color(1f, 0.7f, 0.25f) },                    // the desert city
         };
 
         /// <summary>The stage being fought on (an index into the six).</summary>
@@ -75,7 +75,7 @@ namespace SquashBot.Gameplay
             get
             {
                 // A live match: the same arena on both screens — the server's side 0 to the south (left), side 1 to the north.
-                GridPos south = new GridPos(BoardW / 2, BoardH / 2 - 4), north = new GridPos(BoardW / 2, BoardH / 2 + 4);
+                GridPos south = new GridPos(BoardW / 2, BoardH / 2 - 3), north = new GridPos(BoardW / 2, BoardH / 2 + 3);
                 return chLive && liveSide == 1 ? (north, south) : (south, north);
             }
         }
@@ -163,9 +163,9 @@ namespace SquashBot.Gameplay
                 for (int g = 0; g < Army.Groups && chDuelSquads; g++) // foi against foi: no squads at all
                 {
                     int n = SoldierPool.ForDuel(g);
-                    for (int s = 0; s < n; s++) hunt.AddSquadSoldier(true, g * SoldierPool.PerDuel + s, mine + new GridPos(g - 2, back * (2 + s)), Army.StatsOf(g));
+                    for (int s = 0; s < n; s++) hunt.AddSquadSoldier(true, g * SoldierPool.PerDuel + s, mine + new GridPos((g - 3) * 2 + s, back), Army.StatsOf(g)); // (a row behind foi)
                     if (LiveActive) continue; // the live rival's soldiers come with its state
-                    for (int s = 0; s < rival.squad[g]; s++) hunt.AddSquadSoldier(false, g * SoldierPool.PerDuel + s, theirs + new GridPos(g - 2, -back * (2 + s)), Army.StatsFromTotal(g, rival.points[g]));
+                    for (int s = 0; s < rival.squad[g]; s++) hunt.AddSquadSoldier(false, g * SoldierPool.PerDuel + s, theirs + new GridPos((g - 3) * 2 + s, -back), Army.StatsFromTotal(g, rival.points[g]));
                 }
                 // Every group charges from the start (a tag tapped calls its group back to guard, tapped again: back in).
                 for (int g = 0; g < Army.Groups; g++) { hunt.SetSquadOrder(true, g, true); hunt.SetSquadOrder(false, g, true); }

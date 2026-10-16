@@ -16,7 +16,7 @@ namespace SquashBot.Visual
         public enum Theme { City, Glacier, Volcano, Space, Forest, Desert }
 
         private const int Tiers = 7;
-        private const float PodiumH = 0.55f, TierStep = 0.95f, TierRise = 0.55f;
+        private const float PodiumH = 0.5f, TierRise = 0.5f;
 
         private Vector3 centre;
         private float hw, hd, floorY;
@@ -30,25 +30,19 @@ namespace SquashBot.Visual
         private AudioSource murmur;
         private readonly Matrix4x4[] chunk = new Matrix4x4[1023];
 
-        /// <param name="playerSouth">The player's foi starts at the south end (the left of the screen): its fans fill that stand.</param>
-        public static DuelStands Build(Transform parent, Vector3 centre, float halfWidth, float halfDepth, float floorY, int seed, bool playerSouth, Theme theme)
+        /// <param name="floor">The duel's floor, cell by cell (x across the view, y from the south end to the north).</param>
+        /// <param name="origin">Where cell (0, 0) stands (its middle).</param>
+        /// <param name="playerSouth">The player's foi starts at the south end (the left of the screen): its fans fill that side.</param>
+        public static DuelStands Build(Transform parent, bool[,] floor, Vector3 origin, float floorY, int seed, bool playerSouth, Theme theme)
         {
             var go = new GameObject("DuelStands");
             go.transform.SetParent(parent, false);
             var d = go.AddComponent<DuelStands>();
-            d.centre = centre;
-            d.hw = halfWidth;
-            d.hd = halfDepth;
             d.floorY = floorY;
             var rng = new System.Random(seed);
             var decor = new GameObject("Decor").transform;
             decor.SetParent(go.transform, false);
-            foreach (int s in new[] { -1, 1 })
-            {
-                int team = (s < 0) == playerSouth ? 0 : 1;
-                d.Stand(decor, s, team);
-                d.Crowd(rng, s, team);
-            }
+            d.Terraces(decor, floor, origin, playerSouth, rng);
             d.Backdrop(decor, theme, rng);
             StaticMerge.Combine(decor.gameObject, t => false);
             foreach (var r in decor.GetComponentsInChildren<MeshRenderer>()) r.shadowCastingMode = ShadowCastingMode.Off;
@@ -78,84 +72,127 @@ namespace SquashBot.Visual
 
         private static readonly Color Blue = new Color(0.2f, 0.45f, 0.95f), Red = new Color(0.9f, 0.2f, 0.18f);
 
-        // ---------- The stands ----------
+        // ---------- The stands: terraces round the floor, whatever its shape ----------
 
-        /// <summary>One stand at an end of the floor (s: -1 south, 1 north): its podium against the floor, tiers rising
-        /// away, a back wall with banners, a roof in the side's colour on posts, closed at both ends.</summary>
-        private void Stand(Transform p, int s, int team)
+        /// <summary>
+        /// Every cell round the floor (within the floor's own length along the view, out to seven cells past its ends) is
+        /// a step of the stand, as high as it is far from the floor: the stands wrap the floor's outline wherever it goes,
+        /// right from its edge. The south half is one side's, the north the other's; the outermost ring is a wall in the
+        /// side's colour. The crowd sits on the steps (four to a cell), each looking at the nearest bit of floor.
+        /// </summary>
+        private void Terraces(Transform p, bool[,] floor, Vector3 origin, bool playerSouth, System.Random rng)
         {
+            int w = floor.GetLength(0), h = floor.GetLength(1);
+            int fx0 = w, fx1 = -1, fy0 = h, fy1 = -1;
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                    if (floor[x, y]) { fx0 = Mathf.Min(fx0, x); fx1 = Mathf.Max(fx1, x); fy0 = Mathf.Min(fy0, y); fy1 = Mathf.Max(fy1, y); }
+            if (fx1 < 0) return;
+            // The middle and the size (for the backdrop across the floor).
+            centre = origin + new Vector3((fx0 + fx1) * 0.5f, 0f, (fy0 + fy1) * 0.5f);
+            hw = (fx1 - fx0 + 1) * 0.5f;
+            hd = (fy1 - fy0 + 1) * 0.5f;
+            // Distances from the floor (a step a cell, in eight directions), and the nearest floor cell, by a flood out.
+            int ey0 = fy0 - Tiers, ew = fx1 - fx0 + 1, eh = fy1 - fy0 + 1 + Tiers * 2;
+            var dist = new int[ew, eh];
+            var near = new Vector2Int[ew, eh];
+            var queue = new Queue<Vector2Int>();
+            for (int x = 0; x < ew; x++)
+                for (int y = 0; y < eh; y++)
+                {
+                    int gx = x + fx0, gy = y + ey0;
+                    bool f = gy >= 0 && gy < h && floor[gx, gy];
+                    dist[x, y] = f ? 0 : int.MaxValue;
+                    if (f) { near[x, y] = new Vector2Int(gx, gy); queue.Enqueue(new Vector2Int(x, y)); }
+                }
+            while (queue.Count > 0)
+            {
+                var c = queue.Dequeue();
+                for (int dx = -1; dx <= 1; dx++)
+                    for (int dy = -1; dy <= 1; dy++)
+                    {
+                        int nx = c.x + dx, ny = c.y + dy;
+                        if (nx < 0 || ny < 0 || nx >= ew || ny >= eh || dist[nx, ny] <= dist[c.x, c.y] + 1) continue;
+                        dist[nx, ny] = dist[c.x, c.y] + 1;
+                        near[nx, ny] = near[c.x, c.y];
+                        queue.Enqueue(new Vector2Int(nx, ny));
+                    }
+            }
+            if (batches.Count == 0) MakeBatches();
             var stone = Surface(new Color(0.8f, 0.78f, 0.74f), 0.15f);
-            var riser = Surface(new Color(0.6f, 0.58f, 0.56f), 0.1f);
-            var colour = team == 0 ? Blue : Red;
-            var side = M(colour, 0.1f);
-            var dark = M(new Color(0.16f, 0.16f, 0.2f));
-            var white = M(new Color(0.95f, 0.95f, 0.97f), 0.1f);
-            float x0 = centre.x - hw - 1.5f, x1 = centre.x + hw + 0.6f, len = x1 - x0, mx = (x0 + x1) * 0.5f;
-            float z = centre.z + s * (hd + 0.4f);
-            float y = floorY;
-            // The podium right at the floor's edge, a stripe in the side's colour along its face.
-            Shapes.Rounded("Podium", p, new Vector3(mx, y + PodiumH * 0.5f, z + s * 0.3f), new Vector3(len, PodiumH, 0.6f), 0.04f, riser);
-            Shapes.Rounded("Stripe", p, new Vector3(mx, y + PodiumH * 0.6f, z - s * 0.02f), new Vector3(len, 0.12f, 0.04f), 0.01f, side);
-            float off = 0.6f, top = y + PodiumH;
-            for (int i = 0; i < Tiers; i++)
+            var riser = Surface(new Color(0.62f, 0.6f, 0.58f), 0.1f);
+            var sides = new[] { M(Blue, 0.1f), M(Red, 0.1f) };
+            int southTeam = playerSouth ? 0 : 1;
+            float midY = (fy0 + fy1) * 0.5f;
+            var verts = new List<Vector3>(); var normals = new List<Vector3>();
+            var tris = new[] { new List<int>(), new List<int>(), new List<int>(), new List<int>() }; // stone, riser, blue, red
+            for (int x = 0; x < ew; x++)
+                for (int y = 0; y < eh; y++)
+                {
+                    int dd = dist[x, y];
+                    if (dd < 1 || dd > Tiers) continue;
+                    int gx = x + fx0, gy = y + ey0;
+                    int team = gy <= midY ? southTeam : 1 - southTeam;
+                    bool wall = dd == Tiers;
+                    float top = floorY + PodiumH + (dd - 1) * TierRise + (wall ? 1.4f : 0f);
+                    var c = origin + new Vector3(gx, 0f, gy);
+                    int sub = wall ? 2 + team : dd % 2 == 0 ? 0 : 1;
+                    AddBox(verts, normals, tris[sub], new Vector3(c.x - 0.5f, floorY - 0.4f, c.z - 0.5f), new Vector3(c.x + 0.5f, top, c.z + 0.5f));
+                    if (wall || dd == 1) continue; // the front step a low wall, the back a coloured one: no seats there
+                    // Four to a cell, looking at the nearest floor.
+                    var lookAt = origin + new Vector3(near[x, y].x, 0f, near[x, y].y);
+                    float facing = Mathf.Atan2(lookAt.x - c.x, lookAt.z - c.z) * Mathf.Rad2Deg;
+                    for (int k = 0; k < 4; k++)
+                    {
+                        if (rng.NextDouble() < 0.06) continue; // an empty seat here and there
+                        var at = new Vector3(c.x + (k % 2 == 0 ? -0.25f : 0.25f), top, c.z + (k < 2 ? -0.25f : 0.25f));
+                        float phase = (float)rng.NextDouble() * 10f;
+                        var body = batches[team * 4 + rng.Next(4)];
+                        body.pos.Add(at + Vector3.up * 0.18f); body.phase.Add(phase); body.side.Add(team); body.facing.Add(facing);
+                        var head = batches[8 + rng.Next(4)];
+                        head.pos.Add(at + Vector3.up * 0.46f); head.phase.Add(phase); head.side.Add(team); head.facing.Add(facing);
+                        if (rng.NextDouble() < 0.1)
+                        {
+                            var flag = batches[12 + team];
+                            flag.pos.Add(at + new Vector3(0.1f, 0.85f, 0f)); flag.phase.Add(phase); flag.side.Add(team); flag.facing.Add(facing);
+                        }
+                    }
+                }
+            var mesh = new Mesh { name = "DuelTerraces", indexFormat = IndexFormat.UInt32 };
+            mesh.SetVertices(verts);
+            mesh.SetNormals(normals);
+            mesh.subMeshCount = 4;
+            for (int s = 0; s < 4; s++) mesh.SetTriangles(tris[s], s);
+            mesh.RecalculateBounds();
+            ownedMesh = mesh;
+            var go = new GameObject("Terraces");
+            go.transform.SetParent(transform, false);
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            var mr = go.AddComponent<MeshRenderer>();
+            mr.sharedMaterials = new[] { stone, riser, sides[0], sides[1] };
+            mr.shadowCastingMode = ShadowCastingMode.Off;
+        }
+
+        private Mesh ownedMesh;
+
+        /// <summary>A box's top and four sides (no bottom) into the lists, flat-shaded.</summary>
+        private static void AddBox(List<Vector3> v, List<Vector3> n, List<int> t, Vector3 a, Vector3 b)
+        {
+            void Quad(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 normal)
             {
-                top += TierRise;
-                float zc = z + s * (off + TierStep * 0.5f);
-                Shapes.Rounded("Tier", p, new Vector3(mx, top - (top - y) * 0.5f, zc), new Vector3(len, top - y, TierStep), 0.03f, i % 2 == 0 ? stone : riser);
-                // A colour band on every other step's front.
-                if (i % 2 == 1) Shapes.Rounded("Band", p, new Vector3(mx, top - TierRise * 0.5f, z + s * off - s * 0.01f), new Vector3(len, 0.08f, 0.03f), 0.01f, side);
-                off += TierStep;
+                int s = v.Count;
+                v.Add(p0); v.Add(p1); v.Add(p2); v.Add(p3);
+                n.Add(normal); n.Add(normal); n.Add(normal); n.Add(normal);
+                t.Add(s); t.Add(s + 1); t.Add(s + 2); t.Add(s); t.Add(s + 2); t.Add(s + 3);
             }
-            float back = z + s * (off + 0.25f);
-            Shapes.Rounded("BackWall", p, new Vector3(mx, (y + top + 2.4f) * 0.5f, back), new Vector3(len + 0.4f, top + 2.4f - y, 0.5f), 0.04f, dark);
-            // Banners on the back wall, the side's colour with a white stripe.
-            int banners = Mathf.RoundToInt(len / 3.2f);
-            for (int i = 0; i < banners; i++)
-            {
-                float bx = x0 + (i + 0.5f) * len / banners;
-                Shapes.Rounded("Banner", p, new Vector3(bx, top + 1.2f, back - s * 0.28f), new Vector3(1.1f, 1.8f, 0.04f), 0.01f, side);
-                Shapes.Rounded("BannerStripe", p, new Vector3(bx, top + 1.2f, back - s * 0.31f), new Vector3(0.25f, 1.8f, 0.03f), 0.01f, white);
-            }
-            // Ends closed by walls, and the roof over the upper rows on posts.
-            foreach (float ex in new[] { x0 - 0.25f, x1 + 0.25f })
-                Shapes.Rounded("EndWall", p, new Vector3(ex, (y + top + 2.4f) * 0.5f, z + s * (off * 0.5f + 0.2f)), new Vector3(0.5f, top + 2.4f - y, off + 0.9f), 0.04f, dark);
-            float roofY = top + 2.6f;
-            Shapes.Rounded("Roof", p, new Vector3(mx, roofY, z + s * (off * 0.6f)), new Vector3(len + 1.2f, 0.25f, off * 0.85f), 0.05f, side).transform.localRotation = Quaternion.Euler(-s * 8f, 0f, 0f);
-            for (int i = 0; i <= 4; i++)
-                Shapes.Rounded("RoofPost", p, new Vector3(x0 + i * len / 4f, (top + roofY) * 0.5f, back - s * 0.1f), new Vector3(0.18f, roofY - top, 0.18f), 0.03f, white);
+            Quad(new Vector3(a.x, b.y, a.z), new Vector3(a.x, b.y, b.z), new Vector3(b.x, b.y, b.z), new Vector3(b.x, b.y, a.z), Vector3.up);
+            Quad(new Vector3(a.x, a.y, a.z), new Vector3(a.x, b.y, a.z), new Vector3(b.x, b.y, a.z), new Vector3(b.x, a.y, a.z), Vector3.back);
+            Quad(new Vector3(b.x, a.y, b.z), new Vector3(b.x, b.y, b.z), new Vector3(a.x, b.y, b.z), new Vector3(a.x, a.y, b.z), Vector3.forward);
+            Quad(new Vector3(a.x, a.y, b.z), new Vector3(a.x, b.y, b.z), new Vector3(a.x, b.y, a.z), new Vector3(a.x, a.y, a.z), Vector3.left);
+            Quad(new Vector3(b.x, a.y, a.z), new Vector3(b.x, b.y, a.z), new Vector3(b.x, b.y, b.z), new Vector3(b.x, a.y, b.z), Vector3.right);
         }
 
         // ---------- The crowd ----------
-
-        private void Crowd(System.Random rng, int s, int team)
-        {
-            if (batches.Count == 0) MakeBatches();
-            float x0 = centre.x - hw - 1.2f, x1 = centre.x + hw + 0.3f;
-            float z = centre.z + s * (hd + 0.4f);
-            float off = 0.6f, y = floorY + PodiumH;
-            float facing = s < 0 ? 0f : 180f; // looking at the floor
-            for (int tier = 0; tier < Tiers; tier++)
-            {
-                y += TierRise;
-                float seatZ = z + s * (off + TierStep * 0.45f);
-                for (float x = x0 + (tier % 2) * 0.21f; x < x1; x += 0.42f)
-                {
-                    if (rng.NextDouble() < 0.05) continue; // an empty seat here and there
-                    float phase = (float)rng.NextDouble() * 10f;
-                    var body = batches[team * 4 + rng.Next(4)];
-                    body.pos.Add(new Vector3(x, y + 0.18f, seatZ)); body.phase.Add(phase); body.side.Add(team); body.facing.Add(facing);
-                    var head = batches[8 + rng.Next(4)];
-                    head.pos.Add(new Vector3(x, y + 0.46f, seatZ)); head.phase.Add(phase); head.side.Add(team); head.facing.Add(facing);
-                    // Some wave a flag in their side's colour.
-                    if (rng.NextDouble() < 0.12)
-                    {
-                        var flag = batches[12 + team];
-                        flag.pos.Add(new Vector3(x + 0.1f, y + 0.85f, seatZ)); flag.phase.Add(phase); flag.side.Add(team); flag.facing.Add(facing);
-                    }
-                }
-                off += TierStep;
-            }
-        }
 
         /// <summary>The crowd's batches: 4 shades of each side's shirts, 4 skins, the two sides' flags.</summary>
         private void MakeBatches()
@@ -437,6 +474,7 @@ namespace SquashBot.Visual
         private void OnDestroy()
         {
             foreach (var m in mats) if (m != null) Destroy(m);
+            if (ownedMesh != null) Destroy(ownedMesh);
             if (murmur != null && murmur.clip != null) Destroy(murmur.clip);
         }
     }

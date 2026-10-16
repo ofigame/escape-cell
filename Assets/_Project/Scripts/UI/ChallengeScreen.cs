@@ -654,24 +654,24 @@ namespace SquashBot.UI
         /// right edge.</summary>
         private void BuildPowerButtons()
         {
-            heartButton = PowerButton(PowerUpType.Heart, new Vector2(-100f, 540f), () => HeartPressed?.Invoke(), out heartText);
-            shieldButton = PowerButton(PowerUpType.Shield, new Vector2(-100f, 720f), () => ShieldPressed?.Invoke(), out shieldText);
+            heartButton = PowerButton(PowerUpType.Heart, new Vector2(-75f, 520f), () => HeartPressed?.Invoke(), out heartText);
+            shieldButton = PowerButton(PowerUpType.Shield, new Vector2(-75f, 645f), () => ShieldPressed?.Invoke(), out shieldText);
         }
 
         private Button PowerButton(PowerUpType type, Vector2 at, Action onClick, out TextMeshProUGUI count)
         {
-            var root = UiFactory.Box(type + "Button", (RectTransform)pickPanel.parent, new Vector2(1f, 0f), at, new Vector2(150f, 150f));
+            var root = UiFactory.Box(type + "Button", (RectTransform)pickPanel.parent, new Vector2(1f, 0f), at, new Vector2(110f, 110f)); // (small: the floor stays in view)
             root.pivot = new Vector2(0.5f, 0.5f);
             var colour = type == PowerUpType.Heart ? new Color(1f, 0.5f, 0.62f) : new Color(0.45f, 0.75f, 1f);
             var bg = UiFactory.Chunky(root, UiFactory.StyleOf(colour), 1f, 0f, UiSprites.Circle);
             var icon = UiFactory.Box("Icon", root, new Vector2(0.5f, 0.5f), new Vector2(0f, 4f), new Vector2(SkillBar.IconBase, SkillBar.IconBase));
             icon.pivot = new Vector2(0.5f, 0.5f);
-            icon.localScale = Vector3.one * (150f / SkillBar.IconBase * 0.92f);
+            icon.localScale = Vector3.one * (110f / SkillBar.IconBase * 0.92f);
             SkillBar.DrawIcon(icon, type);
-            var badge = UiFactory.Box("Badge", root, new Vector2(1f, 1f), new Vector2(14f, 14f), new Vector2(62f, 62f));
+            var badge = UiFactory.Box("Badge", root, new Vector2(1f, 1f), new Vector2(12f, 12f), new Vector2(46f, 46f));
             badge.pivot = new Vector2(1f, 1f);
             UiFactory.Fill(UiFactory.Stretch("BadgeFace", badge), new Color(1f, 0.3f, 0.36f, 1f), UiSprites.Circle).raycastTarget = false;
-            count = UiFactory.OutlinedText("Count", badge, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(60f, 56f), "", 38f, new Color(0.3f, 0.02f, 0.08f));
+            count = UiFactory.OutlinedText("Count", badge, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(46f, 42f), "", 28f, new Color(0.3f, 0.02f, 0.08f));
             count.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var button = root.gameObject.AddComponent<Button>();
             button.targetGraphic = bg;
@@ -704,8 +704,8 @@ namespace SquashBot.UI
             top.offsetMax = new Vector2(now ? -380f : 0f, now ? -150f : -365f);
             status.rectTransform.anchoredPosition = now ? new Vector2(0f, 330f) : new Vector2(-60f, 380f);
             if (heartButton == null) return;
-            ((RectTransform)heartButton.transform).anchoredPosition = now ? new Vector2(-100f, 520f) : new Vector2(-100f, 540f);
-            ((RectTransform)shieldButton.transform).anchoredPosition = now ? new Vector2(-100f, 690f) : new Vector2(-100f, 720f);
+            ((RectTransform)heartButton.transform).anchoredPosition = now ? new Vector2(-75f, 500f) : new Vector2(-75f, 520f);
+            ((RectTransform)shieldButton.transform).anchoredPosition = now ? new Vector2(-75f, 625f) : new Vector2(-75f, 645f);
         }
 
         private void Update()

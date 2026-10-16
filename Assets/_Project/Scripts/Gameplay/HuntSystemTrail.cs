@@ -83,6 +83,21 @@ namespace SquashBot.Gameplay
             foeCombo = 0;
         }
 
+        /// <summary>The rival foi's model (for its stand-in in the big moments), or null.</summary>
+        public Transform ChallengeFoeModel => challengeFoe != null && !challengeFoe.dead ? challengeFoe.model : null;
+
+        /// <summary>The rival foi lands on a tile (after a leap): there at once, its old tile free.</summary>
+        public void PlaceFoe(GridPos p)
+        {
+            var g = challengeFoe;
+            if (g == null || g.dead || !grid.InBounds(p)) return;
+            grid.SetOccupied(g.pos, false);
+            g.pos = g.prevPos = p;
+            grid.SetOccupied(p, true);
+            g.root.position = g.from = g.to = At(p);
+            g.moveT = 1f;
+        }
+
         /// <summary>Where the rival foi stands as a tile (null once fallen).</summary>
         public GridPos? ChallengeFoeTile => challengeFoe != null && !challengeFoe.dead ? challengeFoe.pos : (GridPos?)null;
 

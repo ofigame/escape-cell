@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using SquashBot.Audio;
 using SquashBot.Core;
 using SquashBot.Data;
@@ -12,11 +11,13 @@ namespace SquashBot.Gameplay
     /// <summary>
     /// The duel's fighting moves, Mortal Kombat style. A power bar in three parts fills with every blow landed (and a
     /// little with every blow taken). Blows landed one after another make a combo: three open a power hit, five a
-    /// knockdown, for a moment. One part of the bar throws foi's special (each build its own: foi a fireball, Volt a
-    /// lightning orb — fast — Kaya a boulder — slow and heavy — Zip a blade wave), dodged by stepping out of its way;
-    /// one part breaks the rival's combo when caught in it; the whole bar unleashes the ultimate (slow motion, the
-    /// camera close, a flurry and a blast). After a knock-down: the finish (a show of sparks and bolts). The AI rival
-    /// uses them all too; in a live match the server checks every move and keeps both bars.
+    /// knockdown, for a moment. One part of the bar is the special: from anywhere on the floor foi leaps to the rival
+    /// with a stunt of its build (foi a front flip, Volt a double spin, Kaya a big jump, Zip a side roll) and strikes
+    /// with its own power (a fire blast, lightning from the sky, a ground slam, a whirl of blades). One part breaks the
+    /// rival's combo when caught in it; the whole bar is the ultimate (a leap, slow motion, the camera close, a flurry
+    /// and a blast). The big blows are big moments: time slows, the robot struck bursts into its pieces and comes back
+    /// together, then the fight goes on. After a knock-down: the finish (sparks and flying bolts). The AI rival uses them
+    /// all too; in a live match the server checks every move and keeps both bars.
     /// </summary>
     public partial class GameManager
     {
@@ -24,30 +25,15 @@ namespace SquashBot.Gameplay
         private float myMeter, rivalMeter;
         private int myCombo, rivalCombo, myComboMove;
         private float myComboAt, rivalComboAt, comboMoveUntil, finishUntil, rivalThinkAt;
-        private Vector3 lastFoeAt;
-        private Vector3 finishAt;
-        private bool specialStrike, ultimateOn, finishing;
+        private Vector3 finishAt, lastFoeAt;
+        private bool specialStrike, ultimateOn, finishing, moveBusy;
         private int rivalHero;
 
         private const float MeterGain = 0.22f, MeterHurt = 0.12f, ComboGap = 1.4f, ComboMoveTime = 2.6f;
-        /// <summary>What each move takes off (times one of the mover's own blows).</summary>
-        private const float SpecialTimes = 1.8f, HeavyHit = 1.8f, UpperHit = 2.5f, UltimateHit = 6f; // (as the server: Rules)
+        /// <summary>What each move takes off (times one of the mover's own blows) — as the server's Rules.</summary>
+        private const float SpecialTimes = 1.8f, HeavyHit = 1.8f, UpperHit = 2.5f, UltimateHit = 6f;
 
-        private class DuelShot
-        {
-            public Transform view;
-            public Vector3 pos, dir;
-            public float speed, radius, travelled;
-            public bool mine;
-            public int kind;
-        }
-
-        private readonly List<DuelShot> duelShots = new List<DuelShot>();
-        private readonly List<Material> shotMats = new List<Material>();
-
-        private static readonly Color[] SpecialColour = { new Color(1f, 0.5f, 0.12f), new Color(0.45f, 0.85f, 1f), new Color(0.55f, 0.4f, 0.28f), new Color(0.75f, 0.4f, 1f) };
-        private static float SpecialSpeed(int kind) => kind switch { 1 => 18f, 2 => 7f, 3 => 14f, _ => 11f };
-        private static float SpecialRadius(int kind) => kind switch { 1 => 0.6f, 2 => 1.05f, 3 => 0.95f, _ => 0.75f };
+        private static readonly Color[] SpecialColour = { new Color(1f, 0.5f, 0.12f), new Color(0.45f, 0.85f, 1f), new Color(0.6f, 0.45f, 0.3f), new Color(0.75f, 0.4f, 1f) };
 
         // ---------- Start and end ----------
 
@@ -64,6 +50,7 @@ namespace SquashBot.Gameplay
             myMeter = rivalMeter = 0f;
             ResetCombos();
             finishUntil = 0f;
+            moveBusy = false;
             rivalHero = Mathf.Abs((rival.name ?? "").GetHashCode()) % 4;
             if (skillBar != null) Destroy(skillBar.gameObject);
             skillBar = DuelSkillBar.Create(chUi.BattleHud, Loc.T("duel.sp." + Mathf.Clamp(SaveData.Hero, 0, 3)));
@@ -81,11 +68,8 @@ namespace SquashBot.Gameplay
         {
             if (skillBar != null) Destroy(skillBar.gameObject);
             skillBar = null;
-            foreach (var s in duelShots) if (s.view != null) Destroy(s.view.gameObject);
-            duelShots.Clear();
-            foreach (var m in shotMats) if (m != null) Destroy(m);
-            shotMats.Clear();
-            if (ultimateOn) { ultimateOn = false; Time.timeScale = 1f; }
+            moveBusy = false;
+            if (ultimateOn || Time.timeScale < 0.99f) { ultimateOn = false; if (State == GameState.Playing) Time.timeScale = 1f; }
         }
 
         // ---------- Blows landing ----------
@@ -128,7 +112,7 @@ namespace SquashBot.Gameplay
             if (myComboMove > 0 && Time.time > comboMoveUntil) myComboMove = 0;
             DuelSkillBar.Move? ctx = null;
             if (Time.time < finishUntil) ctx = DuelSkillBar.Move.Finish;
-            else if (chPhase == ChPhase.Duel)
+            else if (chPhase == ChPhase.Duel && !moveBusy)
             {
                 if (rivalCombo >= 2 && myMeter >= 1f) ctx = DuelSkillBar.Move.Breaker;
                 else if (myComboMove == 5) ctx = DuelSkillBar.Move.Upper;
@@ -136,8 +120,7 @@ namespace SquashBot.Gameplay
             }
             skillBar.SetContext(ctx);
             skillBar.SetMeters(myMeter, rivalMeter);
-            UpdateShots(dt);
-            if (!LiveActive && chPhase == ChPhase.Duel && !ultimateOn) RivalMoves();
+            if (!LiveActive && chPhase == ChPhase.Duel && !moveBusy) RivalMoves();
         }
 
         // ---------- The player's moves ----------
@@ -146,17 +129,15 @@ namespace SquashBot.Gameplay
         {
             if (!challengeRun) return;
             if (move == DuelSkillBar.Move.Finish) { DoFinish(); return; }
-            if (chPhase != ChPhase.Duel || ultimateOn || !hunt.ChallengeFoeTile.HasValue) return;
+            if (chPhase != ChPhase.Duel || moveBusy || !hunt.ChallengeFoeTile.HasValue) return;
             var foeTile = hunt.ChallengeFoeTile.Value;
             var foeAt = hunt.ChallengeFoeAt ?? robot.transform.position;
-            float dist = Flat(foeAt - robot.transform.position).magnitude;
             switch (move)
             {
                 case DuelSkillBar.Move.Special:
                     if (myMeter < 1f) return;
                     myMeter -= 1f;
-                    FireShot(true, Mathf.Clamp(SaveData.Hero, 0, 3), robot.transform.position, foeAt);
-                    if (LiveActive) LiveNet.Special(1);
+                    cameraRig.StartCoroutine(SpecialMove(true));
                     break;
                 case DuelSkillBar.Move.Heavy:
                 case DuelSkillBar.Move.Upper:
@@ -175,9 +156,10 @@ namespace SquashBot.Gameplay
                     else
                     {
                         HitFoe(upper ? UpperHit : HeavyHit);
-                        hunt.StunFoe(upper ? 1.4f : 0.8f);
+                        hunt.StunFoe(upper ? 1.6f : 0.8f);
                     }
                     if (colosseum != null) colosseum.Cheer(0, 0.9f);
+                    if (upper) cameraRig.StartCoroutine(BigMoment(false)); // the knockdown: a big moment
                     break;
                 }
                 case DuelSkillBar.Move.Breaker:
@@ -192,10 +174,9 @@ namespace SquashBot.Gameplay
                     else hunt.StunFoe(1f);
                     break;
                 case DuelSkillBar.Move.Ultimate:
-                    if (myMeter < 3f || dist > 4.5f) { if (myMeter >= 3f) chUi.SetStatus(Loc.T("duel.ultNear")); return; }
+                    if (myMeter < 3f) return;
                     myMeter = 0f;
-                    if (LiveActive) LiveNet.Special(4);
-                    cameraRig.StartCoroutine(Ultimate(true));
+                    cameraRig.StartCoroutine(Ultimate(true, leap: true));
                     break;
             }
         }
@@ -223,78 +204,146 @@ namespace SquashBot.Gameplay
             hitShareOverride = -1f;
         }
 
-        // ---------- The specials in flight ----------
+        // ---------- The leap ----------
 
-        private void FireShot(bool mine, int kind, Vector3 from, Vector3 to)
+        /// <summary>
+        /// The mover leaps to the tile beside the other (on its own side), with its build's stunt on the way: a stand-in
+        /// does the flying while the robot itself waits hidden, and the robot lands there. Nothing if already beside it.
+        /// </summary>
+        private IEnumerator LeapTo(bool mine, int stunt)
         {
-            var dir = Flat(to - from);
-            if (dir.sqrMagnitude < 0.01f) dir = Vector3.forward;
-            dir.Normalize();
-            var colour = SpecialColour[kind];
-            var mat = MaterialFactory.Create(colour, colour * 2.2f);
-            shotMats.Add(mat);
-            var view = new GameObject("Special").transform;
-            view.position = from + Vector3.up * 0.7f + dir * 0.6f;
-            switch (kind)
-            {
-                case 2: Shapes.Rounded("Boulder", view, Vector3.zero, new Vector3(0.75f, 0.7f, 0.75f), 0.25f, mat); break;
-                case 3: Shapes.Rounded("Wave", view, Vector3.zero, new Vector3(1.4f, 0.5f, 0.12f), 0.06f, mat).transform.localRotation = Quaternion.LookRotation(dir); break;
-                default: Shapes.Primitive(PrimitiveType.Sphere, "Orb", view, Vector3.zero, Vector3.one * (kind == 1 ? 0.42f : 0.55f), mat); break;
-            }
-            duelShots.Add(new DuelShot { view = view, pos = view.position, dir = dir, speed = SpecialSpeed(kind), radius = SpecialRadius(kind), mine = mine, kind = kind });
-            fx.Burst(view.position, colour, colour * 2f, 16, 4f);
-            AudioManager.PlaySfx(kind == 1 ? Sfx.Shield : Sfx.Impact, 0.8f, kind == 2 ? 0.6f : 1.3f);
+            var from = mine ? robot.Position : hunt.ChallengeFoeTile ?? robot.Position;
+            var victim = mine ? hunt.ChallengeFoeTile ?? robot.Position : robot.Position;
+            if (HuntSystem.Chebyshev(from, victim) <= 1) yield break;
+            var model = mine ? robot.Visual : hunt.ChallengeFoeModel;
+            if (model == null) yield break;
+            var land = LandingBeside(victim, from);
+            if (!land.HasValue) yield break;
+            var dbl = StuntDouble.Make(model);
+            AudioManager.PlaySfx(Sfx.Hop, 1f, stunt == 2 ? 0.7f : 1.2f);
+            fx.Burst(model.position + Vector3.up * 0.2f, SpecialColour[stunt], SpecialColour[stunt] * 1.6f, 14, 4f);
+            yield return dbl.Leap(GridView.ToWorld(land.Value) + Vector3.up * GridView.SurfaceY, 1.6f, 0.5f, stunt);
+            if (mine) robot.Spawn(grid, land.Value); else hunt.PlaceFoe(land.Value);
+            dbl.Done();
+            if (stunt == 2) { Shockwave.Create(GridView.ToWorld(land.Value) + Vector3.up * GridView.SurfaceY, 1.6f, SpecialColour[2]); cameraRig.Shake(0.4f); }
         }
 
-        private void UpdateShots(float dt)
+        /// <summary>A free tile next to <paramref name="victim"/>, on the side the mover comes from.</summary>
+        private GridPos? LandingBeside(GridPos victim, GridPos from)
         {
-            for (int i = duelShots.Count - 1; i >= 0; i--)
+            int dx = System.Math.Sign(from.x - victim.x), dy = System.Math.Sign(from.y - victim.y);
+            var tries = new[] { new GridPos(dx, dy), new GridPos(dx, 0), new GridPos(0, dy), new GridPos(-dy, dx), new GridPos(dy, -dx), new GridPos(1, 0), new GridPos(-1, 0), new GridPos(0, 1), new GridPos(0, -1) };
+            foreach (var d in tries)
             {
-                var s = duelShots[i];
-                if (s.view == null) { duelShots.RemoveAt(i); continue; }
-                float step = s.speed * dt;
-                s.pos += s.dir * step;
-                s.travelled += step;
-                s.view.position = s.pos;
-                if (s.kind == 2) s.view.Rotate(Vector3.Cross(Vector3.up, s.dir), step * 120f, Space.World);
-                if (Random.value < dt * 20f) fx.Burst(s.pos, SpecialColour[s.kind], SpecialColour[s.kind] * 1.5f, 3, 1.5f);
-                Vector3? target = s.mine ? hunt.ChallengeFoeAt : robot.transform.position;
-                bool hit = target.HasValue && Flat(target.Value - s.pos).magnitude < s.radius;
-                if (!hit && s.travelled < 16f) continue;
-                if (hit) ShotLands(s);
-                Destroy(s.view.gameObject);
-                duelShots.RemoveAt(i);
+                if (d.x == 0 && d.y == 0) continue;
+                var p = victim + d;
+                if (grid.InBounds(p) && grid.IsStandable(p) && !grid.IsOccupied(p)) return p;
             }
+            return null;
         }
 
-        private void ShotLands(DuelShot s)
+        // ---------- The special ----------
+
+        private IEnumerator SpecialMove(bool mine)
         {
-            var colour = SpecialColour[s.kind];
-            fx.Burst(s.pos, colour, colour * 2.5f, 34, 7f);
-            Shockwave.Create(new Vector3(s.pos.x, robot.transform.position.y, s.pos.z), 1.8f, colour);
-            AudioManager.PlaySfx(Sfx.Impact, 1f, s.kind == 2 ? 0.6f : 1f);
-            cameraRig.Shake(s.kind == 2 ? 0.6f : 0.35f);
-            if (s.mine)
+            moveBusy = true;
+            int hero = mine ? Mathf.Clamp(SaveData.Hero, 0, 3) : rivalHero;
+            if (mine) hunt.StunFoe(1.6f);
+            strikeCooldown = Mathf.Max(strikeCooldown, mine ? 0.9f : 1.4f);
+            yield return LeapTo(mine, hero);
+            if (!challengeRun || chPhase != ChPhase.Duel || !hunt.ChallengeFoeAt.HasValue) { moveBusy = false; yield break; }
+            var foeAt = hunt.ChallengeFoeAt.Value;
+            if (mine) robot.Strike(foeAt);
+            PowerFx(hero, mine ? robot.transform.position : foeAt, mine ? foeAt : robot.transform.position);
+            if (mine)
             {
-                if (LiveActive) LiveNet.SpecialHit();
+                if (LiveActive) LiveNet.Special(1);
                 else HitFoe(SpecialTimes);
-                if (colosseum != null) colosseum.Cheer(0, 0.7f);
+                if (colosseum != null) colosseum.Cheer(0, 0.9f);
             }
-            else if (!LiveActive) HurtMe(SpecialTimes); // a live rival's: the server says what it did
+            else HurtMe(SpecialTimes);
+            yield return BigMoment(!mine);
+            moveBusy = false;
+        }
+
+        /// <summary>A build's own power at the end of its special: a fire blast, lightning from the sky, a slam, a whirl of blades.</summary>
+        private void PowerFx(int hero, Vector3 from, Vector3 at)
+        {
+            var c = SpecialColour[hero];
+            var up = Vector3.up;
+            switch (hero)
+            {
+                case 1:
+                    for (int i = 0; i < 3; i++) Tracer.Create(at + up * 9f + new Vector3(Random.Range(-0.6f, 0.6f), 0f, Random.Range(-0.6f, 0.6f)), at + up * 0.3f, new Color(0.6f, 0.9f, 1f));
+                    fx.Burst(at + up * 0.5f, c, new Color(1.2f, 2.4f, 3f), 46, 8f);
+                    Shockwave.Create(at, 2.2f, c);
+                    AudioManager.PlaySfx(Sfx.Shield, 1f, 0.6f);
+                    break;
+                case 2:
+                    fx.Burst(at + up * 0.3f, new Color(0.55f, 0.5f, 0.45f), new Color(0.8f, 0.7f, 0.6f), 50, 9f);
+                    Shockwave.Create(at, 3.2f, c);
+                    Shockwave.Create(at, 1.8f, new Color(0.9f, 0.8f, 0.6f));
+                    cameraRig.Shake(0.9f);
+                    AudioManager.PlaySfx(Sfx.Impact, 1f, 0.55f);
+                    break;
+                case 3:
+                    for (int i = 0; i < 4; i++)
+                    {
+                        float a = i * Mathf.PI * 0.5f;
+                        var side = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * 1.1f;
+                        SlashFx.Create(at - side, at + side, c, 1.8f);
+                    }
+                    fx.Burst(at + up * 0.6f, c, c * 2.4f, 40, 7f);
+                    AudioManager.PlaySfx(Sfx.Impact, 1f, 1.3f);
+                    break;
+                default:
+                    for (int i = 0; i < 4; i++) fx.Burst(at + up * (0.3f + i * 0.45f), c, new Color(3f, 1.4f, 0.3f), 30, 6f + i);
+                    Shockwave.Create(at, 2.6f, c);
+                    AudioManager.PlaySfx(Sfx.Impact, 1f, 0.75f);
+                    break;
+            }
+            cameraRig.Shake(0.6f);
+        }
+
+        // ---------- The big moment ----------
+
+        /// <summary>
+        /// Time slows; the robot struck (foi's own, or the rival's) bursts into its pieces, hangs, and comes back together;
+        /// then the fight goes on. Nothing if it fell for good (the knock-down shows itself).
+        /// </summary>
+        private IEnumerator BigMoment(bool meStruck)
+        {
+            var model = meStruck ? robot.Visual : hunt.ChallengeFoeModel;
+            if (model == null || !challengeRun || (meStruck ? !robot.IsAlive : hunt.ChallengeFoeDown)) yield break;
+            if (!meStruck) hunt.StunFoe(1.2f);
+            float was = Time.timeScale;
+            Time.timeScale = 0.25f;
+            var dbl = StuntDouble.Make(model);
+            fx.Burst(model.position + Vector3.up * 0.5f, new Color(1f, 0.85f, 0.4f), new Color(3f, 2.4f, 0.8f), 26, 5f);
+            AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.6f);
+            yield return dbl.Shatter(model.position + Vector3.up * 0.45f);
+            fx.Burst(model.position + Vector3.up * 0.5f, new Color(0.7f, 0.85f, 1f), new Color(1.6f, 2f, 2.6f), 18, 3f);
+            AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.5f);
+            dbl.Done();
+            if (State == GameState.Playing) Time.timeScale = ultimateOn ? 0.35f : (was < 0.99f && was > 0.3f ? was : 1f);
         }
 
         // ---------- The ultimate ----------
 
-        /// <summary>Slow motion, the camera close: four quick blows and a blast (the mover's: foi's or the rival's).</summary>
-        private IEnumerator Ultimate(bool mine)
+        /// <summary>A leap to the other (the AI's or foi's own), slow motion, the camera close: four quick blows and a
+        /// blast, the last a big moment.</summary>
+        private IEnumerator Ultimate(bool mine, bool leap)
         {
+            moveBusy = true;
             ultimateOn = true;
             skillBar?.Shout(Loc.T("duel.ultTitle"), mine ? new Color(0.8f, 0.5f, 1f) : new Color(1f, 0.4f, 0.4f));
             AudioManager.PlaySfx(Sfx.Win, 1f, 0.6f);
             if (colosseum != null) colosseum.Cheer(mine ? 0 : 1, 1f);
+            if (mine) hunt.StunFoe(4f);
+            strikeCooldown = Mathf.Max(strikeCooldown, mine ? 0.5f : 2.5f);
+            if (leap) yield return LeapTo(mine, mine ? Mathf.Clamp(SaveData.Hero, 0, 3) : rivalHero);
+            if (mine && LiveActive) LiveNet.Special(4);
             Time.timeScale = 0.35f;
-            if (mine) hunt.StunFoe(3f);
-            else strikeCooldown = Mathf.Max(strikeCooldown, 1.2f); // foi reels under it
             for (int i = 0; i < 5; i++)
             {
                 yield return new WaitForSecondsRealtime(i == 4 ? 0.35f : 0.2f);
@@ -314,9 +363,11 @@ namespace SquashBot.Gameplay
                     float part = i == 4 ? UltimateHit * 0.5f : UltimateHit * 0.125f;
                     if (mine) HitFoe(part); else HurtMe(part);
                 }
+                if (i == 4) yield return BigMoment(!mine);
             }
-            if (State == GameState.Playing) Time.timeScale = 1f;
             ultimateOn = false;
+            if (State == GameState.Playing) Time.timeScale = 1f;
+            moveBusy = false;
         }
 
         // ---------- The finish ----------
@@ -364,10 +415,10 @@ namespace SquashBot.Gameplay
             var foeAt = hunt.ChallengeFoeAt.Value;
             float dist = Flat(foeAt - robot.transform.position).magnitude;
             float bold = Mathf.Clamp01(rival.boldness);
-            if (rivalMeter >= 3f && dist <= 3.5f && Random.value < 0.35f + 0.3f * bold)
+            if (rivalMeter >= 3f && Random.value < 0.3f + 0.3f * bold)
             {
                 rivalMeter = 0f;
-                cameraRig.StartCoroutine(Ultimate(false));
+                cameraRig.StartCoroutine(Ultimate(false, leap: true));
                 return;
             }
             if (rivalMeter >= 1f && myCombo >= 4 && Random.value < 0.3f)
@@ -390,10 +441,10 @@ namespace SquashBot.Gameplay
                 HurtMe(HeavyHit);
                 return;
             }
-            if (rivalMeter >= 1f && dist >= 3f && Random.value < 0.22f + 0.15f * bold)
+            if (rivalMeter >= 1f && Random.value < (dist >= 3f ? 0.22f : 0.1f) + 0.15f * bold)
             {
                 rivalMeter -= 1f;
-                FireShot(false, rivalHero, foeAt, robot.transform.position);
+                cameraRig.StartCoroutine(SpecialMove(false));
             }
         }
 
@@ -406,21 +457,26 @@ namespace SquashBot.Gameplay
             if (theirs >= 0f) rivalMeter = Mathf.Clamp(theirs, 0f, 3f);
         }
 
-        /// <summary>A move of the live rival, as the server passes it on: shown here (its damage comes with the health).</summary>
+        /// <summary>A move of the live rival, as the server passes it on: shown here (its damage comes with the health;
+        /// its leaps with its game's positions).</summary>
         private void LiveRivalMove(int kind)
         {
             if (!challengeRun) return;
             var foeAt = hunt.ChallengeFoeAt ?? robot.transform.position;
             switch (kind)
             {
-                case 1: FireShot(false, rivalHero, foeAt, robot.transform.position); break;
+                case 1:
+                    PowerFx(rivalHero, foeAt, robot.transform.position);
+                    cameraRig.StartCoroutine(BigMoment(true));
+                    break;
                 case 2:
                 case 3:
                     SlashFx.Create(foeAt, robot.transform.position, new Color(1f, 0.35f, 0.3f), kind == 3 ? 2.4f : 1.8f);
                     Shockwave.Create(robot.transform.position, kind == 3 ? 2.6f : 1.8f, new Color(1f, 0.4f, 0.3f));
                     cameraRig.Shake(kind == 3 ? 0.7f : 0.45f);
+                    if (kind == 3) cameraRig.StartCoroutine(BigMoment(true));
                     break;
-                case 4: cameraRig.StartCoroutine(Ultimate(false)); break;
+                case 4: cameraRig.StartCoroutine(Ultimate(false, leap: false)); break;
                 case 5:
                     myCombo = 0; myComboMove = 0;
                     strikeCooldown = Mathf.Max(strikeCooldown, 0.9f);

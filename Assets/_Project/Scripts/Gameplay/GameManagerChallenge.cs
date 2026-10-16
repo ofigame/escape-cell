@@ -42,7 +42,7 @@ namespace SquashBot.Gameplay
         private Vector3 duelPan;
         private float duelBack = 21f;
 
-        private const int BoardW = 25, BoardH = 15; // (15 across the screen: the stands at its two ends come into view)
+        private const int BoardW = 25, BoardH = 11; // (11 across the screen: the stands round its two ends in view)
         private bool liveHooksWired;
 
         private void InitChallenge()
@@ -303,17 +303,32 @@ namespace SquashBot.Gameplay
         /// diamond or cross), in the look of the stage's world; the colosseum's stands round the first stage, low walls
         /// crowned with flames, ice or light round the others. No crates, no vanG, no cage.
         /// </summary>
+        /// <summary>The columns where the floor's ends run whole (the stands stand along them).</summary>
+        private int standFrom, standTo;
+
         private void BuildCourtyard()
         {
             var st = Stage;
             var rows = new string[BoardH];
+            // The shape laid across the view: 21 deep (away from the camera), 15 across, cut at the camera's end and the
+            // far end — so its two ends (the screen's left and right) run straight and whole, and the stands meet them.
+            const int Deep = 21;
+            int off = (BoardW - Deep) / 2;
+            standFrom = BoardW; standTo = -1;
             for (int r = 0; r < BoardH; r++)
             {
                 var row = new char[BoardW];
-                // A shape 21 deep (away from the camera) and 15 across: its outline stretched along the view.
-                const int Deep = 21;
-                int inset = st.shape == BattleArenas.Shape.Square ? 0 : Mathf.RoundToInt(BattleArenas.Inset(st.shape, BoardH, r) * Deep / (float)BoardH) + (BoardW - Deep) / 2;
-                for (int x = 0; x < BoardW; x++) row[x] = x >= inset && x < BoardW - inset ? '#' : '.';
+                for (int x = 0; x < BoardW; x++)
+                {
+                    bool inside = st.shape == BattleArenas.Shape.Square;
+                    if (!inside && x >= off && x < off + Deep)
+                    {
+                        int insetZ = Mathf.RoundToInt(BattleArenas.Inset(st.shape, Deep, x - off) * BoardH / (float)Deep);
+                        inside = r >= insetZ && r < BoardH - insetZ;
+                    }
+                    row[x] = inside ? '#' : '.';
+                    if (inside && r == 0) { standFrom = Mathf.Min(standFrom, x); standTo = Mathf.Max(standTo, x); }
+                }
                 if (r == BoardH - 3) row[BoardW / 2] = 'S';
                 rows[r] = new string(row);
             }
@@ -355,7 +370,10 @@ namespace SquashBot.Gameplay
             // stage's backdrop across the floor (the camera's side open).
             if (colosseum != null) Destroy(colosseum.gameObject);
             var (mark, other) = DuelMarks;
-            colosseum = DuelStands.Build(transform, GridView.ToWorld(new GridPos(BoardW / 2, BoardH / 2)), BoardW * 0.5f, BoardH * 0.5f, GridView.SurfaceY - 0.02f, rival.name.GetHashCode(), mark.y < other.y, st.theme);
+            var floorCells = new bool[BoardW, BoardH];
+            for (int y = 0; y < BoardH; y++) for (int x = 0; x < BoardW; x++) floorCells[x, y] = l.layout[y][x] != '.';
+            var cell0 = GridView.ToWorld(new GridPos(0, 0));
+            colosseum = DuelStands.Build(transform, floorCells, new Vector3(cell0.x, 0f, cell0.z), GridView.SurfaceY - 0.02f, rival.name.GetHashCode(), mark.y < other.y, st.theme);
         }
 
         /// <summary>A copy of foi in the rival's red, with the rival's weapon, for the rival's foi.</summary>
@@ -513,7 +531,7 @@ namespace SquashBot.Gameplay
             var gap = aim - duelPan;
             if (gap.magnitude > 1f) duelPan += gap.normalized * (gap.magnitude - 1f) * Mathf.Min(1f, Time.deltaTime * 2.5f);
             float apart = new Vector2(me.x - foe.x, me.z - foe.z).magnitude;
-            duelBack = Mathf.Lerp(duelBack, ultimateOn ? 13f : 25f + Mathf.Clamp(apart - 3f, 0f, 14f) * 1.3f, Time.unscaledDeltaTime * (ultimateOn ? 5f : 2f)); // (the ultimate: close in)
+            duelBack = Mathf.Lerp(duelBack, ultimateOn ? 13f : 29f + Mathf.Clamp(apart - 3f, 0f, 14f) * 1.2f, Time.unscaledDeltaTime * (ultimateOn ? 5f : 2f)); // (the ultimate: close in)
             pos = boardCentre + duelPan - look * duelBack;
             rot = Quaternion.LookRotation(look);
         }

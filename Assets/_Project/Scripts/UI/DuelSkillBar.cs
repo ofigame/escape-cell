@@ -76,9 +76,9 @@ namespace SquashBot.UI
                 rivalParts[i].raycastTarget = false;
             }
 
-            special = Round("Special", new Vector2(-100f, 900f), new Color(1f, 0.55f, 0.15f), specialName, () => Pressed?.Invoke(Move.Special), out specialText);
+            special = Round("Special", new Vector2(-75f, 770f), new Color(1f, 0.55f, 0.15f), specialName, () => Pressed?.Invoke(Move.Special), out specialText);
             specialGroup = special.gameObject.AddComponent<CanvasGroup>();
-            ultimate = Round("Ultimate", new Vector2(-100f, 1080f), new Color(0.75f, 0.35f, 1f), Loc.T("duel.ult"), () => Pressed?.Invoke(Move.Ultimate), out _);
+            ultimate = Round("Ultimate", new Vector2(-75f, 895f), new Color(0.75f, 0.35f, 1f), Loc.T("duel.ult"), () => Pressed?.Invoke(Move.Ultimate), out _);
             ultGroup = ultimate.gameObject.AddComponent<CanvasGroup>();
 
             // The move that comes and goes: big, bottom middle.
@@ -105,14 +105,14 @@ namespace SquashBot.UI
 
         private Button Round(string name, Vector2 at, Color colour, string text, Action onClick, out TextMeshProUGUI label)
         {
-            var b = UiFactory.Box(name, root, new Vector2(1f, 0f), at, new Vector2(150f, 150f));
+            var b = UiFactory.Box(name, root, new Vector2(1f, 0f), at, new Vector2(110f, 110f));
             b.pivot = new Vector2(0.5f, 0.5f);
             var bg = UiFactory.Chunky(b, UiFactory.StyleOf(colour), 1f, 0f, UiSprites.Circle);
-            label = UiFactory.OutlinedText("Label", b, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(140f, 90f), text, 30f, new Color(colour.r * 0.2f, colour.g * 0.15f, colour.b * 0.2f));
+            label = UiFactory.OutlinedText("Label", b, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(100f, 70f), text, 24f, new Color(colour.r * 0.2f, colour.g * 0.15f, colour.b * 0.2f));
             label.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             label.enableAutoSizing = true;
-            label.fontSizeMin = 18f;
-            label.fontSizeMax = 30f;
+            label.fontSizeMin = 14f;
+            label.fontSizeMax = 24f;
             var button = b.gameObject.AddComponent<Button>();
             button.targetGraphic = bg;
             button.onClick.AddListener(() => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.3f); onClick(); });
