@@ -157,6 +157,14 @@ jobs:
           echo "::warning::$(swapon --show --noheadings | tr '\n' ' ')"
           sudo git clean -ffdx -e Library || true
           sudo git checkout -- . || true
+          # (the checkout undid the store build settings: put them back)
+          if [[ "$GITHUB_REF_NAME" == appstore-* ]]; then
+            VERSION="${GITHUB_REF_NAME#appstore-}"; VERSION="${VERSION%%-*}"
+            sudo sed -i "s/^    iPhone: TEST_TOOLS$/    iPhone: REAL_ADS/" ProjectSettings/ProjectSettings.asset
+            sudo sed -i "s/^  bundleVersion: .*/  bundleVersion: $VERSION/" ProjectSettings/ProjectSettings.asset
+            sudo sed -i "/^  buildNumber:/,/^  [a-zA-Z]/ s/^    iPhone: .*/    iPhone: $GITHUB_RUN_NUMBER/" ProjectSettings/ProjectSettings.asset
+            grep -n "iPhone: REAL_ADS" ProjectSettings/ProjectSettings.asset || { echo "::error::store settings lost"; exit 1; }
+          fi
           sync && echo 3 | sudo tee /proc/sys/vm/drop_caches
           docker ps -aq | xargs -r docker rm -f || true
           sudo rm -rf build/iOS || true
