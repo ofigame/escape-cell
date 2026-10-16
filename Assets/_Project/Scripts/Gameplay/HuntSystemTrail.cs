@@ -65,6 +65,30 @@ namespace SquashBot.Gameplay
 
         private Guard challengeFoe;
 
+        /// <summary>foi's blow landed on the rival foi (the duel's combos and power bar count it).</summary>
+        public event Action ChallengeFoeStruck;
+        /// <summary>The rival foi's blow landed on foi.</summary>
+        public event Action FoiStruckByFoe;
+
+        private float foeStunUntil;
+
+        /// <summary>The rival foi reels for a while (a heavy blow, an uppercut, a combo broken): no steps, no swings.</summary>
+        public void StunFoe(float seconds)
+        {
+            var g = challengeFoe;
+            if (g == null || g.dead) return;
+            foeStunUntil = Mathf.Max(foeStunUntil, Time.time + seconds);
+            g.windup = -1f;
+            ClearTelegraph(g);
+            foeCombo = 0;
+        }
+
+        /// <summary>Where the rival foi stands as a tile (null once fallen).</summary>
+        public GridPos? ChallengeFoeTile => challengeFoe != null && !challengeFoe.dead ? challengeFoe.pos : (GridPos?)null;
+
+        /// <summary>The share of foi's health one of the rival foi's blows takes.</summary>
+        public float ChallengeFoeShare => challengeFoe != null ? challengeFoe.share : 0f;
+
         /// <summary>
         /// The challenge's rival foi for the duel: <paramref name="look"/> (a copy of foi in the rival's colours) fighting
         /// like a warlord (an area smash), taking <paramref name="hp"/> blows and each of its blows taking
@@ -160,6 +184,7 @@ namespace SquashBot.Gameplay
         /// <summary>The rival's tactics start fresh each duel (nothing carried over from the last one).</summary>
         private void ResetFoeState()
         {
+            foeStunUntil = 0f;
             foeCombo = 0;
             remoteSeen = false;
             remoteSwings = -1;

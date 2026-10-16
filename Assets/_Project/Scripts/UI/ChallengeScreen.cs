@@ -40,6 +40,8 @@ namespace SquashBot.UI
 
         private UiScreen lobby, hud, namePanel;
         private RectTransform pickPanel, pickBar, myBadge, theirBadge;
+        /// <summary>The battle screen's own layer (the duel's moves are laid on it).</summary>
+        public RectTransform BattleHud => (RectTransform)pickPanel.parent;
         private TextMeshProUGUI pickTitle;
         private Image pickFill;
         private float pickPop = 1f;
@@ -129,6 +131,12 @@ namespace SquashBot.UI
             Flat.Label(m, Loc.T("ch.modeTitle"), new Vector2(0.5f, 1f), new Vector2(0f, -110f), new Vector2(960f, 80f), 56f, Flat.Text, TextAlignmentOptions.Center, bold: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
             ModeCard(m, 1, new Vector2(0f, 120f), "duel", "ch.mode.duel", "ch.mode.duelText", new Color(1f, 0.6f, 0.25f), tappable: false);
+            // With squads or foi against foi alone (kept for next time), then the length.
+            squadsOn = Flat.Button(m, Loc.T("duel.squads"), new Vector2(0.5f, 0.5f), new Vector2(-230f, -150f), new Vector2(430f, 104f), Flat.CardHi, Flat.Text, () => PickSquads(true), 34f);
+            ((RectTransform)squadsOn.transform).pivot = new Vector2(0.5f, 0.5f);
+            squadsOff = Flat.Button(m, Loc.T("duel.solo"), new Vector2(0.5f, 0.5f), new Vector2(230f, -150f), new Vector2(430f, 104f), Flat.CardHi, Flat.Text, () => PickSquads(false), 34f);
+            ((RectTransform)squadsOff.transform).pivot = new Vector2(0.5f, 0.5f);
+            PickSquads(Challenge.DuelSquads, false);
             // The duel's length: each button starts a duel of that many minutes.
             int[] lengths = { 3, 5, 10 };
             for (int i = 0; i < lengths.Length; i++)
@@ -144,6 +152,17 @@ namespace SquashBot.UI
             var back = Flat.Button(m, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, 90f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => modes.Hide(true), 34f);
             ((RectTransform)back.transform).pivot = new Vector2(0.5f, 0.5f);
             BuildFriend(root);
+        }
+
+        private Button squadsOn, squadsOff;
+
+        /// <summary>Squads or foi alone: the picked one lit.</summary>
+        private void PickSquads(bool on, bool sound = true)
+        {
+            if (sound) AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.2f);
+            Challenge.DuelSquads = on;
+            ((Image)squadsOn.targetGraphic).color = on ? new Color(0.3f, 0.62f, 1f) : Flat.CardHi;
+            ((Image)squadsOff.targetGraphic).color = on ? Flat.CardHi : new Color(0.3f, 0.62f, 1f);
         }
 
         // ---------- Playing a friend ----------

@@ -17,7 +17,7 @@ namespace SquashBot.Data
     public static class LiveNet
     {
         /// <summary>The live protocol this game speaks (the server turns older ones away).</summary>
-        private const int Protocol = 3;
+        private const int Protocol = 4; // 4: the duel's moves (specials, combos, ultimate), foi-alone duels
         private static string Url => (FoiNet.DevServer != null ? FoiNet.DevServer.Replace("https://", "wss://").Replace("http://", "ws://") + "/v1/live" : "wss://apifoi.ofigame.com/v1/live") + "?v=" + Protocol;
 
         /// <summary>A message from the server (only the fields its kind uses are set; <see cref="raw"/> is the text itself).</summary>
@@ -27,6 +27,12 @@ namespace SquashBot.Data
             public string t, code, score;
             public long matchId;
             public int side, seed, min, outcome, change, by, u, d, f;
+            /// <summary>Squads in the match (1) or foi against foi (0); -1: the server did not say.</summary>
+            public int sq = -1;
+            /// <summary>A move (the duel's specials: 1 special, 2 power hit, 3 knockdown, 4 ultimate, 5 breaker, 6 finish).</summary>
+            public int k;
+            /// <summary>The two power bars (0..3) with the health; -1: not sent.</summary>
+            public float mm = -1f, tm = -1f;
             public float secs, mine, theirs;
             public bool won, ranked, left;
             public string from;
@@ -148,10 +154,10 @@ namespace SquashBot.Data
 
         private static string I(float v) => v.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
 
-        public static void Queue(int minutes) => Send("{\"t\":\"queue\",\"min\":" + minutes + "}");
+        public static void Queue(int minutes) => Send("{\"t\":\"queue\",\"min\":" + minutes + ",\"sq\":" + (Challenge.DuelSquads ? 1 : 0) + "}");
         /// <summary>Makes a code for a friend (<paramref name="invite"/>: a friend's id, who is sent an invitation to it).</summary>
         public static void Host(int minutes, string invite = null) =>
-            Send("{\"t\":\"host\",\"min\":" + minutes + (string.IsNullOrEmpty(invite) ? "" : ",\"to\":\"" + Clean(invite, 40, true) + "\"") + "}");
+            Send("{\"t\":\"host\",\"min\":" + minutes + ",\"sq\":" + (Challenge.DuelSquads ? 1 : 0) + (string.IsNullOrEmpty(invite) ? "" : ",\"to\":\"" + Clean(invite, 40, true) + "\"") + "}");
         public static void Join(string code) => Send("{\"t\":\"join\",\"code\":\"" + Clean(code) + "\"}");
         public static void Cancel() => Send("{\"t\":\"cancel\"}");
         public static void Ready() => Send("{\"t\":\"ready\"}");
@@ -171,6 +177,10 @@ namespace SquashBot.Data
 
         /// <summary>A heart (the server heals) and a shield (the server lets it take two blows for three seconds).</summary>
         public static void Heal() => Send("{\"t\":\"heal\"}");
+        /// <summary>A duel move (the server checks the bar, the combo and the reach).</summary>
+        public static void Special(int kind) => Send("{\"t\":\"sp\",\"k\":" + kind + "}");
+        /// <summary>This game's special reached the rival.</summary>
+        public static void SpecialHit() => Send("{\"t\":\"sphit\"}");
         public static void Shield() => Send("{\"t\":\"shield\"}");
 
         /// <summary>Leaves the live match (a loss) and closes the connection.</summary>

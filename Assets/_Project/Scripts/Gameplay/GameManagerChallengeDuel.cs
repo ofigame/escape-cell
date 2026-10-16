@@ -21,6 +21,9 @@ namespace SquashBot.Gameplay
         /// <summary>The duel's length in minutes (3, 5 or 10).</summary>
         private int chDuelMinutes = 3;
 
+        /// <summary>This duel has squads (the player's choice; in a live match, the match's).</summary>
+        private bool chDuelSquads = true;
+
         /// <summary>Knock-downs scored by each side, and the time left (seconds).</summary>
         private int chDuelMe, chDuelThem;
         private float chDuelLeft;
@@ -94,6 +97,7 @@ namespace SquashBot.Gameplay
             rivalPowerUpAt = Time.time + 20f;
             if (robot.Visual != null) robot.Visual.gameObject.SetActive(true);
             chUi.ShowBattle();
+            BeginDuelSkills();
             ui.SetHudTitle(Loc.T("ch.mode.duel") + " · " + Loc.T(Stage.key));
             PlaceDuelists(first: true);
             RefreshSquadBar();
@@ -156,7 +160,7 @@ namespace SquashBot.Gameplay
             {
                 hunt.ClearSquads();
                 hunt.ResetRemoteSquad();
-                for (int g = 0; g < Army.Groups; g++)
+                for (int g = 0; g < Army.Groups && chDuelSquads; g++) // foi against foi: no squads at all
                 {
                     int n = SoldierPool.ForDuel(g);
                     for (int s = 0; s < n; s++) hunt.AddSquadSoldier(true, g * SoldierPool.PerDuel + s, mine + new GridPos(g - 2, back * (2 + s)), Army.StatsOf(g));
@@ -177,6 +181,7 @@ namespace SquashBot.Gameplay
         {
             if (!challengeRun || chPhase != ChPhase.Duel) return;
             if (iWon) chDuelMe++; else chDuelThem++;
+            if (iWon) OfferFinish(lastFoeAt);
             chPhase = ChPhase.Break;
             hunt.Freeze();
             RefreshDuelClock();
@@ -195,7 +200,7 @@ namespace SquashBot.Gameplay
             chDuelThem = theirs;
             chPhase = ChPhase.Break;
             hunt.Freeze();
-            if (iWon) hunt.RemoveChallengeFoe(); else { health = 0f; RefreshHealthBar(); robot.Squash(); }
+            if (iWon) { OfferFinish(hunt.ChallengeFoeAt ?? lastFoeAt); hunt.RemoveChallengeFoe(); } else { health = 0f; RefreshHealthBar(); robot.Squash(); }
             RefreshDuelClock();
             chUi.SetStatus(Loc.T(iWon ? "ch.koYou" : "ch.koThem"));
             if (colosseum != null) colosseum.Cheer(iWon ? 0 : 1, 0.9f);
@@ -239,6 +244,7 @@ namespace SquashBot.Gameplay
         private System.Collections.IEnumerator AfterKnockdown()
         {
             yield return new WaitForSeconds(1.2f);
+            while (challengeRun && (Time.time < finishUntil || finishing)) yield return null; // the finish offered (or playing) first
             while (challengeRun && State == GameState.Paused) yield return null;
             if (!challengeRun || chPhase != ChPhase.Break || State != GameState.Playing) yield break;
             if (chDuelLeft <= 0f) { ChallengeEnd(); yield break; }
@@ -249,6 +255,7 @@ namespace SquashBot.Gameplay
         /// <summary>Each frame of the duel: the clock (it only runs while the two fight), a knock-down, time up.</summary>
         private void UpdateDuel(float dt)
         {
+            UpdateDuelSkills(dt);
             chDuelLeft = Mathf.Max(0f, chDuelLeft - dt);
             RefreshDuelClock();
             RefreshSquadBar();
@@ -338,6 +345,7 @@ namespace SquashBot.Gameplay
             if (theirTag != null) Destroy(theirTag.gameObject);
             myTag = theirTag = null;
             hunt.ClearSquads();
+            EndDuelSkills();
         }
     }
 

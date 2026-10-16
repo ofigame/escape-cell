@@ -595,6 +595,7 @@ namespace SquashBot.Gameplay
                     fx.Burst(At(p) + Vector3.up * 0.4f, Palette.UiGold, Palette.CoinGlow, 20, 5f);
                     AudioManager.PlaySfx(Sfx.Impact, 0.7f, 1.15f);
                     RemoteFoeStruck?.Invoke();
+                    ChallengeFoeStruck?.Invoke();
                     return true;
                 }
                 RaiseAlarm(g);
@@ -604,6 +605,7 @@ namespace SquashBot.Gameplay
                 g.Flash();
                 g.windup = -1f;
                 if (g == challengeFoe) foeCounter = false; // its swing (a counter too) is cut short
+                if (g == challengeFoe) ChallengeFoeStruck?.Invoke();
                 ClearTelegraph(g);
                 fx.Burst(At(p) + Vector3.up * 0.4f, Palette.UiGold, Palette.CoinGlow, 34, 6f);
                 Shockwave.Create(At(p), 1.4f, new Color(1f, 0.85f, 0.45f));
@@ -1064,6 +1066,7 @@ namespace SquashBot.Gameplay
         private void UpdateGuard(Guard g, float dt)
         {
             if (g == challengeFoe && FoeRemote) { UpdateHealthBar(g); UpdateRemoteFoe(g, dt); return; }
+            if (g == challengeFoe && Time.time < foeStunUntil) { UpdateHealthBar(g); return; } // stunned: it stands reeling
             if (g.squad) { UpdateSquad(g, dt); return; }
             UpdateHealthBar(g);
             if (Iced(g)) return;
@@ -1101,7 +1104,7 @@ namespace SquashBot.Gameplay
                     AudioManager.PlaySfx(Sfx.Impact, g.brute ? 1f : 0.7f, g.brute ? 0.55f : 0.8f);
                     rig.Shake(g.brute ? 0.8f : 0.3f);
                     if (g.atWall) { if (PlayerAway) AwayHit?.Invoke(ShareOf(g)); }
-                    else if (g.area.Contains(robot.Position)) Hit?.Invoke(robot.Position, ShareOf(g));
+                    else if (g.area.Contains(robot.Position)) { Hit?.Invoke(robot.Position, ShareOf(g)); if (g == challengeFoe) FoiStruckByFoe?.Invoke(); }
                     g.atWall = false;
                     if (CompanionTile.HasValue && g.area.Contains(CompanionTile.Value)) CompanionHurt?.Invoke(g.brute ? 3 : 2);
                     HurtAllies(g, g.area);

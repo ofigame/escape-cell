@@ -115,6 +115,7 @@ namespace SquashBot.Gameplay
             chOnline = true;
             chMatchId = 0;
             chDuelMinutes = m.min is 3 or 5 or 10 ? m.min : 3;
+            if (m.sq >= 0) chDuelSquads = m.sq == 1; // a friend's code: the maker's choice
             rival = Challenge.FromRival(m.rival);
             if (chFriend != 0)
             {
@@ -195,11 +196,15 @@ namespace SquashBot.Gameplay
                         }
                         else if (health > before + 0.0001f) FloatAt(robot.transform.position, "+" + Mathf.RoundToInt((health - before) * 100f) + "%", new Color(1f, 0.5f, 0.6f));
                         hunt.SetFoeHealth(m.theirs / 100f);
+                        LiveMeters(m.mm, m.tm);
                         break;
                     }
                     case "shield":
                         // The rival raised its shield (the server counts its blows): its bubble here for the time.
                         if (m.by == 0) { hunt.ShieldFoe(DuelShieldHits); rivalShieldUntil = Time.time + DuelShieldSeconds; }
+                        break;
+                    case "sp":
+                        LiveRivalMove(m.k);
                         break;
                     case "ko":
                         LiveKnockdown(m.won, Mathf.RoundToInt(m.mine), Mathf.RoundToInt(m.theirs));

@@ -59,7 +59,7 @@ namespace SquashBot.Gameplay
             chUi.NameSubmitted += OnNameSubmitted;
             chUi.NameClosed += () => { profileNaming = false; chCancelled = true; chPhase = ChPhase.Off; chUi.HideAll(); };
             chUi.RenamePressed += () => { chCancelled = true; chPhase = ChPhase.Off; chUi.ShowName(Challenge.PlayerName); };
-            chUi.ModePicked += (_, minutes) => { chDuelMinutes = minutes is 3 or 5 or 10 ? minutes : 3; chUi.HideModes(); StartChallenge(false); };
+            chUi.ModePicked += (_, minutes) => { chDuelMinutes = minutes is 3 or 5 or 10 ? minutes : 3; chDuelSquads = Challenge.DuelSquads; chUi.HideModes(); StartChallenge(false); };
             if (liveHooksWired) return;
             // The hunt's links (made once: the hunt outlives a language change, the challenge screens do not).
             liveHooksWired = true;
@@ -284,6 +284,7 @@ namespace SquashBot.Gameplay
             // A virtual rival, made from the server's seed (at about the player's trophies): no real player behind it.
             int seed = match != null ? match.seed : Random.Range(0, 1000000);
             rival = Challenge.MakeBot(seed, match != null ? match.trophies : -1);
+            if (!chDuelSquads) for (int g = 0; g < rival.squad.Length; g++) rival.squad[g] = 0; // foi against foi
             int rivalPower = 0;
             for (int g = 0; g < Army.Groups; g++) rivalPower += Mathf.RoundToInt(Army.Soldiers * rival.Power(g) * 10f);
             chUi.ShowRival(SideText(rival.name, rival.Rank, rival.trophies, rivalPower), rival.Rank);
@@ -512,7 +513,7 @@ namespace SquashBot.Gameplay
             var gap = aim - duelPan;
             if (gap.magnitude > 1f) duelPan += gap.normalized * (gap.magnitude - 1f) * Mathf.Min(1f, Time.deltaTime * 2.5f);
             float apart = new Vector2(me.x - foe.x, me.z - foe.z).magnitude;
-            duelBack = Mathf.Lerp(duelBack, 25f + Mathf.Clamp(apart - 3f, 0f, 14f) * 1.3f, Time.deltaTime * 2f);
+            duelBack = Mathf.Lerp(duelBack, ultimateOn ? 13f : 25f + Mathf.Clamp(apart - 3f, 0f, 14f) * 1.3f, Time.unscaledDeltaTime * (ultimateOn ? 5f : 2f)); // (the ultimate: close in)
             pos = boardCentre + duelPan - look * duelBack;
             rot = Quaternion.LookRotation(look);
         }
