@@ -123,8 +123,9 @@ namespace SquashBot.Gameplay
                 FortressFloor.TowerGrow = 1.6f;
                 FortressFloor.WallScaleAt = null;
             }
-            FortressFloor.SkipCornerTowers = arenaRun || (challengeRun && !duelWalls);
+            FortressFloor.SkipCornerTowers = arenaRun || challengeRun; // (the duel: its stands stand at the corners)
             FortressFloor.SkipWall = trailRun || (challengeRun && !duelWalls) ? (System.Func<GridPos, bool>)(p => true) // the roads: mountains, no ramparts (the colosseum: its stands)
+                : challengeRun ? (System.Func<GridPos, bool>)(p => p.y <= 0 || p.y >= grid.Height - 1) // the duel: no wall where a stand meets the floor
                 : arenaRun ? (System.Func<GridPos, bool>)(p => BattleArenas.BuildingAt(p.x, p.y))
                 : (System.Func<GridPos, bool>)(p => p.x >= grid.Width - 1); // the floors: no wall on the stand's side (the stand meets the floor)
             FortressFloor.Detailed = arenaRun;

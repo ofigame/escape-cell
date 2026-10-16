@@ -22,7 +22,7 @@ namespace SquashBot.Gameplay
         /// <summary>The duel under way (fighting, or the countdown after a knock-down): it may be fought in TPS.</summary>
         private bool DuelTps => challengeRun && (chPhase == ChPhase.Duel || chPhase == ChPhase.Break);
 
-        private Colosseum colosseum;
+        private DuelStands colosseum;
         private float zoom = 1f;
 
         private bool challengeRun;
@@ -42,7 +42,7 @@ namespace SquashBot.Gameplay
         private Vector3 duelPan;
         private float duelBack = 21f;
 
-        private const int BoardW = 25, BoardH = 21;
+        private const int BoardW = 25, BoardH = 15; // (15 across the screen: the stands at its two ends come into view)
         private bool liveHooksWired;
 
         private void InitChallenge()
@@ -309,7 +309,9 @@ namespace SquashBot.Gameplay
             for (int r = 0; r < BoardH; r++)
             {
                 var row = new char[BoardW];
-                int inset = st.shape == BattleArenas.Shape.Square ? 0 : BattleArenas.Inset(st.shape, BoardH, r) + (BoardW - BoardH) / 2;
+                // A shape 21 deep (away from the camera) and 15 across: its outline stretched along the view.
+                const int Deep = 21;
+                int inset = st.shape == BattleArenas.Shape.Square ? 0 : Mathf.RoundToInt(BattleArenas.Inset(st.shape, BoardH, r) * Deep / (float)BoardH) + (BoardW - Deep) / 2;
                 for (int x = 0; x < BoardW; x++) row[x] = x >= inset && x < BoardW - inset ? '#' : '.';
                 if (r == BoardH - 3) row[BoardW / 2] = 'S';
                 rows[r] = new string(row);
@@ -348,11 +350,11 @@ namespace SquashBot.Gameplay
             boardCentre = GridView.ToWorld(new GridPos(BoardW / 2, BoardH / 2)) + Vector3.up * GridView.SurfaceY;
             boardPan = Vector3.zero;
             zoom = 1f;
-            // The colosseum round the first stage: tiers, gates, torches, banners and the crowd (none on the camera's side).
+            // The stands at the floor's two ends (the player's fans behind the player's mark, the rival's behind the rival's), the
+            // stage's backdrop across the floor (the camera's side open).
             if (colosseum != null) Destroy(colosseum.gameObject);
-            colosseum = st.colosseum
-                ? Colosseum.Build(transform, GridView.ToWorld(new GridPos(BoardW / 2, BoardH / 2)), BoardW * 0.5f, BoardH * 0.5f, GridView.SurfaceY - 0.02f, rival.name.GetHashCode(), openEast: true)
-                : null;
+            var (mark, other) = DuelMarks;
+            colosseum = DuelStands.Build(transform, GridView.ToWorld(new GridPos(BoardW / 2, BoardH / 2)), BoardW * 0.5f, BoardH * 0.5f, GridView.SurfaceY - 0.02f, rival.name.GetHashCode(), mark.y < other.y, st.theme);
         }
 
         /// <summary>A copy of foi in the rival's red, with the rival's weapon, for the rival's foi.</summary>
@@ -510,7 +512,7 @@ namespace SquashBot.Gameplay
             var gap = aim - duelPan;
             if (gap.magnitude > 1f) duelPan += gap.normalized * (gap.magnitude - 1f) * Mathf.Min(1f, Time.deltaTime * 2.5f);
             float apart = new Vector2(me.x - foe.x, me.z - foe.z).magnitude;
-            duelBack = Mathf.Lerp(duelBack, 22f + Mathf.Clamp(apart - 3f, 0f, 14f) * 1.3f, Time.deltaTime * 2f);
+            duelBack = Mathf.Lerp(duelBack, 25f + Mathf.Clamp(apart - 3f, 0f, 14f) * 1.3f, Time.deltaTime * 2f);
             pos = boardCentre + duelPan - look * duelBack;
             rot = Quaternion.LookRotation(look);
         }

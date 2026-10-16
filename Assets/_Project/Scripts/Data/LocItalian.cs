@@ -166,7 +166,7 @@ namespace SquashBot.Data
             ["squad.stage"] = "Livello {0}",
             ["squad.arrived"] = "{0} soldati si sono uniti a te!",
             ["pre.squad"] = "PORTA SOLDATI · {0}",
-            ["duel.stage.0"] = "Colosseo",
+            ["duel.stage.0"] = "Stadio Cittadino",
             ["duel.stage.1"] = "Arena di ghiaccio",
             ["duel.stage.2"] = "Fossa di lava",
             ["duel.stage.3"] = "Piattaforma spaziale",

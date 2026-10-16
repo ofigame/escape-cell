@@ -166,7 +166,7 @@ namespace SquashBot.Data
             ["squad.stage"] = "Mərhələ {0}",
             ["squad.arrived"] = "{0} əsgər sənə qoşuldu!",
             ["pre.squad"] = "ƏSGƏR GƏTİR · {0}",
-            ["duel.stage.0"] = "Kolizey",
+            ["duel.stage.0"] = "Şəhər Stadionu",
             ["duel.stage.1"] = "Buz Arenası",
             ["duel.stage.2"] = "Lava Çuxuru",
             ["duel.stage.3"] = "Kosmik Platforma",
