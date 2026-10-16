@@ -956,7 +956,23 @@ namespace SquashBot.UI
             UiFactory.Dim(t, new Color(0.06f, 0.05f, 0.18f, 0.5f));
             var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1590f));
             settingsCard = card;
-            UiFactory.TextBox("Title", card, Top, new Vector2(0f, -50f), new Vector2(800f, 120f), Loc.T("settings.title"), 90f, Palette.UiText, title: true);
+            var settingsTitle = UiFactory.TextBox("Title", card, Top, new Vector2(0f, -50f), new Vector2(800f, 120f), Loc.T("settings.title"), 90f, Palette.UiText, title: true);
+            // Five taps on the title: a small line with the ads' state (for checking a store build on the phone).
+            var adLine = UiFactory.TextBox("AdState", card, Top, new Vector2(0f, -150f), new Vector2(800f, 44f), "", 22f, new Color(1f, 1f, 1f, 0.7f), FontStyles.Normal);
+            adLine.textWrappingMode = TextWrappingModes.Normal;
+            adLine.gameObject.SetActive(false);
+            settingsTitle.raycastTarget = true;
+            var titleTap = settingsTitle.gameObject.AddComponent<Button>();
+            int taps = 0; float lastTap = 0f;
+            titleTap.onClick.AddListener(() =>
+            {
+                taps = Time.unscaledTime - lastTap < 1f ? taps + 1 : 1;
+                lastTap = Time.unscaledTime;
+                if (taps < 5) return;
+                taps = 0;
+                adLine.text = "Ads: " + Monetization.AdMob.Status;
+                adLine.gameObject.SetActive(!adLine.gameObject.activeSelf);
+            });
 
             var rows = new[]
             {
@@ -1763,6 +1779,7 @@ namespace SquashBot.UI
             UiFactory.Text(strip, Loc.T("ad.banner"), 34f, new Color(1f, 1f, 1f, 0.35f));
             bannerPlaceholder = strip.gameObject;
             bannerPlaceholder.SetActive(false);
+            Ads.BannerChanged += () => { if (bannerPlaceholder != null) bannerPlaceholder.SetActive(false); };
         }
 
         /// <summary>Banners appear only on menu-type screens, never over gameplay.</summary>
@@ -1771,7 +1788,11 @@ namespace SquashBot.UI
             Ads.BannerWanted = on;
             if (on) Ads.Banner.Show();
             else Ads.Banner.Hide();
+#if REAL_ADS
+            bannerPlaceholder.SetActive(false); // a store build never shows the "test ad area" strip
+#else
             bannerPlaceholder.SetActive(on && Ads.Banner.IsPlaceholder);
+#endif
             bannerPlaceholder.transform.SetAsLastSibling();
         }
 

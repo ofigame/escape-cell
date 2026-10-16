@@ -3,7 +3,7 @@
 #   2. macOS runner: Xcode compiles it.
 # Two kinds, by the tag pushed:
 #   ios-*                     a test build: unsigned .ipa (test ads, test tools) for Sideloadly.
-#   appstore-<version>        the store build (e.g. appstore-1.0): live ads, no test tools, signed for the App Store
+#   appstore-<version>        the store build (e.g. appstore-1.0); appstore-1.0-b2 is another build of 1.0: live ads, no test tools, signed for the App Store
 #                             and uploaded to App Store Connect (TestFlight first, then submitted from there).
 #                             The build number is the run number.
 #
@@ -113,6 +113,7 @@ jobs:
         if: startsWith(github.ref_name, 'appstore-')
         run: |
           VERSION="${GITHUB_REF_NAME#appstore-}"
+          VERSION="${VERSION%%-*}" # appstore-1.0-b2: another build of 1.0
           sed -i "s/^    iPhone: TEST_TOOLS$/    iPhone: REAL_ADS/" ProjectSettings/ProjectSettings.asset
           sed -i "s/^  bundleVersion: .*/  bundleVersion: $VERSION/" ProjectSettings/ProjectSettings.asset
           sed -i "/^  buildNumber:/,/^  [a-zA-Z]/ s/^    iPhone: .*/    iPhone: $GITHUB_RUN_NUMBER/" ProjectSettings/ProjectSettings.asset

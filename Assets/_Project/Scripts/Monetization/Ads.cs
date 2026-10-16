@@ -41,9 +41,18 @@ namespace SquashBot.Monetization
     /// </summary>
     public static class Ads
     {
+#if REAL_ADS
+        // A store build never shows the test stand-in: until the network is up there is simply no ad to watch.
+        public static IRewardedAds Rewarded { get; set; } = new NoRewardedAds();
+#else
         public static IRewardedAds Rewarded { get; set; } = new TestRewardedAds();
+#endif
         public static IBannerAds Banner { get; set; } = new TestBannerAds();
         public static IInterstitialAds Interstitial { get; set; } = new NoInterstitialAds();
+
+        /// <summary>The real banner took the placeholder's place (the UI drops its labelled strip).</summary>
+        public static event Action BannerChanged;
+        public static void RaiseBannerChanged() => BannerChanged?.Invoke();
 
         /// <summary>The menus want the banner right now (a real banner that loads later shows up if so).</summary>
         public static bool BannerWanted;
@@ -78,6 +87,13 @@ namespace SquashBot.Monetization
 
         /// <summary>Height (in UI units of the 1080-wide reference canvas) kept free at the bottom of menu screens for the banner.</summary>
         public const float BannerReserve = 170f;
+    }
+
+    /// <summary>A store build before the ad network is up: no rewarded ad to watch (never a free test one).</summary>
+    public class NoRewardedAds : IRewardedAds
+    {
+        public bool IsReady => false;
+        public void Show(Action<bool> onFinished) => onFinished?.Invoke(false);
     }
 
     /// <summary>No interstitials off the phones (editor, Windows).</summary>

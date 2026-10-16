@@ -14,6 +14,10 @@ namespace SquashBot.Monetization
     {
         private static bool started, initialized;
 
+        /// <summary>What the ads are doing, for the hidden line in the settings (five taps on the title): started,
+        /// the consent step's answer and any error, initialised. Lets a store build be checked on the phone itself.</summary>
+        public static string Status { get; private set; } = "not started";
+
         /// <summary>Called once at start-up: asks for consent if needed, then starts AdMob and swaps the real ads in.</summary>
         public static void Start()
         {
@@ -26,13 +30,17 @@ namespace SquashBot.Monetization
             started = true;
             MobileAds.RaiseAdEventsOnUnityMainThread = true;
             if (AdIds.AreTestIds) Debug.Log("[Ads] AdMob runs with Google's TEST ad ids.");
+            Status = "consent: asking";
             var request = new ConsentRequestParameters();
             ConsentInformation.Update(request, updateError =>
             {
                 if (updateError != null) Debug.LogWarning("[Ads] Consent info: " + updateError.Message);
+                Status = updateError != null ? "consent info error: " + updateError.Message : "consent: " + ConsentInformation.ConsentStatus;
                 ConsentForm.LoadAndShowConsentFormIfRequired(formError =>
                 {
                     if (formError != null) Debug.LogWarning("[Ads] Consent form: " + formError.Message);
+                    if (formError != null) Status += " · form error: " + formError.Message;
+                    Status += " · can request: " + ConsentInformation.CanRequestAds();
                     if (ConsentInformation.CanRequestAds()) Initialize();
                 });
             });
@@ -45,6 +53,7 @@ namespace SquashBot.Monetization
         {
             if (initialized) return;
             initialized = true;
+            Status += " · initialising";
             // Ads fit for a cartoon game played by all ages: nothing above PG (parental guidance); never marked as
             // child-directed or under the age of consent (the game is not aimed at children only).
             MobileAds.SetRequestConfiguration(new RequestConfiguration
@@ -55,6 +64,7 @@ namespace SquashBot.Monetization
             MobileAds.Initialize(status =>
             {
                 Debug.Log("[Ads] AdMob initialized.");
+                Status = "AdMob ready (" + (AdIds.AreTestIds ? "test ids" : "live ids") + ")";
                 var rewarded = new AdMobRewarded();
                 var interstitial = new AdMobInterstitial();
                 var banner = new AdMobBanner();
@@ -64,6 +74,7 @@ namespace SquashBot.Monetization
                 rewarded.Load();
                 interstitial.Load();
                 if (Ads.BannerWanted) banner.Show();
+                Ads.RaiseBannerChanged(); // the placeholder strip goes
             });
         }
 
