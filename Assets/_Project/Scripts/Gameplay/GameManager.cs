@@ -985,7 +985,8 @@ namespace SquashBot.Gameplay
         /// <summary>Lost? Watch an ad and carry on from a safe tile nearby, once per attempt.</summary>
         private void WatchAdToContinue()
         {
-            if (continued || State != GameState.Result || !Ads.Rewarded.IsReady) return;
+            if (continued || State != GameState.Result) return;
+            if (!Ads.Rewarded.IsReady) { NoAdNow(); return; }
             Ads.Rewarded.Show(rewarded =>
             {
                 if (rewarded && State == GameState.Result) Revive();
@@ -1036,7 +1037,8 @@ namespace SquashBot.Gameplay
         /// <summary>After a result: watch an ad to get the run's coins once more.</summary>
         private void WatchAdToDouble()
         {
-            if (doubled || State != GameState.Result || !Ads.Rewarded.IsReady) return;
+            if (doubled || State != GameState.Result) return;
+            if (!Ads.Rewarded.IsReady) { NoAdNow(); return; }
             int earned = Earned;
             Ads.Rewarded.Show(rewarded =>
             {
@@ -1049,7 +1051,7 @@ namespace SquashBot.Gameplay
 
         private void WatchAdForLife()
         {
-            if (!Ads.Rewarded.IsReady) return;
+            if (!Ads.Rewarded.IsReady) { NoAdNow(); return; }
             Ads.Rewarded.Show(rewarded =>
             {
                 if (!rewarded) return;

@@ -28,21 +28,30 @@ namespace SquashBot.Monetization
 #if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
             if (started) return;
             started = true;
+            MainThread.Ensure();
             MobileAds.RaiseAdEventsOnUnityMainThread = true;
             if (AdIds.AreTestIds) Debug.Log("[Ads] AdMob runs with Google's TEST ad ids.");
             Status = "consent: asking";
             var request = new ConsentRequestParameters();
-            ConsentInformation.Update(request, updateError =>
+            // The consent step answers on another thread on iOS: everything it says is handled back on Unity's main thread.
+            ConsentInformation.Update(request, updateError => MainThread.Run(() =>
             {
                 if (updateError != null) Debug.LogWarning("[Ads] Consent info: " + updateError.Message);
                 Status = updateError != null ? "consent info error: " + updateError.Message : "consent: " + ConsentInformation.ConsentStatus;
-                ConsentForm.LoadAndShowConsentFormIfRequired(formError =>
+                ConsentForm.LoadAndShowConsentFormIfRequired(formError => MainThread.Run(() =>
                 {
                     if (formError != null) Debug.LogWarning("[Ads] Consent form: " + formError.Message);
                     if (formError != null) Status += " · form error: " + formError.Message;
                     Status += " · can request: " + ConsentInformation.CanRequestAds();
                     if (ConsentInformation.CanRequestAds()) Initialize();
-                });
+                }));
+            }));
+            // No answer after a while (it never came back on some phones): start anyway where ads may be asked for.
+            MainThread.After(12f, () =>
+            {
+                if (initialized) return;
+                Status += " · no answer in 12 s";
+                if (ConsentInformation.CanRequestAds()) Initialize();
             });
             // A returning player who already answered can get ads at once.
             if (ConsentInformation.CanRequestAds()) Initialize();
@@ -61,7 +70,7 @@ namespace SquashBot.Monetization
                 MaxAdContentRating = MaxAdContentRating.PG,
                 TagForChildDirectedTreatment = TagForChildDirectedTreatment.Unspecified,
             });
-            MobileAds.Initialize(status =>
+            MobileAds.Initialize(status => MainThread.Run(() =>
             {
                 Debug.Log("[Ads] AdMob initialized.");
                 Status = "AdMob ready (" + (AdIds.AreTestIds ? "test ids" : "live ids") + ")";
@@ -75,7 +84,7 @@ namespace SquashBot.Monetization
                 interstitial.Load();
                 if (Ads.BannerWanted) banner.Show();
                 Ads.RaiseBannerChanged(); // the placeholder strip goes
-            });
+            }));
         }
 
         /// <summary>The privacy options entry (settings screen) is required where the consent form applies.</summary>
@@ -94,11 +103,11 @@ namespace SquashBot.Monetization
         public static void ShowPrivacyOptions()
         {
 #if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
-            ConsentForm.ShowPrivacyOptionsForm(error =>
+            ConsentForm.ShowPrivacyOptionsForm(error => MainThread.Run(() =>
             {
                 if (error != null) Debug.LogWarning("[Ads] Privacy options: " + error.Message);
                 if (ConsentInformation.CanRequestAds()) Initialize();
-            });
+            }));
 #endif
         }
     }

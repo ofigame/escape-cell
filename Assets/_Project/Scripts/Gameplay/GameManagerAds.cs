@@ -13,6 +13,13 @@ namespace SquashBot.Gameplay
     /// </summary>
     public partial class GameManager
     {
+        /// <summary>An ad button pressed while no ad is loaded: say so (instead of nothing happening).</summary>
+        private void NoAdNow()
+        {
+            ui.Float(new Vector3(Screen.width * 0.5f, Screen.height * 0.55f, 0f), Loc.T("ad.unavailable"), Palette.UiGold, 52f);
+            AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+        }
+
         /// <summary>The health refill was used this level.</summary>
         private bool adHealUsed;
 
@@ -53,7 +60,8 @@ namespace SquashBot.Gameplay
         /// <summary>After the daily chest: offer to double it for an ad (when one is ready).</summary>
         private void OfferDailyDouble(int got)
         {
-            if (got <= 0 || !Ads.Rewarded.IsReady) return;
+            if (got <= 0) return;
+            if (!Ads.Rewarded.IsReady) { NoAdNow(); return; }
             ui.AdOffer.Show(Loc.T("ad.dailyTitle"), Loc.F("ad.dailyBody", got), () =>
             {
                 Ads.Rewarded.Show(rewarded =>
