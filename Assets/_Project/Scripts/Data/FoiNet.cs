@@ -416,7 +416,7 @@ namespace SquashBot.Data
 
         public static IEnumerator DeleteMe(Action<bool> done)
         {
-            if (!Registered) { Challenge.ResetLocal(); done(true); yield break; }
+            if (!Registered) { Challenge.ResetLocal(); CloudSave.ProfileDeleted(); done(true); yield break; }
             long code = 0;
             yield return Send("DELETE", "/me", null, true, (c, _) => code = c);
             if (code != 200 && code != 401) { done(false); yield break; } // 401: already gone on the server
@@ -424,6 +424,7 @@ namespace SquashBot.Data
             Prefs.DeleteKey(SecretKey);
             Prefs.DeleteKey(NameSyncedKey);
             Challenge.ResetLocal();
+            CloudSave.ProfileDeleted(); // no copy goes up again until the player asks for the online side
             done(true);
         }
 

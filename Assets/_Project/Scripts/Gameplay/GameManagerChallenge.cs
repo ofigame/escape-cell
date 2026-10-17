@@ -128,6 +128,7 @@ namespace SquashBot.Gameplay
                 if (err != null && err != "offline") { chUi.NameRefused(Loc.T("ch.name." + err)); return; }
                 Challenge.PlayerName = name;
                 Challenge.NameChosen = true;
+                CloudSave.Paused = false; // a name picked: the online side is on again (the copy goes up)
                 Challenge.Sync(profile);
                 if (profileNaming) { ProfileNamed(); return; }
                 chUi.HideName();

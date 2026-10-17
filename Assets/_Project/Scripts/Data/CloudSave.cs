@@ -27,6 +27,26 @@ namespace SquashBot.Data
             public string[] v;
         }
 
+        /// <summary>
+        /// Off after the online profile was deleted: no copy goes up (it would open a new profile behind the player's
+        /// back) until the player asks for the online side again (picks a name for the challenge, makes a recovery code
+        /// or brings a game back). This phone's own flag, never in the copy.
+        /// </summary>
+        public static bool Paused
+        {
+            get => PlayerPrefs.GetInt("sb_cloud_paused", 0) == 1;
+            set { PlayerPrefs.SetInt("sb_cloud_paused", value ? 1 : 0); PlayerPrefs.Save(); }
+        }
+
+        /// <summary>The online profile was deleted: the old code and version are gone with it, and sending stops.</summary>
+        public static void ProfileDeleted()
+        {
+            Prefs.DeleteKey(CodeKey);
+            Prefs.DeleteKey(VersionKey);
+            Prefs.Save();
+            Paused = true;
+        }
+
         /// <summary>The recovery code last made on this phone ("" if none yet).</summary>
         public static string Code => Prefs.GetString(CodeKey, "");
 
@@ -91,6 +111,7 @@ namespace SquashBot.Data
         /// <summary>Sends the copy if something changed (not two at once).</summary>
         public static IEnumerator Upload()
         {
+            if (Paused) yield break; // (the changes wait: they go up if the player turns the online side on again)
             if (sending || !Prefs.Dirty || Application.internetReachability == NetworkReachability.NotReachable) yield break;
             sending = true;
             Prefs.Dirty = false;
@@ -116,6 +137,7 @@ namespace SquashBot.Data
             yield return FoiNet.NewRecoveryCode(c => code = c);
             if (!string.IsNullOrEmpty(code))
             {
+                Paused = false; // the player asked for the online copy again
                 Prefs.SetString(CodeKey, code);
                 Prefs.Save();
                 // The copy goes up now, so the code brings back today's game.
@@ -135,6 +157,7 @@ namespace SquashBot.Data
             if (string.IsNullOrEmpty(r.json) || !Apply(r.json)) { Version = r.version; Prefs.Save(); done("empty"); yield break; }
             Version = r.version;
             Prefs.SetString(CodeKey, typed.Trim().ToUpperInvariant());
+            Paused = false;
             Prefs.Save();
             done(null);
         }
