@@ -71,10 +71,13 @@ namespace SquashBot.UI
             pic.pivot = new Vector2(0f, 0.5f);
             pictures[i] = pic.gameObject.AddComponent<RawImage>();
             pictures[i].raycastTarget = false;
-            Flat.Label(row, TierName(t), new Vector2(0f, 0.5f), new Vector2(300f, 50f), new Vector2(380f, 64f), 44f, Flat.Text, bold: true)
+            Flat.Label(row, TierName(t), new Vector2(0f, 0.5f), new Vector2(300f, 70f), new Vector2(380f, 64f), 44f, Flat.Text, bold: true)
                 .rectTransform.pivot = new Vector2(0f, 0.5f);
-            counts[i] = Flat.Label(row, "", new Vector2(0f, 0.5f), new Vector2(300f, -30f), new Vector2(380f, 56f), 36f, ChestModels.StrapColour(t));
+            counts[i] = Flat.Label(row, "", new Vector2(0f, 0.5f), new Vector2(300f, 10f), new Vector2(380f, 56f), 36f, ChestModels.StrapColour(t));
             counts[i].rectTransform.pivot = new Vector2(0f, 0.5f);
+            // What may come out, and how likely (shown before any chest is opened).
+            var odds = Flat.Label(row, Loc.T("chests.odds" + i), new Vector2(0f, 0.5f), new Vector2(300f, -92f), new Vector2(380f, 64f), 22f, Flat.Muted, wrap: true);
+            odds.rectTransform.pivot = new Vector2(0f, 0.5f);
             openButtons[i] = Flat.Button(row, Loc.T("chests.open"), new Vector2(1f, 0.5f), new Vector2(-30f, 0f), new Vector2(250f, 120f), new Color(0.2f, 0.72f, 0.36f), Color.white, () => TryOpen(t), 38f);
             ((RectTransform)openButtons[i].transform).pivot = new Vector2(1f, 0.5f);
             openLabels[i] = openButtons[i].GetComponentInChildren<TextMeshProUGUI>();
