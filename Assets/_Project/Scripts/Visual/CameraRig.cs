@@ -415,13 +415,23 @@ namespace SquashBot.Visual
             background.localScale = new Vector3(h * Cam.aspect * 1.08f, h * 1.08f, 1f);
         }
 
+        private Material borrowedBackdrop;
+
+        /// <summary>Shows another picture behind everything (a road's own sky); null puts the world's backdrop back.</summary>
+        public void SetBackdrop(Texture texture)
+        {
+            if (borrowedBackdrop != null) Destroy(borrowedBackdrop);
+            borrowedBackdrop = texture != null ? MaterialFactory.CreateUnlit(texture) : null;
+            background.GetComponent<MeshRenderer>().sharedMaterial = borrowedBackdrop != null ? borrowedBackdrop : backgroundMaterial;
+        }
+
         private void RegenerateBackground()
         {
             int texH = Mathf.Clamp(Screen.height, 720, Mobile ? 1280 : 2048);
             int texW = Mathf.Clamp(Mathf.RoundToInt(texH * Cam.aspect), 256, 4096);
             if (backgroundMaterial != null) Destroy(backgroundMaterial.mainTexture);
             backgroundMaterial = MaterialFactory.CreateUnlit(BackgroundArt.Generate(texW, texH));
-            background.GetComponent<MeshRenderer>().sharedMaterial = backgroundMaterial;
+            background.GetComponent<MeshRenderer>().sharedMaterial = borrowedBackdrop != null ? borrowedBackdrop : backgroundMaterial;
         }
     }
 }

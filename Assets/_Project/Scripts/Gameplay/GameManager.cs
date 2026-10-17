@@ -2696,6 +2696,16 @@ namespace SquashBot.Gameplay
             roadExit = PickExit(out var outward);
             var origin = GridView.ToWorld(roadExit) + new Vector3(outward.x, 0f, outward.y);
             float heading = outward.y > 0 ? 0f : 90f;
+            // The road keeps clear of every floor of this level (it never runs back over them).
+            var floorArea = new Rect(origin.x, origin.z, 0f, 0f);
+            foreach (var p in grid.AllPositions())
+            {
+                if (!grid.Exists(p)) continue;
+                var w = GridView.ToWorld(p);
+                floorArea.xMin = Mathf.Min(floorArea.xMin, w.x - 0.5f); floorArea.xMax = Mathf.Max(floorArea.xMax, w.x + 0.5f);
+                floorArea.yMin = Mathf.Min(floorArea.yMin, w.z - 0.5f); floorArea.yMax = Mathf.Max(floorArea.yMax, w.z + 0.5f);
+            }
+            runner.AvoidArea = floorArea;
             runner.PrepareRoad(levelIndex * 7919 + 13, origin, heading, levelIndex, LevelCatalog.WorldOf(levelIndex + 1));
 
             roadBeacon = new GameObject("RoadExit");

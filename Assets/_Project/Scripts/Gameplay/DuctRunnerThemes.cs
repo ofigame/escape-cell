@@ -17,10 +17,14 @@ namespace SquashBot.Gameplay
 
         private bool IsThemed => kind != Kind.Duct && kind != Kind.Surf && kind != Kind.Mine;
 
-        /// <summary>The world a road passes through for a level (0-based): simple ducts first, a new world every 30 levels or so.</summary>
-        public static Kind RoadTheme(int level) =>
-            level < 20 ? Kind.Duct : level < 50 ? Kind.Forest : level < 80 ? Kind.Canyon : level < 110 ? Kind.Ocean :
-            level < 140 ? Kind.Snow : level < 170 ? Kind.Crystal : level < 210 ? Kind.Sky : Kind.Void;
+        /// <summary>
+        /// The world a road passes through for a level (0-based): a new one every ten levels, round and round — a forest,
+        /// the desert, a glacier among mountains, between lava rivers, the sea floor, a bridge in the sky, a crystal cave
+        /// and the stars. Mostly on the land; the sky and the stars float.
+        /// </summary>
+        public static Kind RoadTheme(int level) => RoadCycle[Mathf.Max(0, level) / 10 % RoadCycle.Length];
+
+        private static readonly Kind[] RoadCycle = { Kind.Forest, Kind.Canyon, Kind.Snow, Kind.Lava, Kind.Ocean, Kind.Sky, Kind.Crystal, Kind.Void };
 
         // Among the stars: lighter gravity and slower lane changes (less grip).
         private float GravityScale => kind == Kind.Void ? 0.7f : 1f;
@@ -123,6 +127,7 @@ namespace SquashBot.Gameplay
                     hurdleMat = themeB;
                     barMat = themeA;
                     break;
+                case Kind.Lava: break; // all in LandMaterials
                 case Kind.Void:
                     glassMat = MaterialFactory.CreateTransparent(new Color(0.85f, 0.9f, 1f, 0.35f), new Color(0.25f, 0.3f, 0.45f));
                     frameMat = M(H("#C8D0F0"), new Color(0.3f, 0.35f, 0.6f));
@@ -134,6 +139,7 @@ namespace SquashBot.Gameplay
                     barMat = M(H("#D8C8F0"), new Color(0.5f, 0.4f, 0.8f));
                     break;
             }
+            LandMaterials();
         }
 
         // ---------- Rows ----------
@@ -144,6 +150,7 @@ namespace SquashBot.Gameplay
             // down on it from above, and tall things right at the edge would cover the floor.
             openTop = roadMode && r < 8;
             var rng = new System.Random(r * 7717 + (int)kind * 31 + 3);
+            LandGround(root, r);
             switch (kind)
             {
                 case Kind.Forest: ForestRow(root, r, rng); break;
@@ -152,8 +159,10 @@ namespace SquashBot.Gameplay
                 case Kind.Snow: SnowRow(root, r, rng); break;
                 case Kind.Sky: SkyRow(root, r, rng); break;
                 case Kind.Crystal: CrystalRow(root, r, rng); break;
+                case Kind.Lava: LavaRow(root, r, rng); break;
                 case Kind.Void: VoidRow(root, r); break;
             }
+            LandScenery(root, r, rng);
         }
 
         private static float R(System.Random rng) => (float)rng.NextDouble();
@@ -186,27 +195,34 @@ namespace SquashBot.Gameplay
             }
         }
 
-        /// <summary>A red-rock canyon: layered sandstone walls, cacti and loose rocks.</summary>
+        /// <summary>The desert: soft sand verges, a cactus or a bleached rock now and then (open to the horizon).</summary>
         private void CanyonRow(Transform root, int r, System.Random rng)
         {
             foreach (float side in new[] { -1f, 1f })
             {
-                Shapes.Rounded("Sand", root, new Vector3(side * (WallX + 0.3f), -0.08f, 0f), new Vector3(1.0f, 0.2f, 1.1f), 0.08f, themeD);
+                Shapes.Rounded("Sand", root, new Vector3(side * (WallX + 0.3f), -0.1f, 0f), new Vector3(1.0f, 0.2f, 1.1f), 0.08f, themeD);
                 if (openTop) continue;
-                // The canyon walls rise in layered bands further out.
-                float h = 2.4f + Mathf.PerlinNoise(r * 0.15f, side * 3f) * 2.4f;
-                Shapes.Rounded("Wall", root, new Vector3(side * (WallX + 1.9f), h * 0.5f - 0.2f, 0f), new Vector3(1.6f, h, 1.12f), 0.3f, themeA);
-                Shapes.Rounded("Band", root, new Vector3(side * (WallX + 1.12f), h * 0.45f, 0f), new Vector3(0.08f, 0.3f, 1.13f), 0.04f, themeB);
-                if (R(rng) < 0.12f)
+                if (R(rng) < 0.08f)
                 {
-                    // A cactus with an arm.
-                    float cx = side * (WallX + 0.6f);
+                    float cx = side * (WallX + 1f + R(rng));
                     Shapes.Rounded("Cactus", root, new Vector3(cx, 0.55f, 0f), new Vector3(0.2f, 1.1f, 0.2f), 0.09f, themeC);
                     Shapes.Rounded("Arm", root, new Vector3(cx + 0.15f, 0.65f, 0f), new Vector3(0.2f, 0.12f, 0.12f), 0.05f, themeC);
                     Shapes.Rounded("Arm", root, new Vector3(cx + 0.22f, 0.8f, 0f), new Vector3(0.12f, 0.35f, 0.12f), 0.05f, themeC);
                 }
-                else if (R(rng) < 0.2f)
-                    Shapes.Rounded("Rock", root, new Vector3(side * (WallX + 0.7f), 0.15f, R(rng) - 0.5f), new Vector3(0.4f, 0.3f, 0.35f), 0.12f, themeB);
+                else if (R(rng) < 0.15f)
+                    Shapes.Rounded("Rock", root, new Vector3(side * (WallX + 0.8f), 0.05f, R(rng) - 0.5f), new Vector3(0.4f, 0.3f, 0.35f), 0.12f, themeB);
+            }
+        }
+
+        /// <summary>Between lava rivers: black rock verges, a glowing channel of lava along each side and flames now and then.</summary>
+        private void LavaRow(Transform root, int r, System.Random rng)
+        {
+            foreach (float side in new[] { -1f, 1f })
+            {
+                Shapes.Rounded("Verge", root, new Vector3(side * (WallX + 0.25f), -0.08f, 0f), new Vector3(0.8f, 0.26f, 1.1f), 0.08f, themeC);
+                if (r >= GroundFrom) Shapes.Primitive(PrimitiveType.Cube, "River", root, new Vector3(side * (WallX + 1.5f), -0.27f, 0f), new Vector3(1.3f, 0.05f, 2.2f), lavaGlow);
+                if (openTop) continue;
+                if ((r + (side > 0 ? 4 : 0)) % 9 == 0) Flame(root, new Vector3(side * (WallX + 1.5f + (R(rng) - 0.5f) * 0.6f), -0.25f, 0f), 0.5f + R(rng) * 0.5f);
             }
         }
 
@@ -341,6 +357,7 @@ namespace SquashBot.Gameplay
                         case Kind.Canyon:
                         case Kind.Snow:
                         case Kind.Sky:
+                        case Kind.Lava:
                             // A low ridge of rock, snow or cloud.
                             for (int i = 0; i < 4; i++)
                                 Shapes.Primitive(PrimitiveType.Sphere, "Ridge", go, new Vector3(-w * 0.4f + i * w * 0.27f, 0.2f, 0f), new Vector3(1.1f, 0.45f, 0.5f), hurdleMat);
@@ -426,6 +443,7 @@ namespace SquashBot.Gameplay
                 new[] { new GradientAlphaKey(0.6f, 0f), new GradientAlphaKey(0f, 1f) });
             trail.colorGradient = g;
             trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            StartLand();
         }
 
         /// <summary>Particles born ahead of the camera and flying back past it, so they always stream at the player.</summary>
@@ -533,6 +551,7 @@ namespace SquashBot.Gameplay
         private void UpdateThemeFx(float dt)
         {
             fovKick = Mathf.MoveTowards(fovKick, 0f, dt * 1.4f);
+            UpdateLand(dt);
             if (sky != null)
             {
                 // Far below and ahead of the camera, turning slowly.
@@ -544,6 +563,7 @@ namespace SquashBot.Gameplay
 
         private void StopThemeFx()
         {
+            StopLand();
             if (speedLines != null) Destroy(speedLines.gameObject);
             if (themeDust != null) Destroy(themeDust.gameObject);
             if (sky != null) Destroy(sky.gameObject);

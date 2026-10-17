@@ -59,7 +59,7 @@ namespace SquashBot.Gameplay
         public event Action<string, Vector3> Notice;
 
         /// <summary>The flavours of bonus tunnel: same running and lanes, different world and rules.</summary>
-        public enum Kind { Duct, Surf, Mine, Crystal, Void, Forest, Canyon, Ocean, Snow, Sky }
+        public enum Kind { Duct, Surf, Mine, Crystal, Void, Forest, Canyon, Ocean, Snow, Sky, Lava }
 
         public const int SafeBonus = 10, RiskBonus = 30;
         private const int RiskLength = 40;
@@ -206,6 +206,7 @@ namespace SquashBot.Gameplay
 
         public void Begin(int seed, Kind tunnel = Kind.Duct)
         {
+            AvoidArea = default; // a bonus run starts from nowhere in particular
             Prepare(seed, tunnel, Vector3.zero, 0f);
             TakeOver();
         }
@@ -698,67 +699,105 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>
-        /// Bends the straight plan into a course: straight runs, sweeping left and right turns and gentle hills.
-        /// The start and the gates stay straight and level.
+        /// Bends the straight plan into a course: long straights, long sweeping turns and long, gentle hills (no quick
+        /// zig-zags or little bumps). The heading never strays more than <see cref="MaxStray"/> degrees from the way
+        /// out, so the course always moves on away from the floor it left and can never come back across itself or
+        /// across the floors (<see cref="AvoidArea"/> is checked too). The start and the end stay straight and level.
         /// </summary>
         private void BendCourse(System.Random rng)
+        {
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                BendOnce(rng, attempt < 9);
+                if (ClearOfAvoid()) return;
+            }
+        }
+
+        /// <summary>The most the course turns away from the way out (degrees).</summary>
+        private const float MaxStray = 50f;
+        /// <summary>Gentlest turning on average (degrees per row): a 60 degree turn takes about 65 rows.</summary>
+        private const float TurnRate = 0.95f;
+
+        /// <summary>The floors' area on the ground (world x, z) the course must keep out of; empty for none.</summary>
+        public Rect AvoidArea { get; set; }
+
+        private bool ClearOfAvoid()
+        {
+            if (AvoidArea.width <= 0f) return true;
+            var area = new Rect(AvoidArea.xMin - 3f, AvoidArea.yMin - 3f, AvoidArea.width + 6f, AvoidArea.height + 6f);
+            for (int i = 4; i < centers.Length; i++)
+            {
+                var p = transform.TransformPoint(centers[i]);
+                if (area.Contains(new Vector2(p.x, p.z))) return false;
+            }
+            return true;
+        }
+
+        private void BendOnce(System.Random rng, bool bends)
         {
             int n = totalRows + 1;
             var turn = new float[n];
             var height = new float[n];
-            int straightFrom = roadMode ? Mathf.CeilToInt(length) - 4 : GateRow - 16;
-            int r = roadMode ? 8 : 22;
-            while (r < straightFrom)
+            curveRows.Clear();
+            int straightFrom = roadMode ? Mathf.CeilToInt(length) - 6 : GateRow - 16;
+            int r = roadMode ? 14 : 22;
+            float heading = 0f; // degrees from the way out
+            while (bends && r < straightFrom)
             {
-                if (rng.Next(3) > 0)
+                r += 18 + rng.Next(roadMode ? 28 : 20); // a long straight
+                // A new heading inside the allowed fan, at least 25 degrees from this one, reached over a long bend.
+                float target;
+                int guard = 0;
+                do target = ((float)rng.NextDouble() * 2f - 1f) * MaxStray;
+                while (Mathf.Abs(target - heading) < 25f && ++guard < 20);
+                float delta = target - heading;
+                int len = Mathf.RoundToInt(Mathf.Abs(delta) / TurnRate) + rng.Next(12);
+                if (r + len >= straightFrom)
                 {
-                    // A turn: the turning rate eases in and out, total 40-100 degrees.
-                    int len = 16 + rng.Next(14);
-                    float total = (40f + rng.Next(60)) * (rng.Next(2) == 0 ? -1f : 1f) * Mathf.Deg2Rad;
-                    for (int i = 0; i < len && r + i < straightFrom; i++)
-                    {
-                        float s = Mathf.Sin((i + 0.5f) / len * Mathf.PI);
-                        turn[r + i] = total * s * (Mathf.PI / 2f) / len;
-                        curveRows.Add(r + i);
-                    }
-                    r += len;
+                    // Not enough room left: a smaller turn that still fits, or none.
+                    len = straightFrom - r - 2;
+                    if (len < 30) break;
+                    delta = Mathf.Sign(delta) * Mathf.Min(Mathf.Abs(delta), len * TurnRate);
                 }
-                r += 8 + rng.Next(16);
+                for (int i = 0; i < len; i++)
+                {
+                    float s = Mathf.Sin((i + 0.5f) / len * Mathf.PI);
+                    turn[r + i] = delta * Mathf.Deg2Rad * s * (Mathf.PI / 2f) / len;
+                    curveRows.Add(r + i);
+                }
+                heading += delta;
+                r += len;
             }
 
-            // The ground rises and falls on its own, through the turns too: hills to crest, valleys to dive into,
-            // roller-coaster waves and long drops that climb back out. Bigger on later roads; never steeper than
-            // about 25 degrees, and level again at the start and the end.
-            float grow = roadMode ? Mathf.Clamp01(roadLevel / 120f) : 0.5f;
-            int h0 = roadMode ? 10 : 24;
-            while (h0 < straightFrom - 12)
+            // Long, drawn-out hills, valleys and dips (never short bumps), a little bigger on later roads and never
+            // steeper than about 12 degrees; level ground between them and at both ends.
+            float grow = roadMode ? Mathf.Clamp01(roadLevel / 150f) : 0.5f;
+            int h0 = (roadMode ? 20 : 30) + rng.Next(16);
+            while (bends && h0 < straightFrom - 30)
             {
-                int shape = rng.Next(4);
-                float amp = Mathf.Lerp(1.2f, 4.2f, grow) * (0.6f + (float)rng.NextDouble() * 0.6f);
-                int len = Mathf.Max(30, Mathf.RoundToInt(amp * 14f)) + rng.Next(16); // long, drawn-out climbs and descents
-                if (shape == 2) len = Mathf.Max(len, 48);
-                if (shape == 3) len = Mathf.Max(len + 20, 56);
-                if (h0 + len >= straightFrom) len = straightFrom - h0 - 2; // short roads: the room that is left
-                if (len < 22) break; // only whole shapes: the ground is level again before the end
-                amp = Mathf.Min(amp, len / (shape == 2 ? 20f : 12f)); // never too steep for its length
-                for (int i = 0; i < len && h0 + i < straightFrom; i++)
+                int shape = rng.Next(3);
+                int len = 60 + rng.Next(60) + (shape == 2 ? 30 : 0);
+                if (h0 + len >= straightFrom) len = straightFrom - h0 - 2;
+                if (len < 50) break;
+                float amp = Mathf.Lerp(1.4f, 4.2f, grow) * (0.7f + (float)rng.NextDouble() * 0.5f);
+                amp = Mathf.Min(amp, len * (shape == 2 ? 0.035f : 0.06f));
+                for (int i = 0; i < len; i++)
                 {
                     float t = i / (float)len;
                     float hgt;
                     switch (shape)
                     {
-                        case 0: hgt = amp * (1f - Mathf.Cos(t * Mathf.PI * 2f)) * 0.5f; break;                  // a hill
-                        case 1: hgt = -amp * (1f - Mathf.Cos(t * Mathf.PI * 2f)) * 0.5f; break;                 // a valley
-                        case 2: hgt = amp * 0.55f * (1f - Mathf.Cos(t * Mathf.PI * 6f)) * 0.5f; break;          // three waves
-                        default:                                                                               // a long drop, a run along the bottom, the climb out
-                            hgt = t < 0.35f ? -amp * Mathf.SmoothStep(0f, 1f, t / 0.35f)
-                                : t < 0.65f ? -amp
-                                : -amp * (1f - Mathf.SmoothStep(0f, 1f, (t - 0.65f) / 0.35f));
+                        case 0: hgt = amp * (1f - Mathf.Cos(t * Mathf.PI * 2f)) * 0.5f; break;     // a hill
+                        case 1: hgt = -amp * (1f - Mathf.Cos(t * Mathf.PI * 2f)) * 0.5f; break;    // a valley
+                        default:                                                                  // down, a long run along the bottom, back up
+                            hgt = t < 0.3f ? -amp * Mathf.SmoothStep(0f, 1f, t / 0.3f)
+                                : t < 0.7f ? -amp
+                                : -amp * (1f - Mathf.SmoothStep(0f, 1f, (t - 0.7f) / 0.3f));
                             break;
                     }
                     height[h0 + i] = hgt;
                 }
-                h0 += len + 4 + rng.Next(roadMode ? Mathf.RoundToInt(Mathf.Lerp(14f, 4f, grow)) : 10);
+                h0 += len + 25 + rng.Next(40);
             }
 
             centers = new Vector3[n];

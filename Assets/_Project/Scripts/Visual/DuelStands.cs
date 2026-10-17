@@ -254,7 +254,7 @@ namespace SquashBot.Visual
         private static readonly Dictionary<int, Mesh> cones = new Dictionary<int, Mesh>();
 
         /// <summary>A cone (or a pyramid with 4 sides) 1 wide and 1 tall on its base.</summary>
-        private static Mesh Cone(int sides)
+        internal static Mesh Cone(int sides)
         {
             if (cones.TryGetValue(sides, out var m) && m != null) return m;
             var v = new List<Vector3>(); var n = new List<Vector3>(); var t = new List<int>();
