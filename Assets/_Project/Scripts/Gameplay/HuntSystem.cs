@@ -93,6 +93,12 @@ namespace SquashBot.Gameplay
             public Transform bubble;
             public Material bubbleMat;
             public float shieldFlash;
+            /// <summary>The floors' new ways of fighting (see HuntSystemFoes): it carries a gun; its wind-up follows foi;
+            /// its lunge into the blow (1 down to 0) and which way; its red charge and a gunner's aiming line.</summary>
+            public bool gunner, tracking;
+            public float lunge;
+            public Vector3 lungeDir;
+            public Transform charge, aimLine;
             /// <summary>The tiles its slam will hit (the target, and its neighbours for a brute).</summary>
             public readonly List<GridPos> area = new List<GridPos>();
 
@@ -400,6 +406,7 @@ namespace SquashBot.Gameplay
                 // Never spindly: a little broader than tall would make them.
                 model.localScale = Vector3.Scale(model.localScale, g.human != null ? new Vector3(1.22f, 1f, 1.22f) : new Vector3(1.12f, 1f, 1.12f));
             }
+            MaybeArm(g);
             AddHealthBar(g);
             if (level.shieldEvery > 0 && guards.Count % level.shieldEvery == level.shieldEvery - 1) AddShield(g);
             g.from = g.to = At(p);
@@ -1072,6 +1079,7 @@ namespace SquashBot.Gameplay
             if (g == challengeFoe && Time.time < foeStunUntil) { UpdateHealthBar(g); return; } // stunned: it stands reeling
             if (g.squad) { UpdateSquad(g, dt); return; }
             UpdateHealthBar(g);
+            if (g.windup < 0f) IdleCharge(g); // a blow cut short (struck, frozen, pushed): its charge and aim go
             if (Iced(g)) return;
             UpdateShield(g, dt);
             if (g.flash > 0f) g.flash -= dt * 3f;
@@ -1081,6 +1089,7 @@ namespace SquashBot.Gameplay
                 g.moveT = Mathf.Min(1f, g.moveT + dt / g.moveDur);
                 g.root.position = Vector3.Lerp(g.from, g.to, g.moveT) + Vector3.up * Mathf.Abs(Mathf.Sin(g.moveT * Mathf.PI)) * 0.035f; // a light stride
             }
+            UpdateLunge(g, dt);
             if (g.spitter) { UpdateSpitter(g, dt); return; }
             var toRobot = GridView.ToWorld(robot.Position) - g.root.position;
             toRobot.y = 0f;
@@ -1091,6 +1100,8 @@ namespace SquashBot.Gameplay
                 // Winding up: the tiles it will hit glow ever redder; the slam lands on them.
                 g.windup += dt;
                 float k = g.windup / ((g.brute ? BruteWindTime : WindTime) * FoeWindScale(g));
+                TrackFoi(g, k);
+                ShowCharge(g, Mathf.Clamp01(k));
                 g.SetRaise(k * 1.3f);
                 if (g.soldier == null || g.area.Contains(robot.Position)) foreach (var t in g.area) view.SetWarning(t, 0.4f + 0.6f * k); // soldiers on soldiers: no red tiles
                 if (k >= 1f)
@@ -1103,13 +1114,14 @@ namespace SquashBot.Gameplay
                     if (g.held != null) g.held.Swing();
                     g.SetRaise(0f);
                     foreach (var t in g.area) view.SetWarning(t, 0f);
+                    bool shot = LandBlow(g); // the floors: a gunner's tracer (its hit lands when it arrives), or a lunge and a slash
                     if (IsArcher(g)) ArrowFx(g.root.position, At(g.target));
-                    else Shockwave.Create(At(g.target), g.brute ? 2.2f : 1f, new Color(1f, 0.5f, 0.3f));
+                    else if (!shot) Shockwave.Create(At(g.target), g.brute ? 2.2f : 1f, new Color(1f, 0.5f, 0.3f));
                     if (g.brute) fx.Dust(At(g.target), new Color(0.55f, 0.5f, 0.45f), 18, 4f);
                     AudioManager.PlaySfx(Sfx.Impact, g.brute ? 1f : 0.7f, g.brute ? 0.55f : 0.8f);
                     rig.Shake(g.brute ? 0.8f : 0.3f);
                     if (g.atWall) { if (PlayerAway) AwayHit?.Invoke(ShareOf(g)); }
-                    else if (g.area.Contains(robot.Position)) { Hit?.Invoke(robot.Position, ShareOf(g)); if (g == challengeFoe) FoiStruckByFoe?.Invoke(); }
+                    else if (!shot && g.area.Contains(robot.Position)) { Hit?.Invoke(robot.Position, ShareOf(g)); if (g == challengeFoe) FoiStruckByFoe?.Invoke(); }
                     g.atWall = false;
                     if (CompanionTile.HasValue && g.area.Contains(CompanionTile.Value)) CompanionHurt?.Invoke(g.brute ? 3 : 2);
                     HurtAllies(g, g.area);
@@ -1166,6 +1178,7 @@ namespace SquashBot.Gameplay
             if ((near <= reach || atFifi) && g.cooldown <= 0f && !PlayerAway)
             {
                 g.windup = 0f;
+                g.tracking = !atFifi;
                 g.target = atFifi ? CompanionTile.Value : robot.Position;
                 g.area.Clear();
                 g.area.Add(g.target);

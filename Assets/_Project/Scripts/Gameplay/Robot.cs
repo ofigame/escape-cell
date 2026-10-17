@@ -221,7 +221,7 @@ namespace SquashBot.Gameplay
                 cosmetics = new GameObject("Cosmetics").transform;
                 cosmetics.SetParent(visual, false);
             }
-            for (int i = cosmetics.childCount - 1; i >= 0; i--) Destroy(cosmetics.GetChild(i).gameObject);
+            for (int i = cosmetics.childCount - 1; i >= 0; i--) DestroyImmediate(cosmetics.GetChild(i).gameObject); // at once: a lookalike may be copied right after
             var hat = outfit[Data.Slot.Hat];
             var back = outfit[Data.Slot.Back];
             // A build with a longer body wears its gear that much higher (head and arms all of it, back and badge half).
@@ -244,7 +244,7 @@ namespace SquashBot.Gameplay
             foreach (var e in new[] { eyeL, eyeR })
             {
                 var old = e.Find("Shape");
-                if (old != null) Destroy(old.gameObject);
+                if (old != null) DestroyImmediate(old.gameObject);
                 e.GetComponent<MeshRenderer>().enabled = !shaped;
                 if (shaped) CosmeticModels.EyeShape(e, eyes.id, eyeMaterial);
             }
@@ -444,7 +444,7 @@ namespace SquashBot.Gameplay
             copy.transform.localPosition = Vector3.zero;
             copy.transform.localRotation = Quaternion.identity;
             copy.transform.localScale = Vector3.one;
-            foreach (var b in copy.GetComponentsInChildren<MonoBehaviour>()) Destroy(b);
+            foreach (var b in copy.GetComponentsInChildren<MonoBehaviour>()) if (!(b is CapeWave)) Destroy(b); // (a cape still waves)
             return copy;
         }
 
@@ -514,7 +514,7 @@ namespace SquashBot.Gameplay
             // The finger sets the pace: a quick flick hops quicker, a slow drag a little slower, within a steady range.
             paceScale = pace < 0f ? 1f : Mathf.Lerp(1.3f, 0.75f, Mathf.Clamp01(pace));
             // Walking or running in the arenas: a steady stride, a little quicker when the stick is pushed all the way.
-            walkStep = Mathf.Lerp(0.3f, 0.17f, Mathf.InverseLerp(0.6f, 0.95f, pace < 0f ? 0.5f : pace));
+            walkStep = Mathf.Lerp(0.27f, 0.155f, Mathf.InverseLerp(0.6f, 0.95f, pace < 0f ? 0.5f : pace));
             HopTo(target, 1);
             if (WalkStyle) AudioManager.PlaySfx(Sfx.Hop, 0.12f, 1.5f, 0.1f); // soft footsteps, no buzz on every tile
             else

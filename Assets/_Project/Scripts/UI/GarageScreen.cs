@@ -71,7 +71,6 @@ namespace SquashBot.UI
             var coins = UiFactory.Pill("Coins", bar, new Vector2(1f, 0.5f), new Vector2(-36f, 0f), new Vector2(260f, 100f), UiFactory.PillColor);
             UIController.CoinIcon(coins, new Vector2(56f, 0f));
             // Switch to another of foi's builds (for coins), under the title bar.
-            UiFactory.MakeButton(root, Loc.T("hero.change"), Kind.Gold, new Vector2(1f, 1f), new Vector2(-36f, -206f), new Vector2(300f, 90f), () => HeroPressed?.Invoke(), 34f);
             coinsText = UiFactory.TextBox("Value", coins, new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Vector2(150f, 90f), "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
 
             // A drag across the open space above the panel turns foi round (all the way: see its back and its outfit).
@@ -153,9 +152,9 @@ namespace SquashBot.UI
             PreviewChanged?.Invoke(Cosmetics.Outfit());
         }
 
-        private bool Locked(Cosmetic c) => !Cosmetics.Owns(c) && (c.storyLevel > 0 || reachedWorld < c.world);
+        private bool Locked(Cosmetic c) => !Cosmetics.Owns(c) && (c.storyLevel > 0 || c.rank > 0 || reachedWorld < c.world);
 
-        private string LockText(Cosmetic c) => c.storyLevel > 0 ? Loc.F("garage.story", c.storyLevel) : Loc.F("garage.world", c.world + 1);
+        private string LockText(Cosmetic c) => c.rank > 0 ? Challenge.RankName(c.rank).ToUpper(Loc.Culture) : c.storyLevel > 0 ? Loc.F("garage.story", c.storyLevel) : Loc.F("garage.world", c.world + 1);
 
         private void RebuildGrid()
         {
@@ -280,7 +279,7 @@ namespace SquashBot.UI
             actionLabel.text = equipped ? Loc.T("garage.equipped") : owned ? Loc.T("garage.equip")
                 : locked ? LockText(selected) : selected.reward ? Loc.T("garage.completeSet") : Loc.F("garage.buy", selected.price);
             actionButton.interactable = !equipped && !locked && (owned || !selected.reward);
-            bool sellable = !owned && !selected.reward && selected.storyLevel == 0;
+            bool sellable = !owned && !selected.reward && selected.storyLevel == 0 && selected.rank == 0;
             goalButton.gameObject.SetActive(sellable);
             bool isGoal = Goal.Is(Goal.ForCosmetic(selected));
             goalLabel.text = Loc.T(isGoal ? "goal.on" : "goal.set");

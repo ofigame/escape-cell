@@ -415,13 +415,13 @@ namespace SquashBot.UI
                 SetPips(pips, Bombs.Level);
                 veil.SetActive(!Bombs.Unlocked);
                 lockText.text = Loc.F("ws.lockedAt", Bombs.FromLevel + 1);
-                desc.text = Loc.F("bomb.desc", Bombs.PerFloor, Bombs.Damage * 4);
+                desc.text = Loc.F("bomb.desc", Bombs.PerFloor + 2, Bombs.Damage * 4);
                 label.text = !Bombs.Unlocked ? Loc.F("ws.lockedAt", Bombs.FromLevel + 1) : Bombs.IsMaxed ? Loc.T("shop.max") : Bombs.NextPrice.ToString();
                 Afford(buy, Bombs.Unlocked && !Bombs.IsMaxed, SaveData.Coins >= Bombs.NextPrice);
             });
         }
 
-        /// <summary>The ice and fire bombs: bought once, three of each ride along to every floor beside the blast's.</summary>
+        /// <summary>The ice and fire bombs: bought once, four of each ride along to every floor beside the blast's.</summary>
         private void KindBombCell(BombKind k)
         {
             var colour = Bombs.ColourOf(k);

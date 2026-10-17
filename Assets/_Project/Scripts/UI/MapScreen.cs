@@ -182,14 +182,20 @@ namespace SquashBot.UI
         {
             var theme = WorldTheme.ForWorld(w);
             bool locked = w * LevelCatalog.LevelsPerWorld > unlocked && !openAll;
-            var banner = UiFactory.Pill("Banner " + (w + 1), overlay, new Vector2(0f, 0f), Vector2.zero, new Vector2(680f, 130f), new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */);
+            // The game look: a parchment with the world's name and its levels in ink, the map's emblem at its side.
+            var banner = UiFactory.Box("Banner " + (w + 1), overlay, new Vector2(0f, 0f), Vector2.zero, new Vector2(780f, 176f));
             banner.pivot = new Vector2(0.5f, 0.5f);
-            var title = UiFactory.TextBox("Name", banner, new Vector2(0.5f, 1f), new Vector2(0f, -14f), new Vector2(640f, 64f),
-                Loc.F("world", w + 1, Loc.T(theme.key)), 42f, theme.accent, title: true);
-            title.characterSpacing = 3f;
+            UiFactory.Fill(UiFactory.Stretch("Body", banner), Color.white, UiSprites.Parchment, 1.1f);
+            if (!locked) MenuArt.Emblem(banner, MenuArt.Icon.Map, new Color(0.42f, 0.36f, 0.88f), new Vector2(1f, 0.5f), new Vector2(-86f, 0f), 112f);
+            var title = UiFactory.TextBox("Name", banner, new Vector2(0.5f, 1f), new Vector2(-50f, -22f), new Vector2(600f, 54f),
+                Loc.F("world", w + 1, Loc.T(theme.key)).ToUpper(Loc.Culture), 32f, new Color(0.45f, 0.24f, 0.08f), title: true);
+            title.characterSpacing = 2f;
+            title.enableAutoSizing = true;
+            title.fontSizeMin = 20f;
+            title.fontSizeMax = 32f;
             string sub = locked ? Loc.F("map.locked", w) : $"{w * LevelCatalog.LevelsPerWorld + 1} - {(w + 1) * LevelCatalog.LevelsPerWorld}";
-            UiFactory.TextBox("Sub", banner, new Vector2(0.5f, 0f), new Vector2(0f, 12f), new Vector2(640f, 48f), sub, 30f,
-                new Color(1f, 1f, 1f, 0.75f), FontStyles.Normal);
+            UiFactory.TextBox("Sub", banner, new Vector2(0.5f, 0f), new Vector2(-50f, 22f), new Vector2(600f, 80f), sub, locked ? 34f : 62f,
+                new Color(0.28f, 0.15f, 0.05f), title: true);
             if (locked) Lock(banner, new Vector2(0f, 0.5f), new Vector2(54f, 0f), 0.7f);
             else
             {

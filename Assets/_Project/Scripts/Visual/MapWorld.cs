@@ -82,6 +82,9 @@ namespace SquashBot.Visual
             data.renderPostProcessing = true;
             data.renderShadows = false; // nothing on the map casts a shadow: no shadow pass
             data.antialiasing = Application.isMobilePlatform ? AntialiasingMode.None : AntialiasingMode.SubpixelMorphologicalAntiAliasing;
+            // Deep space behind everything: the galaxy picture, hung far behind the path and moving with the camera.
+            var sky = Shapes.Primitive(PrimitiveType.Quad, "Galaxy", camGo.transform, new Vector3(0f, 0f, 76f), new Vector3(46f, 100f, 1f), MaterialFactory.CreateUnlit(SquashBot.UI.UiSprites.Galaxy.texture));
+            sky.transform.localRotation = Quaternion.identity;
         }
 
         /// <summary>Far stars and soft clouds behind the path, all the way up.</summary>
@@ -107,7 +110,7 @@ namespace SquashBot.Visual
             {
                 var theme = WorldTheme.ForWorld(w);
                 var tint = Color.Lerp(theme.accent, Color.white, 0.6f);
-                var cloud = MaterialFactory.CreateTransparent(new Color(tint.r, tint.g, tint.b, 0.035f), tint * 0.06f);
+                var cloud = MaterialFactory.CreateTransparent(new Color(tint.r, tint.g, tint.b, 0.05f), tint * 0.08f);
                 float baseY = IslandPosition(w).y - Origin.y;
                 for (int c = 0; c < 5; c++)
                 {
@@ -241,20 +244,22 @@ namespace SquashBot.Visual
             // Shared per world and state (the pulsing current stone keeps a top of its own).
             int wd = i / LevelCatalog.LevelsPerWorld;
             string state = locked ? "L" : completed ? "C" : "O";
-            var rock = locked ? Shared("rockL", new Color(0.22f, 0.2f, 0.32f), Color.black)
-                : Shared("rock" + wd, Color.Lerp(theme.pillar, new Color(0.25f, 0.22f, 0.35f), 0.35f), Color.black);
-            Color topColor = locked ? new Color(0.3f, 0.28f, 0.42f) : isCurrent ? Color.white : theme.accent;
+            // Purple pedestals edged in gold (the game look): a lit top in the world's colour, a deep purple body.
+            var rock = locked ? Shared("rockL", new Color(0.18f, 0.16f, 0.26f), Color.black)
+                : Shared("rockP", new Color(0.26f, 0.17f, 0.42f), new Color(0.04f, 0.02f, 0.08f));
+            Color topColor = locked ? new Color(0.28f, 0.26f, 0.38f) : isCurrent ? Color.white : Color.Lerp(theme.accent, new Color(0.42f, 0.3f, 0.62f), 0.55f);
             // The stone the map pulses (the current one, or the last when all are done) has its own top: never a shared one.
             bool pulsed = i == Mathf.Clamp(unlocked, 0, levelCount - 1);
             var top = isCurrent ? MaterialFactory.Create(topColor, topColor * 0.7f)
                 : pulsed ? MaterialFactory.Create(topColor, locked ? Color.black : topColor * 0.35f)
                 : locked ? Shared("topL", topColor, Color.black) : Shared("top" + wd, topColor, topColor * 0.35f);
-            var rim = Shared("rim" + state, completed ? Palette.UiGold : locked ? new Color(0.4f, 0.38f, 0.55f) : Color.white,
-                completed ? Palette.UiGold * 1.4f : locked ? Color.black : new Color(1.4f, 1.4f, 1.6f));
+            var rim = Shared("rim" + state, locked ? new Color(0.42f, 0.38f, 0.5f) : new Color(1f, 0.78f, 0.36f),
+                locked ? Color.black : completed ? new Color(1.2f, 0.85f, 0.3f) : new Color(1.6f, 1.2f, 0.5f));
             // A rounded slab on top, a rock tapering away below (two stacked pieces read as a floating stone).
             Shapes.Primitive(PrimitiveType.Cylinder, "Top", stone, new Vector3(0f, -0.12f, 0f), new Vector3(1.25f, 0.12f, 1.25f), top);
             Shapes.Primitive(PrimitiveType.Cylinder, "Rim", stone, new Vector3(0f, -0.2f, 0f), new Vector3(1.38f, 0.06f, 1.38f), rim);
             Shapes.Primitive(PrimitiveType.Cylinder, "Rock", stone, new Vector3(0f, -0.48f, 0f), new Vector3(1.15f, 0.24f, 1.15f), rock);
+            Shapes.Primitive(PrimitiveType.Cylinder, "Band", stone, new Vector3(0f, -0.62f, 0f), new Vector3(1.05f, 0.025f, 1.05f), rim);
             Shapes.Primitive(PrimitiveType.Sphere, "Root", stone, new Vector3(0f, -0.78f, 0f), new Vector3(0.85f, 0.7f, 0.85f), rock);
             stoneTops.Add(top);
             return stone;

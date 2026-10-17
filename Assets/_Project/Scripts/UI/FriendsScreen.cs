@@ -71,7 +71,7 @@ namespace SquashBot.UI
             status = Flat.Label(root, "", new Vector2(0.5f, 1f), new Vector2(0f, -360f), new Vector2(940f, 60f), 28f, Flat.Gold, TextAlignmentOptions.Center, wrap: true);
             status.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             // The list.
-            var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(40f, 220f), new Vector2(-40f, -410f));
+            var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(40f, Monetization.Ads.BannerReserve + 140f), new Vector2(-40f, -410f));
             viewport.gameObject.AddComponent<RectMask2D>();
             UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
@@ -82,7 +82,7 @@ namespace SquashBot.UI
             scroll.horizontal = false;
             scroll.decelerationRate = 0.12f;
             scroll.scrollSensitivity = 60f;
-            var close = Flat.Button(root, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, 100f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, Hide, 34f);
+            var close = Flat.Button(root, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 70f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, Hide, 34f);
             ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
 
             // A friend's invitation that came in.

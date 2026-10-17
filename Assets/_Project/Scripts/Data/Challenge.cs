@@ -241,6 +241,8 @@ namespace SquashBot.Data
             public float armor;
             /// <summary>Blows its foi's shield takes before it breaks (0: none).</summary>
             public int shield;
+            /// <summary>What its foi wears (a player's own outfit; null for a computer rival or an older game).</summary>
+            public string look;
 
             /// <summary>Soldiers of each group it brings into the duel.</summary>
             public readonly int[] squad = { SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel };
@@ -294,7 +296,7 @@ namespace SquashBot.Data
         /// <summary>A live rival as the server sent it (its own game plays it).</summary>
         public static Opponent FromRival(FoiNet.Rival r)
         {
-            var o = new Opponent { bot = false, name = r.name, trophies = Mathf.Max(0, r.trophies) };
+            var o = new Opponent { bot = false, name = r.name, trophies = Mathf.Max(0, r.trophies), look = r.look };
             var parts = (r.army ?? "").Split(',');
             for (int g = 0; g < Army.Groups && g < parts.Length; g++)
                 o.points[g] = int.TryParse(parts[g], out int v) ? Mathf.Clamp(v, 0, 2500) : 0;

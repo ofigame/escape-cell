@@ -26,6 +26,8 @@ namespace SquashBot.Gameplay
         private float health = 1f;
         /// <summary>A share of health the next hit takes instead of the usual (set around a robot's blow).</summary>
         private float hitShareOverride = -1f;
+        /// <summary>The blow being dealt is a duel move's own (it lands even during the big moment).</summary>
+        private bool moveHit;
         private float hurtCooldown;
 
         // The battle arenas always fight with the health bar (they are played like a bonus, but one blow must not end them).
@@ -63,6 +65,7 @@ namespace SquashBot.Gameplay
         {
             if (!HealthEnabled) return false;
             if (hurtCooldown > 0f) return true; // still blinking from the last hit
+            if (DuelCinematic && !moveHit) return true; // nothing lands while a big moment plays (but the move itself)
             float share = hitShareOverride >= 0f ? hitShareOverride
                 : level != null && level.mission == MissionType.Hunt && crushed ? level.crateShare
                 : HitShare(levelIndex) * weight;

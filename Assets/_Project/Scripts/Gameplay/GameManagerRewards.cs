@@ -21,7 +21,7 @@ namespace SquashBot.Gameplay
 
         private void InitRewards()
         {
-            hunt.Felled += g => QuestProgress(g);
+            hunt.Felled += g => { QuestProgress(g); if (g != DailyGoal.Bugs) OnFoeFelledForPowers(); }; // robots and towers fill the ultimate
             hunt.ShieldHit += (p, broke) => { if (broke) QuestProgress(DailyGoal.Shields); };
         }
 

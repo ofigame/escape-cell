@@ -29,6 +29,8 @@ namespace SquashBot.Gameplay
 
         /// <summary>The hero's size on the floors and in the arenas (wider a quarter, taller two fifths); the tunnels keep 1.</summary>
         private static readonly Vector3 HeroScale = new Vector3(1.25f, 1.4f, 1.25f);
+        /// <summary>foi stands this much bigger again on every floor (not on the roads); the robots keep their size.</summary>
+        private const float FoiGrow = 1.5f;
         private float foiBaseHeight = 0.875f;
 
         /// <summary>foi's height as it stands (its body, without the weapon it carries): the robots are sized against it.</summary>
@@ -112,8 +114,8 @@ namespace SquashBot.Gameplay
             foiBaseHeight = FoiHeight(); // the robots and Fifi are sized against foi's plain height
             hunt.FoiHeight = foiBaseHeight * HeroScale.y; // foi as it stands (the hero scale): no robot is shorter than that
             // The hero stands out in the crowd: a little bigger and a little taller than the robots round it.
-            robot.transform.localScale = HeroScale;
-            Robot.HopScale = 0.9f; // steady and readable: each step follows the finger, a run of steps flows on (0.6 felt too fast)
+            robot.transform.localScale = HeroScale * FoiGrow;
+            Robot.HopScale = 0.82f; // brisk but readable: each step follows the finger, a run of steps flows on (0.6 felt too fast)
             hunt.EnemyScale = Mathf.Lerp(1.6f, 2.03f, grow);
             adHealUsed = false;
             weapon = Armory.Equipped;
@@ -179,11 +181,12 @@ namespace SquashBot.Gameplay
         /// </summary>
         private void OnBugSquashed(GridPos p)
         {
-            if (arenaRun || challengeRun || Random.value > 0.34f) return;
+            if (arenaRun || challengeRun || Random.value > 0.4f) return;
             var pool = new System.Collections.Generic.List<PowerUpType> { PowerUpType.Shield };
             if (HealthEnabled && health < 0.85f) { pool.Add(PowerUpType.Heart); pool.Add(PowerUpType.Heart); }
             if (World >= 2) pool.Add(PowerUpType.Freeze);
-            if (World >= 5) pool.Add(PowerUpType.Blast);
+            if (World >= 1) pool.Add(PowerUpType.Blast); // the blast fells robots: it comes early and often
+            if (World >= 3) pool.Add(PowerUpType.Blast);
             if (World >= 8 && Random.value < 0.15f) pool.Add(PowerUpType.Super);
             powerUps.Drop(pool[Random.Range(0, pool.Count)], p);
         }
@@ -427,6 +430,7 @@ namespace SquashBot.Gameplay
         /// </summary>
         private bool TryStrikeNow(GridPos at, bool crowd)
         {
+            if (DuelCinematic) return false; // the big moment first
             var w = weapon ?? Armory.Equipped;
             if (strikeCooldown > 0f || !robot.Strike(GridView.ToWorld(at))) return false;
             if (heldShown != null && heldShown.kind == WeaponKind.Gun && !arenaRun) ShowHeld(w); // the blade back in hand

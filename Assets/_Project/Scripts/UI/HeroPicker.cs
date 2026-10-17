@@ -48,11 +48,11 @@ namespace SquashBot.UI
             sub = UiFactory.TextBox("Sub", root, new Vector2(0.5f, 1f), new Vector2(0f, -260f), new Vector2(960f, 70f), "", 34f, new Color(1f, 1f, 1f, 0.8f), FontStyles.Normal);
             sub.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             grid = UiFactory.Rect("Grid", root, Vector2.zero, Vector2.one, new Vector2(20f, 220f), new Vector2(-20f, -320f));
-            var close = UiFactory.MakeButton(root, Loc.T("btn.close"), Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(0f, 110f), new Vector2(480f, 110f), () => screen.Hide(), 48f);
+            var close = UiFactory.MakeButton(root, Loc.T("btn.close"), Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 60f), new Vector2(480f, 110f), () => screen.Hide(), 48f);
             ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
             closeButton = close.gameObject;
             // A new phone: the game played before comes back with its recovery code.
-            var restore = UiFactory.MakeButton(root, Loc.T("hero.haveCode"), Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(0f, 110f), new Vector2(620f, 100f), () => RestorePressed?.Invoke(), 34f);
+            var restore = UiFactory.MakeButton(root, Loc.T("hero.haveCode"), Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 60f), new Vector2(620f, 100f), () => RestorePressed?.Invoke(), 34f);
             ((RectTransform)restore.transform).pivot = new Vector2(0.5f, 0.5f);
             restoreButton = restore.gameObject;
         }

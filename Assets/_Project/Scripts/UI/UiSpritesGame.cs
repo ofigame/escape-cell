@@ -4,8 +4,8 @@ namespace SquashBot.UI
 {
     /// <summary>
     /// The game look's sprites, drawn in code like the rest: cut-corner plates and bevelled faces (tint them), a double
-    /// gold rim with small diamonds at the corners, a gold ring for round buttons, a gold corner ornament for a screen's
-    /// frame, a ribbon for titles and a starry galaxy for the backgrounds.
+    /// gold rim with small diamonds at the corners, a gold ring for round buttons, a ribbon for titles and a starry
+    /// galaxy for the backgrounds.
     /// </summary>
     public static partial class UiSprites
     {
@@ -14,7 +14,7 @@ namespace SquashBot.UI
         private const float FramePad = 3f;
         private const int FrameBorder = 40;
 
-        private static Sprite plate, bevel, goldRim, goldRing, corner, galaxy, ribbon;
+        private static Sprite plate, bevel, goldRim, goldRing, galaxy, ribbon;
 
         /// <summary>A cut-corner plate, a touch brighter at the top (tint it: panels, cards, chips).</summary>
         public static Sprite Plate => plate != null ? plate : plate = MakeFrame(FrameKind.Plate);
@@ -24,8 +24,6 @@ namespace SquashBot.UI
         public static Sprite GoldRim => goldRim != null ? goldRim : goldRim = MakeFrame(FrameKind.Rim);
         /// <summary>A double gold ring for round buttons and orbs (unsliced).</summary>
         public static Sprite GoldRing => goldRing != null ? goldRing : goldRing = MakeGoldRing();
-        /// <summary>A gold ornament for a screen's top-left corner, pivot at that corner (mirror it for the others).</summary>
-        public static Sprite Corner => corner != null ? corner : corner = MakeCorner();
         /// <summary>A deep space backdrop: nebula clouds, stars and faint constellations (portrait, unsliced).</summary>
         public static Sprite Galaxy => galaxy != null ? galaxy : galaxy = MakeGalaxy();
         /// <summary>A banner ribbon with folded tails (tint it: screen titles). Sliced left and right.</summary>
@@ -157,60 +155,6 @@ namespace SquashBot.UI
             tex.SetPixels(px);
             tex.Apply(true, true);
             return Sprite.Create(tex, new Rect(0, 0, S, S), new Vector2(0.5f, 0.5f), 200f);
-        }
-
-        /// <summary>A shape as a test on (u, v), measured in pixels from the texture's top-left corner.</summary>
-        private delegate bool Inside(float u, float v);
-
-        /// <summary>Supersampled (4x4) coverage of a shape over one pixel.</summary>
-        private static float Cover(int x, int y, int size, Inside inside)
-        {
-            int n = 0;
-            for (int sy = 0; sy < 4; sy++)
-                for (int sx = 0; sx < 4; sx++)
-                    if (inside(x + (sx + 0.5f) / 4f, size - (y + (sy + 0.5f) / 4f))) n++;
-            return n / 16f;
-        }
-
-        private static bool CornerShape(float u, float v)
-        {
-            float Taper(float along) => Mathf.Lerp(5f, 1.2f, Mathf.Clamp01(along / 150f));
-            // a broad L along both edges, tapering away from the corner
-            if (u >= 2f && v >= 2f && u < 2f + Taper(v) && v < 152f) return true;
-            if (v >= 2f && u >= 2f && v < 2f + Taper(u) && u < 152f) return true;
-            // a finer L inside it
-            if (u >= 12f && u < 14f && v >= 12f && v < 100f) return true;
-            if (v >= 12f && v < 14f && u >= 12f && u < 100f) return true;
-            // a ring round a diamond near the corner
-            float cx = u - 34f, cy = v - 34f, r = Mathf.Sqrt(cx * cx + cy * cy);
-            if (r > 14f && r < 17f) return true;
-            if (Mathf.Abs(cx) + Mathf.Abs(cy) < 9f) return true;
-            // scrolls curling out along each edge
-            float s1x = u - 66f, s1y = v - 24f, r1 = Mathf.Sqrt(s1x * s1x + s1y * s1y);
-            if (r1 > 8f && r1 < 10.5f && s1y > -4f) return true;
-            float s2x = u - 24f, s2y = v - 66f, r2 = Mathf.Sqrt(s2x * s2x + s2y * s2y);
-            if (r2 > 8f && r2 < 10.5f && s2x > -4f) return true;
-            // small diamonds further along
-            if (Mathf.Abs(u - 112f) + Mathf.Abs(v - 8f) < 5f) return true;
-            if (Mathf.Abs(u - 8f) + Mathf.Abs(v - 112f) < 5f) return true;
-            return false;
-        }
-
-        private static Sprite MakeCorner()
-        {
-            const int S = 160;
-            var tex = new Texture2D(S, S, TextureFormat.RGBA32, true) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Trilinear };
-            var px = new Color[S * S];
-            for (int y = 0; y < S; y++)
-                for (int x = 0; x < S; x++)
-                {
-                    float a = Cover(x, y, S, CornerShape);
-                    var g = GoldAt(0.4f + 0.6f * y / (float)S, 0.2f);
-                    px[y * S + x] = new Color(g.r, g.g, g.b, a);
-                }
-            tex.SetPixels(px);
-            tex.Apply(true, true);
-            return Sprite.Create(tex, new Rect(0, 0, S, S), new Vector2(0f, 1f), 100f);
         }
 
         private static Sprite MakeRibbon()

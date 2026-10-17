@@ -100,7 +100,7 @@ namespace SquashBot.UI
 
             status = Flat.Label(p, "", new Vector2(0.5f, 0.5f), new Vector2(0f, -490f), new Vector2(940f, 120f), 32f, Flat.Text, TextAlignmentOptions.Center, bold: true, wrap: true);
             status.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var close = Flat.Button(p, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, 90f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => { if (!busy) screen.Hide(); }, 34f);
+            var close = Flat.Button(p, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 70f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => { if (!busy) screen.Hide(); }, 34f);
             ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 

@@ -31,7 +31,7 @@ namespace SquashBot.Data
         /// <summary>Body / eye / trail colour, or the swatch colour shown in the garage.</summary>
         public Color color;
 
-        public bool IsDefault => price == 0 && !reward && storyLevel == 0;
+        public bool IsDefault => price == 0 && !reward && storyLevel == 0 && rank == 0;
 
         /// <summary>The themed set this piece belongs to (null = none).</summary>
         public string set;
@@ -39,6 +39,8 @@ namespace SquashBot.Data
         public bool reward;
         /// <summary>A story reward: not sold, it comes with beating this level (1-based; 0 = none).</summary>
         public int storyLevel;
+        /// <summary>A rank reward: not sold, worn from this challenge rank on (0 = none).</summary>
+        public int rank;
     }
 
     /// <summary>
@@ -158,6 +160,22 @@ namespace SquashBot.Data
             T("arms.lumi", Slot.Arms, 170, new Color(1f, 0.82f, 0.3f)),
             T("back.raven", Slot.Back, 211, new Color(0.16f, 0.15f, 0.24f)),
             T("badge.heart", Slot.Badge, 250, new Color(1f, 0.8f, 0.3f)),
+
+            // Capes that wave as foi runs: sold in the workshop...
+            C("back.cape.night", Slot.Back, 500, 0, new Color(0.14f, 0.18f, 0.42f)),
+            C("back.cape.royal", Slot.Back, 700, 3, new Color(0.45f, 0.2f, 0.62f)),
+            C("back.cape.flame", Slot.Back, 800, 6, new Color(0.95f, 0.38f, 0.12f)),
+            C("back.cape.frost", Slot.Back, 800, 9, new Color(0.55f, 0.82f, 1f)),
+            // ...and the ranks' own capes and hats: earned in the challenge, never sold.
+            K("back.cape.rank3", Slot.Back, 3, new Color(0.62f, 0.36f, 0.2f)),
+            K("back.cape.rank6", Slot.Back, 6, new Color(0.62f, 0.66f, 0.74f)),
+            K("back.cape.rank9", Slot.Back, 9, new Color(0.85f, 0.65f, 0.2f)),
+            K("back.cape.rank12", Slot.Back, 12, new Color(0.5f, 0.12f, 0.2f)),
+            K("hat.rank2", Slot.Hat, 2, new Color(0.38f, 0.45f, 0.3f)),
+            K("hat.rank5", Slot.Hat, 5, new Color(0.16f, 0.2f, 0.36f)),
+            K("hat.rank8", Slot.Hat, 8, new Color(0.7f, 0.12f, 0.16f)),
+            K("hat.rank11", Slot.Hat, 11, new Color(0.92f, 0.92f, 0.95f)),
+            K("hat.rank12", Slot.Hat, 12, new Color(0.12f, 0.12f, 0.26f)),
         };
 
         private static Cosmetic C(string id, Slot slot, int price, int world, Color color) =>
@@ -171,6 +189,9 @@ namespace SquashBot.Data
 
         private static Cosmetic T(string id, Slot slot, int level, Color color) =>
             new Cosmetic { id = id, slot = slot, price = 0, world = 0, color = color, storyLevel = level };
+
+        private static Cosmetic K(string id, Slot slot, int rank, Color color) =>
+            new Cosmetic { id = id, slot = slot, price = 0, world = 0, color = color, rank = rank };
 
         /// <summary>The world sets in story order (the ids of the first four are older than the world names).</summary>
         public static readonly string[] Sets = { "canal", "forest", "canyon", "ocean", "mountain", "cyber", "cloud", "candy", "galaxy" };
@@ -215,8 +236,11 @@ namespace SquashBot.Data
         /// <summary>A story reward is owned once its level is beaten.</summary>
         public static bool StoryEarned(Cosmetic c) => c.storyLevel > 0 && Progress.Stars(c.storyLevel - 1) > 0;
 
+        /// <summary>A rank reward is worn once the challenge rank reached is that high.</summary>
+        public static bool RankEarned(Cosmetic c) => c.rank > 0 && Challenge.Rank >= c.rank;
+
         public static bool Owns(Cosmetic c) =>
-            c.reward ? SetComplete(c.set) : c.storyLevel > 0 ? StoryEarned(c) : c.IsDefault || Bought(c);
+            c.reward ? SetComplete(c.set) : c.storyLevel > 0 ? StoryEarned(c) : c.rank > 0 ? RankEarned(c) : c.IsDefault || Bought(c);
 
         public static Cosmetic Equipped(Slot slot)
         {
@@ -233,7 +257,7 @@ namespace SquashBot.Data
 
         public static bool TryBuy(Cosmetic c, int reachedWorld)
         {
-            if (c.reward || c.storyLevel > 0 || Owns(c) || reachedWorld < c.world || !Shop.Spend(c.price)) return false;
+            if (c.reward || c.storyLevel > 0 || c.rank > 0 || Owns(c) || reachedWorld < c.world || !Shop.Spend(c.price)) return false;
             Prefs.SetInt("sb_cos_" + c.id, 1);
             Prefs.Save();
             return true;
@@ -247,6 +271,47 @@ namespace SquashBot.Data
         }
 
         /// <summary>The full outfit: what is equipped, with an optional preview piece swapped in.</summary>
+        /// <summary>The visible pieces worn (paint, eyes, hat, arms, legs, back, badge) as one short text, for the rival's
+        /// screen in a duel.</summary>
+        public static string LookText()
+        {
+            var ids = new List<string>();
+            foreach (var s in new[] { Slot.Color, Slot.Eyes, Slot.Hat, Slot.Arms, Slot.Legs, Slot.Back, Slot.Badge })
+            {
+                var c = Equipped(s);
+                if (!c.IsDefault) ids.Add(c.id);
+            }
+            return string.Join(",", ids);
+        }
+
+        /// <summary>An outfit from such a text (unknown pieces are skipped; the rest is the defaults).</summary>
+        public static Dictionary<Slot, Cosmetic> OutfitFrom(string look)
+        {
+            var outfit = new Dictionary<Slot, Cosmetic>();
+            foreach (Slot s in System.Enum.GetValues(typeof(Slot))) outfit[s] = InSlot(s)[0];
+            if (string.IsNullOrEmpty(look)) return outfit;
+            foreach (var id in look.Split(','))
+            {
+                var c = Find(id.Trim());
+                if (c != null && (c.slot != Slot.Step && c.slot != Slot.Trail && c.slot != Slot.Dance)) outfit[c.slot] = c;
+            }
+            return outfit;
+        }
+
+        /// <summary>A made-up outfit for a computer rival (the same for the same name).</summary>
+        public static Dictionary<Slot, Cosmetic> OutfitFor(string name)
+        {
+            var rng = new System.Random((name ?? "").GetHashCode());
+            var outfit = OutfitFrom(null);
+            foreach (var s in new[] { Slot.Color, Slot.Eyes, Slot.Hat, Slot.Back })
+            {
+                if (rng.Next(3) == 0) continue;
+                var pool = InSlot(s).FindAll(c => !c.reward && c.storyLevel == 0 && c.rank == 0);
+                outfit[s] = pool[rng.Next(pool.Count)];
+            }
+            return outfit;
+        }
+
         public static Dictionary<Slot, Cosmetic> Outfit(Cosmetic preview = null)
         {
             var outfit = new Dictionary<Slot, Cosmetic>();

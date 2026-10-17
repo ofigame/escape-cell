@@ -140,6 +140,52 @@ namespace SquashBot.Visual
                     Shapes.Rounded("Top", root, new Vector3(0f, 0.81f, 0f), new Vector3(0.4f, 0.12f, 0.28f), 0.04f, main);
                     Shapes.Rounded("Skull", root, new Vector3(0f, 0.81f, 0.145f), new Vector3(0.08f, 0.07f, 0.02f), 0.02f, shine);
                     break;
+                case "hat.rank2":
+                {
+                    // A soldier's round helmet with a rim and a badge.
+                    Shapes.Rounded("Helmet", root, new Vector3(0f, 0.74f, -0.01f), new Vector3(0.5f, 0.16f, 0.46f), 0.08f, main);
+                    Shapes.Rounded("Rim", root, new Vector3(0f, 0.68f, -0.01f), new Vector3(0.54f, 0.03f, 0.5f), 0.015f, main);
+                    Shapes.Rounded("Badge", root, new Vector3(0f, 0.75f, 0.225f), new Vector3(0.06f, 0.06f, 0.015f), 0.02f, MaterialFactory.Create(new Color(0.85f, 0.7f, 0.35f), new Color(0.4f, 0.3f, 0.1f)));
+                    break;
+                }
+                case "hat.rank5":
+                case "hat.rank11":
+                {
+                    // An officer's peaked cap (a general's: white with gold braid and a bigger badge).
+                    var gold = MaterialFactory.Create(new Color(1f, 0.8f, 0.3f), new Color(0.7f, 0.5f, 0.12f));
+                    bool general = id == "hat.rank11";
+                    Shapes.Rounded("Band", root, new Vector3(0f, 0.73f, 0f), new Vector3(0.44f, 0.07f, 0.42f), 0.03f, general ? dark : main);
+                    Shapes.Rounded("Crown", root, new Vector3(0f, 0.8f, -0.01f), new Vector3(0.5f, 0.07f, 0.48f), 0.035f, main);
+                    Shapes.Rounded("Peak", root, new Vector3(0f, 0.7f, 0.24f), new Vector3(0.36f, 0.025f, 0.14f), 0.012f, dark);
+                    Shapes.Rounded("Braid", root, new Vector3(0f, 0.735f, 0.215f), new Vector3(0.3f, 0.018f, 0.012f), 0.006f, gold);
+                    Shapes.Rounded("Badge", root, new Vector3(0f, 0.775f, 0.218f), new Vector3(general ? 0.09f : 0.06f, general ? 0.07f : 0.05f, 0.015f), 0.02f, gold);
+                    break;
+                }
+                case "hat.rank8":
+                {
+                    // A commander's beret, tilted, with a gold badge.
+                    var beret = Shapes.Primitive(PrimitiveType.Sphere, "Beret", root, new Vector3(0.04f, 0.74f, 0f), new Vector3(0.52f, 0.12f, 0.48f), main).transform;
+                    beret.localRotation = Quaternion.Euler(0f, 0f, -10f);
+                    Shapes.Rounded("Badge", root, new Vector3(-0.12f, 0.73f, 0.2f), new Vector3(0.06f, 0.07f, 0.015f), 0.02f, MaterialFactory.Create(new Color(1f, 0.8f, 0.3f), new Color(0.7f, 0.5f, 0.12f)));
+                    break;
+                }
+                case "hat.rank12":
+                {
+                    // A marshal's bicorne: wide, edged in gold, with a white plume.
+                    var gold = MaterialFactory.Create(new Color(1f, 0.8f, 0.3f), new Color(0.8f, 0.55f, 0.15f));
+                    var plume = MaterialFactory.Create(Color.white, new Color(0.4f, 0.4f, 0.45f));
+                    foreach (float s in new[] { -1f, 1f })
+                    {
+                        // Two wings rising to a peak over the middle, each edged in gold.
+                        var wing = Shapes.Rounded("Wing", root, new Vector3(s * 0.16f, 0.77f, 0f), new Vector3(0.36f, 0.15f, 0.2f), 0.07f, main).transform;
+                        wing.localRotation = Quaternion.Euler(0f, 0f, s * -14f);
+                        Shapes.Rounded("Trim", wing, new Vector3(0f, 0.07f, 0f), new Vector3(0.34f, 0.02f, 0.21f), 0.01f, gold);
+                    }
+                    Shapes.Rounded("Cockade", root, new Vector3(0f, 0.79f, 0.105f), new Vector3(0.09f, 0.09f, 0.02f), 0.04f, gold);
+                    for (int i = 0; i < 3; i++)
+                        Shapes.Primitive(PrimitiveType.Sphere, "Plume", root, new Vector3(-0.04f + i * 0.04f, 0.87f + i * 0.02f, -0.02f), new Vector3(0.1f, 0.12f, 0.1f), plume);
+                    break;
+                }
                 case "hat.crown":
                 {
                     var gold = MaterialFactory.Create(color, color * 0.6f);
@@ -150,6 +196,110 @@ namespace SquashBot.Visual
                     Shapes.Rounded("Gem", root, new Vector3(0f, 0.76f, 0.205f), new Vector3(0.07f, 0.06f, 0.02f), 0.02f, gem);
                     break;
                 }
+            }
+        }
+
+        /// <summary>
+        /// A grand cape that waves: a mantle over both shoulders, a broad cloth falling to the heels in hinged strips (moved
+        /// by <see cref="CapeWave"/>), embroidered gold edges down both sides, a pattern on the cloth (stars, diamonds,
+        /// flames or snowflakes by the cape) and a heavy hem. The royal and the ranks' gold capes wear a white fur collar,
+        /// like a king's; the ranks' capes glow a little.
+        /// </summary>
+        private static void Cape(Transform root, string id, Color color)
+        {
+            bool rank = id.StartsWith("back.cape.rank");
+            bool royal = id == "back.cape.royal" || id == "back.cape.rank9" || id == "back.cape.rank12";
+            Color trimColour = id == "back.cape.rank3" ? new Color(0.8f, 0.5f, 0.25f) : id == "back.cape.rank6" || id == "back.cape.frost" ? new Color(0.9f, 0.94f, 1f) : new Color(1f, 0.8f, 0.3f);
+            var cloth = MaterialFactory.Create(color, rank || id == "back.cape.flame" ? color * 0.25f : color * 0.06f);
+            var lining = MaterialFactory.Create(Color.Lerp(color, Color.black, 0.45f), Color.black);
+            var trim = MaterialFactory.Create(trimColour, trimColour * (rank ? 0.6f : 0.3f));
+            var pattern = MaterialFactory.Create(Color.Lerp(trimColour, color, 0.25f), trimColour * 0.35f);
+
+            // The mantle over the shoulders, its gold edge, the clasps at the chest.
+            Shapes.Rounded("Mantle", root, new Vector3(0f, 0.36f, -0.06f), new Vector3(0.5f, 0.07f, 0.2f), 0.03f, cloth);
+            Shapes.Rounded("MantleEdge", root, new Vector3(0f, 0.33f, -0.06f), new Vector3(0.52f, 0.02f, 0.21f), 0.01f, trim);
+            if (royal)
+            {
+                // A king's fur collar: white with black flecks.
+                var fur = MaterialFactory.Create(new Color(0.96f, 0.96f, 0.94f), new Color(0.1f, 0.1f, 0.1f));
+                var fleck = MaterialFactory.Create(new Color(0.08f, 0.08f, 0.1f), Color.black);
+                Shapes.Rounded("Fur", root, new Vector3(0f, 0.395f, -0.07f), new Vector3(0.46f, 0.07f, 0.17f), 0.035f, fur);
+                for (int i = 0; i < 5; i++)
+                    Shapes.Primitive(PrimitiveType.Sphere, "Fleck", root, new Vector3(-0.16f + i * 0.08f, 0.43f, -0.05f + (i % 2) * 0.05f), new Vector3(0.025f, 0.012f, 0.025f), fleck);
+            }
+            foreach (float s in new[] { -1f, 1f })
+                Shapes.Primitive(PrimitiveType.Sphere, "Clasp", root, new Vector3(s * 0.12f, 0.35f, 0.09f), Vector3.one * 0.05f, trim);
+
+            var top = new GameObject("CapeTop").transform;
+            top.SetParent(root, false);
+            top.localPosition = new Vector3(0f, 0.36f, -0.15f);
+            var wave = top.gameObject.AddComponent<CapeWave>();
+            Transform parent = top;
+            const int strips = 6;
+            const float h = 0.058f;
+            for (int i = 0; i < strips; i++)
+            {
+                var seg = new GameObject("Seg" + i).transform;
+                seg.SetParent(parent, false);
+                seg.localPosition = i == 0 ? Vector3.zero : new Vector3(0f, -h, 0f);
+                float w = Mathf.Lerp(0.48f, 0.64f, i / (strips - 1f));
+                float y = -h * 0.5f;
+                Shapes.Rounded("Cloth", seg, new Vector3(0f, y, 0f), new Vector3(w, h + 0.008f, 0.022f), 0.008f, cloth);
+                Shapes.Rounded("Lining", seg, new Vector3(0f, y, 0.012f), new Vector3(w * 0.96f, h + 0.006f, 0.006f), 0.003f, lining);
+                // Embroidered edges down both sides.
+                foreach (float s in new[] { -1f, 1f })
+                    Shapes.Rounded("Edge", seg, new Vector3(s * (w * 0.5f - 0.012f), y, -0.004f), new Vector3(0.022f, h + 0.008f, 0.026f), 0.006f, trim);
+                // The pattern on the outside of the cloth.
+                if (i >= 1 && i <= 4) Pattern(seg, id, i, w, y, pattern, trim);
+                if (i == strips - 1)
+                {
+                    Shapes.Rounded("Hem", seg, new Vector3(0f, -h - 0.006f, 0f), new Vector3(w + 0.012f, 0.026f, 0.03f), 0.01f, trim);
+                    if (royal) for (int k = 0; k < 7; k++)
+                        Shapes.Primitive(PrimitiveType.Sphere, "Tassel", seg, new Vector3(-w * 0.45f + k * w * 0.15f, -h - 0.03f, 0f), new Vector3(0.025f, 0.035f, 0.025f), trim);
+                }
+                wave.segments.Add(seg);
+                parent = seg;
+            }
+        }
+
+        /// <summary>One strip's share of a cape's pattern, on its outer face (-z).</summary>
+        private static void Pattern(Transform seg, string id, int i, float w, float y, Material pattern, Material trim)
+        {
+            const float z = -0.014f;
+            switch (id)
+            {
+                case "back.cape.night":
+                    // Little stars scattered over the night blue.
+                    for (int k = 0; k < 3; k++)
+                        Shapes.Primitive(PrimitiveType.Sphere, "Star", seg, new Vector3((k - 1) * w * 0.28f + (i % 2) * 0.05f, y, z), new Vector3(0.022f, 0.022f, 0.008f), trim);
+                    break;
+                case "back.cape.flame":
+                    // Tongues of flame rising from the hem.
+                    if (i >= 3)
+                        for (int k = 0; k < 4; k++)
+                        {
+                            var tongue = Shapes.Rounded("Flame", seg, new Vector3((k - 1.5f) * w * 0.22f, y, z), new Vector3(0.04f, 0.05f, 0.006f), 0.015f, pattern).transform;
+                            tongue.localRotation = Quaternion.Euler(0f, 0f, 45f);
+                        }
+                    break;
+                case "back.cape.frost":
+                    // Snowflakes: three crossed bars.
+                    if (i % 2 == 1)
+                        for (int k = -1; k <= 1; k += 2)
+                            for (int r = 0; r < 3; r++)
+                                Shapes.Rounded("Flake", seg, new Vector3(k * w * 0.22f, y, z), new Vector3(0.008f, 0.05f, 0.006f), 0.003f, pattern)
+                                    .transform.localRotation = Quaternion.Euler(0f, 0f, r * 60f);
+                    break;
+                default:
+                    // A royal pattern: gold diamonds down the middle and a band of smaller ones across.
+                    var diamond = Shapes.Rounded("Diamond", seg, new Vector3(0f, y, z), new Vector3(0.05f, 0.05f, 0.006f), 0.008f, pattern).transform;
+                    diamond.localRotation = Quaternion.Euler(0f, 0f, 45f);
+                    if (i == 2)
+                        for (int k = -2; k <= 2; k++)
+                            if (k != 0)
+                                Shapes.Rounded("Dot", seg, new Vector3(k * w * 0.18f, y, z), new Vector3(0.025f, 0.025f, 0.006f), 0.006f, pattern)
+                                    .transform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+                    break;
             }
         }
 
@@ -253,13 +403,16 @@ namespace SquashBot.Visual
                     break;
                 }
                 case "back.cape":
-                {
-                    var cloth = MaterialFactory.Create(color, Color.black);
-                    var cape = Shapes.Rounded("Cape", root, new Vector3(0f, 0.2f, -0.17f), new Vector3(0.36f, 0.34f, 0.03f), 0.015f, cloth);
-                    cape.transform.localRotation = Quaternion.Euler(-12f, 0f, 0f);
-                    Shapes.Rounded("Collar", root, new Vector3(0f, 0.31f, -0.1f), new Vector3(0.3f, 0.04f, 0.1f), 0.015f, cloth);
+                case "back.cape.night":
+                case "back.cape.royal":
+                case "back.cape.flame":
+                case "back.cape.frost":
+                case "back.cape.rank3":
+                case "back.cape.rank6":
+                case "back.cape.rank9":
+                case "back.cape.rank12":
+                    Cape(root, id, color);
                     break;
-                }
                 case "back.jetpack":
                 {
                     var metal = MaterialFactory.Create(color, Color.black);
@@ -460,6 +613,37 @@ namespace SquashBot.Visual
                         Shapes.Cube("Ray", holder, Vector3.zero, new Vector3(0.22f, 1.1f, 1f), glow)
                             .transform.localRotation = Quaternion.Euler(0f, 0f, k * 60f);
                     break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Waves a cape's strips: a gentle ripple running down it while foi stands, swept back and fluttering harder the
+    /// faster foi moves (it watches its own movement in the world).
+    /// </summary>
+    public class CapeWave : MonoBehaviour
+    {
+        public readonly System.Collections.Generic.List<Transform> segments = new System.Collections.Generic.List<Transform>();
+        private Vector3 last;
+        private float speed, phase;
+
+        private void OnEnable() => last = transform.position;
+
+        private void LateUpdate()
+        {
+            float dt = Mathf.Max(0.0001f, Time.deltaTime);
+            var p = transform.position;
+            speed = Mathf.Lerp(speed, Mathf.Min(1f, (p - last).magnitude / dt / 5f), 1f - Mathf.Exp(-dt * 6f));
+            last = p;
+            phase += dt * (3.2f + speed * 7f);
+            for (int i = 0; i < segments.Count; i++)
+            {
+                if (segments[i] == null) continue;
+                float k = (i + 1f) / segments.Count;
+                float sweep = i == 0 ? 10f + speed * 45f : speed * 6f; // swept back from the shoulders as foi runs
+                float ripple = Mathf.Sin(phase - i * 0.8f) * (4f + speed * 10f) * k;
+                float sway = Mathf.Sin(phase * 0.6f - i * 0.5f) * 3f * k;
+                segments[i].localRotation = Quaternion.Euler(sweep + ripple, 0f, sway);
             }
         }
     }

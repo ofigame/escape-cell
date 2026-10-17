@@ -85,16 +85,16 @@ namespace SquashBot.UI
             var vs = Flat.Panel(l, "Vs", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(140f, 140f), Flat.CardHi, 0.9f);
             vs.pivot = new Vector2(0.5f, 0.5f);
             Flat.Label(vs, "VS", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(120f, 80f), 52f, Flat.Text, TextAlignmentOptions.Center, bold: true).rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            lobbyStatus = Flat.Label(l, "", new Vector2(0.5f, 0f), new Vector2(0f, 330f), new Vector2(940f, 60f), 34f, Flat.Text, TextAlignmentOptions.Center, bold: true, wrap: true);
+            lobbyStatus = Flat.Label(l, "", new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 235f), new Vector2(940f, 60f), 34f, Flat.Text, TextAlignmentOptions.Center, bold: true, wrap: true);
             lobbyStatus.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var track = Flat.Panel(l, "Track", new Vector2(0.5f, 0f), new Vector2(0f, 270f), new Vector2(600f, 10f), Flat.Line, 6f);
+            var track = Flat.Panel(l, "Track", new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 175f), new Vector2(600f, 10f), Flat.Line, 6f);
             track.pivot = new Vector2(0.5f, 0.5f);
-            searchBar = UiFactory.Box("Search", l, new Vector2(0.5f, 0f), new Vector2(0f, 270f), new Vector2(160f, 10f));
+            searchBar = UiFactory.Box("Search", l, new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 175f), new Vector2(160f, 10f));
             searchBar.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.Fill(searchBar, Flat.Blue, UiSprites.Rounded, 6f).raycastTarget = false;
-            renameButton = Flat.Button(l, Loc.T("ch.rename"), new Vector2(0.5f, 0f), new Vector2(-240f, 130f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => RenamePressed?.Invoke(), 32f);
+            renameButton = Flat.Button(l, Loc.T("ch.rename"), new Vector2(0.5f, 0f), new Vector2(-240f, Monetization.Ads.BannerReserve + 75f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => RenamePressed?.Invoke(), 32f);
             ((RectTransform)renameButton.transform).pivot = new Vector2(0.5f, 0.5f);
-            leaveButton = Flat.Button(l, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(240f, 130f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => Leave?.Invoke(), 32f);
+            leaveButton = Flat.Button(l, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(240f, Monetization.Ads.BannerReserve + 75f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => Leave?.Invoke(), 32f);
             ((RectTransform)leaveButton.transform).pivot = new Vector2(0.5f, 0.5f);
 
             BuildNamePanel(root);
@@ -164,9 +164,9 @@ namespace SquashBot.UI
                 ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0.5f);
             }
             // Playing a friend by code, between the lengths and CLOSE (the friends list is on the main menu).
-            var friend = Flat.Button(m, Loc.T("live.friend"), new Vector2(0.5f, 0f), new Vector2(0f, 230f), new Vector2(640f, 100f), Flat.Blue, Flat.Text, ShowFriend, 34f);
+            var friend = Flat.Button(m, Loc.T("live.friend"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 190f), new Vector2(640f, 100f), Flat.Blue, Flat.Text, ShowFriend, 34f);
             ((RectTransform)friend.transform).pivot = new Vector2(0.5f, 0.5f);
-            var back = Flat.Button(m, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, 90f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => modes.Hide(true), 34f);
+            var back = Flat.Button(m, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 70f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => modes.Hide(true), 34f);
             ((RectTransform)back.transform).pivot = new Vector2(0.5f, 0.5f);
             BuildFriend(root);
         }
@@ -257,7 +257,7 @@ namespace SquashBot.UI
 
             friendStatus = Flat.Label(p, "", new Vector2(0.5f, 0.5f), new Vector2(0f, -320f), new Vector2(940f, 120f), 32f, Flat.Text, TextAlignmentOptions.Center, bold: true, wrap: true);
             friendStatus.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var close = Flat.Button(p, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, 90f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => FriendClose?.Invoke(), 34f);
+            var close = Flat.Button(p, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 70f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => FriendClose?.Invoke(), 34f);
             ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 

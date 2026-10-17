@@ -391,21 +391,19 @@ namespace SquashBot.Gameplay
             colosseum = DuelStands.Build(transform, floorCells, new Vector3(cell0.x, 0f, cell0.z), GridView.SurfaceY - 0.02f, rival.name.GetHashCode(), mark.y < other.y, st.theme);
         }
 
-        /// <summary>A copy of foi in the rival's red, with the rival's weapon, for the rival's foi.</summary>
+        /// <summary>The rival's foi: foi as the rival dresses it (its own outfit; a made-up one for a computer rival), with the rival's weapon.</summary>
         private Transform RivalLook()
         {
             var root = new GameObject("RivalLook").transform;
+            var outfit = !string.IsNullOrEmpty(rival.look) ? Cosmetics.OutfitFrom(rival.look) : Cosmetics.OutfitFor(rival.name);
+            robot.ApplyOutfit(outfit);
             var copy = robot.BuildLookalike(root).transform;
+            robot.ApplyOutfit(Cosmetics.Outfit()); // foi back in its own
             root.localScale = robot.Visual.lossyScale; // foi's own size
             // Not foi's weapon: the rival's.
             var drop = new System.Collections.Generic.List<GameObject>();
             foreach (Transform c in copy.GetComponentsInChildren<Transform>(true)) if (c.name == "HeldWeapon") drop.Add(c.gameObject);
             foreach (var g in drop) DestroyImmediate(g);
-            foreach (var r in root.GetComponentsInChildren<Renderer>())
-            {
-                var m = r.material;
-                if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", Color.Lerp(m.GetColor("_BaseColor"), ArmyBattleColours.Theirs, 0.45f));
-            }
             rivalHeld = HeldWeapon.Attach(copy, Armory.Get(rival.weapon));
             return root;
         }
@@ -565,6 +563,12 @@ namespace SquashBot.Gameplay
         /// <summary>The camera goes in close and circles the two foi while the duel is in slow motion (a big blow, the ultimate).</summary>
         private bool SlowCamOn => challengeRun && (ultimateOn || Time.unscaledTime < slowCamUntil || slowCamWeight > 0f);
 
+        /// <summary>
+        /// A big moment is playing (the slow motion and the camera circling the two): until it is over nobody lands a
+        /// blow — only the move itself — and a live duel's health changes wait for its end.
+        /// </summary>
+        private bool DuelCinematic => challengeRun && chPhase == ChPhase.Duel && (ultimateOn || Time.unscaledTime < slowCamUntil);
+
         /// <summary>A big moment: film it close, circling <paramref name="centre"/>, for <paramref name="seconds"/>.</summary>
         private void SlowCam(Vector3 centre, float seconds)
         {
@@ -589,8 +593,8 @@ namespace SquashBot.Gameplay
             slowCamAngle += dt * 70f;
             float a = slowCamAngle * Mathf.Deg2Rad;
             float apart = Mathf.Clamp(new Vector2(me.x - foe.x, me.z - foe.z).magnitude, 0f, 6f);
-            float radius = 4.2f + apart * 0.4f;
-            var orbit = centre + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * radius + Vector3.up * (3.3f + apart * 0.2f);
+            float radius = 6.4f + apart * 0.5f; // far enough to see both whole, and the moment round them
+            var orbit = centre + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * radius + Vector3.up * (4.3f + apart * 0.25f);
             // Never into the stands: it keeps over the floor (the stands rise along its long sides).
             orbit.x = Mathf.Clamp(orbit.x, boardCentre.x - BoardW * 0.5f, boardCentre.x + BoardW * 0.5f);
             orbit.z = Mathf.Clamp(orbit.z, boardCentre.z - BoardH * 0.5f + 0.5f, boardCentre.z + BoardH * 0.5f - 0.5f);

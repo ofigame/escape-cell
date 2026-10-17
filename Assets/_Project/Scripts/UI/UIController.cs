@@ -271,6 +271,47 @@ namespace SquashBot.UI
         }
 
         private UnityEngine.UI.Image bombFaceImg, bombBodyImg, bombSparkImg;
+
+        /// <summary>The floor's action buttons (bomb, fire, the powers, the ad heal) at this share of their drawn size.</summary>
+        private const float ActionScale = 0.8f;
+        private RectTransform ultiButton, crowdButton;
+        private UnityEngine.UI.Image ultiFace, ultiFill, crowdFace, crowdOrb;
+        private TMPro.TextMeshProUGUI crowdText;
+        /// <summary>The floors' ULTI button was pressed (only answers when its bar is full).</summary>
+        public event Action UltiPressed;
+        /// <summary>The offered crowd skill was pressed.</summary>
+        public event Action CrowdSkillPressed;
+
+        /// <summary>The ULTI button: hidden off the floors; its gold ring shows the bar; full, it glows and breathes.</summary>
+        public void SetUlti(float meter, bool show)
+        {
+            if (ultiButton == null) return;
+            show &= !challengeHud;
+            if (ultiButton.gameObject.activeSelf != show) ultiButton.gameObject.SetActive(show);
+            if (!show) return;
+            bool full = meter >= 1f;
+            ultiFill.fillAmount = Mathf.Clamp01(meter);
+            ultiFace.color = full ? new Color(0.75f, 0.45f, 1f) : new Color(0.38f, 0.3f, 0.5f);
+            float s = ActionScale * (full ? 1f + Mathf.Sin(Time.unscaledTime * 6f) * 0.1f : 1f);
+            ultiButton.localScale = new Vector3(s, s, 1f);
+        }
+
+        /// <summary>The crowd skill's button (0 fire ball, 1 ice ball, 2 rusty chain), shown while it is offered.</summary>
+        public void SetCrowdSkill(int kind, bool show)
+        {
+            if (crowdButton == null) return;
+            show &= !challengeHud;
+            if (crowdButton.gameObject.activeSelf != show) crowdButton.gameObject.SetActive(show);
+            if (!show) return;
+            var c = kind == 0 ? new Color(1f, 0.5f, 0.15f) : kind == 1 ? new Color(0.45f, 0.85f, 1f) : new Color(0.62f, 0.4f, 0.25f);
+            crowdFace.color = c;
+            crowdOrb.color = kind == 0 ? new Color(1f, 0.85f, 0.3f) : kind == 1 ? new Color(0.9f, 0.98f, 1f) : new Color(0.35f, 0.22f, 0.14f);
+            crowdOrb.sprite = kind == 2 ? UiSprites.Ring : UiSprites.Circle;
+            crowdOrb.type = kind == 2 ? Image.Type.Sliced : Image.Type.Simple;
+            crowdText.text = Loc.T(kind == 0 ? "power.fire" : kind == 1 ? "power.ice" : "power.chain");
+            float s = ActionScale * (1f + Mathf.Sin(Time.unscaledTime * 7f) * 0.12f);
+            crowdButton.localScale = new Vector3(s, s, 1f);
+        }
         private RectTransform fireButton;
         private UnityEngine.UI.Image fireFace;
         /// <summary>The FIRE button (a gun on a floor): fires at the target in the gun's sight.</summary>
@@ -287,7 +328,12 @@ namespace SquashBot.UI
         private RectTransform bombSwitch;
         public event Action BombSwitchPressed;
 
-        private bool IsOverBomb(Vector2 screen) => (fireButton != null && fireButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(fireButton, screen, null))
+        private bool IsOverBomb(Vector2 screen) => IsOverPower(screen) || IsOverBombOnly(screen);
+
+        private bool IsOverPower(Vector2 screen) => (ultiButton != null && ultiButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(ultiButton, screen, null))
+            || (crowdButton != null && crowdButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(crowdButton, screen, null));
+
+        private bool IsOverBombOnly(Vector2 screen) => (fireButton != null && fireButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(fireButton, screen, null))
             || (bombButton != null && bombButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(bombButton, screen, null))
             || (bombSwitch != null && bombSwitch.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(bombSwitch, screen, null));
 
@@ -396,7 +442,6 @@ namespace SquashBot.UI
         private void BuildMenu(Transform root)
         {
             menu = UiScreen.Create("Menu", root, out var t);
-            Flat.Corners(t); // the game look's gold corners round the home screen
 
             // Top bar: coins, lives, stars, settings.
             var coins = UiFactory.Pill("Coins", t, TopLeft, new Vector2(40f, -40f), new Vector2(260f, 100f), UiFactory.PillColor);
@@ -1169,7 +1214,9 @@ namespace SquashBot.UI
             bagButton.gameObject.SetActive(false);
 
             // Bombs (from level 31, three a floor): bottom right, a round black bomb with its count.
-            bombButton = UiFactory.Box("Bomb", t, new Vector2(1f, 0f), new Vector2(-190f, 380f), new Vector2(150f, 150f));
+            bombButton = UiFactory.Box("Bomb", t, new Vector2(1f, 0.5f), new Vector2(-270f, 20f), new Vector2(150f, 150f)); // the action column, beside the skills
+            bombButton.pivot = new Vector2(0.5f, 0.5f);
+            bombButton.localScale = Vector3.one * ActionScale;
             var bombFace = UiFactory.Chunky(bombButton, UiFactory.StyleOf(new Color(0.95f, 0.45f, 0.25f)), 1f, 0f, UiSprites.Circle);
             var bombBody = UiFactory.Box("Body", bombButton, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(84f, 84f));
             bombBody.pivot = new Vector2(0.5f, 0.5f);
@@ -1192,7 +1239,9 @@ namespace SquashBot.UI
             bombButton.gameObject.SetActive(false);
             bombFaceImg = bombFace as UnityEngine.UI.Image;
             // The kind switch (blast, ice, fire): a small round button at the bomb's bottom left, shown with two kinds or more.
-            bombSwitch = UiFactory.Box("BombSwitch", t, new Vector2(1f, 0f), new Vector2(-300f, 290f), new Vector2(84f, 84f));
+            bombSwitch = UiFactory.Box("BombSwitch", t, new Vector2(1f, 0.5f), new Vector2(-356f, -40f), new Vector2(84f, 84f));
+            bombSwitch.pivot = new Vector2(0.5f, 0.5f);
+            bombSwitch.localScale = Vector3.one * ActionScale;
             var swFace = UiFactory.Chunky(bombSwitch, UiFactory.StyleOf(new Color(0.3f, 0.32f, 0.42f)), 1f, 0f, UiSprites.Circle);
             var swText = UiFactory.OutlinedText("Label", bombSwitch, new Vector2(0.5f, 0.5f), new Vector2(0f, 4f), new Vector2(84f, 60f), "<>", 30f, Color.white);
             swText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
@@ -1202,8 +1251,45 @@ namespace SquashBot.UI
             bombSwitch.gameObject.AddComponent<ButtonPress>();
             bombSwitch.gameObject.SetActive(false);
 
+            // ULTI (the floors): above the bomb, a purple orb with a gold ring that fills as robots fall; full, it glows and pulses.
+            ultiButton = UiFactory.Box("Ulti", t, new Vector2(1f, 0.5f), new Vector2(-270f, 170f), new Vector2(160f, 160f));
+            ultiButton.pivot = new Vector2(0.5f, 0.5f);
+            var ultiRing = UiFactory.Box("Fill", ultiButton, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(184f, 184f));
+            ultiRing.pivot = new Vector2(0.5f, 0.5f);
+            ultiFill = UiFactory.Fill(ultiRing, new Color(1f, 0.8f, 0.3f), UiSprites.Circle);
+            ultiFill.type = Image.Type.Filled;
+            ultiFill.fillMethod = Image.FillMethod.Radial360;
+            ultiFill.fillOrigin = (int)Image.Origin360.Top;
+            ultiFill.raycastTarget = false;
+            ultiFace = UiFactory.Chunky(ultiButton, UiFactory.StyleOf(new Color(0.55f, 0.3f, 0.9f)), 1f, 0f, UiSprites.Circle);
+            var ultiText = UiFactory.OutlinedText("Label", ultiFace.transform, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(160f, 60f), Loc.T("power.ulti"), 36f, new Color(0.2f, 0.05f, 0.35f));
+            ultiText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var ultiBtn = ultiButton.gameObject.AddComponent<Button>();
+            ultiBtn.targetGraphic = ultiFace;
+            ultiBtn.onClick.AddListener(() => UltiPressed?.Invoke());
+            ultiButton.gameObject.AddComponent<ButtonPress>();
+            ultiButton.gameObject.SetActive(false);
+
+            // The crowd skill (fire ball, ice ball, rusty chain): a big round button bottom centre while it is offered.
+            crowdButton = UiFactory.Box("CrowdSkill", t, new Vector2(1f, 0.5f), new Vector2(-270f, 345f), new Vector2(190f, 190f));
+            crowdButton.pivot = new Vector2(0.5f, 0.5f);
+            crowdFace = UiFactory.Chunky(crowdButton, UiFactory.StyleOf(new Color(1f, 0.5f, 0.15f)), 1f, 0f, UiSprites.Circle);
+            var orb = UiFactory.Box("Orb", crowdFace.transform, new Vector2(0.5f, 0.5f), new Vector2(0f, 14f), new Vector2(84f, 84f));
+            orb.pivot = new Vector2(0.5f, 0.5f);
+            crowdOrb = UiFactory.Fill(orb, Color.white, UiSprites.Circle);
+            crowdOrb.raycastTarget = false;
+            crowdText = UiFactory.OutlinedText("Label", crowdButton, new Vector2(0.5f, 0f), new Vector2(0f, 4f), new Vector2(260f, 48f), "", 30f, new Color(0.25f, 0.08f, 0.02f));
+            crowdText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var crowdBtn = crowdButton.gameObject.AddComponent<Button>();
+            crowdBtn.targetGraphic = crowdFace;
+            crowdBtn.onClick.AddListener(() => CrowdSkillPressed?.Invoke());
+            crowdButton.gameObject.AddComponent<ButtonPress>();
+            crowdButton.gameObject.SetActive(false);
+
             // FIRE (a gun on a floor): up and left of the bomb, a red round button with a sight on it.
-            fireButton = UiFactory.Box("Fire", t, new Vector2(1f, 0f), new Vector2(-350f, 470f), new Vector2(150f, 150f));
+            fireButton = UiFactory.Box("Fire", t, new Vector2(1f, 0.5f), new Vector2(-270f, -130f), new Vector2(150f, 150f));
+            fireButton.pivot = new Vector2(0.5f, 0.5f);
+            fireButton.localScale = Vector3.one * ActionScale;
             fireFace = UiFactory.Chunky(fireButton, UiFactory.StyleOf(new Color(0.95f, 0.3f, 0.25f)), 1f, 0f, UiSprites.Circle);
             var sightRing = UiFactory.Box("Ring", fireButton, new Vector2(0.5f, 0.5f), new Vector2(0f, 8f), new Vector2(70f, 70f));
             sightRing.pivot = new Vector2(0.5f, 0.5f);
@@ -1223,7 +1309,8 @@ namespace SquashBot.UI
             fireButton.gameObject.SetActive(false);
 
             // Low on health: watch an ad and fill the bar (above the bag, pulsing; once a level).
-            adHealButton = UiFactory.Box("AdHeal", t, new Vector2(0f, 0f), new Vector2(210f, 480f), new Vector2(150f, 150f)); // beside the bag, not on it
+            adHealButton = UiFactory.Box("AdHeal", t, new Vector2(0f, 1f), new Vector2(36f, -430f), new Vector2(150f, 150f)); // the top-left corner, under the health bar: clear of the play area
+            adHealButton.localScale = Vector3.one * ActionScale;
             var healFace = UiFactory.Chunky(adHealButton, UiFactory.StyleOf(new Color(0.25f, 0.78f, 0.55f)), 1f, 0f, UiSprites.Circle);
             HeartIcon(adHealButton, new Vector2(75f, 6f), 84f);
             var healLabel = UiFactory.OutlinedText("Label", adHealButton, new Vector2(0.5f, 0f), new Vector2(0f, -16f), new Vector2(220f, 44f), Loc.T("ad.heal"), 26f, new Color(0.04f, 0.22f, 0.14f));

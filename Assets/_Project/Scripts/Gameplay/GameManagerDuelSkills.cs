@@ -60,7 +60,7 @@ namespace SquashBot.Gameplay
             ResetCombos();
             finishUntil = 0f;
             moveBusy = false;
-            rivalHero = Mathf.Abs((rival.name ?? "").GetHashCode()) % 4;
+            rivalHero = 0; // one foi for everyone
             if (skillBar != null) Destroy(skillBar.gameObject);
             skillBar = DuelSkillBar.Create(chUi.BattleHud, Loc.T("duel.sp." + Mathf.Clamp(SaveData.Hero, 0, 3)));
             skillBar.Pressed += OnSkill;
@@ -76,6 +76,7 @@ namespace SquashBot.Gameplay
 
         private void EndDuelSkills()
         {
+            pendingHp = null;
             if (skillBar != null) Destroy(skillBar.gameObject);
             skillBar = null;
             moveBusy = false;
@@ -212,7 +213,9 @@ namespace SquashBot.Gameplay
             float share = hunt.ChallengeFoeShare * times;
             if (share <= 0f) return;
             hitShareOverride = share;
+            moveHit = true;
             OnBlockImpact(robot.Position);
+            moveHit = false;
             hitShareOverride = -1f;
         }
 
@@ -328,7 +331,7 @@ namespace SquashBot.Gameplay
         {
             var model = meStruck ? robot.Visual : hunt.ChallengeFoeModel;
             if (model == null || !challengeRun || (meStruck ? !robot.IsAlive : hunt.ChallengeFoeDown)) yield break;
-            if (!meStruck) hunt.StunFoe(1.2f);
+            hunt.StunFoe(1.4f); // the rival stands still through the moment, whoever was struck
             float was = Time.timeScale;
             Time.timeScale = 0.25f;
             SlowCam(model.position, 1.9f); // the camera goes in close and circles them

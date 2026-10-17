@@ -240,7 +240,7 @@ namespace SquashBot.Gameplay
             // Developer tool: -sbExport <folder> writes every model as PNG + OBJ (see AssetExporter), then quits.
             var exportFolder = AssetExporter.RequestedFolder();
             if (exportFolder != null) cameraRig.StartCoroutine(AssetExporter.Run(exportFolder, robot));
-            if (!SaveData.HeroChosen) cameraRig.StartCoroutine(FirstHeroPick());
+            SaveData.HeroChosen = true; // one foi for everyone: no picker
         }
 
         private void CreateUi()
@@ -314,6 +314,8 @@ namespace SquashBot.Gameplay
             ui.PausePressed += Pause;
             ui.BagPressed += OpenBag;
             ui.BombPressed += ThrowBomb;
+            ui.UltiPressed += OnUltiPressed;
+            ui.CrowdSkillPressed += OnCrowdSkillPressed;
             ui.CloudRestored += () => UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
             ui.BombSwitchPressed += () => NextBombKind();
             WireDefenseUi();
@@ -1240,7 +1242,7 @@ namespace SquashBot.Gameplay
                 var r = cam.right; r.y = 0f;
                 var s = stick.Value;
                 float push = s.magnitude;
-                float speed = push < 0.2f ? 0f : Mathf.Lerp(2.0f, 5.2f, Mathf.InverseLerp(0.2f, 1f, push));
+                float speed = push < 0.2f ? 0f : Mathf.Lerp(2.2f, 5.8f, Mathf.InverseLerp(0.2f, 1f, push));
                 var dir = r.normalized * s.x + f.normalized * s.y;
                 if (dir.sqrMagnitude > 0.0001f) vel = dir.normalized * speed;
             }
@@ -1385,6 +1387,10 @@ namespace SquashBot.Gameplay
             Time.timeScale = Mathf.Min(slowMoLeft > 0f ? SlowMoScale : 1f, toolSlowLeft > 0f && State == GameState.Playing ? Tools.SlowScale : 1f);
             if (hitStopLeft > 0f && State == GameState.Playing) Time.timeScale = Mathf.Min(Time.timeScale, 0.08f); // the hit-stop of a knock-out
             if (blowSlowLeft > 0f) { blowSlowLeft -= Time.unscaledDeltaTime; Time.timeScale = Mathf.Min(Time.timeScale, 0.3f); } // the monster's last blow
+            if (powerSlowLeft > 0f) { powerSlowLeft -= Time.unscaledDeltaTime; Time.timeScale = Mathf.Min(Time.timeScale, powerSlowScale); } // a floor power's slow motion
+            UpdatePowers(Time.deltaTime);
+            if (DuelCinematic) Time.timeScale = Mathf.Min(Time.timeScale, ultimateOn ? 0.35f : 0.3f); // the duel's big moment, slowed for all of it
+            if (pendingHp != null && !DuelCinematic) { var hp = pendingHp; pendingHp = null; ApplyLiveHp(hp); } // the live duel's health, held back through it
 
             if (State != GameState.Playing) { if (tpsOn && !arenaRun && State != GameState.Paused) ExitTps(); if (State != GameState.Paused) ui.SetFire(false, false); return; }
 
@@ -1840,12 +1846,13 @@ namespace SquashBot.Gameplay
                     AudioManager.PlaySfx(Sfx.Shield, 0.9f, 0.7f);
                     break;
                 case PowerUpType.Blast:
-                    // Blocks around the robot burst.
+                    // A blast round foi: every robot in the 5x5 square takes a heavy blow (and any crate bursts).
                     for (int x = -2; x <= 2; x++)
                         for (int y = -2; y <= 2; y++)
                         {
                             var t = new GridPos(p.x + x, p.y + y);
                             if (grid.InBounds(t)) hazards.Shatter(t);
+                            if (grid.InBounds(t)) hunt.Strike(t, PowerDamage(4f));
                         }
                     fx.Burst(GridView.ToWorld(p) + Vector3.up * 0.5f, new Color(1f, 0.5f, 0.3f), new Color(3f, 1.2f, 0.3f), 50, 8f);
                     cameraRig.Shake(0.8f);
@@ -3239,9 +3246,10 @@ namespace SquashBot.Gameplay
             var steps = new List<(BriefShot, string)>();
             if (level.mission == MissionType.Hunt)
             {
-                // The core loop, told the same way every time: the crates, the crowd, then the monster.
-                steps.Add((BriefShot.Block, Loc.T("brief.huntCrates")));
+                // The core loop, told the same way every time: the crowd, how robots strike, foi's powers, then the monster.
                 steps.Add((BriefShot.HammerHit, Loc.T("brief.huntCrowd")));
+                steps.Add((BriefShot.Stomp, Loc.T("brief.huntFoes")));
+                steps.Add((BriefShot.Super, Loc.T("brief.huntPowers")));
                 steps.Add((BriefShot.Stomp, Loc.T("brief.huntMonster")));
                 // Armoured floors: what it takes, and whether the weapon in hand has it.
                 if (level.armor > 0)

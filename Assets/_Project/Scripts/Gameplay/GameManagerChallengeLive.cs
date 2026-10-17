@@ -194,23 +194,10 @@ namespace SquashBot.Gameplay
                         break;
                     }
                     case "hp":
-                    {
-                        // The duel's health as the server keeps it (100 each).
-                        float before = health;
-                        health = Mathf.Clamp01(m.mine / 100f);
-                        RefreshHealthBar();
-                        if (health < before - 0.0001f)
-                        {
-                            ui.Flash(new Color(1f, 0.15f, 0.15f), 0.3f);
-                            cameraRig.Shake(0.6f);
-                            fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(1f, 0.35f, 0.35f), new Color(2.4f, 0.5f, 0.4f), 30, 6f);
-                            Haptics.Light();
-                        }
-                        else if (health > before + 0.0001f) FloatAt(robot.transform.position, "+" + Mathf.RoundToInt((health - before) * 100f) + "%", new Color(1f, 0.5f, 0.6f));
-                        hunt.SetFoeHealth(m.theirs / 100f);
-                        LiveMeters(m.mm, m.tm);
+                        // The duel's health as the server keeps it (100 each); held back while a big moment plays.
+                        if (DuelCinematic) pendingHp = m;
+                        else ApplyLiveHp(m);
                         break;
-                    }
                     case "shield":
                         // The rival raised its shield (the server counts its blows): its bubble here for the time.
                         if (m.by == 0) { hunt.ShieldFoe(DuelShieldHits); rivalShieldUntil = Time.time + DuelShieldSeconds; }
@@ -255,6 +242,26 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>The server's word on the match: the result card with its score and trophies.</summary>
+        /// <summary>The live duel's health from the server, held back during a big moment (see <see cref="DuelCinematic"/>).</summary>
+        private LiveNet.Msg pendingHp;
+
+        private void ApplyLiveHp(LiveNet.Msg m)
+        {
+            float before = health;
+            health = Mathf.Clamp01(m.mine / 100f);
+            RefreshHealthBar();
+            if (health < before - 0.0001f)
+            {
+                ui.Flash(new Color(1f, 0.15f, 0.15f), 0.3f);
+                cameraRig.Shake(0.6f);
+                fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(1f, 0.35f, 0.35f), new Color(2.4f, 0.5f, 0.4f), 30, 6f);
+                Haptics.Light();
+            }
+            else if (health > before + 0.0001f) FloatAt(robot.transform.position, "+" + Mathf.RoundToInt((health - before) * 100f) + "%", new Color(1f, 0.5f, 0.6f));
+            hunt.SetFoeHealth(m.theirs / 100f);
+            LiveMeters(m.mm, m.tm);
+        }
+
         private void FinishLive(LiveNet.Msg m)
         {
             if (m.profile != null && !string.IsNullOrEmpty(m.profile.name)) liveProfile = m.profile;

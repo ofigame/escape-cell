@@ -36,7 +36,7 @@ namespace SquashBot.UI
         public static Color FamilyColour(GroupKind k) =>
             Army.Family(k) == 0 ? new Color(0.95f, 0.42f, 0.4f) : Army.Family(k) == 1 ? new Color(0.25f, 0.78f, 0.7f) : new Color(1f, 0.76f, 0.3f);
 
-        private const float RowH = 196f, RowGap = 14f, Top = -330f;
+        private const float RowH = 186f, RowGap = 12f, Top = -330f;
 
         private void Build(RectTransform root)
         {
@@ -61,9 +61,9 @@ namespace SquashBot.UI
             for (int g = 0; g < Army.Groups; g++) GroupRow(root, g);
 
             var bottom = new Vector2(0.5f, 0f);
-            Flat.Label(root, Loc.T("army.wheel"), bottom, new Vector2(0f, 200f), new Vector2(960f, 50f), 26f, Flat.Muted, TextAlignmentOptions.Center)
+            Flat.Label(root, Loc.T("army.wheel"), bottom, new Vector2(0f, Monetization.Ads.BannerReserve + 180f), new Vector2(960f, 50f), 26f, Flat.Muted, TextAlignmentOptions.Center)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var close = Flat.Button(root, Loc.T("btn.close"), bottom, new Vector2(0f, 80f), new Vector2(520f, 110f), Flat.Blue, Color.white, () => screen.Hide(), 42f);
+            var close = Flat.Button(root, Loc.T("btn.close"), bottom, new Vector2(0f, Monetization.Ads.BannerReserve + 70f), new Vector2(520f, 110f), Flat.Blue, Color.white, () => screen.Hide(), 42f);
             ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 

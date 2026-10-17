@@ -143,7 +143,7 @@ namespace SquashBot.Gameplay
                 // Free walking and running: any way the stick points, as fast as it is pushed (a walk part-way, a run
                 // all the way out, never a dash); walls, buildings and robots stop foi, which slides along them.
                 float push = move.magnitude;
-                float speed = push < 0.25f ? 0f : Mathf.Lerp(2.2f, 5.6f, Mathf.InverseLerp(0.25f, 1f, push));
+                float speed = push < 0.25f ? 0f : Mathf.Lerp(2.4f, 6.2f, Mathf.InverseLerp(0.25f, 1f, push));
                 var vel = want.sqrMagnitude > 0.0001f ? want.normalized * speed : Vector3.zero;
                 robot.FreeStep(vel, Time.deltaTime, arenaRun ? (System.Func<GridPos, bool>)FreeWalkable : FloorWalkable);
                 return command;

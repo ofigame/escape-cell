@@ -9,8 +9,8 @@ namespace SquashBot.Gameplay
 {
     /// <summary>
     /// The special gear of the core loop: the whirl blades (every blow is a full turn that hits everything around foi
-    /// at once) and bombs (from level 31, three a floor: thrown at the thickest knot of enemies within six tiles, they
-    /// blow up the 3x3 square where they land, or 5x5 at the top level).
+    /// at once) and bombs (from level 5, four blast bombs a floor, six once bought: thrown at the thickest knot of
+    /// enemies within six tiles, they blow up the 3x3 square where they land, or 5x5 at the top level).
     /// </summary>
     public partial class GameManager
     {
@@ -20,8 +20,11 @@ namespace SquashBot.Gameplay
 
         private void SetupBombs()
         {
+            ResetPowers(); // a new floor: the ultimate's bar empty, the crowd skills counted out
             bool carry = levelIndex >= Bombs.FromLevel && !bonusRun;
-            for (int k = 0; k < Bombs.Kinds; k++) bombsLeft[k] = carry && Bombs.Has((BombKind)k) ? Bombs.PerFloor : 0;
+            // Every floor from the fifth level brings blast bombs (more once bought); ice and fire once bought.
+            for (int k = 0; k < Bombs.Kinds; k++)
+                bombsLeft[k] = !carry ? 0 : k == (int)BombKind.Blast ? Bombs.PerFloor + (Bombs.Owned ? 2 : 0) : Bombs.Has((BombKind)k) ? Bombs.PerFloor : 0;
             if (bombsLeft[(int)bombKind] <= 0) NextBombKind(quiet: true);
             ShowBombs();
         }

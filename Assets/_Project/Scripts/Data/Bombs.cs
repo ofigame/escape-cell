@@ -14,7 +14,8 @@ namespace SquashBot.Data
     }
 
     /// <summary>
-    /// Bombs from Bip's workshop: once a kind is bought, foi carries three of it to every floor and throws one (the bomb
+    /// Bombs: from the fifth level foi carries four blast bombs to every floor (six once bought in Bip's workshop, and
+    /// four of each other kind bought) and throws one (the bomb
     /// button; the small button beside it picks the kind) at the thickest knot of enemies near it. The blast has three
     /// levels (a bigger bang each time, and at the top a wider one); ice and fire are bought once.
     /// </summary>
@@ -23,8 +24,8 @@ namespace SquashBot.Data
         private const string Key = "sb_bombs";
 
         /// <summary>The level (0-based index) from which bombs are sold and carried.</summary>
-        public const int FromLevel = 30;
-        public const int PerFloor = 3;
+        public const int FromLevel = 4;
+        public const int PerFloor = 4;
         public const int MaxLevel = 3;
         /// <summary>How far a bomb is thrown (diagonals count as one step).</summary>
         public const int ThrowRange = 6;

@@ -33,10 +33,10 @@ namespace SquashBot.Data
             set { Prefs.SetInt(CoinsKey, value); Prefs.Save(); }
         }
 
-        /// <summary>Which of foi's four builds the player plays (0 Classic, 1 Volt, 2 Kaya, 3 Zip).</summary>
+        /// <summary>foi's build: there is only the one foi now (the old picker's choice is no longer read).</summary>
         public static int Hero
         {
-            get => Prefs.GetInt("sb_hero", 0);
+            get => 0;
             set { Prefs.SetInt("sb_hero", value); Prefs.Save(); }
         }
 

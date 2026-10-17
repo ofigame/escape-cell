@@ -36,6 +36,7 @@ namespace SquashBot.UI
             // A column down the right edge, big enough to hit with a thumb, each skill named under its button.
             var rt = UiFactory.Box("SkillBar", parent, new Vector2(1f, 0.5f), new Vector2(-118f, 60f), new Vector2(Size, 900f));
             rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.localScale = Vector3.one * 0.8f; // smaller, beside the action column
             var bar = rt.gameObject.AddComponent<SkillBar>();
             bar.root = rt;
             foreach (var t in SkillBag.Order) bar.slots.Add(bar.MakeSlot(t));

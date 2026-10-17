@@ -42,7 +42,7 @@ namespace SquashBot.UI
             title.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             // The buttons stay above the banner's place; the rest scrolls between them and the title.
             float buttons = Monetization.Ads.BannerReserve + 70f;
-            var viewport = UiFactory.Rect("Viewport", p, Vector2.zero, Vector2.one, new Vector2(30f, buttons + 80f), new Vector2(-30f, -140f));
+            var viewport = UiFactory.Rect("Viewport", p, Vector2.zero, Vector2.one, new Vector2(30f, buttons + 80f), new Vector2(-30f, -185f)); // clear below the title
             viewport.gameObject.AddComponent<RectMask2D>();
             UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);

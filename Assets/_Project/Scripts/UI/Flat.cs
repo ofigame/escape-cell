@@ -76,11 +76,12 @@ namespace SquashBot.UI
         public static void Background(Transform parent)
         {
             UiFactory.Dim(parent, Back);
-            Backdrop(parent);        }
+            Backdrop(parent);
+        }
 
         /// <summary>
-        /// The game look's backdrop over a full-screen layer: the galaxy (stretched to cover, notch included) and the
-        /// gold ornaments in the four corners. Nothing in it takes clicks.
+        /// The game look's backdrop over a full-screen layer: the galaxy, stretched to cover (notch included).
+        /// Nothing in it takes clicks.
         /// </summary>
         public static void Backdrop(Transform parent)
         {
@@ -88,24 +89,6 @@ namespace SquashBot.UI
             var img = UiFactory.Fill(sky, Color.white, UiSprites.Galaxy);
             img.raycastTarget = false;
             sky.gameObject.AddComponent<IgnoreSafeArea>();
-            Corners(parent);
-        }
-
-        /// <summary>The game look's gold ornaments in the four corners of the screen (over the safe area's edges too).</summary>
-        public static void Corners(Transform parent)
-        {
-            var frame = UiFactory.Stretch("Frame", parent);
-            frame.gameObject.AddComponent<IgnoreSafeArea>();
-            for (int i = 0; i < 4; i++)
-            {
-                var c = UiFactory.Rect("Corner", frame, new Vector2(i % 2, i / 2 == 0 ? 1 : 0), new Vector2(i % 2, i / 2 == 0 ? 1 : 0));
-                c.pivot = new Vector2(0f, 1f);
-                c.sizeDelta = new Vector2(170f, 170f);
-                c.anchoredPosition = Vector2.zero;
-                c.localScale = new Vector3(i % 2 == 0 ? 1f : -1f, i / 2 == 0 ? 1f : -1f, 1f);
-                var ci = UiFactory.Fill(c, new Color(1f, 1f, 1f, 0.9f), UiSprites.Corner);
-                ci.raycastTarget = false;
-            }
         }
     }
 }
