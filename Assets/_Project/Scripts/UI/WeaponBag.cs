@@ -104,6 +104,13 @@ namespace SquashBot.UI
                 if (inHand)
                     UiFactory.TextBox("InHandLabel", card, new Vector2(0.5f, 1f), new Vector2(0f, -22f), new Vector2(280f, 40f), Loc.T("weapon.equipped"), 24f, new Color(0.4f, 1f, 0.6f), title: true)
                         .rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                if (weapon.chest)
+                {
+                    var badge = UiFactory.Box("ChestBadge", card, new Vector2(1f, 1f), new Vector2(-12f, -64f), new Vector2(120f, 42f)); // under the "in hand" line
+                    badge.pivot = new Vector2(1f, 1f);
+                    UiFactory.Fill(badge, Palette.UiGold, UiSprites.Rounded, 2f).raycastTarget = false;
+                    UiFactory.Text(badge, Loc.T("chests.badge"), 22f, new Color(0.3f, 0.16f, 0.06f), title: true).raycastTarget = false;
+                }
                 bool dropGun = inHand && weapon.kind == WeaponKind.Gun && gunsAllowed;
                 if (dropGun)
                     UiFactory.TextBox("DropLabel", card, new Vector2(0.5f, 0f), new Vector2(0f, 14f), new Vector2(300f, 34f), Loc.T("bag.dropGun"), 22f, new Color(1f, 0.75f, 0.45f), title: true)

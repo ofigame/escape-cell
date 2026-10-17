@@ -231,6 +231,8 @@ namespace SquashBot.Data
             ["chests.exclusive"] = "Un'arma che nessun negozio vende!",
             ["chests.gold"] = "{0} oro",
             ["chests.take"] = "PRENDI IL REGALO",
+            ["chests.badge"] = "FORZIERE",
+            ["chests.equip"] = "EQUIPAGGIA",
             ["chests.hint"] = "Vinci un duello, vinci un forziere! Serie di vittorie e buon gioco portano forzieri migliori.",
             ["chests.none"] = "Ancora nessuno",
             ["chests.free"] = "Aperture gratis oggi: {0}/{1}",

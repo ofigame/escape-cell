@@ -231,6 +231,8 @@ namespace SquashBot.Data
             ["chests.exclusive"] = "Mağazada olmayan xüsusi silah!",
             ["chests.gold"] = "{0} qızıl",
             ["chests.take"] = "HƏDİYYƏNİ AL",
+            ["chests.badge"] = "SANDIQ",
+            ["chests.equip"] = "TAXIN",
             ["chests.hint"] = "Dueli qazan, sandıq qazan! Ardıcıl qələbələr və yaxşı oyun daha yaxşı sandıqlar gətirir.",
             ["chests.none"] = "Hələ yoxdur",
             ["chests.free"] = "Bu gün pulsuz açma: {0}/{1}",

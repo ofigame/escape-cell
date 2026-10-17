@@ -231,6 +231,8 @@ namespace SquashBot.Data
             ["chests.exclusive"] = "¡Un arma que ninguna tienda vende!",
             ["chests.gold"] = "{0} de oro",
             ["chests.take"] = "TOMAR EL REGALO",
+            ["chests.badge"] = "COFRE",
+            ["chests.equip"] = "EQUIPAR",
             ["chests.hint"] = "¡Gana un duelo, gana un cofre! Las rachas de victorias y el buen juego traen mejores cofres.",
             ["chests.none"] = "Aún ninguno",
             ["chests.free"] = "Aperturas gratis hoy: {0}/{1}",

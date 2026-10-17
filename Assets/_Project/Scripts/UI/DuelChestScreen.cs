@@ -17,7 +17,8 @@ namespace SquashBot.UI
     {
         private UiScreen screen, opening;
         private TextMeshProUGUI freeLine, openTitle, openGift, openNote;
-        private Button takeButton;
+        private Button takeButton, equipButton;
+        private WeaponDef gifted;
         private readonly TextMeshProUGUI[] counts = new TextMeshProUGUI[DuelChests.Tiers];
         private readonly Button[] openButtons = new Button[DuelChests.Tiers];
         private readonly TextMeshProUGUI[] openLabels = new TextMeshProUGUI[DuelChests.Tiers];
@@ -95,6 +96,15 @@ namespace SquashBot.UI
             openNote.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             takeButton = Flat.Button(root, Loc.T("chests.take"), new Vector2(0.5f, 0f), new Vector2(0f, Ads.BannerReserve + 120f), new Vector2(600f, 130f), new Color(0.2f, 0.72f, 0.36f), Color.white, Take, 46f);
             ((RectTransform)takeButton.transform).pivot = new Vector2(0.5f, 0.5f);
+            equipButton = Flat.Button(root, Loc.T("chests.equip"), new Vector2(0.5f, 0f), new Vector2(-180f, Ads.BannerReserve + 120f), new Vector2(340f, 130f), new Color(0.62f, 0.4f, 1f), Color.white, Equip, 44f);
+            ((RectTransform)equipButton.transform).pivot = new Vector2(0.5f, 0.5f);
+        }
+
+        /// <summary>EQUIP: the weapon that came out goes straight into foi's hand (a gun into the gun slot).</summary>
+        private void Equip()
+        {
+            if (gifted != null) Armory.Equip(gifted);
+            Take();
         }
 
         public void Show()
@@ -151,6 +161,8 @@ namespace SquashBot.UI
             openGift.text = "";
             openNote.text = "";
             takeButton.gameObject.SetActive(false);
+            equipButton.gameObject.SetActive(false);
+            gifted = reward.weapon;
             opening.Show();
             Audio.AudioManager.PlaySfx(Audio.Sfx.Click, 0.8f, 0.7f);
             ChestStage.Get().Play(t, reward, () =>
@@ -163,6 +175,11 @@ namespace SquashBot.UI
                     openNote.text = reward.weapon.chest ? Loc.T("chests.exclusive") : Loc.T("chests.newWeapon");
                 }
                 else openGift.text = Loc.F("chests.gold", reward.gold);
+                // A weapon: EQUIP on the left, TAKE THE GIFT on the right; gold: TAKE THE GIFT alone, in the middle.
+                var take = (RectTransform)takeButton.transform;
+                take.anchoredPosition = new Vector2(gifted != null ? 180f : 0f, take.anchoredPosition.y);
+                take.sizeDelta = new Vector2(gifted != null ? 340f : 600f, 130f);
+                equipButton.gameObject.SetActive(gifted != null);
                 takeButton.gameObject.SetActive(true);
             });
         }

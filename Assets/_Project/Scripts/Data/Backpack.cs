@@ -37,6 +37,7 @@ namespace SquashBot.Data
 
         public static int Weight(WeaponDef w)
         {
+            if (w.chest) return 0; // a chest's gift: no room taken (a prize never blocks the shop)
             switch (w.id)
             {
                 case "mallet": return 1;

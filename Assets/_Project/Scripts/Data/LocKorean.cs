@@ -231,6 +231,8 @@ namespace SquashBot.Data
             ["chests.exclusive"] = "상점에서 팔지 않는 특별한 무기!",
             ["chests.gold"] = "골드 {0}",
             ["chests.take"] = "선물 받기",
+            ["chests.badge"] = "상자",
+            ["chests.equip"] = "장착",
             ["chests.hint"] = "결투에서 이기면 상자를 얻어요! 연승과 좋은 플레이는 더 좋은 상자를 가져다줘요.",
             ["chests.none"] = "아직 없음",
             ["chests.free"] = "오늘 무료 열기: {0}/{1}",

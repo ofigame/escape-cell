@@ -231,6 +231,8 @@ namespace SquashBot.Data
             ["chests.exclusive"] = "سلاح لا يُباع في أي متجر!",
             ["chests.gold"] = "{0} ذهب",
             ["chests.take"] = "خذ الهدية",
+            ["chests.badge"] = "صندوق",
+            ["chests.equip"] = "جهّز",
             ["chests.hint"] = "اربح مبارزة واربح صندوقًا! سلاسل الانتصارات واللعب الجيد تجلب صناديق أفضل.",
             ["chests.none"] = "لا يوجد بعد",
             ["chests.free"] = "مرات الفتح المجانية اليوم: {0}/{1}",

@@ -231,6 +231,8 @@ namespace SquashBot.Data
             ["chests.exclusive"] = "Eine Waffe, die kein Laden verkauft!",
             ["chests.gold"] = "{0} Gold",
             ["chests.take"] = "GESCHENK NEHMEN",
+            ["chests.badge"] = "TRUHE",
+            ["chests.equip"] = "AUSRÜSTEN",
             ["chests.hint"] = "Gewinne ein Duell, gewinne eine Truhe! Siegesserien und gutes Spiel bringen bessere Truhen.",
             ["chests.none"] = "Noch keine",
             ["chests.free"] = "Heute gratis öffnen: {0}/{1}",
