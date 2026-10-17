@@ -28,7 +28,8 @@ namespace SquashBot.Gameplay
             k == DuctRunner.Kind.Forest || k == DuctRunner.Kind.Canyon || k == DuctRunner.Kind.Snow || k == DuctRunner.Kind.Lava || k == DuctRunner.Kind.Ocean || k == DuctRunner.Kind.Crystal;
 
         /// <summary>Builds the world's land round the floor under <paramref name="parent"/>; returns its sky for the backdrop.</summary>
-        public static Texture Build(Transform parent, GridModel grid, DuctRunner.Kind kind, int seed)
+        /// <param name="duel">The duel's board: the land starts past the stands round it, and the camera's side (east) stays open.</param>
+        public static Texture Build(Transform parent, GridModel grid, DuctRunner.Kind kind, int seed, bool duel = false)
         {
             var root = new GameObject("Biome").transform;
             root.SetParent(parent, false);
@@ -49,14 +50,14 @@ namespace SquashBot.Gameplay
 
             var rng = new System.Random(seed);
             float R() => (float)rng.NextDouble();
-            int target = Mathf.Clamp((w + 28) * (h + 28) / 9, 70, 190);
+            int target = Mathf.Clamp((w + 28) * (h + 28) / 9, 70, duel ? 120 : 190);
             int placed = 0;
             for (int tries = 0; tries < target * 8 && placed < target; tries++)
             {
                 float x = -16f + R() * (w + 32f), z = -16f + R() * (h + 32f);
-                if (NearFloor(grid, x, z)) continue;
-                if (x > w - 1.5f && x < w + 9f && z > -2f && z < h + 1f) continue; // the stands along the east side
-                bool front = x < -0.5f || z < -0.5f;      // between the camera and the floor: low things only
+                if (NearFloor(grid, x, z, duel ? 9.5f : Clearance)) continue;
+                if (!duel && x > w - 1.5f && x < w + 9f && z > -2f && z < h + 1f) continue; // the stands along the east side
+                bool front = duel ? x > w - 1f : x < -0.5f || z < -0.5f; // between the camera and the floor (the duel: its east side): low things only
                 bool between = x > 0f && x < w - 1f && z > 0f && z < h - 1f; // in a gap between stages
                 float maxH = front ? 0.55f : between ? 2.2f : 3.6f;
                 Place(root, m, kind, new Vector3(x, GroundY, z), maxH, R);
@@ -65,16 +66,16 @@ namespace SquashBot.Gameplay
             return Sky(kind);
         }
 
-        private static bool NearFloor(GridModel grid, float x, float z)
+        private static bool NearFloor(GridModel grid, float x, float z, float clearance)
         {
-            int r = Mathf.CeilToInt(Clearance);
+            int r = Mathf.CeilToInt(clearance);
             int cx = Mathf.RoundToInt(x), cz = Mathf.RoundToInt(z);
             for (int dx = -r; dx <= r; dx++)
                 for (int dz = -r; dz <= r; dz++)
                 {
                     var p = new GridPos(cx + dx, cz + dz);
                     if (!grid.InBounds(p) || !grid.Exists(p)) continue;
-                    if (Mathf.Abs(p.x - x) <= Clearance && Mathf.Abs(p.y - z) <= Clearance) return true;
+                    if (Mathf.Abs(p.x - x) <= clearance && Mathf.Abs(p.y - z) <= clearance) return true;
                 }
             return false;
         }

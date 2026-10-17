@@ -384,12 +384,30 @@ namespace SquashBot.Gameplay
             // The stands at the floor's two ends (the player's fans behind the player's mark, the rival's behind the rival's), the
             // stage's backdrop across the floor (the camera's side open).
             if (colosseum != null) Destroy(colosseum.gameObject);
+            if (duelSky) { duelSky = false; cameraRig.SetBackdrop(null); }
             var (mark, other) = DuelMarks;
             var floorCells = new bool[BoardW, BoardH];
             for (int y = 0; y < BoardH; y++) for (int x = 0; x < BoardW; x++) floorCells[x, y] = l.layout[y][x] != '.';
             var cell0 = GridView.ToWorld(new GridPos(0, 0));
             colosseum = DuelStands.Build(transform, floorCells, new Vector3(cell0.x, 0f, cell0.z), GridView.SurfaceY - 0.02f, rival.name.GetHashCode(), mark.y < other.y, st.theme);
+            // The stage's own land all round the stands and its own sky (the city stadium keeps the city).
+            if (st.theme != DuelStands.Theme.City)
+            {
+                var land = st.theme switch
+                {
+                    DuelStands.Theme.Glacier => DuctRunner.Kind.Snow,
+                    DuelStands.Theme.Volcano => DuctRunner.Kind.Lava,
+                    DuelStands.Theme.Space => DuctRunner.Kind.Void,
+                    DuelStands.Theme.Forest => DuctRunner.Kind.Forest,
+                    _ => DuctRunner.Kind.Canyon,
+                };
+                cameraRig.SetBackdrop(FloorBiome.Build(colosseum.transform, grid, land, rival.name.GetHashCode() & 0xffff, duel: true));
+                duelSky = true;
+            }
         }
+
+        /// <summary>The duel's land put its own sky up (put back when the duel ends).</summary>
+        private bool duelSky;
 
         /// <summary>The rival's foi: foi as the rival dresses it (its own outfit; a made-up one for a computer rival), with the rival's weapon.</summary>
         private Transform RivalLook()
@@ -541,6 +559,7 @@ namespace SquashBot.Gameplay
             if (rivalLook != null) Destroy(rivalLook.gameObject);
             rivalLook = null;
             if (colosseum != null) Destroy(colosseum.gameObject);
+            if (duelSky) { duelSky = false; cameraRig.SetBackdrop(null); }
             colosseum = null;
             hunt.ClearChallengeFoe();
         }
