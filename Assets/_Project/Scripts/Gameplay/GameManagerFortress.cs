@@ -154,6 +154,14 @@ namespace SquashBot.Gameplay
                 floorStand = FloorStand.Build(fortressFloor, x0, sections, 3 + Mathf.Max(1, level.fortressStages),
                     Color.Lerp(FortressFloor.WallTint ?? new Color(0.7f, 0.66f, 0.6f), Color.white, 0.35f), levelIndex * 31 + 7);
             }
+            // The floor stands in its world's land (the same as its road's): ground, scenery round the stages, the sky.
+            // The perfect city keeps its own look.
+            if (!arenaRun && !trailRun && !challengeRun && !level.utopia)
+            {
+                var land = DuctRunner.RoadTheme(World * LevelCatalog.LevelsPerWorld);
+                cameraRig.SetBackdrop(FloorBiome.Build(fortressFloor, grid, land, levelIndex * 13 + 5));
+                biomeSky = true;
+            }
             // The fortress never moves: its thousands of pieces are merged into a few big meshes (far fewer draw calls).
             // Never on a huge one (memory); the flames stay out of it (merged, they would stand still).
             StaticMerge.Combine(fortressFloor.gameObject, t => t.GetComponentInParent<Flames>() != null);
@@ -185,8 +193,12 @@ namespace SquashBot.Gameplay
             return world < 2 ? Color.Lerp(new Color(0.86f, 0.86f, 0.88f), tint, 0.3f) : tint;
         }
 
+        /// <summary>The floor's land put its own sky up (put back when the floor goes).</summary>
+        private bool biomeSky;
+
         private void ClearFortressFloor()
         {
+            if (biomeSky) { biomeSky = false; cameraRig.SetBackdrop(null); }
             if (fortressFloor != null) Destroy(fortressFloor.gameObject);
             fortressFloor = null;
             if (glassCell != null) Destroy(glassCell.gameObject);
