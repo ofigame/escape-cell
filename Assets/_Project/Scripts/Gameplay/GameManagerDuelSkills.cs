@@ -76,6 +76,7 @@ namespace SquashBot.Gameplay
 
         private void EndDuelSkills()
         {
+            if (pendingHp != null && LiveActive) ApplyLiveHp(pendingHp); // the last word on health still shows
             pendingHp = null;
             if (skillBar != null) Destroy(skillBar.gameObject);
             skillBar = null;
@@ -133,7 +134,7 @@ namespace SquashBot.Gameplay
             }
             skillBar.SetContext(ctx);
             skillBar.SetMeters(myMeter, rivalMeter);
-            if (!LiveActive && chPhase == ChPhase.Duel && !moveBusy) RivalMoves();
+            if (!LiveActive && chPhase == ChPhase.Duel && !moveBusy && !DuelCinematic) RivalMoves(); // (never inside a big moment)
         }
 
         // ---------- The player's moves ----------

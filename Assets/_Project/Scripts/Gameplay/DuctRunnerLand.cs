@@ -16,6 +16,24 @@ namespace SquashBot.Gameplay
         /// <summary>The road's own ground starts this many rows out from the floor's edge.</summary>
         private const int GroundFrom = 6;
 
+        private static Mesh blobMesh;
+
+        /// <summary>A rounded piece of scenery: one shared rounded mesh, scaled to the size.</summary>
+        private static GameObject Blob(string name, Transform parent, Vector3 at, Vector3 size, Material material)
+        {
+            if (blobMesh == null) blobMesh = MeshFactory.RoundedBox(Vector3.one, 0.3f);
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = at;
+            go.transform.localScale = size;
+            go.AddComponent<MeshFilter>().sharedMesh = blobMesh;
+            var r = go.AddComponent<MeshRenderer>();
+            r.sharedMaterial = material;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            r.receiveShadows = false;
+            return go;
+        }
+
         private bool IsLand => kind == Kind.Forest || kind == Kind.Canyon || kind == Kind.Snow || kind == Kind.Lava || kind == Kind.Ocean || kind == Kind.Crystal;
 
         private Material groundMat, groundFarMat, pitMat, landA, landB, landC, landD, lavaGlow, flameMat;
@@ -117,11 +135,11 @@ namespace SquashBot.Gameplay
         /// <summary>The far scenery on both sides of a land road, past the near verges (which each world draws itself).</summary>
         private void LandScenery(Transform root, int r, System.Random rng)
         {
-            if (!IsLand || r < GroundFrom + 2) return;
+            if (!IsLand || r < GroundFrom + 2 || r % 2 == 1) return; // every other row is plenty, and half the objects
             foreach (float side in new[] { -1f, 1f })
             {
                 // Two or three things a row per side, between 5 and 30 out: a world full of scenery, not a strip.
-                int count = 1 + rng.Next(3);
+                int count = 1 + rng.Next(2);
                 for (int i = 0; i < count; i++)
                 {
                     float d = 5f + Mathf.Pow(R(rng), 0.8f) * 25f;
@@ -144,7 +162,7 @@ namespace SquashBot.Gameplay
             float s = 0.9f + R(rng) * 0.9f;
             if (pine)
             {
-                Shapes.Rounded("Trunk", root, at + new Vector3(0f, 0.4f * s, 0f), new Vector3(0.22f, 0.8f, 0.22f) * s, 0.06f, themeC);
+                Blob("Trunk", root, at + new Vector3(0f, 0.4f * s, 0f), new Vector3(0.22f, 0.8f, 0.22f) * s, themeC);
                 for (int i = 0; i < 3; i++)
                 {
                     float w = s * (1.5f - i * 0.38f);
@@ -154,7 +172,7 @@ namespace SquashBot.Gameplay
             else
             {
                 float h = (1.6f + R(rng) * 1.2f) * s;
-                Shapes.Rounded("Trunk", root, at + new Vector3(0f, h * 0.5f, 0f), new Vector3(0.3f * s, h, 0.3f * s), 0.1f, themeC);
+                Blob("Trunk", root, at + new Vector3(0f, h * 0.5f, 0f), new Vector3(0.3f * s, h, 0.3f * s), themeC);
                 for (int i = 0; i < 3; i++)
                     Shapes.Primitive(PrimitiveType.Sphere, "Leaves", root, at + new Vector3((R(rng) - 0.5f) * 0.8f * s, h + (0.2f + R(rng) * 0.5f) * s, (R(rng) - 0.5f) * 0.8f * s),
                         Vector3.one * (1.1f + R(rng) * 0.7f) * s, i == 0 ? themeA : themeB);
@@ -173,12 +191,12 @@ namespace SquashBot.Gameplay
             else if (k < 0.72f)
             {
                 float s = 0.8f + R(rng) * 0.8f;
-                Shapes.Rounded("Cactus", root, at + new Vector3(0f, 0.7f * s, 0f), new Vector3(0.26f, 1.4f, 0.26f) * s, 0.12f * s, themeC);
-                Shapes.Rounded("Arm", root, at + new Vector3(0.22f * s, 0.9f * s, 0f), new Vector3(0.24f, 0.14f, 0.14f) * s, 0.06f * s, themeC);
-                Shapes.Rounded("Arm", root, at + new Vector3(0.32f * s, 1.15f * s, 0f), new Vector3(0.14f, 0.5f, 0.14f) * s, 0.06f * s, themeC);
+                Blob("Cactus", root, at + new Vector3(0f, 0.7f * s, 0f), new Vector3(0.26f, 1.4f, 0.26f) * s, themeC);
+                Blob("Arm", root, at + new Vector3(0.22f * s, 0.9f * s, 0f), new Vector3(0.24f, 0.14f, 0.14f) * s, themeC);
+                Blob("Arm", root, at + new Vector3(0.32f * s, 1.15f * s, 0f), new Vector3(0.14f, 0.5f, 0.14f) * s, themeC);
             }
             else if (k < 0.85f)
-                Shapes.Rounded("Rock", root, at + new Vector3(0f, 0.3f, 0f), new Vector3(0.9f + R(rng), 0.6f + R(rng) * 0.6f, 0.8f + R(rng)), 0.25f, landD);
+                Blob("Rock", root, at + new Vector3(0f, 0.3f, 0f), new Vector3(0.9f + R(rng), 0.6f + R(rng) * 0.6f, 0.8f + R(rng)), landD);
         }
 
         private void GlacierThing(Transform root, Vector3 at, System.Random rng, float d)
@@ -187,19 +205,19 @@ namespace SquashBot.Gameplay
             if (k < 0.3f && d > 9f)
             {
                 // A tilted slab of glacier ice.
-                var ice = Shapes.Rounded("Ice", root, at + new Vector3(0f, 0.9f, 0f), new Vector3(2.4f + R(rng) * 3f, 1.8f + R(rng) * 2.6f, 1.6f + R(rng) * 2f), 0.3f, landA).transform;
+                var ice = Blob("Ice", root, at + new Vector3(0f, 0.9f, 0f), new Vector3(2.4f + R(rng) * 3f, 1.8f + R(rng) * 2.6f, 1.6f + R(rng) * 2f), landA).transform;
                 ice.localRotation = Quaternion.Euler((R(rng) - 0.5f) * 20f, R(rng) * 90f, (R(rng) - 0.5f) * 25f);
             }
             else if (k < 0.75f)
             {
                 // A snowy pine.
                 float s = 0.9f + R(rng) * 0.8f;
-                Shapes.Rounded("Trunk", root, at + new Vector3(0f, 0.3f * s, 0f), new Vector3(0.18f, 0.6f, 0.18f) * s, 0.05f, themeC);
+                Blob("Trunk", root, at + new Vector3(0f, 0.3f * s, 0f), new Vector3(0.18f, 0.6f, 0.18f) * s, themeC);
                 for (int i = 0; i < 3; i++)
                 {
                     float w = s * (1.2f - i * 0.3f), y0 = (0.6f + i * 0.55f) * s;
-                    Shapes.Rounded("Tier", root, at + new Vector3(0f, y0, 0f), new Vector3(w, 0.5f * s, w), 0.2f, themeA).transform.localRotation = Quaternion.Euler(0f, 45f, 0f);
-                    Shapes.Rounded("Snow", root, at + new Vector3(0f, y0 + 0.24f * s, 0f), new Vector3(w * 0.7f, 0.08f, w * 0.7f), 0.04f, themeB).transform.localRotation = Quaternion.Euler(0f, 45f, 0f);
+                    Blob("Tier", root, at + new Vector3(0f, y0, 0f), new Vector3(w, 0.5f * s, w), themeA).transform.localRotation = Quaternion.Euler(0f, 45f, 0f);
+                    Blob("Snow", root, at + new Vector3(0f, y0 + 0.24f * s, 0f), new Vector3(w * 0.7f, 0.08f, w * 0.7f), themeB).transform.localRotation = Quaternion.Euler(0f, 45f, 0f);
                 }
             }
             else if (k < 0.85f)
@@ -222,9 +240,9 @@ namespace SquashBot.Gameplay
             else if (k < 0.7f)
             {
                 // Black rock, some of it cracked and glowing.
-                var rock = Shapes.Rounded("Rock", root, at + new Vector3(0f, 0.4f, 0f), new Vector3(1f + R(rng) * 1.6f, 0.8f + R(rng) * 1.6f, 1f + R(rng) * 1.4f), 0.3f, themeA).transform;
+                var rock = Blob("Rock", root, at + new Vector3(0f, 0.4f, 0f), new Vector3(1f + R(rng) * 1.6f, 0.8f + R(rng) * 1.6f, 1f + R(rng) * 1.4f), themeA).transform;
                 rock.localRotation = Quaternion.Euler(R(rng) * 15f, R(rng) * 90f, R(rng) * 15f);
-                if (R(rng) < 0.4f) Shapes.Rounded("Crack", rock, new Vector3(0f, 0.1f, 0f), new Vector3(0.08f, 0.9f, 1.02f), 0.03f, lavaGlow);
+                if (R(rng) < 0.4f) Shapes.Primitive(PrimitiveType.Cylinder, "Seam", root, at + new Vector3(0f, 0.02f, 0f), new Vector3(1.6f, 0.02f, 1.6f), lavaGlow);
             }
             else if (k < 0.85f)
                 Flame(root, at, 0.8f + R(rng) * 1.4f); // the ground itself burning
@@ -260,13 +278,13 @@ namespace SquashBot.Gameplay
         {
             if (R(rng) < 0.4f)
             {
-                var rock = Shapes.Rounded("Rock", root, at + new Vector3(0f, 0.6f, 0f), new Vector3(1.4f + R(rng) * 2f, 1.2f + R(rng) * 2.5f, 1.4f + R(rng) * 2f), 0.4f, landA).transform;
+                var rock = Blob("Rock", root, at + new Vector3(0f, 0.6f, 0f), new Vector3(1.4f + R(rng) * 2f, 1.2f + R(rng) * 2.5f, 1.4f + R(rng) * 2f), landA).transform;
                 rock.localRotation = Quaternion.Euler(R(rng) * 20f, R(rng) * 90f, R(rng) * 20f);
             }
             else if (R(rng) < 0.5f && d > 7f)
             {
                 float h = 1.5f + R(rng) * 3.5f;
-                var c = Shapes.Rounded("Crystal", root, at + new Vector3(0f, h * 0.45f, 0f), new Vector3(0.5f, h, 0.5f), 0.1f, landB).transform;
+                var c = Blob("Crystal", root, at + new Vector3(0f, h * 0.45f, 0f), new Vector3(0.5f, h, 0.5f), landB).transform;
                 c.localRotation = Quaternion.Euler((R(rng) - 0.5f) * 30f, R(rng) * 90f, (R(rng) - 0.5f) * 30f);
             }
         }
@@ -303,8 +321,8 @@ namespace SquashBot.Gameplay
                         if (i % 2 == 0)
                         {
                             float h = Rn(10f, 22f), w = Rn(14f, 30f);
-                            Shapes.Rounded("Mesa", skyline, at + Vector3.up * h * 0.5f, new Vector3(w, h, w * Rn(0.6f, 1f)), 1.2f, landB);
-                            Shapes.Rounded("Band", skyline, at + Vector3.up * h * 0.6f, new Vector3(w * 1.01f, h * 0.12f, w * Rn(0.6f, 1f) * 1.01f), 0.5f, landC);
+                            Blob("Mesa", skyline, at + Vector3.up * h * 0.5f, new Vector3(w, h, w * Rn(0.6f, 1f)), landB);
+                            Blob("Band", skyline, at + Vector3.up * h * 0.6f, new Vector3(w * 1.01f, h * 0.12f, w * Rn(0.6f, 1f) * 1.01f), landC);
                         }
                         else Shapes.Primitive(PrimitiveType.Sphere, "Dune", skyline, at, new Vector3(Rn(30f, 50f), Rn(6f, 12f), Rn(20f, 35f)), landA);
                         break;
@@ -328,7 +346,7 @@ namespace SquashBot.Gameplay
                     case Kind.Crystal:
                     {
                         float h = Rn(20f, 50f);
-                        var c = Shapes.Rounded("Spire", skyline, at + Vector3.up * h * 0.4f, new Vector3(h * 0.18f, h, h * 0.18f), 1f, i % 2 == 0 ? landB : landA).transform;
+                        var c = Blob("Spire", skyline, at + Vector3.up * h * 0.4f, new Vector3(h * 0.18f, h, h * 0.18f), i % 2 == 0 ? landB : landA).transform;
                         c.localRotation = Quaternion.Euler(Rn(-15f, 15f), Rn(0f, 90f), Rn(-15f, 15f));
                         break;
                     }

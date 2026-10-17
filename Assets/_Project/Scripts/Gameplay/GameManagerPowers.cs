@@ -35,7 +35,7 @@ namespace SquashBot.Gameplay
 
         /// <summary>A plain floor fight (the campaign's robots), where the powers belong.</summary>
         private bool PowerFloor => State == GameState.Playing && level != null && level.mission == MissionType.Hunt && !challengeRun && !arenaRun
-            && !bonusRun && !trailRun && roadPhase == RoadPhase.None && !previewing;
+            && !bonusRun && !trailRun && roadPhase == RoadPhase.None && !previewing && !IntroRunning && !introPending && (glassCell == null || glassCell.Broken);
 
         /// <summary>A new floor: the bar empty, the crowd skills counted out for this level.</summary>
         private void ResetPowers()
@@ -47,6 +47,18 @@ namespace SquashBot.Gameplay
             powerBusy = false;
             ui.SetUlti(0f, false);
             ui.SetCrowdSkill((int)crowdKind, false);
+        }
+
+        /// <summary>The ball or chain of the power under way (gone with it).</summary>
+        private GameObject powerThing;
+
+        /// <summary>A power cut short (a restart, a revive, the menu): nothing of it stays.</summary>
+        private void ClearPowers()
+        {
+            if (powerThing != null) Destroy(powerThing);
+            powerThing = null;
+            powerBusy = false;
+            powerSlowLeft = 0f;
         }
 
         private void OnFoeFelledForPowers()
@@ -63,7 +75,7 @@ namespace SquashBot.Gameplay
             if (crowdOffer > 0f)
             {
                 crowdOffer -= dt;
-                if (crowdOffer <= 0f) ui.SetCrowdSkill((int)crowdKind, false);
+                if (crowdOffer <= 0f) { ui.SetCrowdSkill((int)crowdKind, false); crowdCooldown = 5f; }
                 return;
             }
             if (crowdCooldown > 0f) { crowdCooldown -= dt; return; }
@@ -117,6 +129,7 @@ namespace SquashBot.Gameplay
             for (int i = 0; i < blows; i++)
             {
                 yield return new WaitForSecondsRealtime(0.2f);
+                while (State == GameState.Paused) yield return null;
                 if (!PowerFloor) break;
                 var at = targets[i];
                 var to = GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY;
@@ -128,6 +141,7 @@ namespace SquashBot.Gameplay
                 hunt.Strike(at, PowerDamage(4f));
             }
             yield return new WaitForSecondsRealtime(0.3f);
+            while (State == GameState.Paused) yield return null;
             if (PowerFloor)
             {
                 // The finish: a shockwave out from foi.
@@ -171,6 +185,7 @@ namespace SquashBot.Gameplay
             }
             var mat = MaterialFactory.Create(colour, colour * 2.4f);
             var ball = Shapes.Primitive(PrimitiveType.Sphere, fire ? "FireBall" : "IceBall", null, robot.transform.position + Vector3.up * 0.8f, Vector3.one * 0.2f, mat).transform;
+            powerThing = ball.gameObject;
             var halo = Shapes.Primitive(PrimitiveType.Sphere, "Halo", ball, Vector3.zero, Vector3.one * 1.5f,
                 MaterialFactory.CreateTransparent(new Color(colour.r, colour.g, colour.b, 0.3f), colour * 1.5f)).transform;
             AudioManager.PlaySfx(Sfx.Hop, 1f, 0.6f);
@@ -179,6 +194,7 @@ namespace SquashBot.Gameplay
             const float flight = 1.0f;
             for (float t = 0f; t < 1f; t += Time.deltaTime / flight)
             {
+                while (State == GameState.Paused) yield return null;
                 if (ball == null) yield break;
                 float e = t * t * (3f - 2f * t);
                 ball.position = Vector3.Lerp(from, to, e) + Vector3.up * Mathf.Sin(t * Mathf.PI) * 3.6f;
@@ -216,6 +232,7 @@ namespace SquashBot.Gameplay
             powerBusy = true;
             if (chainMat == null) chainMat = MaterialFactory.Create(new Color(0.55f, 0.33f, 0.2f), new Color(0.12f, 0.05f, 0.02f));
             var root = new GameObject("Chain").transform;
+            powerThing = root.gameObject;
             var links = new List<Transform>();
             const int count = 14;
             for (int i = 0; i < count; i++)
@@ -233,6 +250,7 @@ namespace SquashBot.Gameplay
             float nextStrike = 0f;
             for (float t = 0f; t < spin; t += Time.deltaTime)
             {
+                while (State == GameState.Paused) yield return null;
                 if (!PowerFloor) break;
                 float k = t / spin;
                 float reach = Mathf.Lerp(0.8f, 3.2f, Mathf.Min(1f, k * 3f));

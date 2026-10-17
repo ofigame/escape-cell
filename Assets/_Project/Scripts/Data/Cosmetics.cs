@@ -270,7 +270,6 @@ namespace SquashBot.Data
             Prefs.Save();
         }
 
-        /// <summary>The full outfit: what is equipped, with an optional preview piece swapped in.</summary>
         /// <summary>The visible pieces worn (paint, eyes, hat, arms, legs, back, badge) as one short text, for the rival's
         /// screen in a duel.</summary>
         public static string LookText()
@@ -312,6 +311,7 @@ namespace SquashBot.Data
             return outfit;
         }
 
+        /// <summary>The full outfit: what is equipped, with an optional preview piece swapped in.</summary>
         public static Dictionary<Slot, Cosmetic> Outfit(Cosmetic preview = null)
         {
             var outfit = new Dictionary<Slot, Cosmetic>();

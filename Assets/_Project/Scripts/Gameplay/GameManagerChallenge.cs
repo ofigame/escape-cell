@@ -395,9 +395,22 @@ namespace SquashBot.Gameplay
         private Transform RivalLook()
         {
             var root = new GameObject("RivalLook").transform;
-            var outfit = !string.IsNullOrEmpty(rival.look) ? Cosmetics.OutfitFrom(rival.look) : Cosmetics.OutfitFor(rival.name);
+            var outfit = rival.bot ? Cosmetics.OutfitFor(rival.name) : Cosmetics.OutfitFrom(rival.look); // a player's own (plain if it wears nothing), a made-up one for the computer
             robot.ApplyOutfit(outfit);
             var copy = robot.BuildLookalike(root).transform;
+            // The copy shares foi's paint and eye materials: give it its own before foi dresses back.
+            var own = new System.Collections.Generic.Dictionary<Material, Material>();
+            foreach (var r in copy.GetComponentsInChildren<Renderer>(true))
+            {
+                var mats = r.sharedMaterials;
+                for (int i = 0; i < mats.Length; i++)
+                {
+                    if (mats[i] == null) continue;
+                    if (!own.TryGetValue(mats[i], out var m)) own[mats[i]] = m = new Material(mats[i]);
+                    mats[i] = m;
+                }
+                r.sharedMaterials = mats;
+            }
             robot.ApplyOutfit(Cosmetics.Outfit()); // foi back in its own
             root.localScale = robot.Visual.lossyScale; // foi's own size
             // Not foi's weapon: the rival's.

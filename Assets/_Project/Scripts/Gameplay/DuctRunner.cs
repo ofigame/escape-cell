@@ -773,7 +773,7 @@ namespace SquashBot.Gameplay
             // steeper than about 12 degrees; level ground between them and at both ends.
             float grow = roadMode ? Mathf.Clamp01(roadLevel / 150f) : 0.5f;
             int h0 = (roadMode ? 20 : 30) + rng.Next(16);
-            while (bends && h0 < straightFrom - 30)
+            while (h0 < straightFrom - 30) // (the hills stay even when the bends had to go)
             {
                 int shape = rng.Next(3);
                 int len = 60 + rng.Next(60) + (shape == 2 ? 30 : 0);

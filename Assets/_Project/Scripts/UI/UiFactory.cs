@@ -263,7 +263,7 @@ namespace SquashBot.UI
         {
             var root = Box(name, parent, anchor, position, size);
             // Game-look chips: a cut-corner plate in the colour under a fine double gold rim.
-            Framed(root, color, 2f, plateName: "Body");
+            Framed(root, color, 2f, plateName: "Body").raycastTarget = false; // a chip never eats a touch meant for the play area
             return root;
         }
 

@@ -623,7 +623,8 @@ namespace SquashBot.Visual
     /// </summary>
     public class CapeWave : MonoBehaviour
     {
-        public readonly System.Collections.Generic.List<Transform> segments = new System.Collections.Generic.List<Transform>();
+        // (A plain public list: a copy of foi carries it over, pointing at its own strips.)
+        public System.Collections.Generic.List<Transform> segments = new System.Collections.Generic.List<Transform>();
         private Vector3 last;
         private float speed, phase;
 

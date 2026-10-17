@@ -308,7 +308,8 @@ namespace SquashBot.UI
             crowdOrb.color = kind == 0 ? new Color(1f, 0.85f, 0.3f) : kind == 1 ? new Color(0.9f, 0.98f, 1f) : new Color(0.35f, 0.22f, 0.14f);
             crowdOrb.sprite = kind == 2 ? UiSprites.Ring : UiSprites.Circle;
             crowdOrb.type = kind == 2 ? Image.Type.Sliced : Image.Type.Simple;
-            crowdText.text = Loc.T(kind == 0 ? "power.fire" : kind == 1 ? "power.ice" : "power.chain");
+            string label = Loc.T(kind == 0 ? "power.fire" : kind == 1 ? "power.ice" : "power.chain");
+            if (crowdText.text != label) crowdText.text = label;
             float s = ActionScale * (1f + Mathf.Sin(Time.unscaledTime * 7f) * 0.12f);
             crowdButton.localScale = new Vector3(s, s, 1f);
         }
@@ -1309,7 +1310,7 @@ namespace SquashBot.UI
             fireButton.gameObject.SetActive(false);
 
             // Low on health: watch an ad and fill the bar (above the bag, pulsing; once a level).
-            adHealButton = UiFactory.Box("AdHeal", t, new Vector2(0f, 1f), new Vector2(36f, -430f), new Vector2(150f, 150f)); // the top-left corner, under the health bar: clear of the play area
+            adHealButton = UiFactory.Box("AdHeal", t, new Vector2(0f, 1f), new Vector2(36f, -480f), new Vector2(150f, 150f)); // the top-left corner, under the health bar and ammo: clear of the play area
             adHealButton.localScale = Vector3.one * ActionScale;
             var healFace = UiFactory.Chunky(adHealButton, UiFactory.StyleOf(new Color(0.25f, 0.78f, 0.55f)), 1f, 0f, UiSprites.Circle);
             HeartIcon(adHealButton, new Vector2(75f, 6f), 84f);
@@ -1508,6 +1509,7 @@ namespace SquashBot.UI
                 if (!show) return;
                 ammoPill = UiFactory.Pill("Ammo", healthPill.parent, new Vector2(0f, 1f), Vector2.zero, new Vector2(250f, 74f), new Color(0.55f, 0.9f, 1f));
                 ammoPill.pivot = new Vector2(0f, 1f);
+                ammoPill.Find("Body").GetComponent<Image>().raycastTarget = true; // (a button)
                 ammoPill.anchoredPosition = healthPill.anchoredPosition + new Vector2(0f, -healthPill.rect.height - 18f);
                 ammoText = UiFactory.TextBox("Text", ammoPill, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(240f, 64f), "", 30f, UiFactory.TextDark, title: true);
                 ammoText.rectTransform.pivot = new Vector2(0.5f, 0.5f);

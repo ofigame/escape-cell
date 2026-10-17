@@ -241,7 +241,6 @@ namespace SquashBot.Gameplay
             }
         }
 
-        /// <summary>The server's word on the match: the result card with its score and trophies.</summary>
         /// <summary>The live duel's health from the server, held back during a big moment (see <see cref="DuelCinematic"/>).</summary>
         private LiveNet.Msg pendingHp;
 
@@ -262,6 +261,7 @@ namespace SquashBot.Gameplay
             LiveMeters(m.mm, m.tm);
         }
 
+        /// <summary>The server's word on the match: the result card with its score and trophies.</summary>
         private void FinishLive(LiveNet.Msg m)
         {
             if (m.profile != null && !string.IsNullOrEmpty(m.profile.name)) liveProfile = m.profile;

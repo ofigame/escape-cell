@@ -65,7 +65,8 @@ namespace SquashBot.Visual
             dial.localScale = new Vector3(0.62f, 1f, 0.62f); // under foi, whole in the view
             var navy = MaterialFactory.Create(new Color(0.07f, 0.09f, 0.22f), new Color(0.02f, 0.03f, 0.08f));
             var deep = MaterialFactory.Create(new Color(0.05f, 0.06f, 0.16f), Color.black);
-            var lines = MaterialFactory.Create(new Color(0.55f, 0.8f, 1f), new Color(0.6f, 1.1f, 1.8f));
+            var lines = MaterialFactory.Create(new Color(0.6f, 0.88f, 1f), new Color(1.1f, 1.9f, 3f));
+            var starGold = MaterialFactory.Create(new Color(1f, 0.85f, 0.45f), new Color(2.4f, 1.8f, 0.7f));
             var floor = MaterialFactory.Create(new Color(0.06f, 0.06f, 0.16f), new Color(0.02f, 0.02f, 0.06f));
             Shapes.Primitive(PrimitiveType.Cylinder, "Floor", transform, new Vector3(0f, -0.42f, 0f), new Vector3(30f, 0.02f, 30f), floor);
             Shapes.Primitive(PrimitiveType.Cylinder, "Base", dial, new Vector3(0f, -0.2f, 0f), new Vector3(7.4f, 0.2f, 7.4f), deep);
@@ -76,6 +77,21 @@ namespace SquashBot.Visual
             var core = MaterialFactory.Create(new Color(0.16f, 0.3f, 0.65f), new Color(0.2f, 0.45f, 1.1f));
             Shapes.Primitive(PrimitiveType.Cylinder, "Core", dial, new Vector3(0f, 0.09f, 0f), new Vector3(2.1f, 0.012f, 2.1f), core);
             Shapes.Primitive(PrimitiveType.Cylinder, "CoreRim", dial, new Vector3(0f, 0.086f, 0f), new Vector3(2.3f, 0.012f, 2.3f), gold);
+            Shapes.Primitive(PrimitiveType.Cylinder, "RimWall", dial, new Vector3(0f, -0.06f, 0f), new Vector3(7.25f, 0.14f, 7.25f), gold);
+            var studs = MaterialFactory.Create(new Color(1f, 0.85f, 0.5f), new Color(0.9f, 0.65f, 0.25f));
+            for (int i = 0; i < 32; i++)
+            {
+                float ang = (i + 0.5f) * Mathf.PI * 2f / 32f;
+                Shapes.Primitive(PrimitiveType.Sphere, "Stud", dial, new Vector3(Mathf.Sin(ang) * 3.58f, 0.03f, Mathf.Cos(ang) * 3.58f), new Vector3(0.12f, 0.08f, 0.12f), studs);
+            }
+            // The medallion: rings round an eight-pointed gold star that glows.
+            Shapes.Primitive(PrimitiveType.Cylinder, "MedalRing", dial, new Vector3(0f, 0.095f, 0f), new Vector3(1.5f, 0.01f, 1.5f), gold);
+            Shapes.Primitive(PrimitiveType.Cylinder, "Medal", dial, new Vector3(0f, 0.1f, 0f), new Vector3(1.36f, 0.01f, 1.36f), core);
+            for (int i = 0; i < 4; i++)
+            {
+                var ray = Shapes.Primitive(PrimitiveType.Cube, "Ray", dial, new Vector3(0f, 0.105f, 0f), new Vector3(0.09f, 0.01f, i % 2 == 0 ? 1.25f : 0.8f), starGold).transform;
+                ray.localRotation = Quaternion.Euler(0f, i * 45f, 0f);
+            }
             // Tick marks round the rim, spokes between the fields.
             for (int i = 0; i < 48; i++)
             {
@@ -98,12 +114,39 @@ namespace SquashBot.Visual
                     stars.Add(centre + new Vector3(((float)rng.NextDouble() - 0.5f) * 0.9f, 0f, ((float)rng.NextDouble() - 0.5f) * 0.9f));
                 for (int k = 0; k < stars.Count; k++)
                 {
-                    Shapes.Primitive(PrimitiveType.Sphere, "Star", dial, stars[k], new Vector3(0.07f, 0.02f, 0.07f), lines);
+                    Shapes.Primitive(PrimitiveType.Sphere, "Star", dial, stars[k], new Vector3(0.11f, 0.03f, 0.11f), k % 2 == 0 ? starGold : lines);
                     if (k == 0) continue;
                     var d = stars[k] - stars[k - 1];
-                    var line = Shapes.Primitive(PrimitiveType.Cube, "Line", dial, stars[k - 1] + d * 0.5f, new Vector3(0.015f, 0.006f, d.magnitude), lines).transform;
+                    var line = Shapes.Primitive(PrimitiveType.Cube, "Line", dial, stars[k - 1] + d * 0.5f, new Vector3(0.028f, 0.008f, d.magnitude), lines).transform;
                     line.localRotation = Quaternion.LookRotation(d);
                 }
+            }
+
+            // Behind the dial: an observatory's colonnade on an arc (dark stone, gold capitals and bases), a gold arch
+            // running over the columns, a low balustrade between them.
+            var colonnade = new GameObject("Colonnade").transform;
+            colonnade.SetParent(transform, false);
+            var stone = MaterialFactory.Create(new Color(0.16f, 0.17f, 0.32f), new Color(0.03f, 0.03f, 0.08f));
+            const int columns = 9;
+            const float arcR = 7.2f;
+            Vector3 prevTop = Vector3.zero;
+            for (int i = 0; i < columns; i++)
+            {
+                float ang = Mathf.Lerp(-72f, 72f, i / (columns - 1f)) * Mathf.Deg2Rad;
+                var at = new Vector3(Mathf.Sin(ang) * arcR, 0f, Mathf.Cos(ang) * arcR * 0.8f + 1.5f);
+                Shapes.Rounded("Base", colonnade, at + new Vector3(0f, 0.1f, 0f), new Vector3(0.7f, 0.2f, 0.7f), 0.05f, gold);
+                Shapes.Rounded("Column", colonnade, at + new Vector3(0f, 2.1f, 0f), new Vector3(0.42f, 3.8f, 0.42f), 0.18f, stone);
+                Shapes.Rounded("Capital", colonnade, at + new Vector3(0f, 4.1f, 0f), new Vector3(0.66f, 0.22f, 0.66f), 0.05f, gold);
+                var top = at + new Vector3(0f, 4.3f, 0f);
+                if (i > 0)
+                {
+                    var d = top - prevTop;
+                    var beam = Shapes.Rounded("Arch", colonnade, prevTop + d * 0.5f + Vector3.up * 0.15f, new Vector3(0.3f, 0.26f, d.magnitude + 0.2f), 0.08f, gold).transform;
+                    beam.localRotation = Quaternion.LookRotation(d);
+                    var rail = Shapes.Rounded("Rail", colonnade, prevTop + d * 0.5f - Vector3.up * 3.3f, new Vector3(0.16f, 0.12f, d.magnitude), 0.04f, stone).transform;
+                    rail.localRotation = Quaternion.LookRotation(d);
+                }
+                prevTop = top;
             }
 
             // A brass globe on its stand to the left, half in the shadows.
@@ -117,11 +160,16 @@ namespace SquashBot.Visual
             meridian.localRotation = Quaternion.Euler(0f, 0f, 70f);
             globeSpin = globe.Find("Ball");
 
+            StaticMerge.Combine(dial.gameObject, _ => false);
+            StaticMerge.Combine(colonnade.gameObject, _ => false);
+            StaticMerge.Combine(ringA.gameObject, _ => false);
+            StaticMerge.Combine(ringB.gameObject, _ => false);
+
             // Sparks drifting up.
             sparks = new GameObject("Sparks").transform;
             sparks.SetParent(transform, false);
             var spark = MaterialFactory.Create(Color.white, new Color(1.6f, 1.6f, 2f));
-            for (int i = 0; i < 30; i++)
+            for (int i = 0; i < 18; i++)
             {
                 var p = new Vector3((float)rng.NextDouble() * 9f - 4.5f, (float)rng.NextDouble() * 6f - 0.5f, (float)rng.NextDouble() * 6f - 1f);
                 var sp = Shapes.Primitive(PrimitiveType.Cube, "Spark", sparks, p, Vector3.one * (0.03f + (float)rng.NextDouble() * 0.04f), spark).transform;

@@ -407,6 +407,7 @@ namespace SquashBot.Gameplay
             painted.Clear();
             Time.timeScale = 1f;
             slowMoLeft = 0f;
+            ClearPowers(); // a power cut short: its slow motion, its ball or chain, its busy flag
             hazards.Stop();
             coins.Stop();
             powerUps.Stop();
@@ -1001,6 +1002,7 @@ namespace SquashBot.Gameplay
         {
             continued = true;
             StopAllCoroutines();
+            ClearPowers();
             // The loss already banked the coins and counted a fail; this run goes on instead.
             SaveData.Coins -= Earned;
             Prefs.SetInt(FailKey(levelIndex), Mathf.Max(0, Prefs.GetInt(FailKey(levelIndex), 0) - 1));
@@ -1387,7 +1389,7 @@ namespace SquashBot.Gameplay
             Time.timeScale = Mathf.Min(slowMoLeft > 0f ? SlowMoScale : 1f, toolSlowLeft > 0f && State == GameState.Playing ? Tools.SlowScale : 1f);
             if (hitStopLeft > 0f && State == GameState.Playing) Time.timeScale = Mathf.Min(Time.timeScale, 0.08f); // the hit-stop of a knock-out
             if (blowSlowLeft > 0f) { blowSlowLeft -= Time.unscaledDeltaTime; Time.timeScale = Mathf.Min(Time.timeScale, 0.3f); } // the monster's last blow
-            if (powerSlowLeft > 0f) { powerSlowLeft -= Time.unscaledDeltaTime; Time.timeScale = Mathf.Min(Time.timeScale, powerSlowScale); } // a floor power's slow motion
+            if (powerSlowLeft > 0f) { powerSlowLeft -= Time.unscaledDeltaTime; if (State == GameState.Playing) Time.timeScale = Mathf.Min(Time.timeScale, powerSlowScale); } // a floor power's slow motion
             UpdatePowers(Time.deltaTime);
             if (DuelCinematic) Time.timeScale = Mathf.Min(Time.timeScale, ultimateOn ? 0.35f : 0.3f); // the duel's big moment, slowed for all of it
             if (pendingHp != null && !DuelCinematic) { var hp = pendingHp; pendingHp = null; ApplyLiveHp(hp); } // the live duel's health, held back through it

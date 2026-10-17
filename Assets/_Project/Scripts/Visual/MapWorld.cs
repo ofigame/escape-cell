@@ -83,7 +83,7 @@ namespace SquashBot.Visual
             data.renderShadows = false; // nothing on the map casts a shadow: no shadow pass
             data.antialiasing = Application.isMobilePlatform ? AntialiasingMode.None : AntialiasingMode.SubpixelMorphologicalAntiAliasing;
             // Deep space behind everything: the galaxy picture, hung far behind the path and moving with the camera.
-            var sky = Shapes.Primitive(PrimitiveType.Quad, "Galaxy", camGo.transform, new Vector3(0f, 0f, 76f), new Vector3(46f, 100f, 1f), MaterialFactory.CreateUnlit(SquashBot.UI.UiSprites.Galaxy.texture));
+            var sky = Shapes.Primitive(PrimitiveType.Quad, "Galaxy", camGo.transform, new Vector3(0f, 0f, 76f), new Vector3(80f, 100f, 1f), MaterialFactory.CreateUnlit(SquashBot.UI.UiSprites.Galaxy.texture)); // wide enough for a tablet
             sky.transform.localRotation = Quaternion.identity;
         }
 
