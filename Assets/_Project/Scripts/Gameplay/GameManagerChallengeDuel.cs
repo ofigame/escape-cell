@@ -89,6 +89,7 @@ namespace SquashBot.Gameplay
         {
             duelStage = Mathf.Clamp(stage, 0, DuelStages.Length - 1);
             zoneRadius = 99f; zoneDrawn = -1; zoneHurtMe = zoneHurtFoe = 0f; zoneAnnounced = false;
+            hunt.Unsafe = null;
             BuildCourtyard();
             chDuelMe = chDuelThem = 0;
             chDuelLeft = chDuelMinutes * 60f;
@@ -304,7 +305,7 @@ namespace SquashBot.Gameplay
             float total = Mathf.Max(60f, chDuelMinutes * 60f);
             float elapsed = total - chDuelLeft;
             float k = Mathf.InverseLerp(total * 0.25f, total * 0.9f, elapsed);
-            if (k <= 0f) { zoneRadius = 99f; zoneAnnounced = false; return; }
+            if (k <= 0f) { zoneRadius = 99f; zoneAnnounced = false; hunt.Unsafe = null; return; }
             if (!zoneAnnounced)
             {
                 zoneAnnounced = true;
@@ -313,6 +314,9 @@ namespace SquashBot.Gameplay
             }
             zoneRadius = Mathf.Lerp(13.5f, 2.6f, k);
             var mid = new GridPos(BoardW / 2, BoardH / 2);
+            // The rival (and every robot on the board) keeps inside the ring.
+            hunt.SafeCentre = mid;
+            if (hunt.Unsafe == null) hunt.Unsafe = p => Vector2.Distance(new Vector2(p.x, p.y), new Vector2(BoardW / 2, BoardH / 2)) > zoneRadius;
             int step = Mathf.RoundToInt(zoneRadius * 2f);
             if (step != zoneDrawn)
             {

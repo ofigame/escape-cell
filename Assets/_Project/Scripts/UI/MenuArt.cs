@@ -16,34 +16,31 @@ namespace SquashBot.UI
         public enum Icon { Garage, Shop, Map, Guide, Chest, Swords, Friends, House, Profile }
 
         /// <summary>
-        /// The logo: "foi" big in the display font (a dark extruded back, a bright gradient face with a thick outline),
-        /// and "CELL" under it, smaller and spaced out (the game is "foi cell").
+        /// The logo in the game's card look (like the level card): a navy plate in a gold frame with a parchment on it,
+        /// "foi" big in dark ink pressed into the paper, and "CELL" under it, spaced out between two thin rules.
         /// </summary>
         public static void Logo(Transform parent, Vector2 anchor, Vector2 position)
         {
-            var root = UiFactory.Box("Logo", parent, anchor, position, new Vector2(1000f, 360f));
-            root.localRotation = Quaternion.Euler(0f, 0f, 2.5f);
-            // The extrusion: a few dark copies stepping down make the letters look like thick blocks.
-            for (int i = 4; i >= 1; i--)
-            {
-                var depth = Layer(root, "foi", new Vector2(0f, 46f - i * 6f), 250f, Color.Lerp(new Color(0.07f, 0.32f, 0.45f), new Color(0.04f, 0.12f, 0.25f), i / 4f));
-                Outline(depth, new Color(0.04f, 0.1f, 0.22f), 0.22f);
-            }
-            var face = Layer(root, "foi", new Vector2(0f, 46f), 250f, Color.white);
+            var root = UiFactory.Box("Logo", parent, anchor, position + new Vector2(0f, -22f), new Vector2(530f, 286f));
+            UiFactory.Framed(root, UiFactory.CardColor, 1.1f).raycastTarget = false;
+            var paper = UiFactory.Box("Parchment", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(490f, 246f));
+            UiFactory.Fill(paper, Color.white, UiSprites.Parchment, 1.2f).raycastTarget = false;
+            var ink = new Color(0.3f, 0.16f, 0.06f);
+            var light = new Color(1f, 0.95f, 0.8f, 0.85f);
+            // Pressed into the paper: a pale edge under the ink.
+            Layer(paper, "foi", new Vector2(0f, 24f), 162f, light);
+            var face = Layer(paper, "foi", new Vector2(0f, 28f), 162f, ink);
             face.enableVertexGradient = true;
-            face.colorGradient = new VertexGradient(Color.white, Color.white, new Color(0.45f, 0.95f, 1f), new Color(0.6f, 1f, 0.85f));
-            Outline(face, new Color(0.05f, 0.14f, 0.3f), 0.22f);
-            for (int i = 2; i >= 1; i--)
+            face.colorGradient = new VertexGradient(new Color(0.42f, 0.24f, 0.1f), new Color(0.42f, 0.24f, 0.1f), ink, ink);
+            var cellLight = Layer(paper, "CELL", new Vector2(0f, -84f), 52f, light);
+            cellLight.characterSpacing = 40f;
+            var cell = Layer(paper, "CELL", new Vector2(0f, -81f), 52f, new Color(0.55f, 0.3f, 0.1f));
+            cell.characterSpacing = 40f;
+            foreach (float s in new[] { -1f, 1f })
             {
-                var back = Layer(root, "CELL", new Vector2(0f, -122f - i * 4f), 84f, new Color(0.04f, 0.12f, 0.25f));
-                back.characterSpacing = 40f;
-                Outline(back, new Color(0.04f, 0.1f, 0.22f), 0.25f);
+                var rule = UiFactory.Box("Rule", paper, new Vector2(0.5f, 0.5f), new Vector2(s * 160f, -84f), new Vector2(82f, 4f));
+                UiFactory.Fill(rule, new Color(0.55f, 0.3f, 0.1f, 0.7f)).raycastTarget = false;
             }
-            var sub = Layer(root, "CELL", new Vector2(0f, -122f), 84f, Color.white);
-            sub.characterSpacing = 40f;
-            sub.enableVertexGradient = true;
-            sub.colorGradient = new VertexGradient(Color.white, Color.white, new Color(1f, 0.85f, 0.45f), new Color(1f, 0.85f, 0.45f));
-            Outline(sub, new Color(0.05f, 0.14f, 0.3f), 0.25f);
         }
 
         private static TextMeshProUGUI Layer(Transform root, string text, Vector2 offset, float size, Color color)

@@ -17,7 +17,7 @@ namespace SquashBot.Gameplay
         /// <summary>Health bars start at this level (0-based index, so level 21).</summary>
         public const int HealthFromLevel = 0;
         /// <summary>A heart pickup heals this much.</summary>
-        private const float HeartHeal = 0.3f;
+        private const float HeartHeal = 0.55f;
         /// <summary>After a hit the robot can't be hurt again for a moment.</summary>
         private const float HurtGrace = 1.3f;
         /// <summary>The blink after a robot's or soldier's blow on the floors: short, so a crowd that keeps swinging keeps hurting.</summary>

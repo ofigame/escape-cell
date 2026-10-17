@@ -53,13 +53,14 @@ namespace SquashBot.Visual
         }
 
         /// <summary>The glow of a weapon's blows: a rank weapon's effect colour, else its tier's.</summary>
-        public static Color GlowOf(WeaponDef w) => w.Special ? FxColour(w.fx) : Glow(w.tier);
+        public static Color GlowOf(WeaponDef w) => w.chest ? w.tint : w.Special ? FxColour(w.fx) : Glow(w.tier);
 
         /// <summary>A weapon's model; a rank weapon is bigger, made of its effect's glowing metal, with a glowing orb set in it.</summary>
         public static Transform Build(Transform parent, WeaponDef w, float scale = 1f)
         {
             var root = BuildPlain(parent, w, w.Special ? scale * w.size : scale);
             if (!w.Special) return root;
+            if (w.chest) { ChestTrim(root, w); return root; }
             var c = FxColour(w.fx);
             var orbMat = MaterialFactory.Create(c, c * 3f);
             float y = w.kind == WeaponKind.Gun ? 0.14f : w.kind == WeaponKind.Spear ? 1.05f : 0.2f;
@@ -69,14 +70,16 @@ namespace SquashBot.Visual
 
         private static Transform BuildPlain(Transform parent, WeaponDef w, float scale)
         {
-            if (w.kind == WeaponKind.Hammer) return HammerModels.Build(parent, Mathf.Clamp(w.tier, 1, 5), scale);
+            if (w.kind == WeaponKind.Hammer && !w.chest) return HammerModels.Build(parent, Mathf.Clamp(w.tier, 1, 5), scale);
             var root = new GameObject(w.id).transform;
             root.SetParent(parent, false);
             root.localScale = Vector3.one * scale;
             var wood = MaterialFactory.Create(new Color(0.45f, 0.28f, 0.16f), Color.black);
             var grip = MaterialFactory.Create(new Color(0.2f, 0.15f, 0.12f), Color.black);
             var gold = MaterialFactory.Create(new Color(1f, 0.8f, 0.3f), new Color(0.3f, 0.2f, 0.02f));
-            var metal = w.Special ? MaterialFactory.Create(FxColour(w.fx), FxColour(w.fx) * 1.6f) : Metal(w.tier);
+            var metal = w.chest ? MaterialFactory.CreateSurface(w.tint, w.tint * 0.9f, 0.9f, 0.55f)
+                : w.Special ? MaterialFactory.Create(FxColour(w.fx), FxColour(w.fx) * 1.6f) : Metal(w.tier);
+            if (w.chest) gold = MaterialFactory.CreateSurface(w.trim, w.trim * 0.35f, 0.85f, 0.8f);
             switch (w.kind)
             {
                 case WeaponKind.Sword:
@@ -136,6 +139,16 @@ namespace SquashBot.Visual
                     if (w.tier >= 4) Shapes.Rounded("Fin", root, new Vector3(0f, 0.1f, 0.18f), new Vector3(0.02f, 0.05f, 0.14f), 0.01f, gold);
                     break;
                 }
+                case WeaponKind.Hammer: // (a chest maul: a crowned head of shining metal)
+                    Shapes.Rounded("Grip", root, new Vector3(0f, 0.2f, 0f), new Vector3(0.08f, 0.46f, 0.08f), 0.035f, grip);
+                    Shapes.Rounded("Collar", root, new Vector3(0f, 0.44f, 0f), new Vector3(0.13f, 0.06f, 0.13f), 0.02f, gold);
+                    Shapes.Rounded("Head", root, new Vector3(0f, 0.58f, 0f), new Vector3(0.46f, 0.22f, 0.24f), 0.05f, metal);
+                    foreach (float s in new[] { -1f, 1f })
+                        Shapes.Rounded("Face", root, new Vector3(s * 0.25f, 0.58f, 0f), new Vector3(0.05f, 0.27f, 0.28f), 0.02f, gold);
+                    for (int i = 0; i < 5; i++)
+                        Shapes.Rounded("Point", root, new Vector3(-0.16f + i * 0.08f, 0.72f, 0f), new Vector3(0.04f, 0.07f, 0.04f), 0.015f, gold)
+                            .transform.localRotation = Quaternion.Euler(0f, 45f, 45f);
+                    break;
                 default: // spear
                     Shapes.Rounded("Shaft", root, new Vector3(0f, 0.36f, 0f), new Vector3(0.04f, 0.95f, 0.04f), 0.015f, wood);
                     Shapes.Rounded("Collar", root, new Vector3(0f, 0.84f, 0f), new Vector3(0.07f, 0.05f, 0.07f), 0.02f, gold);
@@ -149,6 +162,60 @@ namespace SquashBot.Visual
             }
             Details(root, w, wood, grip, gold, metal);
             return root;
+        }
+
+        /// <summary>
+        /// A chest weapon's finery: raised patterns in its trim colour along the blade (or round the head), gems set in
+        /// it that glow, and small glints of light, so it shines in the hand.
+        /// </summary>
+        private static void ChestTrim(Transform root, WeaponDef w)
+        {
+            var trim = MaterialFactory.CreateSurface(w.trim, w.trim * 0.45f, 0.85f, 0.8f);
+            var gemC = w.gem;
+            var gem = MaterialFactory.Create(gemC, gemC * 3.2f);
+            var glint = MaterialFactory.Create(Color.white, new Color(3f, 2.9f, 2.6f));
+            switch (w.kind)
+            {
+                case WeaponKind.Sword:
+                    // Raised diamonds down both faces of the blade, wings on the guard, a gem in its middle and the pommel.
+                    for (int i = 0; i < 5; i++)
+                        foreach (float z in new[] { -1f, 1f })
+                            Shapes.Rounded("Emboss", root, new Vector3(0f, 0.27f + i * 0.11f, z * 0.014f), new Vector3(0.045f - i * 0.004f, 0.045f - i * 0.004f, 0.008f), 0.006f, trim)
+                                .transform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+                    foreach (float s in new[] { -1f, 1f })
+                        Shapes.Rounded("Wing", root, new Vector3(s * 0.16f, 0.19f, 0f), new Vector3(0.1f, 0.035f, 0.06f), 0.015f, trim)
+                            .transform.localRotation = Quaternion.Euler(0f, 0f, s * 28f);
+                    foreach (float z in new[] { -1f, 1f })
+                        Shapes.Primitive(PrimitiveType.Sphere, "Gem", root, new Vector3(0f, 0.16f, z * 0.035f), new Vector3(0.06f, 0.06f, 0.03f), gem);
+                    Shapes.Primitive(PrimitiveType.Sphere, "Gem", root, new Vector3(0f, -0.06f, 0f), Vector3.one * 0.06f, gem);
+                    Shapes.Primitive(PrimitiveType.Sphere, "Glint", root, new Vector3(0.02f, 0.62f, 0.02f), Vector3.one * 0.035f, glint);
+                    Shapes.Primitive(PrimitiveType.Sphere, "Glint", root, new Vector3(-0.015f, 0.4f, 0.02f), Vector3.one * 0.025f, glint);
+                    break;
+                case WeaponKind.Mace:
+                    // Bands round the head, a ring of gems between them, a gem on top.
+                    foreach (float y in new[] { 0.56f, 0.68f })
+                        Shapes.Primitive(PrimitiveType.Cylinder, "Band", root, new Vector3(0f, y, 0f), new Vector3(0.215f, 0.012f, 0.215f), trim);
+                    for (int i = 0; i < 6; i++)
+                    {
+                        float a = i * Mathf.PI / 3f;
+                        Shapes.Primitive(PrimitiveType.Sphere, "Gem", root, new Vector3(Mathf.Cos(a) * 0.1f, 0.62f, Mathf.Sin(a) * 0.1f), Vector3.one * 0.04f, gem);
+                    }
+                    Shapes.Primitive(PrimitiveType.Sphere, "Gem", root, new Vector3(0f, 0.8f, 0f), Vector3.one * 0.07f, gem);
+                    Shapes.Rounded("Grip", root, new Vector3(0f, 0.08f, 0f), new Vector3(0.065f, 0.05f, 0.065f), 0.02f, trim);
+                    Shapes.Primitive(PrimitiveType.Sphere, "Glint", root, new Vector3(0.07f, 0.7f, 0.06f), Vector3.one * 0.03f, glint);
+                    break;
+                case WeaponKind.Hammer:
+                    // Gems in both faces and down the head's side, a glint on it.
+                    foreach (float s in new[] { -1f, 1f })
+                        Shapes.Primitive(PrimitiveType.Sphere, "Gem", root, new Vector3(s * 0.28f, 0.58f, 0f), new Vector3(0.03f, 0.1f, 0.1f), gem);
+                    foreach (float z in new[] { -1f, 1f })
+                    {
+                        Shapes.Primitive(PrimitiveType.Sphere, "Gem", root, new Vector3(0f, 0.58f, z * 0.122f), new Vector3(0.08f, 0.08f, 0.03f), gem);
+                        Shapes.Rounded("Emboss", root, new Vector3(0f, 0.58f, z * 0.121f), new Vector3(0.36f, 0.025f, 0.01f), 0.008f, trim);
+                    }
+                    Shapes.Primitive(PrimitiveType.Sphere, "Glint", root, new Vector3(0.12f, 0.66f, 0.12f), Vector3.one * 0.03f, glint);
+                    break;
+            }
         }
 
         /// <summary>The newer weapons' own touches on top of their kind's build.</summary>

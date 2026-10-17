@@ -244,6 +244,10 @@ namespace SquashBot.UI
         public QuestsScreen Quests { get; private set; }
         /// <summary>foi's army: the six soldier groups and their development points.</summary>
         public ArmyScreen ArmyView { get; private set; }
+        /// <summary>The duel chests won (open them for gold and weapons).</summary>
+        public DuelChestScreen DuelChestsView { get; private set; }
+        private GameObject chestsPing;
+        private TextMeshProUGUI chestsPingText;
         private Button menuQuests;
         private GameObject questsPing;
 
@@ -469,6 +473,8 @@ namespace SquashBot.UI
             AdOffer = AdOfferCard.Create(root);
             Chest = ChestCard.Create(root);
             ArmyView = ArmyScreen.Create(root);
+            DuelChestsView = DuelChestScreen.Create(root);
+            DuelChestsView.Changed += () => { RefreshMenuCoins(); RefreshChests(); };
             ChallengeStats = ChallengeStatsScreen.Create(root);
             ChallengeStats.SettingsPressed += ShowSettings;
             Quests = QuestsScreen.Create(root);
@@ -551,6 +557,15 @@ namespace SquashBot.UI
             ((RectTransform)menuBonus.transform).pivot = new Vector2(0.5f, 0.5f);
             menuBonusLabel = menuBonus.transform.Find("Label").GetComponentInChildren<TextMeshProUGUI>();
             menuBonus.gameObject.AddComponent<Pulse>();
+
+            // The duel chests: under the daily bonus, with how many wait to be opened.
+            var chests = MenuArt.DockButton(t, Loc.T("chests.button"), MenuArt.Icon.Chest, new Color(0.62f, 0.4f, 0.22f), TopRight, new Vector2(-110f, -740f), 120f, () => { DuelChestsView.Show(); });
+            ((RectTransform)chests.transform).pivot = new Vector2(0.5f, 0.5f);
+            var cPing = UiFactory.Box("Ping", chests.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(48f, 48f));
+            cPing.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(cPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
+            chestsPingText = UiFactory.Text(cPing, "0", 30f, Color.white);
+            chestsPing = cPing.gameObject;
 
             // The player's challenge rank (insignia, name, trophies) between the logo and foi.
             menuRank = UiFactory.Box("Rank", t, Top, new Vector2(0f, -585f), new Vector2(520f, 120f));
@@ -737,9 +752,19 @@ namespace SquashBot.UI
             if (armyPing != null) armyPing.SetActive(SquashBot.Data.Army.FreePoints > 0);
             menuDaily.gameObject.SetActive(DailyChest.Ready);
             RefreshQuests();
+            RefreshChests();
             RefreshDailyBonus();
             RefreshMenuRank(MenuDefenseLine);
             RefreshLives();
+        }
+
+        /// <summary>The chests button's count of unopened duel chests.</summary>
+        public void RefreshChests()
+        {
+            if (chestsPing == null) return;
+            int n = SquashBot.Data.DuelChests.Total;
+            chestsPing.SetActive(n > 0);
+            chestsPingText.text = n > 9 ? "9+" : n.ToString();
         }
 
         /// <summary>Coins changed while the menu is up (daily chest, shop).</summary>

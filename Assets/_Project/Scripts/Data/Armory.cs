@@ -33,6 +33,9 @@ namespace SquashBot.Data
         public SpecialFx fx;
         public float size = 1f;
         public bool Special => rank >= 0;
+        /// <summary>Only ever found in a duel chest (never sold): its own glowing metal and its trim's colour.</summary>
+        public bool chest;
+        public Color tint, trim, gem;
     }
 
     /// <summary>
@@ -103,6 +106,14 @@ namespace SquashBot.Data
             new WeaponDef { id = "meteorHammer", kind = WeaponKind.Hammer, tier = 6, damage = 40, reach = 2, cooldown = 0.25f, price = 18000, rank = 3, fx = SpecialFx.Quake, size = 1.35f },
             new WeaponDef { id = "glacierMaul", kind = WeaponKind.Hammer, tier = 6, damage = 56, reach = 2, cooldown = 0.25f, price = 36000, rank = 7, fx = SpecialFx.Freeze, size = 1.5f },
             new WeaponDef { id = "worldbreaker", kind = WeaponKind.Hammer, tier = 6, damage = 80, reach = 2, cooldown = 0.26f, price = 60000, rank = 12, fx = SpecialFx.Quake, size = 1.7f },
+
+            // The chest weapons: never in the shop, only in duel chests (the better ones, for winning streaks). Shining
+            // metal with raised patterns and set gems; each with an effect of its own like the rank weapons.
+            new WeaponDef { id = "dawnBlade", kind = WeaponKind.Sword, tier = 6, damage = 46, reach = 2, cooldown = 0.12f, price = 40000, rank = 0, fx = SpecialFx.Burn, size = 1.5f, chest = true, tint = new Color(1f, 0.85f, 0.5f), trim = new Color(1f, 0.78f, 0.3f), gem = new Color(1f, 0.42f, 0.18f) },
+            new WeaponDef { id = "nightBlade", kind = WeaponKind.Sword, tier = 6, damage = 52, reach = 2, cooldown = 0.12f, price = 45000, rank = 0, fx = SpecialFx.Chain, size = 1.55f, chest = true, tint = new Color(0.45f, 0.35f, 0.95f), trim = new Color(0.85f, 0.9f, 1f), gem = new Color(0.45f, 0.95f, 1f) },
+            new WeaponDef { id = "emeraldBlade", kind = WeaponKind.Sword, tier = 6, damage = 50, reach = 2, cooldown = 0.11f, price = 45000, rank = 0, fx = SpecialFx.Freeze, size = 1.5f, chest = true, tint = new Color(0.3f, 0.95f, 0.6f), trim = new Color(1f, 0.82f, 0.35f), gem = new Color(0.55f, 1f, 0.7f) },
+            new WeaponDef { id = "sunMace", kind = WeaponKind.Mace, tier = 6, damage = 58, reach = 2, cooldown = 0.28f, price = 48000, rank = 0, fx = SpecialFx.Quake, size = 1.5f, chest = true, tint = new Color(1f, 0.72f, 0.25f), trim = new Color(1f, 0.86f, 0.45f), gem = new Color(1f, 0.25f, 0.3f) },
+            new WeaponDef { id = "crownMaul", kind = WeaponKind.Hammer, tier = 6, damage = 64, reach = 2, cooldown = 0.25f, price = 50000, rank = 0, fx = SpecialFx.Quake, size = 1.5f, chest = true, tint = new Color(0.95f, 0.74f, 0.28f), trim = new Color(1f, 0.9f, 0.6f), gem = new Color(0.95f, 0.15f, 0.25f) },
         };
 
         /// <summary>The shop's shelves: 0 guns, 1 swords (and whirl blades), 2 axes and maces, 3 spears, 4 hammers.</summary>
@@ -125,15 +136,22 @@ namespace SquashBot.Data
 
         private const string EquipKey = "sb_weapon";
 
+        /// <summary>A chest weapon goes to the player (no gold, no backpack check: it was won).</summary>
+        public static void Grant(WeaponDef w)
+        {
+            Prefs.SetInt("sb_weapon_own_" + w.id, 1);
+            Prefs.Save();
+        }
+
         public static WeaponDef Get(string id) => All.Find(w => w.id == id) ?? All[0];
 
         public static bool Owned(WeaponDef w) => w.price == 0 || Prefs.GetInt("sb_weapon_own_" + w.id, 0) == 1;
 
         /// <summary>Sold to the player: an ordinary weapon from its level on; a rank weapon while the trophy rank is high enough.</summary>
-        public static bool Unlocked(WeaponDef w) => w.Special ? Challenge.League >= w.rank : Owned(w) || SaveData.UnlockedLevel >= w.unlockAt;
+        public static bool Unlocked(WeaponDef w) => w.chest ? Owned(w) : w.Special ? Challenge.League >= w.rank : Owned(w) || SaveData.UnlockedLevel >= w.unlockAt;
 
         /// <summary>Why a weapon is not for sale yet: its level, or (a rank weapon) the rank it needs.</summary>
-        public static string LockText(WeaponDef w) => w.Special ? Loc.F("special.needRank", Loc.T("rank." + w.rank)) : Loc.F("ws.lockedAt", w.unlockAt + 1);
+        public static string LockText(WeaponDef w) => w.chest ? Loc.T("chests.only") : w.Special ? Loc.F("special.needRank", Loc.T("rank." + w.rank)) : Loc.F("ws.lockedAt", w.unlockAt + 1);
 
         /// <summary>
         /// The rank weapons whose rank the player no longer holds are taken away (with their levels); the hand and the gun
@@ -145,7 +163,7 @@ namespace SquashBot.Data
             int league = Challenge.League;
             foreach (var w in All)
             {
-                if (!w.Special || league >= w.rank || Prefs.GetInt("sb_weapon_own_" + w.id, 0) != 1) continue;
+                if (!w.Special || w.chest || league >= w.rank || Prefs.GetInt("sb_weapon_own_" + w.id, 0) != 1) continue;
                 Prefs.DeleteKey("sb_weapon_own_" + w.id);
                 Prefs.DeleteKey("sb_weapon_lv_" + w.id);
                 lost.Add(w.id);

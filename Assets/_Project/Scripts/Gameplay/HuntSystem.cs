@@ -53,7 +53,7 @@ namespace SquashBot.Gameplay
             /// <summary>The health its bar last showed (-1: never drawn).</summary>
             public int barHp = -1;
             /// <summary>Its renderers and their own colours (faded as it loses health).</summary>
-            public List<(Renderer r, Color c)> tint;
+            public List<(Renderer r, Color c, Material m)> tint;
             /// <summary>A chest's guardian on the roads (see HuntSystemTrail): the chest it keeps near, its number.</summary>
             public bool spitter;
             public GridPos home;
@@ -144,6 +144,12 @@ namespace SquashBot.Gameplay
         public Func<GridPos, int, Monster> CreateMonster;
         /// <summary>A tile the crowd should keep off (a warning, a pickup...).</summary>
         public Func<GridPos, bool> Avoid;
+
+        /// <summary>The duel's red ground outside the closing ring: nobody steps out into it (stepping back in is fine).</summary>
+        public Func<GridPos, bool> Unsafe;
+
+        /// <summary>The middle of the duel's safe ring.</summary>
+        public GridPos SafeCentre;
 
         private GridModel grid;
         private LevelData level;
@@ -969,7 +975,7 @@ namespace SquashBot.Gameplay
         }
 
         private bool CanStep(GridPos from, GridPos p) => FloorRelief.StepOk(from, p) &&
-            grid.IsStandable(p) && !grid.IsOccupied(p) && !AllyAt(p) && !grid.IsGap(p) && p != robot.Position && (Avoid == null || !Avoid(p));
+            grid.IsStandable(p) && !grid.IsOccupied(p) && !AllyAt(p) && !grid.IsGap(p) && p != robot.Position && (Avoid == null || !Avoid(p)) && (Unsafe == null || !Unsafe(p) || Unsafe(from));
 
         private void UpdateBug(Bug b, float dt)
         {
@@ -1045,31 +1051,61 @@ namespace SquashBot.Gameplay
 
         private static MaterialPropertyBlock hurtBlock;
 
-        /// <summary>When its health changed: its colours, from full to faded (a property block each, no new materials).</summary>
+        /// <summary>See-through copies of the robots' materials (one per original, shared by every robot wearing it).</summary>
+        private static readonly Dictionary<Material, Material> glassOf = new Dictionary<Material, Material>();
+
+        private static Material GlassOf(Material m)
+        {
+            if (glassOf.TryGetValue(m, out var v) && v != null) return v;
+            if (glassOf.Count > 400)
+            {
+                var gone = new List<Material>();
+                foreach (var kv in glassOf) if (kv.Key == null || kv.Value == null) gone.Add(kv.Key);
+                foreach (var k in gone) glassOf.Remove(k);
+            }
+            v = new Material(m) { name = m.name + " (glass)" };
+            MaterialFactory.ConfigureTransparent(v);
+            glassOf[m] = v;
+            return v;
+        }
+
+        /// <summary>
+        /// When its health changed: the more hurt, the more see-through it grows (down to a ghost of itself near the
+        /// end). Unhurt it keeps its own solid materials; hurt it wears shared see-through copies with its alpha in a
+        /// property block (no new material per robot). The rival foi stays solid: its health shows at the top.
+        /// </summary>
         private void UpdateHealthBar(Guard g)
         {
             if (g.barHp == g.hp || g.root == null) return;
             g.barHp = g.hp;
+            if (g == challengeFoe) return;
             float k = Mathf.Clamp01(g.hp / (float)Mathf.Max(1, g.maxHp));
             if (g.tint == null)
             {
-                g.tint = new List<(Renderer, Color)>();
+                g.tint = new List<(Renderer, Color, Material)>();
                 foreach (var r in g.root.GetComponentsInChildren<Renderer>(true))
                 {
                     var m = r.sharedMaterial;
                     if (r is ParticleSystemRenderer || m == null || !m.HasProperty("_BaseColor")) continue;
-                    g.tint.Add((r, m.GetColor("_BaseColor")));
+                    if (m.renderQueue >= (int)UnityEngine.Rendering.RenderQueue.Transparent) continue; // already see-through (glows, shields)
+                    g.tint.Add((r, m.GetColor("_BaseColor"), m));
                 }
             }
             if (hurtBlock == null) hurtBlock = new MaterialPropertyBlock();
-            var dull = new Color(0.24f, 0.24f, 0.27f);
-            foreach (var (r, c) in g.tint)
+            bool whole = k >= 0.999f;
+            float alpha = Mathf.Lerp(0.3f, 0.92f, k);
+            foreach (var (r, c, m) in g.tint)
             {
                 if (r == null) continue;
-                var col = Color.Lerp(c, dull, (1f - k) * 0.8f);
-                col.a = c.a;
+                if (whole)
+                {
+                    r.sharedMaterial = m;
+                    r.SetPropertyBlock(null);
+                    continue;
+                }
+                r.sharedMaterial = GlassOf(m);
                 hurtBlock.Clear();
-                hurtBlock.SetColor("_BaseColor", col);
+                hurtBlock.SetColor("_BaseColor", new Color(c.r, c.g, c.b, c.a * alpha));
                 r.SetPropertyBlock(hurtBlock);
             }
         }

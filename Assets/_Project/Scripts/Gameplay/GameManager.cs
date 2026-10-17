@@ -379,6 +379,7 @@ namespace SquashBot.Gameplay
         private void ResetRun()
         {
             ClearHuntDress();
+            if (hunt != null) hunt.Unsafe = null; // (the duel's closing ring)
             StopAllCoroutines();
             hovering = false;
             if (hoverMarker != null) hoverMarker.SetActive(false);
@@ -1255,7 +1256,7 @@ namespace SquashBot.Gameplay
                 var r = cam.right; r.y = 0f;
                 var s = stick.Value;
                 float push = s.magnitude;
-                float speed = push < 0.2f ? 0f : Mathf.Lerp(2.6f, 6.8f, Mathf.InverseLerp(0.2f, 1f, push));
+                float speed = push < 0.2f ? 0f : Mathf.Lerp(3.3f, 8.6f, Mathf.InverseLerp(0.2f, 1f, push));
                 var dir = r.normalized * s.x + f.normalized * s.y;
                 if (dir.sqrMagnitude > 0.0001f) vel = dir.normalized * speed;
             }

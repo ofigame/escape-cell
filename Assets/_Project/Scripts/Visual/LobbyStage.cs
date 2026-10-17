@@ -17,7 +17,7 @@ namespace SquashBot.Visual
 
         public Camera Cam { get; private set; }
 
-        private Transform robotHolder, saturn;
+        private Transform robotHolder;
         private Func<Transform, GameObject> robotLook;
         private readonly List<Transform> sparkList = new List<Transform>();
         private readonly List<GameObject> bolts = new List<GameObject>();
@@ -73,15 +73,6 @@ namespace SquashBot.Visual
             violet.SetTexture("_BaseMap", soft);
             Shapes.Primitive(PrimitiveType.Quad, "Nebula", transform, new Vector3(-9f, 5f, 26f), new Vector3(20f, 14f, 1f), violet);
             Shapes.Primitive(PrimitiveType.Quad, "Nebula", transform, new Vector3(10f, 2.5f, 25f), new Vector3(18f, 12f, 1f), violet);
-            Planet("PlanetOrange", new Vector3(2.9f, 5.6f, 14f), 1.3f, new Color(0.95f, 0.55f, 0.25f), new Color(0.8f, 0.35f, 0.15f));
-            Planet("PlanetBlue", new Vector3(-2.0f, 0.95f, 6f), 0.55f, new Color(0.35f, 0.6f, 0.95f), new Color(0.2f, 0.35f, 0.7f));
-            saturn = Planet("Saturn", new Vector3(2.1f, 1.5f, 8f), 0.8f, new Color(0.95f, 0.75f, 0.5f), new Color(0.75f, 0.5f, 0.3f));
-            var ringMat = MaterialFactory.CreateTransparent(new Color(1f, 0.85f, 0.6f, 0.75f), new Color(0.6f, 0.45f, 0.25f));
-            var sRing = new GameObject("Ring").transform;
-            sRing.SetParent(saturn, false);
-            sRing.localRotation = Quaternion.Euler(14f, 0f, -18f);
-            FlatRing(sRing, 0.86f, 0.16f, ringMat, 0f, 48, 0.002f);
-            FlatRing(sRing, 1.05f, 0.08f, ringMat, 0f, 48, 0.002f);
 
             // The great star wheel spread over the floor: gold rings, sector lines and a constellation in each field.
             var floor = MaterialFactory.Create(new Color(0.07f, 0.06f, 0.18f), new Color(0.025f, 0.02f, 0.07f));
@@ -89,8 +80,12 @@ namespace SquashBot.Visual
             var wheel = new GameObject("Wheel").transform;
             wheel.SetParent(transform, false);
             wheel.localPosition = new Vector3(0f, -0.395f, 0f);
-            var wheelGold = MaterialFactory.Create(new Color(0.95f, 0.75f, 0.38f), new Color(0.75f, 0.5f, 0.18f));
-            FlatRing(wheel, 2.75f, 0.09f, cyanGlow, 0f, 72, 0.01f);
+            // Faint, half see-through lines: foi and its platform stay in front.
+            var wheelGold = MaterialFactory.CreateTransparent(new Color(0.95f, 0.78f, 0.45f, 0.22f), new Color(0.16f, 0.11f, 0.05f));
+            var dimStar = MaterialFactory.CreateTransparent(new Color(1f, 0.88f, 0.6f, 0.3f), new Color(0.3f, 0.22f, 0.1f));
+            var dimStarB = MaterialFactory.CreateTransparent(new Color(0.85f, 0.95f, 1f, 0.28f), new Color(0.2f, 0.26f, 0.3f));
+            var dimLine = MaterialFactory.CreateTransparent(new Color(0.6f, 0.9f, 1f, 0.18f), new Color(0.08f, 0.16f, 0.2f));
+            FlatRing(wheel, 2.75f, 0.07f, cyanGlow, 0f, 72, 0.01f);
             FlatRing(wheel, 4.0f, 0.07f, wheelGold, 0f, 96, 0.01f);
             FlatRing(wheel, 4.28f, 0.035f, wheelGold, 0f, 96, 0.01f);
             FlatRing(wheel, 7.0f, 0.07f, wheelGold, 0f, 120, 0.01f);
@@ -111,9 +106,9 @@ namespace SquashBot.Visual
                 Line(wheel, Dir(a) * 4.28f, Dir(a) * 7.0f, 0.04f, wheelGold);
                 Line(wheel, Dir(a) * 7.32f, Dir(a) * 11.2f, 0.05f, wheelGold);
                 Line(wheel, Dir(a + Mathf.PI / 12f) * 11.6f, Dir(a + Mathf.PI / 12f) * 16f, 0.06f, wheelGold);
-                Constellation(wheel, Dir(a + Mathf.PI / 12f) * 5.65f, 0.95f, rng, starGold, starWhite, lines);
-                Constellation(wheel, Dir(a + Mathf.PI / 12f) * 9.2f, 1.6f, rng, starGold, starWhite, lines);
-                Constellation(wheel, Dir(a) * 13.8f, 2.3f, rng, starGold, starWhite, lines);
+                Constellation(wheel, Dir(a + Mathf.PI / 12f) * 5.65f, 0.95f, rng, dimStar, dimStarB, dimLine);
+                Constellation(wheel, Dir(a + Mathf.PI / 12f) * 9.2f, 1.6f, rng, dimStar, dimStarB, dimLine);
+                Constellation(wheel, Dir(a) * 13.8f, 2.3f, rng, dimStar, dimStarB, dimLine);
             }
             var floorGlow = MaterialFactory.CreateTransparent(new Color(0.3f, 1f, 0.95f, 0.3f), new Color(0.15f, 0.6f, 0.55f));
             floorGlow.SetTexture("_BaseMap", soft);
@@ -226,15 +221,6 @@ namespace SquashBot.Visual
         }
 
         private static Vector3 Dir(float a) => new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a));
-
-        private Transform Planet(string name, Vector3 at, float size, Color colour, Color band)
-        {
-            var p = Shapes.Primitive(PrimitiveType.Sphere, name, transform, at, Vector3.one * size, MaterialFactory.Create(colour, colour * 0.3f)).transform;
-            var stripe = MaterialFactory.Create(band, band * 0.25f);
-            Shapes.Primitive(PrimitiveType.Sphere, "Band", p, new Vector3(0f, 0.12f, 0f), new Vector3(1.01f, 0.16f, 1.01f), stripe);
-            Shapes.Primitive(PrimitiveType.Sphere, "Band", p, new Vector3(0f, -0.2f, 0f), new Vector3(0.985f, 0.1f, 0.985f), stripe);
-            return p;
-        }
 
         /// <summary>A thin straight bar from a to b (constellation lines, wheel spokes, lightning).</summary>
         private static void Line(Transform parent, Vector3 a, Vector3 b, float width, Material mat)
@@ -363,7 +349,6 @@ namespace SquashBot.Visual
             // The robot turns a little this way and that, as if showing off, with a slow breath.
             robotHolder.localRotation = Quaternion.Euler(0f, 180f + Mathf.Sin(time * 0.5f) * 28f, 0f); // the model faces +Z, the camera is on -Z
             robotHolder.localPosition = new Vector3(0f, 0.16f + Mathf.Abs(Mathf.Sin(time * 1.6f)) * 0.03f, 0f);
-            saturn.localRotation = Quaternion.Euler(0f, time * 6f, 0f);
             // The light breathes; now and then a bolt of lightning flashes through it.
             float pulse = 0.85f + 0.15f * Mathf.Sin(time * 2.1f);
             boltClock -= dt;

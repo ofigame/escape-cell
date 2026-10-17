@@ -456,6 +456,9 @@ namespace SquashBot.Gameplay
             ChallengeFinish(me > them ? 1 : me < them ? -1 : 0, me + " - " + them);
         }
 
+        /// <summary>The chest the last duel brought (none: lost, or a draw).</summary>
+        private ChestTier? chestWon;
+
         /// <param name="outcome">1 won, 0 a draw, -1 lost.</param>
         private void ChallengeFinish(int outcome, string score)
         {
@@ -466,6 +469,8 @@ namespace SquashBot.Gameplay
             // The challenge's quests: a duel played, won, won alone or against a live rival.
             ChallengeQuests.Report(DuelGoal.Play);
             if (won) { ChallengeQuests.Report(DuelGoal.Win); if (!chDuelSquads) ChallengeQuests.Report(DuelGoal.SoloWin); if (chLive) ChallengeQuests.Report(DuelGoal.LiveWin); }
+            // A duel won brings a chest: the better the streak and the health left, the better the chest.
+            chestWon = DuelChests.OnDuelEnd(won, draw, chOnline || chLive, health);
             if (colosseum != null) colosseum.Cheer(won ? 0 : draw ? -1 : 1, 1f);
             hunt.Freeze();
             int gold = won && (chOnline || chLive) ? Challenge.WinGold : 0; // offline practice pays no prize
@@ -515,6 +520,7 @@ namespace SquashBot.Gameplay
             string line = score + "  ·  " + Loc.F(won ? "ch.wonLine" : draw ? "ch.drawLine" : "ch.lostLine", rival.name)
                           + (chLive && liveLeft ? "\n" + Loc.T("live.rivalLeftWin") : "")
                           + "\n" + trophies + (gold > 0 ? " · +" + gold + " " + Loc.T("ch.gold") : "")
+                          + (won && chestWon.HasValue ? "\n" + Loc.F("chests.won", DuelChestScreen.TierName(chestWon.Value)) : "")
                           + "\n" + Challenge.RankName(Challenge.Rank) + " · " + Loc.F("ch.trophies", Challenge.Trophies);
             yield return ShowResultDelayed(new UIController.ResultInfo
             {

@@ -116,7 +116,7 @@ namespace SquashBot.UI
                     WeaponChips();
                     if (weaponCat == 0) { PackCell(); BombCell(); KindBombCell(BombKind.Ice); KindBombCell(BombKind.Fire); }
                     // Weakest first, strongest last (by the damage of a blow, a burst counted whole).
-                    var shelf = Armory.All.FindAll(x => Armory.Category(x) == weaponCat);
+                    var shelf = Armory.All.FindAll(x => Armory.Category(x) == weaponCat && (!x.chest || Armory.Owned(x))); // chest weapons only once won
                     shelf.Sort((a, b) => a.damage * a.burst != b.damage * b.burst ? (a.damage * a.burst).CompareTo(b.damage * b.burst) : a.unlockAt.CompareTo(b.unlockAt));
                     foreach (var w in shelf) WeaponCell(w);
                     break;
@@ -339,7 +339,7 @@ namespace SquashBot.UI
                 desc.text = Loc.F("weapon.line", dmg, w.reach, Loc.T(cd <= 0.16f ? "weapon.fast" : cd >= 0.3f ? "weapon.slow" : "weapon.normal"))
                             + "\n" + (w.kind == WeaponKind.Gun ? Loc.T(w.auto ? "weapon.auto" : "weapon.single") + (w.auto ? " ×" + w.burst : "") : Loc.T("weapon.kind." + w.kind)) + "  ·  " + Loc.F("pack.weight", Backpack.Weight(w))
                             + (owned && lv < Armory.MaxLevel ? "  ·  " + Loc.F("weapon.nextLevel", Armory.Damage(w, lv + 1)) : "");
-                if (w.Special) desc.text = "<color=#FFD25A>" + Loc.F("special.line", Loc.T("rank." + w.rank)) + " · " + Loc.T("special.fx." + w.fx) + "</color>\n" + desc.text;
+                if (w.Special) desc.text = "<color=#FFD25A>" + (w.chest ? Loc.T("chests.exclusive") : Loc.F("special.line", Loc.T("rank." + w.rank))) + " · " + Loc.T("special.fx." + w.fx) + "</color>\n" + desc.text;
                 SetPips(pips, owned ? lv : 0);
                 veil.SetActive(!unlocked);
                 lockText.text = Armory.LockText(w);

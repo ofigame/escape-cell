@@ -444,6 +444,13 @@ namespace SquashBot.Gameplay
         private bool FoeTactics(Guard g, int near)
         {
             if (g.windup >= 0f || g.moveT < 1f) return false;
+            // Caught out in the red: back into the ring first, quickly.
+            if (Unsafe != null && Unsafe(g.pos))
+            {
+                if ((g.step -= Time.deltaTime) > 0f) return true;
+                g.step = 0f;
+                if (StepInside(g)) return true;
+            }
             if (g.hp < g.maxHp * (0.25f + 0.2f * (1f - FoeBoldness)) && near <= 3 && Time.time > foeFleeUntil + 6f) foeFleeUntil = Time.time + 2.5f;
             // Between blows, face to face with foi: now and then a step to the side (a dodge), more for a careful one.
             if (near <= 2 && g.cooldown > 0.2f && Time.time > foeDodgeAt && g.step <= 0f)
@@ -456,6 +463,23 @@ namespace SquashBot.Gameplay
             if ((g.step -= Time.deltaTime) > 0f) return true;
             g.step = 0f;
             return StepAway(g, robot.Position, 1f / (GuardSpeed(g) * 1.9f)); // a quick getaway
+        }
+
+        /// <summary>A step toward the middle of the duel's safe ring.</summary>
+        private bool StepInside(Guard g)
+        {
+            GridPos best = g.pos;
+            float bd = Vector2.Distance(new Vector2(g.pos.x, g.pos.y), new Vector2(SafeCentre.x, SafeCentre.y));
+            foreach (var d in DirectionExtensions.All)
+            {
+                var n = g.pos + d.ToOffset();
+                if (!CanStep(g.pos, n)) continue;
+                float nd = Vector2.Distance(new Vector2(n.x, n.y), new Vector2(SafeCentre.x, SafeCentre.y));
+                if (nd < bd) { bd = nd; best = n; }
+            }
+            if (best == g.pos) return false;
+            MoveGuard(g, best, 1f / (GuardSpeed(g) * 1.6f));
+            return true;
         }
 
         /// <summary>Blows left in the rival foi's current flurry.</summary>
