@@ -124,11 +124,7 @@ namespace SquashBot.UI
             var hit = UiFactory.Fill(root, new Color(1f, 1f, 1f, 0.001f));
             var orb = UiFactory.Box("Orb", root, new Vector2(0.5f, 1f), new Vector2(0f, 0f), new Vector2(size, size));
             orb.pivot = new Vector2(0.5f, 1f);
-            UiFactory.Fill(orb, color, UiSprites.Circle).raycastTarget = false;
-            UiFactory.Fill(UiFactory.Stretch("Rim", orb), new Color(1f, 1f, 1f, 0.55f), UiSprites.Ring, 0.6f).raycastTarget = false;
-            var iconBox = UiFactory.Box("Icon", orb, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(size * 0.56f, size * 0.56f));
-            iconBox.pivot = new Vector2(0.5f, 0.5f);
-            DrawIcon(iconBox, icon, color);
+            OrbFace(orb, icon, color, size);
             var text = UiFactory.TextBox("Label", root, new Vector2(0.5f, 0f), new Vector2(0f, 2f), new Vector2(size * 1.5f, 50f), label, 32f, Color.white, title: true);
             Outline(text, new Color(0.05f, 0.03f, 0.15f, 0.8f), 0.2f);
 
@@ -143,6 +139,25 @@ namespace SquashBot.UI
             });
             root.gameObject.AddComponent<ButtonPress>();
             return button;
+        }
+
+        /// <summary>The game look's orb: a gradient disc in the colour inside a double gold ring, the icon on it.</summary>
+        private static void OrbFace(RectTransform orb, Icon icon, Color color, float size)
+        {
+            UiFactory.Fill(orb, color, UiSprites.CircleGradient).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Stretch("Rim", orb), Color.white, UiSprites.GoldRing).raycastTarget = false;
+            var iconBox = UiFactory.Box("Icon", orb, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(size * 0.52f, size * 0.52f));
+            iconBox.pivot = new Vector2(0.5f, 0.5f);
+            DrawIcon(iconBox, icon, color);
+        }
+
+        /// <summary>A lone orb with an icon (no label, no click): emblems on cards and banners.</summary>
+        public static RectTransform Emblem(Transform parent, Icon icon, Color color, Vector2 anchor, Vector2 position, float size)
+        {
+            var orb = UiFactory.Box("Emblem", parent, anchor, position, new Vector2(size, size));
+            orb.pivot = new Vector2(0.5f, 0.5f);
+            OrbFace(orb, icon, color, size);
+            return orb;
         }
 
         // ---------- Icons, drawn from the UI's rounded shapes ----------

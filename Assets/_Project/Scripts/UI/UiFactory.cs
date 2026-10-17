@@ -15,7 +15,7 @@ namespace SquashBot.UI
     /// <summary>Builds the UI from code: crisp TextMeshPro text, rounded glass cards and animated buttons.</summary>
     public static class UiFactory
     {
-        public static readonly Color CardColor = new Color(0.05f, 0.05f, 0.1f, 0.8f);
+        public static readonly Color CardColor = new Color(0.07f, 0.09f, 0.2f, 0.95f);
         public static readonly Color PillColor = new Color(0.03f, 0.03f, 0.08f, 0.5f);
         public static readonly Color TextDark = new Color(0.13f, 0.12f, 0.29f);
 
@@ -236,28 +236,34 @@ namespace SquashBot.UI
             var shadow = Rect("Shadow", root, Vector2.zero, Vector2.one, new Vector2(-40f, -60f), new Vector2(40f, 24f));
             Fill(shadow, new Color(0f, 0f, 0.04f, 0.45f), UiSprites.Shadow, 0.6f).raycastTarget = false;
 
-            // Frosted glass: a smoky see-through body (the scene glows through it), a light wash that fades down from the
-            // top edge, and a fine bright rim. No flat colour slab.
-            var bg = Stretch("Background", root);
-            Fill(bg, CardColor, UiSprites.Rounded, 0.6f);
-            var wash = Rect("Wash", root, new Vector2(0f, 0.55f), Vector2.one, new Vector2(2f, 0f), new Vector2(-2f, -2f));
-            Fill(wash, new Color(1f, 1f, 1f, 0.07f), UiSprites.RoundedGradient, 0.7f).raycastTarget = false;
-            var rim = Stretch("Rim", root);
-            Fill(rim, new Color(1f, 1f, 1f, 0.3f), UiSprites.Ring, 0.6f).raycastTarget = false;
-            var glint = Rect("Glint", root, new Vector2(0.08f, 1f), new Vector2(0.92f, 1f), new Vector2(0f, -3f), new Vector2(0f, -1f));
-            Fill(glint, new Color(1f, 1f, 1f, 0.35f), UiSprites.Rounded, 6f).raycastTarget = false;
+            // The game look: a deep navy cut-corner plate under a double gold rim with diamonds at its corners.
+            Framed(root, CardColor, 1.1f, plateName: "Background");
             return root;
+        }
+
+        /// <summary>Deep navy, a little see-through: the body of the game look's cards, chips and dark buttons.</summary>
+        public static readonly Color Navy = new Color(0.07f, 0.09f, 0.2f, 0.94f);
+
+        /// <summary>
+        /// Fills the rect with a cut-corner plate in the colour and lays the double gold rim over it (ppu 1 = the rim's
+        /// full size; larger is finer). The ppu grows by itself where the rect is too small for the corners. Returns the plate.
+        /// </summary>
+        public static Image Framed(RectTransform rt, Color colour, float ppu = 1.6f, bool rim = true, string plateName = "Plate")
+        {
+            float w = rt.rect.width > 0f ? rt.rect.width : rt.sizeDelta.x;
+            float h = rt.rect.height > 0f ? rt.rect.height : rt.sizeDelta.y;
+            float least = Mathf.Min(w, h);
+            if (least > 0f) ppu = Mathf.Max(ppu, 84f / least);
+            var plate = Fill(Stretch(plateName, rt), colour, UiSprites.Plate, ppu);
+            if (rim) Fill(Stretch("Rim", rt), Color.white, UiSprites.GoldRim, ppu).raycastTarget = false;
+            return plate;
         }
 
         public static RectTransform Pill(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size, Color color)
         {
             var root = Box(name, parent, anchor, position, size);
-            // Glass HUD chips: a see-through body, fully rounded ends and a fine bright rim.
-            float ppu = Mathf.Clamp(88f / Mathf.Max(1f, Mathf.Min(size.x, size.y)), 0.25f, 3f);
-            var body = Stretch("Body", root);
-            Fill(body, color, UiSprites.Rounded, ppu).raycastTarget = false;
-            var rim = Stretch("Rim", root);
-            Fill(rim, new Color(1f, 1f, 1f, 0.22f), UiSprites.Ring, ppu).raycastTarget = false;
+            // Game-look chips: a cut-corner plate in the colour under a fine double gold rim.
+            Framed(root, color, 2f, plateName: "Body");
             return root;
         }
 
@@ -340,12 +346,13 @@ namespace SquashBot.UI
         public static readonly ChunkyStyle GreenStyle = new ChunkyStyle("#2FD07A", "#2FD07A", "#073A1E");
         public static readonly ChunkyStyle RedStyle = new ChunkyStyle("#FF4F6A", "#FF4F6A", "#4E0A16");
         public static readonly ChunkyStyle DarkStyle = new ChunkyStyle("#0A0A1499", "#00000000", "#05050C", glass: true);
+        public static readonly ChunkyStyle OrangeStyle = new ChunkyStyle("#FF8424", "#FF8424", "#5A2400");
 
         /// <summary>A style from any colour (skills, worlds): that colour's face and glow, a deep shade of it for text.</summary>
         public static ChunkyStyle StyleOf(Color c) => new ChunkyStyle { face = c, lip = c, outline = new Color(c.r * 0.22f, c.g * 0.2f, c.b * 0.3f, 1f) };
 
         public static ChunkyStyle Style(ButtonKind kind) =>
-            kind == ButtonKind.Primary ? CyanStyle : kind == ButtonKind.Gold ? GoldStyle : kind == ButtonKind.Icon ? DarkStyle : PurpleStyle;
+            kind == ButtonKind.Primary ? OrangeStyle : kind == ButtonKind.Gold ? GoldStyle : kind == ButtonKind.Icon ? DarkStyle : PurpleStyle;
 
         private static Color Hex(string hex)
         {
@@ -365,11 +372,20 @@ namespace SquashBot.UI
             float w = root.rect.width > 0f ? root.rect.width : root.sizeDelta.x;
             float h = root.rect.height > 0f ? root.rect.height : root.sizeDelta.y;
             if (ppu <= 0f) ppu = MinCornerPpu; // every button: small rounded corners
+            // The game look: a bevelled cut-corner face (glass styles turn deep navy) under a double gold rim; round
+            // buttons a gradient disc in a gold ring.
             var face = Stretch("Face", root);
-            Sprite faceSprite = s.glass ? (circle ? UiSprites.Circle : UiSprites.Rounded) : (circle ? UiSprites.CircleGradient : UiSprites.RoundedGradient);
-            var image = Fill(face, s.face, faceSprite, circle ? 1f : ppu);
-            // Flat and clean: the gradient face and a fine edge, no glow, drop shadow or sheen around it.
-            Fill(Stretch("Edge", face), new Color(1f, 1f, 1f, s.glass ? 0.38f : 0.3f), UiSprites.Ring, circle ? 0.35f : ppu).raycastTarget = false;
+            Color colour = s.glass ? Navy : s.face;
+            if (circle)
+            {
+                var disc = Fill(face, colour, UiSprites.CircleGradient, 1f);
+                Fill(Stretch("Edge", face), Color.white, UiSprites.GoldRing, 1f).raycastTarget = false;
+                return disc;
+            }
+            float least = Mathf.Min(w, h);
+            float fp = Mathf.Max(1.5f, least > 0f ? 84f / least : 1.5f);
+            var image = Fill(face, colour, UiSprites.Bevel, fp);
+            Fill(Stretch("Edge", face), Color.white, UiSprites.GoldRim, fp).raycastTarget = false;
             return image;
         }
 

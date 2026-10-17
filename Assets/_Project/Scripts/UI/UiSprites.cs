@@ -3,7 +3,7 @@ using UnityEngine;
 namespace SquashBot.UI
 {
     /// <summary>Procedurally generated 9-sliced sprites (rounded fills, rings, soft shadows) so the UI needs no art files.</summary>
-    public static class UiSprites
+    public static partial class UiSprites
     {
         private const int Size = 128;
         private const int Radius = 44;

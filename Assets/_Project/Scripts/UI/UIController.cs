@@ -396,6 +396,7 @@ namespace SquashBot.UI
         private void BuildMenu(Transform root)
         {
             menu = UiScreen.Create("Menu", root, out var t);
+            Flat.Corners(t); // the game look's gold corners round the home screen
 
             // Top bar: coins, lives, stars, settings.
             var coins = UiFactory.Pill("Coins", t, TopLeft, new Vector2(40f, -40f), new Vector2(260f, 100f), UiFactory.PillColor);
@@ -470,7 +471,7 @@ namespace SquashBot.UI
             // The player's challenge rank (insignia, name, trophies) between the logo and foi.
             menuRank = UiFactory.Box("Rank", t, Top, new Vector2(0f, -585f), new Vector2(520f, 120f));
             menuRank.pivot = new Vector2(0.5f, 0.5f);
-            var rankHit = UiFactory.Fill(menuRank, new Color(0.04f, 0.04f, 0.1f, 0.45f), UiSprites.Rounded, 1f);
+            var rankHit = UiFactory.Framed(menuRank, new Color(0.07f, 0.09f, 0.2f, 0.8f), 1.8f);
             var rankButton = menuRank.gameObject.AddComponent<Button>();
             rankButton.targetGraphic = rankHit;
             rankButton.onClick.AddListener(() => { Audio.AudioManager.PlaySfx(Audio.Sfx.Click, 0.7f); ChallengeStatsPressed?.Invoke(); });
@@ -500,15 +501,22 @@ namespace SquashBot.UI
             arenaTipGroup.alpha = 0f;
             arenaTipGroup.blocksRaycasts = false;
 
-            // The level card: a frosted glass panel with the world, the level, its mission and the big PLAY button.
+            // The level card (the game look): a navy plate in a gold frame; on it a parchment with the map's emblem,
+            // the world, the level and its mission; under it the big PLAY and CHALLENGE buttons.
             var card = UiFactory.Box("LevelCard", t, Bottom, new Vector2(0f, Ads.BannerReserve + 236f), new Vector2(940f, 420f));
-            UiFactory.Fill(card, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 0.8f);
-            UiFactory.Fill(UiFactory.Stretch("Rim", card), new Color(0.75f, 0.85f, 1f, 0.35f), UiSprites.Ring, 0.8f).raycastTarget = false;
-            menuWorld = UiFactory.TextBox("World", card, Top, new Vector2(0f, -26f), new Vector2(860f, 50f), "", 30f, Palette.UiCyan);
+            UiFactory.Framed(card, UiFactory.CardColor, 1.1f);
+            var paper = UiFactory.Box("Parchment", card, Top, new Vector2(0f, -22f), new Vector2(890f, 206f));
+            UiFactory.Fill(paper, Color.white, UiSprites.Parchment, 1.2f).raycastTarget = false;
+            MenuArt.Emblem(paper, MenuArt.Icon.Map, new Color(0.42f, 0.36f, 0.88f), new Vector2(0f, 0.5f), new Vector2(92f, 0f), 128f);
+            var ink = new Color(0.3f, 0.16f, 0.06f);
+            menuWorld = UiFactory.TextBox("World", paper, Top, new Vector2(60f, -18f), new Vector2(700f, 46f), "", 30f, new Color(0.55f, 0.3f, 0.1f));
             menuWorld.characterSpacing = 5f;
-            menuLevel = UiFactory.TextBox("Level", card, Top, new Vector2(0f, -68f), new Vector2(860f, 100f), "", 76f, Palette.UiText, title: true);
-            menuMission = UiFactory.TextBox("Mission", card, Top, new Vector2(0f, -170f), new Vector2(860f, 52f), "", 34f,
-                new Color(0.85f, 0.86f, 1f, 0.8f), FontStyles.Normal);
+            menuLevel = UiFactory.TextBox("Level", paper, Top, new Vector2(60f, -56f), new Vector2(700f, 92f), "", 72f, ink, title: true);
+            menuMission = UiFactory.TextBox("Mission", paper, Top, new Vector2(60f, -146f), new Vector2(700f, 48f), "", 30f,
+                new Color(0.36f, 0.22f, 0.1f), FontStyles.Normal);
+            menuMission.enableAutoSizing = true;
+            menuMission.fontSizeMin = 20f;
+            menuMission.fontSizeMax = 30f;
 
             var play = UiFactory.MakeButton(card, Loc.T("menu.mission"), Kind.Primary, Bottom, new Vector2(-225f, 30f), new Vector2(430f, 150f), () => PlayPressed?.Invoke(), 64f);
             play.gameObject.AddComponent<Pulse>();
@@ -516,10 +524,9 @@ namespace SquashBot.UI
             var challenge = UiFactory.MakeButton(card, Loc.T("ch.button"), Kind.Primary, Bottom, new Vector2(225f, 30f), new Vector2(430f, 150f), () => ChallengePressed?.Invoke(), 60f);
             ((Image)challenge.targetGraphic).color = new Color(0.62f, 0.4f, 1f);
 
-            // The dock: garage, shop, map and the guide, as glossy orbs on a glass bar.
+            // The dock: garage, shop, map and the guide, as gold-ringed orbs on a framed navy bar.
             var dock = UiFactory.Box("Dock", t, Bottom, new Vector2(0f, Ads.BannerReserve + 14f), new Vector2(1000f, 206f));
-            UiFactory.Fill(dock, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 0.7f);
-            UiFactory.Fill(UiFactory.Stretch("Rim", dock), new Color(0.75f, 0.85f, 1f, 0.25f), UiSprites.Ring, 0.7f).raycastTarget = false;
+            UiFactory.Framed(dock, UiFactory.CardColor, 1.2f);
             var items = new (string label, MenuArt.Icon icon, Color color, Action click)[]
             {
                 (Loc.T("btn.garage"), MenuArt.Icon.Garage, new Color(0.12f, 0.71f, 0.64f), () => GaragePressed?.Invoke()),

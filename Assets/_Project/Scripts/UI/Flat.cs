@@ -14,8 +14,8 @@ namespace SquashBot.UI
     public static class Flat
     {
         public static readonly Color Back = new Color(0.051f, 0.055f, 0.102f);
-        public static readonly Color Card = new Color(0.094f, 0.102f, 0.169f);
-        public static readonly Color CardHi = new Color(0.13f, 0.14f, 0.22f);
+        public static readonly Color Card = new Color(0.075f, 0.095f, 0.2f);
+        public static readonly Color CardHi = new Color(0.12f, 0.15f, 0.3f);
         public static readonly Color Line = new Color(1f, 1f, 1f, 0.08f);
         public static readonly Color Text = Color.white;
         public static readonly Color Muted = new Color(0.62f, 0.65f, 0.76f);
@@ -30,7 +30,9 @@ namespace SquashBot.UI
         public static RectTransform Panel(Transform parent, string name, Vector2 anchor, Vector2 position, Vector2 size, Color colour, float round = 1.6f)
         {
             var r = UiFactory.Box(name, parent, anchor, position, size);
-            UiFactory.Fill(r, colour, UiSprites.Rounded, round).raycastTarget = false;
+            // The game look: a cut-corner plate; solid ones big enough for it get the double gold rim.
+            bool rim = colour.a > 0.5f && Mathf.Min(size.x, size.y) >= 44f;
+            UiFactory.Framed(r, colour, Mathf.Max(1.4f, round), rim).raycastTarget = false;
             return r;
         }
 
@@ -51,7 +53,9 @@ namespace SquashBot.UI
         public static Button Button(Transform parent, string text, Vector2 anchor, Vector2 position, Vector2 size, Color face, Color textColour, Action onClick, float fontSize = 34f)
         {
             var root = UiFactory.Box("Button " + text, parent, anchor, position, size);
-            var img = UiFactory.Fill(root, face, UiSprites.Rounded, 2.2f);
+            float fp = Mathf.Max(1.5f, 84f / Mathf.Max(1f, Mathf.Min(size.x, size.y)));
+            var img = UiFactory.Fill(UiFactory.Stretch("Face", root), face, UiSprites.Bevel, fp);
+            UiFactory.Fill(UiFactory.Stretch("Rim", root), Color.white, UiSprites.GoldRim, fp).raycastTarget = false;
             var label = UiFactory.Text(root, text, fontSize, textColour, title: true);
             label.rectTransform.offsetMin = new Vector2(10f, 0f);
             label.rectTransform.offsetMax = new Vector2(-10f, 0f);
@@ -72,6 +76,36 @@ namespace SquashBot.UI
         public static void Background(Transform parent)
         {
             UiFactory.Dim(parent, Back);
+            Backdrop(parent);        }
+
+        /// <summary>
+        /// The game look's backdrop over a full-screen layer: the galaxy (stretched to cover, notch included) and the
+        /// gold ornaments in the four corners. Nothing in it takes clicks.
+        /// </summary>
+        public static void Backdrop(Transform parent)
+        {
+            var sky = UiFactory.Stretch("Galaxy", parent);
+            var img = UiFactory.Fill(sky, Color.white, UiSprites.Galaxy);
+            img.raycastTarget = false;
+            sky.gameObject.AddComponent<IgnoreSafeArea>();
+            Corners(parent);
+        }
+
+        /// <summary>The game look's gold ornaments in the four corners of the screen (over the safe area's edges too).</summary>
+        public static void Corners(Transform parent)
+        {
+            var frame = UiFactory.Stretch("Frame", parent);
+            frame.gameObject.AddComponent<IgnoreSafeArea>();
+            for (int i = 0; i < 4; i++)
+            {
+                var c = UiFactory.Rect("Corner", frame, new Vector2(i % 2, i / 2 == 0 ? 1 : 0), new Vector2(i % 2, i / 2 == 0 ? 1 : 0));
+                c.pivot = new Vector2(0f, 1f);
+                c.sizeDelta = new Vector2(170f, 170f);
+                c.anchoredPosition = Vector2.zero;
+                c.localScale = new Vector3(i % 2 == 0 ? 1f : -1f, i / 2 == 0 ? 1f : -1f, 1f);
+                var ci = UiFactory.Fill(c, new Color(1f, 1f, 1f, 0.9f), UiSprites.Corner);
+                ci.raycastTarget = false;
+            }
         }
     }
 }

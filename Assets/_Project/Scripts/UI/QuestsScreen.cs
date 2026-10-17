@@ -55,7 +55,7 @@ namespace SquashBot.UI
             float y = -200f - i * 270f;
             var row = UiFactory.Box("Quest" + i, card, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(820f, 240f));
             row.pivot = new Vector2(0.5f, 1f);
-            UiFactory.Fill(row, new Color(1f, 1f, 1f, 0.07f), UiSprites.Rounded, 24f).raycastTarget = false;
+            UiFactory.Framed(row, Flat.Card, 1.8f).raycastTarget = false; // the game look: a framed navy row
             var text = UiFactory.TextBox("Text", row, new Vector2(0f, 1f), new Vector2(30f, -24f), new Vector2(520f, 100f), "", 36f, Palette.UiText, FontStyles.Normal, align: TextAlignmentOptions.TopLeft);
             text.rectTransform.pivot = new Vector2(0f, 1f);
             text.textWrappingMode = TextWrappingModes.Normal;

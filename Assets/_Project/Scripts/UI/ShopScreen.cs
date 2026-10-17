@@ -54,6 +54,7 @@ namespace SquashBot.UI
         private void Build(RectTransform root)
         {
             UiFactory.Fill(UiFactory.Stretch("Backdrop", root), new Color(0.03f, 0.03f, 0.07f, 0.94f)).gameObject.AddComponent<IgnoreSafeArea>();
+            Flat.Backdrop(root); // the game look's galaxy and gold corners
 
             var bar = UiFactory.Rect("TopBar", root, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -190f), Vector2.zero);
             UiFactory.MakeButton(bar, "<", Kind.Icon, new Vector2(0f, 0.5f), new Vector2(36f, 0f), new Vector2(124f, 124f), () => BackPressed?.Invoke(), 64f);

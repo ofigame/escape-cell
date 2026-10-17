@@ -379,6 +379,7 @@ namespace SquashBot.UI
         {
             namePanel = UiScreen.Create("ChallengeName", root, out var n);
             UiFactory.Dim(n, new Color(0.03f, 0.03f, 0.1f, 1f)).gameObject.AddComponent<IgnoreSafeArea>();
+            Flat.Backdrop(n); // the game look's galaxy and gold corners
             UiFactory.TextBox("Title", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 760f), new Vector2(900f, 110f), Loc.T("ch.nameTitle"), 72f, Palette.UiGold, title: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var hint = UiFactory.TextBox("Hint", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 650f), new Vector2(900f, 90f), Loc.T("ch.nameHint"), 34f, new Color(1f, 1f, 1f, 0.75f));

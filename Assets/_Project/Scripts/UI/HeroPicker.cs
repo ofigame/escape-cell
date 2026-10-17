@@ -42,6 +42,7 @@ namespace SquashBot.UI
         private void Build(RectTransform root)
         {
             UiFactory.Fill(UiFactory.Stretch("Backdrop", root), new Color(0.03f, 0.03f, 0.08f, 0.96f)).gameObject.AddComponent<IgnoreSafeArea>();
+            Flat.Backdrop(root); // the game look's galaxy and gold corners
             title = UiFactory.TextBox("Title", root, new Vector2(0.5f, 1f), new Vector2(0f, -170f), new Vector2(980f, 120f), "", 76f, Palette.UiGold, title: true);
             title.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             sub = UiFactory.TextBox("Sub", root, new Vector2(0.5f, 1f), new Vector2(0f, -260f), new Vector2(960f, 70f), "", 34f, new Color(1f, 1f, 1f, 0.8f), FontStyles.Normal);
