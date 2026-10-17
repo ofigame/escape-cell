@@ -36,7 +36,7 @@ namespace SquashBot.UI
         public static Color FamilyColour(GroupKind k) =>
             Army.Family(k) == 0 ? new Color(0.95f, 0.42f, 0.4f) : Army.Family(k) == 1 ? new Color(0.25f, 0.78f, 0.7f) : new Color(1f, 0.76f, 0.3f);
 
-        private const float RowH = 186f, RowGap = 12f, Top = -330f;
+        private const float RowH = 330f, RowGap = 16f, Top = -8f;
 
         private void Build(RectTransform root)
         {
@@ -58,7 +58,20 @@ namespace SquashBot.UI
             worldText = Flat.Label(root, "", top, new Vector2(0f, -262f), new Vector2(960f, 56f), 26f, Flat.Muted, TextAlignmentOptions.Center, wrap: true);
             worldText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
 
-            for (int g = 0; g < Army.Groups; g++) GroupRow(root, g);
+            // The six groups in a list that scrolls (each card tall, with big buttons).
+            var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(0f, Monetization.Ads.BannerReserve + 220f), new Vector2(0f, -300f));
+            viewport.gameObject.AddComponent<RectMask2D>();
+            UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0f));
+            var content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
+            content.pivot = new Vector2(0.5f, 1f);
+            content.sizeDelta = new Vector2(0f, Army.Groups * (RowH + RowGap) + 16f);
+            var scroll = viewport.gameObject.AddComponent<ScrollRect>();
+            scroll.viewport = viewport;
+            scroll.content = content;
+            scroll.horizontal = false;
+            scroll.decelerationRate = 0.12f;
+            scroll.scrollSensitivity = 60f;
+            for (int g = 0; g < Army.Groups; g++) GroupRow(content, g);
 
             var bottom = new Vector2(0.5f, 0f);
             Flat.Label(root, Loc.T("army.wheel"), bottom, new Vector2(0f, Monetization.Ads.BannerReserve + 180f), new Vector2(960f, 50f), 26f, Flat.Muted, TextAlignmentOptions.Center)
@@ -79,8 +92,8 @@ namespace SquashBot.UI
             UiFactory.Fill(stripe, colour, UiSprites.Rounded, 6f).raycastTarget = false;
 
             // The soldier's picture on a tinted tile, with the soldier count.
-            var tile = Flat.Panel(row, "Tile", new Vector2(0f, 0.5f), new Vector2(30f, 0f), new Vector2(150f, 150f), new Color(colour.r, colour.g, colour.b, 0.18f), 2f);
-            tile.pivot = new Vector2(0f, 0.5f);
+            var tile = Flat.Panel(row, "Tile", new Vector2(0f, 1f), new Vector2(30f, -20f), new Vector2(150f, 150f), new Color(colour.r, colour.g, colour.b, 0.18f), 2f);
+            tile.pivot = new Vector2(0f, 1f);
             ChallengeScreen.UnitPicture(tile, kind, new Vector2(0f, 6f), 130f);
             var count = Flat.Panel(tile, "Count", new Vector2(0.5f, 0f), new Vector2(0f, 6f), new Vector2(72f, 36f), new Color(0f, 0f, 0f, 0.55f), 4f);
             count.pivot = new Vector2(0.5f, 0f);
@@ -89,7 +102,7 @@ namespace SquashBot.UI
 
             // The words: name, what it beats, points and strength, tier stars.
             const float textX = 30f + 150f + Flat.Pad;
-            const float textW = 960f - textX - 420f - Flat.Pad;
+            const float textW = 960f - textX - Flat.Pad;
             var name = Flat.Label(row, Loc.T("army.kind." + kind), new Vector2(0f, 1f), new Vector2(textX, -22f), new Vector2(textW, 48f), 36f, Flat.Text, bold: true);
             name.rectTransform.pivot = new Vector2(0f, 1f);
             var beats = Flat.Label(row, "", new Vector2(0f, 1f), new Vector2(textX, -74f), new Vector2(textW, 34f), 20f, Flat.Muted);
@@ -99,18 +112,18 @@ namespace SquashBot.UI
             var stars = new List<Image>();
             for (int s = 0; s < 4; s++)
             {
-                var st = UiFactory.Box("Star", row, new Vector2(0f, 0f), new Vector2(textX + s * 34f, 22f), new Vector2(28f, 28f));
+                var st = UiFactory.Box("Star", row, new Vector2(0f, 1f), new Vector2(textX + s * 38f, -150f), new Vector2(32f, 32f));
                 var img = UiFactory.Fill(st, Color.white, UiSprites.Star);
                 img.raycastTarget = false;
                 stars.Add(img);
             }
 
             // Three rows on the right — power, blow, armour — each with its value and − +1 +5.
-            var pad = new Vector2(1f, 0.5f);
+            var pad = new Vector2(0f, 0f);
             Button B(string t, float x, float y, Color face, Color text, Action a)
             {
-                var b = Flat.Button(row, t, pad, new Vector2(x, y), new Vector2(62f, 52f), face, text, a, 24f);
-                ((RectTransform)b.transform).pivot = new Vector2(1f, 0.5f);
+                var b = Flat.Button(row, t, pad, new Vector2(x, y), new Vector2(92f, 74f), face, text, a, 34f);
+                ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0.5f);
                 return b;
             }
             var dark = new Color(0.1f, 0.08f, 0.15f);
@@ -122,12 +135,12 @@ namespace SquashBot.UI
             for (int r = 0; r < 3; r++)
             {
                 var track = tracks[r];
-                float y = 58f - r * 58f;
-                plus5[r] = B("+5", -Flat.Pad, y, colour, dark, () => Add(g, 5, track));
-                plus1[r] = B("+1", -Flat.Pad - 68f, y, colour, dark, () => Add(g, 1, track));
-                minus[r] = B("-", -Flat.Pad - 136f, y, Flat.CardHi, Flat.Text, () => Take(g, 1, track));
-                values[r] = Flat.Label(row, "", pad, new Vector2(-Flat.Pad - 206f, y), new Vector2(170f, 44f), 22f, Flat.Text, TextAlignmentOptions.Right, bold: true);
-                values[r].rectTransform.pivot = new Vector2(1f, 0.5f);
+                float x0 = 30f + r * 304f; // each column 300 wide
+                minus[r] = B("-", x0 + 50f, 52f, Flat.CardHi, Flat.Text, () => Take(g, 1, track));
+                plus1[r] = B("+1", x0 + 150f, 52f, colour, dark, () => Add(g, 1, track));
+                plus5[r] = B("+5", x0 + 250f, 52f, colour, dark, () => Add(g, 5, track));
+                values[r] = Flat.Label(row, "", pad, new Vector2(x0 + 150f, 122f), new Vector2(290f, 42f), 26f, Flat.Text, TextAlignmentOptions.Center, bold: true);
+                values[r].rectTransform.pivot = new Vector2(0.5f, 0.5f);
             }
 
             refreshers.Add(() =>

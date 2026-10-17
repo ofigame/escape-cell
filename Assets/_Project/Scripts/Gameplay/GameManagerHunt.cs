@@ -29,8 +29,9 @@ namespace SquashBot.Gameplay
 
         /// <summary>The hero's size on the floors and in the arenas (wider a quarter, taller two fifths); the tunnels keep 1.</summary>
         private static readonly Vector3 HeroScale = new Vector3(1.25f, 1.4f, 1.25f);
-        /// <summary>foi stands this much bigger again on every floor (not on the roads); the robots keep their size.</summary>
-        private const float FoiGrow = 1.5f;
+        /// <summary>foi stands this much bigger again: in the duel the most, on the floors and in the free battle a little
+        /// less (not on the roads).</summary>
+        private float FoiGrow => challengeRun ? 1.5f : 1.4f;
         private float foiBaseHeight = 0.875f;
 
         /// <summary>foi's height as it stands (its body, without the weapon it carries): the robots are sized against it.</summary>
@@ -112,7 +113,8 @@ namespace SquashBot.Gameplay
             float grow = Mathf.Clamp01(World / 12f);
             robot.transform.localScale = Vector3.one;
             foiBaseHeight = FoiHeight(); // the robots and Fifi are sized against foi's plain height
-            hunt.FoiHeight = foiBaseHeight * HeroScale.y; // foi as it stands (the hero scale): no robot is shorter than that
+            // foi as it stands: no robot (and none of our soldiers) is shorter than that (the duel keeps its own sizes).
+            hunt.FoiHeight = foiBaseHeight * HeroScale.y * (challengeRun ? 1f : FoiGrow);
             // The hero stands out in the crowd: a little bigger and a little taller than the robots round it.
             robot.transform.localScale = HeroScale * FoiGrow;
             Robot.HopScale = 0.82f; // brisk but readable: each step follows the finger, a run of steps flows on (0.6 felt too fast)

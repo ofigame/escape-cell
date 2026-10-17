@@ -14,13 +14,13 @@ namespace SquashBot.Data
         /// <summary>How many of one kind fit now: the backpack's level decides (3 at first, up to <see cref="Max"/>).</summary>
         public static int Room => Backpack.OrbCapacity;
 
-        /// <summary>Kinds that go into the bag (rescues still work by themselves).</summary>
-        public static bool Bagged(Gameplay.PowerUpType t) => t != Gameplay.PowerUpType.Rescue;
+        /// <summary>Kinds that go into the bag: rescues, shields and magnets work the moment they are picked up (a shield is
+        /// simply put on).</summary>
+        public static bool Bagged(Gameplay.PowerUpType t) => t != Gameplay.PowerUpType.Rescue && t != Gameplay.PowerUpType.Shield && t != Gameplay.PowerUpType.Magnet;
 
         public static readonly Gameplay.PowerUpType[] Order =
         {
-            Gameplay.PowerUpType.Super, Gameplay.PowerUpType.Shield, Gameplay.PowerUpType.Heart,
-            Gameplay.PowerUpType.Freeze, Gameplay.PowerUpType.Blast, Gameplay.PowerUpType.Magnet
+            Gameplay.PowerUpType.Super, Gameplay.PowerUpType.Heart, Gameplay.PowerUpType.Freeze, Gameplay.PowerUpType.Blast
         };
 
         private static string Key(Gameplay.PowerUpType t) => "sb_bag_" + t;

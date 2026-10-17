@@ -542,9 +542,13 @@ namespace SquashBot.Gameplay
         // The menu's showroom and the 3D map have their own cameras; the game's camera only draws when neither is up.
         private LobbyStage lobby;
 
+        /// <summary>The garage's own front view is up (it ends when the garage closes).</summary>
+        private bool garageView;
+
         private void LateUpdate()
         {
             if (ui == null) return;
+            if (garageView && !ui.Garage.Screen.IsVisible) { garageView = false; cameraRig.EndChase(); }
             // The splash waits for the menu to stand (a few frames in, when the lobby has drawn).
             if (!SplashScreen.Ready && Time.frameCount > 5) SplashScreen.Ready = true;
             if (lobby != null && lobby.IsOpen && !ui.MenuVisible) lobby.Close();
@@ -613,9 +617,15 @@ namespace SquashBot.Gameplay
         {
             if (State != GameState.Menu) ShowMenu();
             ui.ShowGarage(LevelCatalog.WorldOf(SaveData.UnlockedLevel));
-            cameraRig.Showcase(robot.transform, 1f, 1.9f, 0.55f); // the whole robot, above the paint panel
             robot.FaceCamera();
             cameraRig.SetMenuFocus(false);
+            // Straight from the front at foi's own height, foi up in the space above the paint panel.
+            var front = robot.transform.forward;
+            front.y = 0f;
+            front = front.sqrMagnitude > 0.01f ? front.normalized : Vector3.back;
+            var aim = robot.transform.position + Vector3.up * -0.32f;
+            cameraRig.Chase(aim + front * 4.4f + Vector3.up * 0.42f, Quaternion.LookRotation(aim - (aim + front * 4.4f + Vector3.up * 0.42f)), 40f);
+            garageView = true;
         }
 
         /// <summary>A daily bonus play: the day's next game (or a given one).</summary>

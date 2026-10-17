@@ -51,11 +51,17 @@ namespace SquashBot.UI
         /// <summary>The TPS switch: shown on the floors' fights, reading TPS (to switch to it) or 2D (back).</summary>
         public void SetTpsSwitch(bool on, bool inTps)
         {
-            // In TPS the lower corners belong to the stick and the strike: the tool buttons go up beside the bag.
+            // In TPS the lower corners belong to the stick and the strike: the tool buttons sit in a row beside the bag,
+            // clear of the health bar above and of the skills on the right.
             if (toolButtons[0] != null)
             {
-                toolButtons[0].Rect.anchoredPosition = inTps ? new Vector2(40f, 660f) : new Vector2(40f, 170f);
-                toolButtons[1].Rect.anchoredPosition = inTps ? new Vector2(-40f, 660f) : new Vector2(-40f, 170f);
+                for (int i = 0; i < 2; i++)
+                {
+                    var r = toolButtons[i].Rect;
+                    var corner = inTps ? Vector2.zero : new Vector2(i, 0f);
+                    r.anchorMin = r.anchorMax = r.pivot = corner;
+                    r.anchoredPosition = inTps ? new Vector2(205f + i * 165f, 480f) : new Vector2(i == 0 ? 40f : -40f, 170f);
+                }
             }
             if (tpsSwitch == null) return;
             if (tpsSwitch.gameObject.activeSelf != on) tpsSwitch.gameObject.SetActive(on);
@@ -260,7 +266,7 @@ namespace SquashBot.UI
             if (bombButton == null) return;
             bool on = show && left > 0 && !challengeHud;
             if (bombButton.gameObject.activeSelf != on) bombButton.gameObject.SetActive(on);
-            bool sw = on && canSwitch;
+            bool sw = false; // no kind switch: the bomb throws the kind in hand, then the next one left
             if (bombSwitch.gameObject.activeSelf != sw) bombSwitch.gameObject.SetActive(sw);
             if (!on) return;
             bombCount.text = left.ToString();
@@ -292,9 +298,40 @@ namespace SquashBot.UI
             bool full = meter >= 1f;
             ultiFill.fillAmount = Mathf.Clamp01(meter);
             ultiFace.color = full ? new Color(0.75f, 0.45f, 1f) : new Color(0.38f, 0.3f, 0.5f);
-            float s = ActionScale * (full ? 1f + Mathf.Sin(Time.unscaledTime * 6f) * 0.1f : 1f);
+            LayoutActions();
+            float s = ActionScale * actionScaleSide * (full ? 1f + Mathf.Sin(Time.unscaledTime * 6f) * 0.1f : 1f);
             ultiButton.localScale = new Vector3(s, s, 1f);
         }
+
+        private int actionsLaidFor = -1;
+
+        /// <summary>
+        /// The powers' buttons in the bottom-right corner, against the right edge: upright, a column (bomb, ULTI, the crowd
+        /// skill above); sideways (TPS), the same column in the corner where the arenas show their map.
+        /// </summary>
+        private void LayoutActions()
+        {
+            int land = Screen.width > Screen.height ? 1 : 0;
+            if (land == actionsLaidFor || bombButton == null) return;
+            actionsLaidFor = land;
+            void Place(RectTransform r, float x, float y)
+            {
+                r.anchorMin = r.anchorMax = new Vector2(1f, 0f);
+                r.pivot = new Vector2(0.5f, 0.5f);
+                r.anchoredPosition = new Vector2(x, y);
+            }
+            // (Sideways: where the arenas' map stands, in the bottom-right corner, right of the TPS strike button.)
+            float x0 = land == 1 ? -90f : -95f;
+            Place(bombButton, x0, land == 1 ? 120f : 470f);
+            Place(ultiButton, x0, land == 1 ? 235f : 615f);
+            Place(crowdButton, x0, land == 1 ? 360f : 775f);
+            float k = land == 1 ? 0.62f : 1f;
+            bombButton.localScale = Vector3.one * ActionScale * k;
+            actionScaleSide = k;
+        }
+
+        /// <summary>The powers' buttons drawn smaller still when sideways.</summary>
+        private float actionScaleSide = 1f;
 
         /// <summary>The crowd skill's button (0 fire ball, 1 ice ball, 2 rusty chain), shown while it is offered.</summary>
         public void SetCrowdSkill(int kind, bool show)
@@ -310,7 +347,8 @@ namespace SquashBot.UI
             crowdOrb.type = kind == 2 ? Image.Type.Sliced : Image.Type.Simple;
             string label = Loc.T(kind == 0 ? "power.fire" : kind == 1 ? "power.ice" : "power.chain");
             if (crowdText.text != label) crowdText.text = label;
-            float s = ActionScale * (1f + Mathf.Sin(Time.unscaledTime * 7f) * 0.12f);
+            LayoutActions();
+            float s = ActionScale * actionScaleSide * (1f + Mathf.Sin(Time.unscaledTime * 7f) * 0.12f);
             crowdButton.localScale = new Vector3(s, s, 1f);
         }
         private RectTransform fireButton;
@@ -322,7 +360,7 @@ namespace SquashBot.UI
         public void SetFire(bool show, bool ready)
         {
             if (fireButton == null) return;
-            show &= !challengeHud;
+            show = false; // no FIRE button any more: a tap on the screen fires the gun
             if (fireButton.gameObject.activeSelf != show) fireButton.gameObject.SetActive(show);
             if (show) fireFace.color = ready ? new Color(0.95f, 0.3f, 0.25f) : new Color(0.5f, 0.45f, 0.5f);
         }

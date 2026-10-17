@@ -171,7 +171,16 @@ namespace SquashBot.UI
                 var swatch = UiFactory.Box("Swatch", tile, new Vector2(0.5f, 1f), new Vector2(0f, -16f), new Vector2(96f, 96f));
                 var sc = c.color;
                 float m = Mathf.Max(1f, Mathf.Max(sc.r, Mathf.Max(sc.g, sc.b)));
-                UiFactory.Fill(swatch, new Color(sc.r / m, sc.g / m, sc.b / m, 1f), slot == Slot.Color || slot == Slot.Eyes ? UiSprites.Circle : UiSprites.Rounded, 2f).raycastTarget = false;
+                var picture = ItemPreview.Cosmetic(c); // hats, capes, arms and legs show themselves
+                if (picture != null)
+                {
+                    swatch.sizeDelta = new Vector2(124f, 124f);
+                    swatch.anchoredPosition = new Vector2(0f, -6f);
+                    var raw = swatch.gameObject.AddComponent<RawImage>();
+                    raw.texture = picture;
+                    raw.raycastTarget = false;
+                }
+                else UiFactory.Fill(swatch, new Color(sc.r / m, sc.g / m, sc.b / m, 1f), slot == Slot.Color || slot == Slot.Eyes ? UiSprites.Circle : UiSprites.Rounded, 2f).raycastTarget = false;
                 if (c.set != null || c.storyLevel > 0)
                 {
                     // A little star marks set pieces and story rewards.

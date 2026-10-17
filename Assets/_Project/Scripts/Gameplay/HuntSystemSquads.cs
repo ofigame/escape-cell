@@ -417,7 +417,11 @@ namespace SquashBot.Gameplay
             if (!tile.HasValue) return false;
             var kind = Army.KindOf(group);
             var model = SoldierModel.Build(transform, kind, Army.Heavy(kind) ? MineColour : Color.Lerp(MineColour, Color.white, 0.3f));
-            model.transform.localScale = Vector3.one * Mathf.Max(0.4f, FoiHeight * 0.62f) * (Army.Heavy(kind) ? 1.12f : 1f) * Army.SizeFor(group, stats); // trained soldiers stand taller
+            // As tall as foi at least (trained and heavy soldiers taller), and a plain cape in the team's colour.
+            float h0 = HeightOf(model.transform);
+            if (h0 > 0.05f) CosmeticModels.SimpleCape(model.transform, new Vector3(0f, h0 * 0.66f, -h0 * 0.12f), h0 * 0.34f, h0 * 0.5f, Color.Lerp(MineColour, Color.black, 0.35f));
+            float want = Mathf.Max(0.4f, FoiHeight) * (Army.Heavy(kind) ? 1.12f : 1f) * Army.SizeFor(group, stats);
+            model.transform.localScale = Vector3.one * (h0 > 0.05f ? want / h0 : Mathf.Max(0.4f, FoiHeight * 0.62f));
             // Its health in the floor robots' blows, its blow in theirs (robots take a few).
             int hp = Mathf.Max(1, stats.hp);
             int hit = Mathf.Max(1, Mathf.RoundToInt(stats.hit));

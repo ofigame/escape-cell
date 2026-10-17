@@ -138,6 +138,118 @@ namespace SquashBot.Gameplay
             if (g.moveT >= 1f) g.root.position = g.to + g.lungeDir * Mathf.Sin(g.lunge * Mathf.PI) * 0.45f;
         }
 
+        // ---------- vanG's big attacks, one for each kind of world ----------
+
+        /// <summary>The big attack under way (-1 none): 0 a cross of fire along the rows, 1 a rain of rocks round foi, 2 a
+        /// charge in a line, 3 a call for reinforcements.</summary>
+        private int specialKind = -1;
+        private float specialTimer = 7f;
+        private GridPos chargeEnd;
+
+        /// <summary>Now and then (more often when hurt), instead of an ordinary blow, the world's own big attack.</summary>
+        private bool TrySpecial(float dt, float hard, bool enraged)
+        {
+            specialTimer -= dt * (enraged ? 1.5f : 1f);
+            if (specialTimer > 0f) return false;
+            specialTimer = Mathf.Lerp(9f, 6f, hard) * (0.85f + (float)rng.NextDouble() * 0.3f);
+            if (grid.IsSafe(robot.Position)) return false;
+            attackTiles.Clear();
+            specialKind = world % 4;
+            switch (specialKind)
+            {
+                case 0:
+                    // A cross of fire: every tile along vanG's row and column, six each way.
+                    foreach (var d in DirectionExtensions.All)
+                        for (int i = 1; i <= 6; i++)
+                        {
+                            var p = monsterPos + new GridPos(d.ToOffset().x * i, d.ToOffset().y * i);
+                            if (grid.IsStandable(p) && !grid.IsSafe(p)) attackTiles.Add(p);
+                        }
+                    monster.Stomp();
+                    break;
+                case 1:
+                    // Rocks raining round foi: its tile and five more near it.
+                    attackTiles.Add(robot.Position);
+                    for (int n = 0, tries = 0; n < 5 && tries < 40; tries++)
+                    {
+                        var p = robot.Position + new GridPos(rng.Next(-2, 3), rng.Next(-2, 3));
+                        if (!attackTiles.Contains(p) && grid.IsStandable(p) && !grid.IsSafe(p)) { attackTiles.Add(p); n++; }
+                    }
+                    monster.Throw();
+                    break;
+                case 2:
+                {
+                    // A charge: the line from vanG through foi's tile, and a little past it.
+                    var d = new Vector2(robot.Position.x - monsterPos.x, robot.Position.y - monsterPos.y);
+                    if (d.sqrMagnitude < 0.5f) { specialKind = -1; return false; }
+                    d.Normalize();
+                    chargeEnd = monsterPos;
+                    for (int i = 1; i <= 7; i++)
+                    {
+                        var p = new GridPos(monsterPos.x + Mathf.RoundToInt(d.x * i), monsterPos.y + Mathf.RoundToInt(d.y * i));
+                        if (!grid.IsStandable(p) || grid.IsSafe(p)) break;
+                        attackTiles.Add(p);
+                        chargeEnd = p;
+                    }
+                    if (attackTiles.Count == 0) { specialKind = -1; return false; }
+                    monster.Stomp();
+                    break;
+                }
+                default:
+                    // A roar: the tiles round vanG shake, and reinforcements land.
+                    for (int x = -1; x <= 1; x++)
+                        for (int y = -1; y <= 1; y++)
+                        {
+                            var p = monsterPos + new GridPos(x, y);
+                            if ((x != 0 || y != 0) && grid.IsStandable(p) && !grid.IsSafe(p)) attackTiles.Add(p);
+                        }
+                    monster.Stomp();
+                    break;
+            }
+            Shockwave.Create(At(monsterPos), 1.6f, new Color(1f, 0.3f, 0.6f));
+            AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.5f);
+            attackWind = 0f;
+            return true;
+        }
+
+        /// <summary>The big attack lands (the tiles' blow itself is the ordinary one's): its own show and after-effects.</summary>
+        private void LandSpecial()
+        {
+            int kind = specialKind;
+            specialKind = -1;
+            switch (kind)
+            {
+                case 0:
+                    foreach (var p in attackTiles) fx.Burst(At(p) + Vector3.up * 0.3f, new Color(1f, 0.45f, 0.15f), new Color(3f, 1.1f, 0.3f), 6, 3f);
+                    break;
+                case 1:
+                    foreach (var p in attackTiles) ThrownRock.Create(At(p) + new Vector3(0.4f, 7f, 0.4f), At(p), 0.35f, new Color(0.55f, 0.45f, 0.4f));
+                    break;
+                case 2:
+                    // vanG crashes along the line to its end.
+                    leapFrom = monster.transform.position;
+                    grid.SetOccupied(monsterPos, false);
+                    monsterPos = chargeEnd;
+                    grid.SetOccupied(monsterPos, true);
+                    leapTo = At(monsterPos);
+                    leapT = 0f;
+                    break;
+                default:
+                    // Two robots drop in beside it.
+                    for (int n = 0, tries = 0; n < 2 && tries < 20; tries++)
+                    {
+                        var p = monsterPos + new GridPos(rng.Next(-3, 4), rng.Next(-3, 4));
+                        if (grid.IsStandable(p) && !grid.IsOccupied(p) && !grid.IsSafe(p) && p != robot.Position)
+                        {
+                            AddGuard(p);
+                            Shockwave.Create(At(p), 1.2f, new Color(1f, 0.4f, 0.4f));
+                            n++;
+                        }
+                    }
+                    break;
+            }
+        }
+
         // ---------- What foi's crowd skills look for ----------
 
         /// <summary>Fighting enemies (robots, towers, an awake vanG) within <paramref name="radius"/> of a tile.</summary>

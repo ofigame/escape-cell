@@ -61,9 +61,10 @@ namespace SquashBot.Data
             return new Type { world = w, advanced = advanced };
         }
 
-        /// <summary>vanG's health points: 100 in the first world up to 1500 in the last, five per cent more each floor of a world.</summary>
+        /// <summary>vanG's health points: 180 in the first world up to 2700 in the last, five per cent more each floor of a world
+        /// (a real fight: foi's powers and bombs are strong now).</summary>
         public static int VanGHp(int world, int inWorld) =>
-            Mathf.RoundToInt(Mathf.Lerp(100f, 1500f, Mathf.Clamp01(world / (float)(Worlds - 1))) * (1f + 0.05f * Mathf.Clamp(inWorld, 0, 9)));
+            Mathf.RoundToInt(Mathf.Lerp(180f, 2700f, Mathf.Clamp01(world / (float)(Worlds - 1))) * (1f + 0.05f * Mathf.Clamp(inWorld, 0, 9)));
 
         /// <summary>vanG's blow: twice the world's hardest robot's.</summary>
         public static int VanGDamage(int world, int inWorld) => 2 * For(new Type { world = world, advanced = true }, world, inWorld).damage;

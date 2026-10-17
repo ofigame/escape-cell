@@ -184,7 +184,7 @@ namespace SquashBot.UI
         {
             bool sideways = Screen.width > Screen.height;
             root.localScale = Vector3.one * (sideways ? 0.62f : 0.8f); // smaller, beside the action column
-            root.anchoredPosition = sideways ? new Vector2(-80f, 40f) : new Vector2(-118f, 60f);
+            root.anchoredPosition = sideways ? new Vector2(-80f, 40f) : new Vector2(-95f, 160f); // upright: above the powers' column, against the edge
             foreach (var s in slots)
             {
                 if (s.punch <= 0f) continue;

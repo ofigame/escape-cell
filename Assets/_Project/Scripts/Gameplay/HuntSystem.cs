@@ -401,7 +401,7 @@ namespace SquashBot.Gameplay
             {
                 var model = g.bot != null ? g.bot.transform : g.human.transform;
                 float h = HeightOf(g.root);
-                float want = FoiHeight * (g.human != null ? (rank >= 99 ? 1.3f : 1.18f) : rank > 0 ? 1.06f : 1f);
+                float want = FoiHeight * (g.human != null ? (rank >= 99 ? 1.2f : 1.1f) : 1f); // none shorter than foi, the big ones only a little taller
                 if (h > 0.05f) model.localScale *= want / h;
                 // Never spindly: a little broader than tall would make them.
                 model.localScale = Vector3.Scale(model.localScale, g.human != null ? new Vector3(1.22f, 1f, 1.22f) : new Vector3(1.12f, 1f, 1.12f));
@@ -1323,7 +1323,7 @@ namespace SquashBot.Gameplay
 
         private float ShareOf(Guard g) => g.share >= 0f ? g.share : g.blow > 0 ? g.blow * FoeHitScale / (float)Mathf.Max(1, FoiHp) : g.rank >= 99 ? 0.55f : g.brute ? BruteHitShare : g.rank == 0 ? 0.12f : g.rank > 0 ? Mathf.Min(0.3f, 0.16f + g.rank * 0.025f) : GuardHitShare;
         /// <summary>The monster's blows hurt more on later floors.</summary>
-        private float MonsterHitShare => RosterWorld >= 0 ? EnemyRoster.VanGDamage(RosterWorld, RosterFloor) * Mathf.Max(1f, FoeHitScale * 0.8f) / (float)Mathf.Max(1, FoiHp) : Mathf.Lerp(0.36f, 0.6f, level.score / 100f);
+        private float MonsterHitShare => 1.3f * (RosterWorld >= 0 ? EnemyRoster.VanGDamage(RosterWorld, RosterFloor) * Mathf.Max(1f, FoeHitScale * 0.8f) / (float)Mathf.Max(1, FoiHp) : Mathf.Lerp(0.36f, 0.6f, level.score / 100f));
 
         /// <summary>Blows still to come in the monster's current combo (later floors chain two or three).</summary>
         private int comboLeft;
@@ -1355,7 +1355,7 @@ namespace SquashBot.Gameplay
             {
                 attackWind += dt;
                 // The wind-up shortens on later floors and when the monster is enraged.
-                float wind = (attackIsRock ? 1.1f : 0.95f) * Mathf.Lerp(1f, 0.68f, hard) * (enraged ? 0.85f : 1f);
+                float wind = specialKind >= 0 ? 1.35f * Mathf.Lerp(1f, 0.8f, hard) : (attackIsRock ? 1.1f : 0.95f) * Mathf.Lerp(1f, 0.68f, hard) * (enraged ? 0.85f : 1f);
                 float k = attackWind / wind;
                 foreach (var t in attackTiles) view.SetWarning(t, 0.4f + 0.6f * k);
                 if (k < 1f) return;
@@ -1366,6 +1366,7 @@ namespace SquashBot.Gameplay
                     Shockwave.Create(At(t), 0.8f, new Color(1f, 0.45f, 0.3f));
                     fx.Dust(At(t), new Color(0.55f, 0.5f, 0.45f), 6, 2f);
                 }
+                if (specialKind >= 0) LandSpecial();
                 rig.Shake(attackIsRock ? 0.4f : 0.7f);
                 AudioManager.PlaySfx(Sfx.Impact, 1f, attackIsRock ? 1f : 0.6f);
                 if (attackTiles.Contains(robot.Position)) Hit?.Invoke(robot.Position, MonsterHitShare);
@@ -1379,6 +1380,7 @@ namespace SquashBot.Gameplay
                 }
                 return;
             }
+            if (TrySpecial(dt, hard, enraged)) return; // the world's own big attack, now and then
             monsterTimer -= dt * (enraged ? 1.35f : 1f);
             if (monsterTimer > 0f) return;
             monsterTimer = level.monsterAttack * (0.85f + (float)rng.NextDouble() * 0.3f);

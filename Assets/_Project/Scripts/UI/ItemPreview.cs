@@ -65,6 +65,48 @@ namespace SquashBot.UI
             return rt;
         }
 
+        /// <summary>
+        /// A picture of a garage piece (a hat, a cape or back gear, arms, legs), built on its own and framed whole: hats,
+        /// arms and legs three-quarters from the front, back gear from behind. Null for the other kinds and the plain ones.
+        /// </summary>
+        public static Texture Cosmetic(Cosmetic c)
+        {
+            if (c == null || c.IsDefault || !(c.slot == Slot.Hat || c.slot == Slot.Back || c.slot == Slot.Arms || c.slot == Slot.Legs)) return null;
+            string key = "cos." + c.id;
+            if (cache.TryGetValue(key, out var rt) && rt != null && rt.IsCreated()) return rt;
+            Setup();
+            rt = new RenderTexture(256, 256, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Cosmetic " + c.id };
+            rt.Create();
+            var holder = new GameObject("Preview").transform;
+            holder.SetParent(stage, false);
+            var piece = new GameObject("Piece").transform;
+            piece.SetParent(holder, false);
+            switch (c.slot)
+            {
+                case Slot.Hat: CosmeticModels.Hat(piece, c.id, c.color); break;
+                case Slot.Back: CosmeticModels.Back(piece, c.id, c.color); break;
+                case Slot.Arms: CosmeticModels.Arms(piece, c.id, c.color); break;
+                default: CosmeticModels.Legs(piece, c.id, c.color); break;
+            }
+            holder.localRotation = Quaternion.Euler(10f, c.slot == Slot.Back ? 330f : 200f, 0f);
+            // Framed on what was built: its middle in the middle of the picture, all of it in view.
+            var renderers = holder.GetComponentsInChildren<Renderer>();
+            if (renderers.Length > 0)
+            {
+                var b = renderers[0].bounds;
+                foreach (var r in renderers) b.Encapsulate(r.bounds);
+                holder.position += stage.position - b.center;
+                cam.orthographicSize = Mathf.Max(0.05f, Mathf.Max(b.extents.y, b.extents.x) * 1.18f);
+            }
+            cam.transform.localPosition = new Vector3(0f, 0f, -4f);
+            cam.targetTexture = rt;
+            cam.Render();
+            cam.targetTexture = null;
+            Object.DestroyImmediate(holder.gameObject);
+            cache[key] = rt;
+            return rt;
+        }
+
         // ---------- Turning pictures (the shop's weapon cards) ----------
 
         private class Live

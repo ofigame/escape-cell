@@ -303,6 +303,29 @@ namespace SquashBot.Visual
             }
         }
 
+        /// <summary>A plain waving cape (soldiers): a few cloth strips hanging from <paramref name="top"/>, in the colour.</summary>
+        public static void SimpleCape(Transform parent, Vector3 top, float width, float length, Color colour)
+        {
+            var cloth = MaterialFactory.Create(colour, colour * 0.08f);
+            var holder = new GameObject("CapeTop").transform;
+            holder.SetParent(parent, false);
+            holder.localPosition = top;
+            var wave = holder.gameObject.AddComponent<CapeWave>();
+            Transform p = holder;
+            const int strips = 4;
+            float h = length / strips;
+            for (int i = 0; i < strips; i++)
+            {
+                var seg = new GameObject("Seg" + i).transform;
+                seg.SetParent(p, false);
+                seg.localPosition = i == 0 ? Vector3.zero : new Vector3(0f, -h, 0f);
+                float w = width * Mathf.Lerp(1f, 1.25f, i / (strips - 1f));
+                var piece = Shapes.Primitive(PrimitiveType.Cube, "Cloth", seg, new Vector3(0f, -h * 0.5f, 0f), new Vector3(w, h * 1.08f, width * 0.06f), cloth);
+                wave.segments.Add(seg);
+                p = seg;
+            }
+        }
+
         public static void Back(Transform root, string id, Color color)
         {
             switch (id)
@@ -439,48 +462,50 @@ namespace SquashBot.Visual
         /// <summary>Arm pieces (they replace the plain arms at x = ±0.18, y = 0.2).</summary>
         public static void Arms(Transform root, string id, Color color)
         {
+            // Big, thick arms, each one whole piece from the shoulder down, with its hand at the end.
             var main = MaterialFactory.Create(color, Color.black);
             foreach (float side in new[] { -1f, 1f })
             {
-                float x = side * 0.18f;
+                float x = side * 0.2f;
                 switch (id)
                 {
                     case "arms.brush":
                     case "arms.lumi":
                     {
-                        // A paint-brush hand; Lumi's own brush has a glowing gold tip.
+                        // A paint-brush arm; Lumi's own brush has a glowing gold tip.
                         bool lumi = id == "arms.lumi";
                         var wood = MaterialFactory.Create(new Color(0.75f, 0.55f, 0.35f), Color.black);
                         var tip = lumi ? MaterialFactory.Create(color, new Color(1.8f, 1.3f, 0.3f)) : main;
-                        Shapes.Rounded("Arm", root, new Vector3(x, 0.22f, 0f), new Vector3(0.06f, 0.1f, 0.08f), 0.018f, wood);
-                        Shapes.Rounded("Ferrule", root, new Vector3(x, 0.15f, 0f), new Vector3(0.07f, 0.03f, 0.07f), 0.01f,
+                        Shapes.Rounded("Arm", root, new Vector3(x, 0.25f, 0f), new Vector3(0.1f, 0.22f, 0.1f), 0.045f, wood);
+                        Shapes.Rounded("Ferrule", root, new Vector3(x, 0.125f, 0f), new Vector3(0.11f, 0.04f, 0.11f), 0.015f,
                             MaterialFactory.Create(new Color(0.8f, 0.82f, 0.88f), new Color(0.2f, 0.2f, 0.22f)));
-                        Shapes.Rounded("Bristles", root, new Vector3(x, 0.1f, 0f), new Vector3(0.07f, 0.08f, 0.07f), 0.03f, tip);
+                        Shapes.Rounded("Bristles", root, new Vector3(x, 0.06f, 0f), new Vector3(0.11f, 0.1f, 0.11f), 0.045f, tip);
                         break;
                     }
                     case "arms.spring":
                     {
                         var coil = MaterialFactory.Create(color, new Color(0.1f, 0.1f, 0.12f));
-                        for (int k = 0; k < 4; k++)
-                            Shapes.Primitive(PrimitiveType.Cylinder, "Coil", root, new Vector3(x, 0.26f - k * 0.035f, 0f), new Vector3(0.07f, 0.008f, 0.07f), coil);
-                        Shapes.Primitive(PrimitiveType.Sphere, "Fist", root, new Vector3(x, 0.12f, 0f), Vector3.one * 0.075f,
+                        Shapes.Primitive(PrimitiveType.Sphere, "Shoulder", root, new Vector3(x, 0.34f, 0f), Vector3.one * 0.11f, coil);
+                        for (int k = 0; k < 5; k++)
+                            Shapes.Primitive(PrimitiveType.Cylinder, "Coil", root, new Vector3(x, 0.3f - k * 0.04f, 0f), new Vector3(0.11f, 0.011f, 0.11f), coil);
+                        Shapes.Primitive(PrimitiveType.Sphere, "Fist", root, new Vector3(x, 0.09f, 0f), Vector3.one * 0.12f,
                             MaterialFactory.Create(new Color(0.95f, 0.4f, 0.35f), Color.black));
                         break;
                     }
                     case "arms.claw":
                     {
-                        Shapes.Rounded("Arm", root, new Vector3(x, 0.22f, 0f), new Vector3(0.06f, 0.1f, 0.08f), 0.018f, main);
-                        foreach (float f in new[] { -1f, 1f })
+                        Shapes.Rounded("Arm", root, new Vector3(x, 0.25f, 0f), new Vector3(0.11f, 0.22f, 0.115f), 0.05f, main);
+                        foreach (float fz in new[] { -1f, 1f })
                         {
-                            var finger = Shapes.Rounded("Pincer", root, new Vector3(x + f * 0.022f, 0.135f, 0.01f), new Vector3(0.025f, 0.07f, 0.04f), 0.01f, main);
-                            finger.transform.localRotation = Quaternion.Euler(0f, 0f, f * 18f);
+                            var finger = Shapes.Rounded("Pincer", root, new Vector3(x + fz * 0.032f, 0.1f, 0.012f), new Vector3(0.04f, 0.11f, 0.06f), 0.018f, main);
+                            finger.transform.localRotation = Quaternion.Euler(0f, 0f, fz * 18f);
                         }
                         break;
                     }
                     case "arms.crystal":
                     {
-                        var crystal = MaterialFactory.CreateTransparent(new Color(color.r, color.g, color.b, 0.8f), new Color(0.4f, 0.8f, 1.2f));
-                        var arm = Shapes.Rounded("Crystal", root, new Vector3(x, 0.19f, 0f), new Vector3(0.07f, 0.16f, 0.07f), 0.02f, crystal);
+                        var crystal = MaterialFactory.CreateTransparent(new Color(color.r, color.g, color.b, 0.85f), new Color(0.4f, 0.8f, 1.2f));
+                        var arm = Shapes.Rounded("Crystal", root, new Vector3(x, 0.22f, 0f), new Vector3(0.11f, 0.26f, 0.11f), 0.03f, crystal);
                         arm.transform.localRotation = Quaternion.Euler(0f, 45f, 0f);
                         break;
                     }
@@ -491,50 +516,51 @@ namespace SquashBot.Visual
         /// <summary>Leg pieces (they replace the plain legs and feet).</summary>
         public static void Legs(Transform root, string id, Color color)
         {
+            // Big, sturdy legs: thick pieces standing wide, chunky feet.
             var main = MaterialFactory.Create(color, Color.black);
             var dark = MaterialFactory.Create(new Color(0.18f, 0.17f, 0.24f), Color.black);
             switch (id)
             {
                 case "legs.spring":
-                    foreach (float x in new[] { -0.08f, 0.08f })
+                    foreach (float x in new[] { -0.09f, 0.09f })
                     {
-                        for (int k = 0; k < 3; k++)
-                            Shapes.Primitive(PrimitiveType.Cylinder, "Coil", root, new Vector3(x, 0.12f - k * 0.035f, 0f), new Vector3(0.09f, 0.008f, 0.09f), main);
-                        Shapes.Rounded("Foot", root, new Vector3(x, 0.02f, 0.03f), new Vector3(0.11f, 0.04f, 0.16f), 0.012f, dark);
+                        for (int k = 0; k < 4; k++)
+                            Shapes.Primitive(PrimitiveType.Cylinder, "Coil", root, new Vector3(x, 0.15f - k * 0.035f, 0f), new Vector3(0.12f, 0.01f, 0.12f), main);
+                        Shapes.Rounded("Foot", root, new Vector3(x, 0.03f, 0.03f), new Vector3(0.14f, 0.06f, 0.2f), 0.025f, dark);
                     }
                     break;
                 case "legs.wheel":
                 {
-                    // One wheel under the body, like a unicycle.
-                    Shapes.Rounded("Fork", root, new Vector3(0f, 0.1f, 0f), new Vector3(0.14f, 0.08f, 0.06f), 0.02f, main);
-                    var wheel = Shapes.Primitive(PrimitiveType.Cylinder, "Wheel", root, new Vector3(0f, 0.065f, 0f), new Vector3(0.13f, 0.03f, 0.13f), dark).transform;
+                    // One big wheel under the body, like a unicycle.
+                    Shapes.Rounded("Fork", root, new Vector3(0f, 0.13f, 0f), new Vector3(0.2f, 0.1f, 0.09f), 0.03f, main);
+                    var wheel = Shapes.Primitive(PrimitiveType.Cylinder, "Wheel", root, new Vector3(0f, 0.085f, 0f), new Vector3(0.17f, 0.045f, 0.17f), dark).transform;
                     wheel.localRotation = Quaternion.Euler(0f, 0f, 90f);
-                    Shapes.Primitive(PrimitiveType.Cylinder, "Hub", root, new Vector3(0f, 0.065f, 0f), new Vector3(0.05f, 0.032f, 0.05f), main)
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Hub", root, new Vector3(0f, 0.085f, 0f), new Vector3(0.07f, 0.047f, 0.07f), main)
                         .transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
                     break;
                 }
                 case "legs.tracks":
-                    foreach (float x in new[] { -0.09f, 0.09f })
+                    foreach (float x in new[] { -0.1f, 0.1f })
                     {
-                        Shapes.Rounded("Track", root, new Vector3(x, 0.05f, 0f), new Vector3(0.09f, 0.1f, 0.24f), 0.04f, dark);
-                        Shapes.Rounded("Wheel", root, new Vector3(x * 1.35f, 0.05f, 0f), new Vector3(0.01f, 0.06f, 0.16f), 0.005f, main);
+                        Shapes.Rounded("Track", root, new Vector3(x, 0.07f, 0f), new Vector3(0.12f, 0.14f, 0.3f), 0.05f, dark);
+                        Shapes.Rounded("Wheel", root, new Vector3(x * 1.42f, 0.07f, 0f), new Vector3(0.012f, 0.08f, 0.2f), 0.006f, main);
                     }
                     break;
                 case "legs.jet":
                 {
                     var flame = MaterialFactory.Create(new Color(1f, 0.6f, 0.2f), new Color(2.6f, 1f, 0.2f));
-                    foreach (float x in new[] { -0.08f, 0.08f })
+                    foreach (float x in new[] { -0.09f, 0.09f })
                     {
-                        Shapes.Rounded("Boot", root, new Vector3(x, 0.08f, 0f), new Vector3(0.1f, 0.13f, 0.12f), 0.035f, main);
-                        Shapes.Rounded("Flame", root, new Vector3(x, 0.0f, 0f), new Vector3(0.05f, 0.04f, 0.05f), 0.02f, flame);
+                        Shapes.Rounded("Boot", root, new Vector3(x, 0.09f, 0f), new Vector3(0.13f, 0.17f, 0.15f), 0.05f, main);
+                        Shapes.Rounded("Flame", root, new Vector3(x, 0.0f, 0f), new Vector3(0.07f, 0.05f, 0.07f), 0.025f, flame);
                     }
                     break;
                 }
                 case "legs.snow":
-                    foreach (float x in new[] { -0.08f, 0.08f })
+                    foreach (float x in new[] { -0.09f, 0.09f })
                     {
-                        Shapes.Rounded("Leg", root, new Vector3(x, 0.08f, 0f), new Vector3(0.09f, 0.12f, 0.11f), 0.027f, main);
-                        Shapes.Rounded("Shoe", root, new Vector3(x, 0.015f, 0.02f), new Vector3(0.14f, 0.025f, 0.26f), 0.012f,
+                        Shapes.Rounded("Leg", root, new Vector3(x, 0.095f, 0f), new Vector3(0.12f, 0.16f, 0.13f), 0.045f, main);
+                        Shapes.Rounded("Shoe", root, new Vector3(x, 0.017f, 0.025f), new Vector3(0.17f, 0.03f, 0.3f), 0.014f,
                             MaterialFactory.Create(new Color(0.55f, 0.4f, 0.3f), Color.black));
                     }
                     break;

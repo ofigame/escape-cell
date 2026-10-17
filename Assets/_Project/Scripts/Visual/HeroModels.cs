@@ -98,17 +98,15 @@ namespace SquashBot.Visual
                     {
                         string side = s < 0 ? "L" : "R";
                         // A chunky rounded boot on a dark sole.
-                        var foot = Shapes.Rounded("Foot" + side, visual, new Vector3(0.08f * s, 0.036f, 0.022f), new Vector3(0.125f, 0.07f, 0.175f), 0.034f, dark).transform;
+                        var foot = Shapes.Rounded("Foot" + side, visual, new Vector3(0.082f * s, 0.038f, 0.024f), new Vector3(0.135f, 0.075f, 0.19f), 0.036f, dark).transform;
                         Shapes.Rounded("Sole", foot, new Vector3(0f, -0.03f, 0f), new Vector3(0.13f, 0.018f, 0.18f), 0.008f, frame);
                         Shapes.Rounded("Cuff", foot, new Vector3(0f, 0.04f, -0.01f), new Vector3(0.1f, 0.025f, 0.11f), 0.012f, light);
                         // A leg with a knee joint.
-                        var leg = Shapes.Rounded("Leg" + side, visual, new Vector3(0.08f * s, 0.12f, 0f), new Vector3(0.078f, 0.11f, 0.084f), 0.034f, body).transform;
-                        Shapes.Primitive(PrimitiveType.Sphere, "Knee", leg, new Vector3(0f, 0.045f, 0.01f), Vector3.one * 0.07f, dark);
+                        Shapes.Rounded("Leg" + side, visual, new Vector3(0.082f * s, 0.12f, 0f), new Vector3(0.1f, 0.13f, 0.105f), 0.045f, body); // one sturdy piece
                         // An arm out from the body: shoulder ball, upper arm, forearm, a round hand.
-                        var arm = Shapes.Rounded("Arm" + side, visual, new Vector3(0.185f * s, 0.27f + Extra, 0f), new Vector3(0.07f, 0.09f, 0.075f), 0.032f, body).transform;
-                        Shapes.Primitive(PrimitiveType.Sphere, "Shoulder", arm, new Vector3(-0.014f * s, 0.05f, 0f), Vector3.one * 0.08f, dark);
-                        Shapes.Rounded("Forearm", arm, new Vector3(0.006f * s, -0.082f, 0.006f), new Vector3(0.072f, 0.085f, 0.078f), 0.033f, light);
-                        Shapes.Primitive(PrimitiveType.Sphere, "Hand", arm, new Vector3(0.006f * s, -0.15f, 0.012f), Vector3.one * 0.078f, dark);
+                        // A thick arm in one piece from the shoulder, a big round hand at its end.
+                        var arm = Shapes.Rounded("Arm" + side, visual, new Vector3(0.19f * s, 0.24f + Extra, 0f), new Vector3(0.095f, 0.2f, 0.1f), 0.046f, body).transform;
+                        Shapes.Primitive(PrimitiveType.Sphere, "Hand", arm, new Vector3(0.004f * s, -0.12f, 0.01f), Vector3.one * 0.095f, dark);
                     }
                     Shapes.Rounded("Body", visual, new Vector3(0f, 0.255f + Extra * 0.5f, 0f), new Vector3(0.27f, 0.17f + Extra, 0.2f), 0.08f, body);
                     Shapes.Rounded("Hero_Chest", visual, new Vector3(0f, 0.27f + Extra * 0.7f, 0.096f), new Vector3(0.15f, 0.1f + Extra * 0.4f, 0.016f), 0.04f, frame);

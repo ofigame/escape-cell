@@ -75,7 +75,8 @@ namespace SquashBot.Gameplay
             if (crowdOffer > 0f)
             {
                 crowdOffer -= dt;
-                if (crowdOffer <= 0f) { ui.SetCrowdSkill((int)crowdKind, false); crowdCooldown = 5f; }
+                ui.SetCrowdSkill((int)crowdKind, crowdOffer > 0f); // (it breathes while offered)
+                if (crowdOffer <= 0f) crowdCooldown = 5f;
                 return;
             }
             if (crowdCooldown > 0f) { crowdCooldown -= dt; return; }
@@ -118,26 +119,35 @@ namespace SquashBot.Gameplay
             ui.SetUlti(0f, true);
             hurtCooldown = Mathf.Max(hurtCooldown, 3f); // untouchable through it
             hunt.Freeze();
-            PowerSlow(2.6f, 0.3f);
+            PowerSlow(2.4f, 0.55f); // slowed, but the flips stay quick
             ui.Flash(UltiColour, 0.5f);
             ui.ShowCallout(Loc.T("power.ultiShout"), robot.transform.position + Vector3.up * 1.6f, cameraRig.Cam, 1.4f);
             cameraRig.Punch(1f);
             AudioManager.PlaySfx(Sfx.Win, 1f, 0.6f);
             fx.Burst(robot.transform.position + Vector3.up * 0.6f, UltiColour, UltiColour * 2.5f, 40, 6f);
+            // Left and right in turn: a somersault blow, then a swing of the weapon in hand (sword, mace, axe...), quick.
             var targets = hunt.FightersAround(robot.Position, 5);
+            SortLeftRight(targets);
             int blows = Mathf.Min(6, targets.Count);
             for (int i = 0; i < blows; i++)
             {
-                yield return new WaitForSecondsRealtime(0.2f);
+                yield return new WaitForSecondsRealtime(0.06f);
                 while (State == GameState.Paused) yield return null;
                 if (!PowerFloor) break;
                 var at = targets[i];
                 var to = GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY;
                 robot.Strike(to);
-                SlashFx.Create(robot.transform.position + Vector3.up * 0.5f, to, UltiColour, 2.2f);
+                bool flip = i % 2 == 0;
+                if (flip) yield return Somersault();
+                else
+                {
+                    if (heldWeapon != null) heldWeapon.Swing();
+                    yield return new WaitForSecondsRealtime(0.12f);
+                }
+                SlashFx.Create(robot.transform.position + Vector3.up * 0.5f, to, UltiColour, flip ? 2.4f : 1.8f);
                 fx.Burst(to + Vector3.up * 0.6f, UltiColour, UltiColour * 2.5f, 22, 5f);
-                cameraRig.Shake(0.35f);
-                AudioManager.PlaySfx(Sfx.Impact, 1f, 1.1f);
+                cameraRig.Shake(flip ? 0.45f : 0.3f);
+                AudioManager.PlaySfx(Sfx.Impact, 1f, flip ? 0.9f : 1.2f);
                 hunt.Strike(at, PowerDamage(4f));
             }
             yield return new WaitForSecondsRealtime(0.3f);
@@ -156,6 +166,37 @@ namespace SquashBot.Gameplay
             yield return new WaitForSecondsRealtime(0.25f);
             if (skillFreezeLeft <= 0f) hunt.Resume();
             powerBusy = false;
+        }
+
+        /// <summary>The targets in turn from one side to the other: right, left, right... as they stand round foi.</summary>
+        private void SortLeftRight(List<GridPos> targets)
+        {
+            var me = robot.Position;
+            var right = targets.FindAll(p => p.x >= me.x);
+            var left = targets.FindAll(p => p.x < me.x);
+            targets.Clear();
+            for (int i = 0; i < Mathf.Max(right.Count, left.Count); i++)
+            {
+                if (i < right.Count) targets.Add(right[i]);
+                if (i < left.Count) targets.Add(left[i]);
+            }
+        }
+
+        /// <summary>A quick forward somersault: foi's body turns over once in the air and lands.</summary>
+        private IEnumerator Somersault()
+        {
+            var vis = robot.Visual;
+            if (vis == null) yield break;
+            const float time = 0.2f;
+            for (float k = 0f; k < 1f; k += Time.unscaledDeltaTime / time)
+            {
+                if (vis == null) yield break;
+                float e = Mathf.SmoothStep(0f, 1f, k);
+                vis.localRotation = Quaternion.Euler(-360f * e, 0f, 0f);
+                vis.localPosition = Vector3.up * Mathf.Sin(e * Mathf.PI) * 0.6f; // up and over
+                yield return null;
+            }
+            if (vis != null) { vis.localRotation = Quaternion.identity; vis.localPosition = Vector3.zero; }
         }
 
         // ---------- The crowd skills ----------
@@ -225,22 +266,66 @@ namespace SquashBot.Gameplay
         }
 
         private Material chainMat;
+        private static Mesh linkMesh;
+
+        /// <summary>An oval ring (a chain link) lying in the y-z plane, long along z: half-length <paramref name="a"/>,
+        /// half-width <paramref name="b"/>, its iron <paramref name="tube"/> thick.</summary>
+        private static Mesh LinkMesh(float a, float b, float tube)
+        {
+            const int around = 20, sides = 8;
+            var v = new List<Vector3>();
+            var n = new List<Vector3>();
+            var tris = new List<int>();
+            for (int i = 0; i <= around; i++)
+            {
+                float u = i * Mathf.PI * 2f / around;
+                var centre = new Vector3(0f, Mathf.Sin(u) * b, Mathf.Cos(u) * a);
+                var tangent = new Vector3(0f, Mathf.Cos(u) * b, -Mathf.Sin(u) * a).normalized;
+                var outward = Vector3.Cross(tangent, Vector3.right).normalized;
+                if (Vector3.Dot(outward, centre) < 0f) outward = -outward;
+                for (int j = 0; j <= sides; j++)
+                {
+                    float w = j * Mathf.PI * 2f / sides;
+                    var dir = outward * Mathf.Cos(w) + Vector3.right * Mathf.Sin(w);
+                    v.Add(centre + dir * tube);
+                    n.Add(dir);
+                }
+            }
+            for (int i = 0; i < around; i++)
+                for (int j = 0; j < sides; j++)
+                {
+                    int p0 = i * (sides + 1) + j, p1 = p0 + sides + 1;
+                    tris.Add(p0); tris.Add(p1); tris.Add(p0 + 1);
+                    tris.Add(p1); tris.Add(p1 + 1); tris.Add(p0 + 1);
+                }
+            var m = new Mesh { name = "ChainLink" };
+            m.SetVertices(v); m.SetNormals(n); m.SetTriangles(tris, 0);
+            m.RecalculateBounds();
+            return m;
+        }
 
         /// <summary>The great rusty chain: it swings out from foi's hand and whips twice round, felling all within reach.</summary>
         private IEnumerator ChainWhip()
         {
             powerBusy = true;
-            if (chainMat == null) chainMat = MaterialFactory.Create(new Color(0.55f, 0.33f, 0.2f), new Color(0.12f, 0.05f, 0.02f));
+            if (chainMat == null) chainMat = MaterialFactory.CreateSurface(new Color(0.5f, 0.32f, 0.2f), new Color(0.1f, 0.04f, 0.02f), 0.6f, 0.55f); // rusty iron, a little shine
             var root = new GameObject("Chain").transform;
             powerThing = root.gameObject;
+            // Real chain: oval iron rings, each turned a quarter to the last so they hang through one another.
             var links = new List<Transform>();
-            const int count = 14;
+            const int count = 13;
+            if (linkMesh == null) linkMesh = LinkMesh(0.21f, 0.12f, 0.048f);
             for (int i = 0; i < count; i++)
             {
-                var link = Shapes.Rounded("Link", root, Vector3.zero, new Vector3(0.12f, 0.26f, 0.42f), 0.06f, chainMat).transform;
+                var link = new GameObject("Link").transform;
+                link.SetParent(root, false);
+                link.gameObject.AddComponent<MeshFilter>().sharedMesh = linkMesh;
+                var mr = link.gameObject.AddComponent<MeshRenderer>();
+                mr.sharedMaterial = chainMat;
+                mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                link.localScale = Vector3.one * (i == count - 1 ? 1.5f : 1.1f); // a heavy last ring
                 links.Add(link);
             }
-            var weight = Shapes.Primitive(PrimitiveType.Sphere, "Weight", root, Vector3.zero, Vector3.one * 0.55f, chainMat).transform;
             PowerSlow(0.5f, 0.35f);
             cameraRig.Punch(0.8f);
             AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.5f);
@@ -255,7 +340,7 @@ namespace SquashBot.Gameplay
                 float k = t / spin;
                 float reach = Mathf.Lerp(0.8f, 3.2f, Mathf.Min(1f, k * 3f));
                 float angle = angle0 + k * 720f;
-                var c = robot.transform.position + Vector3.up * 0.55f;
+                var c = robot.transform.position + Vector3.up * 0.8f; // from foi's hand
                 var dir = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
                 for (int i = 0; i < count; i++)
                 {
@@ -263,7 +348,6 @@ namespace SquashBot.Gameplay
                     links[i].position = c + dir * reach * f + Vector3.up * Mathf.Sin(f * Mathf.PI) * 0.15f;
                     links[i].rotation = Quaternion.LookRotation(dir) * Quaternion.Euler(0f, 0f, i % 2 == 0 ? 0f : 90f);
                 }
-                weight.position = c + dir * (reach + 0.25f);
                 if (t >= nextStrike)
                 {
                     // Whatever the chain sweeps over this moment is struck (each enemy once a turn).

@@ -603,11 +603,11 @@ namespace SquashBot.Gameplay
             }
             slowCamWeight = Mathf.MoveTowards(slowCamWeight, on ? 1f : 0f, dt * (on ? 2.6f : 1.8f));
             if (slowCamWeight <= 0f) return;
-            slowCamAngle += dt * 70f;
+            slowCamAngle += dt * 22f; // a slow turn
             float a = slowCamAngle * Mathf.Deg2Rad;
             float apart = Mathf.Clamp(new Vector2(me.x - foe.x, me.z - foe.z).magnitude, 0f, 6f);
-            float radius = 6.4f + apart * 0.5f; // far enough to see both whole, and the moment round them
-            var orbit = centre + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * radius + Vector3.up * (4.3f + apart * 0.25f);
+            float radius = 10.5f + apart * 0.6f; // only a touch closer than the board's view
+            var orbit = centre + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * radius + Vector3.up * (7.5f + apart * 0.3f);
             // Never into the stands: it keeps over the floor (the stands rise along its long sides).
             orbit.x = Mathf.Clamp(orbit.x, boardCentre.x - BoardW * 0.5f, boardCentre.x + BoardW * 0.5f);
             orbit.z = Mathf.Clamp(orbit.z, boardCentre.z - BoardH * 0.5f + 0.5f, boardCentre.z + BoardH * 0.5f - 0.5f);
