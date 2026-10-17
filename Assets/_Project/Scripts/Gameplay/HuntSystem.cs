@@ -401,7 +401,7 @@ namespace SquashBot.Gameplay
             {
                 var model = g.bot != null ? g.bot.transform : g.human.transform;
                 float h = HeightOf(g.root);
-                float want = FoiHeight * (g.human != null ? (rank >= 99 ? 1.2f : 1.1f) : 1f); // none shorter than foi, the big ones only a little taller
+                float want = FoiHeight * (g.human != null ? (rank >= 99 ? 1.15f : 1f) : rank > 0 || type.advanced ? 1f : 0.9f); // foi stands as tall as the second smallest: the plain robots a touch shorter
                 if (h > 0.05f) model.localScale *= want / h;
                 // Never spindly: a little broader than tall would make them.
                 model.localScale = Vector3.Scale(model.localScale, g.human != null ? new Vector3(1.22f, 1f, 1.22f) : new Vector3(1.12f, 1f, 1.12f));
