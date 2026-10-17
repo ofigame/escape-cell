@@ -88,6 +88,7 @@ namespace SquashBot.Gameplay
         private void BuildDuelBoard(int stage)
         {
             duelStage = Mathf.Clamp(stage, 0, DuelStages.Length - 1);
+            zoneRadius = 99f; zoneDrawn = -1; zoneHurtMe = zoneHurtFoe = 0f; zoneAnnounced = false;
             BuildCourtyard();
             chDuelMe = chDuelThem = 0;
             chDuelLeft = chDuelMinutes * 60f;
@@ -285,8 +286,74 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>Each frame of the duel: the clock (it only runs while the two fight), a knock-down, time up.</summary>
+        // ---------- The closing ring ----------
+
+        /// <summary>The safe ring's radius (tiles from the board's middle) and the last one drawn.</summary>
+        private float zoneRadius = 99f;
+        private int zoneDrawn = -1;
+        private float zoneHurtMe, zoneHurtFoe;
+        private bool zoneAnnounced;
+
+        /// <summary>
+        /// So nobody runs round the board for ever: from a quarter of the duel's time the safe ring closes in, down to a
+        /// ring a few tiles across just before the end. The tiles outside it glow red, and whoever stands out there loses
+        /// health (a live duel's health is the server's: there only the ring shows).
+        /// </summary>
+        private void UpdateDuelZone(float dt)
+        {
+            float total = Mathf.Max(60f, chDuelMinutes * 60f);
+            float elapsed = total - chDuelLeft;
+            float k = Mathf.InverseLerp(total * 0.25f, total * 0.9f, elapsed);
+            if (k <= 0f) { zoneRadius = 99f; zoneAnnounced = false; return; }
+            if (!zoneAnnounced)
+            {
+                zoneAnnounced = true;
+                FloatAt(robot.transform.position + Vector3.up * 1.6f, Loc.T("duel.zone"), new Color(1f, 0.4f, 0.35f));
+                AudioManager.PlaySfx(Sfx.Blocked, 0.9f, 0.6f);
+            }
+            zoneRadius = Mathf.Lerp(13.5f, 2.6f, k);
+            var mid = new GridPos(BoardW / 2, BoardH / 2);
+            int step = Mathf.RoundToInt(zoneRadius * 2f);
+            if (step != zoneDrawn)
+            {
+                zoneDrawn = step;
+                var red = new Color(1f, 0.3f, 0.25f);
+                for (int y = 0; y < BoardH; y++)
+                    for (int x = 0; x < BoardW; x++)
+                    {
+                        var p = new GridPos(x, y);
+                        if (!grid.Exists(p)) continue;
+                        bool outside = Vector2.Distance(new Vector2(x, y), new Vector2(mid.x, mid.y)) > zoneRadius;
+                        gridView.SetTint(p, outside ? red : (Color?)null);
+                    }
+            }
+            if (LiveActive) return;
+            // Out in the red: foi's health drains (in small knocks, so it shows), and the rival's too.
+            if (Vector2.Distance(new Vector2(robot.Position.x, robot.Position.y), new Vector2(mid.x, mid.y)) > zoneRadius)
+            {
+                zoneHurtMe += dt * 0.07f;
+                if (zoneHurtMe >= 0.035f)
+                {
+                    hitShareOverride = zoneHurtMe;
+                    moveHit = true;
+                    OnBlockImpact(robot.Position);
+                    moveHit = false;
+                    hitShareOverride = -1f;
+                    zoneHurtMe = 0f;
+                }
+            }
+            var foeTile = hunt.ChallengeFoeTile;
+            if (foeTile.HasValue && Vector2.Distance(new Vector2(foeTile.Value.x, foeTile.Value.y), new Vector2(mid.x, mid.y)) > zoneRadius)
+            {
+                zoneHurtFoe += dt;
+                if (zoneHurtFoe >= 0.6f) { zoneHurtFoe = 0f; HitFoe(0.35f); }
+            }
+        }
+
         private void UpdateDuel(float dt)
         {
+            ui.SetRivalHealth(true, hunt.ChallengeFoeHealth); // the rival's bar at the top right, over its name
+            UpdateDuelZone(dt);
             UpdateDuelSkills(dt);
             chDuelLeft = Mathf.Max(0f, chDuelLeft - dt);
             RefreshDuelClock();

@@ -139,8 +139,8 @@ namespace SquashBot.UI
                 minus[r] = B("-", x0 + 50f, 52f, Flat.CardHi, Flat.Text, () => Take(g, 1, track));
                 plus1[r] = B("+1", x0 + 150f, 52f, colour, dark, () => Add(g, 1, track));
                 plus5[r] = B("+5", x0 + 250f, 52f, colour, dark, () => Add(g, 5, track));
-                values[r] = Flat.Label(row, "", pad, new Vector2(x0 + 150f, 122f), new Vector2(290f, 42f), 26f, Flat.Text, TextAlignmentOptions.Center, bold: true);
-                values[r].rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                // Right over its +1: what the column raises and how much it is now.
+                values[r] = Flat.Label(row, "", pad, new Vector2(x0 + 5f, 100f), new Vector2(290f, 44f), 26f, Flat.Text, TextAlignmentOptions.Center, bold: true);
             }
 
             refreshers.Add(() =>

@@ -161,16 +161,22 @@ namespace SquashBot.Data
             T("back.raven", Slot.Back, 211, new Color(0.16f, 0.15f, 0.24f)),
             T("badge.heart", Slot.Badge, 250, new Color(1f, 0.8f, 0.3f)),
 
-            // Capes that wave as foi runs: sold in the workshop...
-            C("back.cape.night", Slot.Back, 500, 0, new Color(0.14f, 0.18f, 0.42f)),
-            C("back.cape.royal", Slot.Back, 700, 3, new Color(0.45f, 0.2f, 0.62f)),
-            C("back.cape.flame", Slot.Back, 800, 6, new Color(0.95f, 0.38f, 0.12f)),
-            C("back.cape.frost", Slot.Back, 800, 9, new Color(0.55f, 0.82f, 1f)),
+            // Capes that wave as foi runs. Plain ones tied at the neck (the old hero cape is the red one)...
+            C("back.cape.sky", Slot.Back, 400, 0, new Color(0.3f, 0.55f, 0.95f)),
+            C("back.cape.sun", Slot.Back, 400, 0, new Color(1f, 0.78f, 0.25f)),
+            // ...middle ones tied at the neck with a light pattern...
+            C("back.cape.night", Slot.Back, 650, 2, new Color(0.14f, 0.18f, 0.42f)),
+            C("back.cape.teal", Slot.Back, 650, 2, new Color(0.15f, 0.6f, 0.58f)),
+            C("back.cape.wine", Slot.Back, 650, 2, new Color(0.55f, 0.16f, 0.26f)),
+            // ...high ones from the shoulders with gold patterns...
+            C("back.cape.royal", Slot.Back, 1000, 4, new Color(0.45f, 0.2f, 0.62f)),
+            C("back.cape.flame", Slot.Back, 1000, 6, new Color(0.95f, 0.38f, 0.12f)),
+            C("back.cape.frost", Slot.Back, 1000, 9, new Color(0.55f, 0.82f, 1f)),
             // ...and the ranks' own capes and hats: earned in the challenge, never sold.
-            K("back.cape.rank3", Slot.Back, 3, new Color(0.62f, 0.36f, 0.2f)),
-            K("back.cape.rank6", Slot.Back, 6, new Color(0.62f, 0.66f, 0.74f)),
-            K("back.cape.rank9", Slot.Back, 9, new Color(0.85f, 0.65f, 0.2f)),
-            K("back.cape.rank12", Slot.Back, 12, new Color(0.5f, 0.12f, 0.2f)),
+            K("back.cape.rank3", Slot.Back, 3, new Color(0.18f, 0.42f, 0.22f)),
+            K("back.cape.rank6", Slot.Back, 6, new Color(0.18f, 0.42f, 0.22f)),
+            K("back.cape.rank9", Slot.Back, 9, new Color(0.18f, 0.42f, 0.22f)),
+            K("back.cape.rank12", Slot.Back, 12, new Color(0.45f, 0.06f, 0.12f)),
             K("hat.rank2", Slot.Hat, 2, new Color(0.38f, 0.45f, 0.3f)),
             K("hat.rank5", Slot.Hat, 5, new Color(0.16f, 0.2f, 0.36f)),
             K("hat.rank8", Slot.Hat, 8, new Color(0.7f, 0.12f, 0.16f)),

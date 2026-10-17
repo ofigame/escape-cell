@@ -620,11 +620,12 @@ namespace SquashBot.Gameplay
             robot.FaceCamera();
             cameraRig.SetMenuFocus(false);
             // Straight from the front at foi's own height, foi up in the space above the paint panel.
-            var front = robot.transform.forward;
+            var front = robot.Visual != null ? robot.Visual.forward : robot.transform.forward; // the way its face looks
             front.y = 0f;
             front = front.sqrMagnitude > 0.01f ? front.normalized : Vector3.back;
-            var aim = robot.transform.position + Vector3.up * -0.32f;
-            cameraRig.Chase(aim + front * 4.4f + Vector3.up * 0.42f, Quaternion.LookRotation(aim - (aim + front * 4.4f + Vector3.up * 0.42f)), 40f);
+            var aim = robot.transform.position + Vector3.up * -0.2f;
+            var eye = aim + front * 5.1f + Vector3.up * 0.45f; // far enough that a dance's jump stays in the picture
+            cameraRig.Chase(eye, Quaternion.LookRotation(aim - eye), 40f);
             garageView = true;
         }
 
@@ -1254,7 +1255,7 @@ namespace SquashBot.Gameplay
                 var r = cam.right; r.y = 0f;
                 var s = stick.Value;
                 float push = s.magnitude;
-                float speed = push < 0.2f ? 0f : Mathf.Lerp(2.2f, 5.8f, Mathf.InverseLerp(0.2f, 1f, push));
+                float speed = push < 0.2f ? 0f : Mathf.Lerp(2.6f, 6.8f, Mathf.InverseLerp(0.2f, 1f, push));
                 var dir = r.normalized * s.x + f.normalized * s.y;
                 if (dir.sqrMagnitude > 0.0001f) vel = dir.normalized * speed;
             }

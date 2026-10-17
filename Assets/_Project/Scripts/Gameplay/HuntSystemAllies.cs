@@ -97,7 +97,7 @@ namespace SquashBot.Gameplay
         private void UpdateAlly(Guard a, float dt)
         {
             if (a.squad) { UpdateSquad(a, dt); return; }
-            if (a.bar != null && Camera.main != null) a.bar.rotation = Quaternion.LookRotation(Camera.main.transform.forward, Vector3.up);
+            UpdateHealthBar(a); // (its colours fade as it is hurt)
             if (a.barFill != null) a.barFill.localScale = new Vector3(Mathf.Max(0.001f, a.hp / (float)a.maxHp), 1f, 1f);
             if (a.flash > 0f) a.flash -= dt * 3f;
             a.cooldown -= dt;

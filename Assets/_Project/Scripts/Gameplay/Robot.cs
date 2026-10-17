@@ -176,6 +176,7 @@ namespace SquashBot.Gameplay
                 if (HeroModels.IsPart(c.name)) DestroyImmediate(c.gameObject);
             }
             (eyeL, eyeR) = HeroModels.Build(visual, hero, bodyMaterial, lightMaterial, darkMaterial, eyeMaterial);
+            legLT = footLT = null;
             accessories.localPosition = new Vector3(0f, HeroModels.TorsoExtra(hero), 0f);
             int w = lookWorld;
             lookWorld = -1;
@@ -227,18 +228,24 @@ namespace SquashBot.Gameplay
             // A build with a longer body wears its gear that much higher (head and arms all of it, back and badge half).
             float extra = HeroModels.TorsoExtra(hero);
             if (!hat.IsDefault) CosmeticModels.Hat(Raised(extra), hat.id, hat.color);
-            if (!back.IsDefault) CosmeticModels.Back(Raised(extra * 0.6f), back.id, back.color);
+            float lift = HeroModels.LegLift(hero); // (the longer legs lift the body: its gear with it)
+            if (!back.IsDefault) CosmeticModels.Back(Raised(extra * 0.6f + lift), back.id, back.color);
             accessories.gameObject.SetActive(hat.IsDefault && back.IsDefault);
 
             // Arm and leg pieces replace the plain ones; shaped eyes replace the plain eye blocks.
             var arms = outfit[Data.Slot.Arms];
             var legs = outfit[Data.Slot.Legs];
-            if (!arms.IsDefault) CosmeticModels.Arms(Raised(extra), arms.id, arms.color);
-            if (!legs.IsDefault) CosmeticModels.Legs(cosmetics, legs.id, legs.color);
+            if (!arms.IsDefault) CosmeticModels.Arms(Raised(extra + lift), arms.id, arms.color);
+            if (!legs.IsDefault)
+            {
+                var legHolder = Raised(0.0001f);
+                legHolder.localScale = new Vector3(1f, HeroModels.LegStretch(hero), 1f); // as long as the legs they replace
+                CosmeticModels.Legs(legHolder, legs.id, legs.color);
+            }
             foreach (var part in new[] { "ArmL", "ArmR" }) SetPartShown(part, arms.IsDefault);
             foreach (var part in new[] { "LegL", "LegR", "FootL", "FootR" }) SetPartShown(part, legs.IsDefault);
             var badge = outfit[Data.Slot.Badge];
-            if (!badge.IsDefault) CosmeticModels.Badge(Raised(extra * 0.5f), badge.id, badge.color);
+            if (!badge.IsDefault) CosmeticModels.Badge(Raised(extra * 0.5f + lift), badge.id, badge.color);
 
             bool shaped = Data.Cosmetics.ShapedEyes(eyes.id);
             foreach (var e in new[] { eyeL, eyeR })
@@ -676,6 +683,33 @@ namespace SquashBot.Gameplay
 
         private Vector3 freeVel;
         private float stridePhase, lastBob;
+        private bool stepParity;
+        private Transform legLT, legRT, footLT, footRT;
+        private Vector3 legLB, legRB, footLB, footRB;
+        private Quaternion legLR, legRR;
+
+        /// <summary>
+        /// The legs walking: at <paramref name="phase"/> one foot reaches forward and lifts while the other pushes back,
+        /// the legs swinging with them; <paramref name="amount"/> 0 stands them straight again.
+        /// </summary>
+        private void Stride(float phase, float amount)
+        {
+            if (legLT == null || footLT == null)
+            {
+                legLT = visual.Find("LegL"); legRT = visual.Find("LegR"); footLT = visual.Find("FootL"); footRT = visual.Find("FootR");
+                if (legLT == null || legRT == null || footLT == null || footRT == null) { legLT = footLT = null; return; }
+                legLB = legLT.localPosition; legRB = legRT.localPosition; footLB = footLT.localPosition; footRB = footRT.localPosition;
+                legLR = legLT.localRotation; legRR = legRT.localRotation;
+            }
+            float s = Mathf.Sin(phase) * amount;
+            float liftL = Mathf.Max(0f, s), liftR = Mathf.Max(0f, -s);
+            footLT.localPosition = footLB + new Vector3(0f, liftL * 0.04f, s * 0.07f);
+            footRT.localPosition = footRB + new Vector3(0f, liftR * 0.04f, -s * 0.07f);
+            legLT.localPosition = legLB + new Vector3(0f, liftL * 0.02f, s * 0.035f);
+            legRT.localPosition = legRB + new Vector3(0f, liftR * 0.02f, -s * 0.035f);
+            legLT.localRotation = legLR * Quaternion.Euler(-s * 22f, 0f, 0f);
+            legRT.localRotation = legRR * Quaternion.Euler(s * 22f, 0f, 0f);
+        }
 
         /// <summary>
         /// The battle arenas: walks foi freely (any direction, any speed) instead of tile to tile. It eases into the
@@ -728,6 +762,7 @@ namespace SquashBot.Gameplay
                 lastBob = bob;
                 float s = 1f + Mathf.Sin(stridePhase * 2f) * 0.025f;
                 visual.localScale = new Vector3(1f / s, s, 1f / s);
+                Stride(stridePhase, Mathf.Clamp01(speed / 3f));
                 if (tile != Position && grid.InBounds(tile))
                 {
                     LastLeftTile = Position;
@@ -740,6 +775,7 @@ namespace SquashBot.Gameplay
             {
                 freeVel = Vector3.zero;
                 transform.position = new Vector3(pos.x, Mathf.MoveTowards(pos.y, GridView.ToWorld(Position).y, dt * 4f), pos.z);
+                Stride(0f, 0f);
             }
         }
 
@@ -807,6 +843,8 @@ namespace SquashBot.Gameplay
                     if (t >= 1f) { carry = new Vector3(to.x - from.x, 0f, to.z - from.z); carryAt = Time.time; } // a turn soon after curves out of this step
                     float stretch = 1f + Mathf.Sin(t * Mathf.PI) * (walk ? 0.03f : 0.15f);
                     visual.localScale = new Vector3(1f / stretch, stretch, 1f / stretch);
+                    Stride((stepParity ? Mathf.PI : 0f) + t * Mathf.PI, t >= 1f ? 0f : 1f);
+                    if (t >= 1f) stepParity = !stepParity;
                     if (t >= 1f)
                     {
                         visual.localScale = flow || walk ? Vector3.one : new Vector3(1.15f, 0.85f, 1.15f);
@@ -858,11 +896,11 @@ namespace SquashBot.Gameplay
                     float ease = 1f - Mathf.Pow(1f - Mathf.Clamp01(animTime / 1.1f), 3f);
                     float bounce = Mathf.Abs(Mathf.Sin(animTime * 7.5f)) * 0.45f * fade;
                     var pose = Quaternion.Euler(0f, 720f * ease, 0f);
-                    if (dance == "dance.jump") { bounce = Mathf.Abs(Mathf.Sin(animTime * 5f)) * 0.8f * fade; pose = Quaternion.identity; }
+                    if (dance == "dance.jump") { bounce = Mathf.Abs(Mathf.Sin(animTime * 5f)) * 0.38f * fade; pose = Quaternion.identity; }
                     else if (dance == "dance.wobble") pose = Quaternion.Euler(0f, Mathf.Sin(animTime * 9f) * 35f * fade, Mathf.Sin(animTime * 12f) * 20f * fade);
                     else if (dance == "dance.swim") { bounce = 0.25f + Mathf.Sin(animTime * 4f) * 0.12f * fade; pose = Quaternion.Euler(Mathf.Sin(animTime * 8f) * 20f * fade, Mathf.Sin(animTime * 4f) * 40f * fade, 0f); }
                     else if (dance == "dance.sugar") { bounce = Mathf.Abs(Mathf.Sin(animTime * 14f)) * 0.3f * fade; pose = Quaternion.Euler(0f, animTime * 540f, Mathf.Sin(animTime * 14f) * 12f * fade); }
-                    else if (dance == "dance.flip") { bounce = Mathf.Sin(Mathf.Clamp01(animTime / 0.8f) * Mathf.PI) * 0.9f; pose = Quaternion.Euler(-360f * Mathf.Clamp01(animTime / 0.8f), 0f, 0f); }
+                    else if (dance == "dance.flip") { bounce = Mathf.Sin(Mathf.Clamp01(animTime / 0.8f) * Mathf.PI) * 0.5f; pose = Quaternion.Euler(-360f * Mathf.Clamp01(animTime / 0.8f), 0f, 0f); }
                     transform.position = from + Vector3.up * bounce;
                     visual.localRotation = FacingCamera * pose;
                     if (cheerBrief && animTime >= 1.6f)

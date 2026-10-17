@@ -32,6 +32,17 @@ namespace SquashBot.Visual
 
         private const float Extra = 0.06f;
 
+        /// <summary>foi's longer legs lift everything above the hips this much (the gear worn there goes up with it).</summary>
+        private const float Lift = 0.06f;
+
+        /// <summary>The middle of foi's head (its smaller head sits on the lifted neck).</summary>
+        private const float HeadY = 0.553f + Extra;
+
+        public static float LegLift(int hero) => hero == 0 ? Lift : 0f;
+
+        /// <summary>How much taller the legs are than the old ones (garage legs stretch to match).</summary>
+        public static float LegStretch(int hero) => hero == 0 ? 1f + Lift / 0.17f : 1f;
+
         /// <summary>Builds the body parts of <paramref name="hero"/> under <paramref name="visual"/>; returns the two eyes.</summary>
         public static (Transform eyeL, Transform eyeR) Build(Transform visual, int hero, Material body, Material light, Material dark, Material eye)
         {
@@ -102,28 +113,29 @@ namespace SquashBot.Visual
                         Shapes.Rounded("Sole", foot, new Vector3(0f, -0.03f, 0f), new Vector3(0.13f, 0.018f, 0.18f), 0.008f, frame);
                         Shapes.Rounded("Cuff", foot, new Vector3(0f, 0.04f, -0.01f), new Vector3(0.1f, 0.025f, 0.11f), 0.012f, light);
                         // A leg with a knee joint.
-                        Shapes.Rounded("Leg" + side, visual, new Vector3(0.082f * s, 0.12f, 0f), new Vector3(0.1f, 0.13f, 0.105f), 0.045f, body); // one sturdy piece
-                        // An arm out from the body: shoulder ball, upper arm, forearm, a round hand.
+                        Shapes.Rounded("Leg" + side, visual, new Vector3(0.082f * s, 0.15f, 0f), new Vector3(0.1f, 0.19f, 0.105f), 0.045f, body); // one sturdy piece, longer
                         // A thick arm in one piece from the shoulder, a big round hand at its end.
-                        var arm = Shapes.Rounded("Arm" + side, visual, new Vector3(0.19f * s, 0.24f + Extra, 0f), new Vector3(0.095f, 0.2f, 0.1f), 0.046f, body).transform;
+                        var arm = Shapes.Rounded("Arm" + side, visual, new Vector3(0.19f * s, 0.24f + Extra + Lift, 0f), new Vector3(0.095f, 0.2f, 0.1f), 0.046f, body).transform;
                         Shapes.Primitive(PrimitiveType.Sphere, "Hand", arm, new Vector3(0.004f * s, -0.12f, 0.01f), Vector3.one * 0.095f, dark);
                     }
-                    Shapes.Rounded("Body", visual, new Vector3(0f, 0.255f + Extra * 0.5f, 0f), new Vector3(0.27f, 0.17f + Extra, 0.2f), 0.08f, body);
-                    Shapes.Rounded("Hero_Chest", visual, new Vector3(0f, 0.27f + Extra * 0.7f, 0.096f), new Vector3(0.15f, 0.1f + Extra * 0.4f, 0.016f), 0.04f, frame);
-                    Shapes.Primitive(PrimitiveType.Sphere, "Hero_Light", visual, new Vector3(0f, 0.27f + Extra * 0.7f, 0.106f), new Vector3(0.045f, 0.045f, 0.012f), glow);
-                    Shapes.Rounded("Hero_Hips", visual, new Vector3(0f, 0.165f, 0f), new Vector3(0.2f, 0.05f, 0.15f), 0.024f, dark);
-                    Shapes.Rounded("Hero_Neck", visual, new Vector3(0f, 0.35f + Extra, 0f), new Vector3(0.1f, 0.04f, 0.08f), 0.018f, dark);
-                    Shapes.Rounded("Head", visual, new Vector3(0f, 0.53f + Extra, 0f), new Vector3(0.46f, 0.37f, 0.4f), 0.13f, body);
-                    Shapes.Rounded("Hero_Frame", visual, new Vector3(0f, 0.525f + Extra, 0.19f), new Vector3(0.37f, 0.27f, 0.03f), 0.09f, frame);
-                    Shapes.Rounded("Visor", visual, new Vector3(0f, 0.525f + Extra, 0.201f), new Vector3(0.33f, 0.23f, 0.02f), 0.08f, screen);
+                    Shapes.Rounded("Body", visual, new Vector3(0f, 0.255f + Extra * 0.5f + Lift, 0f), new Vector3(0.27f, 0.17f + Extra, 0.2f), 0.08f, body);
+                    Shapes.Rounded("Hero_Chest", visual, new Vector3(0f, 0.27f + Extra * 0.7f + Lift, 0.096f), new Vector3(0.15f, 0.1f + Extra * 0.4f, 0.016f), 0.04f, frame);
+                    Shapes.Primitive(PrimitiveType.Sphere, "Hero_Light", visual, new Vector3(0f, 0.27f + Extra * 0.7f + Lift, 0.106f), new Vector3(0.045f, 0.045f, 0.012f), glow);
+                    Shapes.Rounded("Hero_Hips", visual, new Vector3(0f, 0.165f + Lift, 0f), new Vector3(0.2f, 0.05f, 0.15f), 0.024f, dark);
+                    Shapes.Rounded("Hero_Neck", visual, new Vector3(0f, 0.35f + Extra + Lift, 0f), new Vector3(0.1f, 0.04f, 0.08f), 0.018f, dark);
+                    // A head a fifth smaller than the first design, its screen narrower and lower.
+                    float hc = HeadY;
+                    Shapes.Rounded("Head", visual, new Vector3(0f, hc, 0f), new Vector3(0.368f, 0.296f, 0.32f), 0.104f, body);
+                    Shapes.Rounded("Hero_Frame", visual, new Vector3(0f, hc - 0.012f, 0.152f), new Vector3(0.29f, 0.19f, 0.03f), 0.07f, frame);
+                    Shapes.Rounded("Visor", visual, new Vector3(0f, hc - 0.012f, 0.161f), new Vector3(0.25f, 0.155f, 0.02f), 0.06f, screen);
                     foreach (float s in new[] { -1f, 1f })
                     {
-                        var ear = Shapes.Primitive(PrimitiveType.Cylinder, s < 0 ? "Hero_EarL" : "Hero_EarR", visual, new Vector3(0.232f * s, 0.53f + Extra, -0.01f), new Vector3(0.12f, 0.022f, 0.12f), light).transform;
+                        var ear = Shapes.Primitive(PrimitiveType.Cylinder, s < 0 ? "Hero_EarL" : "Hero_EarR", visual, new Vector3(0.186f * s, hc, -0.008f), new Vector3(0.1f, 0.02f, 0.1f), light).transform;
                         ear.localRotation = Quaternion.Euler(0f, 0f, 90f);
                         Shapes.Primitive(PrimitiveType.Cylinder, "Core", ear, new Vector3(0f, 0.6f, 0f), new Vector3(0.55f, 0.5f, 0.55f), dark);
                     }
-                    var l = StarEye("EyeL", visual, new Vector3(-0.068f, 0.53f + Extra, 0.213f), eye);
-                    var r = StarEye("EyeR", visual, new Vector3(0.068f, 0.53f + Extra, 0.213f), eye);
+                    var l = StarEye("EyeL", visual, new Vector3(-0.052f, hc - 0.012f, 0.172f), eye);
+                    var r = StarEye("EyeR", visual, new Vector3(0.052f, hc - 0.012f, 0.172f), eye);
                     return (l, r);
                 }
             }
@@ -134,7 +146,7 @@ namespace SquashBot.Visual
         /// <summary>A glowing five-pointed star eye (its size baked in: the blink scales eyes from 1).</summary>
         private static Transform StarEye(string name, Transform parent, Vector3 at, Material eye)
         {
-            if (star == null) star = StarMesh(0.05f, 0.022f, 0.014f);
+            if (star == null) star = StarMesh(0.04f, 0.018f, 0.014f);
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
             go.transform.localPosition = at;

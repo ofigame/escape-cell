@@ -19,7 +19,7 @@ namespace SquashBot.Gameplay
     /// </summary>
     public partial class GameManager
     {
-        private const float TpsDistance = 5.9f, TpsFov = 58f, TpsTurnSpeed = 240f, TpsPitchSpeed = 120f;
+        private const float TpsDistance = 6.9f, TpsFov = 58f, TpsTurnSpeed = 240f, TpsPitchSpeed = 120f;
         private TpsControls tps;
         private readonly System.Collections.Generic.List<(Vector3 at, bool big)> mapEnemies = new System.Collections.Generic.List<(Vector3 at, bool big)>();
         private bool tpsOn, tpsStrike, tpsSpin, tpsJump;
@@ -144,7 +144,7 @@ namespace SquashBot.Gameplay
                 // Free walking and running: any way the stick points, as fast as it is pushed (a walk part-way, a run
                 // all the way out, never a dash); walls, buildings and robots stop foi, which slides along them.
                 float push = move.magnitude;
-                float speed = push < 0.25f ? 0f : Mathf.Lerp(2.4f, 6.2f, Mathf.InverseLerp(0.25f, 1f, push));
+                float speed = push < 0.25f ? 0f : Mathf.Lerp(2.8f, 7.2f, Mathf.InverseLerp(0.25f, 1f, push));
                 var vel = want.sqrMagnitude > 0.0001f ? want.normalized * speed : Vector3.zero;
                 robot.FreeStep(vel, Time.deltaTime, arenaRun ? (System.Func<GridPos, bool>)FreeWalkable : FloorWalkable);
                 return command;
@@ -245,7 +245,7 @@ namespace SquashBot.Gameplay
         private void TpsPose(out Vector3 pos, out Quaternion rot)
         {
             if (Gunning) { GunPose(out pos, out rot); return; }
-            var focus = robot.transform.position + Vector3.up * 1.05f; // a little above foi: the view looks down a touch more
+            var focus = robot.transform.position + Vector3.up * 1.35f; // above foi: the view looks down a touch more
             var dir = Quaternion.Euler(tpsPitch, tpsYaw, 0f) * Vector3.forward;
             pos = focus - dir * TpsDistance + Quaternion.Euler(0f, tpsYaw, 0f) * Vector3.right * tpsSide; // a touch to the right
             rot = Quaternion.LookRotation(dir);

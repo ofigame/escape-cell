@@ -335,11 +335,13 @@ namespace SquashBot.Gameplay
             hunt.StunFoe(1.4f); // the rival stands still through the moment, whoever was struck
             float was = Time.timeScale;
             Time.timeScale = 0.25f;
-            SlowCam(model.position, 1.9f); // the camera goes in close and circles them
+            SlowCam(model.position, 1.9f); // the big moment's time (slow motion, no blows); the camera stays on the board
+            cameraRig.Shake(1.1f); // and shakes as the pieces fly
             var dbl = StuntDouble.Make(model);
             fx.Burst(model.position + Vector3.up * 0.5f, new Color(1f, 0.85f, 0.4f), new Color(3f, 2.4f, 0.8f), 26, 5f);
             AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.6f);
             yield return dbl.Shatter(model.position + Vector3.up * 0.45f);
+            cameraRig.Shake(0.7f);
             fx.Burst(model.position + Vector3.up * 0.5f, new Color(0.7f, 0.85f, 1f), new Color(1.6f, 2f, 2.6f), 18, 3f);
             AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.5f);
             dbl.Done();

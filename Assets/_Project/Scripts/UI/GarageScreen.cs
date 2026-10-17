@@ -80,7 +80,7 @@ namespace SquashBot.UI
             turn.SetAsFirstSibling();
 
             // Lower panel
-            var panel = UiFactory.Card("Panel", root, new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 20f), new Vector2(1000f, 1040f));
+            var panel = UiFactory.Card("Panel", root, new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 20f), new Vector2(1000f, 868f)); // two rows of items (the rest scroll): more room for foi
             itemName = UiFactory.TextBox("Name", panel, new Vector2(0.5f, 1f), new Vector2(0f, -20f), new Vector2(940f, 70f), "", 42f, Palette.UiText, title: true);
             itemName.enableAutoSizing = true;
             itemName.fontSizeMin = 26f;
@@ -96,8 +96,8 @@ namespace SquashBot.UI
                 tabs.Add((s, tab.targetGraphic as Image));
             }
 
-            // The item grid scrolls when a category holds more than three rows.
-            var viewport = UiFactory.Box("GridView", panel, new Vector2(0.5f, 1f), new Vector2(0f, -300f), new Vector2(950f, 540f));
+            // The item grid shows two rows and scrolls for the rest.
+            var viewport = UiFactory.Box("GridView", panel, new Vector2(0.5f, 1f), new Vector2(0f, -300f), new Vector2(950f, 372f));
             viewport.gameObject.AddComponent<RectMask2D>();
             UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
             grid = UiFactory.Rect("Grid", viewport, new Vector2(0f, 1f), Vector2.one);
@@ -124,7 +124,7 @@ namespace SquashBot.UI
             actionLabel = actionButton.GetComponentInChildren<TextMeshProUGUI>();
 
             bip = BipTip.Create(root);
-            bip.BaseY = Monetization.Ads.BannerReserve + 1080f;
+            bip.BaseY = Monetization.Ads.BannerReserve + 908f;
         }
 
         public void Show(int worldReached)

@@ -25,6 +25,43 @@ namespace SquashBot.Gameplay
         /// <summary>The gun foi carries in the battle arenas (null on the floors, or with none taken).</summary>
         private WeaponDef gun;
         private HeldWeapon heldWeapon;
+        private GameObject foiGlow;
+
+        /// <summary>
+        /// A soft light round foi on the floors: a warm halo behind it (one soft glowing particle that never fades) and a
+        /// glowing pool at its feet, so it stands out among the robots.
+        /// </summary>
+        private void AddFoiGlow()
+        {
+            if (foiGlow != null) Destroy(foiGlow);
+            foiGlow = new GameObject("FoiGlow");
+            foiGlow.transform.SetParent(robot.transform, false);
+            var pool = MaterialFactory.CreateTransparent(new Color(1f, 0.93f, 0.7f, 0.22f), new Color(1.2f, 1.05f, 0.7f));
+            Shapes.Primitive(PrimitiveType.Cylinder, "Pool", foiGlow.transform, new Vector3(0f, 0.015f, 0f), new Vector3(0.95f, 0.004f, 0.95f), pool);
+            var halo = new GameObject("Halo");
+            halo.transform.SetParent(foiGlow.transform, false);
+            halo.transform.localPosition = new Vector3(0f, 0.42f, 0f);
+            var ps = halo.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main;
+            main.loop = false;
+            main.playOnAwake = false;
+            main.startLifetime = 100000f;
+            main.startSpeed = 0f;
+            main.maxParticles = 2;
+            main.simulationSpace = ParticleSystemSimulationSpace.Local;
+            main.scalingMode = ParticleSystemScalingMode.Hierarchy;
+            var emission = ps.emission;
+            emission.enabled = false;
+            var r = halo.GetComponent<ParticleSystemRenderer>();
+            r.sharedMaterial = Weather.AddMaterial;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            var p = new ParticleSystem.EmitParams { position = Vector3.zero, startLifetime = 100000f, startSize = 1.5f, startColor = new Color(1f, 0.92f, 0.7f, 0.42f) };
+            ps.Emit(p, 1);
+            p.startSize = 0.85f;
+            p.startColor = new Color(1f, 0.97f, 0.88f, 0.5f);
+            ps.Emit(p, 1);
+        }
         private float lastArmorNote = -10f;
 
         /// <summary>The hero's size on the floors and in the arenas (wider a quarter, taller two fifths); the tunnels keep 1.</summary>
@@ -54,6 +91,8 @@ namespace SquashBot.Gameplay
             ClearFifi();
             if (ui != null) HideBombs();
             if (robot != null) robot.transform.localScale = Vector3.one;
+            if (foiGlow != null) Destroy(foiGlow);
+            foiGlow = null;
             Robot.HopScale = 1f;
             if (heldWeapon != null) Destroy(heldWeapon.gameObject);
             heldWeapon = null;
@@ -117,7 +156,8 @@ namespace SquashBot.Gameplay
             hunt.FoiHeight = foiBaseHeight * HeroScale.y * (challengeRun ? 1f : FoiGrow);
             // The hero stands out in the crowd: a little bigger and a little taller than the robots round it.
             robot.transform.localScale = HeroScale * FoiGrow;
-            Robot.HopScale = 0.82f; // brisk but readable: each step follows the finger, a run of steps flows on (0.6 felt too fast)
+            if (!challengeRun) AddFoiGlow(); // the floors: foi glows, easy to find in the crowd
+            Robot.HopScale = 0.7f; // quick, still readable: each step follows the finger, a run of steps flows on (0.6 felt too fast)
             hunt.EnemyScale = Mathf.Lerp(1.6f, 2.03f, grow);
             adHealUsed = false;
             weapon = Armory.Equipped;
@@ -592,12 +632,16 @@ namespace SquashBot.Gameplay
             if (striking) { strikeLeanLeft -= dt; yawGoal = Mathf.Clamp(yawGoal + strikeLean, -CamLean - StrikeLean, CamLean + StrikeLean); }
             camYaw = Mathf.SmoothDamp(camYaw, yawGoal, ref camYawVelocity, striking ? 0.45f : 1.1f, striking ? 60f : 25f, dt);
 
-            var baseOffset = Vector3.Lerp(CloseCamOffset, FightCamOffset, combatBlend);
-            var offset = Quaternion.Euler(0f, camYaw, 0f) * baseOffset * (CamDistanceScale[SaveData.CameraDistance] * camPull * Mathf.Lerp(1f, FightCamCloser, combatBlend));
+            // The fight view: one step closer than the chosen distance (far → medium, farthest → far); from the nearest, none.
+            int camStep = SaveData.CameraDistance;
+            float fightBlend = camStep > 0 ? combatBlend : 0f;
+            var baseOffset = Vector3.Lerp(CloseCamOffset, FightCamOffset, fightBlend * 0.5f);
+            float camScale = Mathf.Lerp(CamDistanceScale[camStep], CamDistanceScale[Mathf.Max(0, camStep - 1)], fightBlend);
+            var offset = Quaternion.Euler(0f, camYaw, 0f) * baseOffset * (camScale * camPull);
             var pos = closeCamFocus + offset;
             // Low down, it looks a little higher, over foi towards the fight.
             var rot = Quaternion.LookRotation(closeCamFocus + Vector3.up * Mathf.Lerp(0.35f, 0.9f, combatBlend) - pos);
-            float fov = Mathf.Lerp(CloseCamFov, FightCamFov, combatBlend);
+            float fov = Mathf.Lerp(CloseCamFov, FightCamFov, fightBlend);
             if (TpsActive) { TpsPose(out pos, out rot); fov = TpsFov; } // the battle arenas: over foi's shoulder
             if (introPending) { introPending = false; introStart = Time.time; }
             if (IntroRunning)
@@ -671,7 +715,7 @@ namespace SquashBot.Gameplay
         /// <summary>The fight view: the same heading, much lower (about 30 degrees down instead of 46).</summary>
         private static readonly Vector3 FightCamOffset = new Vector3(-2.7f, 3.1f, -2.7f); // steeper than before (user asked)
         /// <summary>How much closer the fight view sits, and its slightly wider lens.</summary>
-        private const float FightCamCloser = 0.62f, FightCamFov = 56f; // the fight view sits close behind foi (user asked)
+        private const float FightCamFov = 56f; // the fight view's lens
         /// <summary>How many tiles the fight view leads towards the way foi strikes.</summary>
         private const float FightLead = 1.4f;
         /// <summary>The settings' camera distances (near, medium, far, farthest), as multiples of the nearest view.</summary>

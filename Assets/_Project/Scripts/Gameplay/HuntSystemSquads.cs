@@ -181,6 +181,7 @@ namespace SquashBot.Gameplay
 
         private void UpdateSquad(Guard s, float dt)
         {
+            UpdateHealthBar(s); // (its colours fade as it is hurt)
             UpdateHealthBar(s);
             if (s.flash > 0f) s.flash -= dt * 3f;
             if (s.remote) { FollowSquadNet(s, dt); return; }

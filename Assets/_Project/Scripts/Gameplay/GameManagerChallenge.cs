@@ -327,7 +327,7 @@ namespace SquashBot.Gameplay
             var rows = new string[BoardH];
             // The shape laid across the view: 21 deep (away from the camera), 15 across, cut at the camera's end and the
             // far end — so its two ends (the screen's left and right) run straight and whole, and the stands meet them.
-            const int Deep = 21;
+            const int Deep = BoardW; // every stage the board's whole length (all about the same size, big)
             int off = (BoardW - Deep) / 2;
             standFrom = BoardW; standTo = -1;
             for (int r = 0; r < BoardH; r++)
@@ -561,6 +561,7 @@ namespace SquashBot.Gameplay
             if (colosseum != null) Destroy(colosseum.gameObject);
             if (duelSky) { duelSky = false; cameraRig.SetBackdrop(null); }
             colosseum = null;
+            ui.SetRivalHealth(false, 0f);
             hunt.ClearChallengeFoe();
         }
 
@@ -580,7 +581,7 @@ namespace SquashBot.Gameplay
             var gap = aim - duelPan;
             if (gap.magnitude > 1f) duelPan += gap.normalized * (gap.magnitude - 1f) * Mathf.Min(1f, Time.deltaTime * 2.5f);
             float apart = new Vector2(me.x - foe.x, me.z - foe.z).magnitude;
-            duelBack = Mathf.Lerp(duelBack, ultimateOn ? 13f : 29f + Mathf.Clamp(apart - 3f, 0f, 14f) * 1.2f, Time.unscaledDeltaTime * (ultimateOn ? 5f : 2f)); // (the ultimate: close in)
+            duelBack = Mathf.Lerp(duelBack, 29f + Mathf.Clamp(apart - 3f, 0f, 14f) * 1.2f, Time.unscaledDeltaTime * 2f); // (no closing in, even for the ultimate)
             pos = boardCentre + duelPan - look * duelBack;
             rot = Quaternion.LookRotation(look);
             OrbitPose(ref pos, ref rot, me, foe);
@@ -593,7 +594,7 @@ namespace SquashBot.Gameplay
         private Vector3 slowCamCentre;
 
         /// <summary>The camera goes in close and circles the two foi while the duel is in slow motion (a big blow, the ultimate).</summary>
-        private bool SlowCamOn => challengeRun && (ultimateOn || Time.unscaledTime < slowCamUntil || slowCamWeight > 0f);
+        private bool SlowCamOn => false; // (the duel's camera stays on the board in a big moment: it shakes instead)
 
         /// <summary>
         /// A big moment is playing (the slow motion and the camera circling the two): until it is over nobody lands a
@@ -611,6 +612,7 @@ namespace SquashBot.Gameplay
         /// <summary>Blends the board's view into the circling close one (and back out) while the slow motion lasts.</summary>
         private void OrbitPose(ref Vector3 pos, ref Quaternion rot, Vector3 me, Vector3 foe)
         {
+            if (!SlowCamOn) return; // no close-up circling any more (the user asked): the board's view with a shake
             float dt = Time.unscaledDeltaTime;
             bool on = ultimateOn || Time.unscaledTime < slowCamUntil;
             var centre = Time.unscaledTime < slowCamUntil ? Vector3.Lerp(slowCamCentre, (me + foe) * 0.5f, 0.35f) : (me + foe) * 0.5f;

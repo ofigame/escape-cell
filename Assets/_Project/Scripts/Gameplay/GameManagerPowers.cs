@@ -22,6 +22,8 @@ namespace SquashBot.Gameplay
         /// <summary>The ultimate's bar (0..1) and its share filled by one robot felled.</summary>
         private float ultiMeter;
         private const float UltiPerKill = 1f / 14f;
+        /// <summary>How long the ultimate fights on its own.</summary>
+        private const float UltiSeconds = 5f;
         private bool powerBusy;
         /// <summary>Slow motion of a power (unscaled seconds left), and how slow.</summary>
         private float powerSlowLeft, powerSlowScale = 1f;
@@ -117,24 +119,26 @@ namespace SquashBot.Gameplay
             powerBusy = true;
             ultiMeter = 0f;
             ui.SetUlti(0f, true);
-            hurtCooldown = Mathf.Max(hurtCooldown, 3f); // untouchable through it
+            hurtCooldown = Mathf.Max(hurtCooldown, UltiSeconds + 0.6f); // untouchable through it
             hunt.Freeze();
-            PowerSlow(2.4f, 0.55f); // slowed, but the flips stay quick
+            PowerSlow(UltiSeconds + 0.4f, 0.75f); // a little slowed, the flips stay quick
             ui.Flash(UltiColour, 0.5f);
             ui.ShowCallout(Loc.T("power.ultiShout"), robot.transform.position + Vector3.up * 1.6f, cameraRig.Cam, 1.4f);
             cameraRig.Punch(1f);
             AudioManager.PlaySfx(Sfx.Win, 1f, 0.6f);
             fx.Burst(robot.transform.position + Vector3.up * 0.6f, UltiColour, UltiColour * 2.5f, 40, 6f);
-            // Left and right in turn: a somersault blow, then a swing of the weapon in hand (sword, mace, axe...), quick.
-            var targets = hunt.FightersAround(robot.Position, 5);
-            SortLeftRight(targets);
-            int blows = Mathf.Min(6, targets.Count);
-            for (int i = 0; i < blows; i++)
+            // For five seconds foi fights on its own: the nearest enemy each time, left and right in turn, a somersault
+            // blow, then a swing of the weapon in hand (sword, mace, axe...), quick.
+            float until = Time.unscaledTime + UltiSeconds;
+            for (int i = 0; Time.unscaledTime < until; i++)
             {
                 yield return new WaitForSecondsRealtime(0.06f);
-                while (State == GameState.Paused) yield return null;
+                while (State == GameState.Paused) { until += Time.unscaledDeltaTime; yield return null; }
                 if (!PowerFloor) break;
-                var at = targets[i];
+                var near = hunt.FightersAround(robot.Position, 4);
+                if (near.Count == 0) { yield return new WaitForSecondsRealtime(0.15f); continue; }
+                SortLeftRight(near);
+                var at = near[i % 2 == 0 || near.Count == 1 ? 0 : 1];
                 var to = GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY;
                 robot.Strike(to);
                 bool flip = i % 2 == 0;

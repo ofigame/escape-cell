@@ -226,7 +226,13 @@ namespace SquashBot.Visual
 
         private bool isGun;
 
-        public void Swing() => swing = 0f;
+        public void Swing()
+        {
+            swing = 0f;
+            fromRight = !fromRight; // each blow the other way: right to left, then left to right
+        }
+
+        private bool fromRight;
 
         private float spin = 1f;
         private Vector3 restPosition;
@@ -259,10 +265,19 @@ namespace SquashBot.Visual
                 Pose(kick * 60f);
                 return;
             }
-            swing = Mathf.Min(1f, swing + Time.deltaTime / 0.24f);
-            // Wind back, chop down hard, settle.
-            float a = swing < 0.3f ? Mathf.Lerp(0f, -70f, swing / 0.3f) : swing < 0.55f ? Mathf.Lerp(-70f, 115f, (swing - 0.3f) / 0.25f) : Mathf.Lerp(115f, 0f, (swing - 0.55f) / 0.45f);
-            Pose(a);
+            swing = Mathf.Min(1f, swing + Time.deltaTime / 0.26f);
+            // A sweep across the front: the hand draws back to one side, slashes across to the other (the blade near level,
+            // reaching out ahead), then comes back to rest. Every other blow the other way round.
+            float side = fromRight ? 1f : -1f;
+            float yaw;
+            if (swing < 0.2f) yaw = Mathf.Lerp(0f, 80f * side, swing / 0.2f);
+            else if (swing < 0.6f) yaw = Mathf.Lerp(80f * side, -85f * side, Mathf.SmoothStep(0f, 1f, (swing - 0.2f) / 0.4f));
+            else yaw = Mathf.Lerp(-85f * side, 0f, (swing - 0.6f) / 0.4f);
+            float reach = Mathf.Sin(Mathf.Clamp01((swing - 0.1f) / 0.6f) * Mathf.PI); // out ahead in the middle of the sweep
+            var arc = Quaternion.Euler(0f, yaw, 0f);
+            transform.localPosition = Vector3.Lerp(restPosition, arc * new Vector3(0f, restPosition.y + 0.05f, 0.34f) + Vector3.right * restPosition.x * 0.3f, reach);
+            transform.localRotation = Quaternion.Slerp(Quaternion.Euler(25f, 0f, -12f), arc * Quaternion.Euler(78f, 0f, -18f * side), reach);
+            if (swing >= 1f) transform.localPosition = restPosition;
         }
     }
 }

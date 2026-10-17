@@ -52,6 +52,8 @@ namespace SquashBot.Gameplay
             public bool atWall;
             /// <summary>The health its bar last showed (-1: never drawn).</summary>
             public int barHp = -1;
+            /// <summary>Its renderers and their own colours (faded as it loses health).</summary>
+            public List<(Renderer r, Color c)> tint;
             /// <summary>A chest's guardian on the roads (see HuntSystemTrail): the chest it keeps near, its number.</summary>
             public bool spitter;
             public GridPos home;
@@ -1030,49 +1032,48 @@ namespace SquashBot.Gameplay
 
 
         /// <summary>A small health bar over a guard's head: dark back, a fill that empties and turns from green to red.</summary>
+        /// <summary>
+        /// No bar over a robot or a soldier (a crowd of bars was a clutter): its colours fade towards a dull grey as it
+        /// loses health instead. (The bar's material stays for the code that still colours it.)
+        /// </summary>
         private void AddHealthBar(Guard g)
         {
-            float top = 0f;
-            foreach (var r in g.root.GetComponentsInChildren<Renderer>()) top = Mathf.Max(top, r.bounds.max.y - g.root.position.y);
-            g.bar = new GameObject("HealthBar").transform;
-            g.bar.SetParent(g.root, false);
-            g.bar.localPosition = new Vector3(0f, top + 0.28f, 0f);
-            float w = g.brute ? 1.05f : 0.8f;
-            bool cast = Shapes.CastShadows;
-            Shapes.CastShadows = false; // a bar's shadow is only a cost
-            if (barBackMat == null) barBackMat = MaterialFactory.Create(new Color(0.08f, 0.06f, 0.12f), Color.black);
-            Shapes.Rounded("Back", g.bar, Vector3.zero, new Vector3(w + 0.08f, 0.15f, 0.03f), 0.05f, barBackMat);
             g.barMat = MaterialFactory.Create(new Color(0.4f, 1f, 0.45f), new Color(0.4f, 1.5f, 0.45f));
-            OwnedMaterials.Own(g.bar.gameObject, g.barMat); // (the fill's own colour: gone with the bar)
-            g.barFill = new GameObject("Fill").transform;
-            g.barFill.SetParent(g.bar, false);
-            g.barFill.localPosition = new Vector3(-w * 0.5f, 0f, -0.025f);
-            Shapes.Rounded("Fill", g.barFill, new Vector3(w * 0.5f, 0f, 0f), new Vector3(w, 0.09f, 0.02f), 0.04f, g.barMat);
-            // Notches: one per point of health, so it reads how many blows are left.
-            if (g.maxHp > 1 && g.maxHp <= 12)
-                for (int i = 1; i < g.maxHp; i++)
-                    Shapes.Rounded("Notch", g.bar, new Vector3(-w * 0.5f + w * i / g.maxHp, 0f, -0.04f), new Vector3(0.02f, 0.12f, 0.02f), 0.008f, barBackMat);
-            Shapes.CastShadows = cast;
+            OwnedMaterials.Own(g.root.gameObject, g.barMat);
+            g.barHp = g.hp;
         }
 
-        /// <summary>The dark back of every health bar (and its notches): one material for all.</summary>
-        private static Material barBackMat;
+        private static MaterialPropertyBlock hurtBlock;
 
-        private Camera barCam;
-
+        /// <summary>When its health changed: its colours, from full to faded (a property block each, no new materials).</summary>
         private void UpdateHealthBar(Guard g)
         {
-            if (g.bar == null) return;
-            if (barCam == null) barCam = Camera.main;
-            if (barCam != null) g.bar.rotation = Quaternion.LookRotation(barCam.transform.forward, Vector3.up);
-            // Fill and colour only when the health changed (a material write each frame for each robot adds up).
-            if (g.barHp == g.hp) return;
+            if (g.barHp == g.hp || g.root == null) return;
             g.barHp = g.hp;
-            float k = Mathf.Clamp01(g.hp / (float)g.maxHp);
-            g.barFill.localScale = new Vector3(Mathf.Max(0.001f, k), 1f, 1f);
-            var c = Color.Lerp(new Color(1f, 0.3f, 0.3f), new Color(0.4f, 1f, 0.45f), k);
-            MaterialFactory.SetColors(g.barMat, c, c * 1.5f);
+            float k = Mathf.Clamp01(g.hp / (float)Mathf.Max(1, g.maxHp));
+            if (g.tint == null)
+            {
+                g.tint = new List<(Renderer, Color)>();
+                foreach (var r in g.root.GetComponentsInChildren<Renderer>(true))
+                {
+                    var m = r.sharedMaterial;
+                    if (r is ParticleSystemRenderer || m == null || !m.HasProperty("_BaseColor")) continue;
+                    g.tint.Add((r, m.GetColor("_BaseColor")));
+                }
+            }
+            if (hurtBlock == null) hurtBlock = new MaterialPropertyBlock();
+            var dull = new Color(0.24f, 0.24f, 0.27f);
+            foreach (var (r, c) in g.tint)
+            {
+                if (r == null) continue;
+                var col = Color.Lerp(c, dull, (1f - k) * 0.8f);
+                col.a = c.a;
+                hurtBlock.Clear();
+                hurtBlock.SetColor("_BaseColor", col);
+                r.SetPropertyBlock(hurtBlock);
+            }
         }
+
         private void UpdateGuard(Guard g, float dt)
         {
             if (g == challengeFoe && FoeRemote) { UpdateHealthBar(g); UpdateRemoteFoe(g, dt); return; }

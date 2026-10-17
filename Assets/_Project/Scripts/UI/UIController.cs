@@ -1391,6 +1391,14 @@ namespace SquashBot.UI
             healthText = UiFactory.TextBox("Value", healthPill, new Vector2(1f, 0.5f), new Vector2(-12f, 0f), new Vector2(84f, 56f), "", 32f, Palette.UiText, align: TextAlignmentOptions.Right);
             healthText.rectTransform.pivot = new Vector2(1f, 0.5f);
             healthPill.gameObject.SetActive(false);
+            // The duel's rival: the same bar mirrored at the top right (its heart on the right).
+            rivalPill = UiFactory.Pill("RivalHealth", t, TopRight, new Vector2(-36f, -282f), new Vector2(340f, 70f), UiFactory.PillColor);
+            HeartIcon(rivalPill, new Vector2(300f, 0f), 46f);
+            UiFactory.Bar(rivalPill, new Vector2(0f, 0.5f), new Vector2(94f, 0f), new Vector2(170f, 22f), new Color(1f, 0.45f, 0.45f), out rivalFill);
+            ((RectTransform)rivalFill.transform.parent).pivot = new Vector2(0f, 0.5f);
+            rivalText = UiFactory.TextBox("Value", rivalPill, new Vector2(0f, 0.5f), new Vector2(12f, 0f), new Vector2(84f, 56f), "", 32f, Palette.UiText, align: TextAlignmentOptions.Left);
+            rivalText.rectTransform.pivot = new Vector2(0f, 0.5f);
+            rivalPill.gameObject.SetActive(false);
 
             // Rescue charges (under the pause button): a life-ring icon, the count, and progress to the next one.
             rescuePill = UiFactory.Pill("Rescue", t, TopLeft, new Vector2(36f, -176f), new Vector2(200f, 92f), UiFactory.PillColor);
@@ -1493,7 +1501,7 @@ namespace SquashBot.UI
             if (alarmPill != null) alarmPill.gameObject.SetActive(on);
         }
 
-        public void SetTool(int slot, Tool? tool, int charges, bool trial, float active) => toolButtons[slot].Set(challengeHud ? null : tool, charges, trial, active);
+        public void SetTool(int slot, Tool? tool, int charges, bool trial, float active) => toolButtons[slot].Set(null, charges, trial, active); // (the tools' buttons are gone)
 
         public void PunchTool(int slot) => toolButtons[slot].Punch();
 
@@ -1558,6 +1566,22 @@ namespace SquashBot.UI
             ammoPill.gameObject.SetActive(show);
             if (!show) return;
             ammoText.text = ammo > 0 ? Loc.F("gun.ammo", ammo) : Loc.F("gun.refill", price);
+        }
+
+        private RectTransform rivalPill;
+        private Image rivalFill;
+        private TextMeshProUGUI rivalText;
+
+        /// <summary>The duel's rival health at the top right (hidden off the duel).</summary>
+        public void SetRivalHealth(bool show, float value)
+        {
+            if (rivalPill == null) return;
+            if (rivalPill.gameObject.activeSelf != show) rivalPill.gameObject.SetActive(show);
+            if (!show) return;
+            UiFactory.SetBar(rivalFill, value);
+            int pct = Mathf.CeilToInt(Mathf.Clamp01(value) * 100f);
+            string s = Loc.Current == Language.Turkish || Loc.Current == Language.Azerbaijani ? "%" + pct : pct + "%";
+            if (rivalText.text != s) rivalText.text = s;
         }
 
         public void SetHealth(bool enabled, float value, float armor)
