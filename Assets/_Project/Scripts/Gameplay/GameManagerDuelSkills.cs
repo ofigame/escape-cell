@@ -236,11 +236,14 @@ namespace SquashBot.Gameplay
             var land = LandingBeside(victim, from);
             if (!land.HasValue) yield break;
             var dbl = StuntDouble.Make(model);
-            AudioManager.PlaySfx(Sfx.Hop, 1f, stunt == 2 ? 0.7f : 1.2f);
-            fx.Burst(model.position + Vector3.up * 0.2f, SpecialColour[stunt], SpecialColour[stunt] * 1.6f, 14, 4f);
-            yield return dbl.Leap(GridView.ToWorld(land.Value) + Vector3.up * GridView.SurfaceY, 1.6f, 0.5f, stunt);
-            if (mine) robot.Spawn(grid, land.Value); else hunt.PlaceFoe(land.Value);
-            dbl.Done();
+            try
+            {
+                AudioManager.PlaySfx(Sfx.Hop, 1f, stunt == 2 ? 0.7f : 1.2f);
+                fx.Burst(model.position + Vector3.up * 0.2f, SpecialColour[stunt], SpecialColour[stunt] * 1.6f, 14, 4f);
+                yield return dbl.Leap(GridView.ToWorld(land.Value) + Vector3.up * GridView.SurfaceY, 1.6f, 0.5f, stunt);
+                if (mine) robot.Spawn(grid, land.Value); else if (!hunt.ChallengeFoeDown) hunt.PlaceFoe(land.Value); // (a live knock-down may have taken it meanwhile)
+            }
+            finally { if (dbl != null) dbl.Done(); } // the stand-in never stays behind, whatever happened on the way
             if (stunt == 2) { Shockwave.Create(GridView.ToWorld(land.Value) + Vector3.up * GridView.SurfaceY, 1.6f, SpecialColour[2]); cameraRig.Shake(0.4f); }
         }
 
@@ -338,13 +341,17 @@ namespace SquashBot.Gameplay
             SlowCam(model.position, 1.9f); // the big moment's time (slow motion, no blows); the camera stays on the board
             cameraRig.Shake(1.1f); // and shakes as the pieces fly
             var dbl = StuntDouble.Make(model);
-            fx.Burst(model.position + Vector3.up * 0.5f, new Color(1f, 0.85f, 0.4f), new Color(3f, 2.4f, 0.8f), 26, 5f);
-            AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.6f);
-            yield return dbl.Shatter(model.position + Vector3.up * 0.45f);
-            cameraRig.Shake(0.7f);
-            fx.Burst(model.position + Vector3.up * 0.5f, new Color(0.7f, 0.85f, 1f), new Color(1.6f, 2f, 2.6f), 18, 3f);
-            AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.5f);
-            dbl.Done();
+            var at = model.position; // (the model may be gone before the moment ends: a live knock-down)
+            try
+            {
+                fx.Burst(at + Vector3.up * 0.5f, new Color(1f, 0.85f, 0.4f), new Color(3f, 2.4f, 0.8f), 26, 5f);
+                AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.6f);
+                yield return dbl.Shatter(at + Vector3.up * 0.45f);
+                cameraRig.Shake(0.7f);
+                fx.Burst(at + Vector3.up * 0.5f, new Color(0.7f, 0.85f, 1f), new Color(1.6f, 2f, 2.6f), 18, 3f);
+                AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.5f);
+            }
+            finally { if (dbl != null) dbl.Done(); }
             if (State == GameState.Playing) Time.timeScale = ultimateOn ? 0.35f : (was < 0.99f && was > 0.3f ? was : 1f);
         }
 

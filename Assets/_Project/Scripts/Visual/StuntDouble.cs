@@ -13,6 +13,8 @@ namespace SquashBot.Visual
     public class StuntDouble : MonoBehaviour
     {
         private readonly List<Renderer> hidden = new List<Renderer>();
+        private Transform source;
+        private float bornAt;
         private readonly List<(Transform t, Vector3 pos, Quaternion rot)> parts = new List<(Transform, Vector3, Quaternion)>();
 
         /// <summary>A copy of every mesh under <paramref name="model"/>, the model hidden meanwhile.</summary>
@@ -21,6 +23,8 @@ namespace SquashBot.Visual
             var go = new GameObject("StuntDouble");
             go.transform.SetPositionAndRotation(model.position, model.rotation);
             var d = go.AddComponent<StuntDouble>();
+            d.source = model;
+            d.bornAt = Time.realtimeSinceStartup;
             foreach (var r in model.GetComponentsInChildren<MeshRenderer>())
             {
                 if (!r.enabled) continue;
@@ -48,6 +52,15 @@ namespace SquashBot.Visual
         {
             foreach (var r in hidden) if (r != null) r.enabled = true;
             Destroy(gameObject);
+        }
+
+        /// <summary>
+        /// Never left behind: gone with the robot it stands in for (a live knock-down can take the rival away mid-moment),
+        /// and in any case after a few seconds (no moment lasts that long).
+        /// </summary>
+        private void Update()
+        {
+            if (source == null || Time.realtimeSinceStartup - bornAt > 6f) Done();
         }
 
         private void OnDestroy()
