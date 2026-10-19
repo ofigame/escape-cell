@@ -17,7 +17,7 @@ namespace BrickMuseum.FreeBuild
         private const float P = Piece.Plate, G = Piece.Gap;
         private static readonly Dictionary<string, Mesh> meshes = new Dictionary<string, Mesh>();
 
-        public static bool IsSpecial(string t) => t == "door" || t == "window" || t == "stairs" || t == "fence";
+        public static bool IsSpecial(string t) => t == "door" || t == "window" || t == "stairs" || t == "fence" || t == "taxisign";
 
         public static GameObject Create(Piece p, PieceLook look = PieceLook.Solid, Transform parent = null)
         {
@@ -80,6 +80,20 @@ namespace BrickMuseum.FreeBuild
                         }
                     }, w, d, H);
                     Part(go, m, Colour(p.c, look));
+                    break;
+                }
+                case "taxisign":
+                {
+                    // the roof sign: a yellow box with a black chequered band (the car becomes a taxi)
+                    var box = Mesh("taxi-box", b => b.Box(new Vector3(0, H / 2f, 0), new Vector3(w - 0.1f, H - 0.02f, d - 0.15f)), w, d, H);
+                    Part(go, box, Colour("yellow", look));
+                    var chk = Mesh("taxi-check", b =>
+                    {
+                        for (int i = 0; i < 6; i++)
+                            foreach (float side in new[] { -1f, 1f })
+                                b.Box(new Vector3(-w / 2f + 0.2f + i * (w - 0.4f) / 5f, H * (i % 2 == 0 ? 0.42f : 0.62f), side * (d / 2f - 0.06f)), new Vector3(0.3f, H * 0.2f, 0.04f));
+                    }, w, d, H);
+                    Part(go, chk, Colour("black", look));
                     break;
                 }
                 case "fence":

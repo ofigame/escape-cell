@@ -54,6 +54,7 @@ namespace BrickMuseum.Core
             du.removeBtn.onClick.AddListener(() =>
             {
                 if (selected == null) return;
+                FreeBuild.Wallet.Earn(selected.def.Price / 2);            // half the price back
                 Progress.Data.home.items.Remove(selected.data);
                 furniture.Remove(selected);
                 Destroy(selected.go);
@@ -196,7 +197,7 @@ namespace BrickMuseum.Core
             foreach (var f in Furniture.All)
             {
                 var def = f;
-                du.AddCard(Previews.Model(f.model, 160), f.name, Progress.Level < f.level ? $"Seviye {f.level}" : null, () => AddFurniture(def));
+                du.AddCard(Previews.Model(f.model, 160), $"{f.name} · {f.Price}", Progress.Level < f.level ? $"Seviye {f.level}" : null, () => AddFurniture(def));
             }
             ShowStorey(StoreyOf(walkPos.y));
             Select(null);
@@ -225,6 +226,7 @@ namespace BrickMuseum.Core
 
         private void AddFurniture(FurnitureDef def)
         {
+            if (!FreeBuild.Wallet.Spend(def.Price)) { Toast("Yeterli paran yok"); Sfx.Play("wrong", 0.5f); return; }
             // dropped on the floor in the middle of the shown storey
             var from = house.root.TransformPoint(new Vector3(house.lx / 2f, decorStorey * BuildSite.Storey * Piece.Plate - 1f, house.lz / 2f));
             if (!house.FloorUnder(new Ray(from, Vector3.down), out var at)) return;

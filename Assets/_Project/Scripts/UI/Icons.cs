@@ -160,7 +160,10 @@ namespace BrickMuseum.UI
             if (l == "Koleksiyon") return Grid;
             if (l.StartsWith("Envanter")) return Crate;
             if (l == "Şehri gez") return Walker;
-            if (l == "Karakter") return Person;
+            if (l == "Karakter" || l == "MÜŞTERİ") return Person;
+            if (l == "İPTAL") return Close;
+            if (l == "Sonraki araba") return Car;
+            if (l == "Yeni araba") return Plus;
             if (l == "Dil") return Globe;
             if (l == "Evimi yap" || l == "Evime geç" || l == "GİR") return l == "GİR" ? Door : House;
             if (l == "Arabamı yap" || l == "Arabama geç" || l == "Arabam olsun" || l == "BİN") return Car;

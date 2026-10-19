@@ -12,7 +12,8 @@ namespace BrickMuseum.UI
     {
         public Canvas canvas;
         public PointerArea touch;
-        public Button backBtn, jumpBtn, runBtn, carBtn, homeBtn, decorBtn;
+        public Button backBtn, jumpBtn, runBtn, carBtn, homeBtn, decorBtn, taxiBtn;
+        public TextMeshProUGUI money;
         public RectTransform stickBase, stickKnob;
         public GameObject nearChip;
         public TextMeshProUGUI nearText, help;
@@ -49,6 +50,16 @@ namespace BrickMuseum.UI
             carBtn = RoundButton(root, "BİN", new Vector2(-95, 340), 180);
             carBtn.GetComponent<Image>().color = Ui.Yellow;
             carBtn.gameObject.SetActive(false);
+            taxiBtn = RoundButton(root, "MÜŞTERİ", new Vector2(-300, 340), 180);
+            taxiBtn.GetComponent<Image>().color = new Color(1f, 0.93f, 0.5f);
+            taxiBtn.gameObject.SetActive(false);
+            var mp = Ui.Panel(root, "Money", new Color(1f, 0.96f, 0.82f, 0.95f), false);
+            mp.rectTransform.Place(new Vector2(1, 1), new Vector2(240, 80), new Vector2(-30, -30));
+            var coin = Ui.Plain(mp.transform, "Coin", new Color(0.95f, 0.7f, 0.1f), false);
+            coin.sprite = Icons.Circle;
+            coin.rectTransform.Place(new Vector2(0, 0.5f), new Vector2(46, 46), new Vector2(16, 0));
+            money = Ui.Text(mp.transform, "", 34, Ui.Ink, true);
+            money.rectTransform.Fill(8); money.rectTransform.offsetMin = new Vector2(70, 8);
             homeBtn = RoundButton(root, "GİR", new Vector2(-95, 340), 180);
             homeBtn.GetComponent<Image>().color = Ui.Yellow;
             homeBtn.gameObject.SetActive(false);
@@ -81,6 +92,8 @@ namespace BrickMuseum.UI
         }
 
         public void SetHomeLabel(string label) => homeBtn.SetLabel(label);
+
+        public void SetTaxiLabel(string label) => taxiBtn.SetLabel(label);
 
         public void SetCarLabel(string label) => carBtn.SetLabel(label);
 

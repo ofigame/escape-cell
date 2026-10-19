@@ -9,6 +9,8 @@ namespace BrickMuseum.FreeBuild
     {
         public string key, t, name, group;
         public int w, d, h;
+        /// <summary>Special materials are bought with lira: this many pieces for this price (0 = only earned by building the city).</summary>
+        public int price, pack;
         /// <summary>A piece of this kind in its canonical orientation (for pictures and building).</summary>
         public Piece Make(string colour, int x = 0, int z = 0, int y = 0, int rot = 0) =>
             Piece.Make(t, colour, x, z, y, w, d, h, Dirs[rot & 3]);
@@ -31,28 +33,30 @@ namespace BrickMuseum.FreeBuild
         private static List<BuildKind> MakeKinds()
         {
             var l = new List<BuildKind>();
-            void K(string group, string t, int w, int d, int h, string name) => l.Add(new BuildKind { key = $"{t}:{w}x{d}x{h}", t = t, w = w, d = d, h = h, name = name, group = group });
+            void K(string group, string t, int w, int d, int h, string name, int price = 0, int pack = 0) =>
+                l.Add(new BuildKind { key = $"{t}:{w}x{d}x{h}", t = t, w = w, d = d, h = h, name = name, group = group, price = price, pack = pack });
             foreach (var (w, d) in new[] { (1, 1), (2, 1), (3, 1), (4, 1), (6, 1), (8, 1), (2, 2), (3, 2), (4, 2), (6, 2), (8, 2) })
                 K("Tuğla", "brick", w, d, 3, $"{d}×{w} tuğla");
             foreach (var (w, d) in new[] { (2, 1), (4, 1), (2, 2), (4, 2), (6, 2), (8, 2), (4, 4), (8, 4), (8, 8) })
                 K("Plaka", "brick", w, d, 1, $"{d}×{w} plaka");
-            K("Özel", "door", 3, 1, 9, "Kapı");
-            K("Özel", "window", 2, 1, 6, "Pencere");
-            K("Özel", "window", 4, 1, 6, "Geniş pencere");
-            K("Özel", "stairs", 10, 2, 10, "Merdiven");
-            K("Özel", "fence", 2, 1, 3, "Korkuluk");
-            K("Özel", "fence", 4, 1, 3, "Uzun korkuluk");
+            K("Özel", "door", 3, 1, 9, "Kapı", 40, 1);
+            K("Özel", "window", 2, 1, 6, "Pencere", 40, 2);
+            K("Özel", "window", 4, 1, 6, "Geniş pencere", 50, 1);
+            K("Özel", "stairs", 10, 2, 10, "Merdiven", 80, 1);
+            K("Özel", "fence", 2, 1, 3, "Korkuluk", 20, 2);
+            K("Özel", "fence", 4, 1, 3, "Uzun korkuluk", 25, 1);
             K("Çatı", "slope", 2, 1, 3, "Eğimli 1×2");
             K("Çatı", "slope", 2, 2, 3, "Eğimli 2×2");
             K("Çatı", "slope", 2, 4, 3, "Eğimli 2×4");
             K("Çatı", "curve", 2, 2, 3, "Kavisli 2×2");
-            K("Süs", "tile", 2, 2, 1, "Düz plaka 2×2");
-            K("Süs", "tile", 4, 1, 1, "Düz plaka 1×4");
-            K("Süs", "round", 1, 1, 3, "Yuvarlak 1×1");
-            K("Süs", "round", 2, 2, 3, "Yuvarlak 2×2");
-            K("Süs", "cone", 1, 1, 3, "Koni");
-            K("Süs", "dome", 2, 2, 2, "Kubbe");
-            K("Araba", "wheel", 2, 1, 3, "Tekerlek");
+            K("Süs", "tile", 2, 2, 1, "Düz plaka 2×2", 20, 4);
+            K("Süs", "tile", 4, 1, 1, "Düz plaka 1×4", 20, 4);
+            K("Süs", "round", 1, 1, 3, "Yuvarlak 1×1", 20, 4);
+            K("Süs", "round", 2, 2, 3, "Yuvarlak 2×2", 25, 2);
+            K("Süs", "cone", 1, 1, 3, "Koni", 20, 4);
+            K("Süs", "dome", 2, 2, 2, "Kubbe", 25, 2);
+            K("Araba", "wheel", 2, 1, 3, "Tekerlek", 60, 4);
+            K("Araba", "taxisign", 2, 1, 3, "Taksi tabelası", 100, 1);
             return l;
         }
 
@@ -72,6 +76,15 @@ namespace BrickMuseum.FreeBuild
 
         public static bool Take(string key) { if (Count(key) <= 0) return false; Add(key, -1); return true; }
 
+        /// <summary>Buys one pack of a special material; false when it is not for sale or there is not enough money.</summary>
+        public static bool Buy(BuildKind k)
+        {
+            if (k.price <= 0 || !Wallet.Spend(k.price)) return false;
+            Add(k.key, k.pack);
+            Progress.Save();
+            return true;
+        }
+
         // ---------- earning ----------
 
         /// <summary>The first time: the starter kit, plus materials for every model already finished.</summary>
@@ -84,7 +97,7 @@ namespace BrickMuseum.FreeBuild
                 ("brick:2x1x3", 60), ("brick:4x1x3", 50), ("brick:2x2x3", 30), ("brick:4x2x3", 40), ("brick:1x1x3", 30), ("brick:6x1x3", 20),
                 ("brick:4x2x1", 20), ("brick:8x4x1", 12), ("brick:8x8x1", 4),
                 ("door:3x1x9", 2), ("window:2x1x6", 4), ("stairs:10x2x10", 1), ("fence:2x1x3", 4),
-                ("slope:2x2x3", 16), ("slope:2x4x3", 10),
+                ("slope:2x2x3", 16), ("slope:2x4x3", 10), ("wheel:2x1x3", 4), ("taxisign:2x1x3", 1),   // enough for a first taxi
             })
                 Add(key, n);
             foreach (var st in data.models)
@@ -93,10 +106,11 @@ namespace BrickMuseum.FreeBuild
                 if (m != null && st.stars > 0) foreach (var kv in Reward(m, st.stars)) Add(kv.Key, kv.Value);
             }
             data.stockInit = true;
+            Wallet.EnsureStarted();
             Progress.Save();
         }
 
-        /// <summary>What a finished model puts into the box: 30 / 45 / 60 % of its pieces by stars, plus special pieces.</summary>
+        /// <summary>What a finished model puts into the box: 30 / 45 / 60 % of its rough pieces (bricks, plates, roof pieces) by stars.</summary>
         public static Dictionary<string, int> Reward(ModelDef m, int stars)
         {
             float share = stars >= 3 ? 0.6f : stars == 2 ? 0.45f : 0.3f;
@@ -115,11 +129,6 @@ namespace BrickMuseum.FreeBuild
                         break;
                     case "slope": Put(a >= 4 ? "slope:2x4x3" : b >= 2 ? "slope:2x2x3" : "slope:2x1x3", 1); break;
                     case "curve": Put("curve:2x2x3", 1); break;
-                    case "tile": Put(a >= 3 ? "tile:4x1x1" : "tile:2x2x1", 1); break;
-                    case "round": Put(a >= 2 ? "round:2x2x3" : "round:1x1x3", 1); break;
-                    case "cone": case "spire": Put("cone:1x1x3", 1); break;
-                    case "dome": Put("dome:2x2x2", 1); break;
-                    case "wheel": Put("wheel:2x1x3", 1); break;
                 }
             }
             var gift = new Dictionary<string, int>();
@@ -127,16 +136,6 @@ namespace BrickMuseum.FreeBuild
             {
                 int n = (int)System.Math.Round(kv.Value * share);
                 if (n > 0) gift[kv.Key] = n;
-            }
-            void Extra(string key, int n) { if (n <= 0) return; gift.TryGetValue(key, out var v); gift[key] = v + n; }
-            switch (m.kind)
-            {
-                case "house": Extra("window:2x1x6", stars); Extra("door:3x1x9", stars >= 2 ? 1 : 0); break;
-                case "big": case "civic": case "historic":
-                    Extra("window:4x1x6", stars); Extra("door:3x1x9", 1); Extra("stairs:10x2x10", stars >= 3 ? 1 : 0); break;
-                case "landmark": case "statue": Extra("fence:4x1x3", stars); Extra("brick:8x8x1", 1); break;
-                case "decor": Extra("fence:2x1x3", stars); break;
-                case "vehicle": Extra("wheel:2x1x3", stars >= 2 ? 2 : 0); break;
             }
             return gift;
         }
@@ -149,6 +148,35 @@ namespace BrickMuseum.FreeBuild
             foreach (var kv in Reward(m, stars)) { Add(kv.Key, kv.Value); total += kv.Value; }
             Progress.Save();
             return total;
+        }
+    }
+}
+
+namespace BrickMuseum.FreeBuild
+{
+    /// <summary>The player's lira (150 to start with).</summary>
+    public static class Wallet
+    {
+        public static int Money => Progress.Data.money;
+
+        public static void EnsureStarted()
+        {
+            var d = Progress.Data;
+            if (d.moneyInit) return;
+            d.moneyInit = true;
+            d.money += 150;
+            Progress.Save();
+        }
+
+        public static void Earn(int n) { EnsureStarted(); Progress.Data.money += n; Progress.Save(); }
+
+        public static bool Spend(int n)
+        {
+            EnsureStarted();
+            if (Progress.Data.money < n) return false;
+            Progress.Data.money -= n;
+            Progress.Save();
+            return true;
         }
     }
 }

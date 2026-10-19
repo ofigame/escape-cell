@@ -199,10 +199,22 @@ namespace BrickMuseum.Core
                 s.PlaceAt("brick:1x1x3", "blue", 1, y, 7, 0); s.PlaceAt("brick:1x1x3", "blue", 6, y, 7, 0);
             }
             for (int x = 1; x <= 5; x += 2) for (int z = 3; z <= 7; z += 2) s.PlaceAt("brick:2x2x1", "white", x, 10, z, 0);
+            s.PlaceAt("taxisign:2x1x3", "yellow", 3, 11, 5, 0);                           // it's a taxi
             RefreshBuildUi();
             Debug.Log($"[Tour] car built: {s.pieces.Count} pieces, wheels {s.CountOf("wheel")}");
             yield return new WaitForSeconds(0.5f);
             yield return Shot(dir, "47_car_build");
+            // a second car in the garage: a little red runabout
+            SwitchCar(true);
+            yield return new WaitForSeconds(0.3f);
+            s = site;
+            foreach (var (x, z) in new[] { (1, 2), (6, 2), (1, 8), (6, 8) }) s.PlaceAt("wheel:2x1x3", "black", x, 0, z, 1);
+            for (int x = 1; x <= 5; x += 2) for (int z = 1; z <= 9; z += 2) s.PlaceAt("brick:2x2x1", "red", x, 3, z, 0);
+            for (int x = 1; x <= 5; x += 2) { s.PlaceAt("brick:2x2x3", "red", x, 4, 1, 0); s.PlaceAt("slope:2x2x3", "red", x, 4, 8, 3); }
+            RefreshBuildUi();
+            yield return new WaitForSeconds(0.4f);
+            yield return Shot(dir, "47b_second_car");
+            Debug.Log($"[Tour] garage: {Garage.Cars.Count} cars, money {Wallet.Money}");
             ExitBuild();
             yield return new WaitForSeconds(0.4f);
             EnterWalk();
@@ -219,6 +231,25 @@ namespace BrickMuseum.Core
                 yield return new WaitForSeconds(2f);
                 yield return Shot(dir, "49_driving_built");
                 testMove = Vector2.zero;
+                // a taxi fare: the strip to the passenger, pick them up, the strip to their stop, get paid
+                yield return new WaitForSeconds(0.6f);
+                Debug.Log($"[Tour] taxi: {carName} taxi={carIsTaxi}");
+                int before = Wallet.Money;
+                StartTaxiJob();
+                yield return new WaitForSeconds(1f);
+                camPitch = 30f;
+                yield return Shot(dir, "49b_taxi_route");
+                Debug.Log($"[Tour] {route.Debug}, passenger at {fare.root.position}, car {car.position}");
+                car.position = city.WorldAt(fareStreet, 0f); car.position = new Vector3(car.position.x, city.GroundAt(car.position), car.position.z);
+                carSpeed = 0f;
+                yield return new WaitForSeconds(1f);
+                yield return Shot(dir, "49c_passenger_in");
+                car.position = city.WorldAt(dropStreet, 0f); car.position = new Vector3(car.position.x, city.GroundAt(car.position), car.position.z);
+                carSpeed = 0f;
+                yield return new WaitForSeconds(1f);
+                yield return Shot(dir, "49d_paid");
+                Debug.Log($"[Tour] taxi paid: {before} -> {Wallet.Money}");
+                camPitch = 14f;
                 GetOutOfCar();
             }
             Debug.Log($"[Tour] built car: {(car != null ? carName : "none")}");

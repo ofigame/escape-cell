@@ -406,3 +406,21 @@ BANK	BENCH	ベンチ	مقعد	BANK	BANC	PANCHINA	BANCO	벤치	SKAMYA
 Yapım kaydedildi	Build saved	制作を保存した	تم حفظ البناء	Bau gespeichert	Construction enregistrée	Costruzione salvata	Construcción guardada	제작을 저장했어요	Tikinti yadda saxlanıldı
 İnşaya devam et ile sürdür	pick it up with Continue building	「続きをつくる」で再開	تابعه عبر «تابع البناء»	mit „Weiterbauen“ fortsetzen	reprends avec « Continuer la construction »	riprendi con "Continua a costruire"	síguelo con «Seguir construyendo»	'이어서 만들기'로 계속	"Tikintiyə davam et" ilə davam et
 Yarım kalan yapım bırakıldı	The unfinished build was dropped	途中の制作をやめた	تم ترك البناء غير المكتمل	Der angefangene Bau wurde verworfen	La construction inachevée est abandonnée	La costruzione a metà è stata abbandonata	Se dejó la construcción a medias	만들던 것을 그만뒀어요	Yarımçıq tikinti buraxıldı
+Araba {0}	Car {0}	車 {0}	السيارة {0}	Auto {0}	Voiture {0}	Auto {0}	Coche {0}	자동차 {0}	Maşın {0}
+Sonraki araba	Next car	次の車	السيارة التالية	Nächstes Auto	Voiture suivante	Auto successiva	Siguiente coche	다음 차	Növbəti maşın
+Yeni araba	New car	新しい車	سيارة جديدة	Neues Auto	Nouvelle voiture	Nuova auto	Coche nuevo	새 차	Yeni maşın
+{0} lira	{0} lira	{0} リラ	{0} ليرة	{0} Lira	{0} lires	{0} lire	{0} liras	{0} 리라	{0} lirə
+satın al	buy it	買おう	اشترِها	kaufe es	achète-la	compralo	cómprala	구매하세요	satın al
+Yeterli paran yok	Not enough money	お金が足りない	لا يكفي مالك	Nicht genug Geld	Pas assez d'argent	Soldi insufficienti	No tienes suficiente dinero	돈이 부족해요	Kifayət qədər pulun yoxdur
+Taksi tabelası	Taxi sign	タクシー表示灯	لافتة تاكسي	Taxischild	Enseigne taxi	Insegna taxi	Letrero de taxi	택시 표시등	Taksi lövhəsi
+MÜŞTERİ	FARE	客	راكب	KUNDE	CLIENT	CLIENTE	CLIENTE	손님	MÜŞTƏRİ
+İPTAL	CANCEL	中止	إلغاء	ABBRECHEN	ANNULER	ANNULLA	CANCELAR	취소	LƏĞV ET
+Bir müşteri seni bekliyor	A passenger is waiting for you	お客さんが待っている	راكب ينتظرك	Ein Fahrgast wartet auf dich	Un client t'attend	Un cliente ti aspetta	Un cliente te espera	손님이 기다리고 있어요	Bir müştəri səni gözləyir
+Taksi işi iptal	Taxi job cancelled	タクシーの仕事を中止	أُلغيت رحلة التاكسي	Taxifahrt abgebrochen	Course annulée	Corsa annullata	Carrera cancelada	택시 일 취소	Taksi işi ləğv edildi
+Müşteriye git	Go to the passenger	お客さんのところへ	اذهب إلى الراكب	Zum Fahrgast	Va chercher le client	Vai dal cliente	Ve a por el cliente	손님에게 가기	Müştəriyə get
+{0} m	{0} m	{0} m	{0} م	{0} m	{0} m	{0} m	{0} m	{0} m	{0} m
+Hedefe git	Drive to the stop	目的地へ	اذهب إلى الوجهة	Zum Ziel	Va à la destination	Vai alla destinazione	Ve al destino	목적지로 가기	Hədəfə get
+Yolcu bindi	Passenger on board	お客さんが乗った	صعد الراكب	Fahrgast eingestiegen	Le client est monté	Il cliente è salito	El cliente subió	손님이 탔어요	Sərnişin mindi
+ücret {0} lira	fare {0} lira	料金 {0} リラ	الأجرة {0} ليرة	Fahrpreis {0} Lira	prix {0} lires	tariffa {0} lire	tarifa {0} liras	요금 {0} 리라	qiymət {0} lirə
+bahşiş +{0}	tip +{0}	チップ +{0}	بقشيش +{0}	Trinkgeld +{0}	pourboire +{0}	mancia +{0}	propina +{0}	팁 +{0}	bəxşiş +{0}
++{0} lira	+{0} lira	+{0} リラ	+{0} ليرة	+{0} Lira	+{0} lires	+{0} lire	+{0} liras	+{0} 리라	+{0} lirə

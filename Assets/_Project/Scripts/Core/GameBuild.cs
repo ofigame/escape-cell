@@ -37,6 +37,9 @@ namespace BrickMuseum.Core
             bu.Build(transform);
             cu.buildBtn.onClick.AddListener(() => EnterBuild(false));
             bu.switchBtn.onClick.AddListener(() => { if (site.dirty) { Progress.Save(); site.dirty = false; } site.HideGhost(); EnterBuild(!buildingCar); });
+            // the garage: work on the next car, or start a new one
+            bu.nextCarBtn.onClick.AddListener(() => { SwitchCar(false); });
+            bu.newCarBtn.onClick.AddListener(() => { SwitchCar(true); });
             bu.backBtn.onClick.AddListener(ExitBuild);
             bu.undoBtn.onClick.AddListener(() => { if (site.Undo()) { Sfx.Play("rustle", 0.6f); RefreshBuildUi(); } else bu.Say("Geri alınacak bir şey yok"); });
             bu.modeBtn.onClick.AddListener(() => { removing = !removing; bu.SetMode(removing); site.HideGhost(); });
@@ -69,9 +72,11 @@ namespace BrickMuseum.Core
             Stock.EnsureStarted();
             int lot = CityLayout.HomePlate;
             site = forCar
-                ? carEdit ??= new BuildSite(transform, Progress.Data.carBuild, ChassisX, ChassisZ, BuildSite.CornerFor(BuildSite.CarOrigin, ChassisX, ChassisZ, 0f), 0f, 1f, true, "gray")
+                ? carEdit ??= new BuildSite(transform, Garage.Active.pieces, ChassisX, ChassisZ, BuildSite.CornerFor(BuildSite.CarOrigin, ChassisX, ChassisZ, 0f), 0f, 1f, true, "gray")
                 : houseEdit ??= new BuildSite(transform, Progress.Data.build, lot, lot, BuildSite.CornerFor(BuildSite.HouseOrigin, lot, lot, 0f), 0f, 1f, true, "dgreen");
-            bu.title.text = forCar ? "Arabam" : "Evim";
+            bu.title.text = forCar ? Garage.Active.name : "Evim";
+            bu.nextCarBtn.gameObject.SetActive(forCar && Garage.Cars.Count > 1);
+            bu.newCarBtn.gameObject.SetActive(forCar);
             bu.switchBtn.SetLabel(forCar ? "Evime geç" : "Arabama geç");
             site.SetView(0);
             bu.storeyBtn.SetLabel("Tüm katlar");
@@ -98,6 +103,17 @@ namespace BrickMuseum.Core
             cityCam.Focus(city.WorldAt(lot, 0f), 90f);
         }
 
+        /// <summary>Saves the car on the chassis and puts another one there (the next in the garage, or a new empty one).</summary>
+        private void SwitchCar(bool makeNew)
+        {
+            if (site.dirty) { Progress.Save(); site.dirty = false; }
+            site.HideGhost();
+            if (makeNew) Garage.AddNew(); else Garage.Next();
+            if (carEdit != null) { Destroy(carEdit.root.gameObject); carEdit = null; }
+            EnterBuild(true);
+            bu.Say(Garage.Active.name);
+        }
+
         private void ShowBuildTab(string group)
         {
             buildTab = group;
@@ -110,7 +126,12 @@ namespace BrickMuseum.Core
                 {
                     buildKind = kind;
                     if (removing) { removing = false; bu.SetMode(false); }
-                    if (Stock.Count(kind.key) <= 0) bu.Say("Bu parçadan yok · şehirde model yaparak kazan");
+                    if (Stock.Count(kind.key) <= 0) bu.Say(kind.price > 0 ? "Bu parçadan yok · satın al" : "Bu parçadan yok · şehirde model yaparak kazan");
+                    RefreshBuildUi();
+                }, k.price, k.pack, () =>
+                {
+                    if (Stock.Buy(kind)) { Sfx.Play("place", 0.7f); buildKind = kind; bu.Say($"+{kind.pack} {kind.name}"); }
+                    else { Sfx.Play("wrong", 0.5f); bu.Say("Yeterli paran yok"); }
                     RefreshBuildUi();
                 });
             }
@@ -121,7 +142,7 @@ namespace BrickMuseum.Core
         private void RefreshBuildUi()
         {
             bu.UpdateCards(buildKind?.key, Stock.Count);
-            bu.stockText.text = $"{site.pieces.Count} parça yerinde · kutuda {Stock.Total}" + (buildingCar ? $" · tekerlek {site.CountOf("wheel")}/4" : "");
+            bu.stockText.text = $"{site.pieces.Count} parça yerinde · kutuda {Stock.Total} · {Wallet.Money} lira" + (buildingCar ? $" · tekerlek {site.CountOf("wheel")}/4" : "");
         }
 
         private void BuildDrag(PointerEventData e)

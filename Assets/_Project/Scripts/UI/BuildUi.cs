@@ -15,7 +15,7 @@ namespace BrickMuseum.UI
     {
         public Canvas canvas;
         public PointerArea touch;
-        public Button backBtn, undoBtn, modeBtn, turnBtn, colourBtn, storeyBtn, switchBtn;
+        public Button backBtn, undoBtn, modeBtn, turnBtn, colourBtn, storeyBtn, switchBtn, nextCarBtn, newCarBtn;
         public Image colourSwatch;
         public TextMeshProUGUI title, stockText, message;
         public GameObject colours;
@@ -47,6 +47,10 @@ namespace BrickMuseum.UI
 
             switchBtn = Ui.Button(root, "Arabama geç", new Color(0.8f, 0.9f, 1f), Ui.Ink, 30, () => { });
             ((RectTransform)switchBtn.transform).Place(new Vector2(0.5f, 1), new Vector2(300, 76), new Vector2(0, -160));
+            nextCarBtn = Ui.Button(root, "Sonraki araba", Color.white, Ui.Ink, 28, () => { });
+            ((RectTransform)nextCarBtn.transform).Place(new Vector2(0.5f, 1), new Vector2(270, 76), new Vector2(-300, -160));
+            newCarBtn = Ui.Button(root, "Yeni araba", Ui.Yellow, Ui.Ink, 28, () => { });
+            ((RectTransform)newCarBtn.transform).Place(new Vector2(0.5f, 1), new Vector2(250, 76), new Vector2(290, -160));
 
             // tools on the right
             modeBtn = Tool(root, "Koy", 0);
@@ -140,7 +144,7 @@ namespace BrickMuseum.UI
 
         public void ClearCards() { foreach (Transform c in strip) UnityEngine.Object.Destroy(c.gameObject); cards.Clear(); }
 
-        public void AddCard(string key, Texture pic, string name, Action onClick)
+        public void AddCard(string key, Texture pic, string name, Action onClick, int price = 0, int pack = 0, Action onBuy = null)
         {
             var card = Ui.Panel(strip, "Card " + name, new Color(0.95f, 0.96f, 1f));
             var le = card.gameObject.AddComponent<LayoutElement>();
@@ -155,6 +159,15 @@ namespace BrickMuseum.UI
             var count = Ui.Text(card.transform, "", 28, new Color(0.2f, 0.45f, 0.25f), true);
             count.rectTransform.Place(new Vector2(0.5f, 0), new Vector2(186, 40), new Vector2(0, 6));
             card.gameObject.AddComponent<Button>().onClick.AddListener(() => { Core.Sfx.Play("pick", 0.6f); onClick(); });
+            if (price > 0 && onBuy != null)
+            {
+                // buy a pack: "+4 · 20" with a coin
+                var buy = Ui.Button(card.transform, $"+{pack} · {price}", new Color(1f, 0.86f, 0.3f), Ui.Ink, 22, () => onBuy());
+                ((RectTransform)buy.transform).Place(new Vector2(1, 1), new Vector2(118, 44), new Vector2(-4, -4));
+                var coin = Ui.Plain(buy.transform, "Coin", new Color(0.95f, 0.7f, 0.1f), false);
+                coin.sprite = Icons.Circle;
+                coin.rectTransform.Place(new Vector2(0, 0.5f), new Vector2(22, 22), new Vector2(6, 0));
+            }
             cards.Add((card, key, count));
         }
 

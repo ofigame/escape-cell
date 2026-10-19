@@ -40,6 +40,7 @@ namespace BrickMuseum.Core
             tu.touch.Up = WalkUp;
             cu.walkBtn.onClick.AddListener(EnterWalk);
             WireHome();
+            WireTaxi();
         }
 
         private static void SetLandscape(bool on)
@@ -87,6 +88,7 @@ namespace BrickMuseum.Core
         private void ExitWalk()
         {
             if (decorating) EndDecor();
+            CancelTaxi(false);
             if (driving) GetOutOfCar();
             RemoveCar();
             SetLandscape(false);
@@ -139,6 +141,8 @@ namespace BrickMuseum.Core
 
         private void WalkUpdate(float dt)
         {
+            tu.money.text = $"{FreeBuild.Wallet.Money} lira";
+            if (!driving) tu.taxiBtn.gameObject.SetActive(false);
             if (decorating) { DecorUpdate(dt); return; }
             if (driving) { CarUpdate(dt); return; }
             var move = stickVec + testMove;

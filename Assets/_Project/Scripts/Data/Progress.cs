@@ -66,6 +66,14 @@ namespace BrickMuseum.Data
         public bool Has => !string.IsNullOrEmpty(model);
     }
 
+    /// <summary>One of the player's own cars: a name and its pieces on the chassis.</summary>
+    [Serializable]
+    public class CarSave
+    {
+        public string name = "";
+        public List<BuildPieceData> pieces = new List<BuildPieceData>();
+    }
+
     [Serializable]
     public class SaveFile
     {
@@ -77,6 +85,10 @@ namespace BrickMuseum.Data
         public string myHouse = "";          // model id of the player's own house
         public HomeData home = new HomeData();
         public PendingBuild pending = new PendingBuild();
+        public bool moneyInit;
+        public int money;                     // lira: earned with the taxi (and fishing), spent on special materials, furniture, lots
+        public List<CarSave> cars = new List<CarSave>();   // the player's own cars (the garage)
+        public int activeCar;
         public bool stockInit;               // the starter kit (and materials for models built before) has been given
         public List<StockItem> stock = new List<StockItem>();
         public List<BuildPieceData> build = new List<BuildPieceData>();   // the player's own house, piece by piece

@@ -9,6 +9,8 @@ namespace BrickMuseum.Home
         public string id, name;
         public int level;
         public ModelDef model;
+        /// <summary>Price in lira (dearer for the pieces that open later).</summary>
+        public int Price => 20 + level * 15;
     }
 
     /// <summary>

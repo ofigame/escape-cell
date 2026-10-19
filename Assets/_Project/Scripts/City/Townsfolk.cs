@@ -139,6 +139,9 @@ namespace BrickMuseum.City
             return o;
         }
 
+        /// <summary>Everyday clothes for someone in town (a taxi passenger).</summary>
+        public static Outfit Resident(System.Random r) => Dress("resident", r);
+
         private static int Seed(string s) { unchecked { int h = (int)2166136261; foreach (char c in s) h = (h ^ c) * 16777619; return h; } }
 
         // ---------- keeping the crowd in step with the city ----------

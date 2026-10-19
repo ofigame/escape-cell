@@ -312,6 +312,7 @@ namespace BrickMuseum.Core
             city.people.Tick(dt, cityCam.target, cityCam.distance < 220f ? 130f : 0f);   // people are too small to see from high up
             if (cu.levelUp.activeSelf && Time.unscaledTime > levelUpUntil) cu.levelUp.SetActive(false);
             cu.resumeBtn.gameObject.SetActive(Pending.Has && !cu.panel.activeSelf && !cu.list.activeSelf);
+            cu.money.text = $"{FreeBuild.Wallet.Money} lira";
         }
     }
 }

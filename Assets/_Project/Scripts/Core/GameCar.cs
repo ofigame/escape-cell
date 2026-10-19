@@ -23,8 +23,21 @@ namespace BrickMuseum.Core
         public const float BuiltCarScale = 0.5f;
         public const int ChassisX = 8, ChassisZ = 12;
 
-        /// <summary>The free-built car can be driven once it has at least four wheels.</summary>
-        private static bool HasBuiltCar => Progress.Data.carBuild.Count(p => p.kind.StartsWith("wheel")) >= 4;
+        /// <summary>A free-built car can be driven once it has at least four wheels.</summary>
+        private static bool HasBuiltCar => Garage.AnyDrivable;
+
+        /// <summary>One of the player's own cars standing in the street (the garage's cars that can drive).</summary>
+        private sealed class OwnCar
+        {
+            public Transform t;
+            public float halfLen, halfWid, yaw;
+            public string name;
+            public bool taxi;
+        }
+
+        private readonly System.Collections.Generic.List<OwnCar> ownCars = new System.Collections.Generic.List<OwnCar>();
+        private OwnCar ownCar;          // the one the player is next to / drives
+        private bool carIsTaxi;
         private Slot carSlot;
         private bool driving;
         private float carYaw, carSpeed, carHalfLen, carHalfWid;
@@ -35,7 +48,7 @@ namespace BrickMuseum.Core
         {
             RemoveCar();
             var data = Progress.Data;
-            if (HasBuiltCar) { SpawnBuiltCar(); return; }
+            if (HasBuiltCar) { SpawnBuiltCars(); return; }
             if (string.IsNullOrEmpty(data.myCar) || !Progress.Owned(data.myCar))
             {
                 // no car chosen yet: the first parked car (a four-wheeler before a scooter or a motorbike)
@@ -77,11 +90,32 @@ namespace BrickMuseum.Core
             carSpeed = 0f;
         }
 
-        /// <summary>The player's own free-built car, on the road by the start (beside the house when there is one).</summary>
-        private void SpawnBuiltCar()
+        /// <summary>The garage's cars, parked one behind the other on the road by the house (or by the start).</summary>
+        private void SpawnBuiltCars()
         {
-            carModel = null; carSlot = null; carName = "Arabam";
-            var list = Progress.Data.carBuild;
+            carModel = null; carSlot = null;
+            int n = 0;
+            foreach (var save in Garage.Cars)
+            {
+                if (!Garage.Drivable(save)) continue;
+                SpawnBuiltCar(save, n++);
+                ownCars.Add(new OwnCar { t = car, halfLen = carHalfLen, halfWid = carHalfWid, yaw = carYaw, name = save.name, taxi = Garage.IsTaxi(save) });
+            }
+            UseOwnCar(ownCars.FirstOrDefault());
+        }
+
+        private void UseOwnCar(OwnCar c)
+        {
+            if (ownCar != null && ownCar != c) ownCar.yaw = carYaw;
+            ownCar = c;
+            if (c == null) return;
+            car = c.t; carHalfLen = c.halfLen; carHalfWid = c.halfWid; carYaw = c.yaw; carName = c.name; carIsTaxi = c.taxi;
+        }
+
+        private void SpawnBuiltCar(CarSave save, int index)
+        {
+            carName = save.name;
+            var list = save.pieces;
             int minX = int.MaxValue, maxX = 0, minZ = int.MaxValue, maxZ = 0;
             foreach (var p in list)
             {
@@ -99,12 +133,12 @@ namespace BrickMuseum.Core
             carHalfWid = (maxX - minX) * BuiltCarScale / 2f;
             if (Progress.Data.build.Count > 0)
             {
-                car.position = city.WorldAt(new Vector2(CityLayout.MinX + 13f, CityLayout.HomeLotCenter.y - 6f), CityMap.RoadTop);
+                car.position = city.WorldAt(new Vector2(CityLayout.MinX + 13f, CityLayout.HomeLotCenter.y - 6f - index * 9f), CityMap.RoadTop);
                 carYaw = 180f;
             }
             else
             {
-                car.position = new Vector3(walkPos.x - 7f, walkPos.y, walkPos.z + 2.5f);
+                car.position = new Vector3(walkPos.x - 7f - index * 9f, walkPos.y, walkPos.z + 2.5f);
                 carYaw = 270f;
             }
             car.rotation = Quaternion.Euler(0, carYaw, 0);
@@ -113,6 +147,10 @@ namespace BrickMuseum.Core
 
         private void RemoveCar()
         {
+            foreach (var c in ownCars) if (c.t != null && c.t != car) Destroy(c.t.gameObject);
+            ownCars.Clear();
+            ownCar = null;
+            carIsTaxi = false;
             if (car == null) return;
             Destroy(car.gameObject);
             car = null;
@@ -122,6 +160,13 @@ namespace BrickMuseum.Core
 
         private bool NearCar()
         {
+            // with several cars, the nearest one is the one to get into
+            if (!driving && ownCars.Count > 1)
+            {
+                var best = ownCars.OrderBy(c => (c.t.position - walkPos).sqrMagnitude).First();
+                if (best != ownCar) UseOwnCar(best);
+            }
+            if (car == null) return false;
             var off = Quaternion.Inverse(car.rotation) * (walkPos - car.position);
             return Mathf.Abs(off.x) < carHalfWid + 2.5f && Mathf.Abs(off.z) < carHalfLen + 2.5f;
         }
@@ -142,6 +187,7 @@ namespace BrickMuseum.Core
 
         private void GetOutOfCar()
         {
+            CancelTaxi(taxi != TaxiState.Off);
             driving = false;
             carSpeed = 0f;
             // step out on the driver's side, or the other side when that is the kerb
@@ -210,6 +256,7 @@ namespace BrickMuseum.Core
             city.people.Tick(dt, car.position, 90f, car.position);
             tu.nearChip.SetActive(true);
             tu.nearText.text = $"{carName}  ·  {Mathf.RoundToInt(Mathf.Abs(carSpeed) * 0.9f * 3.6f)} km/sa";
+            TaxiUpdate(dt);
         }
 
         /// <summary>The car (a box) would leave the streets and bridges, or run into a model.</summary>
