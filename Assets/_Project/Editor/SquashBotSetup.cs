@@ -296,7 +296,13 @@ namespace SquashBot.EditorTools
                 PlayerSettings.SetScriptingBackend(target, ScriptingImplementation.IL2CPP);
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
                 PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
-                PlayerSettings.bundleVersion = "0.2";
+                // The store version as on Play and the App Store; the code one more than the last AppGallery upload
+                // (E:/OFIGAME/Tools/huawei-version.txt keeps it; 1 went up first as 0.2).
+                const string HuaweiCodeFile = "../Tools/huawei-version.txt";
+                int hLast = File.Exists(HuaweiCodeFile) && int.TryParse(File.ReadAllText(HuaweiCodeFile).Trim(), out int hl) ? hl : 1;
+                PlayerSettings.bundleVersion = "1.0";
+                PlayerSettings.Android.bundleVersionCode = hLast + 1;
+                File.WriteAllText(HuaweiCodeFile, (hLast + 1).ToString());
                 EditorUserBuildSettings.buildAppBundle = false;
                 ResolveAndroidDependencies();
                 Directory.CreateDirectory("Builds/Huawei");
