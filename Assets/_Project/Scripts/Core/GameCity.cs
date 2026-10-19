@@ -34,6 +34,7 @@ namespace BrickMuseum.Core
             FreeBuild.Wallet.EnsureStarted();
             city = new CityMap(transform);
             BuildFarm();
+            BuildFields();
             BuildHouse();
             var start = CityLayout.AreaNamed("Türk Mahallesi").center;
             cityCam.Focus(city.WorldAt(start, 0f), 150f);
@@ -56,6 +57,7 @@ namespace BrickMuseum.Core
             cu.scoreBtn.onClick.AddListener(ShowScore);
             cu.bonusBtn.onClick.AddListener(ShowBonus);
             cu.farmBtn.onClick.AddListener(() => { FocusFarm(); OpenFarm(); });
+            cu.harvestBtn.onClick.AddListener(GoToHarvest);
             cu.farBtn.onClick.AddListener(() => { FocusFar(); ShowDistrict(); });
             Loc.Changed += () =>
             {
@@ -115,6 +117,7 @@ namespace BrickMuseum.Core
         {
             var s = city.Hit(cam.ScreenPointToRay(screen));
             if (s == null && FarmHitBy(cam.ScreenPointToRay(screen))) { OpenFarm(); return; }
+            if (s == null && FarmTap(cam.ScreenPointToRay(screen))) return;
             if (s == null)
             {
                 // the player's own lot: build the house or the car
@@ -137,6 +140,7 @@ namespace BrickMuseum.Core
         private void ClosePanel()
         {
             farmPanel = false;
+            fieldPanel = -1; barnPanel = null;
             panelSlot = null;
             city.Select(null);
             cu.panel.SetActive(false);
@@ -148,6 +152,7 @@ namespace BrickMuseum.Core
         private void OpenSlot(Slot s)
         {
             farmPanel = false;
+            fieldPanel = -1; barnPanel = null;
             panelSlot = s;
             city.Select(s);
             Sfx.Play("pick", 0.6f);
@@ -264,7 +269,7 @@ namespace BrickMuseum.Core
             cu.help.transform.parent.gameObject.SetActive(false);
             if (District.IsOpen)
             {
-                cu.ShowPanel(CityLayout.FarName, "İmara açık\nHer türden ev, bina ve kamu binası yapılabilir\nTaksiyle de gidilir", null,
+                cu.ShowPanel(CityLayout.FarName, "İmara açık\nTarla ek, ahır ve kümes kur, köy evleri yap\nTaksiyle de gidilir", null,
                     ("Oraya bak", Ui.Yellow, () => { ClosePanel(); FocusFar(); }), ("Kapat", Neutral, ClosePanel));
                 return;
             }
@@ -289,6 +294,7 @@ namespace BrickMuseum.Core
             ClosePanel();
             Sfx.Play("win");
             city.RefreshAll();
+            RefreshFields(true);
             UpdateCityHud();
             FocusFar();
             Toast($"{CityLayout.FarName} imara açıldı!", 2.5f);
@@ -523,6 +529,7 @@ namespace BrickMuseum.Core
             cityCam.Apply(cam);
             city.Tick(dt);
             FarmTick(dt);
+            FieldsTick(dt);
             city.people.Tick(dt, cityCam.target, cityCam.distance < 220f ? 130f : 0f);   // people are too small to see from high up
             if (cu.levelUp.activeSelf && Time.unscaledTime > levelUpUntil) cu.levelUp.SetActive(false);
             cu.resumeBtn.gameObject.SetActive(AnySite && !cu.panel.activeSelf && !cu.list.activeSelf);

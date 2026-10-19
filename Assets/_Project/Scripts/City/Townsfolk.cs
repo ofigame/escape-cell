@@ -185,6 +185,18 @@ namespace BrickMuseum.City
                     if (!walkers.ContainsKey(key)) walkers[key] = Spawn(key, role, beats[beat % beats.Count].slots[0]);
                     beat++;
                 }
+            // the village's farmers, once it is open: one for every two fields, one more for each farm building
+            if (District.IsOpen)
+            {
+                var village = CityLayout.Areas.Where(a => a.far && a.slots.Count > 0).ToList();
+                int farmers = 1 + Progress.Data.fields.Count(f => f.owned) / 2 + Progress.Data.barns.Count(b => b.owned);
+                for (int i = 0; i < farmers && village.Count > 0; i++)
+                {
+                    string key = $"farmer|{i}";
+                    want.Add(key);
+                    if (!walkers.ContainsKey(key)) walkers[key] = Spawn(key, "farmer", village[i % village.Count].slots[0]);
+                }
+            }
             var gone = new List<string>();
             foreach (var k in walkers.Keys) if (!want.Contains(k)) gone.Add(k);
             foreach (var k in gone) { Object.Destroy(walkers[k].person.root.gameObject); walkers.Remove(k); }

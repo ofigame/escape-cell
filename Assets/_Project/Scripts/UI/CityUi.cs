@@ -15,7 +15,7 @@ namespace BrickMuseum.UI
         public Image levelFill;
         public Button inventoryBtn, collectionBtn, walkBtn, characterBtn, buildBtn, langBtn, resumeBtn;
         public TextMeshProUGUI money;
-        public Button scoreBtn, bonusBtn, farBtn, farmBtn;
+        public Button scoreBtn, bonusBtn, farBtn, farmBtn, harvestBtn;
         // slot panel
         public GameObject panel;
         public TextMeshProUGUI panelTitle, panelInfo;
@@ -80,6 +80,9 @@ namespace BrickMuseum.UI
             farmBtn = Ui.Button(root, "Balıklar hazır", new Color(0.7f, 0.88f, 1f), Ui.Ink, 30, () => { });
             ((RectTransform)farmBtn.transform).Place(new Vector2(0, 1), new Vector2(330, 80), new Vector2(24, -340));
             farmBtn.gameObject.SetActive(false);
+            harvestBtn = Ui.Button(root, "Hasat hazır", new Color(0.8f, 0.95f, 0.6f), Ui.Ink, 30, () => { });
+            ((RectTransform)harvestBtn.transform).Place(new Vector2(0, 1), new Vector2(330, 80), new Vector2(24, -428));
+            harvestBtn.gameObject.SetActive(false);
             resumeBtn = Ui.Button(root, "İnşaya devam et", Ui.Yellow, Ui.Ink, 40, () => { });
             ((RectTransform)resumeBtn.transform).Place(new Vector2(0.5f, 0), new Vector2(560, 116), new Vector2(0, 190));
             resumeBtn.gameObject.SetActive(false);

@@ -66,6 +66,7 @@ namespace BrickMuseum.Core
             yield return ScoreTour(dir);
             yield return RoofTour(dir);
             yield return DistrictTour(dir);
+            yield return VillageTour(dir);
             yield return FarmTour(dir);
             yield return CoachTour(dir);
             yield return FixTour(dir);
@@ -217,6 +218,69 @@ namespace BrickMuseum.Core
             yield return Shot(dir, "57_tip_auto");
             DismissTip();
             touring = true;
+        }
+
+        /// <summary>The village: fields at every stage (seed, sprout, young, ripe), a harvest, the barn and the coop.</summary>
+        private IEnumerator VillageTour(string dir)
+        {
+            EnterCity(null);
+            Wallet.Earn(4000);
+            for (int i = 0; i < Data.Farming.FieldCount; i++) Data.Farming.BuyField(i);
+            var crops = Data.Farming.Crops;
+            float[] grown = { 0.06f, 0.3f, 0.7f, 1.2f, 1.2f, 1.2f, 0.9f, 0f };
+            string[] sown = { "bugday", "misir", "domates", "bugday", "aycicegi", "misir", "cilek", "" };
+            for (int i = 0; i < 8; i++)
+            {
+                if (sown[i] == "") continue;
+                Data.Farming.Sow(i, Data.Farming.CropOf(sown[i]));
+                var f = Data.Farming.Field(i);
+                long span = f.ripeAt - f.sownAt;
+                f.sownAt = System.DateTime.UtcNow.Ticks - (long)(span * grown[i]);
+                f.ripeAt = f.sownAt + span;
+            }
+            RefreshFields(true);
+            Debug.Log($"[Tour] village stages: {string.Join(",", Enumerable.Range(0, 8).Select(i => Data.Farming.Stage(Data.Farming.Field(i))))}");
+            cityCam.Focus(city.WorldAt(City.CityLayout.FarCenter, 0f), 230f);
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "60a_village");
+            cityCam.Focus(fieldViews[1].root.position + new Vector3(14f, 0, 0), 60f);
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "60b_fields_stages");
+            cityCam.Focus(fieldViews[4].root.position, 55f);
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "60c_fields_ripe");
+            OpenField(3);
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot(dir, "60d_field_ripe_panel");
+            int before = Wallet.Money;
+            HarvestField(3);
+            Debug.Log($"[Tour] harvest: {before} -> {Wallet.Money}, ripe left {Data.Farming.RipeCount}, harvest button {cu.harvestBtn.gameObject.activeSelf}");
+            ClosePanel();
+            ChooseCrop(7);
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot(dir, "60e_choose_crop");
+            cu.list.SetActive(false);
+            foreach (var b in Data.Farming.Barns) { Data.Farming.BuyBarn(b.id); Data.Farming.HurryBarn(b.id); }
+            RefreshFields(true);
+            city.people.Sync();
+            var yard = barnViews[0].root.position;
+            cityCam.Focus(yard + new Vector3(-6f, 0, 4f), 60f);
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "60f_barn_coop");
+            OpenBarn("ahir");
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot(dir, "60g_barn_panel");
+            CollectBarn("ahir");
+            ClosePanel();
+            EnterWalk();
+            walkPos = city.WorldAt(new Vector2(City.CityLayout.FarXOf(1), City.CityLayout.CountryZ), 0f);
+            walkPos.y = GroundAt(walkPos);
+            facingYaw = camYaw = 180f; camPitch = 16f;
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "60h_village_walk");
+            ExitWalk();
+            yield return Notify.Init();
+            Notify.Plan();
         }
 
         /// <summary>The fish farm: for sale, bought, growing, hurried by the ad, ready, collected; then the phone's reminders.</summary>

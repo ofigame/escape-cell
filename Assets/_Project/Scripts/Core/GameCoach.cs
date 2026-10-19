@@ -64,9 +64,9 @@ namespace BrickMuseum.Core
                     when = () => FishFarm.Unlocked && !FishFarm.Owned, shown = FocusFarm },
                 CityTip("farmReady", "Balıklar hazır", "Butona dokun, balıkları topla ve Balık Hali'nde sat. Sonraki balıklar kendiliğinden büyür.",
                     () => FishFarm.Ready && cu.farmBtn.gameObject.activeSelf, () => R(cu.farmBtn)),
-                CityTip("far", "Uzak semt: Doğu Yakası", $"Şehrin doğusunda imara kapalı bir semt var. Okul, hastane ve polis karakolu yapınca {District.Price} liraya imara açabilirsin.",
+                CityTip("far", "Uzak köy: Doğu Köyü", $"Şehrin doğusunda imara kapalı bir köy var. Okul, hastane ve polis karakolu yapınca {District.Price} liraya imara açabilirsin.",
                     () => Progress.Level >= 7 && !District.IsOpen, () => R(cu.farBtn)),
-                CityTip("farReady", "Uzak semt açılabilir", $"Okul, hastane ve polis karakolu hazır! {District.Price} lira ile Doğu Yakası'nı imara aç; orada her türden bina yeniden yapılabilir.",
+                CityTip("farReady", "Köy açılabilir", $"Okul, hastane ve polis karakolu hazır! {District.Price} lira ile Doğu Köyü'nü imara aç; orada tarla eker, ahır ve kümes kurarsın.",
                     () => District.Ready && !District.IsOpen, () => R(cu.farBtn)),
 
                 CityTip("sites", "Yarım bırakabilirsin", "Büyük yapılar uzun sürer: istediğin an şehre dön, bina yapıldığı kadarıyla arsasında durur. İnşaya devam et ile kaldığın yerden sürdür.",
@@ -76,6 +76,13 @@ namespace BrickMuseum.Core
 
                 CityTip("sport", "Spor sahaları", "Ormanın önündeki yeni sırada futbol, basketbol, tenis ve voleybol sahaları yapabilirsin. Her saha şehir puanına 10 ekler ve sporcular gelir.",
                     () => Progress.Level >= 4, null),
+
+                CityTip("village", "Köyde çiftçilik", "Tarlana dokun ve tohum ek. Ekinler tohumdan filize, fideden olgunluğa büyür; olgunlaşınca hasat et ve lira kazan. Hasat zamanı telefonuna bildirim gelir.",
+                    () => District.IsOpen, () => R(cu.farBtn)),
+                CityTip("barnTip", "Ahır ve kümes", "Çiftlikteki ahır süt, kümes yumurta verir. Satın al, ürünler hazır olunca topla.",
+                    () => District.IsOpen && Progress.Data.fields.Any(f => f.crop != ""), null),
+                CityTip("harvest", "Hasat zamanı", "Bu düğme hazır ürünleri gösterir: dokun, tarlaya git ve hasat et.",
+                    () => cu.harvestBtn.gameObject.activeSelf, () => R(cu.harvestBtn)),
 
                 // ----- the workshop -----
                 new Tip { key = "bag", mode = Mode.Workshop, title = "Nasıl yapılır?", text = "Resimdeki modele bak. Çantayı aç, parçayı seç ve parlayan yere koy. Yanlış parça bir hata hakkı götürür.",

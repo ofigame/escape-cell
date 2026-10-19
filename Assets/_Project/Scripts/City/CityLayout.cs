@@ -28,6 +28,8 @@ namespace BrickMuseum.City
         public bool shore;        // on the lake: its south side is the waterfront promenade
         public bool creek;        // not a block: the creek valley (its slots stand over the water)
         public bool far;          // in the far district (closed to building until it is opened)
+        public bool fields;       // the village's field blocks (four fields, no plots)
+        public bool farmyard;     // the village's farmyard (the barn and the coop)
         public readonly List<Vector2[]> paths = new List<Vector2[]>();   // winding footpaths (parks), plan points
         public readonly List<Slot> slots = new List<Slot>();
     }
@@ -95,7 +97,7 @@ namespace BrickMuseum.City
         public static bool OnHomeLot(Vector2 local, float margin = 0f) => LotAt(local, margin) >= 0;
         // ---------- the far district (Doğu Yakası): 2×2 blocks east of the town, at the end of a country road ----------
 
-        public const string FarName = "Doğu Yakası";
+        public const string FarName = "Doğu Köyü";
         public const float CountryRoad = 12f, FarGap = 150f;
         public const int FarCols = 2;
         public static float FarMinX => MaxX + FarGap;
@@ -217,10 +219,10 @@ namespace BrickMuseum.City
                 Park(2, 4, 6, "Kuzey Parkı"),
                 SportsGround("Stadyum Alanı", 3, 4, 7),
                 // the far district: houses of any style, towers and public buildings (copies may be built there)
-                Residential("Doğu Mahallesi", "", 0, 1, 1, new Color(0.6f, 0.8f, 0.52f), true),
-                Plots("Doğu Merkezi", "big", 1, 1, 1, new Color(0.74f, 0.76f, 0.8f), true),
-                Plots("Doğu Kamu Binaları", "civic", 0, 2, 1, new Color(0.74f, 0.8f, 0.7f), true),
-                Residential("Doğu Bahçeleri", "", 1, 2, 1, new Color(0.58f, 0.78f, 0.56f), true),
+                Residential("Köy Evleri", "", 0, 1, 1, new Color(0.6f, 0.8f, 0.52f), true),
+                Farm("Tarlalar", 1, 1, false),
+                Farm("Çiftlik", 0, 2, true),
+                Farm("Tarlalar II", 1, 2, false),
             };
         }
 
@@ -368,6 +370,16 @@ namespace BrickMuseum.City
             Add(a, "sport", 14, 14, 26, 26, 0, level);
             Add(a, "sport", -14, -14, 26, 26, 180, level + 1);
             Add(a, "sport", 14, -14, 26, 26, 180, level + 1);
+            return a;
+        }
+
+        /// <summary>A block of the village: four fields, or the farmyard with the barn and the coop (no plots).</summary>
+        private static Area Farm(string name, int col, int row, bool yard)
+        {
+            var a = NewArea(name, "", col, row, 1, yard ? new Color(0.6f, 0.76f, 0.44f) : new Color(0.62f, 0.72f, 0.42f), true);
+            a.fields = !yard;
+            a.farmyard = yard;
+            a.slots.RemoveAll(s => s.kind == "vehicle");   // (a tractor lane would be nice; no parking here)
             return a;
         }
 

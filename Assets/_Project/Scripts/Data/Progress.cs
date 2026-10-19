@@ -130,6 +130,8 @@ namespace BrickMuseum.Data
         public bool farOpen;                          // the far district has been opened for building
         public bool farmOwned;                        // the fish farm has been bought
         public List<string> tips = new List<string>();   // tutorial tips already seen
+        public List<FieldSave> fields = new List<FieldSave>();   // the village's fields
+        public List<BarnSave> barns = new List<BarnSave>();      // the barn and the coop
         public long farmReady;                        // when its batch is ready (UTC ticks)    // lots 1.. along the west road (lot 0 is build/home)
         public int activeCar;
         public bool stockInit;               // the starter kit (and materials for models built before) has been given

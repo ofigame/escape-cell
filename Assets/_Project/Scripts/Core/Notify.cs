@@ -24,6 +24,8 @@ namespace BrickMuseum.Core
         public const string FishReady = "Balıklar toplanmayı bekliyor!";
         public const string GrowCity = "Şehrini geliştir, yenilikleri aç!";
         public const string NoTaxi = "Halk huzursuz, taksi bulamıyor.";
+        public const string CropsReady = "Ekinler hasada hazır!";
+        public const string BarnReady = "Çiftlikte ürünler toplanmayı bekliyor!";
 
         /// <summary>Sets the channel up and asks for permission (once the player has built something).</summary>
         public static IEnumerator Init()
@@ -65,6 +67,10 @@ namespace BrickMuseum.Core
                 Schedule(1, FishReady, left < TimeSpan.FromMinutes(5) ? TimeSpan.FromMinutes(30) : left);
             }
             Schedule(2, GrowCity, TimeSpan.FromHours(24));
+            var crop = Farming.NextCrop();
+            if (crop != null) Schedule(4, CropsReady, crop.Value < TimeSpan.FromMinutes(2) ? TimeSpan.FromMinutes(20) : crop.Value);
+            var barn = Farming.NextBarn();
+            if (barn != null) Schedule(5, BarnReady, barn.Value < TimeSpan.FromMinutes(2) ? TimeSpan.FromMinutes(45) : barn.Value);
             if (Progress.Data.cars.Any(FreeBuild.Garage.IsTaxi)) Schedule(3, NoTaxi, TimeSpan.FromHours(8));
         }
 
