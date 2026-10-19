@@ -45,6 +45,7 @@ namespace BrickMuseum.UI
 
             jumpBtn = RoundButton(root, "ZIPLA", new Vector2(-70, 80), 230);
             runBtn = RoundButton(root, "KOŞ", new Vector2(-330, 70), 180);
+            runBtn.gameObject.SetActive(false);              // always at running pace: no run toggle
             carBtn = RoundButton(root, "BİN", new Vector2(-95, 340), 180);
             carBtn.GetComponent<Image>().color = Ui.Yellow;
             carBtn.gameObject.SetActive(false);
@@ -73,14 +74,15 @@ namespace BrickMuseum.UI
             img.sprite = Icons.Circle;
             img.rectTransform.Place(new Vector2(1, 0), new Vector2(size, size), offset);
             var b = img.gameObject.AddComponent<Button>();
-            var t = Ui.Text(img.transform, label, 40, Ui.Ink, false, true);
+            var t = Ui.Text(img.transform, label, 34, Ui.Ink, false, true);
             t.rectTransform.Fill(20);
+            ButtonIcon.Add(img.gameObject, t, Icons.ForLabel(label), size * 0.18f);
             return b;
         }
 
-        public void SetHomeLabel(string label) => homeBtn.GetComponentInChildren<TextMeshProUGUI>().text = label;
+        public void SetHomeLabel(string label) => homeBtn.SetLabel(label);
 
-        public void SetCarLabel(string label) => carBtn.GetComponentInChildren<TextMeshProUGUI>().text = label;
+        public void SetCarLabel(string label) => carBtn.SetLabel(label);
 
         public void SetRun(bool on) => runBtn.GetComponent<Image>().color = on ? Ui.Yellow : new Color(1, 1, 1, 0.8f);
     }

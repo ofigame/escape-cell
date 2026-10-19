@@ -127,10 +127,17 @@ namespace BrickMuseum.UI
             b.onClick.AddListener(() => { Core.Sfx.Play("pick", 0.6f); onClick(); });
             var t = Text(img.transform, label, fontSize, fg, true);
             t.rectTransform.Fill(12f);
+            ButtonIcon.Add(img.gameObject, t, Icons.ForLabel(label));
             return b;
         }
 
-        public static void SetLabel(this Button b, string text) => b.GetComponentInChildren<TextMeshProUGUI>().text = text;
+        /// <summary>New label, and the icon that goes with it.</summary>
+        public static void SetLabel(this Button b, string text)
+        {
+            b.GetComponentInChildren<TextMeshProUGUI>().text = text;
+            var bi = b.GetComponent<ButtonIcon>();
+            if (bi != null) bi.Set(Icons.ForLabel(text));
+        }
 
         /// <summary>Full-screen dim layer with a centred white card; returns the card.</summary>
         public static RectTransform Modal(Transform parent, string name, float width, float height, out GameObject root)

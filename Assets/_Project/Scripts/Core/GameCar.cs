@@ -154,7 +154,7 @@ namespace BrickMuseum.Core
             person.root.SetPositionAndRotation(walkPos, Quaternion.Euler(0, facingYaw, 0));
             tu.SetCarLabel("BİN");
             tu.jumpBtn.gameObject.SetActive(true);
-            tu.runBtn.gameObject.SetActive(true);
+            // (no run button: walking is always at running pace)
             tu.help.text = "Sol başparmak: yürü   ·   Sağ başparmak: etrafına bak";
             walkCamDist = 6.5f;
         }

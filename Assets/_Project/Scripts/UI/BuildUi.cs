@@ -52,9 +52,7 @@ namespace BrickMuseum.UI
             modeBtn = Tool(root, "Koy", 0);
             turnBtn = Tool(root, "Döndür", 1);
             colourBtn = Tool(root, "Renk", 2);
-            colourSwatch = Ui.Panel(colourBtn.transform, "Swatch", Color.red, false);
-            colourSwatch.rectTransform.Place(new Vector2(0.5f, 1), new Vector2(60, 34), new Vector2(0, -10));
-            colourBtn.GetComponentInChildren<TextMeshProUGUI>().rectTransform.offsetMax = new Vector2(-12, -40);
+            colourSwatch = colourBtn.GetComponent<ButtonIcon>().icon;   // the palette icon shows the chosen colour
             storeyBtn = Tool(root, "Tüm katlar", 3);
 
             var msg = Ui.Panel(root, "Message", new Color(0.12f, 0.13f, 0.18f, 0.85f), false);

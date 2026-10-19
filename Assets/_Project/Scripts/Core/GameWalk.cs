@@ -25,7 +25,8 @@ namespace BrickMuseum.Core
         private Vector2 stickOrigin, stickVec;
         private List<CityMap.Obstacle> obstacles = new List<CityMap.Obstacle>();
         private Vector2 testMove;
-        private const float WalkSpeed = 3.6f, RunSpeed = 7.5f, Radius = 0.6f, JumpSpeed = 8.5f, Gravity = 24f;
+        // one pace only: the walker always moves at running speed (user wish: no separate walk mode)
+        private const float WalkSpeed = 7.5f, RunSpeed = 7.5f, Radius = 0.6f, JumpSpeed = 8.5f, Gravity = 24f;
 
         private void WireWalk()
         {

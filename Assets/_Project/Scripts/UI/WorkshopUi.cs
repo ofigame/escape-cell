@@ -106,8 +106,9 @@ namespace BrickMuseum.UI
             bb.sprite = Icons.Circle; bb.type = Image.Type.Simple;
             bb.rectTransform.Place(new Vector2(0.5f, 0), new Vector2(230, 230), new Vector2(0, 50));
             bagBtn = bb.gameObject.AddComponent<Button>();
-            var bl = Ui.Text(bb.transform, "ÇANTA", 46, Color.white, false, true);
+            var bl = Ui.Text(bb.transform, "ÇANTA", 40, Color.white, false, true);
             bl.rectTransform.Fill(20);
+            ButtonIcon.Add(bb.gameObject, bl, Icons.Bag, 40f);
             var badge = Ui.Panel(bb.transform, "Badge", new Color(0.9f, 0.22f, 0.21f), false);
             badge.rectTransform.Place(new Vector2(1, 1), new Vector2(90, 64), new Vector2(10, 4));
             bagCount = Ui.Text(badge.transform, "0", 36, Color.white, true);
