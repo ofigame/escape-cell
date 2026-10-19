@@ -63,7 +63,44 @@ namespace BrickMuseum.Core
             yield return CarBuildTour(dir);
             yield return FishTour(dir);
             yield return LotTour(dir);
+            yield return GardenTour(dir);
             yield return LanguageTour(dir);
+        }
+
+        /// <summary>A city house's garden: a picket fence with a gate, a pool, a tree, flowers, a stone path, a lamp.</summary>
+        private IEnumerator GardenTour(string dir)
+        {
+            var gs = City.CityLayout.Slots.First(x => x.kind == "house" && Data.Progress.At(x.id) != null);
+            cityCam.Focus(city.WorldOf(gs), 60f);
+            OpenSlot(gs);
+            yield return new WaitForSeconds(0.4f);
+            yield return Shot(dir, "52a_garden_button");
+            foreach (var k in Stock.Kinds) if (k.group == "Bahçe") Stock.Add(k.key, 60);
+            EnterGarden(gs);
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot(dir, "52b_garden_empty");
+            var g = site;
+            int n = Gardens.Size(gs);
+            for (int x = 0; x + 1 < n; x += 2)
+            {
+                g.PlaceAt("picket:2x1x3", "white", x, 0, 0, 0);
+                if (Mathf.Abs(x + 1 - n / 2f) > 2f) g.PlaceAt("picket:2x1x3", "white", x, 0, n - 1, 0);    // a gate in the front
+            }
+            for (int z = 1; z + 1 < n - 1; z += 2) { g.PlaceAt("hedge:2x1x3", "green", 0, 0, z, 1); g.PlaceAt("hedge:2x1x3", "green", n - 1, 0, z, 1); }
+            g.PlaceAt("pool:4x4x1", "white", n - 6, 0, 1, 0);
+            g.PlaceAt("gtree:2x2x8", "green", 1, 0, 1, 0);
+            g.PlaceAt("gtree:2x2x8", "rose", 1, 0, n - 4, 0);
+            for (int x = n - 6; x < n - 2; x++) g.PlaceAt("flowers:1x1x1", x % 2 == 0 ? "yellow" : "rose", x, 0, n - 2, 0);
+            for (int z = n - 4; z < n; z += 2) g.PlaceAt("stones:2x2x1", "gray", n / 2 - 1, 0, z, 0);
+            g.PlaceAt("glamp:1x1x6", "dgray", n / 2 + 2, 0, n - 3, 0);
+            RefreshBuildUi();
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot(dir, "52c_garden_built");
+            Debug.Log($"[Tour] garden: {g.pieces.Count} pieces on a {n}x{n} plot");
+            ExitBuild();
+            cityCam.Focus(city.WorldOf(gs), 55f);
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "52d_garden_in_city");
         }
 
         /// <summary>Buying the lot north of the house, building a second house on it, walking into it.</summary>

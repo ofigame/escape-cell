@@ -57,6 +57,13 @@ namespace BrickMuseum.FreeBuild
             K("Süs", "dome", 2, 2, 2, "Kubbe", 25, 2);
             K("Araba", "wheel", 2, 1, 3, "Tekerlek", 60, 4);
             K("Araba", "taxisign", 2, 1, 3, "Taksi tabelası", 100, 1);
+            K("Bahçe", "picket", 2, 1, 3, "Çit", 15, 2);
+            K("Bahçe", "hedge", 2, 1, 3, "Çalı", 15, 2);
+            K("Bahçe", "pool", 4, 4, 1, "Havuz", 120, 1);
+            K("Bahçe", "gtree", 2, 2, 8, "Süs ağacı", 40, 1);
+            K("Bahçe", "flowers", 1, 1, 1, "Çiçek", 10, 4);
+            K("Bahçe", "stones", 2, 2, 1, "Taş yol", 10, 4);
+            K("Bahçe", "glamp", 1, 1, 6, "Bahçe lambası", 30, 1);
             return l;
         }
 

@@ -20,7 +20,7 @@ namespace BrickMuseum.FreeBuild
         public const int MaxY = 48, Storey = 10;
         private const float P = Piece.Plate;
         /// <summary>Where the editing lots are, far from the city (house lot, car chassis).</summary>
-        public static readonly Vector3 HouseOrigin = new Vector3(-3000f, 1500f, 0f), CarOrigin = new Vector3(-3000f, 1500f, 400f);
+        public static readonly Vector3 HouseOrigin = new Vector3(-3000f, 1500f, 0f), CarOrigin = new Vector3(-3000f, 1500f, 400f), GardenOrigin = new Vector3(-3000f, 1500f, 800f);
 
         public sealed class Placed
         {
@@ -146,6 +146,14 @@ namespace BrickMuseum.FreeBuild
         }
 
         public bool IsFree(int x, int y, int z) => Inside(x, y, z) && !cells.ContainsKey(Cell(x, y, z));
+
+        private static readonly Placed Blocker = new Placed();
+
+        /// <summary>Keeps cells free of pieces (a garden's house stands there).</summary>
+        public void Block(int x0, int z0, int w, int d, int h)
+        {
+            for (int x = x0; x < x0 + w; x++) for (int z = z0; z < z0 + d; z++) for (int y = 0; y < h; y++) if (Inside(x, y, z)) cells[Cell(x, y, z)] = Blocker;
+        }
 
         // ================= editing =================
 
@@ -289,7 +297,7 @@ namespace BrickMuseum.FreeBuild
                         // a wall cell: something stands in the top course of the storey below (not the stairs or a railing)
                         bool wall = false;
                         for (int y = floorY - 3; y < floorY && !wall; y++)
-                            if (y >= 0 && cells.TryGetValue(Cell(x, y, z), out var pc) && pc.kind.t != "stairs" && pc.kind.t != "fence") wall = true;
+                            if (y >= 0 && cells.TryGetValue(Cell(x, y, z), out var pc) && pc.kind != null && pc.kind.t != "stairs" && pc.kind.t != "fence") wall = true;
                         if (!wall) continue;
                         walls.Add((x, z));
                         if (cells.ContainsKey(Cell(x, floorY, z))) covered++;

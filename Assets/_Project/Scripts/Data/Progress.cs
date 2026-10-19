@@ -83,6 +83,14 @@ namespace BrickMuseum.Data
         public List<HomeItem> items = new List<HomeItem>();
     }
 
+    /// <summary>A city house's garden: the pieces laid round it on its plot.</summary>
+    [Serializable]
+    public class GardenSave
+    {
+        public string slot;
+        public List<BuildPieceData> pieces = new List<BuildPieceData>();
+    }
+
     [Serializable]
     public class SaveFile
     {
@@ -98,7 +106,8 @@ namespace BrickMuseum.Data
         public int money;                     // lira: earned with the taxi (and fishing), spent on special materials, furniture, lots
         public List<CarSave> cars = new List<CarSave>();   // the player's own cars (the garage)
         public List<FishItem> fish = new List<FishItem>();  // the cooler
-        public List<LotSave> lots = new List<LotSave>();    // lots 1.. along the west road (lot 0 is build/home)
+        public List<LotSave> lots = new List<LotSave>();
+        public List<GardenSave> gardens = new List<GardenSave>();    // lots 1.. along the west road (lot 0 is build/home)
         public int activeCar;
         public bool stockInit;               // the starter kit (and materials for models built before) has been given
         public List<StockItem> stock = new List<StockItem>();

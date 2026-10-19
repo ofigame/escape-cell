@@ -310,6 +310,7 @@ namespace BrickMuseum.City
             v.label = FlatText(v.go.transform, new Vector3(0, 0.26f, 0), "", Mathf.Min(s.w, s.d, 16f) * 0.2f, Mathf.Min(s.WorldSize.x, 30f) - 1.5f);
             v.hit = v.go.AddComponent<BoxCollider>();
             views[s] = v;
+            if (s.kind == "house") RefreshGarden(s);
         }
 
         /// <summary>Highest and lowest ground under a slot (its middle, corners and edge midpoints).</summary>
@@ -412,6 +413,21 @@ namespace BrickMuseum.City
             }
             foreach (var v in views.Values) Refresh(v, level);
             people.Sync();
+        }
+
+        private readonly Dictionary<Slot, FreeBuild.BuildSite> gardens = new Dictionary<Slot, FreeBuild.BuildSite>();
+
+        /// <summary>(Re)builds a house plot's garden on its pad from the saved pieces.</summary>
+        public void RefreshGarden(Slot s)
+        {
+            if (gardens.TryGetValue(s, out var old)) { Object.Destroy(old.root.gameObject); gardens.Remove(s); }
+            var pieces = FreeBuild.Gardens.Pieces(s.id, false);
+            if (pieces == null || pieces.Count == 0 || !views.TryGetValue(s, out var v)) return;
+            int n = FreeBuild.Gardens.Size(s);
+            var g = new FreeBuild.BuildSite(v.go.transform, pieces, n, n, Vector3.zero, 0f, 1f, false, null, false);
+            g.root.localPosition = new Vector3(-n / 2f, 0.15f, -n / 2f);
+            g.root.localRotation = Quaternion.identity;
+            gardens[s] = g;
         }
 
         /// <summary>The model standing on a slot (null when empty).</summary>

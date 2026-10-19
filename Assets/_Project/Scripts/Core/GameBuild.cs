@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using BrickMuseum.Build;
 using BrickMuseum.City;
 using BrickMuseum.Data;
 using BrickMuseum.FreeBuild;
@@ -23,6 +24,8 @@ namespace BrickMuseum.Core
         private BuildSite site, houseEdit, carEdit;
         private bool buildingCar;
         private int buildLot, houseEditLot = -1;
+        private Slot gardenSlot;                  // a city house's garden being built (else the player's own house or car)
+        private BuildSite gardenEdit;
         private BuildKind buildKind;
         private string buildColour = "red", buildTab = "Tuğla";
         private int buildRot;
@@ -75,6 +78,7 @@ namespace BrickMuseum.Core
             site = forCar
                 ? carEdit ??= new BuildSite(transform, Garage.Active.pieces, ChassisX, ChassisZ, BuildSite.CornerFor(BuildSite.CarOrigin, ChassisX, ChassisZ, 0f), 0f, 1f, true, "gray")
                 : HouseEditFor(buildLot, lot);
+            gardenSlot = null;
             bu.title.text = forCar ? Garage.Active.name : Lots.Name(buildLot);
             bu.nextCarBtn.SetLabel(forCar ? "Sonraki araba" : "Sonraki ev");
             bu.nextCarBtn.gameObject.SetActive(forCar ? Garage.Cars.Count > 1 : Lots.OwnedCount > 1);
@@ -99,10 +103,51 @@ namespace BrickMuseum.Core
             if (site.dirty) { Progress.Save(); site.dirty = false; }
             site.HideGhost();
             bu.canvas.gameObject.SetActive(false);
+            if (gardenSlot != null)
+            {
+                // back to the city, the new garden round the house
+                var s = gardenSlot;
+                gardenSlot = null;
+                city.RefreshGarden(s);
+                EnterCity(s);
+                bu.switchBtn.gameObject.SetActive(true);
+                return;
+            }
             BuildHouse();
             EnterCity(null);
             var lot = CityLayout.LotCenter(buildLot);
             cityCam.Focus(city.WorldAt(lot, 0f), 90f);
+        }
+
+        /// <summary>
+        /// A city house's garden in the editor: its plot as the baseplate, the house standing fixed in the middle (its cells
+        /// can't take pieces), the garden tab open.
+        /// </summary>
+        private void EnterGarden(Slot s)
+        {
+            var m = ModelCatalog.Find(Progress.At(s.id));
+            if (m == null) return;
+            EnterBuild(false);
+            gardenSlot = s;
+            if (gardenEdit != null) Destroy(gardenEdit.root.gameObject);
+            int n = Gardens.Size(s);
+            gardenEdit = new BuildSite(transform, Gardens.Pieces(s.id, true), n, n, BuildSite.CornerFor(BuildSite.GardenOrigin, n, n, 0f), 0f, 1f, true, "green");
+            float k = CityMap.FitScale(m, s);
+            var model = PieceFactory.BuildModel(m).transform;
+            model.SetParent(gardenEdit.root, false);
+            model.localPosition = new Vector3(n / 2f, 0f, n / 2f);
+            model.localScale = Vector3.one * k;
+            int fw = Mathf.CeilToInt(m.sx * k), fd = Mathf.CeilToInt(m.sz * k);
+            gardenEdit.Block((n - fw) / 2, (n - fd) / 2, fw, fd, Mathf.CeilToInt(m.height * k / Piece.Plate) + 1);
+            site = gardenEdit;
+            bu.title.text = "Bahçe";
+            bu.nextCarBtn.gameObject.SetActive(false);
+            bu.newCarBtn.gameObject.SetActive(false);
+            bu.switchBtn.gameObject.SetActive(false);
+            buildCam.target = BuildSite.GardenOrigin + new Vector3(0, 1.5f, 0);
+            buildCam.distance = 30f; buildCam.pitch = 45f;
+            ShowBuildTab("Bahçe");
+            RefreshBuildUi();
         }
 
         /// <summary>The editing lot for a house lot (only one at a time: another lot's is put away first).</summary>

@@ -155,6 +155,16 @@ namespace BrickMuseum.Core
                 bool mine = vehicle && Progress.Data.myCar == id && !HasBuiltCar;
                 string about = $"{CityLayout.SlotName(s)} · {where}\n{stars} yıldız · {m.pieces.Count} parça"
                     + (mine ? "\nSenin araban · Şehri gez'de binebilirsin" : "");
+                if (s.kind == "house")
+                {
+                    // from level 3 a city house's garden can be built
+                    bool open = Progress.Level >= FreeBuild.Gardens.UnlockLevel;
+                    cu.ShowPanel(m.name, about + (open ? "" : $"\nBahçe seviye {FreeBuild.Gardens.UnlockLevel}'te açılır"), Previews.Model(m),
+                        open ? ("Bahçeyi geliştir", new Color(0.7f, 0.92f, 0.6f), () => { ClosePanel(); EnterGarden(s); }) : ("Envantere al", new Color(0.8f, 0.9f, 1f), () => TakeAway(s)),
+                        open ? ("Envantere al", new Color(0.8f, 0.9f, 1f), () => TakeAway(s)) : ("Kapat", Neutral, ClosePanel),
+                        ("Kapat", Neutral, ClosePanel));
+                    return;
+                }
                 if (vehicle && !mine && !HasBuiltCar)
                     cu.ShowPanel(m.name, about, Previews.Model(m),
                         ("Arabam olsun", Ui.Yellow, () =>
