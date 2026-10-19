@@ -13,6 +13,7 @@ namespace BrickMuseum.City
         public float yaw;         // where the model's front looks: 0 = +z (south), 90 = +x, 180 = -z, 270 = -x
         public int level;         // player level that opens it
         public bool onRoad;       // parking spaces lie on the road, everything else on the raised blocks
+        public string only;       // a slot for one model only (the bridge) or one decor (benches)
 
         public Vector2 WorldSize => Mathf.Abs(Mathf.Repeat(yaw, 180f) - 90f) < 1f ? new Vector2(d, w) : new Vector2(w, d);
     }
@@ -25,6 +26,8 @@ namespace BrickMuseum.City
         public int level;
         public Color ground;
         public bool shore;        // on the lake: its south side is the waterfront promenade
+        public bool creek;        // not a block: the creek valley (its slots stand over the water)
+        public readonly List<Vector2[]> paths = new List<Vector2[]>();   // winding footpaths (parks), plan points
         public readonly List<Slot> slots = new List<Slot>();
     }
 
@@ -37,8 +40,31 @@ namespace BrickMuseum.City
     {
         public const float Block = 64f, Road = 18f, Pitch = Block + Road, Pavement = 4f, ParkingLane = 4.5f, Quay = 3f;
         public const int Cols = 4, Rows = 4;
-        public static float MinX => -1.5f * Pitch - Block / 2f - Road;
-        public static float MaxX => -MinX;
+        /// <summary>The creek valley between the 2nd and 3rd columns, instead of a street.</summary>
+        public const float Creek = 44f, CreekWater = 10.5f;
+        private static readonly float[] Gaps = { Road, Road, Creek, Road, Road };    // west edge, between columns, east edge
+        private static float Width { get { float w = Cols * Block; foreach (var g in Gaps) w += g; return w; } }
+        public static float MinX => -Width / 2f;
+        public static float MaxX => Width / 2f;
+        public static float CreekX => XOf(1) + Block / 2f + Creek / 2f;
+
+        /// <summary>Centres of the north-south streets (the creek is not one).</summary>
+        public static IEnumerable<float> StreetXs()
+        {
+            yield return MinX + Road / 2f;
+            for (int c = 0; c < Cols - 1; c++) if (Gaps[c + 1] == Road) yield return XOf(c) + Block / 2f + Road / 2f;
+            yield return MaxX - Road / 2f;
+        }
+
+        /// <summary>Centres of the east-west streets (north of every row).</summary>
+        public static IEnumerable<float> StreetZs() { for (int r = 0; r < Rows; r++) yield return ZOf(r) - Block / 2f - Road / 2f; }
+
+        /// <summary>The middle crossing of the creek, where the big bridge goes.</summary>
+        public static float BridgeZ => ZOf(1) - Block / 2f - Road / 2f;
+
+        public static bool InCreek(Vector2 p) => Mathf.Abs(p.x - CreekX) < Creek / 2f && p.y < ZOf(0) + Block / 2f && p.y > MinZ;
+
+        public static bool OnStreetZ(float z) { foreach (var sz in StreetZs()) if (Mathf.Abs(z - sz) <= Road / 2f) return true; return false; }
         public static float MinZ => ZOf(Rows - 1) - Block / 2f - Road;
         /// <summary>South edge of the quay: the lake starts here.</summary>
         public static float MaxZ => ZOf(0) + Block / 2f + Quay;
@@ -48,7 +74,12 @@ namespace BrickMuseum.City
         public static Vector2 HomeLotCenter => new Vector2(MinX - HomeLot / 2f, ZOf(1));
         public static bool OnHomeLot(Vector2 local, float margin = 0f) =>
             Mathf.Abs(local.x - HomeLotCenter.x) <= HomeLot / 2f + margin && Mathf.Abs(local.y - HomeLotCenter.y) <= HomeLot / 2f + margin;
-        public static float XOf(int col) => (col - 1.5f) * Pitch;
+        public static float XOf(int col)
+        {
+            float x = MinX + Gaps[0] + Block / 2f;
+            for (int c = 0; c < col; c++) x += Block + Gaps[c + 1];
+            return x;
+        }
         public static float ZOf(int row) => (1.5f - row) * Pitch;
         private static List<Area> areas;
 
@@ -65,6 +96,8 @@ namespace BrickMuseum.City
                 case "animal": return "Hayvan alanı";
                 case "statue": return "Heykel yeri";
                 case "landmark": return "Eser alanı";
+                case "bridge": return "Köprü yeri";
+                case "bench": return "Bank yeri";
                 case "decor": return "Dekor yeri";
                 default: return kind;
             }
@@ -84,10 +117,16 @@ namespace BrickMuseum.City
                 case "animal": return "HAYVAN";
                 case "statue": return "HEYKEL";
                 case "landmark": return "ESER";
+                case "bridge": return "KÖPRÜ";
+                case "bench": return "BANK";
                 case "decor": return "DEKOR";
                 default: return kind;
             }
         }
+
+        /// <summary>A slot's name and short label: by its kind, or by the one thing it takes (bridge, bench).</summary>
+        public static string SlotName(Slot s) => KindName(s.only == "bridge" ? "bridge" : s.only == "bank" ? "bench" : s.kind);
+        public static string SlotShort(Slot s) => KindShort(s.only == "bridge" ? "bridge" : s.only == "bank" ? "bench" : s.kind);
 
         public static string StyleName(string style)
         {
@@ -118,7 +157,8 @@ namespace BrickMuseum.City
             {
                 Residential("Türk Mahallesi", "tr", 1, 1, 1, green),
                 ShorePark(1, 0, 2),
-                Square(2, 1, 2),
+                Park(2, 1, 2),
+                CreekValley(5),
                 Yalis("Yalı Boyu", 2, 0, 3),
                 Residential("İngiliz Mahallesi", "en", 0, 1, 3, new Color(0.56f, 0.74f, 0.52f)),
                 Plots("Merkez", "big", 1, 2, 4, new Color(0.78f, 0.78f, 0.76f)),
@@ -201,13 +241,52 @@ namespace BrickMuseum.City
             return a;
         }
 
-        /// <summary>The square: a statue in the middle, decor round it, trees.</summary>
-        private static Area Square(int col, int row, int level)
+        /// <summary>
+        /// The city park by the creek: winding footpaths round a statue, benches along them, trees, a fountain spot.
+        /// </summary>
+        private static Area Park(int col, int row, int level)
         {
-            var a = NewArea("Meydan", "", col, row, level, new Color(0.84f, 0.8f, 0.72f));
-            Add(a, "statue", 0, 0, 16, 16, 0, 4);
-            foreach (var (x, z, l) in new[] { (-20f, 20f, 2), (20f, 20f, 2), (-20f, -20f, 3), (20f, -20f, 3) }) Add(a, "decor", x, z, 8, 8, 0, l);
-            foreach (var (x, z) in new[] { (0f, 22f), (0f, -22f), (-22f, 0f), (22f, 0f) }) Add(a, "tree", x, z, 6, 6, 0, level);
+            var a = NewArea("Şehir Parkı", "", col, row, level, new Color(0.5f, 0.76f, 0.44f));
+            // the paths: a wobbly ring round the middle and four wandering branches out to the pavement
+            var ring = new List<Vector2>();
+            for (int k = 0; k <= 48; k++)
+            {
+                float t = k / 48f * Mathf.PI * 2f, r = 15f + 2.2f * Mathf.Sin(3f * t + 0.6f) + 1.2f * Mathf.Sin(5f * t);
+                ring.Add(a.center + new Vector2(Mathf.Cos(t) * r, Mathf.Sin(t) * r));
+            }
+            a.paths.Add(ring.ToArray());
+            foreach (var (ang, bend) in new[] { (0.35f, 5f), (1.9f, -6f), (3.5f, 4f), (5.0f, -5f) })
+            {
+                var arm = new List<Vector2>();
+                var dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
+                var side = new Vector2(-dir.y, dir.x);
+                for (int k = 0; k <= 12; k++)
+                {
+                    float t = k / 12f, along = Mathf.Lerp(15f, 31f, t);
+                    arm.Add(a.center + dir * along + side * (bend * Mathf.Sin(t * Mathf.PI)));
+                }
+                a.paths.Add(arm.ToArray());
+            }
+            Add(a, "statue", 0, 0, 14, 14, 0, 4);
+            // benches beside the ring, facing the middle
+            for (int k = 0; k < 6; k++)
+            {
+                float t = (k + 0.5f) / 6f * Mathf.PI * 2f, r = 15f + 2.2f * Mathf.Sin(3f * t + 0.6f) + 1.2f * Mathf.Sin(5f * t) + 2.6f;
+                var bench = Add(a, "decor", Mathf.Cos(t) * r, Mathf.Sin(t) * r, 4, 3, 90f - t * Mathf.Rad2Deg + 180f, level + (k < 3 ? 0 : 1));
+                bench.only = "bank";
+            }
+            foreach (var (x, z) in new[] { (-23f, -21f), (22f, 21f), (-24f, 15f), (23f, -14f), (6f, -25f), (-6f, 25f) }) Add(a, "tree", x, z, 6, 6, 0, level);
+            Add(a, "decor", 22f, 2f, 8, 8, 0, level + 1);
+            Add(a, "decor", -22f, -2f, 8, 8, 0, level + 1);
+            return a;
+        }
+
+        /// <summary>The creek valley: no block, only the big bridge's place over the middle crossing.</summary>
+        private static Area CreekValley(int level)
+        {
+            var a = new Area { name = "Dere", style = "", center = new Vector2(CreekX, 0f), level = level, ground = Color.clear, creek = true };
+            var s = Add(a, "landmark", 0f, BridgeZ, 84f, 21f, 0f, level);
+            s.only = "bridge";
             return a;
         }
 

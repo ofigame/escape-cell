@@ -88,6 +88,21 @@ namespace BrickMuseum.Core
             cityCam.Focus(AreaPoint("Sahil Parkı") + new Vector3(0, 0, 30f), 330f);
             yield return new WaitForSeconds(0.5f);
             yield return Shot(dir, "11c_lake_city");
+            // the new land: the whole town from far away, the bridge over the creek, the park's paths
+            cityCam.Focus(city.WorldAt(new Vector2(0, -20f), 0f), CityCam.MaxDist);
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot(dir, "11d0_far");
+            var bridgeSlot = CityLayout.Slots.First(s => s.only == "bridge");
+            Debug.Log($"[Tour] bridge slot: {Progress.At(bridgeSlot.id) ?? "empty"}");
+            cityCam.Focus(city.WorldOf(bridgeSlot), 140f);
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot(dir, "11d1_bridge");
+            cityCam.Focus(AreaPoint("Şehir Parkı"), 95f);
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot(dir, "11d2_park");
+            cityCam.Focus(city.WorldAt(new Vector2(100f, -100f), 0f), 160f);
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot(dir, "11d3_hill");
             yield return SizeLineup(dir);
 
             // take a model away, then put it on another free slot from the inventory
@@ -141,12 +156,30 @@ namespace BrickMuseum.Core
             // the people of the public buildings and the houses on their pavements
             foreach (var (area, shot) in new[] { ("Kamu Binaları", "20b_people_civic"), ("Türk Mahallesi", "20c_people_houses") })
             {
-                walkPos = AreaPoint(area) + new Vector3(26f, 0, CityLayout.Block / 2f + 1.2f);
+                walkPos = city.WorldAt(CityLayout.AreaNamed(area).center + new Vector2(26f, CityLayout.Block / 2f + 1.2f), 0f);
                 walkPos.y = city.GroundAt(walkPos);
                 facingYaw = camYaw = 270f; camPitch = 9f; walkCamDist = 5f;
                 yield return new WaitForSeconds(2.5f);
                 yield return Shot(dir, shot);
             }
+            // on the big bridge looking along it, then down by the creek looking up at it
+            walkPos = city.WorldAt(new Vector2(CityLayout.CreekX + 30f, CityLayout.BridgeZ + 4f), 0f);
+            walkPos.y = city.GroundAt(walkPos);
+            facingYaw = camYaw = 270f; camPitch = 8f; walkCamDist = 7f;
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "20b1_on_bridge");
+            walkPos = city.WorldAt(new Vector2(CityLayout.CreekX - 12f, CityLayout.BridgeZ + 30f), 0f);
+            walkPos.y = city.GroundAt(walkPos);
+            facingYaw = camYaw = 0f; camPitch = -4f; walkCamDist = 6f;
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "20b2_creek");
+            // up a street on the hill
+            walkPos = city.WorldAt(new Vector2(CityLayout.StreetXs().Last() - 4f, 10f), 0f);
+            walkPos.y = city.GroundAt(walkPos);
+            facingYaw = camYaw = 180f; camPitch = 10f; walkCamDist = 7f;
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "20b3_hill_street");
+            camPitch = 14f;
             walkCamDist = 6.5f;
             // my own car: walk up to it, get in, drive off down the street and round a corner
             if (car != null)
@@ -235,7 +268,7 @@ namespace BrickMuseum.Core
             Application.Quit();
         }
 
-        private static Vector3 AreaPoint(string name) { var c = CityLayout.AreaNamed(name).center; return CityMap.Center + new Vector3(c.x, 0, c.y); }
+        private Vector3 AreaPoint(string name) => city.WorldAt(CityLayout.AreaNamed(name).center, 0f);
 
         private bool tourCam;
 

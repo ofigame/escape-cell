@@ -60,13 +60,13 @@ namespace BrickMuseum.Core
             person.root.gameObject.SetActive(true);
             // start on the street in front of the Turkish neighbourhood, looking into the city
             var start = CityLayout.AreaNamed("Türk Mahallesi").center;   // on the street in front of it
-            walkPos = CityMap.Center + new Vector3(start.x, 0, start.y + CityLayout.Block / 2f + CityLayout.Road / 2f);
+            walkPos = city.WorldAt(start + new Vector2(0, CityLayout.Block / 2f + CityLayout.Road / 2f), 0f);
             walkPos.y = city.GroundAt(walkPos);
             facingYaw = camYaw = 180f;
             if (Progress.Data.build.Count > 0)
             {
                 // with a house of your own you start on the road in front of it, looking at it
-                walkPos = CityMap.Center + new Vector3(CityLayout.MinX + 5f, 0, CityLayout.HomeLotCenter.y + 3f);
+                walkPos = city.WorldAt(new Vector2(CityLayout.MinX + 5f, CityLayout.HomeLotCenter.y + 3f), 0f);
                 walkPos.y = city.GroundAt(walkPos);
                 facingYaw = camYaw = 270f;
             }

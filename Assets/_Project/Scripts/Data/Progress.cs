@@ -187,6 +187,8 @@ namespace BrickMuseum.Data
         public static bool Fits(ModelDef m, Slot s)
         {
             if (m.kind != s.kind) return false;
+            // the bridge only spans the creek; a slot for one model (the bridge, a bench) takes only that one
+            if (!string.IsNullOrEmpty(s.only) ? m.id != s.only : m.id == "bridge") return false;
             if (s.kind == "house" && !string.IsNullOrEmpty(s.style) && m.style != s.style) return false;
             // it must stand at (nearly) its real size: trees may spread over the pavement
             return s.kind == "tree" || CityMap.SlotFit(m, s) >= 0.85f * m.scale;

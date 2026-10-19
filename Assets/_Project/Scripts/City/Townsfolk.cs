@@ -151,7 +151,7 @@ namespace BrickMuseum.City
             {
                 var s = CityLayout.Find(p.slot);
                 var m = ModelCatalog.Find(p.id);
-                if (s == null || m == null) continue;
+                if (s == null || m == null || s.area.creek) continue;   // nobody lives on the bridge
                 var roles = RolesFor(m);
                 for (int i = 0; i < roles.Length; i++)
                 {
@@ -209,11 +209,11 @@ namespace BrickMuseum.City
             float radius = Ring + Lane * w.dir;   // clockwise walkers on the outer side, the others on the inner side
             var (at, along) = OnRing(w.f, radius);
             var c = w.area.center + at;
-            w.pos = new Vector3(c.x, CityMap.Lawn + 0.03f, c.y);
+            w.pos = new Vector3(c.x, 0f, c.y);                                    // on the plan; shown on the shaped ground
             var fwd = along * w.dir;
             if (w.pause > 0f) fwd = Quaternion.Euler(0, 0, 90f * w.dir) * (Vector3)fwd;  // stops facing the street or the houses
-            w.person.root.localPosition = w.pos;
-            var want = Quaternion.LookRotation(new Vector3(fwd.x, 0, fwd.y));
+            w.person.root.localPosition = CityShape.Point(c, CityMap.Lawn + 0.03f);
+            var want = Quaternion.Euler(0, CityShape.Angle(c), 0) * Quaternion.LookRotation(new Vector3(fwd.x, 0, fwd.y));
             w.person.root.localRotation = stepYaw <= 0f ? want : Quaternion.RotateTowards(w.person.root.localRotation, want, stepYaw);
         }
 
@@ -223,8 +223,10 @@ namespace BrickMuseum.City
         /// </summary>
         public void Tick(float dt, Vector3 focus, float radius, Vector3? player = null)
         {
-            var localFocus = focus - root.position;
-            Vector3? localPlayer = player.HasValue ? player.Value - root.position : (Vector3?)null;
+            var fp = CityMap.PlanOf(focus);
+            var localFocus = new Vector3(fp.x, 0, fp.y);
+            Vector3? localPlayer = null;
+            if (player.HasValue) { var pp = CityMap.PlanOf(player.Value); localPlayer = new Vector3(pp.x, 0, pp.y); }
             foreach (var w in walkers.Values)
             {
                 float speed = w.speed;
@@ -258,7 +260,8 @@ namespace BrickMuseum.City
         /// <summary>Who stands closest to a world point (within <paramref name="within"/>), for the walk mode's name chip.</summary>
         public string Nearest(Vector3 world, float within, out float dist)
         {
-            var l = world - root.position;
+            var lp = CityMap.PlanOf(world);
+            var l = new Vector3(lp.x, 0, lp.y);
             string best = null;
             dist = within;
             foreach (var w in walkers.Values)

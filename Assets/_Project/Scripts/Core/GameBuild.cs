@@ -95,7 +95,7 @@ namespace BrickMuseum.Core
             BuildHouse();
             EnterCity(null);
             var lot = CityLayout.HomeLotCenter;
-            cityCam.Focus(CityMap.Center + new Vector3(lot.x, 0, lot.y), 90f);
+            cityCam.Focus(city.WorldAt(lot, 0f), 90f);
         }
 
         private void ShowBuildTab(string group)

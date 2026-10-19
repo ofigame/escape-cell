@@ -75,9 +75,10 @@ namespace BrickMuseum.Core
             if (h.version < 2) { h.items.Clear(); h.version = 2; Progress.Save(); }
             var c = CityLayout.HomeLotCenter;
             // the baseplate sits on the lot's lawn; the house's front (+z when building) faces the road to the east
-            var center = CityMap.Center + new Vector3(c.x, CityMap.Lawn + 0.06f + Piece.Plate, c.y);
+            var center = city.WorldAt(c, CityMap.Lawn + 0.06f + Piece.Plate);
+            float yaw = 90f + CityShape.Angle(c);
             house = new BuildSite(city.root, Progress.Data.build, CityLayout.HomePlate, CityLayout.HomePlate,
-                BuildSite.CornerFor(center, CityLayout.HomePlate, CityLayout.HomePlate, 90f), 90f, 1f, false, "dgreen");
+                BuildSite.CornerFor(center, CityLayout.HomePlate, CityLayout.HomePlate, yaw), yaw, 1f, false, "dgreen");
             foreach (var it in h.items) SpawnFurniture(it);
         }
 
@@ -149,13 +150,17 @@ namespace BrickMuseum.Core
 
         private Vector3 ClampWalk(Vector3 next)
         {
-            var c = CityMap.Center;
-            float lotZ = c.z + CityLayout.HomeLotCenter.y, half = CityLayout.HomeLot / 2f - 0.6f;
-            bool byLot = Mathf.Abs(next.z - lotZ) < half;
-            next.x = Mathf.Clamp(next.x, c.x + CityLayout.MinX + (byLot ? -CityLayout.HomeLot + 0.6f : 1f), c.x + CityLayout.MaxX - 1f);
-            if (next.x < c.x + CityLayout.MinX) next.z = Mathf.Clamp(next.z, lotZ - half, lotZ + half);
-            next.z = Mathf.Clamp(next.z, c.z + CityLayout.MinZ + 1f, c.z + CityLayout.MaxZ - 0.8f);
-            return next;
+            // the bounds are on the plan: the town's edges, the lake's quay, the player's lot out to the west
+            var p = CityMap.PlanOf(next);
+            float lotZ = CityLayout.HomeLotCenter.y, half = CityLayout.HomeLot / 2f - 0.6f;
+            bool byLot = Mathf.Abs(p.y - lotZ) < half;
+            var q = p;
+            q.x = Mathf.Clamp(q.x, CityLayout.MinX + (byLot ? -CityLayout.HomeLot + 0.6f : 1f), CityLayout.MaxX - 1f);
+            if (q.x < CityLayout.MinX) q.y = Mathf.Clamp(q.y, lotZ - half, lotZ + half);
+            q.y = Mathf.Clamp(q.y, CityLayout.MinZ + 1f, CityLayout.MaxZ - 0.8f);
+            if (q == p) return next;
+            var w = city.WorldAt(q, 0f);
+            return new Vector3(w.x, next.y, w.z);
         }
 
         /// <summary>Keeps the walking camera above the ground and in front of the house's walls.</summary>

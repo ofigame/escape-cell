@@ -396,3 +396,9 @@ Piyano	Piano	ピアノ	بيانو	Klavier	Piano	Pianoforte	Piano	피아노	Piano
 Akvaryum	Aquarium	水槽	حوض أسماك	Aquarium	Aquarium	Acquario	Acuario	수족관	Akvarium
 Seç	Choose	選ぶ	اختر	Wählen	Choisir	Scegli	Elegir	선택	Seç
 Seçili	Selected	選択中	مُختارة	Ausgewählt	Sélectionnée	Selezionata	Seleccionado	선택됨	Seçilib
+Şehir Parkı	City Park	市民公園	حديقة المدينة	Stadtpark	Parc de la ville	Parco cittadino	Parque de la ciudad	시민 공원	Şəhər parkı
+Dere	Creek	小川	الجدول	Bach	Ruisseau	Torrente	Arroyo	개울	Çay
+Köprü yeri	Bridge site	橋の場所	موقع الجسر	Brückenplatz	Emplacement du pont	Posto del ponte	Sitio del puente	다리 자리	Körpü yeri
+KÖPRÜ	BRIDGE	橋	جسر	BRÜCKE	PONT	PONTE	PUENTE	다리	KÖRPÜ
+Bank yeri	Bench spot	ベンチの場所	مكان مقعد	Bankplatz	Emplacement de banc	Posto panchina	Sitio para banco	벤치 자리	Skamya yeri
+BANK	BENCH	ベンチ	مقعد	BANK	BANC	PANCHINA	BANCO	벤치	SKAMYA

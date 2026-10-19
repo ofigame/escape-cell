@@ -65,12 +65,12 @@ namespace BrickMuseum.Core
                 if (parked != null) parked.SetActive(false);
                 var at = city.WorldOf(carSlot);
                 obstacles.RemoveAll(o => Mathf.Abs(o.center.x - at.x) < 0.5f && Mathf.Abs(o.center.y - at.z) < 0.5f);
-                car.position = new Vector3(at.x, CityMap.Center.y + CityMap.RoadTop, at.z);
-                carYaw = carSlot.yaw + 90f;
+                car.position = at;
+                carYaw = carSlot.yaw + 90f + CityShape.Angle(carSlot.local);
             }
             else
             {
-                car.position = new Vector3(walkPos.x - 7f, CityMap.Center.y + CityMap.RoadTop, walkPos.z + 2.5f);
+                car.position = new Vector3(walkPos.x - 7f, walkPos.y, walkPos.z + 2.5f);
                 carYaw = 270f;
             }
             car.rotation = Quaternion.Euler(0, carYaw, 0);
@@ -99,12 +99,12 @@ namespace BrickMuseum.Core
             carHalfWid = (maxX - minX) * BuiltCarScale / 2f;
             if (Progress.Data.build.Count > 0)
             {
-                car.position = CityMap.Center + new Vector3(CityLayout.MinX + 13f, CityMap.RoadTop, CityLayout.HomeLotCenter.y - 6f);
+                car.position = city.WorldAt(new Vector2(CityLayout.MinX + 13f, CityLayout.HomeLotCenter.y - 6f), CityMap.RoadTop);
                 carYaw = 180f;
             }
             else
             {
-                car.position = new Vector3(walkPos.x - 7f, CityMap.Center.y + CityMap.RoadTop, walkPos.z + 2.5f);
+                car.position = new Vector3(walkPos.x - 7f, walkPos.y, walkPos.z + 2.5f);
                 carYaw = 270f;
             }
             car.rotation = Quaternion.Euler(0, carYaw, 0);
@@ -190,7 +190,12 @@ namespace BrickMuseum.Core
                 carSpeed = -carSpeed * 0.25f;   // a small bounce back
             }
             else { car.position = next; carYaw = yaw; }
-            car.rotation = Quaternion.Euler(0, carYaw, 0);
+            // on the hills: the car sits on the street and leans with it (nose up a slope, down another)
+            var f = Quaternion.Euler(0, carYaw, 0) * Vector3.forward;
+            float front = city.GroundAt(car.position + f * carHalfLen), back = city.GroundAt(car.position - f * carHalfLen);
+            car.position = new Vector3(car.position.x, (front + back) / 2f, car.position.z);
+            float pitch = Mathf.Atan2(back - front, 2f * carHalfLen) * Mathf.Rad2Deg;
+            car.rotation = Quaternion.Euler(pitch, carYaw, 0);
             walkPos = car.position;
 
             // the camera follows behind, unless the player is looking round
@@ -207,18 +212,14 @@ namespace BrickMuseum.Core
             tu.nearText.text = $"{carName}  ·  {Mathf.RoundToInt(Mathf.Abs(carSpeed) * 0.9f * 3.6f)} km/sa";
         }
 
-        /// <summary>The car (a box) would leave the road, run into a model or leave the town.</summary>
+        /// <summary>The car (a box) would leave the streets and bridges, or run into a model.</summary>
         private bool CarBlocked(Vector3 p, float yaw)
         {
             var rot = Quaternion.Euler(0, yaw, 0);
-            var c = CityMap.Center;
-            if (p.x < c.x + CityLayout.MinX + carHalfWid || p.x > c.x + CityLayout.MaxX - carHalfWid) return true;
-            if (p.z < c.z + CityLayout.MinZ + carHalfWid || p.z > c.z + CityLayout.ZOf(0) + CityLayout.Block / 2f - carHalfWid) return true;
-            float road = c.y + CityMap.RoadTop + 0.15f;
             foreach (var (sx, sz) in new[] { (-1f, -1f), (1f, -1f), (-1f, 1f), (1f, 1f), (0f, 1f), (0f, -1f), (-1f, 0f), (1f, 0f) })
             {
                 var q = p + rot * new Vector3(sx * carHalfWid, 0, sz * carHalfLen);
-                if (city.GroundAt(q) > road) return true;                                // a kerb
+                if (!city.IsRoad(q)) return true;                                        // a kerb, the creek or the town's edge
                 foreach (var o in obstacles)
                     if (Mathf.Abs(q.x - o.center.x) < o.half.x && Mathf.Abs(q.z - o.center.y) < o.half.y) return true;
             }

@@ -169,7 +169,7 @@ namespace BrickMuseum.Core
             seq.Add(chosen);
             wu.roulette.SetActive(true);
             wu.rouCard.color = Color.white;
-            wu.rouKicker.text = buildSlot != null ? CityLayout.KindName(buildSlot.kind) + " için model seçiliyor…" : "Model seçiliyor…";
+            wu.rouKicker.text = buildSlot != null ? CityLayout.SlotName(buildSlot) + " için model seçiliyor…" : "Model seçiliyor…";
             for (int n = 0; n < seq.Count; n++)
             {
                 wu.rouImage.texture = Previews.Model(seq[n]);
