@@ -73,6 +73,7 @@ namespace BrickMuseum.Core
             WireWalk();
             WireCharacter();
             WireBuild();
+            WireCoach();
             if (Application.isMobilePlatform) Screen.orientation = ScreenOrientation.Portrait;
             EnterCity(null);
         }
@@ -516,6 +517,7 @@ namespace BrickMuseum.Core
             wu.toastGroup.alpha = Mathf.MoveTowards(wu.toastGroup.alpha, Time.unscaledTime < toastUntil ? 1f : 0f, dt * 5f);
             wu.bagBtn.transform.localScale = Vector3.one * (current != null && bench.PlacedCount == 0 && !bagOpen ? 1f + 0.06f * Mathf.Sin(time * 5f) : 1f);
 
+            CoachTick(dt);
             if (tourCam) { }
             else if (mode == Mode.Workshop) orbit.Apply(cam);
             else if (mode == Mode.Walk) WalkUpdate(dt);

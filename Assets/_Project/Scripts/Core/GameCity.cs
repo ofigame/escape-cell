@@ -442,6 +442,7 @@ namespace BrickMuseum.Core
                 var lang = l;
                 cu.AddRow(null, Loc.NameOf(l), l == Loc.Current ? "Seçili" : "", l == Loc.Current ? null : "Seç", () => { Loc.Set(lang); cu.list.SetActive(false); });
             }
+            cu.AddRow(null, "Eğitimler", "Tüm ipuçlarını yeniden göster", "Baştan göster", () => { ReplayTips(); cu.list.SetActive(false); });
             cu.list.SetActive(true);
         }
 

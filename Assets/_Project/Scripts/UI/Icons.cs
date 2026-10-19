@@ -105,6 +105,9 @@ namespace BrickMuseum.UI
 
         public static Sprite Close => Get("close", (x, y) => U(Seg(x, y, 0.24f, 0.24f, 0.76f, 0.76f, 0.08f), Seg(x, y, 0.24f, 0.76f, 0.76f, 0.24f, 0.08f)));
 
+        /// <summary>A thin ring (the tutorial's highlight).</summary>
+        public static Sprite Halo => Get("halo", (x, y) => Ring(x, y, 0.5f, 0.5f, 0.44f, 0.035f));
+
         public static Sprite Bulb => Get("bulb", (x, y) => U(Circ(x, y, 0.5f, 0.6f, 0.28f), Box(x, y, 0.5f, 0.28f, 0.13f, 0.09f, 0.03f), Box(x, y, 0.5f, 0.12f, 0.09f, 0.04f, 0.03f)));
 
         public static Sprite Spread => Get("spread", (x, y) => U(Circ(x, y, 0.24f, 0.3f, 0.11f), Circ(x, y, 0.72f, 0.24f, 0.1f), Circ(x, y, 0.5f, 0.55f, 0.12f),
@@ -187,6 +190,8 @@ namespace BrickMuseum.UI
             if (l.StartsWith("Puan")) return Star;
             if (l.StartsWith("Şehir bonusu") || l.StartsWith("Reklam izle, topla")) return l.StartsWith("Reklam") ? Video : Star;
             if (l == "ÇIK") return Up;
+            if (l == "Anladım") return Check;
+            if (l == "Baştan göster") return Bulb;
             if (l == "Balıklar hazır" || l == "Topla") return FishIcon;
             if (l == "Uzak semt" || l.StartsWith("İmara aç") || l == "Oraya bak") return City;
             if (l == "AŞAĞI") return Exit;

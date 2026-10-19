@@ -17,6 +17,7 @@ namespace BrickMuseum.Core
         private IEnumerator Tour(string dir)
         {
             if (!Debug.isDebugBuild) yield break;
+            touring = true;
             Directory.CreateDirectory(dir);
             Progress.Reset();
             EnterCity(null);

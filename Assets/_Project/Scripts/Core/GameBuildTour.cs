@@ -67,6 +67,7 @@ namespace BrickMuseum.Core
             yield return RoofTour(dir);
             yield return DistrictTour(dir);
             yield return FarmTour(dir);
+            yield return CoachTour(dir);
             yield return GardenTour(dir);
             yield return LanguageTour(dir);
         }
@@ -92,6 +93,36 @@ namespace BrickMuseum.Core
             yield return Shot(dir, "53d_bonus_collected");
             Debug.Log($"[Tour] bonus: score {before} -> {City.CityScore.Total}, inventory {Data.Progress.Data.inventory.Count}, police {Data.Progress.Data.bonusPolice} workers {Data.Progress.Data.bonusWorkers} staff {Data.Progress.Data.bonusStaff}");
             ClosePanel();
+        }
+
+        /// <summary>The tutorial cards: a few shown on purpose, then one picked by itself (tips cleared, the tour lets go).</summary>
+        private IEnumerator CoachTour(string dir)
+        {
+            EnterCity(null);
+            cityCam.Focus(City.CityMap.Center, 300f);
+            yield return new WaitForSeconds(0.4f);
+            foreach (var key in new[] { "welcome", "score", "bonus", "far" })
+            {
+                ShowTip(tips.First(t => t.key == key));
+                yield return new WaitForSeconds(0.4f);
+                yield return Shot(dir, $"57_tip_{key}");
+                DismissTip();
+            }
+            EnterWalk();
+            yield return new WaitForSeconds(0.4f);
+            ShowTip(tips.First(t => t.key == "walkMove"));
+            yield return new WaitForSeconds(0.4f);
+            yield return Shot(dir, "57_tip_walkMove");
+            DismissTip();
+            ExitWalk();
+            Data.Progress.Data.tips.Clear();
+            touring = false;
+            coachWait = 0f;
+            yield return new WaitForSeconds(1.5f);
+            Debug.Log($"[Tour] tip by itself: {tipShown?.key ?? "-"} ({coach.Shown})");
+            yield return Shot(dir, "57_tip_auto");
+            DismissTip();
+            touring = true;
         }
 
         /// <summary>The fish farm: for sale, bought, growing, hurried by the ad, ready, collected; then the phone's reminders.</summary>
