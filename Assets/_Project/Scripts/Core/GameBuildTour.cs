@@ -61,7 +61,66 @@ namespace BrickMuseum.Core
             yield return Shot(dir, "36_city_home");
             yield return HouseWalkTour(dir);
             yield return CarBuildTour(dir);
+            yield return FishTour(dir);
             yield return LanguageTour(dir);
+        }
+
+        /// <summary>Fishing on the quay (cast, bite, reel, catch), then selling the catch at the Fish Hall.</summary>
+        private IEnumerator FishTour(string dir)
+        {
+            EnterWalk();
+            yield return new WaitForSeconds(0.5f);
+            walkPos = city.WorldAt(new Vector2(-60f, City.CityLayout.ZOf(0) + City.CityLayout.Block / 2f + 1.6f), 0f);
+            walkPos.y = city.GroundAt(walkPos);
+            facingYaw = camYaw = 0f; camPitch = 14f;
+            yield return new WaitForSeconds(0.4f);
+            StartFishing();
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot(dir, "50a_fishing_ready");
+            holdDown = true;
+            yield return new WaitForSeconds(0.7f);
+            yield return Shot(dir, "50b_charging");
+            holdDown = false;
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot(dir, "50c_cast");
+            yield return new WaitForSeconds(0.6f);
+            biteAt = 0.3f;
+            while (fishing != FishState.Bite) yield return null;
+            yield return new WaitForSeconds(0.2f);
+            yield return Shot(dir, "50d_bite");
+            holdDown = true;
+            float shotAt = Time.time + 1.2f;
+            bool shotTaken = false;
+            while (fishing == FishState.Reeling || fishing == FishState.Bite)
+            {
+                holdDown = tension < 0.52f;                    // a steady hand: pull when slack, give when tight
+                if (!shotTaken && Time.time > shotAt) { shotTaken = true; yield return Shot(dir, "50e_reeling"); }
+                yield return null;
+            }
+            holdDown = false;
+            yield return new WaitForSeconds(0.4f);
+            yield return Shot(dir, "50f_caught");
+            Debug.Log($"[Tour] fish in the cooler: {Data.Progress.Data.fish.Count}, state {fishing}");
+            StopFishing();
+            // the Fish Hall on a public building plot, the catch sold there
+            var hallSlot = City.CityLayout.Slots.First(s => s.kind == "civic" && s.level <= Data.Progress.Level);
+            if (Data.Progress.At(hallSlot.id) != null) Data.Progress.Remove(hallSlot.id);
+            Data.Progress.Place(hallSlot.id, "balikhali");
+            city.Refresh(hallSlot);
+            RebuildObstacles();
+            var hf = Quaternion.Euler(0, hallSlot.yaw + City.CityShape.Angle(hallSlot.local), 0) * Vector3.forward;
+            walkPos = city.WorldOf(hallSlot) + hf * (hallSlot.d / 2f - 2f);
+            walkPos.y = city.GroundAt(walkPos);
+            facingYaw = camYaw = Mathf.Atan2(-hf.x, -hf.z) * Mathf.Rad2Deg; camPitch = 10f;
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "50g_fish_hall");
+            int before = Wallet.Money;
+            SellFish();
+            yield return new WaitForSeconds(0.4f);
+            yield return Shot(dir, "50h_sold");
+            Debug.Log($"[Tour] fish sold: {before} -> {Wallet.Money}");
+            ExitWalk();
+            yield return new WaitForSeconds(0.4f);
         }
 
         /// <summary>The city with a panel open in every language, the walking and building screens in a few; back to Turkish.</summary>

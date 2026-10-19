@@ -159,6 +159,9 @@ namespace BrickMuseum.Character
         /// Moves the limbs. speed = how fast the person is moving (studs/s), airborne = jumping or falling.
         /// Walking swings arms and legs opposite to each other; faster = bigger, quicker steps; standing breathes.
         /// </summary>
+        /// <summary>Holds the right arm up and forward (a fishing rod in hand), after <see cref="Animate"/>.</summary>
+        public void HoldRightArm(float pitch) => armR.localRotation = Quaternion.Euler(-pitch, 0, 6f);
+
         public void Animate(float speed, bool airborne, float dt)
         {
             float target = airborne ? 0.45f : Mathf.Clamp01(speed / 7f);

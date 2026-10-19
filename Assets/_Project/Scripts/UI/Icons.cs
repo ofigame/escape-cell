@@ -150,6 +150,12 @@ namespace BrickMuseum.UI
         public static Sprite Palette => Get("palette", (x, y) => Cut(Circ(x, y, 0.5f, 0.5f, 0.42f),
             U(Circ(x, y, 0.32f, 0.6f, 0.07f), Circ(x, y, 0.52f, 0.72f, 0.07f), Circ(x, y, 0.72f, 0.58f, 0.07f), Circ(x, y, 0.42f, 0.3f, 0.1f))));
 
+        public static Sprite Rod => Get("rod", (x, y) => U(Seg(x, y, 0.14f, 0.12f, 0.86f, 0.9f, 0.045f), Ring(x, y, 0.3f, 0.3f, 0.11f, 0.045f),
+            Seg(x, y, 0.86f, 0.9f, 0.86f, 0.42f, 0.02f), Circ(x, y, 0.86f, 0.38f, 0.06f)));
+
+        public static Sprite FishIcon => Get("fish", (x, y) => Cut(U(Mathf.Sqrt(((x - 0.44f) / 0.32f) * ((x - 0.44f) / 0.32f) + ((y - 0.5f) / 0.2f) * ((y - 0.5f) / 0.2f)) * 0.2f - 0.2f,
+            Poly(x, y, 0.7f, 0.5f, 0.94f, 0.72f, 0.94f, 0.28f)), Circ(x, y, 0.3f, 0.55f, 0.04f)));
+
         public static Sprite Bag => Get("bag", (x, y) => U(Box(x, y, 0.5f, 0.38f, 0.36f, 0.3f, 0.09f), Mathf.Max(Ring(x, y, 0.5f, 0.68f, 0.17f, 0.05f), 0.66f - y)));
 
         /// <summary>The icon for a button with this (Turkish source) label; null when it has none.</summary>
@@ -186,6 +192,11 @@ namespace BrickMuseum.UI
             if (l == "Alt kat") return Down;
             if (l == "Dekore et") return Sofa;
             if (l == "ÇANTA") return Bag;
+            if (l == "OLTA") return Rod;
+            if (l == "BIRAK") return Down;
+            if (l == "FIRLAT") return Up;
+            if (l == "ÇEK" || l == "ÇEK!") return Rotate;
+            if (l == "SAT") return FishIcon;
             return null;
         }
 

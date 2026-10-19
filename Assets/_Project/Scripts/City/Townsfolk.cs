@@ -57,6 +57,7 @@ namespace BrickMuseum.City
                         case "hastane": return new[] { "doctor", "nurse" };
                         case "itfaiyeist": return new[] { "firefighter", "firefighter" };
                         case "kutuphane": return new[] { "librarian", "resident" };
+                        case "balikhali": return new[] { "shopkeeper", "resident" };
                         default: return new[] { "office" };
                     }
                 case "historic": return new[] { m.id == "kale" ? "soldier" : m.id == "saray" ? "guard" : "shopkeeper", "tourist" };

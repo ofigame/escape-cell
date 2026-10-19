@@ -41,6 +41,7 @@ namespace BrickMuseum.Core
             cu.walkBtn.onClick.AddListener(EnterWalk);
             WireHome();
             WireTaxi();
+            WireFishing();
         }
 
         private static void SetLandscape(bool on)
@@ -89,6 +90,7 @@ namespace BrickMuseum.Core
         {
             if (decorating) EndDecor();
             CancelTaxi(false);
+            StopFishing();
             if (driving) GetOutOfCar();
             RemoveCar();
             SetLandscape(false);
@@ -144,7 +146,9 @@ namespace BrickMuseum.Core
             tu.money.text = $"{FreeBuild.Wallet.Money} lira";
             if (!driving) tu.taxiBtn.gameObject.SetActive(false);
             if (decorating) { DecorUpdate(dt); return; }
-            if (driving) { CarUpdate(dt); return; }
+            if (driving) { CarUpdate(dt); FishHud(); return; }
+            FishHud();
+            if (fishing != FishState.Off) { FishUpdate(dt); return; }
             var move = stickVec + testMove;
             var kb = Keyboard.current;
             bool runKey = false;

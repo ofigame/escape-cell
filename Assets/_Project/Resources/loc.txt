@@ -424,3 +424,30 @@ Yolcu bindi	Passenger on board	お客さんが乗った	صعد الراكب	Fahr
 ücret {0} lira	fare {0} lira	料金 {0} リラ	الأجرة {0} ليرة	Fahrpreis {0} Lira	prix {0} lires	tariffa {0} lire	tarifa {0} liras	요금 {0} 리라	qiymət {0} lirə
 bahşiş +{0}	tip +{0}	チップ +{0}	بقشيش +{0}	Trinkgeld +{0}	pourboire +{0}	mancia +{0}	propina +{0}	팁 +{0}	bəxşiş +{0}
 +{0} lira	+{0} lira	+{0} リラ	+{0} ليرة	+{0} Lira	+{0} lires	+{0} lire	+{0} liras	+{0} 리라	+{0} lirə
+OLTA	ROD	釣り竿	صنارة	ANGEL	CANNE	CANNA	CAÑA	낚싯대	TİLOV
+BIRAK	PUT AWAY	しまう	اترك	WEGLEGEN	RANGER	RIPONI	GUARDAR	그만	BURAX
+FIRLAT	CAST	投げる	ارمِ	WERFEN	LANCER	LANCIA	LANZAR	던지기	AT
+ÇEK!	PULL!	引け！	اسحب!	ZIEH!	TIRE !	TIRA!	¡TIRA!	당겨!	ÇƏK!
+ÇEK	REEL	巻く	اسحب	ZIEHEN	TIRER	TIRA	TIRAR	감기	ÇƏK
+SAT	SELL	売る	بِع	VERKAUFEN	VENDRE	VENDI	VENDER	팔기	SAT
+FIRLAT'ı basılı tut, bırak	hold CAST, let go	投げるを長押しして離す	اضغط مطولًا على ارمِ ثم اترك	WERFEN halten, loslassen	maintiens LANCER, relâche	tieni premuto LANCIA, rilascia	mantén LANZAR, suelta	던지기를 누르고 있다가 떼기	AT düyməsini basılı saxla, burax
+balık vurunca ÇEK	REEL when a fish bites	食いついたら巻く	اسحب عندما تعضّ سمكة	beim Anbiss ZIEHEN	TIRE quand ça mord	TIRA quando abbocca	TIRA cuando pique	물면 감기	balıq tutanda ÇƏK
+Gerginliği yeşilde tut	Keep the tension in the green	テンションを緑に保とう	أبقِ الشد في الأخضر	Spannung im Grünen halten	Garde la tension dans le vert	Tieni la tensione nel verde	Mantén la tensión en el verde	장력을 초록색에 유지	Gərginliyi yaşılda saxla
+Balık yemi kaptı, kaçtı	The fish took the bait and got away	餌を取られて逃げられた	أخذت السمكة الطُعم وهربت	Der Fisch hat den Köder geklaut	Le poisson a volé l'appât	Il pesce ha preso l'esca ed è scappato	El pez robó el cebo y escapó	미끼만 먹고 도망갔어요	Balıq yemi qapıb qaçdı
+Olta boş geldi	Nothing on the hook	何も釣れなかった	لا شيء على الخطاف	Nichts am Haken	Rien au bout	Niente all'amo	Nada en el anzuelo	아무것도 안 걸렸어요	Tilov boş gəldi
+Misina koptu!	The line snapped!	糸が切れた！	انقطع الخيط!	Die Schnur ist gerissen!	La ligne a cassé !	Il filo si è spezzato!	¡Se rompió el sedal!	줄이 끊어졌어요!	Tilov sapı qırıldı!
+Balık kaçtı	The fish got away	逃げられた	هربت السمكة	Der Fisch ist weg	Le poisson s'est échappé	Il pesce è scappato	El pez escapó	물고기가 도망갔어요	Balıq qaçdı
+{0} cm	{0} cm	{0} cm	{0} سم	{0} cm	{0} cm	{0} cm	{0} cm	{0} cm	{0} sm
+Satmak için şehre Balık Hali yap	Build a Fish Hall in town to sell	売るには街に魚市場をつくろう	ابنِ سوق السمك لتبيع	Baue eine Fischhalle, um zu verkaufen	Construis une halle aux poissons pour vendre	Costruisci un mercato del pesce per vendere	Construye una lonja para vender	팔려면 어시장을 지으세요	Satmaq üçün şəhərdə Balıq bazarı tik
+Balık: {0}	Fish: {0}	魚: {0}	سمك: {0}	Fische: {0}	Poissons : {0}	Pesci: {0}	Peces: {0}	물고기: {0}	Balıq: {0}
+{0} balık satıldı	{0} fish sold	魚を{0}匹売った	بيعت {0} سمكة	{0} Fische verkauft	{0} poissons vendus	{0} pesci venduti	{0} peces vendidos	물고기 {0}마리 팔았어요	{0} balıq satıldı
+Balık Hali	Fish Hall	魚市場	سوق السمك	Fischhalle	Halle aux poissons	Mercato del pesce	Lonja	어시장	Balıq bazarı
+Hamsi	Anchovy	カタクチイワシ	أنشوجة	Sardelle	Anchois	Acciuga	Anchoa	멸치	Hamsi
+İstavrit	Horse mackerel	アジ	سمك الإسقمري	Stöcker	Chinchard	Sugarello	Jurel	전갱이	İstavrit
+Çipura	Sea bream	タイ	دنيس	Dorade	Daurade	Orata	Dorada	도미	Çipura
+Levrek	Sea bass	スズキ	قاروص	Wolfsbarsch	Bar	Spigola	Lubina	농어	Levrek
+Lüfer	Bluefish	アミキリ	سمك أزرق	Blaubarsch	Tassergal	Pesce serra	Anjova	블루피시	Lüfer
+Alabalık	Trout	マス	سلمون مرقط	Forelle	Truite	Trota	Trucha	송어	Qızılbalıq
+Kefal	Mullet	ボラ	بوري	Meeräsche	Mulet	Cefalo	Mújol	숭어	Kefal
+Sazan	Carp	コイ	شبوط	Karpfen	Carpe	Carpa	Carpa	잉어	Çəki
+Turna	Pike	カワカマス	كراكي	Hecht	Brochet	Luccio	Lucio	강꼬치고기	Durna

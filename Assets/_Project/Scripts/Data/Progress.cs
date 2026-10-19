@@ -88,6 +88,7 @@ namespace BrickMuseum.Data
         public bool moneyInit;
         public int money;                     // lira: earned with the taxi (and fishing), spent on special materials, furniture, lots
         public List<CarSave> cars = new List<CarSave>();   // the player's own cars (the garage)
+        public List<FishItem> fish = new List<FishItem>();  // the cooler
         public int activeCar;
         public bool stockInit;               // the starter kit (and materials for models built before) has been given
         public List<StockItem> stock = new List<StockItem>();
