@@ -451,3 +451,13 @@ Alabalık	Trout	マス	سلمون مرقط	Forelle	Truite	Trota	Trucha	송어	Q�
 Kefal	Mullet	ボラ	بوري	Meeräsche	Mulet	Cefalo	Mújol	숭어	Kefal
 Sazan	Carp	コイ	شبوط	Karpfen	Carpe	Carpa	Carpa	잉어	Çəki
 Turna	Pike	カワカマス	كراكي	Hecht	Brochet	Luccio	Lucio	강꼬치고기	Durna
+Satılık · {0} lira	For sale · {0} lira	売り地 · {0} リラ	للبيع · {0} ليرة	Zu verkaufen · {0} Lira	À vendre · {0} lires	In vendita · {0} lire	Se vende · {0} liras	매물 · {0} 리라	Satılır · {0} lirə
+SATILIK	FOR SALE	売り地	للبيع	ZU VERKAUFEN	À VENDRE	VENDESI	SE VENDE	매물	SATILIR
+Satılık arsa	Lot for sale	売り地	أرض للبيع	Grundstück zu verkaufen	Terrain à vendre	Terreno in vendita	Terreno en venta	매물 부지	Satılık sahə
+paran {0} lira	you have {0} lira	所持金 {0} リラ	لديك {0} ليرة	du hast {0} Lira	tu as {0} lires	hai {0} lire	tienes {0} liras	보유 {0} 리라	pulun {0} lirə
+Satın alınca üstüne yeni bir ev yapabilirsin	Buy it and build a new house on it	買えば新しい家を建てられる	اشترها وابنِ عليها بيتًا جديدًا	Kauf es und bau ein neues Haus darauf	Achète-le et construis-y une maison	Compralo e costruiscici una casa	Cómpralo y construye una casa	사면 새 집을 지을 수 있어요	Al və üstündə yeni ev tik
+Satın al	Buy	買う	اشترِ	Kaufen	Acheter	Compra	Comprar	구매	Satın al
+Arsa senin!	The lot is yours!	この土地はあなたのもの！	الأرض لك!	Das Grundstück gehört dir!	Le terrain est à toi !	Il terreno è tuo!	¡El terreno es tuyo!	땅이 당신 거예요!	Sahə sənindir!
+Evimi yap ile üstüne ev kur	build a house on it with Build my house	「家をつくる」で家を建てよう	ابنِ بيتًا عبر «ابنِ بيتي»	bau mit „Mein Haus bauen“ ein Haus darauf	construis-y une maison avec « Construire ma maison »	costruisci una casa con "Costruisci casa"	construye una casa con «Construir mi casa»	'내 집 짓기'로 집을 지어요	"Evimi tik" ilə üstündə ev qur
+Ev {0}	House {0}	家 {0}	البيت {0}	Haus {0}	Maison {0}	Casa {0}	Casa {0}	집 {0}	Ev {0}
+Sonraki ev	Next house	次の家	البيت التالي	Nächstes Haus	Maison suivante	Casa successiva	Siguiente casa	다음 집	Növbəti ev

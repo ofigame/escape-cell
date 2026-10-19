@@ -74,6 +74,15 @@ namespace BrickMuseum.Data
         public List<BuildPieceData> pieces = new List<BuildPieceData>();
     }
 
+    /// <summary>A lot bought along the west road: its house's pieces and furniture.</summary>
+    [Serializable]
+    public class LotSave
+    {
+        public bool owned;
+        public List<BuildPieceData> pieces = new List<BuildPieceData>();
+        public List<HomeItem> items = new List<HomeItem>();
+    }
+
     [Serializable]
     public class SaveFile
     {
@@ -89,6 +98,7 @@ namespace BrickMuseum.Data
         public int money;                     // lira: earned with the taxi (and fishing), spent on special materials, furniture, lots
         public List<CarSave> cars = new List<CarSave>();   // the player's own cars (the garage)
         public List<FishItem> fish = new List<FishItem>();  // the cooler
+        public List<LotSave> lots = new List<LotSave>();    // lots 1.. along the west road (lot 0 is build/home)
         public int activeCar;
         public bool stockInit;               // the starter kit (and materials for models built before) has been given
         public List<StockItem> stock = new List<StockItem>();

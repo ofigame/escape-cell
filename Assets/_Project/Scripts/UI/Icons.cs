@@ -169,6 +169,7 @@ namespace BrickMuseum.UI
             if (l == "Karakter" || l == "MÜŞTERİ") return Person;
             if (l == "İPTAL") return Close;
             if (l == "Sonraki araba") return Car;
+            if (l == "Sonraki ev" || l == "Satın al") return l == "Satın al" ? Plus : House;
             if (l == "Yeni araba") return Plus;
             if (l == "Dil") return Globe;
             if (l == "Evimi yap" || l == "Evime geç" || l == "GİR") return l == "GİR" ? Door : House;

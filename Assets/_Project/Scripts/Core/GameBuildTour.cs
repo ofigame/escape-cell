@@ -62,7 +62,50 @@ namespace BrickMuseum.Core
             yield return HouseWalkTour(dir);
             yield return CarBuildTour(dir);
             yield return FishTour(dir);
+            yield return LotTour(dir);
             yield return LanguageTour(dir);
+        }
+
+        /// <summary>Buying the lot north of the house, building a second house on it, walking into it.</summary>
+        private IEnumerator LotTour(string dir)
+        {
+            Wallet.Earn(2000);
+            cityCam.Focus(city.WorldAt(City.CityLayout.LotCenter(1), 0f), 120f);
+            OpenLot(1);
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot(dir, "51a_lot_for_sale");
+            BuyLot(1);
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot(dir, "51b_lot_bought");
+            ClosePanel();
+            buildLot = 1;
+            EnterBuild(false);
+            yield return new WaitForSeconds(0.3f);
+            ScriptedHouse(1);
+            ScriptedHouse(2);
+            RefreshBuildUi();
+            yield return new WaitForSeconds(0.4f);
+            yield return Shot(dir, "51c_second_house_build");
+            ExitBuild();
+            cityCam.Focus(city.WorldAt(City.CityLayout.LotCenter(0) + new Vector2(0, -16f), 0f), 150f);
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "51d_two_houses");
+            EnterWalk();
+            yield return new WaitForSeconds(0.4f);
+            var h2 = houses[1];
+            walkPos = h2.root.TransformPoint(new Vector3(11.5f, 0f, 19f));
+            walkPos.y = GroundAt(walkPos);
+            var face = h2.root.rotation * Vector3.back;
+            facingYaw = camYaw = Mathf.Atan2(face.x, face.z) * Mathf.Rad2Deg; camPitch = 10f; walkCamDist = 5f;
+            testMove = new Vector2(0, 0.6f);
+            yield return new WaitForSeconds(1.2f);
+            testMove = Vector2.zero;
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot(dir, "51e_in_second_house");
+            Debug.Log($"[Tour] lots owned {Lots.OwnedCount}, money {Wallet.Money}, chip '{tu.nearText.text}'");
+            walkCamDist = 6.5f;
+            ExitWalk();
+            yield return new WaitForSeconds(0.4f);
         }
 
         /// <summary>Fishing on the quay (cast, bite, reel, catch), then selling the catch at the Fish Hall.</summary>

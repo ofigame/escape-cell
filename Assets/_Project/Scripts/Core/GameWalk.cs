@@ -193,7 +193,7 @@ namespace BrickMuseum.Core
             cam.transform.rotation = Quaternion.LookRotation(target - pos);
 
             city.people.Tick(dt, walkPos, 90f, walkPos);
-            house?.Tick(walkPos, dt);
+            TickHouses(dt);
             ShowNearby();
         }
 

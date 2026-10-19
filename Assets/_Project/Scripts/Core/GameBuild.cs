@@ -22,6 +22,7 @@ namespace BrickMuseum.Core
         private readonly OrbitCam buildCam = new OrbitCam { minDist = 6f, maxDist = 80f };
         private BuildSite site, houseEdit, carEdit;
         private bool buildingCar;
+        private int buildLot, houseEditLot = -1;
         private BuildKind buildKind;
         private string buildColour = "red", buildTab = "Tuğla";
         private int buildRot;
@@ -38,7 +39,7 @@ namespace BrickMuseum.Core
             cu.buildBtn.onClick.AddListener(() => EnterBuild(false));
             bu.switchBtn.onClick.AddListener(() => { if (site.dirty) { Progress.Save(); site.dirty = false; } site.HideGhost(); EnterBuild(!buildingCar); });
             // the garage: work on the next car, or start a new one
-            bu.nextCarBtn.onClick.AddListener(() => { SwitchCar(false); });
+            bu.nextCarBtn.onClick.AddListener(() => { if (buildingCar) SwitchCar(false); else SwitchLot(); });
             bu.newCarBtn.onClick.AddListener(() => { SwitchCar(true); });
             bu.backBtn.onClick.AddListener(ExitBuild);
             bu.undoBtn.onClick.AddListener(() => { if (site.Undo()) { Sfx.Play("rustle", 0.6f); RefreshBuildUi(); } else bu.Say("Geri alınacak bir şey yok"); });
@@ -73,9 +74,10 @@ namespace BrickMuseum.Core
             int lot = CityLayout.HomePlate;
             site = forCar
                 ? carEdit ??= new BuildSite(transform, Garage.Active.pieces, ChassisX, ChassisZ, BuildSite.CornerFor(BuildSite.CarOrigin, ChassisX, ChassisZ, 0f), 0f, 1f, true, "gray")
-                : houseEdit ??= new BuildSite(transform, Progress.Data.build, lot, lot, BuildSite.CornerFor(BuildSite.HouseOrigin, lot, lot, 0f), 0f, 1f, true, "dgreen");
-            bu.title.text = forCar ? Garage.Active.name : "Evim";
-            bu.nextCarBtn.gameObject.SetActive(forCar && Garage.Cars.Count > 1);
+                : HouseEditFor(buildLot, lot);
+            bu.title.text = forCar ? Garage.Active.name : Lots.Name(buildLot);
+            bu.nextCarBtn.SetLabel(forCar ? "Sonraki araba" : "Sonraki ev");
+            bu.nextCarBtn.gameObject.SetActive(forCar ? Garage.Cars.Count > 1 : Lots.OwnedCount > 1);
             bu.newCarBtn.gameObject.SetActive(forCar);
             bu.switchBtn.SetLabel(forCar ? "Evime geç" : "Arabama geç");
             site.SetView(0);
@@ -99,8 +101,26 @@ namespace BrickMuseum.Core
             bu.canvas.gameObject.SetActive(false);
             BuildHouse();
             EnterCity(null);
-            var lot = CityLayout.HomeLotCenter;
+            var lot = CityLayout.LotCenter(buildLot);
             cityCam.Focus(city.WorldAt(lot, 0f), 90f);
+        }
+
+        /// <summary>The editing lot for a house lot (only one at a time: another lot's is put away first).</summary>
+        private BuildSite HouseEditFor(int lotIndex, int size)
+        {
+            if (houseEdit != null && houseEditLot != lotIndex) { Destroy(houseEdit.root.gameObject); houseEdit = null; }
+            houseEditLot = lotIndex;
+            return houseEdit ??= new BuildSite(transform, Lots.Pieces(lotIndex), size, size, BuildSite.CornerFor(BuildSite.HouseOrigin, size, size, 0f), 0f, 1f, true, "dgreen");
+        }
+
+        /// <summary>On to the next house lot the player owns.</summary>
+        private void SwitchLot()
+        {
+            if (site.dirty) { Progress.Save(); site.dirty = false; }
+            site.HideGhost();
+            buildLot = Lots.NextOwned(buildLot);
+            EnterBuild(false);
+            bu.Say(Lots.Name(buildLot));
         }
 
         /// <summary>Saves the car on the chassis and puts another one there (the next in the garage, or a new empty one).</summary>

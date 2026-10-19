@@ -111,7 +111,8 @@ namespace BrickMuseum.Core
                 if (ray.direction.y < 0f)
                 {
                     var p = ray.origin + ray.direction * ((lotY - ray.origin.y) / ray.direction.y) - CityMap.Center;
-                    if (CityLayout.OnHomeLot(CityMap.PlanOf(p + CityMap.Center))) { OpenHomeLot(); return; }
+                    int lot = CityLayout.LotAt(CityMap.PlanOf(p + CityMap.Center));
+                    if (lot >= 0) { OpenLot(lot); return; }
                 }
                 ClosePanel();
                 return;
@@ -189,14 +190,55 @@ namespace BrickMuseum.Core
             cu.ShowPanel(s.kind == "house" ? $"{CityLayout.StyleName(s.style)} ev arsası" : CityLayout.SlotName(s), info, null, buttons.ToArray());
         }
 
-        private void OpenHomeLot()
+        private void OpenHomeLot() => OpenLot(0);
+
+        /// <summary>A lot by the west road: build on it when it is the player's, else buy it.</summary>
+        private void OpenLot(int lot)
+        {
+            if (!FreeBuild.Lots.Owned(lot))
+            {
+                panelSlot = null;
+                city.Select(null);
+                Sfx.Play("pick", 0.6f);
+                cu.help.transform.parent.gameObject.SetActive(false);
+                int price = FreeBuild.Lots.Price(lot);
+                cu.ShowPanel("Satılık arsa", $"{price} lira · paran {FreeBuild.Wallet.Money} lira\nSatın alınca üstüne yeni bir ev yapabilirsin", null,
+                    ("Satın al", Ui.Yellow, () => BuyLot(lot)),
+                    ("Kapat", Neutral, ClosePanel));
+                return;
+            }
+            if (lot != 0)
+            {
+                panelSlot = null;
+                city.Select(null);
+                Sfx.Play("pick", 0.6f);
+                cu.help.transform.parent.gameObject.SetActive(false);
+                cu.ShowPanel(FreeBuild.Lots.Name(lot), $"Senin arsan · {FreeBuild.Lots.Pieces(lot).Count} parçalık ev", null,
+                    ("Evimi yap", Ui.Yellow, () => { ClosePanel(); buildLot = lot; EnterBuild(false); }),
+                    ("Kapat", Neutral, ClosePanel));
+                return;
+            }
+            OpenFirstLot();
+        }
+
+        private void BuyLot(int lot)
+        {
+            if (!FreeBuild.Lots.Buy(lot)) { Toast("Yeterli paran yok"); Sfx.Play("wrong", 0.5f); return; }
+            city.RefreshLots();
+            BuildHouse();
+            Sfx.Play("win");
+            Toast("Arsa senin! Evimi yap ile üstüne ev kur", 2.6f);
+            OpenLot(lot);
+        }
+
+        private void OpenFirstLot()
         {
             panelSlot = null;
             city.Select(null);
             Sfx.Play("pick", 0.6f);
             cu.help.transform.parent.gameObject.SetActive(false);
             cu.ShowPanel("Evim", $"Senin arsan · {Progress.Data.build.Count} parçalık ev" + (HasBuiltCar ? " · araban hazır" : ""), null,
-                ("Evimi yap", Ui.Yellow, () => { ClosePanel(); EnterBuild(false); }),
+                ("Evimi yap", Ui.Yellow, () => { ClosePanel(); buildLot = 0; EnterBuild(false); }),
                 ("Arabamı yap", new Color(0.8f, 0.9f, 1f), () => { ClosePanel(); EnterBuild(true); }),
                 ("Kapat", Neutral, ClosePanel));
         }

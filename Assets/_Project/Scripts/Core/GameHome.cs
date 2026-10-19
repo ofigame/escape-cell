@@ -26,12 +26,15 @@ namespace BrickMuseum.Core
             public HomeItem data;
             public FurnitureDef def;
             public GameObject go;
+            public int lot;
             /// <summary>Half size on the lot (lot units), turned with the piece.</summary>
             public Vector2 Half => (data.rot % 2 == 1 ? new Vector2(def.model.sz, def.model.sx) : new Vector2(def.model.sx, def.model.sz)) * FurnitureScale / 2f;
         }
 
         private readonly DecorUi du = new DecorUi();
-        private BuildSite house;
+        private BuildSite house;                // the house the player is in (or was last in)
+        private int houseLot;
+        private readonly BuildSite[] houses = new BuildSite[CityLayout.LotCount];
         private readonly List<FurnitureView> furniture = new List<FurnitureView>();
         private bool decorating, decorDrag;
         private int decorStorey = 1;
@@ -55,7 +58,7 @@ namespace BrickMuseum.Core
             {
                 if (selected == null) return;
                 FreeBuild.Wallet.Earn(selected.def.Price / 2);            // half the price back
-                Progress.Data.home.items.Remove(selected.data);
+                FreeBuild.Lots.Items(selected.lot).Remove(selected.data);
                 furniture.Remove(selected);
                 Destroy(selected.go);
                 Select(null);
@@ -66,29 +69,45 @@ namespace BrickMuseum.Core
             du.touch.Up = _ => { if (decorDrag) Progress.Save(); decorDrag = false; };
         }
 
-        /// <summary>(Re)builds the player's house on its lot from the saved pieces, with its furniture.</summary>
+        /// <summary>(Re)builds the player's houses on their lots from the saved pieces, with their furniture.</summary>
         private void BuildHouse()
         {
-            if (house != null) Destroy(house.root.gameObject);
+            for (int i = 0; i < houses.Length; i++) if (houses[i] != null) { Destroy(houses[i].root.gameObject); houses[i] = null; }
             furniture.Clear();
+            if (selMarker != null) Destroy(selMarker.gameObject);
             selMarker = null;
             var h = Progress.Data.home;
             if (h.version < 2) { h.items.Clear(); h.version = 2; Progress.Save(); }
-            var c = CityLayout.HomeLotCenter;
-            // the baseplate sits on the lot's lawn; the house's front (+z when building) faces the road to the east
-            var center = city.WorldAt(c, CityMap.Lawn + 0.06f + Piece.Plate);
-            float yaw = 90f + CityShape.Angle(c);
-            house = new BuildSite(city.root, Progress.Data.build, CityLayout.HomePlate, CityLayout.HomePlate,
-                BuildSite.CornerFor(center, CityLayout.HomePlate, CityLayout.HomePlate, yaw), yaw, 1f, false, "dgreen");
-            foreach (var it in h.items) SpawnFurniture(it);
+            for (int i = 0; i < CityLayout.LotCount; i++)
+            {
+                if (!FreeBuild.Lots.Owned(i)) continue;
+                var c = CityLayout.LotCenter(i);
+                // the baseplate sits on the lot's lawn; the house's front (+z when building) faces the road to the east
+                var center = city.WorldAt(c, CityMap.Lawn + 0.06f + Piece.Plate);
+                float yaw = 90f + CityShape.Angle(c);
+                houses[i] = new BuildSite(city.root, FreeBuild.Lots.Pieces(i), CityLayout.HomePlate, CityLayout.HomePlate,
+                    BuildSite.CornerFor(center, CityLayout.HomePlate, CityLayout.HomePlate, yaw), yaw, 1f, false, "dgreen");
+                foreach (var it in FreeBuild.Lots.Items(i)) SpawnFurniture(it, i);
+            }
+            house = houses[0]; houseLot = 0;
         }
 
-        private FurnitureView SpawnFurniture(HomeItem it)
+        /// <summary>The house standing under a world point (one with pieces), and its lot.</summary>
+        private BuildSite HouseAt(Vector3 p, float margin = 0f)
+        {
+            for (int i = 0; i < houses.Length; i++)
+                if (houses[i] != null && houses[i].pieces.Count > 0 && houses[i].Covers(p, margin)) return houses[i];
+            return null;
+        }
+
+        private void TickHouses(float dt) { foreach (var h in houses) h?.Tick(walkPos, dt); }
+
+        private FurnitureView SpawnFurniture(HomeItem it, int lot)
         {
             var def = Furniture.Find(it.id);
-            if (def == null) return null;
-            var v = new FurnitureView { data = it, def = def, go = PieceFactory.BuildModel(def.model) };
-            v.go.transform.SetParent(house.root, false);
+            if (def == null || houses[lot] == null) return null;
+            var v = new FurnitureView { data = it, def = def, go = PieceFactory.BuildModel(def.model), lot = lot };
+            v.go.transform.SetParent(houses[lot].root, false);
             v.go.transform.localScale = Vector3.one * FurnitureScale;
             PlaceFurniture(v);
             furniture.Add(v);
@@ -98,8 +117,9 @@ namespace BrickMuseum.Core
         private void PlaceFurniture(FurnitureView v)
         {
             var half = v.Half;
-            v.data.x = Mathf.Clamp(v.data.x, half.x, house.lx - half.x);
-            v.data.z = Mathf.Clamp(v.data.z, half.y, house.lz - half.y);
+            var h = houses[v.lot];
+            v.data.x = Mathf.Clamp(v.data.x, half.x, h.lx - half.x);
+            v.data.z = Mathf.Clamp(v.data.z, half.y, h.lz - half.y);
             v.go.transform.localPosition = new Vector3(v.data.x, v.data.y, v.data.z);
             v.go.transform.localRotation = Quaternion.Euler(0, 90f * v.data.rot, 0);
         }
@@ -107,9 +127,9 @@ namespace BrickMuseum.Core
         /// <summary>The furniture as boxes in the walker's way (only on its own floor).</summary>
         private IEnumerable<CityMap.Obstacle> FurnitureObstacles()
         {
-            bool turned = Mathf.RoundToInt(house.root.eulerAngles.y / 90f) % 2 == 1;
             foreach (var v in furniture)
             {
+                bool turned = Mathf.RoundToInt(houses[v.lot].root.eulerAngles.y / 90f) % 2 == 1;
                 var c = v.go.transform.position;
                 var half = v.Half;
                 yield return new CityMap.Obstacle
@@ -129,23 +149,24 @@ namespace BrickMuseum.Core
                 var at = city.WorldOf(carSlot);
                 obstacles.RemoveAll(o => Mathf.Abs(o.center.x - at.x) < 0.5f && Mathf.Abs(o.center.y - at.z) < 0.5f);
             }
-            if (house != null) obstacles.AddRange(FurnitureObstacles());
+            obstacles.AddRange(FurnitureObstacles());
         }
 
         // ---------- walking in the city and the house ----------
 
-        private bool InHouse(Vector3 p) => house != null && house.pieces.Count > 0 && house.Covers(p);
+        private bool InHouse(Vector3 p) => HouseAt(p) != null;
 
-        private float GroundAt(Vector3 p) => InHouse(p) ? house.Ground(p) : city.GroundAt(p);
+        private float GroundAt(Vector3 p) { var h = HouseAt(p); return h != null ? h.Ground(p) : city.GroundAt(p); }
 
         /// <summary>The walls of the house stop the walker; sliding along them works.</summary>
         private Vector3 HouseCollide(Vector3 next)
         {
-            if (house == null || !house.Covers(next, 1f) || !house.Blocked(next, WallRadius)) return next;
+            var h = HouseAt(next, 1f);
+            if (h == null || !h.Blocked(next, WallRadius)) return next;
             var alongX = new Vector3(next.x, next.y, walkPos.z);
-            if (!house.Blocked(alongX, WallRadius)) return alongX;
+            if (!h.Blocked(alongX, WallRadius)) return alongX;
             var alongZ = new Vector3(walkPos.x, next.y, next.z);
-            if (!house.Blocked(alongZ, WallRadius)) return alongZ;
+            if (!h.Blocked(alongZ, WallRadius)) return alongZ;
             return new Vector3(walkPos.x, next.y, walkPos.z);
         }
 
@@ -153,11 +174,11 @@ namespace BrickMuseum.Core
         {
             // the bounds are on the plan: the town's edges, the lake's quay, the player's lot out to the west
             var p = CityMap.PlanOf(next);
-            float lotZ = CityLayout.HomeLotCenter.y, half = CityLayout.HomeLot / 2f - 0.6f;
-            bool byLot = Mathf.Abs(p.y - lotZ) < half;
+            float north = CityLayout.LotsNorth + 0.6f, south = CityLayout.LotsSouth - 0.6f;
+            bool byLot = p.y > north && p.y < south;
             var q = p;
             q.x = Mathf.Clamp(q.x, CityLayout.MinX + (byLot ? -CityLayout.HomeLot + 0.6f : 1f), CityLayout.MaxX - 1f);
-            if (q.x < CityLayout.MinX) q.y = Mathf.Clamp(q.y, lotZ - half, lotZ + half);
+            if (q.x < CityLayout.MinX) q.y = Mathf.Clamp(q.y, north, south);
             q.y = Mathf.Clamp(q.y, CityLayout.MinZ + 1f, CityLayout.MaxZ - 0.8f);
             if (q == p) return next;
             var w = city.WorldAt(q, 0f);
@@ -167,7 +188,8 @@ namespace BrickMuseum.Core
         /// <summary>Keeps the walking camera above the ground and in front of the house's walls.</summary>
         private Vector3 ClampCam(Vector3 target, Vector3 pos)
         {
-            if (house != null && house.Covers(target, 2f)) pos = house.CamClamp(target, pos);
+            var h = HouseAt(target, 2f);
+            if (h != null) pos = h.CamClamp(target, pos);
             pos.y = Mathf.Max(pos.y, city.GroundAt(pos) + 0.4f);
             return pos;
         }
@@ -177,12 +199,13 @@ namespace BrickMuseum.Core
         /// <summary>Inside the house: the "Dekore et" button and which storey you're on.</summary>
         private bool ShowHomeNearby()
         {
-            bool inside = InHouse(walkPos);
-            tu.decorBtn.gameObject.SetActive(inside);
+            var h = HouseAt(walkPos);
+            tu.decorBtn.gameObject.SetActive(h != null);
             tu.homeBtn.gameObject.SetActive(false);
-            if (!inside) return false;
+            if (h == null) return false;
+            house = h; houseLot = System.Array.IndexOf(houses, h);
             tu.nearChip.SetActive(true);
-            tu.nearText.text = $"Evin · {StoreyOf(walkPos.y)}. kat";
+            tu.nearText.text = $"{FreeBuild.Lots.Name(houseLot)} · {StoreyOf(walkPos.y)}. kat";
             return true;
         }
 
@@ -207,7 +230,7 @@ namespace BrickMuseum.Core
         {
             decorStorey = Mathf.Clamp(storey, 1, house.Storeys);
             house.SetView(decorStorey);
-            foreach (var v in furniture) v.go.SetActive(v.data.y < decorStorey * BuildSite.Storey * Piece.Plate - 0.5f);
+            foreach (var v in furniture) v.go.SetActive(v.lot != houseLot || v.data.y < decorStorey * BuildSite.Storey * Piece.Plate - 0.5f);
             du.help.text = $"{decorStorey}. kat · aşağıdan eşya ekle, sürükleyip taşı";
             if (selected != null && !selected.go.activeSelf) Select(null);
         }
@@ -232,8 +255,8 @@ namespace BrickMuseum.Core
             if (!house.FloorUnder(new Ray(from, Vector3.down), out var at)) return;
             var local = house.root.InverseTransformPoint(at);
             var item = new HomeItem { id = def.id, x = local.x, y = local.y, z = local.z, rot = 0 };
-            Progress.Data.home.items.Add(item);
-            var v = SpawnFurniture(item);
+            FreeBuild.Lots.Items(houseLot).Add(item);
+            var v = SpawnFurniture(item, houseLot);
             Select(v);
             Sfx.Play("place", 0.7f);
             Progress.Save();
@@ -252,8 +275,8 @@ namespace BrickMuseum.Core
                 go.AddComponent<MeshFilter>().sharedMesh = b.ToMesh("sel");
                 go.AddComponent<MeshRenderer>().sharedMaterial = Mats.Lit(new Color(1f, 0.84f, 0.1f), 0.2f);
                 selMarker = go.transform;
-                selMarker.SetParent(house.root, false);
             }
+            selMarker.SetParent(house.root, false);
             selMarker.gameObject.SetActive(v != null);
         }
 
@@ -263,7 +286,7 @@ namespace BrickMuseum.Core
             float bestD = float.MaxValue;
             foreach (var v in furniture)
             {
-                if (!v.go.activeSelf) continue;
+                if (!v.go.activeSelf || v.lot != houseLot) continue;
                 var b = Previews.Bounds(v.go);
                 b.Expand(0.2f);
                 if (b.IntersectRay(ray, out float d) && d < bestD) { bestD = d; best = v; }

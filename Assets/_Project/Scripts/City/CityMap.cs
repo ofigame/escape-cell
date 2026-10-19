@@ -48,7 +48,7 @@ namespace BrickMuseum.City
             root.position = Center;
             BuildGround();
             BuildCreek();
-            BuildHomeLot();
+            BuildLots();
             foreach (var a in CityLayout.Areas) BuildArea(a);
             people = new Townsfolk(root);
         }
@@ -139,18 +139,62 @@ namespace BrickMuseum.City
             Add("CreekStones", stones, Mats.Lit(new Color(0.6f, 0.6f, 0.58f), 0.1f), true, 50f);
         }
 
-        /// <summary>The player's lot: a raised block with a pavement, its name on the pavement by the road.</summary>
-        private void BuildHomeLot()
+        private readonly TextMeshPro[] lotSigns = new TextMeshPro[CityLayout.LotCount];
+        private readonly GameObject[] saleBoards = new GameObject[CityLayout.LotCount];
+
+        /// <summary>The player's lots: raised blocks with a pavement and their name by the road; a red "for sale" board on those not bought.</summary>
+        private void BuildLots()
         {
-            var c = CityLayout.HomeLotCenter;
             var kerb = new MeshBuilder();
-            kerb.Box(new Vector3(c.x, Lawn / 2f - 1f, c.y), new Vector3(CityLayout.HomeLot, Lawn + 2f, CityLayout.HomeLot));
-            Add("Pavement Home", kerb, Mats.Lit(PavementColour, 0.1f));
             var lawn = new MeshBuilder();
-            lawn.Box(new Vector3(c.x, Lawn + 0.03f, c.y), new Vector3(CityLayout.HomeLot - 2f * CityLayout.Pavement, 0.06f, CityLayout.HomeLot - 2f * CityLayout.Pavement));
-            Add("Lawn Home", lawn, Mats.Lit(new Color(0.58f, 0.8f, 0.5f), 0.05f));
-            var sign = FlatText(root, c + new Vector2(0, CityLayout.HomeLot / 2f - CityLayout.Pavement / 2f), Lawn + 0.08f, "Evim", 1.9f, 20f);
-            sign.color = new Color(0.25f, 0.27f, 0.3f);
+            for (int i = 0; i < CityLayout.LotCount; i++)
+            {
+                var c = CityLayout.LotCenter(i);
+                kerb.Box(new Vector3(c.x, Lawn / 2f - 1f, c.y), new Vector3(CityLayout.HomeLot, Lawn + 2f, CityLayout.HomeLot - 0.6f));
+                lawn.Box(new Vector3(c.x, Lawn + 0.03f, c.y), new Vector3(CityLayout.HomeLot - 2f * CityLayout.Pavement, 0.06f, CityLayout.HomeLot - 2f * CityLayout.Pavement));
+                lotSigns[i] = FlatText(root, c + new Vector2(0, CityLayout.HomeLot / 2f - CityLayout.Pavement / 2f), Lawn + 0.08f, "", 1.9f, 22f);
+                lotSigns[i].color = new Color(0.25f, 0.27f, 0.3f);
+                // the board: two posts and a red panel, by the road
+                var board = new MeshBuilder();
+                board.Box(new Vector3(-1.6f, 1.6f, 0), new Vector3(0.25f, 3.2f, 0.25f));
+                board.Box(new Vector3(1.6f, 1.6f, 0), new Vector3(0.25f, 3.2f, 0.25f));
+                var panel = new MeshBuilder();
+                panel.Box(new Vector3(0, 2.6f, 0.05f), new Vector3(4f, 1.6f, 0.15f));
+                var go = new GameObject("ForSale " + i);
+                go.transform.SetParent(root, false);
+                var at = c + new Vector2(CityLayout.HomeLot / 2f - 6f, 0);
+                go.transform.localPosition = CityShape.Point(at, Lawn);
+                go.transform.localRotation = Quaternion.Euler(0, 90f + CityShape.Angle(at), 0);
+                AddChild(go.transform, board.ToMesh("posts"), Mats.Lit(Color.white, 0.3f));
+                AddChild(go.transform, panel.ToMesh("panel"), Mats.Lit(new Color(0.85f, 0.18f, 0.15f), 0.3f));
+                var t = FlatText(go.transform, new Vector3(0, 2.6f, 0.14f), "SATILIK", 0.5f, 3.6f);
+                t.transform.localRotation = Quaternion.Euler(0, 180f, 0);
+                t.color = Color.white;
+                saleBoards[i] = go;
+            }
+            Add("Pavement Lots", kerb, Mats.Lit(PavementColour, 0.1f));
+            Add("Lawn Lots", lawn, Mats.Lit(new Color(0.58f, 0.8f, 0.5f), 0.05f));
+            RefreshLots();
+        }
+
+        private static void AddChild(Transform parent, Mesh mesh, Material m)
+        {
+            var go = new GameObject("part");
+            go.transform.SetParent(parent, false);
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            var r = go.AddComponent<MeshRenderer>();
+            r.sharedMaterial = m;
+        }
+
+        /// <summary>Names on the lots bought, prices and boards on the rest.</summary>
+        public void RefreshLots()
+        {
+            for (int i = 0; i < CityLayout.LotCount; i++)
+            {
+                bool owned = FreeBuild.Lots.Owned(i);
+                lotSigns[i].text = owned ? FreeBuild.Lots.Name(i) : $"Satılık · {FreeBuild.Lots.Price(i)} lira";
+                saleBoards[i].SetActive(!owned);
+            }
         }
 
         private void BuildArea(Area a)
@@ -560,7 +604,7 @@ namespace BrickMuseum.City
             // the camera looks north, so screen right is world -x: the ground follows the finger
             target += new Vector3(deltaPx.x * k, 0f, deltaPx.y * k / Mathf.Sin(pitch * Mathf.Deg2Rad) * 0.85f);
             var c = CityMap.Center;
-            target.x = Mathf.Clamp(target.x, c.x + CityLayout.MinX - CityLayout.HomeLot - 20f, c.x + CityLayout.MaxX + 20f);
+            target.x = Mathf.Clamp(target.x, c.x + CityLayout.MinX - CityLayout.HomeLot - 20f, c.x + CityLayout.MaxX + 20f);   // (the lots lie west of the town)
             target.z = Mathf.Clamp(target.z, c.z + CityLayout.MinZ - 20f, c.z + CityLayout.MaxZ + 60f);
         }
 

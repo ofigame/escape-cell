@@ -71,9 +71,27 @@ namespace BrickMuseum.City
         /// <summary>The player's own lot: a 24×24 baseplate with a pavement round it, west of the city on the west road.</summary>
         public const float HomeLot = 32f;
         public const int HomePlate = 24;
-        public static Vector2 HomeLotCenter => new Vector2(MinX - HomeLot / 2f, ZOf(1));
-        public static bool OnHomeLot(Vector2 local, float margin = 0f) =>
-            Mathf.Abs(local.x - HomeLotCenter.x) <= HomeLot / 2f + margin && Mathf.Abs(local.y - HomeLotCenter.y) <= HomeLot / 2f + margin;
+        public static Vector2 HomeLotCenter => LotCenter(0);
+
+        /// <summary>The player's lots side by side along the west road: the home in the middle, the ones for sale north and south.</summary>
+        public const int LotCount = 5;
+        private static readonly float[] LotOffsets = { 0f, -HomeLot, HomeLot, -2f * HomeLot, 2f * HomeLot };
+        public static Vector2 LotCenter(int i) => new Vector2(MinX - HomeLot / 2f, ZOf(1) + LotOffsets[i]);
+        public static float LotsNorth => ZOf(1) - 2.5f * HomeLot;
+        public static float LotsSouth => ZOf(1) + 2.5f * HomeLot;
+
+        /// <summary>Which lot a plan point is on (-1: none).</summary>
+        public static int LotAt(Vector2 p, float margin = 0f)
+        {
+            for (int i = 0; i < LotCount; i++)
+            {
+                var c = LotCenter(i);
+                if (Mathf.Abs(p.x - c.x) <= HomeLot / 2f + margin && Mathf.Abs(p.y - c.y) <= HomeLot / 2f + margin) return i;
+            }
+            return -1;
+        }
+
+        public static bool OnHomeLot(Vector2 local, float margin = 0f) => LotAt(local, margin) >= 0;
         public static float XOf(int col)
         {
             float x = MinX + Gaps[0] + Block / 2f;
