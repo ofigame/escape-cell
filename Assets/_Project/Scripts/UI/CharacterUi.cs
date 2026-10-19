@@ -20,7 +20,7 @@ namespace BrickMuseum.UI
         public void Build(Transform parent)
         {
             canvas = Ui.MakeCanvas(parent, 15);
-            var root = canvas.transform;
+            var root = Ui.SafeRoot(canvas);
             var bg = Ui.Plain(root, "Bg", new Color(0.93f, 0.95f, 0.97f));
             bg.rectTransform.Fill();
 

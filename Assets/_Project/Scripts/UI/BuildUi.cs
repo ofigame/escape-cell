@@ -27,7 +27,7 @@ namespace BrickMuseum.UI
         public void Build(Transform parent)
         {
             canvas = Ui.MakeCanvas(parent, 14);
-            var root = canvas.transform;
+            var root = Ui.SafeRoot(canvas);
 
             var t = Ui.Plain(root, "Touch", new Color(0, 0, 0, 0));
             t.rectTransform.Fill();

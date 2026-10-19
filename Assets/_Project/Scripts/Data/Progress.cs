@@ -91,6 +91,14 @@ namespace BrickMuseum.Data
         public List<BuildPieceData> pieces = new List<BuildPieceData>();
     }
 
+    /// <summary>A kind of model that can't be built again until this time (UTC ticks).</summary>
+    [Serializable]
+    public class KindLock
+    {
+        public string kind;
+        public long until;
+    }
+
     [Serializable]
     public class SaveFile
     {
@@ -107,7 +115,8 @@ namespace BrickMuseum.Data
         public List<CarSave> cars = new List<CarSave>();   // the player's own cars (the garage)
         public List<FishItem> fish = new List<FishItem>();  // the cooler
         public List<LotSave> lots = new List<LotSave>();
-        public List<GardenSave> gardens = new List<GardenSave>();    // lots 1.. along the west road (lot 0 is build/home)
+        public List<GardenSave> gardens = new List<GardenSave>();
+        public List<KindLock> cooldowns = new List<KindLock>();    // lots 1.. along the west road (lot 0 is build/home)
         public int activeCar;
         public bool stockInit;               // the starter kit (and materials for models built before) has been given
         public List<StockItem> stock = new List<StockItem>();
@@ -245,6 +254,33 @@ namespace BrickMuseum.Data
         public static List<ModelDef> PoolFor(Slot s) =>
             ModelCatalog.All.Where(m => Fits(m, s) && (Repeatable(m.kind) || !Owned(m.id)) && !IsLocked(m.id, out _))
                 .OrderBy(m => Owned(m.id) ? 1 : 0).ThenBy(m => m.index).Take(3).ToList();
+
+        /// <summary>Every model this slot can take now (not built yet, or one that may be built again), easiest first.</summary>
+        public static List<ModelDef> ChoicesFor(Slot s) =>
+            ModelCatalog.All.Where(m => Fits(m, s) && (Repeatable(m.kind) || !Owned(m.id)) && !IsLocked(m.id, out _))
+                .OrderBy(m => Owned(m.id) ? 1 : 0).ThenBy(m => m.index).Take(12).ToList();
+
+        /// <summary>After a model is finished its kind rests for an hour (an ad wakes it at once).</summary>
+        public static readonly TimeSpan KindRest = TimeSpan.FromHours(1);
+
+        public static void RestKind(string kind)
+        {
+            var c = Data.cooldowns.FirstOrDefault(x => x.kind == kind);
+            if (c == null) Data.cooldowns.Add(c = new KindLock { kind = kind });
+            c.until = (DateTime.UtcNow + KindRest).Ticks;
+            Save();
+        }
+
+        public static void WakeKind(string kind) { Data.cooldowns.RemoveAll(x => x.kind == kind); Save(); }
+
+        /// <summary>How long a kind still rests (null: it can be built).</summary>
+        public static TimeSpan? KindResting(string kind)
+        {
+            var c = Data.cooldowns.FirstOrDefault(x => x.kind == kind);
+            if (c == null) return null;
+            var left = new DateTime(c.until, DateTimeKind.Utc) - DateTime.UtcNow;
+            return left > TimeSpan.Zero ? left : (TimeSpan?)null;
+        }
 
         /// <summary>Trees and street decor can be built again and again (a street needs many of them).</summary>
         public static bool Repeatable(string kind) => kind == "tree" || kind == "decor";

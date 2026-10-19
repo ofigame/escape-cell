@@ -115,15 +115,12 @@ namespace BrickMuseum.City
         {
             float cx = CityLayout.CreekX, ch = CityLayout.Creek / 2f, w = CityLayout.CreekWater;
             float z0 = CityLayout.MinZ, z1 = CityLayout.MaxZ + 4f;
-            var banks = new MeshBuilder();
-            var profile = new List<Vector2>
-            {
-                new Vector2(cx - ch, RoadTop), new Vector2(cx - ch, -6f), new Vector2(cx + ch, -6f), new Vector2(cx + ch, RoadTop),
-                new Vector2(cx + w + 1.5f, CreekBed + 0.3f), new Vector2(cx + w - 1f, CreekBed), new Vector2(cx - w + 1f, CreekBed), new Vector2(cx - w - 1.5f, CreekBed + 0.3f),
-            };
-            profile.Reverse();
-            banks.Extrude(profile, z0, z1);
-            Add("CreekBanks", banks, Mats.Lit(new Color(0.5f, 0.72f, 0.42f), 0.05f), false, 6f);
+            // the valley's cross-section, west to east: grass down to the water's edge, a muddy bed under the water
+            var bank = new[] { new Vector2(cx - ch, RoadTop), new Vector2(cx - w - 1.5f, CreekBed + 0.4f) };
+            var bankE = new[] { new Vector2(cx + w + 1.5f, CreekBed + 0.4f), new Vector2(cx + ch, RoadTop) };
+            var bed = new[] { new Vector2(cx - w - 1.5f, CreekBed + 0.4f), new Vector2(cx - w + 1f, CreekBed - 0.6f), new Vector2(cx + w - 1f, CreekBed - 0.6f), new Vector2(cx + w + 1.5f, CreekBed + 0.4f) };
+            AddStrip("CreekBanks", new[] { bank, bankE }, z0, z1, Grass.Lawn(new Color(0.5f, 0.72f, 0.42f)));
+            AddStrip("CreekBed", new[] { bed }, z0, z1, Mats.Lit(new Color(0.36f, 0.33f, 0.24f), 0.15f));
             var water = new MeshBuilder();
             water.Box(new Vector3(cx, WaterTop - 0.05f, (z0 + z1) / 2f), new Vector3(2f * w, 0.1f, z1 - z0));
             Add("CreekWater", water, Water.Creek, false, 6f);
@@ -141,6 +138,31 @@ namespace BrickMuseum.City
 
         private readonly TextMeshPro[] lotSigns = new TextMeshPro[CityLayout.LotCount];
         private readonly GameObject[] saleBoards = new GameObject[CityLayout.LotCount];
+
+        /// <summary>Open surfaces along z made from cross-section lines (no end caps), bent onto the land.</summary>
+        private void AddStrip(string name, Vector2[][] lines, float z0, float z1, Material m)
+        {
+            var verts = new List<Vector3>();
+            var tris = new List<int>();
+            foreach (var line in lines)
+                for (int i = 0; i + 1 < line.Length; i++)
+                {
+                    int k = verts.Count;
+                    verts.Add(new Vector3(line[i].x, line[i].y, z0)); verts.Add(new Vector3(line[i + 1].x, line[i + 1].y, z0));
+                    verts.Add(new Vector3(line[i].x, line[i].y, z1)); verts.Add(new Vector3(line[i + 1].x, line[i + 1].y, z1));
+                    tris.AddRange(new[] { k, k + 2, k + 1, k + 1, k + 2, k + 3 });
+                }
+            var mesh = new Mesh { name = name };
+            mesh.SetVertices(verts);
+            mesh.SetTriangles(tris, 0);
+            var go = new GameObject(name);
+            go.transform.SetParent(root, false);
+            go.AddComponent<MeshFilter>().sharedMesh = CityShape.Bend(mesh, 6f);
+            var r = go.AddComponent<MeshRenderer>();
+            r.sharedMaterial = m;
+            r.shadowCastingMode = ShadowCastingMode.Off;
+            m.SetFloat("_Cull", 0f);
+        }
 
         /// <summary>The player's lots: raised blocks with a pavement and their name by the road; a red "for sale" board on those not bought.</summary>
         private void BuildLots()
@@ -173,7 +195,7 @@ namespace BrickMuseum.City
                 saleBoards[i] = go;
             }
             Add("Pavement Lots", kerb, Mats.Lit(PavementColour, 0.1f));
-            Add("Lawn Lots", lawn, Mats.Lit(new Color(0.58f, 0.8f, 0.5f), 0.05f));
+            Add("Lawn Lots", lawn, Grass.Lawn(new Color(0.58f, 0.8f, 0.5f)));
             RefreshLots();
         }
 
@@ -206,7 +228,7 @@ namespace BrickMuseum.City
             var lawn = new MeshBuilder();
             float inner = CityLayout.Block - 2f * CityLayout.Pavement;   // a pavement all round the block
             lawn.Box(new Vector3(a.center.x, Lawn + 0.03f, a.center.y), new Vector3(inner, 0.06f, inner));
-            var r = Add("Lawn " + a.name, lawn, Mats.Lit(a.ground, 0.05f));
+            var r = Add("Lawn " + a.name, lawn, Grass.Lawn(a.ground));
             // winding gravel footpaths (the park)
             if (a.paths.Count > 0)
             {

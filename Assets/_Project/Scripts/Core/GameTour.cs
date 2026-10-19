@@ -32,9 +32,10 @@ namespace BrickMuseum.Core
             yield return Shot(dir, "02_plot_panel");
 
             BuildFor(plot);
-            yield return new WaitForSeconds(0.8f);
-            yield return Shot(dir, "03_roulette");
-            while (spinning) yield return null;
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot(dir, "03_choose_model");
+            StartChosen(plot, Progress.ChoicesFor(plot)[0]);
+            Debug.Log($"[Tour] bags for {current.id}: {bags.Count} ({string.Join(",", bags.Select(b => b.Count))})");
             yield return new WaitForSeconds(0.5f);
             yield return Shot(dir, "04_target");
             wu.refModal.SetActive(false);
@@ -45,11 +46,16 @@ namespace BrickMuseum.Core
             PlaceFinished();
             yield return new WaitForSeconds(0.6f);
             yield return Shot(dir, "06_house_in_city");
+            var restSlot = CityLayout.Slots.First(x => x.kind == "house" && x.style == "tr" && Progress.At(x.id) == null && x.level <= Progress.Level);
+            OpenSlot(restSlot);
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot(dir, "06a_kind_resting");
+            ClosePanel();
+            Progress.Data.cooldowns.Clear();
 
             // leave a build half-way, come back to it from the city, finish it
             var second = CityLayout.Slots.First(s => s.kind == "house" && s.style == "tr" && Progress.At(s.id) == null && s.level <= Progress.Level);
-            BuildFor(second);
-            while (spinning) yield return null;
+            StartChosen(second, Progress.ChoicesFor(second)[0]);
             wu.refModal.SetActive(false);
             for (int i = 0; i < 6; i++) { PlaceNext(); yield return null; }
             LeaveWorkshop();
@@ -69,8 +75,7 @@ namespace BrickMuseum.Core
 
             // a parking spot: build a vehicle and keep it in the inventory
             var parking = CityLayout.Slots.First(s => s.kind == "vehicle" && s.level <= Progress.Level);
-            BuildFor(parking);
-            while (spinning) yield return null;
+            StartChosen(parking, Progress.ChoicesFor(parking)[0]);
             wu.refModal.SetActive(false);
             while (!bench.Complete) { PlaceNext(); yield return null; }
             yield return new WaitForSeconds(0.8f);

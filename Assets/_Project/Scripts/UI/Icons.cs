@@ -183,6 +183,7 @@ namespace BrickMuseum.UI
             if (l == "Dağıt") return Spread;
             if (l == "Başla" || l == "Devam" || l == "İnşaya devam et") return Play;
             if (l.StartsWith("Reklam izle")) return Video;
+            if (l == "Yap") return Plus;
             if (l == "Yeni yap" || l == "Koy") return Plus;
             if (l == "Geri al") return Undo;
             if (l == "Döndür") return Rotate;

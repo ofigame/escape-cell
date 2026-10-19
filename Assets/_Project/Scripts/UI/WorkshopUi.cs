@@ -49,7 +49,7 @@ namespace BrickMuseum.UI
         public void Build(Transform parent)
         {
             canvas = Ui.MakeCanvas(parent, 10);
-            var root = canvas.transform;
+            var root = Ui.SafeRoot(canvas);
 
             var t = Ui.Plain(root, "Touch", new Color(0, 0, 0, 0));
             t.rectTransform.Fill();
@@ -117,7 +117,7 @@ namespace BrickMuseum.UI
             BuildBag(root);
             // modals and the toast live on their own canvas, shown over the city too
             overlay = Ui.MakeCanvas(parent, 20);
-            root = overlay.transform;
+            root = Ui.SafeRoot(overlay);
             BuildModals(root);
 
             var tg = Ui.Panel(root, "Toast", new Color(0.08f, 0.08f, 0.1f, 0.88f), false);

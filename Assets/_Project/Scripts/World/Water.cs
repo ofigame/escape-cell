@@ -39,15 +39,17 @@ namespace BrickMuseum.World
             }
         }
 
-        private static Material Make()
+        private static Material Make(float alpha)
         {
+            // see-through, so the shallows and the deep bed show under it
             var m = Mats.LitTexture(Ripples, true);
             m.SetFloat("_Smoothness", 0.93f);
+            m.SetColor("_BaseColor", new Color(0.28f, 0.56f, 0.95f, alpha));   // a blue tint over the light ripples
             return m;
         }
 
-        public static Material Lake => lake ??= Make();
-        public static Material Creek => creek ??= Make();
+        public static Material Lake => lake ??= Make(0.78f);
+        public static Material Creek => creek ??= Make(0.72f);
 
         /// <summary>The ripples move: the lake drifts slowly, the creek runs south into it.</summary>
         public static void Tick(float time)

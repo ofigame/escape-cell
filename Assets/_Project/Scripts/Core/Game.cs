@@ -191,10 +191,8 @@ namespace BrickMuseum.Core
             current = m;
             bench.Begin(m);
             if (resume != null) RestorePending(resume);
-            // the bag holds what is still to go on, plus a few pieces that belong to no spot
-            var kinds = bench.targets.Where(t => !t.placed).Select(t => t.p.Kind()).ToList();
-            kinds.AddRange(Distractors(m, Mathf.Clamp(4 + m.pieces.Count / 6, 4, 12)));
-            wu.bag.Fill(kinds);
+            MakeBags();
+            FillBag();
             wu.bag.glowKey = null;
             if (resume == null) { heartsTotal = heartsLeft = m.Hearts; mistakes = 0; adUsed = false; }
             Previews.ShowLive(m);
@@ -207,6 +205,45 @@ namespace BrickMuseum.Core
             ShowTarget(resume == null);
             SavePending();
             if (resume != null && heartsLeft <= 0) { wu.refModal.SetActive(false); ShowOutOfHearts(); }
+        }
+
+        // ---------- the bags: a big model comes in bags of about two layers each ----------
+
+        private readonly List<List<Target>> bags = new List<List<Target>>();
+        private int bagIndex;
+
+        /// <summary>Groups the model's pieces by layer (two brick layers a bag), merging thin groups and splitting fat ones.</summary>
+        private void MakeBags()
+        {
+            bags.Clear();
+            // a piece goes in the bag of its layer, or later when it waits for pieces higher up (a sticker on an upper wall)
+            var key = new Dictionary<Target, int>();
+            int Key(Target t) { if (key.TryGetValue(t, out var k)) return k; k = t.p.y / 6; foreach (var d in t.deps) k = Mathf.Max(k, Key(d)); return key[t] = k; }
+            var layers = bench.targets.GroupBy(Key).OrderBy(g => g.Key).Select(g => g.ToList()).ToList();
+            var bag = new List<Target>();
+            foreach (var layer in layers)
+            {
+                if (bag.Count > 0 && bag.Count + layer.Count > 32) { bags.Add(bag); bag = new List<Target>(); }
+                bag.AddRange(layer);
+                if (bag.Count >= 14) { bags.Add(bag); bag = new List<Target>(); }
+            }
+            if (bag.Count > 0) { if (bags.Count > 0 && bag.Count < 6) bags[bags.Count - 1].AddRange(bag); else bags.Add(bag); }
+            // a resumed build starts at the first bag with pieces still to go on
+            bagIndex = 0;
+            while (bagIndex < bags.Count - 1 && bags[bagIndex].All(t => t.placed)) bagIndex++;
+        }
+
+        private bool BagDone => bagIndex < bags.Count - 1 && bags[bagIndex].All(t => t.placed);
+
+        /// <summary>The current bag: its pieces still to go on, plus a few that belong to no spot.</summary>
+        private void FillBag()
+        {
+            var group = bags.Count > 0 ? bags[bagIndex] : bench.targets;
+            var kinds = group.Where(t => !t.placed).Select(t => t.p.Kind()).ToList();
+            kinds.AddRange(Distractors(current, Mathf.Clamp(2 + kinds.Count / 6, 2, 8)));
+            wu.bag.Fill(kinds);
+            wu.bag.glowKey = null;
+            UpdateHud();
         }
 
         private static List<Piece> Distractors(ModelDef m, int n)
@@ -235,7 +272,7 @@ namespace BrickMuseum.Core
             wu.refKicker.text = first ? "BUNU YAPACAKSIN" : "HEDEF MODEL";
             wu.refGo.SetLabel(first ? "Başla" : "Devam");
             wu.refName.text = current.name;
-            wu.refInfo.text = $"{current.cat} · {current.pieces.Count} parça · {current.Hearts} hata hakkı\nÇantada {wu.bag.Count} parça var";
+            wu.refInfo.text = $"{current.cat} · {current.pieces.Count} parça · {current.Hearts} hata hakkı\nÇantada {wu.bag.Count} parça var" + (bags.Count > 1 ? $" · torba {bagIndex + 1}/{bags.Count}" : "");
             wu.refModal.SetActive(true);
         }
 
@@ -332,6 +369,7 @@ namespace BrickMuseum.Core
                 if (bench.Hint == null) { wu.hintBar.gameObject.SetActive(false); wu.bag.glowKey = null; }
                 UpdateHud();
                 if (bench.Complete) StartCoroutine(Win());
+                else if (BagDone) { bagIndex++; FillBag(); Toast($"Yeni torba açıldı · {bagIndex + 1}/{bags.Count}"); Sfx.Play("rustle"); }
             }
             else
             {
@@ -401,6 +439,7 @@ namespace BrickMuseum.Core
             levelBefore = Progress.Level;
             FreeBuild.Stock.EnsureStarted();
             Progress.Finished(current.id, stars);
+            Progress.RestKind(current.kind);
             int earned = FreeBuild.Stock.Earn(current, stars);
             Sfx.Play("win");
             wu.winTitle.text = $"{current.name} tamamlandı!";

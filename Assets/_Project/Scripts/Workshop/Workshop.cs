@@ -118,11 +118,17 @@ namespace BrickMuseum.Workshop
 
         private static bool Overlap(Piece a, Piece b) => a.x < b.x + b.fw && b.x < a.x + a.fw && a.z < b.z + b.fd && b.z < a.z + a.fd;
 
+        /// <summary>
+        /// Only the lowest layer that can be built now shows its spots: the next layer's spots appear once every piece of
+        /// this one is on (no upper spots while the layer under them is unfinished).
+        /// </summary>
         private void Refresh()
         {
+            int lowest = int.MaxValue;
+            foreach (var t in targets) if (!t.placed && t.deps.All(d => d.placed)) lowest = System.Math.Min(lowest, t.p.y);
             foreach (var t in targets)
             {
-                t.available = !t.placed && t.deps.All(d => d.placed);
+                t.available = !t.placed && t.deps.All(d => d.placed) && t.p.y <= lowest;
                 t.ghost.SetActive(t.available);
             }
         }

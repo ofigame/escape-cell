@@ -57,6 +57,15 @@ namespace BrickMuseum.UI
             return canvas;
         }
 
+        /// <summary>A canvas's content inside the safe area (clear of notches): build the screen's controls under it.</summary>
+        public static Transform SafeRoot(Canvas canvas)
+        {
+            var r = Rect(canvas.transform, "Safe");
+            r.Fill();
+            r.gameObject.AddComponent<SafeArea>();
+            return r;
+        }
+
         public static RectTransform Rect(Transform parent, string name)
         {
             var go = new GameObject(name, typeof(RectTransform));

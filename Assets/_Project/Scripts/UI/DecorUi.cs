@@ -22,7 +22,7 @@ namespace BrickMuseum.UI
         {
             canvas = Ui.MakeCanvas(parent, 13);
             canvas.GetComponent<CanvasScaler>().referenceResolution = new Vector2(1920, 1080);
-            var root = canvas.transform;
+            var root = Ui.SafeRoot(canvas);
 
             var t = Ui.Plain(root, "Touch", new Color(0, 0, 0, 0));
             t.rectTransform.Fill();

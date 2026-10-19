@@ -471,3 +471,11 @@ Taş yol	Stepping stones	飛び石	ممر حجري	Trittsteine	Pas japonais	Sent
 Bahçe lambası	Garden lamp	庭の灯り	مصباح حديقة	Gartenlampe	Lampe de jardin	Lampione da giardino	Farol de jardín	정원등	Bağ lampası
 Bahçeyi geliştir	Improve the garden	庭を整える	طوّر الحديقة	Garten gestalten	Aménager le jardin	Sistema il giardino	Mejorar el jardín	정원 꾸미기	Bağı inkişaf etdir
 Bahçe seviye {0}'te açılır	Garden opens at level {0}	庭はレベル{0}で解放	تُفتح الحديقة في المستوى {0}	Garten ab Stufe {0}	Jardin au niveau {0}	Giardino dal livello {0}	Jardín en el nivel {0}	정원은 레벨 {0}에 열려요	Bağ {0}-cü səviyyədə açılır
+Hangisini yapalım?	Which one shall we build?	どれをつくる？	ماذا نبني؟	Was bauen wir?	On construit quoi ?	Cosa costruiamo?	¿Qué construimos?	무엇을 만들까요?	Hansını tikək?
+Yap	Build	つくる	ابنِ	Bauen	Construire	Costruisci	Construir	만들기	Tik
+Yeni yapım {0} sonra	Next build in {0}	次の制作まで {0}	البناء التالي بعد {0}	Nächster Bau in {0}	Prochaine construction dans {0}	Prossima costruzione tra {0}	Siguiente construcción en {0}	{0} 후 다음 제작	Növbəti tikinti {0} sonra
+Reklam izle: hemen aç	Watch an ad: open now	広告を見て今すぐ解放	شاهد إعلانًا: افتح الآن	Werbung ansehen: sofort öffnen	Regarder une pub : ouvrir	Guarda uno spot: apri ora	Mira un anuncio: abrir ya	광고 보고 바로 열기	Reklam izlə: indi aç
+{0} açıldı	{0} is open	{0}が解放された	فُتح {0}	{0} ist frei	{0} est ouvert	{0} è aperto	{0} abierto	{0} 열림	{0} açıldı
+Yeni torba açıldı	New bag opened	新しい袋を開けた	فُتحت حقيبة جديدة	Neue Tüte geöffnet	Nouveau sac ouvert	Nuovo sacchetto aperto	Bolsa nueva abierta	새 봉지를 열었어요	Yeni torba açıldı
+torba {0}/{1}	bag {0}/{1}	袋 {0}/{1}	حقيبة {0}/{1}	Tüte {0}/{1}	sac {0}/{1}	sacchetto {0}/{1}	bolsa {0}/{1}	봉지 {0}/{1}	torba {0}/{1}
+{0} {1} modeli seçilebilir	{0} {1} models to choose from	{1}のモデルを{0}個から選べる	يمكن اختيار {0} من نماذج {1}	{0} Modelle zur Wahl ({1})	{0} modèles au choix : {1}	{0} modelli tra cui scegliere: {1}	{0} modelos para elegir: {1}	{1} 모델 {0}개 중 선택	{0} {1} modeli seçmək olar

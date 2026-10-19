@@ -31,7 +31,7 @@ namespace BrickMuseum.UI
         public void Build(Transform parent)
         {
             canvas = Ui.MakeCanvas(parent, 11);
-            var root = canvas.transform;
+            var root = Ui.SafeRoot(canvas);
             var t = Ui.Plain(root, "Touch", new Color(0, 0, 0, 0));
             t.rectTransform.Fill();
             touch = t.gameObject.AddComponent<PointerArea>();
@@ -63,7 +63,7 @@ namespace BrickMuseum.UI
             langBtn = Ui.Button(root, "Dil", Color.white, Ui.Ink, 30, () => { });
             ((RectTransform)langBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 80), new Vector2(-24, -586));
             var mp = Ui.Panel(root, "Money", new Color(1f, 0.96f, 0.82f, 0.95f), false);
-            mp.rectTransform.Place(new Vector2(0, 1), new Vector2(230, 74), new Vector2(24, -132));
+            mp.rectTransform.Place(new Vector2(0, 1), new Vector2(230, 74), new Vector2(24, -168));   // under the level chip
             var coin = Ui.Plain(mp.transform, "Coin", new Color(0.95f, 0.7f, 0.1f), false);
             coin.sprite = Icons.Circle;
             coin.rectTransform.Place(new Vector2(0, 0.5f), new Vector2(42, 42), new Vector2(14, 0));

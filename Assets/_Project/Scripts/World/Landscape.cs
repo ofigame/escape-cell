@@ -126,6 +126,14 @@ namespace BrickMuseum.World
             var water = new MeshBuilder();
             water.Box(new Vector3(0, Ground + 0.06f, mid), new Vector3(LakeHalfWidth * 2f, 0.04f, south - north));
             foreach (float sx in new[] { -1f, 1f }) water.Cylinder(new Vector3(sx * LakeHalfWidth, Ground + 0.04f, mid), half, half, 0.04f, 32, true, false);
+            // under the water: a pale sandy shelf along the town's quay, then the deep dark bed
+            var shelf = new MeshBuilder();
+            shelf.Box(new Vector3(0, Ground - 0.9f, north + 7f), new Vector3(LakeHalfWidth * 2f, 0.2f, 14f));
+            Add(parent, "LakeShelf", shelf.ToMesh("shelf"), Mats.Lit(new Color(0.62f, 0.62f, 0.46f), 0.05f), false, true);
+            var bed = new MeshBuilder();
+            bed.Box(new Vector3(0, Ground - 3.2f, mid + 6f), new Vector3(LakeHalfWidth * 2f + half * 2f, 0.2f, south - north));
+            foreach (float sx in new[] { -1f, 1f }) bed.Cylinder(new Vector3(sx * LakeHalfWidth, Ground - 3.3f, mid), half, half, 0.2f, 32, true, false);
+            Add(parent, "LakeBed", bed.ToMesh("bed"), Mats.Lit(new Color(0.1f, 0.24f, 0.32f), 0.05f), false, true);
             var lakeMesh = water.ToMesh("lake");
             Water.PlanarUV(lakeMesh, 0.04f);
             Add(parent, "Lake", lakeMesh, Water.Lake, false, true);

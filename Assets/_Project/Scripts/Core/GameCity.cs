@@ -31,6 +31,7 @@ namespace BrickMuseum.Core
                 Progress.Data.inventory.Add(p.id);
             }
             Progress.Save();
+            FreeBuild.Wallet.EnsureStarted();
             city = new CityMap(transform);
             BuildHouse();
             var start = CityLayout.AreaNamed("Türk Mahallesi").center;
@@ -186,14 +187,20 @@ namespace BrickMuseum.Core
             var inv = Progress.InventoryFor(s);
             string kindLine = s.kind == "house" ? $"{CityLayout.StyleName(s.style)} evleri" : CityLayout.SlotName(s);
             string info;
-            if (pool.Count > 0) info = $"{where}\nÇarkta {pool.Count} {kindLine} modeli var";
+            if (pool.Count > 0) info = $"{where}\n{Progress.ChoicesFor(s).Count} {kindLine} modeli seçilebilir";
             else
             {
                 var wait = Progress.NextUnlock(s);
                 info = $"{where}\n" + (wait != null ? $"Yeni model {Progress.LockText(wait.Value)} sonra" : "Bu alan için yeni modeller yakında");
             }
             var buttons = new List<(string, Color, System.Action)>();
+            var resting = Progress.KindResting(s.kind);
             if (Pending.Has && Pending.slot == s.id) buttons.Add(("İnşaya devam et", Ui.Yellow, ResumeBuild));
+            else if (pool.Count > 0 && resting != null)
+            {
+                info += $"\nYeni yapım {Progress.LockText(resting.Value)} sonra";
+                buttons.Add(("Reklam izle: hemen aç", Ui.Yellow, () => StartCoroutine(WakeKindAd(s))));
+            }
             else if (pool.Count > 0) buttons.Add(("Yeni yap", Ui.Yellow, () => BuildFor(s)));
             if (inv.Count > 0) buttons.Add(($"Envanterden ({inv.Count})", new Color(0.8f, 0.9f, 1f), () => PickFromInventory(s)));
             buttons.Add(("Kapat", Neutral, ClosePanel));
@@ -253,15 +260,39 @@ namespace BrickMuseum.Core
                 ("Kapat", Neutral, ClosePanel));
         }
 
+        /// <summary>"Yeni yap": the models this slot can take, the player picks one (no roulette).</summary>
         private void BuildFor(Slot s)
         {
-            var pool = Progress.PoolFor(s);
-            if (pool.Count == 0) return;
+            var choices = Progress.ChoicesFor(s);
+            if (choices.Count == 0) return;
+            cu.ClearRows();
+            cu.listTitle.text = "Hangisini yapalım?";
+            foreach (var m in choices)
+            {
+                var model = m;
+                cu.AddRow(Previews.Model(m, 160), m.name, $"{m.pieces.Count} parça · {m.Hearts} hata hakkı", "Yap", () => StartChosen(s, model));
+            }
+            cu.list.SetActive(true);
+        }
+
+        private void StartChosen(Slot s, ModelDef m)
+        {
+            cu.list.SetActive(false);
             if (Pending.Has) { ClearPending(); Toast("Yarım kalan yapım bırakıldı"); }
             buildSlot = s;
             ClosePanel();
             EnterWorkshop();
-            StartCoroutine(Spin(pool));
+            StartLevel(m);
+        }
+
+        /// <summary>The ad that wakes a resting kind at once.</summary>
+        private System.Collections.IEnumerator WakeKindAd(Slot s)
+        {
+            ClosePanel();
+            yield return TestAd();
+            Progress.WakeKind(s.kind);
+            Toast($"{CityLayout.SlotName(s)} açıldı");
+            OpenSlot(s);
         }
 
         private void TakeAway(Slot s)

@@ -29,7 +29,7 @@ namespace BrickMuseum.UI
             canvas = Ui.MakeCanvas(parent, 12);
             var scaler = canvas.GetComponent<CanvasScaler>();
             scaler.referenceResolution = new Vector2(1920, 1080);
-            var root = canvas.transform;
+            var root = Ui.SafeRoot(canvas);
 
             var t = Ui.Plain(root, "Touch", new Color(0, 0, 0, 0));
             t.rectTransform.Fill();
@@ -99,7 +99,7 @@ namespace BrickMuseum.UI
             track.rectTransform.Place(new Vector2(0.5f, 0), new Vector2(740, 40), new Vector2(0, 60));
             var gz = Ui.Plain(track.transform, "Green", new Color(0.35f, 0.8f, 0.4f), false);
             greenZone = gz.rectTransform;
-            greenZone.anchorMin = new Vector2(0.35f, 0); greenZone.anchorMax = new Vector2(0.75f, 1);
+            greenZone.anchorMin = new Vector2(0.25f, 0); greenZone.anchorMax = new Vector2(0.8f, 1);
             greenZone.offsetMin = greenZone.offsetMax = Vector2.zero;
             var nd = Ui.Plain(track.transform, "Needle", Ui.Ink, false);
             needle = nd.rectTransform;

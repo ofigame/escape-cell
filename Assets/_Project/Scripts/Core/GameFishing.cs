@@ -24,7 +24,7 @@ namespace BrickMuseum.Core
         private bool fishCreek;
         private Transform rod, bobber, caughtFish;
         private LineRenderer line;
-        private float power, castT, stateTime, biteAt, tension, landed, slack, rodLean, castDist;
+        private float power, castT, stateTime, biteAt, tension, landed, slack, tight, rodLean, castDist;
         private Vector3 castFrom, castTo, bobberRest;
         private FishKind hooked;
         private bool holdDown;
@@ -208,12 +208,12 @@ namespace BrickMuseum.Core
                     tu.holdBtn.transform.localScale = Vector3.one * (1f + 0.08f * Mathf.Sin(time * 18f));
                     if (holdDown)
                     {
-                        fishing = FishState.Reeling; stateTime = 0f; tension = 0.5f; landed = 0f; slack = 0f;
+                        fishing = FishState.Reeling; stateTime = 0f; tension = 0.5f; landed = 0f; slack = 0f; tight = 0f;
                         tu.holdBtn.transform.localScale = Vector3.one;
                         tu.holdBtn.SetLabel("ÇEK");
                         tu.fishText.text = "Gerginliği yeşilde tut";
                     }
-                    else if (stateTime > 1.4f)
+                    else if (stateTime > 2.2f)
                     {
                         tu.holdBtn.transform.localScale = Vector3.one;
                         tu.holdBtn.SetLabel("FIRLAT");
@@ -286,12 +286,14 @@ namespace BrickMuseum.Core
         private void Reel(float dt, Vector3 fwd)
         {
             float s = hooked.strength;
-            float pull = (Mathf.PerlinNoise(time * 0.9f, 3.1f) - 0.35f) * 1.4f * s;   // the fish's runs
-            tension += (holdDown ? 0.75f : -0.65f) * dt + pull * dt;
-            tension = Mathf.Clamp(tension, 0f, 1.05f);
-            bool inGreen = tension >= 0.35f && tension <= 0.75f;
-            landed = Mathf.Clamp01(landed + (inGreen ? 0.2f / s : -0.06f) * dt);
-            slack = tension < 0.08f ? slack + dt : 0f;
+            // gentle: small runs, a slow needle, a wide green; the line snaps only after staying at the top a while
+            float pull = (Mathf.PerlinNoise(time * 0.8f, 3.1f) - 0.5f) * 0.7f * s;
+            tension += (holdDown ? 0.45f : -0.4f) * dt + pull * dt;
+            tension = Mathf.Clamp(tension, 0f, 1f);
+            bool inGreen = tension >= 0.25f && tension <= 0.8f;
+            landed = Mathf.Clamp01(landed + (inGreen ? 0.32f / Mathf.Sqrt(s) : -0.03f) * dt);
+            slack = tension < 0.06f ? slack + dt : 0f;
+            tight = tension > 0.97f ? tight + dt : 0f;
             tu.SetReel(tension, landed);
             // the float comes in as the fish does, splashing about
             bobber.position = Vector3.Lerp(bobberRest, walkPos + fwd * 2.5f + Vector3.up * (WaterY(walkPos + fwd * 2.5f) - walkPos.y), landed)
@@ -299,8 +301,8 @@ namespace BrickMuseum.Core
             bobber.position = new Vector3(bobber.position.x, WaterY(bobber.position) - 0.2f, bobber.position.z);
             DrawLine(0.4f * (1f - tension));
             if (holdDown && Mathf.Repeat(time, 0.25f) < dt) Sfx.Play("tick", 0.4f);
-            if (tension >= 1f) { LoseFish("Misina koptu!"); return; }
-            if (slack > 1.6f) { LoseFish("Balık kaçtı"); return; }
+            if (tight > 0.8f) { LoseFish("Misina koptu!"); return; }
+            if (slack > 3f) { LoseFish("Balık kaçtı"); return; }
             if (landed >= 1f) Landed();
         }
 
