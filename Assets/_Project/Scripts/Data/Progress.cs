@@ -119,7 +119,9 @@ namespace BrickMuseum.Data
         public List<KindLock> cooldowns = new List<KindLock>();
         public int bonusPending;                      // level-up city bonuses waiting to be collected (with an ad)
         public int bonusPolice, bonusWorkers, bonusStaff;   // people the bonuses brought
-        public bool farOpen;                          // the far district has been opened for building    // lots 1.. along the west road (lot 0 is build/home)
+        public bool farOpen;                          // the far district has been opened for building
+        public bool farmOwned;                        // the fish farm has been bought
+        public long farmReady;                        // when its batch is ready (UTC ticks)    // lots 1.. along the west road (lot 0 is build/home)
         public int activeCar;
         public bool stockInit;               // the starter kit (and materials for models built before) has been given
         public List<StockItem> stock = new List<StockItem>();

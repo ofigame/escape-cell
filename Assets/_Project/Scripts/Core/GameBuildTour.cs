@@ -66,6 +66,7 @@ namespace BrickMuseum.Core
             yield return ScoreTour(dir);
             yield return RoofTour(dir);
             yield return DistrictTour(dir);
+            yield return FarmTour(dir);
             yield return GardenTour(dir);
             yield return LanguageTour(dir);
         }
@@ -91,6 +92,34 @@ namespace BrickMuseum.Core
             yield return Shot(dir, "53d_bonus_collected");
             Debug.Log($"[Tour] bonus: score {before} -> {City.CityScore.Total}, inventory {Data.Progress.Data.inventory.Count}, police {Data.Progress.Data.bonusPolice} workers {Data.Progress.Data.bonusWorkers} staff {Data.Progress.Data.bonusStaff}");
             ClosePanel();
+        }
+
+        /// <summary>The fish farm: for sale, bought, growing, hurried by the ad, ready, collected; then the phone's reminders.</summary>
+        private IEnumerator FarmTour(string dir)
+        {
+            EnterCity(null);
+            FocusFarm();
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "56a_farm_for_sale");
+            Wallet.Earn(Data.FishFarm.Price);
+            OpenFarm();
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot(dir, "56b_farm_panel");
+            BuyFarm();
+            yield return new WaitForSeconds(1.2f);
+            yield return Shot(dir, "56c_farm_growing");
+            yield return HurryFarm();
+            yield return new WaitForSeconds(1.5f);
+            Debug.Log($"[Tour] farm ready {Data.FishFarm.Ready}, button {cu.farmBtn.gameObject.activeSelf}");
+            yield return Shot(dir, "56d_farm_ready");
+            int before = Data.Progress.Data.fish.Count;
+            CollectFarm();
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot(dir, "56e_farm_collected");
+            Debug.Log($"[Tour] farm: cooler {before} -> {Data.Progress.Data.fish.Count}, next in {Data.FishFarm.Left.TotalMinutes:F0} min");
+            ClosePanel();
+            yield return Notify.Init();
+            Notify.Plan();
         }
 
         /// <summary>The far district: closed, what it needs, opened, built on, the taxi's way there, walking the country road.</summary>

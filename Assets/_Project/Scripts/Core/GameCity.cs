@@ -33,6 +33,7 @@ namespace BrickMuseum.Core
             Progress.Save();
             FreeBuild.Wallet.EnsureStarted();
             city = new CityMap(transform);
+            BuildFarm();
             BuildHouse();
             var start = CityLayout.AreaNamed("Türk Mahallesi").center;
             cityCam.Focus(city.WorldAt(start, 0f), 150f);
@@ -54,6 +55,7 @@ namespace BrickMuseum.Core
             cu.resumeBtn.onClick.AddListener(ResumeBuild);
             cu.scoreBtn.onClick.AddListener(ShowScore);
             cu.bonusBtn.onClick.AddListener(ShowBonus);
+            cu.farmBtn.onClick.AddListener(() => { FocusFarm(); OpenFarm(); });
             cu.farBtn.onClick.AddListener(() => { FocusFar(); ShowDistrict(); });
             Loc.Changed += () =>
             {
@@ -76,6 +78,7 @@ namespace BrickMuseum.Core
             city.RefreshAll();
             if (focus != null) cityCam.Focus(city.WorldOf(focus), 95f);
             UpdateCityHud();
+            if (Progress.Data.placements.Count > 0) StartCoroutine(Notify.Init());   // after the first build: ask once for notifications
         }
 
         private void UpdateCityHud()
@@ -110,6 +113,7 @@ namespace BrickMuseum.Core
         private void CityTap(Vector2 screen)
         {
             var s = city.Hit(cam.ScreenPointToRay(screen));
+            if (s == null && FarmHitBy(cam.ScreenPointToRay(screen))) { OpenFarm(); return; }
             if (s == null)
             {
                 // the player's own lot: build the house or the car
@@ -131,6 +135,7 @@ namespace BrickMuseum.Core
 
         private void ClosePanel()
         {
+            farmPanel = false;
             panelSlot = null;
             city.Select(null);
             cu.panel.SetActive(false);
@@ -141,6 +146,7 @@ namespace BrickMuseum.Core
 
         private void OpenSlot(Slot s)
         {
+            farmPanel = false;
             panelSlot = s;
             city.Select(s);
             Sfx.Play("pick", 0.6f);
@@ -496,6 +502,7 @@ namespace BrickMuseum.Core
         {
             cityCam.Apply(cam);
             city.Tick(dt);
+            FarmTick(dt);
             city.people.Tick(dt, cityCam.target, cityCam.distance < 220f ? 130f : 0f);   // people are too small to see from high up
             if (cu.levelUp.activeSelf && Time.unscaledTime > levelUpUntil) cu.levelUp.SetActive(false);
             cu.resumeBtn.gameObject.SetActive(Pending.Has && !cu.panel.activeSelf && !cu.list.activeSelf);
