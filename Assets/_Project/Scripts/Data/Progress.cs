@@ -307,7 +307,7 @@ namespace BrickMuseum.Data
         }
 
         /// <summary>Trees and street decor can be built again and again (a street needs many of them).</summary>
-        public static bool Repeatable(string kind) => kind == "tree" || kind == "decor";
+        public static bool Repeatable(string kind) => kind == "tree" || kind == "decor" || kind == "sport";   // (courts may be built again)
 
         /// <summary>The soonest a locked model of this slot's kind becomes available again (null if none is locked).</summary>
         public static TimeSpan? NextUnlock(Slot s)

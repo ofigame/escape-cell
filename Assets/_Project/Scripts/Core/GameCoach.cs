@@ -74,6 +74,9 @@ namespace BrickMuseum.Core
                 CityTip("homes", "Hangi evden gezersin?", "Arsalarından birine dokun ve Buradan gez de: şehir turu o evin önünden başlar.",
                     () => FreeBuild.Lots.OwnedCount > 1, null),
 
+                CityTip("sport", "Spor sahaları", "Ormanın önündeki yeni sırada futbol, basketbol, tenis ve voleybol sahaları yapabilirsin. Her saha şehir puanına 10 ekler ve sporcular gelir.",
+                    () => Progress.Level >= 4, null),
+
                 // ----- the workshop -----
                 new Tip { key = "bag", mode = Mode.Workshop, title = "Nasıl yapılır?", text = "Resimdeki modele bak. Çantayı aç, parçayı seç ve parlayan yere koy. Yanlış parça bir hata hakkı götürür.",
                     when = () => current != null && bench.PlacedCount == 0, target = () => R(wu.bagBtn) },

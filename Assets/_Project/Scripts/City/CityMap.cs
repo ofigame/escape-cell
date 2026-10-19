@@ -483,6 +483,7 @@ namespace BrickMuseum.City
             {
                 case "house": c = new Color(0.86f, 0.72f, 0.92f); break;
                 case "big": c = new Color(0.72f, 0.7f, 0.94f); break;
+                case "sport": c = new Color(0.98f, 0.6f, 0.42f); break;
                 case "civic": c = new Color(0.62f, 0.8f, 0.94f); break;
                 case "historic": c = new Color(0.9f, 0.78f, 0.6f); break;
                 case "vehicle": c = new Color(0.42f, 0.45f, 0.5f); break;

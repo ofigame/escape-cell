@@ -40,7 +40,7 @@ namespace BrickMuseum.City
     public static class CityLayout
     {
         public const float Block = 64f, Road = 18f, Pitch = Block + Road, Pavement = 4f, ParkingLane = 4.5f, Quay = 3f;
-        public const int Cols = 4, Rows = 4;
+        public const int Cols = 4, Rows = 5;     // (row 4, by the forest: the sports grounds and the north park)
         /// <summary>The creek valley between the 2nd and 3rd columns, instead of a street.</summary>
         public const float Creek = 44f, CreekWater = 17f;    // (half the water's width: most of the valley is water)
         private static readonly float[] Gaps = { Road, Road, Creek, Road, Road };    // west edge, between columns, east edge
@@ -126,6 +126,7 @@ namespace BrickMuseum.City
             {
                 case "house": return "Ev arsası";
                 case "big": return "Büyük arsa";
+                case "sport": return "Spor sahası arsası";
                 case "civic": return "Kamu binası arsası";
                 case "historic": return "Tarihi yapı arsası";
                 case "vehicle": return "Park yeri";
@@ -147,6 +148,7 @@ namespace BrickMuseum.City
             {
                 case "house": return "EV";
                 case "big": return "BİNA";
+                case "sport": return "SPOR";
                 case "civic": return "KAMU";
                 case "historic": return "TARİHİ";
                 case "vehicle": return "ARAÇ";
@@ -209,6 +211,11 @@ namespace BrickMuseum.City
                 Plots("Eserler Bahçesi II", "landmark", 2, 3, 8, new Color(0.56f, 0.74f, 0.5f)),
                 Plots("Gökdelenler", "big", 3, 3, 8, new Color(0.74f, 0.76f, 0.8f)),
                 Residential("Asya Mahallesi", "as", 3, 2, 9, new Color(0.58f, 0.78f, 0.6f)),
+                // the northern row by the forest: sports grounds and a second park
+                SportsGround("Spor Alanı", 0, 4, 4),
+                Courts("Spor Kompleksi", 1, 4, 5),
+                Park(2, 4, 6, "Kuzey Parkı"),
+                SportsGround("Stadyum Alanı", 3, 4, 7),
                 // the far district: houses of any style, towers and public buildings (copies may be built there)
                 Residential("Doğu Mahallesi", "", 0, 1, 1, new Color(0.6f, 0.8f, 0.52f), true),
                 Plots("Doğu Merkezi", "big", 1, 1, 1, new Color(0.74f, 0.76f, 0.8f), true),
@@ -286,9 +293,9 @@ namespace BrickMuseum.City
         /// <summary>
         /// The city park by the creek: winding footpaths round a statue, benches along them, trees, a fountain spot.
         /// </summary>
-        private static Area Park(int col, int row, int level)
+        private static Area Park(int col, int row, int level, string name = "Şehir Parkı")
         {
-            var a = NewArea("Şehir Parkı", "", col, row, level, new Color(0.5f, 0.76f, 0.44f));
+            var a = NewArea(name, "", col, row, level, new Color(0.5f, 0.76f, 0.44f));
             // the paths: a wobbly ring round the middle and four wandering branches out to the pavement
             var ring = new List<Vector2>();
             for (int k = 0; k <= 48; k++)
@@ -339,6 +346,28 @@ namespace BrickMuseum.City
             Add(a, "decor", -12, -12, 28, 28, 0, level);
             Add(a, "decor", 16, -14, 16, 16, 0, level + 1);
             foreach (float x in new[] { -18f, 0f, 18f }) Add(a, "decor", x, 18, 8, 8, 0, level + 1);
+            return a;
+        }
+
+        /// <summary>A football pitch (or any sports ground) filling the block, benches for the crowd behind it.</summary>
+        private static Area SportsGround(string name, int col, int row, int level)
+        {
+            var a = NewArea(name, "", col, row, level, new Color(0.46f, 0.72f, 0.4f));
+            Add(a, "sport", 0, 6, 56, 38, 0, level);
+            foreach (float x in new[] { -18f, 0f, 18f }) Add(a, "decor", x, -21, 4, 3, 0, level + 1).only = "bank";
+            Add(a, "tree", -25, -21, 4, 4, 0, level);
+            Add(a, "tree", 25, -21, 4, 4, 0, level);
+            return a;
+        }
+
+        /// <summary>Four courts (basketball, tennis, volleyball...).</summary>
+        private static Area Courts(string name, int col, int row, int level)
+        {
+            var a = NewArea(name, "", col, row, level, new Color(0.5f, 0.74f, 0.46f));
+            Add(a, "sport", -14, 14, 26, 26, 0, level);
+            Add(a, "sport", 14, 14, 26, 26, 0, level);
+            Add(a, "sport", -14, -14, 26, 26, 180, level + 1);
+            Add(a, "sport", 14, -14, 26, 26, 180, level + 1);
             return a;
         }
 

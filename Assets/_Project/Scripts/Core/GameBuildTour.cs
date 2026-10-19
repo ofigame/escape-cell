@@ -69,6 +69,7 @@ namespace BrickMuseum.Core
             yield return FarmTour(dir);
             yield return CoachTour(dir);
             yield return FixTour(dir);
+            yield return SportTour(dir);
             yield return GardenTour(dir);
             yield return LanguageTour(dir);
         }
@@ -94,6 +95,26 @@ namespace BrickMuseum.Core
             yield return Shot(dir, "53d_bonus_collected");
             Debug.Log($"[Tour] bonus: score {before} -> {City.CityScore.Total}, inventory {Data.Progress.Data.inventory.Count}, police {Data.Progress.Data.bonusPolice} workers {Data.Progress.Data.bonusWorkers} staff {Data.Progress.Data.bonusStaff}");
             ClosePanel();
+        }
+
+        /// <summary>The northern row: the sports grounds from above and from the pavement.</summary>
+        private IEnumerator SportTour(string dir)
+        {
+            EnterCity(null);
+            Debug.Log($"[Tour] sports grounds placed: {Data.Progress.Data.placements.Count(p => Data.ModelCatalog.Find(p.id)?.kind == "sport")}");
+            cityCam.Focus(city.WorldAt(new Vector2((City.CityLayout.XOf(0) + City.CityLayout.XOf(1)) / 2f, City.CityLayout.ZOf(4)), 0f), 190f);
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "59a_sports_row");
+            cityCam.Focus(city.WorldAt(new Vector2(City.CityLayout.XOf(1), City.CityLayout.ZOf(4)), 0f), 80f);
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "59b_courts");
+            EnterWalk();
+            walkPos = city.WorldAt(new Vector2(City.CityLayout.XOf(0), City.CityLayout.ZOf(4) + City.CityLayout.Block / 2f + 2f), 0f);
+            walkPos.y = GroundAt(walkPos);
+            facingYaw = camYaw = 180f; camPitch = 18f;
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "59c_pitch_walk");
+            ExitWalk();
         }
 
         /// <summary>Half-finished builds left on their plots, sitting on a bench, the walk from another home, the level town and its blue creek.</summary>

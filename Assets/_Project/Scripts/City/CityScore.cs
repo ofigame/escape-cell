@@ -35,6 +35,7 @@ namespace BrickMuseum.City
                 new Part { pic = "belediye", name = "Belediye personeli", hint = "Kamu binaları, iş merkezleri, bonus personel", count = roles.Count(r => r == "office") + d.bonusStaff, each = 6 },
                 new Part { pic = "konteyner", name = "Çöp Konteyneri", hint = "Dekor yerlerine konteyner koy", count = placed.Count(m => m.id == "konteyner"), each = 6 },
                 new Part { pic = "itfaiye", name = "Belediye araçları", hint = "Çöp kamyonu, itfaiye, polis arabası, ambulans, kepçe, otobüs", count = placed.Count(m => MunicipalVehicles.Contains(m.id)), each = 12 },
+                new Part { pic = "futbol", name = "Spor sahaları", hint = "Futbol, basketbol, tenis, voleybol sahaları", count = placed.Count(m => m.kind == "sport"), each = 10 },
                 new Part { pic = "okul", name = "Kamu binaları", hint = "Okul, hastane, belediye, itfaiye, kütüphane", count = placed.Count(m => m.kind == "civic"), each = 15 },
             };
         }

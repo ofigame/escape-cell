@@ -52,6 +52,7 @@ namespace BrickMuseum.City
             {
                 case "house": return new[] { "resident", "resident" };
                 case "big": return new[] { "office", "office" };
+                case "sport": return new[] { "player", "player", "player" };
                 case "civic":
                     switch (m.id)
                     {
@@ -101,6 +102,8 @@ namespace BrickMuseum.City
                 case "tourist": return "Turist";
                 case "keeper": return "Bakıcı";
                 case "worker": return "İşçi";
+                case "player": return "Sporcu";
+                case "farmer": return "Çiftçi";
                 default: return "Komşu";
             }
         }
@@ -140,6 +143,8 @@ namespace BrickMuseum.City
                 case "keeper": o.shirt = "dgreen"; o.pattern = "plain"; o.pants = "sand"; o.shoes = "brown"; o.hat = "cap"; o.hatColor = "dgreen"; break;
                 case "worker": o.shirt = "blue"; o.pattern = "stripe"; o.trim = "orange"; o.pants = "dblue"; o.hat = "helmet"; o.hatColor = "yellow"; break;
                 case "child": o.hat = r.NextDouble() < 0.3 ? "cap" : "none"; o.pattern = "plain"; break;
+                case "player": o.shirt = Pick(r, "red", "blue", "yellow", "white"); o.pattern = "stripe"; o.trim = "white"; o.pants = "white"; o.shoes = Pick(r, "black", "white"); o.hat = "none"; break;
+                case "farmer": o.shirt = Pick(r, "red", "green", "lblue"); o.pattern = "stripe"; o.trim = "black"; o.pants = "dblue"; o.shoes = "brown"; o.hat = "cap"; o.hatColor = Pick(r, "yellow", "sand", "red"); break;
             }
             return o;
         }
