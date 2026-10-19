@@ -1,0 +1,398 @@
+tr	en	ja	ar	de	fr	it	es	ko	az
+Dil	Language	言語	اللغة	Sprache	Langue	Lingua	Idioma	언어	Dil
+Koleksiyon	Collection	コレクション	المجموعة	Sammlung	Collection	Collezione	Colección	컬렉션	Kolleksiya
+Envanter	Inventory	持ち物	المخزون	Inventar	Inventaire	Inventario	Inventario	보관함	İnventar
+Envanter ({0})	Inventory ({0})	持ち物 ({0})	المخزون ({0})	Inventar ({0})	Inventaire ({0})	Inventario ({0})	Inventario ({0})	보관함 ({0})	İnventar ({0})
+Şehri gez	Explore	街を歩く	تجوّل في المدينة	Stadt erkunden	Visiter	Esplora	Pasear	도시 산책	Şəhəri gəz
+Karakter	Character	キャラクター	الشخصية	Figur	Personnage	Personaggio	Personaje	캐릭터	Personaj
+Evimi yap	Build my house	家をつくる	ابنِ بيتي	Mein Haus bauen	Construire ma maison	Costruisci casa	Construir mi casa	내 집 짓기	Evimi tik
+Arabamı yap	Build my car	車をつくる	اصنع سيارتي	Mein Auto bauen	Construire ma voiture	Costruisci l'auto	Construir mi coche	내 차 만들기	Maşınımı düzəlt
+Seviye {0}	Level {0}	レベル {0}	المستوى {0}	Stufe {0}	Niveau {0}	Livello {0}	Nivel {0}	레벨 {0}	Səviyyə {0}
+Seviye {0}!	Level {0}!	レベル {0}!	المستوى {0}!	Stufe {0}!	Niveau {0} !	Livello {0}!	¡Nivel {0}!	레벨 {0}!	Səviyyə {0}!
+Sv {0}	Lv {0}	Lv {0}	م {0}	St. {0}	Niv. {0}	Liv. {0}	Niv. {0}	Lv {0}	Sv {0}
+{0} yıldız	{0} stars	星 {0}	{0} نجوم	{0} Sterne	{0} étoiles	{0} stelle	{0} estrellas	별 {0}개	{0} ulduz
+{0}/{1} yıldız	{0}/{1} stars	星 {0}/{1}	{0}/{1} نجوم	{0}/{1} Sterne	{0}/{1} étoiles	{0}/{1} stelle	{0}/{1} estrellas	별 {0}/{1}	{0}/{1} ulduz
++{0} yıldız	+{0} stars	星 +{0}	+{0} نجوم	+{0} Sterne	+{0} étoiles	+{0} stelle	+{0} estrellas	별 +{0}	+{0} ulduz
++{0} malzeme	+{0} materials	素材 +{0}	+{0} مواد	+{0} Material	+{0} matériaux	+{0} materiali	+{0} materiales	재료 +{0}	+{0} material
+Bir EV arsasına dokun ve ilk evini yap	Tap a HOUSE plot and build your first house	「家」の区画をタップして最初の家をつくろう	المس قطعة أرض «بيت» وابنِ بيتك الأول	Tippe auf ein HAUS-Grundstück und baue dein erstes Haus	Touche un terrain MAISON et construis ta première maison	Tocca un lotto CASA e costruisci la tua prima casa	Toca un solar de CASA y construye tu primera casa	'집' 부지를 눌러 첫 집을 지어 보세요	EV sahəsinə toxun və ilk evini tik
+Bir alana dokun	Tap a plot	区画をタップ	المس قطعة أرض	Tippe auf ein Grundstück	Touche un terrain	Tocca un lotto	Toca un solar	부지를 누르세요	Bir sahəyə toxun
+Seviye {0}'de açılır.	Opens at level {0}.	レベル {0} で解放	يُفتح في المستوى {0}.	Ab Stufe {0} frei.	Débloqué au niveau {0}.	Si sblocca al livello {0}.	Se abre en el nivel {0}.	레벨 {0}에 열립니다.	{0}-ci səviyyədə açılır.
+Yıldızların: {0}/{1}	Your stars: {0}/{1}	星: {0}/{1}	نجومك: {0}/{1}	Deine Sterne: {0}/{1}	Tes étoiles : {0}/{1}	Le tue stelle: {0}/{1}	Tus estrellas: {0}/{1}	내 별: {0}/{1}	Ulduzların: {0}/{1}
+Kapat	Close	閉じる	إغلاق	Schließen	Fermer	Chiudi	Cerrar	닫기	Bağla
+{0} parça	{0} pieces	{0} ピース	{0} قطعة	{0} Teile	{0} pièces	{0} pezzi	{0} piezas	{0}개 조각	{0} hissə
+Senin araban	Your car	あなたの車	سيارتك	Dein Auto	Ta voiture	La tua auto	Tu coche	내 차	Sənin maşının
+Şehri gez'de binebilirsin	Get in while exploring	街歩きで乗れるよ	يمكنك ركوبها أثناء التجوّل	Beim Erkunden einsteigen	Monte dedans en visitant	Salici mentre esplori	Súbete al pasear	산책할 때 탈 수 있어요	Şəhəri gəzəndə minə bilərsən
+Arabam olsun	Make it my car	自分の車にする	اجعلها سيارتي	Mein Auto	Ma voiture	Sarà la mia auto	Que sea mi coche	내 차로 하기	Maşınım olsun
+{0} artık senin araban	{0} is now your car	{0}があなたの車になった	{0} أصبحت سيارتك	{0} ist jetzt dein Auto	{0} est ta voiture	{0} è la tua auto	{0} ya es tu coche	{0}이(가) 이제 내 차예요	{0} artıq sənin maşınındır
+Envantere al	Put in inventory	持ち物にしまう	ضعه في المخزون	Ins Inventar	Ranger	Metti in inventario	Guardar	보관함에 넣기	İnventara götür
+{0} envantere alındı	{0} went to the inventory	{0}を持ち物にしまった	وُضع {0} في المخزون	{0} ist im Inventar	{0} est rangé	{0} è nell'inventario	{0} guardado	{0}을(를) 보관함에 넣었어요	{0} inventara götürüldü
+{0} evleri	{0} houses	{0}の家	بيوت {0}	{0} Häuser	Maisons {0}	Case {0}	Casas {0}	{0} 집	{0} evləri
+Çarkta {0} {1} modeli var	The wheel has {0} {1} models	ルーレットに{1}のモデルが{0}個	في العجلة {0} نماذج من {1}	Im Glücksrad: {0} Modelle ({1})	La roue a {0} modèles : {1}	La ruota ha {0} modelli: {1}	La ruleta tiene {0} modelos: {1}	돌림판에 {1} 모델 {0}개	Çarxda {0} {1} modeli var
+Yeni model {0} sonra	New model in {0}	新しいモデルまで {0}	نموذج جديد بعد {0}	Neues Modell in {0}	Nouveau modèle dans {0}	Nuovo modello tra {0}	Nuevo modelo en {0}	{0} 후 새 모델	Yeni model {0} sonra
+Bu alan için yeni modeller yakında	New models for this plot soon	この区画の新しいモデルは近日登場	نماذج جديدة لهذه القطعة قريبًا	Bald neue Modelle für dieses Grundstück	Bientôt de nouveaux modèles ici	Presto nuovi modelli per questo lotto	Pronto habrá modelos nuevos aquí	이 부지의 새 모델이 곧 나와요	Bu sahə üçün yeni modellər tezliklə
+Yeni yap	Build new	新しくつくる	ابنِ جديدًا	Neu bauen	Construire	Costruisci	Construir	새로 만들기	Yenisini tik
+Envanterden ({0})	From inventory ({0})	持ち物から ({0})	من المخزون ({0})	Aus dem Inventar ({0})	De l'inventaire ({0})	Dall'inventario ({0})	Del inventario ({0})	보관함에서 ({0})	İnventardan ({0})
+{0} ev arsası	{0} house plot	{0}の家の区画	قطعة بيت {0}	{0} Hausgrundstück	Terrain maison {0}	Lotto casa {0}	Solar de casa {0}	{0} 집 부지	{0} ev sahəsi
+Evim	My house	わが家	بيتي	Mein Haus	Ma maison	Casa mia	Mi casa	내 집	Evim
+Senin arsan	Your plot	あなたの土地	أرضك	Dein Grundstück	Ton terrain	Il tuo terreno	Tu terreno	내 땅	Sənin sahən
+{0} parçalık ev	a {0}-piece house	{0} ピースの家	بيت من {0} قطعة	Haus aus {0} Teilen	maison de {0} pièces	casa di {0} pezzi	casa de {0} piezas	{0}조각 집	{0} hissəlik ev
+araban hazır	your car is ready	車も完成	سيارتك جاهزة	dein Auto ist fertig	ta voiture est prête	l'auto è pronta	tu coche está listo	차도 준비됐어요	maşının hazırdır
+Buraya ne koyalım?	What goes here?	ここに何を置く？	ماذا نضع هنا؟	Was kommt hierher?	On met quoi ici ?	Cosa mettiamo qui?	¿Qué ponemos aquí?	여기에 뭘 놓을까요?	Bura nə qoyaq?
+Koy	Place	置く	ضع	Setzen	Poser	Metti	Poner	놓기	Qoy
+Envanter boş	Inventory is empty	持ち物は空っぽ	المخزون فارغ	Inventar ist leer	Inventaire vide	Inventario vuoto	Inventario vacío	보관함이 비었어요	İnventar boşdur
+Şehirdeki bir modeli "Envantere al" ile buraya alabilirsin	Use "Put in inventory" on a model in the city to keep it here	街のモデルを「持ち物にしまう」でここに入れられるよ	استخدم «ضعه في المخزون» على نموذج في المدينة لتحفظه هنا	Mit „Ins Inventar“ legst du Modelle aus der Stadt hierher	Utilise « Ranger » sur un modèle de la ville pour le garder ici	Usa "Metti in inventario" su un modello della città per tenerlo qui	Usa «Guardar» en un modelo de la ciudad para tenerlo aquí	도시의 모델에서 '보관함에 넣기'를 누르면 여기로 와요	Şəhərdəki modeli "İnventara götür" ilə bura gətirə bilərsən
+Uygun boş bir alana dokunup yerleştir	Tap a free plot that fits to place it	合う空き区画をタップして置こう	المس قطعة فارغة مناسبة لتضعه	Tippe auf ein passendes freies Grundstück	Touche un terrain libre adapté pour le poser	Tocca un lotto libero adatto per metterlo	Toca un solar libre adecuado para ponerlo	맞는 빈 부지를 눌러 놓으세요	Uyğun boş sahəyə toxunub yerləşdir
+Envantere kondu	Put in the inventory	持ち物にしまった	وُضع في المخزون	Ins Inventar gelegt	Rangé	Messo in inventario	Guardado	보관함에 넣었어요	İnventara qoyuldu
+{0} yeni alan açıldı	{0} new plots opened	新しい区画が{0}個解放	فُتحت {0} قطع جديدة	{0} neue Grundstücke frei	{0} nouveaux terrains ouverts	{0} nuovi lotti sbloccati	{0} solares nuevos abiertos	새 부지 {0}개 열림	{0} yeni sahə açıldı
+Şehir	City	街	المدينة	Stadt	Ville	Città	Ciudad	도시	Şəhər
+Şehre dön	Back to city	街にもどる	العودة إلى المدينة	Zur Stadt	Retour à la ville	Torna in città	Volver a la ciudad	도시로	Şəhərə qayıt
+Atölye	Workshop	工房	الورشة	Werkstatt	Atelier	Laboratorio	Taller	작업실	Emalatxana
+Yapım bırakıldı	Build abandoned	制作を中断した	تُرك البناء	Bau abgebrochen	Construction abandonnée	Costruzione abbandonata	Construcción abandonada	제작을 그만뒀어요	Tikinti dayandırıldı
+{0} için model seçiliyor…	Choosing a model for: {0}…	{0}のモデルを選んでいます…	جارٍ اختيار نموذج لـ {0}…	Modell wird gewählt: {0}…	Choix d'un modèle : {0}…	Scelta del modello: {0}…	Eligiendo modelo: {0}…	{0} 모델을 고르는 중…	{0} üçün model seçilir…
+Model seçiliyor…	Choosing a model…	モデルを選んでいます…	جارٍ اختيار نموذج…	Modell wird gewählt…	Choix d'un modèle…	Scelta del modello…	Eligiendo modelo…	모델을 고르는 중…	Model seçilir…
+BUNU YAPACAKSIN!	YOU'LL BUILD THIS!	これをつくろう！	ستبني هذا!	DAS BAUST DU!	TU VAS CONSTRUIRE ÇA !	COSTRUIRAI QUESTO!	¡VAS A CONSTRUIR ESTO!	이걸 만들 거예요!	BUNU TİKƏCƏKSƏN!
+BUNU YAPACAKSIN	YOU'LL BUILD THIS	これをつくろう	ستبني هذا	DAS BAUST DU	TU VAS CONSTRUIRE ÇA	COSTRUIRAI QUESTO	VAS A CONSTRUIR ESTO	이걸 만들 거예요	BUNU TİKƏCƏKSƏN
+Çantayı aç, gereken parçayı tezgâhtaki parlak yere sürükle	Open the bag and drag the right piece onto the glowing spot on the bench	バッグを開けて、必要なピースを作業台の光る場所へドラッグ	افتح الحقيبة واسحب القطعة المطلوبة إلى المكان المضيء على الطاولة	Öffne die Tasche und zieh das richtige Teil auf die leuchtende Stelle	Ouvre le sac et glisse la bonne pièce sur l'endroit brillant de l'établi	Apri la borsa e trascina il pezzo giusto sul punto luminoso del banco	Abre la bolsa y arrastra la pieza correcta al punto brillante de la mesa	가방을 열고 필요한 조각을 작업대의 빛나는 곳으로 끌어 오세요	Çantanı aç, lazım olan hissəni dəzgahdakı parlayan yerə sürüşdür
+HEDEF MODEL	TARGET MODEL	目標モデル	النموذج المطلوب	ZIELMODELL	MODÈLE CIBLE	MODELLO OBIETTIVO	MODELO OBJETIVO	목표 모델	HƏDƏF MODEL
+Başla	Start	スタート	ابدأ	Los	Commencer	Inizia	Empezar	시작	Başla
+Devam	Continue	続ける	متابعة	Weiter	Continuer	Continua	Continuar	계속	Davam
+{0} hata hakkı	{0} mistakes allowed	ミス {0} 回まで	{0} أخطاء مسموحة	{0} Fehler erlaubt	{0} erreurs permises	{0} errori concessi	{0} errores permitidos	실수 {0}번 가능	{0} səhv haqqı
+Çantada {0} parça var	{0} pieces in the bag	バッグに {0} ピース	في الحقيبة {0} قطعة	{0} Teile in der Tasche	{0} pièces dans le sac	{0} pezzi nella borsa	{0} piezas en la bolsa	가방에 조각 {0}개	Çantada {0} hissə var
+{0} / {1} parça	{0} / {1} pieces	{0} / {1} ピース	{0} / {1} قطعة	{0} / {1} Teile	{0} / {1} pièces	{0} / {1} pezzi	{0} / {1} piezas	{0} / {1} 조각	{0} / {1} hissə
+Parça çantaya geri döndü	The piece went back into the bag	ピースはバッグにもどった	عادت القطعة إلى الحقيبة	Das Teil ist zurück in der Tasche	La pièce est retournée dans le sac	Il pezzo è tornato nella borsa	La pieza volvió a la bolsa	조각이 가방으로 돌아갔어요	Hissə çantaya qayıtdı
+Bu {0} buraya uymuyor	This {0} doesn't fit here	この{0}はここに合わない	هذه القطعة ({0}) لا تناسب هنا	Dieses Teil ({0}) passt hier nicht	Cette pièce ({0}) ne va pas ici	Questo pezzo ({0}) non va qui	Esta pieza ({0}) no va aquí	이 {0}은(는) 여기 맞지 않아요	Bu {0} bura uyğun deyil
+{0} 3 gün boyunca çarkta çıkmayacak.	{0} won't come up on the wheel for 3 days.	{0}は3日間ルーレットに出ない。	لن يظهر {0} في العجلة لمدة 3 أيام.	{0} kommt 3 Tage lang nicht im Glücksrad.	{0} ne sortira pas sur la roue pendant 3 jours.	{0} non uscirà sulla ruota per 3 giorni.	{0} no saldrá en la ruleta durante 3 días.	{0}은(는) 3일 동안 돌림판에 나오지 않아요.	{0} 3 gün çarxda çıxmayacaq.
+Alan boş kaldı, başka bir model deneyebilirsin.	The plot is still free, try another model.	区画は空いたまま。別のモデルに挑戦しよう。	بقيت القطعة فارغة، جرّب نموذجًا آخر.	Das Grundstück ist noch frei, versuch ein anderes Modell.	Le terrain reste libre, essaie un autre modèle.	Il lotto è ancora libero, prova un altro modello.	El solar sigue libre, prueba otro modelo.	부지가 비어 있어요. 다른 모델을 해 보세요.	Sahə boş qaldı, başqa model sına.
++2 hata hakkı	+2 mistakes	ミス +2 回	+2 أخطاء	+2 Fehler	+2 erreurs	+2 errori	+2 errores	실수 +2번	+2 səhv haqqı
+İpucu: {0} al,	Hint: take the {0},	ヒント: {0}を取って、	تلميح: خذ {0}،	Tipp: Nimm {0},	Indice : prends {0},	Suggerimento: prendi {0},	Pista: coge {0},	힌트: {0}을(를) 가져와서	İpucu: {0} götür,
+tezgâhta SARI yanıp sönen yere koy	and put it on the YELLOW blinking spot	作業台の黄色く点滅する場所に置こう	وضعها في المكان الأصفر الوامض على الطاولة	und setz es auf die GELB blinkende Stelle	et pose-la sur l'endroit qui clignote en JAUNE	e mettilo sul punto GIALLO lampeggiante	y ponla en el punto AMARILLO que parpadea	작업대의 노랗게 깜박이는 곳에 놓으세요	dəzgahda SARI yanıb-sönən yerə qoy
+{0} tamamlandı!	{0} finished!	{0} 完成！	اكتمل {0}!	{0} fertig!	{0} terminé !	{0} completato!	¡{0} terminado!	{0} 완성!	{0} tamamlandı!
+Hiç hata yapmadın!	No mistakes at all!	ノーミス！	لم ترتكب أي خطأ!	Kein einziger Fehler!	Aucune erreur !	Nessun errore!	¡Ni un error!	실수 하나 없이!	Heç səhv etmədin!
+{0} hata yaptın	{0} mistakes	ミス {0} 回	ارتكبت {0} أخطاء	{0} Fehler	{0} erreurs	{0} errori	{0} errores	실수 {0}번	{0} səhv etdin
+Şehirde	In the city	街にある	في المدينة	In der Stadt	En ville	In città	En la ciudad	도시에 있음	Şəhərdə
+Envanterde	In inventory	持ち物にある	في المخزون	Im Inventar	Dans l'inventaire	In inventario	En el inventario	보관함에 있음	İnventarda
+Bekliyor	Waiting	待機中	بانتظار	Wartet	En attente	In attesa	En espera	대기 중	Gözləyir
+Yapılmadı	Not built	未完成	لم يُبنَ	Nicht gebaut	Pas construit	Non costruito	Sin construir	아직 안 만듦	Tikilməyib
+{0}g {1}s	{0}d {1}h	{0}日{1}時間	{0}ي {1}س	{0}T {1}Std	{0}j {1}h	{0}g {1}h	{0}d {1}h	{0}일 {1}시간	{0}g {1}s
+{0}s {1}dk	{0}h {1}m	{0}時間{1}分	{0}س {1}د	{0}Std {1}Min	{0}h {1}min	{0}h {1}min	{0}h {1}min	{0}시간 {1}분	{0}s {1}dəq
+{0}dk	{0}m	{0}分	{0}د	{0}Min	{0}min	{0}min	{0}min	{0}분	{0}dəq
+İpucu	Hint	ヒント	تلميح	Tipp	Indice	Aiuto	Pista	힌트	İpucu
+HEDEF  (büyüt)	TARGET (zoom)	目標（拡大）	الهدف (تكبير)	ZIEL (vergrößern)	CIBLE (agrandir)	OBIETTIVO (ingrandisci)	OBJETIVO (ampliar)	목표 (확대)	HƏDƏF (böyüt)
+ÇANTA	BAG	バッグ	الحقيبة	TASCHE	SAC	BORSA	BOLSA	가방	ÇANTA
+Boş yere parmağını sürt: parçalar dağılır	Rub an empty spot: the pieces spread out	空いた所をこすると、ピースが散らばる	افرك مكانًا فارغًا لتتفرّق القطع	Wisch über eine freie Stelle: die Teile verteilen sich	Frotte un endroit vide : les pièces s'étalent	Strofina un punto vuoto: i pezzi si sparpagliano	Frota un hueco vacío: las piezas se esparcen	빈 곳을 문지르면 조각이 흩어져요	Boş yerə barmağını sürt: hissələr dağılır
+Dağıt	Spread	散らす	بعثر	Verteilen	Étaler	Sparpaglia	Esparcir	흩기	Dağıt
+Parmağınla çevirerek her yönden bak	Turn it with your finger to see every side	指で回して全方向から見よう	أدِره بإصبعك لتراه من كل الجهات	Mit dem Finger drehen und von allen Seiten ansehen	Fais-le tourner du doigt pour tout voir	Giralo con il dito per vederlo da ogni lato	Gíralo con el dedo para verlo por todos lados	손가락으로 돌려 모든 방향에서 보세요	Barmağınla çevirib hər tərəfdən bax
+Şehre yerleştir	Place in the city	街に置く	ضعه في المدينة	In die Stadt stellen	Placer en ville	Metti in città	Poner en la ciudad	도시에 놓기	Şəhərə yerləşdir
+Envantere koy	Keep in inventory	持ち物にしまう	احفظه في المخزون	Ins Inventar legen	Garder dans l'inventaire	Tieni in inventario	Guardar en el inventario	보관함에 넣기	İnventara qoy
+Hakların bitti!	Out of chances!	チャンスがなくなった！	نفدت محاولاتك!	Keine Versuche mehr!	Plus de chances !	Tentativi finiti!	¡Sin oportunidades!	기회를 다 썼어요!	Haqların bitdi!
+Reklam izle: +2 hak	Watch an ad: +2 chances	広告を見る: チャンス +2	شاهد إعلانًا: +2 محاولة	Werbung ansehen: +2 Versuche	Regarder une pub : +2 chances	Guarda uno spot: +2 tentativi	Mira un anuncio: +2 oportunidades	광고 보기: 기회 +2	Reklam izlə: +2 haqq
+REKLAM (test)	AD (test)	広告（テスト）	إعلان (تجربة)	WERBUNG (Test)	PUB (test)	SPOT (test)	ANUNCIO (prueba)	광고 (테스트)	REKLAM (test)
+Her alanın çarkı, o türden sıradaki 3 modelden birini seçer	Each plot's wheel picks one of the next 3 models of its kind	各区画のルーレットは、その種類の次の3モデルから1つを選ぶ	تختار عجلة كل قطعة واحدًا من النماذج الثلاثة التالية من نوعها	Das Glücksrad jedes Grundstücks wählt eines der nächsten 3 Modelle dieser Art	La roue de chaque terrain choisit un des 3 prochains modèles de ce type	La ruota di ogni lotto sceglie uno dei 3 prossimi modelli di quel tipo	La ruleta de cada solar elige uno de los 3 siguientes modelos de su tipo	각 부지의 돌림판은 그 종류의 다음 모델 3개 중 하나를 골라요	Hər sahənin çarxı o növdən növbəti 3 modeldən birini seçir
+Geri alınacak bir şey yok	Nothing to undo	元にもどすものはない	لا شيء للتراجع عنه	Nichts zum Rückgängigmachen	Rien à annuler	Niente da annullare	Nada que deshacer	되돌릴 게 없어요	Geri alınacaq heç nə yoxdur
+Geri al	Undo	元にもどす	تراجع	Zurück	Annuler	Annulla	Deshacer	되돌리기	Geri al
+Döndür	Turn	回転	تدوير	Drehen	Tourner	Ruota	Girar	돌리기	Döndər
+Renk	Colour	色	اللون	Farbe	Couleur	Colore	Color	색	Rəng
+Sil	Remove	消す	إزالة	Entfernen	Retirer	Togli	Quitar	빼기	Sil
+Tüm katlar	All floors	全フロア	كل الطوابق	Alle Etagen	Tous les étages	Tutti i piani	Todas las plantas	모든 층	Bütün mərtəbələr
+{0}. kata kadar	Up to floor {0}	{0}階まで	حتى الطابق {0}	Bis Etage {0}	Jusqu'à l'étage {0}	Fino al piano {0}	Hasta la planta {0}	{0}층까지	{0}-cü mərtəbəyə qədər
+Arabam	My car	わたしの車	سيارتي	Mein Auto	Ma voiture	La mia auto	Mi coche	내 차	Maşınım
+Evime geç	To my house	家へ	إلى بيتي	Zum Haus	Vers ma maison	Alla casa	A mi casa	집으로	Evimə keç
+Arabama geç	To my car	車へ	إلى سيارتي	Zum Auto	Vers ma voiture	All'auto	A mi coche	차로	Maşınıma keç
+Bu parçadan yok	You have none of this piece	このピースはない	لا تملك هذه القطعة	Davon hast du keins	Tu n'as pas cette pièce	Non hai questo pezzo	No tienes esta pieza	이 조각이 없어요	Bu hissədən yoxdur
+şehirde model yaparak kazan	earn it by building models in the city	街でモデルをつくって手に入れよう	احصل عليها ببناء نماذج في المدينة	verdiene es mit Modellen in der Stadt	gagne-la en construisant des modèles en ville	guadagnalo costruendo modelli in città	consíguela construyendo modelos en la ciudad	도시에서 모델을 만들어 얻으세요	şəhərdə model tikərək qazan
+Bu parçadan kalmadı	None of this piece left	このピースはもうない	لم يبقَ من هذه القطعة	Davon ist nichts mehr da	Il n'y en a plus	Pezzi finiti	No quedan de esta pieza	이 조각이 다 떨어졌어요	Bu hissədən qalmadı
+Oraya sığmıyor	It doesn't fit there	そこには入らない	لا تتسع هناك	Passt dort nicht	Ça ne rentre pas là	Lì non ci sta	Ahí no cabe	거기엔 안 들어가요	Ora sığmır
+{0} parça yerinde	{0} pieces placed	{0} ピース設置	{0} قطعة في مكانها	{0} Teile verbaut	{0} pièces posées	{0} pezzi messi	{0} piezas puestas	조각 {0}개 놓음	{0} hissə yerində
+kutuda {0}	{0} in the box	箱に {0}	{0} في الصندوق	{0} in der Kiste	{0} dans la boîte	{0} nella scatola	{0} en la caja	상자에 {0}	qutuda {0}
+tekerlek {0}/4	wheels {0}/4	タイヤ {0}/4	العجلات {0}/4	Räder {0}/4	roues {0}/4	ruote {0}/4	ruedas {0}/4	바퀴 {0}/4	təkər {0}/4
+Tuğla	Bricks	ブロック	طوب	Steine	Briques	Mattoni	Ladrillos	브릭	Kərpic
+Plaka	Plates	プレート	ألواح	Platten	Plaques	Piastre	Placas	플레이트	Lövhə
+Özel	Special	特別	خاص	Spezial	Spécial	Speciali	Especial	특수	Xüsusi
+Çatı	Roof	屋根	السقف	Dach	Toit	Tetto	Tejado	지붕	Dam
+Süs	Decor	飾り	زينة	Deko	Déco	Decori	Adornos	장식	Bəzək
+Araba	Car	車	سيارة	Auto	Voiture	Auto	Coche	자동차	Maşın
+{0}×{1} tuğla	{0}×{1} brick	{0}×{1} ブロック	طوبة {0}×{1}	{0}×{1} Stein	brique {0}×{1}	mattone {0}×{1}	ladrillo {0}×{1}	{0}×{1} 브릭	{0}×{1} kərpic
+{0}×{1} plaka	{0}×{1} plate	{0}×{1} プレート	لوح {0}×{1}	{0}×{1} Platte	plaque {0}×{1}	piastra {0}×{1}	placa {0}×{1}	{0}×{1} 플레이트	{0}×{1} lövhə
+Kapı	Door	ドア	باب	Tür	Porte	Porta	Puerta	문	Qapı
+Pencere	Window	窓	نافذة	Fenster	Fenêtre	Finestra	Ventana	창문	Pəncərə
+Geniş pencere	Wide window	大きな窓	نافذة عريضة	Breites Fenster	Grande fenêtre	Finestra larga	Ventana ancha	넓은 창문	Geniş pəncərə
+Merdiven	Stairs	階段	درج	Treppe	Escalier	Scala	Escalera	계단	Pilləkən
+Korkuluk	Railing	手すり	درابزين	Geländer	Rambarde	Ringhiera	Barandilla	난간	Məhəccər
+Uzun korkuluk	Long railing	長い手すり	درابزين طويل	Langes Geländer	Longue rambarde	Ringhiera lunga	Barandilla larga	긴 난간	Uzun məhəccər
+Eğimli 1×2	Slope 1×2	スロープ 1×2	مائل 1×2	Schräge 1×2	Pente 1×2	Spiovente 1×2	Inclinada 1×2	경사 1×2	Maili 1×2
+Eğimli 2×2	Slope 2×2	スロープ 2×2	مائل 2×2	Schräge 2×2	Pente 2×2	Spiovente 2×2	Inclinada 2×2	경사 2×2	Maili 2×2
+Eğimli 2×4	Slope 2×4	スロープ 2×4	مائل 2×4	Schräge 2×4	Pente 2×4	Spiovente 2×4	Inclinada 2×4	경사 2×4	Maili 2×4
+Kavisli 2×2	Curve 2×2	カーブ 2×2	منحنٍ 2×2	Bogen 2×2	Courbe 2×2	Curva 2×2	Curva 2×2	곡선 2×2	Əyri 2×2
+Düz plaka 2×2	Tile 2×2	タイル 2×2	بلاطة 2×2	Fliese 2×2	Carreau 2×2	Piastrella 2×2	Baldosa 2×2	타일 2×2	Düz lövhə 2×2
+Düz plaka 1×4	Tile 1×4	タイル 1×4	بلاطة 1×4	Fliese 1×4	Carreau 1×4	Piastrella 1×4	Baldosa 1×4	타일 1×4	Düz lövhə 1×4
+Yuvarlak 1×1	Round 1×1	丸 1×1	دائري 1×1	Rund 1×1	Rond 1×1	Tondo 1×1	Redondo 1×1	원형 1×1	Dəyirmi 1×1
+Yuvarlak 2×2	Round 2×2	丸 2×2	دائري 2×2	Rund 2×2	Rond 2×2	Tondo 2×2	Redondo 2×2	원형 2×2	Dəyirmi 2×2
+Koni	Cone	コーン	مخروط	Kegel	Cône	Cono	Cono	원뿔	Konus
+Kubbe	Dome	ドーム	قبة	Kuppel	Dôme	Cupola	Cúpula	돔	Günbəz
+Tekerlek	Wheel	タイヤ	عجلة	Rad	Roue	Ruota	Rueda	바퀴	Təkər
+yok	none	なし	لا يوجد	keins	aucune	nessuno	ninguna	없음	yoxdur
+İN	OUT	降りる	انزل	RAUS	DESCENDRE	SCENDI	BAJAR	내리기	DÜŞ
+BİN	GET IN	乗る	اركب	EINSTEIGEN	MONTER	SALI	SUBIR	타기	MİN
+GİR	ENTER	入る	ادخل	REIN	ENTRER	ENTRA	ENTRAR	들어가기	GİR
+ZIPLA	JUMP	ジャンプ	اقفز	SPRINGEN	SAUTER	SALTA	SALTAR	점프	TULLAN
+KOŞ	RUN	走る	اركض	RENNEN	COURIR	CORRI	CORRER	달리기	QAÇ
+Sol başparmak: yürü	Left thumb: walk	左の親指: 歩く	الإبهام الأيسر: امشِ	Linker Daumen: gehen	Pouce gauche : marcher	Pollice sinistro: cammina	Pulgar izquierdo: andar	왼손 엄지: 걷기	Sol baş barmaq: yeri
+Sağ başparmak: etrafına bak	Right thumb: look around	右の親指: 見回す	الإبهام الأيمن: انظر حولك	Rechter Daumen: umsehen	Pouce droit : regarder autour	Pollice destro: guardati intorno	Pulgar derecho: mirar alrededor	오른손 엄지: 둘러보기	Sağ baş barmaq: ətrafa bax
+Sol başparmak: gaz, fren ve direksiyon	Left thumb: gas, brake and steering	左の親指: アクセル・ブレーキ・ハンドル	الإبهام الأيسر: وقود وفرامل وتوجيه	Linker Daumen: Gas, Bremse, Lenken	Pouce gauche : accélérer, freiner, tourner	Pollice sinistro: gas, freno e sterzo	Pulgar izquierdo: gas, freno y volante	왼손 엄지: 가속, 브레이크, 핸들	Sol baş barmaq: qaz, əyləc və sükan
+{0} km/sa	{0} km/h	時速{0}km	{0} كم/س	{0} km/h	{0} km/h	{0} km/h	{0} km/h	시속 {0}km	{0} km/saat
+Araban: {0}	Your car: {0}	あなたの車: {0}	سيارتك: {0}	Dein Auto: {0}	Ta voiture : {0}	La tua auto: {0}	Tu coche: {0}	내 차: {0}	Maşının: {0}
+Dekore et	Decorate	飾りつけ	زيّن	Einrichten	Décorer	Arreda	Decorar	꾸미기	Bəzə
+Evin	Your house	あなたの家	بيتك	Dein Haus	Ta maison	La tua casa	Tu casa	내 집	Evin
+{0}. kat	Floor {0}	{0}階	الطابق {0}	Etage {0}	Étage {0}	Piano {0}	Planta {0}	{0}층	{0}-cü mərtəbə
+Bitti	Done	完了	تم	Fertig	Terminé	Fatto	Listo	완료	Hazırdır
+Alt kat	Floor down	下の階	الطابق السفلي	Etage runter	Étage du bas	Piano sotto	Planta de abajo	아래층	Aşağı mərtəbə
+Üst kat	Floor up	上の階	الطابق العلوي	Etage hoch	Étage du haut	Piano sopra	Planta de arriba	위층	Yuxarı mərtəbə
+Duvar rengi	Wall colour	壁の色	لون الجدار	Wandfarbe	Couleur des murs	Colore pareti	Color de pared	벽 색	Divar rəngi
+Zemin rengi	Floor colour	床の色	لون الأرضية	Bodenfarbe	Couleur du sol	Colore pavimento	Color del suelo	바닥 색	Döşəmə rəngi
+Aşağıdan eşya ekle	Add furniture from below	下から家具を追加	أضف أثاثًا من الأسفل	Möbel unten hinzufügen	Ajoute des meubles en bas	Aggiungi mobili dal basso	Añade muebles desde abajo	아래에서 가구 추가	Aşağıdan əşya əlavə et
+eşyayı sürükleyip taşı	drag furniture to move it	家具はドラッグで移動	اسحب الأثاث لتحريكه	zum Verschieben ziehen	glisse un meuble pour le déplacer	trascina un mobile per spostarlo	arrastra un mueble para moverlo	가구를 끌어 옮기기	əşyanı sürüşdürüb daşı
+aşağıdan eşya ekle, sürükleyip taşı	add furniture below, drag to move	下から家具を追加、ドラッグで移動	أضف الأثاث من الأسفل واسحبه لتحريكه	Möbel unten hinzufügen, ziehen zum Verschieben	ajoute des meubles en bas, glisse pour déplacer	aggiungi mobili dal basso, trascina per spostare	añade muebles abajo, arrastra para mover	아래에서 가구 추가, 끌어서 이동	aşağıdan əşya əlavə et, sürüşdürüb daşı
+Kaldır	Remove	片づける	أزِل	Entfernen	Enlever	Togli	Quitar	치우기	Götür
+Kıyafetin kaydedildi	Outfit saved	服を保存した	تم حفظ ملابسك	Outfit gespeichert	Tenue enregistrée	Abito salvato	Ropa guardada	옷을 저장했어요	Geyimin yadda saxlanıldı
+{0} seviye {1}'de açılır	{0} opens at level {1}	{0}はレベル{1}で解放	{0} يُفتح في المستوى {1}	{0} ab Stufe {1} frei	{0} débloqué au niveau {1}	{0} si sblocca al livello {1}	{0} se abre en el nivel {1}	{0}은(는) 레벨 {1}에 열려요	{0} {1}-ci səviyyədə açılır
+Karakterim	My character	わたしのキャラクター	شخصيتي	Meine Figur	Mon personnage	Il mio personaggio	Mi personaje	내 캐릭터	Personajım
+Tamam	OK	OK	حسنًا	OK	OK	OK	Vale	확인	Oldu
+Rastgele	Random	ランダム	عشوائي	Zufall	Au hasard	Casuale	Al azar	랜덤	Təsadüfi
+Çevirmek için sürükle	Drag to turn	ドラッグで回転	اسحب للتدوير	Zum Drehen ziehen	Glisse pour tourner	Trascina per ruotare	Arrastra para girar	끌어서 돌리기	Çevirmək üçün sürüşdür
+Saç	Hair	かみ	الشعر	Haare	Cheveux	Capelli	Pelo	머리	Saç
+Kısa	Short	ショート	قصير	Kurz	Courts	Corti	Corto	짧게	Qısa
+Uzun	Long	ロング	طويل	Lang	Longs	Lunghi	Largo	길게	Uzun
+Kâküllü	Fringe	前かみあり	بغُرّة	Pony	Frange	Frangia	Flequillo	앞머리	Kəkilli
+Kel	Bald	スキンヘッド	أصلع	Glatze	Chauve	Calvo	Calvo	대머리	Keçəl
+Saç rengi	Hair colour	かみの色	لون الشعر	Haarfarbe	Couleur des cheveux	Colore capelli	Color de pelo	머리 색	Saç rəngi
+Ten	Skin	肌	البشرة	Haut	Peau	Pelle	Piel	피부	Dəri
+Şapka	Hat	帽子	القبعة	Hut	Chapeau	Cappello	Sombrero	모자	Papaq
+Yok	None	なし	لا شيء	Keiner	Aucun	Nessuno	Ninguno	없음	Yoxdur
+Kep	Cap	キャップ	كاب	Kappe	Casquette	Berretto	Gorra	캡 모자	Kepka
+Baret	Hard hat	ヘルメット	خوذة	Helm	Casque	Elmetto	Casco	안전모	Kaska
+Silindir	Top hat	シルクハット	قبعة عالية	Zylinder	Haut-de-forme	Cilindro	Chistera	실크햇	Silindr
+Taç	Crown	王冠	تاج	Krone	Couronne	Corona	Corona	왕관	Tac
+Gömlek	Shirt	シャツ	القميص	Hemd	Chemise	Camicia	Camisa	셔츠	Köynək
+Desen	Pattern	柄	النقش	Muster	Motif	Motivo	Estampado	무늬	Naxış
+Düz	Plain	無地	سادة	Uni	Uni	Tinta unita	Liso	무지	Sadə
+Çizgili	Striped	ストライプ	مخطط	Gestreift	Rayé	A righe	De rayas	줄무늬	Zolaqlı
+Kravatlı	With tie	ネクタイ	بربطة عنق	Mit Krawatte	Avec cravate	Con cravatta	Con corbata	넥타이	Qalstuklu
+Pantolon	Trousers	ズボン	البنطال	Hose	Pantalon	Pantaloni	Pantalón	바지	Şalvar
+Ayakkabı	Shoes	くつ	الحذاء	Schuhe	Chaussures	Scarpe	Zapatos	신발	Ayaqqabı
+Ev arsası	House plot	家の区画	قطعة بيت	Hausgrundstück	Terrain maison	Lotto casa	Solar de casa	집 부지	Ev sahəsi
+Büyük arsa	Big plot	大きな区画	قطعة كبيرة	Großes Grundstück	Grand terrain	Lotto grande	Solar grande	큰 부지	Böyük sahə
+Kamu binası arsası	Public building plot	公共施設の区画	قطعة مبنى عام	Grundstück für öffentliche Gebäude	Terrain bâtiment public	Lotto edificio pubblico	Solar de edificio público	공공건물 부지	İctimai bina sahəsi
+Tarihi yapı arsası	Historic building plot	れきし的建物の区画	قطعة مبنى تاريخي	Grundstück für historische Bauten	Terrain monument historique	Lotto edificio storico	Solar de edificio histórico	역사 건물 부지	Tarixi bina sahəsi
+Park yeri	Parking space	駐車スペース	موقف سيارات	Parkplatz	Place de parking	Parcheggio	Aparcamiento	주차 자리	Park yeri
+Ağaç yeri	Tree spot	木の場所	مكان شجرة	Baumplatz	Emplacement d'arbre	Posto per albero	Sitio para árbol	나무 자리	Ağac yeri
+Hayvan alanı	Animal area	動物エリア	منطقة حيوانات	Tiergehege	Enclos	Area animali	Zona de animales	동물 구역	Heyvan sahəsi
+Heykel yeri	Statue spot	像の場所	مكان تمثال	Statuenplatz	Emplacement de statue	Posto per statua	Sitio para estatua	동상 자리	Heykəl yeri
+Eser alanı	Landmark plot	名所の区画	قطعة معلم	Wahrzeichen-Grundstück	Terrain monument	Lotto monumento	Solar de monumento	명소 부지	Abidə sahəsi
+Dekor yeri	Decor spot	飾りの場所	مكان زينة	Dekoplatz	Emplacement déco	Posto decorazione	Sitio de decoración	장식 자리	Dekor yeri
+EV	HOUSE	家	بيت	HAUS	MAISON	CASA	CASA	집	EV
+BİNA	BUILDING	ビル	مبنى	GEBÄUDE	IMMEUBLE	EDIFICIO	EDIFICIO	건물	BİNA
+KAMU	PUBLIC	公共	عام	ÖFFENTLICH	PUBLIC	PUBBLICO	PÚBLICO	공공	İCTİMAİ
+TARİHİ	HISTORIC	れきし	تاريخي	HISTORISCH	HISTORIQUE	STORICO	HISTÓRICO	역사	TARİXİ
+ARAÇ	VEHICLE	のりもの	مركبة	FAHRZEUG	VÉHICULE	VEICOLO	VEHÍCULO	차량	NƏQLİYYAT
+AĞAÇ	TREE	木	شجرة	BAUM	ARBRE	ALBERO	ÁRBOL	나무	AĞAC
+HAYVAN	ANIMAL	動物	حيوان	TIER	ANIMAL	ANIMALE	ANIMAL	동물	HEYVAN
+HEYKEL	STATUE	像	تمثال	STATUE	STATUE	STATUA	ESTATUA	동상	HEYKƏL
+ESER	LANDMARK	名所	معلم	WAHRZEICHEN	MONUMENT	MONUMENTO	MONUMENTO	명소	ABİDƏ
+DEKOR	DECOR	飾り	زينة	DEKO	DÉCO	DECORO	ADORNO	장식	DEKOR
+Türk	Turkish	トルコ	تركي	Türkisch	Turque	Turco	Turco	터키	Türk
+İngiliz	English	イギリス	إنجليزي	Englisch	Anglais	Inglese	Inglés	영국	İngilis
+Amerikan	American	アメリカ	أمريكي	Amerikanisch	Américain	Americano	Americano	미국	Amerika
+Avrupa	European	ヨーロッパ	أوروبي	Europäisch	Européen	Europeo	Europeo	유럽	Avropa
+Asya	Asian	アジア	آسيوي	Asiatisch	Asiatique	Asiatico	Asiático	아시아	Asiya
+Yalı	Waterside	みずべ	على الماء	Ufervilla	Bord de l'eau	Sull'acqua	Ribereño	물가	Yalı
+Türk Mahallesi	Turkish Quarter	トルコ地区	الحي التركي	Türkisches Viertel	Quartier turc	Quartiere turco	Barrio turco	터키 마을	Türk məhəlləsi
+Yalı Boyu	Waterside Row	みずべ通り	صف البيوت المائية	Uferzeile	Bord de l'eau	Riva	Ribera	물가 거리	Yalı boyu
+Yalı Boyu II	Waterside Row II	みずべ通り II	صف البيوت المائية 2	Uferzeile II	Bord de l'eau II	Riva II	Ribera II	물가 거리 II	Yalı boyu II
+İngiliz Mahallesi	English Quarter	イギリス地区	الحي الإنجليزي	Englisches Viertel	Quartier anglais	Quartiere inglese	Barrio inglés	영국 마을	İngilis məhəlləsi
+Merkez	Downtown	中心街	وسط المدينة	Zentrum	Centre-ville	Centro	Centro	중심가	Mərkəz
+Kamu Binaları	Public Buildings	公共施設	المباني العامة	Öffentliche Gebäude	Bâtiments publics	Edifici pubblici	Edificios públicos	공공건물	İctimai binalar
+Amerikan Mahallesi	American Quarter	アメリカ地区	الحي الأمريكي	Amerikanisches Viertel	Quartier américain	Quartiere americano	Barrio americano	미국 마을	Amerika məhəlləsi
+Tarihi Çarşı	Old Bazaar	れきしの市場	السوق التاريخي	Alter Basar	Vieux bazar	Bazar storico	Bazar histórico	옛 시장	Tarixi bazar
+Eserler Bahçesi	Landmark Garden	名所の庭	حديقة المعالم	Wahrzeichengarten	Jardin des monuments	Giardino dei monumenti	Jardín de monumentos	명소 정원	Abidələr bağı
+Eserler Bahçesi II	Landmark Garden II	名所の庭 II	حديقة المعالم 2	Wahrzeichengarten II	Jardin des monuments II	Giardino dei monumenti II	Jardín de monumentos II	명소 정원 II	Abidələr bağı II
+Avrupa Mahallesi	European Quarter	ヨーロッパ地区	الحي الأوروبي	Europäisches Viertel	Quartier européen	Quartiere europeo	Barrio europeo	유럽 마을	Avropa məhəlləsi
+Gökdelenler	Skyscrapers	高層ビル街	ناطحات السحاب	Hochhäuser	Gratte-ciel	Grattacieli	Rascacielos	고층 빌딩가	Göydələnlər
+Asya Mahallesi	Asian Quarter	アジア地区	الحي الآسيوي	Asiatisches Viertel	Quartier asiatique	Quartiere asiatico	Barrio asiático	아시아 마을	Asiya məhəlləsi
+Sahil Parkı	Lakeside Park	湖畔公園	حديقة الشاطئ	Uferpark	Parc du lac	Parco sul lago	Parque del lago	호숫가 공원	Sahil parkı
+Meydan	Main Square	広場	الساحة	Marktplatz	Grand-place	Piazza	Plaza	광장	Meydan
+Lunapark	Funfair	遊園地	مدينة الملاهي	Rummel	Fête foraine	Luna park	Feria	놀이공원	Lunapark
+Polis	Police officer	警察官	شرطي	Polizist	Policier	Poliziotto	Policía	경찰관	Polis
+İtfaiyeci	Firefighter	消防士	رجل إطفاء	Feuerwehrmann	Pompier	Pompiere	Bombero	소방관	Yanğınsöndürən
+Temizlik görevlisi	Street cleaner	清掃員	عامل نظافة	Straßenreiniger	Agent de propreté	Spazzino	Barrendero	환경미화원	Təmizlik işçisi
+Doktor	Doctor	医者	طبيب	Ärztin	Médecin	Medico	Médico	의사	Həkim
+Hemşire	Nurse	看護師	ممرض	Pfleger	Infirmier	Infermiere	Enfermero	간호사	Tibb bacısı
+Sağlık görevlisi	Paramedic	救急隊員	مسعف	Sanitäter	Ambulancier	Paramedico	Paramédico	구급대원	Təcili yardım işçisi
+Öğretmen	Teacher	先生	معلم	Lehrer	Professeur	Insegnante	Maestro	선생님	Müəllim
+Öğrenci	Pupil	生徒	تلميذ	Schüler	Élève	Alunno	Alumno	학생	Şagird
+Memur	Clerk	職員	موظف	Beamter	Employé	Impiegato	Funcionario	직원	Məmur
+Kütüphaneci	Librarian	司書	أمين مكتبة	Bibliothekar	Bibliothécaire	Bibliotecario	Bibliotecario	사서	Kitabxanaçı
+Kale muhafızı	Castle guard	城の衛兵	حارس القلعة	Burgwache	Garde du château	Guardia del castello	Guardia del castillo	성 경비병	Qala keşikçisi
+Saray muhafızı	Palace guard	宮殿の衛兵	حارس القصر	Palastwache	Garde du palais	Guardia del palazzo	Guardia del palacio	궁전 경비병	Saray keşikçisi
+Esnaf	Shopkeeper	店主	تاجر	Händler	Commerçant	Negoziante	Tendero	상인	Esnaf
+Turist	Tourist	観光客	سائح	Tourist	Touriste	Turista	Turista	관광객	Turist
+Bakıcı	Keeper	飼育員	حارس الحيوانات	Tierpfleger	Soigneur	Guardiano	Cuidador	사육사	Baxıcı
+İşçi	Worker	作業員	عامل	Arbeiter	Ouvrier	Operaio	Obrero	작업자	Fəhlə
+Komşu	Neighbour	ご近所さん	جار	Nachbar	Voisin	Vicino	Vecino	이웃	Qonşu
+kırmızı	red	赤	أحمر	rot	rouge	rosso	rojo	빨강	qırmızı
+beyaz	white	白	أبيض	weiß	blanc	bianco	blanco	흰색	ağ
+gri	grey	グレー	رمادي	grau	gris	grigio	gris	회색	boz
+koyu gri	dark grey	ダークグレー	رمادي داكن	dunkelgrau	gris foncé	grigio scuro	gris oscuro	진회색	tünd boz
+siyah	black	くろ	أسود	schwarz	noir	nero	negro	검정	qara
+mavi	blue	青	أزرق	blau	bleu	blu	azul	파랑	mavi
+cam	glass	ガラス	زجاج	Glas	verre	vetro	cristal	유리	şüşə
+sarı	yellow	黄色	أصفر	gelb	jaune	giallo	amarillo	노랑	sarı
+yeşil	green	みどり	أخضر	grün	vert	verde	verde	초록	yaşıl
+turuncu	orange	オレンジ	برتقالي	orange	orange	arancione	naranja	주황	narıncı
+kahverengi	brown	茶色	بني	braun	marron	marrone	marrón	갈색	qəhvəyi
+bronz	bronze	ブロンズ	برونزي	bronze	bronze	bronzo	bronce	청동색	bürünc
+kum rengi	sand	砂色	رملي	sand	sable	sabbia	arena	모래색	qum rəngi
+koyu yeşil	dark green	こいみどり	أخضر داكن	dunkelgrün	vert foncé	verde scuro	verde oscuro	진초록	tünd yaşıl
+ten rengi	light skin	肌色	لون البشرة	hautfarben	couleur peau	color pelle	color piel	살구색	dəri rəngi
+koyu ten	dark skin	褐色	بشرة داكنة	dunkle Haut	peau foncée	pelle scura	piel oscura	갈색 피부	tünd dəri
+lacivert	navy	紺	كحلي	marineblau	bleu marine	blu scuro	azul marino	남색	tünd göy
+altın	gold	金色	ذهبي	gold	or	oro	dorado	금색	qızılı
+krem	cream	クリーム	كريمي	creme	crème	crema	crema	크림색	krem
+gül pembesi	rose	ローズ	وردي	rosa	rose	rosa	rosa	장밋빛	çəhrayı
+nane yeşili	mint	ミント	نعناعي	mint	menthe	menta	menta	민트	nanə yaşılı
+açık mavi	light blue	水色	أزرق فاتح	hellblau	bleu clair	azzurro	celeste	하늘색	açıq mavi
+kiremit	terracotta	テラコッタ	قرميدي	terrakotta	terre cuite	terracotta	terracota	테라코타	kirəmit
+arduvaz	slate	スレート	أردوازي	schiefer	ardoise	ardesia	pizarra	슬레이트	şifer
+tuğla kırmızısı	brick red	れんが色	أحمر طوبي	ziegelrot	rouge brique	rosso mattone	rojo ladrillo	벽돌색	kərpic qırmızısı
+hardal	mustard	マスタード	خردلي	senf	moutarde	senape	mostaza	겨자색	xardal
+lila	lilac	ライラック	ليلكي	flieder	lilas	lilla	lila	라일락	yasəmən
+{0} {1} tuğla	{0} {1} brick	{0} {1} ブロック	طوبة {1} {0}	{0} {1}-Stein	brique {1} {0}	mattone {1} {0}	ladrillo {1} {0}	{0} {1} 브릭	{0} {1} kərpic
+{0} {1} plaka	{0} {1} plate	{0} {1} プレート	لوح {1} {0}	{0} {1}-Platte	plaque {1} {0}	piastra {1} {0}	placa {1} {0}	{0} {1} 플레이트	{0} {1} lövhə
+{0} {1} düz plaka	{0} {1} tile	{0} {1} タイル	بلاطة {1} {0}	{0} {1}-Fliese	carreau {1} {0}	piastrella {1} {0}	baldosa {1} {0}	{0} {1} 타일	{0} {1} düz lövhə
+{0} {1} eğimli parça	{0} {1} slope	{0} {1} スロープ	قطعة مائلة {1} {0}	{0} {1}-Schräge	pente {1} {0}	spiovente {1} {0}	pieza inclinada {1} {0}	{0} {1} 경사 조각	{0} {1} maili hissə
+{0} {1} kavisli parça	{0} {1} curve	{0} {1} カーブ	قطعة منحنية {1} {0}	{0} {1}-Bogen	courbe {1} {0}	curva {1} {0}	pieza curva {1} {0}	{0} {1} 곡선 조각	{0} {1} əyri hissə
+{0} {1} yuvarlak tuğla	{0} {1} round brick	{0} {1} 丸ブロック	طوبة دائرية {1} {0}	{0} {1}-Rundstein	brique ronde {1} {0}	mattone tondo {1} {0}	ladrillo redondo {1} {0}	{0} {1} 원형 브릭	{0} {1} dəyirmi kərpic
+{0} {1} koni	{0} {1} cone	{0} {1} コーン	مخروط {1} {0}	{0} {1}-Kegel	cône {1} {0}	cono {1} {0}	cono {1} {0}	{0} {1} 원뿔	{0} {1} konus
+{0} {1} kubbe	{0} {1} dome	{0} {1} ドーム	قبة {1} {0}	{0} {1}-Kuppel	dôme {1} {0}	cupola {1} {0}	cúpula {1} {0}	{0} {1} 돔	{0} {1} günbəz
+{0} {1} kule ucu	{0} {1} spire	{0} {1} 尖塔	برج مدبب {1} {0}	{0} {1}-Turmspitze	flèche {1} {0}	guglia {1} {0}	aguja {1} {0}	{0} {1} 첨탑	{0} {1} qüllə ucu
+{0} {1} kemer	{0} {1} arch	{0} {1} アーチ	قوس {1} {0}	{0} {1}-Bogenstein	arche {1} {0}	arco {1} {0}	arco {1} {0}	{0} {1} 아치	{0} {1} tağ
+{0} {1} yuvarlak plaka	{0} {1} round plate	{0} {1} 丸プレート	لوح دائري {1} {0}	{0} {1}-Rundplatte	plaque ronde {1} {0}	piastra tonda {1} {0}	placa redonda {1} {0}	{0} {1} 원형 플레이트	{0} {1} dəyirmi lövhə
+tekerlek	wheel	タイヤ	عجلة	Rad	roue	ruota	rueda	바퀴	təkər
+{0} etiketi	{0} sticker	{0}シール	ملصق {0}	{0}-Aufkleber	autocollant {0}	adesivo {0}	pegatina de {0}	{0} 스티커	{0} etiketi
+saat	clock	時計	ساعة	Uhr	horloge	orologio	reloj	시계	saat
+göz	eye	目	عين	Auge	œil	occhio	ojo	눈	göz
+plaka	number plate	ナンバー	لوحة الأرقام	Nummernschild	plaque	targa	matrícula	번호판	nömrə
+otobüs tabelası	bus sign	バスの行き先表示	لافتة الحافلة	Busschild	panneau de bus	insegna del bus	letrero del autobús	버스 표지	avtobus lövhəsi
+yüz	face	顔	وجه	Gesicht	visage	viso	cara	얼굴	üz
+TAKSİ	TAXI	タクシー	تاكسي	TAXI	TAXI	TAXI	TAXI	택시	TAKSİ
+Küçük Konak	Little Mansion	小さなお屋敷	قصر صغير	Kleines Herrenhaus	Petit manoir	Piccola villa	Pequeña mansión	작은 저택	Kiçik malikanə
+Ahşap Ev	Wooden House	木の家	بيت خشبي	Holzhaus	Maison en bois	Casa di legno	Casa de madera	나무집	Taxta ev
+Cumbalı Köşk	Bay-Window Villa	出窓の館	قصر بشرفة مغلقة	Erkervilla	Villa à oriel	Villa con bovindo	Villa con mirador	돌출창 별장	Erkerli köşk
+Büyük Konak	Grand Mansion	大きなお屋敷	قصر كبير	Großes Herrenhaus	Grand manoir	Grande villa	Gran mansión	큰 저택	Böyük malikanə
+Tuğla Ev	Brick House	れんがの家	بيت من الطوب	Backsteinhaus	Maison en briques	Casa di mattoni	Casa de ladrillo	벽돌집	Kərpic ev
+Kır Evi	Country Cottage	いなかの家	كوخ ريفي	Landhaus	Cottage	Casa di campagna	Casa de campo	시골집	Kənd evi
+Cumba Pencereli Ev	Bay Window House	出窓の家	بيت بنافذة بارزة	Haus mit Erker	Maison à bow-window	Casa con bovindo	Casa con mirador	돌출창 집	Erker pəncərəli ev
+Sıra Evler	Terraced Houses	長屋	بيوت متلاصقة	Reihenhäuser	Maisons mitoyennes	Case a schiera	Casas adosadas	연립주택	Sıra evlər
+Viktorya Evi	Victorian House	ヴィクトリア朝の家	بيت فيكتوري	Viktorianisches Haus	Maison victorienne	Casa vittoriana	Casa victoriana	빅토리아풍 집	Viktoriya evi
+Bahçeli Ev	Garden House	庭つきの家	بيت بحديقة	Haus mit Garten	Maison avec jardin	Casa con giardino	Casa con jardín	정원 있는 집	Bağlı ev
+İki Katlı Ev	Two-Storey House	二階建ての家	بيت من طابقين	Zweistöckiges Haus	Maison à étage	Casa a due piani	Casa de dos plantas	2층집	İkimərtəbəli ev
+Garajlı Ev	House with Garage	ガレージつきの家	بيت بمرآب	Haus mit Garage	Maison avec garage	Casa con garage	Casa con garaje	차고 있는 집	Qarajlı ev
+Büyük Villa	Big Villa	大きなべっそう	فيلا كبيرة	Große Villa	Grande villa	Grande villa	Gran villa	큰 빌라	Böyük villa
+Çiftlik Evi	Farmhouse	農家	بيت مزرعة	Bauernhaus	Ferme	Fattoria	Granja	농가	Ferma evi
+Kanal Evi	Canal House	運河の家	بيت القناة	Grachtenhaus	Maison de canal	Casa sul canale	Casa del canal	운하 집	Kanal evi
+Mavi Kanal Evi	Blue Canal House	青い運河の家	بيت القناة الأزرق	Blaues Grachtenhaus	Maison de canal bleue	Casa blu sul canale	Casa azul del canal	파란 운하 집	Mavi kanal evi
+Alp Evi	Alpine Chalet	アルプスの山小屋	شاليه جبلي	Alpenhaus	Chalet alpin	Baita alpina	Chalé alpino	알프스 산장	Alp evi
+Yarım Ahşap Ev	Half-Timbered House	木骨造りの家	بيت نصف خشبي	Fachwerkhaus	Maison à colombages	Casa a graticcio	Casa con entramado	목조 골조 집	Yarımtaxta ev
+Kasaba Konağı	Town Mansion	町のお屋敷	قصر البلدة	Stadthaus	Hôtel particulier	Palazzetto	Casona	마을 저택	Qəsəbə malikanəsi
+Japon Evi	Japanese House	和風の家	بيت ياباني	Japanisches Haus	Maison japonaise	Casa giapponese	Casa japonesa	일본식 집	Yapon evi
+Çay Evi	Tea House	茶室	بيت الشاي	Teehaus	Maison de thé	Casa del tè	Casa de té	찻집	Çay evi
+Çin Evi	Chinese House	中国風の家	بيت صيني	Chinesisches Haus	Maison chinoise	Casa cinese	Casa china	중국식 집	Çin evi
+Pagoda	Pagoda	五重塔	معبد باغودا	Pagode	Pagode	Pagoda	Pagoda	탑	Paqoda
+İki Katlı Japon Evi	Two-Storey Japanese House	二階建ての和風の家	بيت ياباني من طابقين	Zweistöckiges japanisches Haus	Maison japonaise à étage	Casa giapponese a due piani	Casa japonesa de dos plantas	2층 일본식 집	İkimərtəbəli Yapon evi
+Küçük Yalı	Little Waterside Villa	小さなみずべの館	فيلا صغيرة على الماء	Kleine Ufervilla	Petite villa au bord de l'eau	Piccola villa sull'acqua	Pequeña villa a la orilla	작은 물가 저택	Kiçik yalı
+Beyaz Yalı	White Waterside Villa	白いみずべの館	فيلا بيضاء على الماء	Weiße Ufervilla	Villa blanche au bord de l'eau	Villa bianca sull'acqua	Villa blanca a la orilla	하얀 물가 저택	Ağ yalı
+Kırmızı Yalı	Red Waterside Villa	赤いみずべの館	فيلا حمراء على الماء	Rote Ufervilla	Villa rouge au bord de l'eau	Villa rossa sull'acqua	Villa roja a la orilla	빨간 물가 저택	Qırmızı yalı
+Mavi Yalı	Blue Waterside Villa	青いみずべの館	فيلا زرقاء على الماء	Blaue Ufervilla	Villa bleue au bord de l'eau	Villa blu sull'acqua	Villa azul a la orilla	파란 물가 저택	Mavi yalı
+Büyük Yalı	Grand Waterside Villa	大きなみずべの館	فيلا كبيرة على الماء	Große Ufervilla	Grande villa au bord de l'eau	Grande villa sull'acqua	Gran villa a la orilla	큰 물가 저택	Böyük yalı
+İş Merkezi	Office Building	オフィスビル	مبنى مكاتب	Bürohaus	Immeuble de bureaux	Palazzo uffici	Edificio de oficinas	오피스 빌딩	İş mərkəzi
+Apartman	Apartment Block	マンション	عمارة سكنية	Wohnhaus	Immeuble	Condominio	Bloque de pisos	아파트	Yaşayış binası
+Gökdelen	Skyscraper	高層ビル	ناطحة سحاب	Wolkenkratzer	Gratte-ciel	Grattacielo	Rascacielos	고층 빌딩	Göydələn
+Yüksek Apartman	Tower Block	高層マンション	برج سكني	Hochhaus	Tour d'habitation	Palazzone	Torre de pisos	고층 아파트	Hündür bina
+Kütüphane	Library	図書館	مكتبة	Bibliothek	Bibliothèque	Biblioteca	Biblioteca	도서관	Kitabxana
+İtfaiye İstasyonu	Fire Station	消防署	محطة إطفاء	Feuerwache	Caserne de pompiers	Caserma dei pompieri	Parque de bomberos	소방서	Yanğınsöndürmə məntəqəsi
+Hastane	Hospital	病院	مستشفى	Krankenhaus	Hôpital	Ospedale	Hospital	병원	Xəstəxana
+Okul	School	学校	مدرسة	Schule	École	Scuola	Escuela	학교	Məktəb
+Belediye Binası	Town Hall	市役所	مبنى البلدية	Rathaus	Mairie	Municipio	Ayuntamiento	시청	Bələdiyyə binası
+Hamam	Turkish Bath	ハマム	حمام تركي	Hamam	Hammam	Hammam	Baño turco	하맘	Hamam
+Kervansaray	Caravanserai	キャラバンサライ	خان القوافل	Karawanserei	Caravansérail	Caravanserraglio	Caravasar	대상 숙소	Karvansaray
+Saray	Palace	宮殿	قصر	Palast	Palais	Palazzo	Palacio	궁전	Saray
+Kale	Castle	お城	قلعة	Burg	Château fort	Castello	Castillo	성	Qala
+Scooter	Scooter	スクーター	دراجة سكوتر	Motorroller	Scooter	Scooter	Escúter	스쿠터	Skuter
+Yarış Arabası	Race Car	レーシングカー	سيارة سباق	Rennwagen	Voiture de course	Auto da corsa	Coche de carreras	경주용 자동차	Yarış maşını
+Motosiklet	Motorbike	バイク	دراجة نارية	Motorrad	Moto	Moto	Moto	오토바이	Motosiklet
+Klasik Araba	Classic Car	クラシックカー	سيارة كلاسيكية	Oldtimer	Voiture ancienne	Auto d'epoca	Coche clásico	클래식 카	Klassik maşın
+Pikap	Pickup Truck	ピックアップ	شاحنة صغيرة	Pick-up	Pick-up	Pick-up	Camioneta	픽업트럭	Pikap
+Dolmuş	Minibus	乗合バス	حافلة صغيرة	Sammeltaxi	Minibus	Pulmino	Microbús	합승 버스	Marşrut taksi
+Mini Araba	Mini Car	小さな車	سيارة صغيرة	Kleinwagen	Petite voiture	Utilitaria	Coche pequeño	미니카	Mini maşın
+Otobüs	Bus	バス	حافلة	Bus	Bus	Autobus	Autobús	버스	Avtobus
+Kepçe	Digger	ショベルカー	جرافة	Bagger	Pelleteuse	Escavatore	Excavadora	굴착기	Ekskavator
+Taksi	Taxi	タクシー	سيارة أجرة	Taxi	Taxi	Taxi	Taxi	택시	Taksi
+Spor Araba	Sports Car	スポーツカー	سيارة رياضية	Sportwagen	Voiture de sport	Auto sportiva	Deportivo	스포츠카	İdman maşını
+Polis Arabası	Police Car	パトカー	سيارة شرطة	Polizeiauto	Voiture de police	Auto della polizia	Coche de policía	경찰차	Polis maşını
+Ambulans	Ambulance	救急車	سيارة إسعاف	Krankenwagen	Ambulance	Ambulanza	Ambulancia	구급차	Təcili yardım
+Çöp Kamyonu	Garbage Truck	ごみしゅうしゅう車	شاحنة قمامة	Müllwagen	Camion poubelle	Camion della spazzatura	Camión de basura	쓰레기차	Zibil maşını
+İtfaiye	Fire Engine	消防車	سيارة إطفاء	Feuerwehrauto	Camion de pompiers	Autopompa	Camión de bomberos	소방차	Yanğınsöndürən maşın
+Çam Ağacı	Pine Tree	松の木	شجرة صنوبر	Kiefer	Pin	Pino	Pino	소나무	Şam ağacı
+Meşe Ağacı	Oak Tree	オークの木	شجرة بلوط	Eiche	Chêne	Quercia	Roble	참나무	Palıd ağacı
+Kiraz Ağacı	Cherry Tree	さくらの木	شجرة كرز	Kirschbaum	Cerisier	Ciliegio	Cerezo	벚나무	Albalı ağacı
+Elma Ağacı	Apple Tree	りんごの木	شجرة تفاح	Apfelbaum	Pommier	Melo	Manzano	사과나무	Alma ağacı
+Selvi	Cypress	イトスギ	شجرة سرو	Zypresse	Cyprès	Cipresso	Ciprés	사이프러스	Sərv
+Palmiye	Palm Tree	ヤシの木	نخلة	Palme	Palmier	Palma	Palmera	야자수	Palma
+At	Horse	馬	حصان	Pferd	Cheval	Cavallo	Caballo	말	At
+Kedi	Cat	ねこ	قطة	Katze	Chat	Gatto	Gato	고양이	Pişik
+Ördek	Duck	アヒル	بطة	Ente	Canard	Anatra	Pato	오리	Ördək
+Köpek	Dog	いぬ	كلب	Hund	Chien	Cane	Perro	강아지	İt
+Fil	Elephant	ゾウ	فيل	Elefant	Éléphant	Elefante	Elefante	코끼리	Fil
+Zürafa	Giraffe	キリン	زرافة	Giraffe	Girafe	Giraffa	Jirafa	기린	Zürafə
+Anıt Heykel	Monument	記念像	نصب تذكاري	Denkmal	Monument	Monumento	Monumento	기념상	Abidə heykəl
+Aslan Heykeli	Lion Statue	ライオン像	تمثال الأسد	Löwenstatue	Statue de lion	Statua del leone	Estatua de león	사자상	Şir heykəli
+Kartal Anıtı	Eagle Monument	ワシの記念碑	نصب النسر	Adlerdenkmal	Monument à l'aigle	Monumento all'aquila	Monumento del águila	독수리 기념비	Qartal abidəsi
+Atlı Heykel	Horse Rider Statue	騎馬像	تمثال الفارس	Reiterstandbild	Statue équestre	Statua equestre	Estatua ecuestre	기마상	Atlı heykəl
+Saat Kulesi	Clock Tower	時計塔	برج الساعة	Uhrturm	Tour de l'horloge	Torre dell'orologio	Torre del reloj	시계탑	Saat qülləsi
+Özgürlük Anıtı	Statue of Liberty	自由の女神	تمثال الحرية	Freiheitsstatue	Statue de la Liberté	Statua della Libertà	Estatua de la Libertad	자유의 여신상	Azadlıq heykəli
+Piramit	Pyramid	ピラミッド	هرم	Pyramide	Pyramide	Piramide	Pirámide	피라미드	Piramida
+Eyfel Kulesi	Eiffel Tower	エッフェル塔	برج إيفل	Eiffelturm	Tour Eiffel	Torre Eiffel	Torre Eiffel	에펠탑	Eyfel qülləsi
+Kız Kulesi	Maiden's Tower	乙女の塔	برج الفتاة	Leanderturm	Tour de Léandre	Torre della Fanciulla	Torre de la Doncella	처녀의 탑	Qız qalası
+Big Ben	Big Ben	ビッグ・ベン	بيغ بن	Big Ben	Big Ben	Big Ben	Big Ben	빅벤	Big Ben
+Ayasofya	Hagia Sophia	アヤソフィア	آيا صوفيا	Hagia Sophia	Sainte-Sophie	Santa Sofia	Santa Sofía	아야 소피아	Ayasofya
+Boğaz Köprüsü	Bosphorus Bridge	ボスポラス橋	جسر البوسفور	Bosporus-Brücke	Pont du Bosphore	Ponte sul Bosforo	Puente del Bósforo	보스포루스 대교	Boğaz körpüsü
+Galata Kulesi	Galata Tower	ガラタ塔	برج غلطة	Galataturm	Tour de Galata	Torre di Galata	Torre de Gálata	갈라타 탑	Qalata qülləsi
+Çöp Konteyneri	Dumpster	ごみコンテナ	حاوية قمامة	Müllcontainer	Benne à ordures	Cassonetto	Contenedor	쓰레기 컨테이너	Zibil konteyneri
+Park Bankı	Park Bench	公園のベンチ	مقعد حديقة	Parkbank	Banc public	Panchina	Banco del parque	공원 벤치	Park skamyası
+Çiçeklik	Flower Bed	花壇	حوض زهور	Blumenbeet	Parterre de fleurs	Aiuola	Macetero	화단	Gül ləki
+Sokak Lambası	Street Lamp	街灯	مصباح شارع	Straßenlaterne	Réverbère	Lampione	Farola	가로등	Küçə fənəri
+Otobüs Durağı	Bus Stop	バス停	موقف حافلات	Bushaltestelle	Arrêt de bus	Fermata del bus	Parada de autobús	버스 정류장	Avtobus dayanacağı
+Çeşme	Fountain	噴水	نافورة	Brunnen	Fontaine	Fontana	Fuente	분수	Bulaq
+Bayrak Direği	Flagpole	旗ざお	سارية علم	Fahnenmast	Mât de drapeau	Pennone	Mástil	깃대	Bayraq dirəyi
+Telefon Kulübesi	Phone Box	電話ボックス	كشك هاتف	Telefonzelle	Cabine téléphonique	Cabina telefonica	Cabina telefónica	공중전화 부스	Telefon budkası
+Yel Değirmeni	Windmill	風車	طاحونة هواء	Windmühle	Moulin à vent	Mulino a vento	Molino de viento	풍차	Yel dəyirmanı
+Dönme Dolap	Ferris Wheel	かんらん車	عجلة دوّارة	Riesenrad	Grande roue	Ruota panoramica	Noria	관람차	Çərxi-fələk
+Kanepe	Sofa	ソファ	أريكة	Sofa	Canapé	Divano	Sofá	소파	Divan
+Yemek Masası	Dining Table	ダイニングテーブル	طاولة طعام	Esstisch	Table à manger	Tavolo da pranzo	Mesa de comedor	식탁	Yemək masası
+Sandalye	Chair	いす	كرسي	Stuhl	Chaise	Sedia	Silla	의자	Stul
+Yatak	Bed	ベッド	سرير	Bett	Lit	Letto	Cama	침대	Çarpayı
+Ayaklı Lamba	Floor Lamp	フロアランプ	مصباح أرضي	Stehlampe	Lampadaire	Lampada da terra	Lámpara de pie	스탠드 조명	Ayaqlı lampa
+Saksı Çiçeği	Pot Plant	鉢植え	نبتة في أصيص	Topfpflanze	Plante en pot	Pianta in vaso	Planta en maceta	화분	Dibçək gülü
+Halı	Rug	じゅうたん	سجادة	Teppich	Tapis	Tappeto	Alfombra	러그	Xalça
+Televizyon	Television	テレビ	تلفاز	Fernseher	Télévision	Televisore	Televisión	텔레비전	Televizor
+Koltuk	Armchair	ひじかけいす	كرسي بذراعين	Sessel	Fauteuil	Poltrona	Sillón	안락의자	Kreslo
+Çalışma Masası	Desk	勉強机	مكتب	Schreibtisch	Bureau	Scrivania	Escritorio	책상	Yazı masası
+Mutfak Tezgâhı	Kitchen Counter	キッチンカウンター	طاولة المطبخ	Küchenzeile	Plan de travail	Cucina	Encimera	주방 조리대	Mətbəx piştaxtası
+Buzdolabı	Fridge	れいぞうこ	ثلاجة	Kühlschrank	Réfrigérateur	Frigorifero	Nevera	냉장고	Soyuducu
+Gardırop	Wardrobe	クローゼット	خزانة ملابس	Kleiderschrank	Armoire	Armadio	Armario	옷장	Qarderob
+Küvet	Bathtub	バスタブ	حوض استحمام	Badewanne	Baignoire	Vasca da bagno	Bañera	욕조	Vanna
+Kitaplık	Bookshelf	本棚	رف كتب	Bücherregal	Bibliothèque	Libreria	Estantería	책장	Kitab rəfi
+Şömine	Fireplace	だんろ	مدفأة	Kamin	Cheminée	Camino	Chimenea	벽난로	Kamin
+Piyano	Piano	ピアノ	بيانو	Klavier	Piano	Pianoforte	Piano	피아노	Piano
+Akvaryum	Aquarium	水槽	حوض أسماك	Aquarium	Aquarium	Acquario	Acuario	수족관	Akvarium
+Seç	Choose	選ぶ	اختر	Wählen	Choisir	Scegli	Elegir	선택	Seç
+Seçili	Selected	選択中	مُختارة	Ausgewählt	Sélectionnée	Selezionata	Seleccionado	선택됨	Seçilib
