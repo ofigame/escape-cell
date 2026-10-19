@@ -157,6 +157,7 @@ namespace BrickMuseum.Core
         private void BuildUpdate(float dt)
         {
             buildCam.Apply(cam);
+            site.UpdateGuides();
             bu.Tick();
             var kb = Keyboard.current;
             if (kb != null && kb.rKey.wasPressedThisFrame) buildRot = (buildRot + 1) % 4;

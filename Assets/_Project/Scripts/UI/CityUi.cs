@@ -13,7 +13,7 @@ namespace BrickMuseum.UI
         public PointerArea touch;
         public TextMeshProUGUI level, stars, help;
         public Image levelFill;
-        public Button inventoryBtn, collectionBtn, walkBtn, characterBtn, buildBtn, langBtn;
+        public Button inventoryBtn, collectionBtn, walkBtn, characterBtn, buildBtn, langBtn, resumeBtn;
         // slot panel
         public GameObject panel;
         public TextMeshProUGUI panelTitle, panelInfo;
@@ -61,6 +61,9 @@ namespace BrickMuseum.UI
             ((RectTransform)characterBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 96), new Vector2(-24, -366));
             langBtn = Ui.Button(root, "Dil", Color.white, Ui.Ink, 30, () => { });
             ((RectTransform)langBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 80), new Vector2(-24, -586));
+            resumeBtn = Ui.Button(root, "İnşaya devam et", Ui.Yellow, Ui.Ink, 40, () => { });
+            ((RectTransform)resumeBtn.transform).Place(new Vector2(0.5f, 0), new Vector2(560, 116), new Vector2(0, 190));
+            resumeBtn.gameObject.SetActive(false);
             buildBtn = Ui.Button(root, "Evimi yap", new Color(0.75f, 0.95f, 0.75f), Ui.Ink, 34, () => { });
             ((RectTransform)buildBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 96), new Vector2(-24, -476));
 

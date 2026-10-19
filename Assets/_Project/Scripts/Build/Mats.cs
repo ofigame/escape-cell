@@ -88,10 +88,12 @@ namespace BrickMuseum.Build
             var c = Palette.Of(key);
             if (Palette.IsGlass(key))
             {
+                // clear glass with a cool tint: you see in and out, the sky shines on it
                 m = new Material(BaseTransparent);
-                m.SetColor(BaseColor, new Color(c.r, c.g, c.b, 0.55f));
+                var tint = Color.Lerp(c, new Color(0.22f, 0.38f, 0.55f), 0.65f);
+                m.SetColor(BaseColor, new Color(tint.r, tint.g, tint.b, 0.5f));
                 m.SetColor(Emission, Color.black);
-                m.SetFloat(Smooth, 0.9f);
+                m.SetFloat(Smooth, 0.96f);
             }
             else
             {

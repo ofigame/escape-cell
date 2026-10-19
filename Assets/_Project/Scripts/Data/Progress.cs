@@ -55,6 +55,17 @@ namespace BrickMuseum.Data
         public int x, y, z, r;
     }
 
+    /// <summary>A workshop build left half-way: which model, for which slot, the pieces already on (target indices), hearts.</summary>
+    [Serializable]
+    public class PendingBuild
+    {
+        public string model = "", slot = "";
+        public List<int> placed = new List<int>();
+        public int heartsTotal, heartsLeft, mistakes;
+        public bool adUsed;
+        public bool Has => !string.IsNullOrEmpty(model);
+    }
+
     [Serializable]
     public class SaveFile
     {
@@ -65,6 +76,7 @@ namespace BrickMuseum.Data
         public string myCar = "";            // model id of the player's own car ("" = none chosen yet)
         public string myHouse = "";          // model id of the player's own house
         public HomeData home = new HomeData();
+        public PendingBuild pending = new PendingBuild();
         public bool stockInit;               // the starter kit (and materials for models built before) has been given
         public List<StockItem> stock = new List<StockItem>();
         public List<BuildPieceData> build = new List<BuildPieceData>();   // the player's own house, piece by piece

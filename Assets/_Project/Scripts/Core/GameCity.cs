@@ -50,6 +50,7 @@ namespace BrickMuseum.Core
             cu.inventoryBtn.onClick.AddListener(ShowInventory);
             cu.collectionBtn.onClick.AddListener(ShowCollection);
             cu.langBtn.onClick.AddListener(ShowLanguages);
+            cu.resumeBtn.onClick.AddListener(ResumeBuild);
             Loc.Changed += () =>
             {
                 // every text on screen (and hidden) is drawn again in the new language
@@ -79,6 +80,7 @@ namespace BrickMuseum.Core
             cu.SetLevel(Progress.Level, Progress.Stars, from, to);
             cu.inventoryBtn.SetLabel(Progress.Data.inventory.Count > 0 ? $"Envanter ({Progress.Data.inventory.Count})" : "Envanter");
             cu.help.transform.parent.gameObject.SetActive(!cu.panel.activeSelf);
+            cu.resumeBtn.gameObject.SetActive(Pending.Has && !cu.panel.activeSelf);
             cu.help.text = Progress.Data.placements.Count == 0 ? "Bir EV arsasına dokun ve ilk evini yap" : "Bir alana dokun";
         }
 
@@ -180,7 +182,8 @@ namespace BrickMuseum.Core
                 info = $"{where}\n" + (wait != null ? $"Yeni model {Progress.LockText(wait.Value)} sonra" : "Bu alan için yeni modeller yakında");
             }
             var buttons = new List<(string, Color, System.Action)>();
-            if (pool.Count > 0) buttons.Add(("Yeni yap", Ui.Yellow, () => BuildFor(s)));
+            if (Pending.Has && Pending.slot == s.id) buttons.Add(("İnşaya devam et", Ui.Yellow, ResumeBuild));
+            else if (pool.Count > 0) buttons.Add(("Yeni yap", Ui.Yellow, () => BuildFor(s)));
             if (inv.Count > 0) buttons.Add(($"Envanterden ({inv.Count})", new Color(0.8f, 0.9f, 1f), () => PickFromInventory(s)));
             buttons.Add(("Kapat", Neutral, ClosePanel));
             cu.ShowPanel(s.kind == "house" ? $"{CityLayout.StyleName(s.style)} ev arsası" : CityLayout.SlotName(s), info, null, buttons.ToArray());
@@ -202,6 +205,7 @@ namespace BrickMuseum.Core
         {
             var pool = Progress.PoolFor(s);
             if (pool.Count == 0) return;
+            if (Pending.Has) { ClearPending(); Toast("Yarım kalan yapım bırakıldı"); }
             buildSlot = s;
             ClosePanel();
             EnterWorkshop();
@@ -307,6 +311,7 @@ namespace BrickMuseum.Core
             city.Tick(dt);
             city.people.Tick(dt, cityCam.target, cityCam.distance < 220f ? 130f : 0f);   // people are too small to see from high up
             if (cu.levelUp.activeSelf && Time.unscaledTime > levelUpUntil) cu.levelUp.SetActive(false);
+            cu.resumeBtn.gameObject.SetActive(Pending.Has && !cu.panel.activeSelf && !cu.list.activeSelf);
         }
     }
 }

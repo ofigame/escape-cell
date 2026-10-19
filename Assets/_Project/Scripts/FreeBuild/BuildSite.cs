@@ -122,6 +122,7 @@ namespace BrickMuseum.FreeBuild
                 }
             pieces.Add(pc);
             ApplyView(pc);
+            guidesDirty = true;
             return pc;
         }
 
@@ -134,6 +135,7 @@ namespace BrickMuseum.FreeBuild
             if (col != null) byCollider.Remove(col);
             pieces.Remove(pc);
             Object.Destroy(pc.go);
+            guidesDirty = true;
         }
 
         private bool Free(int x0, int y0, int z0, int fw, int h, int fd)
@@ -256,7 +258,59 @@ namespace BrickMuseum.FreeBuild
 
         // ================= what is shown =================
 
-        public void SetView(int storeys) { view = storeys; foreach (var pc in pieces) ApplyView(pc); }
+        public void SetView(int storeys) { view = storeys; foreach (var pc in pieces) ApplyView(pc); guidesDirty = true; }
+
+        // ================= next-storey guides =================
+
+        private GameObject guides;
+        private bool guidesDirty = true;
+
+        /// <summary>
+        /// Once a storey's walls are roofed over by a floor (most of the walls' footprint covered), see-through bricks show
+        /// where the walls of the storey above go: the same footprint, standing on the new floor, wherever it is still free.
+        /// Taps go through them to the floor, so a piece lands right there.
+        /// </summary>
+        public void UpdateGuides()
+        {
+            if (!editable || !guidesDirty) return;
+            guidesDirty = false;
+            if (guides != null) Object.Destroy(guides);
+            var b = new MeshBuilder();
+            int count = 0;
+            for (int k = 1; k * Storey + 3 <= MaxY; k++)
+            {
+                int floorY = k * Storey - 1, top = k * Storey;
+                if (view != 0 && view < k + 1) break;
+                var walls = new List<(int x, int z)>();
+                int covered = 0;
+                for (int x = 0; x < lx; x++)
+                    for (int z = 0; z < lz; z++)
+                    {
+                        // a wall cell: something stands in the top course of the storey below (not the stairs or a railing)
+                        bool wall = false;
+                        for (int y = floorY - 3; y < floorY && !wall; y++)
+                            if (y >= 0 && cells.TryGetValue(Cell(x, y, z), out var pc) && pc.kind.t != "stairs" && pc.kind.t != "fence") wall = true;
+                        if (!wall) continue;
+                        walls.Add((x, z));
+                        if (cells.ContainsKey(Cell(x, floorY, z))) covered++;
+                    }
+                if (walls.Count < 8 || covered < walls.Count * 0.5f) continue;   // (a stairwell may stay open)
+                foreach (var (x, z) in walls)
+                {
+                    if (!cells.ContainsKey(Cell(x, floorY, z))) continue;               // only where the floor carries it
+                    if (!IsFree(x, top, z) || !IsFree(x, top + 1, z) || !IsFree(x, top + 2, z)) continue;
+                    b.Box(new Vector3(x + 0.5f, (top + 1.5f) * P, z + 0.5f), new Vector3(0.9f, 3f * P - 0.06f, 0.9f));
+                    count++;
+                }
+            }
+            if (count == 0) return;
+            guides = new GameObject("NextStoreyGuides");
+            guides.transform.SetParent(root, false);
+            guides.AddComponent<MeshFilter>().sharedMesh = b.ToMesh("guides");
+            var r = guides.AddComponent<MeshRenderer>();
+            r.sharedMaterial = Mats.Ghost("lblue");
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        }
 
         private void ApplyView(Placed pc) => pc.go.SetActive(view == 0 || pc.data.y < view * Storey - 1);
 

@@ -15,8 +15,9 @@ namespace BrickMuseum.City
     {
         // ---------- the bend ----------
 
-        private static float Dx(float z) => 10f * Mathf.Sin(z / 57f + 0.7f) + 4f * Mathf.Sin(z / 23f + 2.1f);
-        private static float Dz(float x) => 9f * Mathf.Sin(x / 63f + 1.3f) + 3.5f * Mathf.Sin(x / 29f + 0.4f);
+        // long, low waves: the streets curve, but a block is skewed by only a few degrees (it still reads as a square from above)
+        private static float Dx(float z) => 8f * Mathf.Sin(z / 88f + 0.7f) + 1.5f * Mathf.Sin(z / 37f + 2.1f);
+        private static float Dz(float x) => 7f * Mathf.Sin(x / 96f + 1.3f) + 1.5f * Mathf.Sin(x / 41f + 0.4f);
 
         /// <summary>The lake shore stays a straight quay: east-west waves fade out toward it.</summary>
         private static float ShoreFade(float z) => Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((CityLayout.MaxZ - z) / 50f));
@@ -34,9 +35,12 @@ namespace BrickMuseum.City
         /// <summary>How much the plan's x axis is turned at a point, as a yaw in degrees (Unity: positive turns +x toward -z).</summary>
         public static float Angle(Vector2 p)
         {
+            // the mean turn of the plan's two axes (the bend skews them a little apart): squares sit straight in their block
             var a = Warp(p);
-            var e = Warp(p + new Vector2(1f, 0f)) - a;
-            return Mathf.Atan2(-e.y, e.x) * Mathf.Rad2Deg;
+            var ex = Warp(p + new Vector2(1f, 0f)) - a;
+            var ez = Warp(p + new Vector2(0f, 1f)) - a;
+            float ax = Mathf.Atan2(-ex.y, ex.x) * Mathf.Rad2Deg, az = Mathf.Atan2(ez.x, ez.y) * Mathf.Rad2Deg;
+            return (ax + az) / 2f;
         }
 
         // ---------- the hills ----------
@@ -51,8 +55,8 @@ namespace BrickMuseum.City
         public static float Height(Vector2 p)
         {
             float x = p.x, z = p.y;
-            float h = Hill(x, z, 100f, -100f, 15f, 52f) + Hill(x, z, -118f, -36f, 11f, 44f) + Hill(x, z, 128f, 50f, 5f, 32f)
-                      + 6f * Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((-40f - z) / 120f));                   // rising toward the forest
+            float h = Hill(x, z, 100f, -100f, 12f, 58f) + Hill(x, z, -118f, -36f, 8f, 50f) + Hill(x, z, 128f, 50f, 4f, 36f)
+                      + 5f * Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((-40f - z) / 120f));                   // rising toward the forest
             float edge = Mathf.Min(Mathf.Min(x - CityLayout.MinX, CityLayout.MaxX - x), Mathf.Min(z - CityLayout.MinZ, CityLayout.MaxZ - z));
             return h * Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(edge / 40f));
         }
@@ -101,15 +105,18 @@ namespace BrickMuseum.City
                 }
             }
             var verts = new Vector3[outV.Count];
+            var uv = new Vector2[outV.Count];
             var idx = new int[outV.Count];
             for (int i = 0; i < verts.Length; i++)
             {
                 var v = outV[i];
                 verts[i] = Point(new Vector2(v.x, v.z), v.y);
+                uv[i] = new Vector2(v.x, v.z) * 0.08f;                 // plan-aligned texture coordinates (the water's ripples)
                 idx[i] = i;
             }
             var mesh = new Mesh { name = m.name + " bent", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
             mesh.vertices = verts;
+            mesh.uv = uv;
             mesh.triangles = idx;
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();

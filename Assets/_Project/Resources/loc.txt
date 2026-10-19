@@ -402,3 +402,7 @@ Köprü yeri	Bridge site	橋の場所	موقع الجسر	Brückenplatz	Emplacem
 KÖPRÜ	BRIDGE	橋	جسر	BRÜCKE	PONT	PONTE	PUENTE	다리	KÖRPÜ
 Bank yeri	Bench spot	ベンチの場所	مكان مقعد	Bankplatz	Emplacement de banc	Posto panchina	Sitio para banco	벤치 자리	Skamya yeri
 BANK	BENCH	ベンチ	مقعد	BANK	BANC	PANCHINA	BANCO	벤치	SKAMYA
+İnşaya devam et	Continue building	続きをつくる	تابع البناء	Weiterbauen	Continuer la construction	Continua a costruire	Seguir construyendo	이어서 만들기	Tikintiyə davam et
+Yapım kaydedildi	Build saved	制作を保存した	تم حفظ البناء	Bau gespeichert	Construction enregistrée	Costruzione salvata	Construcción guardada	제작을 저장했어요	Tikinti yadda saxlanıldı
+İnşaya devam et ile sürdür	pick it up with Continue building	「続きをつくる」で再開	تابعه عبر «تابع البناء»	mit „Weiterbauen“ fortsetzen	reprends avec « Continuer la construction »	riprendi con "Continua a costruire"	síguelo con «Seguir construyendo»	'이어서 만들기'로 계속	"Tikintiyə davam et" ilə davam et
+Yarım kalan yapım bırakıldı	The unfinished build was dropped	途中の制作をやめた	تم ترك البناء غير المكتمل	Der angefangene Bau wurde verworfen	La construction inachevée est abandonnée	La costruzione a metà è stata abbandonata	Se dejó la construcción a medias	만들던 것을 그만뒀어요	Yarımçıq tikinti buraxıldı

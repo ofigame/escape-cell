@@ -126,7 +126,7 @@ namespace BrickMuseum.City
             Add("CreekBanks", banks, Mats.Lit(new Color(0.5f, 0.72f, 0.42f), 0.05f), false, 6f);
             var water = new MeshBuilder();
             water.Box(new Vector3(cx, WaterTop - 0.05f, (z0 + z1) / 2f), new Vector3(2f * w, 0.1f, z1 - z0));
-            Add("CreekWater", water, Mats.Lit(new Color(0.3f, 0.56f, 0.8f), 0.92f), false, 6f);
+            Add("CreekWater", water, Water.Creek, false, 6f);
             // stones along the water's edge
             var stones = new MeshBuilder();
             var rnd = new System.Random(7);
@@ -229,7 +229,7 @@ namespace BrickMuseum.City
             var v = new SlotView { slot = s };
             v.go = new GameObject("Slot " + s.id);
             v.go.transform.SetParent(root, false);
-            v.go.transform.localPosition = CityShape.Point(s.local, Base(s));
+            v.go.transform.localPosition = SlotPoint(s);
             var turn = Quaternion.Euler(0f, s.yaw + CityShape.Angle(s.local), 0f);
             v.go.transform.localRotation = s.onRoad ? Quaternion.FromToRotation(Vector3.up, CityShape.Normal(s.local)) * turn : turn;
             float drop = s.onRoad || s.only == "bridge" ? 0f : Plinth(s);
@@ -239,7 +239,25 @@ namespace BrickMuseum.City
             else if (s.onRoad)
                 pad.Box(new Vector3(0, 0.02f, 0), new Vector3(s.w - 0.4f, 0.04f, s.d - 0.4f));
             else
-                pad.Box(new Vector3(0, (0.15f - drop) / 2f, 0), new Vector3(s.w - 0.4f, 0.15f + drop, s.d - 0.4f));
+                pad.Box(new Vector3(0, 0.075f, 0), new Vector3(s.w - 0.4f, 0.15f, s.d - 0.4f));
+            if (drop > 0.45f)
+            {
+                var stone = new MeshBuilder();
+                stone.Box(new Vector3(0, -drop / 2f + 0.001f, 0), new Vector3(s.w - 0.4f, drop, s.d - 0.4f));
+                var (n, rise, ground) = Stairs(s);
+                float z0 = (s.d - 0.4f) / 2f;
+                for (int i = 0; i < n; i++)
+                {
+                    float top = 0.15f - (i + 1) * rise / (n + 1);
+                    stone.Box(new Vector3(0, (top + ground - 0.4f) / 2f, z0 + (i + 0.5f) * StepDepth), new Vector3(StairWidth, top - ground + 0.4f, StepDepth));
+                }
+                var plinth = new GameObject("Plinth");
+                plinth.transform.SetParent(v.go.transform, false);
+                plinth.AddComponent<MeshFilter>().sharedMesh = stone.ToMesh("plinth");
+                var pr = plinth.AddComponent<MeshRenderer>();
+                pr.sharedMaterial = stoneMat ??= Mats.Lit(new Color(0.74f, 0.72f, 0.68f), 0.1f);
+                pr.shadowCastingMode = ShadowCastingMode.On;
+            }
             v.pad = new GameObject("Pad");
             v.pad.transform.SetParent(v.go.transform, false);
             v.pad.AddComponent<MeshFilter>().sharedMesh = pad.ToMesh("pad");
@@ -250,14 +268,69 @@ namespace BrickMuseum.City
             views[s] = v;
         }
 
-        /// <summary>How far a slot's plinth reaches below its top: down past the lowest ground under its corners.</summary>
+        /// <summary>Highest and lowest ground under a slot (its middle, corners and edge midpoints).</summary>
+        private static (float high, float low) GroundUnder(Slot s)
+        {
+            float high = float.MinValue, low = float.MaxValue;
+            var ws = s.WorldSize / 2f;
+            for (int i = -1; i <= 1; i++)
+                for (int k = -1; k <= 1; k++)
+                {
+                    float h = CityShape.Height(s.local + new Vector2(i * ws.x, k * ws.y));
+                    high = Mathf.Max(high, h); low = Mathf.Min(low, h);
+                }
+            return (high, low);
+        }
+
+        /// <summary>
+        /// The ground height a slot stands at: a level pad on top of the highest ground under it (so it is never half
+        /// buried on a slope); parking spaces and the bridge follow the street under their middle.
+        /// </summary>
+        private static float SlotGround(Slot s) => s.onRoad || s.only == "bridge" ? CityShape.Height(s.local) : GroundUnder(s).high;
+
+        private static Vector3 SlotPoint(Slot s)
+        {
+            var w = CityShape.Warp(s.local);
+            return new Vector3(w.x, SlotGround(s) + Base(s), w.y);
+        }
+
+        private const float StepDepth = 0.55f, StairWidth = 3.2f;
+        private static Material stoneMat;
+
+        /// <summary>
+        /// Steps from a raised plot down to the ground in front of it (toward its street): how many, how high the pad
+        /// stands over that ground, and that ground's height in the slot's own frame. None for a pad close to the ground.
+        /// </summary>
+        private static (int n, float rise, float ground) Stairs(Slot s)
+        {
+            if (s.onRoad || s.only == "bridge" || s.kind == "tree" || s.w < 6f) return (0, 0f, 0f);
+            var f = Quaternion.Euler(0, s.yaw, 0) * Vector3.forward;
+            var outside = s.local + new Vector2(f.x, f.z) * (s.d / 2f + StepDepth * 2f);
+            float ground = CityShape.Height(outside) - SlotGround(s) + 0.03f;   // the lawn in front, from the pad's foot
+            float rise = 0.15f - ground;
+            if (rise < 0.45f) return (0, 0f, 0f);
+            return (Mathf.CeilToInt(rise / 0.35f), rise, ground);
+        }
+
+        /// <summary>The walkable height on a plot's steps (above the bare ground at p), or NaN when p is not on them.</summary>
+        private static float OnStairs(Slot s, Vector2 p)
+        {
+            var (n, rise, ground) = Stairs(s);
+            if (n == 0) return float.NaN;
+            var f = Quaternion.Euler(0, s.yaw, 0) * Vector3.forward;
+            var r = Quaternion.Euler(0, s.yaw, 0) * Vector3.right;
+            var d = p - s.local;
+            float lz = d.x * f.x + d.y * f.z, lx = d.x * r.x + d.y * r.z, z0 = (s.d - 0.4f) / 2f;
+            if (Mathf.Abs(lx) > StairWidth / 2f || lz < z0 || lz > z0 + n * StepDepth) return float.NaN;
+            float t = (lz - z0) / (n * StepDepth);
+            return SlotGround(s) + Lawn + Mathf.Lerp(0.15f, ground, t) - CityShape.Height(p);
+        }
+
+        /// <summary>How far a slot's plinth reaches below its top: down past the lowest ground under it.</summary>
         private static float Plinth(Slot s)
         {
-            float mid = CityShape.Height(s.local), low = mid;
-            var ws = s.WorldSize / 2f;
-            foreach (var (x, z) in new[] { (-1f, -1f), (1f, -1f), (-1f, 1f), (1f, 1f) })
-                low = Mathf.Min(low, CityShape.Height(s.local + new Vector2(x * ws.x, z * ws.y)));
-            return mid - low + 0.4f;
+            var (high, low) = GroundUnder(s);
+            return high - low + 0.4f;
         }
 
         // ---------- state ----------
@@ -322,6 +395,8 @@ namespace BrickMuseum.City
                 // the big bridge stands in the creek with its deck just under the street's deck; the rest stand on their pads
                 v.model.transform.localPosition = new Vector3(0, s.only == "bridge" ? -0.05f - (BridgeDeck + StudHeight) * k : s.onRoad ? 0.04f : 0.15f, 0);
                 v.model.transform.localScale = Vector3.one * k;
+                if (s.only == "bridge")
+                    foreach (Transform c in v.model.transform) if (c.name.Contains(":blue:")) Object.Destroy(c.gameObject);   // the toy's water: the real creek flows here
             }
             v.padRenderer.sharedMaterial = s == selected ? (padSelected ??= Mats.Lit(new Color(1f, 0.86f, 0.2f), 0.3f)) : open ? PadMat(s.kind) : (padLocked ??= Mats.Lit(new Color(0.7f, 0.7f, 0.7f), 0.1f));
             v.pad.SetActive(m == null || s.only != "bridge" || s == selected);
@@ -363,7 +438,7 @@ namespace BrickMuseum.City
             return null;
         }
 
-        public Vector3 WorldOf(Slot s) => root.TransformPoint(CityShape.Point(s.local, Base(s)));
+        public Vector3 WorldOf(Slot s) => root.TransformPoint(SlotPoint(s));
 
         /// <summary>A plan point (relative to the city centre) at height y above the ground, in the world.</summary>
         public Vector3 WorldAt(Vector2 plan, float y) => root.TransformPoint(CityShape.Point(plan, y));
@@ -398,9 +473,11 @@ namespace BrickMuseum.City
                 foreach (var s in a.slots)
                 {
                     if (s.onRoad) continue;
+                    float steps = OnStairs(s, p);
+                    if (!float.IsNaN(steps)) return steps;
                     var ws = s.WorldSize;
                     if (Mathf.Abs(p.x - s.local.x) <= ws.x / 2f - 0.2f && Mathf.Abs(p.y - s.local.y) <= ws.y / 2f - 0.2f)
-                        return CityShape.Height(s.local) - CityShape.Height(p) + Lawn + 0.15f;   // a level pad
+                        return SlotGround(s) - CityShape.Height(p) + Lawn + 0.15f;   // a level pad
                 }
                 return Lawn + 0.03f;
             }

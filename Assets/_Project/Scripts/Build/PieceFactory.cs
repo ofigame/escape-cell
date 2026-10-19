@@ -39,8 +39,44 @@ namespace BrickMuseum.Build
                 if (look == PieceLook.Solid || look == PieceLook.Picture) AddStickerText(go.transform, p); // not on the hand copy (its materials get destroyed)
                 return go;
             }
+            if (p.t == "brick" && Palette.IsGlass(p.c) && (look == PieceLook.Solid || look == PieceLook.Picture))
+            {
+                // a window: white frame and sill round a clear pane (several glass bricks side by side read as panes)
+                AddMesh(go, WindowFrame(p), MaterialFor("white", look), look);
+                AddMesh(go, WindowPane(p), MaterialFor(p.c, look), look);
+                return go;
+            }
             AddMesh(go, MeshFor(p), MaterialFor(p.c, look), look);
             return go;
+        }
+
+        private static Mesh WindowFrame(Piece p)
+        {
+            string key = $"wframe:{p.w}x{p.d}x{p.h}";
+            if (meshes.TryGetValue(key, out var cached)) return cached;
+            var b = new MeshBuilder();
+            float w = p.w - G, d = p.d - G, H = p.h * P - 0.01f, t = 0.13f;
+            foreach (float sx in new[] { -1f, 1f })
+                foreach (float sz in new[] { -1f, 1f })
+                    b.Box(new Vector3(sx * (w / 2f - t / 2f), H / 2f, sz * (d / 2f - t / 2f)), new Vector3(t, H, t));          // corner posts
+            foreach (float y in new[] { t / 2f, H - t / 2f })
+                foreach (float sz in new[] { -1f, 1f })
+                {
+                    b.Box(new Vector3(0, y, sz * (d / 2f - t / 2f)), new Vector3(w, t, t));                                     // rails on the long faces
+                    b.Box(new Vector3(sz * (w / 2f - t / 2f), y, 0), new Vector3(t, t, d));                                     // and on the ends
+                }
+            b.Box(new Vector3(0, 0.04f, 0), new Vector3(w + 0.08f, 0.08f, d + 0.08f));                                       // the sill
+            return meshes[key] = b.ToMesh(key);
+        }
+
+        private static Mesh WindowPane(Piece p)
+        {
+            string key = $"wpane:{p.w}x{p.d}x{p.h}";
+            if (meshes.TryGetValue(key, out var cached)) return cached;
+            var b = new MeshBuilder();
+            float w = p.w - G, d = p.d - G, H = p.h * P - 0.01f;
+            b.Box(new Vector3(0, H / 2f, 0), new Vector3(w - 0.2f, H - 0.24f, d - 0.2f));
+            return meshes[key] = b.ToMesh(key);
         }
 
         /// <summary>Puts a piece object at its spot in a model (model offset ox/oz centres the model on the origin).</summary>

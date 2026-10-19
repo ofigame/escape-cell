@@ -46,6 +46,27 @@ namespace BrickMuseum.Core
             yield return new WaitForSeconds(0.6f);
             yield return Shot(dir, "06_house_in_city");
 
+            // leave a build half-way, come back to it from the city, finish it
+            var second = CityLayout.Slots.First(s => s.kind == "house" && s.style == "tr" && Progress.At(s.id) == null && s.level <= Progress.Level);
+            BuildFor(second);
+            while (spinning) yield return null;
+            wu.refModal.SetActive(false);
+            for (int i = 0; i < 6; i++) { PlaceNext(); yield return null; }
+            LeaveWorkshop();
+            yield return new WaitForSeconds(0.6f);
+            Debug.Log($"[Tour] pending: {Progress.Data.pending.model}, {Progress.Data.pending.placed.Count} pieces");
+            yield return Shot(dir, "06b_resume_button");
+            ResumeBuild();
+            yield return new WaitForSeconds(0.8f);
+            Debug.Log($"[Tour] resumed: {bench.PlacedCount} pieces on, bag {wu.bag.Count}");
+            yield return Shot(dir, "06c_resumed");
+            wu.refModal.SetActive(false);
+            while (!bench.Complete) { PlaceNext(); yield return null; }
+            yield return new WaitForSeconds(1.2f);
+            wu.win.SetActive(false);
+            PlaceFinished();
+            yield return new WaitForSeconds(0.4f);
+
             // a parking spot: build a vehicle and keep it in the inventory
             var parking = CityLayout.Slots.First(s => s.kind == "vehicle" && s.level <= Progress.Level);
             BuildFor(parking);
@@ -103,6 +124,11 @@ namespace BrickMuseum.Core
             cityCam.Focus(city.WorldAt(new Vector2(100f, -100f), 0f), 160f);
             yield return new WaitForSeconds(0.5f);
             yield return Shot(dir, "11d3_hill");
+            var hillSlot = CityLayout.Slots.Where(s => !s.onRoad && s.kind != "tree" && Progress.At(s.id) != null)
+                .OrderByDescending(s => CityShape.Height(s.local + new Vector2(0, 8)) - CityShape.Height(s.local - new Vector2(0, 8))).First();
+            cityCam.Focus(city.WorldOf(hillSlot), 45f);
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot(dir, "11d4_hill_slot");
             yield return SizeLineup(dir);
 
             // take a model away, then put it on another free slot from the inventory
@@ -179,6 +205,15 @@ namespace BrickMuseum.Core
             facingYaw = camYaw = 180f; camPitch = 10f; walkCamDist = 7f;
             yield return new WaitForSeconds(0.8f);
             yield return Shot(dir, "20b3_hill_street");
+            // beside a plot on the steepest slope: the pad stands level, nothing sinks
+            var steep = CityLayout.Slots.Where(s => !s.onRoad && s.kind == "house" && Progress.At(s.id) != null)
+                .OrderByDescending(s => Mathf.Abs(CityShape.Height(s.local + new Vector2(8, 0)) - CityShape.Height(s.local - new Vector2(8, 0)))).First();
+            var sf = Quaternion.Euler(0, steep.yaw + CityShape.Angle(steep.local), 0) * Vector3.forward;
+            walkPos = city.WorldOf(steep) + sf * (steep.d / 2f + 2.5f) + Quaternion.Euler(0, 90, 0) * sf * 6f;
+            walkPos.y = city.GroundAt(walkPos);
+            facingYaw = camYaw = Mathf.Atan2(-sf.x, -sf.z) * Mathf.Rad2Deg + 35f; camPitch = 6f; walkCamDist = 7f;
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "20b4_slope_plot");
             camPitch = 14f;
             walkCamDist = 6.5f;
             // my own car: walk up to it, get in, drive off down the street and round a corner

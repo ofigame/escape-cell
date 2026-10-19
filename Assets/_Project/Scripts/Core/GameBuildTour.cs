@@ -22,7 +22,13 @@ namespace BrickMuseum.Core
 
             foreach (var k in Stock.Kinds) Stock.Add(k.key, 400);   // the test house needs a full box
             yield return null;
-            ScriptedHouse();
+            ScriptedHouse(1);
+            RefreshBuildUi();
+            buildCam.distance = 40f; buildCam.yaw = 205f; buildCam.pitch = 40f;
+            buildCam.target = BuildSite.HouseOrigin + new Vector3(0, 4f, 0);
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "31a_next_storey_guides");
+            ScriptedHouse(2);
             RefreshBuildUi();
             buildCam.distance = 40f; buildCam.yaw = 205f; buildCam.pitch = 30f;
             buildCam.target = BuildSite.HouseOrigin + new Vector3(0, 4f, 0);
@@ -222,10 +228,11 @@ namespace BrickMuseum.Core
         }
 
         /// <summary>A test house: two storeys with a door, windows, stairs inside, a balcony with a railing and a flat roof.</summary>
-        private void ScriptedHouse()
+        private void ScriptedHouse(int stage)
         {
             const int x0 = 6, x1 = 17, z0 = 6, z1 = 15;
             var s = site;
+            if (stage == 2) goto upper;
             // openings and the stairs first, the walls fill round them
             s.PlaceAt("door:3x1x9", "white", 10, 0, z1, 0);
             s.PlaceAt("window:2x1x6", "white", 7, 3, z1, 0);
@@ -239,6 +246,8 @@ namespace BrickMuseum.Core
             for (int x = x0; x <= x1; x += 2)
                 for (int z = z0; z <= z1; z += 2)
                     if (!(z + 1 >= 7 && z <= 8 && x + 1 >= 7 && x <= 16)) s.PlaceAt("brick:2x2x1", "brown", x, 9, z, 0);
+            if (stage == 1) return;
+            upper:
             foreach (int x in new[] { 8, 10, 12 }) { s.PlaceAt("brick:2x2x1", "gray", x, 9, 16, 0); s.PlaceAt("fence:2x1x3", "white", x, 10, 17, 0); }
             s.PlaceAt("door:3x1x9", "white", 10, 10, z1, 0);
             s.PlaceAt("window:2x1x6", "white", 14, 13, z1, 0);

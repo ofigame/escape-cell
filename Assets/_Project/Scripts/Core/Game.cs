@@ -99,7 +99,7 @@ namespace BrickMuseum.Core
             wu.refDrag.Drag = e => Previews.TurnLive(-e.delta.x * 0.4f);
             wu.exhibitBtn.onClick.AddListener(() => { wu.win.SetActive(false); PlaceFinished(); });
             wu.newBtn.onClick.AddListener(() => { wu.win.SetActive(false); KeepFinished(); });
-            wu.failOkBtn.onClick.AddListener(() => { wu.fail.SetActive(false); Progress.Failed(current.id); EnterCity(buildSlot); });
+            wu.failOkBtn.onClick.AddListener(() => { wu.fail.SetActive(false); Progress.Failed(current.id); ClearPending(); EnterCity(buildSlot); });
             wu.failAdBtn.onClick.AddListener(() => StartCoroutine(ContinueAd()));
             wu.refImage.texture = Previews.Live;
             wu.refBigImage.texture = Previews.Live;
@@ -148,7 +148,7 @@ namespace BrickMuseum.Core
             if (spinning) return;
             bool building = current != null && !bench.Done;
             EnterCity(buildSlot);
-            if (building) Toast("Yapım bırakıldı");
+            if (building) { SavePending(); Toast("Yapım kaydedildi · İnşaya devam et ile sürdür", 2.6f); }
         }
 
         private IEnumerator Spin(List<ModelDef> pool)
@@ -186,17 +186,17 @@ namespace BrickMuseum.Core
             StartLevel(chosen);
         }
 
-        private void StartLevel(ModelDef m)
+        private void StartLevel(ModelDef m, PendingBuild resume = null)
         {
             current = m;
             bench.Begin(m);
-            var kinds = m.pieces.Select(p => p.Kind()).ToList();
+            if (resume != null) RestorePending(resume);
+            // the bag holds what is still to go on, plus a few pieces that belong to no spot
+            var kinds = bench.targets.Where(t => !t.placed).Select(t => t.p.Kind()).ToList();
             kinds.AddRange(Distractors(m, Mathf.Clamp(4 + m.pieces.Count / 6, 4, 12)));
             wu.bag.Fill(kinds);
             wu.bag.glowKey = null;
-            heartsTotal = heartsLeft = m.Hearts;
-            mistakes = 0;
-            adUsed = false;
+            if (resume == null) { heartsTotal = heartsLeft = m.Hearts; mistakes = 0; adUsed = false; }
             Previews.ShowLive(m);
             orbit.Fit(cam, m.sx, m.sz, m.height);
             wu.refCard.gameObject.SetActive(true);
@@ -204,7 +204,9 @@ namespace BrickMuseum.Core
             wu.heartsRow.gameObject.SetActive(true);
             Help("Çantayı aç, gereken parçayı tezgâhtaki parlak yere sürükle");
             UpdateHud();
-            ShowTarget(true);
+            ShowTarget(resume == null);
+            SavePending();
+            if (resume != null && heartsLeft <= 0) { wu.refModal.SetActive(false); ShowOutOfHearts(); }
         }
 
         private static List<Piece> Distractors(ModelDef m, int n)
@@ -325,6 +327,7 @@ namespace BrickMuseum.Core
             {
                 bench.PlaceAt(snapped);
                 wu.bag.Remove(it);
+                SavePending();
                 Sfx.Play(snapped.p.t == "sticker" ? "stick" : "click");
                 if (bench.Hint == null) { wu.hintBar.gameObject.SetActive(false); wu.bag.glowKey = null; }
                 UpdateHud();
@@ -346,6 +349,7 @@ namespace BrickMuseum.Core
             Sfx.Play("wrong");
             Sfx.Haptic();
             UpdateHud();
+            SavePending();
             if (heartsLeft > 0) { Toast($"Bu {kind.Label()} buraya uymuyor"); return; }
             Sfx.Play("fail");
             wu.failInfo.text = $"{current.name} 3 gün boyunca çarkta çıkmayacak.\nAlan boş kaldı, başka bir model deneyebilirsin.";
@@ -362,6 +366,7 @@ namespace BrickMuseum.Core
             heartsTotal = Mathf.Max(heartsTotal, heartsLeft);
             UpdateHud();
             Toast("+2 hata hakkı");
+            SavePending();
         }
 
         private IEnumerator TestAd()
@@ -390,6 +395,7 @@ namespace BrickMuseum.Core
         private IEnumerator Win()
         {
             bench.Done = true;
+            ClearPending();
             yield return new WaitForSeconds(0.35f);
             int stars = mistakes == 0 ? 3 : mistakes <= heartsTotal / 2 ? 2 : 1;
             levelBefore = Progress.Level;
@@ -455,6 +461,7 @@ namespace BrickMuseum.Core
             float dt = Time.deltaTime;
             time += dt;
             Mats.Pulse(time);
+            Water.Tick(time);
             bench.Tick(dt);
             studio.Tick(dt, chu.canvas.gameObject.activeSelf);
             Previews.Tick(dt, mode == Mode.Workshop && current != null && (wu.refCard.gameObject.activeInHierarchy || wu.refModal.activeSelf));

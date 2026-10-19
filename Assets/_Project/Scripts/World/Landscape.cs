@@ -126,7 +126,9 @@ namespace BrickMuseum.World
             var water = new MeshBuilder();
             water.Box(new Vector3(0, Ground + 0.06f, mid), new Vector3(LakeHalfWidth * 2f, 0.04f, south - north));
             foreach (float sx in new[] { -1f, 1f }) water.Cylinder(new Vector3(sx * LakeHalfWidth, Ground + 0.04f, mid), half, half, 0.04f, 32, true, false);
-            Add(parent, "Lake", water.ToMesh("lake"), Mats.Lit(new Color(0.27f, 0.52f, 0.78f), 0.92f), false, true);
+            var lakeMesh = water.ToMesh("lake");
+            Water.PlanarUV(lakeMesh, 0.04f);
+            Add(parent, "Lake", lakeMesh, Water.Lake, false, true);
 
             var hulls = new MeshBuilder();
             var cabins = new MeshBuilder();
