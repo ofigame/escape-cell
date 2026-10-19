@@ -63,8 +63,64 @@ namespace BrickMuseum.Core
             yield return CarBuildTour(dir);
             yield return FishTour(dir);
             yield return LotTour(dir);
+            yield return ScoreTour(dir);
+            yield return RoofTour(dir);
             yield return GardenTour(dir);
             yield return LanguageTour(dir);
+        }
+
+        /// <summary>The city score list, then a level-up bonus collected with the ad.</summary>
+        private IEnumerator ScoreTour(string dir)
+        {
+            EnterCity(null);
+            yield return new WaitForSeconds(0.4f);
+            Debug.Log($"[Tour] city score {City.CityScore.Total}, bonuses waiting {Data.Progress.Data.bonusPending}");
+            yield return Shot(dir, "53a_score_pill");
+            ShowScore();
+            yield return new WaitForSeconds(0.4f);
+            yield return Shot(dir, "53b_score_list");
+            cu.list.SetActive(false);
+            if (Data.Progress.Data.bonusPending == 0) Data.Progress.Data.bonusPending = 1;
+            ShowBonus();
+            yield return new WaitForSeconds(0.4f);
+            yield return Shot(dir, "53c_bonus_panel");
+            int before = City.CityScore.Total;
+            yield return CollectBonus();
+            yield return new WaitForSeconds(0.4f);
+            yield return Shot(dir, "53d_bonus_collected");
+            Debug.Log($"[Tour] bonus: score {before} -> {City.CityScore.Total}, inventory {Data.Progress.Data.inventory.Count}, police {Data.Progress.Data.bonusPolice} workers {Data.Progress.Data.bonusWorkers} staff {Data.Progress.Data.bonusStaff}");
+            ClosePanel();
+        }
+
+        /// <summary>Walking to a skyscraper's door, up to its roof, the city from above, and back down.</summary>
+        private IEnumerator RoofTour(string dir)
+        {
+            EnterWalk();
+            yield return new WaitForSeconds(0.4f);
+            var towers = obstacles.Where(IsTower).OrderByDescending(o => o.top).ToList();
+            Debug.Log($"[Tour] towers: {towers.Count}");
+            if (towers.Count == 0) { ExitWalk(); yield break; }
+            var t = towers[0];
+            walkPos = new Vector3(t.center.x, 0f, t.center.y - t.half.y - 1.2f);
+            walkPos.y = GroundAt(walkPos);
+            facingYaw = camYaw = 0f; camPitch = 14f;
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot(dir, "54a_tower_door");
+            Debug.Log($"[Tour] roof button: {tu.homeBtn.gameObject.activeSelf} near {(roofNear != null ? roofNear.Value.model.id : "-")}");
+            ClimbRoof(t);
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "54b_on_roof");
+            testMove = new Vector2(0, 1);
+            camYaw = 180f;
+            yield return new WaitForSeconds(1.2f);
+            testMove = Vector2.zero;
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot(dir, "54c_roof_view");
+            Debug.Log($"[Tour] roof: y {walkPos.y:F1} top {t.top:F1}, inside {Mathf.Abs(walkPos.x - t.center.x) <= t.half.x && Mathf.Abs(walkPos.z - t.center.y) <= t.half.y}");
+            LeaveRoof();
+            yield return new WaitForSeconds(0.4f);
+            yield return Shot(dir, "54d_back_down");
+            ExitWalk();
         }
 
         /// <summary>A city house's garden: a picket fence with a gate, a pool, a tree, flowers, a stone path, a lamp.</summary>

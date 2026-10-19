@@ -42,6 +42,7 @@ namespace BrickMuseum.Core
             WireHome();
             WireTaxi();
             WireFishing();
+            WireRoof();
         }
 
         private static void SetLandscape(bool on)
@@ -77,6 +78,7 @@ namespace BrickMuseum.Core
             SpawnCar();
             if (house != null) obstacles.AddRange(FurnitureObstacles());
             decorating = false;
+            onRoof = false; walkCamDist = 6.5f;
             tu.SetHomeLabel("GİR");
             tu.homeBtn.gameObject.SetActive(false);
             tu.decorBtn.gameObject.SetActive(false);
@@ -89,6 +91,7 @@ namespace BrickMuseum.Core
         private void ExitWalk()
         {
             if (decorating) EndDecor();
+            LeaveRoof();
             CancelTaxi(false);
             StopFishing();
             if (driving) GetOutOfCar();
@@ -166,9 +169,9 @@ namespace BrickMuseum.Core
             var dir = camRot * new Vector3(move.x, 0, move.y);
             float speed = (running || runKey ? RunSpeed : WalkSpeed) * move.magnitude;
             var next = walkPos + dir.normalized * speed * dt;
-            next = HouseCollide(Collide(next));
-            next = ClampWalk(next);
-            float ground = GroundAt(next);
+            if (onRoof) next = RoofClamp(next);
+            else next = ClampWalk(HouseCollide(Collide(next)));
+            float ground = onRoof ? roof.top : GroundAt(next);
             if (ground - walkPos.y > 1.1f) { next.x = walkPos.x; next.z = walkPos.z; ground = GroundAt(next); } // too high to step up
             float moved = new Vector2(next.x - walkPos.x, next.z - walkPos.z).magnitude / Mathf.Max(dt, 0.0001f);
 
@@ -234,6 +237,7 @@ namespace BrickMuseum.Core
                 if (d < 9f && d < bestD) { bestD = d; best = o; }
             }
             if (ShowHomeNearby()) { tu.carBtn.gameObject.SetActive(false); return; }
+            if (ShowRoofNearby(best, bestD)) return;
             bool nearCar = car != null && NearCar();
             tu.carBtn.gameObject.SetActive(nearCar);
             if (nearCar) { tu.nearChip.SetActive(true); tu.nearText.text = $"Araban: {carName}"; return; }

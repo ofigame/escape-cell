@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using BrickMuseum.Character;
 using BrickMuseum.Data;
 using UnityEngine;
@@ -43,6 +44,9 @@ namespace BrickMuseum.City
         // ---------- who lives where ----------
 
         /// <summary>The people a placed model brings: role ids (see <see cref="Dress"/>).</summary>
+        /// <summary>The people a placed model brings (for the city score too).</summary>
+        public static string[] RolesOf(ModelDef m) => RolesFor(m);
+
         private static string[] RolesFor(ModelDef m)
         {
             switch (m.kind)
@@ -164,6 +168,18 @@ namespace BrickMuseum.City
                     if (!walkers.ContainsKey(key)) walkers[key] = Spawn(key, roles[i], s);
                 }
             }
+            // the staff the city bonuses brought, walking round the public blocks
+            var beats = new[] { "Kamu Binaları", "Şehir Parkı", "Merkez", "Türk Mahallesi", "Sahil Parkı" }
+                .Select(CityLayout.AreaNamed).Where(a => a != null && a.slots.Count > 0).ToList();
+            int beat = 0;
+            foreach (var (role, n) in new[] { ("police", Progress.Data.bonusPolice), ("cleaner", Progress.Data.bonusWorkers), ("office", Progress.Data.bonusStaff) })
+                for (int i = 0; i < n && beats.Count > 0; i++)
+                {
+                    string key = $"bonus|{role}|{i}";
+                    want.Add(key);
+                    if (!walkers.ContainsKey(key)) walkers[key] = Spawn(key, role, beats[beat % beats.Count].slots[0]);
+                    beat++;
+                }
             var gone = new List<string>();
             foreach (var k in walkers.Keys) if (!want.Contains(k)) gone.Add(k);
             foreach (var k in gone) { Object.Destroy(walkers[k].person.root.gameObject); walkers.Remove(k); }

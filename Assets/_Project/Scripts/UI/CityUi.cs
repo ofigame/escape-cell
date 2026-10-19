@@ -15,6 +15,7 @@ namespace BrickMuseum.UI
         public Image levelFill;
         public Button inventoryBtn, collectionBtn, walkBtn, characterBtn, buildBtn, langBtn, resumeBtn;
         public TextMeshProUGUI money;
+        public Button scoreBtn, bonusBtn;
         // slot panel
         public GameObject panel;
         public TextMeshProUGUI panelTitle, panelInfo;
@@ -69,6 +70,11 @@ namespace BrickMuseum.UI
             coin.rectTransform.Place(new Vector2(0, 0.5f), new Vector2(42, 42), new Vector2(14, 0));
             money = Ui.Text(mp.transform, "", 32, Ui.Ink, true);
             money.rectTransform.Fill(8); money.rectTransform.offsetMin = new Vector2(64, 8);
+            scoreBtn = Ui.Button(root, "Puan", new Color(0.86f, 0.93f, 1f), Ui.Ink, 30, () => { });
+            ((RectTransform)scoreBtn.transform).Place(new Vector2(0, 1), new Vector2(220, 74), new Vector2(264, -168));
+            bonusBtn = Ui.Button(root, "Şehir bonusu", Ui.Yellow, Ui.Ink, 30, () => { });
+            ((RectTransform)bonusBtn.transform).Place(new Vector2(0, 1), new Vector2(330, 80), new Vector2(24, -252));
+            bonusBtn.gameObject.SetActive(false);
             resumeBtn = Ui.Button(root, "İnşaya devam et", Ui.Yellow, Ui.Ink, 40, () => { });
             ((RectTransform)resumeBtn.transform).Place(new Vector2(0.5f, 0), new Vector2(560, 116), new Vector2(0, 190));
             resumeBtn.gameObject.SetActive(false);

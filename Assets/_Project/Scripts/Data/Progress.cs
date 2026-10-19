@@ -116,7 +116,9 @@ namespace BrickMuseum.Data
         public List<FishItem> fish = new List<FishItem>();  // the cooler
         public List<LotSave> lots = new List<LotSave>();
         public List<GardenSave> gardens = new List<GardenSave>();
-        public List<KindLock> cooldowns = new List<KindLock>();    // lots 1.. along the west road (lot 0 is build/home)
+        public List<KindLock> cooldowns = new List<KindLock>();
+        public int bonusPending;                      // level-up city bonuses waiting to be collected (with an ad)
+        public int bonusPolice, bonusWorkers, bonusStaff;   // people the bonuses brought    // lots 1.. along the west road (lot 0 is build/home)
         public int activeCar;
         public bool stockInit;               // the starter kit (and materials for models built before) has been given
         public List<StockItem> stock = new List<StockItem>();
@@ -234,7 +236,13 @@ namespace BrickMuseum.Data
             return id;
         }
 
-        public static void ToInventory(string id) { if (!Data.inventory.Contains(id)) Data.inventory.Add(id); Save(); }
+        /// <summary>Into the inventory (street decor and trees may be there more than once: bonuses give several).</summary>
+        public static void ToInventory(string id)
+        {
+            var m = ModelCatalog.Find(id);
+            if (!Data.inventory.Contains(id) || (m != null && Repeatable(m.kind))) Data.inventory.Add(id);
+            Save();
+        }
 
         /// <summary>Whether a model may stand on a slot: same kind, same house style, and small enough.</summary>
         public static bool Fits(ModelDef m, Slot s)

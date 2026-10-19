@@ -176,7 +176,7 @@ namespace BrickMuseum.UI
             if (l == "Dil") return Globe;
             if (l == "Evimi yap" || l == "Evime geç" || l == "GİR") return l == "GİR" ? Door : House;
             if (l == "Arabamı yap" || l == "Arabama geç" || l == "Arabam olsun" || l == "BİN") return Car;
-            if (l == "İN") return Exit;
+            if (l == "AŞAĞI") return Exit;
             if (l == "Şehre dön" || l == "Şehir" || l == "Şehre yerleştir") return City;
             if (l == "Kapat") return Close;
             if (l == "İpucu") return Bulb;
@@ -184,6 +184,10 @@ namespace BrickMuseum.UI
             if (l == "Başla" || l == "Devam" || l == "İnşaya devam et") return Play;
             if (l.StartsWith("Reklam izle")) return Video;
             if (l == "Yap") return Plus;
+            if (l.StartsWith("Puan")) return Star;
+            if (l.StartsWith("Şehir bonusu") || l.StartsWith("Reklam izle, topla")) return l.StartsWith("Reklam") ? Video : Star;
+            if (l == "ÇIK") return Up;
+            if (l == "AŞAĞI") return Exit;
             if (l == "Yeni yap" || l == "Koy") return Plus;
             if (l == "Geri al") return Undo;
             if (l == "Döndür") return Rotate;

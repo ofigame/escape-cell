@@ -52,6 +52,8 @@ namespace BrickMuseum.Core
             cu.collectionBtn.onClick.AddListener(ShowCollection);
             cu.langBtn.onClick.AddListener(ShowLanguages);
             cu.resumeBtn.onClick.AddListener(ResumeBuild);
+            cu.scoreBtn.onClick.AddListener(ShowScore);
+            cu.bonusBtn.onClick.AddListener(ShowBonus);
             Loc.Changed += () =>
             {
                 // every text on screen (and hidden) is drawn again in the new language
@@ -82,6 +84,9 @@ namespace BrickMuseum.Core
             cu.inventoryBtn.SetLabel(Progress.Data.inventory.Count > 0 ? $"Envanter ({Progress.Data.inventory.Count})" : "Envanter");
             cu.help.transform.parent.gameObject.SetActive(!cu.panel.activeSelf);
             cu.resumeBtn.gameObject.SetActive(Pending.Has && !cu.panel.activeSelf);
+            cu.scoreBtn.SetLabel($"Puan {CityScore.Total}");
+            cu.bonusBtn.gameObject.SetActive(Progress.Data.bonusPending > 0);
+            if (Progress.Data.bonusPending > 0) cu.bonusBtn.SetLabel($"Şehir bonusu ({Progress.Data.bonusPending})");
             cu.help.text = Progress.Data.placements.Count == 0 ? "Bir EV arsasına dokun ve ilk evini yap" : "Bir alana dokun";
         }
 
@@ -156,11 +161,12 @@ namespace BrickMuseum.Core
                 bool mine = vehicle && Progress.Data.myCar == id && !HasBuiltCar;
                 string about = $"{CityLayout.SlotName(s)} · {where}\n{stars} yıldız · {m.pieces.Count} parça"
                     + (mine ? "\nSenin araban · Şehri gez'de binebilirsin" : "");
-                if (s.kind == "house")
+                if (CityScore.CanUpgrade(s))
                 {
-                    // from level 3 a city house's garden can be built
-                    bool open = Progress.Level >= FreeBuild.Gardens.UnlockLevel;
-                    cu.ShowPanel(m.name, about + (open ? "" : $"\nBahçe seviye {FreeBuild.Gardens.UnlockLevel}'te açılır"), Previews.Model(m),
+                    // the city score opens the gardens: of houses first, then of the bigger buildings
+                    int need = CityScore.NeededFor(s), score = CityScore.Total;
+                    bool open = score >= need;
+                    cu.ShowPanel(m.name, about + (open ? "" : $"\nGeliştirme şehir puanı {need} olunca açılır (şimdi {score})"), Previews.Model(m),
                         open ? ("Bahçeyi geliştir", new Color(0.7f, 0.92f, 0.6f), () => { ClosePanel(); EnterGarden(s); }) : ("Envantere al", new Color(0.8f, 0.9f, 1f), () => TakeAway(s)),
                         open ? ("Envantere al", new Color(0.8f, 0.9f, 1f), () => TakeAway(s)) : ("Kapat", Neutral, ClosePanel),
                         ("Kapat", Neutral, ClosePanel));
@@ -208,6 +214,58 @@ namespace BrickMuseum.Core
         }
 
         private void OpenHomeLot() => OpenLot(0);
+
+        // ---------- the city score and the level-up bonuses ----------
+
+        private void ShowScore()
+        {
+            cu.ClearRows();
+            var parts = CityScore.Parts();
+            cu.listTitle.text = $"Şehir puanı {parts.Sum(p => p.Points)}";
+            foreach (var p in parts) cu.AddRow(ModelCatalog.Find(p.pic) is ModelDef pm ? Previews.Model(pm, 160) : null, $"{p.name} · {p.count}", $"{p.count} × {p.each} = {p.Points} puan\n{p.hint}", null, null);
+            cu.AddRow(ModelCatalog.All.FirstOrDefault(x => x.kind == "house") is ModelDef hm ? Previews.Model(hm, 160) : null, "Neden gerekli?", $"Puan {CityScore.HouseGardens}: evlerin bahçeleri geliştirilir\nPuan {CityScore.BuildingGardens}: büyük binaların çevresi geliştirilir", null, null);
+            cu.list.SetActive(true);
+        }
+
+        private static readonly string[] BonusPool = { "bank", "konteyner", "lamba", "trafiklambasi", "workers", "police", "staff" };
+
+        private void ShowBonus()
+        {
+            panelSlot = null;
+            city.Select(null);
+            cu.help.transform.parent.gameObject.SetActive(false);
+            cu.ShowPanel("Şehir bonusu", $"Reklam izle, şehir bonusunu topla\n{Progress.Data.bonusPending} bonus seni bekliyor · her biri 2 hediye", null,
+                ("Reklam izle, topla", Ui.Yellow, () => StartCoroutine(CollectBonus())),
+                ("Kapat", Neutral, ClosePanel));
+        }
+
+        /// <summary>Two gifts per bonus: street furniture into the inventory, or staff that start walking the town.</summary>
+        private IEnumerator CollectBonus()
+        {
+            ClosePanel();
+            yield return TestAd();
+            var picks = BonusPool.OrderBy(_ => Random.value).Take(2).ToList();
+            var names = new List<string>();
+            foreach (var g in picks)
+            {
+                switch (g)
+                {
+                    case "workers": Progress.Data.bonusWorkers += 2; names.Add("2 belediye işçisi"); break;
+                    case "police": Progress.Data.bonusPolice += 3; names.Add("3 polis"); break;
+                    case "staff": Progress.Data.bonusStaff += 2; names.Add("2 belediye personeli"); break;
+                    default:
+                        Progress.ToInventory(g);
+                        names.Add(ModelCatalog.Find(g)?.name ?? g);
+                        break;
+                }
+            }
+            Progress.Data.bonusPending = Mathf.Max(0, Progress.Data.bonusPending - 1);
+            Progress.Save();
+            city.people.Sync();
+            Sfx.Play("win");
+            UpdateCityHud();
+            cu.ShowPanel("Bonus toplandı", string.Join("\n", names) + $"\nŞehir puanı: {CityScore.Total}", null, ("Tamam", Ui.Yellow, ClosePanel));
+        }
 
         /// <summary>A lot by the west road: build on it when it is the player's, else buy it.</summary>
         private void OpenLot(int lot)
@@ -383,6 +441,8 @@ namespace BrickMuseum.Core
             cu.levelUp.SetActive(true);
             levelUpUntil = Time.unscaledTime + 3f;
             Sfx.Play("win");
+            Progress.Data.bonusPending += now - levelBefore;   // a city bonus for every level
+            Progress.Save();
             levelBefore = now;
             city.RefreshAll();
             UpdateCityHud();
