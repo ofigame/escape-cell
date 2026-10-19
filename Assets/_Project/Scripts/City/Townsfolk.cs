@@ -53,6 +53,8 @@ namespace BrickMuseum.City
                 case "house": return new[] { "resident", "resident" };
                 case "big": return new[] { "office", "office" };
                 case "sport": return new[] { "player", "player", "player" };
+                case "hotel": return new[] { "tourist", "tourist", "office" };
+                case "golf": return new[] { "tourist", "player" };
                 case "civic":
                     switch (m.id)
                     {

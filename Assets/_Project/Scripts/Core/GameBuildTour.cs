@@ -67,6 +67,8 @@ namespace BrickMuseum.Core
             yield return RoofTour(dir);
             yield return DistrictTour(dir);
             yield return VillageTour(dir);
+            yield return MegaTour(dir);
+            yield return VillaTour(dir);
             yield return FarmTour(dir);
             yield return CoachTour(dir);
             yield return FixTour(dir);
@@ -218,6 +220,131 @@ namespace BrickMuseum.Core
             yield return Shot(dir, "57_tip_auto");
             DismissTip();
             touring = true;
+        }
+
+        /// <summary>A villa lot in Gökkent: bought, a villa with a pool built on its big plate, in the city, its rent, the walk from it.</summary>
+        private IEnumerator VillaTour(string dir)
+        {
+            EnterCity(null);
+            int lot = City.CityLayout.TownLots;
+            Wallet.Earn(FreeBuild.Lots.Price(lot));
+            Debug.Log($"[Tour] villa for sale {FreeBuild.Lots.ForSale(lot)}, bought {FreeBuild.Lots.Buy(lot)}");
+            city.RefreshLots();
+            cityCam.Focus(city.WorldAt(City.CityLayout.LotCenter(lot), 0f), 120f);
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "62a_villa_lot");
+            foreach (var k in Stock.Kinds) Stock.Add(k.key, 600);
+            buildLot = lot;
+            EnterBuild(false);
+            var s = site;
+            // windows and the door first, then the walls round them (bricks that would overlap are skipped)
+            s.PlaceAt("door:3x1x9", "brown", 20, 0, 25, 0);
+            foreach (int x in new[] { 12, 27 }) s.PlaceAt("window:4x1x6", "white", x, 3, 25, 0);
+            foreach (int x in new[] { 12, 27 }) s.PlaceAt("window:4x1x6", "white", x, 3, 8, 0);
+            for (int y = 0; y < 12; y += 3)
+            {
+                for (int x = 10; x < 34; x += 2) { s.PlaceAt("brick:2x1x3", "white", x, y, 8, 0); s.PlaceAt("brick:2x1x3", "white", x, y, 25, 0); }
+                for (int z = 9; z < 25; z += 4) { s.PlaceAt("brick:4x1x3", "white", 10, y, z, 1); s.PlaceAt("brick:4x1x3", "white", 33, y, z, 1); }
+            }
+            for (int x = 10; x < 34; x += 8) { s.PlaceAt("brick:8x8x1", "dgray", x, 12, 8, 0); s.PlaceAt("brick:8x8x1", "dgray", x, 12, 16, 0); s.PlaceAt("brick:8x2x1", "dgray", x, 12, 24, 0); }
+            // the pool in the front garden, a stone path to the gate, hedges, trees, lamps, flowers
+            foreach (int x in new[] { 12, 16, 24, 28 }) s.PlaceAt("pool:4x4x1", "white", x, 0, 32, 0);
+            foreach (int x in new[] { 12, 16, 24, 28 }) s.PlaceAt("pool:4x4x1", "white", x, 0, 36, 0);
+            for (int z = 26; z < 52; z += 2) s.PlaceAt("stones:2x2x1", "gray", 20, 0, z, 0);
+            for (int x = 0; x + 1 < 52; x += 2) { s.PlaceAt("hedge:2x1x3", "green", x, 0, 0, 0); if (x < 18 || x > 23) s.PlaceAt("hedge:2x1x3", "green", x, 0, 51, 0); }
+            for (int z = 1; z + 1 < 51; z += 2) { s.PlaceAt("hedge:2x1x3", "green", 0, 0, z, 1); s.PlaceAt("hedge:2x1x3", "green", 51, 0, z, 1); }
+            foreach (var (x, z) in new[] { (4, 4), (44, 4), (4, 44), (44, 44), (36, 30) }) s.PlaceAt("gtree:2x2x8", "green", x, 0, z, 0);
+            foreach (int z in new[] { 30, 40, 48 }) { s.PlaceAt("glamp:1x1x6", "dgray", 18, 0, z, 0); s.PlaceAt("glamp:1x1x6", "dgray", 23, 0, z, 0); }
+            for (int x = 12; x < 32; x++) s.PlaceAt("flowers:1x1x1", x % 2 == 0 ? "rose" : "yellow", x, 0, 41, 0);
+            RefreshBuildUi();
+            Debug.Log($"[Tour] villa: {s.pieces.Count} pieces on a {City.CityLayout.PlateOf(lot)} plate");
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "62b_villa_build");
+            ExitBuild();
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "62c_villa_in_city");
+            Data.Progress.Data.lots[lot].rentLast = System.DateTime.UtcNow.AddHours(-6).Ticks;
+            OpenLot(lot);
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot(dir, "62d_villa_rent");
+            Debug.Log($"[Tour] rent: rate {FreeBuild.Lots.RentRate(lot)}, due {FreeBuild.Lots.RentDue(lot)}, collected {FreeBuild.Lots.CollectRent(lot)}");
+            ClosePanel();
+            WalkFrom(lot);
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "62e_walk_from_villa");
+            ExitWalk();
+            Data.Progress.Data.walkLot = 0;
+        }
+
+        /// <summary>Gökkent: closed behind its barrier, the panel, opened, filled with towers, hotels and golf courses; the highway; a hotel's till.</summary>
+        private IEnumerator MegaTour(string dir)
+        {
+            EnterCity(null);
+            FocusMega();
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "61a_mega_closed");
+            ShowMega();
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot(dir, "61b_mega_panel");
+            Wallet.Earn(City.Mega.Price);
+            Debug.Log($"[Tour] mega ready {City.Mega.Ready} (score {City.CityScore.Total})");
+            OpenMega();
+            yield return new WaitForSeconds(0.5f);
+            // fill it: tall towers, hotels, golf courses, homes, trees and cars
+            string[] towers = { "camkule", "gokdelen", "ikizkule", "yuksek", "ismerkezi", "camkule" };
+            string[] hotels = { "devotel", "luksotel", "otel" };
+            int k = 0, placed = 0;
+            foreach (var sl in City.CityLayout.Slots.Where(x => x.area.mega && Data.Progress.At(x.id) == null).ToList())
+            {
+                k++;
+                string[] pool = sl.kind == "big" ? towers : sl.kind == "hotel" ? hotels : null;
+                Data.ModelDef pick = null;
+                if (pool != null)
+                    for (int t = 0; t < pool.Length && pick == null; t++) { var m = Data.ModelCatalog.Find(pool[(k + t) % pool.Length]); if (m != null && Data.Progress.Fits(m, sl)) pick = m; }
+                else { var ch = Data.Progress.ChoicesFor(sl); if (ch.Count > 0) pick = ch[k % ch.Count]; }
+                if (pick != null) { Data.Progress.Place(sl.id, pick.id); placed++; }
+            }
+            city.RefreshAll();
+            Debug.Log($"[Tour] mega placed {placed}, slots {City.CityLayout.Slots.Count(x => x.area.mega)}");
+            FocusMega();
+            yield return new WaitForSeconds(1f);
+            yield return Shot(dir, "61c_mega_built");
+            cityCam.Focus(city.WorldAt(new Vector2(City.CityLayout.MegaXOf(1), City.CityLayout.ZOf(0)), 0f), 150f);
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "61d_hotels_golf");
+            var route = City.StreetGraph.Route(new Vector2(City.CityLayout.XOf(1), City.CityLayout.CountryZ), City.CityLayout.MegaCenter);
+            Debug.Log($"[Tour] taxi route to Gökkent: {route.Count} points, {City.StreetGraph.Length(route):F0} long");
+            // a hotel's till after five hours
+            var hs = City.CityLayout.Slots.First(x => x.area.mega && Data.ModelCatalog.Find(Data.Progress.At(x.id) ?? "")?.kind == "hotel");
+            City.Hotels.InTill(hs.id, Data.ModelCatalog.Find(Data.Progress.At(hs.id)));
+            Data.Progress.Data.hotels.First(h => h.slot == hs.id).last = System.DateTime.UtcNow.AddHours(-5).Ticks;
+            cityCam.Focus(city.WorldOf(hs), 110f);
+            OpenSlot(hs);
+            yield return new WaitForSeconds(0.4f);
+            yield return Shot(dir, "61e_hotel_till");
+            int before = Wallet.Money;
+            City.Hotels.Collect(hs.id, Data.ModelCatalog.Find(Data.Progress.At(hs.id)), false);
+            Debug.Log($"[Tour] hotel till: {before} -> {Wallet.Money}");
+            ClosePanel();
+            // on foot: the highway, then a Gökkent street
+            EnterWalk();
+            walkPos = city.WorldAt(new Vector2(City.CityLayout.MegaMinX - 30f, City.CityLayout.CountryZ - 4f), 0f);
+            walkPos.y = GroundAt(walkPos);
+            facingYaw = camYaw = 90f; camPitch = 10f;
+            float startX = City.CityMap.PlanOf(walkPos).x;
+            testMove = new Vector2(0, 1);
+            yield return new WaitForSeconds(2f);
+            testMove = Vector2.zero;
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot(dir, "61f_highway_walk");
+            Debug.Log($"[Tour] walked {City.CityMap.PlanOf(walkPos).x - startX:F1} into Gökkent");
+            walkPos = city.WorldAt(new Vector2(City.CityLayout.MegaXOf(2) + City.CityLayout.Block / 2f + City.CityLayout.Road / 2f, City.CityLayout.ZOf(2)), 0f);
+            walkPos.y = GroundAt(walkPos);
+            obstacles = city.Obstacles();
+            facingYaw = camYaw = 180f; camPitch = 22f;
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "61g_mega_street");
+            ExitWalk();
         }
 
         /// <summary>The village: fields at every stage (seed, sprout, young, ripe), a harvest, the barn and the coop.</summary>

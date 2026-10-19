@@ -7952,6 +7952,3913 @@
    "scale": 1.744
   },
   {
+   "id": "camkule",
+   "name": "Cam Kule",
+   "cat": "Büyük bina",
+   "kind": "big",
+   "style": "",
+   "layers": [
+    {
+     "rows": [
+      "........",
+      ".wttttw.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".wtddtw.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".wttttw.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".wttttw.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".wttttw.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".wttttw.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".wttttw.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".wttttw.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".wttttw.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".wttttw.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".wttttw.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".wttttw.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".wttttw.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".wttttw.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".wttttw.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".wttttw.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".wttttw.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".wttttw.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".wttttw.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".tttttt.",
+      ".wttttw.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      ".llllll.",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      "........",
+      "..wttw..",
+      "..tttt..",
+      "..tttt..",
+      "..wttw..",
+      "........",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      "........",
+      "..tttt..",
+      "..tttt..",
+      "..tttt..",
+      "..tttt..",
+      "........",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      "........",
+      "..wttw..",
+      "..tttt..",
+      "..tttt..",
+      "..wttw..",
+      "........",
+      "........"
+     ]
+    },
+    {
+     "rows": [
+      "........",
+      "........",
+      "..llll..",
+      "..llll..",
+      "..llll..",
+      "..llll..",
+      "........",
+      "........"
+     ]
+    }
+   ],
+   "parts": [
+    {
+     "t": "spire",
+     "c": "white",
+     "x": 3,
+     "z": 3,
+     "y": 72,
+     "w": 2,
+     "d": 0,
+     "h": 10,
+     "f": "",
+     "art": "",
+     "need": -1
+    }
+   ],
+   "scale": 2.134
+  },
+  {
+   "id": "ikizkule",
+   "name": "İkiz Kuleler",
+   "cat": "Büyük bina",
+   "kind": "big",
+   "style": "",
+   "layers": [
+    {
+     "rows": [
+      "..............",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggdgg..ggdgg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".gtttg..gtttg.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".gtttg..gtttg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".gtttg..gtttg.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".gtttg..gtttg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".gtttg..gtttg.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".gtttg..gtttg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".gtttg..gtttg.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".gtttg..gtttg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".gtttg..gtttg.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".gtttg..gtttg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".gtttg..gtttg.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".gtttg..gtttg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".gggggddggggg.",
+      ".gggggddggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".gtttg..gtttg.",
+      ".tgggt..tgggt.",
+      ".tgggtddtgggt.",
+      ".tgggtddtgggt.",
+      ".tgggt..tgggt.",
+      ".gtttg..gtttg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".gtttg..gtttg.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".gtttg..gtttg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".gtttg..gtttg.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".gtttg..gtttg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".ggggg..ggggg.",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".gtttg..gtttg.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".tgggt..tgggt.",
+      ".gtttg..gtttg.",
+      ".............."
+     ]
+    }
+   ],
+   "parts": [
+    {
+     "t": "spire",
+     "c": "gray",
+     "x": 2,
+     "z": 3,
+     "y": 60,
+     "w": 2,
+     "d": 0,
+     "h": 8,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "spire",
+     "c": "gray",
+     "x": 9,
+     "z": 3,
+     "y": 60,
+     "w": 2,
+     "d": 0,
+     "h": 8,
+     "f": "",
+     "art": "",
+     "need": -1
+    }
+   ],
+   "scale": 2.206
+  },
+  {
+   "id": "otel",
+   "name": "Otel",
+   "cat": "Otel",
+   "kind": "hotel",
+   "style": "",
+   "layers": [
+    {
+     "rows": [
+      "..............",
+      ".tttttttttttt.",
+      ".tttttttttttt.",
+      ".tttttttttttt.",
+      ".tttttttttttt.",
+      ".tttttttttttt.",
+      ".tttttddttttt.",
+      "..............",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".wbbbbbbbbbbw.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".wbbbbbbbbbbw.",
+      "..............",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      "..............",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".wbbbbbbbbbbw.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".wbbbbbbbbbbw.",
+      "..............",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      "..............",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".wbbbbbbbbbbw.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".wbbbbbbbbbbw.",
+      "..............",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      "..............",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".wbbbbbbbbbbw.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".wbbbbbbbbbbw.",
+      "..............",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      "..............",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".wbbbbbbbbbbw.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".wbbbbbbbbbbw.",
+      "..............",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      "..............",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".wbbbbbbbbbbw.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".wbbbbbbbbbbw.",
+      "..............",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      ".wwwwwwwwwwww.",
+      "..............",
+      ".............."
+     ]
+    },
+    {
+     "rows": [
+      "..............",
+      ".wbbbbbbbbbbw.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".bwwwwwwwwwwb.",
+      ".wbbbbbbbbbbw.",
+      "..............",
+      ".............."
+     ]
+    }
+   ],
+   "parts": [
+    {
+     "t": "tile",
+     "c": "white",
+     "x": 2,
+     "z": 7,
+     "y": 6,
+     "w": 10,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "white",
+     "x": 2,
+     "z": 7,
+     "y": 12,
+     "w": 10,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "white",
+     "x": 2,
+     "z": 7,
+     "y": 18,
+     "w": 10,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "white",
+     "x": 2,
+     "z": 7,
+     "y": 24,
+     "w": 10,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "white",
+     "x": 2,
+     "z": 7,
+     "y": 30,
+     "w": 10,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "white",
+     "x": 2,
+     "z": 7,
+     "y": 36,
+     "w": 10,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "gray",
+     "x": 1,
+     "z": 1,
+     "y": 42,
+     "w": 12,
+     "d": 6,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "brick",
+     "c": "red",
+     "x": 4,
+     "z": 6,
+     "y": 43,
+     "w": 6,
+     "d": 1,
+     "h": 3,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "gold",
+     "x": 4,
+     "z": 7,
+     "y": 3,
+     "w": 6,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    }
+   ],
+   "scale": 1.957
+  },
+  {
+   "id": "luksotel",
+   "name": "Lüks Otel",
+   "cat": "Otel",
+   "kind": "hotel",
+   "style": "",
+   "layers": [
+    {
+     "rows": [
+      "............",
+      ".YYYYYYYYYY.",
+      ".YYYYYYYYYY.",
+      ".YYYYYYYYYY.",
+      ".YYYYYYYYYY.",
+      ".YYYYYYYYYY.",
+      ".YYYYYYYYYY.",
+      ".YYYYttYYYY.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cttttttttc.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".cttttttttc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cttttttttc.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".cttttttttc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cttttttttc.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".cttttttttc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cttttttttc.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".cttttttttc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cttttttttc.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".cttttttttc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cttttttttc.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".cttttttttc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cttttttttc.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".cttttttttc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cttttttttc.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".cttttttttc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      ".cccccccccc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".cttttttttc.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".tcccccccct.",
+      ".cttttttttc.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      "............",
+      "...cccccc...",
+      "...cccccc...",
+      "...cccccc...",
+      "...cccccc...",
+      "...cccccc...",
+      "............",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      "............",
+      "...cttttc...",
+      "...tcccct...",
+      "...tcccct...",
+      "...tcccct...",
+      "...cttttc...",
+      "............",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      "............",
+      "...cccccc...",
+      "...cccccc...",
+      "...cccccc...",
+      "...cccccc...",
+      "...cccccc...",
+      "............",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      "............",
+      "...cttttc...",
+      "...tcccct...",
+      "...tcccct...",
+      "...tcccct...",
+      "...cttttc...",
+      "............",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      "............",
+      "...cccccc...",
+      "...cccccc...",
+      "...cccccc...",
+      "...cccccc...",
+      "...cccccc...",
+      "............",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      "............",
+      "...cttttc...",
+      "...tcccct...",
+      "...tcccct...",
+      "...tcccct...",
+      "...cttttc...",
+      "............",
+      "............",
+      "............"
+     ]
+    }
+   ],
+   "parts": [
+    {
+     "t": "tile",
+     "c": "lblue",
+     "x": 1,
+     "z": 1,
+     "y": 54,
+     "w": 2,
+     "d": 6,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "lblue",
+     "x": 9,
+     "z": 1,
+     "y": 54,
+     "w": 2,
+     "d": 6,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "dome",
+     "c": "gold",
+     "x": 4,
+     "z": 3,
+     "y": 72,
+     "w": 4,
+     "d": 0,
+     "h": 3,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "gold",
+     "x": 3,
+     "z": 8,
+     "y": 3,
+     "w": 6,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    }
+   ],
+   "scale": 1.533
+  },
+  {
+   "id": "devotel",
+   "name": "Dev Tatil Oteli",
+   "cat": "Otel",
+   "kind": "hotel",
+   "style": "",
+   "layers": [
+    {
+     "rows": [
+      "....................",
+      ".tttttttttttttttttt.",
+      ".tttttttttttttttttt.",
+      ".tttttttttttttttttt.",
+      ".tttttttttttttttttt.",
+      ".tttttttttttttttttt.",
+      ".ttttttttddtttttttt.",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      ".wttttttttttttttttw.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".wttttttttttttttttw.",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      ".wttttttttttttttttw.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".wttttttttttttttttw.",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      ".wttttttttttttttttw.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".wttttttttttttttttw.",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      ".wttttttttttttttttw.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".wttttttttttttttttw.",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      ".wttttttttttttttttw.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".wttttttttttttttttw.",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      ".wttttttttttttttttw.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".wttttttttttttttttw.",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      ".wwwwwwwwwwwwwwwwww.",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      ".wttttttttttttttttw.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".twwwwwwwwwwwwwwwwt.",
+      ".wttttttttttttttttw.",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      "......wttttttw......",
+      "......twwwwwwt......",
+      "......twwwwwwt......",
+      "......twwwwwwt......",
+      "......twwwwwwt......",
+      "......wttttttw......",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      "......wttttttw......",
+      "......twwwwwwt......",
+      "......twwwwwwt......",
+      "......twwwwwwt......",
+      "......twwwwwwt......",
+      "......wttttttw......",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "......wwwwwwww......",
+      "....................",
+      "...................."
+     ]
+    },
+    {
+     "rows": [
+      "....................",
+      "......wttttttw......",
+      "......twwwwwwt......",
+      "......twwwwwwt......",
+      "......twwwwwwt......",
+      "......twwwwwwt......",
+      "......wttttttw......",
+      "....................",
+      "...................."
+     ]
+    }
+   ],
+   "parts": [
+    {
+     "t": "tile",
+     "c": "lblue",
+     "x": 2,
+     "z": 7,
+     "y": 6,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "lblue",
+     "x": 14,
+     "z": 7,
+     "y": 6,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "lblue",
+     "x": 2,
+     "z": 7,
+     "y": 12,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "lblue",
+     "x": 14,
+     "z": 7,
+     "y": 12,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "lblue",
+     "x": 2,
+     "z": 7,
+     "y": 18,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "lblue",
+     "x": 14,
+     "z": 7,
+     "y": 18,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "lblue",
+     "x": 2,
+     "z": 7,
+     "y": 24,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "lblue",
+     "x": 14,
+     "z": 7,
+     "y": 24,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "lblue",
+     "x": 2,
+     "z": 7,
+     "y": 30,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "lblue",
+     "x": 14,
+     "z": 7,
+     "y": 30,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "lblue",
+     "x": 2,
+     "z": 7,
+     "y": 36,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "lblue",
+     "x": 14,
+     "z": 7,
+     "y": 36,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "gray",
+     "x": 1,
+     "z": 1,
+     "y": 42,
+     "w": 5,
+     "d": 6,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "gray",
+     "x": 14,
+     "z": 1,
+     "y": 42,
+     "w": 5,
+     "d": 6,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "gray",
+     "x": 6,
+     "z": 1,
+     "y": 60,
+     "w": 8,
+     "d": 6,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "brick",
+     "c": "blue",
+     "x": 7,
+     "z": 6,
+     "y": 61,
+     "w": 6,
+     "d": 1,
+     "h": 3,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "gold",
+     "x": 7,
+     "z": 7,
+     "y": 3,
+     "w": 6,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    }
+   ],
+   "scale": 3
+  },
+  {
+   "id": "golf",
+   "name": "Golf Sahası",
+   "cat": "Golf sahası",
+   "kind": "golf",
+   "style": "",
+   "layers": [
+    {
+     "rows": [
+      "................................",
+      ".wwwwww.........................",
+      ".wwwwww.........................",
+      ".wwwwww.........................",
+      ".wwwwww.........................",
+      ".wwnnww.........................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................"
+     ]
+    },
+    {
+     "rows": [
+      "................................",
+      ".wwwwww.........................",
+      ".wwwwww.........................",
+      ".wwwwww.........................",
+      ".wwwwww.........................",
+      ".wttttw.........................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................",
+      "................................"
+     ]
+    }
+   ],
+   "parts": [
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 8,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 8,
+     "z": 0,
+     "y": 0,
+     "w": 8,
+     "d": 4,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 16,
+     "z": 0,
+     "y": 0,
+     "w": 8,
+     "d": 5,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 24,
+     "z": 0,
+     "y": 0,
+     "w": 8,
+     "d": 6,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 0,
+     "z": 1,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 7,
+     "z": 1,
+     "y": 0,
+     "w": 1,
+     "d": 2,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 7,
+     "z": 3,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 8,
+     "z": 4,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 9,
+     "z": 4,
+     "y": 0,
+     "w": 7,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 9,
+     "z": 5,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 10,
+     "z": 5,
+     "y": 0,
+     "w": 8,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 18,
+     "z": 5,
+     "y": 0,
+     "w": 3,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "blue",
+     "x": 21,
+     "z": 5,
+     "y": 0,
+     "w": 3,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 1,
+     "z": 6,
+     "y": 0,
+     "w": 2,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 3,
+     "z": 6,
+     "y": 0,
+     "w": 4,
+     "d": 2,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 10,
+     "z": 6,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 11,
+     "z": 6,
+     "y": 0,
+     "w": 8,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 19,
+     "z": 6,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "blue",
+     "x": 20,
+     "z": 6,
+     "y": 0,
+     "w": 1,
+     "d": 7,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "blue",
+     "x": 24,
+     "z": 6,
+     "y": 0,
+     "w": 1,
+     "d": 7,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 25,
+     "z": 6,
+     "y": 0,
+     "w": 7,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 11,
+     "z": 7,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 12,
+     "z": 7,
+     "y": 0,
+     "w": 7,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "blue",
+     "x": 19,
+     "z": 7,
+     "y": 0,
+     "w": 1,
+     "d": 5,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "blue",
+     "x": 25,
+     "z": 7,
+     "y": 0,
+     "w": 1,
+     "d": 5,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 26,
+     "z": 7,
+     "y": 0,
+     "w": 6,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 3,
+     "z": 8,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 4,
+     "z": 8,
+     "y": 0,
+     "w": 3,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 12,
+     "z": 8,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 13,
+     "z": 8,
+     "y": 0,
+     "w": 5,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "blue",
+     "x": 18,
+     "z": 8,
+     "y": 0,
+     "w": 1,
+     "d": 3,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "blue",
+     "x": 26,
+     "z": 8,
+     "y": 0,
+     "w": 1,
+     "d": 3,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 27,
+     "z": 8,
+     "y": 0,
+     "w": 5,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 0,
+     "z": 9,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 4,
+     "z": 9,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 5,
+     "z": 9,
+     "y": 0,
+     "w": 2,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 13,
+     "z": 9,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 14,
+     "z": 9,
+     "y": 0,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 5,
+     "z": 10,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 6,
+     "z": 10,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 14,
+     "z": 10,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 15,
+     "z": 10,
+     "y": 0,
+     "w": 3,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 6,
+     "z": 11,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 7,
+     "z": 11,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 15,
+     "z": 11,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 16,
+     "z": 11,
+     "y": 0,
+     "w": 3,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 26,
+     "z": 11,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 7,
+     "z": 12,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 8,
+     "z": 12,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 16,
+     "z": 12,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 17,
+     "z": 12,
+     "y": 0,
+     "w": 3,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 25,
+     "z": 12,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "sand",
+     "x": 7,
+     "z": 13,
+     "y": 0,
+     "w": 3,
+     "d": 3,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 17,
+     "z": 13,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 18,
+     "z": 13,
+     "y": 0,
+     "w": 3,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "blue",
+     "x": 21,
+     "z": 13,
+     "y": 0,
+     "w": 3,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 24,
+     "z": 13,
+     "y": 0,
+     "w": 1,
+     "d": 7,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 1,
+     "z": 14,
+     "y": 0,
+     "w": 2,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 10,
+     "z": 14,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 18,
+     "z": 14,
+     "y": 0,
+     "w": 1,
+     "d": 7,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 19,
+     "z": 14,
+     "y": 0,
+     "w": 5,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 10,
+     "z": 15,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 11,
+     "z": 15,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 19,
+     "z": 15,
+     "y": 0,
+     "w": 1,
+     "d": 5,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 20,
+     "z": 15,
+     "y": 0,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 3,
+     "z": 16,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 7,
+     "z": 16,
+     "y": 0,
+     "w": 3,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 11,
+     "z": 16,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 12,
+     "z": 16,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 20,
+     "z": 16,
+     "y": 0,
+     "w": 1,
+     "d": 5,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 21,
+     "z": 16,
+     "y": 0,
+     "w": 3,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 27,
+     "z": 16,
+     "y": 0,
+     "w": 5,
+     "d": 6,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 0,
+     "z": 17,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 4,
+     "z": 17,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 12,
+     "z": 17,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 13,
+     "z": 17,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 21,
+     "z": 17,
+     "y": 0,
+     "w": 1,
+     "d": 5,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 22,
+     "z": 17,
+     "y": 0,
+     "w": 2,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 5,
+     "z": 18,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 13,
+     "z": 18,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 14,
+     "z": 18,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 22,
+     "z": 18,
+     "y": 0,
+     "w": 1,
+     "d": 5,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 23,
+     "z": 18,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 6,
+     "z": 19,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 14,
+     "z": 19,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 15,
+     "z": 19,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 23,
+     "z": 19,
+     "y": 0,
+     "w": 1,
+     "d": 3,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 26,
+     "z": 19,
+     "y": 0,
+     "w": 1,
+     "d": 3,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 15,
+     "z": 20,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 16,
+     "z": 20,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "sand",
+     "x": 19,
+     "z": 20,
+     "y": 0,
+     "w": 1,
+     "d": 5,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 24,
+     "z": 20,
+     "y": 0,
+     "w": 1,
+     "d": 2,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 25,
+     "z": 20,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 16,
+     "z": 21,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 17,
+     "z": 21,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "sand",
+     "x": 18,
+     "z": 21,
+     "y": 0,
+     "w": 1,
+     "d": 3,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "sand",
+     "x": 20,
+     "z": 21,
+     "y": 0,
+     "w": 1,
+     "d": 3,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 25,
+     "z": 21,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 1,
+     "z": 22,
+     "y": 0,
+     "w": 2,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "sand",
+     "x": 17,
+     "z": 22,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "sand",
+     "x": 21,
+     "z": 22,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "mint",
+     "x": 23,
+     "z": 22,
+     "y": 0,
+     "w": 5,
+     "d": 7,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 28,
+     "z": 22,
+     "y": 0,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 10,
+     "z": 23,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 17,
+     "z": 23,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 21,
+     "z": 23,
+     "y": 0,
+     "w": 1,
+     "d": 3,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "mint",
+     "x": 22,
+     "z": 23,
+     "y": 0,
+     "w": 1,
+     "d": 5,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "mint",
+     "x": 28,
+     "z": 23,
+     "y": 0,
+     "w": 1,
+     "d": 5,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 29,
+     "z": 23,
+     "y": 0,
+     "w": 3,
+     "d": 2,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 3,
+     "z": 24,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 7,
+     "z": 24,
+     "y": 0,
+     "w": 3,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 11,
+     "z": 24,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 18,
+     "z": 24,
+     "y": 0,
+     "w": 1,
+     "d": 8,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 20,
+     "z": 24,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 0,
+     "z": 25,
+     "y": 0,
+     "w": 1,
+     "d": 7,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 4,
+     "z": 25,
+     "y": 0,
+     "w": 1,
+     "d": 7,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 12,
+     "z": 25,
+     "y": 0,
+     "w": 1,
+     "d": 7,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 19,
+     "z": 25,
+     "y": 0,
+     "w": 2,
+     "d": 7,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 29,
+     "z": 25,
+     "y": 0,
+     "w": 1,
+     "d": 7,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 30,
+     "z": 25,
+     "y": 0,
+     "w": 2,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 5,
+     "z": 26,
+     "y": 0,
+     "w": 1,
+     "d": 6,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 13,
+     "z": 26,
+     "y": 0,
+     "w": 1,
+     "d": 6,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 21,
+     "z": 26,
+     "y": 0,
+     "w": 1,
+     "d": 6,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 30,
+     "z": 26,
+     "y": 0,
+     "w": 1,
+     "d": 6,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 31,
+     "z": 26,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 6,
+     "z": 27,
+     "y": 0,
+     "w": 1,
+     "d": 5,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 14,
+     "z": 27,
+     "y": 0,
+     "w": 1,
+     "d": 5,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 31,
+     "z": 27,
+     "y": 0,
+     "w": 1,
+     "d": 5,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 15,
+     "z": 28,
+     "y": 0,
+     "w": 1,
+     "d": 4,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 22,
+     "z": 28,
+     "y": 0,
+     "w": 1,
+     "d": 4,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 28,
+     "z": 28,
+     "y": 0,
+     "w": 1,
+     "d": 4,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 16,
+     "z": 29,
+     "y": 0,
+     "w": 1,
+     "d": 3,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 23,
+     "z": 29,
+     "y": 0,
+     "w": 2,
+     "d": 3,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 25,
+     "z": 29,
+     "y": 0,
+     "w": 3,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 1,
+     "z": 30,
+     "y": 0,
+     "w": 2,
+     "d": 2,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 25,
+     "z": 30,
+     "y": 0,
+     "w": 1,
+     "d": 2,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 26,
+     "z": 30,
+     "y": 0,
+     "w": 2,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 10,
+     "z": 31,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 17,
+     "z": 31,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dgreen",
+     "x": 26,
+     "z": 31,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "green",
+     "x": 27,
+     "z": 31,
+     "y": 0,
+     "w": 1,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "terra",
+     "x": 1,
+     "z": 1,
+     "y": 6,
+     "w": 6,
+     "d": 5,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "round",
+     "c": "white",
+     "x": 25,
+     "z": 25,
+     "y": 1,
+     "w": 0,
+     "d": 0,
+     "h": 0,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "round",
+     "c": "white",
+     "x": 25,
+     "z": 25,
+     "y": 4,
+     "w": 0,
+     "d": 0,
+     "h": 0,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "round",
+     "c": "white",
+     "x": 25,
+     "z": 25,
+     "y": 7,
+     "w": 0,
+     "d": 0,
+     "h": 0,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "red",
+     "x": 26,
+     "z": 25,
+     "y": 9,
+     "w": 2,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "round",
+     "c": "brown",
+     "x": 29,
+     "z": 3,
+     "y": 1,
+     "w": 0,
+     "d": 0,
+     "h": 0,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "dome",
+     "c": "dgreen",
+     "x": 29,
+     "z": 3,
+     "y": 4,
+     "w": 2,
+     "d": 0,
+     "h": 2,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "round",
+     "c": "brown",
+     "x": 3,
+     "z": 28,
+     "y": 1,
+     "w": 0,
+     "d": 0,
+     "h": 0,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "dome",
+     "c": "dgreen",
+     "x": 3,
+     "z": 28,
+     "y": 4,
+     "w": 2,
+     "d": 0,
+     "h": 2,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "round",
+     "c": "brown",
+     "x": 14,
+     "z": 29,
+     "y": 1,
+     "w": 0,
+     "d": 0,
+     "h": 0,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "dome",
+     "c": "dgreen",
+     "x": 14,
+     "z": 29,
+     "y": 4,
+     "w": 2,
+     "d": 0,
+     "h": 2,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "round",
+     "c": "brown",
+     "x": 29,
+     "z": 15,
+     "y": 1,
+     "w": 0,
+     "d": 0,
+     "h": 0,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "dome",
+     "c": "dgreen",
+     "x": 29,
+     "z": 15,
+     "y": 4,
+     "w": 2,
+     "d": 0,
+     "h": 2,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "round",
+     "c": "brown",
+     "x": 12,
+     "z": 8,
+     "y": 1,
+     "w": 0,
+     "d": 0,
+     "h": 0,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "dome",
+     "c": "dgreen",
+     "x": 12,
+     "z": 8,
+     "y": 4,
+     "w": 2,
+     "d": 0,
+     "h": 2,
+     "f": "",
+     "art": "",
+     "need": -1
+    }
+   ],
+   "scale": 1.75
+  },
+  {
    "id": "balikhali",
    "name": "Balık Hali",
    "cat": "Kamu binası",

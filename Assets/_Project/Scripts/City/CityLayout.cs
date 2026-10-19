@@ -30,6 +30,7 @@ namespace BrickMuseum.City
         public bool far;          // in the far district (closed to building until it is opened)
         public bool fields;       // the village's field blocks (four fields, no plots)
         public bool farmyard;     // the village's farmyard (the barn and the coop)
+        public bool mega;         // in Gökkent (closed until it is opened)
         public readonly List<Vector2[]> paths = new List<Vector2[]>();   // winding footpaths (parks), plan points
         public readonly List<Slot> slots = new List<Slot>();
     }
@@ -77,9 +78,18 @@ namespace BrickMuseum.City
         public static Vector2 HomeLotCenter => LotCenter(0);
 
         /// <summary>The player's lots side by side along the west road: the home in the middle, the ones for sale north and south.</summary>
-        public const int LotCount = 5;
+        public const int TownLots = 5, VillaLots = 4, LotCount = TownLots + VillaLots;
         private static readonly float[] LotOffsets = { 0f, -HomeLot, HomeLot, -2f * HomeLot, 2f * HomeLot };
-        public static Vector2 LotCenter(int i) => new Vector2(MinX - HomeLot / 2f, ZOf(1) + LotOffsets[i]);
+        /// <summary>The town's lots along the west road; then the villa lots, a whole block each, down Gökkent's east column.</summary>
+        public static Vector2 LotCenter(int i) => i < TownLots ? new Vector2(MinX - HomeLot / 2f, ZOf(1) + LotOffsets[i]) : new Vector2(MegaXOf(5), ZOf(i - TownLots));
+        public static bool IsVilla(int i) => i >= TownLots;
+        /// <summary>A lot's size (kerb to kerb) and its baseplate (studs).</summary>
+        public static float LotSize(int i) => IsVilla(i) ? Block : HomeLot;
+        public static int PlateOf(int i) => IsVilla(i) ? 52 : HomePlate;
+        /// <summary>Which way the house on a lot faces: the town's lots look east at their road, the villas west at theirs.</summary>
+        public static float LotFacing(int i) => IsVilla(i) ? 270f : 90f;
+        /// <summary>Where the walk starts in front of a lot (on its road), and which way the walker looks.</summary>
+        public static Vector2 LotFront(int i) => IsVilla(i) ? LotCenter(i) + new Vector2(-Block / 2f - Road / 2f, 3f) : new Vector2(MinX + 5f, LotCenter(i).y + 3f);
         public static float LotsNorth => ZOf(1) - 2.5f * HomeLot;
         public static float LotsSouth => ZOf(1) + 2.5f * HomeLot;
 
@@ -89,7 +99,8 @@ namespace BrickMuseum.City
             for (int i = 0; i < LotCount; i++)
             {
                 var c = LotCenter(i);
-                if (Mathf.Abs(p.x - c.x) <= HomeLot / 2f + margin && Mathf.Abs(p.y - c.y) <= HomeLot / 2f + margin) return i;
+                float h = LotSize(i) / 2f + margin;
+                if (Mathf.Abs(p.x - c.x) <= h && Mathf.Abs(p.y - c.y) <= h) return i;
             }
             return -1;
         }
@@ -113,6 +124,21 @@ namespace BrickMuseum.City
         public static bool InFar(Vector2 p, float m = 0f) => p.x >= FarMinX - m && p.x <= FarMaxX + m && p.y >= FarNorth - m && p.y <= FarSouth + m;
         public static bool OnCountryRoad(Vector2 p, float m = 0f) => p.x >= MaxX - 2f && p.x <= FarMinX + 2f && Mathf.Abs(p.y - CountryZ) <= CountryRoad / 2f + m;
 
+        // ---------- Gökkent: 6×5 blocks past the village, at the end of the highway ----------
+
+        public const float HighwayGap = 160f, Highway = 18f;
+        public const int MegaCols = 6, MegaRows = 5;
+        public static float MegaMinX => FarMaxX + HighwayGap;
+        public static float MegaMaxX => MegaMinX + MegaCols * Block + (MegaCols + 1) * Road;
+        public static float MegaNorth => ZOf(MegaRows - 1) - Block / 2f - Road;
+        public static float MegaSouth => ZOf(0) + Block / 2f + Road;
+        public static float MegaXOf(int col) => MegaMinX + Road + Block / 2f + col * Pitch;
+        public static Vector2 MegaCenter => new Vector2((MegaMinX + MegaMaxX) / 2f, (MegaNorth + MegaSouth) / 2f);
+        public static IEnumerable<float> MegaStreetXs() { for (int c = 0; c <= MegaCols; c++) yield return MegaMinX + Road / 2f + c * Pitch; }
+        public static IEnumerable<float> MegaStreetZs() { for (int r = 0; r <= MegaRows; r++) yield return ZOf(r) + Block / 2f + Road / 2f; }
+        public static bool InMega(Vector2 p, float m = 0f) => p.x >= MegaMinX - m && p.x <= MegaMaxX + m && p.y >= MegaNorth - m && p.y <= MegaSouth + m;
+        public static bool OnHighway(Vector2 p, float m = 0f) => p.x >= FarMaxX - 2f && p.x <= MegaMinX + 2f && Mathf.Abs(p.y - CountryZ) <= Highway / 2f + m;
+
         public static float XOf(int col)
         {
             float x = MinX + Gaps[0] + Block / 2f;
@@ -128,6 +154,8 @@ namespace BrickMuseum.City
             {
                 case "house": return "Ev arsası";
                 case "big": return "Büyük arsa";
+                case "hotel": return "Otel arsası";
+                case "golf": return "Golf sahası arsası";
                 case "sport": return "Spor sahası arsası";
                 case "civic": return "Kamu binası arsası";
                 case "historic": return "Tarihi yapı arsası";
@@ -150,6 +178,8 @@ namespace BrickMuseum.City
             {
                 case "house": return "EV";
                 case "big": return "BİNA";
+                case "hotel": return "OTEL";
+                case "golf": return "GOLF";
                 case "sport": return "SPOR";
                 case "civic": return "KAMU";
                 case "historic": return "TARİHİ";
@@ -194,7 +224,7 @@ namespace BrickMuseum.City
         private static List<Area> Build()
         {
             var green = new Color(0.6f, 0.78f, 0.5f);
-            return new List<Area>
+            var list = new List<Area>
             {
                 Residential("Türk Mahallesi", "tr", 1, 1, 1, green),
                 ShorePark(1, 0, 2),
@@ -224,11 +254,62 @@ namespace BrickMuseum.City
                 Farm("Çiftlik", 0, 2, true),
                 Farm("Tarlalar II", 1, 2, false),
             };
+            list.AddRange(MegaAreas());
+            return list;
         }
 
-        private static Area NewArea(string name, string style, int col, int row, int level, Color ground, bool far = false)
+        /// <summary>Gökkent: hotel boulevards, golf clubs, towers (narrow and wide plots), parks, homes (the east column is left for villa lots).</summary>
+        private static IEnumerable<Area> MegaAreas()
         {
-            var a = new Area { name = name, style = style, center = new Vector2(far ? FarXOf(col) : XOf(col), ZOf(row)), level = level, ground = ground, shore = row == 0 && !far, far = far };
+            // rows 0 (south) → 4 (north), columns 0 → 4 (column 5 is for the villas)
+            string[,] plan =
+            {
+                { "hotel", "golf", "hotel", "golf", "hotel" },
+                { "tower", "wide", "park", "tower", "wide" },
+                { "tower", "hotel", "tower", "hotel", "tower" },
+                { "golf", "wide", "homes", "tower", "golf" },
+                { "tower", "park", "tower", "wide", "hotel" },
+            };
+            var count = new Dictionary<string, int>();
+            for (int r = 0; r < MegaRows; r++)
+                for (int c = 0; c < 5; c++)
+                {
+                    string k = plan[r, c];
+                    count[k] = count.TryGetValue(k, out int n) ? n + 1 : 1;
+                    string num = count[k] == 1 ? "" : " " + new[] { "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X" }[count[k]];
+                    switch (k)
+                    {
+                        case "hotel": yield return MegaPair("Otel Bulvarı" + num, "hotel", c, r, new Color(0.78f, 0.82f, 0.86f)); break;
+                        case "golf": yield return Golf("Golf Kulübü" + num, c, r); break;
+                        case "tower": yield return Plots("Kuleler" + num, "big", c, r, 1, new Color(0.74f, 0.76f, 0.82f), false, true); break;
+                        case "wide": yield return MegaPair("Kule Meydanı" + num, "big", c, r, new Color(0.72f, 0.74f, 0.8f)); break;
+                        case "park": yield return Park(c, r, 1, "Gökkent Parkı" + num, true); break;
+                        default: yield return Residential("Gökkent Evleri" + num, "", c, r, 1, new Color(0.6f, 0.78f, 0.56f), false, true); break;
+                    }
+                }
+        }
+
+        /// <summary>Two wide plots (hotels, twin towers) facing the streets north and south.</summary>
+        private static Area MegaPair(string name, string kind, int col, int row, Color ground)
+        {
+            var a = NewArea(name, "", col, row, 1, ground, false, true);
+            Add(a, kind, 0, 14, 56, 27, 0, 1);
+            Add(a, kind, 0, -14, 56, 27, 180, 1);
+            return a;
+        }
+
+        /// <summary>A golf course filling the block.</summary>
+        private static Area Golf(string name, int col, int row)
+        {
+            var a = NewArea(name, "", col, row, 1, new Color(0.46f, 0.72f, 0.4f), false, true);
+            Add(a, "golf", 0, 0, 58, 58, 0, 1);
+            a.slots.RemoveAll(s => s.kind == "tree");   // (the course has its own trees)
+            return a;
+        }
+
+        private static Area NewArea(string name, string style, int col, int row, int level, Color ground, bool far = false, bool mega = false)
+        {
+            var a = new Area { name = name, style = style, center = new Vector2(mega ? MegaXOf(col) : far ? FarXOf(col) : XOf(col), ZOf(row)), level = level, ground = ground, shore = row == 0 && !far && !mega, far = far, mega = mega };
             Street(a);
             return a;
         }
@@ -257,9 +338,9 @@ namespace BrickMuseum.City
         }
 
         /// <summary>5 house plots on two streets and decor spots between them.</summary>
-        private static Area Residential(string name, string style, int col, int row, int level, Color ground, bool far = false)
+        private static Area Residential(string name, string style, int col, int row, int level, Color ground, bool far = false, bool mega = false)
         {
-            var a = NewArea(name, style, col, row, level, ground, far);
+            var a = NewArea(name, style, col, row, level, ground, far, mega);
             foreach (float x in new[] { -19f, 0f, 19f }) Add(a, "house", x, 18, 17, 17, 0, level);
             foreach (float x in new[] { -10f, 10f }) Add(a, "house", x, -18, 17, 17, 180, level + 1);
             Add(a, "decor", 0, 0, 8, 8, 0, level + 1);
@@ -295,9 +376,9 @@ namespace BrickMuseum.City
         /// <summary>
         /// The city park by the creek: winding footpaths round a statue, benches along them, trees, a fountain spot.
         /// </summary>
-        private static Area Park(int col, int row, int level, string name = "Şehir Parkı")
+        private static Area Park(int col, int row, int level, string name = "Şehir Parkı", bool mega = false)
         {
-            var a = NewArea(name, "", col, row, level, new Color(0.5f, 0.76f, 0.44f));
+            var a = NewArea(name, "", col, row, level, new Color(0.5f, 0.76f, 0.44f), false, mega);
             // the paths: a wobbly ring round the middle and four wandering branches out to the pavement
             var ring = new List<Vector2>();
             for (int k = 0; k <= 48; k++)
@@ -384,9 +465,9 @@ namespace BrickMuseum.City
         }
 
         /// <summary>Four big plots (apartments, civic buildings, historic buildings or landmarks).</summary>
-        private static Area Plots(string name, string kind, int col, int row, int level, Color ground, bool far = false)
+        private static Area Plots(string name, string kind, int col, int row, int level, Color ground, bool far = false, bool mega = false)
         {
-            var a = NewArea(name, "", col, row, level, ground, far);
+            var a = NewArea(name, "", col, row, level, ground, far, mega);
             Add(a, kind, -14, 14, 26, 26, 0, level);
             Add(a, kind, 14, 14, 26, 26, 0, level);
             Add(a, kind, -14, -14, 26, 26, 180, level + 1);

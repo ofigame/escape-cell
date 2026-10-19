@@ -74,7 +74,7 @@ namespace BrickMuseum.Core
             mode = Mode.Build;
             ClosePanel();
             Stock.EnsureStarted();
-            int lot = CityLayout.HomePlate;
+            int lot = CityLayout.PlateOf(buildLot);
             site = forCar
                 ? carEdit ??= new BuildSite(transform, Garage.Active.pieces, ChassisX, ChassisZ, BuildSite.CornerFor(BuildSite.CarOrigin, ChassisX, ChassisZ, 0f), 0f, 1f, true, "gray")
                 : HouseEditFor(buildLot, lot);
@@ -91,7 +91,7 @@ namespace BrickMuseum.Core
             cam.fieldOfView = 50f;
             ShadowDistance(120f);
             buildCam.target = (forCar ? BuildSite.CarOrigin : BuildSite.HouseOrigin) + new Vector3(0, forCar ? 1f : 2f, 0);
-            buildCam.yaw = 200f; buildCam.pitch = forCar ? 32f : 38f; buildCam.distance = forCar ? 20f : 42f;
+            buildCam.yaw = 200f; buildCam.pitch = forCar ? 32f : 38f; buildCam.distance = forCar ? 20f : CityLayout.IsVilla(buildLot) ? 75f : 42f;
             if (forCar) buildTab = "Araba"; else if (buildTab == "Araba") buildTab = "Tuğla";
             removing = false; bu.SetMode(false);
             bu.colourSwatch.color = Palette.Of(buildColour);

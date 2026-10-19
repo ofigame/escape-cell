@@ -52,6 +52,22 @@ namespace BrickMuseum.City
                     }
                 edges.Add((Node(new Vector2(xs[xs.Count - 1], CityLayout.CountryZ)), Node(new Vector2(fx[0], CityLayout.CountryZ))));
             }
+            if (Mega.IsOpen)
+            {
+                // Gökkent's grid, and the highway to it from the village's east street
+                int Node(Vector2 v) { for (int i = 0; i < nodes.Count; i++) if ((nodes[i] - v).sqrMagnitude < 0.01f) return i; nodes.Add(v); return nodes.Count - 1; }
+                var mx = new List<float>(CityLayout.MegaStreetXs());
+                var mz = new List<float>(CityLayout.MegaStreetZs());
+                mz.Sort();
+                for (int i = 0; i < mx.Count; i++)
+                    for (int j = 0; j < mz.Count; j++)
+                    {
+                        if (j + 1 < mz.Count) edges.Add((Node(new Vector2(mx[i], mz[j])), Node(new Vector2(mx[i], mz[j + 1]))));
+                        if (i + 1 < mx.Count) edges.Add((Node(new Vector2(mx[i], mz[j])), Node(new Vector2(mx[i + 1], mz[j]))));
+                    }
+                var fx = new List<float>(CityLayout.FarStreetXs());
+                edges.Add((Node(new Vector2(fx[fx.Count - 1], CityLayout.CountryZ)), Node(new Vector2(mx[0], CityLayout.CountryZ))));
+            }
             links = new List<List<(int, float)>>();
             for (int n = 0; n < nodes.Count; n++) links.Add(new List<(int, float)>());
             foreach (var (a, b) in edges)
@@ -133,7 +149,7 @@ namespace BrickMuseum.City
                 var (ia, ib) = edges[r.Next(edges.Count)];
                 Vector2 a = nodes[ia], b = nodes[ib];
                 var on = Vector2.Lerp(a, b, 0.2f + (float)r.NextDouble() * 0.6f);
-                if (CityLayout.InCreek(on) || (on.x > CityLayout.MaxX && on.x < CityLayout.FarMinX)) continue;   // not on a bridge or the country road
+                if (CityLayout.InCreek(on) || (on.x > CityLayout.MaxX && on.x < CityLayout.FarMinX) || (on.x > CityLayout.FarMaxX && on.x < CityLayout.MegaMinX)) continue;   // not on a bridge, the country road or the highway
                 var dir = (b - a).normalized;
                 var side = new Vector2(-dir.y, dir.x) * (r.Next(2) == 0 ? 1f : -1f);
                 var stand = on + side * (CityLayout.Road / 2f + 1.2f);

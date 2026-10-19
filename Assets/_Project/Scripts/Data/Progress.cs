@@ -87,6 +87,7 @@ namespace BrickMuseum.Data
         public bool owned;
         public List<BuildPieceData> pieces = new List<BuildPieceData>();
         public List<HomeItem> items = new List<HomeItem>();
+        public long rentLast;    // when its rent was last collected (UTC ticks)
     }
 
     /// <summary>A city house's garden: the pieces laid round it on its plot.</summary>
@@ -132,6 +133,8 @@ namespace BrickMuseum.Data
         public List<string> tips = new List<string>();   // tutorial tips already seen
         public List<FieldSave> fields = new List<FieldSave>();   // the village's fields
         public List<BarnSave> barns = new List<BarnSave>();      // the barn and the coop
+        public bool megaOpen;                                    // Gökkent has been opened
+        public List<City.HotelSave> hotels = new List<City.HotelSave>();   // the hotels' tills
         public long farmReady;                        // when its batch is ready (UTC ticks)    // lots 1.. along the west road (lot 0 is build/home)
         public int activeCar;
         public bool stockInit;               // the starter kit (and materials for models built before) has been given
@@ -265,7 +268,7 @@ namespace BrickMuseum.Data
         public static bool Fits(ModelDef m, Slot s)
         {
             if (m.kind != s.kind) return false;
-            if (s.area != null && s.area.far && !Data.farOpen) return false;   // the far district is closed to building
+            if (s.area != null && (s.area.far && !Data.farOpen || s.area.mega && !Data.megaOpen)) return false;   // closed to building
             // the bridge only spans the creek; a slot for one model (the bridge, a bench) takes only that one
             if (!string.IsNullOrEmpty(s.only) ? m.id != s.only : m.id == "bridge") return false;
             if (s.kind == "house" && !string.IsNullOrEmpty(s.style) && m.style != s.style) return false;
@@ -278,12 +281,12 @@ namespace BrickMuseum.Data
         /// waiting out a lock and fit the slot.
         /// </summary>
         public static List<ModelDef> PoolFor(Slot s) =>
-            ModelCatalog.All.Where(m => Fits(m, s) && (Repeatable(m.kind) || !Owned(m.id) || s.area.far) && !IsLocked(m.id, out _))
+            ModelCatalog.All.Where(m => Fits(m, s) && (Repeatable(m.kind) || !Owned(m.id) || s.area.far || s.area.mega) && !IsLocked(m.id, out _))
                 .OrderBy(m => Owned(m.id) ? 1 : 0).ThenBy(m => m.index).Take(3).ToList();
 
         /// <summary>Every model this slot can take now (not built yet, or one that may be built again), easiest first.</summary>
         public static List<ModelDef> ChoicesFor(Slot s) =>
-            ModelCatalog.All.Where(m => Fits(m, s) && (Repeatable(m.kind) || !Owned(m.id) || s.area.far) && !IsLocked(m.id, out _))
+            ModelCatalog.All.Where(m => Fits(m, s) && (Repeatable(m.kind) || !Owned(m.id) || s.area.far || s.area.mega) && !IsLocked(m.id, out _))
                 .OrderBy(m => Owned(m.id) ? 1 : 0).ThenBy(m => m.index).Take(12).ToList();
 
         /// <summary>After a model is finished its kind rests for an hour (an ad wakes it at once).</summary>

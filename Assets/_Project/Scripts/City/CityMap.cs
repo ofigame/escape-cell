@@ -51,6 +51,7 @@ namespace BrickMuseum.City
             BuildCreek();
             BuildLots();
             BuildFar();
+            BuildMega();
             foreach (var a in CityLayout.Areas) BuildArea(a);
             people = new Townsfolk(root);
         }
@@ -199,7 +200,68 @@ namespace BrickMuseum.City
             br.transform.SetParent(farBarrier.transform, true);
         }
 
-        private TextMeshPro farStateBack;
+        private TextMeshPro farStateBack, megaState, megaStateBack;
+        private GameObject megaBarrier;
+
+        /// <summary>The highway from the village to Gökkent and Gökkent's streets, a sign, a barrier while it is closed.</summary>
+        private void BuildMega()
+        {
+            float x0 = CityLayout.MegaMinX, x1 = CityLayout.MegaMaxX, z0 = CityLayout.MegaNorth, z1 = CityLayout.MegaSouth, cz = CityLayout.CountryZ;
+            float h0 = CityLayout.FarMaxX, hw = CityLayout.Highway;
+            var asphalt = new MeshBuilder();
+            asphalt.Box(new Vector3((x0 + x1) / 2f, RoadTop / 2f, (z0 + z1) / 2f), new Vector3(x1 - x0, RoadTop, z1 - z0));
+            asphalt.Box(new Vector3((h0 + x0) / 2f, RoadTop / 2f, cz), new Vector3(x0 - h0 + 0.2f, RoadTop, hw));
+            Add("MegaRoads", asphalt, Mats.Lit(new Color(0.3f, 0.32f, 0.35f), 0.1f), false, 6f);
+            var lines = new MeshBuilder();
+            foreach (float side in new[] { -0.3f, 0.3f })                       // the highway: a double middle line
+                lines.Box(new Vector3((h0 + x0) / 2f, RoadTop + 0.02f, cz + side), new Vector3(x0 - h0, 0.04f, 0.2f));
+            foreach (float side in new[] { -1f, 1f })                           // its lanes and edges
+            {
+                for (float t = h0 + 3f; t < x0 - 4f; t += 8f) lines.Box(new Vector3(t + 2f, RoadTop + 0.02f, cz + side * hw / 4f), new Vector3(4f, 0.04f, 0.3f));
+                lines.Box(new Vector3((h0 + x0) / 2f, RoadTop + 0.02f, cz + side * (hw / 2f - 0.6f)), new Vector3(x0 - h0, 0.04f, 0.25f));
+            }
+            foreach (float x in CityLayout.MegaStreetXs())
+                for (float t = z0 + 3f; t < z1 - 4f; t += 8f) lines.Box(new Vector3(x, RoadTop + 0.02f, t + 2f), new Vector3(0.5f, 0.04f, 4f));
+            foreach (float z in CityLayout.MegaStreetZs())
+                for (float t = x0 + 3f; t < x1 - 4f; t += 8f) lines.Box(new Vector3(t + 2f, RoadTop + 0.02f, z), new Vector3(4f, 0.04f, 0.5f));
+            Add("MegaRoadLines", lines, Mats.Lit(new Color(0.95f, 0.93f, 0.85f), 0.1f), false, 3f);
+
+            // a big blue motorway sign where the highway leaves the village
+            var at = new Vector2(h0 + 16f, cz - hw / 2f - 3f);
+            var sign = new GameObject("MegaSign");
+            sign.transform.SetParent(root, false);
+            sign.transform.localPosition = CityShape.Point(at, RoadTop);
+            sign.transform.localRotation = Quaternion.Euler(0, 90f + CityShape.Angle(at), 0);
+            var posts = new MeshBuilder();
+            posts.Box(new Vector3(-3.4f, 2.5f, 0), new Vector3(0.35f, 5f, 0.35f));
+            posts.Box(new Vector3(3.4f, 2.5f, 0), new Vector3(0.35f, 5f, 0.35f));
+            var panel = new MeshBuilder();
+            panel.Box(new Vector3(0, 4.6f, 0.05f), new Vector3(8.4f, 3f, 0.15f));
+            AddChild(sign.transform, posts.ToMesh("posts"), Mats.Lit(new Color(0.75f, 0.76f, 0.78f), 0.3f));
+            AddChild(sign.transform, panel.ToMesh("panel"), Mats.Lit(new Color(0.1f, 0.3f, 0.75f), 0.3f));
+            foreach (float face in new[] { 0f, 180f })
+            {
+                var name = FlatText(sign.transform, Vector3.zero, Mega.Name + " →", 0.9f, 8f);
+                name.transform.localPosition = Quaternion.Euler(0, face, 0) * new Vector3(0, 5.2f, 0.14f);
+                name.transform.localRotation = Quaternion.Euler(0, 180f + face, 0);
+                name.color = Color.white;
+                var state = FlatText(sign.transform, Vector3.zero, "", 0.5f, 8f);
+                state.transform.localPosition = Quaternion.Euler(0, face, 0) * new Vector3(0, 3.9f, 0.14f);
+                state.transform.localRotation = Quaternion.Euler(0, 180f + face, 0);
+                state.color = new Color(1f, 0.95f, 0.6f);
+                if (face == 0f) megaState = state; else megaStateBack = state;
+            }
+            var bar = new MeshBuilder();
+            var barRed = new MeshBuilder();
+            float bx = x0 - 3f;
+            foreach (float side in new[] { -1f, 1f }) bar.Box(new Vector3(bx, 0.6f, cz + side * (hw / 2f + 0.4f)), new Vector3(0.4f, 1.2f, 0.4f));
+            for (int i = 0; i < 8; i++)
+                (i % 2 == 0 ? barRed : bar).Box(new Vector3(bx, 1.1f, cz - hw / 2f + (i + 0.5f) * hw / 8f), new Vector3(0.25f, 0.35f, hw / 8f));
+            megaBarrier = new GameObject("MegaBarrier");
+            megaBarrier.transform.SetParent(root, false);
+            Add("MegaBarrierWhite", bar, Mats.Lit(Color.white, 0.3f), true, 3f).transform.SetParent(megaBarrier.transform, true);
+            Add("MegaBarrierRed", barRed, Mats.Lit(new Color(0.85f, 0.15f, 0.12f), 0.3f), true, 3f).transform.SetParent(megaBarrier.transform, true);
+        }
 
         /// <summary>The road sign's line and the barrier, for the district's state.</summary>
         public void RefreshDistrict()
@@ -207,6 +269,9 @@ namespace BrickMuseum.City
             string t = District.IsOpen ? "İmara açık" : "İmara kapalı";
             farState.text = t; farStateBack.text = t;
             farBarrier.SetActive(!District.IsOpen);
+            string m = Mega.IsOpen ? "İmara açık" : "İmara kapalı";
+            megaState.text = m; megaStateBack.text = m;
+            megaBarrier.SetActive(!Mega.IsOpen);
         }
 
         private readonly TextMeshPro[] lotSigns = new TextMeshPro[CityLayout.LotCount];
@@ -245,9 +310,10 @@ namespace BrickMuseum.City
             for (int i = 0; i < CityLayout.LotCount; i++)
             {
                 var c = CityLayout.LotCenter(i);
-                kerb.Box(new Vector3(c.x, Lawn / 2f - 1f, c.y), new Vector3(CityLayout.HomeLot, Lawn + 2f, CityLayout.HomeLot - 0.6f));
-                lawn.Box(new Vector3(c.x, Lawn + 0.03f, c.y), new Vector3(CityLayout.HomeLot - 2f * CityLayout.Pavement, 0.06f, CityLayout.HomeLot - 2f * CityLayout.Pavement));
-                lotSigns[i] = FlatText(root, c + new Vector2(0, CityLayout.HomeLot / 2f - CityLayout.Pavement / 2f), Lawn + 0.08f, "", 1.9f, 22f);
+                float size = CityLayout.LotSize(i);
+                kerb.Box(new Vector3(c.x, Lawn / 2f - 1f, c.y), new Vector3(size, Lawn + 2f, size - 0.6f));
+                lawn.Box(new Vector3(c.x, Lawn + 0.03f, c.y), new Vector3(size - 2f * CityLayout.Pavement, 0.06f, size - 2f * CityLayout.Pavement));
+                lotSigns[i] = FlatText(root, c + new Vector2(0, size / 2f - CityLayout.Pavement / 2f), Lawn + 0.08f, "", 1.9f, 22f);
                 lotSigns[i].color = new Color(0.25f, 0.27f, 0.3f);
                 // the board: two posts and a red panel, by the road
                 var board = new MeshBuilder();
@@ -257,9 +323,10 @@ namespace BrickMuseum.City
                 panel.Box(new Vector3(0, 2.6f, 0.05f), new Vector3(4f, 1.6f, 0.15f));
                 var go = new GameObject("ForSale " + i);
                 go.transform.SetParent(root, false);
-                var at = c + new Vector2(CityLayout.HomeLot / 2f - 6f, 0);
+                bool villa = CityLayout.IsVilla(i);
+                var at = c + new Vector2(villa ? -size / 2f + 6f : size / 2f - 6f, 0);
                 go.transform.localPosition = CityShape.Point(at, Lawn);
-                go.transform.localRotation = Quaternion.Euler(0, 90f + CityShape.Angle(at), 0);
+                go.transform.localRotation = Quaternion.Euler(0, (villa ? 270f : 90f) + CityShape.Angle(at), 0);
                 AddChild(go.transform, board.ToMesh("posts"), Mats.Lit(Color.white, 0.3f));
                 AddChild(go.transform, panel.ToMesh("panel"), Mats.Lit(new Color(0.85f, 0.18f, 0.15f), 0.3f));
                 var t = FlatText(go.transform, new Vector3(0, 2.6f, 0.14f), "SATILIK", 0.5f, 3.6f);
@@ -287,7 +354,7 @@ namespace BrickMuseum.City
             for (int i = 0; i < CityLayout.LotCount; i++)
             {
                 bool owned = FreeBuild.Lots.Owned(i);
-                lotSigns[i].text = owned ? FreeBuild.Lots.Name(i) : $"Satılık · {FreeBuild.Lots.Price(i)} lira";
+                lotSigns[i].text = owned ? FreeBuild.Lots.Name(i) : FreeBuild.Lots.ForSale(i) ? $"Satılık · {FreeBuild.Lots.Price(i)} lira" : $"Villa arsası · İmara kapalı";
                 saleBoards[i].SetActive(!owned);
             }
         }
@@ -484,6 +551,8 @@ namespace BrickMuseum.City
                 case "house": c = new Color(0.86f, 0.72f, 0.92f); break;
                 case "big": c = new Color(0.72f, 0.7f, 0.94f); break;
                 case "sport": c = new Color(0.98f, 0.6f, 0.42f); break;
+                case "hotel": c = new Color(0.98f, 0.8f, 0.45f); break;
+                case "golf": c = new Color(0.62f, 0.9f, 0.5f); break;
                 case "civic": c = new Color(0.62f, 0.8f, 0.94f); break;
                 case "historic": c = new Color(0.9f, 0.78f, 0.6f); break;
                 case "vehicle": c = new Color(0.42f, 0.45f, 0.5f); break;
@@ -505,7 +574,7 @@ namespace BrickMuseum.City
                 var a = kv.Key;
                 bool open = District.Opened(a, level);
                 kv.Value.lawn.sharedMaterial.SetColor("_BaseColor", open ? a.ground : Color.Lerp(a.ground, new Color(0.6f, 0.6f, 0.6f), 0.75f));
-                kv.Value.sign.text = open ? a.name : a.far && !District.IsOpen ? $"{a.name}  ·  İmara kapalı" : $"{a.name}  ·  Seviye {a.level}";
+                kv.Value.sign.text = open ? a.name : District.Closed(a) ? $"{a.name}  ·  İmara kapalı" : $"{a.name}  ·  Seviye {a.level}";
             }
             foreach (var v in views.Values) Refresh(v, level);
             RefreshDistrict();
@@ -578,7 +647,7 @@ namespace BrickMuseum.City
             v.padRenderer.sharedMaterial = s == selected ? (padSelected ??= Mats.Lit(new Color(1f, 0.86f, 0.2f), 0.3f)) : open ? PadMat(s.kind) : (padLocked ??= Mats.Lit(new Color(0.7f, 0.7f, 0.7f), 0.1f));
             v.pad.SetActive(m == null || s.only != "bridge" || s == selected);
             v.label.gameObject.SetActive(m == null && v.partial == null);
-            v.label.text = open ? CityLayout.SlotShort(s) : s.area.far && !District.IsOpen ? "KAPALI" : $"Sv {s.level}";
+            v.label.text = open ? CityLayout.SlotShort(s) : District.Closed(s.area) ? "KAPALI" : $"Sv {s.level}";
             v.label.color = open ? new Color(0.2f, 0.22f, 0.28f, 0.85f) : new Color(0.35f, 0.35f, 0.38f, 0.9f);
             float h = m != null ? Mathf.Max(2f, m.height * FitScale(m, s)) : 2f;
             v.hit.center = new Vector3(0, h / 2f, 0);
@@ -665,7 +734,8 @@ namespace BrickMuseum.City
         public bool IsRoad(Vector3 world)
         {
             var p = PlanOf(world);
-            if (CityLayout.OnCountryRoad(p)) return true;                                       // the country road out east
+            if (CityLayout.OnCountryRoad(p) || CityLayout.OnHighway(p)) return true;          // the country road and the highway out east
+            if (CityLayout.InMega(p)) return Mathf.Abs(SurfaceAt(p) - RoadTop) < 0.01f;         // Gökkent's streets
             if (CityLayout.InFar(p)) return Mathf.Abs(SurfaceAt(p) - RoadTop) < 0.01f;          // the far district's streets
             if (p.x < CityLayout.MinX || p.x > CityLayout.MaxX || p.y < CityLayout.MinZ || p.y > CityLayout.ZOf(0) + CityLayout.Block / 2f) return false;
             if (CityLayout.InCreek(p)) return CityLayout.OnStreetZ(p.y);
@@ -740,7 +810,7 @@ namespace BrickMuseum.City
             // the camera looks north, so screen right is world -x: the ground follows the finger
             target += new Vector3(deltaPx.x * k, 0f, deltaPx.y * k / Mathf.Sin(pitch * Mathf.Deg2Rad) * 0.85f);
             var c = CityMap.Center;
-            target.x = Mathf.Clamp(target.x, c.x + CityLayout.MinX - CityLayout.HomeLot - 20f, c.x + CityLayout.FarMaxX + 20f);   // (the lots lie west of the town, the far district east)
+            target.x = Mathf.Clamp(target.x, c.x + CityLayout.MinX - CityLayout.HomeLot - 20f, c.x + CityLayout.MegaMaxX + 20f);   // (the lots lie west of the town, the village and Gökkent east)
             target.z = Mathf.Clamp(target.z, c.z + CityLayout.MinZ - 20f, c.z + CityLayout.MaxZ + 60f);
         }
 

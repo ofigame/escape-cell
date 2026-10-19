@@ -58,6 +58,7 @@ namespace BrickMuseum.Core
             cu.bonusBtn.onClick.AddListener(ShowBonus);
             cu.farmBtn.onClick.AddListener(() => { FocusFarm(); OpenFarm(); });
             cu.harvestBtn.onClick.AddListener(GoToHarvest);
+            cu.megaBtn.onClick.AddListener(() => { FocusMega(); ShowMega(); });
             cu.farBtn.onClick.AddListener(() => { FocusFar(); ShowDistrict(); });
             Loc.Changed += () =>
             {
@@ -159,6 +160,7 @@ namespace BrickMuseum.Core
             cu.help.transform.parent.gameObject.SetActive(false);
             string where = s.area.name;
             if (s.area.far && !District.IsOpen) { ShowDistrict(); return; }
+            if (s.area.mega && !Mega.IsOpen) { ShowMega(); return; }
             if (Progress.Level < s.level)
             {
                 int need = Progress.LevelStars[Mathf.Min(s.level, Progress.LevelStars.Length) - 1];
@@ -175,6 +177,16 @@ namespace BrickMuseum.Core
                 bool mine = vehicle && Progress.Data.myCar == id && !HasBuiltCar;
                 string about = $"{CityLayout.SlotName(s)} · {where}\n{stars} yıldız · {m.pieces.Count} parça"
                     + (mine ? "\nSenin araban · Şehri gez'de binebilirsin" : "");
+                if (m.kind == "hotel")
+                {
+                    // a hotel's till: what it took while you were away (up to half a day)
+                    int till = Hotels.InTill(s.id, m);
+                    cu.ShowPanel(m.name, about + $"\nKasada {till} lira · saatte {Hotels.Rate(m)} lira (en çok {Hotels.CapHours} saat)", Previews.Model(m),
+                        ($"Geliri topla · {till} lira", Ui.Yellow, () => { int got = Hotels.Collect(s.id, m, false); Toast($"Otel geliri · +{got} lira"); UpdateCityHud(); OpenSlot(s); }),
+                        ("Reklamla 2 katı", new Color(1f, 0.92f, 0.6f), () => StartCoroutine(HotelAd(s, m))),
+                        ("Kapat", Neutral, ClosePanel));
+                    return;
+                }
                 if (CityScore.CanUpgrade(s))
                 {
                     // the city score opens the gardens: of houses first, then of the bigger buildings
@@ -186,19 +198,7 @@ namespace BrickMuseum.Core
                         ("Kapat", Neutral, ClosePanel));
                     return;
                 }
-                if (vehicle && !mine && !HasBuiltCar)
-                    cu.ShowPanel(m.name, about, Previews.Model(m),
-                        ("Arabam olsun", Ui.Yellow, () =>
-                        {
-                            Progress.Data.myCar = id;
-                            Progress.Save();
-                            Toast($"{m.name} artık senin araban");
-                            OpenSlot(s);
-                        }),
-                        ("Envantere al", new Color(0.8f, 0.9f, 1f), () => TakeAway(s)),
-                        ("Kapat", Neutral, ClosePanel));
-                else
-                    cu.ShowPanel(m.name, about, Previews.Model(m),
+                cu.ShowPanel(m.name, about, Previews.Model(m),
                         ("Envantere al", new Color(0.8f, 0.9f, 1f), () => TakeAway(s)),
                         ("Kapat", Neutral, ClosePanel));
                 return;
@@ -300,6 +300,53 @@ namespace BrickMuseum.Core
             Toast($"{CityLayout.FarName} imara açıldı!", 2.5f);
         }
 
+        // ---------- Gökkent ----------
+
+        private void FocusMega() => cityCam.Focus(city.WorldAt(CityLayout.MegaCenter, 0f), 520f);
+
+        private void ShowMega()
+        {
+            panelSlot = null;
+            city.Select(null);
+            cu.help.transform.parent.gameObject.SetActive(false);
+            if (Mega.IsOpen)
+            {
+                cu.ShowPanel(Mega.Name, "İmara açık\nGökdelenler, dev oteller ve golf sahaları yap\nOteller her saat lira kazandırır", null,
+                    ("Oraya bak", Ui.Yellow, () => { ClosePanel(); FocusMega(); }), ("Kapat", Neutral, ClosePanel));
+                return;
+            }
+            var lines = new List<string> { "Gökdelenler, dev oteller ve golf sahalarının şehri · imara kapalı" };
+            lines.Add($"{CityLayout.FarName} imara açık · {(District.IsOpen ? "hazır" : "eksik")}");
+            lines.Add($"Şehir puanı {Mega.ScoreNeeded} · {(CityScore.Total >= Mega.ScoreNeeded ? "hazır" : $"şimdi {CityScore.Total}")}");
+            lines.Add($"İmar bedeli: {Mega.Price} lira (paran: {FreeBuild.Wallet.Money})");
+            cu.ShowPanel(Mega.Name, string.Join("\n", lines), null,
+                ($"İmara aç · {Mega.Price} lira", Mega.Ready && FreeBuild.Wallet.Money >= Mega.Price ? Ui.Yellow : Neutral, OpenMega),
+                ("Kapat", Neutral, ClosePanel));
+        }
+
+        private void OpenMega()
+        {
+            if (!Mega.Ready) { Toast($"Önce {CityLayout.FarName} açılmalı ve şehir puanı {Mega.ScoreNeeded} olmalı"); return; }
+            if (FreeBuild.Wallet.Money < Mega.Price) { Toast($"Yeterli para yok · {Mega.Price} lira gerekli"); return; }
+            if (!Mega.Open()) return;
+            ClosePanel();
+            Sfx.Play("win");
+            city.RefreshAll();
+            UpdateCityHud();
+            FocusMega();
+            Toast($"{Mega.Name} imara açıldı!", 2.5f);
+        }
+
+        private IEnumerator HotelAd(Slot s, ModelDef m)
+        {
+            ClosePanel();
+            yield return TestAd();
+            int got = Hotels.Collect(s.id, m, true);
+            Toast($"Otel geliri iki katı · +{got} lira", 2.2f);
+            UpdateCityHud();
+            OpenSlot(s);
+        }
+
         private static readonly string[] BonusPool = { "bank", "konteyner", "lamba", "trafiklambasi", "workers", "police", "staff" };
 
         private void ShowBonus()
@@ -343,6 +390,7 @@ namespace BrickMuseum.Core
         /// <summary>A lot by the west road: build on it when it is the player's, else buy it.</summary>
         private void OpenLot(int lot)
         {
+            if (!FreeBuild.Lots.ForSale(lot) && !FreeBuild.Lots.Owned(lot)) { ShowMega(); return; }
             if (!FreeBuild.Lots.Owned(lot))
             {
                 panelSlot = null;
@@ -350,7 +398,8 @@ namespace BrickMuseum.Core
                 Sfx.Play("pick", 0.6f);
                 cu.help.transform.parent.gameObject.SetActive(false);
                 int price = FreeBuild.Lots.Price(lot);
-                cu.ShowPanel("Satılık arsa", $"{price} lira · paran {FreeBuild.Wallet.Money} lira\nSatın alınca üstüne yeni bir ev yapabilirsin", null,
+                bool villa = CityLayout.IsVilla(lot);
+                cu.ShowPanel(villa ? "Satılık villa arsası" : "Satılık arsa", $"{price} lira · paran {FreeBuild.Wallet.Money} lira\n" + (villa ? "Kocaman bir arsa: villanı yap, bahçesine havuz kur" : "Satın alınca üstüne yeni bir ev yapabilirsin"), null,
                     ("Satın al", Ui.Yellow, () => BuyLot(lot)),
                     ("Kapat", Neutral, ClosePanel));
                 return;
@@ -361,10 +410,16 @@ namespace BrickMuseum.Core
                 city.Select(null);
                 Sfx.Play("pick", 0.6f);
                 cu.help.transform.parent.gameObject.SetActive(false);
-                cu.ShowPanel(FreeBuild.Lots.Name(lot), $"Senin arsan · {FreeBuild.Lots.Pieces(lot).Count} parçalık ev", null,
-                    ("Evimi yap", Ui.Yellow, () => { ClosePanel(); buildLot = lot; EnterBuild(false); }),
+                int rent = FreeBuild.Lots.RentDue(lot), rate = FreeBuild.Lots.RentRate(lot);
+                string rentLine = rate > 0 ? $"\nKirada · saatte {rate} lira · birikmiş kira {rent} lira" : "\nEvin 20 parçayı geçince kiraya verilir";
+                var buttons = new List<(string, Color, System.Action)>
+                {
+                    (CityLayout.IsVilla(lot) ? "Villamı yap" : "Evimi yap", Ui.Yellow, () => { ClosePanel(); buildLot = lot; EnterBuild(false); }),
                     ("Buradan gez", new Color(0.85f, 0.95f, 0.8f), () => WalkFrom(lot)),
-                    ("Kapat", Neutral, ClosePanel));
+                };
+                if (rent > 0) buttons.Add(($"Kirayı topla · {rent} lira", new Color(1f, 0.92f, 0.6f), () => { int got = FreeBuild.Lots.CollectRent(lot); Toast($"Kira toplandı · +{got} lira"); UpdateCityHud(); OpenLot(lot); }));
+                buttons.Add(("Kapat", Neutral, ClosePanel));
+                cu.ShowPanel(FreeBuild.Lots.Name(lot), $"Senin arsan · {FreeBuild.Lots.Pieces(lot).Count} parçalık ev" + rentLine, null, buttons.ToArray());
                 return;
             }
             OpenFirstLot();

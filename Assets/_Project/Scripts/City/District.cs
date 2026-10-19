@@ -34,7 +34,10 @@ namespace BrickMuseum.City
         }
 
         /// <summary>Is this slot (or block) open for building at this level?</summary>
-        public static bool Opened(Slot s, int level) => level >= s.level && (!s.area.far || IsOpen);
-        public static bool Opened(Area a, int level) => level >= a.level && (!a.far || IsOpen);
+        public static bool Opened(Slot s, int level) => level >= s.level && (!s.area.far || IsOpen) && (!s.area.mega || Mega.IsOpen);
+        public static bool Opened(Area a, int level) => level >= a.level && (!a.far || IsOpen) && (!a.mega || Mega.IsOpen);
+
+        /// <summary>Closed to building (the village or Gökkent not opened yet)?</summary>
+        public static bool Closed(Area a) => a.far && !IsOpen || a.mega && !Mega.IsOpen;
     }
 }

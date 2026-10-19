@@ -22,13 +22,25 @@ namespace BrickMuseum.City
         /// <summary>The lake shore stays a straight quay: east-west waves fade out toward it.</summary>
         private static float ShoreFade(float z) => Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((CityLayout.MaxZ - z) / 50f));
 
-        public static Vector2 Warp(Vector2 p) => new Vector2(p.x + Dx(p.y), p.y + Dz(p.x) * ShoreFade(p.y));
+/// <summary>How much of Gökkent's stronger, wandering bend applies (0 in the town, 1 in Gökkent).</summary>
+        private static float MegaBlend(float x) => Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((x - (CityLayout.MegaMinX - 120f)) / 120f));
+
+        /// <summary>The bend at a plan point: long waves everywhere, and in Gökkent stronger ones that wander across the blocks.</summary>
+        private static Vector2 Offset(Vector2 p)
+        {
+            float b = MegaBlend(p.x);
+            float ox = Dx(p.y) * (1f + 0.9f * b) + b * 8f * Mathf.Sin(p.y / 43f + p.x / 160f);
+            float oz = Dz(p.x) * ShoreFade(p.y) * (1f + 0.9f * b) + b * 7f * Mathf.Sin(p.x / 51f + 1.1f + p.y / 190f);
+            return new Vector2(ox, oz);
+        }
+
+        public static Vector2 Warp(Vector2 p) => p + Offset(p);
 
         /// <summary>The plan point under a bent point (a few fixed-point steps; the bend is gentle).</summary>
         public static Vector2 ToPlan(Vector2 w)
         {
             var p = w;
-            for (int i = 0; i < 5; i++) p = new Vector2(w.x - Dx(p.y), w.y - Dz(p.x) * ShoreFade(p.y));
+            for (int i = 0; i < 8; i++) p = w - Offset(p);
             return p;
         }
 

@@ -84,6 +84,18 @@ namespace BrickMuseum.Core
                 CityTip("harvest", "Hasat zamanı", "Bu düğme hazır ürünleri gösterir: dokun, tarlaya git ve hasat et.",
                     () => cu.harvestBtn.gameObject.activeSelf, () => R(cu.harvestBtn)),
 
+                CityTip("mega", "Gökkent", $"Köyün ötesinde, otoyolun sonunda kocaman bir şehir var: gökdelenler, dev oteller, golf sahaları. {CityLayout.FarName} açık olunca ve şehir puanın {Mega.ScoreNeeded} olunca {Mega.Price} liraya imara açılır.",
+                    () => District.IsOpen && !Mega.IsOpen, () => R(cu.megaBtn)),
+                CityTip("megaReady", "Gökkent açılabilir", $"Şartlar tamam! {Mega.Price} lira ile Gökkent'i imara aç; orada her bina yeniden yapılabilir.",
+                    () => Mega.Ready && !Mega.IsOpen, () => R(cu.megaBtn)),
+                CityTip("hotel", "Otel geliri", $"Oteller sen yokken saatte lira kazanır (en çok {Hotels.CapHours} saat birikir). Otele dokun ve geliri topla; reklam izlersen iki katı.",
+                    () => Hotels.All().Count > 0, null),
+
+                CityTip("villa", "Gökkent villaları", "Gökkent'in doğu sırasındaki kocaman arsalar satılık: villanı yap, bahçesine havuz kur. Gezintiye istersen villandan başla.",
+                    () => Mega.IsOpen, null),
+                CityTip("rent", "Kira geliri", $"İçinde oturmadığın evler kiraya verilir: saatte lira birikir (en çok {FreeBuild.Lots.RentCapHours} saat). Arsana dokun ve kirayı topla.",
+                    () => FreeBuild.Lots.RentWaiting > 0, null),
+
                 // ----- the workshop -----
                 new Tip { key = "bag", mode = Mode.Workshop, title = "Nasıl yapılır?", text = "Resimdeki modele bak. Çantayı aç, parçayı seç ve parlayan yere koy. Yanlış parça bir hata hakkı götürür.",
                     when = () => current != null && bench.PlacedCount == 0, target = () => R(wu.bagBtn) },

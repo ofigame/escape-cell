@@ -45,7 +45,7 @@ namespace BrickMuseum.World
             RenderSettings.fogMode = FogMode.Linear;
             RenderSettings.fogColor = new Color(0.76f, 0.84f, 0.92f);
             RenderSettings.fogStartDistance = 260f;
-            RenderSettings.fogEndDistance = 2400f;
+            RenderSettings.fogEndDistance = 3200f;
 
             var land = new GameObject("Landscape").transform;
             land.SetParent(root, false);
@@ -55,7 +55,7 @@ namespace BrickMuseum.World
             var ground = new MeshBuilder();
             float hx0 = CityCenter.x + City.CityLayout.CreekX - City.CityLayout.Creek / 2f - 20f, hx1 = hx0 + City.CityLayout.Creek + 40f;
             float hz0 = CityCenter.z + City.CityLayout.MinZ + 16f, hz1 = LakeNorth;
-            const float R = 3000f, T = 0.5f;
+            const float R = 4500f, T = 0.5f;
             void Slab(float x0, float x1, float z0, float z1) => ground.Box(new Vector3((x0 + x1) / 2f, Ground - T / 2f, (z0 + z1) / 2f), new Vector3(x1 - x0, T, z1 - z0));
             Slab(-R, hx0, -R, R);
             Slab(hx1, R, -R, R);
@@ -65,9 +65,10 @@ namespace BrickMuseum.World
 
             BuildLake(land);
 
-            Ring(land, "Hills", 900f, 260f, 30f, 110f, 3.1f, new Color(0.33f, 0.5f, 0.3f), 0f);
-            Ring(land, "Mountains", 1500f, 420f, 160f, 420f, 7.7f, new Color(0.45f, 0.52f, 0.6f), 300f);
-            Ring(land, "FarMountains", 2200f, 500f, 260f, 650f, 1.3f, new Color(0.58f, 0.64f, 0.74f), 470f);
+            var middle = new Vector3(420f, 0f, -260f);   // between the deck and Gökkent
+            Ring(land, "Hills", 1150f, 260f, 30f, 110f, 3.1f, new Color(0.33f, 0.5f, 0.3f), 0f, middle);
+            Ring(land, "Mountains", 1750f, 420f, 160f, 420f, 7.7f, new Color(0.45f, 0.52f, 0.6f), 300f, middle);
+            Ring(land, "FarMountains", 2450f, 500f, 260f, 650f, 1.3f, new Color(0.58f, 0.64f, 0.74f), 470f, middle);
             Trees(land);
             Clouds(land);
             return sun;
@@ -85,7 +86,7 @@ namespace BrickMuseum.World
         }
 
         /// <summary>A ring of ridges around the valley; peaks above snowLine get white caps.</summary>
-        private static void Ring(Transform parent, string name, float radius, float depth, float minH, float maxH, float seed, Color color, float snowLine)
+        private static void Ring(Transform parent, string name, float radius, float depth, float minH, float maxH, float seed, Color color, float snowLine, Vector3 middle)
         {
             const int segs = 180;
             var body = new MeshBuilder();
@@ -98,7 +99,7 @@ namespace BrickMuseum.World
                           + Mathf.PerlinNoise(seed * 2 + Mathf.Cos(a) * 7f + 30f, Mathf.Sin(a) * 7f + 30f) * 0.3f;
                 float h = Mathf.Lerp(minH, maxH, Mathf.SmoothStep(0f, 1f, n));
                 float r = radius + (Mathf.PerlinNoise(seed + i * 0.13f, 3f) - 0.5f) * depth * 0.5f;
-                ridge[i] = new Vector3(Mathf.Cos(a) * r, Ground + h, Mathf.Sin(a) * r);
+                ridge[i] = new Vector3(Mathf.Cos(a) * r, Ground + h, Mathf.Sin(a) * r) + middle;
             }
             for (int i = 0; i < segs; i++)
             {
@@ -164,6 +165,7 @@ namespace BrickMuseum.World
         {
             var plan = new Vector2(p.x - CityCenter.x, p.z - CityCenter.z);
             if (City.CityLayout.InFar(plan, 30f) || City.CityLayout.OnCountryRoad(plan, 18f)) return true;   // the far district and its road
+            if (City.CityLayout.InMega(plan, 40f) || City.CityLayout.OnHighway(plan, 22f)) return true;      // Gökkent and the highway
             return p.x > CityWest - City.CityLayout.HomeLot - 30f && p.x < CityEast + 30f && p.z > CityNorth - 30f && p.z < LakeNorth + 4f;
         }
 

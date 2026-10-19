@@ -70,9 +70,9 @@ namespace BrickMuseum.Core
             {
                 // with a house of your own you start on the road in front of it, looking at it
                 int lot = FreeBuild.Lots.Owned(Progress.Data.walkLot) && FreeBuild.Lots.Pieces(Progress.Data.walkLot).Count > 0 ? Progress.Data.walkLot : 0;
-                walkPos = city.WorldAt(new Vector2(CityLayout.MinX + 5f, CityLayout.LotCenter(lot).y + 3f), 0f);
+                walkPos = city.WorldAt(CityLayout.LotFront(lot), 0f);
                 walkPos.y = city.GroundAt(walkPos);
-                facingYaw = camYaw = 270f;
+                facingYaw = camYaw = CityLayout.IsVilla(lot) ? 90f : 270f;
             }
             walkVy = 0f; grounded = true; running = false; tu.SetRun(false);
             obstacles = city.Obstacles();

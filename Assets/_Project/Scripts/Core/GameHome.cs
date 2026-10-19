@@ -84,9 +84,10 @@ namespace BrickMuseum.Core
                 var c = CityLayout.LotCenter(i);
                 // the baseplate sits on the lot's lawn; the house's front (+z when building) faces the road to the east
                 var center = city.WorldAt(c, CityMap.Lawn + 0.06f + Piece.Plate);
-                float yaw = 90f + CityShape.Angle(c);
-                houses[i] = new BuildSite(city.root, FreeBuild.Lots.Pieces(i), CityLayout.HomePlate, CityLayout.HomePlate,
-                    BuildSite.CornerFor(center, CityLayout.HomePlate, CityLayout.HomePlate, yaw), yaw, 1f, false, "dgreen");
+                float yaw = CityLayout.LotFacing(i) + CityShape.Angle(c);
+                int plate = CityLayout.PlateOf(i);
+                houses[i] = new BuildSite(city.root, FreeBuild.Lots.Pieces(i), plate, plate,
+                    BuildSite.CornerFor(center, plate, plate, yaw), yaw, 1f, false, "dgreen");
                 foreach (var it in FreeBuild.Lots.Items(i)) SpawnFurniture(it, i);
             }
             house = houses[0]; houseLot = 0;
@@ -176,16 +177,27 @@ namespace BrickMuseum.Core
             var p = CityMap.PlanOf(next);
             // out east: along the country road and inside the far district
             var cur = CityMap.PlanOf(walkPos);
-            if (cur.x > CityLayout.MaxX - 1.5f && (CityLayout.InFar(cur, 1f) || CityLayout.OnCountryRoad(cur, 2.5f)))
+            if (cur.x > CityLayout.MaxX - 1.5f)
             {
-                var f = p;
-                f.x = Mathf.Min(f.x, CityLayout.FarMaxX - 1f);
-                float road = CityLayout.CountryRoad / 2f + 2f;
-                if (f.x < CityLayout.FarMinX) f.y = Mathf.Clamp(f.y, CityLayout.CountryZ - road, CityLayout.CountryZ + road);
-                else f.y = Mathf.Clamp(f.y, CityLayout.FarNorth + 1f, CityLayout.FarSouth - 1f);
-                if (f == p) return next;
-                var fw = city.WorldAt(f, 0f);
-                return new Vector3(fw.x, next.y, fw.z);
+                // the walkable rectangles out east: the country road, the village, the highway, Gökkent
+                float cz = CityLayout.CountryZ, road = CityLayout.CountryRoad / 2f + 2f, hw = CityLayout.Highway / 2f + 2f;
+                var rects = new[]
+                {
+                    new Rect(CityLayout.MaxX - 3f, cz - road, CityLayout.FarMinX - CityLayout.MaxX + 6f, 2f * road),
+                    Rect.MinMaxRect(CityLayout.FarMinX + 1f, CityLayout.FarNorth + 1f, CityLayout.FarMaxX - 1f, CityLayout.FarSouth - 1f),
+                    new Rect(CityLayout.FarMaxX - 3f, cz - hw, CityLayout.MegaMinX - CityLayout.FarMaxX + 6f, 2f * hw),
+                    Rect.MinMaxRect(CityLayout.MegaMinX + 1f, CityLayout.MegaNorth + 1f, CityLayout.MegaMaxX - 1f, CityLayout.MegaSouth - 1f),
+                };
+                foreach (var r in rects) if (r.Contains(p)) return next;
+                // outside them all: kept in the one the walker is in now
+                foreach (var r in rects)
+                    if (r.Contains(cur))
+                    {
+                        var f = new Vector2(Mathf.Clamp(p.x, r.xMin, r.xMax), Mathf.Clamp(p.y, r.yMin, r.yMax));
+                        var fw = city.WorldAt(f, 0f);
+                        return new Vector3(fw.x, next.y, fw.z);
+                    }
+                if (cur.x > CityLayout.MaxX + 1f) return new Vector3(walkPos.x, next.y, walkPos.z);
             }
             float north = CityLayout.LotsNorth + 0.6f, south = CityLayout.LotsSouth - 0.6f;
             bool byLot = p.y > north && p.y < south;
