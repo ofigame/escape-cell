@@ -16,8 +16,8 @@ namespace BrickMuseum.City
         // ---------- the bend ----------
 
         // long, low waves: the streets curve, but a block is skewed by only a few degrees (it still reads as a square from above)
-        private static float Dx(float z) => 8f * Mathf.Sin(z / 88f + 0.7f) + 1.5f * Mathf.Sin(z / 37f + 2.1f);
-        private static float Dz(float x) => 7f * Mathf.Sin(x / 96f + 1.3f) + 1.5f * Mathf.Sin(x / 41f + 0.4f);
+        private static float Dx(float z) => 14f * Mathf.Sin(z / 78f + 0.7f) + 3f * Mathf.Sin(z / 33f + 2.1f);
+        private static float Dz(float x) => 12f * Mathf.Sin(x / 84f + 1.3f) + 3f * Mathf.Sin(x / 36f + 0.4f);
 
         /// <summary>The lake shore stays a straight quay: east-west waves fade out toward it.</summary>
         private static float ShoreFade(float z) => Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((CityLayout.MaxZ - z) / 50f));
@@ -45,6 +45,8 @@ namespace BrickMuseum.City
 
         // ---------- the hills ----------
 
+        public const bool Level = true;
+
         private static float Hill(float x, float z, float cx, float cz, float h, float sigma)
         {
             float d2 = (x - cx) * (x - cx) + (z - cz) * (z - cz);
@@ -54,6 +56,7 @@ namespace BrickMuseum.City
         /// <summary>Ground height above the city's base at a plan point (0 by the lake and along the edges).</summary>
         public static float Height(Vector2 p)
         {
+            if (Level) return 0f;   // the hills caused too many troubles (stairs over streets, sinking): the land is level now
             float x = p.x, z = p.y;
             float h = Hill(x, z, 100f, -100f, 12f, 58f) + Hill(x, z, -118f, -36f, 8f, 50f) + Hill(x, z, 128f, 50f, 4f, 36f)
                       + 5f * Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((-40f - z) / 120f));                   // rising toward the forest

@@ -68,6 +68,7 @@ namespace BrickMuseum.Core
             yield return DistrictTour(dir);
             yield return FarmTour(dir);
             yield return CoachTour(dir);
+            yield return FixTour(dir);
             yield return GardenTour(dir);
             yield return LanguageTour(dir);
         }
@@ -93,6 +94,78 @@ namespace BrickMuseum.Core
             yield return Shot(dir, "53d_bonus_collected");
             Debug.Log($"[Tour] bonus: score {before} -> {City.CityScore.Total}, inventory {Data.Progress.Data.inventory.Count}, police {Data.Progress.Data.bonusPolice} workers {Data.Progress.Data.bonusWorkers} staff {Data.Progress.Data.bonusStaff}");
             ClosePanel();
+        }
+
+        /// <summary>Half-finished builds left on their plots, sitting on a bench, the walk from another home, the level town and its blue creek.</summary>
+        private IEnumerator FixTour(string dir)
+        {
+            // two builds left half-way on two plots
+            var empty = City.CityLayout.Slots.Where(s => s.kind == "big" && Data.Progress.At(s.id) == null && City.District.Opened(s, Data.Progress.Level) && Data.Progress.ChoicesFor(s).Count > 0).Take(2).ToList();
+            Data.Progress.Data.cooldowns.Clear();
+            foreach (var s in empty)
+            {
+                EnterCity(null);
+                StartChosen(s, Data.Progress.ChoicesFor(s).Last());
+                yield return new WaitForSeconds(0.3f);
+                int n = bench.targets.Count * 2 / 5;
+                for (int i = 0; i < n && !bench.Complete; i++) { PlaceNext(); if (i % 20 == 0) yield return null; }
+                yield return new WaitForSeconds(0.3f);
+                LeaveWorkshop();
+                yield return new WaitForSeconds(0.3f);
+            }
+            Debug.Log($"[Tour] half-finished plots: {Data.Progress.Data.sites.Count} ({string.Join(", ", Data.Progress.Data.sites.Select(x => $"{x.model} {x.placed.Count}"))}), resume button {cu.resumeBtn.gameObject.activeSelf}");
+            if (empty.Count > 0)
+            {
+                cityCam.Focus(city.WorldOf(empty[0]), 70f);
+                yield return new WaitForSeconds(0.6f);
+                yield return Shot(dir, "58a_partial_in_city");
+                OpenSlot(empty[0]);
+                yield return new WaitForSeconds(0.3f);
+                yield return Shot(dir, "58b_partial_panel");
+                ClosePanel();
+            }
+
+            // sitting on a park bench
+            EnterWalk();
+            yield return new WaitForSeconds(0.3f);
+            var benches = obstacles.Where(IsBench).ToList();
+            Debug.Log($"[Tour] benches: {benches.Count}");
+            if (benches.Count > 0)
+            {
+                var b = benches[0];
+                var front = Quaternion.Euler(0, b.yaw, 0) * Vector3.forward;
+                walkPos = new Vector3(b.center.x, 0, b.center.y) + front * 1.6f;
+                walkPos.y = GroundAt(walkPos);
+                facingYaw = camYaw = b.yaw + 180f;
+                yield return new WaitForSeconds(0.5f);
+                Debug.Log($"[Tour] bench button {tu.homeBtn.gameObject.activeSelf} near {benchNear != null}");
+                yield return Shot(dir, "58c_bench_near");
+                if (benchNear != null) SitOn(benchNear.Value); else SitOn(b);
+                yield return new WaitForSeconds(0.6f);
+                yield return Shot(dir, "58d_sitting");
+                StandUp();
+            }
+            ExitWalk();
+
+            // the walk from the second home
+            if (FreeBuild.Lots.Owned(1) && FreeBuild.Lots.Pieces(1).Count > 0)
+            {
+                WalkFrom(1);
+                yield return new WaitForSeconds(0.5f);
+                Debug.Log($"[Tour] walk from lot 1: plan {City.CityMap.PlanOf(walkPos)} lot centre {City.CityLayout.LotCenter(1)}");
+                yield return Shot(dir, "58e_walk_from_lot2");
+                ExitWalk();
+                Data.Progress.Data.walkLot = 0;
+            }
+
+            // the town from above: level ground, curvier streets, the blue creek
+            EnterCity(null);
+            cityCam.Focus(City.CityMap.Center, 520f);
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "58f_town_overview");
+            cityCam.Focus(city.WorldAt(new Vector2(City.CityLayout.CreekX, City.CityLayout.ZOf(2)), 0f), 110f);
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "58g_creek");
         }
 
         /// <summary>The tutorial cards: a few shown on purpose, then one picked by itself (tips cleared, the tour lets go).</summary>

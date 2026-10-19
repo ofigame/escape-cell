@@ -162,6 +162,18 @@ namespace BrickMuseum.Character
         /// <summary>Holds the right arm up and forward (a fishing rod in hand), after <see cref="Animate"/>.</summary>
         public void HoldRightArm(float pitch) => armR.localRotation = Quaternion.Euler(-pitch, 0, 6f);
 
+        /// <summary>Sitting: thighs forward, hands on the knees (after <see cref="Animate"/>).</summary>
+        public void SitPose()
+        {
+            legL.localRotation = Quaternion.Euler(-88f, 0, 0);
+            legR.localRotation = Quaternion.Euler(-88f, 0, 0);
+            armL.localRotation = Quaternion.Euler(-35f, 0, -4f);
+            armR.localRotation = Quaternion.Euler(-35f, 0, 4f);
+        }
+
+        /// <summary>The hips' height above the feet (where a seat meets them).</summary>
+        public const float HipHeight = Hip * Scale;
+
         public void Animate(float speed, bool airborne, float dt)
         {
             float target = airborne ? 0.45f : Mathf.Clamp01(speed / 7f);

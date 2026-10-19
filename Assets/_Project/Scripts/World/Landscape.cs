@@ -50,8 +50,17 @@ namespace BrickMuseum.World
             var land = new GameObject("Landscape").transform;
             land.SetParent(root, false);
 
+            // the valley floor, with an opening along the town's creek: the creek lies below the ground's level, and the
+            // town's own streets and the creek's banks cover the opening (without it the grass hid the water)
             var ground = new MeshBuilder();
-            ground.Cylinder(new Vector3(0, Ground - 0.5f, 0), 3000f, 3000f, 0.5f, 72, true, false);
+            float hx0 = CityCenter.x + City.CityLayout.CreekX - City.CityLayout.Creek / 2f - 20f, hx1 = hx0 + City.CityLayout.Creek + 40f;
+            float hz0 = CityCenter.z + City.CityLayout.MinZ + 16f, hz1 = LakeNorth;
+            const float R = 3000f, T = 0.5f;
+            void Slab(float x0, float x1, float z0, float z1) => ground.Box(new Vector3((x0 + x1) / 2f, Ground - T / 2f, (z0 + z1) / 2f), new Vector3(x1 - x0, T, z1 - z0));
+            Slab(-R, hx0, -R, R);
+            Slab(hx1, R, -R, R);
+            Slab(hx0, hx1, -R, hz0);
+            Slab(hx0, hx1, hz1, R);
             Add(land, "Ground", ground.ToMesh("ground"), Mats.Lit(new Color(0.42f, 0.62f, 0.32f), 0.05f), false, true);
 
             BuildLake(land);

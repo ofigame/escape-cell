@@ -14,7 +14,7 @@ namespace BrickMuseum.Core
         private CityMap.Obstacle roof;
         private Vector3 roofDoor;
 
-        private void WireRoof() => tu.homeBtn.onClick.AddListener(() => { if (onRoof) LeaveRoof(); else if (roofNear != null) ClimbRoof(roofNear.Value); });
+        private void WireRoof() => tu.homeBtn.onClick.AddListener(() => { if (sitting) StandUp(); else if (benchNear != null) SitOn(benchNear.Value); else if (onRoof) LeaveRoof(); else if (roofNear != null) ClimbRoof(roofNear.Value); });
 
         private CityMap.Obstacle? roofNear;
 

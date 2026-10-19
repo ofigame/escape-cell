@@ -49,6 +49,7 @@ namespace BrickMuseum.Core
             RemoveCar();
             var data = Progress.Data;
             if (HasBuiltCar) { SpawnBuiltCars(); return; }
+            return;   // the town's parked cars are not yours: only a car you built can be driven
             if (string.IsNullOrEmpty(data.myCar) || !Progress.Owned(data.myCar))
             {
                 // no car chosen yet: the first parked car (a four-wheeler before a scooter or a motorbike)

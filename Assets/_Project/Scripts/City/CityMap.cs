@@ -27,7 +27,8 @@ namespace BrickMuseum.City
         private sealed class SlotView
         {
             public Slot slot;
-            public GameObject go, pad, model;
+            public GameObject go, pad, model, partial;
+            public string partialKey;
             public Renderer padRenderer;
             public TextMeshPro label;
             public BoxCollider hit;
@@ -117,11 +118,11 @@ namespace BrickMuseum.City
             float cx = CityLayout.CreekX, ch = CityLayout.Creek / 2f, w = CityLayout.CreekWater;
             float z0 = CityLayout.MinZ, z1 = CityLayout.MaxZ + 4f;
             // the valley's cross-section, west to east: grass down to the water's edge, a muddy bed under the water
-            var bank = new[] { new Vector2(cx - ch, RoadTop), new Vector2(cx - w - 1.5f, CreekBed + 0.4f) };
-            var bankE = new[] { new Vector2(cx + w + 1.5f, CreekBed + 0.4f), new Vector2(cx + ch, RoadTop) };
+            var bank = new[] { new Vector2(cx - ch, RoadTop), new Vector2(cx - w - 1.2f, CreekBed + 0.4f) };
+            var bankE = new[] { new Vector2(cx + w + 1.2f, CreekBed + 0.4f), new Vector2(cx + ch, RoadTop) };
             var bed = new[] { new Vector2(cx - w - 1.5f, CreekBed + 0.4f), new Vector2(cx - w + 1f, CreekBed - 0.6f), new Vector2(cx + w - 1f, CreekBed - 0.6f), new Vector2(cx + w + 1.5f, CreekBed + 0.4f) };
             AddStrip("CreekBanks", new[] { bank, bankE }, z0, z1, Grass.Lawn(new Color(0.5f, 0.72f, 0.42f)));
-            AddStrip("CreekBed", new[] { bed }, z0, z1, Mats.Lit(new Color(0.36f, 0.33f, 0.24f), 0.15f));
+            AddStrip("CreekBed", new[] { bed }, z0, z1, Mats.Lit(new Color(0.12f, 0.26f, 0.42f), 0.15f));   // a deep blue bed: the water reads blue
             var water = new MeshBuilder();
             water.Box(new Vector3(cx, WaterTop - 0.05f, (z0 + z1) / 2f), new Vector3(2f * w, 0.1f, z1 - z0));
             Add("CreekWater", water, Water.Creek, false, 6f);
@@ -553,9 +554,29 @@ namespace BrickMuseum.City
                 if (s.only == "bridge")
                     foreach (Transform c in v.model.transform) if (c.name.Contains(":blue:")) Object.Destroy(c.gameObject);   // the toy's water: the real creek flows here
             }
+            // a half-finished build stands on its plot as far as it got
+            var site = m == null ? Progress.Site(s.id) : null;
+            string want = site != null ? site.model + ":" + site.placed.Count : null;
+            if (want != v.partialKey)
+            {
+                if (v.partial != null) Object.Destroy(v.partial);
+                v.partial = null;
+                v.partialKey = want;
+                var pm = site != null ? ModelCatalog.Find(site.model) : null;
+                if (pm != null)
+                {
+                    v.partial = PieceFactory.BuildModel(pm);
+                    var on = new HashSet<int>(site.placed);
+                    for (int i = 0; i < v.partial.transform.childCount; i++) v.partial.transform.GetChild(i).gameObject.SetActive(on.Contains(i));
+                    v.partial.transform.SetParent(v.go.transform, false);
+                    float pk = FitScale(pm, s);
+                    v.partial.transform.localPosition = new Vector3(0, s.onRoad ? 0.04f : 0.15f, 0);
+                    v.partial.transform.localScale = Vector3.one * pk;
+                }
+            }
             v.padRenderer.sharedMaterial = s == selected ? (padSelected ??= Mats.Lit(new Color(1f, 0.86f, 0.2f), 0.3f)) : open ? PadMat(s.kind) : (padLocked ??= Mats.Lit(new Color(0.7f, 0.7f, 0.7f), 0.1f));
             v.pad.SetActive(m == null || s.only != "bridge" || s == selected);
-            v.label.gameObject.SetActive(m == null);
+            v.label.gameObject.SetActive(m == null && v.partial == null);
             v.label.text = open ? CityLayout.SlotShort(s) : s.area.far && !District.IsOpen ? "KAPALI" : $"Sv {s.level}";
             v.label.color = open ? new Color(0.2f, 0.22f, 0.28f, 0.85f) : new Color(0.35f, 0.35f, 0.38f, 0.9f);
             float h = m != null ? Mathf.Max(2f, m.height * FitScale(m, s)) : 2f;
@@ -619,7 +640,7 @@ namespace BrickMuseum.City
             if (CityLayout.InCreek(p))
             {
                 if (CityLayout.OnStreetZ(p.y)) return RoadTop;                                  // a bridge
-                float d = Mathf.Abs(p.x - CityLayout.CreekX), w = CityLayout.CreekWater + 1.5f, ch = CityLayout.Creek / 2f;
+                float d = Mathf.Abs(p.x - CityLayout.CreekX), w = CityLayout.CreekWater + 1.2f, ch = CityLayout.Creek / 2f;
                 return d <= w ? WaterTop : Mathf.Lerp(CreekBed + 0.3f, RoadTop, (d - w) / (ch - w));   // wading, or on the bank
             }
             foreach (var a in CityLayout.Areas)
@@ -657,6 +678,7 @@ namespace BrickMuseum.City
             public float top;
             public float bottom;      // 0 = standing on the ground; else only in the way at this height and above
             public ModelDef model;
+            public float yaw, ground; // which way its front faces (world yaw), the height it stands on
         }
 
         public List<Obstacle> Obstacles()
@@ -676,7 +698,7 @@ namespace BrickMuseum.City
                 list.Add(new Obstacle
                 {
                     center = new Vector2(at.x, at.z), half = size / 2f,
-                    top = at.y + 0.15f + m.height * k, model = m,
+                    top = at.y + 0.15f + m.height * k, model = m, yaw = s.yaw + CityShape.Angle(s.local), ground = at.y + 0.15f,
                 });
             }
             return list;

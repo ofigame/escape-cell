@@ -64,6 +64,12 @@ namespace BrickMuseum.Data
         public int heartsTotal, heartsLeft, mistakes;
         public bool adUsed;
         public bool Has => !string.IsNullOrEmpty(model);
+
+        public PendingBuild Copy() => new PendingBuild
+        {
+            model = model, slot = slot, placed = new List<int>(placed), heartsTotal = heartsTotal, heartsLeft = heartsLeft,
+            mistakes = mistakes, adUsed = adUsed,
+        };
     }
 
     /// <summary>One of the player's own cars: a name and its pieces on the chassis.</summary>
@@ -110,6 +116,8 @@ namespace BrickMuseum.Data
         public string myHouse = "";          // model id of the player's own house
         public HomeData home = new HomeData();
         public PendingBuild pending = new PendingBuild();
+        public List<PendingBuild> sites = new List<PendingBuild>();   // half-finished builds left on their plots
+        public int walkLot;                                          // the home the walk starts from
         public bool moneyInit;
         public int money;                     // lira: earned with the taxi (and fishing), spent on special materials, furniture, lots
         public List<CarSave> cars = new List<CarSave>();   // the player's own cars (the garage)
@@ -241,6 +249,9 @@ namespace BrickMuseum.Data
         }
 
         /// <summary>Into the inventory (street decor and trees may be there more than once: bonuses give several).</summary>
+        /// <summary>The half-finished build on a plot (null: none).</summary>
+        public static PendingBuild Site(string slot) => Data.sites.FirstOrDefault(x => x.slot == slot);
+
         public static void ToInventory(string id)
         {
             var m = ModelCatalog.Find(id);

@@ -71,6 +71,7 @@ namespace BrickMuseum.Core
             current = null;
             CloseBag(true);
             wu.canvas.gameObject.SetActive(false);
+            wu.refModal.SetActive(false);   // (the model's intro card lives on the overlay)
             cu.canvas.gameObject.SetActive(true);
             cam.fieldOfView = Screen.width < Screen.height ? 50f : 40f;
             ShadowDistance(650f);
@@ -87,7 +88,7 @@ namespace BrickMuseum.Core
             cu.SetLevel(Progress.Level, Progress.Stars, from, to);
             cu.inventoryBtn.SetLabel(Progress.Data.inventory.Count > 0 ? $"Envanter ({Progress.Data.inventory.Count})" : "Envanter");
             cu.help.transform.parent.gameObject.SetActive(!cu.panel.activeSelf);
-            cu.resumeBtn.gameObject.SetActive(Pending.Has && !cu.panel.activeSelf);
+            cu.resumeBtn.gameObject.SetActive(AnySite && !cu.panel.activeSelf);
             cu.scoreBtn.SetLabel($"Puan {CityScore.Total}");
             cu.bonusBtn.gameObject.SetActive(Progress.Data.bonusPending > 0);
             if (Progress.Data.bonusPending > 0) cu.bonusBtn.SetLabel($"Şehir bonusu ({Progress.Data.bonusPending})");
@@ -209,7 +210,14 @@ namespace BrickMuseum.Core
             }
             var buttons = new List<(string, Color, System.Action)>();
             var resting = Progress.KindResting(s.kind);
-            if (Pending.Has && Pending.slot == s.id) buttons.Add(("İnşaya devam et", Ui.Yellow, ResumeBuild));
+            var site = Progress.Site(s.id);
+            if (site != null)
+            {
+                int done = site.placed.Count, all = ModelCatalog.Find(site.model)?.pieces.Count ?? 1;
+                info = $"{where}\n{ModelCatalog.Find(site.model)?.name} yapılıyor · %{done * 100 / System.Math.Max(1, all)}";
+                buttons.Add(("İnşaya devam et", Ui.Yellow, () => ResumeSite(site)));
+                buttons.Add(("Yapımı bırak", new Color(1f, 0.85f, 0.85f), () => { Progress.Data.sites.Remove(site); if (Pending.slot == s.id) Progress.Data.pending = new PendingBuild(); Progress.Save(); city.Refresh(s); OpenSlot(s); }));
+            }
             else if (pool.Count > 0 && resting != null)
             {
                 info += $"\nYeni yapım {Progress.LockText(resting.Value)} sonra";
@@ -222,6 +230,15 @@ namespace BrickMuseum.Core
         }
 
         private void OpenHomeLot() => OpenLot(0);
+
+        /// <summary>The walk starts in front of this home (and next time too).</summary>
+        private void WalkFrom(int lot)
+        {
+            Progress.Data.walkLot = lot;
+            Progress.Save();
+            ClosePanel();
+            EnterWalk();
+        }
 
         // ---------- the city score and the level-up bonuses ----------
 
@@ -340,6 +357,7 @@ namespace BrickMuseum.Core
                 cu.help.transform.parent.gameObject.SetActive(false);
                 cu.ShowPanel(FreeBuild.Lots.Name(lot), $"Senin arsan · {FreeBuild.Lots.Pieces(lot).Count} parçalık ev", null,
                     ("Evimi yap", Ui.Yellow, () => { ClosePanel(); buildLot = lot; EnterBuild(false); }),
+                    ("Buradan gez", new Color(0.85f, 0.95f, 0.8f), () => WalkFrom(lot)),
                     ("Kapat", Neutral, ClosePanel));
                 return;
             }
@@ -365,6 +383,7 @@ namespace BrickMuseum.Core
             cu.ShowPanel("Evim", $"Senin arsan · {Progress.Data.build.Count} parçalık ev" + (HasBuiltCar ? " · araban hazır" : ""), null,
                 ("Evimi yap", Ui.Yellow, () => { ClosePanel(); buildLot = 0; EnterBuild(false); }),
                 ("Arabamı yap", new Color(0.8f, 0.9f, 1f), () => { ClosePanel(); EnterBuild(true); }),
+                ("Buradan gez", new Color(0.85f, 0.95f, 0.8f), () => WalkFrom(0)),
                 ("Kapat", Neutral, ClosePanel));
         }
 
@@ -386,7 +405,7 @@ namespace BrickMuseum.Core
         private void StartChosen(Slot s, ModelDef m)
         {
             cu.list.SetActive(false);
-            if (Pending.Has) { ClearPending(); Toast("Yarım kalan yapım bırakıldı"); }
+            Progress.Data.pending = new PendingBuild();   // the build before stays half-finished on its own plot
             buildSlot = s;
             ClosePanel();
             EnterWorkshop();
@@ -506,7 +525,7 @@ namespace BrickMuseum.Core
             FarmTick(dt);
             city.people.Tick(dt, cityCam.target, cityCam.distance < 220f ? 130f : 0f);   // people are too small to see from high up
             if (cu.levelUp.activeSelf && Time.unscaledTime > levelUpUntil) cu.levelUp.SetActive(false);
-            cu.resumeBtn.gameObject.SetActive(Pending.Has && !cu.panel.activeSelf && !cu.list.activeSelf);
+            cu.resumeBtn.gameObject.SetActive(AnySite && !cu.panel.activeSelf && !cu.list.activeSelf);
             cu.money.text = $"{FreeBuild.Wallet.Money} lira";
         }
     }

@@ -42,7 +42,7 @@ namespace BrickMuseum.City
         public const float Block = 64f, Road = 18f, Pitch = Block + Road, Pavement = 4f, ParkingLane = 4.5f, Quay = 3f;
         public const int Cols = 4, Rows = 4;
         /// <summary>The creek valley between the 2nd and 3rd columns, instead of a street.</summary>
-        public const float Creek = 44f, CreekWater = 10.5f;
+        public const float Creek = 44f, CreekWater = 17f;    // (half the water's width: most of the valley is water)
         private static readonly float[] Gaps = { Road, Road, Creek, Road, Road };    // west edge, between columns, east edge
         private static float Width { get { float w = Cols * Block; foreach (var g in Gaps) w += g; return w; } }
         public static float MinX => -Width / 2f;

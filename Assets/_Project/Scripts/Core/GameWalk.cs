@@ -69,7 +69,8 @@ namespace BrickMuseum.Core
             if (Progress.Data.build.Count > 0)
             {
                 // with a house of your own you start on the road in front of it, looking at it
-                walkPos = city.WorldAt(new Vector2(CityLayout.MinX + 5f, CityLayout.HomeLotCenter.y + 3f), 0f);
+                int lot = FreeBuild.Lots.Owned(Progress.Data.walkLot) && FreeBuild.Lots.Pieces(Progress.Data.walkLot).Count > 0 ? Progress.Data.walkLot : 0;
+                walkPos = city.WorldAt(new Vector2(CityLayout.MinX + 5f, CityLayout.LotCenter(lot).y + 3f), 0f);
                 walkPos.y = city.GroundAt(walkPos);
                 facingYaw = camYaw = 270f;
             }
@@ -78,7 +79,7 @@ namespace BrickMuseum.Core
             SpawnCar();
             if (house != null) obstacles.AddRange(FurnitureObstacles());
             decorating = false;
-            onRoof = false; walkCamDist = 6.5f;
+            onRoof = false; sitting = false; walkCamDist = 6.5f;
             tu.SetHomeLabel("GİR");
             tu.homeBtn.gameObject.SetActive(false);
             tu.decorBtn.gameObject.SetActive(false);
@@ -92,6 +93,7 @@ namespace BrickMuseum.Core
         {
             if (decorating) EndDecor();
             LeaveRoof();
+            StandUp();
             CancelTaxi(false);
             StopFishing();
             if (driving) GetOutOfCar();
@@ -150,6 +152,7 @@ namespace BrickMuseum.Core
             if (!driving) tu.taxiBtn.gameObject.SetActive(false);
             if (decorating) { DecorUpdate(dt); return; }
             if (driving) { CarUpdate(dt); FishHud(); return; }
+            if (sitting) { SitUpdate(dt); return; }
             FishHud();
             if (fishing != FishState.Off) { FishUpdate(dt); return; }
             var move = stickVec + testMove;
@@ -238,6 +241,7 @@ namespace BrickMuseum.Core
             }
             if (ShowHomeNearby()) { tu.carBtn.gameObject.SetActive(false); return; }
             if (ShowRoofNearby(best, bestD)) return;
+            if (ShowBenchNearby(best, bestD)) return;
             bool nearCar = car != null && NearCar();
             tu.carBtn.gameObject.SetActive(nearCar);
             if (nearCar) { tu.nearChip.SetActive(true); tu.nearText.text = $"Araban: {carName}"; return; }

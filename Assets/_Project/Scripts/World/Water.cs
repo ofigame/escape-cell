@@ -49,7 +49,7 @@ namespace BrickMuseum.World
         }
 
         public static Material Lake => lake ??= Make(0.78f);
-        public static Material Creek => creek ??= Make(0.72f);
+        public static Material Creek => creek ??= Make(0.88f);
 
         /// <summary>The ripples move: the lake drifts slowly, the creek runs south into it.</summary>
         public static void Tick(float time)

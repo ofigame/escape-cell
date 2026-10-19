@@ -24,21 +24,42 @@ namespace BrickMuseum.Core
             p.slot = buildSlot != null ? buildSlot.id : "";
             p.placed = bench.targets.Select((t, i) => (t, i)).Where(x => x.t.placed).Select(x => x.i).ToList();
             p.heartsTotal = heartsTotal; p.heartsLeft = heartsLeft; p.mistakes = mistakes; p.adUsed = adUsed;
+            // a build on a plot stays there half-finished (shown in the city) until it is finished or given up
+            if (p.slot != "")
+            {
+                Progress.Data.sites.RemoveAll(x => x.slot == p.slot);
+                Progress.Data.sites.Add(p.Copy());
+            }
             Progress.Save();
         }
 
         private static void ClearPending()
         {
+            if (Pending.Has && Pending.slot != "") Progress.Data.sites.RemoveAll(x => x.slot == Pending.slot);
             Progress.Data.pending = new PendingBuild();
             Progress.Save();
         }
 
         /// <summary>The city's "İnşaya devam et": back to the workshop with the build as it was left.</summary>
+        /// <summary>The build "İnşaya devam et" goes back to: the one last worked on, else the newest half-finished plot.</summary>
+        private static PendingBuild LastSite => Pending.Has ? Pending : Progress.Data.sites.LastOrDefault();
+
+        private static bool AnySite => Pending.Has || Progress.Data.sites.Count > 0;
+
         private void ResumeBuild()
         {
+            var last = LastSite;
+            if (last == null) return;
+            ResumeSite(last);
+        }
+
+        /// <summary>Back to the workshop with a plot's half-finished build.</summary>
+        private void ResumeSite(PendingBuild site)
+        {
+            Progress.Data.pending = site.Copy();
             var p = Pending;
             var m = p.Has ? ModelCatalog.Find(p.model) : null;
-            if (m == null) { ClearPending(); UpdateCityHud(); return; }
+            if (m == null) { ClearPending(); UpdateCityHud(); city.RefreshAll(); return; }
             buildSlot = string.IsNullOrEmpty(p.slot) ? null : CityLayout.Find(p.slot);
             ClosePanel();
             EnterWorkshop();

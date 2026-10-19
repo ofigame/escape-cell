@@ -69,6 +69,11 @@ namespace BrickMuseum.Core
                 CityTip("farReady", "Uzak semt açılabilir", $"Okul, hastane ve polis karakolu hazır! {District.Price} lira ile Doğu Yakası'nı imara aç; orada her türden bina yeniden yapılabilir.",
                     () => District.Ready && !District.IsOpen, () => R(cu.farBtn)),
 
+                CityTip("sites", "Yarım bırakabilirsin", "Büyük yapılar uzun sürer: istediğin an şehre dön, bina yapıldığı kadarıyla arsasında durur. İnşaya devam et ile kaldığın yerden sürdür.",
+                    () => Progress.Data.sites.Count > 0, () => R(cu.resumeBtn)),
+                CityTip("homes", "Hangi evden gezersin?", "Arsalarından birine dokun ve Buradan gez de: şehir turu o evin önünden başlar.",
+                    () => FreeBuild.Lots.OwnedCount > 1, null),
+
                 // ----- the workshop -----
                 new Tip { key = "bag", mode = Mode.Workshop, title = "Nasıl yapılır?", text = "Resimdeki modele bak. Çantayı aç, parçayı seç ve parlayan yere koy. Yanlış parça bir hata hakkı götürür.",
                     when = () => current != null && bench.PlacedCount == 0, target = () => R(wu.bagBtn) },
@@ -86,6 +91,8 @@ namespace BrickMuseum.Core
                     when = () => tu.fishBtn.gameObject.activeInHierarchy, target = () => R(tu.fishBtn) },
                 new Tip { key = "sell", mode = Mode.Walk, title = "Balık Hali", text = "Soğutucudaki balıkları burada satıp lira kazan.",
                     when = () => tu.sellBtn.gameObject.activeInHierarchy, target = () => R(tu.sellBtn) },
+                new Tip { key = "bench", mode = Mode.Walk, title = "Banklar", text = "Parktaki banklara oturabilirsin: yanına gidip OTUR'a dokun. Yürümeye başlayınca kalkarsın.",
+                    when = () => benchNear != null && tu.homeBtn.gameObject.activeInHierarchy, target = () => R(tu.homeBtn) },
                 new Tip { key = "roof", mode = Mode.Walk, title = "Gökdelen tepesi", text = "ÇIK ile gökdelenin en tepesine çık ve şehri yukarıdan seyret.",
                     when = () => roofNear != null && tu.homeBtn.gameObject.activeInHierarchy, target = () => R(tu.homeBtn) },
                 new Tip { key = "taxi", mode = Mode.Walk, title = "Taksicilik", text = "Taksi düğmesine dokun, yolcuyu al ve şeritteki oku izleyerek götür. Ücreti ve bahşişi sen alırsın.",
