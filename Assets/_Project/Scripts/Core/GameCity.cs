@@ -54,6 +54,7 @@ namespace BrickMuseum.Core
             cu.resumeBtn.onClick.AddListener(ResumeBuild);
             cu.scoreBtn.onClick.AddListener(ShowScore);
             cu.bonusBtn.onClick.AddListener(ShowBonus);
+            cu.farBtn.onClick.AddListener(() => { FocusFar(); ShowDistrict(); });
             Loc.Changed += () =>
             {
                 // every text on screen (and hidden) is drawn again in the new language
@@ -145,6 +146,7 @@ namespace BrickMuseum.Core
             Sfx.Play("pick", 0.6f);
             cu.help.transform.parent.gameObject.SetActive(false);
             string where = s.area.name;
+            if (s.area.far && !District.IsOpen) { ShowDistrict(); return; }
             if (Progress.Level < s.level)
             {
                 int need = Progress.LevelStars[Mathf.Min(s.level, Progress.LevelStars.Length) - 1];
@@ -225,6 +227,48 @@ namespace BrickMuseum.Core
             foreach (var p in parts) cu.AddRow(ModelCatalog.Find(p.pic) is ModelDef pm ? Previews.Model(pm, 160) : null, $"{p.name} · {p.count}", $"{p.count} × {p.each} = {p.Points} puan\n{p.hint}", null, null);
             cu.AddRow(ModelCatalog.All.FirstOrDefault(x => x.kind == "house") is ModelDef hm ? Previews.Model(hm, 160) : null, "Neden gerekli?", $"Puan {CityScore.HouseGardens}: evlerin bahçeleri geliştirilir\nPuan {CityScore.BuildingGardens}: büyük binaların çevresi geliştirilir", null, null);
             cu.list.SetActive(true);
+        }
+
+        // ---------- the far district ----------
+
+        private void FocusFar() => cityCam.Focus(city.WorldAt(CityLayout.FarCenter, 0f), 260f);
+
+        /// <summary>What the far district needs, and the button that opens it.</summary>
+        private void ShowDistrict()
+        {
+            panelSlot = null;
+            city.Select(null);
+            cu.help.transform.parent.gameObject.SetActive(false);
+            if (District.IsOpen)
+            {
+                cu.ShowPanel(CityLayout.FarName, "İmara açık\nHer türden ev, bina ve kamu binası yapılabilir\nTaksiyle de gidilir", null,
+                    ("Oraya bak", Ui.Yellow, () => { ClosePanel(); FocusFar(); }), ("Kapat", Neutral, ClosePanel));
+                return;
+            }
+            var lines = new List<string> { "Uzak semt imara kapalı" };
+            foreach (var id in District.Needed)
+            {
+                var m = ModelCatalog.Find(id);
+                bool have = !District.Missing().Any(x => x.id == id);
+                lines.Add($"{m?.name ?? id} · {(have ? "hazır" : "eksik")}");
+            }
+            lines.Add($"İmar bedeli: {District.Price} lira (paran: {FreeBuild.Wallet.Money})");
+            cu.ShowPanel(CityLayout.FarName, string.Join("\n", lines), null,
+                ($"İmara aç · {District.Price} lira", District.Ready && FreeBuild.Wallet.Money >= District.Price ? Ui.Yellow : Neutral, OpenDistrict),
+                ("Kapat", Neutral, ClosePanel));
+        }
+
+        private void OpenDistrict()
+        {
+            if (!District.Ready) { Toast("Önce okul, hastane ve polis karakolu yapılmalı"); return; }
+            if (FreeBuild.Wallet.Money < District.Price) { Toast($"Yeterli para yok · {District.Price} lira gerekli"); return; }
+            if (!District.Open()) return;
+            ClosePanel();
+            Sfx.Play("win");
+            city.RefreshAll();
+            UpdateCityHud();
+            FocusFar();
+            Toast($"{CityLayout.FarName} imara açıldı!", 2.5f);
         }
 
         private static readonly string[] BonusPool = { "bank", "konteyner", "lamba", "trafiklambasi", "workers", "police", "staff" };

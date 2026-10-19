@@ -49,6 +49,7 @@ namespace BrickMuseum.City
             BuildGround();
             BuildCreek();
             BuildLots();
+            BuildFar();
             foreach (var a in CityLayout.Areas) BuildArea(a);
             people = new Townsfolk(root);
         }
@@ -134,6 +135,77 @@ namespace BrickMuseum.City
                     stones.Cylinder(new Vector3(x, CreekBed + 0.1f, z + (float)rnd.NextDouble() * 4f), r, r * 0.6f, r * 1.1f, 6);
                 }
             Add("CreekStones", stones, Mats.Lit(new Color(0.6f, 0.6f, 0.58f), 0.1f), true, 50f);
+        }
+
+        private TextMeshPro farState;
+        private GameObject farBarrier;
+
+        /// <summary>The far district's streets, the country road out to it, a road sign and (while closed) a barrier.</summary>
+        private void BuildFar()
+        {
+            float x0 = CityLayout.FarMinX, x1 = CityLayout.FarMaxX, z0 = CityLayout.FarNorth, z1 = CityLayout.FarSouth, cz = CityLayout.CountryZ;
+            var asphalt = new MeshBuilder();
+            asphalt.Box(new Vector3((x0 + x1) / 2f, RoadTop / 2f, (z0 + z1) / 2f), new Vector3(x1 - x0, RoadTop, z1 - z0));
+            asphalt.Box(new Vector3((CityLayout.MaxX + x0) / 2f, RoadTop / 2f, cz), new Vector3(x0 - CityLayout.MaxX + 0.2f, RoadTop, CityLayout.CountryRoad));
+            Add("FarRoads", asphalt, Mats.Lit(new Color(0.33f, 0.35f, 0.38f), 0.1f), false, 6f);
+            var lines = new MeshBuilder();
+            for (float t = CityLayout.MaxX + 3f; t < x0 - 4f; t += 8f) lines.Box(new Vector3(t + 2f, RoadTop + 0.02f, cz), new Vector3(4f, 0.04f, 0.5f));   // the country road
+            foreach (float side in new[] { -1f, 1f })                                                                                                      // and its edge lines
+                lines.Box(new Vector3((CityLayout.MaxX + x0) / 2f, RoadTop + 0.02f, cz + side * (CityLayout.CountryRoad / 2f - 0.6f)), new Vector3(x0 - CityLayout.MaxX, 0.04f, 0.25f));
+            foreach (float x in CityLayout.FarStreetXs())
+                for (float t = z0 + 3f; t < z1 - 4f; t += 8f) lines.Box(new Vector3(x, RoadTop + 0.02f, t + 2f), new Vector3(0.5f, 0.04f, 4f));
+            foreach (float z in CityLayout.FarStreetZs())
+                for (float t = x0 + 3f; t < x1 - 4f; t += 8f) lines.Box(new Vector3(t + 2f, RoadTop + 0.02f, z), new Vector3(4f, 0.04f, 0.5f));
+            Add("FarRoadLines", lines, Mats.Lit(new Color(0.95f, 0.93f, 0.85f), 0.1f), false, 3f);
+
+            // a big green road sign at the town's edge: where the road goes, and whether it is open
+            var at = new Vector2(CityLayout.MaxX + 14f, cz - CityLayout.CountryRoad / 2f - 3f);
+            var sign = new GameObject("FarSign");
+            sign.transform.SetParent(root, false);
+            sign.transform.localPosition = CityShape.Point(at, RoadTop);
+            sign.transform.localRotation = Quaternion.Euler(0, 90f + CityShape.Angle(at), 0);
+            var posts = new MeshBuilder();
+            posts.Box(new Vector3(-2.6f, 2f, 0), new Vector3(0.3f, 4f, 0.3f));
+            posts.Box(new Vector3(2.6f, 2f, 0), new Vector3(0.3f, 4f, 0.3f));
+            var panel = new MeshBuilder();
+            panel.Box(new Vector3(0, 3.7f, 0.05f), new Vector3(6.4f, 2.6f, 0.15f));
+            AddChild(sign.transform, posts.ToMesh("posts"), Mats.Lit(new Color(0.75f, 0.76f, 0.78f), 0.3f));
+            AddChild(sign.transform, panel.ToMesh("panel"), Mats.Lit(new Color(0.1f, 0.5f, 0.28f), 0.3f));
+            foreach (float face in new[] { 0f, 180f })
+            {
+                var name = FlatText(sign.transform, Vector3.zero, CityLayout.FarName + " →", 0.7f, 6f);
+                name.transform.localPosition = Quaternion.Euler(0, face, 0) * new Vector3(0, 4.3f, 0.14f);
+                name.transform.localRotation = Quaternion.Euler(0, 180f + face, 0);
+                name.color = Color.white;
+                var state = FlatText(sign.transform, Vector3.zero, "", 0.45f, 6f);
+                state.transform.localPosition = Quaternion.Euler(0, face, 0) * new Vector3(0, 3.2f, 0.14f);
+                state.transform.localRotation = Quaternion.Euler(0, 180f + face, 0);
+                state.color = new Color(1f, 0.95f, 0.6f);
+                if (face == 0f) farState = state; else farStateBack = state;
+            }
+            // a red and white barrier across the road at the district's entrance
+            var bar = new MeshBuilder();
+            var barRed = new MeshBuilder();
+            float bx = x0 - 3f;
+            foreach (float side in new[] { -1f, 1f }) bar.Box(new Vector3(bx, 0.6f, cz + side * (CityLayout.CountryRoad / 2f + 0.4f)), new Vector3(0.4f, 1.2f, 0.4f));
+            for (int i = 0; i < 6; i++)
+                (i % 2 == 0 ? barRed : bar).Box(new Vector3(bx, 1.1f, cz - CityLayout.CountryRoad / 2f + (i + 0.5f) * CityLayout.CountryRoad / 6f), new Vector3(0.25f, 0.35f, CityLayout.CountryRoad / 6f));
+            farBarrier = new GameObject("FarBarrier");
+            farBarrier.transform.SetParent(root, false);
+            var bw = Add("FarBarrierWhite", bar, Mats.Lit(Color.white, 0.3f), true, 3f);
+            var br = Add("FarBarrierRed", barRed, Mats.Lit(new Color(0.85f, 0.15f, 0.12f), 0.3f), true, 3f);
+            bw.transform.SetParent(farBarrier.transform, true);
+            br.transform.SetParent(farBarrier.transform, true);
+        }
+
+        private TextMeshPro farStateBack;
+
+        /// <summary>The road sign's line and the barrier, for the district's state.</summary>
+        public void RefreshDistrict()
+        {
+            string t = District.IsOpen ? "İmara açık" : "İmara kapalı";
+            farState.text = t; farStateBack.text = t;
+            farBarrier.SetActive(!District.IsOpen);
         }
 
         private readonly TextMeshPro[] lotSigns = new TextMeshPro[CityLayout.LotCount];
@@ -429,11 +501,12 @@ namespace BrickMuseum.City
             foreach (var kv in areaViews)
             {
                 var a = kv.Key;
-                bool open = level >= a.level;
+                bool open = District.Opened(a, level);
                 kv.Value.lawn.sharedMaterial.SetColor("_BaseColor", open ? a.ground : Color.Lerp(a.ground, new Color(0.6f, 0.6f, 0.6f), 0.75f));
-                kv.Value.sign.text = open ? a.name : $"{a.name}  ·  Seviye {a.level}";
+                kv.Value.sign.text = open ? a.name : a.far && !District.IsOpen ? $"{a.name}  ·  İmara kapalı" : $"{a.name}  ·  Seviye {a.level}";
             }
             foreach (var v in views.Values) Refresh(v, level);
+            RefreshDistrict();
             people.Sync();
         }
 
@@ -463,7 +536,7 @@ namespace BrickMuseum.City
         private void Refresh(SlotView v, int level)
         {
             var s = v.slot;
-            bool open = level >= s.level;
+            bool open = District.Opened(s, level);
             string id = Progress.At(s.id);
             var m = id != null ? ModelCatalog.Find(id) : null;
             string shown = v.model != null ? v.model.name : null;
@@ -483,7 +556,7 @@ namespace BrickMuseum.City
             v.padRenderer.sharedMaterial = s == selected ? (padSelected ??= Mats.Lit(new Color(1f, 0.86f, 0.2f), 0.3f)) : open ? PadMat(s.kind) : (padLocked ??= Mats.Lit(new Color(0.7f, 0.7f, 0.7f), 0.1f));
             v.pad.SetActive(m == null || s.only != "bridge" || s == selected);
             v.label.gameObject.SetActive(m == null);
-            v.label.text = open ? CityLayout.SlotShort(s) : $"Sv {s.level}";
+            v.label.text = open ? CityLayout.SlotShort(s) : s.area.far && !District.IsOpen ? "KAPALI" : $"Sv {s.level}";
             v.label.color = open ? new Color(0.2f, 0.22f, 0.28f, 0.85f) : new Color(0.35f, 0.35f, 0.38f, 0.9f);
             float h = m != null ? Mathf.Max(2f, m.height * FitScale(m, s)) : 2f;
             v.hit.center = new Vector3(0, h / 2f, 0);
@@ -570,6 +643,8 @@ namespace BrickMuseum.City
         public bool IsRoad(Vector3 world)
         {
             var p = PlanOf(world);
+            if (CityLayout.OnCountryRoad(p)) return true;                                       // the country road out east
+            if (CityLayout.InFar(p)) return Mathf.Abs(SurfaceAt(p) - RoadTop) < 0.01f;          // the far district's streets
             if (p.x < CityLayout.MinX || p.x > CityLayout.MaxX || p.y < CityLayout.MinZ || p.y > CityLayout.ZOf(0) + CityLayout.Block / 2f) return false;
             if (CityLayout.InCreek(p)) return CityLayout.OnStreetZ(p.y);
             return Mathf.Abs(SurfaceAt(p) - RoadTop) < 0.01f;
@@ -642,7 +717,7 @@ namespace BrickMuseum.City
             // the camera looks north, so screen right is world -x: the ground follows the finger
             target += new Vector3(deltaPx.x * k, 0f, deltaPx.y * k / Mathf.Sin(pitch * Mathf.Deg2Rad) * 0.85f);
             var c = CityMap.Center;
-            target.x = Mathf.Clamp(target.x, c.x + CityLayout.MinX - CityLayout.HomeLot - 20f, c.x + CityLayout.MaxX + 20f);   // (the lots lie west of the town)
+            target.x = Mathf.Clamp(target.x, c.x + CityLayout.MinX - CityLayout.HomeLot - 20f, c.x + CityLayout.FarMaxX + 20f);   // (the lots lie west of the town, the far district east)
             target.z = Mathf.Clamp(target.z, c.z + CityLayout.MinZ - 20f, c.z + CityLayout.MaxZ + 60f);
         }
 

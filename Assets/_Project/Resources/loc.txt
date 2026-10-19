@@ -513,3 +513,26 @@ AŞAĞI	DOWN	下りる	انزل	RUNTER	DESCENDRE	SCENDI	BAJAR	내리기	DÜŞ
 {0} tepesindesin	You're on top of {0}	{0}の屋上にいる	أنت على قمة {0}	Du bist oben auf: {0}	Tu es au sommet : {0}	Sei in cima a {0}	Estás en lo alto de {0}	{0} 꼭대기에 있어요	{0} zirvəsindəsən
 şehri seyret	watch the city	街を眺めよう	تأمّل المدينة	sieh dir die Stadt an	admire la ville	guarda la città	contempla la ciudad	도시를 구경하세요	şəhərə tamaşa et
 tepe	rooftop	屋上	السطح	Dach	toit	tetto	azotea	옥상	dam
+Doğu Yakası	East Side	イーストサイド	الضفة الشرقية	Ostseite	Rive Est	Lato Est	Lado Este	이스트사이드	Şərq Yaxası
+{0} →	{0} →	{0} →	{0} ←	{0} →	{0} →	{0} →	{0} →	{0} →	{0} →
+Doğu Mahallesi	East Quarter	東の住宅街	الحي الشرقي	Ostviertel	Quartier Est	Quartiere Est	Barrio Este	동쪽 마을	Şərq məhəlləsi
+Doğu Merkezi	East Centre	東のセンター	المركز الشرقي	Ostzentrum	Centre Est	Centro Est	Centro Este	동쪽 중심가	Şərq mərkəzi
+Doğu Kamu Binaları	East Public Buildings	東の公共の建物	المباني العامة الشرقية	Öffentliche Gebäude Ost	Bâtiments publics Est	Edifici pubblici Est	Edificios públicos Este	동쪽 공공 건물	Şərq ictimai binaları
+Doğu Bahçeleri	East Gardens	東の庭園	الحدائق الشرقية	Ostgärten	Jardins Est	Giardini Est	Jardines Este	동쪽 정원	Şərq bağları
+İmara açık	Open for building	建築できる	مفتوحة للبناء	Bauland frei	Ouvert à la construction	Aperto all'edilizia	Abierto a la construcción	건설 가능	Tikintiyə açıq
+İmara kapalı	Closed for building	建築できない	مغلقة للبناء	Kein Bauland	Fermé à la construction	Chiuso all'edilizia	Cerrado a la construcción	건설 불가	Tikintiyə bağlı
+KAPALI	CLOSED	閉鎖	مغلق	GESPERRT	FERMÉ	CHIUSO	CERRADO	닫힘	BAĞLI
+Polis Karakolu	Police Station	警察署	مركز الشرطة	Polizeiwache	Commissariat	Stazione di polizia	Comisaría	경찰서	Polis məntəqəsi
+Uzak semt	Far district	遠くの地区	الحي البعيد	Fernes Viertel	Quartier lointain	Quartiere lontano	Barrio lejano	먼 지역	Uzaq məhəllə
+Uzak semt imara kapalı	The far district is closed for building	遠くの地区はまだ建築できない	الحي البعيد مغلق للبناء	Das ferne Viertel ist noch kein Bauland	Le quartier lointain est fermé à la construction	Il quartiere lontano è chiuso all'edilizia	El barrio lejano está cerrado a la construcción	먼 지역은 아직 건설할 수 없어요	Uzaq məhəllə tikintiyə bağlıdır
+hazır	ready	完成	جاهز	fertig	prêt	pronto	listo	완료	hazır
+eksik	missing	未完成	ناقص	fehlt	manquant	manca	falta	없음	çatışmır
+İmar bedeli: {0} lira (paran: {1})	Building permit: {0} lira (you have {1})	建築許可: {0}リラ (所持 {1})	رسوم البناء: {0} ليرة (معك {1})	Baugenehmigung: {0} Lira (du hast {1})	Permis de construire : {0} lires (tu as {1})	Permesso edilizio: {0} lire (hai {1})	Permiso de obra: {0} liras (tienes {1})	건축 허가: {0}리라 (보유 {1})	Tikinti icazəsi: {0} lirə (pulun: {1})
+İmara aç	Open for building	建築を許可	افتح للبناء	Als Bauland freigeben	Ouvrir à la construction	Apri all'edilizia	Abrir a la construcción	건설 열기	Tikintiyə aç
+Her türden ev, bina ve kamu binası yapılabilir	Houses, towers and public buildings of every kind can be built	どんな家や建物も建てられる	يمكن بناء كل أنواع المنازل والمباني	Häuser, Türme und öffentliche Gebäude jeder Art	Maisons, tours et bâtiments publics de tout type	Case, torri ed edifici pubblici di ogni tipo	Casas, torres y edificios públicos de todo tipo	모든 집과 건물을 지을 수 있어요	Hər növ ev, bina və ictimai bina tikilə bilər
+Taksiyle de gidilir	The taxi goes there too	タクシーでも行ける	يمكن الذهاب بالتاكسي أيضًا	Auch das Taxi fährt hin	Le taxi y va aussi	Ci va anche il taxi	El taxi también va	택시로도 갈 수 있어요	Taksi ilə də getmək olar
+Oraya bak	Look there	そこを見る	انظر هناك	Hinschauen	Regarder	Guarda lì	Mirar allí	거기 보기	Ora bax
+Önce okul, hastane ve polis karakolu yapılmalı	First build a school, a hospital and a police station	まず学校、病院、警察署を建てよう	ابنِ أولًا مدرسة ومستشفى ومركز شرطة	Erst Schule, Krankenhaus und Polizeiwache bauen	Construis d'abord une école, un hôpital et un commissariat	Prima costruisci scuola, ospedale e stazione di polizia	Primero construye escuela, hospital y comisaría	먼저 학교, 병원, 경찰서를 지으세요	Əvvəlcə məktəb, xəstəxana və polis məntəqəsi tikilməlidir
+Yeterli para yok	Not enough money	お金が足りない	المال غير كافٍ	Nicht genug Geld	Pas assez d'argent	Soldi insufficienti	No hay suficiente dinero	돈이 부족해요	Kifayət qədər pul yoxdur
+{0} lira gerekli	{0} lira needed	{0}リラ必要	مطلوب {0} ليرة	{0} Lira nötig	{0} lires nécessaires	Servono {0} lire	Se necesitan {0} liras	{0}리라 필요	{0} lirə lazımdır
+{0} imara açıldı!	{0} is open for building!	{0}で建築できるようになった!	{0} أصبحت مفتوحة للبناء!	{0} ist jetzt Bauland!	{0} est ouvert à la construction !	{0} è aperto all'edilizia!	¡{0} está abierto a la construcción!	{0} 건설이 열렸어요!	{0} tikintiyə açıldı!

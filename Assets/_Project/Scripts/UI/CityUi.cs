@@ -15,7 +15,7 @@ namespace BrickMuseum.UI
         public Image levelFill;
         public Button inventoryBtn, collectionBtn, walkBtn, characterBtn, buildBtn, langBtn, resumeBtn;
         public TextMeshProUGUI money;
-        public Button scoreBtn, bonusBtn;
+        public Button scoreBtn, bonusBtn, farBtn;
         // slot panel
         public GameObject panel;
         public TextMeshProUGUI panelTitle, panelInfo;
@@ -63,6 +63,8 @@ namespace BrickMuseum.UI
             ((RectTransform)characterBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 96), new Vector2(-24, -366));
             langBtn = Ui.Button(root, "Dil", Color.white, Ui.Ink, 30, () => { });
             ((RectTransform)langBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 80), new Vector2(-24, -586));
+            farBtn = Ui.Button(root, "Uzak semt", new Color(0.8f, 0.95f, 0.82f), Ui.Ink, 30, () => { });
+            ((RectTransform)farBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 80), new Vector2(-24, -676));
             var mp = Ui.Panel(root, "Money", new Color(1f, 0.96f, 0.82f, 0.95f), false);
             mp.rectTransform.Place(new Vector2(0, 1), new Vector2(230, 74), new Vector2(24, -168));   // under the level chip
             var coin = Ui.Plain(mp.transform, "Coin", new Color(0.95f, 0.7f, 0.1f), false);

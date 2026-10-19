@@ -9562,6 +9562,226 @@
    "scale": 2
   },
   {
+   "id": "karakol",
+   "name": "Polis Karakolu",
+   "cat": "Kamu binası",
+   "kind": "civic",
+   "style": "",
+   "layers": [
+    {
+     "rows": [
+      "............",
+      ".wwwwwwwwww.",
+      ".wwwwwwwwww.",
+      ".wwwwwwwwww.",
+      ".wwwwwwwwww.",
+      ".wwwwwwwwww.",
+      ".wwwwBBwwww.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".wwwwwwwwww.",
+      ".wwwwwwwwww.",
+      ".twwwwwwwwt.",
+      ".wwwwwwwwww.",
+      ".wwwwwwwwww.",
+      ".wttwBBwttw.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".BBBBBBBBBB.",
+      ".BBBBBBBBBB.",
+      ".BBBBBBBBBB.",
+      ".BBBBBBBBBB.",
+      ".BBBBBBBBBB.",
+      ".BBBBBBBBBB.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".BBBBBBBBBB.",
+      ".BBBBBBBBBB.",
+      ".tBBBBBBBBt.",
+      ".BBBBBBBBBB.",
+      ".BBBBBBBBBB.",
+      ".BttBttBttB.",
+      "............",
+      "............"
+     ]
+    },
+    {
+     "rows": [
+      "............",
+      ".wwwwwwwwww.",
+      ".wwwwwwwwww.",
+      ".wwwwwwwwww.",
+      ".wwwwwwwwww.",
+      ".wwwwwwwwww.",
+      ".wwwwwwwwww.",
+      "............",
+      "............"
+     ]
+    }
+   ],
+   "parts": [
+    {
+     "t": "tile",
+     "c": "gray",
+     "x": 1,
+     "z": 1,
+     "y": 15,
+     "w": 10,
+     "d": 6,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "dblue",
+     "x": 3,
+     "z": 7,
+     "y": 6,
+     "w": 6,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "gray",
+     "x": 4,
+     "z": 7,
+     "y": 0,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "tile",
+     "c": "white",
+     "x": 4,
+     "z": 8,
+     "y": 0,
+     "w": 4,
+     "d": 1,
+     "h": 1,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "dome",
+     "c": "blue",
+     "x": 5,
+     "z": 3,
+     "y": 16,
+     "w": 2,
+     "d": 0,
+     "h": 2,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "round",
+     "c": "white",
+     "x": 0,
+     "z": 8,
+     "y": 0,
+     "w": 0,
+     "d": 0,
+     "h": 0,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "round",
+     "c": "white",
+     "x": 0,
+     "z": 8,
+     "y": 3,
+     "w": 0,
+     "d": 0,
+     "h": 0,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "round",
+     "c": "white",
+     "x": 0,
+     "z": 8,
+     "y": 6,
+     "w": 0,
+     "d": 0,
+     "h": 0,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "round",
+     "c": "white",
+     "x": 0,
+     "z": 8,
+     "y": 9,
+     "w": 0,
+     "d": 0,
+     "h": 0,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "round",
+     "c": "white",
+     "x": 0,
+     "z": 8,
+     "y": 12,
+     "w": 0,
+     "d": 0,
+     "h": 0,
+     "f": "",
+     "art": "",
+     "need": -1
+    },
+    {
+     "t": "brick",
+     "c": "red",
+     "x": 1,
+     "z": 8,
+     "y": 12,
+     "w": 2,
+     "d": 1,
+     "h": 2,
+     "f": "",
+     "art": "",
+     "need": -1
+    }
+   ],
+   "scale": 1.636
+  },
+  {
    "id": "hamam",
    "name": "Hamam",
    "cat": "Tarihi yapı",

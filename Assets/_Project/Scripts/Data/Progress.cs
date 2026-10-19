@@ -118,7 +118,8 @@ namespace BrickMuseum.Data
         public List<GardenSave> gardens = new List<GardenSave>();
         public List<KindLock> cooldowns = new List<KindLock>();
         public int bonusPending;                      // level-up city bonuses waiting to be collected (with an ad)
-        public int bonusPolice, bonusWorkers, bonusStaff;   // people the bonuses brought    // lots 1.. along the west road (lot 0 is build/home)
+        public int bonusPolice, bonusWorkers, bonusStaff;   // people the bonuses brought
+        public bool farOpen;                          // the far district has been opened for building    // lots 1.. along the west road (lot 0 is build/home)
         public int activeCar;
         public bool stockInit;               // the starter kit (and materials for models built before) has been given
         public List<StockItem> stock = new List<StockItem>();
@@ -248,6 +249,7 @@ namespace BrickMuseum.Data
         public static bool Fits(ModelDef m, Slot s)
         {
             if (m.kind != s.kind) return false;
+            if (s.area != null && s.area.far && !Data.farOpen) return false;   // the far district is closed to building
             // the bridge only spans the creek; a slot for one model (the bridge, a bench) takes only that one
             if (!string.IsNullOrEmpty(s.only) ? m.id != s.only : m.id == "bridge") return false;
             if (s.kind == "house" && !string.IsNullOrEmpty(s.style) && m.style != s.style) return false;
@@ -260,12 +262,12 @@ namespace BrickMuseum.Data
         /// waiting out a lock and fit the slot.
         /// </summary>
         public static List<ModelDef> PoolFor(Slot s) =>
-            ModelCatalog.All.Where(m => Fits(m, s) && (Repeatable(m.kind) || !Owned(m.id)) && !IsLocked(m.id, out _))
+            ModelCatalog.All.Where(m => Fits(m, s) && (Repeatable(m.kind) || !Owned(m.id) || s.area.far) && !IsLocked(m.id, out _))
                 .OrderBy(m => Owned(m.id) ? 1 : 0).ThenBy(m => m.index).Take(3).ToList();
 
         /// <summary>Every model this slot can take now (not built yet, or one that may be built again), easiest first.</summary>
         public static List<ModelDef> ChoicesFor(Slot s) =>
-            ModelCatalog.All.Where(m => Fits(m, s) && (Repeatable(m.kind) || !Owned(m.id)) && !IsLocked(m.id, out _))
+            ModelCatalog.All.Where(m => Fits(m, s) && (Repeatable(m.kind) || !Owned(m.id) || s.area.far) && !IsLocked(m.id, out _))
                 .OrderBy(m => Owned(m.id) ? 1 : 0).ThenBy(m => m.index).Take(12).ToList();
 
         /// <summary>After a model is finished its kind rests for an hour (an ad wakes it at once).</summary>

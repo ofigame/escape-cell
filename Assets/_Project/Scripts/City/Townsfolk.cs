@@ -43,8 +43,7 @@ namespace BrickMuseum.City
 
         // ---------- who lives where ----------
 
-        /// <summary>The people a placed model brings: role ids (see <see cref="Dress"/>).</summary>
-        /// <summary>The people a placed model brings (for the city score too).</summary>
+        /// <summary>The people a placed model brings: role ids (see <see cref="Dress"/>); the city score counts them too.</summary>
         public static string[] RolesOf(ModelDef m) => RolesFor(m);
 
         private static string[] RolesFor(ModelDef m)
@@ -62,6 +61,7 @@ namespace BrickMuseum.City
                         case "itfaiyeist": return new[] { "firefighter", "firefighter" };
                         case "kutuphane": return new[] { "librarian", "resident" };
                         case "balikhali": return new[] { "shopkeeper", "resident" };
+                        case "karakol": return new[] { "police", "police", "office" };
                         default: return new[] { "office" };
                     }
                 case "historic": return new[] { m.id == "kale" ? "soldier" : m.id == "saray" ? "guard" : "shopkeeper", "tourist" };

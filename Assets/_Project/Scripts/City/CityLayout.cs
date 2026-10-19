@@ -27,6 +27,7 @@ namespace BrickMuseum.City
         public Color ground;
         public bool shore;        // on the lake: its south side is the waterfront promenade
         public bool creek;        // not a block: the creek valley (its slots stand over the water)
+        public bool far;          // in the far district (closed to building until it is opened)
         public readonly List<Vector2[]> paths = new List<Vector2[]>();   // winding footpaths (parks), plan points
         public readonly List<Slot> slots = new List<Slot>();
     }
@@ -92,6 +93,24 @@ namespace BrickMuseum.City
         }
 
         public static bool OnHomeLot(Vector2 local, float margin = 0f) => LotAt(local, margin) >= 0;
+        // ---------- the far district (Doğu Yakası): 2×2 blocks east of the town, at the end of a country road ----------
+
+        public const string FarName = "Doğu Yakası";
+        public const float CountryRoad = 12f, FarGap = 150f;
+        public const int FarCols = 2;
+        public static float FarMinX => MaxX + FarGap;
+        public static float FarMaxX => FarMinX + FarCols * Block + (FarCols + 1) * Road;
+        public static float FarNorth => ZOf(2) - Block / 2f - Road;
+        public static float FarSouth => ZOf(1) + Block / 2f + Road;
+        /// <summary>The country road runs along the town's middle east-west street.</summary>
+        public static float CountryZ => ZOf(1) - Block / 2f - Road / 2f;
+        public static Vector2 FarCenter => new Vector2((FarMinX + FarMaxX) / 2f, (FarNorth + FarSouth) / 2f);
+        public static float FarXOf(int col) => FarMinX + Road + Block / 2f + col * Pitch;
+        public static IEnumerable<float> FarStreetXs() { for (int c = 0; c <= FarCols; c++) yield return FarMinX + Road / 2f + c * Pitch; }
+        public static IEnumerable<float> FarStreetZs() { yield return FarNorth + Road / 2f; yield return CountryZ; yield return FarSouth - Road / 2f; }
+        public static bool InFar(Vector2 p, float m = 0f) => p.x >= FarMinX - m && p.x <= FarMaxX + m && p.y >= FarNorth - m && p.y <= FarSouth + m;
+        public static bool OnCountryRoad(Vector2 p, float m = 0f) => p.x >= MaxX - 2f && p.x <= FarMinX + 2f && Mathf.Abs(p.y - CountryZ) <= CountryRoad / 2f + m;
+
         public static float XOf(int col)
         {
             float x = MinX + Gaps[0] + Block / 2f;
@@ -190,12 +209,17 @@ namespace BrickMuseum.City
                 Plots("Eserler Bahçesi II", "landmark", 2, 3, 8, new Color(0.56f, 0.74f, 0.5f)),
                 Plots("Gökdelenler", "big", 3, 3, 8, new Color(0.74f, 0.76f, 0.8f)),
                 Residential("Asya Mahallesi", "as", 3, 2, 9, new Color(0.58f, 0.78f, 0.6f)),
+                // the far district: houses of any style, towers and public buildings (copies may be built there)
+                Residential("Doğu Mahallesi", "", 0, 1, 1, new Color(0.6f, 0.8f, 0.52f), true),
+                Plots("Doğu Merkezi", "big", 1, 1, 1, new Color(0.74f, 0.76f, 0.8f), true),
+                Plots("Doğu Kamu Binaları", "civic", 0, 2, 1, new Color(0.74f, 0.8f, 0.7f), true),
+                Residential("Doğu Bahçeleri", "", 1, 2, 1, new Color(0.58f, 0.78f, 0.56f), true),
             };
         }
 
-        private static Area NewArea(string name, string style, int col, int row, int level, Color ground)
+        private static Area NewArea(string name, string style, int col, int row, int level, Color ground, bool far = false)
         {
-            var a = new Area { name = name, style = style, center = new Vector2(XOf(col), ZOf(row)), level = level, ground = ground, shore = row == 0 };
+            var a = new Area { name = name, style = style, center = new Vector2(far ? FarXOf(col) : XOf(col), ZOf(row)), level = level, ground = ground, shore = row == 0 && !far, far = far };
             Street(a);
             return a;
         }
@@ -224,9 +248,9 @@ namespace BrickMuseum.City
         }
 
         /// <summary>5 house plots on two streets and decor spots between them.</summary>
-        private static Area Residential(string name, string style, int col, int row, int level, Color ground)
+        private static Area Residential(string name, string style, int col, int row, int level, Color ground, bool far = false)
         {
-            var a = NewArea(name, style, col, row, level, ground);
+            var a = NewArea(name, style, col, row, level, ground, far);
             foreach (float x in new[] { -19f, 0f, 19f }) Add(a, "house", x, 18, 17, 17, 0, level);
             foreach (float x in new[] { -10f, 10f }) Add(a, "house", x, -18, 17, 17, 180, level + 1);
             Add(a, "decor", 0, 0, 8, 8, 0, level + 1);
@@ -319,9 +343,9 @@ namespace BrickMuseum.City
         }
 
         /// <summary>Four big plots (apartments, civic buildings, historic buildings or landmarks).</summary>
-        private static Area Plots(string name, string kind, int col, int row, int level, Color ground)
+        private static Area Plots(string name, string kind, int col, int row, int level, Color ground, bool far = false)
         {
-            var a = NewArea(name, "", col, row, level, ground);
+            var a = NewArea(name, "", col, row, level, ground, far);
             Add(a, kind, -14, 14, 26, 26, 0, level);
             Add(a, kind, 14, 14, 26, 26, 0, level);
             Add(a, kind, -14, -14, 26, 26, 180, level + 1);

@@ -65,6 +65,7 @@ namespace BrickMuseum.Core
             yield return LotTour(dir);
             yield return ScoreTour(dir);
             yield return RoofTour(dir);
+            yield return DistrictTour(dir);
             yield return GardenTour(dir);
             yield return LanguageTour(dir);
         }
@@ -90,6 +91,67 @@ namespace BrickMuseum.Core
             yield return Shot(dir, "53d_bonus_collected");
             Debug.Log($"[Tour] bonus: score {before} -> {City.CityScore.Total}, inventory {Data.Progress.Data.inventory.Count}, police {Data.Progress.Data.bonusPolice} workers {Data.Progress.Data.bonusWorkers} staff {Data.Progress.Data.bonusStaff}");
             ClosePanel();
+        }
+
+        /// <summary>The far district: closed, what it needs, opened, built on, the taxi's way there, walking the country road.</summary>
+        private IEnumerator DistrictTour(string dir)
+        {
+            EnterCity(null);
+            FocusFar();
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "55a_district_closed");
+            ShowDistrict();
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot(dir, "55b_district_needs");
+            Debug.Log($"[Tour] district missing: {string.Join(",", City.District.Missing().Select(m => m.id))}");
+            // the missing public buildings go up in the town (in place of others)
+            foreach (var m in City.District.Missing())
+            {
+                var slot = City.CityLayout.Slots.First(s => s.kind == "civic" && !s.area.far && System.Array.IndexOf(City.District.Needed, Data.Progress.At(s.id)) < 0);
+                if (Data.Progress.At(slot.id) != null) Data.Progress.Remove(slot.id);
+                if (!Data.Progress.Owned(m.id)) Data.Progress.Finished(m.id, 2);
+                Data.Progress.Place(slot.id, m.id);
+            }
+            Wallet.Earn(City.District.Price);
+            city.RefreshAll();
+            ShowDistrict();
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot(dir, "55c_district_ready");
+            OpenDistrict();
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "55d_district_open");
+            // copies built out there: houses of any style, a tower, a town hall
+            foreach (var id in new[] { "tr_1", "us_5", "as_5", "en_5", "gokdelen", "ismerkezi", "belediye", "okul", "cam", "polis" })
+            {
+                var m = Data.ModelCatalog.Find(id);
+                var s = m == null ? null : City.CityLayout.Slots.FirstOrDefault(x => x.area.far && Data.Progress.At(x.id) == null && Data.Progress.Fits(m, x));
+                if (s != null) Data.Progress.Place(s.id, id);
+            }
+            city.RefreshAll();
+            cityCam.Focus(city.WorldAt(City.CityLayout.FarCenter, 0f), 300f);
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "55e_district_built");
+            Debug.Log($"[Tour] district placed: {Data.Progress.Data.placements.Count(p => City.CityLayout.Find(p.slot)?.area.far ?? false)}, score {City.CityScore.Total}");
+            var route = City.StreetGraph.Route(new Vector2(City.CityLayout.XOf(0), City.CityLayout.CountryZ), City.CityLayout.FarCenter + new Vector2(30f, 0f));
+            Debug.Log($"[Tour] taxi route to the district: {route.Count} points, {City.StreetGraph.Length(route):F0} long, ends {route[route.Count - 1]}");
+            // walking out along the country road, then in the district
+            EnterWalk();
+            walkPos = city.WorldAt(new Vector2(City.CityLayout.MaxX - 4f, City.CityLayout.CountryZ + 2f), 0f);
+            walkPos.y = GroundAt(walkPos);
+            facingYaw = camYaw = 90f; camPitch = 14f;
+            float startX = City.CityLayout.MaxX - 4f;
+            testMove = new Vector2(0, 1);
+            yield return new WaitForSeconds(2.5f);
+            testMove = Vector2.zero;
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot(dir, "55f_country_road");
+            Debug.Log($"[Tour] walked east {City.CityMap.PlanOf(walkPos).x - startX:F1} along the country road");
+            walkPos = city.WorldAt(new Vector2(City.CityLayout.FarMinX + City.CityLayout.Road / 2f, City.CityLayout.CountryZ), 0f);
+            walkPos.y = GroundAt(walkPos);
+            obstacles = city.Obstacles();
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot(dir, "55g_in_district");
+            ExitWalk();
         }
 
         /// <summary>Walking to a skyscraper's door, up to its roof, the city from above, and back down.</summary>

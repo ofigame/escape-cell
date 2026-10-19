@@ -151,7 +151,12 @@ namespace BrickMuseum.World
         }
 
         private static bool InLake(Vector3 p) => p.z > LakeNorth - 8f && p.z < LakeSouth + 12f && Mathf.Abs(p.x) < LakeHalfWidth + (LakeSouth - LakeNorth) / 2f + 8f;
-        private static bool InCity(Vector3 p) => p.x > CityWest - City.CityLayout.HomeLot - 30f && p.x < CityEast + 30f && p.z > CityNorth - 30f && p.z < LakeNorth + 4f;
+        private static bool InCity(Vector3 p)
+        {
+            var plan = new Vector2(p.x - CityCenter.x, p.z - CityCenter.z);
+            if (City.CityLayout.InFar(plan, 30f) || City.CityLayout.OnCountryRoad(plan, 18f)) return true;   // the far district and its road
+            return p.x > CityWest - City.CityLayout.HomeLot - 30f && p.x < CityEast + 30f && p.z > CityNorth - 30f && p.z < LakeNorth + 4f;
+        }
 
         /// <summary>Pine woods across the valley and a thick forest north of the town, kept off the deck, the lake and the city.</summary>
         private static void Trees(Transform parent)

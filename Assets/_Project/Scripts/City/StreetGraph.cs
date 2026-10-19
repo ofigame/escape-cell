@@ -14,6 +14,9 @@ namespace BrickMuseum.City
         private static List<(int a, int b)> edges;
         private static List<List<(int to, float len)>> links;
 
+        /// <summary>Forget the graph (the far district was opened: its streets join it).</summary>
+        public static void Reset() => nodes = null;
+
         private static void Build()
         {
             if (nodes != null) return;
@@ -35,6 +38,20 @@ namespace BrickMuseum.City
                     edges.Add((index[(i, j)], index[(i, j + 1)]));                      // along a north-south street
                     if (i + 1 < xs.Count) edges.Add((index[(i, j)], index[(i + 1, j)]));  // along an east-west street
                 }
+            if (District.IsOpen)
+            {
+                // the far district's grid, and the country road out to it from the town's east street
+                int Node(Vector2 v) { for (int i = 0; i < nodes.Count; i++) if ((nodes[i] - v).sqrMagnitude < 0.01f) return i; nodes.Add(v); return nodes.Count - 1; }
+                var fx = new List<float>(CityLayout.FarStreetXs());
+                var fz = new List<float>(CityLayout.FarStreetZs());
+                for (int i = 0; i < fx.Count; i++)
+                    for (int j = 0; j < fz.Count; j++)
+                    {
+                        if (j + 1 < fz.Count) edges.Add((Node(new Vector2(fx[i], fz[j])), Node(new Vector2(fx[i], fz[j + 1]))));
+                        if (i + 1 < fx.Count) edges.Add((Node(new Vector2(fx[i], fz[j])), Node(new Vector2(fx[i + 1], fz[j]))));
+                    }
+                edges.Add((Node(new Vector2(xs[xs.Count - 1], CityLayout.CountryZ)), Node(new Vector2(fx[0], CityLayout.CountryZ))));
+            }
             links = new List<List<(int, float)>>();
             for (int n = 0; n < nodes.Count; n++) links.Add(new List<(int, float)>());
             foreach (var (a, b) in edges)
@@ -116,7 +133,7 @@ namespace BrickMuseum.City
                 var (ia, ib) = edges[r.Next(edges.Count)];
                 Vector2 a = nodes[ia], b = nodes[ib];
                 var on = Vector2.Lerp(a, b, 0.2f + (float)r.NextDouble() * 0.6f);
-                if (CityLayout.InCreek(on)) continue;
+                if (CityLayout.InCreek(on) || (on.x > CityLayout.MaxX && on.x < CityLayout.FarMinX)) continue;   // not on a bridge or the country road
                 var dir = (b - a).normalized;
                 var side = new Vector2(-dir.y, dir.x) * (r.Next(2) == 0 ? 1f : -1f);
                 var stand = on + side * (CityLayout.Road / 2f + 1.2f);

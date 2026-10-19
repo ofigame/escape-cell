@@ -174,6 +174,19 @@ namespace BrickMuseum.Core
         {
             // the bounds are on the plan: the town's edges, the lake's quay, the player's lot out to the west
             var p = CityMap.PlanOf(next);
+            // out east: along the country road and inside the far district
+            var cur = CityMap.PlanOf(walkPos);
+            if (cur.x > CityLayout.MaxX - 1.5f && (CityLayout.InFar(cur, 1f) || CityLayout.OnCountryRoad(cur, 2.5f)))
+            {
+                var f = p;
+                f.x = Mathf.Min(f.x, CityLayout.FarMaxX - 1f);
+                float road = CityLayout.CountryRoad / 2f + 2f;
+                if (f.x < CityLayout.FarMinX) f.y = Mathf.Clamp(f.y, CityLayout.CountryZ - road, CityLayout.CountryZ + road);
+                else f.y = Mathf.Clamp(f.y, CityLayout.FarNorth + 1f, CityLayout.FarSouth - 1f);
+                if (f == p) return next;
+                var fw = city.WorldAt(f, 0f);
+                return new Vector3(fw.x, next.y, fw.z);
+            }
             float north = CityLayout.LotsNorth + 0.6f, south = CityLayout.LotsSouth - 0.6f;
             bool byLot = p.y > north && p.y < south;
             var q = p;
