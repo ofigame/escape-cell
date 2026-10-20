@@ -38,8 +38,8 @@ namespace SquashBot.Audio
 
         /// <summary>
         /// The game's songs, cut into seamless loops by mood (Resources/Music): everything outside play (menu, garage, map,
-        /// shop) the calm opening and close of The Iron Conflict; from Tungsten Edge the floors its main part, the roads its
-        /// opening, duels, monsters and bosses its climax. Where a theme has one, it
+        /// shop) the calm opening and close of The Iron Conflict; from Colossus at the Gates the floors its two first heavy parts,
+        /// the roads its lighter middle, duels, monsters and bosses its climax. Where a theme has one, it
         /// plays instead of the synthesized layers (and the fight layer stays out).
         /// </summary>
         private static string SongOf(MusicTheme t) =>
@@ -51,7 +51,7 @@ namespace SquashBot.Audio
         private AudioClip[] SongSet(MusicTheme theme)
         {
             string key = SongOf(theme);
-            if (!songs.TryGetValue(key, out var clip)) songs[key] = clip = Resources.Load<AudioClip>(key == "menu" ? "Music/iron_menu" : "Music/tungsten_" + key);
+            if (!songs.TryGetValue(key, out var clip)) songs[key] = clip = Resources.Load<AudioClip>(key == "menu" ? "Music/iron_menu" : "Music/colossus_" + key);
             return clip == null ? null : new[] { clip, null, null };
         }
 
