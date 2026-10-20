@@ -836,7 +836,7 @@ namespace SquashBot.Gameplay
         {
             if (!challengeRun) EndChallenge();
             SkillBar.Blocked = challengeRun;
-            Audio.MusicDirector.Level = challengeRun ? 0.35f : 1f; // the arena: the music low under the crowd
+            Audio.MusicDirector.Level = challengeRun ? 0.75f : 1f; // the arena: the battle song a little under the crowd
             arenaMode = arenaRun;
             levelTps = false; // every floor starts in the usual view
             robot.transform.rotation = Quaternion.identity;
@@ -903,7 +903,7 @@ namespace SquashBot.Gameplay
             SetupHealth();
             State = GameState.Playing;
             RefreshAmmo(); // (set up before the floor was on: shown now)
-            AudioManager.PlayMusic(LevelMusic());
+            AudioManager.PlayMusic(challengeRun ? MusicTheme.Duel : LevelMusic());
             ui.ShowHud(bonusRun ? -1 : levelIndex);
             // The battle arena mode: the arena (or the road to it) and its world, not BONUS.
             if (arenaRun) ui.SetHudTitle(Loc.T("arena.title") + " · " + Loc.T(WorldTheme.ForWorld(arenaIndex).key));

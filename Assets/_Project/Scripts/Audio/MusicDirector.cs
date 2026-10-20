@@ -36,6 +36,27 @@ namespace SquashBot.Audio
         private float tension, tensionTarget;
         private bool on = true;
 
+        /// <summary>
+        /// The game's songs, cut into seamless loops by mood (Resources/Music): everything outside play (menu, garage, map,
+        /// shop) the calm opening and close of The Iron Conflict; from Tungsten Edge the floors its main part, the roads its
+        /// opening, duels, monsters and bosses its climax. Where a theme has one, it
+        /// plays instead of the synthesized layers (and the fight layer stays out).
+        /// </summary>
+        private static string SongOf(MusicTheme t) =>
+            t == MusicTheme.Menu ? "menu" : t == MusicTheme.Tunnel ? "road" :
+            t == MusicTheme.Duel || t == MusicTheme.Monster || t == MusicTheme.Boss ? "duel" : "level";
+
+        private readonly Dictionary<string, AudioClip> songs = new Dictionary<string, AudioClip>();
+
+        private AudioClip[] SongSet(MusicTheme theme)
+        {
+            string key = SongOf(theme);
+            if (!songs.TryGetValue(key, out var clip)) songs[key] = clip = Resources.Load<AudioClip>(key == "menu" ? "Music/iron_menu" : "Music/tungsten_" + key);
+            return clip == null ? null : new[] { clip, null, null };
+        }
+
+        private bool SongPlaying => decks[current].live && decks[current].sources[1].clip == null;
+
         // The fight layer: a hard-rock loop over the world's music, as loud as the danger (see SetDanger).
         private const float RockVolume = 0.3f;
         private AudioSource rock;
@@ -109,6 +130,8 @@ namespace SquashBot.Audio
         private void Request(MusicTheme theme)
         {
             if (clips.ContainsKey(theme) || rendering.ContainsKey(theme)) return;
+            var song = SongSet(theme);
+            if (song != null) { clips[theme] = song; return; }
             rendering[theme] = Task.Run(() => MusicSynth.Render(theme));
         }
 
@@ -147,7 +170,7 @@ namespace SquashBot.Audio
                 rockRender = null;
             }
             danger = Mathf.MoveTowards(danger, dangerTarget, dt * (dangerTarget > danger ? 1.4f : 0.3f));
-            float rockMix = Smooth(0.05f, 0.7f, danger);
+            float rockMix = SongPlaying ? 0f : Smooth(0.05f, 0.7f, danger); // a song carries the fight itself
             if (rock.clip != null)
             {
                 if (on && rockMix > 0.01f && !rock.isPlaying) rock.Play();
@@ -158,12 +181,14 @@ namespace SquashBot.Audio
 
             // Layer mix: the groove comes in from a little tension, the intense layer near the top.
             float[] layer = { 1f, Smooth(0.15f, 0.45f, tension), Smooth(0.55f, 0.85f, tension) };
+            const float MenuSongGain = 1.15f, PlaySongGain = 0.6f; // in play the song stays in the background, under the fight
             for (int k = 0; k < 2; k++)
             {
                 var d = decks[k];
                 if (!d.live) continue;
                 d.fade = Mathf.MoveTowards(d.fade, k == current ? 1f : 0f, dt / FadeSeconds);
-                for (int i = 0; i < d.sources.Length; i++) d.sources[i].volume = Volume * Level * duck * d.fade * layer[i] * (i == 0 ? 0.85f : 1f);
+                bool song = d.sources[1].clip == null;
+                for (int i = 0; i < d.sources.Length; i++) d.sources[i].volume = song ? (i == 0 ? Volume * (d.theme == MusicTheme.Menu ? MenuSongGain : PlaySongGain) * Level * d.fade : 0f) : Volume * Level * duck * d.fade * layer[i] * (i == 0 ? 0.85f : 1f);
                 if (k != current && d.fade <= 0f)
                 {
                     foreach (var s in d.sources) s.Stop();
@@ -182,7 +207,7 @@ namespace SquashBot.Audio
                 d.sources[i].Stop();
                 d.sources[i].clip = set[i];
                 d.sources[i].volume = 0f;
-                d.sources[i].PlayScheduled(at);
+                if (set[i] != null) d.sources[i].PlayScheduled(at);
             }
             d.theme = wanted;
             d.live = true;
@@ -204,6 +229,7 @@ namespace SquashBot.Audio
             while (recent.Count > KeepThemes)
             {
                 var old = recent[0];
+                if (clips.TryGetValue(old, out var oc) && oc.Length > 1 && oc[1] == null) { recent.RemoveAt(0); continue; } // a song: kept (it belongs to Resources)
                 recent.RemoveAt(0);
                 if (old == wanted || (decks[0].live && decks[0].theme == old) || (decks[1].live && decks[1].theme == old))
                 {

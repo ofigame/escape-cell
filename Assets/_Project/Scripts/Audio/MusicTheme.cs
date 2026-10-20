@@ -12,6 +12,8 @@ namespace SquashBot.Audio
         World5,
         Tunnel,
         Monster,
-        Boss
+        Boss,
+        /// <summary>The live and practice duels.</summary>
+        Duel
     }
 }
