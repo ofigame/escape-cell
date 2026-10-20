@@ -15,7 +15,10 @@ namespace BrickMuseum.UI
         public Image levelFill;
         public Button inventoryBtn, collectionBtn, walkBtn, characterBtn, buildBtn, langBtn, resumeBtn;
         public TextMeshProUGUI money;
-        public Button scoreBtn, bonusBtn, farBtn, farmBtn, harvestBtn, megaBtn;
+        public Button scoreBtn, bonusBtn, farBtn, farmBtn, harvestBtn, megaBtn, moreBtn;
+        private Button[] more;
+        private Image moreArrow;
+        public bool moreOpen;
         // slot panel
         public GameObject panel;
         public TextMeshProUGUI panelTitle, panelInfo;
@@ -63,7 +66,7 @@ namespace BrickMuseum.UI
             ((RectTransform)characterBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 96), new Vector2(-24, -366));
             langBtn = Ui.Button(root, "Dil", Color.white, Ui.Ink, 30, () => { });
             ((RectTransform)langBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 80), new Vector2(-24, -586));
-            farBtn = Ui.Button(root, "Uzak semt", new Color(0.8f, 0.95f, 0.82f), Ui.Ink, 30, () => { });
+            farBtn = Ui.Button(root, "Köy", new Color(0.8f, 0.95f, 0.82f), Ui.Ink, 30, () => { });
             ((RectTransform)farBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 80), new Vector2(-24, -676));
             megaBtn = Ui.Button(root, "Gökkent", new Color(0.82f, 0.88f, 1f), Ui.Ink, 30, () => { });
             ((RectTransform)megaBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 80), new Vector2(-24, -766));
@@ -90,6 +93,18 @@ namespace BrickMuseum.UI
             resumeBtn.gameObject.SetActive(false);
             buildBtn = Ui.Button(root, "Evimi yap", new Color(0.75f, 0.95f, 0.75f), Ui.Ink, 34, () => { });
             ((RectTransform)buildBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 96), new Vector2(-24, -476));
+
+            // the right column: Envanter and Şehri gez always; the rest folds away under a bobbing arrow
+            ((RectTransform)inventoryBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 96), new Vector2(-24, -36));
+            ((RectTransform)walkBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 96), new Vector2(-24, -146));
+            moreBtn = Ui.Button(root, "", new Color(1f, 1f, 1f, 0.92f), Ui.Ink, 30, () => SetMore(!moreOpen));
+            ((RectTransform)moreBtn.transform).Place(new Vector2(1, 1), new Vector2(250, 66), new Vector2(-24, -256));
+            moreArrow = Ui.Plain(moreBtn.transform, "Arrow", Ui.Ink, false);
+            moreArrow.rectTransform.Place(new Vector2(0.5f, 0.5f), new Vector2(46, 46), Vector2.zero);
+            more = new[] { collectionBtn, characterBtn, buildBtn, farBtn, megaBtn, langBtn };
+            for (int i = 0; i < more.Length; i++)
+                ((RectTransform)more[i].transform).Place(new Vector2(1, 1), new Vector2(250, 80), new Vector2(-24, -336 - i * 90));
+            SetMore(false);
 
             var hp = Ui.Panel(root, "HelpBg", new Color(1, 1, 1, 0.88f), false);
             hp.rectTransform.Place(new Vector2(0.5f, 0), new Vector2(900, 110), new Vector2(0, 60));
@@ -155,6 +170,20 @@ namespace BrickMuseum.UI
         }
 
         /// <summary>Fills the slot panel: picture (optional), title, info and up to three buttons.</summary>
+        /// <summary>Opens or folds the right column's other menus.</summary>
+        public void SetMore(bool open)
+        {
+            moreOpen = open;
+            foreach (var b in more) b.gameObject.SetActive(open);
+            moreArrow.sprite = open ? Icons.Up : Icons.Down;
+        }
+
+        /// <summary>Is this one of the folded menus?</summary>
+        public bool InMore(RectTransform r) => System.Array.Exists(more, b => b.transform == r);
+
+        /// <summary>The arrow bobs (more so while folded, to be noticed).</summary>
+        public void TickMore(float time) => moreArrow.rectTransform.anchoredPosition = new Vector2(0, Mathf.Sin(time * 4f) * (moreOpen ? 2f : 7f));
+
         public void ShowPanel(string title, string info, Texture pic, params (string label, Color color, Action action)[] buttons)
         {
             panelTitle.text = title;

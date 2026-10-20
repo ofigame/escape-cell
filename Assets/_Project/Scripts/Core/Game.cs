@@ -306,8 +306,7 @@ namespace BrickMuseum.Core
             bagOpen = true;
             wu.bagSheet.gameObject.SetActive(true);
             Canvas.ForceUpdateCanvases();
-            wu.bag.Layout();
-            Sfx.Play("rustle");
+            wu.bag.Layout();   // (silent: only shuffling the bag rustles)
         }
 
         private void CloseBag(bool instant = false)
@@ -370,7 +369,7 @@ namespace BrickMuseum.Core
                 if (bench.Hint == null) { wu.hintBar.gameObject.SetActive(false); wu.bag.glowKey = null; }
                 UpdateHud();
                 if (bench.Complete) StartCoroutine(Win());
-                else if (BagDone) { bagIndex++; FillBag(); Toast($"Yeni torba açıldı · {bagIndex + 1}/{bags.Count}"); Sfx.Play("rustle"); }
+                else if (BagDone) { bagIndex++; FillBag(); Toast($"Yeni torba açıldı · {bagIndex + 1}/{bags.Count}"); }
             }
             else
             {
@@ -385,8 +384,7 @@ namespace BrickMuseum.Core
         {
             mistakes++;
             heartsLeft = Mathf.Max(0, heartsLeft - 1);
-            Sfx.Play("wrong");
-            Sfx.Haptic();
+            Sfx.Haptic();   // a wrong piece: only a buzz
             UpdateHud();
             SavePending();
             if (heartsLeft > 0) { Toast($"Bu {kind.Label()} buraya uymuyor"); return; }

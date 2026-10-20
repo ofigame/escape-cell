@@ -65,7 +65,7 @@ namespace BrickMuseum.World
 
             BuildLake(land);
 
-            var middle = new Vector3(420f, 0f, -260f);   // between the deck and Gökkent
+            var middle = new Vector3(-220f, 0f, -460f);   // between the deck, Gökkent (west) and the village (north)
             Ring(land, "Hills", 1150f, 260f, 30f, 110f, 3.1f, new Color(0.33f, 0.5f, 0.3f), 0f, middle);
             Ring(land, "Mountains", 1750f, 420f, 160f, 420f, 7.7f, new Color(0.45f, 0.52f, 0.6f), 300f, middle);
             Ring(land, "FarMountains", 2450f, 500f, 260f, 650f, 1.3f, new Color(0.58f, 0.64f, 0.74f), 470f, middle);

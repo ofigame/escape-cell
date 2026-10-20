@@ -175,29 +175,32 @@ namespace BrickMuseum.Core
         {
             // the bounds are on the plan: the town's edges, the lake's quay, the player's lot out to the west
             var p = CityMap.PlanOf(next);
-            // out east: along the country road and inside the far district
+            // outside the town: the country road and the village north, the highway and Gökkent west
             var cur = CityMap.PlanOf(walkPos);
-            if (cur.x > CityLayout.MaxX - 1.5f)
             {
-                // the walkable rectangles out east: the country road, the village, the highway, Gökkent
-                float cz = CityLayout.CountryZ, road = CityLayout.CountryRoad / 2f + 2f, hw = CityLayout.Highway / 2f + 2f;
+                // the walkable rectangles outside the town: the country road north, the village, the highway west, Gökkent
+                float road = CityLayout.CountryRoad / 2f + 2f, hw = CityLayout.Highway / 2f + 2f, cx = CityLayout.CountryX, hz = CityLayout.HighwayZ;
                 var rects = new[]
                 {
-                    new Rect(CityLayout.MaxX - 3f, cz - road, CityLayout.FarMinX - CityLayout.MaxX + 6f, 2f * road),
+                    Rect.MinMaxRect(cx - road, CityLayout.FarSouth - 3f, cx + road, CityLayout.MinZ + 3f),
                     Rect.MinMaxRect(CityLayout.FarMinX + 1f, CityLayout.FarNorth + 1f, CityLayout.FarMaxX - 1f, CityLayout.FarSouth - 1f),
-                    new Rect(CityLayout.FarMaxX - 3f, cz - hw, CityLayout.MegaMinX - CityLayout.FarMaxX + 6f, 2f * hw),
+                    Rect.MinMaxRect(CityLayout.MegaMaxX - 3f, hz - hw, CityLayout.MinX + 3f, hz + hw),
                     Rect.MinMaxRect(CityLayout.MegaMinX + 1f, CityLayout.MegaNorth + 1f, CityLayout.MegaMaxX - 1f, CityLayout.MegaSouth - 1f),
                 };
                 foreach (var r in rects) if (r.Contains(p)) return next;
-                // outside them all: kept in the one the walker is in now
-                foreach (var r in rects)
-                    if (r.Contains(cur))
-                    {
-                        var f = new Vector2(Mathf.Clamp(p.x, r.xMin, r.xMax), Mathf.Clamp(p.y, r.yMin, r.yMax));
-                        var fw = city.WorldAt(f, 0f);
-                        return new Vector3(fw.x, next.y, fw.z);
-                    }
-                if (cur.x > CityLayout.MaxX + 1f) return new Vector3(walkPos.x, next.y, walkPos.z);
+                bool inTown = cur.x >= CityLayout.MinX - CityLayout.HomeLot - 1f && cur.x <= CityLayout.MaxX && cur.y >= CityLayout.MinZ && cur.y <= CityLayout.MaxZ;
+                if (!inTown)
+                {
+                    // out there: kept in the rectangle the walker is in now
+                    foreach (var r in rects)
+                        if (r.Contains(cur))
+                        {
+                            var f = new Vector2(Mathf.Clamp(p.x, r.xMin, r.xMax), Mathf.Clamp(p.y, r.yMin, r.yMax));
+                            var fw = city.WorldAt(f, 0f);
+                            return new Vector3(fw.x, next.y, fw.z);
+                        }
+                    return new Vector3(walkPos.x, next.y, walkPos.z);
+                }
             }
             float north = CityLayout.LotsNorth + 0.6f, south = CityLayout.LotsSouth - 0.6f;
             bool byLot = p.y > north && p.y < south;

@@ -5,7 +5,7 @@ using BrickMuseum.Data;
 namespace BrickMuseum.City
 {
     /// <summary>
-    /// The far district (Doğu Yakası): four blocks east of the town at the end of a country road. It is closed to building
+    /// The village (Orman Köyü): four blocks far north of the town in the forest, at the end of a country road. It is closed to building
     /// ("imara kapalı") until the town has a school, a hospital and a police station, and then it is opened for a high
     /// price. Any model of a plot's kind may be built there again (a second copy), so the town can keep growing.
     /// </summary>

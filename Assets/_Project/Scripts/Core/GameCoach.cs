@@ -60,13 +60,13 @@ namespace BrickMuseum.Core
                     () => Progress.Data.inventory.Count > 0 && Progress.Data.placements.Count >= 2, () => R(cu.inventoryBtn)),
                 CityTip("garden", "Bahçeler açıldı", $"Şehir puanın {CityScore.HouseGardens} oldu! Bir eve dokun ve \"Bahçeyi geliştir\" ile bahçesini kur.",
                     () => CityScore.Total >= CityScore.HouseGardens, () => R(cu.scoreBtn)),
-                new Tip { key = "farm", mode = Mode.City, title = "Balık çiftliği", text = $"Sahil Parkı'nın önündeki gölde balık çiftliği satılık. Her 2 saatte {FishFarm.Batch} balık verir, oltadan çok kazandırır. Kafeslere dokun.",
+                new Tip { key = "farm", mode = Mode.City, title = "Balık çiftliği", text = $"Sahil Parkı'nın önündeki gölde balık çiftliği satılık. Her 10 dakikada {FishFarm.Batch} balık verir, geliştirdikçe daha fazla. Kafeslere dokun.",
                     when = () => FishFarm.Unlocked && !FishFarm.Owned, shown = FocusFarm },
                 CityTip("farmReady", "Balıklar hazır", "Butona dokun, balıkları topla ve Balık Hali'nde sat. Sonraki balıklar kendiliğinden büyür.",
                     () => FishFarm.Ready && cu.farmBtn.gameObject.activeSelf, () => R(cu.farmBtn)),
-                CityTip("far", "Uzak köy: Doğu Köyü", $"Şehrin doğusunda imara kapalı bir köy var. Okul, hastane ve polis karakolu yapınca {District.Price} liraya imara açabilirsin.",
+                CityTip("far", "Uzak köy: Orman Köyü", $"Şehrin kuzeyinde, ormanın içinde imara kapalı bir köy var. Okul, hastane ve polis karakolu yapınca {District.Price} liraya imara açabilirsin.",
                     () => Progress.Level >= 7 && !District.IsOpen, () => R(cu.farBtn)),
-                CityTip("farReady", "Köy açılabilir", $"Okul, hastane ve polis karakolu hazır! {District.Price} lira ile Doğu Köyü'nü imara aç; orada tarla eker, ahır ve kümes kurarsın.",
+                CityTip("farReady", "Köy açılabilir", $"Okul, hastane ve polis karakolu hazır! {District.Price} lira ile Orman Köyü'nü imara aç; orada tarla eker, ahır ve kümes kurarsın.",
                     () => District.Ready && !District.IsOpen, () => R(cu.farBtn)),
 
                 CityTip("sites", "Yarım bırakabilirsin", "Büyük yapılar uzun sürer: istediğin an şehre dön, bina yapıldığı kadarıyla arsasında durur. İnşaya devam et ile kaldığın yerden sürdür.",
@@ -84,14 +84,14 @@ namespace BrickMuseum.Core
                 CityTip("harvest", "Hasat zamanı", "Bu düğme hazır ürünleri gösterir: dokun, tarlaya git ve hasat et.",
                     () => cu.harvestBtn.gameObject.activeSelf, () => R(cu.harvestBtn)),
 
-                CityTip("mega", "Gökkent", $"Köyün ötesinde, otoyolun sonunda kocaman bir şehir var: gökdelenler, dev oteller, golf sahaları. {CityLayout.FarName} açık olunca ve şehir puanın {Mega.ScoreNeeded} olunca {Mega.Price} liraya imara açılır.",
+                CityTip("mega", "Gökkent", $"Şehrin batısında, otoyolun sonunda kocaman bir şehir var: gökdelenler, dev oteller, golf sahaları. {CityLayout.FarName} açık olunca ve şehir puanın {Mega.ScoreNeeded} olunca {Mega.Price} liraya imara açılır.",
                     () => District.IsOpen && !Mega.IsOpen, () => R(cu.megaBtn)),
                 CityTip("megaReady", "Gökkent açılabilir", $"Şartlar tamam! {Mega.Price} lira ile Gökkent'i imara aç; orada her bina yeniden yapılabilir.",
                     () => Mega.Ready && !Mega.IsOpen, () => R(cu.megaBtn)),
                 CityTip("hotel", "Otel geliri", $"Oteller sen yokken saatte lira kazanır (en çok {Hotels.CapHours} saat birikir). Otele dokun ve geliri topla; reklam izlersen iki katı.",
                     () => Hotels.All().Count > 0, null),
 
-                CityTip("villa", "Gökkent villaları", "Gökkent'in doğu sırasındaki kocaman arsalar satılık: villanı yap, bahçesine havuz kur. Gezintiye istersen villandan başla.",
+                CityTip("villa", "Gökkent villaları", "Gökkent'in şehre bakan sırasındaki kocaman arsalar satılık: villanı yap, bahçesine havuz kur. Gezintiye istersen villandan başla.",
                     () => Mega.IsOpen, null),
                 CityTip("rent", "Kira geliri", $"İçinde oturmadığın evler kiraya verilir: saatte lira birikir (en çok {FreeBuild.Lots.RentCapHours} saat). Arsana dokun ve kirayı topla.",
                     () => FreeBuild.Lots.RentWaiting > 0, null),
@@ -159,7 +159,9 @@ namespace BrickMuseum.Core
         {
             tipShown = tip;
             tip.shown?.Invoke();
-            coach.Show(tip.title, tip.text, $"{tips.Count(t => SeenTip(t.key)) + 1}/{tips.Count}", tip.target?.Invoke());
+            var target = tip.target?.Invoke();
+            if (target != null && cu.InMore(target)) cu.SetMore(true);   // a folded menu: unfold it to show the button
+            coach.Show(tip.title, tip.text, $"{tips.Count(t => SeenTip(t.key)) + 1}/{tips.Count}", target);
         }
 
         private void DismissTip()

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using BrickMuseum.Build;
 using BrickMuseum.Character;
 using BrickMuseum.Data;
 using UnityEngine;
@@ -32,6 +33,21 @@ namespace BrickMuseum.City
 
         private readonly Transform root;
         private readonly Dictionary<string, Walker> walkers = new Dictionary<string, Walker>();
+
+        /// <summary>A built animal out for a walk: the model itself, waddling round its block's pavement.</summary>
+        private sealed class Animal
+        {
+            public ModelDef model;
+            public Transform t;
+            public Area area;
+            public float f, speed, pause, nextPause, phase;
+            public int dir;
+            public System.Random rnd;
+            public Vector3 pos;
+            public bool shown = true;
+        }
+
+        private readonly Dictionary<string, Animal> animals = new Dictionary<string, Animal>();
 
         public Townsfolk(Transform cityRoot)
         {
@@ -175,6 +191,18 @@ namespace BrickMuseum.City
                     if (!walkers.ContainsKey(key)) walkers[key] = Spawn(key, roles[i], s);
                 }
             }
+            // the animals built: out of their pens, strolling round the block
+            var wantAnimals = new HashSet<string>();
+            foreach (var p in Progress.Data.placements)
+            {
+                var s = CityLayout.Find(p.slot);
+                var m = ModelCatalog.Find(p.id);
+                if (s == null || m == null || m.kind != "animal") continue;
+                string key = $"{p.slot}|{p.id}";
+                wantAnimals.Add(key);
+                if (!animals.ContainsKey(key)) animals[key] = SpawnAnimal(key, m, s);
+            }
+            foreach (var k in animals.Keys.Where(k => !wantAnimals.Contains(k)).ToList()) { Object.Destroy(animals[k].t.gameObject); animals.Remove(k); }
             // the staff the city bonuses brought, walking round the public blocks
             var beats = new[] { "Kamu Binaları", "Şehir Parkı", "Merkez", "Türk Mahallesi", "Sahil Parkı" }
                 .Select(CityLayout.AreaNamed).Where(a => a != null && a.slots.Count > 0).ToList();
@@ -219,6 +247,26 @@ namespace BrickMuseum.City
             w.f = Mathf.Repeat(RingParam(s.local - s.area.center) + (float)(r.NextDouble() - 0.5) * 0.25f, 4f);
             Place(w, 0f);
             return w;
+        }
+
+        private Animal SpawnAnimal(string key, ModelDef m, Slot s)
+        {
+            var r = new System.Random(Seed(key));
+            var a = new Animal
+            {
+                model = m, area = s.area, rnd = r, dir = r.Next(2) == 0 ? 1 : -1,
+                speed = (float)(0.7 + r.NextDouble() * 0.6) * Mathf.Clamp(m.height * m.scale / 2f, 0.6f, 1.6f),
+                nextPause = (float)(4 + r.NextDouble() * 10), phase = (float)r.NextDouble() * 10f,
+                f = Mathf.Repeat(RingParam(s.local - s.area.center), 4f),
+            };
+            a.t = new GameObject(m.name).transform;
+            a.t.SetParent(root, false);
+            var body = PieceFactory.BuildModel(m).transform;
+            body.SetParent(a.t, false);
+            body.localRotation = Quaternion.Euler(0, -90f, 0);          // (the models' fronts point to +x)
+            body.localScale = Vector3.one * m.scale;
+            body.name = "Body";
+            return a;
         }
 
         /// <summary>The ring position (0..4) nearest to a point given relative to the block centre.</summary>
@@ -294,7 +342,43 @@ namespace BrickMuseum.City
                 Place(w, 360f * dt);
                 w.person.Animate(speed, false, dt);
             }
+            TickAnimals(dt, localFocus, radius);
         }
+
+        /// <summary>The animals walk on (slower near the player), waddle and bob, stop to look round now and then.</summary>
+        private void TickAnimals(float dt, Vector3 localFocus, float radius)
+        {
+            foreach (var a in animals.Values)
+            {
+                float speed = a.speed;
+                if (a.pause > 0f) { a.pause -= dt; speed = 0f; }
+                else if ((a.nextPause -= dt) <= 0f)
+                {
+                    a.pause = (float)(1.5 + a.rnd.NextDouble() * 3);
+                    a.nextPause = (float)(5 + a.rnd.NextDouble() * 12);
+                    if (a.rnd.NextDouble() < 0.25) a.dir = -a.dir;
+                }
+                float rad = Ring - Lane * 0.5f * a.dir;
+                a.f = Mathf.Repeat(a.f + a.dir * speed * dt / (2f * rad), 4f);
+                var (at, along) = OnRing(a.f, rad);
+                var c = a.area.center + at;
+                a.pos = new Vector3(c.x, 0, c.y);
+                var d = new Vector2(a.pos.x - localFocus.x, a.pos.z - localFocus.z);
+                bool show = radius <= 0f || d.sqrMagnitude < radius * radius;
+                if (show != a.shown) { a.t.gameObject.SetActive(show); a.shown = show; }
+                if (!show) continue;
+                a.phase += dt * (speed > 0f ? 9f : 2f);
+                var fwd = along * a.dir;
+                a.t.localPosition = CityShape.Point(c, CityMap.Lawn + 0.03f + (speed > 0f ? Mathf.Abs(Mathf.Sin(a.phase)) * 0.12f : 0f));
+                var want = Quaternion.Euler(0, CityShape.Angle(c), 0) * Quaternion.LookRotation(new Vector3(fwd.x, 0, fwd.y));
+                a.t.localRotation = Quaternion.RotateTowards(a.t.localRotation, want, 240f * dt) * Quaternion.Euler(0, 0, speed > 0f ? Mathf.Sin(a.phase) * 5f : 0f);
+            }
+        }
+
+        /// <summary>Where the first animal out walking is (world), for the tour.</summary>
+        public Vector3? FirstAnimal() => animals.Count > 0 ? animals.Values.First().t.position : (Vector3?)null;
+
+        public int AnimalCount => animals.Count;
 
         /// <summary>Who stands closest to a world point (within <paramref name="within"/>), for the walk mode's name chip.</summary>
         public string Nearest(Vector3 world, float within, out float dist)
@@ -308,6 +392,12 @@ namespace BrickMuseum.City
                 if (!w.shown) continue;
                 float d = new Vector2(w.pos.x - l.x, w.pos.z - l.z).magnitude;
                 if (d < dist) { dist = d; best = RoleName(w.role); }
+            }
+            foreach (var a in animals.Values)
+            {
+                if (!a.shown) continue;
+                float d = new Vector2(a.pos.x - l.x, a.pos.z - l.z).magnitude;
+                if (d < dist) { dist = d; best = a.model.name; }
             }
             return best;
         }

@@ -584,6 +584,7 @@ namespace BrickMuseum.Core
             cityCam.Apply(cam);
             city.Tick(dt);
             FarmTick(dt);
+            cu.TickMore(time);
             FieldsTick(dt);
             city.people.Tick(dt, cityCam.target, cityCam.distance < 220f ? 130f : 0f);   // people are too small to see from high up
             if (cu.levelUp.activeSelf && Time.unscaledTime > levelUpUntil) cu.levelUp.SetActive(false);

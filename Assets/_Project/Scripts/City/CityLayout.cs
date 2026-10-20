@@ -106,38 +106,44 @@ namespace BrickMuseum.City
         }
 
         public static bool OnHomeLot(Vector2 local, float margin = 0f) => LotAt(local, margin) >= 0;
-        // ---------- the far district (Doğu Yakası): 2×2 blocks east of the town, at the end of a country road ----------
+        // ---------- the village (Orman Köyü): 2×2 blocks far north in the forest, at the end of a country road ----------
 
-        public const string FarName = "Doğu Köyü";
-        public const float CountryRoad = 12f, FarGap = 150f;
+        public const string FarName = "Orman Köyü";
+        public const float CountryRoad = 12f, FarGap = 220f;
         public const int FarCols = 2;
-        public static float FarMinX => MaxX + FarGap;
+        /// <summary>The country road runs north out of the town along the street between its 3rd and 4th columns.</summary>
+        public static float CountryX => XOf(2) + Block / 2f + Road / 2f;
+        public static float FarMinX => CountryX - (FarCols * Block + (FarCols + 1) * Road) / 2f;
         public static float FarMaxX => FarMinX + FarCols * Block + (FarCols + 1) * Road;
-        public static float FarNorth => ZOf(2) - Block / 2f - Road;
-        public static float FarSouth => ZOf(1) + Block / 2f + Road;
-        /// <summary>The country road runs along the town's middle east-west street.</summary>
-        public static float CountryZ => ZOf(1) - Block / 2f - Road / 2f;
+        public static float FarSouth => MinZ - FarGap;
+        public static float FarNorth => FarSouth - (2 * Block + 3 * Road);
         public static Vector2 FarCenter => new Vector2((FarMinX + FarMaxX) / 2f, (FarNorth + FarSouth) / 2f);
         public static float FarXOf(int col) => FarMinX + Road + Block / 2f + col * Pitch;
+        /// <summary>Row 0 is the village's south row (by the country road), row 1 the north one.</summary>
+        public static float FarZOf(int row) => FarSouth - Road - Block / 2f - row * Pitch;
         public static IEnumerable<float> FarStreetXs() { for (int c = 0; c <= FarCols; c++) yield return FarMinX + Road / 2f + c * Pitch; }
-        public static IEnumerable<float> FarStreetZs() { yield return FarNorth + Road / 2f; yield return CountryZ; yield return FarSouth - Road / 2f; }
+        public static IEnumerable<float> FarStreetZs() { for (int r = 0; r <= 2; r++) yield return FarSouth - Road / 2f - r * Pitch; }
         public static bool InFar(Vector2 p, float m = 0f) => p.x >= FarMinX - m && p.x <= FarMaxX + m && p.y >= FarNorth - m && p.y <= FarSouth + m;
-        public static bool OnCountryRoad(Vector2 p, float m = 0f) => p.x >= MaxX - 2f && p.x <= FarMinX + 2f && Mathf.Abs(p.y - CountryZ) <= CountryRoad / 2f + m;
+        public static bool OnCountryRoad(Vector2 p, float m = 0f) => Mathf.Abs(p.x - CountryX) <= CountryRoad / 2f + m && p.y <= MinZ + 2f && p.y >= FarSouth - 2f;
 
-        // ---------- Gökkent: 6×5 blocks past the village, at the end of the highway ----------
+        // ---------- Gökkent: 6×5 blocks west of the town, at the end of the highway past the lots ----------
 
         public const float HighwayGap = 160f, Highway = 18f;
         public const int MegaCols = 6, MegaRows = 5;
-        public static float MegaMinX => FarMaxX + HighwayGap;
-        public static float MegaMaxX => MegaMinX + MegaCols * Block + (MegaCols + 1) * Road;
-        public static float MegaNorth => ZOf(MegaRows - 1) - Block / 2f - Road;
-        public static float MegaSouth => ZOf(0) + Block / 2f + Road;
+        /// <summary>The highway runs west out of the town along its street north of the lots.</summary>
+        public static float HighwayZ => ZOf(2) - Block / 2f - Road / 2f;
+        public static float MegaMaxX => MinX - HomeLot - HighwayGap;
+        public static float MegaMinX => MegaMaxX - (MegaCols * Block + (MegaCols + 1) * Road);
+        /// <summary>Gökkent's rows lie one row north of the town's (clear of the lake's west end).</summary>
+        public static float MegaZOf(int row) => ZOf(row + 1);
+        public static float MegaNorth => MegaZOf(MegaRows - 1) - Block / 2f - Road;
+        public static float MegaSouth => MegaZOf(0) + Block / 2f + Road;
         public static float MegaXOf(int col) => MegaMinX + Road + Block / 2f + col * Pitch;
         public static Vector2 MegaCenter => new Vector2((MegaMinX + MegaMaxX) / 2f, (MegaNorth + MegaSouth) / 2f);
         public static IEnumerable<float> MegaStreetXs() { for (int c = 0; c <= MegaCols; c++) yield return MegaMinX + Road / 2f + c * Pitch; }
-        public static IEnumerable<float> MegaStreetZs() { for (int r = 0; r <= MegaRows; r++) yield return ZOf(r) + Block / 2f + Road / 2f; }
+        public static IEnumerable<float> MegaStreetZs() { for (int r = 0; r <= MegaRows; r++) yield return MegaZOf(r) + Block / 2f + Road / 2f; }
         public static bool InMega(Vector2 p, float m = 0f) => p.x >= MegaMinX - m && p.x <= MegaMaxX + m && p.y >= MegaNorth - m && p.y <= MegaSouth + m;
-        public static bool OnHighway(Vector2 p, float m = 0f) => p.x >= FarMaxX - 2f && p.x <= MegaMinX + 2f && Mathf.Abs(p.y - CountryZ) <= Highway / 2f + m;
+        public static bool OnHighway(Vector2 p, float m = 0f) => p.x >= MegaMaxX - 2f && p.x <= MinX + 2f && Mathf.Abs(p.y - HighwayZ) <= Highway / 2f + m;
 
         public static float XOf(int col)
         {
@@ -166,6 +172,8 @@ namespace BrickMuseum.City
                 case "landmark": return "Eser alanı";
                 case "bridge": return "Köprü yeri";
                 case "bench": return "Bank yeri";
+                case "lamp": return "Lamba yeri";
+                case "bin": return "Çöp konteyneri yeri";
                 case "decor": return "Dekor yeri";
                 default: return kind;
             }
@@ -190,14 +198,17 @@ namespace BrickMuseum.City
                 case "landmark": return "ESER";
                 case "bridge": return "KÖPRÜ";
                 case "bench": return "BANK";
+                case "lamp": return "LAMBA";
+                case "bin": return "ÇÖP";
                 case "decor": return "DEKOR";
                 default: return kind;
             }
         }
 
         /// <summary>A slot's name and short label: by its kind, or by the one thing it takes (bridge, bench).</summary>
-        public static string SlotName(Slot s) => KindName(s.only == "bridge" ? "bridge" : s.only == "bank" ? "bench" : s.kind);
-        public static string SlotShort(Slot s) => KindShort(s.only == "bridge" ? "bridge" : s.only == "bank" ? "bench" : s.kind);
+        private static string SlotKind(Slot s) => s.only == "bridge" ? "bridge" : s.only == "bank" ? "bench" : s.only == "lamba" ? "lamp" : s.only == "konteyner" ? "bin" : s.kind;
+        public static string SlotName(Slot s) => KindName(SlotKind(s));
+        public static string SlotShort(Slot s) => KindShort(SlotKind(s));
 
         public static string StyleName(string style)
         {
@@ -249,10 +260,10 @@ namespace BrickMuseum.City
                 Park(2, 4, 6, "Kuzey Parkı"),
                 SportsGround("Stadyum Alanı", 3, 4, 7),
                 // the far district: houses of any style, towers and public buildings (copies may be built there)
-                Residential("Köy Evleri", "", 0, 1, 1, new Color(0.6f, 0.8f, 0.52f), true),
-                Farm("Tarlalar", 1, 1, false),
-                Farm("Çiftlik", 0, 2, true),
-                Farm("Tarlalar II", 1, 2, false),
+                Residential("Köy Evleri", "", 0, 0, 1, new Color(0.6f, 0.8f, 0.52f), true),
+                Farm("Tarlalar", 1, 0, false),
+                Farm("Çiftlik", 0, 1, true),
+                Farm("Tarlalar II", 1, 1, false),
             };
             list.AddRange(MegaAreas());
             return list;
@@ -309,7 +320,7 @@ namespace BrickMuseum.City
 
         private static Area NewArea(string name, string style, int col, int row, int level, Color ground, bool far = false, bool mega = false)
         {
-            var a = new Area { name = name, style = style, center = new Vector2(mega ? MegaXOf(col) : far ? FarXOf(col) : XOf(col), ZOf(row)), level = level, ground = ground, shore = row == 0 && !far && !mega, far = far, mega = mega };
+            var a = new Area { name = name, style = style, center = new Vector2(mega ? MegaXOf(col) : far ? FarXOf(col) : XOf(col), mega ? MegaZOf(row) : far ? FarZOf(row) : ZOf(row)), level = level, ground = ground, shore = row == 0 && !far && !mega, far = far, mega = mega };
             Street(a);
             return a;
         }
@@ -335,6 +346,9 @@ namespace BrickMuseum.City
             float walk = a.shore ? half - Pavement / 2f : half - Pavement / 2f;
             Add(a, "tree", -16, walk, 3, 3, 0, a.level);
             Add(a, "tree", 16, walk, 3, 3, 0, a.level + 1);
+            // street furniture on the pavement: two street lamps and a rubbish bin
+            foreach (float x in new[] { -27f, 27f }) Add(a, "decor", x, walk, 3, 3, 0, a.level).only = "lamba";
+            Add(a, "decor", -6f, walk, 3.6f, 3f, 0, a.level).only = "konteyner";
         }
 
         /// <summary>5 house plots on two streets and decor spots between them.</summary>

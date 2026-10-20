@@ -73,6 +73,7 @@ namespace BrickMuseum.Core
             yield return CoachTour(dir);
             yield return FixTour(dir);
             yield return SportTour(dir);
+            yield return LayoutTour(dir);
             yield return GardenTour(dir);
             yield return LanguageTour(dir);
         }
@@ -98,6 +99,36 @@ namespace BrickMuseum.Core
             yield return Shot(dir, "53d_bonus_collected");
             Debug.Log($"[Tour] bonus: score {before} -> {City.CityScore.Total}, inventory {Data.Progress.Data.inventory.Count}, police {Data.Progress.Data.bonusPolice} workers {Data.Progress.Data.bonusWorkers} staff {Data.Progress.Data.bonusStaff}");
             ClosePanel();
+        }
+
+        /// <summary>The folded right menu, the animals out walking, the pavement's lamp and bin spots, the whole map from above.</summary>
+        private IEnumerator LayoutTour(string dir)
+        {
+            EnterCity(null);
+            cu.SetMore(false);
+            var animal = city.people.FirstAnimal();
+            Debug.Log($"[Tour] animals out walking: {city.people.AnimalCount}");
+            cityCam.Focus(animal ?? city.WorldAt(City.CityLayout.AreaNamed("Sahil Parkı").center, 0f), 28f);
+            yield return new WaitForSeconds(0.3f);
+            if (city.people.FirstAnimal() is Vector3 a2) cityCam.Focus(a2, 28f);
+            yield return new WaitForSeconds(0.2f);
+            yield return Shot(dir, "63a_menu_folded_animals");
+            cu.SetMore(true);
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot(dir, "63b_menu_open");
+            cu.SetMore(false);
+            int lamps = City.CityLayout.Slots.Count(x => x.only == "lamba"), bins = City.CityLayout.Slots.Count(x => x.only == "konteyner");
+            Debug.Log($"[Tour] pavement spots: {lamps} lamps, {bins} bins");
+            EnterWalk();
+            walkPos = city.WorldAt(City.CityLayout.AreaNamed("Türk Mahallesi").center + new Vector2(-22f, City.CityLayout.Block / 2f + 4f), 0f);
+            walkPos.y = GroundAt(walkPos);
+            facingYaw = camYaw = 90f; camPitch = 12f;
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "63c_pavement");
+            ExitWalk();
+            cityCam.Focus(city.WorldAt(new Vector2((City.CityLayout.MegaMinX + City.CityLayout.MaxX) / 2f, (City.CityLayout.FarNorth + City.CityLayout.MaxZ) / 2f), 0f), 1000f);
+            yield return new WaitForSeconds(0.8f);
+            yield return Shot(dir, "63d_map");
         }
 
         /// <summary>The northern row: the sports grounds from above and from the pavement.</summary>
@@ -309,10 +340,10 @@ namespace BrickMuseum.Core
             FocusMega();
             yield return new WaitForSeconds(1f);
             yield return Shot(dir, "61c_mega_built");
-            cityCam.Focus(city.WorldAt(new Vector2(City.CityLayout.MegaXOf(1), City.CityLayout.ZOf(0)), 0f), 150f);
+            cityCam.Focus(city.WorldAt(new Vector2(City.CityLayout.MegaXOf(1), City.CityLayout.MegaZOf(0)), 0f), 150f);
             yield return new WaitForSeconds(0.6f);
             yield return Shot(dir, "61d_hotels_golf");
-            var route = City.StreetGraph.Route(new Vector2(City.CityLayout.XOf(1), City.CityLayout.CountryZ), City.CityLayout.MegaCenter);
+            var route = City.StreetGraph.Route(new Vector2(City.CityLayout.XOf(1), City.CityLayout.HighwayZ), City.CityLayout.MegaCenter);
             Debug.Log($"[Tour] taxi route to Gökkent: {route.Count} points, {City.StreetGraph.Length(route):F0} long");
             // a hotel's till after five hours
             var hs = City.CityLayout.Slots.First(x => x.area.mega && Data.ModelCatalog.Find(Data.Progress.At(x.id) ?? "")?.kind == "hotel");
@@ -328,17 +359,17 @@ namespace BrickMuseum.Core
             ClosePanel();
             // on foot: the highway, then a Gökkent street
             EnterWalk();
-            walkPos = city.WorldAt(new Vector2(City.CityLayout.MegaMinX - 30f, City.CityLayout.CountryZ - 4f), 0f);
+            walkPos = city.WorldAt(new Vector2(City.CityLayout.MegaMaxX + 30f, City.CityLayout.HighwayZ - 4f), 0f);
             walkPos.y = GroundAt(walkPos);
-            facingYaw = camYaw = 90f; camPitch = 10f;
+            facingYaw = camYaw = 270f; camPitch = 10f;
             float startX = City.CityMap.PlanOf(walkPos).x;
             testMove = new Vector2(0, 1);
             yield return new WaitForSeconds(2f);
             testMove = Vector2.zero;
             yield return new WaitForSeconds(0.3f);
             yield return Shot(dir, "61f_highway_walk");
-            Debug.Log($"[Tour] walked {City.CityMap.PlanOf(walkPos).x - startX:F1} into Gökkent");
-            walkPos = city.WorldAt(new Vector2(City.CityLayout.MegaXOf(2) + City.CityLayout.Block / 2f + City.CityLayout.Road / 2f, City.CityLayout.ZOf(2)), 0f);
+            Debug.Log($"[Tour] walked {startX - City.CityMap.PlanOf(walkPos).x:F1} into Gökkent");
+            walkPos = city.WorldAt(new Vector2(City.CityLayout.MegaXOf(2) + City.CityLayout.Block / 2f + City.CityLayout.Road / 2f, City.CityLayout.MegaZOf(2)), 0f);
             walkPos.y = GroundAt(walkPos);
             obstacles = city.Obstacles();
             facingYaw = camYaw = 180f; camPitch = 22f;
@@ -400,7 +431,7 @@ namespace BrickMuseum.Core
             CollectBarn("ahir");
             ClosePanel();
             EnterWalk();
-            walkPos = city.WorldAt(new Vector2(City.CityLayout.FarXOf(1), City.CityLayout.CountryZ), 0f);
+            walkPos = city.WorldAt(new Vector2(City.CityLayout.FarXOf(1), City.CityLayout.FarSouth - City.CityLayout.Road / 2f - City.CityLayout.Pitch), 0f);
             walkPos.y = GroundAt(walkPos);
             facingYaw = camYaw = 180f; camPitch = 16f;
             yield return new WaitForSeconds(0.8f);
@@ -424,7 +455,8 @@ namespace BrickMuseum.Core
             BuyFarm();
             yield return new WaitForSeconds(1.2f);
             yield return Shot(dir, "56c_farm_growing");
-            yield return HurryFarm();
+            Data.FishFarm.Hurry();   // (the tour skips the 10 minutes; the game has no ad for it)
+            FocusFarm(); OpenFarm();
             yield return new WaitForSeconds(1.5f);
             Debug.Log($"[Tour] farm ready {Data.FishFarm.Ready}, button {cu.farmBtn.gameObject.activeSelf}");
             yield return Shot(dir, "56d_farm_ready");
@@ -477,21 +509,21 @@ namespace BrickMuseum.Core
             yield return new WaitForSeconds(0.8f);
             yield return Shot(dir, "55e_district_built");
             Debug.Log($"[Tour] district placed: {Data.Progress.Data.placements.Count(p => City.CityLayout.Find(p.slot)?.area.far ?? false)}, score {City.CityScore.Total}");
-            var route = City.StreetGraph.Route(new Vector2(City.CityLayout.XOf(0), City.CityLayout.CountryZ), City.CityLayout.FarCenter + new Vector2(30f, 0f));
+            var route = City.StreetGraph.Route(new Vector2(City.CityLayout.XOf(0), City.CityLayout.HighwayZ), City.CityLayout.FarCenter + new Vector2(30f, 0f));
             Debug.Log($"[Tour] taxi route to the district: {route.Count} points, {City.StreetGraph.Length(route):F0} long, ends {route[route.Count - 1]}");
             // walking out along the country road, then in the district
             EnterWalk();
-            walkPos = city.WorldAt(new Vector2(City.CityLayout.MaxX - 4f, City.CityLayout.CountryZ + 2f), 0f);
+            walkPos = city.WorldAt(new Vector2(City.CityLayout.CountryX + 2f, City.CityLayout.MinZ + 4f), 0f);
             walkPos.y = GroundAt(walkPos);
-            facingYaw = camYaw = 90f; camPitch = 14f;
-            float startX = City.CityLayout.MaxX - 4f;
+            facingYaw = camYaw = 180f; camPitch = 14f;
+            float startX = City.CityLayout.MinZ + 4f;
             testMove = new Vector2(0, 1);
             yield return new WaitForSeconds(2.5f);
             testMove = Vector2.zero;
             yield return new WaitForSeconds(0.3f);
             yield return Shot(dir, "55f_country_road");
-            Debug.Log($"[Tour] walked east {City.CityMap.PlanOf(walkPos).x - startX:F1} along the country road");
-            walkPos = city.WorldAt(new Vector2(City.CityLayout.FarMinX + City.CityLayout.Road / 2f, City.CityLayout.CountryZ), 0f);
+            Debug.Log($"[Tour] walked north {startX - City.CityMap.PlanOf(walkPos).y:F1} along the country road");
+            walkPos = city.WorldAt(new Vector2(City.CityLayout.CountryX, City.CityLayout.FarSouth - City.CityLayout.Road / 2f), 0f);
             walkPos.y = GroundAt(walkPos);
             obstacles = city.Obstacles();
             yield return new WaitForSeconds(0.6f);

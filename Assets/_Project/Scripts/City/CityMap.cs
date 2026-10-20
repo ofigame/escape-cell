@@ -145,15 +145,15 @@ namespace BrickMuseum.City
         /// <summary>The far district's streets, the country road out to it, a road sign and (while closed) a barrier.</summary>
         private void BuildFar()
         {
-            float x0 = CityLayout.FarMinX, x1 = CityLayout.FarMaxX, z0 = CityLayout.FarNorth, z1 = CityLayout.FarSouth, cz = CityLayout.CountryZ;
+            float x0 = CityLayout.FarMinX, x1 = CityLayout.FarMaxX, z0 = CityLayout.FarNorth, z1 = CityLayout.FarSouth, cx = CityLayout.CountryX, tz = CityLayout.MinZ;
             var asphalt = new MeshBuilder();
             asphalt.Box(new Vector3((x0 + x1) / 2f, RoadTop / 2f, (z0 + z1) / 2f), new Vector3(x1 - x0, RoadTop, z1 - z0));
-            asphalt.Box(new Vector3((CityLayout.MaxX + x0) / 2f, RoadTop / 2f, cz), new Vector3(x0 - CityLayout.MaxX + 0.2f, RoadTop, CityLayout.CountryRoad));
+            asphalt.Box(new Vector3(cx, RoadTop / 2f, (z1 + tz) / 2f), new Vector3(CityLayout.CountryRoad, RoadTop, tz - z1 + 0.2f));
             Add("FarRoads", asphalt, Mats.Lit(new Color(0.33f, 0.35f, 0.38f), 0.1f), false, 6f);
             var lines = new MeshBuilder();
-            for (float t = CityLayout.MaxX + 3f; t < x0 - 4f; t += 8f) lines.Box(new Vector3(t + 2f, RoadTop + 0.02f, cz), new Vector3(4f, 0.04f, 0.5f));   // the country road
-            foreach (float side in new[] { -1f, 1f })                                                                                                      // and its edge lines
-                lines.Box(new Vector3((CityLayout.MaxX + x0) / 2f, RoadTop + 0.02f, cz + side * (CityLayout.CountryRoad / 2f - 0.6f)), new Vector3(x0 - CityLayout.MaxX, 0.04f, 0.25f));
+            for (float t = z1 + 3f; t < tz - 4f; t += 8f) lines.Box(new Vector3(cx, RoadTop + 0.02f, t + 2f), new Vector3(0.5f, 0.04f, 4f));   // the country road through the forest
+            foreach (float side in new[] { -1f, 1f })                                                                                            // and its edge lines
+                lines.Box(new Vector3(cx + side * (CityLayout.CountryRoad / 2f - 0.6f), RoadTop + 0.02f, (z1 + tz) / 2f), new Vector3(0.25f, 0.04f, tz - z1));
             foreach (float x in CityLayout.FarStreetXs())
                 for (float t = z0 + 3f; t < z1 - 4f; t += 8f) lines.Box(new Vector3(x, RoadTop + 0.02f, t + 2f), new Vector3(0.5f, 0.04f, 4f));
             foreach (float z in CityLayout.FarStreetZs())
@@ -161,11 +161,11 @@ namespace BrickMuseum.City
             Add("FarRoadLines", lines, Mats.Lit(new Color(0.95f, 0.93f, 0.85f), 0.1f), false, 3f);
 
             // a big green road sign at the town's edge: where the road goes, and whether it is open
-            var at = new Vector2(CityLayout.MaxX + 14f, cz - CityLayout.CountryRoad / 2f - 3f);
+            var at = new Vector2(cx + CityLayout.CountryRoad / 2f + 3f, tz - 14f);
             var sign = new GameObject("FarSign");
             sign.transform.SetParent(root, false);
             sign.transform.localPosition = CityShape.Point(at, RoadTop);
-            sign.transform.localRotation = Quaternion.Euler(0, 90f + CityShape.Angle(at), 0);
+            sign.transform.localRotation = Quaternion.Euler(0, CityShape.Angle(at), 0);
             var posts = new MeshBuilder();
             posts.Box(new Vector3(-2.6f, 2f, 0), new Vector3(0.3f, 4f, 0.3f));
             posts.Box(new Vector3(2.6f, 2f, 0), new Vector3(0.3f, 4f, 0.3f));
@@ -188,10 +188,10 @@ namespace BrickMuseum.City
             // a red and white barrier across the road at the district's entrance
             var bar = new MeshBuilder();
             var barRed = new MeshBuilder();
-            float bx = x0 - 3f;
-            foreach (float side in new[] { -1f, 1f }) bar.Box(new Vector3(bx, 0.6f, cz + side * (CityLayout.CountryRoad / 2f + 0.4f)), new Vector3(0.4f, 1.2f, 0.4f));
+            float bz = z1 + 3f;
+            foreach (float side in new[] { -1f, 1f }) bar.Box(new Vector3(cx + side * (CityLayout.CountryRoad / 2f + 0.4f), 0.6f, bz), new Vector3(0.4f, 1.2f, 0.4f));
             for (int i = 0; i < 6; i++)
-                (i % 2 == 0 ? barRed : bar).Box(new Vector3(bx, 1.1f, cz - CityLayout.CountryRoad / 2f + (i + 0.5f) * CityLayout.CountryRoad / 6f), new Vector3(0.25f, 0.35f, CityLayout.CountryRoad / 6f));
+                (i % 2 == 0 ? barRed : bar).Box(new Vector3(cx - CityLayout.CountryRoad / 2f + (i + 0.5f) * CityLayout.CountryRoad / 6f, 1.1f, bz), new Vector3(CityLayout.CountryRoad / 6f, 0.35f, 0.25f));
             farBarrier = new GameObject("FarBarrier");
             farBarrier.transform.SetParent(root, false);
             var bw = Add("FarBarrierWhite", bar, Mats.Lit(Color.white, 0.3f), true, 3f);
@@ -206,19 +206,19 @@ namespace BrickMuseum.City
         /// <summary>The highway from the village to Gökkent and Gökkent's streets, a sign, a barrier while it is closed.</summary>
         private void BuildMega()
         {
-            float x0 = CityLayout.MegaMinX, x1 = CityLayout.MegaMaxX, z0 = CityLayout.MegaNorth, z1 = CityLayout.MegaSouth, cz = CityLayout.CountryZ;
-            float h0 = CityLayout.FarMaxX, hw = CityLayout.Highway;
+            float x0 = CityLayout.MegaMinX, x1 = CityLayout.MegaMaxX, z0 = CityLayout.MegaNorth, z1 = CityLayout.MegaSouth, cz = CityLayout.HighwayZ;
+            float h0 = x1, h1 = CityLayout.MinX, hw = CityLayout.Highway;   // the highway: from Gökkent's east edge to the town's west street
             var asphalt = new MeshBuilder();
             asphalt.Box(new Vector3((x0 + x1) / 2f, RoadTop / 2f, (z0 + z1) / 2f), new Vector3(x1 - x0, RoadTop, z1 - z0));
-            asphalt.Box(new Vector3((h0 + x0) / 2f, RoadTop / 2f, cz), new Vector3(x0 - h0 + 0.2f, RoadTop, hw));
+            asphalt.Box(new Vector3((h0 + h1) / 2f, RoadTop / 2f, cz), new Vector3(h1 - h0 + 0.2f, RoadTop, hw));
             Add("MegaRoads", asphalt, Mats.Lit(new Color(0.3f, 0.32f, 0.35f), 0.1f), false, 6f);
             var lines = new MeshBuilder();
             foreach (float side in new[] { -0.3f, 0.3f })                       // the highway: a double middle line
-                lines.Box(new Vector3((h0 + x0) / 2f, RoadTop + 0.02f, cz + side), new Vector3(x0 - h0, 0.04f, 0.2f));
+                lines.Box(new Vector3((h0 + h1) / 2f, RoadTop + 0.02f, cz + side), new Vector3(h1 - h0, 0.04f, 0.2f));
             foreach (float side in new[] { -1f, 1f })                           // its lanes and edges
             {
-                for (float t = h0 + 3f; t < x0 - 4f; t += 8f) lines.Box(new Vector3(t + 2f, RoadTop + 0.02f, cz + side * hw / 4f), new Vector3(4f, 0.04f, 0.3f));
-                lines.Box(new Vector3((h0 + x0) / 2f, RoadTop + 0.02f, cz + side * (hw / 2f - 0.6f)), new Vector3(x0 - h0, 0.04f, 0.25f));
+                for (float t = h0 + 3f; t < h1 - 4f; t += 8f) lines.Box(new Vector3(t + 2f, RoadTop + 0.02f, cz + side * hw / 4f), new Vector3(4f, 0.04f, 0.3f));
+                lines.Box(new Vector3((h0 + h1) / 2f, RoadTop + 0.02f, cz + side * (hw / 2f - 0.6f)), new Vector3(h1 - h0, 0.04f, 0.25f));
             }
             foreach (float x in CityLayout.MegaStreetXs())
                 for (float t = z0 + 3f; t < z1 - 4f; t += 8f) lines.Box(new Vector3(x, RoadTop + 0.02f, t + 2f), new Vector3(0.5f, 0.04f, 4f));
@@ -227,7 +227,7 @@ namespace BrickMuseum.City
             Add("MegaRoadLines", lines, Mats.Lit(new Color(0.95f, 0.93f, 0.85f), 0.1f), false, 3f);
 
             // a big blue motorway sign where the highway leaves the village
-            var at = new Vector2(h0 + 16f, cz - hw / 2f - 3f);
+            var at = new Vector2(h1 - 16f, cz + hw / 2f + 3f);
             var sign = new GameObject("MegaSign");
             sign.transform.SetParent(root, false);
             sign.transform.localPosition = CityShape.Point(at, RoadTop);
@@ -253,7 +253,7 @@ namespace BrickMuseum.City
             }
             var bar = new MeshBuilder();
             var barRed = new MeshBuilder();
-            float bx = x0 - 3f;
+            float bx = x1 + 3f;
             foreach (float side in new[] { -1f, 1f }) bar.Box(new Vector3(bx, 0.6f, cz + side * (hw / 2f + 0.4f)), new Vector3(0.4f, 1.2f, 0.4f));
             for (int i = 0; i < 8; i++)
                 (i % 2 == 0 ? barRed : bar).Box(new Vector3(bx, 1.1f, cz - hw / 2f + (i + 0.5f) * hw / 8f), new Vector3(0.25f, 0.35f, hw / 8f));
@@ -620,9 +620,11 @@ namespace BrickMuseum.City
                 float k = FitScale(m, s);
                 // the big bridge stands in the creek with its deck just under the street's deck; the rest stand on their pads
                 v.model.transform.localPosition = new Vector3(0, s.only == "bridge" ? -0.05f - (BridgeDeck + StudHeight) * k : s.onRoad ? 0.04f : 0.15f, 0);
-                v.model.transform.localScale = Vector3.one * k;
+                // a tree on a pavement grows slimmer (its trunk must not block the way)
+                v.model.transform.localScale = s.kind == "tree" && s.w <= 3f ? new Vector3(k * 0.65f, k, k * 0.65f) : Vector3.one * k;
                 if (s.only == "bridge")
                     foreach (Transform c in v.model.transform) if (c.name.Contains(":blue:")) Object.Destroy(c.gameObject);   // the toy's water: the real creek flows here
+                if (m.kind == "animal") v.model.SetActive(false);   // it walks the streets (Townsfolk)
             }
             // a half-finished build stands on its plot as far as it got
             var site = m == null ? Progress.Site(s.id) : null;
@@ -706,7 +708,7 @@ namespace BrickMuseum.City
         {
             float half = CityLayout.Block / 2f;
             if (CityLayout.OnHomeLot(p)) return Lawn + 0.03f;
-            if (p.y > CityLayout.ZOf(0) + half) return Lawn;                                     // the quay
+            if (p.y > CityLayout.ZOf(0) + half && p.x > CityLayout.MinX - CityLayout.HomeLot && p.x < CityLayout.MaxX) return Lawn;   // the quay
             if (CityLayout.InCreek(p))
             {
                 if (CityLayout.OnStreetZ(p.y)) return RoadTop;                                  // a bridge
@@ -762,6 +764,7 @@ namespace BrickMuseum.City
                 if (m == null) continue;
                 var s = v.slot;
                 if (s.only == "bridge") continue;              // you walk and drive over the bridge
+                if (m.kind == "animal") continue;              // out walking
                 float k = FitScale(m, s);
                 var size = new Vector2(m.sx, m.sz) * k;
                 if (Mathf.Abs(Mathf.Repeat(s.yaw + CityShape.Angle(s.local), 180f) - 90f) < 45f) size = new Vector2(size.y, size.x);
@@ -810,8 +813,8 @@ namespace BrickMuseum.City
             // the camera looks north, so screen right is world -x: the ground follows the finger
             target += new Vector3(deltaPx.x * k, 0f, deltaPx.y * k / Mathf.Sin(pitch * Mathf.Deg2Rad) * 0.85f);
             var c = CityMap.Center;
-            target.x = Mathf.Clamp(target.x, c.x + CityLayout.MinX - CityLayout.HomeLot - 20f, c.x + CityLayout.MegaMaxX + 20f);   // (the lots lie west of the town, the village and Gökkent east)
-            target.z = Mathf.Clamp(target.z, c.z + CityLayout.MinZ - 20f, c.z + CityLayout.MaxZ + 60f);
+            target.x = Mathf.Clamp(target.x, c.x + CityLayout.MegaMinX - 20f, c.x + CityLayout.MaxX + 20f);   // (the lots and Gökkent lie west of the town)
+            target.z = Mathf.Clamp(target.z, c.z + CityLayout.FarNorth - 20f, c.z + CityLayout.MaxZ + 60f);   // (the village far north)
         }
 
         public void Zoom(float factor) => distance = Mathf.Clamp(distance * factor, MinDist, MaxDist);

@@ -26,8 +26,12 @@ namespace BrickMuseum.City
         private static float MegaBlend(float x) => Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((x - (CityLayout.MegaMinX - 120f)) / 120f));
 
         /// <summary>The bend at a plan point: long waves everywhere, and in Gökkent stronger ones that wander across the blocks.</summary>
+        /// <summary>Straight streets: the bent ones let plots spill onto the roads (user wish).</summary>
+        public const bool Straight = true;
+
         private static Vector2 Offset(Vector2 p)
         {
+            if (Straight) return Vector2.zero;
             float b = MegaBlend(p.x);
             float ox = Dx(p.y) * (1f + 0.9f * b) + b * 8f * Mathf.Sin(p.y / 43f + p.x / 160f);
             float oz = Dz(p.x) * ShoreFade(p.y) * (1f + 0.9f * b) + b * 7f * Mathf.Sin(p.x / 51f + 1.1f + p.y / 190f);

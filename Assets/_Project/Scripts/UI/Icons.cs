@@ -191,6 +191,7 @@ namespace BrickMuseum.UI
             if (l.StartsWith("Şehir bonusu") || l.StartsWith("Reklam izle, topla")) return l.StartsWith("Reklam") ? Video : Star;
             if (l == "ÇIK") return Up;
             if (l == "Anladım") return Check;
+            if (l == "Köy") return Tree;
             if (l == "Gökkent" || l == "Oraya bak") return City;
             if (l.StartsWith("Geliri topla") || l.StartsWith("Reklamla 2 katı")) return l.StartsWith("Reklam") ? Video : Star;
             if (l.StartsWith("Hasat") || l == "Tohum ek" || l == "Ek") return Tree;

@@ -50,7 +50,7 @@ namespace BrickMuseum.City
                         if (j + 1 < fz.Count) edges.Add((Node(new Vector2(fx[i], fz[j])), Node(new Vector2(fx[i], fz[j + 1]))));
                         if (i + 1 < fx.Count) edges.Add((Node(new Vector2(fx[i], fz[j])), Node(new Vector2(fx[i + 1], fz[j]))));
                     }
-                edges.Add((Node(new Vector2(xs[xs.Count - 1], CityLayout.CountryZ)), Node(new Vector2(fx[0], CityLayout.CountryZ))));
+                edges.Add((Node(new Vector2(CityLayout.CountryX, zs[0])), Node(new Vector2(CityLayout.CountryX, CityLayout.FarSouth - CityLayout.Road / 2f))));   // the country road north
             }
             if (Mega.IsOpen)
             {
@@ -65,8 +65,7 @@ namespace BrickMuseum.City
                         if (j + 1 < mz.Count) edges.Add((Node(new Vector2(mx[i], mz[j])), Node(new Vector2(mx[i], mz[j + 1]))));
                         if (i + 1 < mx.Count) edges.Add((Node(new Vector2(mx[i], mz[j])), Node(new Vector2(mx[i + 1], mz[j]))));
                     }
-                var fx = new List<float>(CityLayout.FarStreetXs());
-                edges.Add((Node(new Vector2(fx[fx.Count - 1], CityLayout.CountryZ)), Node(new Vector2(mx[0], CityLayout.CountryZ))));
+                edges.Add((Node(new Vector2(xs[0], CityLayout.HighwayZ)), Node(new Vector2(mx[mx.Count - 1], CityLayout.HighwayZ))));   // the highway west
             }
             links = new List<List<(int, float)>>();
             for (int n = 0; n < nodes.Count; n++) links.Add(new List<(int, float)>());
@@ -149,7 +148,7 @@ namespace BrickMuseum.City
                 var (ia, ib) = edges[r.Next(edges.Count)];
                 Vector2 a = nodes[ia], b = nodes[ib];
                 var on = Vector2.Lerp(a, b, 0.2f + (float)r.NextDouble() * 0.6f);
-                if (CityLayout.InCreek(on) || (on.x > CityLayout.MaxX && on.x < CityLayout.FarMinX) || (on.x > CityLayout.FarMaxX && on.x < CityLayout.MegaMinX)) continue;   // not on a bridge, the country road or the highway
+                if (CityLayout.InCreek(on) || (on.y < CityLayout.MinZ && on.y > CityLayout.FarSouth) || (on.x < CityLayout.MinX && on.x > CityLayout.MegaMaxX)) continue;   // not on a bridge, the country road or the highway
                 var dir = (b - a).normalized;
                 var side = new Vector2(-dir.y, dir.x) * (r.Next(2) == 0 ? 1f : -1f);
                 var stand = on + side * (CityLayout.Road / 2f + 1.2f);

@@ -212,14 +212,31 @@ namespace BrickMuseum.Core
                 if (!FishFarm.Unlocked)
                     cu.ShowPanel(FarmTitle, $"Gölde balık yetiştir · oltadan çok kazandırır\nSeviye {FishFarm.UnlockLevel}'da açılır", null, ("Kapat", Neutral, ClosePanel));
                 else
-                    cu.ShowPanel(FarmTitle, $"Gölde balık yetiştir · oltadan çok kazandırır\nHer 2 saatte {FishFarm.Batch} balık · Balık Hali'nde sat\nParan: {FreeBuild.Wallet.Money} lira", null,
+                    cu.ShowPanel(FarmTitle, $"Gölde balık yetiştir · oltadan çok kazandırır\nHer 10 dakikada {FishFarm.Batch} balık · Balık Hali'nde sat\nParan: {FreeBuild.Wallet.Money} lira", null,
                         ($"Satın al · {FishFarm.Price} lira", FreeBuild.Wallet.Money >= FishFarm.Price ? Ui.Yellow : Neutral, BuyFarm), ("Kapat", Neutral, ClosePanel));
             }
-            else if (FishFarm.Ready)
-                cu.ShowPanel(FarmTitle, $"Balıklar hazır!\n{FishFarm.Batch} balık toplanmayı bekliyor", null, ("Topla", Ui.Yellow, CollectFarm), ("Kapat", Neutral, ClosePanel));
             else
-                cu.ShowPanel(FarmTitle, $"Balıklar büyüyor\nHasat: {Progress.LockText(FishFarm.Left)} sonra\nSoğutucuda {Progress.Data.fish.Count} balık", null,
-                    ("Reklam izle: hemen hazır", Ui.Yellow, () => StartCoroutine(HurryFarm())), ("Kapat", Neutral, ClosePanel));
+            {
+                // the batch, and the upgrade (more fish, better ones) while it can still grow
+                var buttons = new List<(string, Color, System.Action)>();
+                string info;
+                if (FishFarm.Ready) { info = $"Balıklar hazır!\n{FishFarm.Batch} balık toplanmayı bekliyor"; buttons.Add(("Topla", Ui.Yellow, CollectFarm)); }
+                else info = $"Balıklar büyüyor\nHasat: {Progress.LockText(FishFarm.Left)} sonra\nSoğutucuda {Progress.Data.fish.Count} balık";
+                info += $"\nÇiftlik seviyesi {FishFarm.Level} · her hasatta {FishFarm.Batch} balık";
+                if (FishFarm.Level < FishFarm.MaxLevel) buttons.Add(($"Geliştir · {FishFarm.UpgradePrice} lira", new Color(0.8f, 0.92f, 1f), UpgradeFarm));
+                buttons.Add(("Kapat", Neutral, ClosePanel));
+                cu.ShowPanel(FarmTitle, info, null, buttons.ToArray());
+            }
+        }
+
+        private void UpgradeFarm()
+        {
+            if (FreeBuild.Wallet.Money < FishFarm.UpgradePrice) { Toast($"Yeterli para yok · {FishFarm.UpgradePrice} lira gerekli"); return; }
+            if (!FishFarm.Upgrade()) return;
+            Sfx.Play("win");
+            UpdateCityHud();
+            Toast($"Çiftlik geliştirildi · her hasatta {FishFarm.Batch} balık", 2.5f);
+            ShowFarm();
         }
 
         private void BuyFarm()
@@ -229,17 +246,8 @@ namespace BrickMuseum.Core
             Sfx.Play("win");
             RefreshFarm();
             UpdateCityHud();
-            Toast("Balık çiftliği senin! İlk balıklar 2 saatte büyür", 2.5f);
+            Toast("Balık çiftliği senin! İlk balıklar 10 dakikada büyür", 2.5f);
             ShowFarm();
-        }
-
-        private IEnumerator HurryFarm()
-        {
-            ClosePanel();
-            yield return TestAd();
-            FishFarm.Hurry();
-            RefreshFarm();
-            OpenFarm();
         }
 
         private void CollectFarm()

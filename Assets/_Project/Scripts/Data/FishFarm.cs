@@ -5,14 +5,27 @@ namespace BrickMuseum.Data
 {
     /// <summary>
     /// The fish farm: floating pens in the lake by the quay. Bought once (from a higher level), it grows a batch of sea
-    /// bream and sea bass on a countdown; when they are ready they are collected into the cooler (and sold at the Fish
-    /// Hall), and the next batch starts. An ad makes a batch ready at once. At this level it earns more than the rod.
+    /// fish every 10 minutes (30, more and better ones with each upgrade); when they are ready they are collected into the
+    /// cooler (and sold at the Fish Hall), and the next batch starts. No ad hurries it.
     /// </summary>
     public static class FishFarm
     {
-        public const int Price = 1200, UnlockLevel = 6, Batch = 10;
-        public static readonly TimeSpan Grow = TimeSpan.FromHours(2);
-        private static readonly string[] Species = { "cipura", "levrek", "cipura" };
+        public const int Price = 1200, UnlockLevel = 6, MaxLevel = 3;
+        public static readonly TimeSpan Grow = TimeSpan.FromMinutes(10);
+
+        /// <summary>The farm's level (1 when bought): each upgrade gives more fish, and better ones.</summary>
+        public static int Level => Math.Max(1, D.farmLevel);
+        public static int Batch => 30 + 15 * (Level - 1);
+        public static int UpgradePrice => Level == 1 ? 2500 : 6000;
+        private static string[] Species => Level == 1 ? new[] { "hamsi", "istavrit" } : Level == 2 ? new[] { "hamsi", "istavrit", "cipura" } : new[] { "istavrit", "cipura", "levrek" };
+
+        public static bool Upgrade()
+        {
+            if (!Owned || Level >= MaxLevel || !FreeBuild.Wallet.Spend(UpgradePrice)) return false;
+            D.farmLevel = Level + 1;
+            Progress.Save();
+            return true;
+        }
 
         private static SaveFile D => Progress.Data;
 
@@ -39,13 +52,14 @@ namespace BrickMuseum.Data
         {
             if (Owned || !Unlocked || !FreeBuild.Wallet.Spend(Price)) return false;
             D.farmOwned = true;
+            D.farmLevel = 1;
             Restart();
             return true;
         }
 
         public static void Restart() { D.farmReady = (DateTime.UtcNow + Grow).Ticks; Progress.Save(); }
 
-        /// <summary>The ad: this batch is ready now.</summary>
+        /// <summary>This batch ready now (the screenshot tour only).</summary>
         public static void Hurry() { D.farmReady = DateTime.UtcNow.Ticks; Progress.Save(); }
 
         /// <summary>The grown fish into the cooler; the next batch starts.</summary>
@@ -53,7 +67,8 @@ namespace BrickMuseum.Data
         {
             var got = new List<FishItem>();
             if (!Ready) return got;
-            for (int i = 0; i < Batch; i++) got.Add(Fish.Catch(Fish.Find(Species[r.Next(Species.Length)]), r));
+            var species = Species;
+            for (int i = 0; i < Batch; i++) got.Add(Fish.Catch(Fish.Find(species[r.Next(species.Length)]), r));
             D.fish.AddRange(got);
             Restart();
             return got;

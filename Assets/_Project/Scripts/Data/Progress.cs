@@ -135,7 +135,8 @@ namespace BrickMuseum.Data
         public List<BarnSave> barns = new List<BarnSave>();      // the barn and the coop
         public bool megaOpen;                                    // Gökkent has been opened
         public List<City.HotelSave> hotels = new List<City.HotelSave>();   // the hotels' tills
-        public long farmReady;                        // when its batch is ready (UTC ticks)    // lots 1.. along the west road (lot 0 is build/home)
+        public long farmReady;                        // when its batch is ready (UTC ticks)
+        public int farmLevel;                         // its upgrades (1..3)    // lots 1.. along the west road (lot 0 is build/home)
         public int activeCar;
         public bool stockInit;               // the starter kit (and materials for models built before) has been given
         public List<StockItem> stock = new List<StockItem>();
