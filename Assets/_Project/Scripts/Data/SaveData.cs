@@ -40,6 +40,13 @@ namespace SquashBot.Data
             set { Prefs.SetInt("sb_hero", value); Prefs.Save(); }
         }
 
+        /// <summary>foi's head was picked (free) at the first start of this version.</summary>
+        public static bool HeadChosen
+        {
+            get => Prefs.GetInt("sb_head_chosen", 0) == 1;
+            set { Prefs.SetInt("sb_head_chosen", value ? 1 : 0); Prefs.Save(); }
+        }
+
         /// <summary>The build was picked at the very first start (the picker never opens by itself again).</summary>
         public static bool HeroChosen
         {

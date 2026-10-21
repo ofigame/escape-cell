@@ -412,9 +412,11 @@ namespace SquashBot.UI
             nameError.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             nameOk = UiFactory.MakeButton(n, Loc.T("ch.nameOk"), Kind.Primary, new Vector2(0.5f, 0.5f), new Vector2(0f, 250f), new Vector2(460f, 130f), SubmitName, 48f);
             ((RectTransform)nameOk.transform).pivot = new Vector2(0.5f, 0.5f);
-            var back = UiFactory.MakeButton(n, Loc.T("btn.close"), Kind.Secondary, new Vector2(0.5f, 0.5f), new Vector2(0f, 100f), new Vector2(360f, 100f), () => NameClosed?.Invoke(), 38f);
-            ((RectTransform)back.transform).pivot = new Vector2(0.5f, 0.5f);
+            nameClose = UiFactory.MakeButton(n, Loc.T("btn.close"), Kind.Secondary, new Vector2(0.5f, 0.5f), new Vector2(0f, 100f), new Vector2(360f, 100f), () => { if (Challenge.NameChosen) NameClosed?.Invoke(); }, 38f);
+            ((RectTransform)nameClose.transform).pivot = new Vector2(0.5f, 0.5f);
         }
+
+        private Button nameClose;
 
         private void SubmitName()
         {
@@ -430,6 +432,7 @@ namespace SquashBot.UI
             nameInput.text = current;
             nameError.text = error;
             nameOk.interactable = true;
+            nameClose.gameObject.SetActive(Challenge.NameChosen); // the first name is a must: no way out without one
             namePanel.Show();
             transform.SetAsLastSibling();
         }

@@ -242,7 +242,8 @@ namespace SquashBot.Gameplay
             // Developer tool: -sbExport <folder> writes every model as PNG + OBJ (see AssetExporter), then quits.
             var exportFolder = AssetExporter.RequestedFolder();
             if (exportFolder != null) cameraRig.StartCoroutine(AssetExporter.Run(exportFolder, robot));
-            SaveData.HeroChosen = true; // one foi for everyone: no picker
+            SaveData.HeroChosen = true; // one foi for everyone: no build picker
+            if (!SaveData.HeadChosen) ui.HeroPicker.ShowHeads(); // but its head: a man or a woman, chosen once (the others are bought later)
         }
 
         private void CreateUi()
@@ -325,6 +326,7 @@ namespace SquashBot.Gameplay
             WireArenaUi();
             ui.AdHealPressed += OnAdHealPressed;
             ui.HeroPicker.Picked += OnHeroPicked;
+            ui.HeroPicker.HeadPicked += _ => { robot.ApplyOutfit(Cosmetics.Outfit()); if (lobby != null) { Destroy(lobby.gameObject); lobby = null; } if (State == GameState.Menu) ShowMenu(); };
             ui.WeaponBag.Picked += TakeWeapon;
             ui.WeaponBag.Dropped += DropWeaponGun;
             ui.AmmoPressed += BuyAmmo;

@@ -57,6 +57,55 @@ namespace SquashBot.UI
             restoreButton = restore.gameObject;
         }
 
+        /// <summary>A head was picked at the first start (given free and worn).</summary>
+        public event Action<Data.Cosmetic> HeadPicked;
+
+        /// <summary>The first start: foi's four heads (two men, two women) as big cards; one is given free, the others can be
+        /// bought later in the workshop.</summary>
+        public void ShowHeads()
+        {
+            paid = false;
+            title.text = Loc.T("hero.title");
+            sub.text = Loc.T("hero.sub");
+            closeButton.SetActive(false);
+            restoreButton.SetActive(true);
+            for (int i = grid.childCount - 1; i >= 0; i--) Destroy(grid.GetChild(i).gameObject);
+            const float w = 470f, h = 640f, gap = 30f;
+            var heads = Cosmetics.InSlot(Slot.Head);
+            for (int i = 0; i < heads.Count && i < 4; i++)
+            {
+                var c = heads[i];
+                float x = (i % 2 == 0 ? -1f : 1f) * (w + gap) * 0.5f;
+                float y = -(i / 2) * (h + gap);
+                var card = UiFactory.Card("Head" + i, grid, new Vector2(0.5f, 1f), new Vector2(x, y), new Vector2(w, h));
+                card.pivot = new Vector2(0.5f, 1f);
+                var halo = UiFactory.Box("Halo", card, new Vector2(0.5f, 1f), new Vector2(0f, -205f), new Vector2(400f, 400f));
+                halo.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(halo, new Color(0.4f, 0.9f, 1f, 0.4f), UiSprites.Shadow, 0.5f).raycastTarget = false;
+                var pic = UiFactory.Box("Picture", card, new Vector2(0.5f, 1f), new Vector2(0f, -205f), new Vector2(350f, 350f));
+                pic.pivot = new Vector2(0.5f, 0.5f);
+                var raw = pic.gameObject.AddComponent<RawImage>();
+                raw.texture = ItemPreview.Cosmetic(c);
+                raw.raycastTarget = false;
+                UiFactory.TextBox("Name", card, new Vector2(0.5f, 1f), new Vector2(0f, -425f), new Vector2(440f, 60f), Loc.T("cos." + c.id), 44f, Palette.UiText, title: true)
+                    .rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                var b = UiFactory.MakeButton(card, Loc.T("hero.pick"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 34f), new Vector2(400f, 96f), () => ChooseHead(c), 42f);
+                ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0f);
+            }
+            screen.Show();
+            transform.SetAsLastSibling();
+        }
+
+        private void ChooseHead(Data.Cosmetic c)
+        {
+            Audio.AudioManager.PlaySfx(Audio.Sfx.Win, 0.7f, 1.2f);
+            Cosmetics.Give(c.id);
+            Cosmetics.Equip(c);
+            SaveData.HeadChosen = true;
+            screen.Hide();
+            HeadPicked?.Invoke(c);
+        }
+
         /// <param name="switching">From the garage: changing costs <see cref="SwitchPrice"/> coins; otherwise the free first pick.</param>
         public void Show(bool switching)
         {

@@ -57,9 +57,9 @@ namespace SquashBot.EditorTools
         public static void BuildWindowsTest()
         {
             // Windows can't have '|' in a folder name (the player's data folder is named after the product): the test
-            // build is "foi cell" for the duration, the phones keep "foi | cell".
+            // build is "foi cell" for the duration, the phones show "Robot foi".
             string name = PlayerSettings.productName;
-            PlayerSettings.productName = name.Replace(" | ", " ").Replace("|", " ");
+            PlayerSettings.productName = "foi cell"; // (the desktop builds keep their old data folder)
             BuildReport report;
             try
             {
@@ -89,7 +89,7 @@ namespace SquashBot.EditorTools
             {
                 Setup();
                 string name = PlayerSettings.productName;
-                PlayerSettings.productName = name.Replace(" | ", " ").Replace("|", " ");
+                PlayerSettings.productName = "foi cell"; // (the desktop builds keep their old data folder)
                 BuildReport report;
                 try
                 {
@@ -621,7 +621,7 @@ namespace SquashBot.EditorTools
         private static void ConfigurePlayer()
         {
             PlayerSettings.companyName = "OFIGAME";
-            PlayerSettings.productName = "foi | cell"; // the game's name, under the icon and in the stores
+            PlayerSettings.productName = "Robot foi"; // the game's name under the icon on the phone
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.ofigame.foicell");
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.iOS, "com.ofigame.foicell");
             PlayerSettings.iOS.targetOSVersionString = "15.0";
