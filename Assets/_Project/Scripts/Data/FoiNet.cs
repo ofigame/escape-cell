@@ -125,18 +125,35 @@ namespace SquashBot.Data
 
         // ---------- Calls ----------
 
-        /// <summary>Makes this device's player on the server if it has none yet. Reports whether one is there.</summary>
+        /// <summary>A register call is on its way: others wait for it instead of making a second player.</summary>
+        private static bool registering;
+        private static float registeringSince;
+
+        /// <summary>Makes this device's player on the server if it has none yet (only once, however many ask at the same
+        /// time: the cloud save and the name both ask at the first start). Reports whether one is there.</summary>
         public static IEnumerator EnsurePlayer(Action<bool> done)
         {
             if (Registered) { done(true); yield break; }
-            long code = 0; string body = null;
-            yield return Send("POST", "/register", null, false, (c, b) => { code = c; body = b; });
-            if (code != 200) { done(false); yield break; }
-            var r = JsonUtility.FromJson<RegisterReply>(body);
-            if (r == null || string.IsNullOrEmpty(r.id) || string.IsNullOrEmpty(r.key)) { done(false); yield break; }
-            Prefs.SetString(IdKey, r.id);
-            Prefs.SetString(SecretKey, r.key);
-            Prefs.Save();
+            if (registering && Time.realtimeSinceStartup - registeringSince < 30f) // (a stopped call frees it after a while)
+            {
+                while (registering && Time.realtimeSinceStartup - registeringSince < 30f) yield return null;
+                done(Registered);
+                yield break;
+            }
+            registering = true;
+            registeringSince = Time.realtimeSinceStartup;
+            try
+            {
+                long code = 0; string body = null;
+                yield return Send("POST", "/register", null, false, (c, b) => { code = c; body = b; });
+                if (code != 200) { done(false); yield break; }
+                var r = JsonUtility.FromJson<RegisterReply>(body);
+                if (r == null || string.IsNullOrEmpty(r.id) || string.IsNullOrEmpty(r.key)) { done(false); yield break; }
+                Prefs.SetString(IdKey, r.id);
+                Prefs.SetString(SecretKey, r.key);
+                Prefs.Save();
+            }
+            finally { registering = false; }
             done(true);
         }
 
