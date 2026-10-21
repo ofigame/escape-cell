@@ -723,6 +723,7 @@ namespace SquashBot.Gameplay
             arenaRun = false;
             dailyRun = false;
             levelIndex = Mathf.Clamp(index, 0, LevelCount - 1);
+            Monster.CurrentWorld = World; // (the briefing's vanG as the floor's)
             level = levelSet.levels[levelIndex].Clone();
             bool assisted = ApplyAssist(level);
             Toughen(level);
@@ -3114,7 +3115,7 @@ namespace SquashBot.Gameplay
             monsterHp = objectivesTotal = Mathf.Max(2, level.keys) * MonsterPointsPerHit;
             objectivesDone = 0;
             MonsterLook(out var kind, out var tint);
-            monster = Monster.Create(kind, GridView.ToWorld(monsterPos) + Vector3.up * GridView.SurfaceY, monsterHp, tint, robot.transform, MonsterPointsPerHit);
+            monster = Monster.Create(kind, GridView.ToWorld(monsterPos) + Vector3.up * GridView.SurfaceY, monsterHp, tint, robot.transform, MonsterPointsPerHit, World);
             GuardianLooks.DressGuardian(monster.Body, World); // the floor's named guardian (Kütükbaş, Penguen Kral...)
             princessPos = new GridPos(-99, -99);
             if (level.guardsPrincess && !level.cage)

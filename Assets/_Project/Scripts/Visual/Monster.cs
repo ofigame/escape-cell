@@ -23,13 +23,22 @@ namespace SquashBot.Visual
 
         public bool Dead => deadT >= 0f;
 
+        /// <summary>The world the next vanG is made for (0-based; the game sets it as a floor starts), when its maker does
+        /// not say: its model is chosen by it.</summary>
+        public static int CurrentWorld = -1;
+
+        /// <summary>The vanG's model, when it is one (its moves played on its bones).</summary>
+        private VanGRig rig;
+        public bool HasModel => rig != null;
+        private int world = -1;
+
         /// <summary>The model's body (for the named guardians' props).</summary>
         public Transform Body => body;
 
         // Big enough to read as the boss of its floor, while still standing on a single tile.
         private const float Size = 1.45f;
 
-        public static Monster Create(Kind kind, Vector3 position, int health, Color tint, Transform lookAt, int notchEvery = 1)
+        public static Monster Create(Kind kind, Vector3 position, int health, Color tint, Transform lookAt, int notchEvery = 1, int world = -1)
         {
             var go = new GameObject("Monster " + kind);
             go.transform.position = position;
@@ -39,6 +48,7 @@ namespace SquashBot.Visual
             m.notchEvery = Mathf.Max(1, notchEvery);
             m.target = lookAt;
             m.skinColor = tint;
+            m.world = world >= 0 ? world : CurrentWorld;
             m.Build();
             return m;
         }
@@ -52,7 +62,14 @@ namespace SquashBot.Visual
             var white = MaterialFactory.Create(Color.white, new Color(0.5f, 0.5f, 0.5f));
             eyeMat = MaterialFactory.Create(new Color(1f, 0.95f, 0.5f), new Color(2f, 1.6f, 0.4f));
             var black = MaterialFactory.Create(new Color(0.08f, 0.06f, 0.12f), Color.black);
-            switch (kind)
+            // The vanGs made as models (four, by how far on the world is); the cage stays as it is.
+            if (kind != Kind.Cage && world >= 0) rig = VanGRig.Build(body, VanGRig.ModelFor(world), out var paint);
+            if (rig != null)
+            {
+                skin = rig.GetComponentInChildren<Renderer>().sharedMaterial; // (it flashes white when hit)
+                skinColor = Color.white;
+            }
+            else switch (kind)
             {
                 case Kind.Slime:
                     Shapes.Primitive(PrimitiveType.Sphere, "Blob", body, new Vector3(0f, 0.42f, 0f), new Vector3(1.05f, 0.85f, 1.05f), skin);
@@ -107,7 +124,7 @@ namespace SquashBot.Visual
                         Shapes.Primitive(PrimitiveType.Sphere, "Eye", body, new Vector3(s, 0.95f, 0.36f), new Vector3(0.14f, 0.2f, 0.1f), eyeMat);
                     break;
             }
-            if (kind != Kind.Cage) Menace(skinColor);
+            if (kind != Kind.Cage && rig == null) Menace(skinColor);
             body.localScale = Vector3.one * Size;
 
             // The health bar over its head.
@@ -188,19 +205,20 @@ namespace SquashBot.Visual
         /// <summary>A magic hit: it reels, flashes white and its health bar drops.</summary>
         public void Hit(int remaining)
         {
+            rig?.Jolt();
             health = Mathf.Max(0, remaining);
             hitT = 0f;
             RefreshBar();
         }
 
         /// <summary>Winds up and slams the ground (the game handles the knock-back).</summary>
-        public void Stomp() => stompT = 0f;
+        public void Stomp() { stompT = 0f; rig?.Slam(); }
 
         /// <summary>Rears back and sweeps forward (a swipe that sends a wave along the floor).</summary>
-        public void Swipe() => swipeT = 0f;
+        public void Swipe() { swipeT = 0f; rig?.Sweep(); }
 
         /// <summary>Rises up with a boulder and hurls it.</summary>
-        public void Throw() => throwT = 0f;
+        public void Throw() { throwT = 0f; rig?.Hurl(); }
 
         private float swipeT = -1f, throwT = -1f;
         private Quaternion facing = Quaternion.identity;
@@ -261,7 +279,8 @@ namespace SquashBot.Visual
             {
                 hitT = Mathf.Min(1f, hitT + Time.deltaTime * 2.5f);
                 float flash = 1f - hitT;
-                MaterialFactory.SetColors(skin, Color.Lerp(skinColor, Color.white, flash), Color.Lerp(skinColor * 0.25f, new Color(3f, 3f, 3f), flash));
+                if (rig != null) MaterialFactory.SetColors(skin, Color.white, Color.Lerp(Color.black, new Color(1.6f, 1.6f, 1.6f), flash));
+                else MaterialFactory.SetColors(skin, Color.Lerp(skinColor, Color.white, flash), Color.Lerp(skinColor * 0.25f, new Color(3f, 3f, 3f), flash));
                 body.localPosition = Random.insideUnitSphere * 0.08f * flash;
             }
             else body.localPosition = Vector3.zero;

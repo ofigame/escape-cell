@@ -135,7 +135,7 @@ namespace SquashBot.Gameplay
             hunt.CreateMonster = (p, hp) =>
             {
                 MonsterLook(out var kind, out var tint);
-                var m = Monster.Create(kind, GridView.ToWorld(p) + Vector3.up * GridView.SurfaceY, hp, tint, robot.transform, 1);
+                var m = Monster.Create(kind, GridView.ToWorld(p) + Vector3.up * GridView.SurfaceY, hp, tint, robot.transform, 1, World);
                 GuardianLooks.DressGuardian(m.Body, World);
                 NameTag(m);
                 return m;

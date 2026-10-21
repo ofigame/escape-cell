@@ -201,6 +201,7 @@ namespace SquashBot.Visual
             }
 
             StaticMerge.Combine(dial.gameObject, _ => false);
+            PlaceModelPlatform(dial);
             StaticMerge.Combine(wheel.gameObject, _ => false);
 
             // Sparks drifting up through the light.
@@ -218,6 +219,55 @@ namespace SquashBot.Visual
             robotHolder.SetParent(transform, false);
             robotHolder.localPosition = new Vector3(0f, 0.16f, 0f);
             robotHolder.localScale = Vector3.one * 1.8f;
+        }
+
+        /// <summary>How the menu's own platform model (Resources/Lobby/platform) sits: its turn, the share of its height
+        /// where foi stands (its floor, under the crystals), and how wide its round part is.</summary>
+        public static float PlatformYaw = 0f, PlatformFloor = 0.62f, PlatformWidth = 4.1f;
+
+        /// <summary>The platform made for the menu, in place of the drawn star dial, when it is there.</summary>
+        private const float PlatformGlow = 3.4f;
+        private Material platformMat;
+
+        private void PlaceModelPlatform(Transform dial)
+        {
+            var model = Resources.Load<GameObject>("Lobby/platform");
+            if (model == null) return;
+            dial.gameObject.SetActive(false);
+            var p = Instantiate(model, transform, false).transform;
+            p.name = "Platform";
+            p.localRotation = Quaternion.Euler(0f, PlatformYaw, 0f) * p.localRotation;
+            var tex = Resources.Load<Texture2D>("Lobby/platform_tex");
+            var mat = MaterialFactory.CreateSurface(Color.white, Color.black, 0.35f, 0.15f);
+            if (tex != null)
+            {
+                mat.SetTexture("_BaseMap", tex); mat.SetTexture("_MainTex", tex);
+                mat.EnableKeyword("_EMISSION");
+                mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+                // its light-blue places (crystals, the lines, the rings) shine on their own; the rest only a touch
+                var glow = Resources.Load<Texture2D>("Lobby/platform_glow");
+                mat.SetTexture("_EmissionMap", glow != null ? glow : tex);
+                mat.SetColor("_EmissionColor", glow != null ? Color.white * PlatformGlow : Color.white * 0.3f);
+                if (glow != null) platformMat = mat;
+                if (glow != null)
+                {
+                    // and their light falls round the platform (light blue)
+                    var lamp = new GameObject("PlatformLight").AddComponent<Light>();
+                    lamp.transform.SetParent(transform, false);
+                    lamp.transform.localPosition = new Vector3(0f, -0.05f, -1.1f); // (low and in front: it lights the platform more than foi)
+                    lamp.type = LightType.Point; lamp.color = new Color(0.55f, 0.88f, 1f);
+                    lamp.intensity = 1.3f; lamp.range = 3.2f * transform.lossyScale.x; lamp.shadows = LightShadows.None;
+                }
+            }
+            var renderers = p.GetComponentsInChildren<Renderer>(true);
+            foreach (var r in renderers) { r.sharedMaterial = mat; r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; }
+            Bounds Measure() { var bb = renderers[0].bounds; foreach (var r in renderers) bb.Encapsulate(r.bounds); return bb; }
+            var b = Measure();
+            float round = Mathf.Min(b.size.x, b.size.z); // (the cables reach out sideways: the round part is the narrower way)
+            p.localScale *= PlatformWidth * transform.lossyScale.x / Mathf.Max(0.001f, round);
+            b = Measure();
+            var floor = new Vector3(b.center.x, b.min.y + b.size.y * PlatformFloor, b.center.z);
+            p.position += transform.TransformPoint(new Vector3(0f, 0.1f, 0f)) - floor;
         }
 
         private static Vector3 Dir(float a) => new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a));
@@ -346,6 +396,7 @@ namespace SquashBot.Visual
         {
             float dt = Time.unscaledDeltaTime;
             time += dt;
+            if (platformMat != null) platformMat.SetColor("_EmissionColor", Color.white * (PlatformGlow * (0.8f + 0.2f * Mathf.Sin(time * 2.2f)))); // the platform's lights breathe
             // The robot turns a little this way and that, as if showing off, with a slow breath.
             robotHolder.localRotation = Quaternion.Euler(0f, 180f + Mathf.Sin(time * 0.5f) * 28f, 0f); // the model faces +Z, the camera is on -Z
             robotHolder.localPosition = new Vector3(0f, 0.16f + Mathf.Abs(Mathf.Sin(time * 1.6f)) * 0.03f, 0f);

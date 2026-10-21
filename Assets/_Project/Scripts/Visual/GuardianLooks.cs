@@ -39,6 +39,7 @@ namespace SquashBot.Visual
         /// <summary>Adds the floor's guardian props under <paramref name="body"/> (the monster's own body).</summary>
         public static void DressGuardian(Transform body, int floor)
         {
+            if (body != null && body.GetComponentInChildren<VanGRig>() != null) return; // (a vanG model wears no props made for the old shapes)
             switch (floor)
             {
                 case 2: // Kütükbaş: a crown of leaves and moss, wood rings on the chest

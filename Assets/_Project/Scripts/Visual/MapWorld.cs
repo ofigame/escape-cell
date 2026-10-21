@@ -420,7 +420,7 @@ namespace SquashBot.Visual
             }
 
             MonsterLook(world, out var kind, out var tint);
-            var monster = Monster.Create(kind, island.position, 1, tint, null);
+            var monster = Monster.Create(kind, island.position, 1, tint, null, 1, world);
             GuardianLooks.DressGuardian(monster.Body, world);
             monster.transform.SetParent(island, false);
             monster.transform.localPosition = new Vector3(2.8f, floorY, 1.15f);

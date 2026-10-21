@@ -492,35 +492,49 @@ namespace SquashBot.UI
             menu = UiScreen.Create("Menu", root, out var t);
 
             // Top bar: coins, lives, stars, settings.
-            var coins = UiFactory.Pill("Coins", t, TopLeft, new Vector2(40f, -40f), new Vector2(260f, 100f), UiFactory.PillColor);
-            CoinIcon(coins, new Vector2(56f, 0f));
-            menuCoins = UiFactory.TextBox("Value", coins, new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Vector2(150f, 90f),
-                "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
+            // The painted pills (their coin, heart and star drawn in); the numbers written over them.
+            var barEdge = new Color(0.2f, 0.1f, 0.02f);
+            var coins = MenuSkin.Picture("Coins", t, "pill_coin", TopLeft, new Vector2(20f, -34f), new Vector2(280f, 106f));
+            menuCoins = UiFactory.TextBox("Value", coins, new Vector2(0f, 0.5f), new Vector2(92f, 2f), new Vector2(116f, 80f),
+                "0", 46f, Palette.UiGold, align: TextAlignmentOptions.Center);
+            MenuSkin.Word(menuCoins, barEdge);
+            menuCoins.enableAutoSizing = true; menuCoins.fontSizeMin = 26f; menuCoins.fontSizeMax = 46f;
+            var coinsHit = coins.GetComponent<Image>(); coinsHit.raycastTarget = true; // its + opens the shop
+            var coinsButton = coins.gameObject.AddComponent<Button>(); coinsButton.targetGraphic = coinsHit;
+            coinsButton.onClick.AddListener(() => { Audio.AudioManager.PlaySfx(Audio.Sfx.Click, 0.7f); ShopPressed?.Invoke(); });
 
-            var lives = UiFactory.Pill("Lives", t, TopLeft, new Vector2(320f, -40f), new Vector2(280f, 100f), UiFactory.PillColor);
-            HeartIcon(lives, new Vector2(58f, 0f), 56f);
-            menuLives = UiFactory.TextBox("Value", lives, new Vector2(0f, 0.5f), new Vector2(104f, 0f), new Vector2(170f, 90f),
-                "", 44f, Palette.UiText, align: TextAlignmentOptions.Left);
+            var lives = MenuSkin.Picture("Lives", t, "pill_heart", TopLeft, new Vector2(310f, -34f), new Vector2(272f, 106f));
+            menuLives = UiFactory.TextBox("Value", lives, new Vector2(0f, 0.5f), new Vector2(92f, 2f), new Vector2(166f, 80f),
+                "", 40f, Color.white, align: TextAlignmentOptions.Left);
+            MenuSkin.Word(menuLives, new Color(0.05f, 0.08f, 0.2f));
+            menuLives.enableAutoSizing = true; menuLives.fontSizeMin = 22f; menuLives.fontSizeMax = 40f;
 
-            var stars = UiFactory.Pill("Stars", t, TopLeft, new Vector2(620f, -40f), new Vector2(220f, 100f), UiFactory.PillColor);
-            var starIcon = UiFactory.Box("Star", stars, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(60f, 60f));
-            starIcon.pivot = new Vector2(0f, 0.5f);
-            UiFactory.Fill(starIcon, Palette.UiGold, UiSprites.Star).raycastTarget = false;
-            menuStars = UiFactory.TextBox("Value", stars, new Vector2(0f, 0.5f), new Vector2(96f, 0f), new Vector2(120f, 90f),
-                "0", 44f, Palette.UiGold, align: TextAlignmentOptions.Left);
+            var stars = MenuSkin.Picture("Stars", t, "pill_star", TopLeft, new Vector2(592f, -34f), new Vector2(228f, 106f));
+            menuStars = UiFactory.TextBox("Value", stars, new Vector2(0f, 0.5f), new Vector2(104f, 2f), new Vector2(110f, 80f),
+                "0", 46f, Palette.UiGold, align: TextAlignmentOptions.Center);
+            MenuSkin.Word(menuStars, barEdge);
+            menuStars.enableAutoSizing = true; menuStars.fontSizeMin = 24f; menuStars.fontSizeMax = 46f;
 
             // The profile (in the settings' old place; the settings open from it), the player's name under it.
-            var profile = MenuArt.DockButton(t, "", MenuArt.Icon.Profile, new Color(0.62f, 0.42f, 1f), TopRight, new Vector2(-110f, -110f), 120f, () => ChallengeStatsPressed?.Invoke());
-            ((RectTransform)profile.transform).pivot = new Vector2(0.5f, 0.5f);
-            menuProfileName = profile.transform.Find("Label").GetComponentInChildren<TextMeshProUGUI>();
-            menuProfileOrb = (RectTransform)profile.transform.Find("Orb");
+            // The profile: its painted badge with the player's rank insignia in its ring, the name on its banner; the settings open from it.
+            var profile = MenuSkin.Picture("Profile", t, "badge_rank", TopRight, new Vector2(-18f, -18f), new Vector2(158f, 198f));
+            profile.pivot = new Vector2(1f, 1f);
+            var profileHit = profile.GetComponent<Image>(); profileHit.raycastTarget = true;
+            var profileButton = profile.gameObject.AddComponent<Button>(); profileButton.targetGraphic = profileHit;
+            profileButton.onClick.AddListener(() => { Audio.AudioManager.PlaySfx(Audio.Sfx.Click, 0.7f); ChallengeStatsPressed?.Invoke(); });
+            profile.gameObject.AddComponent<ButtonPress>();
+            menuProfileName = UiFactory.TextBox("Name", profile, new Vector2(0.5f, 0f), new Vector2(0f, 42f), new Vector2(118f, 34f), "", 28f, Color.white);
+            menuProfileName.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            MenuSkin.Word(menuProfileName, new Color(0.05f, 0.12f, 0.2f));
+            menuProfileOrb = UiFactory.Box("RankSpot", profile, new Vector2(0.5f, 0f), new Vector2(0f, 126f), new Vector2(100f, 100f)); // (RefreshMenuRank sets the insignia in it)
+            menuProfileOrb.pivot = new Vector2(0.5f, 0.5f);
             menuProfileName.enableAutoSizing = true;
             menuProfileName.fontSizeMin = 18f;
             menuProfileName.fontSizeMax = 30f;
             menuProfileName.text = string.IsNullOrEmpty(Data.Challenge.PlayerName) ? Loc.T("profile.title") : Data.Challenge.PlayerName;
 
             // Logo up top; the robot stands on its lit pedestal in the middle (the lobby stage behind the menu).
-            MenuArt.Logo(t, Top, new Vector2(0f, -150f));
+            MenuSkin.Picture("Logo", t, "logo", Top, new Vector2(0f, -150f), new Vector2(500f, 285f));
 
             // Today's chest: a glowing chest button under the coins, only while it is waiting.
             menuDaily = MenuArt.DockButton(t, Loc.T("daily.chest"), MenuArt.Icon.Chest, Palette.UiGold, TopLeft, new Vector2(110f, -230f), 120f, () => DailyPressed?.Invoke());
@@ -530,6 +544,7 @@ namespace SquashBot.UI
             UiFactory.Fill(ping, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
             UiFactory.Text(ping, "!", 32f, Color.white);
             menuDaily.gameObject.AddComponent<Pulse>();
+            MenuSkin.Orb(menuDaily, "orb_blank_gold", true);
 
             // Today's quests: under the chest, with a red dot while one is done and waiting.
             menuQuests = MenuArt.DockButton(t, Loc.T("quests.button"), MenuArt.Icon.Guide, new Color(0.45f, 0.75f, 1f), TopLeft, new Vector2(110f, -400f), 120f, () => Quests.Show());
@@ -539,6 +554,7 @@ namespace SquashBot.UI
             UiFactory.Fill(qPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
             UiFactory.Text(qPing, "!", 32f, Color.white);
             questsPing = qPing.gameObject;
+            MenuSkin.Orb(menuQuests, "orb_quests");
 
             // The army: under the quests (its free development points glow on it).
             var army = MenuArt.DockButton(t, Loc.T("army.button"), MenuArt.Icon.Swords, new Color(1f, 0.72f, 0.25f), TopLeft, new Vector2(110f, -570f), 120f, () => ArmyView.Show(armyWorld));
@@ -548,19 +564,23 @@ namespace SquashBot.UI
             UiFactory.Fill(aPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
             UiFactory.Text(aPing, "!", 32f, Color.white);
             armyPing = aPing.gameObject;
+            MenuSkin.Orb(army, "orb_army");
 
             // Friends: under the army (add a friend, invite one to a duel).
             var friends = MenuArt.DockButton(t, Loc.T("friends.button"), MenuArt.Icon.Friends, new Color(0.4f, 0.75f, 1f), TopLeft, new Vector2(110f, -740f), 120f, () => FriendsPressed?.Invoke());
             ((RectTransform)friends.transform).pivot = new Vector2(0.5f, 0.5f);
+            MenuSkin.Orb(friends, "orb_friends");
 
             // The battle arenas: top right, under the settings.
             var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopRight, new Vector2(-110f, -400f), 120f, () => ArenasPressed?.Invoke());
             ((RectTransform)arenas.transform).pivot = new Vector2(0.5f, 0.5f);
+            MenuSkin.Orb(arenas, "orb_battle");
             // The daily bonus games: under the battle arenas (plays left today, glowing while there are some).
             menuBonus = MenuArt.DockButton(t, "", MenuArt.Icon.Chest, new Color(1f, 0.6f, 0.2f), TopRight, new Vector2(-110f, -570f), 120f, () => DailyBonusPressed?.Invoke());
             ((RectTransform)menuBonus.transform).pivot = new Vector2(0.5f, 0.5f);
             menuBonusLabel = menuBonus.transform.Find("Label").GetComponentInChildren<TextMeshProUGUI>();
             menuBonus.gameObject.AddComponent<Pulse>();
+            MenuSkin.Orb(menuBonus, "orb_blank_orange", true);
 
             // The duel chests: under the daily bonus, with how many wait to be opened.
             var chests = MenuArt.DockButton(t, Loc.T("chests.button"), MenuArt.Icon.Chest, new Color(0.62f, 0.4f, 0.22f), TopRight, new Vector2(-110f, -740f), 120f, () => { DuelChestsView.Show(); });
@@ -570,6 +590,7 @@ namespace SquashBot.UI
             UiFactory.Fill(cPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
             chestsPingText = UiFactory.Text(cPing, "0", 30f, Color.white);
             chestsPing = cPing.gameObject;
+            MenuSkin.Orb(chests, "orb_blank_brown", true);
 
             // The player's challenge rank (insignia, name, trophies) between the logo and foi.
             menuRank = UiFactory.Box("Rank", t, Top, new Vector2(0f, -585f), new Vector2(520f, 120f));
@@ -609,15 +630,13 @@ namespace SquashBot.UI
             // The level card (the game look): a navy plate in a gold frame; on it a parchment with the map's emblem,
             // the world, the level and its mission; under it the big PLAY and CHALLENGE buttons.
             var card = UiFactory.Box("LevelCard", t, Bottom, new Vector2(0f, Ads.BannerReserve + 236f), new Vector2(940f, 420f));
-            UiFactory.Framed(card, UiFactory.CardColor, 1.1f);
-            var paper = UiFactory.Box("Parchment", card, Top, new Vector2(0f, -22f), new Vector2(890f, 206f));
-            UiFactory.Fill(paper, Color.white, UiSprites.Parchment, 1.2f).raycastTarget = false;
-            MenuArt.Emblem(paper, MenuArt.Icon.Map, new Color(0.42f, 0.36f, 0.88f), new Vector2(0f, 0.5f), new Vector2(92f, 0f), 128f);
+            // The painted plate: a parchment (the world's globe drawn on it) in a steel frame.
+            var paper = MenuSkin.Picture("Plate", card, "card_level", Top, new Vector2(0f, 0f), new Vector2(950f, 258f));
             var ink = new Color(0.3f, 0.16f, 0.06f);
-            menuWorld = UiFactory.TextBox("World", paper, Top, new Vector2(60f, -18f), new Vector2(700f, 46f), "", 30f, new Color(0.55f, 0.3f, 0.1f));
+            menuWorld = UiFactory.TextBox("World", paper, Top, new Vector2(70f, -38f), new Vector2(700f, 46f), "", 30f, new Color(0.55f, 0.3f, 0.1f));
             menuWorld.characterSpacing = 5f;
-            menuLevel = UiFactory.TextBox("Level", paper, Top, new Vector2(60f, -56f), new Vector2(700f, 92f), "", 72f, ink, title: true);
-            menuMission = UiFactory.TextBox("Mission", paper, Top, new Vector2(60f, -146f), new Vector2(700f, 48f), "", 30f,
+            menuLevel = UiFactory.TextBox("Level", paper, Top, new Vector2(70f, -76f), new Vector2(700f, 92f), "", 72f, ink, title: true);
+            menuMission = UiFactory.TextBox("Mission", paper, Top, new Vector2(70f, -166f), new Vector2(720f, 48f), "", 30f,
                 new Color(0.36f, 0.22f, 0.1f), FontStyles.Normal);
             menuMission.enableAutoSizing = true;
             menuMission.fontSizeMin = 20f;
@@ -625,13 +644,19 @@ namespace SquashBot.UI
 
             var play = UiFactory.MakeButton(card, Loc.T("menu.mission"), Kind.Primary, Bottom, new Vector2(-225f, 30f), new Vector2(430f, 150f), () => PlayPressed?.Invoke(), 64f);
             play.gameObject.AddComponent<Pulse>();
+            ((RectTransform)play.transform).sizeDelta = new Vector2(432f, 146f);
+            MenuSkin.Face(play, "btn_green", new Color(0.05f, 0.25f, 0.05f));
             // CHALLENGE beside PLAY, the same size, in the challenge's purple.
             var challenge = UiFactory.MakeButton(card, Loc.T("ch.button"), Kind.Primary, Bottom, new Vector2(225f, 30f), new Vector2(430f, 150f), () => ChallengePressed?.Invoke(), 60f);
-            ((Image)challenge.targetGraphic).color = new Color(0.62f, 0.4f, 1f);
+            ((RectTransform)challenge.transform).sizeDelta = new Vector2(432f, 146f);
+            MenuSkin.Face(challenge, "btn_purple", new Color(0.25f, 0.05f, 0.3f));
 
             // The dock: garage, shop, map and the guide, as gold-ringed orbs on a framed navy bar.
             var dock = UiFactory.Box("Dock", t, Bottom, new Vector2(0f, Ads.BannerReserve + 14f), new Vector2(1000f, 206f));
-            UiFactory.Framed(dock, UiFactory.CardColor, 1.2f);
+            dock.sizeDelta = new Vector2(1040f, 206f);
+            MenuSkin.Paint(dock, "dock_bar");
+            var dockIcons = new[] { "icon_garage", "icon_shop", "icon_map", "icon_guide" };
+            var dockAt = new[] { -386f, -128f, 128f, 386f }; // (the bar's four tiles)
             var items = new (string label, MenuArt.Icon icon, Color color, Action click)[]
             {
                 (Loc.T("btn.garage"), MenuArt.Icon.Garage, new Color(0.12f, 0.71f, 0.64f), () => GaragePressed?.Invoke()),
@@ -642,7 +667,8 @@ namespace SquashBot.UI
             for (int i = 0; i < items.Length; i++)
             {
                 var it = items[i];
-                MenuArt.DockButton(dock, it.label, it.icon, it.color, new Vector2(0.5f, 0.5f), new Vector2((i - 1.5f) * 240f, 0f), 120f, it.click);
+                var b = MenuArt.DockButton(dock, it.label, it.icon, it.color, new Vector2(0.5f, 0.5f), new Vector2(dockAt[i], 0f), 120f, it.click);
+                MenuSkin.DockIcon(b, dockIcons[i], 150f, 44f);
             }
         }
 
