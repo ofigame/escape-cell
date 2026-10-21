@@ -199,7 +199,8 @@ jobs:
   xcode:
     name: Xcode → .ipa (test) or App Store Connect (store)
     needs: unity
-    runs-on: macos-latest
+    # macos-latest (macOS 26, arm64) kept failing to get a runner (GitHub capacity): macOS 15, with Xcode 26 picked below
+    runs-on: macos-15
     timeout-minutes: 60
     steps:
       - uses: actions/download-artifact@v4
@@ -208,6 +209,13 @@ jobs:
 
       - name: Unpack
         run: mkdir xcode && tar -xzf xcode-project.tgz -C xcode
+
+      # The newest Xcode 26 on the image (the App Store wants the iOS 26 SDK), else the image default.
+      - name: Select Xcode
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          if [ -n "$X" ]; then sudo xcode-select -s "$X"; fi
+          xcodebuild -version
 
       # The ad SDKs (Google Mobile Ads and the mediation networks) come as CocoaPods: the External Dependency Manager
       # writes the Podfile during the Unity export (CocoaPods isn't on the Linux runner), so they are installed here.
