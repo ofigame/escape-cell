@@ -127,8 +127,11 @@ namespace SquashBot.Gameplay
             cameraRig.Punch(1f);
             AudioManager.PlaySfx(Sfx.Win, 1f, 0.6f);
             fx.Burst(robot.transform.position + Vector3.up * 0.6f, UltiColour, UltiColour * 2.5f, 40, 6f);
-            // For five seconds foi fights on its own: the nearest enemy each time, left and right in turn, a somersault
-            // blow, then a swing of the weapon in hand (sword, mace, axe...), quick.
+            // For five seconds foi fights on its own: the nearest enemy each time, left and right in turn, foi turning to
+            // each while it plays its combo (the ultimate's own move, through all of it), then a spin kick to finish.
+            var moves = robot.Moves;
+            float comboLength = SkinnedHero.MoveLength("cast");
+            moves?.PlayMove("cast", comboLength > 0f ? comboLength / (UltiSeconds - 0.3f) : 1f, true);
             float until = Time.unscaledTime + UltiSeconds;
             for (int i = 0; Time.unscaledTime < until; i++)
             {
@@ -140,13 +143,21 @@ namespace SquashBot.Gameplay
                 SortLeftRight(near);
                 var at = near[i % 2 == 0 || near.Count == 1 ? 0 : 1];
                 var to = GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY;
-                robot.Strike(to);
                 bool flip = i % 2 == 0;
-                if (flip) yield return Somersault();
+                if (moves != null)
+                {
+                    robot.Face(to);
+                    yield return new WaitForSecondsRealtime(0.36f); // (the combo's rhythm)
+                }
                 else
                 {
-                    if (heldWeapon != null) heldWeapon.Swing();
-                    yield return new WaitForSecondsRealtime(0.12f);
+                    robot.Strike(to);
+                    if (flip) yield return Somersault();
+                    else
+                    {
+                        if (heldWeapon != null) heldWeapon.Swing();
+                        yield return new WaitForSecondsRealtime(0.12f);
+                    }
                 }
                 SlashFx.Create(robot.transform.position + Vector3.up * 0.5f, to, UltiColour, flip ? 2.4f : 1.8f);
                 fx.Burst(to + Vector3.up * 0.6f, UltiColour, UltiColour * 2.5f, 22, 5f);
@@ -154,7 +165,8 @@ namespace SquashBot.Gameplay
                 AudioManager.PlaySfx(Sfx.Impact, 1f, flip ? 0.9f : 1.2f);
                 hunt.Strike(at, PowerDamage(4f));
             }
-            yield return new WaitForSecondsRealtime(0.3f);
+            if (moves != null && moves.PlayMove("kick", 1.3f, true)) yield return new WaitForSecondsRealtime(SkinnedHero.MoveLength("kick") / 1.3f * 0.55f); // the spin kick lands
+            else yield return new WaitForSecondsRealtime(0.3f);
             while (State == GameState.Paused) yield return null;
             if (PowerFloor)
             {

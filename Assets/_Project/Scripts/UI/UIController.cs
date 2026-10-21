@@ -166,6 +166,9 @@ namespace SquashBot.UI
         private UiScreen settings;
         private RectTransform settingsCard;
         private TextMeshProUGUI menuProfileName;
+        /// <summary>The profile button's orb: it shows the player's rank insignia instead of an icon.</summary>
+        private RectTransform menuProfileOrb, menuProfileBadge;
+        private int menuProfileRank = -1;
         private readonly Dictionary<SettingKind, TextMeshProUGUI> settingValues = new Dictionary<SettingKind, TextMeshProUGUI>();
         private readonly Dictionary<SettingKind, Image> settingFaces = new Dictionary<SettingKind, Image>();
 
@@ -510,6 +513,7 @@ namespace SquashBot.UI
             var profile = MenuArt.DockButton(t, "", MenuArt.Icon.Profile, new Color(0.62f, 0.42f, 1f), TopRight, new Vector2(-110f, -110f), 120f, () => ChallengeStatsPressed?.Invoke());
             ((RectTransform)profile.transform).pivot = new Vector2(0.5f, 0.5f);
             menuProfileName = profile.transform.Find("Label").GetComponentInChildren<TextMeshProUGUI>();
+            menuProfileOrb = (RectTransform)profile.transform.Find("Orb");
             menuProfileName.enableAutoSizing = true;
             menuProfileName.fontSizeMin = 18f;
             menuProfileName.fontSizeMax = 30f;
@@ -570,6 +574,7 @@ namespace SquashBot.UI
             // The player's challenge rank (insignia, name, trophies) between the logo and foi.
             menuRank = UiFactory.Box("Rank", t, Top, new Vector2(0f, -585f), new Vector2(520f, 120f));
             menuRank.pivot = new Vector2(0.5f, 0.5f);
+            menuRank.gameObject.SetActive(false); // (the rank shows on the profile button)
             var rankHit = UiFactory.Framed(menuRank, new Color(0.07f, 0.09f, 0.2f, 0.8f), 1.8f);
             var rankButton = menuRank.gameObject.AddComponent<Button>();
             rankButton.targetGraphic = rankHit;
@@ -671,8 +676,8 @@ namespace SquashBot.UI
         public void RefreshMenuRank(string defenseLine)
         {
             if (menuRank == null) return;
-            // The rank card is the profile's door: always there (the name, rank and trophies), from the very start.
-            menuRank.gameObject.SetActive(true);
+            // The rank is on the profile button now (its insignia is the button's face); no card over foi.
+            menuRank.gameObject.SetActive(false);
             menuDefense.gameObject.SetActive(!string.IsNullOrEmpty(defenseLine));
             menuDefense.text = defenseLine ?? "";
             int rank = Data.Challenge.Rank;
@@ -684,6 +689,15 @@ namespace SquashBot.UI
                 var cupBox = RankArt.Trophy(menuRank, league, new Vector2(0f, 0.5f), new Vector2(165f, 0f), 84f);
                 cupBox.SetParent(menuRankBadge, true);
                 menuRankShown = rank * 100 + league;
+            }
+            if (menuProfileOrb != null && rank != menuProfileRank)
+            {
+                var icon = menuProfileOrb.Find("Icon");
+                if (icon != null) icon.gameObject.SetActive(false);
+                if (menuProfileBadge != null) Destroy(menuProfileBadge.gameObject);
+                menuProfileBadge = RankArt.Badge(menuProfileOrb, rank, new Vector2(0.5f, 0.5f), Vector2.zero, menuProfileOrb.sizeDelta.x * 0.82f);
+                foreach (var g in menuProfileBadge.GetComponentsInChildren<Graphic>(true)) g.raycastTarget = false;
+                menuProfileRank = rank;
             }
             menuRankText.text = Data.Challenge.PlayerName + " · " + Data.Challenge.RankName(rank);
             if (menuProfileName != null) menuProfileName.text = string.IsNullOrEmpty(Data.Challenge.PlayerName) ? Loc.T("profile.title") : Data.Challenge.PlayerName;

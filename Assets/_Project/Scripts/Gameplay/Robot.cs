@@ -716,6 +716,19 @@ namespace SquashBot.Gameplay
         /// <summary>Blows swung so far (a live duel tells the other game, which swings the rival's weapon).</summary>
         public int Swings { get; private set; }
 
+        /// <summary>Turns to face <paramref name="target"/> at once (no blow of its own: the ultimates' moves play instead).</summary>
+        public void Face(Vector3 target)
+        {
+            var dir = target - transform.position;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.0001f) return;
+            targetFacing = Quaternion.LookRotation(dir.normalized);
+            visual.localRotation = targetFacing;
+        }
+
+        /// <summary>The skinned hero's move player (null for the old builds).</summary>
+        public SkinnedHero Moves => Skin;
+
         public bool Strike(Vector3 target)
         {
             if (!IsAlive || anim != Anim.Idle) return false;

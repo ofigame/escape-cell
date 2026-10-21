@@ -226,7 +226,7 @@ namespace SquashBot.Gameplay
         /// The mover leaps to the tile beside the other (on its own side), with its build's stunt on the way: a stand-in
         /// does the flying while the robot itself waits hidden, and the robot lands there. Nothing if already beside it.
         /// </summary>
-        private IEnumerator LeapTo(bool mine, int stunt)
+        private IEnumerator LeapTo(bool mine, int stunt, bool plain = false)
         {
             var from = mine ? robot.Position : hunt.ChallengeFoeTile ?? robot.Position;
             var victim = mine ? hunt.ChallengeFoeTile ?? robot.Position : robot.Position;
@@ -240,7 +240,7 @@ namespace SquashBot.Gameplay
             {
                 AudioManager.PlaySfx(Sfx.Hop, 1f, stunt == 2 ? 0.7f : 1.2f);
                 fx.Burst(model.position + Vector3.up * 0.2f, SpecialColour[stunt], SpecialColour[stunt] * 1.6f, 14, 4f);
-                yield return dbl.Leap(GridView.ToWorld(land.Value) + Vector3.up * GridView.SurfaceY, 1.6f, 0.5f, stunt);
+                yield return dbl.Leap(GridView.ToWorld(land.Value) + Vector3.up * GridView.SurfaceY, 1.6f, 0.5f, plain ? -1 : stunt); // (plain: a jump, no somersault)
                 if (mine) robot.Spawn(grid, land.Value); else if (!hunt.ChallengeFoeDown) hunt.PlaceFoe(land.Value); // (a live knock-down may have taken it meanwhile)
             }
             finally { if (dbl != null) dbl.Done(); } // the stand-in never stays behind, whatever happened on the way
@@ -366,26 +366,40 @@ namespace SquashBot.Gameplay
             skillBar?.Shout(Loc.T("duel.ultTitle"), mine ? new Color(0.8f, 0.5f, 1f) : new Color(1f, 0.4f, 0.4f));
             AudioManager.PlaySfx(Sfx.Win, 1f, 0.6f);
             if (colosseum != null) colosseum.Cheer(mine ? 0 : 1, 1f);
-            if (mine) hunt.StunFoe(4f);
+            if (mine) hunt.StunFoe(6.5f);
             strikeCooldown = Mathf.Max(strikeCooldown, mine ? 0.5f : 2.5f);
             if (mine) ChallengeQuests.Report(DuelGoal.Ultimate);
-            // the power gathers: foi casts (the rival's foi too) before it leaps in
+            // foi leaps in (a plain jump), then the ultimate's own moves through all of it: its combo, and a spin kick to end
+            if (leap) yield return LeapTo(mine, mine ? HeroModels.Skill(SaveData.Hero) : rivalHero, true);
             var caster = mine ? robot.Visual : hunt.ChallengeFoeModel;
             var casterSkin = caster != null ? caster.GetComponentInChildren<SkinnedHero>() : null;
-            if (casterSkin != null && casterSkin.PlayMove("cast", 1.6f)) yield return new WaitForSecondsRealtime(Mathf.Min(1.4f, SkinnedHero.MoveLength("cast") / 1.6f));
-            if (leap) yield return LeapTo(mine, mine ? HeroModels.Skill(SaveData.Hero) : rivalHero);
+            const float ComboRate = 1.6f;
+            float combo = casterSkin != null ? SkinnedHero.MoveLength("cast") / ComboRate : 0f;
+            if (casterSkin != null) casterSkin.PlayMove("cast", ComboRate, true);
             if (mine && LiveActive) LiveNet.Special(4);
             Time.timeScale = 0.35f;
             for (int i = 0; i < 5; i++)
             {
-                yield return new WaitForSecondsRealtime(i == 4 ? 0.35f : 0.2f);
+                if (casterSkin == null) yield return new WaitForSecondsRealtime(i == 4 ? 0.35f : 0.2f);
+                else if (i < 4) yield return new WaitForSecondsRealtime(combo / 5f); // four blows through the combo
+                else
+                {
+                    yield return new WaitForSecondsRealtime(combo / 5f);
+                    casterSkin.PlayMove("kick", 1.3f, true); // and the spin kick lands the last
+                    yield return new WaitForSecondsRealtime(SkinnedHero.MoveLength("kick") / 1.3f * 0.55f);
+                }
                 if (!challengeRun || chPhase != ChPhase.Duel) break;
                 var foeAt = hunt.ChallengeFoeAt ?? robot.transform.position;
                 var from = mine ? robot.transform.position : foeAt;
                 var to = mine ? foeAt : robot.transform.position;
                 var colour = mine ? new Color(0.8f, 0.5f, 1f) : new Color(1f, 0.35f, 0.3f);
-                if (mine) robot.Strike(to);
-                if (casterSkin != null) casterSkin.PlayMove("kick", 2.2f); // each blow a kick
+                if (casterSkin != null)
+                {
+                    // turned to the other the whole time
+                    if (mine) robot.Face(to);
+                    else if (caster != null) { var d = to - caster.position; d.y = 0f; if (d.sqrMagnitude > 0.0001f) caster.rotation = Quaternion.LookRotation(d.normalized); }
+                }
+                else if (mine) robot.Strike(to);
                 SlashFx.Create(from, to, colour, i == 4 ? 3f : 1.6f);
                 fx.Burst(to + Vector3.up * 0.6f, colour, colour * 2.5f, i == 4 ? 60 : 20, i == 4 ? 9f : 5f);
                 if (i == 4) Shockwave.Create(to, 3.2f, colour);

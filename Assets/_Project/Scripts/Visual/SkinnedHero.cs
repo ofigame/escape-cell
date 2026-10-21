@@ -229,7 +229,7 @@ namespace SquashBot.Visual
             var tex = suit != null ? Resources.Load<Texture2D>(Folder + "armour_" + suit) : null;
             if (tex == null) tex = Resources.Load<Texture2D>(Folder + "armour");
             bool premium = System.Array.IndexOf(Premium, suit) >= 0;
-            m = MaterialFactory.CreateSurface(Color.white, Color.black, premium ? 0.75f : 0.6f, premium ? 0.45f : 0.12f); // (polished, but lit by its own colour: a dark arena with nothing to reflect does not dull it)
+            m = MaterialFactory.CreateSurface(Color.white, Color.black, premium ? 0.75f : 0.5f, premium ? 0.45f : 0.25f); // (polished, but lit by its own colour: a dark arena with nothing to reflect does not dull it)
             if (premium)
             {
                 var mask = Resources.Load<Texture2D>(Folder + "armour_mask");
@@ -243,6 +243,14 @@ namespace SquashBot.Visual
                 }
             }
             m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
+            if (!premium && tex != null)
+            {
+                // a little of its own light, as the icon shows it: the brushed metal never goes dull in a dark arena
+                m.EnableKeyword("_EMISSION");
+                m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+                m.SetTexture("_EmissionMap", tex);
+                m.SetColor("_EmissionColor", Color.white * 0.12f);
+            }
             // (no normal map: its shader variant is not in the build)
             materials[key] = m;
             return m;
@@ -252,6 +260,21 @@ namespace SquashBot.Visual
         private static readonly List<string> recent = new List<string>();
         private static readonly Dictionary<int, (Color32[] px, Color32[] mk, int w, int mw)> pixels = new Dictionary<int, (Color32[], Color32[], int, int)>();
 
+        /// <summary>Livelier skin (as on the icon): more colour, a touch warmer, so the blush on the nose and cheeks shows.</summary>
+        private static Color32 Vivid(Color32 p, float amount)
+        {
+            if (amount < 0.01f) return p;
+            float r = p.r, g = p.g, b = p.b, lum = r * 0.3f + g * 0.59f + b * 0.11f;
+            float sat = 1f + 0.3f * amount;
+            r = lum + (r - lum) * sat; g = lum + (g - lum) * sat; b = lum + (b - lum) * sat;
+            r *= 1f + 0.04f * amount; b *= 1f - 0.03f * amount;
+            return new Color32((byte)Mathf.Clamp(r, 0f, 255f), (byte)Mathf.Clamp(g, 0f, 255f), (byte)Mathf.Clamp(b, 0f, 255f), 255);
+        }
+
+        /// <summary>The head's own light: a part of its colour that no light or shadow takes away, so the face never
+        /// darkens as the lights round it change (on phones each thing gets only a few of the scene's lights).</summary>
+        private const float HeadGlow = 0.24f;
+
         private static Material HeadPaint(int n, Color? hair, Color? skin)
         {
             string key = "head" + n + hair + skin;
@@ -260,7 +283,7 @@ namespace SquashBot.Visual
             Texture2D tex = baseTex;
             var mask = Resources.Load<Texture2D>(Folder + "head_" + n + "_mask");
             var info = InfoOf(n);
-            if ((hair.HasValue || skin.HasValue) && baseTex != null && mask != null && baseTex.isReadable && mask.isReadable)
+            if (baseTex != null && mask != null && baseTex.isReadable && mask.isReadable) // (always: the skin is warmed up too)
             {
                 if (!pixels.TryGetValue(n, out var src)) pixels[n] = src = (baseTex.GetPixels32(), mask.GetPixels32(), baseTex.width, mask.width);
                 int W = src.w / 2, mw = src.mw;
@@ -284,7 +307,7 @@ namespace SquashBot.Visual
                         if (wh < 0.01f && ws < 0.01f) continue;
                         var mul = Vector3.one + (hr - Vector3.one) * wh + (sr - Vector3.one) * ws;
                         var p = px[i];
-                        px[i] = new Color32((byte)Mathf.Min(255f, p.r * mul.x), (byte)Mathf.Min(255f, p.g * mul.y), (byte)Mathf.Min(255f, p.b * mul.z), 255);
+                        px[i] = Vivid(new Color32((byte)Mathf.Min(255f, p.r * mul.x), (byte)Mathf.Min(255f, p.g * mul.y), (byte)Mathf.Min(255f, p.b * mul.z), 255), ws);
                     }
                     tex = new Texture2D(W, W, TextureFormat.RGBA32, true) { name = key };
                     tex.SetPixels32(px);
@@ -292,13 +315,20 @@ namespace SquashBot.Visual
                 }
             }
             m = MaterialFactory.CreateSurface(Color.white, Color.black, 0.18f, 0f); // matte skin
-            if (tex != null) { m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex); }
+            if (tex != null)
+            {
+                m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
+                m.EnableKeyword("_EMISSION");
+                m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+                m.SetTexture("_EmissionMap", tex);
+                m.SetColor("_EmissionColor", Color.white * HeadGlow);
+            }
             materials[key] = m;
             if (tex != baseTex)
             {
                 // only a few recoloured heads are kept (rivals bring their own): the oldest goes, texture and all
                 recent.Add(key);
-                while (recent.Count > 6)
+                while (recent.Count > 10)
                 {
                     var old = recent[0]; recent.RemoveAt(0);
                     if (materials.TryGetValue(old, out var om) && om != null)
@@ -316,6 +346,20 @@ namespace SquashBot.Visual
         /// <summary>Head <paramref name="n"/> as made (for its picture in the workshop).</summary>
         public static Material HeadMaterial(int n) => HeadPaint(Mathf.Clamp(n, 1, Heads), null, null);
 
+        /// <summary>The eyelids' paint: the skin's colour, livened and lit as the face is.</summary>
+        private static Material LidPaint(Color c)
+        {
+            var v = Vivid(c, 1f); var cv = new Color(v.r / 255f, v.g / 255f, v.b / 255f);
+            string key = "lid" + cv;
+            if (materials.TryGetValue(key, out var m) && m != null) return m;
+            m = MaterialFactory.CreateSurface(cv, Color.black, 0.18f, 0f);
+            m.EnableKeyword("_EMISSION");
+            m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+            m.SetColor("_EmissionColor", cv * HeadGlow);
+            materials[key] = m;
+            return m;
+        }
+
         /// <summary>The head's skin colour as the eyelids wear it.</summary>
         private static Color SkinOf(int n, Color? skin)
         {
@@ -331,10 +375,13 @@ namespace SquashBot.Visual
             int n = Mathf.Clamp(look.head <= 0 ? 1 : look.head, 1, Heads);
             if (me != null)
             {
-                me.lidMaterial = Paint(SkinOf(n, look.skin));
+                me.lidMaterial = LidPaint(SkinOf(n, look.skin));
                 me.PutHead(n);
                 foreach (var r in me.head.GetComponentsInChildren<Renderer>(true))
+                {
                     r.sharedMaterial = r.name == "Cover" ? me.lidMaterial : HeadPaint(n, look.hair, look.skin);
+                    r.receiveShadows = false; // (no flickering self-shadow on the face from the hair, hat or crown)
+                }
             }
             var armour = Armour(look.suit);
             foreach (var r in skin.GetComponentsInChildren<SkinnedMeshRenderer>(true))
@@ -454,6 +501,7 @@ namespace SquashBot.Visual
         private AnimationPlayableOutput output;
         private AnimationClipPlayable clipPlay;
         private float playingTime, playingRate = 1f;
+        private bool playingReal;
 
         private static AnimationClip ClipOf(string name)
         {
@@ -465,12 +513,13 @@ namespace SquashBot.Visual
         }
 
         /// <summary>Plays move <paramref name="name"/> (dance1..4, cast, kick) once; false if there is no such move.</summary>
-        public bool PlayMove(string name, float rate = 1f)
+        /// <param name="realTime">Plays in real seconds, whatever the slow motion round it (the ultimates).</param>
+        public bool PlayMove(string name, float rate = 1f, bool realTime = false)
         {
             if (!ready) Setup();
             var c = ClipOf(name);
             if (c == null) return false;
-            playing = c; playingTime = 0f; playingRate = rate;
+            playing = c; playingTime = 0f; playingRate = rate; playingReal = realTime;
             // played through the body's animator (a graph of its own, evaluated by hand)
             var animator = GetComponent<Animator>();
             if (animator == null) animator = gameObject.AddComponent<Animator>();
@@ -631,7 +680,7 @@ namespace SquashBot.Visual
             clap = Mathf.Min(1f, clap + dt / 2.6f);
             if (playing != null)
             {
-                playingTime += (Time.timeScale > 0.01f ? dt : Time.unscaledDeltaTime) * playingRate;
+                playingTime += (playingReal || Time.timeScale <= 0.01f ? Time.unscaledDeltaTime : dt) * playingRate;
                 if (playingTime >= playing.length || speed > 0.6f) playing = null; // done, or it walked off
             }
             if (playing != null)
