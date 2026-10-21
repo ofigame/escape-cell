@@ -7,22 +7,24 @@ namespace SquashBot.Data
     /// <summary>The three duel chests: a plain one (green strap), a middle one (bronze, yellow strap), a great one (gold, red strap).</summary>
     public enum ChestTier { Basic, Mid, Advanced }
 
-    /// <summary>What came out of a chest: gold, or a weapon (a shop one, or one only chests hold).</summary>
+    /// <summary>What came out of a chest: gold, a weapon (a shop one, or one only chests hold) or an outfit for foi.</summary>
     public class ChestReward
     {
         public int gold;
         public WeaponDef weapon;
+        public Cosmetic outfit;
     }
 
     /// <summary>
     /// Duel chests: every duel won brings one, and the better the play the better the chest — a winning streak and
-    /// health to spare. Two may be opened free each day; after that an ad opens one. Inside: gold, a weapon from the
-    /// shop, or (in the better chests, for winning streaks) a weapon no shop sells.
+    /// health to spare. Each opens after an ad watched to the end. Inside: gold, a weapon from the
+    /// shop, or (in the better chests, for winning streaks) a weapon no shop sells; now and then a surprise outfit for foi
+    /// (one only chests hold, or one from the workshop not yet owned).
     /// </summary>
     public static class DuelChests
     {
         public const int Tiers = 3;
-        public const int FreePerDay = 2;
+        public const int FreePerDay = 0; // every chest opens after an ad
         private const int Cap = 30;
 
         public static int Count(ChestTier t) => Prefs.GetInt("sb_dchest_" + (int)t, 0);
@@ -80,6 +82,7 @@ namespace SquashBot.Data
             SetCount(t, Count(t) - 1);
             var r = Roll(t);
             if (r.weapon != null) Armory.Grant(r.weapon);
+            else if (r.outfit != null) Cosmetics.Give(r.outfit.id);
             else SaveData.Coins += r.gold;
             Prefs.Save();
             return r;
@@ -87,6 +90,15 @@ namespace SquashBot.Data
 
         private static ChestReward Roll(ChestTier t)
         {
+            // A surprise outfit first: the chests' own ones, or a suit from the workshop not owned yet.
+            float suitChance = t == ChestTier.Advanced ? 0.22f : t == ChestTier.Mid ? 0.1f : 0.03f;
+            if (UnityEngine.Random.value < suitChance)
+            {
+                var own = Cosmetics.ChestOnly();
+                var pool = own.Count > 0 && (t != ChestTier.Basic || UnityEngine.Random.value < 0.3f) ? own
+                    : Cosmetics.InSlot(Slot.Suit).FindAll(c => !c.IsDefault && !c.chest && !Cosmetics.Owns(c));
+                if (pool.Count > 0) return new ChestReward { outfit = pool[UnityEngine.Random.Range(0, pool.Count)] };
+            }
             float roll = UnityEngine.Random.value;
             bool wantChest = t == ChestTier.Advanced ? roll < 0.32f : t == ChestTier.Mid && Streak >= 3 && roll < 0.08f;
             bool wantShop = !wantChest && roll < (t == ChestTier.Advanced ? 0.62f : t == ChestTier.Mid ? 0.4f : 0.25f);

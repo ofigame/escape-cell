@@ -22,7 +22,7 @@ namespace SquashBot.Gameplay
         private int chDuelMinutes = 3;
 
         /// <summary>This duel has squads (the player's choice; in a live match, the match's).</summary>
-        private bool chDuelSquads = true;
+        private bool chDuelSquads = false;
 
         /// <summary>Knock-downs scored by each side, and the time left (seconds).</summary>
         private int chDuelMe, chDuelThem;

@@ -598,6 +598,7 @@ namespace SquashBot.UI
             tipText.raycastTarget = false;
             arenaTipGroup = arenaTip.gameObject.AddComponent<CanvasGroup>();
             arenaTipGroup.alpha = 0f;
+            arenaTip.gameObject.SetActive(false); // (no tip over the arenas' button any more)
             arenaTipGroup.blocksRaycasts = false;
 
             // The level card (the game look): a navy plate in a gold frame; on it a parchment with the map's emblem,
@@ -1884,7 +1885,7 @@ namespace SquashBot.UI
             bool bonus = info.bonusAvailable && ended && !info.arena;
             bool next = !bonus && ended && info.hasNext;
             bool contAd = !ended && info.canContinue;
-            bool contCoins = !ended && info.canBuyContinue;
+            bool contCoins = false; // (no buying a way on with gold: an ad, or the level again)
             bool cont = contAd || contCoins;
             bool retryTop = !bonus && !next && !cont;
             resultBonus.gameObject.SetActive(bonus);

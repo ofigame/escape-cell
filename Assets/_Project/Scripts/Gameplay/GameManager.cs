@@ -159,9 +159,11 @@ namespace SquashBot.Gameplay
             FramePacer.Install();
             CloudSave.Install();
             OldNotes.Clear(); // the removed open world's farm notes still waiting on the phones that had it
+            Reminder.Schedule(); // the daily reminder: tomorrow evening (set again whenever the game is left)
             Prefs.DeleteKey("sb_ow"); Prefs.DeleteKey("sb_km"); Prefs.DeleteKey("sb_intro_seen"); // the removed open world and kingdom: test phones' leftovers
             FramePacer.Busy = () => State == GameState.Playing;
             FramePacer.KeepAwake = () => State == GameState.Playing;
+            SkinnedHero.OffDuty = () => State != GameState.Playing; // arms folded in the menus, at ease in play
             Application.lowMemory += OnLowMemory;
             if (Debug.isDebugBuild) gameObject.AddComponent<DevStats>(); // test builds: FPS and memory in the corner
             QualitySettings.vSyncCount = 0;
@@ -291,6 +293,7 @@ namespace SquashBot.Gameplay
             ui.DailyBonus.AdPressed += WatchAdForDailyBonus;
             ui.Garage.PreviewChanged += outfit => robot.ApplyOutfit(outfit);
             ui.Garage.DancePreview += robot.Cheer;
+            ui.DuelChestsView.OutfitWorn += () => robot.ApplyOutfit(Cosmetics.Outfit());
             ui.SkillBar.Pressed += OnSkillPressed;
             ui.NextPressed += () =>
             {
@@ -511,6 +514,7 @@ namespace SquashBot.Gameplay
 
         private void ShowMenu()
         {
+            robot.SetSize(1f);
             EndChallenge();
             // A rank weapon whose rank was lost (trophies fell) goes from the armory.
             var lostRank = Armory.RevokeLostRanks();
@@ -532,7 +536,14 @@ namespace SquashBot.Gameplay
             ShowBackdrop(NextLevel);
             ui.ShowMenu(NextLevel, SaveData.Coins, LevelCatalog.WorldName(NextLevel),
                 PendingRoad >= 0 ? Loc.T("menu.roadPending") : MissionText(levelSet.levels[NextLevel]));
-            if (lobby == null) lobby = LobbyStage.Create(t => robot.BuildLookalike(t));
+            if (lobby == null) lobby = LobbyStage.Create(t =>
+            {
+                var look = robot.BuildLookalike(t);
+                bool holds = false;
+                foreach (var c in look.GetComponentsInChildren<Transform>(true)) if (c.name == "HeldWeapon") holds = true;
+                if (!holds) HeldWeapon.Attach(look.transform, Armory.Equipped); // the weapon in its hand
+                return look;
+            });
             lobby.Open(WorldTheme.ForWorld(LevelCatalog.WorldOf(NextLevel)));
             // The robot is the star of the menu: crisp, close and in the middle of the screen.
             cameraRig.SetMenuFocus(false);
@@ -687,6 +698,7 @@ namespace SquashBot.Gameplay
 
         private void StartLevel(int index, List<Boost> boosts = null)
         {
+            robot.SetSize(challengeRun || arenaRun ? 1f : 1.2f); // foi a fifth bigger on the floors
             // A new floor opens with its story scene (once; the map banner replays it).
             int floor = LevelCatalog.WorldOf(index);
             if (index % LevelCatalog.LevelsPerWorld == 0 && !Story.Seen(floor))
@@ -942,6 +954,7 @@ namespace SquashBot.Gameplay
         /// <summary>Losing focus (a phone call, the home button) pauses the run.</summary>
         private void OnApplicationPause(bool paused)
         {
+            if (paused) Reminder.Schedule();
             if (paused) Pause();
         }
 

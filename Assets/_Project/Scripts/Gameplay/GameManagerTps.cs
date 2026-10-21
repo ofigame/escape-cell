@@ -19,7 +19,7 @@ namespace SquashBot.Gameplay
     /// </summary>
     public partial class GameManager
     {
-        private const float TpsDistance = 6.9f, TpsFov = 58f, TpsTurnSpeed = 240f, TpsPitchSpeed = 120f;
+        private const float TpsDistance = 8.1f, TpsFov = 58f, TpsTurnSpeed = 240f, TpsPitchSpeed = 120f;
         private TpsControls tps;
         private readonly System.Collections.Generic.List<(Vector3 at, bool big)> mapEnemies = new System.Collections.Generic.List<(Vector3 at, bool big)>();
         private bool tpsOn, tpsStrike, tpsSpin, tpsJump;

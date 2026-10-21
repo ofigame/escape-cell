@@ -186,6 +186,19 @@ namespace SquashBot.Visual
                 gift.localScale = Vector3.one * (2.1f / l);
                 if (reward.weapon.kind == WeaponKind.Gun) w.localRotation = Quaternion.Euler(0f, 90f, 0f);
             }
+            else if (reward != null && reward.outfit != null)
+            {
+                // foi itself, wearing the outfit
+                var look = new GameObject("Foi").transform;
+                look.SetParent(gift, false);
+                var skin = SkinnedHero.Build(look);
+                var body = look.GetComponentInChildren<SkinnedHero>().transform;
+                if (reward.outfit.slot == Slot.Back) { SkinnedHero.Dress(body, new SkinnedHero.Look { head = 1 }); SoftCape.Build(body, reward.outfit.id, reward.outfit.color); look.localRotation = Quaternion.Euler(0f, 30f, 0f); }
+                else SkinnedHero.Dress(body, new SkinnedHero.Look { head = 1, suit = reward.outfit.id.Replace("suit.", "") });
+                look.localPosition = new Vector3(0f, -0.5f, 0f);
+                look.localRotation = Quaternion.Euler(0f, 180f, 0f);
+                gift.localScale = Vector3.one * 2f;
+            }
             else { CoinHeap(gift); gift.localScale = Vector3.one * 1.6f; }
             OnLayer(gift.gameObject);
             gift.localPosition = new Vector3(0f, 0.3f, 0f);

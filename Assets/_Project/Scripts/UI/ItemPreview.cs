@@ -71,7 +71,7 @@ namespace SquashBot.UI
         /// </summary>
         public static Texture Cosmetic(Cosmetic c)
         {
-            if (c == null || c.IsDefault || !(c.slot == Slot.Hat || c.slot == Slot.Back || c.slot == Slot.Arms || c.slot == Slot.Legs)) return null;
+            if (c == null || !(c.slot == Slot.Head || (!c.IsDefault && (c.slot == Slot.Hat || c.slot == Slot.Back || c.slot == Slot.Arms || c.slot == Slot.Legs)))) return null;
             string key = "cos." + c.id;
             if (cache.TryGetValue(key, out var rt) && rt != null && rt.IsCreated()) return rt;
             Setup();
@@ -83,12 +83,19 @@ namespace SquashBot.UI
             piece.SetParent(holder, false);
             switch (c.slot)
             {
-                case Slot.Hat: CosmeticModels.Hat(piece, c.id, c.color); break;
+                case Slot.Hat:
+                    if (c.id.StartsWith("hat.hood"))
+                    {
+                        var hp = Resources.Load<GameObject>("Heroes/Foi/hood");
+                        if (hp != null) { var made = Object.Instantiate(hp, piece, false); var m = MaterialFactory.CreateSurface(c.color, Color.black, 0.15f, 0f); var tx = Resources.Load<Texture2D>("Heroes/Foi/hood"); if (tx != null) { m.SetTexture("_BaseMap", tx); m.SetTexture("_MainTex", tx); } foreach (var r in made.GetComponentsInChildren<Renderer>()) r.sharedMaterial = m; }
+                    }
+                    else CosmeticModels.Hat(piece, c.id, c.color);
+                    break;
                 case Slot.Back: CosmeticModels.Back(piece, c.id, c.color); break;
-                case Slot.Arms: CosmeticModels.Arms(piece, c.id, c.color); break;
-                default: CosmeticModels.Legs(piece, c.id, c.color); break;
+                case Slot.Head: { var h = Resources.Load<GameObject>("Heroes/Foi/head_" + c.id.Replace("head.", "")); if (h != null) { var made = Object.Instantiate(h, piece, false); foreach (var r in made.GetComponentsInChildren<Renderer>()) r.sharedMaterial = SkinnedHero.HeadMaterial(int.Parse(c.id.Replace("head.", ""))); } break; } // (its own picture)
+                default: GearModels.Picture(piece, c.id, c.color); break; // arm and leg gear, as foi wears it
             }
-            holder.localRotation = Quaternion.Euler(10f, c.slot == Slot.Back ? 330f : 200f, 0f);
+            holder.localRotation = Quaternion.Euler(c.slot == Slot.Head ? 0f : 10f, c.slot == Slot.Back ? 330f : c.slot == Slot.Head ? 180f : 200f, 0f);
             // Framed on what was built: its middle in the middle of the picture, all of it in view.
             var renderers = holder.GetComponentsInChildren<Renderer>();
             if (renderers.Length > 0)

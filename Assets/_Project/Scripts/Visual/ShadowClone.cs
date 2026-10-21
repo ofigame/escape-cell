@@ -38,8 +38,10 @@ namespace SquashBot.Visual
                 foreach (var r in look.GetComponentsInChildren<Renderer>())
                 {
                     // The eyes keep a cold violet glow; everything else turns to shadow.
-                    bool glows = r.name.StartsWith("Eye");
-                    r.sharedMaterial = glows ? eye : shade;
+                    bool glows = r.name.StartsWith("Eye") || r.name == "Glow";
+                    var mats = new Material[r.sharedMaterials.Length];
+                    for (int i = 0; i < mats.Length; i++) mats[i] = glows ? eye : shade; // (every part of a body with several)
+                    r.sharedMaterials = mats;
                 }
             Shapes.Primitive(PrimitiveType.Cylinder, "Pool", go.transform, new Vector3(0f, 0.02f, 0f), new Vector3(0.8f, 0.01f, 0.8f), pool);
             return c;

@@ -24,8 +24,9 @@ namespace SquashBot.UI
         public event Action DancePreview;
         /// <summary>The "change build" button (foi's four builds) was pressed.</summary>
         public event Action HeroPressed;
+        /// <summary>Vega's hood on/off, and its next suit colour.</summary>
 
-        private const int TabsPerRow = 5;
+        private const int TabsPerRow = 6;
 
         private UiScreen screen;
         private TextMeshProUGUI coinsText, itemName, actionLabel;
@@ -35,7 +36,7 @@ namespace SquashBot.UI
         private ScrollRect gridScroll;
         private BipTip bip;
         private readonly List<(Slot slot, Image bg)> tabs = new List<(Slot, Image)>();
-        private Slot slot = Slot.Color;
+        private Slot slot = Slot.Head;
         private Cosmetic selected;
         private int reachedWorld;
         private string setJustDone;
@@ -70,7 +71,6 @@ namespace SquashBot.UI
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var coins = UiFactory.Pill("Coins", bar, new Vector2(1f, 0.5f), new Vector2(-36f, 0f), new Vector2(260f, 100f), UiFactory.PillColor);
             UIController.CoinIcon(coins, new Vector2(56f, 0f));
-            // Switch to another of foi's builds (for coins), under the title bar.
             coinsText = UiFactory.TextBox("Value", coins, new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Vector2(150f, 90f), "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
 
             // A drag across the open space above the panel turns foi round (all the way: see its back and its outfit).
@@ -87,12 +87,13 @@ namespace SquashBot.UI
             itemName.fontSizeMax = 42f;
 
             var tabRow = UiFactory.Box("Tabs", panel, new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(940f, 190f));
-            var slots = (Slot[])Enum.GetValues(typeof(Slot));
+            // foi's tabs (paint and eyes belonged to the old robot): its head first, its looks, then its gear and the rest
+            var slots = new[] { Slot.Head, Slot.Hair, Slot.Skin, Slot.Suit, Slot.Hat, Slot.Back, Slot.Arms, Slot.Dance }; // (step marks, trails, badges and leg pieces: gone)
             for (int i = 0; i < slots.Length; i++)
             {
                 var s = slots[i];
                 int col = i % TabsPerRow, row = i / TabsPerRow;
-                var tab = UiFactory.MakeButton(tabRow, Loc.T("garage." + s), Kind.Secondary, new Vector2(0f, 1f), new Vector2(col * 188f, -row * 96f), new Vector2(180f, 88f), () => SelectSlot(s), 26f);
+                var tab = UiFactory.MakeButton(tabRow, Loc.T("garage." + s), Kind.Secondary, new Vector2(0f, 1f), new Vector2(col * 157f, -row * 96f), new Vector2(150f, 88f), () => SelectSlot(s), 24f);
                 tabs.Add((s, tab.targetGraphic as Image));
             }
 
@@ -152,14 +153,21 @@ namespace SquashBot.UI
             PreviewChanged?.Invoke(Cosmetics.Outfit());
         }
 
-        private bool Locked(Cosmetic c) => !Cosmetics.Owns(c) && (c.storyLevel > 0 || c.rank > 0 || reachedWorld < c.world);
+        private bool Locked(Cosmetic c) => !Cosmetics.Owns(c) && (c.storyLevel > 0 || c.rank > 0 || c.chest || reachedWorld < c.world);
 
-        private string LockText(Cosmetic c) => c.rank > 0 ? Challenge.RankName(c.rank).ToUpper(Loc.Culture) : c.storyLevel > 0 ? Loc.F("garage.story", c.storyLevel) : Loc.F("garage.world", c.world + 1);
+        private string LockText(Cosmetic c) => c.chest ? Loc.T("garage.chest") : c.rank > 0 ? Challenge.RankName(c.rank).ToUpper(Loc.Culture) : c.storyLevel > 0 ? Loc.F("garage.story", c.storyLevel) : Loc.F("garage.world", c.world + 1);
+
+        /// <summary>What foi can wear: on its back only capes (or nothing), no hats that would cover its face.</summary>
+        private static bool Fits(Cosmetic c) =>
+            c.slot == Slot.Back ? c.IsDefault || c.id.StartsWith("back.cape")
+            : c.slot == Slot.Dance ? c.IsDefault || c.id.StartsWith("dance.d")
+            : c.slot == Slot.Hat ? !(c.id == "hat.diver" || c.id == "hat.astro" || c.id == "hat.visor" || c.id == "hat.cloud")
+            : true;
 
         private void RebuildGrid()
         {
             for (int i = grid.childCount - 1; i >= 0; i--) Destroy(grid.GetChild(i).gameObject);
-            var items = Cosmetics.InSlot(slot);
+            var items = Cosmetics.InSlot(slot).FindAll(Fits);
             const int columns = 5;
             const float cell = 172f, gap = 14f;
             for (int i = 0; i < items.Count; i++)

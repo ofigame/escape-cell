@@ -62,7 +62,7 @@ namespace SquashBot.Gameplay
             moveBusy = false;
             rivalHero = 0; // one foi for everyone
             if (skillBar != null) Destroy(skillBar.gameObject);
-            skillBar = DuelSkillBar.Create(chUi.BattleHud, Loc.T("duel.sp." + Mathf.Clamp(SaveData.Hero, 0, 3)));
+            skillBar = DuelSkillBar.Create(chUi.BattleHud, Loc.T("duel.sp." + HeroModels.Skill(SaveData.Hero)));
             skillBar.Pressed += OnSkill;
             skillBar.Emoted += e => { ShowEmote(true, e); if (LiveActive) LiveNet.Emote(e); };
             skillBar.SetMeters(0f, 0f);
@@ -267,7 +267,7 @@ namespace SquashBot.Gameplay
         {
             moveBusy = true;
             if (mine) ChallengeQuests.Report(DuelGoal.Special);
-            int hero = mine ? Mathf.Clamp(SaveData.Hero, 0, 3) : rivalHero;
+            int hero = mine ? HeroModels.Skill(SaveData.Hero) : rivalHero;
             if (mine) hunt.StunFoe(1.6f);
             strikeCooldown = Mathf.Max(strikeCooldown, mine ? 0.9f : 1.4f);
             yield return LeapTo(mine, hero);
@@ -369,7 +369,11 @@ namespace SquashBot.Gameplay
             if (mine) hunt.StunFoe(4f);
             strikeCooldown = Mathf.Max(strikeCooldown, mine ? 0.5f : 2.5f);
             if (mine) ChallengeQuests.Report(DuelGoal.Ultimate);
-            if (leap) yield return LeapTo(mine, mine ? Mathf.Clamp(SaveData.Hero, 0, 3) : rivalHero);
+            // the power gathers: foi casts (the rival's foi too) before it leaps in
+            var caster = mine ? robot.Visual : hunt.ChallengeFoeModel;
+            var casterSkin = caster != null ? caster.GetComponentInChildren<SkinnedHero>() : null;
+            if (casterSkin != null && casterSkin.PlayMove("cast", 1.6f)) yield return new WaitForSecondsRealtime(Mathf.Min(1.4f, SkinnedHero.MoveLength("cast") / 1.6f));
+            if (leap) yield return LeapTo(mine, mine ? HeroModels.Skill(SaveData.Hero) : rivalHero);
             if (mine && LiveActive) LiveNet.Special(4);
             Time.timeScale = 0.35f;
             for (int i = 0; i < 5; i++)
@@ -381,6 +385,7 @@ namespace SquashBot.Gameplay
                 var to = mine ? foeAt : robot.transform.position;
                 var colour = mine ? new Color(0.8f, 0.5f, 1f) : new Color(1f, 0.35f, 0.3f);
                 if (mine) robot.Strike(to);
+                if (casterSkin != null) casterSkin.PlayMove("kick", 2.2f); // each blow a kick
                 SlashFx.Create(from, to, colour, i == 4 ? 3f : 1.6f);
                 fx.Burst(to + Vector3.up * 0.6f, colour, colour * 2.5f, i == 4 ? 60 : 20, i == 4 ? 9f : 5f);
                 if (i == 4) Shockwave.Create(to, 3.2f, colour);

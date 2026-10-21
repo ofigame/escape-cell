@@ -35,8 +35,8 @@ namespace SquashBot.Data
         /// <summary>Duels with each side's squad behind its foi (true, the default) or foi against foi alone.</summary>
         public static bool DuelSquads
         {
-            get => Prefs.GetInt("sb_duel_squads", 1) == 1;
-            set { Prefs.SetInt("sb_duel_squads", value ? 1 : 0); Prefs.Save(); }
+            get => Prefs.GetInt("sb_duel_squads2", 0) == 1; // (foi against foi alone unless chosen; a new key: alone for everyone at first)
+            set { Prefs.SetInt("sb_duel_squads2", value ? 1 : 0); Prefs.Save(); }
         }
 
         /// <summary>Whether the player has picked their name (asked on the first challenge).</summary>

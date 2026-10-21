@@ -13,6 +13,7 @@ namespace SquashBot.Visual
     public class StuntDouble : MonoBehaviour
     {
         private readonly List<Renderer> hidden = new List<Renderer>();
+        private readonly List<Mesh> baked = new List<Mesh>();
         private Transform source;
         private float bornAt;
         private readonly List<(Transform t, Vector3 pos, Quaternion rot)> parts = new List<(Transform, Vector3, Quaternion)>();
@@ -25,6 +26,24 @@ namespace SquashBot.Visual
             var d = go.AddComponent<StuntDouble>();
             d.source = model;
             d.bornAt = Time.realtimeSinceStartup;
+            foreach (var sk in model.GetComponentsInChildren<SkinnedMeshRenderer>())
+            {
+                if (!sk.enabled || sk.sharedMesh == null) continue;
+                var baked = new Mesh();
+                sk.BakeMesh(baked, true);
+                var p = new GameObject("Part").transform;
+                p.SetParent(go.transform, false);
+                p.SetPositionAndRotation(sk.transform.position, sk.transform.rotation);
+                p.localScale = Divide(sk.transform.lossyScale, go.transform.lossyScale);
+                p.gameObject.AddComponent<MeshFilter>().sharedMesh = baked;
+                var copy = p.gameObject.AddComponent<MeshRenderer>();
+                copy.sharedMaterials = sk.sharedMaterials;
+                copy.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                d.parts.Add((p, p.localPosition, p.localRotation));
+                d.baked.Add(baked);
+                sk.enabled = false;
+                d.hidden.Add(sk);
+            }
             foreach (var r in model.GetComponentsInChildren<MeshRenderer>())
             {
                 if (!r.enabled) continue;
@@ -66,6 +85,7 @@ namespace SquashBot.Visual
         private void OnDestroy()
         {
             foreach (var r in hidden) if (r != null) r.enabled = true; // never leave a robot invisible
+            foreach (var m in baked) if (m != null) Destroy(m);
         }
 
         /// <summary>

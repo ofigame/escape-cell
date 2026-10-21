@@ -209,7 +209,7 @@ namespace SquashBot.Visual
             }
             for (int i = robotHolder.childCount - 1; i >= 0; i--) Destroy(robotHolder.GetChild(i).gameObject);
             robotLook?.Invoke(robotHolder);
-            robotHolder.localScale = Vector3.one * 1.6f;
+            robotHolder.localScale = Vector3.one * 1.1f; // (as tall as the old foi was here: clear of the level's number and the next stone)
 
             minHeight = NodePosition(0).y - Origin.y - 1f;
             maxHeight = NodePosition(levelCount - 1).y - Origin.y + 5.5f; // up to the Red Desert above the last level

@@ -33,7 +33,7 @@ namespace SquashBot.Data
             set { Prefs.SetInt(CoinsKey, value); Prefs.Save(); }
         }
 
-        /// <summary>foi's build: there is only the one foi now (the old picker's choice is no longer read).</summary>
+        /// <summary>foi's build: there is only the one foi (an old choice of another build reads as foi).</summary>
         public static int Hero
         {
             get => 0;

@@ -1,5 +1,6 @@
 using System.Collections;
 using SquashBot.Data;
+using SquashBot.Visual;
 using UnityEngine;
 
 namespace SquashBot.Gameplay

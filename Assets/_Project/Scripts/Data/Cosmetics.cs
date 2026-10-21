@@ -18,7 +18,15 @@ namespace SquashBot.Data
         Step,
         /// <summary>The hop and road trail.</summary>
         Trail,
-        Dance
+        Dance,
+        /// <summary>The paint on foi's armour: camouflage or colours.</summary>
+        Suit,
+        /// <summary>Which head foi wears.</summary>
+        Head,
+        /// <summary>The colour of its hair.</summary>
+        Hair,
+        /// <summary>The colour of its skin (on the head: the body is armour).</summary>
+        Skin
     }
 
     public class Cosmetic
@@ -31,7 +39,7 @@ namespace SquashBot.Data
         /// <summary>Body / eye / trail colour, or the swatch colour shown in the garage.</summary>
         public Color color;
 
-        public bool IsDefault => price == 0 && !reward && storyLevel == 0 && rank == 0;
+        public bool IsDefault => price == 0 && !reward && storyLevel == 0 && rank == 0 && !chest;
 
         /// <summary>The themed set this piece belongs to (null = none).</summary>
         public string set;
@@ -41,6 +49,8 @@ namespace SquashBot.Data
         public int storyLevel;
         /// <summary>A rank reward: not sold, worn from this challenge rank on (0 = none).</summary>
         public int rank;
+        /// <summary>A duel chest's surprise: not sold, it only comes out of a chest.</summary>
+        public bool chest;
     }
 
     /// <summary>
@@ -79,17 +89,23 @@ namespace SquashBot.Data
             C("hat.top", Slot.Hat, 400, 2, new Color(0.2f, 0.18f, 0.25f)),
             C("hat.pirate", Slot.Hat, 400, 3, new Color(0.15f, 0.13f, 0.2f)),
             C("hat.crown", Slot.Hat, 600, 5, new Color(1f, 0.8f, 0.3f)),
+            C("hat.hood", Slot.Hat, 500, 0, new Color(0.7f, 0.7f, 0.74f)),
+            C("hat.hood.black", Slot.Hat, 600, 2, new Color(0.22f, 0.22f, 0.25f)),
+            C("hat.hood.crimson", Slot.Hat, 700, 4, new Color(0.62f, 0.1f, 0.14f)),
+            C("hat.hood.forest", Slot.Hat, 700, 5, new Color(0.3f, 0.42f, 0.26f)),
 
             C("arms.std", Slot.Arms, 0, 0, new Color(0.5f, 0.5f, 0.6f)),
             C("arms.brush", Slot.Arms, 300, 3, new Color(0.95f, 0.6f, 0.3f)),
             C("arms.spring", Slot.Arms, 400, 6, new Color(0.8f, 0.84f, 0.95f)),
             C("arms.crystal", Slot.Arms, 600, 14, new Color(0.6f, 0.9f, 1f)),
+            C("arms.shoulder", Slot.Arms, 450, 4, new Color(0.35f, 0.38f, 0.5f)),
 
             C("legs.std", Slot.Legs, 0, 0, new Color(0.5f, 0.5f, 0.6f)),
+            C("legs.knee", Slot.Legs, 250, 0, new Color(0.2f, 0.2f, 0.24f)),
             C("legs.spring", Slot.Legs, 400, 2, new Color(0.8f, 0.84f, 0.95f)),
 
             C("back.none", Slot.Back, 0, 0, new Color(0.5f, 0.5f, 0.6f)),
-            C("back.cape", Slot.Back, 400, 0, new Color(0.9f, 0.3f, 0.4f)),
+            X("back.cape", Slot.Back, new Color(0.9f, 0.3f, 0.4f)),
             C("back.jetpack", Slot.Back, 500, 1, new Color(0.7f, 0.75f, 0.85f)),
             C("back.wings", Slot.Back, 600, 4, new Color(0.85f, 0.95f, 1f)),
             C("back.shell", Slot.Back, 400, 9, new Color(1f, 0.75f, 0.7f)),
@@ -115,6 +131,52 @@ namespace SquashBot.Data
             C("dance.jump", Slot.Dance, 300, 0, new Color(0.55f, 0.9f, 0.75f)),
             C("dance.wobble", Slot.Dance, 400, 1, new Color(1f, 0.7f, 0.4f)),
             C("dance.flip", Slot.Dance, 500, 2, new Color(0.62f, 0.45f, 0.95f)),
+            // foi's own dances (made on its body)
+            C("dance.d1", Slot.Dance, 300, 0, new Color(0.4f, 0.8f, 1f)),
+            C("dance.d2", Slot.Dance, 400, 1, new Color(1f, 0.6f, 0.3f)),
+            C("dance.d3", Slot.Dance, 500, 2, new Color(0.7f, 0.45f, 1f)),
+            C("dance.d4", Slot.Dance, 600, 3, new Color(1f, 0.85f, 0.3f)),
+
+            // The paint on foi's armour: camouflage and colours.
+            C("suit.none", Slot.Suit, 0, 0, new Color(0.74f, 0.76f, 0.81f)),
+            C("suit.camo", Slot.Suit, 400, 0, new Color(0.36f, 0.4f, 0.25f)),
+            C("suit.tactical", Slot.Suit, 800, 1, new Color(0.18f, 0.18f, 0.2f)),
+            C("suit.camo.desert", Slot.Suit, 500, 2, new Color(0.72f, 0.6f, 0.42f)),
+            C("suit.camo.urban", Slot.Suit, 600, 3, new Color(0.45f, 0.47f, 0.52f)),
+            C("suit.tactical.forest", Slot.Suit, 900, 3, new Color(0.3f, 0.36f, 0.22f)),
+            C("suit.camo.snow", Slot.Suit, 600, 4, new Color(0.9f, 0.92f, 0.95f)),
+            C("suit.tactical.desert", Slot.Suit, 900, 5, new Color(0.66f, 0.56f, 0.38f)),
+            C("suit.tactical.urban", Slot.Suit, 900, 6, new Color(0.25f, 0.3f, 0.42f)),
+            C("suit.shadow", Slot.Suit, 1500, 8, new Color(0.1f, 0.1f, 0.12f)),
+            // ...and the duel chests' surprises: never sold.
+            X("suit.elite", Slot.Suit, new Color(1f, 0.78f, 0.3f)),
+            X("suit.ghost", Slot.Suit, new Color(0.93f, 0.94f, 0.96f)),
+            X("suit.ranger", Slot.Suit, new Color(0.26f, 0.36f, 0.22f)),
+            X("suit.crimson", Slot.Suit, new Color(0.6f, 0.08f, 0.12f)),
+            X("suit.fox", Slot.Suit, new Color(0.78f, 0.62f, 0.4f)),
+
+            // foi's heads, and the colours of its hair and skin.
+            C("head.1", Slot.Head, 0, 0, new Color(0.66f, 0.55f, 0.49f)),
+            C("head.2", Slot.Head, 600, 1, new Color(0.38f, 0.18f, 0.09f)),
+            C("head.3", Slot.Head, 600, 0, new Color(0.6f, 0.46f, 0.38f)),
+            C("head.4", Slot.Head, 700, 2, new Color(0.65f, 0.56f, 0.5f)),
+            C("hair.own", Slot.Hair, 0, 0, new Color(0.35f, 0.18f, 0.11f)),
+            C("hair.black", Slot.Hair, 150, 0, new Color(0.08f, 0.07f, 0.07f)),
+            C("hair.blonde", Slot.Hair, 200, 0, new Color(0.95f, 0.78f, 0.42f)),
+            C("hair.red", Slot.Hair, 200, 1, new Color(0.72f, 0.2f, 0.08f)),
+            C("hair.white", Slot.Hair, 300, 2, new Color(0.92f, 0.92f, 0.95f)),
+            C("hair.blue", Slot.Hair, 300, 3, new Color(0.18f, 0.4f, 0.95f)),
+            C("hair.pink", Slot.Hair, 300, 3, new Color(1f, 0.45f, 0.7f)),
+            C("hair.green", Slot.Hair, 300, 4, new Color(0.25f, 0.75f, 0.35f)),
+            C("hair.purple", Slot.Hair, 400, 5, new Color(0.55f, 0.28f, 0.9f)),
+            C("skin.own", Slot.Skin, 0, 0, new Color(0.66f, 0.55f, 0.49f)),
+            C("skin.light", Slot.Skin, 100, 0, new Color(0.96f, 0.82f, 0.74f)),
+            C("skin.tan", Slot.Skin, 100, 0, new Color(0.8f, 0.6f, 0.45f)),
+            C("skin.brown", Slot.Skin, 100, 0, new Color(0.55f, 0.37f, 0.25f)),
+            C("skin.dark", Slot.Skin, 100, 0, new Color(0.36f, 0.23f, 0.16f)),
+            C("skin.olive", Slot.Skin, 100, 1, new Color(0.72f, 0.62f, 0.44f)),
+            C("skin.green", Slot.Skin, 400, 4, new Color(0.45f, 0.75f, 0.42f)),
+            C("skin.blue", Slot.Skin, 400, 6, new Color(0.42f, 0.6f, 0.95f)),
 
             // World sets: three pieces each; owning all three gives the set's prize.
             S("hat.cable", Slot.Hat, 300, 0, new Color(0.3f, 0.32f, 0.4f), "canal"),
@@ -161,17 +223,17 @@ namespace SquashBot.Data
             T("back.raven", Slot.Back, 211, new Color(0.16f, 0.15f, 0.24f)),
             T("badge.heart", Slot.Badge, 250, new Color(1f, 0.8f, 0.3f)),
 
-            // Capes that wave as foi runs. Plain ones tied at the neck (the old hero cape is the red one)...
-            C("back.cape.sky", Slot.Back, 400, 0, new Color(0.3f, 0.55f, 0.95f)),
-            C("back.cape.sun", Slot.Back, 400, 0, new Color(1f, 0.78f, 0.25f)),
+            // Capes that wave as foi runs (only from the duel chests). Plain ones tied at the neck (the old hero cape is the red one)...
+            X("back.cape.sky", Slot.Back, new Color(0.3f, 0.55f, 0.95f)),
+            X("back.cape.sun", Slot.Back, new Color(1f, 0.78f, 0.25f)),
             // ...middle ones tied at the neck with a light pattern...
-            C("back.cape.night", Slot.Back, 650, 2, new Color(0.14f, 0.18f, 0.42f)),
-            C("back.cape.teal", Slot.Back, 650, 2, new Color(0.15f, 0.6f, 0.58f)),
-            C("back.cape.wine", Slot.Back, 650, 2, new Color(0.55f, 0.16f, 0.26f)),
+            X("back.cape.night", Slot.Back, new Color(0.14f, 0.18f, 0.42f)),
+            X("back.cape.teal", Slot.Back, new Color(0.15f, 0.6f, 0.58f)),
+            X("back.cape.wine", Slot.Back, new Color(0.55f, 0.16f, 0.26f)),
             // ...high ones from the shoulders with gold patterns...
-            C("back.cape.royal", Slot.Back, 1000, 4, new Color(0.45f, 0.2f, 0.62f)),
-            C("back.cape.flame", Slot.Back, 1000, 6, new Color(0.95f, 0.38f, 0.12f)),
-            C("back.cape.frost", Slot.Back, 1000, 9, new Color(0.55f, 0.82f, 1f)),
+            X("back.cape.royal", Slot.Back, new Color(0.45f, 0.2f, 0.62f)),
+            X("back.cape.flame", Slot.Back, new Color(0.95f, 0.38f, 0.12f)),
+            X("back.cape.frost", Slot.Back, new Color(0.55f, 0.82f, 1f)),
             // ...and the ranks' own capes and hats: earned in the challenge, never sold.
             K("back.cape.rank3", Slot.Back, 3, new Color(0.18f, 0.42f, 0.22f)),
             K("back.cape.rank6", Slot.Back, 6, new Color(0.18f, 0.42f, 0.22f)),
@@ -198,6 +260,12 @@ namespace SquashBot.Data
 
         private static Cosmetic K(string id, Slot slot, int rank, Color color) =>
             new Cosmetic { id = id, slot = slot, price = 0, world = 0, color = color, rank = rank };
+
+        private static Cosmetic X(string id, Slot slot, Color color) =>
+            new Cosmetic { id = id, slot = slot, price = 0, world = 0, color = color, chest = true };
+
+        /// <summary>The duel chests' surprises not yet owned.</summary>
+        public static List<Cosmetic> ChestOnly() => All.FindAll(c => c.chest && !Bought(c));
 
         /// <summary>The world sets in story order (the ids of the first four are older than the world names).</summary>
         public static readonly string[] Sets = { "canal", "forest", "canyon", "ocean", "mountain", "cyber", "cloud", "candy", "galaxy" };
@@ -246,7 +314,7 @@ namespace SquashBot.Data
         public static bool RankEarned(Cosmetic c) => c.rank > 0 && Challenge.Rank >= c.rank;
 
         public static bool Owns(Cosmetic c) =>
-            c.reward ? SetComplete(c.set) : c.storyLevel > 0 ? StoryEarned(c) : c.rank > 0 ? RankEarned(c) : c.IsDefault || Bought(c);
+            c.reward ? SetComplete(c.set) : c.storyLevel > 0 ? StoryEarned(c) : c.rank > 0 ? RankEarned(c) : c.chest ? Bought(c) : c.IsDefault || Bought(c);
 
         public static Cosmetic Equipped(Slot slot)
         {
@@ -263,7 +331,7 @@ namespace SquashBot.Data
 
         public static bool TryBuy(Cosmetic c, int reachedWorld)
         {
-            if (c.reward || c.storyLevel > 0 || c.rank > 0 || Owns(c) || reachedWorld < c.world || !Shop.Spend(c.price)) return false;
+            if (c.reward || c.storyLevel > 0 || c.rank > 0 || c.chest || Owns(c) || reachedWorld < c.world || !Shop.Spend(c.price)) return false;
             Prefs.SetInt("sb_cos_" + c.id, 1);
             Prefs.Save();
             return true;
@@ -276,12 +344,12 @@ namespace SquashBot.Data
             Prefs.Save();
         }
 
-        /// <summary>The visible pieces worn (paint, eyes, hat, arms, legs, back, badge) as one short text, for the rival's
+        /// <summary>The visible pieces worn (paint, eyes, hat, arms, legs, back, badge, suit) as one short text, for the rival's
         /// screen in a duel.</summary>
         public static string LookText()
         {
             var ids = new List<string>();
-            foreach (var s in new[] { Slot.Color, Slot.Eyes, Slot.Hat, Slot.Arms, Slot.Legs, Slot.Back, Slot.Badge })
+            foreach (var s in new[] { Slot.Color, Slot.Eyes, Slot.Hat, Slot.Arms, Slot.Legs, Slot.Back, Slot.Badge, Slot.Suit, Slot.Head, Slot.Hair, Slot.Skin })
             {
                 var c = Equipped(s);
                 if (!c.IsDefault) ids.Add(c.id);
@@ -308,10 +376,12 @@ namespace SquashBot.Data
         {
             var rng = new System.Random((name ?? "").GetHashCode());
             var outfit = OutfitFrom(null);
-            foreach (var s in new[] { Slot.Color, Slot.Eyes, Slot.Hat, Slot.Back })
+            foreach (var s in new[] { Slot.Hat, Slot.Back, Slot.Suit, Slot.Arms, Slot.Legs, Slot.Head, Slot.Hair, Slot.Skin })
             {
                 if (rng.Next(3) == 0) continue;
-                var pool = InSlot(s).FindAll(c => !c.reward && c.storyLevel == 0 && c.rank == 0);
+                var pool = InSlot(s).FindAll(c => !c.reward && c.storyLevel == 0 && c.rank == 0 && !c.chest
+                    && (s != Slot.Back || c.id.StartsWith("back.cape")) && !(c.id == "hat.diver" || c.id == "hat.astro" || c.id == "hat.visor" || c.id == "hat.cloud"));
+                if (pool.Count == 0) continue;
                 outfit[s] = pool[rng.Next(pool.Count)];
             }
             return outfit;

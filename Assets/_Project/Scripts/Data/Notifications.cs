@@ -6,12 +6,12 @@ namespace SquashBot.Data
     /// <summary>
     /// The challenge's phone notifications ("your profile is being fought right now", the result): on Android, asked
     /// for once on the first challenge (Android 13+ asks the player), then Firebase gives the phone's token, which the
-    /// server keeps for the player. Off until the Firebase project's settings are filled in below; never on Huawei.
+    /// server keeps for the player. Never on Huawei.
     /// </summary>
     public static class Notifications
     {
         // The Firebase project's Android app (from its google-services.json; not secret: they ship in every app).
-        private const string AppId = "", ApiKey = "", ProjectId = "", SenderId = "";
+        private const string AppId = "1:660179106650:android:ecd10e281d5f42eeb5d163", ApiKey = "AIzaSyAaZ0t9H3hnUMI9iWoXc3Wg-tjlue3UAko", ProjectId = "foi-cell", SenderId = "660179106650";
 
         private const string TokenKey = "sb_push_token", AskedKey = "sb_push_asked";
 

@@ -117,7 +117,7 @@ namespace SquashBot.Visual
             robotRoot.localScale = Vector3.one * 1.3f;
             robotLook?.Invoke(robotRoot);
             foreach (var r in robotRoot.GetComponentsInChildren<Renderer>())
-                if (r.name.StartsWith("Eye")) eyes.Add(r);
+                if (r.name.StartsWith("Eye") || r.name == "Glow") eyes.Add(r);
             Part(PrimitiveType.Cylinder, robotRoot.localPosition + new Vector3(-0.8f, 0.3f, 0.1f), new Vector3(0.45f, 0.3f, 0.45f), M("#C9CFE0"));
             Part(PrimitiveType.Cylinder, robotRoot.localPosition + new Vector3(-0.8f, 0.42f, 0.1f), new Vector3(0.47f, 0.05f, 0.47f), M("#FFC94A", new Color(1.6f, 1.1f, 0.3f)));
             var bip = Buddy.Create(transform.TransformPoint(robotRoot.localPosition + new Vector3(0.9f, 0f, -0.1f)));

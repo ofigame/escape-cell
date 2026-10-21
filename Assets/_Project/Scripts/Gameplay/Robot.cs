@@ -99,7 +99,7 @@ namespace SquashBot.Gameplay
         private void BuildVisual()
         {
             // Lift the model onto the tile surface; "visual" is what animations scale and rotate.
-            var lift = new GameObject("Lift").transform;
+            var lift = this.lift = new GameObject("Lift").transform;
             lift.SetParent(transform, false);
             lift.localPosition = new Vector3(0f, GridView.SurfaceY, 0f);
             visual = new GameObject("Visual").transform;
@@ -126,8 +126,20 @@ namespace SquashBot.Gameplay
             bubble.gameObject.SetActive(false);
         }
 
+        private Transform lift;
+
+        /// <summary>foi's size in this mode (the floors show it a little bigger; 1 elsewhere).</summary>
+        public void SetSize(float size) { if (lift != null) lift.localScale = Vector3.one * size; }
+
         /// <summary>The animated model (scaled and rotated by animations); other modes may pose it directly.</summary>
         public Transform Visual => visual;
+
+        /// <summary>Plays one of foi's own moves (a dance, the ultimate's cast or kick); false if there is none.</summary>
+        public bool PlayMove(string name, float rate = 1f) => Skin != null && Skin.PlayMove(name, rate);
+
+        /// <summary>A rigged build's clip player (null for the builds made of parts).</summary>
+        private SkinnedHero Skin => HeroModels.IsSkinned(hero) ? visual.GetComponentInChildren<SkinnedHero>() : null;
+
 
         /// <summary>Shield for <paramref name="seconds"/> that can take <paramref name="hits"/> blocks (upgrades add hits).</summary>
         public void GiveShield(float seconds, int hits = 1)
@@ -207,6 +219,20 @@ namespace SquashBot.Gameplay
         /// </summary>
         public void ApplyOutfit(System.Collections.Generic.Dictionary<Data.Slot, Data.Cosmetic> outfit)
         {
+            var step = outfit[Data.Slot.Step];
+            StepId = step.IsDefault ? null : step.id;
+            StepColor = step.color;
+            var trail = outfit[Data.Slot.Trail];
+            TrailColor = trail.IsDefault ? (Color?)null : trail.color;
+            dance = outfit[Data.Slot.Dance].id;
+            var skin = Skin;
+            if (skin != null)
+            {
+                StepId = null; TrailColor = null; // (the workshop has none of these now)
+                DressSkin(skin, outfit);
+                return;
+            }
+
             int world = Mathf.Max(0, lookWorld);
             var paint = outfit[Data.Slot.Color];
             var bodyColor = paint.IsDefault ? OwnBody(world) : paint.color;
@@ -231,7 +257,6 @@ namespace SquashBot.Gameplay
             float lift = HeroModels.LegLift(hero); // (the longer legs lift the body: its gear with it)
             if (!back.IsDefault) CosmeticModels.Back(Raised(extra * 0.6f + lift), back.id, back.color);
             accessories.gameObject.SetActive(hat.IsDefault && back.IsDefault);
-
             // Arm and leg pieces replace the plain ones; shaped eyes replace the plain eye blocks.
             var arms = outfit[Data.Slot.Arms];
             var legs = outfit[Data.Slot.Legs];
@@ -255,13 +280,43 @@ namespace SquashBot.Gameplay
                 e.GetComponent<MeshRenderer>().enabled = !shaped;
                 if (shaped) CosmeticModels.EyeShape(e, eyes.id, eyeMaterial);
             }
+        }
 
-            var step = outfit[Data.Slot.Step];
-            StepId = step.IsDefault ? null : step.id;
-            StepColor = step.color;
-            var trail = outfit[Data.Slot.Trail];
-            TrailColor = trail.IsDefault ? (Color?)null : trail.color;
-            dance = outfit[Data.Slot.Dance].id;
+        /// <summary>
+        /// foi (the rigged build) in a workshop outfit: its head, hair and skin colour, its armour's paint, a hat on its head,
+        /// a cape as cloth or another back piece on its back, arm and leg gear on its bones, a badge on its chest.
+        /// </summary>
+        private void DressSkin(SkinnedHero skin, System.Collections.Generic.Dictionary<Data.Slot, Data.Cosmetic> outfit)
+        {
+            accessories.gameObject.SetActive(false);
+            if (cosmetics != null) cosmetics.gameObject.SetActive(false);
+            var suit = outfit[Data.Slot.Suit];
+            var headPiece = outfit[Data.Slot.Head];
+            var hair = outfit[Data.Slot.Hair];
+            var skinPiece = outfit[Data.Slot.Skin];
+            int.TryParse(headPiece.id.Replace("head.", ""), out int headNo);
+            SkinnedHero.Dress(skin.transform, new SkinnedHero.Look
+            {
+                head = headNo,
+                hair = hair.IsDefault ? (Color?)null : hair.color,
+                skin = skinPiece.IsDefault ? (Color?)null : skinPiece.color,
+                suit = suit.IsDefault ? null : suit.id.Replace("suit.", ""),
+            });
+            foreach (var mount in new[] { skin.HatMount, skin.BackMount, skin.BadgeMount })
+                if (mount != null)
+                    for (int i = mount.childCount - 1; i >= 0; i--) DestroyImmediate(mount.GetChild(i).gameObject); // at once: a lookalike may be copied right after
+            var hat = outfit[Data.Slot.Hat];
+            bool hood = hat.id.StartsWith("hat.hood"); // a hooded cloak: over the head, not on it
+            SkinnedHero.Hood(skin.transform, hood ? hat.color : (Color?)null);
+            if (!hat.IsDefault && !hood && skin.HatMount != null) CosmeticModels.Hat(skin.HatMount, hat.id, hat.color);
+            var oldCape = skin.transform.Find("Hero_Cape");
+            if (oldCape != null) DestroyImmediate(oldCape.gameObject);
+            var back = outfit[Data.Slot.Back];
+            if (back.id.StartsWith("back.cape")) SoftCape.Build(skin.transform, back.id, back.color); // a cape is cloth on this body
+            // (other back pieces belonged to the old robot: foi wears capes only)
+            var arms = outfit[Data.Slot.Arms];
+            var legs = outfit[Data.Slot.Legs];
+            SkinnedHero.Gear(skin.transform, arms.IsDefault ? null : arms.id, arms.color, null, legs.color);
         }
 
         /// <summary>A holder for garage gear, <paramref name="y"/> higher than the gear was made for.</summary>
@@ -451,7 +506,9 @@ namespace SquashBot.Gameplay
             copy.transform.localPosition = Vector3.zero;
             copy.transform.localRotation = Quaternion.identity;
             copy.transform.localScale = Vector3.one;
-            foreach (var b in copy.GetComponentsInChildren<MonoBehaviour>()) if (!(b is CapeWave)) Destroy(b); // (a cape still waves)
+            foreach (var b in copy.GetComponentsInChildren<MonoBehaviour>()) if (!(b is CapeWave || b is SkinnedHero || b is SoftCape)) Destroy(b); // (a cape still waves, a rigged build still moves)
+            if (HeroModels.IsSkinned(hero))
+                foreach (var r in copy.GetComponentsInChildren<Renderer>(true)) r.enabled = true; // (a stand-in may have hidden its pieces at the moment it was copied)
             return copy;
         }
 
@@ -652,6 +709,7 @@ namespace SquashBot.Gameplay
             away.y = 0f;
             flinchDir = away.sqrMagnitude > 0.001f ? away.normalized : Vector3.zero;
             flinchT = 0f;
+            Skin?.Anger();
         }
 
         /// <summary>A hammer blow at something on another tile: turn to it and lunge a little that way.</summary>
@@ -668,6 +726,7 @@ namespace SquashBot.Gameplay
             targetFacing = Quaternion.LookRotation(dir);
             visual.localRotation = targetFacing; // face the target at once, even one behind: no slow turn before a blow
             StartAnim(Anim.Bump, transform.position, transform.position + dir * 0.32f);
+            Skin?.Punch();
             Swings++;
             return true;
         }
@@ -783,12 +842,14 @@ namespace SquashBot.Gameplay
         public void CheerBrief()
         {
             cheerBrief = true;
+            Skin?.Celebrate(dance);
             StartAnim(Anim.Cheer, transform.position, transform.position);
         }
 
         public void Cheer()
         {
             cheerBrief = false;
+            Skin?.Celebrate(dance);
             IsAlive = false; // freezes input
             targetFacing = FacingCamera;
             var from = GroundedPosition;

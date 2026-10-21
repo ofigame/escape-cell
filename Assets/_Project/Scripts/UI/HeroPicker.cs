@@ -9,7 +9,7 @@ using Kind = SquashBot.UI.UiFactory.ButtonKind;
 namespace SquashBot.UI
 {
     /// <summary>
-    /// Choose foi: the four builds as big cards with their pictures and names. At the very first start it is free and
+    /// Choose foi: the builds on offer as big cards with their pictures and names. At the very first start it is free and
     /// comes up once; later the garage opens it to switch build for a price (the build in use is marked and free).
     /// </summary>
     public class HeroPicker : MonoBehaviour
@@ -62,34 +62,35 @@ namespace SquashBot.UI
         {
             paid = switching;
             title.text = Loc.T(switching ? "hero.switchTitle" : "hero.title");
-            sub.text = switching ? Loc.F("hero.switchSub", SwitchPrice) : Loc.T("hero.sub");
+            sub.text = switching && SwitchPrice > 0 ? Loc.F("hero.switchSub", SwitchPrice) : Loc.T("hero.sub");
             closeButton.SetActive(switching);
             restoreButton.SetActive(!switching);
             for (int i = grid.childCount - 1; i >= 0; i--) Destroy(grid.GetChild(i).gameObject);
             const float w = 470f, h = 640f, gap = 30f;
-            for (int i = 0; i < HeroModels.Count; i++)
+            for (int i = 0; i < HeroModels.Offered.Length; i++)
             {
-                int hero = i;
+                int hero = HeroModels.Offered[i];
                 float x = (i % 2 == 0 ? -1f : 1f) * (w + gap) * 0.5f;
                 float y = -(i / 2) * (h + gap);
                 var card = UiFactory.Card("Hero" + i, grid, new Vector2(0.5f, 1f), new Vector2(x, y), new Vector2(w, h));
                 card.pivot = new Vector2(0.5f, 1f);
-                var colour = HeroModels.Colours(i).body;
+                var colour = HeroModels.Colours(hero).body;
                 var halo = UiFactory.Box("Halo", card, new Vector2(0.5f, 1f), new Vector2(0f, -205f), new Vector2(400f, 400f));
                 halo.pivot = new Vector2(0.5f, 0.5f);
                 UiFactory.Fill(halo, new Color(colour.r, colour.g, colour.b, 0.45f), UiSprites.Shadow, 0.5f).raycastTarget = false;
                 var pic = UiFactory.Box("Picture", card, new Vector2(0.5f, 1f), new Vector2(0f, -205f), new Vector2(350f, 350f));
                 pic.pivot = new Vector2(0.5f, 0.5f);
                 var raw = pic.gameObject.AddComponent<RawImage>();
-                raw.texture = ItemPreview.Hero(i);
+                raw.texture = ItemPreview.Hero(hero);
                 raw.raycastTarget = false;
-                UiFactory.TextBox("Name", card, new Vector2(0.5f, 1f), new Vector2(0f, -425f), new Vector2(440f, 60f), Loc.T("hero." + i), 44f, Palette.UiText, title: true)
+                UiFactory.TextBox("Name", card, new Vector2(0.5f, 1f), new Vector2(0f, -425f), new Vector2(440f, 60f), Loc.T("hero." + hero), 44f, Palette.UiText, title: true)
                     .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-                bool current = switching && SaveData.Hero == i;
+                bool current = switching && SaveData.Hero == hero;
                 if (current)
                     UiFactory.Fill(UiFactory.Stretch("InUse", card), new Color(0.3f, 1f, 0.55f, 0.9f), UiSprites.Ring, 0.6f).raycastTarget = false;
-                string label = current ? Loc.T("hero.inUse") : switching ? SwitchPrice.ToString() : Loc.T("hero.pick");
-                var b = UiFactory.MakeButton(card, label, current ? Kind.Secondary : switching ? Kind.Gold : Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 34f), new Vector2(400f, 96f), () => Choose(hero), 42f);
+                bool priced = switching && SwitchPrice > 0;
+                string label = current ? Loc.T("hero.inUse") : priced ? SwitchPrice.ToString() : Loc.T("hero.pick");
+                var b = UiFactory.MakeButton(card, label, current ? Kind.Secondary : priced ? Kind.Gold : Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 34f), new Vector2(400f, 96f), () => Choose(hero), 42f);
                 ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0f);
                 b.interactable = !current && (!switching || SaveData.Coins >= SwitchPrice);
             }
@@ -101,7 +102,7 @@ namespace SquashBot.UI
         {
             if (paid)
             {
-                if (hero == SaveData.Hero || !Shop.Spend(SwitchPrice)) { Audio.AudioManager.PlaySfx(Audio.Sfx.Bump, 0.6f); return; }
+                if (hero == SaveData.Hero || (SwitchPrice > 0 && !Shop.Spend(SwitchPrice))) { Audio.AudioManager.PlaySfx(Audio.Sfx.Bump, 0.6f); return; }
                 Audio.AudioManager.PlaySfx(Audio.Sfx.Coin, 1f, 1.2f);
             }
             else Audio.AudioManager.PlaySfx(Audio.Sfx.Win, 0.7f, 1.2f);

@@ -19,6 +19,7 @@ namespace SquashBot.UI
         private TextMeshProUGUI freeLine, openTitle, openGift, openNote;
         private Button takeButton, equipButton;
         private WeaponDef gifted;
+        private Cosmetic giftedOutfit;
         private readonly TextMeshProUGUI[] counts = new TextMeshProUGUI[DuelChests.Tiers];
         private readonly Button[] openButtons = new Button[DuelChests.Tiers];
         private readonly TextMeshProUGUI[] openLabels = new TextMeshProUGUI[DuelChests.Tiers];
@@ -27,6 +28,8 @@ namespace SquashBot.UI
 
         /// <summary>A gift was taken (the coins on the menu may need a refresh).</summary>
         public event Action Changed;
+        /// <summary>An outfit from a chest was put on (foi dresses in it).</summary>
+        public event Action OutfitWorn;
 
         public bool IsOpen => screen.IsVisible || opening.IsVisible;
 
@@ -107,6 +110,7 @@ namespace SquashBot.UI
         private void Equip()
         {
             if (gifted != null) Armory.Equip(gifted);
+            if (giftedOutfit != null) { Cosmetics.Equip(giftedOutfit); OutfitWorn?.Invoke(); }
             Take();
         }
 
@@ -120,7 +124,7 @@ namespace SquashBot.UI
         private void Refresh()
         {
             int free = DuelChests.FreeLeft;
-            freeLine.text = Loc.F("chests.free", free, DuelChests.FreePerDay);
+            freeLine.text = DuelChests.FreePerDay > 0 ? Loc.F("chests.free", free, DuelChests.FreePerDay) : "";
             for (int i = 0; i < DuelChests.Tiers; i++)
             {
                 int n = DuelChests.Count((ChestTier)i);
@@ -166,6 +170,7 @@ namespace SquashBot.UI
             takeButton.gameObject.SetActive(false);
             equipButton.gameObject.SetActive(false);
             gifted = reward.weapon;
+            giftedOutfit = reward.outfit;
             opening.Show();
             Audio.AudioManager.PlaySfx(Audio.Sfx.Click, 0.8f, 0.7f);
             ChestStage.Get().Play(t, reward, () =>
@@ -177,12 +182,18 @@ namespace SquashBot.UI
                     openGift.text = Loc.T("weapon." + reward.weapon.id);
                     openNote.text = reward.weapon.chest ? Loc.T("chests.exclusive") : Loc.T("chests.newWeapon");
                 }
+                else if (reward.outfit != null)
+                {
+                    openGift.text = Loc.T("cos." + reward.outfit.id);
+                    openNote.text = reward.outfit.chest ? Loc.T("chests.outfitExclusive") : Loc.T("chests.outfit");
+                }
                 else openGift.text = Loc.F("chests.gold", reward.gold);
                 // A weapon: EQUIP on the left, TAKE THE GIFT on the right; gold: TAKE THE GIFT alone, in the middle.
                 var take = (RectTransform)takeButton.transform;
-                take.anchoredPosition = new Vector2(gifted != null ? 180f : 0f, take.anchoredPosition.y);
-                take.sizeDelta = new Vector2(gifted != null ? 340f : 600f, 130f);
-                equipButton.gameObject.SetActive(gifted != null);
+                bool wearable = gifted != null || giftedOutfit != null;
+                take.anchoredPosition = new Vector2(wearable ? 180f : 0f, take.anchoredPosition.y);
+                take.sizeDelta = new Vector2(wearable ? 340f : 600f, 130f);
+                equipButton.gameObject.SetActive(wearable);
                 takeButton.gameObject.SetActive(true);
             });
         }
