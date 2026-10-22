@@ -13,9 +13,9 @@ namespace SquashBot.UI
     /// </summary>
     public static class Flat
     {
-        public static readonly Color Back = new Color(0.051f, 0.055f, 0.102f);
-        public static readonly Color Card = new Color(0.075f, 0.095f, 0.2f);
-        public static readonly Color CardHi = new Color(0.12f, 0.15f, 0.3f);
+        public static readonly Color Back = new Color(0.04f, 0.07f, 0.16f);
+        public static readonly Color Card = new Color(0.09f, 0.19f, 0.4f);
+        public static readonly Color CardHi = new Color(0.15f, 0.29f, 0.55f);
         public static readonly Color Line = new Color(1f, 1f, 1f, 0.08f);
         public static readonly Color Text = Color.white;
         public static readonly Color Muted = new Color(0.62f, 0.65f, 0.76f);

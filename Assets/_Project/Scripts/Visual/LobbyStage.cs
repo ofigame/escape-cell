@@ -200,6 +200,19 @@ namespace SquashBot.Visual
                 bolts.Add(bolt.gameObject);
             }
 
+            // the night jungle round it all (the space backdrop and the star wheel give way to it)
+            LobbyJungle.Build(transform);
+            foreach (var n in new[] { "Galaxy", "Haze", "Nebula" }) foreach (Transform c in transform) if (c.name == n) c.gameObject.SetActive(false);
+            wheel.gameObject.SetActive(false);
+            foreach (Transform c in transform)
+                if (c.name == "Floor")
+                {
+                    c.localScale = new Vector3(26f, 0.02f, 26f); // (it ends before the forest's own ground)
+                    var dark = new Texture2D(1, 1); dark.SetPixel(0, 0, new Color(0.02f, 0.045f, 0.05f)); dark.Apply();
+                    c.GetComponent<Renderer>().sharedMaterial = MaterialFactory.CreateUnlit(dark); // (no light greys it)
+                }
+            MaterialFactory.SetColors(floor, new Color(0.02f, 0.05f, 0.07f), new Color(0.005f, 0.02f, 0.03f));
+
             StaticMerge.Combine(dial.gameObject, _ => false);
             PlaceModelPlatform(dial);
             StaticMerge.Combine(wheel.gameObject, _ => false);
@@ -385,7 +398,7 @@ namespace SquashBot.Visual
             Cam.fieldOfView = CameraFit.Fov(34f, Cam.aspect);
             for (int i = robotHolder.childCount - 1; i >= 0; i--) Destroy(robotHolder.GetChild(i).gameObject);
             robotLook?.Invoke(robotHolder);
-            Cam.backgroundColor = new Color(0.04f, 0.03f, 0.1f);
+            Cam.backgroundColor = new Color(0.01f, 0.025f, 0.07f);
         }
 
         public void Close() => gameObject.SetActive(false);

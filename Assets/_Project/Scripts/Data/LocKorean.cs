@@ -231,6 +231,7 @@ namespace SquashBot.Data
             ["chests.exclusive"] = "상점에서 팔지 않는 특별한 무기!",
             ["chests.gold"] = "골드 {0}",
             ["chests.take"] = "선물 받기",
+            ["chests.swap"] = "바꾸기 (광고)",
             ["chests.odds0"] = "골드 75% · 무기 25%",
             ["chests.odds1"] = "골드 60% · 무기 32–40% · 상자 전용 무기 8% (3연승 이상)",
             ["chests.odds2"] = "골드 38% · 무기 30% · 상자 전용 무기 32%",

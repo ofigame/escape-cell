@@ -231,6 +231,7 @@ namespace SquashBot.Data
             ["chests.exclusive"] = "¡Un arma que ninguna tienda vende!",
             ["chests.gold"] = "{0} de oro",
             ["chests.take"] = "TOMAR EL REGALO",
+            ["chests.swap"] = "CAMBIAR (ANUNCIO)",
             ["chests.odds0"] = "Oro 75% · Arma 25%",
             ["chests.odds1"] = "Oro 60% · Arma 32–40% · Arma de cofre 8% (racha de 3+)",
             ["chests.odds2"] = "Oro 38% · Arma 30% · Arma de cofre 32%",

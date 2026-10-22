@@ -130,7 +130,7 @@ namespace SquashBot.Visual
             // The health bar over its head.
             barRoot = new GameObject("HealthBar").transform;
             barRoot.SetParent(transform, false);
-            barRoot.localPosition = new Vector3(0f, 2.3f, 0f);
+            barRoot.localPosition = new Vector3(0f, rig != null ? 3.35f : 2.3f, 0f); // (over the taller vanG models)
             barRoot.localScale = Vector3.one * 1.35f;
             Shapes.Rounded("Back", barRoot, Vector3.zero, new Vector3(1.24f, 0.2f, 0.04f), 0.06f, MaterialFactory.Create(new Color(0.1f, 0.08f, 0.16f), Color.black));
             barMat = MaterialFactory.Create(new Color(0.4f, 1f, 0.4f), new Color(0.4f, 1.6f, 0.4f));

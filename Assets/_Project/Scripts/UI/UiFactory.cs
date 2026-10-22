@@ -15,8 +15,8 @@ namespace SquashBot.UI
     /// <summary>Builds the UI from code: crisp TextMeshPro text, rounded glass cards and animated buttons.</summary>
     public static class UiFactory
     {
-        public static readonly Color CardColor = new Color(0.07f, 0.09f, 0.2f, 0.95f);
-        public static readonly Color PillColor = new Color(0.03f, 0.03f, 0.08f, 0.5f);
+        public static readonly Color CardColor = new Color(0.08f, 0.18f, 0.4f, 0.96f); // (the new look's deep blue)
+        public static readonly Color PillColor = new Color(0.05f, 0.12f, 0.3f, 0.78f);
         public static readonly Color TextDark = new Color(0.13f, 0.12f, 0.29f);
 
         private static TMP_FontAsset font, titleFont;
@@ -242,7 +242,7 @@ namespace SquashBot.UI
         }
 
         /// <summary>Deep navy, a little see-through: the body of the game look's cards, chips and dark buttons.</summary>
-        public static readonly Color Navy = new Color(0.07f, 0.09f, 0.2f, 0.94f);
+        public static readonly Color Navy = new Color(0.08f, 0.18f, 0.4f, 0.94f);
 
         /// <summary>
         /// Fills the rect with a cut-corner plate in the colour and lays the double gold rim over it (ppu 1 = the rim's
@@ -342,11 +342,11 @@ namespace SquashBot.UI
 
         public static readonly ChunkyStyle CyanStyle = new ChunkyStyle("#22C3FF", "#22C3FF", "#05304E");
         public static readonly ChunkyStyle GoldStyle = new ChunkyStyle("#FFB424", "#FFA51A", "#5C3200");
-        public static readonly ChunkyStyle PurpleStyle = new ChunkyStyle("#FFFFFF24", "#00000000", "#0A0820", glass: true);
+        public static readonly ChunkyStyle PurpleStyle = new ChunkyStyle("#A63CE0", "#C060F2", "#34084C"); // (the new look: glossy purple)
         public static readonly ChunkyStyle GreenStyle = new ChunkyStyle("#2FD07A", "#2FD07A", "#073A1E");
         public static readonly ChunkyStyle RedStyle = new ChunkyStyle("#FF4F6A", "#FF4F6A", "#4E0A16");
-        public static readonly ChunkyStyle DarkStyle = new ChunkyStyle("#0A0A1499", "#00000000", "#05050C", glass: true);
-        public static readonly ChunkyStyle OrangeStyle = new ChunkyStyle("#FF8424", "#FF8424", "#5A2400");
+        public static readonly ChunkyStyle DarkStyle = new ChunkyStyle("#2C78D8", "#3E8CF0", "#0A2250"); // (glossy blue)
+        public static readonly ChunkyStyle OrangeStyle = new ChunkyStyle("#46C81E", "#52DC28", "#0F4606"); // (the main call to action: glossy green, as on the menu)
 
         /// <summary>A style from any colour (skills, worlds): that colour's face and glow, a deep shade of it for text.</summary>
         public static ChunkyStyle StyleOf(Color c) => new ChunkyStyle { face = c, lip = c, outline = new Color(c.r * 0.22f, c.g * 0.2f, c.b * 0.3f, 1f) };

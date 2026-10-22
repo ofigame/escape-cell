@@ -231,6 +231,7 @@ namespace SquashBot.Data
             ["chests.exclusive"] = "سلاح لا يُباع في أي متجر!",
             ["chests.gold"] = "{0} ذهب",
             ["chests.take"] = "خذ الهدية",
+            ["chests.swap"] = "استبدال (إعلان)",
             ["chests.odds0"] = "ذهب 75% · سلاح 25%",
             ["chests.odds1"] = "ذهب 60% · سلاح 32–40% · سلاح خاص 8% (3 انتصارات متتالية أو أكثر)",
             ["chests.odds2"] = "ذهب 38% · سلاح 30% · سلاح خاص 32%",

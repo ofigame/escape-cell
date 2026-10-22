@@ -231,6 +231,7 @@ namespace SquashBot.Data
             ["chests.exclusive"] = "Mağazada olmayan xüsusi silah!",
             ["chests.gold"] = "{0} qızıl",
             ["chests.take"] = "HƏDİYYƏNİ AL",
+            ["chests.swap"] = "DƏYİŞ (REKLAM)",
             ["chests.odds0"] = "Qızıl 75% · Silah 25%",
             ["chests.odds1"] = "Qızıl 60% · Silah 32–40% · Xüsusi silah 8% (3+ seriya)",
             ["chests.odds2"] = "Qızıl 38% · Silah 30% · Xüsusi silah 32%",

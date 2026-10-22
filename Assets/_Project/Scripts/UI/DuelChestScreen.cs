@@ -17,7 +17,7 @@ namespace SquashBot.UI
     {
         private UiScreen screen, opening;
         private TextMeshProUGUI freeLine, openTitle, openGift, openNote;
-        private Button takeButton, equipButton;
+        private Button takeButton, equipButton, swapButton;
         private WeaponDef gifted;
         private Cosmetic giftedOutfit;
         private readonly TextMeshProUGUI[] counts = new TextMeshProUGUI[DuelChests.Tiers];
@@ -104,11 +104,16 @@ namespace SquashBot.UI
             ((RectTransform)takeButton.transform).pivot = new Vector2(0.5f, 0.5f);
             equipButton = Flat.Button(root, Loc.T("chests.equip"), new Vector2(0.5f, 0f), new Vector2(-180f, Ads.BannerReserve + 120f), new Vector2(340f, 130f), new Color(0.62f, 0.4f, 1f), Color.white, Equip, 44f);
             ((RectTransform)equipButton.transform).pivot = new Vector2(0.5f, 0.5f);
+            // Not happy with it? An ad swaps it for another draw (once).
+            swapButton = Flat.Button(root, "▶ " + Loc.T("chests.swap"), new Vector2(0.5f, 0f), new Vector2(0f, Ads.BannerReserve + 270f), new Vector2(600f, 110f), new Color(0.95f, 0.6f, 0.15f), Color.white, Swap, 38f);
+            ((RectTransform)swapButton.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 
         /// <summary>EQUIP: the weapon that came out goes straight into foi's hand (a gun into the gun slot).</summary>
         private void Equip()
         {
+            DuelChests.Give(shown); // (owned first, then worn)
+            shown = null;
             if (gifted != null) Armory.Equip(gifted);
             if (giftedOutfit != null) { Cosmetics.Equip(giftedOutfit); OutfitWorn?.Invoke(); }
             Take();
@@ -130,45 +135,51 @@ namespace SquashBot.UI
                 int n = DuelChests.Count((ChestTier)i);
                 counts[i].text = n > 0 ? "x" + n : Loc.T("chests.none");
                 openButtons[i].interactable = n > 0;
-                openLabels[i].text = free > 0 ? Loc.T("chests.open") : "▶ " + Loc.T("chests.open");
+                openLabels[i].text = Loc.T("chests.open");
                 pictures[i].color = n > 0 ? Color.white : new Color(1f, 1f, 1f, 0.35f);
             }
         }
 
-        /// <summary>OPEN: free while today's free openings last, else after an ad watched to the end.</summary>
+        /// <summary>OPEN: free, always (an ad only swaps what came out, if the player wants).</summary>
         private void TryOpen(ChestTier t)
         {
             if (busy || DuelChests.Count(t) <= 0) return;
-            if (DuelChests.FreeLeft > 0)
-            {
-                DuelChests.UseFree();
-                Open(t);
-                return;
-            }
-            if (!Ads.Rewarded.IsReady)
-            {
-                freeLine.text = Loc.T("chests.noAd");
-                return;
-            }
-            busy = true;
+            var reward = DuelChests.Open(t);
+            if (reward == null) { Refresh(); return; }
+            openedTier = t;
+            swapped = false;
+            Reveal(t, reward);
+        }
+
+        private ChestTier openedTier;
+        private ChestReward shown;
+        private bool swapped;
+
+        /// <summary>SWAP: after an ad watched to the end, the chest is drawn again (once).</summary>
+        private void Swap()
+        {
+            if (swapped || shown == null) return;
+            if (!Ads.Rewarded.IsReady) { openNote.text = Loc.T("chests.noAd"); return; }
+            swapButton.interactable = false;
             Ads.Rewarded.Show(rewarded =>
             {
-                busy = false;
-                if (rewarded) Open(t);
-                else Refresh();
+                if (!rewarded) { swapButton.interactable = true; return; }
+                swapped = true;
+                ChestStage.Get().Stop();
+                Reveal(openedTier, DuelChests.Redraw(openedTier, shown));
             });
         }
 
-        private void Open(ChestTier t)
+        private void Reveal(ChestTier t, ChestReward reward)
         {
-            var reward = DuelChests.Open(t);
-            if (reward == null) { Refresh(); return; }
+            shown = reward;
             busy = true;
             openTitle.text = TierName(t);
             openGift.text = "";
             openNote.text = "";
             takeButton.gameObject.SetActive(false);
             equipButton.gameObject.SetActive(false);
+            swapButton.gameObject.SetActive(false);
             gifted = reward.weapon;
             giftedOutfit = reward.outfit;
             opening.Show();
@@ -195,11 +206,15 @@ namespace SquashBot.UI
                 take.sizeDelta = new Vector2(wearable ? 340f : 600f, 130f);
                 equipButton.gameObject.SetActive(wearable);
                 takeButton.gameObject.SetActive(true);
+                swapButton.gameObject.SetActive(!swapped);
+                swapButton.interactable = true;
             });
         }
 
         private void Take()
         {
+            DuelChests.Give(shown); // (given only now: a swapped draw never gave the first)
+            shown = null;
             ChestStage.Get().Stop();
             opening.Hide();
             busy = false;

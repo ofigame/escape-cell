@@ -64,13 +64,28 @@ namespace SquashBot.UI
 
         private enum FrameKind { Plate, Bevel, Rim }
 
-        /// <summary>Signed distance to the cut-corner rectangle inset by <see cref="FramePad"/> (negative inside).</summary>
+        /// <summary>Corner radius of the new look's rounded plates and frames (old 128 units).</summary>
+        private const float Round = 28f;
+
+        /// <summary>Signed distance to the rounded rectangle inset by <see cref="FramePad"/> (negative inside).</summary>
         private static float ChamferDistance(float x, float y)
         {
             float half = Size * 0.5f - FramePad;
-            float px = Mathf.Abs(x - Size * 0.5f), py = Mathf.Abs(y - Size * 0.5f);
-            return Mathf.Max(Mathf.Max(px - half, py - half), (px + py - (2f * half - Chamfer)) * 0.70710678f);
+            float qx = Mathf.Abs(x - Size * 0.5f) - (half - Round), qy = Mathf.Abs(y - Size * 0.5f) - (half - Round);
+            float ox = Mathf.Max(qx, 0f), oy = Mathf.Max(qy, 0f);
+            return Mathf.Sqrt(ox * ox + oy * oy) + Mathf.Min(Mathf.Max(qx, qy), 0f) - Round;
         }
+
+        /// <summary>Brushed steel with a blue cast: dark at the bottom, pale at the top, a bright streak where <paramref name="shine"/> is high.</summary>
+        private static Color SteelAt(float t, float shine)
+        {
+            var dark = new Color(0.36f, 0.42f, 0.52f);
+            var light = new Color(0.86f, 0.9f, 0.96f);
+            var c = Color.Lerp(dark, light, Mathf.SmoothStep(0f, 1f, t));
+            return Color.Lerp(c, Color.white, shine * 0.5f);
+        }
+
+        private static readonly Color Neon = new Color(0.35f, 0.92f, 1f);
 
         /// <summary>How much of a band of distances [from, to] covers this pixel (soft edges).</summary>
         /// <summary>The same in the fine drawing: distances in the old units, soft edges one fine pixel wide.</summary>
@@ -101,36 +116,37 @@ namespace SquashBot.UI
                     Color c;
                     if (kind == FrameKind.Plate)
                     {
-                        float g = Mathf.Lerp(0.82f, 1f, Mathf.SmoothStep(0f, 1f, t));
+                        // the new look's panels: a soft top-to-bottom gradient, a gloss along the top, a shade at the foot
+                        float g = Mathf.Lerp(0.78f, 1f, Mathf.SmoothStep(0f, 1f, t));
+                        if (t > 0.8f && d < -6f) g = Mathf.Min(1.0f, g + 0.06f * Mathf.SmoothStep(0.8f, 0.95f, t));
+                        g = Mathf.Lerp(g, 0.7f, BandK(d, -6f, 0f) * (t < 0.5f ? 0.5f : 0f));
                         c = new Color(g, g, g, Mathf.Clamp01(0.5f - d * K));
                     }
                     else if (kind == FrameKind.Bevel)
                     {
                         // A raised face: the body over a gradient, a lit band along the upper inner edge and a shaded
                         // band along the lower one, and a faint sheen over the upper half.
-                        float g = Mathf.Lerp(0.66f, 0.9f, Mathf.SmoothStep(0f, 1f, t));
-                        float edge = BandK(d, -7f, 0f);
-                        g = Mathf.Lerp(g, t > 0.5f ? 1f : 0.48f, edge * 0.85f);
-                        if (t > 0.55f && d < -7f) g = Mathf.Min(1f, g + 0.08f);
-                        c = new Color(g, g, g, Mathf.Clamp01(0.5f - d * K));
+                        // the new look's glossy candy face: deeper toward the foot, a broad pale gloss over the top half,
+                        // a darker band along the lower edge, and a small white glint near the top-left corner
+                        float g = Mathf.Lerp(0.55f, 0.92f, Mathf.SmoothStep(0f, 1f, t));
+                        float edge = BandK(d, -8f, 0f);
+                        g = Mathf.Lerp(g, t > 0.5f ? 1f : 0.38f, edge * 0.85f);
+                        float gloss = t > 0.54f && d < -7f ? Mathf.SmoothStep(0.54f, 0.68f, t) * 0.3f : 0f;
+                        float gx = fx - 26f, gy = fy - (Size - 22f);
+                        float glint = Mathf.Clamp01(1.2f - Mathf.Sqrt(gx * gx / 64f + gy * gy / 16f));
+                        float w = Mathf.Min(1f, g + gloss + glint * 0.6f);
+                        c = new Color(w, w, w, Mathf.Clamp01(0.5f - d * K));
                     }
                     else
                     {
-                        // a dark outline, a broad gold line, a gap, a fine gold line; diamonds at the four inner corners
-                        float outline = BandK(d, 0f, 1.6f) * 0.75f;
-                        float outer = BandK(d, -4.6f, 0f);
-                        float inner = BandK(d, -9.6f, -7.6f);
-                        float shine = Mathf.Clamp01(1f - Mathf.Abs((d + 2.3f) / 2.3f));
-                        float ax = Mathf.Abs(fx - Size * 0.5f), ay = Mathf.Abs(fy - Size * 0.5f);
-                        float dia = Mathf.Abs(ax - (half - 12f)) + Mathf.Abs(ay - (half - 12f));
-                        float diamond = Mathf.Clamp01((5.2f - dia) * K);
-                        float a = Mathf.Max(outer, Mathf.Max(inner * 0.9f, diamond));
-                        if (a > 0f)
-                        {
-                            var g = outer >= inner || diamond > inner ? GoldAt(t, shine) : GoldAt(t, 0f) * 0.92f;
-                            c = new Color(g.r, g.g, g.b, a);
-                        }
-                        else c = new Color(0.06f, 0.035f, 0.01f, outline);
+                        // the new look's frame: a dark navy outline, a band of brushed steel, a fine neon-cyan line inside
+                        float outline = BandK(d, 0f, 2.2f) * 0.9f;
+                        float outer = BandK(d, -6.8f, 0f);
+                        float inner = BandK(d, -10f, -8.2f);
+                        float shine = Mathf.Clamp01(1f - Mathf.Abs((d + 3.4f) / 3.4f));
+                        if (outer > 0f) { var g = SteelAt(t, shine); c = new Color(g.r, g.g, g.b, outer); }
+                        else if (inner > 0f) c = new Color(Neon.r, Neon.g, Neon.b, inner * 0.8f);
+                        else c = new Color(0.03f, 0.05f, 0.14f, outline);
                     }
                     px[y * FS + x] = c;
                 }
@@ -151,12 +167,19 @@ namespace SquashBot.UI
                 {
                     float dx = x + 0.5f - S * 0.5f, dy = y + 0.5f - S * 0.5f;
                     float d = Mathf.Sqrt(dx * dx + dy * dy) - R; // negative inside
-                    float outer = Band(d, -9f, 0f), inner = Band(d, -18f, -14.5f), outline = Band(d, 0f, 2.5f) * 0.75f;
+                    // the new look: a dark outline, a thick band of brushed steel, a fine neon-cyan line inside it,
+                    // and a white glint at the top left of the ball
+                    float outer = Band(d, -12f, 0f), inner = Band(d, -16f, -13.5f), outline = Band(d, 0f, 3f) * 0.85f;
                     float t = y / (float)(S - 1);
-                    float shine = Mathf.Clamp01(1f - Mathf.Abs((d + 4.5f) / 4.5f));
-                    float a = Mathf.Max(outer, inner * 0.9f);
-                    var g = a > 0f ? (inner > outer ? GoldAt(t, 0f) * 0.92f : GoldAt(t, shine)) : new Color(0.06f, 0.035f, 0.01f);
-                    px[y * S + x] = new Color(g.r, g.g, g.b, a > 0f ? a : outline);
+                    float shine = Mathf.Clamp01(1f - Mathf.Abs((d + 5f) / 5f));
+                    float gx = dx + S * 0.2f, gy = dy - S * 0.24f;
+                    float glint = Mathf.Clamp01(1.3f - Mathf.Sqrt(gx * gx / 380f + gy * gy / 120f)) * (d < -16f ? 1f : 0f);
+                    Color g; float a;
+                    if (outer > 0f) { g = SteelAt(t, shine); a = outer; }
+                    else if (inner > 0f) { g = Neon; a = inner * 0.85f; }
+                    else if (glint > 0f) { g = Color.white; a = glint * 0.7f; }
+                    else { g = new Color(0.03f, 0.05f, 0.14f); a = outline; }
+                    px[y * S + x] = new Color(g.r, g.g, g.b, a);
                 }
             tex.SetPixels(px);
             tex.Apply(true, true);

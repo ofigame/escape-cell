@@ -17,14 +17,14 @@ namespace SquashBot.Data
 
     /// <summary>
     /// Duel chests: every duel won brings one, and the better the play the better the chest — a winning streak and
-    /// health to spare. Each opens after an ad watched to the end. Inside: gold, a weapon from the
+    /// health to spare. Each opens free; what came out can be swapped once for another draw after an ad. Inside: gold, a weapon from the
     /// shop, or (in the better chests, for winning streaks) a weapon no shop sells; now and then a surprise outfit for foi
     /// (one only chests hold, or one from the workshop not yet owned).
     /// </summary>
     public static class DuelChests
     {
         public const int Tiers = 3;
-        public const int FreePerDay = 0; // every chest opens after an ad
+        public const int FreePerDay = 0; // (no daily count: every chest opens free; an ad only swaps what came out)
         private const int Cap = 30;
 
         public static int Count(ChestTier t) => Prefs.GetInt("sb_dchest_" + (int)t, 0);
@@ -75,17 +75,36 @@ namespace SquashBot.Data
             Prefs.Save();
         }
 
-        /// <summary>Opens one chest of the kind: takes it, draws what is inside and gives it to the player.</summary>
+        /// <summary>Opens one chest of the kind: takes it and draws what is inside (not given yet: <see cref="Give"/>).</summary>
         public static ChestReward Open(ChestTier t)
         {
             if (Count(t) <= 0) return null;
             SetCount(t, Count(t) - 1);
-            var r = Roll(t);
+            Prefs.Save();
+            return Roll(t);
+        }
+
+        /// <summary>A second draw from the same chest (after an ad), never the same thing again.</summary>
+        public static ChestReward Redraw(ChestTier t, ChestReward was)
+        {
+            ChestReward r = null;
+            for (int i = 0; i < 8; i++)
+            {
+                r = Roll(t);
+                bool same = was != null && (r.weapon != null ? r.weapon == was.weapon : r.outfit != null ? r.outfit == was.outfit : was.weapon == null && was.outfit == null);
+                if (!same) break;
+            }
+            return r;
+        }
+
+        /// <summary>Gives what came out to the player.</summary>
+        public static void Give(ChestReward r)
+        {
+            if (r == null) return;
             if (r.weapon != null) Armory.Grant(r.weapon);
             else if (r.outfit != null) Cosmetics.Give(r.outfit.id);
             else SaveData.Coins += r.gold;
             Prefs.Save();
-            return r;
         }
 
         private static ChestReward Roll(ChestTier t)
