@@ -139,7 +139,7 @@ namespace SquashBot.UI
         private CanvasGroup arenaTipGroup;
         private float arenaTipClock;
         private TextMeshProUGUI menuLevel, menuWorld, menuMission, menuCoins, menuLives, menuStars;
-        private Button menuDaily, menuBonus;
+        private Button menuBonus; // (the bonus button is gone: never set)
         private RectTransform menuRank, menuRankBadge;
         private TextMeshProUGUI menuRankText, menuRankCups, menuDefense;
         private int menuRankShown = -1;
@@ -536,18 +536,8 @@ namespace SquashBot.UI
             // Logo up top; the robot stands on its lit pedestal in the middle (the lobby stage behind the menu).
             MenuSkin.Picture("Logo", t, "logo", Top, new Vector2(0f, -150f), new Vector2(500f, 285f));
 
-            // Today's chest: a glowing chest button under the coins, only while it is waiting.
-            menuDaily = MenuArt.DockButton(t, Loc.T("daily.chest"), MenuArt.Icon.Chest, Palette.UiGold, TopLeft, new Vector2(110f, -230f), 120f, () => DailyPressed?.Invoke());
-            ((RectTransform)menuDaily.transform).pivot = new Vector2(0.5f, 0.5f);
-            var ping = UiFactory.Box("Ping", menuDaily.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(44f, 44f));
-            ping.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(ping, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
-            UiFactory.Text(ping, "!", 32f, Color.white);
-            menuDaily.gameObject.AddComponent<Pulse>();
-            MenuSkin.Orb(menuDaily, "orb_blank_gold", true);
-
-            // Today's quests: under the chest, with a red dot while one is done and waiting.
-            menuQuests = MenuArt.DockButton(t, Loc.T("quests.button"), MenuArt.Icon.Guide, new Color(0.45f, 0.75f, 1f), TopLeft, new Vector2(110f, -400f), 120f, () => Quests.Show());
+            // Today's quests: top left, with a red dot while one is done and waiting.
+            menuQuests = MenuArt.DockButton(t, Loc.T("quests.button"), MenuArt.Icon.Guide, new Color(0.45f, 0.75f, 1f), TopLeft, new Vector2(110f, -230f), 120f, () => Quests.Show());
             ((RectTransform)menuQuests.transform).pivot = new Vector2(0.5f, 0.5f);
             var qPing = UiFactory.Box("Ping", menuQuests.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(44f, 44f));
             qPing.pivot = new Vector2(0.5f, 0.5f);
@@ -557,7 +547,7 @@ namespace SquashBot.UI
             MenuSkin.Orb(menuQuests, "orb_quests");
 
             // The army: under the quests (its free development points glow on it).
-            var army = MenuArt.DockButton(t, Loc.T("army.button"), MenuArt.Icon.Swords, new Color(1f, 0.72f, 0.25f), TopLeft, new Vector2(110f, -570f), 120f, () => ArmyView.Show(armyWorld));
+            var army = MenuArt.DockButton(t, Loc.T("army.button"), MenuArt.Icon.Swords, new Color(1f, 0.72f, 0.25f), TopLeft, new Vector2(110f, -400f), 120f, () => ArmyView.Show(armyWorld));
             ((RectTransform)army.transform).pivot = new Vector2(0.5f, 0.5f);
             var aPing = UiFactory.Box("Ping", army.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(44f, 44f));
             aPing.pivot = new Vector2(0.5f, 0.5f);
@@ -567,23 +557,12 @@ namespace SquashBot.UI
             MenuSkin.Orb(army, "orb_army");
 
             // Friends: under the army (add a friend, invite one to a duel).
-            var friends = MenuArt.DockButton(t, Loc.T("friends.button"), MenuArt.Icon.Friends, new Color(0.4f, 0.75f, 1f), TopLeft, new Vector2(110f, -740f), 120f, () => FriendsPressed?.Invoke());
+            var friends = MenuArt.DockButton(t, Loc.T("friends.button"), MenuArt.Icon.Friends, new Color(0.4f, 0.75f, 1f), TopLeft, new Vector2(110f, -570f), 120f, () => FriendsPressed?.Invoke());
             ((RectTransform)friends.transform).pivot = new Vector2(0.5f, 0.5f);
             MenuSkin.Orb(friends, "orb_friends");
 
-            // The battle arenas: top right, under the settings.
-            var arenas = MenuArt.DockButton(t, Loc.T("arena.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.35f, 0.3f), TopRight, new Vector2(-110f, -400f), 120f, () => ArenasPressed?.Invoke());
-            ((RectTransform)arenas.transform).pivot = new Vector2(0.5f, 0.5f);
-            MenuSkin.Orb(arenas, "orb_battle");
-            // The daily bonus games: under the battle arenas (plays left today, glowing while there are some).
-            menuBonus = MenuArt.DockButton(t, "", MenuArt.Icon.Chest, new Color(1f, 0.6f, 0.2f), TopRight, new Vector2(-110f, -570f), 120f, () => DailyBonusPressed?.Invoke());
-            ((RectTransform)menuBonus.transform).pivot = new Vector2(0.5f, 0.5f);
-            menuBonusLabel = menuBonus.transform.Find("Label").GetComponentInChildren<TextMeshProUGUI>();
-            menuBonus.gameObject.AddComponent<Pulse>();
-            MenuSkin.Orb(menuBonus, "orb_blank_orange", true);
-
-            // The duel chests: under the daily bonus, with how many wait to be opened.
-            var chests = MenuArt.DockButton(t, Loc.T("chests.button"), MenuArt.Icon.Chest, new Color(0.62f, 0.4f, 0.22f), TopRight, new Vector2(-110f, -740f), 120f, () => { DuelChestsView.Show(); });
+            // The duel chests: top right under the profile, with how many wait to be opened.
+            var chests = MenuArt.DockButton(t, Loc.T("chests.button"), MenuArt.Icon.Chest, new Color(0.62f, 0.4f, 0.22f), TopRight, new Vector2(-110f, -400f), 120f, () => { DuelChestsView.Show(); });
             ((RectTransform)chests.transform).pivot = new Vector2(0.5f, 0.5f);
             var cPing = UiFactory.Box("Ping", chests.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(48f, 48f));
             cPing.pivot = new Vector2(0.5f, 0.5f);
@@ -642,14 +621,14 @@ namespace SquashBot.UI
             menuMission.fontSizeMin = 20f;
             menuMission.fontSizeMax = 30f;
 
-            var play = UiFactory.MakeButton(card, Loc.T("menu.mission"), Kind.Primary, Bottom, new Vector2(-225f, 30f), new Vector2(430f, 150f), () => PlayPressed?.Invoke(), 64f);
-            play.gameObject.AddComponent<Pulse>();
-            ((RectTransform)play.transform).sizeDelta = new Vector2(432f, 146f);
-            MenuSkin.Face(play, "btn_green", new Color(0.05f, 0.25f, 0.05f));
-            // CHALLENGE beside PLAY, the same size, in the challenge's purple.
-            var challenge = UiFactory.MakeButton(card, Loc.T("ch.button"), Kind.Primary, Bottom, new Vector2(225f, 30f), new Vector2(430f, 150f), () => ChallengePressed?.Invoke(), 60f);
-            ((RectTransform)challenge.transform).sizeDelta = new Vector2(432f, 146f);
-            MenuSkin.Face(challenge, "btn_purple", new Color(0.36f, 0.15f, 0.02f)); // (orange now)
+            // DUEL first: the game's heart now (left, green, beating, a little bigger); the mission beside it, still.
+            var challenge = UiFactory.MakeButton(card, Loc.T("menu.duel"), Kind.Primary, Bottom, new Vector2(-195f, 22f), new Vector2(430f, 150f), () => ChallengePressed?.Invoke(), 84f);
+            challenge.gameObject.AddComponent<Pulse>();
+            ((RectTransform)challenge.transform).sizeDelta = new Vector2(530f, 182f);
+            MenuSkin.Face(challenge, "btn_green", new Color(0.05f, 0.25f, 0.05f));
+            var play = UiFactory.MakeButton(card, Loc.T("menu.mission"), Kind.Primary, Bottom, new Vector2(272f, 34f), new Vector2(430f, 150f), () => PlayPressed?.Invoke(), 50f);
+            ((RectTransform)play.transform).sizeDelta = new Vector2(370f, 130f);
+            MenuSkin.Face(play, "btn_purple", new Color(0.36f, 0.15f, 0.02f)); // (orange)
 
             // The dock: garage, shop, map and the guide, as gold-ringed orbs on a framed navy bar.
             var dock = UiFactory.Box("Dock", t, Bottom, new Vector2(0f, Ads.BannerReserve + 14f), new Vector2(1000f, 206f));
@@ -791,7 +770,6 @@ namespace SquashBot.UI
             menuStars.text = Progress.TotalStars(levelCount).ToString();
             armyWorld = SquashBot.Data.LevelCatalog.WorldOf(levelIndex);
             if (armyPing != null) armyPing.SetActive(SquashBot.Data.Army.FreePoints > 0);
-            menuDaily.gameObject.SetActive(DailyChest.Ready);
             RefreshQuests();
             RefreshChests();
             RefreshDailyBonus();
@@ -812,7 +790,6 @@ namespace SquashBot.UI
         public void RefreshMenuCoins()
         {
             menuCoins.text = SaveData.Coins.ToString();
-            menuDaily.gameObject.SetActive(DailyChest.Ready);
         }
 
         public void ShowShop()

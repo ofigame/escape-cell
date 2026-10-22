@@ -271,13 +271,30 @@ namespace SquashBot.Visual
             return new Color32((byte)Mathf.Clamp(r, 0f, 255f), (byte)Mathf.Clamp(g, 0f, 255f), (byte)Mathf.Clamp(b, 0f, 255f), 255);
         }
 
+        /// <summary>
+        /// A truer look for the whole head: a little more contrast (the shading of the hair's strands and the face's shapes
+        /// shows, not a flat toy colour) and, for hair, richer colour.
+        /// </summary>
+        private static Color32 Grade(Color32 p, float hair)
+        {
+            float r = p.r, g = p.g, b = p.b;
+            const float Contrast = 1.12f;
+            r = 128f + (r - 128f) * Contrast; g = 128f + (g - 128f) * Contrast; b = 128f + (b - 128f) * Contrast;
+            if (hair > 0.01f)
+            {
+                float lum = r * 0.3f + g * 0.59f + b * 0.11f, sat = 1f + 0.22f * hair;
+                r = lum + (r - lum) * sat; g = lum + (g - lum) * sat; b = lum + (b - lum) * sat;
+            }
+            return new Color32((byte)Mathf.Clamp(r, 0f, 255f), (byte)Mathf.Clamp(g, 0f, 255f), (byte)Mathf.Clamp(b, 0f, 255f), 255);
+        }
+
         /// <summary>The head's own light: a part of its colour that no light or shadow takes away, so the face never
         /// darkens as the lights round it change (on phones each thing gets only a few of the scene's lights).</summary>
-        private const float HeadGlow = 0.68f;
+        private const float HeadGlow = 0.4f;
 
         /// <summary>How much the face takes from the lights round it (the rest is its own light): coloured lamps and flames
         /// on a floor tint it only a little, and it never goes dark or orange.</summary>
-        private const float HeadLit = 0.4f;
+        private const float HeadLit = 0.72f; // (lit like the body: shaped by its light and shade, not a flat sticker)
 
         private static Material HeadPaint(int n, Color? hair, Color? skin)
         {
@@ -315,17 +332,17 @@ namespace SquashBot.Visual
                     for (int i = 0; i < px.Length; i++)
                     {
                         float wh = mk[i].r / 255f, ws = mk[i].g / 255f;
-                        if (wh < 0.01f && ws < 0.01f) continue;
+                        if (wh < 0.01f && ws < 0.01f) { px[i] = Grade(px[i], 0f); continue; }
                         var mul = Vector3.one + (hr - Vector3.one) * wh + (sr - Vector3.one) * ws;
                         var p = px[i];
-                        px[i] = Vivid(new Color32((byte)Mathf.Min(255f, p.r * mul.x), (byte)Mathf.Min(255f, p.g * mul.y), (byte)Mathf.Min(255f, p.b * mul.z), 255), ws);
+                        px[i] = Grade(Vivid(new Color32((byte)Mathf.Min(255f, p.r * mul.x), (byte)Mathf.Min(255f, p.g * mul.y), (byte)Mathf.Min(255f, p.b * mul.z), 255), ws), wh);
                     }
                     tex = new Texture2D(W, W, TextureFormat.RGBA32, true) { name = key };
                     tex.SetPixels32(px);
                     tex.Apply(true, true);
                 }
             }
-            m = MaterialFactory.CreateSurface(new Color(HeadLit, HeadLit, HeadLit), Color.black, 0.18f, 0f); // matte skin, mostly its own light
+            m = MaterialFactory.CreateSurface(new Color(HeadLit, HeadLit, HeadLit), Color.black, 0.3f, 0f); // skin with a soft sheen, partly its own light
             if (tex != null)
             {
                 m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
@@ -551,7 +568,69 @@ namespace SquashBot.Visual
 
         // ---------- Knocks (the duel's big blows) ----------
 
-        private Coroutine knock, pop, hop;
+        private Coroutine knock, pop, hop, stagger;
+
+        /// <summary>How much its arms, legs and body are thrown about (0 in its own control .. 1 flung through the air);
+        /// 'flat' is how much it lies spread on the ground.</summary>
+        private float flail, flat;
+        /// <summary>Stepping back under a blow: how much (0..1), and how far through its steps.</summary>
+        private float reel, reelStep;
+        /// <summary>Getting up: how deep its crouch (the knees drawn up and bent), and how much one hand pushes on the ground.</summary>
+        private float rise, push;
+
+        /// <summary>Thrown about (reeling, flying, lying): the arms are its own, what it holds goes with its hands.</summary>
+        public bool Flailing => flail > 0.04f || flat > 0.04f || rise > 0.04f || push > 0.04f;
+
+        /// <summary>
+        /// Struck: it reels back (away from <paramref name="from"/>) and a little to one side, and finds its feet again;
+        /// <paramref name="strength"/> 0..1 (blows in a row hit harder: it reels further, leans further).
+        /// </summary>
+        public void Stagger(Vector3 from, float strength)
+        {
+            if (knock != null) return; // (already going down)
+            if (stagger != null) StopCoroutine(stagger);
+            stagger = StartCoroutine(Staggering(from, Mathf.Clamp01(strength)));
+        }
+
+        private Vector3 staggerRest;
+        private bool staggerRestKnown;
+
+        private System.Collections.IEnumerator Staggering(Vector3 from, float strength)
+        {
+            if (!staggerRestKnown) { staggerRest = transform.localPosition; staggerRestKnown = true; }
+            var restRot = transform.localRotation;
+            var away = transform.position - from; away.y = 0f;
+            if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
+            away.Normalize();
+            var side = Vector3.Cross(Vector3.up, away) * (Random.value < 0.5f ? -1f : 1f);
+            var push = (away + side * 0.45f).normalized * (0.12f + 0.45f * strength); // (world units: back and a little aside)
+            var axis = Vector3.Cross(Vector3.up, away);
+            float lean = 3f + 7f * strength, scale = transform.parent != null ? Mathf.Max(0.01f, transform.parent.lossyScale.y) : 1f; // (it rocks, it never topples)
+            float outT = 0.09f + 0.05f * strength, backT = 0.28f + 0.25f * strength;
+            for (float e = 0f; e < outT + backT; e += Time.deltaTime)
+            {
+                float k = e < outT ? Mathf.SmoothStep(0f, 1f, e / outT) : 1f - Mathf.SmoothStep(0f, 1f, (e - outT) / backT);
+                var parentRot = transform.parent != null ? transform.parent.rotation : Quaternion.identity;
+                transform.rotation = Quaternion.AngleAxis(k * lean, axis) * parentRot * restRot;
+                var local = transform.parent != null ? transform.parent.InverseTransformVector(push) : push;
+                transform.localPosition = staggerRest + local * k + Vector3.up * (0.03f * strength * Mathf.Sin(k * Mathf.PI) / scale);
+                flail = k * (0.12f + 0.2f * strength); // (the arms only thrown a little)
+                reel = k * (0.5f + 0.5f * strength); reelStep = e / (outT + backT); // the feet stepping back under it
+                yield return null;
+            }
+            transform.localRotation = restRot;
+            transform.localPosition = staggerRest;
+            flail = 0f; reel = 0f;
+            stagger = null;
+        }
+
+        /// <summary>A big blow: it flies back off its feet (away from <paramref name="from"/>), lands flat on its back, gets up.</summary>
+        public void Launch(Vector3 from, float height = 1.3f, float lie = 0.3f)
+        {
+            if (stagger != null) { StopCoroutine(stagger); stagger = null; if (staggerRestKnown) transform.localPosition = staggerRest; }
+            if (knock != null) StopCoroutine(knock);
+            knock = StartCoroutine(Knocked(from, lie, height));
+        }
 
         /// <summary>Knocked down: falls over backwards (away from <paramref name="from"/>), lies there, gets back up.</summary>
         public void KnockDown(Vector3 from, float lie = 1.1f)
@@ -560,18 +639,67 @@ namespace SquashBot.Visual
             knock = StartCoroutine(Knocked(from, lie));
         }
 
-        private System.Collections.IEnumerator Knocked(Vector3 from, float lie)
+        private System.Collections.IEnumerator Knocked(Vector3 from, float lie, float arc = 0f)
         {
             var away = transform.position - from; away.y = 0f;
             if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
             var axis = Vector3.Cross(Vector3.up, away.normalized); // (tipping over this: the top goes away from the blow)
             var restLocal = transform.localRotation;
-            float Tilt(float k) { var parentRot = transform.parent != null ? transform.parent.rotation : Quaternion.identity; transform.rotation = Quaternion.AngleAxis(k * 82f, axis) * parentRot * restLocal; return k; }
-            for (float e = 0f; e < 0.32f; e += Time.deltaTime) { float k = e / 0.32f; Tilt(k * k); yield return null; } // falling faster and faster
+            var restPos = transform.localPosition;
+            float lift = 0.22f / Mathf.Max(0.01f, transform.parent != null ? transform.parent.lossyScale.y : 1f); // (its back's thickness, in its parent's units)
+            float Tilt(float k)
+            {
+                var parentRot = transform.parent != null ? transform.parent.rotation : Quaternion.identity;
+                transform.rotation = Quaternion.AngleAxis(k * 82f, axis) * parentRot * restLocal;
+                transform.localPosition = restPos + Vector3.up * (lift * Mathf.Clamp01(k)); // (raised as it goes over: lying on the floor, not sunk in it)
+                return k;
+            }
+            if (arc > 0f)
+            {
+                // off its feet: up in an arc, turning over onto its back on the way, down flat
+                float up = arc / Mathf.Max(0.01f, transform.parent != null ? transform.parent.lossyScale.y : 1f);
+                const float Air = 0.5f;
+                for (float e = 0f; e < Air; e += Time.deltaTime)
+                {
+                    float k = e / Air;
+                    float tk = Tilt(Mathf.SmoothStep(0f, 1f, k));
+                    transform.localPosition = restPos + Vector3.up * (4f * k * (1f - k) * up + lift * tk);
+                    flail = Mathf.Min(1f, k * 4f);
+                    yield return null;
+                }
+            }
+            else
+                for (float e = 0f; e < 0.32f; e += Time.deltaTime) { float k = e / 0.32f; Tilt(k * k); yield return null; } // falling faster and faster
             Tilt(1f);
-            for (float e = 0f; e < lie; e += Time.deltaTime) { Tilt(1f + Mathf.Sin(e * 20f) * Mathf.Exp(-e * 6f) * 0.06f); yield return null; } // a bounce, then still
-            for (float e = 0f; e < 0.45f; e += Time.deltaTime) { Tilt(1f - Mathf.SmoothStep(0f, 1f, e / 0.45f)); yield return null; } // back up
+            for (float e = 0f; e < lie; e += Time.deltaTime)
+            {
+                Tilt(1f + Mathf.Sin(e * 20f) * Mathf.Exp(-e * 6f) * 0.06f); // a bounce, then still
+                flail = Mathf.Max(0f, 1f - e * 5f) * 0.8f; // (the arms and legs still going as it lands)
+                flat = Mathf.Min(1f, e * 4f);
+                yield return null;
+            }
+            // Up again at once, as a person gets up: it sits up with a hand pushing on the ground behind it, the knees
+            // drawn up and bent, then stands up from the crouch.
+            flail = 0f;
+            const float SitUp = 0.32f, StandUp = 0.36f;
+            for (float e = 0f; e < SitUp; e += Time.deltaTime)
+            {
+                float k = Mathf.SmoothStep(0f, 1f, e / SitUp);
+                Tilt(Mathf.Lerp(1f, 0.42f, k)); // (the back off the ground: sitting)
+                flat = 1f - k;
+                rise = k; push = k;
+                yield return null;
+            }
+            for (float e = 0f; e < StandUp; e += Time.deltaTime)
+            {
+                float k = Mathf.SmoothStep(0f, 1f, e / StandUp);
+                Tilt(Mathf.Lerp(0.42f, 0f, k)); // (up onto its feet)
+                rise = 1f - k; push = Mathf.Max(0f, 1f - k * 2.5f); // (the hand leaves the ground first)
+                yield return null;
+            }
+            flail = flat = rise = push = 0f;
             transform.localRotation = restLocal;
+            transform.localPosition = restPos;
             knock = null;
         }
 
@@ -648,6 +776,8 @@ namespace SquashBot.Visual
         private float downL = 1f, downR = -1f, forward = 1f, kneeBack = 1f;
 
         private Quaternion Frame => transform.parent != null ? transform.parent.rotation : transform.rotation;
+        /// <summary>Where this body is in its own rhythm (set once: two side by side never move as one).</summary>
+        private float phase = -1f;
 
         private void Turn(Transform b, Vector3 axis, float degrees)
         {
@@ -673,6 +803,7 @@ namespace SquashBot.Visual
         private void Setup()
         {
             ready = true;
+            if (phase < 0f) phase = Random.Range(0f, 10f);
             var anim = GetComponent<Animator>();
             if (anim != null) anim.enabled = true; // (no controller: it only moves the body when a move's graph is evaluated)
             hips = FindBone(transform, "Hips"); spine = FindBone(transform, "Spine"); chest = FindBone(transform, "Spine2"); neck = FindBone(transform, "Neck");
@@ -715,31 +846,84 @@ namespace SquashBot.Visual
             if (handR != null && transform.parent != null) handRest = transform.parent.InverseTransformPoint(handR.position) + new Vector3(0.02f, 0.04f, 0.06f); // a little forward and up: held, not hanging
         }
 
-        /// <summary>This frame's pose: standing (breathing), walking (legs and arms swinging), a chop, a clap.</summary>
+        /// <summary>This frame's pose: standing (breathing, its weight shifting, ready), walking (legs and arms swinging,
+        /// leaning into it), a chop (the whole body behind it), a clap.</summary>
         private void Pose(float time)
         {
             Rest();
             var right = Vector3.right; var up = Vector3.up; var fwd = Vector3.forward;
-            float breathe = Mathf.Sin(time * 2.2f);
+            float t = time + phase; // (each its own rhythm: two foi side by side never move as one)
+            float breathe = Mathf.Sin(t * 2.2f);
             float w = walk, s = Mathf.Sin(stride), c = Mathf.Cos(stride);
-            // arms down at the sides, a little out, the elbows soft
-            Turn(armL, fwd, downL * (60f + breathe * 1.5f)); // (not all the way down: the armour is broad)
-            Turn(armR, fwd, downR * (60f + breathe * 1.5f));
-            Turn(foreL, fwd, downL * 8f); Turn(foreR, fwd, downR * 8f);
-            // walking: legs forward and back, the knee bending as it comes through, the arms against the legs
-            Turn(legL, right, -forward * 26f * s * w); Turn(legR, right, forward * 26f * s * w);
-            Turn(kneeL, right, kneeBack * (6f + 34f * Mathf.Max(0f, c)) * w); Turn(kneeR, right, kneeBack * (6f + 34f * Mathf.Max(0f, -c)) * w);
-            Turn(armL, right, forward * 22f * s * w); Turn(armR, right, -forward * 22f * s * w);
-            Turn(spine, up, 5f * s * w);
-            Turn(chest, right, forward * 1.5f * breathe * (1f - w));
-            // a chop: the right arm up and back, then down hard forward
+            float still = 1f - w;
+            float sway = Mathf.Sin(t * 1.3f), drift = Mathf.Sin(t * 0.83f + 1.1f), nod = Mathf.Sin(t * 1.9f + 0.4f);
+            // arms down at the sides, a little out, the elbows soft and moving with the breath
+            Turn(armL, fwd, downL * (58f + breathe * 2.5f + sway * 2f * still));
+            Turn(armR, fwd, downR * (58f + breathe * 2.5f - sway * 2f * still));
+            Turn(foreL, fwd, downL * (16f + 5f * drift * still)); Turn(foreR, fwd, downR * (16f - 5f * drift * still));
+            Turn(armL, right, forward * 6f * drift * still); Turn(armR, right, -forward * 6f * drift * still);
+            // standing ready: the knees a little bent, the weight going from one foot to the other, the body turning a touch
+            Turn(hips, up, 5f * sway * still);
+            Turn(spine, fwd, 2.5f * drift * still);
+            Turn(legL, right, -forward * (5f + 3f * sway) * still); Turn(legR, right, -forward * (5f - 3f * sway) * still);
+            Turn(kneeL, right, kneeBack * (10f + 5f * Mathf.Max(0f, sway)) * still); Turn(kneeR, right, kneeBack * (10f + 5f * Mathf.Max(0f, -sway)) * still);
+            Turn(neck, right, forward * 3f * nod * still);
+            // walking: legs well forward and back, the knee bending as it comes through, the arms against the legs, leaning in
+            Turn(legL, right, -forward * 34f * s * w); Turn(legR, right, forward * 34f * s * w);
+            Turn(kneeL, right, kneeBack * (8f + 48f * Mathf.Max(0f, c)) * w); Turn(kneeR, right, kneeBack * (8f + 48f * Mathf.Max(0f, -c)) * w);
+            Turn(armL, right, forward * 30f * s * w); Turn(armR, right, -forward * 30f * s * w);
+            Turn(foreL, right, forward * (12f + 14f * Mathf.Max(0f, s)) * w); Turn(foreR, right, forward * (12f + 14f * Mathf.Max(0f, -s)) * w);
+            Turn(spine, up, 9f * s * w);
+            Turn(spine, right, forward * 6f * w);
+            Turn(chest, right, forward * 1.5f * breathe * still);
+            // a chop: the right arm up and back, then down hard forward; the body winds up and throws itself into it
             if (chop < 1f)
             {
                 float k = chop < 0.35f ? Mathf.SmoothStep(0f, 1f, chop / 0.35f) : 1f - Mathf.SmoothStep(0f, 1f, (chop - 0.35f) / 0.25f);
                 float down = chop < 0.35f ? 0f : Mathf.Clamp01((chop - 0.35f) / 0.25f) * (1f - Mathf.Clamp01((chop - 0.75f) / 0.25f));
                 Turn(armR, right, forward * (120f * k + 40f * down));
                 Turn(foreR, right, forward * 35f * k);
-                Turn(chest, up, -14f * k + 10f * down);
+                Turn(chest, up, -18f * k + 14f * down);
+                Turn(hips, up, -8f * k + 10f * down);
+                Turn(spine, right, forward * (-5f * k + 12f * down));
+                Turn(armL, right, forward * (20f * k - 10f * down)); // (the other arm swings against it)
+                Turn(kneeL, right, kneeBack * 12f * down); Turn(kneeR, right, kneeBack * 12f * down);
+            }
+            // getting up: the knees drawn up and bent under it, the body forward over them, the left hand down pushing on
+            // the ground behind, the right (with its weapon) out for balance
+            if (rise > 0.01f || push > 0.01f)
+            {
+                Turn(legL, right, -forward * 78f * rise); Turn(legR, right, -forward * 64f * rise);
+                Turn(kneeL, right, kneeBack * 105f * rise); Turn(kneeR, right, kneeBack * 90f * rise);
+                Turn(spine, right, forward * 22f * rise);
+                Turn(armL, fwd, downL * 18f * push); Turn(armL, right, -forward * 38f * push); // (down and back: the palm on the ground)
+                Turn(foreL, fwd, -downL * 6f * push);
+                Turn(armR, right, forward * 30f * rise); Turn(foreR, fwd, downR * 25f * rise);
+            }
+            // stepping back under a blow: a quick step back with one foot, then the other, the knees lifting, a little crouch
+            if (reel > 0.01f)
+            {
+                float st = Mathf.Sin(reelStep * Mathf.PI * 3f); // (a step and a half)
+                Turn(legL, right, forward * 26f * st * reel); Turn(legR, right, -forward * 26f * st * reel);
+                Turn(kneeL, right, kneeBack * (12f + 32f * Mathf.Max(0f, st)) * reel); Turn(kneeR, right, kneeBack * (12f + 32f * Mathf.Max(0f, -st)) * reel);
+                Turn(armL, right, -forward * 14f * st * reel); Turn(armR, right, forward * 14f * st * reel); // (the arms against the legs, for balance)
+            }
+            // thrown about: the arms flung up and out, each in its own rhythm and lagging, the forearms whipping, the legs
+            // kicking, the body bending and the head going with it; lying, spread out flat
+            if (flail > 0.01f || flat > 0.01f)
+            {
+                float f = flail, ft = time * 13f;
+                float a1 = Mathf.Sin(ft + 0.3f), a2 = Mathf.Sin(ft * 1.27f + 2.1f), l1 = Mathf.Sin(ft * 0.9f + 1.2f), l2 = Mathf.Sin(ft * 1.13f + 4f);
+                Turn(armL, fwd, -downL * (55f * f + 25f * f * a1 + 50f * flat)); // (up from hanging: out to the side)
+                Turn(armR, fwd, -downR * (55f * f + 25f * f * a2 + 50f * flat));
+                Turn(armL, right, forward * (30f * a2 * f - 20f * flat)); Turn(armR, right, forward * (30f * a1 * f - 20f * flat));
+                Turn(foreL, fwd, downL * (25f + 30f * Mathf.Abs(a1)) * f); Turn(foreR, fwd, downR * (25f + 30f * Mathf.Abs(a2)) * f);
+                Turn(legL, right, -forward * (28f * l1 + 18f) * f); Turn(legR, right, -forward * (28f * l2 + 10f) * f);
+                Turn(legL, fwd, 10f * flat); Turn(legR, fwd, -10f * flat); // (lying: the legs apart)
+                Turn(kneeL, right, kneeBack * (20f + 30f * Mathf.Abs(l2)) * f); Turn(kneeR, right, kneeBack * (20f + 30f * Mathf.Abs(l1)) * f);
+                Turn(spine, right, -forward * 14f * f * (0.6f + 0.4f * a1)); // (bent back by the blow)
+                Turn(spine, up, 10f * l1 * f);
+                Turn(neck, right, forward * 18f * f * a2);
             }
             // a clap: both arms up in front, the hands meeting again and again
             if (clap < 1f)
@@ -841,9 +1025,9 @@ namespace SquashBot.Visual
             }
             if (weapon == null) return;
             weapon.parent.localPosition = gripRest; // each frame from its own place (the snap below must not add up)
-            if (playing != null)
+            if (playing != null || Flailing)
             {
-                // a move plays: the arm is the move's; the weapon follows the hand (turned with it from how it rests)
+                // a move plays (or it is thrown about): the arm is its own; the weapon follows the hand (turned with it from how it rests)
                 weapon.parent.rotation = handR.rotation * gripTurn;
             }
             else
@@ -854,7 +1038,7 @@ namespace SquashBot.Visual
             // then the weapon into the palm itself (between the wrist and the middle finger's root), so the fist closes on it
             var palm = fingerR != null ? Vector3.Lerp(handR.position, fingerR.position, 0.65f) : handR.position;
             weapon.parent.position += palm - weapon.position;
-            if (playing == null) gripTurn = Quaternion.Inverse(handR.rotation) * weapon.parent.rotation; // (how it sits in the hand at rest: a move keeps it so)
+            if (playing == null && !Flailing) gripTurn = Quaternion.Inverse(handR.rotation) * weapon.parent.rotation; // (how it sits in the hand at rest: a move keeps it so)
         }
 
         /// <summary>Two-joint reach: the elbow bends (on the side it already bends to) so the hand comes to the target.</summary>

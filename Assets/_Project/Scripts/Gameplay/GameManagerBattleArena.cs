@@ -19,7 +19,6 @@ namespace SquashBot.Gameplay
 
         private void WireArenaUi()
         {
-            ui.ArenasPressed += ShowArenas;
             ui.ChallengePressed += StartChallenge;
             ui.ChallengeStatsPressed += ShowChallengeStats;
             ui.Arenas.BackPressed += () => ui.Arenas.Hide();

@@ -613,7 +613,7 @@ namespace SquashBot.Gameplay
             pos = boardCentre + duelPan - look * (duelBack + 11f); // (every stage further back: all of the floor, its stands and the land in view)
             // The grove: the view a little further in (the platform lower on the screen, its stands and trees above it in view)
             if (DuelStands.IsMade(Stage.theme)) pos += new Vector3(-4.5f, 0f, 0f) - look * 5f; // (and a little further back: all of it in view)
-            rot = Quaternion.LookRotation(look);
+            rot = Quaternion.LookRotation(look) * Quaternion.Euler(-3.5f, 0f, 0f); // (its head up a little: less floor under the platform, still some room under it)
             OrbitPose(ref pos, ref rot, me, foe);
         }
 

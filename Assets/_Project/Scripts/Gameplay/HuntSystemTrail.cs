@@ -83,6 +83,9 @@ namespace SquashBot.Gameplay
             foeCombo = 0;
         }
 
+        /// <summary>The rival foi's reeling ends now (it can act again at once).</summary>
+        public void EndFoeStun() => foeStunUntil = 0f;
+
         /// <summary>The rival foi's model (for its stand-in in the big moments), or null.</summary>
         public Transform ChallengeFoeModel => challengeFoe != null && !challengeFoe.dead ? challengeFoe.model : null;
 

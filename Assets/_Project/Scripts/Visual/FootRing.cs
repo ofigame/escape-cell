@@ -21,7 +21,7 @@ namespace SquashBot.Visual
             r.colour = colour;
             r.mat = new Material(Weather.AddMaterial);
             r.mat.SetTexture("_BaseMap", Ring()); r.mat.SetTexture("_MainTex", Ring());
-            r.mat.SetColor("_BaseColor", colour * 1.6f);
+            r.mat.SetColor("_BaseColor", colour * 2.8f);
             r.mat.renderQueue = 3100; // (over the floor and the platforms' glow)
             go.AddComponent<MeshFilter>().sharedMesh = Quad();
             var mr = go.AddComponent<MeshRenderer>();
@@ -38,8 +38,8 @@ namespace SquashBot.Visual
             if (!at.HasValue) { if (gameObject.activeSelf) gameObject.SetActive(false); return; }
             if (!gameObject.activeSelf) gameObject.SetActive(true);
             transform.position = at.Value + Vector3.up * 0.06f;
-            float k = 0.8f + 0.2f * Mathf.Sin(Time.unscaledTime * 3f);
-            mat.SetColor("_BaseColor", colour * 1.6f * k);
+            float k = 0.85f + 0.15f * Mathf.Sin(Time.unscaledTime * 3f);
+            mat.SetColor("_BaseColor", colour * 2.8f * k);
         }
 
         private void OnDestroy() { if (mat != null) Destroy(mat); }
@@ -55,8 +55,8 @@ namespace SquashBot.Visual
                 for (int x = 0; x < N; x++)
                 {
                     float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(N * 0.5f, N * 0.5f)) / (N * 0.5f);
-                    float ring = Mathf.Exp(-Mathf.Pow((d - 0.82f) / 0.07f, 2f));
-                    float inner = d < 0.8f ? 0.18f * (1f - d / 0.8f * 0.5f) : 0f;
+                    float ring = Mathf.Exp(-Mathf.Pow((d - 0.82f) / 0.09f, 2f));
+                    float inner = d < 0.8f ? 0.26f * (1f - d / 0.8f * 0.5f) : 0f;
                     float a = Mathf.Clamp01(ring + inner) * (d < 1f ? 1f : 0f);
                     px[y * N + x] = new Color(1f, 1f, 1f, a);
                 }

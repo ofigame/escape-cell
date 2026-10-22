@@ -288,8 +288,6 @@ namespace SquashBot.Gameplay
             ui.Map.RobotLook = t => robot.BuildLookalike(t);
             ui.GaragePressed += ShowGarage;
             ui.ShopPressed += ShowShop;
-            ui.DailyPressed += ClaimDaily;
-            ui.DailyBonusPressed += () => ui.DailyBonus.Show();
             ui.DailyBonus.PlayPressed += PlayDailyBonus;
             ui.DailyBonus.AdPressed += WatchAdForDailyBonus;
             ui.Garage.PreviewChanged += outfit => robot.ApplyOutfit(outfit);
@@ -1412,6 +1410,7 @@ namespace SquashBot.Gameplay
             UpdateFortressView();
             HandleBackButton();
             WatchArmyFromMenu();
+            UpdateLevelRing();
             if (State == GameState.Paused) return;
 
             // Close-call slow motion and the slow-motion tool both bend time; the slower one wins.

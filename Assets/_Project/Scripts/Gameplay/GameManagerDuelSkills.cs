@@ -117,7 +117,9 @@ namespace SquashBot.Gameplay
             if (myCombo == HeavyCombo || myCombo == UpperCombo) { myComboMove = myCombo; comboMoveUntil = Time.time + ComboMoveTime; }
             if (myCombo == HeavyCombo) ChallengeQuests.Report(DuelGoal.Combo5); // (a five-hit combo)
             if (Time.time < myJumpUntil) AirStrike(true);
+            else Reel(false, myCombo);
             if (colosseum != null && myCombo >= 3) colosseum.Cheer(0, 0.4f + myCombo * 0.08f);
+            duelStirAt = Time.time;
         }
 
         /// <summary>The rival's blow landed on foi: its bar and combo grow, foi's combo is broken.</summary>
@@ -131,6 +133,8 @@ namespace SquashBot.Gameplay
             myCombo = 0;
             myComboMove = 0;
             if (colosseum != null && rivalCombo >= 3) colosseum.Cheer(1, 0.4f + rivalCombo * 0.08f);
+            Reel(true, rivalCombo);
+            duelStirAt = Time.time;
         }
 
         // ---------- Each frame ----------
@@ -155,6 +159,7 @@ namespace SquashBot.Gameplay
             skillBar.SetContext(ctx);
             skillBar.SetMeters(myMeter, rivalMeter);
             if (!LiveActive && chPhase == ChPhase.Duel && !moveBusy && !DuelCinematic) RivalMoves(); // (never inside a big moment)
+            Unstick();
         }
 
         // ---------- The player's moves ----------
@@ -192,7 +197,6 @@ namespace SquashBot.Gameplay
                         HitFoe(upper ? UpperHit : HeavyHit);
                         hunt.StunFoe(upper ? 2.2f : 0.8f);
                     }
-                    if (upper) KnockOver(hunt.ChallengeFoeModel, robot.transform.position); // the rival goes down on its back
                     if (colosseum != null) colosseum.Cheer(0, 0.9f);
                     if (upper) cameraRig.StartCoroutine(BigMoment(false)); // the knockdown: a big moment
                     break;
@@ -362,31 +366,106 @@ namespace SquashBot.Gameplay
         // ---------- The big moment ----------
 
         /// <summary>
-        /// Time slows; the robot struck (foi's own, or the rival's) bursts into its pieces, hangs, and comes back together;
-        /// then the fight goes on. Nothing if it fell for good (the knock-down shows itself).
+        /// Time slows; the one struck (foi's own, or the rival) flies back off its feet and lands flat on its back, then
+        /// gets up; the fight goes on. Nothing if it fell for good (the knock-down shows itself).
         /// </summary>
         private IEnumerator BigMoment(bool meStruck)
         {
             var model = meStruck ? robot.Visual : hunt.ChallengeFoeModel;
             if (model == null || !challengeRun || (meStruck ? !robot.IsAlive : hunt.ChallengeFoeDown)) yield break;
-            hunt.StunFoe(1.4f); // the rival stands still through the moment, whoever was struck
+            hunt.StunFoe(1.8f); // the rival stands still through the moment, whoever was struck (and gets up after)
             float was = Time.timeScale;
-            Time.timeScale = 0.25f;
-            SlowCam(model.position, 1.9f); // the big moment's time (slow motion, no blows); the camera stays on the board
-            cameraRig.Shake(1.1f); // and shakes as the pieces fly
-            var dbl = StuntDouble.Make(model);
-            var at = model.position; // (the model may be gone before the moment ends: a live knock-down)
-            try
-            {
-                fx.Burst(at + Vector3.up * 0.5f, new Color(1f, 0.85f, 0.4f), new Color(3f, 2.4f, 0.8f), 26, 5f);
-                AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.6f);
-                yield return dbl.Shatter(at + Vector3.up * 0.45f);
-                cameraRig.Shake(0.7f);
-                fx.Burst(at + Vector3.up * 0.5f, new Color(0.7f, 0.85f, 1f), new Color(1.6f, 2f, 2.6f), 18, 3f);
-                AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.5f);
-            }
-            finally { if (dbl != null) dbl.Done(); }
+            Time.timeScale = 0.35f;
+            SlowCam(model.position, 1.4f); // the big moment's time (slow motion, no blows); the camera stays on the board
+            cameraRig.Shake(1.1f);
+            var at = model.position;
+            var from = meStruck ? (hunt.ChallengeFoeAt ?? at) : robot.transform.position;
+            fx.Burst(at + Vector3.up * 0.6f, new Color(1f, 0.85f, 0.4f), new Color(3f, 2.4f, 0.8f), 26, 5f);
+            AudioManager.PlaySfx(Sfx.Impact, 1f, 0.6f);
+            Fling(meStruck, from, 1.5f, 2);
+            yield return new WaitForSecondsRealtime(0.75f);
+            cameraRig.Shake(0.6f); // (landing)
+            cameraRig.StartCoroutine(FaceWhenUp(meStruck));
+            fx.Burst(at + Vector3.up * 0.2f, new Color(0.8f, 0.7f, 0.55f), new Color(1.4f, 1.2f, 1f), 16, 3f);
             if (State == GameState.Playing) Time.timeScale = ultimateOn ? 0.35f : (was < 0.99f && was > 0.3f ? was : 1f);
+        }
+
+        /// <summary>Back on its feet: foi turns straight to its rival (the rival turns by itself as it comes at foi).</summary>
+        private IEnumerator FaceWhenUp(bool meStruck)
+        {
+            yield return new WaitForSeconds(0.75f);
+            if (meStruck && challengeRun && hunt.ChallengeFoeAt is Vector3 foe) robot.Face(foe);
+        }
+
+        /// <summary>When something last happened between the two (a blow landed, one moved), and where they stood.</summary>
+        private float duelStirAt;
+        private GridPos stuckMe, stuckFoe;
+
+        /// <summary>
+        /// Two foi side by side with nothing happening for a while (no blow, neither moving) are stuck on each other: the
+        /// rival's reeling is cut short and they are parted by a step (the AI game).
+        /// </summary>
+        private void Unstick()
+        {
+            if (LiveActive || chPhase != ChPhase.Duel || DuelCinematic || moveBusy || !hunt.ChallengeFoeTile.HasValue) { duelStirAt = Time.time; return; }
+            var me = robot.Position; var foe = hunt.ChallengeFoeTile.Value;
+            if (me != stuckMe || foe != stuckFoe || HuntSystem.Chebyshev(me, foe) > 1) { stuckMe = me; stuckFoe = foe; duelStirAt = Time.time; return; }
+            if (Time.time - duelStirAt < 3f) return;
+            duelStirAt = Time.time;
+            hunt.StunFoe(0f); hunt.EndFoeStun();
+            Push(false, robot.transform.position, 1);
+        }
+
+        // ---------- Reeling and flying ----------
+
+        /// <summary>
+        /// A blow landed on foi (<paramref name="meStruck"/>) or the rival: it reels, harder the more blows came in a row;
+        /// from the fourth in a row it is knocked a step back (the AI game: a live one's places are the server's).
+        /// </summary>
+        private void Reel(bool meStruck, int inARow)
+        {
+            var model = meStruck ? robot.Visual : hunt.ChallengeFoeModel;
+            var skin = model != null ? model.GetComponentInChildren<SkinnedHero>() : null;
+            if (skin == null) return;
+            var from = meStruck ? (hunt.ChallengeFoeAt ?? model.position) : robot.transform.position;
+            float strength = Mathf.Clamp01(0.25f + 0.15f * Mathf.Max(0, inARow - 1));
+            skin.Stagger(from, strength);
+            if (inARow >= 4 && !LiveActive) Push(meStruck, from, 1);
+        }
+
+        /// <summary>The one struck flies back off its feet and lands on its back (and is pushed <paramref name="tiles"/> back).</summary>
+        private void Fling(bool meStruck, Vector3 from, float height, int tiles)
+        {
+            var model = meStruck ? robot.Visual : hunt.ChallengeFoeModel;
+            var skin = model != null ? model.GetComponentInChildren<SkinnedHero>() : null;
+            if (skin != null) skin.Launch(from, height);
+            if (!LiveActive) Push(meStruck, from, tiles);
+        }
+
+        /// <summary>Foi or the rival pushed up to <paramref name="tiles"/> tiles away from <paramref name="from"/> (as far as the floor lets it).</summary>
+        private void Push(bool meStruck, Vector3 from, int tiles)
+        {
+            var at = meStruck ? robot.Position : hunt.ChallengeFoeTile ?? robot.Position;
+            var w = GridView.ToWorld(at);
+            var d = new Vector2(w.x - from.x, w.z - from.z);
+            if (d.sqrMagnitude < 1e-4f) return;
+            var step = Mathf.Abs(d.x) >= Mathf.Abs(d.y) ? new GridPos(System.Math.Sign(d.x), 0) : new GridPos(0, System.Math.Sign(d.y));
+            for (int n = tiles; n >= 1; n--)
+            {
+                var to = new GridPos(at.x + step.x * n, at.y + step.y * n);
+                if (!grid.InBounds(to) || !grid.IsStandable(to) || grid.IsOccupied(to)) continue;
+                if (meStruck)
+                {
+                    var dir = step.x > 0 ? Direction.PlusX : step.x < 0 ? Direction.MinusX : step.y > 0 ? Direction.PlusY : Direction.MinusY;
+                    robot.Shove(dir, n, 0.25f, 1.3f);
+                }
+                else
+                {
+                    hunt.StunFoe(0.4f);
+                    cameraRig.StartCoroutine(hunt.ShoveFoe(to, 0.22f + 0.08f * n));
+                }
+                return;
+            }
         }
 
         // ---------- The ultimate ----------
@@ -471,9 +550,9 @@ namespace SquashBot.Gameplay
         {
             if (mine) myJumpUntil = 0f; else rivalJumpAt = Time.time + 9f; // (one per jump)
             var struck = mine ? hunt.ChallengeFoeModel : robot.Visual;
-            var skin = struck != null ? struck.GetComponentInChildren<SkinnedHero>() : null;
-            if (skin != null) skin.PopHead();
             var at = struck != null ? struck.position : robot.transform.position;
+            Fling(!mine, mine ? robot.transform.position : (hunt.ChallengeFoeAt ?? at), 1f, 1); // knocked off its feet, onto its back
+            if (mine) hunt.StunFoe(1.3f);
             fx.Burst(at + Vector3.up * 1.4f, new Color(1f, 0.9f, 0.5f), new Color(3f, 2.6f, 1f), 24, 6f);
             cameraRig.Shake(0.5f);
             AudioManager.PlaySfx(Sfx.Impact, 1f, 1.2f);
@@ -632,7 +711,7 @@ namespace SquashBot.Gameplay
                     SlashFx.Create(foeAt, robot.transform.position, new Color(1f, 0.35f, 0.3f), kind == 3 ? 2.4f : 1.8f);
                     Shockwave.Create(robot.transform.position, kind == 3 ? 2.6f : 1.8f, new Color(1f, 0.4f, 0.3f));
                     cameraRig.Shake(kind == 3 ? 0.7f : 0.45f);
-                    if (kind == 3) { cameraRig.StartCoroutine(BigMoment(true)); KnockOver(robot.Visual, foeAt); }
+                    if (kind == 3) cameraRig.StartCoroutine(BigMoment(true));
                     break;
                 case 4: cameraRig.StartCoroutine(Ultimate(false, leap: false)); break;
                 case 5:

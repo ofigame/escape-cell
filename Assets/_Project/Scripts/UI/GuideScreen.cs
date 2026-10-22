@@ -12,17 +12,17 @@ namespace SquashBot.UI
     /// <summary>
     /// The guide: every feature of the game explained in a sentence or two, grouped by topic. Opens from the menu's "?"
     /// button, and from the "?" on the shop, garage and map screens straight at their own topic.
-    /// Texts are Loc keys "guide.&lt;topic&gt;.t" (title) and "guide.&lt;topic&gt;.b" (body).
+    /// Texts are Loc keys "rehber.&lt;topic&gt;.t" (title) and "rehber.&lt;topic&gt;.b" (body): the game as it is now, the duel first.
     /// </summary>
     public class GuideScreen : MonoBehaviour
     {
         /// <summary>Topics in reading order; section headers start with '#'.</summary>
         public static readonly string[] Topics =
         {
-            "#play", "move", "jump", "missions", "quest", "monster", "thief", "escort", "clone", "marathon", "skills", "road", "stars", "lives", "armor", "rescue", "fire", "hover", "combo",
-            "#floors", "rules", "boss", "events", "tools",
-            "#bonus", "bonus", "tunnels", "daily", "chest",
-            "#shop", "shop", "goal", "garage", "map",
+            "#duel", "duel", "score", "controls", "power", "combo", "breaker", "jump", "defend", "army", "stages",
+            "#progress", "chests", "rank", "quests", "friends",
+            "#missions", "mission", "map", "lives",
+            "#gear", "shop", "garage",
         };
 
         public event Action BackPressed;
@@ -94,12 +94,12 @@ namespace SquashBot.UI
                 bool section = topic[0] == '#';
                 if (section && !first) Spacer(24f);
                 first = false;
-                string key = section ? "guide.sec." + topic.Substring(1) : "guide." + topic + ".t";
+                string key = section ? "rehber.sec." + topic.Substring(1) : "rehber." + topic + ".t";
                 var title = Paragraph(Loc.T(key), section ? 44f : 36f, section ? Palette.UiGold : Palette.UiCyan, FontStyles.Bold, section);
                 if (section) title.characterSpacing = 4f;
                 anchors[topic] = (RectTransform)title.transform;
                 if (section) continue;
-                var body = Paragraph(Loc.T("guide." + topic + ".b"), 31f, Palette.UiText, FontStyles.Normal, false);
+                var body = Paragraph(Loc.T("rehber." + topic + ".b"), 31f, Palette.UiText, FontStyles.Normal, false);
                 body.lineSpacing = 4f;
                 Spacer(14f);
             }

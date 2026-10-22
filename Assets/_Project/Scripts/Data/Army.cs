@@ -89,12 +89,13 @@ namespace SquashBot.Data
         private static readonly float[,] Table =
         {
             // power, max, hit, max, armour, max
-            { 20f, 110f, 2f, 8f, 0.15f, 0.40f },   // light swords
-            { 25f, 140f, 3f, 10f, 0.15f, 0.40f },  // heavy swords
-            { 18f, 100f, 1.5f, 7f, 0.15f, 0.40f }, // light spears
-            { 22f, 130f, 2.5f, 9f, 0.15f, 0.40f }, // heavy spears
-            { 15f, 90f, 1f, 6f, 0.10f, 0.30f },    // light bows
-            { 20f, 120f, 2f, 8f, 0.10f, 0.30f },   // heavy bows
+            // (every soldier starts 60 health and 5 on its blow stronger than the first table: the user asked)
+            { 80f, 170f, 7f, 13f, 0.15f, 0.40f },    // light swords
+            { 85f, 200f, 8f, 15f, 0.15f, 0.40f },    // heavy swords
+            { 78f, 160f, 6.5f, 12f, 0.15f, 0.40f },  // light spears
+            { 82f, 190f, 7.5f, 14f, 0.15f, 0.40f },  // heavy spears
+            { 75f, 150f, 6f, 11f, 0.10f, 0.30f },    // light bows
+            { 80f, 180f, 7f, 13f, 0.10f, 0.30f },    // heavy bows
         };
 
         private static readonly float[] PerPointOf = { 1f, 0.1f, 0.005f };
@@ -213,7 +214,10 @@ namespace SquashBot.Data
         public static Stats StatsFromTotal(int group, int total) => StatsFor(group, total / 3, total / 3, total - 2 * (total / 3));
 
         /// <summary>A group's strength as a multiplier of its plain soldier's power (for the rival cards and matching).</summary>
-        public static float Power(int group) => StatsOf(group).hp / Table[Mathf.Clamp(group, 0, Groups - 1), 0];
+        public static float Power(int group) => (StatsOf(group).hp - HpBoost) / (Table[Mathf.Clamp(group, 0, Groups - 1), 0] - HpBoost); // (as before the boost: matching and the cards unchanged)
+
+        /// <summary>The health every soldier got on top of the first table (the power multiplier leaves it out).</summary>
+        private const float HpBoost = 60f;
 
         /// <summary>How far a group's soldiers have grown (0 untrained … 1 every track full): the three tracks' shares, averaged.
         /// Their models grow with it.</summary>

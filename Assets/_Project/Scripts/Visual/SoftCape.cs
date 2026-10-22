@@ -67,7 +67,23 @@ namespace SquashBot.Visual
             worn.position = shoulders + up * 0.05f * unit + back * (torso + Mathf.Clamp(wornDepth, 0f, span * 0.06f)); // (close on the back)
             var face = wornFlip ? back : -back; // (the model's front made to face the body or away, as it was made)
             worn.rotation = Quaternion.AngleAxis(swing + sway, right) * Quaternion.LookRotation(face, up);
+            // A long cape (or one on a foi reeling, flung, lying) reaching below the floor: shortened to end on it, as if
+            // its hem lay on the ground (never through it).
+            if (!wornScaleKnown) { wornScale = worn.localScale; wornScaleKnown = true; }
+            worn.localScale = wornScale;
+            if (wornRenderers == null) wornRenderers = worn.GetComponentsInChildren<Renderer>(true);
+            if (wornRenderers.Length == 0) return;
+            float low = float.MaxValue;
+            foreach (var r in wornRenderers) if (r != null) low = Mathf.Min(low, r.bounds.min.y);
+            float floor = (root.parent != null ? root.parent.position.y : root.position.y) + 0.015f * unit;
+            float top = worn.position.y;
+            if (low < floor && top > floor + 0.05f * unit)
+                worn.localScale = new Vector3(wornScale.x, wornScale.y * Mathf.Max(0.3f, (top - floor) / Mathf.Max(1e-4f, top - low)), wornScale.z);
         }
+
+        private Vector3 wornScale;
+        private bool wornScaleKnown;
+        private Renderer[] wornRenderers;
 
         private int Tier => id == "back.cape" || id == "back.cape.sky" || id == "back.cape.sun" ? 0
             : id == "back.cape.night" || id == "back.cape.teal" || id == "back.cape.wine" ? 1

@@ -521,12 +521,13 @@ namespace SquashBot.Visual
             public float snowFall = 1.5f;
             /// <summary>A tree right behind the platform, between the stands (none where the sky picture has its castle there).</summary>
             public bool backTree = true;
-            /// <summary>Its sky picture (Resources), or none (the grove's night, drawn).</summary>
+            /// <summary>Its sky picture behind it all (Resources; its landscape as designed), or none.</summary>
             public string sky;
-            /// <summary>Its far view (mountains, a castle, domes) standing on the horizon behind the stage (Resources), or none.</summary>
-            public string far;
-            /// <summary>How wide its far view stands (a near castle smaller than a mountain range).</summary>
-            public float farWidth = 150f;
+            /// <summary>The colour its sky picture fades into at its foot: a haze of it where the land ends, so the land and
+            /// the picture meet softly (none: no haze).</summary>
+            public Color haze;
+            /// <summary>Its sky's colours if it had no picture: high up and at the horizon (none: the grove's night).</summary>
+            public Color skyTop, skyLow;
             /// <summary>Its light: the sun's colour and strength, the ambient sky, horizon and ground.</summary>
             public Color sun = Color.white, ambSky = Color.grey, ambHorizon = Color.grey, ambGround = Color.black;
             public float sunPower = 1f;
@@ -534,7 +535,7 @@ namespace SquashBot.Visual
 
         private static readonly Look GroveLook = new Look
         {
-            folder = "Duel/Grove/grove_", trees = 3, treeMin = 12f, treeMax = 16f, grass = true, lanterns = true, thick = 0.6f, rim = 0.86f,
+            folder = "Duel/Grove/grove_", trees = 3, treeMin = 12f, treeMax = 16f, grass = true, lanterns = true, thick = 0.6f, rim = 1.03f,
             glow = new Color(0.35f, 0.85f, 1f), selfLight = new Color(0.16f, 0.2f, 0.26f),
             ground = new Color(0.07f, 0.12f, 0.1f), mound = new Color(0.1f, 0.17f, 0.13f), bank = new Color(0.05f, 0.09f, 0.08f), grassColour = new Color(0.05f, 0.11f, 0.08f),
             crystal = new Color(0.45f, 0.85f, 1f), mist = new Color(0.55f, 0.8f, 0.95f, 0.17f), lamp = new Color(0.35f, 0.85f, 1f), lampPower = 1f,
@@ -543,63 +544,63 @@ namespace SquashBot.Visual
 
         private static readonly Look FrostLook = new Look
         {
-            folder = "Duel/Ice/ice_", trees = 1, treeMin = 7f, treeMax = 10.5f, rocks = true, snow = true, glints = true, thick = 1f, rim = 0.95f,
+            folder = "Duel/Ice/ice_", trees = 1, treeMin = 7f, treeMax = 10.5f, rocks = true, snow = true, glints = true, thick = 1f, rim = 1.03f,
             glow = new Color(0.55f, 0.9f, 1f), selfLight = new Color(0.42f, 0.48f, 0.56f),
             ground = new Color(0.8f, 0.87f, 0.95f), mound = new Color(0.9f, 0.94f, 1f), bank = new Color(0.72f, 0.8f, 0.9f), grassColour = Color.white,
             crystal = new Color(0.55f, 0.88f, 1f), mist = new Color(0.92f, 0.96f, 1f, 0.16f), lamp = new Color(0.7f, 0.9f, 1f), lampPower = 0.45f,
-            sky = "Duel/Ice/ice_sky", far = "Duel/Ice/ice_far", sun = new Color(0.95f, 0.97f, 1f), sunPower = 1.15f, ambSky = new Color(0.62f, 0.72f, 0.86f), ambHorizon = new Color(0.55f, 0.66f, 0.78f), ambGround = new Color(0.35f, 0.4f, 0.48f),
+            sky = "Duel/Ice/ice_sky", haze = new Color(0.561f, 0.729f, 0.855f), skyTop = new Color(0.5f, 0.68f, 0.88f), skyLow = new Color(0.86f, 0.92f, 0.98f), sun = new Color(0.95f, 0.97f, 1f), sunPower = 1.15f, ambSky = new Color(0.62f, 0.72f, 0.86f), ambHorizon = new Color(0.55f, 0.66f, 0.78f), ambGround = new Color(0.35f, 0.4f, 0.48f),
         };
 
         private static readonly Look MarsLook = new Look
         {
-            folder = "Duel/Mars/mars_", trees = 1, treeMin = 9f, treeMax = 15f, rocks = true, dust = true, props = 2, thick = 0.8f, rim = 0.95f, standRise = 0.15f,
+            folder = "Duel/Mars/mars_", trees = 1, treeMin = 9f, treeMax = 15f, rocks = true, dust = true, props = 2, thick = 0.8f, rim = 1.03f, standRise = 0.15f,
             glow = new Color(1f, 0.6f, 0.25f), selfLight = new Color(0.34f, 0.24f, 0.2f),
             ground = new Color(0.58f, 0.27f, 0.16f), mound = new Color(0.66f, 0.32f, 0.19f), bank = new Color(0.46f, 0.2f, 0.12f), grassColour = Color.white,
             crystal = new Color(1f, 0.6f, 0.22f), mist = new Color(0.9f, 0.55f, 0.35f, 0.15f), lamp = new Color(1f, 0.62f, 0.3f), lampPower = 0.6f,
-            sky = "Duel/Mars/mars_sky", far = "Duel/Mars/mars_far", sun = new Color(1f, 0.84f, 0.68f), sunPower = 1.1f, ambSky = new Color(0.72f, 0.48f, 0.36f), ambHorizon = new Color(0.62f, 0.4f, 0.3f), ambGround = new Color(0.32f, 0.17f, 0.1f),
+            sky = "Duel/Mars/mars_sky", haze = new Color(0.671f, 0.314f, 0.247f), skyTop = new Color(0.42f, 0.18f, 0.14f), skyLow = new Color(0.96f, 0.6f, 0.4f), sun = new Color(1f, 0.84f, 0.68f), sunPower = 1.1f, ambSky = new Color(0.72f, 0.48f, 0.36f), ambHorizon = new Color(0.62f, 0.4f, 0.3f), ambGround = new Color(0.32f, 0.17f, 0.1f),
         };
 
         private static readonly Look CappadociaLook = new Look
         {
-            folder = "Duel/Kapa/kapa_", trees = 2, treeMin = 9f, treeMax = 14f, rocks = true, dust = true, crystals = false, thick = 1f, rim = 0.95f, standRise = 0.8f,
+            folder = "Duel/Kapa/kapa_", trees = 2, treeMin = 9f, treeMax = 14f, rocks = true, dust = true, crystals = false, thick = 1f, rim = 1.03f, standRise = 0.8f,
             glow = new Color(1f, 0.82f, 0.45f), selfLight = new Color(0.36f, 0.31f, 0.27f),
             ground = new Color(0.8f, 0.62f, 0.44f), mound = new Color(0.86f, 0.68f, 0.48f), bank = new Color(0.74f, 0.56f, 0.4f), grassColour = Color.white,
             crystal = Color.white, mist = new Color(1f, 0.8f, 0.6f, 0.12f), lamp = new Color(1f, 0.72f, 0.45f), lampPower = 0.5f,
             dustColour = new Color(1f, 0.85f, 0.6f, 0.45f),
-            sky = "Duel/Kapa/kapa_sky", far = "Duel/Kapa/kapa_far", sun = new Color(1f, 0.86f, 0.66f), sunPower = 1.12f, ambSky = new Color(0.76f, 0.58f, 0.52f), ambHorizon = new Color(0.7f, 0.52f, 0.4f), ambGround = new Color(0.36f, 0.26f, 0.18f),
+            sky = "Duel/Kapa/kapa_sky", haze = new Color(0.553f, 0.341f, 0.22f), skyTop = new Color(0.38f, 0.3f, 0.56f), skyLow = new Color(1f, 0.74f, 0.5f), sun = new Color(1f, 0.86f, 0.66f), sunPower = 1.12f, ambSky = new Color(0.76f, 0.58f, 0.52f), ambHorizon = new Color(0.7f, 0.52f, 0.4f), ambGround = new Color(0.36f, 0.26f, 0.18f),
         };
 
         private static readonly Look AsiaLook = new Look
         {
             folder = "Duel/Asia/asia_", trees = 2, treeMin = 9f, treeMax = 13f, rocks = true, grass = true, snow = true, crystals = false, props = 2,
-            thick = 1f, rim = 0.95f, standRise = 0.8f,
+            thick = 1f, rim = 0.97f, standRise = 0.8f,
             glow = new Color(1f, 0.8f, 0.4f), selfLight = new Color(0.34f, 0.3f, 0.3f),
             ground = new Color(0.36f, 0.5f, 0.3f), mound = new Color(0.42f, 0.56f, 0.34f), bank = new Color(0.32f, 0.44f, 0.28f), grassColour = new Color(0.3f, 0.48f, 0.24f),
             crystal = Color.white, mist = new Color(1f, 0.9f, 0.95f, 0.16f), lamp = new Color(1f, 0.75f, 0.5f), lampPower = 0.5f,
             snowColour = new Color(1f, 0.7f, 0.82f, 0.95f), snowFall = 0.7f,
-            sky = "Duel/Asia/asia_sky", far = "Duel/Asia/asia_far", sun = new Color(1f, 0.9f, 0.82f), sunPower = 1.12f, ambSky = new Color(0.78f, 0.68f, 0.72f), ambHorizon = new Color(0.68f, 0.62f, 0.6f), ambGround = new Color(0.3f, 0.32f, 0.26f),
+            sky = "Duel/Asia/asia_sky", haze = new Color(0.546f, 0.553f, 0.557f), skyTop = new Color(0.62f, 0.5f, 0.7f), skyLow = new Color(1f, 0.84f, 0.8f), sun = new Color(1f, 0.9f, 0.82f), sunPower = 1.12f, ambSky = new Color(0.78f, 0.68f, 0.72f), ambHorizon = new Color(0.68f, 0.62f, 0.6f), ambGround = new Color(0.3f, 0.32f, 0.26f),
         };
 
         private static readonly Look EuropeLook = new Look
         {
             folder = "Duel/Euro/euro_", trees = 1, treeMin = 10f, treeMax = 14f, rocks = true, grass = true, snow = true, crystals = false, props = 2, backTree = false,
-            thick = 1f, rim = 0.95f, standRise = 0.8f,
+            thick = 1f, rim = 1.03f, standRise = 0.8f,
             glow = new Color(1f, 0.82f, 0.4f), selfLight = new Color(0.34f, 0.32f, 0.3f),
             ground = new Color(0.36f, 0.54f, 0.27f), mound = new Color(0.42f, 0.6f, 0.3f), bank = new Color(0.33f, 0.48f, 0.25f), grassColour = new Color(0.3f, 0.5f, 0.21f),
             crystal = Color.white, mist = new Color(1f, 1f, 0.95f, 0.1f), lamp = new Color(1f, 0.85f, 0.6f), lampPower = 0.35f,
             snowColour = new Color(0.62f, 0.78f, 0.3f, 0.9f), snowFall = 0.6f, // (leaves drifting down from the oaks)
-            sky = "Duel/Euro/euro_sky", far = "Duel/Euro/euro_far", farWidth = 95f, sun = new Color(1f, 0.96f, 0.88f), sunPower = 1.2f, ambSky = new Color(0.7f, 0.78f, 0.9f), ambHorizon = new Color(0.62f, 0.68f, 0.62f), ambGround = new Color(0.32f, 0.36f, 0.26f),
+            sky = "Duel/Euro/euro_sky", haze = new Color(0.443f, 0.435f, 0.318f), skyTop = new Color(0.34f, 0.6f, 0.92f), skyLow = new Color(0.8f, 0.9f, 0.98f), sun = new Color(1f, 0.96f, 0.88f), sunPower = 1.2f, ambSky = new Color(0.7f, 0.78f, 0.9f), ambHorizon = new Color(0.62f, 0.68f, 0.62f), ambGround = new Color(0.32f, 0.36f, 0.26f),
         };
 
         private static readonly Look ArabiaLook = new Look
         {
             folder = "Duel/Arab/arab_", trees = 1, treeMin = 8f, treeMax = 12f, rocks = true, dust = true, crystals = false, props = 2,
-            thick = 1f, rim = 0.95f, standRise = 0.8f,
+            thick = 1f, rim = 1.03f, standRise = 0.8f,
             glow = new Color(0.4f, 0.9f, 1f), selfLight = new Color(0.36f, 0.3f, 0.28f),
             ground = new Color(0.84f, 0.64f, 0.44f), mound = new Color(0.9f, 0.7f, 0.48f), bank = new Color(0.78f, 0.58f, 0.4f), grassColour = Color.white,
             crystal = Color.white, mist = new Color(1f, 0.8f, 0.7f, 0.12f), lamp = new Color(1f, 0.72f, 0.42f), lampPower = 0.55f,
             dustColour = new Color(1f, 0.82f, 0.58f, 0.45f),
-            sky = "Duel/Arab/arab_sky", far = "Duel/Arab/arab_far", sun = new Color(1f, 0.8f, 0.64f), sunPower = 1.1f, ambSky = new Color(0.74f, 0.56f, 0.62f), ambHorizon = new Color(0.76f, 0.56f, 0.46f), ambGround = new Color(0.38f, 0.27f, 0.2f),
+            sky = "Duel/Arab/arab_sky", haze = new Color(0.694f, 0.431f, 0.333f), skyTop = new Color(0.36f, 0.24f, 0.5f), skyLow = new Color(1f, 0.7f, 0.48f), sun = new Color(1f, 0.8f, 0.64f), sunPower = 1.1f, ambSky = new Color(0.74f, 0.56f, 0.62f), ambHorizon = new Color(0.76f, 0.56f, 0.46f), ambGround = new Color(0.38f, 0.27f, 0.2f),
         };
 
         private static Look LookOf(Theme t) => t switch
@@ -742,9 +743,8 @@ namespace SquashBot.Visual
                 tree.position += new Vector3(spot.x - tb.center.x, ground - tb.min.y - 0.2f, spot.z - tb.center.z);
             }
 
-            // The far view on the horizon behind it all (the sky picture's mountains, castle or domes, standing on the land
-            // rather than painted on the sky: the land never hides them).
-            if (look.far != null) FarCard(look.far, ground, look.farWidth);
+            // Where the land ends: a haze of the sky picture's own horizon colour, thick at the land and thinning upwards.
+            if (look.haze.a > 0f) Haze(look.haze, ground);
 
             // Icy rocks here and there between the trees (the glacier).
             if (look.rocks)
@@ -945,31 +945,56 @@ namespace SquashBot.Visual
         }
 
 
-        private Mesh farMesh;
+        private Mesh hazeMesh;
+        private static Texture2D hazeFade;
 
-        /// <summary>A big picture card far behind the stage, facing the camera, its foot on the land.</summary>
-        private void FarCard(string picture, float ground, float Width)
+        /// <summary>
+        /// A ring of haze round the stage at the land's far edge, facing in: its colour the sky picture's horizon, solid at
+        /// the bottom and clear at the top, so the land fades into the picture with no seam whichever way the camera looks.
+        /// </summary>
+        private void Haze(Color colour, float ground)
         {
-            var tex = Resources.Load<Texture2D>(picture);
-            if (tex == null) return;
-            tex.wrapMode = TextureWrapMode.Clamp;
-            const float Back = 105f;
-            float height = Width * tex.height / tex.width;
-            float x = centre.x - hw - Back, y0 = ground - 4f, z0 = centre.z - Width * 0.5f, z1 = centre.z + Width * 0.5f;
-            farMesh = new Mesh { name = "FarCard" };
-            farMesh.vertices = new[] { new Vector3(x, y0, z0), new Vector3(x, y0 + height, z0), new Vector3(x, y0 + height, z1), new Vector3(x, y0, z1) };
-            farMesh.uv = new[] { new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(1f, 0f) };
-            farMesh.colors = new[] { Color.white, Color.white, Color.white, Color.white };
-            farMesh.triangles = new[] { 0, 1, 2, 0, 2, 3 }; // (facing the camera, east)
-            farMesh.RecalculateBounds();
+            if (hazeFade == null)
+            {
+                const int N = 64;
+                hazeFade = new Texture2D(2, N, TextureFormat.RGBA32, false) { name = "HazeFade", wrapMode = TextureWrapMode.Clamp };
+                var px = new Color32[2 * N];
+                for (int y = 0; y < N; y++)
+                {
+                    float v = y / (float)(N - 1);
+                    var a = (byte)(255f * Mathf.Pow(1f - v, 1.4f));
+                    px[y * 2] = px[y * 2 + 1] = new Color32(255, 255, 255, a);
+                }
+                hazeFade.SetPixels32(px);
+                hazeFade.Apply(false, true);
+            }
+            const int Segments = 48;
+            const float Radius = 54f, Height = 26f;
+            var c = new Vector3(centre.x - 10f, ground - 1.5f, centre.z); // (the land's own middle: its square reaches 55 out)
+            var v3 = new List<Vector3>(); var uv = new List<Vector2>(); var cols = new List<Color>(); var tris = new List<int>();
+            for (int i = 0; i <= Segments; i++)
+            {
+                float a = i / (float)Segments * Mathf.PI * 2f;
+                var d = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * Radius;
+                v3.Add(c + d); v3.Add(c + d + Vector3.up * Height);
+                uv.Add(new Vector2(i / (float)Segments, 0f)); uv.Add(new Vector2(i / (float)Segments, 1f));
+                cols.Add(Color.white); cols.Add(Color.white);
+                if (i == Segments) break;
+                int k = i * 2;
+                tris.AddRange(new[] { k, k + 1, k + 3, k, k + 3, k + 2 }); // (both faces: whatever the material culls)
+                tris.AddRange(new[] { k, k + 3, k + 1, k, k + 2, k + 3 });
+            }
+            hazeMesh = new Mesh { name = "Haze" };
+            hazeMesh.SetVertices(v3); hazeMesh.SetUVs(0, uv); hazeMesh.SetColors(cols); hazeMesh.SetTriangles(tris, 0);
+            hazeMesh.RecalculateBounds();
             var m = new Material(Weather.AlphaMaterial);
-            m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
-            m.SetColor("_BaseColor", Color.white);
-            m.renderQueue = 2990; // (before the stage's mist and dust)
+            m.SetTexture("_BaseMap", hazeFade); m.SetTexture("_MainTex", hazeFade);
+            m.SetColor("_BaseColor", colour);
+            m.renderQueue = 2990;
             mats.Add(m);
-            var go = new GameObject("FarView");
+            var go = new GameObject("Haze");
             go.transform.SetParent(transform, false);
-            go.AddComponent<MeshFilter>().sharedMesh = farMesh;
+            go.AddComponent<MeshFilter>().sharedMesh = hazeMesh;
             var mr = go.AddComponent<MeshRenderer>();
             mr.sharedMaterial = m;
             mr.shadowCastingMode = ShadowCastingMode.Off;
@@ -1172,7 +1197,33 @@ namespace SquashBot.Visual
         private static Texture2D groveSky;
 
         /// <summary>A made stage's sky: the glacier's mountains, or the grove's night.</summary>
-        public static Texture SkyOf(Theme theme) => LookOf(theme).sky != null ? Resources.Load<Texture2D>(LookOf(theme).sky) : GroveSky();
+        public static Texture SkyOf(Theme theme)
+        {
+            var l = LookOf(theme);
+            if (l.sky != null) { var picture = Resources.Load<Texture2D>(l.sky); if (picture != null) return picture; }
+            if (l.skyTop.a <= 0f) return GroveSky();
+            if (skies.TryGetValue(theme, out var made) && made != null) return made;
+            return skies[theme] = Gradient(l.skyTop, l.skyLow, theme.ToString());
+        }
+
+        private static readonly Dictionary<Theme, Texture2D> skies = new Dictionary<Theme, Texture2D>();
+
+        /// <summary>A sky from one colour high up to another low down, softly (a glow at the horizon).</summary>
+        private static Texture2D Gradient(Color top, Color low, string name)
+        {
+            const int H = 256;
+            var tex = new Texture2D(4, H, TextureFormat.RGBA32, false) { name = "Sky " + name, wrapMode = TextureWrapMode.Clamp };
+            var px = new Color32[4 * H];
+            for (int y = 0; y < H; y++)
+            {
+                float k = y / (float)(H - 1); // 0 the bottom .. 1 the top
+                var c = Color.Lerp(low, top, Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((k - 0.35f) / 0.65f)));
+                for (int x = 0; x < 4; x++) px[y * 4 + x] = c;
+            }
+            tex.SetPixels32(px);
+            tex.Apply(false, true);
+            return tex;
+        }
 
         /// <summary>The grove's sky: deep night blue above, a soft blue glow low between the trees.</summary>
         public static Texture GroveSky()
@@ -1198,8 +1249,8 @@ namespace SquashBot.Visual
             Blockers.Clear();
             if (ownedMesh != null) Destroy(ownedMesh);
             if (grassMesh != null) Destroy(grassMesh);
-            if (farMesh != null) Destroy(farMesh);
             foreach (var bm in bentMeshes) if (bm != null) Destroy(bm);
+            if (hazeMesh != null) Destroy(hazeMesh);
             if (murmur != null && murmur.clip != null) Destroy(murmur.clip);
         }
     }
