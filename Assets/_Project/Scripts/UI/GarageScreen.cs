@@ -168,6 +168,13 @@ namespace SquashBot.UI
         {
             for (int i = grid.childCount - 1; i >= 0; i--) Destroy(grid.GetChild(i).gameObject);
             var items = Cosmetics.InSlot(slot).FindAll(Fits);
+            if (slot == Slot.Back)
+            {
+                // the capes made as models first (the plain one stays first of all), the older ones after
+                int Rank(Cosmetic c) => c.IsDefault ? 0 : SquashBot.Visual.GearFiles.CapeModel(c.id) != null ? 1 : 2;
+                var sorted = new System.Collections.Generic.List<Cosmetic>(items);
+                items.Sort((x, y) => Rank(x) != Rank(y) ? Rank(x).CompareTo(Rank(y)) : sorted.IndexOf(x).CompareTo(sorted.IndexOf(y)));
+            }
             const int columns = 5;
             const float cell = 172f, gap = 14f;
             for (int i = 0; i < items.Count; i++)

@@ -112,7 +112,7 @@ namespace SquashBot.Visual
             {
                 // a cape made as a model hangs as it was made (its own folds and colours), from the shoulders, swaying
                 // as long as foi is tall from the shoulders nearly to its feet, and never narrower than the back it covers
-                float wornLength = (shoulderY - root.position.y) * 0.92f;
+                float wornLength = (shoulderY - FeetY()) * 0.86f; // (ending above the feet: never into the floor)
                 var old = transform.Find(id); if (old != null) DestroyImmediate(old.gameObject); // (a copy of foi brings the original's along: one only)
                 worn = GearFiles.CapePicture(transform, id, wornLength);
                 if (worn != null)
@@ -279,6 +279,17 @@ namespace SquashBot.Visual
             glow.Apply(false);
         }
 
+        private Transform footL, footR;
+
+        /// <summary>The floor under foi: its lower foot (or its root).</summary>
+        private float FeetY()
+        {
+            if (footL == null) footL = Bone(root, "LeftFoot");
+            if (footR == null) footR = Bone(root, "RightFoot");
+            if (footL == null || footR == null) return root.position.y;
+            return Mathf.Min(footL.position.y, footR.position.y) - 0.02f * unit;
+        }
+
         /// <summary>Hangs it at once and lets it fall still (for a picture taken now).</summary>
         public void Settle(int steps = 45)
         {
@@ -310,7 +321,7 @@ namespace SquashBot.Visual
                 pos[k] = p + vel + gravity * dt * dt;
             }
             float dy = length / Rows;
-            float ground = root.position.y + 0.01f * unit;
+            float ground = FeetY() + 0.01f * unit; // (the floor where foi stands, wherever its root is)
             for (int it = 0; it < Iterations; it++)
             {
                 for (int j = 0; j <= Rows; j++)

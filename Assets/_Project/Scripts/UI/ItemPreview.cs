@@ -72,7 +72,7 @@ namespace SquashBot.UI
         /// </summary>
         public static Texture Cosmetic(Cosmetic c)
         {
-            if (c == null || !(c.slot == Slot.Head || (!c.IsDefault && (c.slot == Slot.Hat || c.slot == Slot.Back || c.slot == Slot.Arms || c.slot == Slot.Legs)))) return null;
+            if (c == null || !(c.slot == Slot.Head || (!c.IsDefault && (c.slot == Slot.Hat || c.slot == Slot.Back || c.slot == Slot.Arms || c.slot == Slot.Legs || c.slot == Slot.Suit)))) return null;
             string key = "cos." + c.id;
             if (cache.TryGetValue(key, out var rt) && rt != null && rt.IsCreated()) return rt;
             Setup();
@@ -112,6 +112,16 @@ namespace SquashBot.UI
                     }
                     else CosmeticModels.Back(piece, c.id, c.color);
                     break;
+                case Slot.Suit:
+                {
+                    // an armour paint: foi wearing it
+                    var look = new GameObject("Foi").transform;
+                    look.SetParent(piece, false);
+                    SkinnedHero.Build(look);
+                    var body = look.GetComponentInChildren<SkinnedHero>().transform;
+                    SkinnedHero.Dress(body, new SkinnedHero.Look { head = 1, suit = c.IsDefault ? null : c.id.Replace("suit.", "") });
+                    break;
+                }
                 case Slot.Head: { var h = Resources.Load<GameObject>("Heroes/Foi/head_" + c.id.Replace("head.", "")); if (h != null) { var made = Object.Instantiate(h, piece, false); foreach (var r in made.GetComponentsInChildren<Renderer>()) r.sharedMaterial = SkinnedHero.HeadMaterial(int.Parse(c.id.Replace("head.", ""))); } break; } // (its own picture)
                 default: GearModels.Picture(piece, c.id, c.color); break; // arm and leg gear, as foi wears it
             }

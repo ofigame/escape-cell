@@ -31,7 +31,7 @@ namespace SquashBot.UI
         /// <summary>An outfit from a chest was put on (foi dresses in it).</summary>
         public event Action OutfitWorn;
 
-        public bool IsOpen => screen.IsVisible || opening.IsVisible;
+        public bool IsOpen => screen.IsVisible || opening.IsVisible || (contents != null && contents.IsVisible);
 
         public static DuelChestScreen Create(Transform canvasRoot)
         {
@@ -41,6 +41,8 @@ namespace SquashBot.UI
             d.Build(root);
             d.opening = UiScreen.Create("ChestOpening", canvasRoot, out var openRoot);
             d.BuildOpening(openRoot);
+            d.contents = UiScreen.Create("ChestContents", canvasRoot, out var contentsRoot);
+            d.BuildContents(contentsRoot);
             return d;
         }
 
@@ -81,9 +83,75 @@ namespace SquashBot.UI
             // What may come out, and how likely (shown before any chest is opened).
             var odds = Flat.Label(row, Loc.T("chests.odds" + i), new Vector2(0f, 0.5f), new Vector2(300f, -92f), new Vector2(380f, 64f), 22f, Flat.Muted, wrap: true);
             odds.rectTransform.pivot = new Vector2(0f, 0.5f);
+            // what may come out of it, with pictures (a reason to win the next duel)
+            var see = Flat.Button(row, Loc.T("chests.contents"), new Vector2(1f, 0.5f), new Vector2(-30f, -92f), new Vector2(250f, 64f), Flat.CardHi, Flat.Text, () => ShowContents(t), 24f);
+            ((RectTransform)see.transform).pivot = new Vector2(1f, 0.5f);
             openButtons[i] = Flat.Button(row, Loc.T("chests.open"), new Vector2(1f, 0.5f), new Vector2(-30f, 0f), new Vector2(250f, 120f), new Color(0.2f, 0.72f, 0.36f), Color.white, () => TryOpen(t), 38f);
             ((RectTransform)openButtons[i].transform).pivot = new Vector2(1f, 0.5f);
             openLabels[i] = openButtons[i].GetComponentInChildren<TextMeshProUGUI>();
+        }
+
+        // ---------- What a chest may hold ----------
+
+        private UiScreen contents;
+        private RectTransform contentsGrid;
+        private TextMeshProUGUI contentsTitle, contentsOdds;
+
+        private void BuildContents(RectTransform root)
+        {
+            Flat.Background(root);
+            var top = new Vector2(0.5f, 1f);
+            contentsTitle = Flat.Label(root, "", top, new Vector2(0f, -80f), new Vector2(960f, 80f), 54f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
+            contentsTitle.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            contentsOdds = Flat.Label(root, "", top, new Vector2(0f, -150f), new Vector2(960f, 60f), 28f, Flat.Muted, TextAlignmentOptions.Center, wrap: true);
+            contentsOdds.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(30f, Ads.BannerReserve + 150f), new Vector2(-30f, -200f));
+            viewport.gameObject.AddComponent<RectMask2D>();
+            UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
+            contentsGrid = UiFactory.Rect("Grid", viewport, new Vector2(0f, 1f), Vector2.one);
+            contentsGrid.pivot = new Vector2(0.5f, 1f);
+            var scroll = root.gameObject.AddComponent<ScrollRect>();
+            scroll.viewport = viewport; scroll.content = contentsGrid; scroll.horizontal = false;
+            var close = Flat.Button(root, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, Ads.BannerReserve + 70f), new Vector2(520f, 110f), Flat.Blue, Color.white, () => contents.Hide(), 42f);
+            ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
+        }
+
+        /// <summary>The chest's possible gifts, each with its picture and name: its own rare weapons, shields and capes
+        /// first, the workshop's weapons and the gold after.</summary>
+        private void ShowContents(ChestTier t)
+        {
+            for (int i = contentsGrid.childCount - 1; i >= 0; i--) Destroy(contentsGrid.GetChild(i).gameObject);
+            contentsTitle.text = TierName(t);
+            contentsOdds.text = Loc.T("chests.odds" + (int)t);
+            int n = 0;
+            void Cell(Texture pic, string name, bool rare, string leaseId = null)
+            {
+                const int Cols = 3; const float W = 300f, H = 360f, Gap = 18f;
+                float x = (n % Cols - (Cols - 1) * 0.5f) * (W + Gap), y = -(n / Cols) * (H + Gap);
+                var card = Flat.Panel(contentsGrid, "Gift", new Vector2(0.5f, 1f), new Vector2(x, y), new Vector2(W, H), rare ? new Color(0.32f, 0.22f, 0.08f) : Flat.Card);
+                card.pivot = new Vector2(0.5f, 1f);
+                var box = UiFactory.Box("Picture", card, new Vector2(0.5f, 1f), new Vector2(0f, -140f), new Vector2(250f, 250f));
+                box.pivot = new Vector2(0.5f, 0.5f);
+                var raw = box.gameObject.AddComponent<RawImage>(); raw.texture = pic; raw.raycastTarget = false;
+                if (leaseId != null) box.gameObject.AddComponent<ItemPreview.Lease>().id = leaseId;
+                var label = Flat.Label(card, name, new Vector2(0.5f, 0f), new Vector2(0f, 50f), new Vector2(W - 20f, 70f), 26f, rare ? Flat.Gold : Flat.Text, TextAlignmentOptions.Center, bold: true, wrap: true);
+                label.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                n++;
+            }
+            if (t == ChestTier.Advanced)
+            {
+                foreach (var w in Armory.All) if (w.chest) Cell(ItemPreview.Weapon(w), Loc.T("weapon." + w.id), true);
+                foreach (var s in Shields.All) if (s.chest) Cell(ItemPreview.SpinningShield(s), Loc.T(s.id), true, s.id);
+            }
+            if (t != ChestTier.Basic)
+                foreach (var c in Cosmetics.All) if (c.chest) Cell(ItemPreview.Cosmetic(c), Loc.T("cos." + c.id), true);
+            int lo = t == ChestTier.Advanced ? 4 : t == ChestTier.Mid ? 3 : 1, hi = t == ChestTier.Advanced ? 6 : t == ChestTier.Mid ? 4 : 2;
+            foreach (var w in Armory.All)
+                if (!w.Special && !w.chest && w.price > 0 && w.tier >= lo && w.tier <= hi && w.kind != WeaponKind.Gun) Cell(ItemPreview.Weapon(w), Loc.T("weapon." + w.id), false);
+            contentsGrid.sizeDelta = new Vector2(0f, ((n + 2) / 3) * 378f + 30f);
+            contentsGrid.anchoredPosition = Vector2.zero;
+            contents.Show();
+            contents.transform.SetAsLastSibling();
         }
 
         private void BuildOpening(RectTransform root)

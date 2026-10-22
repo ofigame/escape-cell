@@ -245,9 +245,10 @@ namespace SquashBot.Gameplay
         private void TpsPose(out Vector3 pos, out Quaternion rot)
         {
             if (Gunning) { GunPose(out pos, out rot); return; }
-            var focus = robot.transform.position + Vector3.up * 1.35f; // above foi: the view looks down a touch more
+            float grow = arenaRun ? 1f : 1.3f; // foi stands a fifth bigger on the floors and in the duels: the camera further back
+            var focus = robot.transform.position + Vector3.up * 1.35f * Mathf.Lerp(1f, grow, 0.6f); // above foi: the view looks down a touch more
             var dir = Quaternion.Euler(tpsPitch, tpsYaw, 0f) * Vector3.forward;
-            pos = focus - dir * TpsDistance + Quaternion.Euler(0f, tpsYaw, 0f) * Vector3.right * tpsSide; // a touch to the right
+            pos = focus - dir * TpsDistance * grow + Quaternion.Euler(0f, tpsYaw, 0f) * Vector3.right * tpsSide; // a touch to the right
             rot = Quaternion.LookRotation(dir);
             // A building of the arena city between foi and the camera: the camera comes in in front of it (quickly), and
             // eases back out once the view is clear, so foi is never hidden behind a wall.
