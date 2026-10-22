@@ -13,7 +13,24 @@ namespace SquashBot.Visual
     /// </summary>
     public class DuelStands : MonoBehaviour
     {
-        public enum Theme { City, Glacier, Volcano, Space, Forest, Desert }
+        public enum Theme { City, Glacier, Volcano, Space, Forest, Desert, Grove, Frost, Mars, Cappadocia, Asia, Europe, Arabia }
+
+        /// <summary>A stage built of made models (the platform, its stands, the land round it), not of the board's own tiles.</summary>
+        public static bool IsMade(Theme t) => t >= Theme.Grove;
+
+        /// <summary>What the shoulder camera must not go into on a made stage: its stands (their own shapes).</summary>
+        private static readonly List<Collider> Blockers = new List<Collider>();
+
+        /// <summary>How far from <paramref name="from"/> towards <paramref name="to"/> the view is clear of the stands.</summary>
+        public static float ClearTo(Vector3 from, Vector3 to)
+        {
+            var d = to - from;
+            float best = d.magnitude;
+            var ray = new Ray(from, d.normalized);
+            foreach (var c in Blockers)
+                if (c != null && c.Raycast(ray, out var hit, best)) best = hit.distance;
+            return best;
+        }
 
         private const int Tiers = 7;
         private const float PodiumH = 0.5f, TierRise = 0.5f;
@@ -42,8 +59,12 @@ namespace SquashBot.Visual
             var rng = new System.Random(seed);
             var decor = new GameObject("Decor").transform;
             decor.SetParent(go.transform, false);
-            d.Terraces(decor, floor, origin, playerSouth, rng);
-            d.Backdrop(decor, theme, rng);
+            if (IsMade(theme)) d.MadeStage(decor, floor, origin, playerSouth, rng, LookOf(theme));
+            else
+            {
+                d.Terraces(decor, floor, origin, playerSouth, rng);
+                d.Backdrop(decor, theme, rng);
+            }
             StaticMerge.Combine(decor.gameObject, t => false);
             foreach (var r in decor.GetComponentsInChildren<MeshRenderer>()) r.shadowCastingMode = ShadowCastingMode.Off;
             foreach (var bt in d.batches) bt.m = new Matrix4x4[bt.pos.Count];
@@ -67,6 +88,9 @@ namespace SquashBot.Visual
             mats.Add(m);
             return m;
         }
+
+        /// <summary>A rough, unshining surface (moss, earth, grass) with a little of its own light: no grey sheen in the dark.</summary>
+        private Material Matte(Color c, float glow) { var m = MaterialFactory.CreateSurface(c, c * glow, 0.04f, 0f); mats.Add(m); return m; }
 
         private Material Surface(Color c, float smooth) { var m = MaterialFactory.CreateSurface(c, Color.black, smooth, 0f); mats.Add(m); return m; }
 
@@ -471,10 +495,711 @@ namespace SquashBot.Visual
             murmur.Play();
         }
 
+        // ---------- The made stages (the blue grove, the glacier peak): a rune platform, two stands, the land round about ----------
+
+        /// <summary>What a made stage is made of and how it looks.</summary>
+        private class Look
+        {
+            /// <summary>Its models' folder and names' start (platform, stand, tree_1.., rock).</summary>
+            public string folder;
+            public int trees;
+            public float treeMin, treeMax;
+            public bool rocks, grass, lanterns, snow, glints, dust;
+            /// <summary>A few of its own made thing beside the platform (Mars: a rover), how many.</summary>
+            public int props;
+            /// <summary>The platform's height to its width (as made: 1), and how far in its rim is from its outline.</summary>
+            public float thick, rim;
+            public Color glow, selfLight, ground, mound, bank, grassColour, crystal, mist, lamp;
+            public float lampPower;
+            /// <summary>How high above the floor the stands stand (on their banks).</summary>
+            public float standRise = 1.2f;
+            /// <summary>Glowing crystal clusters on the ground (not in Cappadocia), and the colour of the dust in the air.</summary>
+            public bool crystals = true;
+            public Color dustColour = new Color(0.95f, 0.6f, 0.4f, 0.55f);
+            /// <summary>What falls from the sky (snow, cherry petals): its colour and how fast.</summary>
+            public Color snowColour = new Color(1f, 1f, 1f, 0.9f);
+            public float snowFall = 1.5f;
+            /// <summary>A tree right behind the platform, between the stands (none where the sky picture has its castle there).</summary>
+            public bool backTree = true;
+            /// <summary>Its sky picture (Resources), or none (the grove's night, drawn).</summary>
+            public string sky;
+            /// <summary>Its far view (mountains, a castle, domes) standing on the horizon behind the stage (Resources), or none.</summary>
+            public string far;
+            /// <summary>How wide its far view stands (a near castle smaller than a mountain range).</summary>
+            public float farWidth = 150f;
+            /// <summary>Its light: the sun's colour and strength, the ambient sky, horizon and ground.</summary>
+            public Color sun = Color.white, ambSky = Color.grey, ambHorizon = Color.grey, ambGround = Color.black;
+            public float sunPower = 1f;
+        }
+
+        private static readonly Look GroveLook = new Look
+        {
+            folder = "Duel/Grove/grove_", trees = 3, treeMin = 12f, treeMax = 16f, grass = true, lanterns = true, thick = 0.6f, rim = 0.86f,
+            glow = new Color(0.35f, 0.85f, 1f), selfLight = new Color(0.16f, 0.2f, 0.26f),
+            ground = new Color(0.07f, 0.12f, 0.1f), mound = new Color(0.1f, 0.17f, 0.13f), bank = new Color(0.05f, 0.09f, 0.08f), grassColour = new Color(0.05f, 0.11f, 0.08f),
+            crystal = new Color(0.45f, 0.85f, 1f), mist = new Color(0.55f, 0.8f, 0.95f, 0.17f), lamp = new Color(0.35f, 0.85f, 1f), lampPower = 1f,
+            sun = new Color(0.6f, 0.75f, 1f), sunPower = 0.95f, ambSky = new Color(0.2f, 0.32f, 0.5f), ambHorizon = new Color(0.12f, 0.26f, 0.36f), ambGround = new Color(0.03f, 0.05f, 0.07f),
+        };
+
+        private static readonly Look FrostLook = new Look
+        {
+            folder = "Duel/Ice/ice_", trees = 1, treeMin = 7f, treeMax = 10.5f, rocks = true, snow = true, glints = true, thick = 1f, rim = 0.95f,
+            glow = new Color(0.55f, 0.9f, 1f), selfLight = new Color(0.42f, 0.48f, 0.56f),
+            ground = new Color(0.8f, 0.87f, 0.95f), mound = new Color(0.9f, 0.94f, 1f), bank = new Color(0.72f, 0.8f, 0.9f), grassColour = Color.white,
+            crystal = new Color(0.55f, 0.88f, 1f), mist = new Color(0.92f, 0.96f, 1f, 0.16f), lamp = new Color(0.7f, 0.9f, 1f), lampPower = 0.45f,
+            sky = "Duel/Ice/ice_sky", far = "Duel/Ice/ice_far", sun = new Color(0.95f, 0.97f, 1f), sunPower = 1.15f, ambSky = new Color(0.62f, 0.72f, 0.86f), ambHorizon = new Color(0.55f, 0.66f, 0.78f), ambGround = new Color(0.35f, 0.4f, 0.48f),
+        };
+
+        private static readonly Look MarsLook = new Look
+        {
+            folder = "Duel/Mars/mars_", trees = 1, treeMin = 9f, treeMax = 15f, rocks = true, dust = true, props = 2, thick = 0.8f, rim = 0.95f, standRise = 0.15f,
+            glow = new Color(1f, 0.6f, 0.25f), selfLight = new Color(0.34f, 0.24f, 0.2f),
+            ground = new Color(0.58f, 0.27f, 0.16f), mound = new Color(0.66f, 0.32f, 0.19f), bank = new Color(0.46f, 0.2f, 0.12f), grassColour = Color.white,
+            crystal = new Color(1f, 0.6f, 0.22f), mist = new Color(0.9f, 0.55f, 0.35f, 0.15f), lamp = new Color(1f, 0.62f, 0.3f), lampPower = 0.6f,
+            sky = "Duel/Mars/mars_sky", far = "Duel/Mars/mars_far", sun = new Color(1f, 0.84f, 0.68f), sunPower = 1.1f, ambSky = new Color(0.72f, 0.48f, 0.36f), ambHorizon = new Color(0.62f, 0.4f, 0.3f), ambGround = new Color(0.32f, 0.17f, 0.1f),
+        };
+
+        private static readonly Look CappadociaLook = new Look
+        {
+            folder = "Duel/Kapa/kapa_", trees = 2, treeMin = 9f, treeMax = 14f, rocks = true, dust = true, crystals = false, thick = 1f, rim = 0.95f, standRise = 0.8f,
+            glow = new Color(1f, 0.82f, 0.45f), selfLight = new Color(0.36f, 0.31f, 0.27f),
+            ground = new Color(0.8f, 0.62f, 0.44f), mound = new Color(0.86f, 0.68f, 0.48f), bank = new Color(0.74f, 0.56f, 0.4f), grassColour = Color.white,
+            crystal = Color.white, mist = new Color(1f, 0.8f, 0.6f, 0.12f), lamp = new Color(1f, 0.72f, 0.45f), lampPower = 0.5f,
+            dustColour = new Color(1f, 0.85f, 0.6f, 0.45f),
+            sky = "Duel/Kapa/kapa_sky", far = "Duel/Kapa/kapa_far", sun = new Color(1f, 0.86f, 0.66f), sunPower = 1.12f, ambSky = new Color(0.76f, 0.58f, 0.52f), ambHorizon = new Color(0.7f, 0.52f, 0.4f), ambGround = new Color(0.36f, 0.26f, 0.18f),
+        };
+
+        private static readonly Look AsiaLook = new Look
+        {
+            folder = "Duel/Asia/asia_", trees = 2, treeMin = 9f, treeMax = 13f, rocks = true, grass = true, snow = true, crystals = false, props = 2,
+            thick = 1f, rim = 0.95f, standRise = 0.8f,
+            glow = new Color(1f, 0.8f, 0.4f), selfLight = new Color(0.34f, 0.3f, 0.3f),
+            ground = new Color(0.36f, 0.5f, 0.3f), mound = new Color(0.42f, 0.56f, 0.34f), bank = new Color(0.32f, 0.44f, 0.28f), grassColour = new Color(0.3f, 0.48f, 0.24f),
+            crystal = Color.white, mist = new Color(1f, 0.9f, 0.95f, 0.16f), lamp = new Color(1f, 0.75f, 0.5f), lampPower = 0.5f,
+            snowColour = new Color(1f, 0.7f, 0.82f, 0.95f), snowFall = 0.7f,
+            sky = "Duel/Asia/asia_sky", far = "Duel/Asia/asia_far", sun = new Color(1f, 0.9f, 0.82f), sunPower = 1.12f, ambSky = new Color(0.78f, 0.68f, 0.72f), ambHorizon = new Color(0.68f, 0.62f, 0.6f), ambGround = new Color(0.3f, 0.32f, 0.26f),
+        };
+
+        private static readonly Look EuropeLook = new Look
+        {
+            folder = "Duel/Euro/euro_", trees = 1, treeMin = 10f, treeMax = 14f, rocks = true, grass = true, snow = true, crystals = false, props = 2, backTree = false,
+            thick = 1f, rim = 0.95f, standRise = 0.8f,
+            glow = new Color(1f, 0.82f, 0.4f), selfLight = new Color(0.34f, 0.32f, 0.3f),
+            ground = new Color(0.36f, 0.54f, 0.27f), mound = new Color(0.42f, 0.6f, 0.3f), bank = new Color(0.33f, 0.48f, 0.25f), grassColour = new Color(0.3f, 0.5f, 0.21f),
+            crystal = Color.white, mist = new Color(1f, 1f, 0.95f, 0.1f), lamp = new Color(1f, 0.85f, 0.6f), lampPower = 0.35f,
+            snowColour = new Color(0.62f, 0.78f, 0.3f, 0.9f), snowFall = 0.6f, // (leaves drifting down from the oaks)
+            sky = "Duel/Euro/euro_sky", far = "Duel/Euro/euro_far", farWidth = 95f, sun = new Color(1f, 0.96f, 0.88f), sunPower = 1.2f, ambSky = new Color(0.7f, 0.78f, 0.9f), ambHorizon = new Color(0.62f, 0.68f, 0.62f), ambGround = new Color(0.32f, 0.36f, 0.26f),
+        };
+
+        private static readonly Look ArabiaLook = new Look
+        {
+            folder = "Duel/Arab/arab_", trees = 1, treeMin = 8f, treeMax = 12f, rocks = true, dust = true, crystals = false, props = 2,
+            thick = 1f, rim = 0.95f, standRise = 0.8f,
+            glow = new Color(0.4f, 0.9f, 1f), selfLight = new Color(0.36f, 0.3f, 0.28f),
+            ground = new Color(0.84f, 0.64f, 0.44f), mound = new Color(0.9f, 0.7f, 0.48f), bank = new Color(0.78f, 0.58f, 0.4f), grassColour = Color.white,
+            crystal = Color.white, mist = new Color(1f, 0.8f, 0.7f, 0.12f), lamp = new Color(1f, 0.72f, 0.42f), lampPower = 0.55f,
+            dustColour = new Color(1f, 0.82f, 0.58f, 0.45f),
+            sky = "Duel/Arab/arab_sky", far = "Duel/Arab/arab_far", sun = new Color(1f, 0.8f, 0.64f), sunPower = 1.1f, ambSky = new Color(0.74f, 0.56f, 0.62f), ambHorizon = new Color(0.76f, 0.56f, 0.46f), ambGround = new Color(0.38f, 0.27f, 0.2f),
+        };
+
+        private static Look LookOf(Theme t) => t switch
+        {
+            Theme.Frost => FrostLook, Theme.Mars => MarsLook, Theme.Cappadocia => CappadociaLook, Theme.Asia => AsiaLook, Theme.Europe => EuropeLook,
+            Theme.Arabia => ArabiaLook, _ => GroveLook,
+        };
+
+        /// <summary>A made stage's light: the sun's colour and strength, the ambient sky, horizon and ground.</summary>
+        public static (Color sun, float power, Color sky, Color horizon, Color ground) LightOf(Theme t)
+        {
+            var l = LookOf(t);
+            return (l.sun, l.sunPower, l.ambSky, l.ambHorizon, l.ambGround);
+        }
+
+        /// <summary>
+        /// A made stage: the rune platform under the floor (the floor's own tiles are hidden, see GridView.Ghost), a stand at
+        /// each back corner against its rim with each side's fans on its steps, trees (and rocks) behind and round about, lamps.
+        /// </summary>
+        private void MadeStage(Transform p, bool[,] floor, Vector3 origin, bool playerSouth, System.Random rng, Look look)
+        {
+            Blockers.Clear();
+            int w = floor.GetLength(0), h = floor.GetLength(1);
+            int fx0 = w, fx1 = -1, fy0 = h, fy1 = -1;
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                    if (floor[x, y]) { fx0 = Mathf.Min(fx0, x); fx1 = Mathf.Max(fx1, x); fy0 = Mathf.Min(fy0, y); fy1 = Mathf.Max(fy1, y); }
+            if (fx1 < 0) return;
+            centre = origin + new Vector3((fx0 + fx1) * 0.5f, 0f, (fy0 + fy1) * 0.5f);
+            hw = (fx1 - fx0 + 1) * 0.5f; // (along the view)
+            hd = (fy1 - fy0 + 1) * 0.5f; // (across it: the stands' ends)
+            if (batches.Count == 0) MakeBatches();
+            float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
+
+            // The platform: round (as made), its stone ring a little wider than the floor, its top where the floor is.
+            var plat = MadeModel(p, look, "platform", true);
+            var pb = BoundsOf(plat);
+            float kp = Mathf.Max(hw, hd) * 2f * 1.28f / Mathf.Max(pb.size.x, pb.size.z);
+            plat.localScale = new Vector3(kp, kp * look.thick, kp);
+            pb = BoundsOf(plat);
+            plat.position += new Vector3(centre.x - pb.center.x, 0f, centre.z - pb.center.z);
+            // its walking surface: the highest of several points across it (an inlaid emblem in the middle may sit lower)
+            float top = float.MinValue;
+            for (int i = 0; i <= 8; i++)
+            {
+                float a = i * Mathf.PI / 4f, rr = i == 8 ? 0f : Mathf.Min(hw, hd) * 0.55f;
+                top = Mathf.Max(top, SurfaceAt(plat, new Vector3(centre.x + Mathf.Cos(a) * rr, pb.max.y + 1f, centre.z + Mathf.Sin(a) * rr), float.MinValue));
+            }
+            if (top == float.MinValue) top = pb.max.y;
+            plat.position += Vector3.up * (floorY - top);
+            // The forest floor a little under the platform's top: it stands on the land, sunk in it (not up in the air).
+            float ground = floorY - 1.1f;
+            var moss = Matte(look.ground, 0.2f); // (a little of its own light: the land reads in the dark)
+            Shapes.Rounded("Ground", p, new Vector3(centre.x - 10f, ground - 0.3f, centre.z), new Vector3(110f, 0.6f, 110f), 0.05f, moss);
+            // mossy mounds and patches here and there (the ground is not a flat board)
+            var mossLight = Matte(look.mound, 0.2f);
+            var mossDark = Matte(look.bank, 0.2f);
+            for (int i = 0; i < 34; i++)
+            {
+                float ang = R(0f, Mathf.PI * 2f), dist = R(Mathf.Max(hw, hd) * 1.15f, 30f);
+                if (Mathf.Cos(ang) > 0.25f) ang += Mathf.PI * 0.5f * Mathf.Sign(Mathf.Sin(ang) + 1e-4f); // (none in front of the camera: flat slabs there)
+                var at = new Vector3(centre.x + Mathf.Cos(ang) * dist, ground, centre.z + Mathf.Sin(ang) * dist);
+                float sx = R(2.5f, 7f), sz = R(2.5f, 7f);
+                Shapes.Rounded("Mound", p, at, new Vector3(sx, R(0.3f, 1.1f), sz), Mathf.Min(sx, sz) * 0.45f, i % 2 == 0 ? mossLight : mossDark).transform.rotation = Quaternion.Euler(0f, R(0f, 180f), 0f);
+            }
+
+            // Long dark grass all round the platform and out under the trees, in tufts.
+            if (look.grass)
+            {
+                var grass = new GameObject("Grass");
+                grass.transform.SetParent(p, false);
+                grassMesh = GroveGrass(new Vector3(centre.x, ground, centre.z), Mathf.Max(hw, hd) * 1.22f, 32f, 420, rng);
+                grass.AddComponent<MeshFilter>().sharedMesh = grassMesh;
+                grass.AddComponent<MeshRenderer>().sharedMaterial = Matte(look.grassColour, 0.35f);
+            }
+
+            // A stand at each end of the floor (the screen's left and right), its steps towards the floor, up on a bank:
+            // the floor lies down in the hollow between them.
+            float bank = floorY + look.standRise;
+            float platR = Mathf.Max(pb.size.x, pb.size.z) * 0.5f; // (the stands stand clear of the platform's rim)
+            int southTeam = playerSouth ? 0 : 1;
+            for (int s = 0; s < 2; s++)
+            {
+                float dir = s == 0 ? -1f : 1f; // south (-z), north (+z)
+                int team = s == 0 ? southTeam : 1 - southTeam;
+                var stand = MadeModel(p, look, "stand", true);
+                var sb = BoundsOf(stand);
+                float k = hw * 2f * 0.95f / Mathf.Max(sb.size.x, sb.size.z);
+                stand.localScale = Vector3.one * k;
+                // its long side along the view (x), its seats facing the floor (which way the made model faces is found by looking)
+                sb = BoundsOf(stand);
+                if (sb.size.z > sb.size.x) stand.rotation = Quaternion.Euler(0f, 90f, 0f) * stand.rotation;
+                for (int tryTurn = 0; tryTurn < 2; tryTurn++)
+                {
+                    sb = BoundsOf(stand);
+                    stand.position += new Vector3(centre.x - sb.center.x, bank - sb.min.y, centre.z + dir * (platR - 0.3f + sb.extents.z) - sb.center.z);
+                    if (tryTurn == 0 && !SeatsFaceFloor(stand, dir)) { stand.rotation = Quaternion.Euler(0f, 180f, 0f) * stand.rotation; continue; }
+                    break;
+                }
+                // the bank of earth it stands on (the hollow's side), mossy, from the forest floor up: under it and behind it, never over the platform
+                sb = BoundsOf(stand);
+                var bankGo = Shapes.Rounded("Bank", p, new Vector3(sb.center.x, (ground + bank) * 0.5f - 0.25f, sb.center.z + dir * 1.2f), new Vector3(sb.size.x + 1f, bank - ground + 0.5f, sb.size.z + 1f), 0.8f, mossDark);
+                // turned back round the floor (with its bank) to its back corner: against the rim, diagonally behind it
+                var pivot = new Vector3(centre.x, ground, centre.z);
+                stand.RotateAround(pivot, Vector3.up, -dir * 45f);
+                bankGo.transform.RotateAround(pivot, Vector3.up, -dir * 45f);
+                // in against the rim: the middle of its front row (its curve leaves the middle further out than its ends) just
+                // outside the platform's edge
+                var outward = BoundsOf(stand).center - pivot; outward.y = 0f; outward.Normalize();
+                float shift = platR * look.rim - FrontDistance(stand, pivot, outward); // (the stone rim: roots may reach further out)
+                stand.position += outward * shift;
+                bankGo.transform.position += outward * shift;
+                BendToRing(stand, pivot, outward, platR * look.rim);
+                SeatCrowd(stand, team, rng);
+                Blockers.AddRange(Probe(stand)); // (its colliders stay: the camera keeps out of it)
+            }
+
+            // Giant trees: between the stands behind the platform, one at each side of it (a little to the front), and the
+            // forest beyond them all round (never in front of the camera).
+            var spots = new List<Vector3>();
+            Vector3 Around(float degrees, float dist) => new Vector3(centre.x + Mathf.Cos(degrees * Mathf.Deg2Rad) * dist, 0f, centre.z + Mathf.Sin(degrees * Mathf.Deg2Rad) * dist);
+            if (look.backTree) spots.Add(Around(180f, platR + 8.5f)); // (not where it would hide the sky picture's castle)
+            if (look.backTree) { spots.Add(Around(160f, platR + 14f)); spots.Add(Around(200f, platR + 14f)); }
+            if (look.backTree) spots.Add(Around(180f, platR + 20f));
+            spots.Add(Around(-80f, platR + 4.5f)); // the left side
+            spots.Add(Around(80f, platR + 4.5f)); // the right side
+            for (int i = 0; i < 8; i++)
+            {
+                float deg = R(70f, 290f);
+                if (!look.backTree && deg > 140f && deg < 220f) deg += deg < 180f ? -70f : 70f; // (the view behind the platform kept clear)
+                spots.Add(Around(deg, platR + R(17f, 26f)));
+            }
+            foreach (var spot in spots)
+            {
+                var tree = MadeModel(p, look, "tree_" + (1 + rng.Next(look.trees)), false);
+                var tb = BoundsOf(tree);
+                tree.localScale = Vector3.one * (R(look.treeMin, look.treeMax) / tb.size.y);
+                tree.rotation = Quaternion.Euler(0f, R(0f, 360f), 0f) * tree.rotation;
+                tb = BoundsOf(tree);
+                tree.position += new Vector3(spot.x - tb.center.x, ground - tb.min.y - 0.2f, spot.z - tb.center.z);
+            }
+
+            // The far view on the horizon behind it all (the sky picture's mountains, castle or domes, standing on the land
+            // rather than painted on the sky: the land never hides them).
+            if (look.far != null) FarCard(look.far, ground, look.farWidth);
+
+            // Icy rocks here and there between the trees (the glacier).
+            if (look.rocks)
+                for (int i = 0; i < 7; i++)
+                {
+                    var boulder = MadeModel(p, look, "rock", true); // (its crystals glow, if it has a glow picture)
+                    var rb = BoundsOf(boulder);
+                    boulder.localScale = Vector3.one * (R(2.2f, 4.2f) / Mathf.Max(rb.size.x, rb.size.z));
+                    boulder.rotation = Quaternion.Euler(0f, R(0f, 360f), 0f) * boulder.rotation;
+                    rb = BoundsOf(boulder);
+                    var at = Around(i < 2 ? (i == 0 ? -100f : 100f) : R(110f, 250f), platR + (i < 2 ? R(2.5f, 4f) : R(5f, 14f)));
+                    boulder.position += new Vector3(at.x - rb.center.x, ground - rb.min.y - 0.15f, at.z - rb.center.z);
+                }
+
+            // Its own things beside the platform (Mars: rovers), facing every which way.
+            for (int i = 0; i < look.props; i++)
+            {
+                var thing = MadeModel(p, look, "prop", false);
+                var tb = BoundsOf(thing);
+                thing.localScale = Vector3.one * (R(3.2f, 3.8f) / Mathf.Max(tb.size.x, tb.size.z));
+                thing.rotation = Quaternion.Euler(0f, R(0f, 360f), 0f) * thing.rotation;
+                tb = BoundsOf(thing);
+                var at = Around(i == 0 ? -95f : 95f, platR + R(4.5f, 6f));
+                thing.position += new Vector3(at.x - tb.center.x, ground - tb.min.y, at.z - tb.center.z);
+            }
+
+            // Lamps: either side of the floor and among the trees behind.
+            void Lamp(Vector3 at, float intensity, float range)
+            {
+                var l = new GameObject("GroveLamp").AddComponent<Light>();
+                l.transform.SetParent(transform, false);
+                l.transform.position = at;
+                l.type = LightType.Point; l.color = look.lamp; l.intensity = intensity * look.lampPower; l.range = range; l.shadows = LightShadows.None;
+            }
+            Lamp(new Vector3(centre.x, floorY + 2.5f, centre.z - hd - 1f), 2.2f, 11f);
+            Lamp(new Vector3(centre.x, floorY + 2.5f, centre.z + hd + 1f), 2.2f, 11f);
+            Lamp(new Vector3(centre.x - hw - 3f, floorY + 4f, centre.z), 3f, 16f);
+            Lamp(new Vector3(centre.x + hw + 4f, floorY + 2f, centre.z), 2.4f, 15f); // (the near side: the land in front of the floor)
+
+            // Crystal clusters on the forest floor round the platform and among the trees, and mossy rocks.
+            var crystal = M(look.crystal, 1.5f);
+            var rock = Surface(new Color(0.3f, 0.36f, 0.42f), 0.2f);
+            var cone = Cone(6);
+            for (int i = 0; i < (look.crystals ? 16 : 0); i++)
+            {
+                float ang = R(0f, Mathf.PI * 2f), dist = R(Mathf.Max(hw, hd) * 1.25f, 22f);
+                if (i < 4) { ang = (i % 2 == 0 ? -1f : 1f) * R(1.35f, 1.65f); dist = R(11f, 14f); } // the near sides (not in front of the floor)
+                else if (Mathf.Cos(ang) > 0.3f) ang += Mathf.PI * 0.6f; // (none in front of the camera)
+                var at = new Vector3(centre.x + Mathf.Cos(ang) * dist, ground, centre.z + Mathf.Sin(ang) * dist);
+                int n = 3 + rng.Next(3);
+                for (int k = 0; k < n; k++)
+                {
+                    float hgt = R(0.9f, 2.6f) * (k == 0 ? 1.3f : 1f);
+                    var piece = new GameObject("Crystal");
+                    piece.transform.SetParent(p, false);
+                    piece.transform.position = at + new Vector3(R(-0.6f, 0.6f), -0.1f, R(-0.6f, 0.6f));
+                    piece.transform.rotation = Quaternion.Euler(R(-28f, 28f), R(0f, 360f), R(-28f, 28f));
+                    piece.transform.localScale = new Vector3(hgt * 0.32f, hgt, hgt * 0.32f);
+                    piece.AddComponent<MeshFilter>().sharedMesh = cone;
+                    piece.AddComponent<MeshRenderer>().sharedMaterial = crystal;
+                }
+                Shapes.Rounded("Rock", p, at + new Vector3(R(-1.4f, 1.4f), 0.15f, R(-1.4f, 1.4f)), new Vector3(R(0.8f, 1.6f), R(0.5f, 0.9f), R(0.8f, 1.4f)), 0.25f, rock);
+            }
+
+            // Lanterns hanging from the trees round the back and sides: a dark frame round a glowing blue core, on a chain.
+            var iron = Surface(new Color(0.1f, 0.12f, 0.15f), 0.4f);
+            var flame = M(new Color(0.5f, 0.9f, 1f), 2.4f);
+            for (int i = 0; i < (look.lanterns ? 9 : 0); i++)
+            {
+                float ang = Mathf.Lerp(Mathf.PI * 0.55f, Mathf.PI * 1.45f, i / 8f) + R(-0.12f, 0.12f); // (the far half of the ring)
+                float dist = Mathf.Max(hw, hd) * R(1.35f, 1.9f);
+                var at = new Vector3(centre.x + Mathf.Cos(ang) * dist, floorY + R(4f, 6.5f), centre.z + Mathf.Sin(ang) * dist);
+                Shapes.Rounded("Chain", p, at + Vector3.up * 3.4f, new Vector3(0.05f, 6f, 0.05f), 0.02f, iron);
+                Shapes.Rounded("LanternCap", p, at + Vector3.up * 0.48f, new Vector3(0.62f, 0.14f, 0.62f), 0.05f, iron);
+                Shapes.Rounded("LanternFrame", p, at, new Vector3(0.5f, 0.78f, 0.5f), 0.06f, iron);
+                Shapes.Rounded("LanternLight", p, at, new Vector3(0.56f, 0.6f, 0.56f), 0.1f, flame);
+                Shapes.Rounded("LanternBase", p, at + Vector3.down * 0.44f, new Vector3(0.6f, 0.1f, 0.6f), 0.04f, iron);
+            }
+
+            // Fireflies drifting over the floor and among the trees (or snow falling), and a low mist on the ground.
+            if (look.dust)
+                GroveParticles("Dust", Weather.AlphaMaterial, new Vector3(centre.x - 3f, floorY + 2.5f, centre.z), new Vector3(40f, 5f, 40f),
+                    300, 40f, 6f, look.dustColour, 0.06f, 0.13f, 1.4f, 0.15f);
+            else if (look.snow)
+                GroveParticles("Snow", Weather.AlphaMaterial, new Vector3(centre.x - 3f, floorY + 11f, centre.z), new Vector3(40f, 1f, 40f),
+                    600, 70f, 8f, look.snowColour, 0.08f, 0.17f, look.snowFall > 1f ? 0.4f : 1.1f, look.snowFall); // (petals drift more)
+            else
+                GroveParticles("Fireflies", Weather.AddMaterial, new Vector3(centre.x - 3f, floorY + 2.2f, centre.z), new Vector3(34f, 4.5f, 34f),
+                    90, 26f, 7f, new Color(1.7f, 1.9f, 0.8f), 0.14f, 0.24f, 0.9f);
+            GroveParticles("Mist", Weather.AlphaMaterial, new Vector3(centre.x - 6f, ground + 0.7f, centre.z), new Vector3(48f, 0.6f, 48f),
+                70, 4f, 16f, look.mist, 7f, 11f, 0.25f);
+            // The ice glinting: small sparkles coming and going over the platform's top and over the stands.
+            if (look.glints)
+            {
+                GroveParticles("Glints", Weather.AddMaterial, new Vector3(centre.x, floorY + 0.25f, centre.z), new Vector3(platR * 1.7f, 0.3f, platR * 1.7f),
+                    120, 40f, 1.4f, new Color(2f, 2.5f, 3f), 0.14f, 0.28f, 0.05f);
+                for (int s = 0; s < 2; s++)
+                {
+                    var at = Around(s == 0 ? -135f : 135f, platR + 4f);
+                    GroveParticles("StandGlints", Weather.AddMaterial, new Vector3(at.x, floorY + 3.5f, at.z), new Vector3(11f, 4f, 11f),
+                        90, 30f, 1.4f, new Color(2f, 2.5f, 3f), 0.16f, 0.32f, 0.05f);
+                }
+            }
+        }
+
+        private Mesh grassMesh;
+
+        /// <summary>
+        /// Tufts of long grass in a ring round <paramref name="c"/> (from <paramref name="inner"/> out to <paramref name="outer"/>):
+        /// each blade a thin leaning triangle, both faces, taller further out; one mesh for all of it.
+        /// </summary>
+        private static Mesh GroveGrass(Vector3 c, float inner, float outer, int tufts, System.Random rng)
+        {
+            float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
+            var v = new List<Vector3>(); var n = new List<Vector3>(); var t = new List<int>();
+            for (int i = 0; i < tufts; i++)
+            {
+                float ang = R(0f, Mathf.PI * 2f);
+                float d = Mathf.Sqrt(R(inner * inner, outer * outer));
+                bool near = Mathf.Cos(ang) > 0.5f && d < inner * 1.6f; // (in front of the camera: shorter, the floor stays in view)
+                var tc = c + new Vector3(Mathf.Cos(ang) * d, 0f, Mathf.Sin(ang) * d);
+                int blades = 7 + rng.Next(6);
+                float tall = Mathf.Lerp(0.9f, 2.1f, Mathf.InverseLerp(inner, outer * 0.6f, d)) * (near ? 0.55f : 1f);
+                for (int b = 0; b < blades; b++)
+                {
+                    var at = tc + new Vector3(R(-0.45f, 0.45f), -0.05f, R(-0.45f, 0.45f));
+                    float h = tall * R(0.6f, 1.15f), w = R(0.06f, 0.12f), turn = R(0f, Mathf.PI);
+                    var side = new Vector3(Mathf.Cos(turn), 0f, Mathf.Sin(turn)) * w;
+                    var lean = new Vector3(R(-0.45f, 0.45f), 0f, R(-0.45f, 0.45f)) * h;
+                    var tip = at + Vector3.up * h + lean;
+                    var normal = Vector3.Cross(side, tip - at).normalized;
+                    normal = (normal + Vector3.up * 0.8f).normalized;
+                    int k = v.Count;
+                    v.Add(at - side); v.Add(at + side); v.Add(tip);
+                    v.Add(at - side); v.Add(at + side); v.Add(tip);
+                    n.Add(normal); n.Add(normal); n.Add(Vector3.up);
+                    var back = new Vector3(-normal.x, normal.y, -normal.z);
+                    n.Add(back); n.Add(back); n.Add(Vector3.up);
+                    t.Add(k); t.Add(k + 2); t.Add(k + 1);
+                    t.Add(k + 3); t.Add(k + 4); t.Add(k + 5);
+                }
+            }
+            var m = new Mesh { name = "GroveGrass", indexFormat = IndexFormat.UInt32 };
+            m.SetVertices(v); m.SetNormals(n); m.SetTriangles(t, 0);
+            m.RecalculateBounds();
+            return m;
+        }
+
+        /// <summary>A soft cloud of particles in a box (the grove's fireflies, its mist), drifting where the noise takes them.</summary>
+        private void GroveParticles(string name, Material mat, Vector3 at, Vector3 box, int max, float rate, float life, Color color, float sizeMin, float sizeMax, float drift, float fall = 0f)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(transform, false);
+            go.transform.position = at;
+            var ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main;
+            main.duration = 5f;
+            main.loop = true;
+            main.prewarm = true;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(life * 0.7f, life);
+            main.startSpeed = 0f;
+            main.startSize = new ParticleSystem.MinMaxCurve(sizeMin, sizeMax);
+            main.startColor = color;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.maxParticles = max;
+            var emission = ps.emission;
+            emission.rateOverTime = rate;
+            var shape = ps.shape;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = box;
+            var noise = ps.noise;
+            noise.enabled = true;
+            noise.strength = drift;
+            noise.frequency = 0.25f;
+            noise.scrollSpeed = 0.2f;
+            if (fall > 0f)
+            {
+                var vel = ps.velocityOverLifetime;
+                vel.enabled = true;
+                vel.space = ParticleSystemSimulationSpace.World;
+                vel.x = new ParticleSystem.MinMaxCurve(0f, 0f);
+                vel.y = new ParticleSystem.MinMaxCurve(-fall * 1.2f, -fall * 0.8f);
+                vel.z = new ParticleSystem.MinMaxCurve(0f, 0f);
+            }
+            var fade = ps.colorOverLifetime;
+            fade.enabled = true;
+            var g = new Gradient();
+            g.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                new[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(1f, 0.2f), new GradientAlphaKey(1f, 0.7f), new GradientAlphaKey(0f, 1f) });
+            fade.color = g;
+            var r = go.GetComponent<ParticleSystemRenderer>();
+            r.sharedMaterial = mat;
+            r.renderMode = ParticleSystemRenderMode.Billboard;
+            r.shadowCastingMode = ShadowCastingMode.Off;
+            r.receiveShadows = false;
+            ps.Play();
+        }
+
+
+        private Mesh farMesh;
+
+        /// <summary>A big picture card far behind the stage, facing the camera, its foot on the land.</summary>
+        private void FarCard(string picture, float ground, float Width)
+        {
+            var tex = Resources.Load<Texture2D>(picture);
+            if (tex == null) return;
+            tex.wrapMode = TextureWrapMode.Clamp;
+            const float Back = 105f;
+            float height = Width * tex.height / tex.width;
+            float x = centre.x - hw - Back, y0 = ground - 4f, z0 = centre.z - Width * 0.5f, z1 = centre.z + Width * 0.5f;
+            farMesh = new Mesh { name = "FarCard" };
+            farMesh.vertices = new[] { new Vector3(x, y0, z0), new Vector3(x, y0 + height, z0), new Vector3(x, y0 + height, z1), new Vector3(x, y0, z1) };
+            farMesh.uv = new[] { new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(1f, 0f) };
+            farMesh.colors = new[] { Color.white, Color.white, Color.white, Color.white };
+            farMesh.triangles = new[] { 0, 1, 2, 0, 2, 3 }; // (facing the camera, east)
+            farMesh.RecalculateBounds();
+            var m = new Material(Weather.AlphaMaterial);
+            m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
+            m.SetColor("_BaseColor", Color.white);
+            m.renderQueue = 2990; // (before the stage's mist and dust)
+            mats.Add(m);
+            var go = new GameObject("FarView");
+            go.transform.SetParent(transform, false);
+            go.AddComponent<MeshFilter>().sharedMesh = farMesh;
+            var mr = go.AddComponent<MeshRenderer>();
+            mr.sharedMaterial = m;
+            mr.shadowCastingMode = ShadowCastingMode.Off;
+            mr.receiveShadows = false;
+        }
+
+        private readonly List<Mesh> bentMeshes = new List<Mesh>();
+
+        /// <summary>
+        /// A stand bent round the platform's ring: its front follows the ring (the middle against the rim, the ends coming
+        /// round with it), whichever way the made model curves.
+        /// </summary>
+        private void BendToRing(Transform stand, Vector3 pivot, Vector3 outward, float ring)
+        {
+            var side = Vector3.Cross(Vector3.up, outward);
+            var b = BoundsOf(stand);
+            float half = Mathf.Max(b.extents.x, b.extents.z);
+            float mid = FrontDistance(stand, pivot, outward);
+            float end = FrontDistance(stand, pivot, outward, 0.6f, 0.95f);
+            float xe = half * 0.8f;
+            float want = ring - Mathf.Sqrt(Mathf.Max(0f, ring * ring - xe * xe)); // how much nearer the floor's middle the ring is there
+            float delta = (end - mid) + want;
+            if (Mathf.Abs(delta) < 0.05f) return;
+            float k = delta / (xe * xe);
+            var c = b.center;
+            foreach (var mf in stand.GetComponentsInChildren<MeshFilter>(true))
+            {
+                if (mf.sharedMesh == null || !mf.sharedMesh.isReadable) continue;
+                var mesh = Instantiate(mf.sharedMesh);
+                bentMeshes.Add(mesh);
+                var v = mesh.vertices;
+                var toWorld = mf.transform.localToWorldMatrix;
+                var toLocal = mf.transform.worldToLocalMatrix;
+                for (int i = 0; i < v.Length; i++)
+                {
+                    var w = toWorld.MultiplyPoint3x4(v[i]);
+                    float x = Vector3.Dot(w - c, side);
+                    v[i] = toLocal.MultiplyPoint3x4(w - outward * (k * x * x));
+                }
+                mesh.vertices = v;
+                mesh.RecalculateBounds();
+                mf.sharedMesh = mesh;
+            }
+        }
+
+        /// <summary>One of a made stage's models in its own colour picture (the rune pieces with their runes and crystals glowing).</summary>
+        private Transform MadeModel(Transform p, Look look, string name, bool runes)
+        {
+            var holder = new GameObject(name).transform;
+            holder.SetParent(p, false);
+            var prefab = Resources.Load<GameObject>(look.folder + name);
+            if (prefab == null) return holder;
+            Instantiate(prefab, holder, false);
+            var m = Surface(Color.white, 0.12f);
+            var tex = Resources.Load<Texture2D>(look.folder + name + "_tex");
+            m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
+            m.EnableKeyword("_EMISSION");
+            m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+            var glow = runes ? Resources.Load<Texture2D>(look.folder + name + "_glow") : null;
+            // (a little of its own colour too: the grove is dark, but nothing in it goes black)
+            m.SetTexture("_EmissionMap", glow != null ? glow : tex);
+            m.SetColor("_EmissionColor", glow != null ? look.glow * 1.4f : look.selfLight);
+            foreach (var r in holder.GetComponentsInChildren<Renderer>(true))
+            {
+                r.sharedMaterial = m;
+                r.shadowCastingMode = ShadowCastingMode.Off;
+            }
+            return holder;
+        }
+
+        /// <summary>
+        /// How far out from <paramref name="pivot"/> (along <paramref name="outward"/>) a stand's front is, measured on its middle
+        /// (the third of it straight out from the pivot).
+        /// </summary>
+        private static float FrontDistance(Transform stand, Vector3 pivot, Vector3 outward, float from = 0f, float to = 0.33f)
+        {
+            var side = Vector3.Cross(Vector3.up, outward);
+            var b = BoundsOf(stand);
+            float halfWidth = Mathf.Max(b.extents.x, b.extents.z);
+            float best = float.MaxValue;
+            foreach (var mf in stand.GetComponentsInChildren<MeshFilter>(true))
+            {
+                if (mf.sharedMesh == null || !mf.sharedMesh.isReadable) continue;
+                var m = mf.transform.localToWorldMatrix;
+                foreach (var v in mf.sharedMesh.vertices)
+                {
+                    var w = m.MultiplyPoint3x4(v) - pivot;
+                    float across = Mathf.Abs(Vector3.Dot(w, side)) / halfWidth;
+                    if (across < from || across > to) continue;
+                    best = Mathf.Min(best, Vector3.Dot(w, outward));
+                }
+            }
+            return best == float.MaxValue ? Vector3.Dot(b.center - pivot, outward) - halfWidth * 0.5f : best;
+        }
+
+        private static Bounds BoundsOf(Transform t)
+        {
+            var rs = t.GetComponentsInChildren<Renderer>(true);
+            if (rs.Length == 0) return new Bounds(t.position, Vector3.one);
+            var b = rs[0].bounds;
+            foreach (var r in rs) b.Encapsulate(r.bounds);
+            return b;
+        }
+
+        /// <summary>Colliders on a model's meshes for a moment (to find its surfaces), taken off again by <see cref="Unprobe"/>.</summary>
+        private static List<MeshCollider> Probe(Transform t)
+        {
+            var list = new List<MeshCollider>();
+            foreach (var mf in t.GetComponentsInChildren<MeshFilter>(true))
+                if (mf.sharedMesh != null && mf.sharedMesh.isReadable) { var c = mf.gameObject.AddComponent<MeshCollider>(); c.sharedMesh = mf.sharedMesh; list.Add(c); }
+            Physics.SyncTransforms();
+            return list;
+        }
+
+        private static void Unprobe(List<MeshCollider> list) { foreach (var c in list) if (c != null) DestroyImmediate(c); }
+
+        /// <summary>The height of a model's surface under a point (from above), or <paramref name="otherwise"/>.</summary>
+        private static float SurfaceAt(Transform t, Vector3 from, float otherwise)
+        {
+            var probe = Probe(t);
+            bool found = false;
+            float y = otherwise;
+            foreach (var c in probe)
+                if (c.Raycast(new Ray(from, Vector3.down), out var hit, 200f)) { y = found ? Mathf.Max(y, hit.point.y) : hit.point.y; found = true; }
+            Unprobe(probe);
+            return y;
+        }
+
+        /// <summary>The seats a stand's steps make: the highest upward-facing step under its roof, on a grid.</summary>
+        private List<Vector3> Seats(Transform stand)
+        {
+            var seats = new List<Vector3>();
+            var b = BoundsOf(stand);
+            var probe = Probe(stand);
+            float roof = b.min.y + b.size.y * 0.8f, ground = b.min.y;
+            var ups = new List<float>();
+            for (float x = b.min.x + 0.3f; x < b.max.x - 0.3f; x += 0.55f)
+                for (float z = b.min.z + 0.3f; z < b.max.z - 0.3f; z += 0.55f)
+                {
+                    // down the column surface by surface: every upward face, highest first
+                    ups.Clear();
+                    foreach (var c in probe)
+                    {
+                        var from = new Vector3(x, b.max.y + 1f, z);
+                        for (int guard = 0; guard < 12 && c.Raycast(new Ray(from, Vector3.down), out var hit, 200f); guard++)
+                        {
+                            if (hit.normal.y > 0.6f && hit.point.y > ground + 0.3f) ups.Add(hit.point.y);
+                            from = hit.point + Vector3.down * 0.05f;
+                        }
+                    }
+                    if (ups.Count == 0) continue;
+                    ups.Sort((p, q) => q.CompareTo(p));
+                    // the top one with something under it is a roof (or its eaves): the seat is the step under it; a step open to
+                    // the sky only low down (a roof's eave with nothing under it is not a seat)
+                    bool roofed = ups.Count >= 2 && ups[0] - ups[1] > 1f; // (room to sit between them: a roof over a step)
+                    float seat = roofed ? ups[1] : ups[0];
+                    if (!roofed && ups[0] > b.min.y + b.size.y * 0.5f) continue;
+                    if (seat >= roof) continue;
+                    seats.Add(new Vector3(x, seat, z));
+                }
+            Unprobe(probe);
+            return seats;
+        }
+
+        /// <summary>Whether a stand's steps rise away from the floor (its low front towards it).</summary>
+        private bool SeatsFaceFloor(Transform stand, float dir)
+        {
+            var seats = Seats(stand);
+            if (seats.Count < 8) return true;
+            float near = 0f, far = 0f; int nn = 0, nf = 0;
+            float mid = BoundsOf(stand).center.z;
+            foreach (var s in seats)
+            {
+                if ((s.z - mid) * dir < 0f) { near += s.y; nn++; } else { far += s.y; nf++; }
+            }
+            return nn == 0 || nf == 0 || near / nn <= far / nf;
+        }
+
+        /// <summary>A side's fans on a stand's steps, each looking at the floor.</summary>
+        private void SeatCrowd(Transform stand, int team, System.Random rng)
+        {
+            var seats = Seats(stand);
+            foreach (var at in seats)
+            {
+                if (rng.NextDouble() < 0.12) continue; // an empty seat here and there
+                float facing = Mathf.Atan2(centre.x - at.x, centre.z - at.z) * Mathf.Rad2Deg;
+                float phase = (float)rng.NextDouble() * 10f;
+                var body = batches[team * 4 + rng.Next(4)];
+                body.pos.Add(at + Vector3.up * 0.18f); body.phase.Add(phase); body.side.Add(team); body.facing.Add(facing);
+                var head = batches[8 + rng.Next(4)];
+                head.pos.Add(at + Vector3.up * 0.46f); head.phase.Add(phase); head.side.Add(team); head.facing.Add(facing);
+                if (rng.NextDouble() < 0.1)
+                {
+                    var flag = batches[12 + team];
+                    flag.pos.Add(at + new Vector3(0.1f, 0.85f, 0f)); flag.phase.Add(phase); flag.side.Add(team); flag.facing.Add(facing);
+                }
+            }
+        }
+
+        private static Texture2D groveSky;
+
+        /// <summary>A made stage's sky: the glacier's mountains, or the grove's night.</summary>
+        public static Texture SkyOf(Theme theme) => LookOf(theme).sky != null ? Resources.Load<Texture2D>(LookOf(theme).sky) : GroveSky();
+
+        /// <summary>The grove's sky: deep night blue above, a soft blue glow low between the trees.</summary>
+        public static Texture GroveSky()
+        {
+            if (groveSky != null) return groveSky;
+            const int H = 256;
+            groveSky = new Texture2D(4, H, TextureFormat.RGBA32, false) { name = "GroveSky", wrapMode = TextureWrapMode.Clamp };
+            var px = new Color32[4 * H];
+            for (int y = 0; y < H; y++)
+            {
+                float k = y / (float)(H - 1); // 0 the bottom .. 1 the top
+                var c = Color.Lerp(new Color(0.16f, 0.42f, 0.55f), new Color(0.02f, 0.05f, 0.12f), Mathf.SmoothStep(0f, 1f, Mathf.Abs(k - 0.42f) / 0.58f));
+                for (int x = 0; x < 4; x++) px[y * 4 + x] = c;
+            }
+            groveSky.SetPixels32(px);
+            groveSky.Apply(false, true);
+            return groveSky;
+        }
+
         private void OnDestroy()
         {
             foreach (var m in mats) if (m != null) Destroy(m);
+            Blockers.Clear();
             if (ownedMesh != null) Destroy(ownedMesh);
+            if (grassMesh != null) Destroy(grassMesh);
+            if (farMesh != null) Destroy(farMesh);
+            foreach (var bm in bentMeshes) if (bm != null) Destroy(bm);
             if (murmur != null && murmur.clip != null) Destroy(murmur.clip);
         }
     }

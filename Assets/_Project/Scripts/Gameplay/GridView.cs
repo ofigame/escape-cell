@@ -74,7 +74,25 @@ namespace SquashBot.Gameplay
             var t = tiles[p.x, p.y];
             t.tinted = color.HasValue;
             if (color.HasValue) { t.tint = color.Value; t.tintGlow = glow; }
+            if (ghost) foreach (var r in t.tile.GetComponentsInChildren<Renderer>(true)) r.enabled = color.HasValue; // (a hidden floor shows its tinted tiles)
             Wake(p);
+        }
+
+        private bool ghost;
+
+        /// <summary>
+        /// The floor's tiles and slab hidden: a stage that brings its own floor (the grove's rune platform) shows through.
+        /// A tinted tile still shows (the duel's closing ring). Until the next floor is built.
+        /// </summary>
+        public void Ghost()
+        {
+            ghost = true;
+            // everything built on the board (its slab, grout, and the fortress's ground round the floor's shape) hidden...
+            foreach (var r in GetComponentsInChildren<Renderer>(true)) r.enabled = false;
+            // ...but a tinted tile
+            if (tiles != null)
+                foreach (var t in tiles)
+                    if (t != null && t.tinted) foreach (var r in t.tile.GetComponentsInChildren<Renderer>(true)) r.enabled = true;
         }
         private FxSystem fx;
 
@@ -326,6 +344,7 @@ namespace SquashBot.Gameplay
             for (int i = transform.childCount - 1; i >= 0; i--)
                 Destroy(transform.GetChild(i).gameObject);
             tiles = null;
+            ghost = false;
             busy.Clear();
             allBusy = true;
         }

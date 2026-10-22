@@ -327,7 +327,7 @@ namespace SquashBot.Gameplay
             var rows = new string[BoardH];
             // The shape laid across the view: 21 deep (away from the camera), 15 across, cut at the camera's end and the
             // far end — so its two ends (the screen's left and right) run straight and whole, and the stands meet them.
-            const int Deep = BoardW; // every stage the board's whole length (all about the same size, big)
+            int Deep = DuelStands.IsMade(st.theme) ? 15 : BoardW; // every stage the board's whole length (all about the same size, big); the grove a round floor on its round platform
             int off = (BoardW - Deep) / 2;
             standFrom = BoardW; standTo = -1;
             for (int r = 0; r < BoardH; r++)
@@ -391,8 +391,28 @@ namespace SquashBot.Gameplay
             for (int y = 0; y < BoardH; y++) for (int x = 0; x < BoardW; x++) floorCells[x, y] = l.layout[y][x] != '.';
             var cell0 = GridView.ToWorld(new GridPos(0, 0));
             colosseum = DuelStands.Build(transform, floorCells, new Vector3(cell0.x, 0f, cell0.z), GridView.SurfaceY - 0.02f, rival.name.GetHashCode(), mark.y < other.y, st.theme);
+            if (DuelStands.IsMade(st.theme))
+            {
+                // A made stage brings its own floor, land and sky: the tiles hidden; the grove's moonlit night, the glacier's
+                // cold bright day.
+                var light = DuelStands.LightOf(st.theme);
+                gridView.Ghost();
+                cameraRig.SetBackdrop(DuelStands.SkyOf(st.theme));
+                duelSky = true;
+                foreach (var lamp in FindObjectsByType<Light>(FindObjectsSortMode.None))
+                    if (lamp.type == LightType.Directional)
+                    {
+                        lamp.color = light.sun;
+                        lamp.intensity = light.power;
+                        break;
+                    }
+                RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+                RenderSettings.ambientSkyColor = light.sky;
+                RenderSettings.ambientEquatorColor = light.horizon;
+                RenderSettings.ambientGroundColor = light.ground;
+            }
             // The stage's own land all round the stands and its own sky (the city stadium keeps the city).
-            if (st.theme != DuelStands.Theme.City)
+            else if (st.theme != DuelStands.Theme.City)
             {
                 var land = st.theme switch
                 {
@@ -590,7 +610,9 @@ namespace SquashBot.Gameplay
             if (gap.magnitude > 1f) duelPan += gap.normalized * (gap.magnitude - 1f) * Mathf.Min(1f, Time.deltaTime * 2.5f);
             float apart = new Vector2(me.x - foe.x, me.z - foe.z).magnitude;
             duelBack = Mathf.Lerp(duelBack, 29f + Mathf.Clamp(apart - 3f, 0f, 14f) * 1.2f, Time.unscaledDeltaTime * 2f); // (no closing in, even for the ultimate)
-            pos = boardCentre + duelPan - look * duelBack;
+            pos = boardCentre + duelPan - look * (duelBack + 11f); // (every stage further back: all of the floor, its stands and the land in view)
+            // The grove: the view a little further in (the platform lower on the screen, its stands and trees above it in view)
+            if (DuelStands.IsMade(Stage.theme)) pos += new Vector3(-4.5f, 0f, 0f) - look * 5f; // (and a little further back: all of it in view)
             rot = Quaternion.LookRotation(look);
             OrbitPose(ref pos, ref rot, me, foe);
         }

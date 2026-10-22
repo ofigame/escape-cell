@@ -56,18 +56,22 @@ namespace SquashBot.Gameplay
 
         private static readonly DuelStage[] DuelStages =
         {
-            new DuelStage { key = "duel.stage.0", world = 6, shape = BattleArenas.Shape.Square, fx = 1, theme = DuelStands.Theme.City, wall = new Color(0.86f, 0.72f, 0.5f), fxColour = new Color(1f, 0.6f, 0.2f) },             // the city stadium
-            new DuelStage { key = "duel.stage.1", world = 13, shape = BattleArenas.Shape.Hexagon, fx = 2, theme = DuelStands.Theme.Glacier, wall = new Color(0.72f, 0.9f, 1f), fxColour = new Color(0.55f, 0.9f, 1f) },                     // the ice arena
-            new DuelStage { key = "duel.stage.2", world = 0, shape = BattleArenas.Shape.Octagon, fx = 1, theme = DuelStands.Theme.Volcano, wall = new Color(0.36f, 0.2f, 0.18f), fxColour = new Color(1f, 0.45f, 0.1f) },                   // the lava pit
-            new DuelStage { key = "duel.stage.3", world = 23, shape = BattleArenas.Shape.Round, fx = 3, theme = DuelStands.Theme.Space, wall = new Color(0.3f, 0.32f, 0.42f), fxColour = new Color(0.4f, 0.9f, 1f) },                     // the space platform
-            new DuelStage { key = "duel.stage.4", world = 2, shape = BattleArenas.Shape.Diamond, fx = 0, theme = DuelStands.Theme.Forest, wall = new Color(0.5f, 0.56f, 0.4f), fxColour = new Color(0.6f, 1f, 0.4f) },                     // the forest temple
-            new DuelStage { key = "duel.stage.5", world = 5, shape = BattleArenas.Shape.Octagon, fx = 1, theme = DuelStands.Theme.Desert, wall = new Color(0.86f, 0.66f, 0.42f), fxColour = new Color(1f, 0.7f, 0.25f) },                    // the desert city
+            new DuelStage { key = "duel.stage.6", world = 23, shape = BattleArenas.Shape.Round, fx = 0, colosseum = true, theme = DuelStands.Theme.Grove, wall = new Color(0.3f, 0.4f, 0.45f), fxColour = new Color(0.35f, 0.85f, 1f) },  // the blue grove
+            new DuelStage { key = "duel.stage.7", world = 13, shape = BattleArenas.Shape.Round, fx = 0, colosseum = true, theme = DuelStands.Theme.Frost, wall = new Color(0.8f, 0.9f, 1f), fxColour = new Color(0.55f, 0.9f, 1f) },     // the glacier peak
+            new DuelStage { key = "duel.stage.8", world = 0, shape = BattleArenas.Shape.Round, fx = 0, colosseum = true, theme = DuelStands.Theme.Mars, wall = new Color(0.6f, 0.3f, 0.2f), fxColour = new Color(1f, 0.6f, 0.25f) },        // the red planet
+            new DuelStage { key = "duel.stage.9", world = 5, shape = BattleArenas.Shape.Round, fx = 0, colosseum = true, theme = DuelStands.Theme.Cappadocia, wall = new Color(0.86f, 0.7f, 0.52f), fxColour = new Color(1f, 0.82f, 0.45f) }, // Cappadocia
+            new DuelStage { key = "duel.stage.10", world = 9, shape = BattleArenas.Shape.Round, fx = 0, colosseum = true, theme = DuelStands.Theme.Asia, wall = new Color(0.7f, 0.3f, 0.25f), fxColour = new Color(1f, 0.8f, 0.4f) },      // the temple of blossoms
+            new DuelStage { key = "duel.stage.11", world = 2, shape = BattleArenas.Shape.Round, fx = 0, colosseum = true, theme = DuelStands.Theme.Europe, wall = new Color(0.6f, 0.6f, 0.6f), fxColour = new Color(1f, 0.82f, 0.4f) },   // the knights' court
+            new DuelStage { key = "duel.stage.12", world = 5, shape = BattleArenas.Shape.Round, fx = 0, colosseum = true, theme = DuelStands.Theme.Arabia, wall = new Color(0.86f, 0.68f, 0.48f), fxColour = new Color(0.4f, 0.9f, 1f) },  // the desert palace
         };
 
-        /// <summary>The stage being fought on (an index into the six).</summary>
+        /// <summary>The stages a match is drawn from (all of them: only the made stages are left).</summary>
+        private static int DrawnStages => DuelStages.Length;
+
+        /// <summary>The stage being fought on (an index into the list).</summary>
         private int duelStage;
         private DuelStage Stage => DuelStages[Mathf.Clamp(duelStage, 0, DuelStages.Length - 1)];
-        public static int DuelStageCount => DuelStages.Length;
+        public static int DuelStageCount => DrawnStages;
 
         /// <summary>The marks the two foi start from: either side of the middle, the player's to the south (left on screen).</summary>
         private (GridPos mine, GridPos theirs) DuelMarks
@@ -300,6 +304,8 @@ namespace SquashBot.Gameplay
 
         /// <summary>The safe ring's radius (tiles from the board's middle) and the last one drawn.</summary>
         private float zoneRadius = 99f;
+        /// <summary>The closing ring is off (the whole floor stays safe to the end).</summary>
+        private static readonly bool ClosingRing = false;
         private int zoneDrawn = -1;
         private float zoneHurtMe, zoneHurtFoe;
         private bool zoneAnnounced;
@@ -311,6 +317,7 @@ namespace SquashBot.Gameplay
         /// </summary>
         private void UpdateDuelZone(float dt)
         {
+            if (!ClosingRing) { zoneRadius = 99f; hunt.Unsafe = null; return; } // (taken off: the user asked)
             float total = Mathf.Max(60f, chDuelMinutes * 60f);
             float elapsed = total - chDuelLeft;
             float k = Mathf.InverseLerp(total * 0.25f, total * 0.9f, elapsed);

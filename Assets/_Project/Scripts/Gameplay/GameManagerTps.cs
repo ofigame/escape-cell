@@ -245,7 +245,7 @@ namespace SquashBot.Gameplay
         private void TpsPose(out Vector3 pos, out Quaternion rot)
         {
             if (Gunning) { GunPose(out pos, out rot); return; }
-            float grow = arenaRun ? 1f : 1.3f; // foi stands a fifth bigger on the floors and in the duels: the camera further back
+            float grow = arenaRun ? 1f : challengeRun ? 1.5f : 1.3f; // foi stands a fifth bigger on the floors and in the duels: the camera further back (the duel's a little more)
             var focus = robot.transform.position + Vector3.up * 1.35f * Mathf.Lerp(1f, grow, 0.6f); // above foi: the view looks down a touch more
             var dir = Quaternion.Euler(tpsPitch, tpsYaw, 0f) * Vector3.forward;
             pos = focus - dir * TpsDistance * grow + Quaternion.Euler(0f, tpsYaw, 0f) * Vector3.right * tpsSide; // a touch to the right
@@ -255,15 +255,17 @@ namespace SquashBot.Gameplay
             float full = Vector3.Distance(focus, pos), allowed = full;
             // On a floor the ramparts round its edge do the same: the camera never goes out behind them low down.
             bool city = arenaRun && SquashBot.Visual.ArenaDecor.BuildingTop.Count > 0;
+            bool walls = !(challengeRun && Stage.colosseum); // (a duel stage with no walls round it: nothing to come in front of)
             if (city || !arenaRun)
                 for (float d = 0.6f; d <= full; d += 0.25f)
                 {
                     var p = Vector3.Lerp(focus, pos, d / full);
                     var tile = new GridPos(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.z));
                     bool blocked = city ? SquashBot.Visual.ArenaDecor.BuildingTop.TryGetValue(tile, out float top) && p.y < top
-                        : grid != null && IsRampart(tile) && p.y < GridView.ToWorld(robot.Position).y + 2.6f;
-                    if (blocked) { allowed = Mathf.Max(0.9f, d - 0.5f); break; }
+                        : walls && grid != null && IsRampart(tile) && p.y < GridView.ToWorld(robot.Position).y + 2.6f;
+                    if (blocked) { allowed = Mathf.Max(2.6f, d - 0.5f); break; } // (never into foi itself)
                 }
+            if (!walls) allowed = Mathf.Min(allowed, Mathf.Max(2.6f, DuelStands.ClearTo(focus, pos) - 1.8f)); // a made duel stage: in front of its stands and their crowd
             float dt = Time.unscaledDeltaTime;
             tpsCamDist = allowed < tpsCamDist ? Mathf.Lerp(tpsCamDist, allowed, 1f - Mathf.Exp(-18f * dt)) : Mathf.MoveTowards(tpsCamDist, allowed, dt * 3f);
             pos = focus + (pos - focus).normalized * tpsCamDist;

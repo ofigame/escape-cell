@@ -17,7 +17,7 @@ namespace SquashBot.UI
     /// </summary>
     public class DuelSkillBar : MonoBehaviour
     {
-        public enum Move { Special, Heavy, Upper, Ultimate, Breaker, Finish }
+        public enum Move { Special, Heavy, Upper, Ultimate, Breaker, Finish, Jump }
         public event Action<Move> Pressed;
         /// <summary>An emote picked (0..5).</summary>
         public event Action<int> Emoted;
@@ -29,7 +29,7 @@ namespace SquashBot.UI
         private bool sideways;
         private Image[] parts, rivalParts;
         private Image[] partFill;
-        private Button special, ultimate, context;
+        private Button special, ultimate, context, jump;
         private TextMeshProUGUI specialText, contextText, comboText;
         private CanvasGroup comboGroup, contextGroup, specialGroup, ultGroup;
         private Move contextMove;
@@ -88,6 +88,7 @@ namespace SquashBot.UI
             specialGroup = special.gameObject.AddComponent<CanvasGroup>();
             ultimate = Round("Ultimate", new Vector2(-75f, 895f), new Color(0.75f, 0.35f, 1f), Loc.T("duel.ult"), () => Pressed?.Invoke(Move.Ultimate), out _);
             ultGroup = ultimate.gameObject.AddComponent<CanvasGroup>();
+            jump = Round("Jump", new Vector2(-195f, 770f), new Color(0.35f, 0.85f, 0.55f), Loc.T("duel.jump"), () => Pressed?.Invoke(Move.Jump), out _);
 
             // The move that comes and goes: big, bottom middle.
             var ctx = UiFactory.Box("Context", root, new Vector2(0.5f, 0f), new Vector2(0f, 520f), new Vector2(420f, 130f));
@@ -147,6 +148,7 @@ namespace SquashBot.UI
             Place(emotes, now ? new Vector2(0f, 1f) : Vector2.zero, now ? new Vector2(150f, -520f) : new Vector2(40f, 470f));
             ((RectTransform)special.transform).anchoredPosition = now ? new Vector2(-75f, 610f) : new Vector2(-75f, 770f);
             ((RectTransform)ultimate.transform).anchoredPosition = now ? new Vector2(-75f, 725f) : new Vector2(-75f, 895f);
+            ((RectTransform)jump.transform).anchoredPosition = now ? new Vector2(-195f, 610f) : new Vector2(-195f, 770f);
         }
 
         private static void Place(RectTransform r, Vector2 anchor, Vector2 at)

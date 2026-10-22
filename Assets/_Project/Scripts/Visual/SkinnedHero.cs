@@ -506,7 +506,7 @@ namespace SquashBot.Visual
         private AnimationPlayableOutput output;
         private AnimationClipPlayable clipPlay;
         private float playingTime, playingRate = 1f;
-        private bool playingReal;
+        private bool playingReal, playingLoop;
 
         private static AnimationClip ClipOf(string name)
         {
@@ -519,12 +519,15 @@ namespace SquashBot.Visual
 
         /// <summary>Plays move <paramref name="name"/> (dance1..4, cast, kick) once; false if there is no such move.</summary>
         /// <param name="realTime">Plays in real seconds, whatever the slow motion round it (the ultimates).</param>
-        public bool PlayMove(string name, float rate = 1f, bool realTime = false)
+        /// <param name="loop">Over and over until <see cref="StopMove"/> (the ultimate, start to end).</param>
+        public bool PlayMove(string name, float rate = 1f, bool realTime = false, bool loop = false)
         {
             if (!ready) Setup();
             var c = ClipOf(name);
             if (c == null) return false;
-            playing = c; playingTime = 0f; playingRate = rate; playingReal = realTime;
+            playing = c; playingTime = 0f; playingRate = rate; playingReal = realTime; playingLoop = loop;
+            // (from where it stands now: a leap's landing just before must not read as walking off and end the move at once)
+            lastPos = transform.position; speed = 0f;
             // played through the body's animator (a graph of its own, evaluated by hand)
             var animator = GetComponent<Animator>();
             if (animator == null) animator = gameObject.AddComponent<Animator>();
@@ -541,6 +544,82 @@ namespace SquashBot.Visual
             output.SetSourcePlayable(clipPlay);
             clap = 1f; chop = 1f;
             return true;
+        }
+
+        /// <summary>The move playing ends now (a looping one included).</summary>
+        public void StopMove() { playing = null; playingLoop = false; }
+
+        // ---------- Knocks (the duel's big blows) ----------
+
+        private Coroutine knock, pop, hop;
+
+        /// <summary>Knocked down: falls over backwards (away from <paramref name="from"/>), lies there, gets back up.</summary>
+        public void KnockDown(Vector3 from, float lie = 1.1f)
+        {
+            if (knock != null) StopCoroutine(knock);
+            knock = StartCoroutine(Knocked(from, lie));
+        }
+
+        private System.Collections.IEnumerator Knocked(Vector3 from, float lie)
+        {
+            var away = transform.position - from; away.y = 0f;
+            if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
+            var axis = Vector3.Cross(Vector3.up, away.normalized); // (tipping over this: the top goes away from the blow)
+            var restLocal = transform.localRotation;
+            float Tilt(float k) { var parentRot = transform.parent != null ? transform.parent.rotation : Quaternion.identity; transform.rotation = Quaternion.AngleAxis(k * 82f, axis) * parentRot * restLocal; return k; }
+            for (float e = 0f; e < 0.32f; e += Time.deltaTime) { float k = e / 0.32f; Tilt(k * k); yield return null; } // falling faster and faster
+            Tilt(1f);
+            for (float e = 0f; e < lie; e += Time.deltaTime) { Tilt(1f + Mathf.Sin(e * 20f) * Mathf.Exp(-e * 6f) * 0.06f); yield return null; } // a bounce, then still
+            for (float e = 0f; e < 0.45f; e += Time.deltaTime) { Tilt(1f - Mathf.SmoothStep(0f, 1f, e / 0.45f)); yield return null; } // back up
+            transform.localRotation = restLocal;
+            knock = null;
+        }
+
+        /// <summary>Struck from above: the head flies off (up, spinning) and comes back down onto its neck.</summary>
+        public void PopHead()
+        {
+            if (head == null || pop != null) return;
+            pop = StartCoroutine(Popped());
+        }
+
+        private System.Collections.IEnumerator Popped()
+        {
+            var restPos = head.localPosition; var restRot = head.localRotation;
+            var neck = head.parent;
+            float up = Mathf.Max(0.3f, head.position.y - transform.position.y) * 0.9f; // (about the body's height, in the world)
+            const float T = 0.75f;
+            for (float e = 0f; e < T; e += Time.deltaTime)
+            {
+                float k = e / T;
+                // straight up in the world and down again, spinning, wherever the body is meanwhile
+                head.localPosition = restPos; head.localRotation = restRot;
+                head.position = (neck != null ? neck.TransformPoint(restPos) : head.position) + Vector3.up * (4f * k * (1f - k)) * up;
+                head.rotation = Quaternion.AngleAxis(k * 720f, Vector3.up) * head.rotation;
+                yield return null;
+            }
+            head.localPosition = restPos; head.localRotation = restRot;
+            pop = null;
+        }
+
+        /// <summary>A jump straight up and down (<paramref name="height"/> in world units, <paramref name="time"/> seconds).</summary>
+        public void Hop(float height, float time)
+        {
+            if (hop != null) return;
+            hop = StartCoroutine(Hopping(height, time));
+        }
+
+        private System.Collections.IEnumerator Hopping(float height, float time)
+        {
+            var restPos = transform.localPosition;
+            float local = height / Mathf.Max(0.01f, transform.parent != null ? transform.parent.lossyScale.y : 1f);
+            for (float e = 0f; e < time; e += Time.deltaTime)
+            {
+                float k = e / time;
+                transform.localPosition = restPos + Vector3.up * (4f * k * (1f - k)) * local;
+                yield return null;
+            }
+            transform.localPosition = restPos;
+            hop = null;
         }
 
         /// <summary>The length of move <paramref name="name"/> in seconds (0: none).</summary>
@@ -695,7 +774,8 @@ namespace SquashBot.Visual
             if (playing != null)
             {
                 playingTime += (playingReal || Time.timeScale <= 0.01f ? Time.unscaledDeltaTime : dt) * playingRate;
-                if (playingTime >= playing.length || speed > 0.6f) playing = null; // done, or it walked off
+                if (playingLoop && playingTime >= playing.length) playingTime %= playing.length; // round again
+                else if (playingTime >= playing.length || speed > 0.6f) playing = null; // done, or it walked off
             }
             if (playing != null)
             {

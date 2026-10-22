@@ -98,6 +98,26 @@ namespace SquashBot.Gameplay
             g.moveT = 1f;
         }
 
+        /// <summary>The rival foi knocked back to a tile (sliding there over <paramref name="seconds"/>; stun it first, or it walks on).</summary>
+        public System.Collections.IEnumerator ShoveFoe(GridPos p, float seconds)
+        {
+            var g = challengeFoe;
+            if (g == null || g.dead || !grid.InBounds(p)) yield break;
+            grid.SetOccupied(g.pos, false);
+            grid.SetOccupied(p, true); // (taken at once: nothing steps in meanwhile)
+            var from = g.root.position; var to = At(p);
+            for (float e = 0f; e < seconds && g.root != null && !g.dead; e += Time.deltaTime)
+            {
+                float k = 1f - (1f - e / seconds) * (1f - e / seconds); // fast, then slowing
+                g.root.position = Vector3.Lerp(from, to, k);
+                yield return null;
+            }
+            if (g.dead) yield break;
+            g.pos = g.prevPos = p;
+            g.root.position = g.from = g.to = to;
+            g.moveT = 1f;
+        }
+
         /// <summary>Where the rival foi stands as a tile (null once fallen).</summary>
         public GridPos? ChallengeFoeTile => challengeFoe != null && !challengeFoe.dead ? challengeFoe.pos : (GridPos?)null;
 
