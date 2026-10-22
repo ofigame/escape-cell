@@ -573,6 +573,15 @@ namespace SquashBot.Visual
             b.localRotation = Quaternion.Inverse(pr) * Quaternion.AngleAxis(degrees, axis) * pr * b.localRotation;
         }
 
+        /// <summary>Stands in its idle pose at once (for a picture taken before its first frame).</summary>
+        public void PoseNow()
+        {
+            if (!ready) Setup();
+            if (!ready) return;
+            Rest();
+            Pose(0f);
+        }
+
         private void Rest()
         {
             foreach (var kv in restLocal) kv.Key.localRotation = kv.Value;

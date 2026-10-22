@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using SquashBot.Core;
 using SquashBot.Visual;
 using UnityEngine;
@@ -50,6 +51,17 @@ namespace SquashBot.Gameplay
         /// <summary>Dark floors: how lit each tile is (1 = normal, 0 = black). Warnings stay bright regardless.</summary>
         public System.Func<GridPos, float> Light;
 
+        // The tiles to look at next frame (something about them changes); everything when a whole-floor change happens.
+        private readonly HashSet<GridPos> busy = new HashSet<GridPos>();
+        private readonly List<GridPos> busyNow = new List<GridPos>();
+        private bool allBusy = true;
+        private bool hadLight;
+
+        private void Wake(GridPos p) => busy.Add(p);
+
+        /// <summary>Every tile looked at again next frame (a change to the whole floor's look).</summary>
+        public void WakeAll() => allBusy = true;
+
         /// <summary>The tile's own transform (null for empty cells): floor rules hang their markings on it.</summary>
         public Transform Surface(GridPos p) => tiles != null && InRange(p) && tiles[p.x, p.y] != null ? tiles[p.x, p.y].tile.transform : null;
 
@@ -62,6 +74,7 @@ namespace SquashBot.Gameplay
             var t = tiles[p.x, p.y];
             t.tinted = color.HasValue;
             if (color.HasValue) { t.tint = color.Value; t.tintGlow = glow; }
+            Wake(p);
         }
         private FxSystem fx;
 
@@ -94,6 +107,8 @@ namespace SquashBot.Gameplay
             var obstacleCap = MaterialFactory.Create(WorldTheme.Current.accent, WorldTheme.Current.accent * 1.2f);
 
             tiles = new TileView[grid.Width, grid.Height];
+            busy.Clear();
+            allBusy = true;
             var stone = new System.Random(grid.Width * 131 + grid.Height);
             veinMat = null; // this floor's own vein colour
             marbleTop = null;
@@ -235,7 +250,11 @@ namespace SquashBot.Gameplay
                     stoneTop = slabTop, stoneFrame = FortressStone * (Marble ? 0.9f : 0.42f), stoneGlow = Palette.TileSelfLight * (Marble ? 0.15f : 0.25f) };
             }
             // The grout never moves: one merged mesh (plain cubes, light) instead of a piece per tile.
-            if (groutRoot != null) StaticBatchingUtility.Combine(groutRoot.gameObject);
+            if (groutRoot != null)
+            {
+                if (groutRoot.childCount < 2000) StaticBatchingUtility.Combine(groutRoot.gameObject);
+                else StaticMerge.Bake(groutRoot.gameObject, _ => false); // (a huge floor; a broken tile's grout line then stays, under its pit)
+            }
         }
 
         /// <summary>The slab and its glowing edge band, built cell by cell so they follow the platform's shape (nothing hangs below it).</summary>
@@ -288,7 +307,8 @@ namespace SquashBot.Gameplay
             // The platform never moves: merge it into a few big meshes, so a 20x20 floor costs a handful of draw calls.
             // Under the floor and round its rim: its shadows fall into the void, never on anything seen (a shadow pass saved).
             foreach (var pr in root.GetComponentsInChildren<MeshRenderer>()) pr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            if (pieces < 9000) StaticBatchingUtility.Combine(root.gameObject);
+            if (pieces < 2000) StaticBatchingUtility.Combine(root.gameObject);
+            else StaticMerge.Bake(root.gameObject, _ => false); // (a huge floor: thousands of renderers would cost every frame)
         }
         private Renderer sharedTopRenderer;
 
@@ -306,6 +326,8 @@ namespace SquashBot.Gameplay
             for (int i = transform.childCount - 1; i >= 0; i--)
                 Destroy(transform.GetChild(i).gameObject);
             tiles = null;
+            busy.Clear();
+            allBusy = true;
         }
 
         /// <summary>Called every frame by hazards; 0 = calm, 1 = full red.</summary>
@@ -314,6 +336,7 @@ namespace SquashBot.Gameplay
             if (tiles == null || tiles[p.x, p.y] == null) return;
             var t = tiles[p.x, p.y];
             t.warning = Mathf.Max(t.warning, amount);
+            if (amount > 0f) Wake(p);
         }
 
         public void Break(GridPos p)
@@ -347,6 +370,7 @@ namespace SquashBot.Gameplay
             if (t.grout != null) t.grout.SetActive(true);
             if (t.hole != null) t.hole.SetActive(false);
             t.pop = 0f;
+            Wake(p);
         }
 
         /// <summary>The robot lands (or a block slams down): the tile dips and springs back.</summary>
@@ -356,6 +380,7 @@ namespace SquashBot.Gameplay
             var t = tiles[p.x, p.y];
             t.bounce = 0f;
             t.bounceStrength = strength;
+            Wake(p);
         }
 
         /// <summary>Paint missions: the tile floods with the world's accent color in a little splash.</summary>
@@ -366,6 +391,7 @@ namespace SquashBot.Gameplay
             if (t.painted) return;
             t.painted = true;
             t.paintPop = 0f;
+            Wake(p);
             var accent = WorldTheme.Current.accent;
             fx.Burst(t.tile.transform.position + Vector3.up * 0.1f, accent, accent * 1.6f, 10, 2.2f);
         }
@@ -378,6 +404,7 @@ namespace SquashBot.Gameplay
             if (!t.painted) return;
             t.painted = false;
             t.paintPop = 1f;
+            Wake(p);
             fx.Dust(t.tile.transform.position + Vector3.up * 0.1f, new Color(0.6f, 0.6f, 0.65f), 8, 1.5f);
         }
 
@@ -388,6 +415,7 @@ namespace SquashBot.Gameplay
             if (t == null) return;
             if (t.fire == null) t.fire = Flames.Create(t.tile.transform.parent);
             t.fire.SetActive(true);
+            Wake(p);
             fx.Burst(t.tile.transform.position + Vector3.up * 0.2f, new Color(1f, 0.55f, 0.2f), new Color(2.4f, 0.9f, 0.15f), 12, 3f);
         }
 
@@ -398,17 +426,33 @@ namespace SquashBot.Gameplay
             if (t.fire != null) t.fire.SetActive(false);
             fx.Burst(t.tile.transform.position + Vector3.up * 0.2f, new Color(0.6f, 0.6f, 0.65f), Color.black, 8, 1.5f);
             t.pop = 0.4f;
+            Wake(p);
         }
 
         private void LateUpdate()
         {
             if (tiles == null) return;
-
-            for (int gx = 0; gx < tiles.GetLength(0); gx++)
-            for (int gy = 0; gy < tiles.GetLength(1); gy++)
+            bool lightNow = Light != null;
+            if (lightNow || hadLight) allBusy = true; // (a dark floor's light moves every frame; and once more when it goes)
+            hadLight = lightNow;
+            busyNow.Clear();
+            if (allBusy)
             {
+                for (int x = 0; x < tiles.GetLength(0); x++)
+                    for (int y = 0; y < tiles.GetLength(1); y++) busyNow.Add(new GridPos(x, y));
+                allBusy = false;
+            }
+            else busyNow.AddRange(busy);
+            busy.Clear();
+
+            foreach (var cell in busyNow)
+            {
+                int gx = cell.x, gy = cell.y;
                 var t = tiles[gx, gy];
                 if (t == null || !t.tile.activeSelf) continue;
+                // still changing next frame: looked at again (a fire breathes, a dip or pop or splash plays, a warning shows)
+                if ((t.fire != null && t.fire.activeSelf) || t.warning > 0f || t.bounce < 1f || t.pop < 1f || (t.painted && t.paintPop < 1f)) busy.Add(cell);
+                else if (!t.shown) busy.Add(cell);
                 float lit = Light == null ? 1f : Mathf.Clamp01(Light(new GridPos(gx, gy)));
 
                 if (t.fire != null && t.fire.activeSelf)
@@ -480,7 +524,7 @@ namespace SquashBot.Gameplay
         private Color paintColor = Color.magenta;
 
         /// <summary>Paints with <paramref name="color"/> instead of the floor's own paint (the finale's gold).</summary>
-        public void SetPaintColor(Color color) => paintColor = color;
+        public void SetPaintColor(Color color) { paintColor = color; allBusy = true; }
 
         /// <summary>
         /// The paint for a world: of a few vivid colours, the one whose hue is furthest from the tiles and their glow, so a

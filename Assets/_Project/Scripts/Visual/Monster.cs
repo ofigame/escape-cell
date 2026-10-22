@@ -139,9 +139,12 @@ namespace SquashBot.Visual
             barFill.localPosition = new Vector3(-0.56f, 0f, -0.03f);
             Shapes.Rounded("Fill", barFill, new Vector3(0.56f, 0f, 0f), new Vector3(1.12f, 0.12f, 0.03f), 0.05f, barMat);
             // Notches show how many hits it takes.
-            for (int i = notchEvery; i < maxHealth; i += notchEvery)
-                Shapes.Rounded("Notch", barRoot, new Vector3(-0.56f + 1.12f * i / (float)maxHealth, 0f, -0.05f), new Vector3(0.025f, 0.16f, 0.02f), 0.01f,
-                    MaterialFactory.Create(new Color(0.1f, 0.08f, 0.16f), Color.black));
+            // (at most ten parts: a strong vanG has thousands of points, and a mark for each was thousands of pieces turning
+            // with the bar every frame)
+            int step = Mathf.Max(notchEvery, Mathf.CeilToInt(maxHealth / 10f));
+            var notchMat = MaterialFactory.Create(new Color(0.1f, 0.08f, 0.16f), Color.black);
+            for (int i = step; i < maxHealth; i += step)
+                Shapes.Rounded("Notch", barRoot, new Vector3(-0.56f + 1.12f * i / (float)maxHealth, 0f, -0.05f), new Vector3(0.025f, 0.16f, 0.02f), 0.01f, notchMat);
             RefreshBar();
         }
 

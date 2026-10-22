@@ -58,7 +58,7 @@ namespace SquashBot.Visual
 
         private void Build()
         {
-            Texture = new RenderTexture(1024, 1024, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Briefing" };
+            Texture = new RenderTexture(1024, 1024, 24, RenderTextureFormat.ARGB32) { antiAliasing = 2, name = "Briefing" }; // (2 samples: half the memory)
             var camGo = new GameObject("BriefingCamera");
             camGo.transform.SetParent(transform, false);
             cam = camGo.AddComponent<Camera>();

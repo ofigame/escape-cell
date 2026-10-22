@@ -56,7 +56,7 @@ namespace SquashBot.Visual
             data.antialiasing = Application.isMobilePlatform ? AntialiasingMode.FastApproximateAntialiasing : AntialiasingMode.SubpixelMorphologicalAntiAliasing;
             camGo.transform.localPosition = new Vector3(0f, 1.9f, -5.3f);
             camGo.transform.LookAt(transform.position + new Vector3(0f, 0.55f, 0f));
-            View = new RenderTexture(900, 900, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "ChestView" };
+            View = new RenderTexture(768, 768, 24, RenderTextureFormat.ARGB32) { antiAliasing = 2, name = "ChestView" }; // (2 samples: 9 MB, not 40)
             cam.targetTexture = View;
             cam.enabled = false;
 
@@ -103,10 +103,7 @@ namespace SquashBot.Visual
             c.localRotation = Quaternion.Euler(0f, -24f, 0f);
             c.localScale = Vector3.one * (t == ChestTier.Advanced ? 1.05f : t == ChestTier.Mid ? 1.15f : 1.25f);
             OnLayer(c.gameObject);
-            rt = new RenderTexture(360, 360, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Chest " + t };
-            rt.Create();
-            s.cam.targetTexture = rt;
-            s.cam.Render();
+            rt = Snapshot.Take(s.cam, 360, "Chest " + t);
             s.cam.targetTexture = s.View;
             s.Clear();
             s.gameObject.SetActive(false);

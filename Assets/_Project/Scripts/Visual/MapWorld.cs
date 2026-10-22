@@ -182,7 +182,7 @@ namespace SquashBot.Visual
             // The dots between the stones: merged into two meshes (walked, still ahead), two draws for a thousand dots.
             var dotDone = Shared("dotDone", new Color(1f, 0.95f, 0.8f), new Color(1.6f, 1.4f, 0.9f));
             var dotLocked = Shared("dotLocked", new Color(0.35f, 0.33f, 0.5f), Color.black);
-            var sphere = Shapes.MeshOf(PrimitiveType.Sphere);
+            var sphere = SmallBall(); // (a few dozen corners: hundreds of dots, each as round as it needs to be at this size)
             var doneParts = new List<CombineInstance>();
             var aheadParts = new List<CombineInstance>();
             for (int i = 0; i < levelCount; i++)
@@ -216,6 +216,26 @@ namespace SquashBot.Visual
         }
 
         /// <summary>Many small pieces of one material as a single mesh (destroyed with its object).</summary>
+        private static Mesh smallBall;
+
+        /// <summary>A light ball: an icosahedron split once (42 corners) instead of the built-in sphere's 515.</summary>
+        private static Mesh SmallBall()
+        {
+            if (smallBall != null) return smallBall;
+            float g = (1f + Mathf.Sqrt(5f)) * 0.5f;
+            var v = new List<Vector3> { new Vector3(-1, g, 0), new Vector3(1, g, 0), new Vector3(-1, -g, 0), new Vector3(1, -g, 0), new Vector3(0, -1, g), new Vector3(0, 1, g), new Vector3(0, -1, -g), new Vector3(0, 1, -g), new Vector3(g, 0, -1), new Vector3(g, 0, 1), new Vector3(-g, 0, -1), new Vector3(-g, 0, 1) };
+            var f = new List<int> { 0,11,5, 0,5,1, 0,1,7, 0,7,10, 0,10,11, 1,5,9, 5,11,4, 11,10,2, 10,7,6, 7,1,8, 3,9,4, 3,4,2, 3,2,6, 3,6,8, 3,8,9, 4,9,5, 2,4,11, 6,2,10, 8,6,7, 9,8,1 };
+            var mid = new Dictionary<long, int>();
+            int Mid(int a, int b) { long k = a < b ? ((long)a << 32) | (uint)b : ((long)b << 32) | (uint)a; if (mid.TryGetValue(k, out var i)) return i; v.Add((v[a] + v[b]) * 0.5f); mid[k] = v.Count - 1; return v.Count - 1; }
+            var f2 = new List<int>();
+            for (int i = 0; i < f.Count; i += 3) { int a = f[i], b = f[i + 1], c = f[i + 2], ab = Mid(a, b), bc = Mid(b, c), ca = Mid(c, a); f2.AddRange(new[] { a, ab, ca, b, bc, ab, c, ca, bc, ab, bc, ca }); }
+            for (int i = 0; i < v.Count; i++) v[i] = v[i].normalized * 0.5f;
+            smallBall = new Mesh { name = "SmallBall" };
+            smallBall.SetVertices(v); smallBall.SetTriangles(f2, 0); smallBall.SetNormals(v.ConvertAll(x => x.normalized));
+            smallBall.RecalculateBounds();
+            return smallBall;
+        }
+
         private static void MergedPart(string name, Transform parent, List<CombineInstance> parts, Material material)
         {
             if (parts.Count == 0) return;

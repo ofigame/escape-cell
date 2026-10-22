@@ -20,8 +20,6 @@ namespace SquashBot.UI
         {
             if (cache.TryGetValue(w.id, out var rt) && rt != null && rt.IsCreated()) return rt;
             Setup();
-            rt = new RenderTexture(512, 512, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Weapon " + w.id };
-            rt.Create();
             var holder = new GameObject("Preview").transform;
             holder.SetParent(stage, false);
             var model = WeaponModels.Build(holder, w, 1f);
@@ -31,9 +29,7 @@ namespace SquashBot.UI
             model.localPosition = new Vector3(0f, -length * 0.5f, 0f);
             cam.orthographicSize = length * 0.46f;
             if (GearFiles.HasWeapon(w.id)) cam.orthographicSize = Centre(holder, model) * 0.5f;
-            cam.targetTexture = rt;
-            cam.Render();
-            cam.targetTexture = null;
+            rt = Snapshot.Take(cam, 512, "Weapon " + w.id);
             Object.DestroyImmediate(holder.gameObject); // now, not at the end of the frame: the next picture must not show it
             cache[w.id] = rt;
             return rt;
@@ -45,8 +41,6 @@ namespace SquashBot.UI
             string key = "hero" + hero;
             if (cache.TryGetValue(key, out var rt) && rt != null && rt.IsCreated()) return rt;
             Setup();
-            rt = new RenderTexture(512, 512, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Hero " + hero };
-            rt.Create();
             var holder = new GameObject("Preview").transform;
             holder.SetParent(stage, false);
             var colours = HeroModels.Colours(hero);
@@ -58,9 +52,7 @@ namespace SquashBot.UI
             holder.localRotation = Quaternion.Euler(0f, 205f, 0f);
             holder.localPosition = new Vector3(0f, -0.44f, 0f);
             cam.orthographicSize = 0.52f;
-            cam.targetTexture = rt;
-            cam.Render();
-            cam.targetTexture = null;
+            rt = Snapshot.Take(cam, 512, "Hero " + hero);
             Object.DestroyImmediate(holder.gameObject);
             cache[key] = rt;
             return rt;
@@ -76,8 +68,6 @@ namespace SquashBot.UI
             string key = "cos." + c.id;
             if (cache.TryGetValue(key, out var rt) && rt != null && rt.IsCreated()) return rt;
             Setup();
-            rt = new RenderTexture(256, 256, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Cosmetic " + c.id };
-            rt.Create();
             var holder = new GameObject("Preview").transform;
             holder.SetParent(stage, false);
             var piece = new GameObject("Piece").transform;
@@ -120,6 +110,7 @@ namespace SquashBot.UI
                     SkinnedHero.Build(look);
                     var body = look.GetComponentInChildren<SkinnedHero>().transform;
                     SkinnedHero.Dress(body, new SkinnedHero.Look { head = 1, suit = c.IsDefault ? null : c.id.Replace("suit.", "") });
+                    body.GetComponent<SkinnedHero>().PoseNow(); // (standing, not in its T)
                     break;
                 }
                 case Slot.Head: { var h = Resources.Load<GameObject>("Heroes/Foi/head_" + c.id.Replace("head.", "")); if (h != null) { var made = Object.Instantiate(h, piece, false); foreach (var r in made.GetComponentsInChildren<Renderer>()) r.sharedMaterial = SkinnedHero.HeadMaterial(int.Parse(c.id.Replace("head.", ""))); } break; } // (its own picture)
@@ -136,9 +127,7 @@ namespace SquashBot.UI
                 cam.orthographicSize = Mathf.Max(0.05f, Mathf.Max(b.extents.y, b.extents.x) * 1.18f);
             }
             cam.transform.localPosition = new Vector3(0f, 0f, -4f);
-            cam.targetTexture = rt;
-            cam.Render();
-            cam.targetTexture = null;
+            rt = Snapshot.Take(cam, 256, "Cosmetic " + c.id);
             Object.DestroyImmediate(holder.gameObject);
             cache[key] = rt;
             return rt;
@@ -176,7 +165,7 @@ namespace SquashBot.UI
                 return l.rt;
             }
             l = new Live { id = w.id, users = 1, phase = liveSlot * 47f };
-            l.rt = new RenderTexture(384, 384, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Spin " + w.id };
+            l.rt = new RenderTexture(384, 384, 24, RenderTextureFormat.ARGB32) { antiAliasing = 2, name = "Spin " + w.id };
             l.rt.Create();
             l.holder = new GameObject("Spin " + w.id).transform;
             l.holder.SetParent(stage, false);
@@ -205,7 +194,7 @@ namespace SquashBot.UI
                 return l.rt;
             }
             l = new Live { id = s.id, users = 1, phase = liveSlot * 47f };
-            l.rt = new RenderTexture(384, 384, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Spin " + s.id };
+            l.rt = new RenderTexture(384, 384, 24, RenderTextureFormat.ARGB32) { antiAliasing = 2, name = "Spin " + s.id };
             l.rt.Create();
             l.holder = new GameObject("Spin " + s.id).transform;
             l.holder.SetParent(stage, false);
@@ -259,7 +248,7 @@ namespace SquashBot.UI
             {
                 // Only the ones a card on screen shows: a closed shop costs nothing.
                 int drawn = 0;
-                for (int i = 0; i < liveOrder.Count && drawn < 4; i++)
+                for (int i = 0; i < liveOrder.Count && drawn < 2; i++)
                 {
                     liveNext = (liveNext + 1) % liveOrder.Count;
                     var l = liveOrder[liveNext];
