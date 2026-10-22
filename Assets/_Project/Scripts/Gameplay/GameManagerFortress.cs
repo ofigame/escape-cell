@@ -163,8 +163,9 @@ namespace SquashBot.Gameplay
                 biomeSky = true;
             }
             // The fortress never moves: its thousands of pieces are merged into a few big meshes (far fewer draw calls).
-            // Never on a huge one (memory); the flames stay out of it (merged, they would stand still).
-            StaticMerge.Combine(fortressFloor.gameObject, t => t.GetComponentInParent<Flames>() != null);
+            // A big one is baked (no copy of every piece kept beside the merged meshes: about a third of the memory on the
+            // late floors); the flames stay out of it (merged, they would stand still).
+            StaticMerge.Combine(fortressFloor.gameObject, t => t.GetComponentInParent<Flames>() != null, 2500, 400000);
             // Craft crossing the sky over the later fortresses.
             if (stage >= 1 && !challengeRun) // (not over the challenge board)
                 SkyTraffic.Create(fortressFloor, () => robot != null ? robot.transform.position : Vector3.zero,

@@ -273,7 +273,11 @@ namespace SquashBot.Visual
 
         /// <summary>The head's own light: a part of its colour that no light or shadow takes away, so the face never
         /// darkens as the lights round it change (on phones each thing gets only a few of the scene's lights).</summary>
-        private const float HeadGlow = 0.24f;
+        private const float HeadGlow = 0.68f;
+
+        /// <summary>How much the face takes from the lights round it (the rest is its own light): coloured lamps and flames
+        /// on a floor tint it only a little, and it never goes dark or orange.</summary>
+        private const float HeadLit = 0.4f;
 
         private static Material HeadPaint(int n, Color? hair, Color? skin)
         {
@@ -321,7 +325,7 @@ namespace SquashBot.Visual
                     tex.Apply(true, true);
                 }
             }
-            m = MaterialFactory.CreateSurface(Color.white, Color.black, 0.18f, 0f); // matte skin
+            m = MaterialFactory.CreateSurface(new Color(HeadLit, HeadLit, HeadLit), Color.black, 0.18f, 0f); // matte skin, mostly its own light
             if (tex != null)
             {
                 m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
@@ -353,7 +357,7 @@ namespace SquashBot.Visual
             var v = Vivid(c, 1f); var cv = new Color(v.r / 255f, v.g / 255f, v.b / 255f);
             string key = "lid" + cv;
             if (materials.TryGetValue(key, out var m) && m != null) return m;
-            m = MaterialFactory.CreateSurface(cv, Color.black, 0.18f, 0f);
+            m = MaterialFactory.CreateSurface(cv * HeadLit, Color.black, 0.18f, 0f);
             m.EnableKeyword("_EMISSION");
             m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
             m.SetColor("_EmissionColor", cv * HeadGlow);

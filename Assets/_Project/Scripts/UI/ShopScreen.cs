@@ -264,15 +264,14 @@ namespace SquashBot.UI
             }
         }
 
-        /// <summary>A shield: its picture turning, how soon it is ready again and how wide it covers; buy it, carry it,
+        /// <summary>A shield: its picture (tap for a close look), how soon it is ready again and how wide it covers; buy it, carry it,
         /// or (the golden ones) where it comes from.</summary>
         private void ShieldCell(ShieldDef s)
         {
             var card = Cell(s.id, s.chest ? new Color(1f, 0.8f, 0.3f) : new Color(0.6f, 0.8f, 1f), out var picture);
             var image = picture.gameObject.AddComponent<RawImage>();
-            image.texture = ItemPreview.SpinningShield(s);
-            picture.gameObject.AddComponent<ItemPreview.Lease>().id = s.id;
-            image.raycastTarget = false;
+            image.texture = ItemPreview.Shield(s);
+            ItemViewer.OnTap(image, transform, Loc.T(s.id), () => ItemPreview.ViewShield(s)); // tapped: the close look
             CardName(card, Loc.T(s.id));
             var desc = CardDesc(card);
             var buy = BuyButton(card, () =>
@@ -317,9 +316,8 @@ namespace SquashBot.UI
         {
             var card = Cell(w.id, WeaponModels.GlowOf(w), out var picture);
             var image = picture.gameObject.AddComponent<RawImage>();
-            image.texture = ItemPreview.Spinning(w); // turning all the way round while the card shows
-            picture.gameObject.AddComponent<ItemPreview.Lease>().id = w.id;
-            image.raycastTarget = false;
+            image.texture = ItemPreview.Weapon(w);
+            ItemViewer.OnTap(image, transform, Loc.T("weapon." + w.id), () => ItemPreview.ViewWeapon(w)); // tapped: the close look
             CardName(card, Loc.T("weapon." + w.id));
             var desc = CardDesc(card);
             var pips = Pips(card, Armory.MaxLevel);

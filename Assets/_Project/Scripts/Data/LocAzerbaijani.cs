@@ -243,6 +243,7 @@ namespace SquashBot.Data
             ["chests.take"] = "HƏDİYYƏNİ AL",
             ["chests.contents"] = "İÇİNDƏKİLƏR",
             ["chests.swap"] = "DƏYİŞ (REKLAM)",
+            ["viewer.hint"] = "Döndərmək üçün sürüşdür",
             ["chests.odds0"] = "Qızıl 75% · Silah 25%",
             ["chests.odds1"] = "Qızıl 60% · Silah 32–40% · Xüsusi silah 8% (3+ seriya)",
             ["chests.odds2"] = "Qızıl 38% · Silah 30% · Xüsusi silah 32%",

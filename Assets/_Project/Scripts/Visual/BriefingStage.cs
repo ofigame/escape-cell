@@ -94,7 +94,7 @@ namespace SquashBot.Visual
         public void SetVisible(bool on)
         {
             cam.enabled = on;
-            if (!on) Clear();
+            if (!on) { Clear(); Texture.Release(); } // (its 28 MB only while a briefing shows)
         }
 
         public void Show(BriefShot newShot)
@@ -104,6 +104,7 @@ namespace SquashBot.Visual
             t = 0f;
             loopT = 0f;
             step = 0;
+            if (!Texture.IsCreated()) Texture.Create();
             cam.enabled = true;
             Aim(1f);
             var floor = MaterialFactory.Create(new Color(0.2f, 0.18f, 0.36f), new Color(0.05f, 0.04f, 0.12f));

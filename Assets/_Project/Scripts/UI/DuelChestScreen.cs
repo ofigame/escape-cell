@@ -124,7 +124,7 @@ namespace SquashBot.UI
             contentsTitle.text = TierName(t);
             contentsOdds.text = Loc.T("chests.odds" + (int)t);
             int n = 0;
-            void Cell(Texture pic, string name, bool rare, string leaseId = null)
+            void Cell(Texture pic, string name, bool rare)
             {
                 const int Cols = 3; const float W = 300f, H = 360f, Gap = 18f;
                 float x = (n % Cols - (Cols - 1) * 0.5f) * (W + Gap), y = -(n / Cols) * (H + Gap);
@@ -133,7 +133,6 @@ namespace SquashBot.UI
                 var box = UiFactory.Box("Picture", card, new Vector2(0.5f, 1f), new Vector2(0f, -140f), new Vector2(250f, 250f));
                 box.pivot = new Vector2(0.5f, 0.5f);
                 var raw = box.gameObject.AddComponent<RawImage>(); raw.texture = pic; raw.raycastTarget = false;
-                if (leaseId != null) box.gameObject.AddComponent<ItemPreview.Lease>().id = leaseId;
                 var label = Flat.Label(card, name, new Vector2(0.5f, 0f), new Vector2(0f, 50f), new Vector2(W - 20f, 70f), 26f, rare ? Flat.Gold : Flat.Text, TextAlignmentOptions.Center, bold: true, wrap: true);
                 label.rectTransform.pivot = new Vector2(0.5f, 0.5f);
                 n++;
@@ -141,7 +140,7 @@ namespace SquashBot.UI
             if (t == ChestTier.Advanced)
             {
                 foreach (var w in Armory.All) if (w.chest) Cell(ItemPreview.Weapon(w), Loc.T("weapon." + w.id), true);
-                foreach (var s in Shields.All) if (s.chest) Cell(ItemPreview.SpinningShield(s), Loc.T(s.id), true, s.id);
+                foreach (var s in Shields.All) if (s.chest) Cell(ItemPreview.Shield(s), Loc.T(s.id), true);
             }
             if (t != ChestTier.Basic)
                 foreach (var c in Cosmetics.All) if (c.chest) Cell(ItemPreview.Cosmetic(c), Loc.T("cos." + c.id), true);

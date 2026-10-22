@@ -14,13 +14,21 @@ namespace SquashBot.Visual
         /// <param name="moves">True for a renderer that animates (it stays as it is).</param>
         /// <param name="max">Past this many pieces the still ones are baked instead (see <see cref="Bake"/>): static
         /// batching keeps every piece's renderer, and thousands of them cost the phone every frame.</param>
-        public static void Combine(GameObject root, Func<Transform, bool> moves, int max = 6000)
+        /// <param name="maxVerts">Past this many corners in all they are baked too: static batching keeps a copy of
+        /// everything it merged in memory as well as on the graphics card (tens of MB on a big fortress).</param>
+        public static void Combine(GameObject root, Func<Transform, bool> moves, int max = 6000, int maxVerts = int.MaxValue)
         {
             var still = new List<GameObject>();
+            long verts = 0;
             foreach (var r in root.GetComponentsInChildren<MeshRenderer>())
-                if (!moves(r.transform)) still.Add(r.gameObject);
+                if (!moves(r.transform))
+                {
+                    still.Add(r.gameObject);
+                    var mf = r.GetComponent<MeshFilter>();
+                    if (mf != null && mf.sharedMesh != null) verts += mf.sharedMesh.vertexCount;
+                }
             if (still.Count == 0) return;
-            if (still.Count < max) StaticBatchingUtility.Combine(still.ToArray(), root);
+            if (still.Count < max && verts < maxVerts) Batch(root, still.ToArray());
             else Bake(root, moves);
         }
 
@@ -78,12 +86,33 @@ namespace SquashBot.Visual
             }
         }
 
+        /// <summary>
+        /// Static batching (all of <paramref name="root"/>, or just <paramref name="pieces"/>) whose merged meshes go with
+        /// the root: left to themselves they stay in memory until the next sweep, a few floors later.
+        /// </summary>
+        public static void Batch(GameObject root, GameObject[] pieces = null)
+        {
+            if (pieces == null) StaticBatchingUtility.Combine(root);
+            else StaticBatchingUtility.Combine(pieces, root);
+            var merged = new HashSet<Mesh>();
+            foreach (var mf in root.GetComponentsInChildren<MeshFilter>(true))
+                if (mf.sharedMesh != null && mf.sharedMesh.name.StartsWith("Combined Mesh")) merged.Add(mf.sharedMesh);
+            if (merged.Count > 0) root.AddComponent<BatchedMeshes>().meshes = new List<Mesh>(merged);
+        }
+
         /// <summary>Whether a transform is one of these or under one of them.</summary>
         public static bool Under(Transform t, HashSet<Transform> roots)
         {
             for (; t != null; t = t.parent) if (roots.Contains(t)) return true;
             return false;
         }
+    }
+
+    /// <summary>A root's statically batched meshes go with it.</summary>
+    public class BatchedMeshes : MonoBehaviour
+    {
+        public List<Mesh> meshes;
+        private void OnDestroy() { if (meshes != null) foreach (var m in meshes) if (m != null) Destroy(m); }
     }
 
     /// <summary>A baked mesh goes with its object.</summary>

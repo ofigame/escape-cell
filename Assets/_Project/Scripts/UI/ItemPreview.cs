@@ -125,6 +125,12 @@ namespace SquashBot.UI
                 foreach (var r in renderers) b.Encapsulate(r.bounds);
                 holder.position += stage.position - b.center;
                 cam.orthographicSize = Mathf.Max(0.05f, Mathf.Max(b.extents.y, b.extents.x) * 1.18f);
+                if (c.slot == Slot.Suit)
+                {
+                    // an armour paint: close on the chest and shoulders, where the paints differ (not foi small and whole)
+                    holder.position -= Vector3.up * (b.extents.y * 0.3f);
+                    cam.orthographicSize = b.extents.y * 0.62f;
+                }
             }
             cam.transform.localPosition = new Vector3(0f, 0f, -4f);
             rt = Snapshot.Take(cam, 256, "Cosmetic " + c.id);
@@ -133,78 +139,21 @@ namespace SquashBot.UI
             return rt;
         }
 
-        // ---------- Turning pictures (the shop's weapon cards) ----------
-
-        private class Live
+        /// <summary>A shield's still picture, a little turned so its face and rim both show.</summary>
+        public static Texture Shield(ShieldDef s)
         {
-            public string id;
-            public Transform holder;
-            public RenderTexture rt;
-            public float size, phase;
-            public int users;
-            /// <summary>Cards showing it now (a hidden shop's cards are not drawn for).</summary>
-            public int visible;
-        }
-
-        private static readonly Dictionary<string, Live> live = new Dictionary<string, Live>();
-        private static readonly List<Live> liveOrder = new List<Live>();
-        private static int liveNext, liveSlot;
-
-        /// <summary>
-        /// A weapon's picture turning all the way round (360°) on its own little turntable, for as long as a card shows it
-        /// (<see cref="Release"/> when the card goes). A few are drawn each frame, in turn.
-        /// </summary>
-        public static Texture Spinning(WeaponDef w)
-        {
+            string key = "shield:" + s.id;
+            if (cache.TryGetValue(key, out var rt) && rt != null && rt.IsCreated()) return rt;
             Setup();
-            if (live.TryGetValue(w.id, out var l) && l.rt != null && l.holder != null)
-            {
-                // Already turning (its texture may have been lost: made again in place, the cards keep it).
-                if (!l.rt.IsCreated()) { l.rt.Create(); Draw(l); }
-                l.users++;
-                return l.rt;
-            }
-            l = new Live { id = w.id, users = 1, phase = liveSlot * 47f };
-            l.rt = new RenderTexture(384, 384, 24, RenderTextureFormat.ARGB32) { antiAliasing = 2, name = "Spin " + w.id };
-            l.rt.Create();
-            l.holder = new GameObject("Spin " + w.id).transform;
-            l.holder.SetParent(stage, false);
-            l.holder.localPosition = new Vector3(10f + 6f * (liveSlot++ % 64), 0f, 0f);
-            var model = WeaponModels.Build(l.holder, w, 1f);
-            float length = w.kind == WeaponKind.Spear ? 1.05f : w.kind == WeaponKind.Gun ? 0.7f : 0.85f;
-            // Centred on the turntable: a blade stands up (its middle at the centre), a gun lies level.
-            model.localPosition = w.kind == WeaponKind.Gun ? new Vector3(0f, -0.02f, -0.12f) : new Vector3(0f, -length * 0.5f, 0f);
-            if (w.kind == WeaponKind.Gun) model.localScale *= 1.15f;
-            l.size = length * (w.kind == WeaponKind.Gun ? 0.6f : 0.5f);
-            if (GearFiles.HasWeapon(w.id)) l.size = Centre(l.holder, model) * 0.55f; // (a model: framed on itself)
-            live[w.id] = l;
-            liveOrder.Add(l);
-            Draw(l);
-            return l.rt;
-        }
-
-        /// <summary>A shield's picture turning round (as <see cref="Spinning"/>), for as long as a card shows it.</summary>
-        public static Texture SpinningShield(ShieldDef s)
-        {
-            Setup();
-            if (live.TryGetValue(s.id, out var l) && l.rt != null && l.holder != null)
-            {
-                if (!l.rt.IsCreated()) { l.rt.Create(); Draw(l); }
-                l.users++;
-                return l.rt;
-            }
-            l = new Live { id = s.id, users = 1, phase = liveSlot * 47f };
-            l.rt = new RenderTexture(384, 384, 24, RenderTextureFormat.ARGB32) { antiAliasing = 2, name = "Spin " + s.id };
-            l.rt.Create();
-            l.holder = new GameObject("Spin " + s.id).transform;
-            l.holder.SetParent(stage, false);
-            l.holder.localPosition = new Vector3(10f + 6f * (liveSlot++ % 64), 0f, 0f);
-            GearFiles.Shield(l.holder, s.model, 0.8f, s.chest ? 0.15f : 0f);
-            l.size = 0.5f;
-            live[s.id] = l;
-            liveOrder.Add(l);
-            Draw(l);
-            return l.rt;
+            var holder = new GameObject("Preview").transform;
+            holder.SetParent(stage, false);
+            GearFiles.Shield(holder, s.model, 0.8f, s.chest ? 0.15f : 0f);
+            holder.localRotation = Quaternion.Euler(10f, 205f, 0f); // (its face is +Z: turned to the camera)
+            cam.orthographicSize = 0.5f;
+            rt = Snapshot.Take(cam, 512, "Shield " + s.id);
+            Object.DestroyImmediate(holder.gameObject);
+            cache[key] = rt;
+            return rt;
         }
 
         /// <summary>Moves <paramref name="model"/> so its middle is at <paramref name="holder"/>'s centre; returns its longest side.</summary>
@@ -218,63 +167,86 @@ namespace SquashBot.UI
             return Mathf.Max(b.size.x, Mathf.Max(b.size.y, b.size.z)) / k;
         }
 
-        /// <summary>A card showing a turning picture is gone: its turntable goes when no card shows it.</summary>
-        public static void Release(string id)
+        // ---------- The close look (one item, full screen, turned by the finger) ----------
+
+        private static Transform viewHolder;
+        private static RenderTexture viewRt;
+        private static float viewSize;
+        /// <summary>How the item in the close look is turned (degrees round the upright, and tipped).</summary>
+        public static float ViewYaw, ViewPitch;
+        /// <summary>Which close look is open now (each opening gets the next number).</summary>
+        public static int ViewNumber { get; private set; }
+
+        /// <summary>A weapon in the close look: built once on its own spot of the stage, drawn every frame until <see cref="CloseView"/>.</summary>
+        public static Texture ViewWeapon(WeaponDef w)
         {
-            if (!live.TryGetValue(id, out var l) || --l.users > 0) return;
-            live.Remove(id);
-            liveOrder.Remove(l);
-            if (l.holder != null) Object.Destroy(l.holder.gameObject);
-            if (l.rt != null) { l.rt.Release(); Object.Destroy(l.rt); }
+            var holder = OpenView();
+            var model = WeaponModels.Build(holder, w, 1f);
+            float length = w.kind == WeaponKind.Spear ? 1.05f : w.kind == WeaponKind.Gun ? 0.7f : 0.85f;
+            model.localPosition = w.kind == WeaponKind.Gun ? new Vector3(0f, -0.02f, -0.12f) : new Vector3(0f, -length * 0.5f, 0f);
+            if (w.kind == WeaponKind.Gun) model.localScale *= 1.15f;
+            viewSize = length * (w.kind == WeaponKind.Gun ? 0.6f : 0.5f);
+            if (GearFiles.HasWeapon(w.id)) viewSize = Centre(holder, model) * 0.55f; // (a model: framed on itself)
+            ViewYaw = 200f; ViewPitch = 14f;
+            DrawView();
+            return viewRt;
         }
 
-        private static void Draw(Live l)
+        /// <summary>A shield in the close look (as <see cref="ViewWeapon"/>).</summary>
+        public static Texture ViewShield(ShieldDef s)
         {
-            // A slow turn round the upright, tipped a little towards the camera so the top shows too.
-            l.holder.localRotation = Quaternion.Euler(14f, Time.unscaledTime * 75f + l.phase, 0f);
-            var camPos = l.holder.localPosition + new Vector3(0f, 0f, -4f);
-            cam.transform.localPosition = camPos;
-            cam.orthographicSize = l.size;
-            cam.targetTexture = l.rt;
+            var holder = OpenView();
+            GearFiles.Shield(holder, s.model, 0.8f, s.chest ? 0.15f : 0f);
+            viewSize = 0.5f;
+            ViewYaw = 205f; ViewPitch = 10f;
+            DrawView();
+            return viewRt;
+        }
+
+        /// <summary>The close look is gone: its model and its picture go (nothing is drawn for it any more).</summary>
+        public static void CloseView(int number)
+        {
+            if (number == ViewNumber) CloseView();
+        }
+
+        private static void CloseView()
+        {
+            if (viewHolder != null) Object.Destroy(viewHolder.gameObject);
+            viewHolder = null;
+            if (viewRt != null) { viewRt.Release(); Object.Destroy(viewRt); }
+            viewRt = null;
+        }
+
+        private static Transform OpenView()
+        {
+            CloseView();
+            Setup();
+            ViewNumber++;
+            viewRt = new RenderTexture(768, 768, 24, RenderTextureFormat.ARGB32) { antiAliasing = 2, name = "Close look" }; // (sharp enough full screen; 4 samples at 1024 cost 120 MB)
+            viewRt.Create();
+            viewHolder = new GameObject("Close look").transform;
+            viewHolder.SetParent(stage, false);
+            viewHolder.localPosition = new Vector3(20f, 0f, 0f); // (away from where the still pictures are taken)
+            return viewHolder;
+        }
+
+        private static void DrawView()
+        {
+            if (viewHolder == null || viewRt == null) return;
+            if (!viewRt.IsCreated()) viewRt.Create();
+            viewHolder.localRotation = Quaternion.Euler(ViewPitch, ViewYaw, 0f);
+            cam.transform.localPosition = viewHolder.localPosition + new Vector3(0f, 0f, -4f);
+            cam.orthographicSize = viewSize;
+            cam.targetTexture = viewRt;
             cam.Render();
             cam.targetTexture = null;
             cam.transform.localPosition = new Vector3(0f, 0f, -4f);
         }
 
-        /// <summary>Draws a few of the turning pictures each frame (all of them in turn).</summary>
+        /// <summary>Draws the close look each frame while it is open (nothing at all otherwise).</summary>
         private class Spinner : MonoBehaviour
         {
-            private void LateUpdate()
-            {
-                // Only the ones a card on screen shows: a closed shop costs nothing.
-                int drawn = 0;
-                for (int i = 0; i < liveOrder.Count && drawn < 2; i++)
-                {
-                    liveNext = (liveNext + 1) % liveOrder.Count;
-                    var l = liveOrder[liveNext];
-                    if (l.holder == null || l.rt == null || l.visible <= 0) continue;
-                    Draw(l);
-                    drawn++;
-                }
-            }
-        }
-
-        /// <summary>Put on a card's picture: tells the turntable when the card is gone.</summary>
-        public class Lease : MonoBehaviour
-        {
-            public string id;
-            private bool counted;
-            private void OnEnable() => Count(true);
-            private void Start() => Count(true); // (the id is set just after the lease is put on)
-            private void OnDisable() => Count(false);
-            private void OnDestroy() { if (!string.IsNullOrEmpty(id)) Release(id); }
-
-            private void Count(bool on)
-            {
-                if (on == counted || string.IsNullOrEmpty(id) || !live.TryGetValue(id, out var l)) return;
-                counted = on;
-                l.visible += on ? 1 : -1;
-            }
+            private void LateUpdate() => DrawView();
         }
 
         private static void Setup()
@@ -301,7 +273,7 @@ namespace SquashBot.UI
             key.type = LightType.Point;
             key.range = 8f;
             key.intensity = 3f;
-            key.transform.localPosition = new Vector3(-1.5f, 1.5f, 1.5f); // beside the camera (it moves from turntable to turntable)
+            key.transform.localPosition = new Vector3(-1.5f, 1.5f, 1.5f); // beside the camera (it moves with it to the close look)
             root.AddComponent<Spinner>();
         }
     }

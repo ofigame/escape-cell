@@ -252,7 +252,7 @@ namespace SquashBot.Gameplay
             // The grout never moves: one merged mesh (plain cubes, light) instead of a piece per tile.
             if (groutRoot != null)
             {
-                if (groutRoot.childCount < 2000) StaticBatchingUtility.Combine(groutRoot.gameObject);
+                if (groutRoot.childCount < 2000) StaticMerge.Batch(groutRoot.gameObject);
                 else StaticMerge.Bake(groutRoot.gameObject, _ => false); // (a huge floor; a broken tile's grout line then stays, under its pit)
             }
         }
@@ -307,7 +307,7 @@ namespace SquashBot.Gameplay
             // The platform never moves: merge it into a few big meshes, so a 20x20 floor costs a handful of draw calls.
             // Under the floor and round its rim: its shadows fall into the void, never on anything seen (a shadow pass saved).
             foreach (var pr in root.GetComponentsInChildren<MeshRenderer>()) pr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            if (pieces < 2000) StaticBatchingUtility.Combine(root.gameObject);
+            if (pieces < 2000) StaticMerge.Batch(root.gameObject);
             else StaticMerge.Bake(root.gameObject, _ => false); // (a huge floor: thousands of renderers would cost every frame)
         }
         private Renderer sharedTopRenderer;

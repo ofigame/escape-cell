@@ -194,6 +194,15 @@ namespace SquashBot.UI
                     var raw = swatch.gameObject.AddComponent<RawImage>();
                     raw.texture = picture;
                     raw.raycastTarget = false;
+                    if (slot == Slot.Suit && !c.IsDefault)
+                    {
+                        // the paints are mostly the same polished white (the colour sits in the grooves): a dot of it tells them apart
+                        var dot = UiFactory.Box("Paint", tile, new Vector2(0f, 1f), new Vector2(12f, -12f), new Vector2(36f, 36f));
+                        UiFactory.Fill(dot, Color.white, UiSprites.Circle).raycastTarget = false;
+                        var inner = UiFactory.Box("Colour", dot, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(28f, 28f));
+                        inner.pivot = new Vector2(0.5f, 0.5f);
+                        UiFactory.Fill(inner, new Color(sc.r / m, sc.g / m, sc.b / m, 1f), UiSprites.Circle).raycastTarget = false;
+                    }
                 }
                 else UiFactory.Fill(swatch, new Color(sc.r / m, sc.g / m, sc.b / m, 1f), slot == Slot.Color || slot == Slot.Eyes ? UiSprites.Circle : UiSprites.Rounded, 2f).raycastTarget = false;
                 if (c.set != null || c.storyLevel > 0)

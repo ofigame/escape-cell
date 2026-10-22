@@ -59,6 +59,7 @@ namespace SquashBot.Visual
             View = new RenderTexture(768, 768, 24, RenderTextureFormat.ARGB32) { antiAliasing = 2, name = "ChestView" }; // (2 samples: 9 MB, not 40)
             cam.targetTexture = View;
             cam.enabled = false;
+            View.Release(); // (its memory only while a chest opens: see Play and Stop)
 
             Lamp(LightType.Directional, Quaternion.Euler(40f, -30f, 0f), Vector3.zero, new Color(1f, 0.96f, 0.9f), 2f, 0f);
             Lamp(LightType.Directional, Quaternion.Euler(20f, 140f, 0f), Vector3.zero, new Color(0.7f, 0.8f, 1f), 0.9f, 0f);
@@ -118,6 +119,7 @@ namespace SquashBot.Visual
         public void Play(ChestTier t, ChestReward reward, Action revealed)
         {
             gameObject.SetActive(true);
+            if (!View.IsCreated()) View.Create();
             cam.enabled = true;
             Clear();
             chest = ChestModels.Build(holder, t, out lid);
@@ -134,6 +136,7 @@ namespace SquashBot.Visual
             Clear();
             cam.enabled = false;
             gameObject.SetActive(false);
+            View.Release(); // (9 MB back while no chest is opening)
         }
 
         private IEnumerator Opening(ChestTier t, ChestReward reward, Action revealed)

@@ -243,6 +243,7 @@ namespace SquashBot.Data
             ["chests.take"] = "GESCHENK NEHMEN",
             ["chests.contents"] = "INHALT",
             ["chests.swap"] = "TAUSCHEN (WERBUNG)",
+            ["viewer.hint"] = "Zum Drehen ziehen",
             ["chests.odds0"] = "Gold 75 % · Waffe 25 %",
             ["chests.odds1"] = "Gold 60 % · Waffe 32–40 % · Truhenwaffe 8 % (ab 3 Siegen in Folge)",
             ["chests.odds2"] = "Gold 38 % · Waffe 30 % · Truhenwaffe 32 %",

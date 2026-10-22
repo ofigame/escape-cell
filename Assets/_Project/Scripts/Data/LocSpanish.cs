@@ -243,6 +243,7 @@ namespace SquashBot.Data
             ["chests.take"] = "TOMAR EL REGALO",
             ["chests.contents"] = "CONTENIDO",
             ["chests.swap"] = "CAMBIAR (ANUNCIO)",
+            ["viewer.hint"] = "Arrastra para girarlo",
             ["chests.odds0"] = "Oro 75% · Arma 25%",
             ["chests.odds1"] = "Oro 60% · Arma 32–40% · Arma de cofre 8% (racha de 3+)",
             ["chests.odds2"] = "Oro 38% · Arma 30% · Arma de cofre 32%",

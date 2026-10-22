@@ -243,6 +243,7 @@ namespace SquashBot.Data
             ["chests.take"] = "خذ الهدية",
             ["chests.contents"] = "المحتويات",
             ["chests.swap"] = "استبدال (إعلان)",
+            ["viewer.hint"] = "اسحب لتدويره",
             ["chests.odds0"] = "ذهب 75% · سلاح 25%",
             ["chests.odds1"] = "ذهب 60% · سلاح 32–40% · سلاح خاص 8% (3 انتصارات متتالية أو أكثر)",
             ["chests.odds2"] = "ذهب 38% · سلاح 30% · سلاح خاص 32%",

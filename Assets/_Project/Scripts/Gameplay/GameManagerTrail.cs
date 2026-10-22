@@ -210,7 +210,7 @@ namespace SquashBot.Gameplay
             var decor = new GameObject("Scenery").transform;
             decor.SetParent(trailRoot, false);
             ArenaDecor.Trail(decor, grid, trailTarget, look.wall, look.accent);
-            if (decor.GetComponentsInChildren<MeshRenderer>().Length < 6000) StaticBatchingUtility.Combine(decor.gameObject);
+            if (decor.GetComponentsInChildren<MeshRenderer>().Length < 6000) StaticMerge.Batch(decor.gameObject);
         }
 
         private void ClearTrail()
