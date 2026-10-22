@@ -230,6 +230,7 @@ namespace SquashBot.Gameplay
             {
                 StepId = null; TrailColor = null; // (the workshop has none of these now)
                 DressSkin(skin, outfit);
+                ShieldHold.Attach(visual); // the shield carried, on the left arm
                 return;
             }
 
@@ -506,7 +507,7 @@ namespace SquashBot.Gameplay
             copy.transform.localPosition = Vector3.zero;
             copy.transform.localRotation = Quaternion.identity;
             copy.transform.localScale = Vector3.one;
-            foreach (var b in copy.GetComponentsInChildren<MonoBehaviour>()) if (!(b is CapeWave || b is SkinnedHero || b is SoftCape)) Destroy(b); // (a cape still waves, a rigged build still moves)
+            foreach (var b in copy.GetComponentsInChildren<MonoBehaviour>()) if (!(b is CapeWave || b is SkinnedHero || b is SoftCape || b is ShieldHold)) Destroy(b); // (a cape still waves, a rigged build still moves, its shield stays in hand)
             if (HeroModels.IsSkinned(hero))
                 foreach (var r in copy.GetComponentsInChildren<Renderer>(true)) r.enabled = true; // (a stand-in may have hidden its pieces at the moment it was copied)
             return copy;

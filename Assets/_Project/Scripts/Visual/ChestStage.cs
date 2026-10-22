@@ -182,9 +182,15 @@ namespace SquashBot.Visual
                 var w = WeaponModels.Build(gift, reward.weapon, 1f);
                 float len = reward.weapon.kind == WeaponKind.Spear ? 1.05f : 0.85f;
                 float l = len * (reward.weapon.Special ? reward.weapon.size : 1f); // (a rank or chest weapon is built bigger)
+                if (GearFiles.HasWeapon(reward.weapon.id)) l = HeightOf(w); // (a model: as long as it is)
                 w.localPosition = new Vector3(0f, -l * 0.5f, 0f);
                 gift.localScale = Vector3.one * (2.1f / l);
                 if (reward.weapon.kind == WeaponKind.Gun) w.localRotation = Quaternion.Euler(0f, 90f, 0f);
+            }
+            else if (reward != null && reward.shield != null)
+            {
+                GearFiles.Shield(gift, reward.shield.model, 1f, 0.2f);
+                gift.localScale = Vector3.one * 1.8f;
             }
             else if (reward != null && reward.outfit != null)
             {
@@ -268,6 +274,16 @@ namespace SquashBot.Visual
         {
             const float c1 = 1.70158f, c3 = c1 + 1f;
             return 1f + c3 * Mathf.Pow(x - 1f, 3f) + c1 * Mathf.Pow(x - 1f, 2f);
+        }
+
+        /// <summary>How tall a model stands (in its parent's units).</summary>
+        private static float HeightOf(Transform m)
+        {
+            var rs = m.GetComponentsInChildren<Renderer>(true);
+            if (rs.Length == 0) return 1f;
+            var b = rs[0].bounds;
+            foreach (var r in rs) b.Encapsulate(r.bounds);
+            return b.size.y / Mathf.Max(1e-4f, m.parent != null ? m.parent.lossyScale.y : 1f);
         }
     }
 }

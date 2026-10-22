@@ -58,6 +58,14 @@ namespace SquashBot.Visual
         /// <summary>A weapon's model; a rank weapon is bigger, made of its effect's glowing metal, with a glowing orb set in it.</summary>
         public static Transform Build(Transform parent, WeaponDef w, float scale = 1f)
         {
+            // a weapon made as a model wears it (no orb or trim added: its picture has its own)
+            if (GearFiles.HasWeapon(w.id))
+            {
+                float big = w.Special ? Mathf.Min(1.3f, w.size * 0.8f) : 1f;
+                var made = GearFiles.Weapon(parent, w.id, (w.kind == WeaponKind.Hammer ? 0.62f : w.kind == WeaponKind.Mace ? 0.72f : 0.9f) * big, w.Special ? 0.18f : 0f);
+                made.localScale = Vector3.one * scale;
+                return made;
+            }
             var root = BuildPlain(parent, w, w.Special ? scale * w.size : scale);
             if (!w.Special) return root;
             if (w.chest) { ChestTrim(root, w); return root; }
@@ -296,7 +304,23 @@ namespace SquashBot.Visual
         public void Swing()
         {
             swing = 0f;
-            fromRight = !fromRight; // each blow the other way: right to left, then left to right
+            stroke = (stroke + 1) % 4; // the blows in turn: down from overhead, across from the right, a slant, across from the left
+            fromRight = stroke == 1;
+        }
+
+        private int stroke = 3;
+
+        /// <summary>A blow in three keys (wound up, the strike, followed through), then back to rest.</summary>
+        private void Stroke(Vector3 upP, Vector3 upR, Vector3 hitP, Vector3 hitR, Vector3 outP, Vector3 outR)
+        {
+            Vector3 p; Quaternion r;
+            var rest = Quaternion.Euler(25f, 0f, -12f);
+            if (swing < 0.3f) { float k = Mathf.SmoothStep(0f, 1f, swing / 0.3f); p = Vector3.Lerp(restPosition, upP, k); r = Quaternion.Slerp(rest, Quaternion.Euler(upR), k); }
+            else if (swing < 0.55f) { float k = Mathf.SmoothStep(0f, 1f, (swing - 0.3f) / 0.25f); p = Vector3.Lerp(upP, hitP, k); r = Quaternion.Slerp(Quaternion.Euler(upR), Quaternion.Euler(hitR), k); }
+            else if (swing < 0.7f) { float k = (swing - 0.55f) / 0.15f; p = Vector3.Lerp(hitP, outP, k); r = Quaternion.Slerp(Quaternion.Euler(hitR), Quaternion.Euler(outR), k); }
+            else { float k = Mathf.SmoothStep(0f, 1f, (swing - 0.7f) / 0.3f); p = Vector3.Lerp(outP, restPosition, k); r = Quaternion.Slerp(Quaternion.Euler(outR), rest, k); }
+            transform.localPosition = p;
+            transform.localRotation = r;
         }
 
         private bool fromRight;
@@ -332,7 +356,21 @@ namespace SquashBot.Visual
                 Pose(kick * 60f);
                 return;
             }
-            swing = Mathf.Min(1f, swing + Time.deltaTime / 0.26f);
+            swing = Mathf.Min(1f, swing + Time.deltaTime / 0.34f);
+            if (stroke == 0)
+            {
+                // Down from overhead: the blade raised high behind the head, brought down hard in front.
+                Stroke(new Vector3(0.18f, 0.62f, -0.08f), new Vector3(-40f, 0f, -5f), new Vector3(0.06f, 0.3f, 0.42f), new Vector3(95f, 0f, 0f), new Vector3(0.04f, 0.14f, 0.36f), new Vector3(128f, 0f, 0f));
+                if (swing >= 1f) transform.localPosition = restPosition;
+                return;
+            }
+            if (stroke == 2)
+            {
+                // A slant: from high on the right down across to the low left.
+                Stroke(new Vector3(0.42f, 0.58f, 0f), new Vector3(-15f, 20f, -55f), new Vector3(-0.05f, 0.26f, 0.42f), new Vector3(70f, -35f, 50f), new Vector3(-0.28f, 0.12f, 0.24f), new Vector3(100f, -60f, 75f));
+                if (swing >= 1f) transform.localPosition = restPosition;
+                return;
+            }
             // A sweep across the front: the hand draws back to one side, slashes across to the other (the blade near level,
             // reaching out ahead), then comes back to rest. Every other blow the other way round.
             float side = fromRight ? 1f : -1f;

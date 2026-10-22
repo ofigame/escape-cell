@@ -98,6 +98,21 @@ namespace SquashBot.Gameplay
             heldWeapon = null;
         }
 
+        /// <summary>foi's shield takes a blow coming from <paramref name="from"/>: raised, a clang and sparks, nothing lost.</summary>
+        private bool ShieldTakes(Vector3 from)
+        {
+            if (robot == null || !robot.IsAlive || robot.Visual == null) return false;
+            if (!Shields.Blocks(from, robot.transform.position, robot.Visual.forward)) return false;
+            var hold = robot.Visual.GetComponentInChildren<ShieldHold>();
+            if (hold != null) hold.Raise();
+            var at = robot.transform.position + Vector3.up * 0.7f + (from - robot.transform.position).normalized * 0.35f;
+            fx.Burst(at, new Color(1f, 0.9f, 0.6f), new Color(3f, 2.6f, 1.6f), 18, 4f);
+            AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.9f);
+            Haptics.Light();
+            cameraRig.Shake(0.25f);
+            return true;
+        }
+
         private void InitHunt()
         {
             hunt = new GameObject("Hunt").AddComponent<HuntSystem>();

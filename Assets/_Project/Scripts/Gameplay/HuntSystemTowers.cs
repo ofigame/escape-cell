@@ -222,13 +222,14 @@ namespace SquashBot.Gameplay
                     {
                         var target = a;
                         int gen = beginGen;
-                        TowerBolt.Fire(t.model.Muzzle.position, At(target) + Vector3.up * 0.3f, colour, 0.32f, () =>
+                        var from = t.model.Muzzle.position;
+                        TowerBolt.Fire(from, At(target) + Vector3.up * 0.3f, colour, 0.32f, () =>
                         {
                             if (view != null && gen == beginGen) view.SetWarning(target, 0f);
                             if (!running || gen != beginGen) return; // fired in a level that is over
                             Shockwave.Create(At(target), 0.9f, colour);
                             fx.Burst(At(target) + Vector3.up * 0.3f, colour, colour * 2f, 14, 3f);
-                            if (robot.Position == target) Hit?.Invoke(target, share);
+                            if (robot.Position == target) { BlowFrom = from; Hit?.Invoke(target, share); }
                             if (CompanionTile.HasValue && CompanionTile.Value == target) CompanionHurt?.Invoke(t.reactor ? 2 : 1);
                         });
                     }

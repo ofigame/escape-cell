@@ -28,6 +28,47 @@ namespace SquashBot.Visual
         private float unit = 1f, span = 0.3f, length, topWidth, flare = 1.45f;
         private bool ready;
 
+
+
+        // A cape made as a model, worn as it is: hung from the shoulders, swung back as foi moves, a slow breath of wind.
+        private Transform worn;
+        private bool wornFlip;
+        private Vector3 lastShoulders;
+        private float swing, wave;
+        /// <summary>How far the cape's middle reaches toward the body from where it hangs (its own depth there).</summary>
+        private float wornDepth;
+
+        /// <summary>The cape's middle part (not its edges, which wrap round the sides): how far it comes toward the body.</summary>
+        private static float BodySide(Transform worn, bool flip)
+        {
+            float half = 0f, most = 0f;
+            var pts = new System.Collections.Generic.List<Vector3>();
+            foreach (var mf in worn.GetComponentsInChildren<MeshFilter>(true))
+            {
+                if (mf.sharedMesh == null || !mf.sharedMesh.isReadable) continue;
+                foreach (var v in mf.sharedMesh.vertices) pts.Add(worn.InverseTransformPoint(mf.transform.TransformPoint(v)));
+            }
+            foreach (var p in pts) half = Mathf.Max(half, Mathf.Abs(p.x));
+            foreach (var p in pts) if (Mathf.Abs(p.x) < half * 0.3f) most = Mathf.Max(most, flip ? -p.z : p.z);
+            return most * worn.lossyScale.z; // (in the world)
+        }
+
+        private void HangWorn()
+        {
+            Frame(out var right, out var up, out var back, out var shoulders);
+            float dt = Mathf.Max(1e-4f, Time.deltaTime);
+            var v = (shoulders - lastShoulders) / dt; lastShoulders = shoulders;
+            float forward = Vector3.Dot(v, -back) / Mathf.Max(1e-4f, unit); // moving ahead swings it back
+            swing = Mathf.Lerp(swing, Mathf.Clamp(forward * 3f, -2f, 7f), dt * 3f); // (only a little: it never flies up)
+            wave += dt;
+            float sway = Mathf.Sin(wave * 1.5f) * 1.8f + Mathf.Sin(wave * 0.7f) * 1.2f; // a soft breath, standing still or not
+            // its body side just behind the back (the armour is broad): never into the body
+            float torso = Mathf.Max(0.09f * unit, span * 0.27f); // (close behind the back, its middle just off it)
+            worn.position = shoulders + up * 0.05f * unit + back * (torso + Mathf.Clamp(wornDepth, 0f, span * 0.06f)); // (close on the back)
+            var face = wornFlip ? back : -back; // (the model's front made to face the body or away, as it was made)
+            worn.rotation = Quaternion.AngleAxis(swing + sway, right) * Quaternion.LookRotation(face, up);
+        }
+
         private int Tier => id == "back.cape" || id == "back.cape.sky" || id == "back.cape.sun" ? 0
             : id == "back.cape.night" || id == "back.cape.teal" || id == "back.cape.wine" ? 1
             : id.StartsWith("back.cape.rank") ? 3 : 2;
@@ -67,6 +108,30 @@ namespace SquashBot.Visual
             float kneeY = kneeL != null && kneeR != null ? (kneeL.position.y + kneeR.position.y) * 0.5f : hips.position.y - 0.2f * unit;
             length = Marshal ? (shoulderY - root.position.y) * 1.08f : shoulderY - kneeY;
 
+            if (GearFiles.CapeModel(id) != null)
+            {
+                // a cape made as a model hangs as it was made (its own folds and colours), from the shoulders, swaying
+                // as long as foi is tall from the shoulders nearly to its feet, and never narrower than the back it covers
+                float wornLength = (shoulderY - root.position.y) * 0.92f;
+                var old = transform.Find(id); if (old != null) DestroyImmediate(old.gameObject); // (a copy of foi brings the original's along: one only)
+                worn = GearFiles.CapePicture(transform, id, wornLength);
+                if (worn != null)
+                {
+                    var rs = worn.GetComponentsInChildren<Renderer>(true);
+                    var wb = rs[0].bounds; foreach (var rr in rs) wb.Encapsulate(rr.bounds);
+                    float wide = Mathf.Max(wb.size.x, wb.size.z), need = span * 1.55f;
+                    if (wide < need) worn.localScale = Vector3.Scale(worn.localScale, new Vector3(need / wide, 1f, need / wide));
+                }
+                if (worn != null)
+                {
+                    foreach (var tr in worn.GetComponentsInChildren<Transform>(true)) tr.gameObject.layer = gameObject.layer;
+                    wornFlip = GearFiles.CapeFlipped(id);
+                    wornDepth = BodySide(worn, wornFlip);
+                    lastShoulders = (armL.position + armR.position) * 0.5f;
+                    ready = true;
+                    return;
+                }
+            }
             int n = (Cols + 1) * (Rows + 1);
             pos = new Vector3[n]; prev = new Vector3[n];
             for (int j = 0; j <= Rows; j++)
@@ -214,11 +279,25 @@ namespace SquashBot.Visual
             glow.Apply(false);
         }
 
+        /// <summary>Hangs it at once and lets it fall still (for a picture taken now).</summary>
+        public void Settle(int steps = 45)
+        {
+            if (!ready) { Setup(); if (!ready) return; }
+            if (worn != null) { HangWorn(); return; }
+            for (int s = 0; s < steps; s++) Step(1f / 30f);
+        }
+
         private void LateUpdate()
         {
             if (!ready) { Setup(); if (!ready) return; }
+            if (worn != null) { HangWorn(); return; }
             float dt = Mathf.Min(Time.deltaTime, 1f / 30f);
             if (dt <= 0f) return;
+            Step(dt);
+        }
+
+        private void Step(float dt)
+        {
             int stride = Cols + 1, n = pos.Length;
             var gravity = Vector3.down * 2.6f * unit;
             // move: the top row is pinned to the shoulders, the rest falls and keeps its swing

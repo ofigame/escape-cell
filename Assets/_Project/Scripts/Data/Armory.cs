@@ -95,7 +95,8 @@ namespace SquashBot.Data
             new WeaponDef { id = "thunderRail", kind = WeaponKind.Gun, tier = 6, damage = 34, reach = 12, cooldown = 0.6f, price = 36000, rank = 7, fx = SpecialFx.Chain, size = 1.4f },
             new WeaponDef { id = "starBreaker", kind = WeaponKind.Gun, tier = 6, damage = 18, reach = 11, cooldown = 0.7f, price = 60000, rank = 12, fx = SpecialFx.Quake, size = 1.5f, auto = true, burst = 4 },
             new WeaponDef { id = "emberBlade", kind = WeaponKind.Sword, tier = 6, damage = 30, reach = 2, cooldown = 0.13f, price = 18000, rank = 3, fx = SpecialFx.Burn, size = 1.35f },
-            new WeaponDef { id = "frostEdge", kind = WeaponKind.Sword, tier = 6, damage = 44, reach = 2, cooldown = 0.12f, price = 36000, rank = 7, fx = SpecialFx.Freeze, size = 1.5f },
+            new WeaponDef { id = "frostEdge", kind = WeaponKind.Sword, tier = 6, damage = 42, reach = 2, cooldown = 0.12f, price = 30000, rank = 6, fx = SpecialFx.Freeze, size = 1.5f }, // the first lieutenant's
+            new WeaponDef { id = "colonelBlade", kind = WeaponKind.Sword, tier = 6, damage = 50, reach = 2, cooldown = 0.12f, price = 46000, rank = 9, fx = SpecialFx.Freeze, size = 1.6f }, // the lieutenant colonel's
             new WeaponDef { id = "kingsBlade", kind = WeaponKind.Sword, tier = 6, damage = 60, reach = 2, cooldown = 0.12f, price = 60000, rank = 12, fx = SpecialFx.Cleave, size = 1.7f },
             new WeaponDef { id = "lavaAxe", kind = WeaponKind.Axe, tier = 6, damage = 38, reach = 2, cooldown = 0.28f, price = 18000, rank = 3, fx = SpecialFx.Burn, size = 1.35f },
             new WeaponDef { id = "quakeMace", kind = WeaponKind.Mace, tier = 6, damage = 54, reach = 2, cooldown = 0.3f, price = 36000, rank = 7, fx = SpecialFx.Quake, size = 1.5f },

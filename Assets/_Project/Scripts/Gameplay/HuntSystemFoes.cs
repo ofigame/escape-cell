@@ -117,7 +117,7 @@ namespace SquashBot.Gameplay
                 {
                     if (!running) return;
                     fx.Burst(to + Vector3.up * 0.3f, ChargeColour, new Color(2.6f, 0.5f, 0.3f), 10, 3f);
-                    if (robot.Position == target) Hit?.Invoke(target, share);
+                    if (robot.Position == target) { BlowFrom = from; Hit?.Invoke(target, share); }
                 });
                 return true;
             }

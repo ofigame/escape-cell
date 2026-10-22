@@ -234,6 +234,9 @@ namespace SquashBot.Data
             X("back.cape.royal", Slot.Back, new Color(0.45f, 0.2f, 0.62f)),
             X("back.cape.flame", Slot.Back, new Color(0.95f, 0.38f, 0.12f)),
             X("back.cape.frost", Slot.Back, new Color(0.55f, 0.82f, 1f)),
+            // ...two capes made as models, sold in the workshop: a plain blue one and a dark blue one with a torn hem...
+            C("back.cape.basic", Slot.Back, 2500, 0, new Color(0.15f, 0.45f, 0.75f)),
+            C("back.cape.mid", Slot.Back, 7500, 0, new Color(0.18f, 0.16f, 0.5f)),
             // ...and the ranks' own capes and hats: earned in the challenge, never sold.
             K("back.cape.rank3", Slot.Back, 3, new Color(0.18f, 0.42f, 0.22f)),
             K("back.cape.rank6", Slot.Back, 6, new Color(0.18f, 0.42f, 0.22f)),

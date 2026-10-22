@@ -131,6 +131,12 @@ namespace SquashBot.Gameplay
 
         /// <summary>The robot was hit on a tile, taking this share of its health.</summary>
         public event Action<GridPos, float> Hit;
+
+        /// <summary>Where the blow now landing on foi came from (for its shield).</summary>
+        public Vector3 BlowFrom { get; private set; }
+
+        /// <summary>Set by the game when foi's shield took the blow just now (the rival gains nothing from it).</summary>
+        public bool BlowBlocked { get; set; }
         public event Action MonsterAppeared;
         public event Action MonsterDefeated;
         /// <summary>A bug or robot was finished (its tile), for coins and combos.</summary>
@@ -1158,7 +1164,7 @@ namespace SquashBot.Gameplay
                     AudioManager.PlaySfx(Sfx.Impact, g.brute ? 1f : 0.7f, g.brute ? 0.55f : 0.8f);
                     rig.Shake(g.brute ? 0.8f : 0.3f);
                     if (g.atWall) { if (PlayerAway) AwayHit?.Invoke(ShareOf(g)); }
-                    else if (!shot && g.area.Contains(robot.Position)) { Hit?.Invoke(robot.Position, ShareOf(g)); if (g == challengeFoe) FoiStruckByFoe?.Invoke(); }
+                    else if (!shot && g.area.Contains(robot.Position)) { BlowFrom = g.root.position; BlowBlocked = false; Hit?.Invoke(robot.Position, ShareOf(g)); if (g == challengeFoe && !BlowBlocked) FoiStruckByFoe?.Invoke(); }
                     g.atWall = false;
                     if (CompanionTile.HasValue && g.area.Contains(CompanionTile.Value)) CompanionHurt?.Invoke(g.brute ? 3 : 2);
                     HurtAllies(g, g.area);
@@ -1383,7 +1389,7 @@ namespace SquashBot.Gameplay
                 fx.Dust(At(monsterPos), new Color(0.55f, 0.5f, 0.45f), 22, 4f);
                 AudioManager.PlaySfx(Sfx.Impact, 1f, 0.5f);
                 rig.Shake(0.6f);
-                if (Chebyshev(robot.Position, monsterPos) <= 1) Hit?.Invoke(robot.Position, MonsterHitShare);
+                if (Chebyshev(robot.Position, monsterPos) <= 1) { BlowFrom = At(monsterPos); Hit?.Invoke(robot.Position, MonsterHitShare); }
                 if (CompanionTile.HasValue && Chebyshev(CompanionTile.Value, monsterPos) <= 1) CompanionHurt?.Invoke(2);
                 monsterTimer = Mathf.Min(monsterTimer, 0.35f); // and straight into an attack
                 return;
@@ -1406,7 +1412,7 @@ namespace SquashBot.Gameplay
                 if (specialKind >= 0) LandSpecial();
                 rig.Shake(attackIsRock ? 0.4f : 0.7f);
                 AudioManager.PlaySfx(Sfx.Impact, 1f, attackIsRock ? 1f : 0.6f);
-                if (attackTiles.Contains(robot.Position)) Hit?.Invoke(robot.Position, MonsterHitShare);
+                if (attackTiles.Contains(robot.Position)) { BlowFrom = At(monsterPos); Hit?.Invoke(robot.Position, MonsterHitShare); }
                 if (CompanionTile.HasValue && attackTiles.Contains(CompanionTile.Value)) CompanionHurt?.Invoke(2);
                 attackTiles.Clear();
                 // A combo: the next blow follows almost at once.

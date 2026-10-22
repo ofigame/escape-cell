@@ -30,6 +30,7 @@ namespace SquashBot.UI
             holder.localRotation = Quaternion.Euler(0f, 0f, -42f);
             model.localPosition = new Vector3(0f, -length * 0.5f, 0f);
             cam.orthographicSize = length * 0.46f;
+            if (GearFiles.HasWeapon(w.id)) cam.orthographicSize = Centre(holder, model) * 0.5f;
             cam.targetTexture = rt;
             cam.Render();
             cam.targetTexture = null;
@@ -91,13 +92,32 @@ namespace SquashBot.UI
                     }
                     else CosmeticModels.Hat(piece, c.id, c.color);
                     break;
-                case Slot.Back: CosmeticModels.Back(piece, c.id, c.color); break;
+                case Slot.Back:
+                    if (c.id.StartsWith("back.cape"))
+                    {
+                        // a cape as it is worn: foi seen from behind, the cape hanging on it
+                        var look = new GameObject("Foi").transform;
+                        look.SetParent(piece, false);
+                        SkinnedHero.Build(look);
+                        var body = look.GetComponentInChildren<SkinnedHero>().transform;
+                        SkinnedHero.Dress(body, new SkinnedHero.Look { head = 1 });
+                        SoftCape.Build(body, c.id, c.color).Settle();
+                        // the cape alone in the picture (foi only holds it up)
+                        foreach (var r in look.GetComponentsInChildren<Renderer>(true))
+                        {
+                            bool cape = false;
+                            for (var p = r.transform; p != null && p != look; p = p.parent) if (p.name == "Hero_Cape" || p.name == "Fittings") { cape = true; break; }
+                            if (!cape) r.enabled = false;
+                        }
+                    }
+                    else CosmeticModels.Back(piece, c.id, c.color);
+                    break;
                 case Slot.Head: { var h = Resources.Load<GameObject>("Heroes/Foi/head_" + c.id.Replace("head.", "")); if (h != null) { var made = Object.Instantiate(h, piece, false); foreach (var r in made.GetComponentsInChildren<Renderer>()) r.sharedMaterial = SkinnedHero.HeadMaterial(int.Parse(c.id.Replace("head.", ""))); } break; } // (its own picture)
                 default: GearModels.Picture(piece, c.id, c.color); break; // arm and leg gear, as foi wears it
             }
-            holder.localRotation = Quaternion.Euler(c.slot == Slot.Head ? 0f : 10f, c.slot == Slot.Back ? 330f : c.slot == Slot.Head ? 180f : 200f, 0f);
+            holder.localRotation = Quaternion.Euler(c.slot == Slot.Head ? 0f : 10f, c.slot == Slot.Back ? (c.id.StartsWith("back.cape") ? 20f : 330f) : c.slot == Slot.Head ? 180f : 200f, 0f); // (a cape: foi from behind)
             // Framed on what was built: its middle in the middle of the picture, all of it in view.
-            var renderers = holder.GetComponentsInChildren<Renderer>();
+            var renderers = System.Array.FindAll(holder.GetComponentsInChildren<Renderer>(), r => r.enabled); // (what shows)
             if (renderers.Length > 0)
             {
                 var b = renderers[0].bounds;
@@ -157,10 +177,46 @@ namespace SquashBot.UI
             model.localPosition = w.kind == WeaponKind.Gun ? new Vector3(0f, -0.02f, -0.12f) : new Vector3(0f, -length * 0.5f, 0f);
             if (w.kind == WeaponKind.Gun) model.localScale *= 1.15f;
             l.size = length * (w.kind == WeaponKind.Gun ? 0.6f : 0.5f);
+            if (GearFiles.HasWeapon(w.id)) l.size = Centre(l.holder, model) * 0.55f; // (a model: framed on itself)
             live[w.id] = l;
             liveOrder.Add(l);
             Draw(l);
             return l.rt;
+        }
+
+        /// <summary>A shield's picture turning round (as <see cref="Spinning"/>), for as long as a card shows it.</summary>
+        public static Texture SpinningShield(ShieldDef s)
+        {
+            Setup();
+            if (live.TryGetValue(s.id, out var l) && l.rt != null && l.holder != null)
+            {
+                if (!l.rt.IsCreated()) { l.rt.Create(); Draw(l); }
+                l.users++;
+                return l.rt;
+            }
+            l = new Live { id = s.id, users = 1, phase = liveSlot * 47f };
+            l.rt = new RenderTexture(384, 384, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4, name = "Spin " + s.id };
+            l.rt.Create();
+            l.holder = new GameObject("Spin " + s.id).transform;
+            l.holder.SetParent(stage, false);
+            l.holder.localPosition = new Vector3(10f + 6f * (liveSlot++ % 64), 0f, 0f);
+            GearFiles.Shield(l.holder, s.model, 0.8f, s.chest ? 0.15f : 0f);
+            l.size = 0.5f;
+            live[s.id] = l;
+            liveOrder.Add(l);
+            Draw(l);
+            return l.rt;
+        }
+
+        /// <summary>Moves <paramref name="model"/> so its middle is at <paramref name="holder"/>'s centre; returns its longest side.</summary>
+        private static float Centre(Transform holder, Transform model)
+        {
+            var rs = model.GetComponentsInChildren<Renderer>(true);
+            if (rs.Length == 0) return 1f;
+            var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
+            model.position += holder.position - b.center;
+            float k = Mathf.Max(1e-4f, holder.lossyScale.y);
+            return Mathf.Max(b.size.x, Mathf.Max(b.size.y, b.size.z)) / k;
         }
 
         /// <summary>A card showing a turning picture is gone: its turntable goes when no card shows it.</summary>

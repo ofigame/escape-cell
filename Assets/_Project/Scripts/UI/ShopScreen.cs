@@ -75,8 +75,11 @@ namespace SquashBot.UI
                 tabFaces[t] = (Image)b.targetGraphic;
             }
 
+            // The weapons' kinds as chips under the tabs: fixed (they stay while the cards scroll under them).
+            chipBar = UiFactory.Rect("Chips", root, new Vector2(0f, 1f), Vector2.one, new Vector2(16f, -200f - TabBarH - ChipBarH), new Vector2(-16f, -200f - TabBarH));
+
             // The grid of cards below scrolls.
-            var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(0f, Monetization.Ads.BannerReserve), new Vector2(0f, -200f - TabBarH));
+            var viewport = this.viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(0f, Monetization.Ads.BannerReserve), new Vector2(0f, -200f - TabBarH));
             viewport.gameObject.AddComponent<RectMask2D>();
             UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
@@ -91,6 +94,9 @@ namespace SquashBot.UI
 
             bip = BipTip.Create(root);
         }
+
+        private RectTransform chipBar, viewport;
+        private const float ChipBarH = 108f;
 
         private void SetTab(Tab t)
         {
@@ -109,11 +115,15 @@ namespace SquashBot.UI
             cells = 0;
             foreach (var kv in tabFaces) kv.Value.color = kv.Key == tab ? UiFactory.CyanStyle.face : UiFactory.PurpleStyle.face;
 
+            bool chips = tab == Tab.Weapons;
+            chipBar.gameObject.SetActive(chips);
+            viewport.offsetMax = new Vector2(0f, -200f - TabBarH - (chips ? ChipBarH : 0f));
             switch (tab)
             {
                 case Tab.Weapons:
-                    // The weapons by kind: guns, swords, axes and maces, spears, hammers (chips across the top).
+                    // The weapons by kind: guns, swords, axes and maces, spears, hammers, and the shields (chips above).
                     WeaponChips();
+                    if (weaponCat == ShieldsCat) { foreach (var s in Shields.All) if (!s.chest || Shields.Owned(s)) ShieldCell(s); break; }
                     if (weaponCat == 0) { PackCell(); BombCell(); KindBombCell(BombKind.Ice); KindBombCell(BombKind.Fire); }
                     // Weakest first, strongest last (by the damage of a blow, a burst counted whole).
                     var shelf = Armory.All.FindAll(x => Armory.Category(x) == weaponCat && (!x.chest || Armory.Owned(x))); // chest weapons only once won
@@ -140,7 +150,7 @@ namespace SquashBot.UI
                     break;
             }
             int rows = (cells + 1) / 2;
-            content.sizeDelta = new Vector2(0f, rows * (CellH + Gap) + (tab == Tab.Weapons ? 180f : 60f));
+            content.sizeDelta = new Vector2(0f, rows * (CellH + Gap) + 60f);
         }
 
         // ---------- Cards ----------
@@ -150,7 +160,7 @@ namespace SquashBot.UI
         {
             int i = cells++;
             float x = (i % 2 == 0 ? -1f : 1f) * (CellW + Gap) * 0.5f;
-            float y = -(tab == Tab.Weapons ? 150f : 30f) - (i / 2) * (CellH + Gap);
+            float y = -30f - (i / 2) * (CellH + Gap);
             var card = UiFactory.Card(name, content, new Vector2(0.5f, 1f), new Vector2(x, y), new Vector2(CellW, CellH));
             card.pivot = new Vector2(0.5f, 1f);
             // The picture sits on a soft glow of the item's colour.
@@ -227,17 +237,20 @@ namespace SquashBot.UI
 
         private void Pop(RectTransform card) => card.localScale = Vector3.one * 1.05f;
 
-        /// <summary>The weapons shelf's kind (0 guns, 1 swords, 2 axes and maces, 3 spears, 4 hammers).</summary>
+        /// <summary>The weapons shelf's kind (0 guns, 1 swords, 2 axes and maces, 3 spears, 4 hammers, 5 shields).</summary>
         private int weaponCat = 1;
+        private const int ShieldsCat = Armory.Categories;
 
         /// <summary>The chips across the top of the weapons shelf, one per kind (the open one lit).</summary>
         private void WeaponChips()
         {
-            float w = 196f, gap = 12f, x0 = -(Armory.Categories - 1) * (w + gap) * 0.5f;
-            for (int c = 0; c < Armory.Categories; c++)
+            for (int i = chipBar.childCount - 1; i >= 0; i--) Destroy(chipBar.GetChild(i).gameObject);
+            int count = Armory.Categories + 1; // (and the shields)
+            float w = 162f, gap = 10f, x0 = -(count - 1) * (w + gap) * 0.5f;
+            for (int c = 0; c < count; c++)
             {
                 int cat = c;
-                var b = UiFactory.MakeButton(content, Loc.T("ws.cat." + c), Kind.Secondary, new Vector2(0.5f, 1f), new Vector2(x0 + c * (w + gap), -70f), new Vector2(w, 86f), () =>
+                var b = UiFactory.MakeButton(chipBar, Loc.T("ws.cat." + c), Kind.Secondary, new Vector2(0.5f, 0.5f), new Vector2(x0 + c * (w + gap), 0f), new Vector2(w, 86f), () =>
                 {
                     if (weaponCat == cat) return;
                     AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.2f);
@@ -250,6 +263,54 @@ namespace SquashBot.UI
                 b.targetGraphic.color = c == weaponCat ? UiFactory.CyanStyle.face : UiFactory.PurpleStyle.face;
             }
         }
+
+        /// <summary>A shield: its picture turning, how soon it is ready again and how wide it covers; buy it, carry it,
+        /// or (the golden ones) where it comes from.</summary>
+        private void ShieldCell(ShieldDef s)
+        {
+            var card = Cell(s.id, s.chest ? new Color(1f, 0.8f, 0.3f) : new Color(0.6f, 0.8f, 1f), out var picture);
+            var image = picture.gameObject.AddComponent<RawImage>();
+            image.texture = ItemPreview.SpinningShield(s);
+            picture.gameObject.AddComponent<ItemPreview.Lease>().id = s.id;
+            image.raycastTarget = false;
+            CardName(card, Loc.T(s.id));
+            var desc = CardDesc(card);
+            var buy = BuyButton(card, () =>
+            {
+                if (Shields.Owned(s)) { Shields.Equip(s); AudioManager.PlaySfx(Sfx.Click, 0.7f, 1.2f); ShieldChanged?.Invoke(); }
+                else if (Shields.TryBuy(s))
+                {
+                    AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
+                    Haptics.Medium();
+                    Pop(card);
+                    Purchased?.Invoke();
+                    ShieldChanged?.Invoke();
+                }
+                else { AudioManager.PlaySfx(Sfx.Bump, 0.6f); if (!s.chest) WorkshopTalk.Poor(bip); }
+                Refresh();
+            });
+            var label = buy.GetComponentInChildren<TextMeshProUGUI>();
+            refreshers.Add(() =>
+            {
+                bool owned = Shields.Owned(s), carried = owned && Shields.Equipped == s;
+                desc.text = (s.chest ? "<color=#FFD25A>" + Loc.T("chests.exclusive") + "</color>\n" : "") + Loc.F("shield.line", s.recharge.ToString("0.#"), Mathf.RoundToInt(s.arc * 2f));
+                if (owned)
+                {
+                    label.text = Loc.T(carried ? "weapon.equipped" : "weapon.equip");
+                    buy.interactable = !carried;
+                    buy.targetGraphic.color = carried ? UiFactory.GreenStyle.face : UiFactory.CyanStyle.face;
+                }
+                else
+                {
+                    label.text = s.chest ? Loc.T("shield.fromChest") : s.price.ToString();
+                    Afford(buy, !s.chest, SaveData.Coins >= s.price);
+                    buy.interactable = !s.chest;
+                }
+            });
+        }
+
+        /// <summary>The shield carried changed (foi wears the new one).</summary>
+        public event System.Action ShieldChanged;
 
         /// <summary>A weapon: its picture, how it hits, buy it (opens at its level) or take it in hand.</summary>
         private void WeaponCell(WeaponDef w)

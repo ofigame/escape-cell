@@ -294,7 +294,7 @@ namespace SquashBot.Gameplay
             ui.DailyBonus.AdPressed += WatchAdForDailyBonus;
             ui.Garage.PreviewChanged += outfit => robot.ApplyOutfit(outfit);
             ui.Garage.DancePreview += robot.Cheer;
-            ui.DuelChestsView.OutfitWorn += () => robot.ApplyOutfit(Cosmetics.Outfit());
+            ui.DuelChestsView.OutfitWorn += () => { robot.ApplyOutfit(Cosmetics.Outfit()); if (lobby != null) { Destroy(lobby.gameObject); lobby = null; } }; // (the menu's foi wears it when it opens again)
             ui.SkillBar.Pressed += OnSkillPressed;
             ui.NextPressed += () =>
             {
@@ -327,6 +327,7 @@ namespace SquashBot.Gameplay
             ui.AdHealPressed += OnAdHealPressed;
             ui.HeroPicker.Picked += OnHeroPicked;
             ui.HeroPicker.HeadPicked += _ => { robot.ApplyOutfit(Cosmetics.Outfit()); if (lobby != null) { Destroy(lobby.gameObject); lobby = null; } if (State == GameState.Menu) ShowMenu(); };
+            ui.Shop.ShieldChanged += () => { robot.ApplyOutfit(Cosmetics.Outfit()); if (lobby != null) { Destroy(lobby.gameObject); lobby = null; } }; // (the menu's foi carries the new shield when it opens again)
             ui.WeaponBag.Picked += TakeWeapon;
             ui.WeaponBag.Dropped += DropWeaponGun;
             ui.AmmoPressed += BuyAmmo;
@@ -383,6 +384,7 @@ namespace SquashBot.Gameplay
 
         private void ResetRun()
         {
+            duelCountdown = false;
             ClearHuntDress();
             if (hunt != null) hunt.Unsafe = null; // (the duel's closing ring)
             StopAllCoroutines();
@@ -700,7 +702,7 @@ namespace SquashBot.Gameplay
 
         private void StartLevel(int index, List<Boost> boosts = null)
         {
-            robot.SetSize(challengeRun || arenaRun ? 1f : 1.2f); // foi a fifth bigger on the floors
+            robot.SetSize(arenaRun ? 1f : 1.2f); // foi a fifth bigger on the floors and in the duels
             // A new floor opens with its story scene (once; the map banner replays it).
             int floor = LevelCatalog.WorldOf(index);
             if (index % LevelCatalog.LevelsPerWorld == 0 && !Story.Seen(floor))
@@ -724,6 +726,7 @@ namespace SquashBot.Gameplay
             dailyRun = false;
             levelIndex = Mathf.Clamp(index, 0, LevelCount - 1);
             Monster.CurrentWorld = World; // (the briefing's vanG as the floor's)
+            Shields.Ready(); // (a new floor: the shield ready)
             level = levelSet.levels[levelIndex].Clone();
             bool assisted = ApplyAssist(level);
             Toughen(level);
@@ -1485,8 +1488,10 @@ namespace SquashBot.Gameplay
             ui.SetTpsSwitch(!arenaRun && (!challengeRun || DuelTps) && level.mission == MissionType.Hunt && roadPhase == RoadPhase.None, tpsOn);
             var command = ArenaActive ? default(InputCommand) : tpsOn ? TpsCommand() : input.Poll(robot.transform.position);
             command = GlassCellGate(command); // foi starts each floor in its glass cell
+            bool onMark = duelCountdown || (challengeRun && chPhase == ChPhase.Lobby); // the duel's briefing and its 3, 2, 1: foi stands on its mark
+            if (onMark) command = default;
             UpdateHover(command);
-            if (!hovering)
+            if (!hovering && !onMark)
             {
                 if (!tpsOn && !ArenaActive && level.mission == MissionType.Hunt && InputReader.AttackKey()) KeyStrike(); // computers: space strikes
                 if (command.spin) SpinAttack();
@@ -1726,6 +1731,8 @@ namespace SquashBot.Gameplay
                     FloatAt(GridView.ToWorld(p), broke ? Loc.T("float.shieldBroke") : robot.ShieldHits < Shop.ShieldHits ? Loc.F("float.shieldCrack", robot.ShieldHits) : Loc.T("float.blocked"), broke ? Palette.UiRed : Palette.UiCyan);
                     return;
                 }
+                // an enemy's blow from the front, the shield in hand ready: it lands on the shield
+                if (hitShareOverride >= 0f && level.mission == MissionType.Hunt && ShieldTakes(hunt.BlowFrom)) { hunt.BlowBlocked = true; return; }
 
                 if (TryRescue(p, crushed: true)) return;
 

@@ -649,7 +649,7 @@ namespace SquashBot.UI
             // CHALLENGE beside PLAY, the same size, in the challenge's purple.
             var challenge = UiFactory.MakeButton(card, Loc.T("ch.button"), Kind.Primary, Bottom, new Vector2(225f, 30f), new Vector2(430f, 150f), () => ChallengePressed?.Invoke(), 60f);
             ((RectTransform)challenge.transform).sizeDelta = new Vector2(432f, 146f);
-            MenuSkin.Face(challenge, "btn_purple", new Color(0.25f, 0.05f, 0.3f));
+            MenuSkin.Face(challenge, "btn_purple", new Color(0.36f, 0.15f, 0.02f)); // (orange now)
 
             // The dock: garage, shop, map and the guide, as gold-ringed orbs on a framed navy bar.
             var dock = UiFactory.Box("Dock", t, Bottom, new Vector2(0f, Ads.BannerReserve + 14f), new Vector2(1000f, 206f));

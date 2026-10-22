@@ -134,6 +134,7 @@ namespace SquashBot.Gameplay
         {
             hunt.RemoveChallengeFoe();
             health = 1f;
+            Shields.Ready(); // (each round: the shield ready)
             RefreshHealthBar();
             var (mine, theirs) = DuelMarks;
             robot.Spawn(grid, mine);
@@ -255,19 +256,27 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>3, 2, 1 over the two foi on their marks (everything still), then the duel goes on.</summary>
+        /// <summary>The 3, 2, 1 is on: no moves, no blows.</summary>
+        private bool duelCountdown;
+
         private System.Collections.IEnumerator CountdownThenGo()
         {
             hunt.Freeze();
             chPhase = ChPhase.Break;
-            for (int i = 3; i >= 1; i--)
+            duelCountdown = true;
+            try
             {
-                if (!challengeRun || chPhase == ChPhase.Done) yield break;
-                chUi.SetStatus(i.ToString());
-                ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.6f), i.ToString(), Palette.UiGold, 220f);
-                AudioManager.PlaySfx(Sfx.Click, 1f, 0.8f + 0.1f * (3 - i));
-                yield return new WaitForSeconds(0.8f);
-                while (challengeRun && State == GameState.Paused) yield return null;
+                for (int i = 3; i >= 1; i--)
+                {
+                    if (!challengeRun || chPhase == ChPhase.Done) yield break;
+                    chUi.SetStatus(i.ToString());
+                    ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.6f), i.ToString(), Palette.UiGold, 220f);
+                    AudioManager.PlaySfx(Sfx.Click, 1f, 0.8f + 0.1f * (3 - i));
+                    yield return new WaitForSeconds(0.8f);
+                    while (challengeRun && State == GameState.Paused) yield return null;
+                }
             }
+            finally { duelCountdown = false; }
             if (!challengeRun || chPhase == ChPhase.Done || State != GameState.Playing) yield break;
             hunt.Resume();
             chPhase = ChPhase.Duel;

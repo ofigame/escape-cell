@@ -342,7 +342,7 @@ namespace SquashBot.UI
 
         public static readonly ChunkyStyle CyanStyle = new ChunkyStyle("#22C3FF", "#22C3FF", "#05304E");
         public static readonly ChunkyStyle GoldStyle = new ChunkyStyle("#FFB424", "#FFA51A", "#5C3200");
-        public static readonly ChunkyStyle PurpleStyle = new ChunkyStyle("#A63CE0", "#C060F2", "#34084C"); // (the new look: glossy purple)
+        public static readonly ChunkyStyle PurpleStyle = new ChunkyStyle("#F08A1C", "#FFA23A", "#5A2A04"); // (the new look's second colour: glossy orange)
         public static readonly ChunkyStyle GreenStyle = new ChunkyStyle("#2FD07A", "#2FD07A", "#073A1E");
         public static readonly ChunkyStyle RedStyle = new ChunkyStyle("#FF4F6A", "#FF4F6A", "#4E0A16");
         public static readonly ChunkyStyle DarkStyle = new ChunkyStyle("#2C78D8", "#3E8CF0", "#0A2250"); // (glossy blue)

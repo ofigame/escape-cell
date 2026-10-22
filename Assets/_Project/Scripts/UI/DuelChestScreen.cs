@@ -112,8 +112,10 @@ namespace SquashBot.UI
         /// <summary>EQUIP: the weapon that came out goes straight into foi's hand (a gun into the gun slot).</summary>
         private void Equip()
         {
+            var wonShield = shown != null ? shown.shield : null;
             DuelChests.Give(shown); // (owned first, then worn)
             shown = null;
+            if (wonShield != null) { Shields.Equip(wonShield); OutfitWorn?.Invoke(); }
             if (gifted != null) Armory.Equip(gifted);
             if (giftedOutfit != null) { Cosmetics.Equip(giftedOutfit); OutfitWorn?.Invoke(); }
             Take();
@@ -121,6 +123,7 @@ namespace SquashBot.UI
 
         public void Show()
         {
+            if (!busy && DuelChests.GivePending()) Changed?.Invoke(); // (a gift left when the game closed during a reveal)
             for (int i = 0; i < DuelChests.Tiers; i++) pictures[i].texture = ChestStage.Thumbnail((ChestTier)i);
             Refresh();
             screen.Show();
@@ -198,10 +201,15 @@ namespace SquashBot.UI
                     openGift.text = Loc.T("cos." + reward.outfit.id);
                     openNote.text = reward.outfit.chest ? Loc.T("chests.outfitExclusive") : Loc.T("chests.outfit");
                 }
+                else if (reward.shield != null)
+                {
+                    openGift.text = Loc.T(reward.shield.id);
+                    openNote.text = Loc.T("chests.exclusive");
+                }
                 else openGift.text = Loc.F("chests.gold", reward.gold);
                 // A weapon: EQUIP on the left, TAKE THE GIFT on the right; gold: TAKE THE GIFT alone, in the middle.
                 var take = (RectTransform)takeButton.transform;
-                bool wearable = gifted != null || giftedOutfit != null;
+                bool wearable = gifted != null || giftedOutfit != null || reward.shield != null;
                 take.anchoredPosition = new Vector2(wearable ? 180f : 0f, take.anchoredPosition.y);
                 take.sizeDelta = new Vector2(wearable ? 340f : 600f, 130f);
                 equipButton.gameObject.SetActive(wearable);

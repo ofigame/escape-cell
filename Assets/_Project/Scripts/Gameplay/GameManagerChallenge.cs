@@ -370,6 +370,7 @@ namespace SquashBot.Gameplay
             arenaRun = false;
             trailRun = false;
             dailyRun = false;
+            robot.SetSize(1.2f); // foi a fifth bigger in the duels too
             BeginRun();
             ui.SetChallengeHud(true);
             ui.SkillBar.Refresh(false);
@@ -433,8 +434,9 @@ namespace SquashBot.Gameplay
             root.localScale = robot.Visual.lossyScale; // foi's own size
             // Not foi's weapon: the rival's.
             var drop = new System.Collections.Generic.List<GameObject>();
-            foreach (Transform c in copy.GetComponentsInChildren<Transform>(true)) if (c.name == "HeldWeapon") drop.Add(c.gameObject);
+            foreach (Transform c in copy.GetComponentsInChildren<Transform>(true)) if (c.name == "HeldWeapon" || c.name == "HeldShield") drop.Add(c.gameObject); // (not foi's shield either)
             foreach (var g in drop) DestroyImmediate(g);
+            foreach (var sh in copy.GetComponentsInChildren<ShieldHold>(true)) DestroyImmediate(sh); // (the rival carries no shield of foi's)
             rivalHeld = HeldWeapon.Attach(copy, Armory.Get(rival.weapon));
             return root;
         }

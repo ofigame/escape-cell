@@ -13,6 +13,7 @@ namespace SquashBot.Data
         public int gold;
         public WeaponDef weapon;
         public Cosmetic outfit;
+        public ShieldDef shield;
     }
 
     /// <summary>
@@ -80,8 +81,9 @@ namespace SquashBot.Data
         {
             if (Count(t) <= 0) return null;
             SetCount(t, Count(t) - 1);
-            Prefs.Save();
-            return Roll(t);
+            var r = Roll(t);
+            Hold(r);
+            return r;
         }
 
         /// <summary>A second draw from the same chest (after an ad), never the same thing again.</summary>
@@ -91,17 +93,45 @@ namespace SquashBot.Data
             for (int i = 0; i < 8; i++)
             {
                 r = Roll(t);
-                bool same = was != null && (r.weapon != null ? r.weapon == was.weapon : r.outfit != null ? r.outfit == was.outfit : was.weapon == null && was.outfit == null);
+                bool same = was != null && (r.weapon != null ? r.weapon == was.weapon : r.outfit != null ? r.outfit == was.outfit : r.shield != null ? r.shield == was.shield : was.weapon == null && was.outfit == null && was.shield == null);
                 if (!same) break;
             }
+            Hold(r);
             return r;
+        }
+
+        // What came out and is not given yet is kept on the phone: if the game closes while it is shown (or while an ad
+        // swaps it), it is given the next time (the chest was already spent).
+        private const string PendingKey = "sb_dchest_pending";
+
+        private static void Hold(ChestReward r)
+        {
+            Prefs.SetString(PendingKey, r == null ? "" : r.weapon != null ? "w:" + r.weapon.id : r.shield != null ? "s:" + r.shield.id : r.outfit != null ? "o:" + r.outfit.id : "g:" + r.gold);
+            Prefs.Save();
+        }
+
+        /// <summary>A gift left from a chest opened when the game closed: given now (true if there was one).</summary>
+        public static bool GivePending()
+        {
+            string p = Prefs.GetString(PendingKey, "");
+            if (p.Length < 3) return false;
+            string v = p.Substring(2);
+            var r = new ChestReward();
+            if (p[0] == 'w') r.weapon = Armory.Get(v);
+            else if (p[0] == 's') r.shield = Shields.Get(v);
+            else if (p[0] == 'o') r.outfit = Cosmetics.Find(v);
+            else int.TryParse(v, out r.gold);
+            Give(r);
+            return true;
         }
 
         /// <summary>Gives what came out to the player.</summary>
         public static void Give(ChestReward r)
         {
-            if (r == null) return;
+            Prefs.SetString(PendingKey, "");
+            if (r == null) { Prefs.Save(); return; }
             if (r.weapon != null) Armory.Grant(r.weapon);
+            else if (r.shield != null) Shields.Grant(r.shield);
             else if (r.outfit != null) Cosmetics.Give(r.outfit.id);
             else SaveData.Coins += r.gold;
             Prefs.Save();
@@ -110,6 +140,12 @@ namespace SquashBot.Data
         private static ChestReward Roll(ChestTier t)
         {
             // A surprise outfit first: the chests' own ones, or a suit from the workshop not owned yet.
+            // the golden chest's own shields, now and then
+            if (t == ChestTier.Advanced && UnityEngine.Random.value < 0.12f)
+            {
+                var left = Shields.ChestLeft();
+                if (left.Count > 0) return new ChestReward { shield = left[UnityEngine.Random.Range(0, left.Count)] };
+            }
             float suitChance = t == ChestTier.Advanced ? 0.22f : t == ChestTier.Mid ? 0.1f : 0.03f;
             if (UnityEngine.Random.value < suitChance)
             {
