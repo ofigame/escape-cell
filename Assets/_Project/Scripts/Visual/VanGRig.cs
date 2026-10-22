@@ -17,7 +17,7 @@ namespace SquashBot.Visual
         /// <summary>Each model's turn so it faces +Z.</summary>
         public static float[] Yaw = { 0f, 0f, 0f, 0f };
 
-        private const float Height = 2.1f; // (in the monster's body: about 3 tall in the world, well over foi on the floors)
+        private const float Height = 2.8f; // (in the monster's body: about 4 tall in the world, more than twice foi)
 
         /// <summary>Builds vanG <paramref name="n"/> under <paramref name="parent"/>; null if its model is not there.</summary>
         public static VanGRig Build(Transform parent, int n, out Material paint)
