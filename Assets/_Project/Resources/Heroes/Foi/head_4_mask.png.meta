@@ -5,5 +5,6 @@ TextureImporter:
   mipmaps:
     sRGBTexture: 0
   isReadable: 1
+  textureCompression: 0
   textureType: 0
   maxTextureSize: 512

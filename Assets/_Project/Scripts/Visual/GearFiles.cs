@@ -58,7 +58,7 @@ namespace SquashBot.Visual
             string key = model + glow + twoSided;
             if (paints.TryGetValue(key, out var m) && m != null) return m;
             var tex = Resources.Load<Texture2D>("Gear/" + model + "_tex");
-            m = MaterialFactory.CreateSurface(Color.white, Color.black, 0.5f, 0.3f);
+            m = MaterialFactory.CreateSurface(Color.white, Color.black, 0.35f, 0.1f); // (its own picture shows: little metal sheen)
             if (tex != null)
             {
                 m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);

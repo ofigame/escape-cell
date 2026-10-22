@@ -80,7 +80,8 @@ namespace SquashBot.Visual
             if (raise < 1f) { raise = Mathf.Min(1f, raise + Time.deltaTime / 0.5f); k = Mathf.Sin(raise * Mathf.PI); }
             var carry = arm.position + ahead * reach * 0.3f - right * reach * 0.42f - up * reach * 0.72f; // (the arm down at the left side, a little forward)
             var guard = arm.position + ahead * reach * 0.75f + right * reach * 0.25f - up * reach * 0.1f;
-            Reach(arm, fore, hand, Vector3.Lerp(carry, guard, k));
+            var hero = GetComponent<SkinnedHero>();
+            if (hero == null || !hero.PlayingMove) Reach(arm, fore, hand, Vector3.Lerp(carry, guard, k)); // (a move playing: the arm is the move's, the shield goes with the hand)
             // the shield: its back on the hand (the grip), its face forward and out to the left
             var face = (ahead * (0.55f + 0.45f * k) - right * (0.85f - 0.7f * k)).normalized;
             holder.rotation = Quaternion.LookRotation(face, up);

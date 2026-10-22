@@ -283,16 +283,23 @@ namespace SquashBot.Visual
             Texture2D tex = baseTex;
             var mask = Resources.Load<Texture2D>(Folder + "head_" + n + "_mask");
             var info = InfoOf(n);
-            if (baseTex != null && mask != null && baseTex.isReadable && mask.isReadable) // (always: the skin is warmed up too)
+            (Color32[] px, Color32[] mk, int w, int mw) src = default;
+            bool canRead = baseTex != null && mask != null && baseTex.isReadable && mask.isReadable;
+            if (canRead && !pixels.TryGetValue(n, out src))
             {
-                if (!pixels.TryGetValue(n, out var src)) pixels[n] = src = (baseTex.GetPixels32(), mask.GetPixels32(), baseTex.width, mask.width);
-                int W = src.w / 2, mw = src.mw;
+                // (the pictures are imported uncompressed for this; a phone that still cannot read them keeps the head as made)
+                try { pixels[n] = src = (baseTex.GetPixels32(), mask.GetPixels32(), baseTex.width, mask.width); }
+                catch (System.Exception e) { Debug.LogWarning("[foi] head " + n + " not recoloured: " + e.Message); canRead = false; }
+            }
+            if (canRead && src.px != null && src.px.Length == src.w * src.w) // (always: the skin is warmed up too)
+            {
+                int W = src.w, mw = src.mw;
                 var px = new Color32[W * W];
                 var mk = new Color32[W * W];
                 for (int y = 0; y < W; y++)
                     for (int x = 0; x < W; x++)
                     {
-                        px[y * W + x] = src.px[(y * 2) * src.w + x * 2]; // (half size: plenty for a head on a phone)
+                        px[y * W + x] = src.px[y * src.w + x]; // (the picture is 1024: as it is)
                         mk[y * W + x] = src.mk[(y * mw / W) * mw + x * mw / W];
                     }
                 {
@@ -331,13 +338,7 @@ namespace SquashBot.Visual
                 while (recent.Count > 10)
                 {
                     var old = recent[0]; recent.RemoveAt(0);
-                    if (materials.TryGetValue(old, out var om) && om != null)
-                    {
-                        var ot = om.GetTexture("_BaseMap");
-                        Destroy(om);
-                        if (ot != null) Destroy(ot);
-                    }
-                    materials.Remove(old);
+                    materials.Remove(old); // (not destroyed: a head may still wear it; once none does, the game's sweeps free it)
                 }
             }
             return m;
@@ -710,6 +711,10 @@ namespace SquashBot.Visual
 
         private Transform armR, foreR, handR, fingerR;
         private Vector3 handRest, gripRest;
+        private Quaternion gripTurn = Quaternion.identity;
+
+        /// <summary>A move (a dance, the ultimate's combo) is playing: the arms are its own.</summary>
+        public bool PlayingMove => playing != null;
         private bool gripKnown;
         /// <summary>What the game hangs by the body to be held (a weapon, a hammer).</summary>
         private static readonly string[] HeldNames = { "HeldWeapon", "ArenaHammer", "HeldHammer" };
@@ -743,10 +748,20 @@ namespace SquashBot.Visual
             }
             if (weapon == null) return;
             weapon.parent.localPosition = gripRest; // each frame from its own place (the snap below must not add up)
-            Reach(armR, foreR, handR, weapon.position);
+            if (playing != null)
+            {
+                // a move plays: the arm is the move's; the weapon follows the hand (turned with it from how it rests)
+                weapon.parent.rotation = handR.rotation * gripTurn;
+            }
+            else
+            {
+                weapon.parent.localRotation = Quaternion.identity;
+                Reach(armR, foreR, handR, weapon.position);
+            }
             // then the weapon into the palm itself (between the wrist and the middle finger's root), so the fist closes on it
             var palm = fingerR != null ? Vector3.Lerp(handR.position, fingerR.position, 0.65f) : handR.position;
             weapon.parent.position += palm - weapon.position;
+            if (playing == null) gripTurn = Quaternion.Inverse(handR.rotation) * weapon.parent.rotation; // (how it sits in the hand at rest: a move keeps it so)
         }
 
         /// <summary>Two-joint reach: the elbow bends (on the side it already bends to) so the hand comes to the target.</summary>
