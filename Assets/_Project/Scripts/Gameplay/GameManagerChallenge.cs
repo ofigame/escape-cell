@@ -585,6 +585,13 @@ namespace SquashBot.Gameplay
             cameraRig.StartCoroutine(FoiNet.SendResult(id, won, draw, r => { if (r != null) Challenge.Sync(r.profile); }, left));
         }
 
+        /// <summary>A duel stage's own models and pictures (loaded for it) let go a frame after the stage went.</summary>
+        private IEnumerator FreeStage()
+        {
+            yield return null;
+            Resources.UnloadUnusedAssets();
+        }
+
         /// <summary>Leaving a challenge (the menu): the board and its screens go; a match the server knows of is lost.</summary>
         private void EndChallenge()
         {
@@ -597,6 +604,7 @@ namespace SquashBot.Gameplay
             challengeRun = false;
             chPhase = ChPhase.Off;
             ClearDuel();
+            cameraRig.StartCoroutine(FreeStage()); // (the stage's models and pictures out of memory once it is gone)
             if (robot != null && robot.Visual != null) robot.Visual.gameObject.SetActive(true);
             if (capesOff && robot != null) { capesOff = false; robot.ApplyOutfit(Cosmetics.Outfit()); } // (its cape back on: it was hung up for the duel)
             if (chUi != null) chUi.HideAll();
