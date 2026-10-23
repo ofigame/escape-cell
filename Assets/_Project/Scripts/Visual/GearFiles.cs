@@ -31,6 +31,24 @@ namespace SquashBot.Visual
             ["emeraldBlade"] = "altin_kasa_kilic_3",
         };
 
+        /// <summary>The swords whose model came hilt up (the grip must be at the bottom, in the hand): turned over.</summary>
+        private static readonly HashSet<string> hiltUp = new HashSet<string> { "emberBlade", "frostEdge", "colonelBlade", "nightBlade", "dawnBlade" };
+
+        /// <summary>The swords' own light, by what they are made of (none: alpha 0).</summary>
+        private static readonly Dictionary<string, Color> weaponLight = new Dictionary<string, Color>
+        {
+            ["emberBlade"] = new Color(1f, 0.55f, 0.2f),   // embers
+            ["frostEdge"] = new Color(0.55f, 0.85f, 1f),  // frost
+            ["colonelBlade"] = new Color(0.4f, 0.8f, 1f), // ice crystal
+            ["kingsBlade"] = new Color(1f, 0.45f, 0.2f),  // the marshal's red-gold
+            ["nightBlade"] = new Color(0.45f, 0.5f, 1f),  // night blue
+            ["dawnBlade"] = new Color(1f, 0.4f, 0.12f),   // fire
+            ["emeraldBlade"] = new Color(1f, 0.7f, 0.25f), // ember thorn
+        };
+
+        /// <summary>A weapon's own light colour (a = 0: none).</summary>
+        public static Color LightOf(string id) => weaponLight.TryGetValue(id, out var c) ? c : new Color(0f, 0f, 0f, 0f);
+
         /// <summary>Cape id → its model.</summary>
         private static readonly Dictionary<string, string> capes = new Dictionary<string, string>
         {
@@ -79,7 +97,7 @@ namespace SquashBot.Visual
         /// A model made upright: under a new root named <paramref name="name"/>, turned so its long side is up,
         /// <paramref name="height"/> tall; <paramref name="anchor"/> (0 its foot .. 1 its top) at the root's origin.
         /// </summary>
-        public static Transform Place(Transform parent, string name, string model, float height, float anchor, Material paint, bool turnUp = true)
+        public static Transform Place(Transform parent, string name, string model, float height, float anchor, Material paint, bool turnUp = true, bool flip = false)
         {
             var root = new GameObject(name).transform;
             root.SetParent(parent, false);
@@ -100,6 +118,7 @@ namespace SquashBot.Visual
             if (!turnUp) { if (s.z > s.y && s.z >= s.x * 0.5f) inner.localRotation = Quaternion.Euler(-90f, 0f, 0f) * inner.localRotation; } // (a cape: made upright, only the import's z-up undone)
             else if (s.z > s.y && s.z >= s.x) inner.localRotation = Quaternion.Euler(-90f, 0f, 0f) * inner.localRotation;
             else if (s.x > s.y && s.x > s.z) inner.localRotation = Quaternion.Euler(0f, 0f, 90f) * inner.localRotation;
+            if (flip) inner.localRotation = Quaternion.Euler(0f, 0f, 180f) * inner.localRotation; // (made the other way up)
             b = LocalBounds(root, inner);
             float k = height / Mathf.Max(1e-4f, b.size.y);
             inner.localScale *= k;
@@ -130,7 +149,38 @@ namespace SquashBot.Visual
         public static Transform Weapon(Transform parent, string id, float length, float glow)
         {
             string model = weapons[id];
-            return Place(parent, id, model, length, 0.12f, Paint(model, glow));
+            var lit = LightOf(id);
+            var paint = lit.a > 0f ? GlowPaint(model, lit) : Paint(model, glow);
+            var root = Place(parent, id, model, length, 0.12f, paint, true, hiltUp.Contains(id));
+            if (lit.a > 0f)
+            {
+                // its glow round the blade: a soft light of its own colour, and a breath in it
+                var l = new GameObject("BladeLight").AddComponent<Light>();
+                l.transform.SetParent(root, false);
+                l.transform.localPosition = new Vector3(0f, length * 0.55f, 0f);
+                l.type = LightType.Point; l.color = lit; l.range = length * 2.2f; l.intensity = 1.6f; l.shadows = LightShadows.None;
+                l.gameObject.AddComponent<BladeGlow>();
+            }
+            return root;
+        }
+
+        /// <summary>A glowing weapon's paint: its own picture, shining in its colour.</summary>
+        private static Material GlowPaint(string model, Color c)
+        {
+            string key = model + "glow" + c;
+            if (paints.TryGetValue(key, out var m) && m != null) return m;
+            var tex = Resources.Load<Texture2D>("Gear/" + model + "_tex");
+            m = MaterialFactory.CreateSurface(Color.white, Color.black, 0.45f, 0.15f);
+            if (tex != null)
+            {
+                m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
+                m.EnableKeyword("_EMISSION");
+                m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+                m.SetTexture("_EmissionMap", tex);
+                m.SetColor("_EmissionColor", Color.Lerp(Color.white, c, 0.6f) * 0.55f);
+            }
+            paints[key] = m;
+            return m;
         }
 
         /// <summary>A shield's model, <paramref name="height"/> tall, centred, facing +Z (out from the arm it is on).</summary>

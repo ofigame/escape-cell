@@ -597,6 +597,43 @@ namespace SquashBot.Visual
         private Quaternion bodyRot;
         private bool bodyKnown;
 
+        /// <summary>Where a blow lands on it: its head, or the middle of its chest (in the world).</summary>
+        public Vector3 HeadPoint => head != null ? head.position + Vector3.up * 0.15f * HeadSize : transform.position + Vector3.up * 1.3f;
+        public Vector3 ChestPoint => chest != null ? chest.position : transform.position + Vector3.up * 0.8f;
+        private float HeadSize => head != null ? Mathf.Max(0.2f, head.lossyScale.y) : 1f;
+
+        private Coroutine jolt;
+
+        /// <summary>A blow to the head: it snaps back (away from <paramref name="from"/>) and wobbles back to rest.</summary>
+        public void JoltHead(Vector3 from)
+        {
+            if (head == null || pop != null) return;
+            if (jolt != null) { StopCoroutine(jolt); if (headRestKnown) { head.localRotation = headRest; } }
+            jolt = StartCoroutine(Jolting(from));
+        }
+
+        private Quaternion headRest;
+        private bool headRestKnown;
+
+        private System.Collections.IEnumerator Jolting(Vector3 from)
+        {
+            if (!headRestKnown) { headRest = head.localRotation; headRestKnown = true; }
+            var away = head.position - from; away.y = 0f;
+            if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
+            var axis = Vector3.Cross(Vector3.up, away.normalized);
+            const float T = 0.45f;
+            for (float e = 0f; e < T; e += Time.deltaTime)
+            {
+                float k = e / T;
+                float a = 26f * Mathf.Sin(k * Mathf.PI * 2.5f) * (1f - k); // (snapped back, a wobble, still)
+                head.localRotation = headRest;
+                head.rotation = Quaternion.AngleAxis(a, axis) * head.rotation;
+                yield return null;
+            }
+            head.localRotation = headRest;
+            jolt = null;
+        }
+
         /// <summary>Whatever knock it was in, it stands again at once (in its own place, nothing thrown about).</summary>
         public void StandUp()
         {

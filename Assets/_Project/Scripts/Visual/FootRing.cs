@@ -11,9 +11,11 @@ namespace SquashBot.Visual
         private static Texture2D ringTex;
         private static Mesh quad;
         private Material mat;
+        /// <summary>How bright the ring is (clear, but never brighter than foi over it).</summary>
+        private const float Glow = 1.9f;
         private Color colour;
 
-        public static FootRing Make(Color colour, float size = 1.7f)
+        public static FootRing Make(Color colour, float size = 1.7f, bool lit = false)
         {
             var go = new GameObject("FootRing");
             go.transform.localScale = new Vector3(size, 1f, size);
@@ -21,13 +23,21 @@ namespace SquashBot.Visual
             r.colour = colour;
             r.mat = new Material(Weather.AddMaterial);
             r.mat.SetTexture("_BaseMap", Ring()); r.mat.SetTexture("_MainTex", Ring());
-            r.mat.SetColor("_BaseColor", colour * 2.8f);
+            r.mat.SetColor("_BaseColor", colour * Glow);
             r.mat.renderQueue = 3100; // (over the floor and the platforms' glow)
             go.AddComponent<MeshFilter>().sharedMesh = Quad();
             var mr = go.AddComponent<MeshRenderer>();
             mr.sharedMaterial = r.mat;
             mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             mr.receiveShadows = false;
+            if (lit)
+            {
+                // a soft white light over foi (over its head, a little in front): foi shines, never left dull by the ring
+                var l = new GameObject("FoiLight").AddComponent<Light>();
+                l.transform.SetParent(go.transform, false);
+                l.transform.localPosition = new Vector3(0f, 2.8f, 0f);
+                l.type = LightType.Point; l.color = new Color(1f, 0.97f, 0.92f); l.intensity = 1.5f; l.range = 4.5f; l.shadows = LightShadows.None;
+            }
             go.SetActive(false);
             return r;
         }
@@ -39,7 +49,7 @@ namespace SquashBot.Visual
             if (!gameObject.activeSelf) gameObject.SetActive(true);
             transform.position = at.Value + Vector3.up * 0.06f;
             float k = 0.85f + 0.15f * Mathf.Sin(Time.unscaledTime * 3f);
-            mat.SetColor("_BaseColor", colour * 2.8f * k);
+            mat.SetColor("_BaseColor", colour * Glow * k);
         }
 
         private void OnDestroy() { if (mat != null) Destroy(mat); }

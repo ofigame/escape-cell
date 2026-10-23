@@ -70,8 +70,8 @@ namespace SquashBot.Gameplay
             skillBar.Emoted += e => { ShowEmote(true, e); if (LiveActive) LiveNet.Emote(e); };
             skillBar.SetMeters(0f, 0f);
             DropRings();
-            myRing = FootRing.Make(new Color(0.25f, 0.6f, 1f), 3.3f); // (wider than foi with its cape and shield)
-            foeRing = FootRing.Make(new Color(1f, 0.25f, 0.2f), 3.3f);
+            myRing = FootRing.Make(new Color(0.25f, 0.6f, 1f), 2.75f, true); // (wider than foi with its cape and shield; a soft light over it)
+            foeRing = FootRing.Make(new Color(1f, 0.25f, 0.2f), 2.75f, true);
         }
 
         /// <summary>The glowing rings under the two foi: which one is the player's at a glance.</summary>
@@ -467,6 +467,14 @@ namespace SquashBot.Gameplay
             if (skin == null) return;
             var from = meStruck ? (hunt.ChallengeFoeAt ?? model.position) : robot.transform.position;
             float strength = Mathf.Clamp01(0.25f + 0.15f * Mathf.Max(0, inARow - 1));
+            // where it lands: the head (a blow from overhead, now and then another) or the body
+            var striker = meStruck ? hunt.ChallengeFoeModel : robot.Visual;
+            var held = striker != null ? striker.GetComponentInChildren<HeldWeapon>() : null;
+            bool toHead = (held != null && held.Overhead) || Random.value < 0.25f;
+            var at = toHead ? skin.HeadPoint : skin.ChestPoint;
+            fx.Burst(at, new Color(1f, 0.92f, 0.6f), new Color(2.4f, 2.1f, 1.2f), 10, 3.2f);
+            Shockwave.Create(at - Vector3.up * 0.1f, 0.45f, new Color(1f, 0.95f, 0.75f));
+            if (toHead) { skin.JoltHead(from); strength *= 0.6f; } // (the head takes it: the body moves less)
             skin.Stagger(from, strength);
             if (inARow >= 4 && !LiveActive) Push(meStruck, from, 1);
         }

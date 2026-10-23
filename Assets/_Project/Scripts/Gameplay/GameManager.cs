@@ -1422,7 +1422,7 @@ namespace SquashBot.Gameplay
             if (blowSlowLeft > 0f) { blowSlowLeft -= Time.unscaledDeltaTime; Time.timeScale = Mathf.Min(Time.timeScale, 0.3f); } // the monster's last blow
             if (powerSlowLeft > 0f) { powerSlowLeft -= Time.unscaledDeltaTime; if (State == GameState.Playing) Time.timeScale = Mathf.Min(Time.timeScale, powerSlowScale); } // a floor power's slow motion
             UpdatePowers(Time.deltaTime);
-            if (DuelCinematic) Time.timeScale = Mathf.Min(Time.timeScale, ultimateOn ? 0.35f : 0.3f); // the duel's big moment, slowed for all of it
+            if (challengeRun && State == GameState.Playing) Time.timeScale = 1f; // (no slow motion in the duels: big moments play at full speed)
             if (pendingHp != null && !DuelCinematic) { var hp = pendingHp; pendingHp = null; ApplyLiveHp(hp); } // the live duel's health, held back through it
 
             if (State != GameState.Playing) { if (tpsOn && !arenaRun && State != GameState.Paused) ExitTps(); if (State != GameState.Paused) ui.SetFire(false, false); return; }

@@ -373,7 +373,7 @@ namespace SquashBot.Gameplay
             arenaRun = false;
             trailRun = false;
             dailyRun = false;
-            robot.SetSize(1.73f); // foi big in the duels (the camera stands well back to show the whole stage)
+            robot.SetSize(1.44f); // foi big in the duels (the camera stands well back to show the whole stage)
             BeginRun();
             ui.SetChallengeHud(true);
             ui.SkillBar.Refresh(false);

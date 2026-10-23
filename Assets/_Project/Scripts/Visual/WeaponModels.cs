@@ -310,6 +310,9 @@ namespace SquashBot.Visual
 
         private int stroke = 3;
 
+        /// <summary>The last blow came down from overhead (it lands on the head; the others on the body).</summary>
+        public bool Overhead => stroke == 0;
+
         /// <summary>A blow in three keys (wound up, the strike, followed through), then back to rest.</summary>
         private void Stroke(Vector3 upP, Vector3 upR, Vector3 hitP, Vector3 hitR, Vector3 outP, Vector3 outR)
         {

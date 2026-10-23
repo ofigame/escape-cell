@@ -722,9 +722,10 @@ namespace SquashBot.Visual
                 // in against the rim: the middle of its front row (its curve leaves the middle further out than its ends) just
                 // outside the platform's edge
                 var outward = BoundsOf(stand).center - pivot; outward.y = 0f; outward.Normalize();
-                float shift = platR * look.rim - FrontDistance(stand, pivot, outward); // (the stone rim: roots may reach further out)
+                float shift = platR * look.rim + 0.6f - FrontDistance(stand, pivot, outward); // (just off the rim, a little room)
                 stand.position += outward * shift;
                 bankGo.transform.position += outward * shift;
+                LevelEnds(stand, pivot, outward);
                 BendToRing(stand, pivot, outward, platR * look.rim);
                 SeatCrowd(stand, team, rng);
                 Blockers.AddRange(Probe(stand)); // (its colliders stay: the camera keeps out of it)
@@ -737,11 +738,11 @@ namespace SquashBot.Visual
             if (look.backTree) spots.Add(Around(180f, platR + 8.5f)); // (not where it would hide the sky picture's castle)
             if (look.backTree) { spots.Add(Around(160f, platR + 14f)); spots.Add(Around(200f, platR + 14f)); }
             if (look.backTree) spots.Add(Around(180f, platR + 20f));
-            spots.Add(Around(-80f, platR + 4.5f)); // the left side
-            spots.Add(Around(80f, platR + 4.5f)); // the right side
+            spots.Add(Around(-64f, platR + 6.5f)); // the left side (low on the screen: clear of the stands)
+            spots.Add(Around(64f, platR + 6.5f)); // the right side
             for (int i = 0; i < 8; i++)
             {
-                float deg = R(70f, 290f);
+                float deg = R(118f, 242f); // (behind: never between the camera and the stands)
                 if (!look.backTree && deg > 140f && deg < 220f) deg += deg < 180f ? -70f : 70f; // (the view behind the platform kept clear)
                 spots.Add(Around(deg, platR + R(17f, 26f)));
             }
@@ -1136,6 +1137,45 @@ namespace SquashBot.Visual
 
         /// <summary>The middle of the platform (on the floor).</summary>
         public Vector3 Middle => new Vector3(centre.x, floorY, centre.z);
+
+        /// <summary>A stand turned about its own middle until both its ends are as far from the platform's middle.</summary>
+        private void LevelEnds(Transform stand, Vector3 pivot, Vector3 outward)
+        {
+            for (int pass = 0; pass < 2; pass++)
+            {
+                var side = Vector3.Cross(Vector3.up, outward);
+                float dl = EndDistance(stand, pivot, side, -1f), dr = EndDistance(stand, pivot, side, 1f);
+                if (float.IsNaN(dl) || float.IsNaN(dr)) return;
+                var b = BoundsOf(stand);
+                float half = Mathf.Max(0.5f, Mathf.Max(b.extents.x, b.extents.z));
+                float turn = Mathf.Atan2(dl - dr, half * 1.6f) * Mathf.Rad2Deg; // (the nearer end swung out)
+                if (Mathf.Abs(turn) < 0.5f) return;
+                stand.RotateAround(b.center, Vector3.up, turn);
+            }
+        }
+
+        /// <summary>How far from the platform's middle a stand's end (<paramref name="sign"/>: which side) comes nearest.</summary>
+        private static float EndDistance(Transform stand, Vector3 pivot, Vector3 side, float sign)
+        {
+            var b = BoundsOf(stand);
+            float half = Mathf.Max(b.extents.x, b.extents.z);
+            float best = float.MaxValue;
+            foreach (var mf in stand.GetComponentsInChildren<MeshFilter>(true))
+            {
+                if (mf.sharedMesh == null || !mf.sharedMesh.isReadable) continue;
+                var m = mf.transform.localToWorldMatrix;
+                var c = b.center;
+                foreach (var v in mf.sharedMesh.vertices)
+                {
+                    var w = m.MultiplyPoint3x4(v);
+                    float across = Vector3.Dot(w - c, side) * sign;
+                    if (across < half * 0.6f) continue; // (its outer end only)
+                    var flat = w - pivot; flat.y = 0f;
+                    best = Mathf.Min(best, flat.magnitude);
+                }
+            }
+            return best == float.MaxValue ? float.NaN : best;
+        }
 
         private readonly List<Mesh> bentMeshes = new List<Mesh>();
 
