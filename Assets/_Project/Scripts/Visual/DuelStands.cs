@@ -521,6 +521,10 @@ namespace SquashBot.Visual
             public float snowFall = 1.5f;
             /// <summary>A tree right behind the platform, between the stands (none where the sky picture has its castle there).</summary>
             public bool backTree = true;
+            /// <summary>Trees behind each stand too (the knights' court).</summary>
+            public bool standTrees;
+            /// <summary>The grass in front of the platform (none: alpha 0) and the pebbles' colour there.</summary>
+            public Color frontGrass, pebbles = new Color(0.4f, 0.4f, 0.42f);
             /// <summary>Its sky picture behind it all (Resources; its landscape as designed), or none.</summary>
             public string sky;
             /// <summary>The colour its sky picture fades into at its foot: a haze of it where the land ends, so the land and
@@ -535,6 +539,7 @@ namespace SquashBot.Visual
 
         private static readonly Look GroveLook = new Look
         {
+            frontGrass = new Color(0.05f, 0.11f, 0.08f), pebbles = new Color(0.22f, 0.26f, 0.3f),
             folder = "Duel/Grove/grove_", trees = 3, treeMin = 12f, treeMax = 16f, grass = true, lanterns = true, thick = 0.6f, rim = 1.03f,
             glow = new Color(0.35f, 0.85f, 1f), selfLight = new Color(0.16f, 0.2f, 0.26f),
             ground = new Color(0.07f, 0.12f, 0.1f), mound = new Color(0.1f, 0.17f, 0.13f), bank = new Color(0.05f, 0.09f, 0.08f), grassColour = new Color(0.05f, 0.11f, 0.08f),
@@ -544,6 +549,7 @@ namespace SquashBot.Visual
 
         private static readonly Look FrostLook = new Look
         {
+            pebbles = new Color(0.78f, 0.88f, 0.98f),
             folder = "Duel/Ice/ice_", trees = 1, treeMin = 7f, treeMax = 10.5f, rocks = true, snow = true, glints = true, thick = 1f, rim = 1.03f,
             glow = new Color(0.55f, 0.9f, 1f), selfLight = new Color(0.42f, 0.48f, 0.56f),
             ground = new Color(0.8f, 0.87f, 0.95f), mound = new Color(0.9f, 0.94f, 1f), bank = new Color(0.72f, 0.8f, 0.9f), grassColour = Color.white,
@@ -553,6 +559,7 @@ namespace SquashBot.Visual
 
         private static readonly Look MarsLook = new Look
         {
+            pebbles = new Color(0.42f, 0.18f, 0.12f),
             folder = "Duel/Mars/mars_", trees = 1, treeMin = 9f, treeMax = 15f, rocks = true, dust = true, props = 2, thick = 0.8f, rim = 1.03f, standRise = 0.15f,
             glow = new Color(1f, 0.6f, 0.25f), selfLight = new Color(0.34f, 0.24f, 0.2f),
             ground = new Color(0.58f, 0.27f, 0.16f), mound = new Color(0.66f, 0.32f, 0.19f), bank = new Color(0.46f, 0.2f, 0.12f), grassColour = Color.white,
@@ -562,6 +569,7 @@ namespace SquashBot.Visual
 
         private static readonly Look CappadociaLook = new Look
         {
+            frontGrass = new Color(0.62f, 0.5f, 0.28f), pebbles = new Color(0.74f, 0.6f, 0.46f),
             folder = "Duel/Kapa/kapa_", trees = 2, treeMin = 9f, treeMax = 14f, rocks = true, dust = true, crystals = false, thick = 1f, rim = 1.03f, standRise = 0.8f,
             glow = new Color(1f, 0.82f, 0.45f), selfLight = new Color(0.36f, 0.31f, 0.27f),
             ground = new Color(0.8f, 0.62f, 0.44f), mound = new Color(0.86f, 0.68f, 0.48f), bank = new Color(0.74f, 0.56f, 0.4f), grassColour = Color.white,
@@ -572,6 +580,7 @@ namespace SquashBot.Visual
 
         private static readonly Look AsiaLook = new Look
         {
+            frontGrass = new Color(0.3f, 0.48f, 0.24f), pebbles = new Color(0.45f, 0.47f, 0.48f),
             folder = "Duel/Asia/asia_", trees = 2, treeMin = 9f, treeMax = 13f, rocks = true, grass = true, snow = true, crystals = false, props = 2,
             thick = 1f, rim = 0.97f, standRise = 0.8f,
             glow = new Color(1f, 0.8f, 0.4f), selfLight = new Color(0.34f, 0.3f, 0.3f),
@@ -583,6 +592,7 @@ namespace SquashBot.Visual
 
         private static readonly Look EuropeLook = new Look
         {
+            frontGrass = new Color(0.3f, 0.5f, 0.21f), pebbles = new Color(0.5f, 0.5f, 0.48f), standTrees = true,
             folder = "Duel/Euro/euro_", trees = 1, treeMin = 10f, treeMax = 14f, rocks = true, grass = true, snow = true, crystals = false, props = 2, backTree = false,
             thick = 1f, rim = 1.03f, standRise = 0.8f,
             glow = new Color(1f, 0.82f, 0.4f), selfLight = new Color(0.34f, 0.32f, 0.3f),
@@ -594,6 +604,7 @@ namespace SquashBot.Visual
 
         private static readonly Look ArabiaLook = new Look
         {
+            frontGrass = new Color(0.6f, 0.52f, 0.3f), pebbles = new Color(0.78f, 0.6f, 0.42f),
             folder = "Duel/Arab/arab_", trees = 1, treeMin = 8f, treeMax = 12f, rocks = true, dust = true, crystals = false, props = 2,
             thick = 1f, rim = 1.03f, standRise = 0.8f,
             glow = new Color(0.4f, 0.9f, 1f), selfLight = new Color(0.36f, 0.3f, 0.28f),
@@ -734,6 +745,14 @@ namespace SquashBot.Visual
                 if (!look.backTree && deg > 140f && deg < 220f) deg += deg < 180f ? -70f : 70f; // (the view behind the platform kept clear)
                 spots.Add(Around(deg, platR + R(17f, 26f)));
             }
+            if (look.standTrees)
+            {
+                for (int s = -1; s <= 1; s += 2)
+                    for (int k = 0; k < 3; k++)
+                        spots.Add(Around(s * (128f + k * 11f + R(-3f, 3f)), platR + R(11f, 15f)));
+                // and behind the middle, between the two stands (big ones: over the stands' roofs)
+                foreach (var deg in new[] { 165f, 180f, 195f }) spots.Add(Around(deg + R(-3f, 3f), platR + R(10f, 13f)));
+            }
             foreach (var spot in spots)
             {
                 var tree = MadeModel(p, look, "tree_" + (1 + rng.Next(look.trees)), false);
@@ -759,6 +778,10 @@ namespace SquashBot.Visual
                     var at = Around(i < 2 ? (i == 0 ? -100f : 100f) : R(110f, 250f), platR + (i < 2 ? R(2.5f, 4f) : R(5f, 14f)));
                     boulder.position += new Vector3(at.x - rb.center.x, ground - rb.min.y - 0.15f, at.z - rb.center.z);
                 }
+
+            // The land in front of the platform (the bottom of the screen): tufts of the stage's grass, low rocks of its
+            // own and pebbles, so it reads as land and never a bare floor.
+            Foreground(p, look, ground, platR, rng);
 
             // Its own things beside the platform (Mars: rovers), facing every which way.
             for (int i = 0; i < look.props; i++)
@@ -851,7 +874,96 @@ namespace SquashBot.Visual
             }
         }
 
-        private Mesh grassMesh;
+        private Mesh grassMesh, frontMesh;
+
+        /// <summary>
+        /// In front of the platform (towards the camera): tufts of the stage's grass, low rocks of its own (or round
+        /// stones), pebbles. Kept low, so the platform and the two foi are never covered.
+        /// </summary>
+        private void Foreground(Transform p, Look look, float ground, float platR, System.Random rng)
+        {
+            float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
+            Vector3 Front(float degrees, float dist) => new Vector3(centre.x + Mathf.Cos(degrees * Mathf.Deg2Rad) * dist, ground, centre.z + Mathf.Sin(degrees * Mathf.Deg2Rad) * dist);
+            if (look.frontGrass.a > 0f)
+            {
+                var go = new GameObject("FrontGrass");
+                go.transform.SetParent(p, false);
+                frontMesh = Tufts(Front, platR * 1.02f, platR + 20f, -85f, 85f, 420, rng);
+                go.AddComponent<MeshFilter>().sharedMesh = frontMesh;
+                go.AddComponent<MeshRenderer>().sharedMaterial = Matte(look.frontGrass, 0.3f);
+            }
+            // low rocks: the stage's own rock model, or round stones
+            var stone = Matte(look.pebbles * 0.85f, 0.15f);
+            // patches of the ground a shade lighter and darker all round (off the platform; the land is never one flat colour)
+            var lighter = Matte(look.mound, 0.2f); var darker = Matte(look.bank, 0.2f);
+            for (int i = 0; i < 70; i++)
+            {
+                var at = Front(R(0f, 360f), platR + 0.5f + Mathf.Sqrt((float)rng.NextDouble()) * 42f);
+                float sx = R(2f, 5.5f), sz = R(1.5f, 4f);
+                Shapes.Rounded("Patch", p, at + Vector3.up * 0.01f, new Vector3(sx, 0.04f, sz), 0.015f, i % 2 == 0 ? lighter : darker)
+                    .transform.rotation = Quaternion.Euler(0f, R(0f, 180f), 0f);
+            }
+            for (int i = 0; i < 12; i++)
+            {
+                float deg = Mathf.Lerp(-75f, 75f, i / 11f) + R(-6f, 6f);
+                var at = Front(deg, platR + R(2f, 16f));
+                if (look.rocks)
+                {
+                    var boulder = MadeModel(p, look, "rock", true);
+                    var rb = BoundsOf(boulder);
+                    boulder.localScale = Vector3.one * (R(0.8f, 1.6f) / Mathf.Max(0.01f, rb.size.y));
+                    boulder.rotation = Quaternion.Euler(0f, R(0f, 360f), 0f) * boulder.rotation;
+                    rb = BoundsOf(boulder);
+                    boulder.position += new Vector3(at.x - rb.center.x, ground - rb.min.y - 0.1f, at.z - rb.center.z);
+                }
+                else
+                {
+                    float s = R(0.6f, 1.2f);
+                    Shapes.Rounded("Stone", p, at + Vector3.up * s * 0.25f, new Vector3(s * R(1f, 1.6f), s * 0.55f, s * R(0.9f, 1.4f)), s * 0.25f, stone)
+                        .transform.rotation = Quaternion.Euler(0f, R(0f, 180f), 0f);
+                }
+            }
+            // pebbles scattered over the ground in front
+            var pebble = Matte(look.pebbles, 0.15f);
+            var pebbleDark = Matte(look.pebbles * 0.7f, 0.15f);
+            for (int i = 0; i < 70; i++)
+            {
+                var at = Front(R(-85f, 85f), platR + R(0.8f, 20f));
+                float s = R(0.12f, 0.38f);
+                Shapes.Rounded("Pebble", p, at + Vector3.up * s * 0.15f, new Vector3(s * R(1f, 1.7f), s * 0.4f, s), s * 0.18f, i % 3 == 0 ? pebbleDark : pebble)
+                    .transform.rotation = Quaternion.Euler(0f, R(0f, 180f), 0f);
+            }
+        }
+
+        /// <summary>Tufts of grass in an arc (from <paramref name="a0"/> to <paramref name="a1"/> degrees, between two distances), short and leaning; one mesh.</summary>
+        private static Mesh Tufts(System.Func<float, float, Vector3> at, float inner, float outer, float a0, float a1, int tufts, System.Random rng)
+        {
+            float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
+            var v = new List<Vector3>(); var n = new List<Vector3>(); var t = new List<int>();
+            for (int i = 0; i < tufts; i++)
+            {
+                var tc = at(R(a0, a1), R(inner, outer));
+                int blades = 6 + rng.Next(6);
+                float tall = R(0.45f, 1.25f);
+                for (int b = 0; b < blades; b++)
+                {
+                    var bp = tc + new Vector3(R(-0.35f, 0.35f), -0.05f, R(-0.35f, 0.35f));
+                    float h = tall * R(0.6f, 1.15f), w = R(0.05f, 0.1f), turn = R(0f, Mathf.PI);
+                    var side = new Vector3(Mathf.Cos(turn), 0f, Mathf.Sin(turn)) * w;
+                    var tip = bp + Vector3.up * h + new Vector3(R(-0.4f, 0.4f), 0f, R(-0.4f, 0.4f)) * h;
+                    var normal = (Vector3.Cross(side, tip - bp).normalized + Vector3.up * 0.8f).normalized;
+                    var back = new Vector3(-normal.x, normal.y, -normal.z);
+                    int k = v.Count;
+                    v.Add(bp - side); v.Add(bp + side); v.Add(tip); v.Add(bp - side); v.Add(bp + side); v.Add(tip);
+                    n.Add(normal); n.Add(normal); n.Add(Vector3.up); n.Add(back); n.Add(back); n.Add(Vector3.up);
+                    t.Add(k); t.Add(k + 2); t.Add(k + 1); t.Add(k + 3); t.Add(k + 4); t.Add(k + 5);
+                }
+            }
+            var m = new Mesh { name = "FrontGrass", indexFormat = IndexFormat.UInt32 };
+            m.SetVertices(v); m.SetNormals(n); m.SetTriangles(t, 0);
+            m.RecalculateBounds();
+            return m;
+        }
 
         /// <summary>
         /// Tufts of long grass in a ring round <paramref name="c"/> (from <paramref name="inner"/> out to <paramref name="outer"/>):
@@ -1273,6 +1385,7 @@ namespace SquashBot.Visual
             Blockers.Clear();
             if (ownedMesh != null) Destroy(ownedMesh);
             if (grassMesh != null) Destroy(grassMesh);
+            if (frontMesh != null) Destroy(frontMesh);
             foreach (var bm in bentMeshes) if (bm != null) Destroy(bm);
             if (hazeMesh != null) Destroy(hazeMesh);
             if (murmur != null && murmur.clip != null) Destroy(murmur.clip);

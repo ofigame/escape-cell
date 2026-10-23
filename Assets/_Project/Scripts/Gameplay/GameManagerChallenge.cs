@@ -373,7 +373,7 @@ namespace SquashBot.Gameplay
             arenaRun = false;
             trailRun = false;
             dailyRun = false;
-            robot.SetSize(1.2f); // foi a fifth bigger in the duels too
+            robot.SetSize(1.44f); // foi bigger in the duels (a fifth, then a fifth again)
             BeginRun();
             ui.SetChallengeHud(true);
             ui.SkillBar.Refresh(false);

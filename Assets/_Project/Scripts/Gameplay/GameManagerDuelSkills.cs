@@ -70,8 +70,8 @@ namespace SquashBot.Gameplay
             skillBar.Emoted += e => { ShowEmote(true, e); if (LiveActive) LiveNet.Emote(e); };
             skillBar.SetMeters(0f, 0f);
             DropRings();
-            myRing = FootRing.Make(new Color(0.25f, 0.6f, 1f), 2.3f); // (wider than foi with its cape and shield)
-            foeRing = FootRing.Make(new Color(1f, 0.25f, 0.2f), 2.3f);
+            myRing = FootRing.Make(new Color(0.25f, 0.6f, 1f), 2.75f); // (wider than foi with its cape and shield)
+            foeRing = FootRing.Make(new Color(1f, 0.25f, 0.2f), 2.75f);
         }
 
         /// <summary>The glowing rings under the two foi: which one is the player's at a glance.</summary>
