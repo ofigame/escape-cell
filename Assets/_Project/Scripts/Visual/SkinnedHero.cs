@@ -239,7 +239,7 @@ namespace SquashBot.Visual
                 string nm = r.name.ToLowerInvariant();
                 r.sharedMaterial = r.name == "Cover" ? (lid ?? LidPaint(SkinOf(n, skin))) : nm.Contains("hair") ? HairPaint(hc) : nm.Contains("brows") ? BrowPaint(hc) : HeadPaint(n, skin, eyes);
                 r.receiveShadows = false; // (no flickering self-shadow on the face from the hair, hat or crown)
-                if (r.name != "Cover" && !nm.Contains("hair") && !nm.Contains("brows")) WithRim(r); // (not on the hair: every lock's edge would glow, wiry)
+                if (r.name != "Cover" && !nm.Contains("hair") && !nm.Contains("brows") && r.sharedMaterial.shader.name != FoiShaderName) WithRim(r); // (foi's own paint has its rim; not on the hair: every lock's edge would glow)
             }
         }
 
@@ -407,9 +407,13 @@ namespace SquashBot.Visual
                 tex.SetPixels32(px);
                 tex.Apply(true, true);
             }
+            m = FoiPaint(tex, Color.white, Resources.Load<Texture2D>(Folder + file + "_normal"), false);
+            if (m == null)
+            {
             m = MaterialFactory.CreateSurface(new Color(HeadLit, HeadLit, HeadLit), Color.black, 0f, 0f); // matte skin, nearly all its own light
             Matte(m);
-            if (tex != null)
+            }
+            if (tex != null && m.shader.name != FoiShaderName)
             {
                 m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
                 m.EnableKeyword("_EMISSION");
@@ -441,6 +445,8 @@ namespace SquashBot.Visual
             string key = "hair" + c;
             if (materials.TryGetValue(key, out var m) && m != null) return m;
             var tex = Resources.Load<Texture2D>(Folder + "hair_strands");
+            m = FoiPaint(tex, c, null, true);
+            if (m != null) { materials[key] = m; return m; }
             m = MaterialFactory.CreateSurface(c * HairLit, Color.black, 0f, 0f);
             Matte(m);
             if (tex != null)
@@ -461,12 +467,41 @@ namespace SquashBot.Visual
             var d = c * 0.82f; d.a = 1f;
             string key = "brow" + d;
             if (materials.TryGetValue(key, out var m) && m != null) return m;
+            m = FoiPaint(null, d, null, false);
+            if (m != null) { m.SetColor("_Sheen", Color.black); materials[key] = m; return m; }
             m = MaterialFactory.CreateSurface(d * HeadLit, Color.black, 0f, 0f);
             Matte(m);
             m.EnableKeyword("_EMISSION");
             m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
             m.SetColor("_EmissionColor", d * HeadGlow);
             materials[key] = m;
+            return m;
+        }
+
+        private const string FoiShaderName = "SquashBot/FoiSkin";
+        private static Shader foiShader;
+
+        /// <summary>
+        /// foi's own paint (skin, hair, brows): lit by its own light fixed to the camera, so it looks the same on every
+        /// stage, with a real falloff into shade, warmth under the skin, a dry sheen (along each lock on the hair) and fine
+        /// pores from <paramref name="normal"/>. Null where the phone cannot draw it (the old paint is used).
+        /// </summary>
+        private static Material FoiPaint(Texture tex, Color tint, Texture normal, bool hair)
+        {
+            if (foiShader == null) foiShader = Resources.Load<Shader>("Shaders/FoiSkin");
+            if (foiShader == null || !foiShader.isSupported) return null;
+            var m = new Material(foiShader) { name = hair ? "FoiHair" : "FoiSkin" };
+            if (tex != null) m.SetTexture("_BaseMap", tex);
+            m.SetColor("_BaseColor", tint);
+            if (normal != null) { m.SetTexture("_BumpMap", normal); m.SetFloat("_BumpScale", 0.8f); }
+            if (hair)
+            {
+                m.SetFloat("_Hair", 1f);
+                m.SetFloat("_Gloss", 40f);
+                m.SetColor("_Sheen", new Color(0.32f, 0.29f, 0.25f) * Mathf.Lerp(0.6f, 1.2f, tint.grayscale));
+                m.SetColor("_FillColor", new Color(0.4f, 0.39f, 0.44f));
+                m.SetColor("_RimColor", new Color(1f, 0.94f, 0.86f, 0.2f));
+            }
             return m;
         }
 
@@ -512,6 +547,8 @@ namespace SquashBot.Visual
             var v = Vivid(c, 1f); var cv = new Color(v.r / 255f, v.g / 255f, v.b / 255f);
             string key = "lid" + cv;
             if (materials.TryGetValue(key, out var m) && m != null) return m;
+            m = FoiPaint(null, cv * 0.9f, null, false);
+            if (m != null) { materials[key] = m; return m; }
             m = MaterialFactory.CreateSurface(cv * HeadLit, Color.black, 0f, 0f);
             m.SetFloat("_SpecularHighlights", 0f); m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
             m.SetFloat("_EnvironmentReflections", 0f); m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");

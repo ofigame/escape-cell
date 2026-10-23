@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 using SquashBot.Data;
 using SquashBot.Visual;
@@ -60,8 +61,7 @@ namespace SquashBot.UI
         /// <summary>A head was picked at the first start (given free and worn).</summary>
         public event Action<Data.Cosmetic> HeadPicked;
 
-        /// <summary>The first start: foi's six heads (the men's three haircuts on the left, the women's on the right) as
-        /// cards; one is given free, the others can be bought later in the workshop.</summary>
+        /// <summary>The first start: a man or a woman (two big cards); the other haircuts are in the workshop.</summary>
         public void ShowHeads()
         {
             paid = false;
@@ -70,26 +70,26 @@ namespace SquashBot.UI
             closeButton.SetActive(false);
             restoreButton.SetActive(true);
             for (int i = grid.childCount - 1; i >= 0; i--) Destroy(grid.GetChild(i).gameObject);
-            const float w = 470f, h = 520f, gap = 24f;
-            var heads = Cosmetics.InSlot(Slot.Head);
-            for (int i = 0; i < heads.Count && i < 6; i++)
+            const float w = 470f, h = 640f, gap = 30f;
+            var heads = new List<Data.Cosmetic> { Cosmetics.Find("head.m1"), Cosmetics.Find("head.f1") };
+            for (int i = 0; i < heads.Count; i++)
             {
                 var c = heads[i];
                 float x = (i % 2 == 0 ? -1f : 1f) * (w + gap) * 0.5f;
                 float y = -(i / 2) * (h + gap);
                 var card = UiFactory.Card("Head" + i, grid, new Vector2(0.5f, 1f), new Vector2(x, y), new Vector2(w, h));
                 card.pivot = new Vector2(0.5f, 1f);
-                var halo = UiFactory.Box("Halo", card, new Vector2(0.5f, 1f), new Vector2(0f, -165f), new Vector2(330f, 330f));
+                var halo = UiFactory.Box("Halo", card, new Vector2(0.5f, 1f), new Vector2(0f, -205f), new Vector2(400f, 400f));
                 halo.pivot = new Vector2(0.5f, 0.5f);
                 UiFactory.Fill(halo, new Color(0.4f, 0.9f, 1f, 0.4f), UiSprites.Shadow, 0.5f).raycastTarget = false;
-                var pic = UiFactory.Box("Picture", card, new Vector2(0.5f, 1f), new Vector2(0f, -165f), new Vector2(290f, 290f));
+                var pic = UiFactory.Box("Picture", card, new Vector2(0.5f, 1f), new Vector2(0f, -205f), new Vector2(350f, 350f));
                 pic.pivot = new Vector2(0.5f, 0.5f);
                 var raw = pic.gameObject.AddComponent<RawImage>();
                 raw.texture = ItemPreview.Cosmetic(c);
                 raw.raycastTarget = false;
-                UiFactory.TextBox("Name", card, new Vector2(0.5f, 1f), new Vector2(0f, -340f), new Vector2(440f, 56f), Loc.T("cos." + c.id), 40f, Palette.UiText, title: true)
+                UiFactory.TextBox("Name", card, new Vector2(0.5f, 1f), new Vector2(0f, -425f), new Vector2(440f, 60f), Loc.T("cos." + c.id), 44f, Palette.UiText, title: true)
                     .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-                var b = UiFactory.MakeButton(card, Loc.T("hero.pick"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 28f), new Vector2(400f, 88f), () => ChooseHead(c), 40f);
+                var b = UiFactory.MakeButton(card, Loc.T("hero.pick"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 34f), new Vector2(400f, 96f), () => ChooseHead(c), 42f);
                 ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0f);
             }
             screen.Show();
