@@ -107,13 +107,10 @@ namespace SquashBot.Gameplay
             ui.SetHudTitle(Loc.T("ch.mode.duel") + " · " + Loc.T(Stage.key));
             PlaceDuelists(first: true);
             RefreshSquadBar();
-            hunt.Freeze(); // nobody moves while the briefing is read
-            chPhase = ChPhase.Lobby; // the briefing first
-            cameraRig.StartCoroutine(ChallengeBriefing("duel", 3, () =>
-            {
-                if (chPhase != ChPhase.Lobby) return; // the server started it meanwhile, or it is over (the rival left)
-                if (LiveActive) LiveWaitFor(LiveWait.Start); else BeginDuel();
-            }));
+            hunt.Freeze(); // nobody moves while it counts down
+            chPhase = ChPhase.Lobby; // the count first
+            capesOff = false;
+            cameraRig.StartCoroutine(DuelOpening());
             AudioManager.PlaySfx(Sfx.Win, 0.6f, 0.9f);
         }
 
@@ -125,7 +122,6 @@ namespace SquashBot.Gameplay
             duelPan = robot.transform.position - boardCentre; duelPan.y = 0f;
             hunt.Resume();
             chUi.SetStatus(Loc.T("ch.duel"));
-            ui.ShowIntro(Loc.T("ch.duel"), Loc.F("ch.duelMinutes", chDuelMinutes));
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 0.8f);
             RefreshDuelClock();
         }
@@ -185,6 +181,7 @@ namespace SquashBot.Gameplay
             }
             // After a knock-down the soldiers left line up behind their foi again (no new ones and no healing until the duel is over).
             else hunt.RegroupSquads();
+            if (capesOff) StripCapes();
 
             RefreshSquadBar();
         }
@@ -257,6 +254,95 @@ namespace SquashBot.Gameplay
             RefreshDuelClock();
             // 3, 2, 1: the server holds the blows and its clock for the same 2.4 s (Rules.DuelCountdown).
             cameraRig.StartCoroutine(CountdownThenGo());
+        }
+
+        /// <summary>A new round's foi dressed again (the rival's copy, foi's own outfit): their capes simply go (theirs hang on the posts already).</summary>
+        private void StripCapes()
+        {
+            foreach (var model in new[] { robot.Visual, hunt.ChallengeFoeModel })
+                if (model != null)
+                    foreach (var cape in model.GetComponentsInChildren<SoftCape>(true))
+                    {
+                        var off = cape.TakeOff();
+                        if (off != null) Destroy(off.gameObject);
+                    }
+        }
+
+        /// <summary>Both foi have hung their capes up (they stay off until the duel is over).</summary>
+        private bool capesOff;
+
+        /// <summary>
+        /// The duel's opening, straight on the board: 5, 4, 3, 2, 1 over the two foi on their marks; at the second count
+        /// each foi takes its cape off and it flies to a post at its corner of the platform, hanging there. Then the fight.
+        /// </summary>
+        private System.Collections.IEnumerator DuelOpening()
+        {
+            duelCountdown = true;
+            try
+            {
+                for (int i = 5; i >= 1; i--)
+                {
+                    if (!challengeRun || chPhase != ChPhase.Lobby) yield break; // (over, or the server started it meanwhile)
+                    chUi.SetStatus(i.ToString());
+                    ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.6f), i.ToString(), Palette.UiGold, 220f);
+                    AudioManager.PlaySfx(Sfx.Click, 1f, 0.75f + 0.08f * (5 - i));
+                    if (i == 4) TakeOffCapes(true);
+                    yield return new WaitForSeconds(1f);
+                    while (challengeRun && State == GameState.Paused) yield return null;
+                }
+            }
+            finally { duelCountdown = false; }
+            if (!challengeRun || chPhase != ChPhase.Lobby) yield break;
+            if (LiveActive) LiveWaitFor(LiveWait.Start); else BeginDuel();
+        }
+
+        /// <summary>Both foi's capes off and onto their posts (flying there, or at once after a knock-down's new round).</summary>
+        private void TakeOffCapes(bool fly)
+        {
+            capesOff = true;
+            if (colosseum == null) return;
+            var (mine, theirs) = DuelMarks;
+            foreach (var (model, mark) in new[] { (robot.Visual, mine), (hunt.ChallengeFoeModel, theirs) })
+            {
+                if (model == null) continue;
+                foreach (var cape in model.GetComponentsInChildren<SoftCape>(true))
+                {
+                    var off = cape.TakeOff();
+                    if (off == null) continue;
+                    var rs = off.GetComponentsInChildren<Renderer>(true);
+                    if (rs.Length == 0) { Destroy(off.gameObject); continue; }
+                    var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
+                    bool south = mark.y < BoardH / 2;
+                    var hook = colosseum.CapeHook(south, b.size.y);
+                    var toMiddle = colosseum.Middle - hook; toMiddle.y = 0f;
+                    var face = Quaternion.LookRotation(toMiddle.sqrMagnitude > 1e-4f ? -toMiddle.normalized : Vector3.forward, Vector3.up); // (its outside towards the platform)
+                    off.SetParent(colosseum.transform, true);
+                    if (fly) cameraRig.StartCoroutine(FlyCape(off, hook, face));
+                    else { off.position = hook; off.rotation = face; }
+                }
+            }
+            if (fly) AudioManager.PlaySfx(Sfx.Hop, 0.8f, 0.8f);
+        }
+
+        /// <summary>A cape lifted off a foi's shoulders, flying in an arc to its post and settling there with a swing.</summary>
+        private System.Collections.IEnumerator FlyCape(Transform cape, Vector3 hook, Quaternion face)
+        {
+            var from = cape.position; var fromRot = cape.rotation;
+            const float T = 0.7f;
+            for (float e = 0f; e < T && cape != null; e += Time.deltaTime)
+            {
+                float k = Mathf.SmoothStep(0f, 1f, e / T);
+                cape.position = Vector3.Lerp(from, hook, k) + Vector3.up * (Mathf.Sin(k * Mathf.PI) * 1.6f);
+                cape.rotation = Quaternion.Slerp(fromRot, face, k) * Quaternion.Euler(Mathf.Sin(k * Mathf.PI * 2f) * 25f, 0f, 0f);
+                yield return null;
+            }
+            for (float e = 0f; e < 1.2f && cape != null; e += Time.deltaTime) // (a swing as it settles on the hook)
+            {
+                cape.position = hook;
+                cape.rotation = face * Quaternion.Euler(Mathf.Sin(e * 9f) * 14f * Mathf.Exp(-e * 3f), 0f, 0f);
+                yield return null;
+            }
+            if (cape != null) { cape.position = hook; cape.rotation = face; }
         }
 
         /// <summary>3, 2, 1 over the two foi on their marks (everything still), then the duel goes on.</summary>

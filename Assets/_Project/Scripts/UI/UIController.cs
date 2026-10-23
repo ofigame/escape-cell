@@ -536,8 +536,8 @@ namespace SquashBot.UI
             // Logo up top; the robot stands on its lit pedestal in the middle (the lobby stage behind the menu).
             MenuSkin.Picture("Logo", t, "logo", Top, new Vector2(0f, -150f), new Vector2(500f, 285f));
 
-            // Today's quests: top left, with a red dot while one is done and waiting.
-            menuQuests = MenuArt.DockButton(t, Loc.T("quests.button"), MenuArt.Icon.Guide, new Color(0.45f, 0.75f, 1f), TopLeft, new Vector2(110f, -230f), 120f, () => Quests.Show());
+            // Today's quests: on the right under the chests, with a red dot while one is done and waiting.
+            menuQuests = MenuArt.DockButton(t, Loc.T("quests.button"), MenuArt.Icon.Guide, new Color(0.45f, 0.75f, 1f), TopRight, new Vector2(-110f, -570f), 120f, () => Quests.Show()); // (under the chests)
             ((RectTransform)menuQuests.transform).pivot = new Vector2(0.5f, 0.5f);
             var qPing = UiFactory.Box("Ping", menuQuests.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(44f, 44f));
             qPing.pivot = new Vector2(0.5f, 0.5f);

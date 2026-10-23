@@ -82,6 +82,24 @@ namespace SquashBot.Visual
                 worn.localScale = new Vector3(wornScale.x, wornScale.y * Mathf.Max(0.3f, (top - floor) / Mathf.Max(1e-4f, top - low)), wornScale.z);
         }
 
+        /// <summary>
+        /// Takes the cape off: it stops following the body; a made cape is handed back (to be hung up somewhere), a cloth
+        /// one simply goes. Null when there was nothing to hand back.
+        /// </summary>
+        public Transform TakeOff()
+        {
+            enabled = false;
+            if (fittings != null) fittings.gameObject.SetActive(false);
+            var r = GetComponent<Renderer>(); if (r != null) r.enabled = false;
+            var mr = GetComponentsInChildren<Renderer>(true);
+            if (worn == null) { foreach (var x in mr) x.enabled = false; return null; }
+            var off = worn;
+            off.SetParent(null, true);
+            worn = null;
+            foreach (var x in GetComponentsInChildren<Renderer>(true)) x.enabled = false;
+            return off;
+        }
+
         private Vector3 wornScale;
         private bool wornScaleKnown;
         private Renderer[] wornRenderers;

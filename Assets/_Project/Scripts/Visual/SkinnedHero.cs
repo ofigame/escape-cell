@@ -588,8 +588,21 @@ namespace SquashBot.Visual
         public void Stagger(Vector3 from, float strength)
         {
             if (knock != null) return; // (already going down)
+            KnowRest();
             if (stagger != null) StopCoroutine(stagger);
             stagger = StartCoroutine(Staggering(from, Mathf.Clamp01(strength)));
+        }
+
+        private Vector3 bodyPos;
+        private Quaternion bodyRot;
+        private bool bodyKnown;
+
+        /// <summary>Its own standing place under its parent, taken once before any knock moves it.</summary>
+        private void KnowRest()
+        {
+            if (bodyKnown) return;
+            bodyKnown = true;
+            bodyPos = transform.localPosition; bodyRot = transform.localRotation;
         }
 
         private Vector3 staggerRest;
@@ -597,8 +610,8 @@ namespace SquashBot.Visual
 
         private System.Collections.IEnumerator Staggering(Vector3 from, float strength)
         {
-            if (!staggerRestKnown) { staggerRest = transform.localPosition; staggerRestKnown = true; }
-            var restRot = transform.localRotation;
+            var restRot = bodyRot;
+            staggerRest = bodyPos; staggerRestKnown = true;
             var away = transform.position - from; away.y = 0f;
             if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
             away.Normalize();
@@ -627,6 +640,9 @@ namespace SquashBot.Visual
         /// <summary>A big blow: it flies back off its feet (away from <paramref name="from"/>), lands flat on its back, gets up.</summary>
         public void Launch(Vector3 from, float height = 1.3f, float lie = 0.3f)
         {
+            if (knock != null) return; // (already down: it gets up, never knocked down again on the ground)
+            KnowRest();
+            if (hop != null) { StopCoroutine(hop); hop = null; }
             if (stagger != null) { StopCoroutine(stagger); stagger = null; if (staggerRestKnown) transform.localPosition = staggerRest; }
             if (knock != null) StopCoroutine(knock);
             knock = StartCoroutine(Knocked(from, lie, height));
@@ -635,6 +651,8 @@ namespace SquashBot.Visual
         /// <summary>Knocked down: falls over backwards (away from <paramref name="from"/>), lies there, gets back up.</summary>
         public void KnockDown(Vector3 from, float lie = 1.1f)
         {
+            if (knock != null) return;
+            KnowRest();
             if (knock != null) StopCoroutine(knock);
             knock = StartCoroutine(Knocked(from, lie));
         }
@@ -644,8 +662,8 @@ namespace SquashBot.Visual
             var away = transform.position - from; away.y = 0f;
             if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
             var axis = Vector3.Cross(Vector3.up, away.normalized); // (tipping over this: the top goes away from the blow)
-            var restLocal = transform.localRotation;
-            var restPos = transform.localPosition;
+            var restLocal = bodyRot; // (its own standing place: never one a blow left it in)
+            var restPos = bodyPos;
             float lift = 0.22f / Mathf.Max(0.01f, transform.parent != null ? transform.parent.lossyScale.y : 1f); // (its back's thickness, in its parent's units)
             float Tilt(float k)
             {
@@ -700,6 +718,7 @@ namespace SquashBot.Visual
             flail = flat = rise = push = 0f;
             transform.localRotation = restLocal;
             transform.localPosition = restPos;
+            reel = 0f;
             knock = null;
         }
 
@@ -732,13 +751,14 @@ namespace SquashBot.Visual
         /// <summary>A jump straight up and down (<paramref name="height"/> in world units, <paramref name="time"/> seconds).</summary>
         public void Hop(float height, float time)
         {
-            if (hop != null) return;
+            if (hop != null || knock != null) return;
+            KnowRest();
             hop = StartCoroutine(Hopping(height, time));
         }
 
         private System.Collections.IEnumerator Hopping(float height, float time)
         {
-            var restPos = transform.localPosition;
+            var restPos = bodyPos;
             float local = height / Mathf.Max(0.01f, transform.parent != null ? transform.parent.lossyScale.y : 1f);
             for (float e = 0f; e < time; e += Time.deltaTime)
             {
