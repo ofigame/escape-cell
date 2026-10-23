@@ -99,7 +99,7 @@ namespace SquashBot.Data
         public static float FoiHitFor(int world) => Mathf.Lerp(0.09f, 0.14f, world / 24f);
 
         /// <summary>Opens once the first world is finished (its development points are the army's first).</summary>
-        public static bool Open => SaveData.UnlockedLevel >= LevelCatalog.LevelsPerWorld || SaveData.TestMode;
+        public static bool Open => true; // (open from the start)
 
         public static string PlayerName
         {

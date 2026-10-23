@@ -135,7 +135,7 @@ namespace SquashBot.Gameplay
         {
             if (g.lunge <= 0f) return;
             g.lunge = Mathf.Max(0f, g.lunge - dt * 4.5f);
-            if (g.moveT >= 1f) g.root.position = g.to + g.lungeDir * Mathf.Sin(g.lunge * Mathf.PI) * 0.45f;
+            if (g.moveT >= 1f) g.root.position = g.to + g.lungeDir * Mathf.Sin(g.lunge * Mathf.PI) * (g == challengeFoe ? 0.1f : 0.45f); // (the duel: a short one, the gap kept)
         }
 
         // ---------- vanG's big attacks, one for each kind of world ----------

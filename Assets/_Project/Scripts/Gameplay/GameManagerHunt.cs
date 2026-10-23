@@ -18,7 +18,7 @@ namespace SquashBot.Gameplay
     {
         /// <summary>How far a blow reaches (diagonals count as one step), for every weapon and the super skill alike.</summary>
         /// <summary>How far foi strikes: two tiles (diagonals count as one) for every blade, the range of a gun.</summary>
-        private int StrikeReach => 2;
+        private int StrikeReach => challengeRun && chPhase == ChPhase.Duel ? HuntSystem.DuelGap : 2; // (the duel: from the gap kept between the two foi)
         private HuntSystem hunt;
         private float strikeCooldown;
         private WeaponDef weapon;

@@ -41,6 +41,9 @@ namespace SquashBot.Visual
 
         private class Batch { public Mesh mesh; public Material mat; public readonly List<Vector3> pos = new List<Vector3>(); public readonly List<float> phase = new List<float>(); public readonly List<int> side = new List<int>(); public readonly List<float> facing = new List<float>(); public Matrix4x4[] m; public int kind; }
         private readonly List<Batch> batches = new List<Batch>();
+        /// <summary>How big the fans are (the made stages' stands: bigger, fewer of them).</summary>
+        private float crowdSize = 1f;
+        private const float MadeCrowd = 1.6f;
         private readonly float[] excite = new float[2];
         private bool wave;
         private float waveT;
@@ -237,9 +240,9 @@ namespace SquashBot.Visual
             float dt = Time.deltaTime, time = Time.time;
             for (int s = 0; s < 2; s++) excite[s] = Mathf.MoveTowards(excite[s], 0f, dt * 0.25f);
             if (wave) waveT += dt * 1.6f;
-            var headScale = Vector3.one * 0.2f;
-            var bodyScale = new Vector3(0.3f, 0.36f, 0.22f);
-            var flagScale = new Vector3(0.34f, 0.22f, 0.02f);
+            var headScale = Vector3.one * 0.2f * crowdSize;
+            var bodyScale = new Vector3(0.3f, 0.36f, 0.22f) * crowdSize;
+            var flagScale = new Vector3(0.34f, 0.22f, 0.02f) * crowdSize;
             foreach (var b in batches)
             {
                 if (b.m == null) continue;
@@ -647,7 +650,7 @@ namespace SquashBot.Visual
             float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
 
             // The platform: round (as made), its stone ring a little wider than the floor, its top where the floor is.
-            var plat = MadeModel(p, look, "platform", true);
+            var plat = MadeModel(p, look, "platform", true, true);
             var pb = BoundsOf(plat);
             float kp = Mathf.Max(hw, hd) * 2f * 1.28f / Mathf.Max(pb.size.x, pb.size.z);
             plat.localScale = new Vector3(kp, kp * look.thick, kp);
@@ -1217,14 +1220,20 @@ namespace SquashBot.Visual
         }
 
         /// <summary>One of a made stage's models in its own colour picture (the rune pieces with their runes and crystals glowing).</summary>
-        private Transform MadeModel(Transform p, Look look, string name, bool runes)
+        private Transform MadeModel(Transform p, Look look, string name, bool runes, bool matte = false)
         {
             var holder = new GameObject(name).transform;
             holder.SetParent(p, false);
             var prefab = Resources.Load<GameObject>(look.folder + name);
             if (prefab == null) return holder;
             Instantiate(prefab, holder, false);
-            var m = Surface(Color.white, 0.12f);
+            var m = Surface(Color.white, matte ? 0f : 0.12f);
+            if (matte)
+            {
+                // no highlights, no reflections: the stone reads by its picture alone
+                m.SetFloat("_SpecularHighlights", 0f); m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+                m.SetFloat("_EnvironmentReflections", 0f); m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
+            }
             var tex = Resources.Load<Texture2D>(look.folder + name + "_tex");
             m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
             m.EnableKeyword("_EMISSION");
@@ -1232,7 +1241,7 @@ namespace SquashBot.Visual
             var glow = runes ? Resources.Load<Texture2D>(look.folder + name + "_glow") : null;
             // (a little of its own colour too: the grove is dark, but nothing in it goes black)
             m.SetTexture("_EmissionMap", glow != null ? glow : tex);
-            m.SetColor("_EmissionColor", glow != null ? look.glow * 1.4f : look.selfLight);
+            m.SetColor("_EmissionColor", glow != null ? look.glow * (matte ? 0.55f : 1.4f) : look.selfLight); // (the platform's runes show, never glare)
             foreach (var r in holder.GetComponentsInChildren<Renderer>(true))
             {
                 r.sharedMaterial = m;
@@ -1300,15 +1309,15 @@ namespace SquashBot.Visual
         }
 
         /// <summary>The seats a stand's steps make: the highest upward-facing step under its roof, on a grid.</summary>
-        private List<Vector3> Seats(Transform stand)
+        private List<Vector3> Seats(Transform stand, float spacing = 0.55f)
         {
             var seats = new List<Vector3>();
             var b = BoundsOf(stand);
             var probe = Probe(stand);
             float roof = b.min.y + b.size.y * 0.8f, ground = b.min.y;
             var ups = new List<float>();
-            for (float x = b.min.x + 0.3f; x < b.max.x - 0.3f; x += 0.55f)
-                for (float z = b.min.z + 0.3f; z < b.max.z - 0.3f; z += 0.55f)
+            for (float x = b.min.x + 0.3f; x < b.max.x - 0.3f; x += spacing)
+                for (float z = b.min.z + 0.3f; z < b.max.z - 0.3f; z += spacing)
                 {
                     // down the column surface by surface: every upward face, highest first
                     ups.Clear();
@@ -1352,20 +1361,22 @@ namespace SquashBot.Visual
         /// <summary>A side's fans on a stand's steps, each looking at the floor.</summary>
         private void SeatCrowd(Transform stand, int team, System.Random rng)
         {
-            var seats = Seats(stand);
+            crowdSize = MadeCrowd;
+            float k = crowdSize;
+            var seats = Seats(stand, 0.55f * k); // (bigger fans: further apart, fewer to a step)
             foreach (var at in seats)
             {
                 if (rng.NextDouble() < 0.12) continue; // an empty seat here and there
                 float facing = Mathf.Atan2(centre.x - at.x, centre.z - at.z) * Mathf.Rad2Deg;
                 float phase = (float)rng.NextDouble() * 10f;
                 var body = batches[team * 4 + rng.Next(4)];
-                body.pos.Add(at + Vector3.up * 0.18f); body.phase.Add(phase); body.side.Add(team); body.facing.Add(facing);
+                body.pos.Add(at + Vector3.up * 0.18f * k); body.phase.Add(phase); body.side.Add(team); body.facing.Add(facing);
                 var head = batches[8 + rng.Next(4)];
-                head.pos.Add(at + Vector3.up * 0.46f); head.phase.Add(phase); head.side.Add(team); head.facing.Add(facing);
+                head.pos.Add(at + Vector3.up * 0.46f * k); head.phase.Add(phase); head.side.Add(team); head.facing.Add(facing);
                 if (rng.NextDouble() < 0.1)
                 {
                     var flag = batches[12 + team];
-                    flag.pos.Add(at + new Vector3(0.1f, 0.85f, 0f)); flag.phase.Add(phase); flag.side.Add(team); flag.facing.Add(facing);
+                    flag.pos.Add(at + new Vector3(0.1f, 0.85f, 0f) * k); flag.phase.Add(phase); flag.side.Add(team); flag.facing.Add(facing);
                 }
             }
         }

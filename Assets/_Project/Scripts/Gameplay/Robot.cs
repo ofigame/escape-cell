@@ -129,7 +129,10 @@ namespace SquashBot.Gameplay
         private Transform lift;
 
         /// <summary>foi's size in this mode (the floors show it a little bigger; 1 elsewhere).</summary>
-        public void SetSize(float size) { if (lift != null) lift.localScale = Vector3.one * size; }
+        public void SetSize(float size, float lunge = 0.32f) { if (lift != null) lift.localScale = Vector3.one * size; this.lunge = lunge; }
+
+        /// <summary>How far a blow lunges towards its target.</summary>
+        private float lunge = 0.32f;
 
         /// <summary>The animated model (scaled and rotated by animations); other modes may pose it directly.</summary>
         public Transform Visual => visual;
@@ -742,7 +745,7 @@ namespace SquashBot.Gameplay
             dir.Normalize();
             targetFacing = Quaternion.LookRotation(dir);
             visual.localRotation = targetFacing; // face the target at once, even one behind: no slow turn before a blow
-            StartAnim(Anim.Bump, transform.position, transform.position + dir * 0.32f);
+            StartAnim(Anim.Bump, transform.position, transform.position + dir * lunge);
             Skin?.Punch();
             Swings++;
             return true;

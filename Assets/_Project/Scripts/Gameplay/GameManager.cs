@@ -182,7 +182,7 @@ namespace SquashBot.Gameplay
             robot.Arrived += OnRobotArrived;
             robot.BumpedInto += OnRobotBumped;
             robot.BlockSmasher = SmashBlock;
-            robot.Forbidden = p => StageLocked(p);
+            robot.Forbidden = p => StageLocked(p) || TooCloseToRival(p);
 
             hazards = new GameObject("Hazards").AddComponent<HazardSystem>();
             hazards.Init(gridView, robot, fx, cameraRig);

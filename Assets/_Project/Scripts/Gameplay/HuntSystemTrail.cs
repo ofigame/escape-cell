@@ -430,8 +430,9 @@ namespace SquashBot.Gameplay
         private static bool IsArcher(Guard g) => g.soldier != null && Army.Family(g.soldierKind) == 2;
 
         /// <summary>How far a robot strikes from: archers 4 tiles, spears 2, swords 1 (others as ever).</summary>
-        private static int ReachOf(Guard g)
+        private int ReachOf(Guard g)
         {
+            if (g == challengeFoe) return DuelGap; // (the duel: it strikes from the gap kept)
             if (g.soldier == null) return g.gunner ? GunReach : AttackReach;
             int fam = Army.Family(g.soldierKind);
             return fam == 2 ? 4 : fam == 1 ? 2 : 1;
@@ -476,7 +477,7 @@ namespace SquashBot.Gameplay
             }
             if (g.hp < g.maxHp * (0.25f + 0.2f * (1f - FoeBoldness)) && near <= 3 && Time.time > foeFleeUntil + 6f) foeFleeUntil = Time.time + 2.5f;
             // Between blows, face to face with foi: now and then a step to the side (a dodge), more for a careful one.
-            if (near <= 2 && g.cooldown > 0.2f && Time.time > foeDodgeAt && g.step <= 0f)
+            if (near <= DuelGap && g.cooldown > 0.2f && Time.time > foeDodgeAt && g.step <= 0f)
             {
                 foeDodgeAt = Time.time + 0.6f;
                 if (rng.NextDouble() < 0.25 + 0.35 * (1f - FoeBoldness) && Sidestep(g)) return true;

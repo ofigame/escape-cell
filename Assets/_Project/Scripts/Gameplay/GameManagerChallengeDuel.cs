@@ -498,7 +498,7 @@ namespace SquashBot.Gameplay
                 rivalPowerUpAt = Time.time + 8f;
                 return;
             }
-            if (rivalShields > 0 && share < 0.75f && hunt.ChallengeFoeAt is Vector3 at && (at - robot.transform.position).sqrMagnitude < 2.5f * 2.5f && Random.value < 0.35f)
+            if (rivalShields > 0 && share < 0.75f && hunt.ChallengeFoeAt is Vector3 at && (at - robot.transform.position).sqrMagnitude < 3.5f * 3.5f && Random.value < 0.35f)
             {
                 rivalShields--;
                 hunt.ShieldFoe(DuelShieldHits);

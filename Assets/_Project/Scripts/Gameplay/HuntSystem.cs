@@ -1019,6 +1019,7 @@ namespace SquashBot.Gameplay
 
         private void MoveGuard(Guard g, GridPos next, float duration)
         {
+            if (g == challengeFoe && Chebyshev(next, robot.Position) < DuelGap && Chebyshev(next, robot.Position) < Chebyshev(g.pos, robot.Position)) return; // (a tile kept between the two foi)
             if (!g.ally) grid.SetOccupied(g.pos, false);
             g.prevPos = g.pos;
             g.pos = next;
@@ -1256,7 +1257,7 @@ namespace SquashBot.Gameplay
             }
             int dist = goal.Manhattan(g.pos);
             g.step -= dt;
-            if (g.step > 0f || (!PlayerAway && (atAlly ? allyD : near) <= Mathf.Max(1, reach - 1)) || (PlayerAway && Chebyshev(g.pos, goal) <= 1)) return;
+            if (g.step > 0f || (!PlayerAway && (atAlly ? allyD : near) <= Mathf.Max(g == challengeFoe ? DuelGap : 1, reach - 1)) || (PlayerAway && Chebyshev(g.pos, goal) <= 1)) return;
             float period = 1f / GuardSpeed(g);
             if (g.human != null) g.human.Step();
             // The arena city: round the buildings by the street map (distances from the goal), never stuck behind a block.
@@ -1648,6 +1649,9 @@ namespace SquashBot.Gameplay
 
         /// <summary>How far the robots and vanG reach with a blow: two tiles, like foi; three is out of reach.</summary>
         public const int AttackReach = 2;
+
+        /// <summary>The nearest the two foi come in the duel (in tiles, diagonals as one): a tile always between them.</summary>
+        public const int DuelGap = 3;
 
         public static int Chebyshev(GridPos a, GridPos b) => Mathf.Max(Mathf.Abs(a.x - b.x), Mathf.Abs(a.y - b.y));
     }

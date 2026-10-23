@@ -70,8 +70,8 @@ namespace SquashBot.Gameplay
             skillBar.Emoted += e => { ShowEmote(true, e); if (LiveActive) LiveNet.Emote(e); };
             skillBar.SetMeters(0f, 0f);
             DropRings();
-            myRing = FootRing.Make(new Color(0.25f, 0.6f, 1f), 2.75f, true); // (wider than foi with its cape and shield; a soft light over it)
-            foeRing = FootRing.Make(new Color(1f, 0.25f, 0.2f), 2.75f, true);
+            myRing = FootRing.Make(new Color(0.25f, 0.6f, 1f), 3f, true); // (wider than foi with its cape and shield; a soft light over it)
+            foeRing = FootRing.Make(new Color(1f, 0.25f, 0.2f), 3f, true);
         }
 
         /// <summary>The glowing rings under the two foi: which one is the player's at a glance.</summary>
@@ -160,6 +160,15 @@ namespace SquashBot.Gameplay
             skillBar.SetMeters(myMeter, rivalMeter);
             if (!LiveActive && chPhase == ChPhase.Duel && !moveBusy && !DuelCinematic) RivalMoves(); // (never inside a big moment)
             Unstick();
+        }
+
+        /// <summary>In the duel: a step that would bring foi right up to the rival (a tile is always kept between them).</summary>
+        private bool TooCloseToRival(GridPos p)
+        {
+            if (!challengeRun || chPhase != ChPhase.Duel || !hunt.ChallengeFoeTile.HasValue) return false;
+            var foe = hunt.ChallengeFoeTile.Value;
+            int d = HuntSystem.Chebyshev(p, foe);
+            return d < HuntSystem.DuelGap && d < HuntSystem.Chebyshev(robot.Position, foe);
         }
 
         // ---------- The player's moves ----------
@@ -713,13 +722,13 @@ namespace SquashBot.Gameplay
                 skillBar?.Shout(Loc.T("duel.broken"), new Color(1f, 0.45f, 0.4f));
                 return;
             }
-            if (dist <= 2.2f && Time.time > rivalJumpAt && Random.value < 0.06f + 0.05f * bold)
+            if (dist <= 3.4f && Time.time > rivalJumpAt && Random.value < 0.06f + 0.05f * bold)
             {
                 rivalJumpAt = Time.time + 9f;
                 cameraRig.StartCoroutine(RivalJumpStrike());
                 return;
             }
-            if (rivalCombo >= HeavyCombo && dist <= 2.2f && Random.value < 0.5f)
+            if (rivalCombo >= HeavyCombo && dist <= 3.4f && Random.value < 0.5f)
             {
                 rivalCombo = 0;
                 SlashFx.Create(foeAt, robot.transform.position, new Color(1f, 0.35f, 0.3f), 1.8f);
