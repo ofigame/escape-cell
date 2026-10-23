@@ -67,6 +67,7 @@ namespace SquashBot.Visual
             worn.position = shoulders + up * 0.05f * unit + back * (torso + Mathf.Clamp(wornDepth, 0f, span * 0.06f)); // (close on the back)
             var face = wornFlip ? back : -back; // (the model's front made to face the body or away, as it was made)
             worn.rotation = Quaternion.AngleAxis(swing + sway, right) * Quaternion.LookRotation(face, up);
+            Ripple(Mathf.Abs(forward) + Mathf.Abs(v.y) / Mathf.Max(1e-4f, unit) * 0.5f);
             // A long cape (or one on a foi reeling, flung, lying) reaching below the floor: shortened to end on it, as if
             // its hem lay on the ground (never through it).
             if (!wornScaleKnown) { wornScale = worn.localScale; wornScaleKnown = true; }
@@ -84,6 +85,74 @@ namespace SquashBot.Visual
         private Vector3 wornScale;
         private bool wornScaleKnown;
         private Renderer[] wornRenderers;
+
+        // The made cape as cloth: its own copy of each mesh, each point moved every frame by how far down the cape it is
+        // (the top at the shoulders still, the hem the most): waves running down it, the hem fluttering, a gust as foi moves.
+        private class Cloth
+        {
+            public Mesh mesh;
+            public Vector3[] rest, now;
+            public float[] down, across;
+            public Vector3 depth, side; // (the cape's own back-and-forth and side to side, in the mesh's own space)
+        }
+
+        private readonly List<Cloth> cloth = new List<Cloth>();
+        private bool clothMade;
+        private float gust;
+
+        private void MakeCloth()
+        {
+            clothMade = true;
+            foreach (var mf in worn.GetComponentsInChildren<MeshFilter>(true))
+            {
+                if (mf.sharedMesh == null || !mf.sharedMesh.isReadable) continue;
+                var c = new Cloth { mesh = Instantiate(mf.sharedMesh) };
+                c.mesh.MarkDynamic();
+                mf.sharedMesh = c.mesh;
+                c.rest = c.mesh.vertices;
+                c.now = (Vector3[])c.rest.Clone();
+                var toWorn = worn.worldToLocalMatrix * mf.transform.localToWorldMatrix;
+                var toMesh = toWorn.inverse;
+                c.depth = toMesh.MultiplyVector(Vector3.forward).normalized;
+                c.side = toMesh.MultiplyVector(Vector3.right).normalized;
+                // how far down the cape (0 the shoulders .. 1 the hem) and across it (-1 .. 1) each point is
+                float top = float.MinValue, bottom = float.MaxValue, half = 1e-4f;
+                var at = new Vector3[c.rest.Length];
+                for (int i = 0; i < at.Length; i++)
+                {
+                    at[i] = toWorn.MultiplyPoint3x4(c.rest[i]);
+                    top = Mathf.Max(top, at[i].y); bottom = Mathf.Min(bottom, at[i].y); half = Mathf.Max(half, Mathf.Abs(at[i].x));
+                }
+                c.down = new float[at.Length]; c.across = new float[at.Length];
+                for (int i = 0; i < at.Length; i++)
+                {
+                    c.down[i] = Mathf.Clamp01((top - at[i].y) / Mathf.Max(1e-4f, top - bottom));
+                    c.across[i] = at[i].x / half;
+                }
+                cloth.Add(c);
+            }
+        }
+
+        private void Ripple(float moving)
+        {
+            if (!clothMade) MakeCloth();
+            if (cloth.Count == 0) return;
+            gust = Mathf.Lerp(gust, Mathf.Clamp(moving, 0f, 3f), Time.deltaTime * 2.5f);
+            float scale = Mathf.Max(1e-4f, Mathf.Abs(worn.lossyScale.z));
+            float amp = 0.055f * unit / scale * (1f + 0.7f * gust); // (in the cape's own units: a few centimetres, more as it moves)
+            float t = wave;
+            foreach (var c in cloth)
+            {
+                for (int i = 0; i < c.rest.Length; i++)
+                {
+                    float d = c.down[i], a = c.across[i], w = d * d; // (the shoulders still, the hem the most)
+                    float roll = Mathf.Sin(t * 2.4f - d * 5.5f + a * 1.3f) + 0.5f * Mathf.Sin(t * 3.7f - d * 8f - a * 2.1f); // waves running down it
+                    float flutter = Mathf.Sin(t * 4.3f + a * 4f - d * 6f) * Mathf.Abs(a); // the edges and hem fluttering
+                    c.now[i] = c.rest[i] + c.depth * (amp * w * (roll + gust * 0.9f)) + c.side * (amp * 0.45f * w * flutter);
+                }
+                c.mesh.SetVertices(c.now);
+            }
+        }
 
         private int Tier => id == "back.cape" || id == "back.cape.sky" || id == "back.cape.sun" ? 0
             : id == "back.cape.night" || id == "back.cape.teal" || id == "back.cape.wine" ? 1
@@ -519,6 +588,7 @@ namespace SquashBot.Visual
             if (material != null) Destroy(material);
             if (glow != null) Destroy(glow);
             if (fittings != null) Destroy(fittings.gameObject);
+            foreach (var c in cloth) if (c.mesh != null) Destroy(c.mesh); // (the cape's own moving copies)
         }
     }
 }
