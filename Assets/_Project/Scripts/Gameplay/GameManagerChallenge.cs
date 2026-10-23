@@ -304,10 +304,13 @@ namespace SquashBot.Gameplay
             for (int g = 0; g < Army.Groups; g++) rivalPower += Mathf.RoundToInt(Army.Soldiers * rival.Power(g) * 10f);
             chUi.ShowRival(SideText(rival.name, rival.Rank, rival.trophies, rivalPower), rival.Rank);
             chUi.SetLobbyStatus(Loc.T(chOnline ? "ch.found" : "ch.offline"));
-            yield return new WaitForSecondsRealtime(2.2f);
+            yield return new WaitForSecondsRealtime(1.6f);
+            if (token != chLobbyToken) yield break;
+            int stage = Mathf.Abs(seed) % DuelStageCount;
+            yield return SpinToStage(stage); // every stage flashes by, it stops on the one drawn
             if (token != chLobbyToken) yield break;
             chUi.HideLobby();
-            BuildDuelBoard(Mathf.Abs(seed) % DuelStageCount);
+            BuildDuelBoard(stage);
         }
 
         /// <summary>The duel's name as the waiting room shows it (with its minutes).</summary>
@@ -500,9 +503,15 @@ namespace SquashBot.Gameplay
             State = GameState.Result;
             if (won)
             {
-                robot.Cheer();
+                robot.Cheer(); // (its dance, if it has one: claps otherwise)
                 AudioManager.PlaySfx(Sfx.Win);
                 fx.Burst(robot.transform.position + Vector3.up * 0.6f, Palette.Coin, Palette.CoinGlow, 40, 6f);
+            }
+            else if (!draw)
+            {
+                // the rival won: it celebrates (a dance of its own, or claps)
+                var foe = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
+                if (foe != null) foe.Celebrate(rival.bot ? "dance.d" + (1 + Mathf.Abs(rival.name.GetHashCode()) % 4) : null);
             }
             chUi.HideAll();
             cameraRig.StartCoroutine(ShowChallengeResult(won, draw, score, gold));
@@ -544,6 +553,12 @@ namespace SquashBot.Gameplay
                           + "\n" + trophies + (gold > 0 ? " · +" + gold + " " + Loc.T("ch.gold") : "")
                           + (won && chestWon.HasValue ? "\n" + Loc.F("chests.won", DuelChestScreen.TierName(chestWon.Value)) : "")
                           + "\n" + Challenge.RankName(Challenge.Rank) + " · " + Loc.F("ch.trophies", Challenge.Trophies);
+            // The winner finishes its dance first, the duel's camera on it (then the card).
+            var dancer = won ? (robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null)
+                : !draw && hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
+            float danceUntil = Time.realtimeSinceStartup + 9f;
+            yield return null;
+            while (dancer != null && dancer.PlayingMove && Time.realtimeSinceStartup < danceUntil && challengeRun) yield return null;
             yield return ShowResultDelayed(new UIController.ResultInfo
             {
                 won = won,
@@ -583,6 +598,7 @@ namespace SquashBot.Gameplay
             chPhase = ChPhase.Off;
             ClearDuel();
             if (robot != null && robot.Visual != null) robot.Visual.gameObject.SetActive(true);
+            if (capesOff && robot != null) { capesOff = false; robot.ApplyOutfit(Cosmetics.Outfit()); } // (its cape back on: it was hung up for the duel)
             if (chUi != null) chUi.HideAll();
             if (rivalLook != null) Destroy(rivalLook.gameObject);
             rivalLook = null;

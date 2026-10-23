@@ -365,6 +365,7 @@ namespace SquashBot.Data
             ["duel.stage.3"] = "Plataforma espacial",
             ["duel.stage.4"] = "Templo del bosque",
             ["duel.stage.5"] = "Ciudad del desierto",
+            ["ch.stagePick"] = "ELIGIENDO LA ARENA...",
             ["duel.stage.6"] = "Arboleda Azul",
             ["duel.stage.7"] = "Cumbre Glaciar",
             ["duel.stage.8"] = "Planeta Rojo",

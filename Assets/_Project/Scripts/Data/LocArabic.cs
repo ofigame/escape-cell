@@ -365,6 +365,7 @@ namespace SquashBot.Data
             ["duel.stage.3"] = "المنصة الفضائية",
             ["duel.stage.4"] = "معبد الغابة",
             ["duel.stage.5"] = "مدينة الصحراء",
+            ["ch.stagePick"] = "...اختيار الساحة",
             ["duel.stage.6"] = "البستان الأزرق",
             ["duel.stage.7"] = "قمة الجليد",
             ["duel.stage.8"] = "الكوكب الأحمر",

@@ -545,6 +545,9 @@ namespace SquashBot.Gameplay
                     else if (caster != null) { var d = to - caster.position; d.y = 0f; if (d.sqrMagnitude > 0.0001f) caster.rotation = Quaternion.LookRotation(d.normalized); }
                 }
                 else if (mine) robot.Strike(to);
+                // its weapon strikes each blow (swinging in the hand the move carries)
+                var held = caster != null ? caster.GetComponentInChildren<HeldWeapon>() : null;
+                if (held != null) held.Swing();
                 SlashFx.Create(from, to, colour, i == 4 ? 3f : 1.6f);
                 fx.Burst(to + Vector3.up * 0.6f, colour, colour * 2.5f, i == 4 ? 60 : 20, i == 4 ? 9f : 5f);
                 if (i == 4) Shockwave.Create(to, 3.2f, colour);

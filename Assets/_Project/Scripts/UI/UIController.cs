@@ -569,7 +569,7 @@ namespace SquashBot.UI
             UiFactory.Fill(cPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
             chestsPingText = UiFactory.Text(cPing, "0", 30f, Color.white);
             chestsPing = cPing.gameObject;
-            MenuSkin.Orb(chests, "orb_blank_brown", true);
+            MenuSkin.Orb(chests, "orb_chest"); // (the game's own gold chest on a teal orb)
 
             // The player's challenge rank (insignia, name, trophies) between the logo and foi.
             menuRank = UiFactory.Box("Rank", t, Top, new Vector2(0f, -585f), new Vector2(520f, 120f));

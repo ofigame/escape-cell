@@ -567,7 +567,7 @@ namespace SquashBot.Gameplay
         private void UpdateCloseCamera()
         {
             bool walking = roadPhase == RoadPhase.Walk && roadBeacon != null;
-            bool want = (State == GameState.Playing || State == GameState.Paused) && level != null && level.mission == MissionType.Hunt && !runner.Active
+            bool want = (State == GameState.Playing || State == GameState.Paused || (challengeRun && State == GameState.Result)) && level != null && level.mission == MissionType.Hunt && !runner.Active
                         && (roadPhase == RoadPhase.None || walking) && !previewing && !ArenaActive && robot != null;
             if (!want)
             {

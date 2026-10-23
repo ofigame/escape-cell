@@ -65,6 +65,19 @@ namespace SquashBot.Gameplay
             new DuelStage { key = "duel.stage.12", world = 5, shape = BattleArenas.Shape.Round, fx = 0, colosseum = true, theme = DuelStands.Theme.Arabia, wall = new Color(0.86f, 0.68f, 0.48f), fxColour = new Color(0.4f, 0.9f, 1f) },  // the desert palace
         };
 
+        /// <summary>The stage wheel before the duel: every stage flashes by and it stops on <paramref name="stage"/>.</summary>
+        private System.Collections.IEnumerator SpinToStage(int stage)
+        {
+            var names = new string[DuelStages.Length];
+            var pics = new Texture[DuelStages.Length];
+            for (int i = 0; i < DuelStages.Length; i++)
+            {
+                names[i] = Loc.T(DuelStages[i].key);
+                pics[i] = Resources.Load<Texture2D>("DuelStages/stage_" + i);
+            }
+            yield return chUi.StageWheel(names, pics, stage);
+        }
+
         /// <summary>The stages a match is drawn from (all of them: only the made stages are left).</summary>
         private static int DrawnStages => DuelStages.Length;
 

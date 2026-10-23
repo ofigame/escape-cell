@@ -365,6 +365,7 @@ namespace SquashBot.Data
             ["duel.stage.3"] = "Kosmik Platforma",
             ["duel.stage.4"] = "Meşə Məbədi",
             ["duel.stage.5"] = "Səhra Şəhəri",
+            ["ch.stagePick"] = "ARENA SEÇİLİR...",
             ["duel.stage.6"] = "Mavi Meşə",
             ["duel.stage.7"] = "Buzlaq Zirvəsi",
             ["duel.stage.8"] = "Qırmızı Planet",

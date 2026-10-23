@@ -365,6 +365,7 @@ namespace SquashBot.Data
             ["duel.stage.3"] = "우주 플랫폼",
             ["duel.stage.4"] = "숲의 신전",
             ["duel.stage.5"] = "사막 도시",
+            ["ch.stagePick"] = "경기장 선택 중...",
             ["duel.stage.6"] = "푸른 숲",
             ["duel.stage.7"] = "빙하 봉우리",
             ["duel.stage.8"] = "붉은 행성",

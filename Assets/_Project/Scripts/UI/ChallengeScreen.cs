@@ -110,9 +110,9 @@ namespace SquashBot.UI
             theirBar = UiFactory.TextBox("Them", top, new Vector2(1f, 0.5f), new Vector2(-118f, 0f), new Vector2(330f, 60f), "", 34f, ArmyBattleColours.Theirs, title: true, align: TextAlignmentOptions.Right);
             theirBar.rectTransform.pivot = new Vector2(1f, 0.5f);
             foreach (var bar in new[] { myBar, theirBar }) { bar.enableAutoSizing = true; bar.fontSizeMin = 20f; bar.fontSizeMax = 34f; }
-            clock = UiFactory.TextBox("Clock", h, new Vector2(0.5f, 1f), new Vector2(0f, -238f), new Vector2(220f, 70f), "", 46f, Color.white, title: true); // (between the names)
+            clock = UiFactory.TextBox("Clock", h, new Vector2(0.5f, 1f), new Vector2(0f, -203f), new Vector2(220f, 70f), "", 46f, Color.white, title: true); // (between the names: its box's top here, its middle on theirs)
             clock.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            score = UiFactory.TextBox("Score", h, new Vector2(0.5f, 1f), new Vector2(0f, -317f), new Vector2(260f, 84f), "", 60f, Palette.UiGold, title: true); // (between the health bars)
+            score = UiFactory.TextBox("Score", h, new Vector2(0.5f, 1f), new Vector2(0f, -275f), new Vector2(260f, 84f), "", 60f, Palette.UiGold, title: true); // (between the health bars: its middle on theirs)
             score.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             status = UiFactory.TextBox("Status", h, new Vector2(0.5f, 0f), new Vector2(-60f, 380f), new Vector2(860f, 70f), "", 34f, Palette.UiGold, title: true);
             status.rectTransform.pivot = new Vector2(0.5f, 0.5f);
@@ -672,6 +672,62 @@ namespace SquashBot.UI
             if (badge == null) return;
             foreach (var img in badge.GetComponentsInChildren<Image>(true))
                 if (img.transform == badge || img.color.a < 0.9f) img.enabled = img.color.a >= 0.9f && img.transform != badge;
+        }
+
+        // ---------- The stage wheel ----------
+
+        /// <summary>
+        /// After the match is found: every duel stage's picture and name flashes by, slowing down, and stops on
+        /// <paramref name="pick"/> (a gold frame, a beat), then it is gone. <paramref name="names"/> and <paramref name="pictures"/>
+        /// in the stages' order.
+        /// </summary>
+        public System.Collections.IEnumerator StageWheel(string[] names, Texture[] pictures, int pick)
+        {
+            var root = UiFactory.Stretch("StageWheel", transform);
+            var layer = root.gameObject.AddComponent<Canvas>(); layer.overrideSorting = true; layer.sortingOrder = 400;
+            root.gameObject.AddComponent<GraphicRaycaster>();
+            UiFactory.Fill(UiFactory.Stretch("Dim", root), new Color(0.02f, 0.02f, 0.07f, 0.94f)).gameObject.AddComponent<IgnoreSafeArea>();
+            var title = Flat.Label(root, Loc.T("ch.stagePick"), new Vector2(0.5f, 0.5f), new Vector2(0f, 520f), new Vector2(900f, 80f), 48f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
+            title.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var frame = UiFactory.Box("Frame", root, new Vector2(0.5f, 0.5f), new Vector2(0f, 60f), new Vector2(930f, 640f));
+            frame.pivot = new Vector2(0.5f, 0.5f);
+            var frameFace = UiFactory.Fill(frame, Flat.CardHi, UiSprites.Rounded, 1.6f);
+            var picBox = UiFactory.Rect("Picture", frame, Vector2.zero, Vector2.one, new Vector2(15f, 15f), new Vector2(-15f, -15f));
+            picBox.gameObject.AddComponent<RectMask2D>();
+            var pic = UiFactory.Stretch("Image", picBox).gameObject.AddComponent<RawImage>();
+            pic.raycastTarget = false;
+            var name = Flat.Label(root, "", new Vector2(0.5f, 0.5f), new Vector2(0f, -330f), new Vector2(900f, 90f), 58f, Flat.Text, TextAlignmentOptions.Center, bold: true);
+            name.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            int n = Mathf.Max(1, names.Length);
+            // round and round, slowing: two full turns and on to the pick
+            int steps = n * 2 + ((pick % n) + n) % n + 1;
+            for (int i = 0; i < steps; i++)
+            {
+                int s = i % n;
+                pic.texture = pictures[s];
+                name.text = names[s];
+                float k = i / (float)Mathf.Max(1, steps - 1);
+                frame.localScale = Vector3.one * 1.04f;
+                AudioManager.PlaySfx(Sfx.Click, 0.6f, 1.5f - 0.5f * k);
+                float wait = Mathf.Lerp(0.06f, 0.38f, k * k);
+                for (float e = 0f; e < wait; e += Time.unscaledDeltaTime)
+                {
+                    frame.localScale = Vector3.one * Mathf.Lerp(1.04f, 1f, e / wait);
+                    yield return null;
+                }
+            }
+            // landed: gold, a pop, a beat
+            frameFace.color = Flat.Gold;
+            name.color = Flat.Gold;
+            AudioManager.PlaySfx(Sfx.Win, 0.8f, 1.1f);
+            for (float e = 0f; e < 0.3f; e += Time.unscaledDeltaTime)
+            {
+                frame.localScale = Vector3.one * (1f + 0.08f * Mathf.Sin(e / 0.3f * Mathf.PI));
+                yield return null;
+            }
+            frame.localScale = Vector3.one;
+            yield return new WaitForSecondsRealtime(0.9f);
+            Destroy(root.gameObject);
         }
 
         // ---------- The duel's squad bar ----------

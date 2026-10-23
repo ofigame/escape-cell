@@ -139,10 +139,13 @@ namespace SquashBot.Gameplay
             chUi.ShowRival(SideText(rival.name, rival.Rank, rival.trophies, rivalPower), rival.Rank);
             chUi.SetLobbyStatus(Loc.T(liveRanked ? "live.found" : "live.foundFriend"));
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 1.2f);
-            yield return new WaitForSecondsRealtime(1.8f);
+            yield return new WaitForSecondsRealtime(1.2f);
+            if (token != chLobbyToken) { LiveNet.Leave(); chLive = false; yield break; }
+            int stage = Mathf.Abs(m.seed) % DuelStageCount; // the same stage on both screens
+            yield return SpinToStage(stage);
             if (token != chLobbyToken) { LiveNet.Leave(); chLive = false; yield break; }
             chUi.HideLobby();
-            BuildDuelBoard(Mathf.Abs(m.seed) % DuelStageCount); // the same stage on both screens
+            BuildDuelBoard(stage);
         }
 
         // ---------- The match ----------
