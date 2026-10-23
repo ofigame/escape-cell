@@ -26,6 +26,11 @@ namespace SquashBot.Visual
         /// <summary>The world the next vanG is made for (0-based; the game sets it as a floor starts), when its maker does
         /// not say: its model is chosen by it.</summary>
         public static int CurrentWorld = -1;
+        /// <summary>The level being played (0-based; -1: none): its vanG's model, colour and size (see <see cref="VanGRig.LookFor"/>).</summary>
+        public static int CurrentLevel = -1;
+        /// <summary>This one's own size against the usual (a guard chief smaller, a world's monster bigger).</summary>
+        private float sizeMul = 1f;
+        private Color rigGlow = Color.black;
 
         /// <summary>The vanG's model, when it is one (its moves played on its bones).</summary>
         private VanGRig rig;
@@ -37,6 +42,8 @@ namespace SquashBot.Visual
 
         // Big enough to read as the boss of its floor, while still standing on a single tile.
         private const float Size = 1.45f;
+
+        private static int LevelCatalogWorld(int level) => SquashBot.Data.LevelCatalog.WorldOf(level);
 
         public static Monster Create(Kind kind, Vector3 position, int health, Color tint, Transform lookAt, int notchEvery = 1, int world = -1)
         {
@@ -63,11 +70,16 @@ namespace SquashBot.Visual
             eyeMat = MaterialFactory.Create(new Color(1f, 0.95f, 0.5f), new Color(2f, 1.6f, 0.4f));
             var black = MaterialFactory.Create(new Color(0.08f, 0.06f, 0.12f), Color.black);
             // The vanGs made as models (four, by how far on the world is); the cage stays as it is.
-            if (kind != Kind.Cage && world >= 0) rig = VanGRig.Build(body, VanGRig.ModelFor(world), out var paint);
+            (int model, Color tint, float size, bool boss) look = CurrentLevel >= 0 && LevelCatalogWorld(CurrentLevel) == world ? VanGRig.LookFor(CurrentLevel) : (VanGRig.ModelFor(world), Color.white, 1f, false);
+            if (kind != Kind.Cage && world >= 0) rig = VanGRig.Build(body, look.model, out var paint);
             if (rig != null)
             {
                 skin = rig.GetComponentInChildren<Renderer>().sharedMaterial; // (it flashes white when hit)
-                skinColor = Color.white;
+                // its level's colour on its own picture (and a glow for a world's monster)
+                rigGlow = look.boss ? look.tint * 0.12f : Color.black;
+                MaterialFactory.SetColors(skin, look.tint, rigGlow);
+                skinColor = look.tint;
+                sizeMul = look.size;
             }
             else switch (kind)
             {
@@ -125,12 +137,12 @@ namespace SquashBot.Visual
                     break;
             }
             if (kind != Kind.Cage && rig == null) Menace(skinColor);
-            body.localScale = Vector3.one * Size;
+            body.localScale = Vector3.one * Size * sizeMul;
 
             // The health bar over its head.
             barRoot = new GameObject("HealthBar").transform;
             barRoot.SetParent(transform, false);
-            barRoot.localPosition = new Vector3(0f, rig != null ? 4.4f : 2.3f, 0f); // (over the taller vanG models)
+            barRoot.localPosition = new Vector3(0f, rig != null ? 4.4f * sizeMul : 2.3f, 0f); // (over the taller vanG models, as big as it is)
             barRoot.localScale = Vector3.one * 1.35f;
             Shapes.Rounded("Back", barRoot, Vector3.zero, new Vector3(1.24f, 0.2f, 0.04f), 0.06f, MaterialFactory.Create(new Color(0.1f, 0.08f, 0.16f), Color.black));
             barMat = MaterialFactory.Create(new Color(0.4f, 1f, 0.4f), new Color(0.4f, 1.6f, 0.4f));
@@ -266,7 +278,8 @@ namespace SquashBot.Visual
             }
 
             float breathe = 1f + Mathf.Sin(time * (kind == Kind.Slime ? 4f : 2f)) * (kind == Kind.Slime ? 0.06f : 0.025f);
-            var scale = new Vector3(Size / Mathf.Sqrt(breathe), Size * breathe, Size / Mathf.Sqrt(breathe));
+            float sz = Size * sizeMul;
+            var scale = new Vector3(sz / Mathf.Sqrt(breathe), sz * breathe, sz / Mathf.Sqrt(breathe));
             float y = kind == Kind.Ghost ? 0.15f + Mathf.Sin(time * 2f) * 0.1f : 0f;
 
             if (stompT >= 0f)
@@ -282,7 +295,7 @@ namespace SquashBot.Visual
             {
                 hitT = Mathf.Min(1f, hitT + Time.deltaTime * 2.5f);
                 float flash = 1f - hitT;
-                if (rig != null) MaterialFactory.SetColors(skin, Color.white, Color.Lerp(Color.black, new Color(1.6f, 1.6f, 1.6f), flash));
+                if (rig != null) MaterialFactory.SetColors(skin, Color.Lerp(skinColor, Color.white, flash), Color.Lerp(rigGlow, new Color(1.6f, 1.6f, 1.6f), flash)); // (back to its own colour after)
                 else MaterialFactory.SetColors(skin, Color.Lerp(skinColor, Color.white, flash), Color.Lerp(skinColor * 0.25f, new Color(3f, 3f, 3f), flash));
                 body.localPosition = Random.insideUnitSphere * 0.08f * flash;
             }

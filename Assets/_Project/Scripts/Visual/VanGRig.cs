@@ -14,6 +14,28 @@ namespace SquashBot.Visual
         /// <summary>The vanG of world <paramref name="world"/> (0-based): four of them, harder ones further on.</summary>
         public static int ModelFor(int world) => world < 0 ? 0 : 1 + Mathf.Clamp(world * 4 / Data.LevelCatalog.WorldCount, 0, 3);
 
+        /// <summary>
+        /// The vanG of a level (0-based), spread over the 250: the four models take turns through every world (each world
+        /// starts on another one), every world tints them in its own colour (deeper the further on), and their size tells
+        /// what they are: the guard chiefs of levels 1–6 small and growing, the strong chiefs of 8–9 bigger, the world's
+        /// own monster on level 10 the biggest of all, glowing, its world's model.
+        /// </summary>
+        public static (int model, Color tint, float size, bool boss) LookFor(int level)
+        {
+            if (level < 0) return (1, Color.white, 1f, false);
+            int world = level / 10, slot = level % 10;
+            bool boss = slot == 9;
+            int model = boss ? 1 + world % 4 : 1 + (world * 3 + slot) % 4;
+            float hue = Mathf.Repeat(0.03f + world * 0.137f, 1f); // (worlds a good way round the colour wheel apart)
+            float depth = Mathf.Lerp(0.22f, 0.5f, world / 24f) + (boss ? 0.15f : slot >= 7 ? 0.07f : 0f);
+            var tint = Color.Lerp(Color.white, Color.HSVToRGB(hue, 0.85f, 1f), depth);
+            float size = boss ? 1.25f + 0.15f * (world / 24f)
+                : slot >= 7 ? 1f
+                : slot == 6 ? 0.9f
+                : 0.72f + 0.03f * slot; // (the guard chiefs: smaller than a world's monster)
+            return (model, tint, size, boss);
+        }
+
         /// <summary>Each model's turn so it faces +Z.</summary>
         public static float[] Yaw = { 0f, 0f, 0f, 0f };
 

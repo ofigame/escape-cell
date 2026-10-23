@@ -17,7 +17,7 @@ namespace SquashBot.UI
     /// </summary>
     public class CompetitionScreen : MonoBehaviour
     {
-        private enum Tab { Season, Top, Cup, Clan, Quests }
+        private enum Tab { Season, Top, Cup, Clan } // (the quests have their own screen, the duel's and the levels' together)
 
         /// <summary>Coins came in (a reward taken): the menu's purse is refreshed.</summary>
         public event Action CoinsChanged;
@@ -25,7 +25,7 @@ namespace SquashBot.UI
         private UiScreen screen;
         private RectTransform content, subBar;
         private TextMeshProUGUI status;
-        private readonly Button[] tabs = new Button[5];
+        private readonly Button[] tabs = new Button[4];
         private Tab tab;
         private string topScope = "world";
         private TMP_InputField input;
@@ -52,11 +52,11 @@ namespace SquashBot.UI
             Flat.Background(p);
             Flat.Label(p, Loc.T("comp.title"), new Vector2(0.5f, 1f), new Vector2(0f, -85f), new Vector2(960f, 80f), 50f, Flat.Text, TextAlignmentOptions.Center, bold: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            string[] names = { "comp.season", "comp.top", "comp.cup", "comp.clan", "comp.quests" };
-            for (int i = 0; i < 5; i++)
+            string[] names = { "comp.season", "comp.top", "comp.cup", "comp.clan" };
+            for (int i = 0; i < names.Length; i++)
             {
                 var t = (Tab)i;
-                tabs[i] = Flat.Button(p, Loc.T(names[i]), new Vector2(0.5f, 1f), new Vector2((i - 2) * 200f, -235f), new Vector2(190f, 84f), Flat.CardHi, Flat.Text, () => { Click(); Open(t); }, 26f);
+                tabs[i] = Flat.Button(p, Loc.T(names[i]), new Vector2(0.5f, 1f), new Vector2((i - 1.5f) * 236f, -235f), new Vector2(222f, 84f), Flat.CardHi, Flat.Text, () => { Click(); Open(t); }, 28f);
                 ((RectTransform)tabs[i].transform).pivot = new Vector2(0.5f, 0.5f);
             }
             subBar = UiFactory.Box("Sub", p, new Vector2(0.5f, 1f), new Vector2(0f, -335f), new Vector2(1000f, 90f));
@@ -85,7 +85,7 @@ namespace SquashBot.UI
         private void Open(Tab t)
         {
             tab = t;
-            for (int i = 0; i < 5; i++) ((Image)tabs[i].targetGraphic).color = i == (int)t ? new Color(1f, 0.6f, 0.25f) : Flat.CardHi;
+            for (int i = 0; i < tabs.Length; i++) ((Image)tabs[i].targetGraphic).color = i == (int)t ? new Color(1f, 0.6f, 0.25f) : Flat.CardHi;
             Clear();
             for (int i = subBar.childCount - 1; i >= 0; i--) Destroy(subBar.GetChild(i).gameObject);
             status.text = "";
@@ -95,8 +95,7 @@ namespace SquashBot.UI
                 case Tab.Season: StartCoroutine(Season()); break;
                 case Tab.Top: TopBar(); StartCoroutine(Top()); break;
                 case Tab.Cup: StartCoroutine(Cup()); break;
-                case Tab.Clan: StartCoroutine(ClanTab()); break;
-                default: Quests(); break;
+                default: StartCoroutine(ClanTab()); break;
             }
         }
 
@@ -388,33 +387,6 @@ namespace SquashBot.UI
             yield return FoiNet.LeaveClan(r => ok = r);
             Open(Tab.Clan);
             if (!ok) Offline();
-        }
-
-        // ---------- The quests ----------
-
-        private void Quests()
-        {
-            foreach (bool weekly in new[] { false, true })
-            {
-                var t = Card(70f, new Color(0f, 0f, 0f, 0f));
-                Text(t, Loc.T(weekly ? "comp.weekly" : "comp.daily"), new Vector2(0f, 0.5f), new Vector2(20f, 0f), new Vector2(900f, 60f), 32f, Flat.Gold, bold: true);
-                for (int i = 0; i < ChallengeQuests.Count; i++)
-                {
-                    var q = ChallengeQuests.Get(weekly, i);
-                    bool w = weekly; int idx = i;
-                    var r = Card(120f, q.claimed ? new Color(0.12f, 0.2f, 0.14f) : Flat.Card);
-                    Text(r, ChallengeQuests.Text(q) + "\n<size=26><color=#FFC64D>" + Loc.F("comp.coins", q.coins) + "</color>   <color=#9EA6C2>" + q.progress + "/" + q.target + "</color></size>", new Vector2(0f, 0.5f), new Vector2(30f, 0f), new Vector2(680f, 110f), 30f, Flat.Text, bold: true);
-                    if (q.claimed) Text(r, Loc.T("comp.taken"), new Vector2(1f, 0.5f), new Vector2(-110f, 0f), new Vector2(200f, 80f), 30f, new Color(0.4f, 1f, 0.5f), TextAlignmentOptions.Center, true);
-                    else if (q.Done) SmallButton(r, Loc.T("comp.claim"), new Color(1f, 0.7f, 0.2f), () =>
-                    {
-                        int coins = ChallengeQuests.Claim(w, idx);
-                        if (coins > 0) { CoinsChanged?.Invoke(); AudioManager.PlaySfx(Sfx.Coin, 1f, 1f); }
-                        Open(Tab.Quests);
-                        if (coins > 0) status.text = Loc.F("comp.got", coins);
-                    });
-                }
-            }
-            Fit();
         }
     }
 

@@ -139,7 +139,7 @@ namespace SquashBot.UI
                     foreach (var k in Defenses.All) { DefensePackCell(k); DefenseStepCell(k); }
                     break;
                 case Tab.Upgrades:
-                    foreach (var item in new[] { Item.Armor, Item.Shield, Item.Helmet, Item.Rescue, Item.Hover, Item.Lives }) ItemCell(item); // (the coin magnet is no longer sold)
+                    foreach (var item in new[] { Item.Armor, Item.Shield, Item.Helmet, Item.Hover }) ItemCell(item); // (no coin magnet, energy store or rescue charges: the scenario's spare safety nets are gone)
                     PaintCell();
                     break;
                 default:

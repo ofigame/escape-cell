@@ -570,14 +570,19 @@ namespace SquashBot.Gameplay
             chPhase = ChPhase.Done;
             if (levelTps) { levelTps = false; ExitTps(); } // the result card upright
             bool won = outcome > 0, draw = outcome == 0;
+            Monetization.Ads.NoteResult(won || draw);
             // The challenge's quests: a duel played, won, won alone or against a live rival.
             ChallengeQuests.Report(DuelGoal.Play);
             if (won) { ChallengeQuests.Report(DuelGoal.Win); if (!chDuelSquads) ChallengeQuests.Report(DuelGoal.SoloWin); if (chLive) ChallengeQuests.Report(DuelGoal.LiveWin); }
-            // A duel won brings a chest: the better the streak and the health left, the better the chest.
-            chestWon = DuelChests.OnDuelEnd(won, draw, chOnline || chLive, health);
+            // A duel won brings a chest: the better the streak and the health left, the better the chest. A friend's
+            // match brings none (nor touches the streak), and pays gold only for the day's first three.
+            bool friendly = chLive && !liveRanked;
+            chestWon = friendly ? null : DuelChests.OnDuelEnd(won, draw, chOnline || chLive, health);
+            bool paid = !friendly || FriendMatchesPaid.Take();
             if (colosseum != null) colosseum.Cheer(won ? 0 : draw ? -1 : 1, 1f);
             hunt.Freeze();
-            int gold = won && (chOnline || chLive) ? Challenge.WinGold : 0; // offline practice pays no prize
+            int gold = won && (chOnline || chLive) && paid ? Challenge.WinGold : 0; // offline practice pays no prize
+            if (!paid) { coinsThisRun = 0; comboBonus = 0; } // (nor the coins picked up in it)
             SaveData.Coins += draw ? 0 : gold + Earned;
             State = GameState.Result;
             danceAt = won ? robot.transform : !draw ? hunt.ChallengeFoeModel : null;

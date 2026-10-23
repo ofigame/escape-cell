@@ -81,7 +81,7 @@ namespace SquashBot.UI
             counts[i] = Flat.Label(row, "", new Vector2(0f, 0.5f), new Vector2(300f, 10f), new Vector2(380f, 56f), 36f, ChestModels.StrapColour(t));
             counts[i].rectTransform.pivot = new Vector2(0f, 0.5f);
             // What may come out, and how likely (shown before any chest is opened).
-            var odds = Flat.Label(row, Loc.T("chests.odds" + i), new Vector2(0f, 0.5f), new Vector2(300f, -92f), new Vector2(380f, 64f), 22f, Flat.Muted, wrap: true);
+            var odds = Flat.Label(row, DuelChests.OddsText(t), new Vector2(0f, 0.5f), new Vector2(300f, -92f), new Vector2(380f, 64f), 22f, Flat.Muted, wrap: true);
             odds.rectTransform.pivot = new Vector2(0f, 0.5f);
             // what may come out of it, with pictures (a reason to win the next duel)
             var see = Flat.Button(row, Loc.T("chests.contents"), new Vector2(1f, 0.5f), new Vector2(-30f, -92f), new Vector2(250f, 64f), Flat.CardHi, Flat.Text, () => ShowContents(t), 24f);
@@ -122,7 +122,7 @@ namespace SquashBot.UI
         {
             for (int i = contentsGrid.childCount - 1; i >= 0; i--) Destroy(contentsGrid.GetChild(i).gameObject);
             contentsTitle.text = TierName(t);
-            contentsOdds.text = Loc.T("chests.odds" + (int)t);
+            contentsOdds.text = DuelChests.OddsText(t);
             int n = 0;
             void Cell(Texture pic, string name, bool rare)
             {

@@ -113,7 +113,7 @@ namespace SquashBot.Data
         /// <summary>Today's counter: a few of the items, a different mix every day.</summary>
         public static Boost[] Counter()
         {
-            var all = (Boost[])System.Enum.GetValues(typeof(Boost));
+            var all = System.Array.FindAll((Boost[])System.Enum.GetValues(typeof(Boost)), b => b != Boost.TunnelBoost && b != Boost.ExtraRescue); // (road boost and extra rescue: no more)
             int day = (int)(System.DateTime.Today - new System.DateTime(2026, 1, 1)).TotalDays;
             var pick = new Boost[CounterSize];
             int start = ((day % all.Length) + all.Length) % all.Length;
@@ -142,7 +142,7 @@ namespace SquashBot.Data
 
         public static float HoverSeconds => 2f + 0.5f * Level(Upgrade.Hover);
 
-        public static int MaxLives => 3 + Level(Upgrade.Lives); // three a day (ads refill)
+        public static int MaxLives => 3; // three energy at most (the energy store upgrade is gone)
 
         /// <summary>Rescue charges a level can bank at once.</summary>
         public static int MaxRescues => 3 + Level(Upgrade.Rescue);

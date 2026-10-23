@@ -57,32 +57,64 @@ namespace SquashBot.Monetization
         /// <summary>The menus want the banner right now (a real banner that loads later shows up if so).</summary>
         public static bool BannerWanted;
 
-        // Pacing of the ads between levels: never in the first levels, at most every few levels and minutes, and
-        // never right after the player chose to watch a rewarded ad.
-        private const int FreeLevels = 10, LevelsBetween = 3;
-        private const float SecondsBetween = 90f, AfterRewarded = 60f;
-        private static int levelsSince;
-        private static float lastFullScreen = -999f;
+        // The ad plan (the scenario's §11): interstitials only at natural breaks, paced and capped.
+        //  - after a level, back to the map: from level 11, every 2nd level, at least 120 s after the last one;
+        //  - after a duel, back to the menu: every 3rd duel (the first 5 are free), at least 180 s after the last one;
+        //  - never within 90 s of a rewarded ad; never after 3 losses in a row; at most 3 in 30 minutes and 20 a day.
+        private const int FreeLevels = 10, LevelsBetween = 2, FreeDuels = 5, DuelsBetween = 3, PerHalfHour = 3, PerDay = 20;
+        private const float LevelGap = 120f, DuelGap = 180f, AfterRewarded = 90f;
+        private static int levelsSince, duelsSince, lossesInRow;
+        private static float lastInterstitial = -999f, lastRewarded = -999f;
+        private static readonly System.Collections.Generic.List<float> recent = new System.Collections.Generic.List<float>();
 
-        /// <summary>A rewarded or interstitial ad was just watched.</summary>
-        public static void MarkFullScreenShown() => lastFullScreen = Time.realtimeSinceStartup;
+        /// <summary>A rewarded ad was just watched (no interstitial for a while after it).</summary>
+        public static void MarkFullScreenShown() => lastRewarded = Time.realtimeSinceStartup;
 
-        /// <summary>
-        /// After a level is won and the player moves on: maybe an interstitial first, then <paramref name="then"/>.
-        /// </summary>
+        /// <summary>A level or duel ended in a loss (or not): three losses in a row skip the next interstitial.</summary>
+        public static void NoteResult(bool won) => lossesInRow = won ? 0 : lossesInRow + 1;
+
+        private static int ShownToday
+        {
+            get => Prefs.GetString("sb_ads_day", "") == DateTime.Now.ToString("yyyyMMdd") ? Prefs.GetInt("sb_ads_today", 0) : 0;
+            set { Prefs.SetString("sb_ads_day", DateTime.Now.ToString("yyyyMMdd")); Prefs.SetInt("sb_ads_today", value); }
+        }
+
+        private static int DuelsPlayed { get => Prefs.GetInt("sb_ads_duels", 0); set => Prefs.SetInt("sb_ads_duels", value); }
+
+        /// <summary>Whether an interstitial may come now (the caps and gaps common to every break).</summary>
+        private static bool Allowed(float gap)
+        {
+            float now = Time.realtimeSinceStartup;
+            recent.RemoveAll(t => now - t > 1800f);
+            return Interstitial.IsReady && lossesInRow < 3 && now - lastInterstitial >= gap && now - lastRewarded >= AfterRewarded
+                   && recent.Count < PerHalfHour && ShownToday < PerDay;
+        }
+
+        private static void Show(Action then)
+        {
+            lastInterstitial = Time.realtimeSinceStartup;
+            recent.Add(lastInterstitial);
+            ShownToday = ShownToday + 1;
+            Interstitial.Show(then);
+        }
+
+        /// <summary>After a level, the player going back to the map: maybe an interstitial first, then <paramref name="then"/>.</summary>
         public static void AfterLevel(int levelIndex, Action then)
         {
             levelsSince++;
-            float since = Time.realtimeSinceStartup - lastFullScreen;
-            bool due = levelIndex >= FreeLevels && levelsSince >= LevelsBetween && since >= SecondsBetween && since >= AfterRewarded;
-            if (!due || !Interstitial.IsReady)
-            {
-                then?.Invoke();
-                return;
-            }
+            if (levelIndex < FreeLevels || levelsSince < LevelsBetween || !Allowed(LevelGap)) { then?.Invoke(); return; }
             levelsSince = 0;
-            MarkFullScreenShown();
-            Interstitial.Show(then);
+            Show(then);
+        }
+
+        /// <summary>After a duel, the player going back to the menu: maybe an interstitial first, then <paramref name="then"/>.</summary>
+        public static void AfterDuel(Action then)
+        {
+            DuelsPlayed = DuelsPlayed + 1;
+            duelsSince++;
+            if (DuelsPlayed <= FreeDuels || duelsSince < DuelsBetween || !Allowed(DuelGap)) { then?.Invoke(); return; }
+            duelsSince = 0;
+            Show(then);
         }
 
         /// <summary>Height (in UI units of the 1080-wide reference canvas) kept free at the bottom of menu screens for the banner.</summary>

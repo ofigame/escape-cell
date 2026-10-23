@@ -134,7 +134,7 @@ namespace SquashBot.UI
         // Menu
         private UiScreen menu;
         private RectTransform arenaTip;
-        private GameObject armyPing;
+        private GameObject loginPing;
         private int armyWorld;
         private CanvasGroup arenaTipGroup;
         private float arenaTipClock;
@@ -255,7 +255,7 @@ namespace SquashBot.UI
         private GameObject questsPing;
 
         /// <summary>The quests button's red dot: a finished quest waits to be claimed.</summary>
-        private void RefreshQuests() { if (questsPing != null) questsPing.SetActive(DailyQuests.Claimable > 0); }
+        private void RefreshQuests() { if (questsPing != null) questsPing.SetActive(QuestsScreen.Waiting > 0); }
         private RectTransform bagButton;
         private RectTransform adHealButton;
         public void SetAdHealVisible(bool on) { on &= !challengeHud; if (adHealButton != null && adHealButton.gameObject.activeSelf != on) adHealButton.gameObject.SetActive(on); }
@@ -408,6 +408,13 @@ namespace SquashBot.UI
             flash.transform.SetAsLastSibling();
         }
         public DailyBonusScreen DailyBonus { get; private set; }
+        public LoginCalendarScreen LoginView { get; private set; }
+
+        /// <summary>The calendar button's red dot: on while today's gift waits.</summary>
+        public void RefreshLogin()
+        {
+            if (loginPing != null) loginPing.SetActive(Data.LoginCalendar.Ready);
+        }
 
         private GameObject bannerPlaceholder;
 
@@ -456,6 +463,8 @@ namespace SquashBot.UI
             Arenas = BattleArenaScreen.Create(root);
             Garage = GarageScreen.Create(root);
             DailyBonus = DailyBonusScreen.Create(root);
+            LoginView = LoginCalendarScreen.Create(root);
+            LoginView.Claimed += _ => RefreshLogin();
             Guide = GuideScreen.Create(root);
             Briefing = BriefingScreen.Create(root);
             Languages = LanguagePicker.Create(root);
@@ -503,7 +512,8 @@ namespace SquashBot.UI
             var coinsButton = coins.gameObject.AddComponent<Button>(); coinsButton.targetGraphic = coinsHit;
             coinsButton.onClick.AddListener(() => { Audio.AudioManager.PlaySfx(Audio.Sfx.Click, 0.7f); ShopPressed?.Invoke(); });
 
-            var lives = MenuSkin.Picture("Lives", t, "pill_heart", TopLeft, new Vector2(310f, -34f), new Vector2(272f, 106f));
+            var lives = MenuSkin.Picture("Lives", t, "pill_energy", // (the level tries are energy now: a bolt, not a heart)
+                 TopLeft, new Vector2(310f, -34f), new Vector2(272f, 106f));
             menuLives = UiFactory.TextBox("Value", lives, new Vector2(0f, 0.5f), new Vector2(92f, 2f), new Vector2(166f, 80f),
                 "", 40f, Color.white, align: TextAlignmentOptions.Left);
             MenuSkin.Word(menuLives, new Color(0.05f, 0.08f, 0.2f));
@@ -546,17 +556,17 @@ namespace SquashBot.UI
             questsPing = qPing.gameObject;
             MenuSkin.Orb(menuQuests, "orb_quests");
 
-            // The army: under the quests (its free development points glow on it).
-            var army = MenuArt.DockButton(t, Loc.T("army.button"), MenuArt.Icon.Swords, new Color(1f, 0.72f, 0.25f), TopLeft, new Vector2(110f, -400f), 120f, () => ArmyView.Show(armyWorld));
-            ((RectTransform)army.transform).pivot = new Vector2(0.5f, 0.5f);
-            var aPing = UiFactory.Box("Ping", army.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(44f, 44f));
-            aPing.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(aPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
-            UiFactory.Text(aPing, "!", 32f, Color.white);
-            armyPing = aPing.gameObject;
-            MenuSkin.Orb(army, "orb_army");
+            // The login calendar (where the army was): a red dot while today's gift waits.
+            var login = MenuArt.DockButton(t, Loc.T("login.button"), MenuArt.Icon.Chest, new Color(1f, 0.72f, 0.25f), TopLeft, new Vector2(110f, -400f), 120f, () => LoginView.Show());
+            ((RectTransform)login.transform).pivot = new Vector2(0.5f, 0.5f);
+            var lPing = UiFactory.Box("Ping", login.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(44f, 44f));
+            lPing.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(lPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
+            UiFactory.Text(lPing, "!", 32f, Color.white);
+            loginPing = lPing.gameObject;
+            MenuSkin.Orb(login, "orb_blank_gold", keepIcon: true);
 
-            // Friends: under the army (add a friend, invite one to a duel).
+            // Friends: under the calendar (add a friend, invite one to a duel).
             var friends = MenuArt.DockButton(t, Loc.T("friends.button"), MenuArt.Icon.Friends, new Color(0.4f, 0.75f, 1f), TopLeft, new Vector2(110f, -570f), 120f, () => FriendsPressed?.Invoke());
             ((RectTransform)friends.transform).pivot = new Vector2(0.5f, 0.5f);
             MenuSkin.Orb(friends, "orb_friends");
@@ -769,7 +779,7 @@ namespace SquashBot.UI
             menuCoins.text = coins.ToString();
             menuStars.text = Progress.TotalStars(levelCount).ToString();
             armyWorld = SquashBot.Data.LevelCatalog.WorldOf(levelIndex);
-            if (armyPing != null) armyPing.SetActive(SquashBot.Data.Army.FreePoints > 0);
+            RefreshLogin();
             RefreshQuests();
             RefreshChests();
             RefreshDailyBonus();
@@ -1034,6 +1044,17 @@ namespace SquashBot.UI
         }
 
         /// <summary>A heart drawn from two circles and a rotated square.</summary>
+        /// <summary>A lightning bolt (the level tries' energy), as the menu's pill draws it.</summary>
+        public static void BoltIcon(Transform parent, Vector2 position, float size)
+        {
+            var root = UiFactory.Box("Bolt", parent, new Vector2(0f, 0.5f), position, new Vector2(size, size));
+            root.pivot = new Vector2(0.5f, 0.5f);
+            var img = root.gameObject.AddComponent<Image>(); // (the painted bolt, as on the energy pill)
+            img.sprite = MenuSkin.Get("icon_bolt");
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+        }
+
         public static void HeartIcon(Transform parent, Vector2 position, float size)
         {
             var root = UiFactory.Box("Heart", parent, new Vector2(0f, 0.5f), position, new Vector2(size, size));
@@ -1058,8 +1079,7 @@ namespace SquashBot.UI
             UiFactory.TextBox("Title", card, Top, new Vector2(0f, -60f), new Vector2(800f, 120f), Loc.T("lives.title"), 80f, Palette.UiRed, title: true);
 
             var heart = UiFactory.Box("HeartHolder", card, Top, new Vector2(0f, -200f), new Vector2(160f, 160f));
-            HeartIcon(heart, new Vector2(80f, 0f), 150f);
-            UiFactory.Text(heart, "0", 64f, Color.white);
+            BoltIcon(heart, new Vector2(80f, 0f), 170f);
 
             noLivesTimer = UiFactory.TextBox("Timer", card, Top, new Vector2(0f, -390f), new Vector2(800f, 70f), "", 46f, Palette.UiText, FontStyles.Normal);
             UiFactory.MakeButton(card, Loc.T("lives.watchAd"), Kind.Primary, Top, new Vector2(0f, -500f), new Vector2(640f, 160f), () => WatchAdPressed?.Invoke(), 64f);
@@ -1250,6 +1270,7 @@ namespace SquashBot.UI
             if (ChallengeStats != null && ChallengeStats.IsOpen) { ChallengeStats.Hide(); return true; }
             if (ArmyView != null && ArmyView.IsOpen) { ArmyView.Hide(); return true; }
             if (DailyBonus != null && DailyBonus.Visible) { DailyBonus.Hide(); return true; }
+            if (LoginView != null && LoginView.Visible) { LoginView.Hide(); return true; }
             return false;
         }
 
@@ -2072,6 +2093,7 @@ namespace SquashBot.UI
             Arenas.Hide();
             Garage.Hide();
             DailyBonus.Hide();
+            LoginView.Hide();
             Guide.Hide();
             if (ArmyView != null) ArmyView.Hide();
             if (ChallengeStats != null) ChallengeStats.Hide();

@@ -75,6 +75,7 @@ namespace SquashBot.Gameplay
         private int Earned => (coinsThisRun + comboBonus) * (doubleCoins ? 2 : 1);
         private bool doubleCoins; // the Double Coins boost is on for this run
         private float elapsed;
+        private float levelStartedAt; // (each level is timed: see LevelTimes)
         private float slowMoLeft;
         /// <summary>A split second of near-freeze when a robot or tower goes down: the blow feels heavy.</summary>
         private float hitStopLeft;
@@ -134,7 +135,7 @@ namespace SquashBot.Gameplay
         private const float TunnelChance = 0.7f;
 
         private int World => LevelCatalog.WorldOf(levelIndex);
-        private bool RescueEnabled => World >= RescueFromWorld && !challengeRun; // a challenge has no rescues
+        private bool RescueEnabled => false; // (no rescue charges any more: the scenario drops the spare safety nets; hearts and shields stay)
         private bool HoverEnabled => World >= HoverFromWorld && !arenaRun && !challengeRun; // the arenas walk freely: no hover
 
         private int LevelCount => levelSet.levels.Count;
@@ -290,6 +291,7 @@ namespace SquashBot.Gameplay
             ui.GaragePressed += ShowGarage;
             ui.ShopPressed += ShowShop;
             ui.DailyBonus.PlayPressed += PlayDailyBonus;
+            ui.LoginView.Claimed += OnLoginGift;
             ui.DailyBonus.AdPressed += WatchAdForDailyBonus;
             ui.Garage.PreviewChanged += outfit => robot.ApplyOutfit(outfit);
             ui.Garage.DancePreview += robot.Cheer;
@@ -313,7 +315,12 @@ namespace SquashBot.Gameplay
             ui.DoublePressed += WatchAdToDouble;
             ui.StoryPressed += world => PlayStory(world, world * LevelCatalog.LevelsPerWorld, () => ShowMap());
             ui.MapPressed += () => ShowMap();
-            ui.MenuPressed += ShowMenu;
+            ui.MenuPressed += () =>
+            {
+                // Back from a duel's result: an interstitial may come first (paced: see Ads.AfterDuel).
+                if (challengeRun && chPhase == ChPhase.Done) Monetization.Ads.AfterDuel(ShowMenu);
+                else ShowMenu();
+            };
             ui.PausePressed += Pause;
             ui.BagPressed += OpenBag;
             ui.BombPressed += ThrowBomb;
@@ -553,6 +560,11 @@ namespace SquashBot.Gameplay
             cameraRig.SetMenuFocus(false);
             cameraRig.Showcase(robot.transform, 0.7f);
             ProfileOnMenu();
+            if (!loginOffered && LoginCalendar.Ready && NextLevel >= 2)
+            {
+                loginOffered = true;
+                ui.LoginView.Show();
+            }
         }
 
         // The menu's showroom and the 3D map have their own cameras; the game's camera only draws when neither is up.
@@ -687,18 +699,18 @@ namespace SquashBot.Gameplay
             cameraRig.SetMenuFocus(true);
         }
 
-        private void ClaimDaily()
+        /// <summary>Today's login gift was taken: a burst of coins round foi, and the menu's counts brought up to date.</summary>
+        private void OnLoginGift(int day)
         {
-            int got = DailyChest.Claim();
-            if (got <= 0) return;
             fx.Burst(robot.transform.position + Vector3.up * 0.8f, Palette.Coin, Palette.CoinGlow, 40, 6f);
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 1.2f);
             Haptics.Medium();
             robot.Cheer();
-            FloatAt(robot.transform.position + Vector3.up * 0.4f, Loc.F("daily.got", got), Palette.UiGold);
             ui.RefreshMenuCoins();
-            OfferDailyDouble(got);
+            ui.RefreshChests();
         }
+
+        private bool loginOffered; // (the calendar opens by itself once a session, on the menu, while a gift waits)
 
         private void StartLevel(int index, List<Boost> boosts = null)
         {
@@ -726,6 +738,8 @@ namespace SquashBot.Gameplay
             dailyRun = false;
             levelIndex = Mathf.Clamp(index, 0, LevelCount - 1);
             Monster.CurrentWorld = World; // (the briefing's vanG as the floor's)
+            Monster.CurrentLevel = levelIndex; // (its model, colour and size: spread over the 250 levels)
+            levelStartedAt = Time.realtimeSinceStartup;
             Shields.Ready(); // (a new floor: the shield ready)
             level = levelSet.levels[levelIndex].Clone();
             bool assisted = ApplyAssist(level);
@@ -2198,6 +2212,8 @@ namespace SquashBot.Gameplay
             chestPending = LevelChest.AddCoins(earned, levelIndex);
 
             pendingEnding = levelIndex == LevelCount - 1 && !Story.Seen(Story.Ending);
+            Monetization.Ads.NoteResult(true);
+            LevelTimes.Record(levelIndex, Time.realtimeSinceStartup - levelStartedAt, true);
             bool hasNext = levelIndex + 1 < LevelCount;
             bool newWorld = unlockedNew && hasNext && (levelIndex + 1) % LevelCatalog.LevelsPerWorld == 0;
             // A good moment for a store rating (first at level 10, then at a world's end; see RatePrompt).
@@ -2291,6 +2307,8 @@ namespace SquashBot.Gameplay
 
             Prefs.SetInt(FailKey(levelIndex), Prefs.GetInt(FailKey(levelIndex), 0) + 1);
             if (!dailyRun) Lives.TryConsume(); // the loss itself costs the life (not starting the level)
+            Monetization.Ads.NoteResult(false);
+            if (!dailyRun) LevelTimes.Record(levelIndex, Time.realtimeSinceStartup - levelStartedAt, false);
             StartCoroutine(ShowResultDelayed(new UIController.ResultInfo
             {
                 won = false,
@@ -3397,6 +3415,7 @@ namespace SquashBot.Gameplay
                 cameraRig.SetMenuFocus(false);
             }
             if (State != GameState.Playing) yield break;
+            levelStartedAt = Time.realtimeSinceStartup; // (the level's clock starts once the briefing is read)
             // Then a moment on the floor itself: where the goal is.
             if (!StartGoalLook(1.6f)) EndPreview();
         }

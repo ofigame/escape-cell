@@ -56,24 +56,5 @@ namespace SquashBot.Gameplay
                 Haptics.Medium();
             });
         }
-
-        /// <summary>After the daily chest: offer to double it for an ad (when one is ready).</summary>
-        private void OfferDailyDouble(int got)
-        {
-            if (got <= 0) return;
-            if (!Ads.Rewarded.IsReady) { NoAdNow(); return; }
-            ui.AdOffer.Show(Loc.T("ad.dailyTitle"), Loc.F("ad.dailyBody", got), () =>
-            {
-                Ads.Rewarded.Show(rewarded =>
-                {
-                    if (!rewarded) return;
-                    SaveData.Coins += got;
-                    FloatAt(robot.transform.position + Vector3.up * 0.8f, "+" + got, Palette.UiGold);
-                    fx.Burst(robot.transform.position + Vector3.up * 0.8f, Palette.Coin, Palette.CoinGlow, 40, 6f);
-                    AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
-                    ui.RefreshMenuCoins();
-                });
-            });
-        }
     }
 }

@@ -19,8 +19,8 @@ namespace SquashBot.UI
         /// <summary>Topics in reading order; section headers start with '#'.</summary>
         public static readonly string[] Topics =
         {
-            "#duel", "duel", "score", "controls", "power", "combo", "breaker", "jump", "defend", "army", "stages",
-            "#progress", "chests", "rank", "quests", "friends",
+            "#duel", "duel", "score", "controls", "power", "combo", "breaker", "jump", "defend", "stages",
+            "#progress", "chests", "rank", "quests", "login", "friends",
             "#missions", "mission", "map", "lives",
             "#gear", "shop", "garage",
         };
