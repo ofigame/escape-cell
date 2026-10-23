@@ -137,8 +137,40 @@ namespace SquashBot.Data
             Prefs.Save();
         }
 
+        /// <summary>
+        /// The golden chest: an outfit 34%, a shield 4%, a chest sword 5% (the best rarest), a shop weapon 7%, else
+        /// 2000 gold (at least half the time; more once there is nothing of a kind left to give).
+        /// </summary>
+        private static ChestReward RollGolden()
+        {
+            float roll = UnityEngine.Random.value;
+            if (roll < 0.34f)
+            {
+                var own = Cosmetics.ChestOnly();
+                var pool = own.Count > 0 ? own : Cosmetics.InSlot(Slot.Suit).FindAll(c => !c.IsDefault && !c.chest && !Cosmetics.Owns(c));
+                if (pool.Count > 0) return new ChestReward { outfit = pool[UnityEngine.Random.Range(0, pool.Count)] };
+            }
+            else if (roll < 0.38f)
+            {
+                var left = Shields.ChestLeft();
+                if (left.Count > 0) return new ChestReward { shield = left[UnityEngine.Random.Range(0, left.Count)] };
+            }
+            else if (roll < 0.43f)
+            {
+                var w = PickWeighted(Armory.All.FindAll(x => x.chest && !Armory.Owned(x)));
+                if (w != null) return new ChestReward { weapon = w };
+            }
+            else if (roll < 0.5f)
+            {
+                var w = Pick(Armory.All.FindAll(x => !x.Special && !x.chest && x.price > 0 && !Armory.Owned(x) && x.tier >= 3 && x.tier <= 5));
+                if (w != null) return new ChestReward { weapon = w };
+            }
+            return new ChestReward { gold = 2000 };
+        }
+
         private static ChestReward Roll(ChestTier t)
         {
+            if (t == ChestTier.Advanced) return RollGolden();
             // A surprise outfit first: the chests' own ones, or a suit from the workshop not owned yet.
             // the golden chest's own shields, now and then
             if (t == ChestTier.Advanced && UnityEngine.Random.value < 0.06f)
