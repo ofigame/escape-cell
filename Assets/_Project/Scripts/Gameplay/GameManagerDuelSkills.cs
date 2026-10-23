@@ -221,7 +221,7 @@ namespace SquashBot.Gameplay
                     else
                     {
                         HitFoe(upper ? UpperHit : HeavyHit);
-                        hunt.StunFoe(upper ? 2.2f : 0.8f);
+                        hunt.StunFoe(upper ? 1.8f : 0.4f); // (short: the rival is back in the fight at once)
                     }
                     if (colosseum != null) colosseum.Cheer(0, 0.9f);
                     if (upper) cameraRig.StartCoroutine(BigMoment(false)); // the knockdown: a big moment
@@ -238,7 +238,7 @@ namespace SquashBot.Gameplay
                     if (LiveActive) LiveNet.Special(5);
                     else
                     {
-                        hunt.StunFoe(2f);
+                        hunt.StunFoe(1.2f);
                         var away = new GridPos(System.Math.Sign(foeTile.x - robot.Position.x), System.Math.Sign(foeTile.y - robot.Position.y));
                         if (away.x == 0 && away.y == 0) away = new GridPos(0, 1);
                         for (int step = 3; step >= 1; step--)
@@ -544,7 +544,7 @@ namespace SquashBot.Gameplay
                 }
                 else
                 {
-                    hunt.StunFoe(0.4f);
+                    hunt.StunFoe(0.2f);
                     cameraRig.StartCoroutine(hunt.ShoveFoe(to, 0.22f + 0.08f * n));
                 }
                 return;
@@ -639,7 +639,7 @@ namespace SquashBot.Gameplay
             var struck = mine ? hunt.ChallengeFoeModel : robot.Visual;
             var at = struck != null ? struck.position : robot.transform.position;
             Fling(!mine, mine ? robot.transform.position : (hunt.ChallengeFoeAt ?? at), 1f, 1); // knocked off its feet, onto its back
-            if (mine) hunt.StunFoe(1.3f);
+            if (mine) hunt.StunFoe(0.7f);
             fx.Burst(at + Vector3.up * 1.4f, new Color(1f, 0.9f, 0.5f), new Color(3f, 2.6f, 1f), 24, 6f);
             cameraRig.Shake(0.5f);
             AudioManager.PlaySfx(Sfx.Impact, 1f, 1.2f);
@@ -740,9 +740,9 @@ namespace SquashBot.Gameplay
                 cameraRig.StartCoroutine(Ultimate(false, leap: true));
                 return;
             }
-            if (rivalMeter >= 1f && myCombo >= 3 && Random.value < 0.45f + 0.25f * bold)
+            if (myCombo >= 3 && (rivalMeter >= 1f ? Random.value < 0.5f + 0.3f * bold : Random.value < 0.18f + 0.12f * bold))
             {
-                rivalMeter -= 1f;
+                rivalMeter = Mathf.Max(0f, rivalMeter - 1f);
                 myCombo = 0;
                 myComboMove = 0;
                 strikeCooldown = Mathf.Max(strikeCooldown, 0.9f); // foi's swing knocked aside

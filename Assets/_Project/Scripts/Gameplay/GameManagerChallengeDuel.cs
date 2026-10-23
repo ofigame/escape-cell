@@ -162,7 +162,7 @@ namespace SquashBot.Gameplay
             hunt.FoeRemote = LiveActive; // a live rival: its own game moves it, the server keeps its health
             var w = Armory.Get(rival.weapon);
             hunt.FoeBoldness = rival.boldness;
-            hunt.FoeSkill = Mathf.Clamp01(0.35f + 0.04f * rival.Rank + 0.2f * rival.boldness); // (higher ranks parry sooner)
+            hunt.FoeSkill = Mathf.Clamp01(0.55f + 0.035f * rival.Rank + 0.2f * rival.boldness); // (every rival fights back; higher ranks parry sooner)
             hunt.ChallengeBattle = true;
             hunt.FoeSoldierDamage = Armory.Damage(w, Mathf.Max(1, rival.weaponLevel));
             // 100 health points behind its armour; foi's blows take its weapon's damage in points (1% each).

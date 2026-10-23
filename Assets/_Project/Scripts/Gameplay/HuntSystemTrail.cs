@@ -485,12 +485,12 @@ namespace SquashBot.Gameplay
                 g.step = 0f;
                 if (StepInside(g)) return true;
             }
-            if (g.hp < g.maxHp * (0.25f + 0.2f * (1f - FoeBoldness)) && near <= 3 && Time.time > foeFleeUntil + 6f) foeFleeUntil = Time.time + 2.5f;
+            if (g.hp < g.maxHp * (0.25f + 0.2f * (1f - FoeBoldness)) && near <= 3 && Time.time > foeFleeUntil + 6f) foeFleeUntil = Time.time + 1.2f; // (a short breather, then back at it)
             // Between blows, face to face with foi: now and then a step to the side (a dodge), more for a careful one.
             if (near <= DuelGap && g.cooldown > 0.2f && Time.time > foeDodgeAt && g.step <= 0f)
             {
                 foeDodgeAt = Time.time + 0.6f;
-                if (rng.NextDouble() < 0.25 + 0.35 * (1f - FoeBoldness) && Sidestep(g)) return true;
+                if (rng.NextDouble() < 0.12 + 0.2 * (1f - FoeBoldness) && Sidestep(g)) return true;
             }
             bool flee = Time.time < foeFleeUntil || Time.time < foeBackOffUntil;
             if (!flee) return false;
@@ -528,7 +528,7 @@ namespace SquashBot.Gameplay
 
         private void FoiRanOn()
         {
-            foiRun = Time.time - foiRunAt < 1.4f ? foiRun + 1 : 1;
+            foiRun = Time.time - foiRunAt < 1.6f ? foiRun + 1 : 1;
             foiRunAt = Time.time;
         }
 
@@ -538,9 +538,9 @@ namespace SquashBot.Gameplay
         /// </summary>
         private bool FoeParries()
         {
-            if (FoeRemote || Time.time < foeStunUntil || Time.time - parryAt < 1.1f) return false;
-            int run = Time.time - foiRunAt < 1.4f ? foiRun : 0;
-            float chance = (0.05f + 0.16f * run) * (0.5f + FoeSkill);
+            if (FoeRemote || Time.time < foeStunUntil || Time.time - parryAt < 0.7f) return false;
+            int run = Time.time - foiRunAt < 1.6f ? foiRun : 0;
+            float chance = (0.12f + 0.18f * run) * (0.6f + FoeSkill);
             return rng.NextDouble() < Mathf.Min(0.75f, chance);
         }
 
@@ -568,7 +568,7 @@ namespace SquashBot.Gameplay
         private int foeCombo;
 
         /// <summary>The rival foi's wind-up: quicker inside a flurry.</summary>
-        private float FoeWindScale(Guard g) => g != challengeFoe ? 1f : foeCounter ? 0.3f : foeCombo > 0 ? 0.4f : 0.6f;
+        private float FoeWindScale(Guard g) => g != challengeFoe ? 1f : foeCounter ? 0.28f : foeCombo > 0 ? 0.36f : 0.5f;
 
         private float foeHurtAt = -9f;
         private int foeHurtStreak;
@@ -620,8 +620,8 @@ namespace SquashBot.Gameplay
                 g.cooldown = 0.08f;
                 return;
             }
-            g.cooldown = 0.45f + (float)rng.NextDouble() * 0.3f;
-            if (rng.NextDouble() < 0.15 + 0.25 * (1f - FoeBoldness)) foeBackOffUntil = Time.time + 0.6f;
+            g.cooldown = 0.3f + (float)rng.NextDouble() * 0.25f;
+            if (rng.NextDouble() < 0.08 + 0.15 * (1f - FoeBoldness)) foeBackOffUntil = Time.time + 0.5f;
         }
 
         /// <summary>A step to a free neighbour as far from foi as it stands now (round foi, not away): false when there is none.</summary>
