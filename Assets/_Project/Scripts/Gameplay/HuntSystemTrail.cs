@@ -248,6 +248,16 @@ namespace SquashBot.Gameplay
             AudioManager.PlaySfx(Sfx.Shield, 0.7f, 1.6f);
         }
 
+        /// <summary>The rival foi turned (flat) along <paramref name="dir"/>: its root, its model straight with it.</summary>
+        public void TurnFoe(Vector3 dir)
+        {
+            var g = challengeFoe;
+            dir.y = 0f;
+            if (g == null || g.root == null || dir.sqrMagnitude < 1e-4f) return;
+            g.root.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
+            if (g.model != null) g.model.localRotation = Quaternion.identity;
+        }
+
         /// <summary>The rival foi raises its shield: a bubble that takes <paramref name="hits"/> blows (until EndFoeShield).</summary>
         public void ShieldFoe(int hits)
         {
@@ -506,6 +516,54 @@ namespace SquashBot.Gameplay
             return true;
         }
 
+        /// <summary>How well the AI rival fights back (0..1, by its rank and boldness): how often it parries.</summary>
+        public float FoeSkill = 0.5f;
+
+        /// <summary>The AI rival parried a blow of foi's (foi's combo is broken; it strikes straight back).</summary>
+        public event Action FoeParried;
+
+        /// <summary>foi's blows landing on the rival in a row (a pause, a blow taken or a parry ends the run).</summary>
+        private int foiRun;
+        private float foiRunAt = -9f, parryAt = -9f;
+
+        private void FoiRanOn()
+        {
+            foiRun = Time.time - foiRunAt < 1.4f ? foiRun + 1 : 1;
+            foiRunAt = Time.time;
+        }
+
+        /// <summary>
+        /// Whether the AI rival parries this blow: seldom the first, ever more likely the longer foi's run of blows
+        /// (a skilled one sooner); never while it reels, and not twice in a breath.
+        /// </summary>
+        private bool FoeParries()
+        {
+            if (FoeRemote || Time.time < foeStunUntil || Time.time - parryAt < 1.1f) return false;
+            int run = Time.time - foiRunAt < 1.4f ? foiRun : 0;
+            float chance = (0.05f + 0.16f * run) * (0.5f + FoeSkill);
+            return rng.NextDouble() < Mathf.Min(0.75f, chance);
+        }
+
+        /// <summary>The parry: the blow turned aside in a flash, and the rival strikes straight back at foi.</summary>
+        private void Parry(Guard g, GridPos p)
+        {
+            foiRun = 0;
+            parryAt = Time.time;
+            var at = At(p) + Vector3.up * 0.9f;
+            fx.Burst(at, new Color(0.75f, 0.92f, 1f), new Color(1.8f, 2.2f, 2.6f), 26, 5f);
+            Shockwave.Create(At(p), 1.6f, new Color(0.6f, 0.85f, 1f));
+            AudioManager.PlaySfx(Sfx.Shield, 1f, 1.25f);
+            if (g.model != null) { var hold = g.model.GetComponentInChildren<ShieldHold>(); if (hold != null) hold.Raise(); }
+            foeCounter = true;
+            foeCombo = 0;
+            g.cooldown = 0f;
+            g.windup = 0f;
+            g.target = robot.Position;
+            g.area.Clear();
+            g.area.Add(g.target);
+            FoeParried?.Invoke();
+        }
+
         /// <summary>Blows left in the rival foi's current flurry.</summary>
         private int foeCombo;
 
@@ -524,6 +582,7 @@ namespace SquashBot.Gameplay
         {
             foeHurtStreak = Time.time - foeHurtAt < 1.6f ? foeHurtStreak + 1 : 1;
             foeHurtAt = Time.time;
+            if (g.windup >= 0f) return; // already swinging: that blow lands
             if (foeHurtStreak < 2 || Chebyshev(robot.Position, g.pos) > ReachOf(g)) return;
             foeHurtStreak = 0;
             foeCounter = true;
@@ -557,12 +616,12 @@ namespace SquashBot.Gameplay
             }
             else
             {
-                foeCombo = 1 + rng.Next(2, 4) + (rng.NextDouble() < FoeBoldness ? 1 : 0); // this blow opens a flurry of 3-5
+                foeCombo = 1 + rng.Next(3, 5) + (rng.NextDouble() < FoeBoldness ? 1 : 0); // this blow opens a flurry of 4-6
                 g.cooldown = 0.08f;
                 return;
             }
-            g.cooldown = 0.9f + (float)rng.NextDouble() * 0.5f;
-            if (rng.NextDouble() < 0.4 + 0.5 * (1f - FoeBoldness)) foeBackOffUntil = Time.time + 0.8f;
+            g.cooldown = 0.45f + (float)rng.NextDouble() * 0.3f;
+            if (rng.NextDouble() < 0.15 + 0.25 * (1f - FoeBoldness)) foeBackOffUntil = Time.time + 0.6f;
         }
 
         /// <summary>A step to a free neighbour as far from foi as it stands now (round foi, not away): false when there is none.</summary>

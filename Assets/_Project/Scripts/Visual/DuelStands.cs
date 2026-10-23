@@ -43,7 +43,7 @@ namespace SquashBot.Visual
         private readonly List<Batch> batches = new List<Batch>();
         /// <summary>How big the fans are (the made stages' stands: bigger, fewer of them).</summary>
         private float crowdSize = 1f;
-        private const float MadeCrowd = 1.6f;
+        private const float MadeCrowd = 2.2f;
         private readonly float[] excite = new float[2];
         private bool wave;
         private float waveT;

@@ -14,6 +14,8 @@ namespace SquashBot.Data
         public float recharge;
         /// <summary>How wide the front it covers (degrees either side of where foi faces).</summary>
         public float arc;
+        /// <summary>How big it is carried (the golden ones bigger).</summary>
+        public float size = 1f;
     }
 
     /// <summary>
@@ -28,8 +30,8 @@ namespace SquashBot.Data
         {
             new ShieldDef { id = "shield.wood", model = "basit_baslangic_kalkan", price = 0, recharge = 3.2f, arc = 55f },
             new ShieldDef { id = "shield.steel", model = "ikinci_seviye_kalkan", price = 6500, recharge = 2.4f, arc = 65f },
-            new ShieldDef { id = "shield.stag", model = "altin_kasa_kalkan", chest = true, recharge = 1.7f, arc = 75f },
-            new ShieldDef { id = "shield.amethyst", model = "altin_kasa_kalkan_2", chest = true, recharge = 1.5f, arc = 80f },
+            new ShieldDef { id = "shield.stag", model = "altin_kasa_kalkan", chest = true, recharge = 1.7f, arc = 75f, size = 1.25f },
+            new ShieldDef { id = "shield.amethyst", model = "altin_kasa_kalkan_2", chest = true, recharge = 1.5f, arc = 80f, size = 1.3f },
         };
 
         public static ShieldDef Get(string id) => All.Find(s => s.id == id);

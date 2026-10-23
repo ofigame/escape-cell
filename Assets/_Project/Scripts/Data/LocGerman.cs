@@ -175,6 +175,7 @@ namespace SquashBot.Data
             ["duel.upper"] = "NIEDERSCHLAG",
             ["duel.breaker"] = "BRECHEN",
             ["duel.broken"] = "KOMBO GEBROCHEN!",
+            ["duel.parried"] = "PARIERT!",
             ["rehber.sec.duel"] = "DUELL",
             ["rehber.duel.t"] = "Was ist ein Duell?",
             ["rehber.duel.b"] = "Das Duell ist das Herz des Spiels. Drücke auf dem Startbildschirm DUELL: Ein passender Gegner wird gefunden (ein Spieler online oder der Computer) und ihr trefft euch auf einer von sieben Duell-Bühnen. Unter deinem foi leuchtet ein blauer Ring, unter dem des Gegners ein roter.",

@@ -96,6 +96,12 @@ namespace SquashBot.Visual
             var off = worn;
             off.SetParent(null, true);
             worn = null;
+            // its moving copies of the meshes go with it (this cape's own going, when foi is dressed again after a knock-down,
+            // must not take them off the post)
+            var keep = off.gameObject.AddComponent<HungCape>();
+            foreach (var c in cloth) if (c.mesh != null) keep.meshes.Add(c.mesh);
+            cloth.Clear();
+            clothMade = true; // (never made again for a cape no longer worn)
             foreach (var x in GetComponentsInChildren<Renderer>(true)) x.enabled = false;
             return off;
         }
@@ -607,6 +613,17 @@ namespace SquashBot.Visual
             if (glow != null) Destroy(glow);
             if (fittings != null) Destroy(fittings.gameObject);
             foreach (var c in cloth) if (c.mesh != null) Destroy(c.mesh); // (the cape's own moving copies)
+        }
+    }
+
+    /// <summary>A cape taken off and hung up: it owns its meshes now (freed when it goes).</summary>
+    public class HungCape : MonoBehaviour
+    {
+        public readonly System.Collections.Generic.List<Mesh> meshes = new System.Collections.Generic.List<Mesh>();
+
+        private void OnDestroy()
+        {
+            foreach (var m in meshes) if (m != null) Destroy(m);
         }
     }
 }

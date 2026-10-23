@@ -623,14 +623,13 @@ namespace SquashBot.Gameplay
                     return true;
                 }
                 RaiseAlarm(g);
+                if (g == challengeFoe && FoeParries()) { Parry(g, p); return true; }
                 if (g.shield > 0) { HitShield(g, p); return true; }
                 g.hp -= g.armorShare > 0f ? Mathf.Max(1, Mathf.RoundToInt(damage * (1f - g.armorShare))) : ThroughArmor(p, damage);
                 g.flash = 1f;
                 g.Flash();
-                g.windup = -1f;
-                if (g == challengeFoe) foeCounter = false; // its swing (a counter too) is cut short
-                if (g == challengeFoe) ChallengeFoeStruck?.Invoke();
-                ClearTelegraph(g);
+                if (g != challengeFoe) { g.windup = -1f; ClearTelegraph(g); } // (the rival foi trades blows: its own swing goes on)
+                if (g == challengeFoe) { FoiRanOn(); ChallengeFoeStruck?.Invoke(); }
                 fx.Burst(At(p) + Vector3.up * 0.4f, Palette.UiGold, Palette.CoinGlow, 34, 6f);
                 Shockwave.Create(At(p), 1.4f, new Color(1f, 0.85f, 0.45f));
                 AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.85f);
@@ -1120,7 +1119,14 @@ namespace SquashBot.Gameplay
         private void UpdateGuard(Guard g, float dt)
         {
             if (g == challengeFoe && FoeRemote) { UpdateHealthBar(g); UpdateRemoteFoe(g, dt); return; }
-            if (g == challengeFoe && Time.time < foeStunUntil) { UpdateHealthBar(g); return; } // stunned: it stands reeling
+            if (g == challengeFoe && Time.time < foeStunUntil)
+            {
+                // stunned: it stands reeling, still turned to foi (never its back to it)
+                var toFoi = GridView.ToWorld(robot.Position) - g.root.position; toFoi.y = 0f;
+                if (toFoi.sqrMagnitude > 0.01f) g.root.rotation = Quaternion.Slerp(g.root.rotation, Quaternion.LookRotation(toFoi), Time.deltaTime * 6f);
+                UpdateHealthBar(g);
+                return;
+            }
             if (g.squad) { UpdateSquad(g, dt); return; }
             UpdateHealthBar(g);
             if (g.windup < 0f) IdleCharge(g); // a blow cut short (struck, frozen, pushed): its charge and aim go
@@ -1150,6 +1156,7 @@ namespace SquashBot.Gameplay
                 if (g.soldier == null || g.area.Contains(robot.Position)) foreach (var t in g.area) view.SetWarning(t, 0.4f + 0.6f * k); // soldiers on soldiers: no red tiles
                 if (k >= 1f)
                 {
+                    if (g == challengeFoe && toRobot.sqrMagnitude > 0.01f) g.root.rotation = Quaternion.LookRotation(toRobot); // (never a blow with its back turned)
                     g.windup = -1f;
                     g.cooldown = ChallengeBattle
                         ? (g.brute ? 1.3f : g.soldier != null ? 0.6f + (float)rng.NextDouble() * 0.3f : 0.55f)
@@ -1165,7 +1172,7 @@ namespace SquashBot.Gameplay
                     AudioManager.PlaySfx(Sfx.Impact, g.brute ? 1f : 0.7f, g.brute ? 0.55f : 0.8f);
                     rig.Shake(g.brute ? 0.8f : 0.3f);
                     if (g.atWall) { if (PlayerAway) AwayHit?.Invoke(ShareOf(g)); }
-                    else if (!shot && g.area.Contains(robot.Position)) { BlowFrom = g.root.position; BlowBlocked = false; Hit?.Invoke(robot.Position, ShareOf(g)); if (g == challengeFoe && !BlowBlocked) FoiStruckByFoe?.Invoke(); }
+                    else if (!shot && g.area.Contains(robot.Position)) { BlowFrom = g.root.position; BlowBlocked = false; Hit?.Invoke(robot.Position, ShareOf(g)); if (g == challengeFoe && !BlowBlocked) { foiRun = 0; FoiStruckByFoe?.Invoke(); } }
                     g.atWall = false;
                     if (CompanionTile.HasValue && g.area.Contains(CompanionTile.Value)) CompanionHurt?.Invoke(g.brute ? 3 : 2);
                     HurtAllies(g, g.area);
@@ -1651,7 +1658,7 @@ namespace SquashBot.Gameplay
         public const int AttackReach = 2;
 
         /// <summary>The nearest the two foi come in the duel (in tiles, diagonals as one): a tile always between them.</summary>
-        public const int DuelGap = 3;
+        public const int DuelGap = 2;
 
         public static int Chebyshev(GridPos a, GridPos b) => Mathf.Max(Mathf.Abs(a.x - b.x), Mathf.Abs(a.y - b.y));
     }

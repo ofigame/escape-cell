@@ -26,6 +26,16 @@ namespace SquashBot.Gameplay
 
         public bool IsShielded => shieldLeft > 0f;
         public bool IsHopping => anim == Anim.Hop;
+        /// <summary>Standing (not walking, hopping or in a blow).</summary>
+        public bool IsIdle => anim == Anim.Idle;
+
+        /// <summary>Turns smoothly toward <paramref name="target"/> (flat), as a turn on the spot does.</summary>
+        public void TurnTo(Vector3 target)
+        {
+            var dir = target - transform.position;
+            dir.y = 0f;
+            if (dir.sqrMagnitude > 0.0001f) targetFacing = Quaternion.LookRotation(dir.normalized);
+        }
 
         /// <summary>Lifted into the air by the hover escape: blocks pass beneath it.</summary>
         public bool IsHovering => anim == Anim.Hover;

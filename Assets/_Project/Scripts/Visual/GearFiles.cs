@@ -51,6 +51,7 @@ namespace SquashBot.Visual
         {
             ["dawnBlade"] = new Color(1f, 0.32f, 0.06f), // red-orange
             ["frostEdge"] = new Color(0.2f, 0.55f, 1f),  // blue
+            ["nightBlade"] = new Color(0.25f, 0.45f, 1f), // blue
         };
 
         /// <summary>A weapon's own light colour (a = 0: none).</summary>

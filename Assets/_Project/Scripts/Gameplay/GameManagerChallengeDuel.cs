@@ -146,6 +146,7 @@ namespace SquashBot.Gameplay
         /// </summary>
         private void PlaceDuelists(bool first)
         {
+            danceAt = null; danceCam = 0f;
             hunt.RemoveChallengeFoe();
             health = 1f;
             Shields.Ready(); // (each round: the shield ready)
@@ -161,6 +162,7 @@ namespace SquashBot.Gameplay
             hunt.FoeRemote = LiveActive; // a live rival: its own game moves it, the server keeps its health
             var w = Armory.Get(rival.weapon);
             hunt.FoeBoldness = rival.boldness;
+            hunt.FoeSkill = Mathf.Clamp01(0.35f + 0.04f * rival.Rank + 0.2f * rival.boldness); // (higher ranks parry sooner)
             hunt.ChallengeBattle = true;
             hunt.FoeSoldierDamage = Armory.Damage(w, Mathf.Max(1, rival.weaponLevel));
             // 100 health points behind its armour; foi's blows take its weapon's damage in points (1% each).
@@ -297,6 +299,7 @@ namespace SquashBot.Gameplay
                 for (int i = 5; i >= 1; i--)
                 {
                     if (!challengeRun || chPhase != ChPhase.Lobby) yield break; // (over, or the server started it meanwhile)
+                    FaceForCountdown(true);
                     chUi.SetStatus(i.ToString());
                     ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.6f), i.ToString(), Palette.UiGold, 220f);
                     AudioManager.PlaySfx(Sfx.Click, 1f, 0.75f + 0.08f * (5 - i));
@@ -307,7 +310,29 @@ namespace SquashBot.Gameplay
             }
             finally { duelCountdown = false; }
             if (!challengeRun || chPhase != ChPhase.Lobby) yield break;
+            FaceForCountdown(false);
             if (LiveActive) LiveWaitFor(LiveWait.Start); else BeginDuel();
+        }
+
+        /// <summary>
+        /// The countdown: both foi turned to the camera (and a little toward each other), never their backs to it;
+        /// <paramref name="on"/> false: face to face again for the fight.
+        /// </summary>
+        private void FaceForCountdown(bool on)
+        {
+            var foe = hunt.ChallengeFoeModel;
+            if (robot.Visual == null || foe == null) return;
+            var cam = Camera.main != null ? Camera.main.transform.position : robot.transform.position + Vector3.right * 10f;
+            Vector3 Dir(Vector3 at, Vector3 other)
+            {
+                var toCam = cam - at; toCam.y = 0f;
+                var toOther = other - at; toOther.y = 0f;
+                if (toCam.sqrMagnitude < 1e-4f || toOther.sqrMagnitude < 1e-4f) return toOther;
+                return on ? Vector3.Slerp(toCam.normalized, toOther.normalized, 0.3f) : toOther.normalized;
+            }
+            var me = robot.transform.position; var them = foe.position;
+            robot.Face(me + Dir(me, them));
+            hunt.TurnFoe(Dir(them, me));
         }
 
         /// <summary>Both foi's capes off and onto their posts (flying there, or at once after a knock-down's new round).</summary>

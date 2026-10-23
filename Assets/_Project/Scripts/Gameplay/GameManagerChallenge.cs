@@ -40,6 +40,85 @@ namespace SquashBot.Gameplay
         /// <summary>How far the view has slid over the courtyard.</summary>
         private Vector3 boardPan;
         private Vector3 duelPan;
+        private bool winnerWalking;
+
+        /// <summary>
+        /// The duel is over: the winner walks to the middle of the platform and dances there to the camera; the other steps
+        /// back to its own side and turns to watch.
+        /// </summary>
+        private IEnumerator WinnerToMiddle(bool won)
+        {
+            // (the rival moved by its root: its model stays on it, so turning it never swings the model off)
+            var foeBody = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.parent ?? hunt.ChallengeFoeModel : null;
+            if (foeBody != null && hunt.ChallengeFoeModel != foeBody) hunt.ChallengeFoeModel.localPosition = Vector3.zero;
+            var winner = won ? robot.transform : foeBody;
+            var loser = won ? foeBody : robot.transform;
+            var winnerFace = won ? robot.Visual : hunt.ChallengeFoeModel;
+            var loserFace = won ? hunt.ChallengeFoeModel : robot.Visual;
+            try
+            {
+                if (winner == null) yield break;
+                DropRings(); // (the duel's rings go: the dance is the show)
+                var mid = boardCentre; mid.y = winner.position.y;
+                Vector3 loserFrom = loser != null ? loser.position : mid, loserTo = loserFrom;
+                if (loser != null)
+                {
+                    var away = loserFrom - mid; away.y = 0f;
+                    if (away.sqrMagnitude < 0.25f) away = Vector3.forward * (loserFrom.z >= mid.z ? 1f : -1f);
+                    loserTo = mid + away.normalized * 4.5f; loserTo.y = loserFrom.y; // (its own side, back from the middle)
+                }
+                var winnerFrom = winner.position;
+                var wSkin = winnerFace != null ? winnerFace.GetComponentInChildren<SkinnedHero>() : null;
+                var lSkin = loserFace != null ? loserFace.GetComponentInChildren<SkinnedHero>() : null;
+                if (wSkin != null) wSkin.StandUp();
+                if (lSkin != null) lSkin.StandUp();
+                const float T = 1.1f;
+                for (float e = 0f; e < T; e += Time.unscaledDeltaTime)
+                {
+                    if (!challengeRun || winner == null) yield break;
+                    float k = Mathf.SmoothStep(0f, 1f, e / T);
+                    float bob = Mathf.Abs(Mathf.Sin(e * 14f)) * 0.06f; // (a walk's light step)
+                    var wNow = Vector3.Lerp(winnerFrom, mid, k);
+                    Face(winnerFace, mid - winnerFrom);
+                    winner.position = wNow + Vector3.up * bob;
+                    if (loser != null)
+                    {
+                        loser.position = Vector3.Lerp(loserFrom, loserTo, k) + Vector3.up * bob;
+                        Face(loserFace, loserTo - loserFrom);
+                    }
+                    yield return null;
+                }
+                winner.position = mid;
+                if (loser != null) { loser.position = loserTo; Face(loserFace, mid - loserTo); } // (it watches the dance)
+                var cam = Camera.main != null ? Camera.main.transform.position : mid + Vector3.right * 10f;
+                Face(winnerFace, cam - mid); // (dancing to the camera)
+                fx.Burst(mid + Vector3.up * 0.6f, Palette.Coin, Palette.CoinGlow, 40, 6f);
+                if (won) robot.Cheer(); // (its dance, if it has one: claps otherwise)
+                else if (wSkin != null) wSkin.Celebrate(rival.bot ? "dance.d" + (1 + Mathf.Abs(rival.name.GetHashCode()) % 4) : null); // the rival's dance of its own
+                winnerWalking = false;
+                // through the dance: the winner kept turned to the duel's camera, the other to the winner (nothing else turns them)
+                for (float e = 0f; e < 10f && challengeRun && State == GameState.Result && winner != null; e += Time.unscaledDeltaTime)
+                {
+                    Face(winnerFace, cam - winner.position);
+                    if (loser != null) Face(loserFace, winner.position - loser.position);
+                    yield return null;
+                }
+            }
+            finally { winnerWalking = false; }
+        }
+
+        /// <summary>foi or the rival turned (flat) along a direction (the rival by its root).</summary>
+        private void Face(Transform model, Vector3 dir)
+        {
+            dir.y = 0f;
+            if (model == null || dir.sqrMagnitude < 1e-4f) return;
+            if (model == robot.Visual) robot.Face(robot.transform.position + dir);
+            else hunt.TurnFoe(dir);
+        }
+
+        /// <summary>The duel's winner dancing (null: none): the camera comes in closer on it.</summary>
+        private Transform danceAt;
+        private float danceCam;
         private float duelBack = 21f;
 
         private const int BoardW = 25, BoardH = 11; // (11 across the screen: the stands round its two ends in view)
@@ -501,18 +580,9 @@ namespace SquashBot.Gameplay
             int gold = won && (chOnline || chLive) ? Challenge.WinGold : 0; // offline practice pays no prize
             SaveData.Coins += draw ? 0 : gold + Earned;
             State = GameState.Result;
-            if (won)
-            {
-                robot.Cheer(); // (its dance, if it has one: claps otherwise)
-                AudioManager.PlaySfx(Sfx.Win);
-                fx.Burst(robot.transform.position + Vector3.up * 0.6f, Palette.Coin, Palette.CoinGlow, 40, 6f);
-            }
-            else if (!draw)
-            {
-                // the rival won: it celebrates (a dance of its own, or claps)
-                var foe = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
-                if (foe != null) foe.Celebrate(rival.bot ? "dance.d" + (1 + Mathf.Abs(rival.name.GetHashCode()) % 4) : null);
-            }
+            danceAt = won ? robot.transform : !draw ? hunt.ChallengeFoeModel : null;
+            if (won) AudioManager.PlaySfx(Sfx.Win);
+            if (danceAt != null) { winnerWalking = true; cameraRig.StartCoroutine(WinnerToMiddle(won)); }
             chUi.HideAll();
             cameraRig.StartCoroutine(ShowChallengeResult(won, draw, score, gold));
         }
@@ -553,7 +623,9 @@ namespace SquashBot.Gameplay
                           + "\n" + trophies + (gold > 0 ? " · +" + gold + " " + Loc.T("ch.gold") : "")
                           + (won && chestWon.HasValue ? "\n" + Loc.F("chests.won", DuelChestScreen.TierName(chestWon.Value)) : "")
                           + "\n" + Challenge.RankName(Challenge.Rank) + " · " + Loc.F("ch.trophies", Challenge.Trophies);
-            // The winner finishes its dance first, the duel's camera on it (then the card).
+            // The winner walks to the middle and finishes its dance first, the duel's camera on it (then the card).
+            float walkUntil = Time.realtimeSinceStartup + 3f;
+            while (winnerWalking && challengeRun && Time.realtimeSinceStartup < walkUntil) yield return null;
             var dancer = won ? (robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null)
                 : !draw && hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
             float danceUntil = Time.realtimeSinceStartup + 9f;
@@ -639,6 +711,16 @@ namespace SquashBot.Gameplay
             if (DuelStands.IsMade(Stage.theme)) pos += new Vector3(-4.5f, 0f, 0f) - look * 5f; // (and a little further back: all of it in view)
             rot = Quaternion.LookRotation(look) * Quaternion.Euler(-3.5f, 0f, 0f); // (its head up a little: less floor under the platform, still some room under it)
             OrbitPose(ref pos, ref rot, me, foe);
+            // The winner's dance: the camera comes in on it (about halfway), looking at it
+            danceCam = Mathf.MoveTowards(danceCam, danceAt != null && State == GameState.Result ? 1f : 0f, Time.unscaledDeltaTime * 0.8f);
+            if (danceCam > 0f && danceAt != null)
+            {
+                var target = danceAt.position + Vector3.up * 1.6f;
+                var near = target + (pos - target) * 0.5f;
+                float w = Mathf.SmoothStep(0f, 1f, danceCam);
+                pos = Vector3.Lerp(pos, near, w);
+                rot = Quaternion.Slerp(rot, Quaternion.LookRotation(target - near), w);
+            }
         }
 
         // ---------- The slow-motion camera ----------

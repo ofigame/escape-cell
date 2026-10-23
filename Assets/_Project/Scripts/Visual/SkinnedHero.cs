@@ -261,6 +261,21 @@ namespace SquashBot.Visual
         private static readonly Dictionary<int, (Color32[] px, Color32[] mk, int w, int mw)> pixels = new Dictionary<int, (Color32[], Color32[], int, int)>();
 
         /// <summary>Livelier skin (as on the icon): more colour, a touch warmer, so the blush on the nose and cheeks shows.</summary>
+        /// <summary>
+        /// A hair pixel in a new colour: the colour times how light the pixel is against the hair's own colour, so the
+        /// strands keep their shading; the lightest roll off softly instead of clipping to a flat, shiny glare.
+        /// </summary>
+        private static Color32 HairTint(Color32 p, Color target, float refLum)
+        {
+            float lum = (p.r * 0.3f + p.g * 0.59f + p.b * 0.11f) / 255f;
+            float f = lum / Mathf.Max(0.02f, refLum);
+            var c = new Vector3(target.r, target.g, target.b) * f;
+            float m = Mathf.Max(c.x, Mathf.Max(c.y, c.z));
+            const float Knee = 0.72f;
+            if (m > Knee) c *= (Knee + (1f - Mathf.Exp(-(m - Knee) * 2.2f)) * (0.95f - Knee)) / m;
+            return new Color32((byte)Mathf.Clamp(c.x * 255f, 0f, 255f), (byte)Mathf.Clamp(c.y * 255f, 0f, 255f), (byte)Mathf.Clamp(c.z * 255f, 0f, 255f), 255);
+        }
+
         private static Color32 Vivid(Color32 p, float amount)
         {
             if (amount < 0.01f) return p;
@@ -290,11 +305,11 @@ namespace SquashBot.Visual
 
         /// <summary>The head's own light: most of its colour, which no light or shadow takes away, so the face keeps the
         /// same skin in every scene (orange suns, blue ice, the menu) and never darkens as the lights round it change.</summary>
-        private const float HeadGlow = 0.75f;
+        private const float HeadGlow = 0.8f;
 
         /// <summary>How much the face takes from the lights round it (the rest is its own light): coloured lamps and flames
         /// on a floor tint it only a little, and it never goes dark or orange.</summary>
-        private const float HeadLit = 0.35f; // (enough of the light for its shape to show; its colour stays its own)
+        private const float HeadLit = 0.12f; // (barely: the shading painted on it shapes it; no lamp tints its skin or hair)
 
         private static Material HeadPaint(int n, Color? hair, Color? skin)
         {
@@ -327,22 +342,26 @@ namespace SquashBot.Visual
                     var hRef = info.hair != null ? new Color(info.hair[0], info.hair[1], info.hair[2]) : new Color(0.35f, 0.18f, 0.11f);
                     var sRef = info.skin != null ? new Color(info.skin[0], info.skin[1], info.skin[2]) : new Color(0.66f, 0.55f, 0.49f);
                     Vector3 Ratio(Color target, Color reference) => new Vector3(target.r / Mathf.Max(0.04f, reference.r), target.g / Mathf.Max(0.04f, reference.g), target.b / Mathf.Max(0.04f, reference.b));
-                    var hr = hair.HasValue ? Ratio(hair.Value, hRef) : Vector3.one;
                     var sr = skin.HasValue ? Ratio(skin.Value, sRef) : Vector3.one;
+                    float hRefLum = hRef.r * 0.3f + hRef.g * 0.59f + hRef.b * 0.11f;
                     for (int i = 0; i < px.Length; i++)
                     {
                         float wh = mk[i].r / 255f, ws = mk[i].g / 255f;
                         if (wh < 0.01f && ws < 0.01f) { px[i] = Grade(px[i], 0f); continue; }
-                        var mul = Vector3.one + (hr - Vector3.one) * wh + (sr - Vector3.one) * ws;
                         var p = px[i];
-                        px[i] = Grade(Vivid(new Color32((byte)Mathf.Min(255f, p.r * mul.x), (byte)Mathf.Min(255f, p.g * mul.y), (byte)Mathf.Min(255f, p.b * mul.z), 255), ws), wh);
+                        var mul = Vector3.one + (sr - Vector3.one) * ws;
+                        var skinned = new Color32((byte)Mathf.Min(255f, p.r * mul.x), (byte)Mathf.Min(255f, p.g * mul.y), (byte)Mathf.Min(255f, p.b * mul.z), 255);
+                        var c = hair.HasValue && wh > 0.01f ? Color32.Lerp(skinned, HairTint(p, hair.Value, hRefLum), wh) : skinned;
+                        px[i] = Grade(Vivid(c, ws), wh);
                     }
                     tex = new Texture2D(W, W, TextureFormat.RGBA32, true) { name = key };
                     tex.SetPixels32(px);
                     tex.Apply(true, true);
                 }
             }
-            m = MaterialFactory.CreateSurface(new Color(HeadLit, HeadLit, HeadLit), Color.black, 0.3f, 0f); // skin with a soft sheen, partly its own light
+            m = MaterialFactory.CreateSurface(new Color(HeadLit, HeadLit, HeadLit), Color.black, 0f, 0f); // matte skin and hair, nearly all its own light
+            m.SetFloat("_SpecularHighlights", 0f); m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+            m.SetFloat("_EnvironmentReflections", 0f); m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
             if (tex != null)
             {
                 m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
@@ -374,7 +393,9 @@ namespace SquashBot.Visual
             var v = Vivid(c, 1f); var cv = new Color(v.r / 255f, v.g / 255f, v.b / 255f);
             string key = "lid" + cv;
             if (materials.TryGetValue(key, out var m) && m != null) return m;
-            m = MaterialFactory.CreateSurface(cv * HeadLit, Color.black, 0.18f, 0f);
+            m = MaterialFactory.CreateSurface(cv * HeadLit, Color.black, 0f, 0f);
+            m.SetFloat("_SpecularHighlights", 0f); m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+            m.SetFloat("_EnvironmentReflections", 0f); m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
             m.EnableKeyword("_EMISSION");
             m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
             m.SetColor("_EmissionColor", cv * HeadGlow);

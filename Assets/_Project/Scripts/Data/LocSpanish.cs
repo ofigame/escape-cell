@@ -175,6 +175,7 @@ namespace SquashBot.Data
             ["duel.upper"] = "DERRIBO",
             ["duel.breaker"] = "ROMPER",
             ["duel.broken"] = "¡COMBO ROTO!",
+            ["duel.parried"] = "¡BLOQUEADO!",
             ["rehber.sec.duel"] = "DUELO",
             ["rehber.duel.t"] = "¿Qué es un duelo?",
             ["rehber.duel.b"] = "El duelo es el corazón del juego. Pulsa DUELO en la pantalla principal: se busca un rival a tu medida (un jugador en línea o el ordenador) y os enfrentáis en uno de los siete escenarios de duelo. Bajo tu foi brilla un anillo azul y bajo el del rival uno rojo.",

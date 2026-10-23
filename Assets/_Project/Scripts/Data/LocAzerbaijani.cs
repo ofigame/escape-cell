@@ -175,6 +175,7 @@ namespace SquashBot.Data
             ["duel.upper"] = "YERƏ SƏR",
             ["duel.breaker"] = "QIR",
             ["duel.broken"] = "KOMBO QIRILDI!",
+            ["duel.parried"] = "QARŞILADI!",
             ["rehber.sec.duel"] = "DUEL",
             ["rehber.duel.t"] = "Duel nədir?",
             ["rehber.duel.b"] = "Duel oyunun ürəyidir. Ana ekranda DUEL düyməsinə bas: sənə uyğun rəqib tapılır (onlayn oyunçu və ya kompüter) və yeddi duel səhnəsindən birində qarşılaşırsınız. Sənin foi-nin altında mavi, rəqibinkinin altında qırmızı halqa parlayır.",

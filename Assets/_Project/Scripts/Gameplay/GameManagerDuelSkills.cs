@@ -58,6 +58,7 @@ namespace SquashBot.Gameplay
                 duelSkillsWired = true;
                 hunt.ChallengeFoeStruck += OnFoeStruck;
                 hunt.FoiStruckByFoe += OnFoiStruck;
+                hunt.FoeParried += OnFoeParried;
             }
             myMeter = rivalMeter = 0f;
             ResetCombos();
@@ -122,6 +123,20 @@ namespace SquashBot.Gameplay
             duelStirAt = Time.time;
         }
 
+        /// <summary>The AI rival parried foi's blow: foi's combo is broken, foi reels a moment before its next swing.</summary>
+        private void OnFoeParried()
+        {
+            if (!challengeRun || chPhase != ChPhase.Duel) return;
+            myCombo = 0;
+            myComboMove = 0;
+            strikeCooldown = Mathf.Max(strikeCooldown, 0.55f);
+            skillBar?.ShowCombo(0);
+            skillBar?.Shout(Loc.T("duel.parried"), new Color(0.6f, 0.85f, 1f));
+            var skin = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null;
+            if (skin != null && hunt.ChallengeFoeAt is Vector3 foeAt) skin.Stagger(foeAt, 0.3f);
+            duelStirAt = Time.time;
+        }
+
         /// <summary>The rival's blow landed on foi: its bar and combo grow, foi's combo is broken.</summary>
         private void OnFoiStruck()
         {
@@ -159,6 +174,8 @@ namespace SquashBot.Gameplay
             skillBar.SetContext(ctx);
             skillBar.SetMeters(myMeter, rivalMeter);
             if (!LiveActive && chPhase == ChPhase.Duel && !moveBusy && !DuelCinematic) RivalMoves(); // (never inside a big moment)
+            // Standing, foi keeps turned to the rival (after a leap, a shove, a step back: never its back to it)
+            if (chPhase == ChPhase.Duel && robot.IsIdle && hunt.ChallengeFoeAt is Vector3 rivalAt) robot.TurnTo(rivalAt);
             Unstick();
         }
 
@@ -277,7 +294,7 @@ namespace SquashBot.Gameplay
         {
             var from = mine ? robot.Position : hunt.ChallengeFoeTile ?? robot.Position;
             var victim = mine ? hunt.ChallengeFoeTile ?? robot.Position : robot.Position;
-            if (HuntSystem.Chebyshev(from, victim) <= 1) yield break;
+            if (HuntSystem.Chebyshev(from, victim) <= HuntSystem.DuelGap) yield break;
             var model = mine ? robot.Visual : hunt.ChallengeFoeModel;
             if (model == null) yield break;
             var land = LandingBeside(victim, from);
@@ -289,22 +306,32 @@ namespace SquashBot.Gameplay
                 fx.Burst(model.position + Vector3.up * 0.2f, SpecialColour[stunt], SpecialColour[stunt] * 1.6f, 14, 4f);
                 yield return dbl.Leap(GridView.ToWorld(land.Value) + Vector3.up * GridView.SurfaceY, 1.6f, 0.5f, plain ? -1 : stunt); // (plain: a jump, no somersault)
                 if (mine) robot.Spawn(grid, land.Value); else if (!hunt.ChallengeFoeDown) hunt.PlaceFoe(land.Value); // (a live knock-down may have taken it meanwhile)
+                FaceEachOther();
             }
             finally { if (dbl != null) dbl.Done(); } // the stand-in never stays behind, whatever happened on the way
             if (stunt == 2) { Shockwave.Create(GridView.ToWorld(land.Value) + Vector3.up * GridView.SurfaceY, 1.6f, SpecialColour[2]); cameraRig.Shake(0.4f); }
         }
 
-        /// <summary>A free tile next to <paramref name="victim"/>, on the side the mover comes from.</summary>
+        /// <summary>The two foi turned to each other at once.</summary>
+        private void FaceEachOther()
+        {
+            if (!(hunt.ChallengeFoeAt is Vector3 foeAt) || robot.Visual == null) return;
+            robot.Face(foeAt);
+            hunt.TurnFoe(robot.transform.position - foeAt);
+        }
+
+        /// <summary>A free tile the duel's gap away from <paramref name="victim"/>, on the side the mover comes from.</summary>
         private GridPos? LandingBeside(GridPos victim, GridPos from)
         {
             int dx = System.Math.Sign(from.x - victim.x), dy = System.Math.Sign(from.y - victim.y);
             var tries = new[] { new GridPos(dx, dy), new GridPos(dx, 0), new GridPos(0, dy), new GridPos(-dy, dx), new GridPos(dy, -dx), new GridPos(1, 0), new GridPos(-1, 0), new GridPos(0, 1), new GridPos(0, -1) };
-            foreach (var d in tries)
-            {
-                if (d.x == 0 && d.y == 0) continue;
-                var p = victim + d;
-                if (grid.InBounds(p) && grid.IsStandable(p) && !grid.IsOccupied(p)) return p;
-            }
+            for (int k = HuntSystem.DuelGap; k <= HuntSystem.DuelGap + 1; k++)
+                foreach (var d in tries)
+                {
+                    if (d.x == 0 && d.y == 0) continue;
+                    var p = new GridPos(victim.x + d.x * k, victim.y + d.y * k);
+                    if (grid.InBounds(p) && grid.IsStandable(p) && !grid.IsOccupied(p)) return p;
+                }
             return null;
         }
 
@@ -411,18 +438,19 @@ namespace SquashBot.Gameplay
         private GridPos stuckMe, stuckFoe;
 
         /// <summary>
-        /// Two foi side by side with nothing happening for a while (no blow, neither moving) are stuck on each other: the
-        /// rival's reeling is cut short and they are parted by a step (the AI game).
+        /// The two foi closer than the duel's gap (a knock, a landing, a shove brought them there) and both standing: after a
+        /// moment the rival's reeling is cut short and it is pushed back out to the gap (the AI game).
         /// </summary>
         private void Unstick()
         {
             if (LiveActive || chPhase != ChPhase.Duel || DuelCinematic || moveBusy || !hunt.ChallengeFoeTile.HasValue) { duelStirAt = Time.time; return; }
             var me = robot.Position; var foe = hunt.ChallengeFoeTile.Value;
-            if (me != stuckMe || foe != stuckFoe || HuntSystem.Chebyshev(me, foe) > 1) { stuckMe = me; stuckFoe = foe; duelStirAt = Time.time; return; }
-            if (Time.time - duelStirAt < 3f) return;
+            int near = HuntSystem.Chebyshev(me, foe);
+            if (me != stuckMe || foe != stuckFoe || near >= HuntSystem.DuelGap) { stuckMe = me; stuckFoe = foe; duelStirAt = Time.time; return; }
+            if (Time.time - duelStirAt < 0.5f) return;
             duelStirAt = Time.time;
             hunt.StunFoe(0f); hunt.EndFoeStun();
-            Push(false, robot.transform.position, 1);
+            Push(false, robot.transform.position, HuntSystem.DuelGap - near);
         }
 
         /// <summary>
@@ -629,7 +657,8 @@ namespace SquashBot.Gameplay
             AudioManager.PlaySfx(Sfx.Hop, 1f, 1.0f);
             yield return new WaitForSeconds(0.32f);
             if (!challengeRun || chPhase != ChPhase.Duel || DuelCinematic || !hunt.ChallengeFoeAt.HasValue) yield break;
-            if (Flat(hunt.ChallengeFoeAt.Value - robot.transform.position).magnitude > 2.4f) yield break;
+            if (Flat(hunt.ChallengeFoeAt.Value - robot.transform.position).magnitude > 3.6f) yield break;
+            hunt.TurnFoe(robot.transform.position - hunt.ChallengeFoeAt.Value);
             SlashFx.Create(hunt.ChallengeFoeAt.Value, robot.transform.position, new Color(1f, 0.4f, 0.3f), 1.6f);
             HurtMe(1f);
             AirStrike(false);
@@ -711,7 +740,7 @@ namespace SquashBot.Gameplay
                 cameraRig.StartCoroutine(Ultimate(false, leap: true));
                 return;
             }
-            if (rivalMeter >= 1f && myCombo >= 4 && Random.value < 0.3f)
+            if (rivalMeter >= 1f && myCombo >= 3 && Random.value < 0.45f + 0.25f * bold)
             {
                 rivalMeter -= 1f;
                 myCombo = 0;
@@ -731,6 +760,7 @@ namespace SquashBot.Gameplay
             if (rivalCombo >= HeavyCombo && dist <= 3.4f && Random.value < 0.5f)
             {
                 rivalCombo = 0;
+                FaceEachOther();
                 SlashFx.Create(foeAt, robot.transform.position, new Color(1f, 0.35f, 0.3f), 1.8f);
                 Shockwave.Create(robot.transform.position, 1.8f, new Color(1f, 0.4f, 0.3f));
                 cameraRig.Shake(0.45f);

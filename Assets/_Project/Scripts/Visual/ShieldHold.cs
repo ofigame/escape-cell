@@ -46,7 +46,7 @@ namespace SquashBot.Visual
             hips = Bone(transform, "Hips"); neck = Bone(transform, "Neck");
             if (want == null || fore == null || hand == null || hips == null || neck == null) return;
             // as tall as the body (hips to neck, and a bit)
-            size = Vector3.Distance(hips.position, neck.position) * 2.6f / Mathf.Max(1e-4f, transform.lossyScale.y); // (big: from the knees to above the shoulders; in the body's own size)
+            size = Vector3.Distance(hips.position, neck.position) * 2.6f * s.size / Mathf.Max(1e-4f, transform.lossyScale.y); // (big: from the knees to above the shoulders; in the body's own size)
             holder = new GameObject("HeldShield").transform;
             holder.SetParent(transform, false);
             GearFiles.Shield(holder, want, 1f, s.chest ? 0.15f : 0f);
