@@ -125,7 +125,7 @@ namespace SquashBot.Gameplay
             liveChange = 0;
             chOnline = true;
             chMatchId = 0;
-            chDuelMinutes = m.min is 3 or 5 or 10 ? m.min : 3;
+            chDuelMinutes = 3;
             if (m.sq >= 0) chDuelSquads = m.sq == 1; // a friend's code: the maker's choice
             rival = Challenge.FromRival(m.rival);
             if (chFriend == 1 || chFriend == 2)
@@ -355,7 +355,7 @@ namespace SquashBot.Gameplay
             chFriendCode = code;
             friendInvite = invite;
             friendMinutes = minutes is 3 or 5 or 10 ? minutes : 3;
-            chDuelMinutes = friendMinutes;
+            chDuelMinutes = 3;
             chCancelled = false;
             chPhase = ChPhase.Lobby;
             chUi.SetFriendBusy(true);

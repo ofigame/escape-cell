@@ -143,62 +143,16 @@ namespace SquashBot.UI
             var comp = Flat.Button(m, Loc.T("comp.button"), new Vector2(0.5f, 1f), new Vector2(0f, -265f), new Vector2(640f, 96f), new Color(0.75f, 0.45f, 1f), Flat.Text, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); competitions.Show(); }, 32f);
             ((RectTransform)comp.transform).pivot = new Vector2(0.5f, 0.5f);
             ModeCard(m, 1, new Vector2(0f, 160f), "duel", "ch.mode.duel", "ch.mode.duelText", new Color(1f, 0.6f, 0.25f), tappable: false);
-            // With squads or foi against foi alone (kept for next time), then the length.
-            squadsOn = Flat.Button(m, Loc.T("duel.squads"), new Vector2(0.5f, 0.5f), new Vector2(-230f, -215f), new Vector2(430f, 104f), Flat.CardHi, Flat.Text, () => PickSquads(true), 34f);
-            ((RectTransform)squadsOn.transform).pivot = new Vector2(0.5f, 0.5f);
-            squadsOff = Flat.Button(m, Loc.T("duel.solo"), new Vector2(0.5f, 0.5f), new Vector2(230f, -215f), new Vector2(430f, 104f), Flat.CardHi, Flat.Text, () => PickSquads(false), 34f);
-            ((RectTransform)squadsOff.transform).pivot = new Vector2(0.5f, 0.5f);
-            PickSquads(Challenge.DuelSquads, false);
-            // The squad's formation (with squads).
-            string[] forms = { "duel.form.0", "duel.form.1", "duel.form.2" };
-            for (int i = 0; i < 3; i++)
-            {
-                int k = i;
-                formButtons[i] = Flat.Button(m, Loc.T(forms[i]), new Vector2(0.5f, 0.5f), new Vector2((i - 1) * 300f, -322f), new Vector2(285f, 84f), Flat.CardHi, Flat.Text, () => PickFormation(k), 28f);
-                ((RectTransform)formButtons[i].transform).pivot = new Vector2(0.5f, 0.5f);
-            }
-            PickFormation(Challenge.DuelFormation, false);
-            // The duel's length: each button starts a duel of that many minutes.
-            int[] lengths = { 3, 5, 10 };
-            for (int i = 0; i < lengths.Length; i++)
-            {
-                int minutes = lengths[i];
-                var b = Flat.Button(m, Loc.F("ch.minutes", minutes), new Vector2(0.5f, 0.5f), new Vector2((i - 1) * 310f, -452f), new Vector2(290f, 120f),
-                    new Color(1f, 0.6f, 0.25f), new Color(0.12f, 0.06f, 0f), () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(1, minutes); }, 40f);
-                ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0.5f);
-            }
+            // One button: a 3-minute duel, foi against foi.
+            var go = Flat.Button(m, Loc.T("ch.duelGo"), new Vector2(0.5f, 0.5f), new Vector2(0f, -300f), new Vector2(720f, 140f),
+                new Color(1f, 0.6f, 0.25f), new Color(0.12f, 0.06f, 0f), () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(1, 3); }, 46f);
+            ((RectTransform)go.transform).pivot = new Vector2(0.5f, 0.5f);
             // Playing a friend by code, between the lengths and CLOSE (the friends list is on the main menu).
             var friend = Flat.Button(m, Loc.T("live.friend"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 190f), new Vector2(640f, 100f), Flat.Blue, Flat.Text, ShowFriend, 34f);
             ((RectTransform)friend.transform).pivot = new Vector2(0.5f, 0.5f);
             var back = Flat.Button(m, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 70f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => modes.Hide(true), 34f);
             ((RectTransform)back.transform).pivot = new Vector2(0.5f, 0.5f);
             BuildFriend(root);
-        }
-
-        private Button squadsOn, squadsOff;
-        private readonly Button[] formButtons = new Button[3];
-
-        /// <summary>A formation picked (lit); shown only with squads.</summary>
-        private void PickFormation(int k, bool sound = true)
-        {
-            if (sound) AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.2f);
-            Challenge.DuelFormation = k;
-            for (int i = 0; i < 3; i++)
-            {
-                if (formButtons[i] == null) continue;
-                ((Image)formButtons[i].targetGraphic).color = i == k ? new Color(1f, 0.6f, 0.25f) : Flat.CardHi;
-                formButtons[i].gameObject.SetActive(Challenge.DuelSquads);
-            }
-        }
-
-        /// <summary>Squads or foi alone: the picked one lit.</summary>
-        private void PickSquads(bool on, bool sound = true)
-        {
-            if (sound) AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.2f);
-            Challenge.DuelSquads = on;
-            ((Image)squadsOn.targetGraphic).color = on ? new Color(0.3f, 0.62f, 1f) : Flat.CardHi;
-            ((Image)squadsOff.targetGraphic).color = on ? Flat.CardHi : new Color(0.3f, 0.62f, 1f);
-            foreach (var b in formButtons) if (b != null) b.gameObject.SetActive(on);
         }
 
         // ---------- Playing a friend ----------
@@ -220,13 +174,6 @@ namespace SquashBot.UI
             // Making a code: the code, big.
             var hostCard = Flat.Panel(p, "Host", new Vector2(0.5f, 0.5f), new Vector2(0f, 380f), new Vector2(940f, 470f), Flat.Card);
             hostCard.pivot = new Vector2(0.5f, 0.5f);
-            // The duel's minutes.
-            int[] lengths2 = { 3, 5, 10 };
-            for (int i = 0; i < 3; i++)
-            {
-                int minutes = lengths2[i];
-                hostLengths[i] = Chip(hostCard, Loc.F("ch.minutes", minutes), new Vector2((i - 1) * 290f, -90f), new Vector2(270f, 84f), () => SetHostMinutes(minutes));
-            }
             friendCode = Flat.Label(hostCard, "", new Vector2(0.5f, 1f), new Vector2(0f, -270f), new Vector2(900f, 110f), 96f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
             friendCode.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             friendCode.characterSpacing = 30f;
@@ -265,26 +212,8 @@ namespace SquashBot.UI
             ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 
-        private readonly Button[] hostLengths = new Button[3];
-        private int hostMinutes = 3;
-
-        /// <summary>A choice chip: lit when picked.</summary>
-        private Button Chip(RectTransform parent, string text, Vector2 at, Vector2 size, Action onClick)
-        {
-            var b = Flat.Button(parent, text, new Vector2(0.5f, 1f), at, size, Flat.CardHi, Flat.Text, () => { AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.2f); onClick(); }, 30f);
-            ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0.5f);
-            return b;
-        }
-
-        private void SetHostMinutes(int minutes)
-        {
-            hostMinutes = minutes;
-            int[] lengths = { 3, 5, 10 };
-            for (int i = 0; i < 3; i++)
-            {
-                ((Image)hostLengths[i].targetGraphic).color = lengths[i] == minutes ? new Color(1f, 0.6f, 0.25f) : Flat.CardHi;
-            }
-        }
+        /// <summary>Every duel lasts three minutes.</summary>
+        private const int hostMinutes = 3;
 
         private void Join()
         {
@@ -301,7 +230,6 @@ namespace SquashBot.UI
             AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f);
             modes.Hide(true);
             friendCode.text = "- - - -";
-            SetHostMinutes(hostMinutes);
             codeInput.text = "";
             friendStatus.text = "";
             SetFriendBusy(false);
@@ -318,7 +246,6 @@ namespace SquashBot.UI
         public void SetFriendBusy(bool busy)
         {
             hostButton.interactable = !busy;
-            foreach (var b in hostLengths) b.interactable = !busy;
             joinButton.interactable = !busy;
             codeInput.interactable = !busy;
         }

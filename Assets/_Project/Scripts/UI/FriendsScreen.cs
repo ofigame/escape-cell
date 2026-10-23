@@ -10,8 +10,8 @@ namespace SquashBot.UI
 {
     /// <summary>
     /// Friends: add one by user name (they accept), the requests to answer, and the friends — each with their rank, whether
-    /// they are in the game now, and a duel invitation (3, 5 or 10 minutes). Over everything, a friend's invitation that
-    /// came in: ACCEPT or NO.
+    /// they are in the game now, and a duel invitation (a 3-minute duel). The friends (and the player among them) are ranked by
+    /// rank or by power. Over everything, a friend's invitation that came in: ACCEPT or NO.
     /// </summary>
     public class FriendsScreen : MonoBehaviour
     {
@@ -70,8 +70,13 @@ namespace SquashBot.UI
             ((RectTransform)add.transform).pivot = new Vector2(0.5f, 0.5f);
             status = Flat.Label(root, "", new Vector2(0.5f, 1f), new Vector2(0f, -360f), new Vector2(940f, 60f), 28f, Flat.Gold, TextAlignmentOptions.Center, wrap: true);
             status.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            // Ranked by rank or by power.
+            byRank = Flat.Button(root, Loc.T("friends.byRank"), new Vector2(0.5f, 1f), new Vector2(-250f, -455f), new Vector2(480f, 84f), Flat.CardHi, Flat.Text, () => SortBy(false), 28f);
+            ((RectTransform)byRank.transform).pivot = new Vector2(0.5f, 0.5f);
+            byPower = Flat.Button(root, Loc.T("friends.byPower"), new Vector2(0.5f, 1f), new Vector2(250f, -455f), new Vector2(480f, 84f), Flat.CardHi, Flat.Text, () => SortBy(true), 28f);
+            ((RectTransform)byPower.transform).pivot = new Vector2(0.5f, 0.5f);
             // The list.
-            var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(40f, Monetization.Ads.BannerReserve + 140f), new Vector2(-40f, -410f));
+            var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(40f, Monetization.Ads.BannerReserve + 140f), new Vector2(-40f, -510f));
             viewport.gameObject.AddComponent<RectMask2D>();
             UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
@@ -109,6 +114,25 @@ namespace SquashBot.UI
                 shownInvite = null;
             }, 38f);
             ((RectTransform)no.transform).pivot = new Vector2(0.5f, 0.5f);
+        }
+
+        private Button byRank, byPower;
+        private bool rankByPower;
+        private FoiNet.FriendList shown;
+
+        /// <summary>The friends ranked by rank (then trophies) or by power: the lit button.</summary>
+        private void SortBy(bool power)
+        {
+            AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.2f);
+            rankByPower = power;
+            if (shown != null) Fill(shown);
+            else LightSort();
+        }
+
+        private void LightSort()
+        {
+            ((Image)byRank.targetGraphic).color = rankByPower ? Flat.CardHi : new Color(1f, 0.6f, 0.25f);
+            ((Image)byPower.targetGraphic).color = rankByPower ? new Color(1f, 0.6f, 0.25f) : Flat.CardHi;
         }
 
         private void Add()
@@ -150,6 +174,8 @@ namespace SquashBot.UI
         public void Fill(FoiNet.FriendList list)
         {
             for (int i = content.childCount - 1; i >= 0; i--) Destroy(content.GetChild(i).gameObject);
+            shown = list;
+            LightSort();
             if (list == null) { status.text = Loc.T("live.offline"); content.sizeDelta = Vector2.zero; return; }
             status.text = "";
             float y = -10f;
@@ -174,9 +200,13 @@ namespace SquashBot.UI
             }
             else
             {
+                // ranked, the player among them (by rank then trophies, or by power)
                 var sorted = new List<FoiNet.Friend>(list.friends);
-                sorted.Sort((a, b) => a.online != b.online ? (a.online ? -1 : 1) : string.Compare(a.name, b.name, StringComparison.OrdinalIgnoreCase));
-                foreach (var f in sorted) { Row(f, y, 0); y -= RowH; }
+                if (list.me != null && !string.IsNullOrEmpty(list.me.name)) sorted.Add(list.me);
+                sorted.Sort((a, b) => rankByPower
+                    ? (b.power != a.power ? b.power.CompareTo(a.power) : b.trophies.CompareTo(a.trophies))
+                    : (b.rank != a.rank ? b.rank.CompareTo(a.rank) : b.trophies != a.trophies ? b.trophies.CompareTo(a.trophies) : b.power.CompareTo(a.power)));
+                for (int i = 0; i < sorted.Count; i++) { Row(sorted[i], y, sorted[i] == list.me ? 3 : 0, i + 1); y -= RowH; }
             }
             if (list.outgoing != null && list.outgoing.Length > 0)
             {
@@ -187,18 +217,21 @@ namespace SquashBot.UI
             content.anchoredPosition = Vector2.zero;
         }
 
-        /// <param name="kind">0 a friend (invite, remove), 1 a request to answer (accept, no), 2 a request sent (take back).</param>
-        private void Row(FoiNet.Friend f, float y, int kind)
+        /// <param name="kind">0 a friend (invite, remove), 1 a request to answer (accept, no), 2 a request sent (take back), 3 the player.</param>
+        /// <param name="place">Its place in the ranking (0: none).</param>
+        private void Row(FoiNet.Friend f, float y, int kind, int place = 0)
         {
-            var row = Flat.Panel(content, "Row", new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(1000f, RowH - 14f), Flat.Card);
+            var row = Flat.Panel(content, "Row", new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(1000f, RowH - 14f), kind == 3 ? Flat.CardHi : Flat.Card);
             row.pivot = new Vector2(0.5f, 1f);
+            if (kind == 3) UiFactory.Fill(UiFactory.Stretch("Rim", row), Flat.Gold, UiSprites.Ring, 1.6f).raycastTarget = false;
+
             RankArt.Badge(row, Mathf.Clamp(f.rank, 0, RankArt.Count - 1), new Vector2(0f, 0.5f), new Vector2(66f, 0f), 96f);
             var dot = UiFactory.Box("Online", row, new Vector2(0f, 0.5f), new Vector2(130f, 26f), new Vector2(22f, 22f));
             dot.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.Fill(dot, f.online ? new Color(0.35f, 1f, 0.45f) : new Color(1f, 1f, 1f, 0.2f), UiSprites.Circle).raycastTarget = false;
-            var name = Flat.Label(row, f.name, new Vector2(0f, 0.5f), new Vector2(150f, 22f), new Vector2(380f, 56f), 38f, Flat.Text, bold: true);
+            var name = Flat.Label(row, (place > 0 ? place + ". " : "") + (kind == 3 ? f.name + " (" + Loc.T("friends.you") + ")" : f.name), new Vector2(0f, 0.5f), new Vector2(150f, 22f), new Vector2(450f, 56f), 38f, kind == 3 ? Flat.Gold : Flat.Text, bold: true);
             name.rectTransform.pivot = new Vector2(0f, 0.5f);
-            var info = Flat.Label(row, Challenge.RankName(f.rank) + " · " + Loc.F("ch.trophies", f.trophies) + (f.online ? " · " + Loc.T("friends.online") : ""), new Vector2(0f, 0.5f), new Vector2(150f, -28f), new Vector2(420f, 40f), 24f, Flat.Muted);
+            var info = Flat.Label(row, Challenge.RankName(f.rank) + " · " + Loc.F("ch.power", f.power) + (f.online && kind != 3 ? " · " + Loc.T("friends.online") : ""), new Vector2(0f, 0.5f), new Vector2(150f, -28f), new Vector2(450f, 40f), 24f, Flat.Muted);
             info.rectTransform.pivot = new Vector2(0f, 0.5f);
             Button Small(string text, float x, float w, Color face, Action onClick)
             {
@@ -209,14 +242,11 @@ namespace SquashBot.UI
             switch (kind)
             {
                 case 0:
-                    int[] lengths = { 10, 5, 3 };
-                    for (int i = 0; i < 3; i++)
-                    {
-                        int minutes = lengths[i];
-                        Small(Loc.F("ch.minutes", minutes), -20f - i * 118f, 108f, new Color(1f, 0.6f, 0.25f), () => InvitePressed?.Invoke(f.id, f.name, minutes));
-                    }
-                    Small(Loc.T("friends.remove"), -380f, 100f, Flat.CardHi, () => RemovePressed?.Invoke(f.id));
+                    Small(Loc.T("friends.duel"), -20f, 240f, new Color(1f, 0.6f, 0.25f), () => InvitePressed?.Invoke(f.id, f.name, 3));
+                    Small(Loc.T("friends.remove"), -276f, 110f, Flat.CardHi, () => RemovePressed?.Invoke(f.id));
                     break;
+                case 3:
+                    break; // the player: no buttons
                 case 1:
                     Small(Loc.T("friends.accept"), -20f, 200f, Flat.Blue, () => AcceptPressed?.Invoke(f.id));
                     Small(Loc.T("friends.decline"), -236f, 160f, Flat.CardHi, () => RemovePressed?.Invoke(f.id));

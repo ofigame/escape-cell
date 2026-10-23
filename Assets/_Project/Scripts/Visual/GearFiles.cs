@@ -22,8 +22,8 @@ namespace SquashBot.Visual
             ["novaMace"] = "ileri_seviye_gurz",
             // the ranks' swords
             ["emberBlade"] = "bascavus_kilic",
-            ["frostEdge"] = "ustegmen_kilic",
-            ["colonelBlade"] = "yarbay_kilic",
+            ["frostEdge"] = "yarbay_kilic",
+            ["colonelBlade"] = "ustegmen_kilic",
             ["kingsBlade"] = "maresal_kilic",
             // the golden chest's swords
             ["nightBlade"] = "altin_kasa_kilic_1",
@@ -38,12 +38,19 @@ namespace SquashBot.Visual
         private static readonly Dictionary<string, Color> weaponLight = new Dictionary<string, Color>
         {
             ["emberBlade"] = new Color(1f, 0.55f, 0.2f),   // embers
-            ["frostEdge"] = new Color(0.55f, 0.85f, 1f),  // frost
-            ["colonelBlade"] = new Color(0.4f, 0.8f, 1f), // ice crystal
+            ["frostEdge"] = new Color(0.3f, 0.65f, 1f),   // blue lava
+            ["colonelBlade"] = new Color(0.55f, 0.85f, 1f), // frost
             ["kingsBlade"] = new Color(1f, 0.45f, 0.2f),  // the marshal's red-gold
             ["nightBlade"] = new Color(0.45f, 0.5f, 1f),  // night blue
             ["dawnBlade"] = new Color(1f, 0.4f, 0.12f),   // fire
             ["emeraldBlade"] = new Color(1f, 0.7f, 0.25f), // ember thorn
+        };
+
+        /// <summary>The swords lava wells out of, and its colour.</summary>
+        private static readonly Dictionary<string, Color> weaponLava = new Dictionary<string, Color>
+        {
+            ["dawnBlade"] = new Color(1f, 0.32f, 0.06f), // red-orange
+            ["frostEdge"] = new Color(0.2f, 0.55f, 1f),  // blue
         };
 
         /// <summary>A weapon's own light colour (a = 0: none).</summary>
@@ -161,6 +168,7 @@ namespace SquashBot.Visual
                 l.type = LightType.Point; l.color = lit; l.range = length * 2.2f; l.intensity = 1.6f; l.shadows = LightShadows.None;
                 l.gameObject.AddComponent<BladeGlow>();
             }
+            if (weaponLava.TryGetValue(id, out var lava)) root.gameObject.AddComponent<BladeLava>().Set(lava, length);
             return root;
         }
 

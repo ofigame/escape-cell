@@ -51,8 +51,8 @@ namespace SquashBot.Data
             }
             int streak = Streak + 1;
             Prefs.SetInt("sb_dchest_streak", streak);
-            var tier = (streak >= 5 && healthLeft >= 0.5f) || streak >= 8 ? ChestTier.Advanced
-                : streak >= 3 || healthLeft >= 0.7f ? ChestTier.Mid
+            var tier = (streak >= 7 && healthLeft >= 0.6f) || streak >= 12 ? ChestTier.Advanced
+                : streak >= 3 || healthLeft >= 0.8f ? ChestTier.Mid
                 : ChestTier.Basic;
             if (!ranked) tier = ChestTier.Basic;
             SetCount(tier, Count(tier) + 1);
@@ -141,12 +141,12 @@ namespace SquashBot.Data
         {
             // A surprise outfit first: the chests' own ones, or a suit from the workshop not owned yet.
             // the golden chest's own shields, now and then
-            if (t == ChestTier.Advanced && UnityEngine.Random.value < 0.12f)
+            if (t == ChestTier.Advanced && UnityEngine.Random.value < 0.06f)
             {
                 var left = Shields.ChestLeft();
                 if (left.Count > 0) return new ChestReward { shield = left[UnityEngine.Random.Range(0, left.Count)] };
             }
-            float suitChance = t == ChestTier.Advanced ? 0.22f : t == ChestTier.Mid ? 0.1f : 0.03f;
+            float suitChance = t == ChestTier.Advanced ? 0.12f : t == ChestTier.Mid ? 0.06f : 0.02f;
             if (UnityEngine.Random.value < suitChance)
             {
                 var own = Cosmetics.ChestOnly();
@@ -155,24 +155,41 @@ namespace SquashBot.Data
                 if (pool.Count > 0) return new ChestReward { outfit = pool[UnityEngine.Random.Range(0, pool.Count)] };
             }
             float roll = UnityEngine.Random.value;
-            bool wantChest = t == ChestTier.Advanced ? roll < 0.32f : t == ChestTier.Mid && Streak >= 3 && roll < 0.08f;
-            bool wantShop = !wantChest && roll < (t == ChestTier.Advanced ? 0.62f : t == ChestTier.Mid ? 0.4f : 0.25f);
+            // the chest swords rare (the golden chest only), and the best of them rarest
+            bool wantChest = t == ChestTier.Advanced && roll < 0.06f;
+            bool wantShop = !wantChest && roll < (t == ChestTier.Advanced ? 0.2f : t == ChestTier.Mid ? 0.16f : 0.12f);
             WeaponDef w = null;
-            if (wantChest) w = Pick(Armory.All.FindAll(x => x.chest && !Armory.Owned(x)));
+            if (wantChest) w = PickWeighted(Armory.All.FindAll(x => x.chest && !Armory.Owned(x)));
             if (w == null && (wantChest || wantShop))
             {
-                int lo = t == ChestTier.Advanced ? 4 : t == ChestTier.Mid ? 3 : 1;
-                int hi = t == ChestTier.Advanced ? 6 : t == ChestTier.Mid ? 4 : 2;
+                int lo = t == ChestTier.Advanced ? 3 : t == ChestTier.Mid ? 2 : 1;
+                int hi = t == ChestTier.Advanced ? 5 : t == ChestTier.Mid ? 3 : 2;
                 w = Pick(Armory.All.FindAll(x => !x.Special && !x.chest && x.price > 0 && !Armory.Owned(x) && x.tier >= lo && x.tier <= hi));
             }
             if (w != null) return new ChestReward { weapon = w };
-            // Gold (more of it when a weapon was due but none was left to give).
-            var range = t == ChestTier.Advanced ? (500, 1100) : t == ChestTier.Mid ? (200, 450) : (60, 160);
+            // Gold: the golden chest's always 2000; the others more of it when a weapon was due but none was left to give.
+            if (t == ChestTier.Advanced) return new ChestReward { gold = 2000 };
+            var range = t == ChestTier.Mid ? (200, 450) : (60, 160);
             float k = wantChest || wantShop ? 1.5f : 1f;
             int gold = Mathf.RoundToInt(UnityEngine.Random.Range(range.Item1, range.Item2) * k / 10f) * 10;
             return new ChestReward { gold = gold };
         }
 
         private static WeaponDef Pick(List<WeaponDef> list) => list.Count == 0 ? null : list[UnityEngine.Random.Range(0, list.Count)];
+
+        /// <summary>One of the list, the stronger ones less likely (by damage: the best comes out least).</summary>
+        private static WeaponDef PickWeighted(List<WeaponDef> list)
+        {
+            if (list.Count == 0) return null;
+            float sum = 0f;
+            foreach (var x in list) sum += 1f / (x.damage * x.damage);
+            float pick = UnityEngine.Random.value * sum;
+            foreach (var x in list)
+            {
+                pick -= 1f / (x.damage * x.damage);
+                if (pick <= 0f) return x;
+            }
+            return list[list.Count - 1];
+        }
     }
 }

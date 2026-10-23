@@ -459,8 +459,8 @@ namespace SquashBot.Data
 
         // ---------- Friends ----------
 
-        [Serializable] public class Friend { public string id, name; public int rank, trophies; public bool online; }
-        [Serializable] public class FriendList { public Friend[] friends, incoming, outgoing; }
+        [Serializable] public class Friend { public string id, name; public int rank, trophies, power; public bool online; }
+        [Serializable] public class FriendList { public Friend[] friends, incoming, outgoing; public Friend me; }
         [Serializable] public class Invitation { public string code, from; public int min; }
         [Serializable] private class FriendBody { public string id; }
         [Serializable] private class CodeBody { public string code; }

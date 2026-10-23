@@ -60,7 +60,7 @@ namespace SquashBot.Gameplay
             chUi.NameSubmitted += OnNameSubmitted;
             chUi.NameClosed += () => { profileNaming = false; chCancelled = true; chPhase = ChPhase.Off; chUi.HideAll(); };
             chUi.RenamePressed += () => { chCancelled = true; chPhase = ChPhase.Off; chUi.ShowName(Challenge.PlayerName); };
-            chUi.ModePicked += (_, minutes) => { chDuelMinutes = minutes is 3 or 5 or 10 ? minutes : 3; chDuelSquads = Challenge.DuelSquads; chUi.HideModes(); StartChallenge(false); };
+            chUi.ModePicked += (_, minutes) => { chDuelMinutes = 3; chDuelSquads = Challenge.DuelSquads; chUi.HideModes(); StartChallenge(false); };
             if (liveHooksWired) return;
             // The hunt's links (made once: the hunt outlives a language change, the challenge screens do not).
             liveHooksWired = true;
