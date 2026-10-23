@@ -239,6 +239,7 @@ namespace SquashBot.Visual
                 string nm = r.name.ToLowerInvariant();
                 r.sharedMaterial = r.name == "Cover" ? (lid ?? LidPaint(SkinOf(n, skin))) : nm.Contains("hair") ? HairPaint(hc) : nm.Contains("brows") ? BrowPaint(hc) : HeadPaint(n, skin, eyes);
                 r.receiveShadows = false; // (no flickering self-shadow on the face from the hair, hat or crown)
+                if (r.name != "Cover" && !nm.Contains("hair") && !nm.Contains("brows")) WithRim(r); // (not on the hair: every lock's edge would glow, wiry)
             }
         }
 
@@ -469,6 +470,33 @@ namespace SquashBot.Visual
             return m;
         }
 
+        private static Material rimMat;
+
+        /// <summary>foi's rim light (a soft warm edge where it turns from the camera: it stands out from any background).</summary>
+        private static Material Rim()
+        {
+            if (rimMat != null) return rimMat;
+            var sh = Resources.Load<Shader>("Shaders/FoiRim");
+            if (sh == null || !sh.isSupported) return null;
+            rimMat = new Material(sh) { name = "FoiRim" };
+            rimMat.SetColor("_RimColor", new Color(1f, 0.93f, 0.8f, 0.55f));
+            rimMat.SetFloat("_RimPower", 3.2f);
+            return rimMat;
+        }
+
+        /// <summary>The rim light drawn over a renderer's own paint (once).</summary>
+        private static void WithRim(Renderer r)
+        {
+            var rim = Rim();
+            if (rim == null) return;
+            var ms = r.sharedMaterials;
+            foreach (var m in ms) if (m == rim) return;
+            var all = new Material[ms.Length + 1];
+            ms.CopyTo(all, 0);
+            all[ms.Length] = rim;
+            r.sharedMaterials = all;
+        }
+
         private static void Matte(Material m)
         {
             m.SetFloat("_SpecularHighlights", 0f); m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
@@ -517,6 +545,7 @@ namespace SquashBot.Visual
             foreach (var r in skin.GetComponentsInChildren<SkinnedMeshRenderer>(true))
             {
                 r.sharedMaterial = armour;
+                WithRim(r);
                 r.shadowCastingMode = Shapes.CastShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
             }
         }
