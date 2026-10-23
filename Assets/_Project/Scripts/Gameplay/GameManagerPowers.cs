@@ -103,7 +103,7 @@ namespace SquashBot.Gameplay
         private int PowerDamage(float times)
         {
             var w = weapon ?? Armory.Equipped;
-            return Mathf.Max(1, Mathf.RoundToInt(Challenge.RankBoost(Armory.Damage(w)) * times));
+            return Mathf.Max(1, Mathf.RoundToInt(MyBlow(w) * times));
         }
 
         // ---------- The ultimate ----------

@@ -328,7 +328,7 @@ namespace SquashBot.Gameplay
                 var points = new int[Army.Groups];
                 for (int g = 0; g < Army.Groups; g++) points[g] = Army.GroupPoints(g);
                 yield return FoiNet.PutArmy(points, Army.EarnedPoints, world, Challenge.FoiMaxHp, Challenge.FoiHitFor(world), 0.5f,
-                    Armory.Equipped.id, Armory.Level(Armory.Equipped), Shop.ArmorShare, Shop.Level(Upgrade.Shield) > 0 ? Shop.ShieldHits : 0, r => ok = r);
+                    Armory.Equipped.id, RobotParts.Level(RobotPart.Arms), RobotParts.Armor, Shields.All.IndexOf(Shields.Equipped) + 1, r => ok = r); // (the shield field: the carried shield, 1 wooden … 4 amethyst) // (the weapon level's field carries the arms' level)
                 if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
             }
             // A live rival first (a friend's code: only that).
@@ -540,6 +540,8 @@ namespace SquashBot.Gameplay
             foreach (var g in drop) DestroyImmediate(g);
             foreach (var sh in copy.GetComponentsInChildren<ShieldHold>(true)) DestroyImmediate(sh); // (the rival carries no shield of foi's)
             rivalHeld = HeldWeapon.Attach(copy, Armory.Get(rival.weapon));
+            var rivalSkin = copy.GetComponentInChildren<SkinnedHero>(true);
+            if (rivalSkin != null) PartLooks.Apply(rivalSkin.transform, rival.Body, rival.Arms, rival.Shell); // its own parts' look
             return root;
         }
 
@@ -562,6 +564,9 @@ namespace SquashBot.Gameplay
 
         /// <summary>The chest the last duel brought (none: lost, or a draw).</summary>
         private ChestTier? chestWon;
+        /// <summary>The last duel's core parts, and whether it was the day's first win.</summary>
+        private int coresWon;
+        private bool firstWinToday;
 
         /// <param name="outcome">1 won, 0 a draw, -1 lost.</param>
         private void ChallengeFinish(int outcome, string score)
@@ -581,9 +586,18 @@ namespace SquashBot.Gameplay
             bool paid = !friendly || FriendMatchesPaid.Take();
             if (colosseum != null) colosseum.Cheer(won ? 0 : draw ? -1 : 1, 1f);
             hunt.Freeze();
-            int gold = won && (chOnline || chLive) && paid ? Challenge.WinGold : 0; // offline practice pays no prize
+            bool prized = (chOnline || chLive) && paid; // offline practice pays no prize
+            int gold = !prized ? 0 : won ? Challenge.WinGold : draw ? Challenge.DrawGold : Challenge.LossGold;
             if (!paid) { coinsThisRun = 0; comboBonus = 0; } // (nor the coins picked up in it)
-            SaveData.Coins += draw ? 0 : gold + Earned;
+            // Core parts: 3 a win, 2 a draw, 1 a loss; the day's first win triples its gold, brings 10 more and a bronze
+            // chest; every fifth win in a row 5 more. (A friend's match brings none.)
+            int cores = friendly || !(chOnline || chLive) ? 0 : won ? 3 : draw ? 2 : 1;
+            firstWinToday = won && cores > 0 && DuelDay.TakeFirstWin();
+            if (firstWinToday) { gold *= 3; cores += 10; DuelChests.Add(ChestTier.Mid); }
+            if (won && cores > 0 && DuelChests.Streak > 0 && DuelChests.Streak % 5 == 0) cores += 5;
+            CoreParts.Add(cores);
+            coresWon = cores;
+            SaveData.Coins += gold + (draw ? 0 : Earned);
             State = GameState.Result;
             danceAt = won ? robot.transform : !draw ? hunt.ChallengeFoeModel : null;
             if (won) AudioManager.PlaySfx(Sfx.Win);
@@ -598,6 +612,7 @@ namespace SquashBot.Gameplay
         /// </summary>
         private IEnumerator ShowChallengeResult(bool won, bool draw, string score, int gold)
         {
+            int bestBefore = Challenge.BestRank;
             string trophies;
             if (chLive && liveLost) trophies = Loc.T("live.lost");
             else if (chLive && liveRanked)
@@ -623,9 +638,20 @@ namespace SquashBot.Gameplay
                 trophies = result != null ? TrophyLine(result.change) : Loc.T("ch.resultLater");
             }
             else trophies = Loc.T("ch.offline");
+            // A new rank reached for the first time: 30 core parts a step and a gold chest.
+            string rankUp = "";
+            if (Challenge.BestRank > bestBefore)
+            {
+                int steps = Challenge.BestRank - bestBefore;
+                CoreParts.Add(30 * steps);
+                DuelChests.Add(ChestTier.Advanced);
+                coresWon += 30 * steps;
+                rankUp = "\n" + Loc.F("ch.rankUpGift", Challenge.RankName(Challenge.BestRank));
+            }
             string line = score + "  ·  " + Loc.F(won ? "ch.wonLine" : draw ? "ch.drawLine" : "ch.lostLine", rival.name)
                           + (chLive && liveLeft ? "\n" + Loc.T("live.rivalLeftWin") : "")
-                          + "\n" + trophies + (gold > 0 ? " · +" + gold + " " + Loc.T("ch.gold") : "")
+                          + "\n" + trophies + (gold > 0 ? " · +" + gold + " " + Loc.T("ch.gold") : "") + (coresWon > 0 ? " · " + Loc.F("login.cores", "+" + coresWon) : "")
+                          + (firstWinToday ? "\n" + Loc.T("ch.firstWin") : "") + rankUp
                           + (won && chestWon.HasValue ? "\n" + Loc.F("chests.won", DuelChestScreen.TierName(chestWon.Value)) : "")
                           + "\n" + Challenge.RankName(Challenge.Rank) + " · " + Loc.F("ch.trophies", Challenge.Trophies);
             // The winner walks to the middle and finishes its dance first, the duel's camera on it (then the card).

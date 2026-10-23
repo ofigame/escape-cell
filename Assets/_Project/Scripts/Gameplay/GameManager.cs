@@ -292,6 +292,7 @@ namespace SquashBot.Gameplay
             ui.ShopPressed += ShowShop;
             ui.DailyBonus.PlayPressed += PlayDailyBonus;
             ui.LoginView.Claimed += OnLoginGift;
+            ui.Shop.Purchased += () => robot.ApplyOutfit(Cosmetics.Outfit()); // (a part raised: its look on foi at once)
             ui.DailyBonus.AdPressed += WatchAdForDailyBonus;
             ui.Garage.PreviewChanged += outfit => robot.ApplyOutfit(outfit);
             ui.Garage.DancePreview += robot.Cheer;

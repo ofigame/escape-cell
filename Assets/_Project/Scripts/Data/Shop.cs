@@ -147,8 +147,8 @@ namespace SquashBot.Data
         /// <summary>Rescue charges a level can bank at once.</summary>
         public static int MaxRescues => 3 + Level(Upgrade.Rescue);
 
-        /// <summary>The share of every hit the armor takes off (0.1 per level).</summary>
-        public static float ArmorShare => Mathf.Min(0.6f, 0.1f * Level(Upgrade.Armor) + HelmetShare);
+        /// <summary>The share of every hit the shell takes off (the armour and helmet upgrades are now the shell part).</summary>
+        public static float ArmorShare => RobotParts.Armor;
 
         /// <summary>The share of every hit the helmet takes off (0.06 per level), counted in <see cref="ArmorShare"/>.</summary>
         public static float HelmetShare => 0.06f * Level(Upgrade.Helmet);

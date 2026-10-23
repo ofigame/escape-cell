@@ -205,6 +205,15 @@ namespace SquashBot.Gameplay
                         // The rival raised its shield (the server counts its blows): its bubble here for the time.
                         if (m.by == 0) { hunt.ShieldFoe(DuelShieldHits); rivalShieldUntil = Time.time + DuelShieldSeconds; }
                         break;
+                    case "blk":
+                        // A carried shield took a plain blow (the server decides): mine raised, or sparks on the rival's.
+                        if (m.by == 1) ShieldShow(hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.position : robot.transform.position + robot.Visual.forward);
+                        else if (hunt.ChallengeFoeModel != null)
+                        {
+                            fx.Burst(hunt.ChallengeFoeModel.position + Vector3.up * 0.7f, new Color(1f, 0.9f, 0.6f), new Color(3f, 2.6f, 1.6f), 18, 4f);
+                            AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.9f);
+                        }
+                        break;
                     case "hold":
                         chUi.SetStatus(Loc.T("live.rivalDropped"));
                         break;

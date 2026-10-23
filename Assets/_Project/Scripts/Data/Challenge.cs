@@ -129,15 +129,12 @@ namespace SquashBot.Data
             return r;
         }
 
-        /// <summary>The player's rank: the highest reached (trophies may drop, the rank stays).</summary>
-        public static int Rank => Mathf.Max(Prefs.GetInt(RankKey, 0), RankFor(Trophies));
+        /// <summary>The player's rank on the one ladder: it falls with the trophies (the server keeps a new rank for its
+        /// first three matches). Its tier sets the league ceiling.</summary>
+        public static int Rank => RankFor(Trophies);
 
-        /// <summary>
-        /// Both foi's health in a duel, times this by the match's level (the higher rank of the two): twice up to
-        /// Başçavuş, five times up to Binbaşı, ten times above — so a strong weapon does not end a round in a few blows.
-        /// As the server's Rules.DuelHpTimes.
-        /// </summary>
-        public static int DuelHpTimes(int rank) => rank <= 3 ? 2 : rank <= 8 ? 5 : 10;
+        /// <summary>The highest rank ever reached: rank weapons and rank cosmetics follow it (never taken back).</summary>
+        public static int BestRank => Mathf.Max(Prefs.GetInt(RankKey, 0), RankFor(Trophies));
 
         public static string RankName(int rank) => Loc.T("rank." + Mathf.Clamp(rank, 0, RankAt.Length - 1));
 
@@ -151,13 +148,10 @@ namespace SquashBot.Data
         public static float ArmyBonus => BonusFor(Trophies);
         public static float BonusFor(int trophies) => 0.04f * RankFor(trophies);
 
-        /// <summary>
-        /// foi's own strength from the rank reached (kept, like the rank), beside the workshop's weapons and armour: 2% a
-        /// rank more damage and 2% a rank less taken — on the floors and in the duels.
-        /// </summary>
-        public static float FoiBonus => 0.02f * Rank;
+        /// <summary>The arms' share on every blow (the rank's own bonus is gone: the league ceiling took its place).</summary>
+        public static float FoiBonus => RobotParts.DamageBonus;
 
-        /// <summary>A blow's damage with the rank's strength (the fraction a chance of one more, so small blows gain too).</summary>
+        /// <summary>A blow's damage with the arms' strength (the fraction a chance of one more, so small blows gain too).</summary>
         public static int RankBoost(int damage)
         {
             float d = damage * (1f + FoiBonus);
@@ -165,16 +159,13 @@ namespace SquashBot.Data
             return whole + (Random.value < d - whole ? 1 : 0);
         }
 
-        /// <summary>A share of health a blow takes, less the rank's strength.</summary>
-        public static float RankGuard(float share) => share / (1f + FoiBonus);
+        /// <summary>A share of health a blow takes (the shell's armour is counted with the rest: see Shop.ArmorShare).</summary>
+        public static float RankGuard(float share) => share;
 
         // ---------- foi's health points ----------
 
-        /// <summary>
-        /// foi's health in points: 100 at the start, one more for every floor won, 15 for every level of an upgrade
-        /// bought in the workshop and 20 for every rank reached. Blows take their damage off it (a share of it on the bar).
-        /// </summary>
-        public static int FoiMaxHp => FoiHpFor(SaveData.UnlockedLevel, UpgradeLevels, Rank);
+        /// <summary>foi's health in points: the body's (150 to start, 40 a level). Blows take their damage off it.</summary>
+        public static int FoiMaxHp => RobotParts.Hp;
 
         public static int FoiHpFor(int floorsWon, int upgradeLevels, int rank) =>
             100 + Mathf.Clamp(floorsWon, 0, LevelCatalog.LevelCount) + 15 * Mathf.Max(0, upgradeLevels) + 20 * Mathf.Clamp(rank, 0, RankAt.Length - 1);
@@ -219,8 +210,10 @@ namespace SquashBot.Data
             return 0;
         }
 
-        /// <summary>Gold a win brings (more the higher the rank).</summary>
+        /// <summary>Gold a win, a draw and a loss bring (more the higher the rank).</summary>
         public static int WinGold => 80 + Rank * 20;
+        public static int DrawGold => 40 + Rank * 10;
+        public static int LossGold => 20 + Rank * 5;
 
         // ---------- Opponents ----------
 
@@ -235,10 +228,15 @@ namespace SquashBot.Data
             /// <summary>How it picks its groups: 0 saves its strongest for last … 1 sends it first.</summary>
             public float boldness;
             public bool bot;
-            /// <summary>Its foi's weapon (id), that weapon's level and its armour (0 none … 0.5).</summary>
+            /// <summary>Its foi's weapon (id), its arms' level (0..20; the old weapon level's field) and its shell's armour (0..0.25).</summary>
             public string weapon = "mallet";
-            public int weaponLevel = 1;
+            public int weaponLevel;
             public float armor;
+
+            /// <summary>Its parts' levels, worked out from what it brings (the body from its health, the shell from its armour).</summary>
+            public int Body => Mathf.Clamp((foiHp - RobotParts.BaseHp) / RobotParts.HpPerLevel, 0, RobotParts.MaxLevel);
+            public int Arms => Mathf.Clamp(weaponLevel, 0, RobotParts.MaxLevel);
+            public int Shell => Mathf.Clamp(Mathf.RoundToInt(armor / RobotParts.ArmorPerLevel), 0, RobotParts.MaxLevel);
             /// <summary>Blows its foi's shield takes before it breaks (0: none).</summary>
             public int shield;
             /// <summary>What its foi wears (a player's own outfit; null for a computer rival or an older game).</summary>
@@ -282,12 +280,17 @@ namespace SquashBot.Data
             o.name = BotName(rng);
             o.trophies = trophies >= 0 ? trophies : Mathf.Max(0, Trophies + rng.Next(-60, 61));
             for (int g = 0; g < Army.Groups; g++) o.points[g] = Mathf.RoundToInt(Army.GroupPoints(g) * 1.1f) + 5;
-            var w = Armory.Equipped;
-            o.weapon = w.id;
-            o.weaponLevel = Mathf.Min(Armory.MaxLevel, Armory.Level(w) + (rng.Next(10) < 4 ? 1 : 0));
-            o.armor = Mathf.Min(0.5f, Shop.ArmorShare + 0.05f);
+            // its weapon: one of the player's own weapon's tier, from any family (now and then a tier up)
+            var mine = Armory.Equipped;
+            int tier = Mathf.Clamp(mine.tier + (rng.Next(10) < 3 ? 1 : 0), 1, 6);
+            var pool = Armory.All.FindAll(x => x.kind != WeaponKind.Gun && !x.chest && x.tier == tier);
+            o.weapon = pool.Count > 0 ? pool[rng.Next(pool.Count)].id : mine.id;
+            // its parts: about the player's own (a level either way)
+            int Near(RobotPart p) => Mathf.Clamp(RobotParts.Level(p) + rng.Next(-1, 2), 0, RobotParts.MaxLevel);
+            o.foiHp = RobotParts.HpAt(Near(RobotPart.Body));
+            o.weaponLevel = Near(RobotPart.Arms);
+            o.armor = RobotParts.ArmorAt(Near(RobotPart.Shell));
             o.boldness = (float)rng.NextDouble();
-            o.foiHp = Mathf.RoundToInt(FoiMaxHp * 1.05f); // a touch tougher than the player
             o.foiHit = 0f;
             return o;
         }
@@ -300,13 +303,13 @@ namespace SquashBot.Data
             var parts = (r.army ?? "").Split(',');
             for (int g = 0; g < Army.Groups && g < parts.Length; g++)
                 o.points[g] = int.TryParse(parts[g], out int v) ? Mathf.Clamp(v, 0, 2500) : 0;
-            o.foiHp = r.foiHp >= 100 ? Mathf.Clamp(r.foiHp, 100, 1500) : 100 + r.world * 10; // its health points (an old profile: about right for its world)
+            o.foiHp = Mathf.Clamp(r.foiHp, RobotParts.BaseHp, RobotParts.HpAt(RobotParts.MaxLevel)); // its body's health points
             o.foiHit = r.foiHit > 0f ? Mathf.Clamp(r.foiHit, 0.05f, 0.15f) : FoiHitFor(r.world);
             o.boldness = Mathf.Clamp01(r.boldness);
             var w = string.IsNullOrEmpty(r.weapon) ? null : Armory.All.Find(x => x.id == r.weapon && x.kind != WeaponKind.Gun);
             o.weapon = w != null ? w.id : "mallet";
-            o.weaponLevel = Mathf.Clamp(r.weaponLevel, 1, Armory.MaxLevel);
-            o.armor = Mathf.Clamp(r.armor, 0f, 0.1f * Shop.MaxLevel(Upgrade.Armor));
+            o.weaponLevel = Mathf.Clamp(r.weaponLevel, 0, RobotParts.MaxLevel); // its arms' level
+            o.armor = Mathf.Clamp(r.armor, 0f, RobotParts.ArmorAt(RobotParts.MaxLevel));
             o.shield = Mathf.Clamp(r.shield, 0, 3);
             return o;
         }

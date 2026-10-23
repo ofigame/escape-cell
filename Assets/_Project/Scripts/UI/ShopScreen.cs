@@ -124,14 +124,13 @@ namespace SquashBot.UI
                     // The weapons by kind: guns, swords, axes and maces, spears, hammers, and the shields (chips above).
                     WeaponChips();
                     if (weaponCat == ShieldsCat) { foreach (var s in Shields.All) if (!s.chest || Shields.Owned(s)) ShieldCell(s); break; }
-                    if (weaponCat == 0) { PackCell(); BombCell(); KindBombCell(BombKind.Ice); KindBombCell(BombKind.Fire); }
-                    // Weakest first, strongest last (by the damage of a blow, a burst counted whole).
+                    if (weaponCat == 0) { BombCell(); KindBombCell(BombKind.Ice); KindBombCell(BombKind.Fire); }
+                    // Lowest tier first (then by the damage of a blow, a burst counted whole).
                     var shelf = Armory.All.FindAll(x => Armory.Category(x) == weaponCat && (!x.chest || Armory.Owned(x))); // chest weapons only once won
-                    shelf.Sort((a, b) => a.damage * a.burst != b.damage * b.burst ? (a.damage * a.burst).CompareTo(b.damage * b.burst) : a.unlockAt.CompareTo(b.unlockAt));
+                    shelf.Sort((a, b) => a.tier != b.tier ? a.tier.CompareTo(b.tier) : a.damage * a.burst != b.damage * b.burst ? (a.damage * a.burst).CompareTo(b.damage * b.burst) : a.unlockAt.CompareTo(b.unlockAt));
                     foreach (var w in shelf) WeaponCell(w);
                     break;
                 case Tab.Tools:
-                    PackCell();
                     BagCell();
                     foreach (var t in Tools.All) ToolCell(t);
                     break;
@@ -139,7 +138,9 @@ namespace SquashBot.UI
                     foreach (var k in Defenses.All) { DefensePackCell(k); DefenseStepCell(k); }
                     break;
                 case Tab.Upgrades:
-                    foreach (var item in new[] { Item.Armor, Item.Shield, Item.Helmet, Item.Hover }) ItemCell(item); // (no coin magnet, energy store or rescue charges: the scenario's spare safety nets are gone)
+                    // foi's three parts first (they took the armour, helmet and health upgrades' place), then the shield and hover
+                    foreach (RobotPart part in System.Enum.GetValues(typeof(RobotPart))) PartCell(part);
+                    foreach (var item in new[] { Item.Shield, Item.Hover }) ItemCell(item);
                     PaintCell();
                     break;
                 default:
@@ -320,9 +321,9 @@ namespace SquashBot.UI
             ItemViewer.OnTap(image, transform, Loc.T("weapon." + w.id), () => ItemPreview.ViewWeapon(w)); // tapped: the close look
             CardName(card, Loc.T("weapon." + w.id));
             var desc = CardDesc(card);
-            var pips = Pips(card, Armory.MaxLevel);
+            var pips = Pips(card, 6); // (its tier, 1..6)
             var lockText = LockVeil(card, out var veil);
-            // Owned: take it in hand (left) beside the level-up (right).
+            // Owned: take it in hand (the whole width: no levels any more).
             var equip = UiFactory.MakeButton(card, "", Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(-108f, 34f), new Vector2(196f, 92f), () =>
             {
                 if (Armory.Owned(w)) Armory.Equip(w);
@@ -392,21 +393,24 @@ namespace SquashBot.UI
             refreshers.Add(() =>
             {
                 bool owned = Armory.Owned(w), unlocked = Armory.Unlocked(w), equipped = Armory.IsEquipped(w);
-                int lv = Armory.Level(w);
                 int dmg = Armory.Damage(w);
                 float cd = Armory.Cooldown(w);
                 desc.text = Loc.F("weapon.line", dmg, w.reach, Loc.T(cd <= 0.16f ? "weapon.fast" : cd >= 0.3f ? "weapon.slow" : "weapon.normal"))
-                            + "\n" + (w.kind == WeaponKind.Gun ? Loc.T(w.auto ? "weapon.auto" : "weapon.single") + (w.auto ? " ×" + w.burst : "") : Loc.T("weapon.kind." + w.kind)) + "  ·  " + Loc.F("pack.weight", Backpack.Weight(w))
-                            + (owned && lv < Armory.MaxLevel ? "  ·  " + Loc.F("weapon.nextLevel", Armory.Damage(w, lv + 1)) : "");
-                if (w.Special) desc.text = "<color=#FFD25A>" + (w.chest ? Loc.T("chests.exclusive") : Loc.F("special.line", Loc.T("rank." + w.rank))) + " · " + Loc.T("special.fx." + w.fx) + "</color>\n" + desc.text;
-                SetPips(pips, owned ? lv : 0);
+                            + "\n" + (w.kind == WeaponKind.Gun ? Loc.T(w.auto ? "weapon.auto" : "weapon.single") + (w.auto ? " ×" + w.burst : "") : Loc.T("family." + Armory.Family(w)))
+                            + "  ·  " + Loc.F("weapon.tier", w.tier);
+                if (w.Special || w.fx != SpecialFx.None) desc.text = "<color=#FFD25A>" + (w.chest ? Loc.T("chests.exclusive") : w.Special ? Loc.F("special.line", Loc.T("rank." + w.rank)) : Loc.T("weapon.fxShop")) + " · " + Loc.T("special.fx." + w.fx) + "</color>\n" + desc.text;
+                SetPips(pips, w.tier);
                 veil.SetActive(!unlocked);
                 lockText.text = Armory.LockText(w);
                 image.color = unlocked ? Color.white : new Color(1f, 1f, 1f, 0.35f);
-                bool fits = Backpack.Fits(Backpack.Weight(w));
+                bool fits = true;
                 equip.gameObject.SetActive(owned);
-                buyRect.sizeDelta = new Vector2(owned ? 196f : 410f, 92f);
-                buyRect.anchoredPosition = new Vector2(owned ? 108f : 0f, 34f);
+                buy.gameObject.SetActive(!owned);
+                var equipRect = (RectTransform)equip.transform;
+                equipRect.sizeDelta = new Vector2(410f, 92f);
+                equipRect.anchoredPosition = new Vector2(0f, 34f);
+                buyRect.sizeDelta = new Vector2(410f, 92f);
+                buyRect.anchoredPosition = new Vector2(0f, 34f);
                 sell.gameObject.SetActive(Armory.CanSell(w));
                 bool armed = Time.unscaledTime - sellArmed <= 2.5f;
                 sellLabel.text = armed ? Loc.T("ws.sellSure") : Loc.F("ws.sell", Armory.SellPrice(w));
@@ -416,9 +420,7 @@ namespace SquashBot.UI
                     equipLabel.text = Loc.T(equipped ? "weapon.equipped" : "weapon.equip");
                     equip.interactable = !equipped;
                     equip.targetGraphic.color = equipped ? UiFactory.GreenStyle.face : UiFactory.CyanStyle.face;
-                    int up = Armory.UpgradePrice(w);
-                    label.text = lv >= Armory.MaxLevel ? Loc.T("shop.max") : Loc.F("weapon.levelUp", up);
-                    Afford(buy, lv < Armory.MaxLevel, SaveData.Coins >= up);
+
                 }
                 else
                 {
@@ -685,6 +687,56 @@ namespace SquashBot.UI
                 if (pips != null) SetPips(pips, Shop.Level(ToUpgrade(item)));
                 if (owned != null) owned.text = Loc.F("shop.owned", Shop.Owned(ToBoost(item)));
                 desc.text = locked ? Loc.T("ws.src." + ToUpgrade(item)) : Describe(item);
+            });
+        }
+
+        /// <summary>
+        /// One of foi's parts: its level big on the disc, what it gives now and at the next level ("590 → 630 health"),
+        /// when its look changes next, and the price (gold; from level 11 core parts too).
+        /// </summary>
+        private void PartCell(RobotPart part)
+        {
+            var colour = part == RobotPart.Body ? new Color(1f, 0.45f, 0.5f) : part == RobotPart.Arms ? new Color(1f, 0.66f, 0.25f) : new Color(0.45f, 0.75f, 1f);
+            var card = Cell(part.ToString(), colour, out var picture);
+            var icon = BigIcon(picture, colour);
+            var level = UiFactory.TextBox("Level", icon, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(110f, 70f), "", 54f, Color.white, title: true);
+            level.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            CardName(card, Loc.T("part." + part));
+            var desc = CardDesc(card);
+            var buy = BuyButton(card, () =>
+            {
+                int before = RobotParts.Level(part);
+                if (RobotParts.TryUpgrade(part))
+                {
+                    AudioManager.PlaySfx(Sfx.Coin, 1f, 1.3f);
+                    Haptics.Medium();
+                    Pop(card);
+                    bip.Queue(Loc.F("part.up", Loc.T("part." + part), RobotParts.Value(part, before), RobotParts.Value(part, before + 1)));
+                    Purchased?.Invoke();
+                }
+                else
+                {
+                    AudioManager.PlaySfx(Sfx.Bump, 0.6f);
+                    if (!RobotParts.IsMaxed(part)) bip.Queue(SaveData.Coins < RobotParts.NextGold(part) ? Loc.T("ws.bip.poor") : Loc.F("part.needCores", RobotParts.NextCores(part)));
+                }
+                Refresh();
+            });
+            var label = buy.GetComponentInChildren<TextMeshProUGUI>();
+            refreshers.Add(() =>
+            {
+                int lv = RobotParts.Level(part);
+                bool maxed = RobotParts.IsMaxed(part);
+                level.text = lv.ToString();
+                int nextLook = Mathf.Min(RobotParts.MaxLevel, (lv / 5 + 1) * 5);
+                desc.text = (maxed ? RobotParts.Value(part, lv) : RobotParts.Value(part, lv) + "  →  " + RobotParts.Value(part, lv + 1))
+                            + "\n" + (maxed ? Loc.T("part.top") : Loc.F("part.nextLook", nextLook)) + "  ·  " + Loc.F("part.cores", CoreParts.Count);
+                // at the league ceiling: the duel counts no more of it until the next tier (an achievement, not a wall)
+                int tier = DuelPower.TierOf(Challenge.Rank);
+                if (lv >= DuelPower.PartCap(tier) && tier < DuelPower.Tiers)
+                    desc.text += "\n<color=#FFD25A>" + Loc.F("part.ceiling", Challenge.RankName(DuelPower.FirstRankOf(tier + 1))) + "</color>";
+                int gold = RobotParts.NextGold(part), cores = RobotParts.NextCores(part);
+                label.text = maxed ? Loc.T("shop.max") : cores > 0 ? Loc.F("part.price2", gold, cores) : gold.ToString();
+                Afford(buy, !maxed, RobotParts.CanAfford(part));
             });
         }
 

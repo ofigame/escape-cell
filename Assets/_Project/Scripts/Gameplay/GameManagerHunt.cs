@@ -103,6 +103,14 @@ namespace SquashBot.Gameplay
         {
             if (robot == null || !robot.IsAlive || robot.Visual == null) return false;
             if (!Shields.Blocks(from, robot.transform.position, robot.Visual.forward)) return false;
+            ShieldShow(from);
+            return true;
+        }
+
+        /// <summary>The shield's block shown: raised, a clang and sparks (a live duel's comes from the server).</summary>
+        private void ShieldShow(Vector3 from)
+        {
+            if (robot == null || robot.Visual == null) return;
             var hold = robot.Visual.GetComponentInChildren<ShieldHold>();
             if (hold != null) hold.Raise();
             var at = robot.transform.position + Vector3.up * 0.7f + (from - robot.transform.position).normalized * 0.35f;
@@ -110,7 +118,6 @@ namespace SquashBot.Gameplay
             AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.9f);
             Haptics.Light();
             cameraRig.Shake(0.25f);
-            return true;
         }
 
         private void InitHunt()
@@ -493,7 +500,10 @@ namespace SquashBot.Gameplay
             if (heldShown != null && heldShown.kind == WeaponKind.Gun && !arenaRun) ShowHeld(w); // the blade back in hand
             strikeCooldown = Armory.Cooldown(w);
             if (crowd && hunt.IsFighter(at)) NoteFightBlow(); // a blow or two into a fight, Fifi teleports in
-            int damage = Challenge.RankBoost(Armory.Damage(w)) * (superLeft > 0f ? 2 : 1); // the rank reached adds its strength
+            int damage = MyBlow(w) * (superLeft > 0f ? 2 : 1); // the arms add their strength (the duel: its own blow)
+            // a heavy weapon staggers the duel's rival a moment on every blow that lands
+            if (challengeRun && chPhase == ChPhase.Duel && !LiveActive && DuelPower.Stagger(w) > 0f && hunt.ChallengeFoeTile.HasValue && at == hunt.ChallengeFoeTile.Value)
+                hunt.StunFoe(DuelPower.Stagger(w));
             if (w.kind == WeaponKind.Whirl)
             {
                 WhirlStrike(w, damage);

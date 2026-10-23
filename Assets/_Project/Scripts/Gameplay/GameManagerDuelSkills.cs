@@ -220,7 +220,7 @@ namespace SquashBot.Gameplay
                     if (LiveActive) LiveNet.Special(upper ? 3 : 2);
                     else
                     {
-                        HitFoe(upper ? UpperHit : HeavyHit);
+                        HitFoe((upper ? UpperHit : HeavyHit) * DuelPower.ComboTimes(weapon ?? Armory.Equipped)); // (an axe's a fifth harder)
                         hunt.StunFoe(upper ? 1.8f : 0.4f); // (short: the rival is back in the fight at once)
                     }
                     if (colosseum != null) colosseum.Cheer(0, 0.9f);
@@ -266,7 +266,7 @@ namespace SquashBot.Gameplay
         {
             if (!hunt.ChallengeFoeTile.HasValue) return;
             var w = weapon ?? Armory.Equipped;
-            int damage = Mathf.RoundToInt(Challenge.RankBoost(Armory.Damage(w)) * times);
+            int damage = Mathf.RoundToInt(MyBlow(w) * times);
             specialStrike = true;
             hunt.Strike(hunt.ChallengeFoeTile.Value, Mathf.Max(1, damage));
             specialStrike = false;

@@ -20,7 +20,7 @@ namespace SquashBot.UI
         public static readonly string[] Topics =
         {
             "#duel", "duel", "score", "controls", "power", "combo", "breaker", "jump", "defend", "stages",
-            "#progress", "chests", "rank", "quests", "login", "friends",
+            "#progress", "chests", "rank", "parts", "ceiling", "weapons", "quests", "login", "friends",
             "#missions", "mission", "map", "lives",
             "#gear", "shop", "garage",
         };

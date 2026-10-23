@@ -324,7 +324,7 @@ namespace SquashBot.Data
         public static bool StoryEarned(Cosmetic c) => c.storyLevel > 0 && Progress.Stars(c.storyLevel - 1) > 0;
 
         /// <summary>A rank reward is worn once the challenge rank reached is that high.</summary>
-        public static bool RankEarned(Cosmetic c) => c.rank > 0 && Challenge.Rank >= c.rank;
+        public static bool RankEarned(Cosmetic c) => c.rank > 0 && Challenge.BestRank >= c.rank;
 
         public static bool Owns(Cosmetic c) =>
             c.reward ? SetComplete(c.set) : c.storyLevel > 0 ? StoryEarned(c) : c.rank > 0 ? RankEarned(c) : c.chest ? Bought(c) : c.IsDefault || Bought(c);

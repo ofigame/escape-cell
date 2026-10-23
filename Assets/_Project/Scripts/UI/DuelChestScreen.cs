@@ -273,7 +273,7 @@ namespace SquashBot.UI
                     openGift.text = Loc.T(reward.shield.id);
                     openNote.text = Loc.T("chests.exclusive");
                 }
-                else openGift.text = Loc.F("chests.gold", reward.gold);
+                else openGift.text = Loc.F("chests.gold", reward.gold) + (reward.cores > 0 ? " + " + Loc.F("login.cores", reward.cores) : "");
                 // A weapon: EQUIP on the left, TAKE THE GIFT on the right; gold: TAKE THE GIFT alone, in the middle.
                 var take = (RectTransform)takeButton.transform;
                 bool wearable = gifted != null || giftedOutfit != null || reward.shield != null;

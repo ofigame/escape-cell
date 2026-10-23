@@ -76,7 +76,7 @@ namespace SquashBot.Data
 
         public static int Free => Capacity - Used;
 
-        public static bool Fits(int weight) => Used + weight <= Capacity;
+        public static bool Fits(int weight) => true; // (no capacity or weight any more: everything fits)
 
         /// <summary>The lowest backpack level at which this much more would fit (beyond the top level: the top level).</summary>
         public static int LevelNeeded(int weight)

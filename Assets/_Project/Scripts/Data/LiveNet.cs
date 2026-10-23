@@ -17,7 +17,7 @@ namespace SquashBot.Data
     public static class LiveNet
     {
         /// <summary>The live protocol this game speaks (the server turns older ones away).</summary>
-        private const int Protocol = 5; // 5: harder bars and combos, the duel health by the match level (4: the duel moves)
+        private const int Protocol = 6; // 6: the league ceiling, carried shields (5: harder bars and combos; 4: the duel moves)
         private static string Url => (FoiNet.DevServer != null ? FoiNet.DevServer.Replace("https://", "wss://").Replace("http://", "ws://") + "/v1/live" : "wss://apifoi.ofigame.com/v1/live") + "?v=" + Protocol;
 
         /// <summary>A message from the server (only the fields its kind uses are set; <see cref="raw"/> is the text itself).</summary>

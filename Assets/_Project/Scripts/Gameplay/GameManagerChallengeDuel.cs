@@ -97,9 +97,16 @@ namespace SquashBot.Gameplay
             }
         }
 
-        /// <summary>The share of foi's health one blow of this weapon takes: its damage (health points), less foi's armour, over foi's health points.</summary>
-        private static float DuelBlow(WeaponDef w, int weaponLevel, float armor) =>
-            Armory.Damage(w, Mathf.Max(1, weaponLevel)) * (1f - Mathf.Clamp01(armor)) / Mathf.Max(1f, Challenge.FoiMaxHp);
+        /// <summary>Both sides' duel strength this match (under their league ceilings, or equal power): set as the foi are placed.</summary>
+        private DuelPower.Stats duelMine, duelTheirs;
+
+        /// <summary>A ranked duel (each side under its own ceiling); a friend's match is equal power.</summary>
+        private bool DuelRanked => !(chLive && !liveRanked);
+
+        /// <summary>The player's blow: the duel's (its weapon's tier under the ceiling, the arms' share), the floors' otherwise.</summary>
+        private int MyBlow(WeaponDef w) => challengeRun
+            ? Mathf.Max(1, Mathf.RoundToInt(DuelPower.Blow(w, duelMine.weaponTier) * (1f + duelMine.damage)))
+            : Challenge.RankBoost(Armory.Damage(w));
 
         /// <summary>The Duel's board: the stage, the two foi on their marks with their squads, the clock.</summary>
         private void BuildDuelBoard(int stage)
@@ -164,17 +171,18 @@ namespace SquashBot.Gameplay
             hunt.FoeBoldness = rival.boldness;
             hunt.FoeSkill = Mathf.Clamp01(0.55f + 0.035f * rival.Rank + 0.2f * rival.boldness); // (every rival fights back; higher ranks parry sooner)
             hunt.ChallengeBattle = true;
-            hunt.FoeSoldierDamage = Armory.Damage(w, Mathf.Max(1, rival.weaponLevel));
-            // 100 health points behind its armour; foi's blows take its weapon's damage in points (1% each).
-            // Its own health points (live: a share of 100, the server keeps the points), its armour taking its share off foi's blows.
-            // Both sides' health times the match's level (live: the server does the same).
-            int times = Challenge.DuelHpTimes(Mathf.Max(Challenge.Rank, rival.Rank));
-            hunt.FoiHp = Challenge.FoiMaxHp * times; // the rival's soldiers' blows off foi's (bigger) health
-            int hp = LiveActive ? 100 : Mathf.RoundToInt(Mathf.Max(100, rival.foiHp) / Mathf.Max(0.5f, 1f - rival.armor));
-            if (!LiveActive) hp *= times;
-            // Its blows weigh what the player's own would (its flurries of quick blows make up for its slower swings).
-            const float rate = 1f;
-            hunt.AddChallengeFoe(theirs, hp, DuelBlow(w, rival.weaponLevel, Shop.ArmorShare) * (LiveActive ? 1f : rate) / times, look, rivalHeld, 0);
+            // Both sides' strength: each under its own rank's ceiling in a ranked duel, both at the third tier's in a
+            // friend's match (as the server counts it). The duel's health is twice the body's.
+            bool ranked = DuelRanked;
+            duelMine = DuelPower.Mine(ranked, Armory.Equipped);
+            duelTheirs = DuelPower.For(rival.Body, rival.Arms, rival.Shell, w.tier, ranked ? DuelPower.TierOf(rival.Rank) : DuelPower.EqualTier, !ranked);
+            hunt.FoeSoldierDamage = DuelPower.Blow(w, duelTheirs.weaponTier);
+            hunt.FoiHp = duelMine.hp;
+            // Its health points behind its shell (live: a share of 100, the server keeps the points).
+            int hp = LiveActive ? 100 : Mathf.RoundToInt(duelTheirs.hp / Mathf.Max(0.5f, 1f - duelTheirs.armor));
+            // Its blow: its weapon's (tier under its ceiling) with its arms' share, less foi's shell, over foi's health.
+            float share = DuelPower.Blow(w, duelTheirs.weaponTier) * (1f + duelTheirs.damage) * (1f - duelMine.armor) / Mathf.Max(1, duelMine.hp);
+            hunt.AddChallengeFoe(theirs, hp, share, look, rivalHeld, 0);
             // (no name tags over the two foi: their names and ranks are over the health bars)
             if (myTag != null) { Destroy(myTag.gameObject); myTag = null; }
             if (theirTag != null) { Destroy(theirTag.gameObject); theirTag = null; }
