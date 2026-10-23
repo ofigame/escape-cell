@@ -288,13 +288,13 @@ namespace SquashBot.Visual
             return new Color32((byte)Mathf.Clamp(r, 0f, 255f), (byte)Mathf.Clamp(g, 0f, 255f), (byte)Mathf.Clamp(b, 0f, 255f), 255);
         }
 
-        /// <summary>The head's own light: a part of its colour that no light or shadow takes away, so the face never
-        /// darkens as the lights round it change (on phones each thing gets only a few of the scene's lights).</summary>
-        private const float HeadGlow = 0.4f;
+        /// <summary>The head's own light: most of its colour, which no light or shadow takes away, so the face keeps the
+        /// same skin in every scene (orange suns, blue ice, the menu) and never darkens as the lights round it change.</summary>
+        private const float HeadGlow = 0.75f;
 
         /// <summary>How much the face takes from the lights round it (the rest is its own light): coloured lamps and flames
         /// on a floor tint it only a little, and it never goes dark or orange.</summary>
-        private const float HeadLit = 0.72f; // (lit like the body: shaped by its light and shade, not a flat sticker)
+        private const float HeadLit = 0.35f; // (enough of the light for its shape to show; its colour stays its own)
 
         private static Material HeadPaint(int n, Color? hair, Color? skin)
         {
