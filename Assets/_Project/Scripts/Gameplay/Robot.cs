@@ -311,12 +311,12 @@ namespace SquashBot.Gameplay
             var headPiece = outfit[Data.Slot.Head];
             var hair = outfit[Data.Slot.Hair];
             var skinPiece = outfit[Data.Slot.Skin];
-            int.TryParse(headPiece.id.Replace("head.", ""), out int headNo);
             SkinnedHero.Dress(skin.transform, new SkinnedHero.Look
             {
-                head = headNo,
+                head = SkinnedHero.HeadNumber(headPiece.id),
                 hair = hair.IsDefault ? (Color?)null : hair.color,
-                skin = skinPiece.IsDefault ? (Color?)null : skinPiece.color,
+                skin = skinPiece.color,
+                eyes = outfit.TryGetValue(Data.Slot.Iris, out var iris) && iris != null ? iris.color : (Color?)null,
                 suit = suit.IsDefault ? null : suit.id.Replace("suit.", ""),
             });
             foreach (var mount in new[] { skin.HatMount, skin.BackMount, skin.BadgeMount })

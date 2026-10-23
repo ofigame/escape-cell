@@ -159,6 +159,7 @@ namespace SquashBot.Gameplay
             FramePacer.Install();
             CloudSave.Install();
             OldNotes.Clear(); // the removed open world's farm notes still waiting on the phones that had it
+            Cosmetics.MigrateHeads(); // the new heads: the old ones' buyers refunded, the old skins to the nearest new tones
             Reminder.Schedule(); // the daily reminder: tomorrow evening (set again whenever the game is left)
             Prefs.DeleteKey("sb_ow"); Prefs.DeleteKey("sb_km"); Prefs.DeleteKey("sb_intro_seen"); // the removed open world and kingdom: test phones' leftovers
             FramePacer.Busy = () => State == GameState.Playing;

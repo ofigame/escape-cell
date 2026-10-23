@@ -26,7 +26,9 @@ namespace SquashBot.Data
         /// <summary>The colour of its hair.</summary>
         Hair,
         /// <summary>The colour of its skin (on the head: the body is armour).</summary>
-        Skin
+        Skin,
+        /// <summary>The colour of its eyes.</summary>
+        Iris
     }
 
     public class Cosmetic
@@ -155,11 +157,13 @@ namespace SquashBot.Data
             X("suit.crimson", Slot.Suit, new Color(0.6f, 0.08f, 0.12f)),
             X("suit.fox", Slot.Suit, new Color(0.78f, 0.62f, 0.4f)),
 
-            // foi's heads, and the colours of its hair and skin.
-            C("head.1", Slot.Head, 0, 0, new Color(0.66f, 0.55f, 0.49f)),
-            C("head.2", Slot.Head, 600, 1, new Color(0.38f, 0.18f, 0.09f)),
-            C("head.3", Slot.Head, 600, 0, new Color(0.6f, 0.46f, 0.38f)),
-            C("head.4", Slot.Head, 700, 2, new Color(0.65f, 0.56f, 0.5f)),
+            // foi's heads (a man's and a woman's, three haircuts each), and the colours of its hair, skin and eyes.
+            C("head.m1", Slot.Head, 0, 0, new Color(0.36f, 0.2f, 0.11f)),
+            C("head.f1", Slot.Head, 0, 0, new Color(0.36f, 0.2f, 0.11f)),
+            C("head.m2", Slot.Head, 400, 0, new Color(0.36f, 0.2f, 0.11f)),
+            C("head.f2", Slot.Head, 400, 0, new Color(0.36f, 0.2f, 0.11f)),
+            C("head.m3", Slot.Head, 400, 0, new Color(0.36f, 0.2f, 0.11f)),
+            C("head.f3", Slot.Head, 400, 0, new Color(0.36f, 0.2f, 0.11f)),
             C("hair.own", Slot.Hair, 0, 0, new Color(0.35f, 0.18f, 0.11f)),
             C("hair.black", Slot.Hair, 150, 0, new Color(0.08f, 0.07f, 0.07f)),
             C("hair.blonde", Slot.Hair, 200, 0, new Color(0.95f, 0.78f, 0.42f)),
@@ -169,14 +173,20 @@ namespace SquashBot.Data
             C("hair.pink", Slot.Hair, 300, 3, new Color(1f, 0.45f, 0.7f)),
             C("hair.green", Slot.Hair, 300, 4, new Color(0.25f, 0.75f, 0.35f)),
             C("hair.purple", Slot.Hair, 400, 5, new Color(0.55f, 0.28f, 0.9f)),
-            C("skin.own", Slot.Skin, 0, 0, new Color(0.66f, 0.55f, 0.49f)),
-            C("skin.light", Slot.Skin, 100, 0, new Color(0.96f, 0.82f, 0.74f)),
-            C("skin.tan", Slot.Skin, 100, 0, new Color(0.8f, 0.6f, 0.45f)),
-            C("skin.brown", Slot.Skin, 100, 0, new Color(0.55f, 0.37f, 0.25f)),
-            C("skin.dark", Slot.Skin, 100, 0, new Color(0.36f, 0.23f, 0.16f)),
-            C("skin.olive", Slot.Skin, 100, 1, new Color(0.72f, 0.62f, 0.44f)),
-            C("skin.green", Slot.Skin, 400, 4, new Color(0.45f, 0.75f, 0.42f)),
-            C("skin.blue", Slot.Skin, 400, 6, new Color(0.42f, 0.6f, 0.95f)),
+            // the skin: people's own tones only, all free (wheat, fair, tan, dark)
+            C("skin.wheat", Slot.Skin, 0, 0, new Color(0.82f, 0.64f, 0.5f)),
+            C("skin.fair", Slot.Skin, 0, 0, new Color(0.94f, 0.79f, 0.7f)),
+            C("skin.tan", Slot.Skin, 0, 0, new Color(0.64f, 0.45f, 0.32f)),
+            C("skin.dark", Slot.Skin, 0, 0, new Color(0.37f, 0.24f, 0.16f)),
+            // the eyes: people's own colours free, a few rarer ones to buy
+            C("iris.brown", Slot.Iris, 0, 0, new Color(0.42f, 0.26f, 0.13f)),
+            C("iris.hazel", Slot.Iris, 0, 0, new Color(0.56f, 0.42f, 0.2f)),
+            C("iris.green", Slot.Iris, 0, 0, new Color(0.3f, 0.56f, 0.3f)),
+            C("iris.blue", Slot.Iris, 0, 0, new Color(0.3f, 0.52f, 0.86f)),
+            C("iris.grey", Slot.Iris, 0, 0, new Color(0.6f, 0.64f, 0.68f)),
+            C("iris.amber", Slot.Iris, 200, 0, new Color(0.86f, 0.56f, 0.16f)),
+            C("iris.violet", Slot.Iris, 300, 1, new Color(0.56f, 0.36f, 0.86f)),
+            C("iris.red", Slot.Iris, 300, 2, new Color(0.8f, 0.18f, 0.15f)),
 
             // World sets: three pieces each; owning all three gives the set's prize.
             S("hat.cable", Slot.Hat, 300, 0, new Color(0.3f, 0.32f, 0.4f), "canal"),
@@ -340,6 +350,24 @@ namespace SquashBot.Data
             return true;
         }
 
+        /// <summary>
+        /// Once, on the new heads' first start: the old heads are gone (their buyers get their gold back; whoever wore one
+        /// wears the man's first head), the old skins too (the light and brown tones become the nearest new ones).
+        /// </summary>
+        public static void MigrateHeads()
+        {
+            if (Prefs.GetInt("sb_heads2", 0) == 1) return;
+            int refund = 0;
+            foreach (var (id, price) in new[] { ("head.2", 600), ("head.3", 600), ("head.4", 700) })
+                if (Prefs.GetInt("sb_cos_" + id, 0) == 1) { refund += price; Prefs.DeleteKey("sb_cos_" + id); }
+            if (refund > 0) SaveData.Coins += refund;
+            string skin = Prefs.GetString("sb_eq_Skin", "");
+            if (skin == "skin.light") Prefs.SetString("sb_eq_Skin", "skin.fair");
+            else if (skin == "skin.brown" || skin == "skin.olive") Prefs.SetString("sb_eq_Skin", "skin.tan");
+            Prefs.SetInt("sb_heads2", 1);
+            Prefs.Save();
+        }
+
         /// <summary>A present: owned without paying.</summary>
         public static void Give(string id)
         {
@@ -352,7 +380,7 @@ namespace SquashBot.Data
         public static string LookText()
         {
             var ids = new List<string>();
-            foreach (var s in new[] { Slot.Color, Slot.Eyes, Slot.Hat, Slot.Arms, Slot.Legs, Slot.Back, Slot.Badge, Slot.Suit, Slot.Head, Slot.Hair, Slot.Skin })
+            foreach (var s in new[] { Slot.Color, Slot.Eyes, Slot.Hat, Slot.Arms, Slot.Legs, Slot.Back, Slot.Badge, Slot.Suit, Slot.Head, Slot.Hair, Slot.Skin, Slot.Iris })
             {
                 var c = Equipped(s);
                 if (!c.IsDefault) ids.Add(c.id);
@@ -379,7 +407,7 @@ namespace SquashBot.Data
         {
             var rng = new System.Random((name ?? "").GetHashCode());
             var outfit = OutfitFrom(null);
-            foreach (var s in new[] { Slot.Hat, Slot.Back, Slot.Suit, Slot.Arms, Slot.Legs, Slot.Head, Slot.Hair, Slot.Skin })
+            foreach (var s in new[] { Slot.Hat, Slot.Back, Slot.Suit, Slot.Arms, Slot.Legs, Slot.Head, Slot.Hair, Slot.Skin, Slot.Iris })
             {
                 if (rng.Next(3) == 0) continue;
                 var pool = InSlot(s).FindAll(c => !c.reward && c.storyLevel == 0 && c.rank == 0 && !c.chest

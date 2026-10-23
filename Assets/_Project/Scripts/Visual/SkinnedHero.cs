@@ -30,21 +30,43 @@ namespace SquashBot.Visual
         public struct Look
         {
             public int head;
-            public Color? hair, skin;
+            public Color? hair, skin, eyes;
             public string suit;
         }
 
-        public const int Heads = 4;
+        /// <summary>
+        /// The heads: 1-3 the man's head with his three haircuts, 4-6 the woman's with hers. Each is a bald head (its
+        /// skin and eyes on its picture), its brows and its hair as their own models, each recoloured on its own.
+        /// </summary>
+        public const int Heads = 6;
+
+        /// <summary>A head piece's number (head.m1-m3: 1-3, head.f1-f3: 4-6).</summary>
+        public static int HeadNumber(string id)
+        {
+            if (string.IsNullOrEmpty(id) || id.Length < 7 || !id.StartsWith("head.")) return 1;
+            int k = id[6] - '0';
+            if (k < 1 || k > 3) return 1;
+            return id[5] == 'f' ? 3 + k : k;
+        }
+
+        /// <summary>The head model a head wears (the man's or the woman's).</summary>
+        public static string HeadFile(int n) => n <= 3 ? "head_m" : "head_f";
+
+        /// <summary>Its haircut's model.</summary>
+        public static string HairFile(int n) => "hair_" + (n <= 3 ? "m" + n : "f" + (n - 3));
+
+        /// <summary>The hair and eyes when none is chosen: brown, as most people's.</summary>
+        public static readonly Color DefaultHair = new Color(0.36f, 0.2f, 0.11f), DefaultEyes = new Color(0.42f, 0.26f, 0.13f);
 
         [System.Serializable]
         private class EyeInfo { public float x, y, z, w, h; }
         [System.Serializable]
-        private class HeadInfo { public float height, width, depth, top, front, neckWidth, hatTop, hatWidth; public float[] skin, hair; public EyeInfo[] eyes; }
+        private class HeadInfo { public float height, width, depth, top, front, neckWidth, hatTop, hatWidth, iris = 0.5f; public float[] skin, hair; public EyeInfo[] eyes; }
         [System.Serializable]
         private class BodyInfo { public float height, ringTop, ringX, ringY, ringWidth, shoulders; public float[] head, neck; }
 
         private static readonly Dictionary<string, Material> materials = new Dictionary<string, Material>();
-        private static readonly Dictionary<int, HeadInfo> headInfos = new Dictionary<int, HeadInfo>();
+        private static readonly Dictionary<string, HeadInfo> headInfos = new Dictionary<string, HeadInfo>();
         private static BodyInfo bodyInfo;
 
         private Transform hips;
@@ -60,12 +82,14 @@ namespace SquashBot.Visual
 
         private int headShown;
 
-        private static HeadInfo InfoOf(int head)
+        private static HeadInfo InfoOf(int head) => InfoOf(HeadFile(head));
+
+        private static HeadInfo InfoOf(string file)
         {
-            if (headInfos.TryGetValue(head, out var i)) return i;
-            var text = Resources.Load<TextAsset>(Folder + "head_" + head);
+            if (headInfos.TryGetValue(file, out var i)) return i;
+            var text = Resources.Load<TextAsset>(Folder + file);
             i = text != null ? JsonUtility.FromJson<HeadInfo>(text.text) : new HeadInfo { height = 0.98f, width = 0.8f, top = 0.98f, neckWidth = 0.3f };
-            headInfos[head] = i;
+            headInfos[file] = i;
             return i;
         }
 
@@ -142,24 +166,10 @@ namespace SquashBot.Visual
             var b = Body();
             var visual = transform.parent;
             float unit = transform.localScale.x;
-            var prefab = Resources.Load<GameObject>(Folder + "head_" + n);
             head = new GameObject("Hero_Head").transform;
             head.SetParent(visual, false);
-            if (prefab != null)
-            {
-                // the model under it as imported (its own turn and size from the file), sized so the head's units are the
-                // measures' (its neck at the origin, the face toward +z)
-                var model = Instantiate(prefab, head, false).transform;
-                var rs = model.GetComponentsInChildren<Renderer>(true);
-                if (rs.Length > 0)
-                {
-                    var bb = rs[0].bounds; foreach (var r in rs) bb.Encapsulate(r.bounds);
-                    float hb = bb.size.y / Mathf.Max(1e-6f, head.lossyScale.y);
-                    if (hb > 1e-5f) model.localScale *= info.height / hb;
-                }
-            }
-            // as big as the others by the face, not the hair: a spike (head 2) or a bun (head 4) on top made them look small
-            float k = b.height * HeadShare * unit / Mathf.Max(0.01f, info.top) * (n == 2 ? 1.25f : n == 4 ? 1.15f : 1f);
+            HeadParts(head, n);
+            float k = b.height * HeadShare * unit / Mathf.Max(0.01f, info.top);
             head.localScale = Vector3.one * k;
             head.localRotation = Quaternion.identity;
             // its neck sits down in the ring (measured from the head joint; the model's front is +z here)
@@ -185,10 +195,51 @@ namespace SquashBot.Visual
             hat.SetParent(head, false);
             float hatScale = info.width * 0.86f / FoiHeadWidth;
             hat.localScale = Vector3.one * hatScale;
-            float crown = info.hatTop > 0f ? info.hatTop : info.top * 0.94f; // where a hat sits: the skull's top (not a spike of hair)
+            float crown = (info.hatTop > 0f ? info.hatTop : info.top * 0.94f) + 0.05f * info.height; // where a hat sits: on the hair over the skull's top
             hat.localPosition = new Vector3(0f, crown - FoiHeadTop * hatScale, 0f);
             HatMount = hat;
             head.SetParent(bone, true);
+        }
+
+        /// <summary>
+        /// Head <paramref name="n"/>'s models under <paramref name="holder"/>: the head as imported (its own turn and size
+        /// from the file), sized so its units are the measures' (its neck at the origin, the face toward +z), and its brows
+        /// and hair in the same frame and size. Returns the head model.
+        /// </summary>
+        public static Transform HeadParts(Transform holder, int n)
+        {
+            n = Mathf.Clamp(n, 1, Heads);
+            var info = InfoOf(n);
+            var prefab = Resources.Load<GameObject>(Folder + HeadFile(n));
+            if (prefab == null) return null;
+            var model = Instantiate(prefab, holder, false).transform;
+            var rs = model.GetComponentsInChildren<Renderer>(true);
+            if (rs.Length > 0)
+            {
+                var bb = rs[0].bounds; foreach (var r in rs) bb.Encapsulate(r.bounds);
+                float hb = bb.size.y / Mathf.Max(1e-6f, holder.lossyScale.y);
+                if (hb > 1e-5f) model.localScale *= info.height / hb;
+            }
+            foreach (var part in new[] { HeadFile(n) + "_brows", HairFile(n) })
+            {
+                var pp = Resources.Load<GameObject>(Folder + part);
+                if (pp == null) continue;
+                var pm = Instantiate(pp, holder, false).transform;
+                pm.localPosition = model.localPosition; pm.localRotation = model.localRotation; pm.localScale = model.localScale;
+            }
+            return model;
+        }
+
+        /// <summary>Paints head <paramref name="n"/>'s parts under <paramref name="holder"/>: skin and eyes, brows and hair (the eyelids too).</summary>
+        public static void PaintHead(Transform holder, int n, Color? hair, Color? skin, Color? eyes, Material lid = null)
+        {
+            var hc = hair ?? DefaultHair;
+            foreach (var r in holder.GetComponentsInChildren<Renderer>(true))
+            {
+                string nm = r.name.ToLowerInvariant();
+                r.sharedMaterial = r.name == "Cover" ? (lid ?? LidPaint(SkinOf(n, skin))) : nm.Contains("hair") ? HairPaint(hc) : nm.Contains("brows") ? BrowPaint(hc) : HeadPaint(n, skin, eyes);
+                r.receiveShadows = false; // (no flickering self-shadow on the face from the hair, hat or crown)
+            }
         }
 
         private Transform FindHead()
@@ -258,7 +309,7 @@ namespace SquashBot.Visual
 
         /// <summary>The head's picture with its hair and skin repainted (kept for the next time the same look is asked for).</summary>
         private static readonly List<string> recent = new List<string>();
-        private static readonly Dictionary<int, (Color32[] px, Color32[] mk, int w, int mw)> pixels = new Dictionary<int, (Color32[], Color32[], int, int)>();
+        private static readonly Dictionary<string, (Color32[] px, Color32[] mk, int w, int mw)> pixels = new Dictionary<string, (Color32[], Color32[], int, int)>();
 
         /// <summary>Livelier skin (as on the icon): more colour, a touch warmer, so the blush on the nose and cheeks shows.</summary>
         /// <summary>
@@ -311,57 +362,52 @@ namespace SquashBot.Visual
         /// on a floor tint it only a little, and it never goes dark or orange.</summary>
         private const float HeadLit = 0.12f; // (barely: the shading painted on it shapes it; no lamp tints its skin or hair)
 
-        private static Material HeadPaint(int n, Color? hair, Color? skin)
+        private static Material HeadPaint(int n, Color? skin, Color? eyes)
         {
-            string key = "head" + n + hair + skin;
+            string file = HeadFile(n);
+            var eye = eyes ?? DefaultEyes;
+            string key = file + skin + eye;
             if (materials.TryGetValue(key, out var m) && m != null) { recent.Remove(key); recent.Add(key); return m; }
-            var baseTex = Resources.Load<Texture2D>(Folder + "head_" + n);
+            var baseTex = Resources.Load<Texture2D>(Folder + file);
             Texture2D tex = baseTex;
-            var mask = Resources.Load<Texture2D>(Folder + "head_" + n + "_mask");
-            var info = InfoOf(n);
+            var mask = Resources.Load<Texture2D>(Folder + file + "_mask");
+            var info = InfoOf(file);
             (Color32[] px, Color32[] mk, int w, int mw) src = default;
             bool canRead = baseTex != null && mask != null && baseTex.isReadable && mask.isReadable;
-            if (canRead && !pixels.TryGetValue(n, out src))
+            if (canRead && !pixels.TryGetValue(file, out src))
             {
                 // (the pictures are imported uncompressed for this; a phone that still cannot read them keeps the head as made)
-                try { pixels[n] = src = (baseTex.GetPixels32(), mask.GetPixels32(), baseTex.width, mask.width); }
-                catch (System.Exception e) { Debug.LogWarning("[foi] head " + n + " not recoloured: " + e.Message); canRead = false; }
+                try { pixels[file] = src = (baseTex.GetPixels32(), mask.GetPixels32(), baseTex.width, mask.width); }
+                catch (System.Exception e) { Debug.LogWarning("[foi] head " + file + " not recoloured: " + e.Message); canRead = false; }
             }
-            if (canRead && src.px != null && src.px.Length == src.w * src.w) // (always: the skin is warmed up too)
+            if (canRead && src.px != null && src.px.Length == src.w * src.w)
             {
                 int W = src.w, mw = src.mw;
+                var sRef = info.skin != null ? new Color(info.skin[0], info.skin[1], info.skin[2]) : new Color(0.78f, 0.64f, 0.56f);
+                Vector3 sr = Vector3.one;
+                if (skin.HasValue) sr = new Vector3(skin.Value.r / Mathf.Max(0.04f, sRef.r), skin.Value.g / Mathf.Max(0.04f, sRef.g), skin.Value.b / Mathf.Max(0.04f, sRef.b));
                 var px = new Color32[W * W];
-                var mk = new Color32[W * W];
                 for (int y = 0; y < W; y++)
                     for (int x = 0; x < W; x++)
                     {
-                        px[y * W + x] = src.px[y * src.w + x]; // (the picture is 1024: as it is)
-                        mk[y * W + x] = src.mk[(y * mw / W) * mw + x * mw / W];
+                        int i = y * W + x;
+                        var p = src.px[i];
+                        var mk = src.mk[(y * mw / W) * mw + x * mw / W];
+                        float ws = mk.g / 255f, wi = mk.b / 255f;
+                        if (ws > 0.01f)
+                        {
+                            var mul = Vector3.one + (sr - Vector3.one) * ws;
+                            p = new Color32((byte)Mathf.Min(255f, p.r * mul.x), (byte)Mathf.Min(255f, p.g * mul.y), (byte)Mathf.Min(255f, p.b * mul.z), 255);
+                        }
+                        if (wi > 0.01f) p = Color32.Lerp(p, HairTint(src.px[i], eye, info.iris), wi); // (the grey iris in the eye colour, its streaks kept)
+                        px[i] = p;
                     }
-                {
-                    var hRef = info.hair != null ? new Color(info.hair[0], info.hair[1], info.hair[2]) : new Color(0.35f, 0.18f, 0.11f);
-                    var sRef = info.skin != null ? new Color(info.skin[0], info.skin[1], info.skin[2]) : new Color(0.66f, 0.55f, 0.49f);
-                    Vector3 Ratio(Color target, Color reference) => new Vector3(target.r / Mathf.Max(0.04f, reference.r), target.g / Mathf.Max(0.04f, reference.g), target.b / Mathf.Max(0.04f, reference.b));
-                    var sr = skin.HasValue ? Ratio(skin.Value, sRef) : Vector3.one;
-                    float hRefLum = hRef.r * 0.3f + hRef.g * 0.59f + hRef.b * 0.11f;
-                    for (int i = 0; i < px.Length; i++)
-                    {
-                        float wh = mk[i].r / 255f, ws = mk[i].g / 255f;
-                        if (wh < 0.01f && ws < 0.01f) { px[i] = Grade(px[i], 0f); continue; }
-                        var p = px[i];
-                        var mul = Vector3.one + (sr - Vector3.one) * ws;
-                        var skinned = new Color32((byte)Mathf.Min(255f, p.r * mul.x), (byte)Mathf.Min(255f, p.g * mul.y), (byte)Mathf.Min(255f, p.b * mul.z), 255);
-                        var c = hair.HasValue && wh > 0.01f ? Color32.Lerp(skinned, HairTint(p, hair.Value, hRefLum), wh) : skinned;
-                        px[i] = Grade(Vivid(c, ws), wh);
-                    }
-                    tex = new Texture2D(W, W, TextureFormat.RGBA32, true) { name = key };
-                    tex.SetPixels32(px);
-                    tex.Apply(true, true);
-                }
+                tex = new Texture2D(W, W, TextureFormat.RGBA32, true) { name = key };
+                tex.SetPixels32(px);
+                tex.Apply(true, true);
             }
-            m = MaterialFactory.CreateSurface(new Color(HeadLit, HeadLit, HeadLit), Color.black, 0f, 0f); // matte skin and hair, nearly all its own light
-            m.SetFloat("_SpecularHighlights", 0f); m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
-            m.SetFloat("_EnvironmentReflections", 0f); m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
+            m = MaterialFactory.CreateSurface(new Color(HeadLit, HeadLit, HeadLit), Color.black, 0f, 0f); // matte skin, nearly all its own light
+            Matte(m);
             if (tex != null)
             {
                 m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
@@ -386,6 +432,51 @@ namespace SquashBot.Visual
 
         /// <summary>Head <paramref name="n"/> as made (for its picture in the workshop).</summary>
         public static Material HeadMaterial(int n) => HeadPaint(Mathf.Clamp(n, 1, Heads), null, null);
+
+        /// <summary>The hair's paint: its grey strand picture in the hair's colour, matte, mostly its own light (some of the
+        /// scene's, so its locks' shapes show).</summary>
+        private static Material HairPaint(Color c)
+        {
+            string key = "hair" + c;
+            if (materials.TryGetValue(key, out var m) && m != null) return m;
+            var tex = Resources.Load<Texture2D>(Folder + "hair_strands");
+            m = MaterialFactory.CreateSurface(c * HairLit, Color.black, 0f, 0f);
+            Matte(m);
+            if (tex != null)
+            {
+                m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
+                m.EnableKeyword("_EMISSION");
+                m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+                m.SetTexture("_EmissionMap", tex);
+                m.SetColor("_EmissionColor", c * HairGlow);
+            }
+            materials[key] = m;
+            return m;
+        }
+
+        /// <summary>The brows: the hair's colour, a shade darker, flat and matte.</summary>
+        private static Material BrowPaint(Color c)
+        {
+            var d = c * 0.82f; d.a = 1f;
+            string key = "brow" + d;
+            if (materials.TryGetValue(key, out var m) && m != null) return m;
+            m = MaterialFactory.CreateSurface(d * HeadLit, Color.black, 0f, 0f);
+            Matte(m);
+            m.EnableKeyword("_EMISSION");
+            m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+            m.SetColor("_EmissionColor", d * HeadGlow);
+            materials[key] = m;
+            return m;
+        }
+
+        private static void Matte(Material m)
+        {
+            m.SetFloat("_SpecularHighlights", 0f); m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+            m.SetFloat("_EnvironmentReflections", 0f); m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
+        }
+
+        /// <summary>How much of the scene's light the hair takes (the rest its own): enough for its locks to show.</summary>
+        private const float HairLit = 0.4f, HairGlow = 0.62f;
 
         /// <summary>The eyelids' paint: the skin's colour, livened and lit as the face is.</summary>
         private static Material LidPaint(Color c)
@@ -420,11 +511,7 @@ namespace SquashBot.Visual
             {
                 me.lidMaterial = LidPaint(SkinOf(n, look.skin));
                 me.PutHead(n);
-                foreach (var r in me.head.GetComponentsInChildren<Renderer>(true))
-                {
-                    r.sharedMaterial = r.name == "Cover" ? me.lidMaterial : HeadPaint(n, look.hair, look.skin);
-                    r.receiveShadows = false; // (no flickering self-shadow on the face from the hair, hat or crown)
-                }
+                PaintHead(me.head, n, look.hair, look.skin, look.eyes, me.lidMaterial);
             }
             var armour = Armour(look.suit);
             foreach (var r in skin.GetComponentsInChildren<SkinnedMeshRenderer>(true))
@@ -447,6 +534,7 @@ namespace SquashBot.Visual
             if (me.head == null) return;
             var old = me.head.Find("Hero_Hood");
             if (old != null) DestroyImmediate(old.gameObject);
+            foreach (var r in me.head.GetComponentsInChildren<Renderer>(true)) if (r.name.ToLowerInvariant().Contains("hair")) r.enabled = !color.HasValue; // (under a hood: no hair)
             if (!color.HasValue) return;
             var prefab = Resources.Load<GameObject>(Folder + "hood");
             if (prefab == null) return;

@@ -113,7 +113,7 @@ namespace SquashBot.UI
                     body.GetComponent<SkinnedHero>().PoseNow(); // (standing, not in its T)
                     break;
                 }
-                case Slot.Head: { var h = Resources.Load<GameObject>("Heroes/Foi/head_" + c.id.Replace("head.", "")); if (h != null) { var made = Object.Instantiate(h, piece, false); foreach (var r in made.GetComponentsInChildren<Renderer>()) r.sharedMaterial = SkinnedHero.HeadMaterial(int.Parse(c.id.Replace("head.", ""))); } break; } // (its own picture)
+                case Slot.Head: { int n = SkinnedHero.HeadNumber(c.id); SkinnedHero.HeadParts(piece, n); SkinnedHero.PaintHead(piece, n, null, null, null); break; } // (the head with its haircut, as made)
                 default: GearModels.Picture(piece, c.id, c.color); break; // arm and leg gear, as foi wears it
             }
             holder.localRotation = Quaternion.Euler(c.slot == Slot.Head ? 0f : 10f, c.slot == Slot.Back ? (c.id.StartsWith("back.cape") ? 20f : 330f) : c.slot == Slot.Head ? 180f : 200f, 0f); // (a cape: foi from behind)

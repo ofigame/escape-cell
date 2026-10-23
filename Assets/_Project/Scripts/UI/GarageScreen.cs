@@ -88,7 +88,7 @@ namespace SquashBot.UI
 
             var tabRow = UiFactory.Box("Tabs", panel, new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(940f, 190f));
             // foi's tabs (paint and eyes belonged to the old robot): its head first, its looks, then its gear and the rest
-            var slots = new[] { Slot.Head, Slot.Hair, Slot.Skin, Slot.Suit, Slot.Hat, Slot.Back, Slot.Arms, Slot.Dance }; // (step marks, trails, badges and leg pieces: gone)
+            var slots = new[] { Slot.Head, Slot.Hair, Slot.Skin, Slot.Iris, Slot.Suit, Slot.Hat, Slot.Back, Slot.Arms, Slot.Dance }; // (step marks, trails, badges and leg pieces: gone)
             for (int i = 0; i < slots.Length; i++)
             {
                 var s = slots[i];
@@ -204,7 +204,7 @@ namespace SquashBot.UI
                         UiFactory.Fill(inner, new Color(sc.r / m, sc.g / m, sc.b / m, 1f), UiSprites.Circle).raycastTarget = false;
                     }
                 }
-                else UiFactory.Fill(swatch, new Color(sc.r / m, sc.g / m, sc.b / m, 1f), slot == Slot.Color || slot == Slot.Eyes ? UiSprites.Circle : UiSprites.Rounded, 2f).raycastTarget = false;
+                else UiFactory.Fill(swatch, new Color(sc.r / m, sc.g / m, sc.b / m, 1f), slot == Slot.Color || slot == Slot.Eyes || slot == Slot.Iris ? UiSprites.Circle : UiSprites.Rounded, 2f).raycastTarget = false;
                 if (c.set != null || c.storyLevel > 0)
                 {
                     // A little star marks set pieces and story rewards.
