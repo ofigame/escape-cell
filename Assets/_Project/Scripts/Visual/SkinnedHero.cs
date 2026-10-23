@@ -356,11 +356,11 @@ namespace SquashBot.Visual
 
         /// <summary>The head's own light: most of its colour, which no light or shadow takes away, so the face keeps the
         /// same skin in every scene (orange suns, blue ice, the menu) and never darkens as the lights round it change.</summary>
-        private const float HeadGlow = 0.8f;
+        private const float HeadGlow = 0.72f;
 
         /// <summary>How much the face takes from the lights round it (the rest is its own light): coloured lamps and flames
         /// on a floor tint it only a little, and it never goes dark or orange.</summary>
-        private const float HeadLit = 0.12f; // (barely: the shading painted on it shapes it; no lamp tints its skin or hair)
+        private const float HeadLit = 0.2f; // (a little: the shade baked on it shapes it; no lamp tints its skin or hair)
 
         private static Material HeadPaint(int n, Color? skin, Color? eyes)
         {
@@ -397,7 +397,7 @@ namespace SquashBot.Visual
                         if (ws > 0.01f)
                         {
                             var mul = Vector3.one + (sr - Vector3.one) * ws;
-                            p = new Color32((byte)Mathf.Min(255f, p.r * mul.x), (byte)Mathf.Min(255f, p.g * mul.y), (byte)Mathf.Min(255f, p.b * mul.z), 255);
+                            p = Vivid(new Color32((byte)Mathf.Min(255f, p.r * mul.x), (byte)Mathf.Min(255f, p.g * mul.y), (byte)Mathf.Min(255f, p.b * mul.z), 255), ws * 0.35f); // (the skin a touch richer: alive, never grey)
                         }
                         if (wi > 0.01f) p = Color32.Lerp(p, HairTint(src.px[i], eye, info.iris), wi); // (the grey iris in the eye colour, its streaks kept)
                         px[i] = p;

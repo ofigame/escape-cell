@@ -174,10 +174,10 @@ namespace SquashBot.Data
             C("hair.green", Slot.Hair, 300, 4, new Color(0.25f, 0.75f, 0.35f)),
             C("hair.purple", Slot.Hair, 400, 5, new Color(0.55f, 0.28f, 0.9f)),
             // the skin: people's own tones only, all free (wheat, fair, tan, dark)
-            C("skin.wheat", Slot.Skin, 0, 0, new Color(0.82f, 0.64f, 0.5f)),
-            C("skin.fair", Slot.Skin, 0, 0, new Color(0.94f, 0.79f, 0.7f)),
-            C("skin.tan", Slot.Skin, 0, 0, new Color(0.64f, 0.45f, 0.32f)),
-            C("skin.dark", Slot.Skin, 0, 0, new Color(0.37f, 0.24f, 0.16f)),
+            C("skin.wheat", Slot.Skin, 0, 0, new Color(0.84f, 0.66f, 0.53f)),
+            C("skin.fair", Slot.Skin, 0, 0, new Color(0.95f, 0.79f, 0.69f)),
+            C("skin.tan", Slot.Skin, 0, 0, new Color(0.68f, 0.49f, 0.36f)),
+            C("skin.dark", Slot.Skin, 0, 0, new Color(0.42f, 0.27f, 0.18f)),
             // the eyes: people's own colours free, a few rarer ones to buy
             C("iris.brown", Slot.Iris, 0, 0, new Color(0.42f, 0.26f, 0.13f)),
             C("iris.hazel", Slot.Iris, 0, 0, new Color(0.56f, 0.42f, 0.2f)),
