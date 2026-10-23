@@ -416,6 +416,44 @@ namespace SquashBot.Gameplay
             Push(false, robot.transform.position, 1);
         }
 
+        /// <summary>
+        /// The ultimate's blows drive the one struck back a step each (reeling), and the one striking steps after it, so the
+        /// ultimate goes on across the floor (the AI game: a live one's places are the server's).
+        /// </summary>
+        private void DriveBack(bool mine)
+        {
+            var model = mine ? hunt.ChallengeFoeModel : robot.Visual;
+            var skin = model != null ? model.GetComponentInChildren<SkinnedHero>() : null;
+            var strikerAt = mine ? robot.transform.position : hunt.ChallengeFoeAt ?? robot.transform.position;
+            if (skin != null) skin.Stagger(strikerAt, 0.7f);
+            if (LiveActive || !hunt.ChallengeFoeTile.HasValue) return;
+            var victim = mine ? hunt.ChallengeFoeTile.Value : robot.Position;
+            var striker = mine ? robot.Position : hunt.ChallengeFoeTile.Value;
+            var d = new GridPos(victim.x - striker.x, victim.y - striker.y);
+            var step = Mathf.Abs(d.x) >= Mathf.Abs(d.y) ? new GridPos(System.Math.Sign(d.x), 0) : new GridPos(0, System.Math.Sign(d.y));
+            if (step.x == 0 && step.y == 0) return;
+            var to = new GridPos(victim.x + step.x, victim.y + step.y);
+            if (!grid.InBounds(to) || !grid.IsStandable(to) || grid.IsOccupied(to) || to == robot.Position) return; // (the edge: it stands its ground)
+            var dir = step.x > 0 ? Direction.PlusX : step.x < 0 ? Direction.MinusX : step.y > 0 ? Direction.PlusY : Direction.MinusY;
+            if (mine)
+            {
+                cameraRig.StartCoroutine(hunt.ShoveFoe(to, 0.18f));
+                cameraRig.StartCoroutine(FollowUp(() => robot.Shove(dir, 1, 0.15f, 1.6f)));
+            }
+            else
+            {
+                robot.Shove(dir, 1, 0.15f, 1.6f);
+                var after = victim;
+                cameraRig.StartCoroutine(FollowUp(() => cameraRig.StartCoroutine(hunt.ShoveFoe(after, 0.2f))));
+            }
+        }
+
+        private static IEnumerator FollowUp(System.Action step)
+        {
+            yield return new WaitForSecondsRealtime(0.08f);
+            step();
+        }
+
         // ---------- Reeling and flying ----------
 
         /// <summary>
@@ -517,6 +555,7 @@ namespace SquashBot.Gameplay
                     float part = i == 4 ? UltimateHit * 0.5f : UltimateHit * 0.125f;
                     if (mine) HitFoe(part); else HurtMe(part);
                 }
+                if (i < 4) DriveBack(mine); // (struck, it is driven back; the one striking follows it up)
                 if (i == 4) yield return BigMoment(!mine);
             }
             if (casterSkin != null) casterSkin.StopMove();

@@ -516,6 +516,7 @@ namespace SquashBot.Gameplay
 
         private void ShowMenu()
         {
+            robot.StandUp(); // (never lying on the menu after a duel)
             robot.SetSize(1f);
             EndChallenge();
             // A rank weapon whose rank was lost (trophies fell) goes from the armory.
@@ -1484,7 +1485,7 @@ namespace SquashBot.Gameplay
                 else if (!want && tpsOn) ExitTps();
                 if (tpsOn) tps.Show(!ArenaActive);
             }
-            ui.SetTpsSwitch(!arenaRun && (!challengeRun || DuelTps) && level.mission == MissionType.Hunt && roadPhase == RoadPhase.None, tpsOn);
+            ui.SetTpsSwitch(!arenaRun && !challengeRun && level.mission == MissionType.Hunt && roadPhase == RoadPhase.None, tpsOn); // (no TPS in the duels)
             var command = ArenaActive ? default(InputCommand) : tpsOn ? TpsCommand() : input.Poll(robot.transform.position);
             command = GlassCellGate(command); // foi starts each floor in its glass cell
             bool onMark = duelCountdown || (challengeRun && chPhase == ChPhase.Lobby); // the duel's briefing and its 3, 2, 1: foi stands on its mark

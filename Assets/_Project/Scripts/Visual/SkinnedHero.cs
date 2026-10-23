@@ -597,6 +597,15 @@ namespace SquashBot.Visual
         private Quaternion bodyRot;
         private bool bodyKnown;
 
+        /// <summary>Whatever knock it was in, it stands again at once (in its own place, nothing thrown about).</summary>
+        public void StandUp()
+        {
+            foreach (var c in new[] { knock, stagger, hop, pop }) if (c != null) StopCoroutine(c);
+            knock = stagger = hop = pop = null;
+            flail = flat = rise = push = reel = 0f;
+            if (bodyKnown) { transform.localPosition = bodyPos; transform.localRotation = bodyRot; }
+        }
+
         /// <summary>Its own standing place under its parent, taken once before any knock moves it.</summary>
         private void KnowRest()
         {

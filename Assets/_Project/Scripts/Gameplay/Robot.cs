@@ -137,6 +137,9 @@ namespace SquashBot.Gameplay
         /// <summary>Plays one of foi's own moves (a dance, the ultimate's cast or kick); false if there is none.</summary>
         public bool PlayMove(string name, float rate = 1f) => Skin != null && Skin.PlayMove(name, rate);
 
+        /// <summary>Standing again at once (out of any knock-down or reel).</summary>
+        public void StandUp() { if (Skin != null) Skin.StandUp(); }
+
         /// <summary>A rigged build's clip player (null for the builds made of parts).</summary>
         private SkinnedHero Skin => HeroModels.IsSkinned(hero) ? visual.GetComponentInChildren<SkinnedHero>() : null;
 

@@ -102,14 +102,18 @@ namespace SquashBot.UI
 
             // The battle's overlay.
             hud = UiScreen.Create("ChallengeHud", root, out var h);
-            var top = UiFactory.Rect("Top", h, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -505f), new Vector2(0f, -365f)); // under the HUD's top row and the health bar
-            UiFactory.Fill(top, new Color(0.03f, 0.03f, 0.1f, 0.55f)).raycastTarget = false;
-            myBar = UiFactory.TextBox("Me", top, new Vector2(0f, 0.5f), new Vector2(136f, -20f), new Vector2(380f, 120f), "", 32f, ArmyBattleColours.Mine, title: true, align: TextAlignmentOptions.Left);
+            // Each side's rank and name just over its health bar (the bars sit at the top left and right), the clock
+            // between the two bars.
+            var top = UiFactory.Rect("Top", h, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -280f), new Vector2(0f, -196f));
+            myBar = UiFactory.TextBox("Me", top, new Vector2(0f, 0.5f), new Vector2(118f, 0f), new Vector2(330f, 60f), "", 34f, ArmyBattleColours.Mine, title: true, align: TextAlignmentOptions.Left);
             myBar.rectTransform.pivot = new Vector2(0f, 0.5f);
-            theirBar = UiFactory.TextBox("Them", top, new Vector2(1f, 0.5f), new Vector2(-136f, -20f), new Vector2(380f, 120f), "", 32f, ArmyBattleColours.Theirs, title: true, align: TextAlignmentOptions.Right);
+            theirBar = UiFactory.TextBox("Them", top, new Vector2(1f, 0.5f), new Vector2(-118f, 0f), new Vector2(330f, 60f), "", 34f, ArmyBattleColours.Theirs, title: true, align: TextAlignmentOptions.Right);
             theirBar.rectTransform.pivot = new Vector2(1f, 0.5f);
-            clock = UiFactory.TextBox("Clock", top, new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(200f, 110f), "", 72f, Color.white, title: true);
+            foreach (var bar in new[] { myBar, theirBar }) { bar.enableAutoSizing = true; bar.fontSizeMin = 20f; bar.fontSizeMax = 34f; }
+            clock = UiFactory.TextBox("Clock", h, new Vector2(0.5f, 1f), new Vector2(0f, -238f), new Vector2(220f, 70f), "", 46f, Color.white, title: true); // (between the names)
             clock.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            score = UiFactory.TextBox("Score", h, new Vector2(0.5f, 1f), new Vector2(0f, -317f), new Vector2(260f, 84f), "", 60f, Palette.UiGold, title: true); // (between the health bars)
+            score.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             status = UiFactory.TextBox("Status", h, new Vector2(0.5f, 0f), new Vector2(-60f, 380f), new Vector2(860f, 70f), "", 34f, Palette.UiGold, title: true);
             status.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             // The secret pick: a pop-up card at the bottom with the six groups (picture, name, soldiers left) and the clock.
@@ -642,22 +646,32 @@ namespace SquashBot.UI
 
         public void SetSides(string me, int myRank, int myLeft, string them, int theirRank, int theirLeft)
         {
-            myBar.text = me + "\n" + Loc.F("ch.soldiers", myLeft);
-            theirBar.text = them + "\n" + Loc.F("ch.soldiers", theirLeft);
+            myBar.text = me;
+            theirBar.text = them;
             // Each side's rank insignia beside its name.
             var top = (RectTransform)myBar.rectTransform.parent.parent;
             if (myRank != myBadgeRank)
             {
                 if (myBadge != null) Destroy(myBadge.gameObject);
-                myBadge = RankArt.Badge(top, myRank, new Vector2(0f, 0.5f), new Vector2(66f, -6f), 110f);
+                myBadge = RankArt.Badge(top, myRank, new Vector2(0f, 0.5f), new Vector2(76f, 0f), 76f);
                 myBadgeRank = myRank;
+                Unplated(myBadge);
             }
             if (theirRank != theirBadgeRank)
             {
                 if (theirBadge != null) Destroy(theirBadge.gameObject);
-                theirBadge = RankArt.Badge(top, theirRank, new Vector2(1f, 0.5f), new Vector2(-66f, -6f), 110f);
+                theirBadge = RankArt.Badge(top, theirRank, new Vector2(1f, 0.5f), new Vector2(-76f, 0f), 76f);
                 theirBadgeRank = theirRank;
+                Unplated(theirBadge);
             }
+        }
+
+        /// <summary>A rank badge without the see-through plate behind its insignia (only the insignia itself shows).</summary>
+        private static void Unplated(RectTransform badge)
+        {
+            if (badge == null) return;
+            foreach (var img in badge.GetComponentsInChildren<Image>(true))
+                if (img.transform == badge || img.color.a < 0.9f) img.enabled = img.color.a >= 0.9f && img.transform != badge;
         }
 
         // ---------- The duel's squad bar ----------
@@ -690,8 +704,8 @@ namespace SquashBot.UI
         /// right edge.</summary>
         private void BuildPowerButtons()
         {
-            heartButton = PowerButton(PowerUpType.Heart, new Vector2(-75f, 520f), () => HeartPressed?.Invoke(), out heartText);
-            shieldButton = PowerButton(PowerUpType.Shield, new Vector2(-75f, 645f), () => ShieldPressed?.Invoke(), out shieldText);
+            heartButton = PowerButton(PowerUpType.Heart, new Vector2(-75f, 395f), () => HeartPressed?.Invoke(), out heartText);
+            shieldButton = PowerButton(PowerUpType.Shield, new Vector2(-75f, 520f), () => ShieldPressed?.Invoke(), out shieldText);
         }
 
         private Button PowerButton(PowerUpType type, Vector2 at, Action onClick, out TextMeshProUGUI count)
@@ -723,6 +737,11 @@ namespace SquashBot.UI
             || shieldButton != null && shieldButton.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint((RectTransform)shieldButton.transform, screen, null);
 
         public void SetClock(string text) => clock.text = text;
+
+        /// <summary>The duel's time (between the names) and score (between the health bars).</summary>
+        public void SetClock(string time, string scoreText) { clock.text = time; score.text = scoreText; }
+
+        private TextMeshProUGUI score;
         public void SetStatus(string text) => status.text = text;
 
         private static bool IsSideways => Screen.width > Screen.height;
@@ -735,13 +754,13 @@ namespace SquashBot.UI
             bool now = IsSideways;
             if (now == sideways || clock == null) return;
             sideways = now;
-            var top = (RectTransform)clock.rectTransform.parent.parent; // (the text sits in its own box)
-            top.offsetMin = new Vector2(now ? 380f : 0f, now ? -290f : -505f);
-            top.offsetMax = new Vector2(now ? -380f : 0f, now ? -150f : -365f);
+            var top = (RectTransform)myBar.rectTransform.parent.parent; // (the text sits in its own box)
+            top.offsetMin = new Vector2(0f, -280f);
+            top.offsetMax = new Vector2(0f, -196f);
             status.rectTransform.anchoredPosition = now ? new Vector2(0f, 330f) : new Vector2(-60f, 380f);
             if (heartButton == null) return;
-            ((RectTransform)heartButton.transform).anchoredPosition = now ? new Vector2(-75f, 380f) : new Vector2(-75f, 520f);
-            ((RectTransform)shieldButton.transform).anchoredPosition = now ? new Vector2(-75f, 495f) : new Vector2(-75f, 645f);
+            ((RectTransform)heartButton.transform).anchoredPosition = new Vector2(-75f, 395f);
+            ((RectTransform)shieldButton.transform).anchoredPosition = new Vector2(-75f, 520f);
         }
 
         private void Update()

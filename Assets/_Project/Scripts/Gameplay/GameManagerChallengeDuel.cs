@@ -92,6 +92,7 @@ namespace SquashBot.Gameplay
         private void BuildDuelBoard(int stage)
         {
             duelStage = Mathf.Clamp(stage, 0, DuelStages.Length - 1);
+            levelTps = false; // (the duel is always seen from the board's camera)
             zoneRadius = 99f; zoneDrawn = -1; zoneHurtMe = zoneHurtFoe = 0f; zoneAnnounced = false;
             hunt.Unsafe = null;
             BuildCourtyard();
@@ -159,9 +160,9 @@ namespace SquashBot.Gameplay
             // Its blows weigh what the player's own would (its flurries of quick blows make up for its slower swings).
             const float rate = 1f;
             hunt.AddChallengeFoe(theirs, hp, DuelBlow(w, rival.weaponLevel, Shop.ArmorShare) * (LiveActive ? 1f : rate) / times, look, rivalHeld, 0);
-            if (myTag == null) myTag = SquashBot.Visual.NameTag.Create(robot.transform, Challenge.PlayerName, ArmyBattleColours.Mine);
-            if (theirTag != null) Destroy(theirTag.gameObject);
-            theirTag = SquashBot.Visual.NameTag.Create(look, rival.name, ArmyBattleColours.Theirs);
+            // (no name tags over the two foi: their names and ranks are over the health bars)
+            if (myTag != null) { Destroy(myTag.gameObject); myTag = null; }
+            if (theirTag != null) { Destroy(theirTag.gameObject); theirTag = null; }
             int back = north ? 1 : -1; // behind each foi, away from the other
             if (first)
             {
@@ -535,7 +536,7 @@ namespace SquashBot.Gameplay
         private void RefreshDuelClock()
         {
             int s = Mathf.CeilToInt(chDuelLeft);
-            chUi.SetClock(ScoreText() + "   " + s / 60 + ":" + (s % 60).ToString("00"));
+            chUi.SetClock(s / 60 + ":" + (s % 60).ToString("00"), ScoreText()); // (the time between the names, the score between the bars)
         }
 
         /// <summary>The score as the board shows it (mine first).</summary>
