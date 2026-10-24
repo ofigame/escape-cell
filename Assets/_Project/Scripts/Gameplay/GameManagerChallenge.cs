@@ -765,8 +765,62 @@ namespace SquashBot.Gameplay
         /// on the left, the rival's on the right), never turning; it keeps both foi in view (their middle, further back the
         /// further apart they are), with a still zone round the middle of the view so small steps do not shake it.
         /// </summary>
+        /// <summary>The duel filmed from the side (on, the default) or from the stage's fixed seat (off): the player's pick.</summary>
+        private bool DuelSideCam
+        {
+            get => Prefs.GetInt("sb_duel_sidecam", 1) == 1;
+            set { Prefs.SetInt("sb_duel_sidecam", value ? 1 : 0); Prefs.Save(); }
+        }
+
+        /// <summary>How far the side camera turns from the stage's own view, either way (it never goes behind the stands).</summary>
+        private const float SideSwing = 50f;
+        private Vector3 sideDir;
+        private bool sideKnown;
+        private float sideDist = 14f;
+
+        /// <summary>
+        /// The side view (as in 3D fighting games): the camera stands square to the line between the two foi, so both
+        /// are always side by side, whole and facing each other, foi on the left at first. It swings round slowly as
+        /// they circle (never jumping to the other side) and backs off as they move apart (the partners in view in 2v2).
+        /// </summary>
+        private void SidePose(out Vector3 pos, out Quaternion rot)
+        {
+            var me = robot.transform.position;
+            var foe = hunt.ChallengeFoeAt ?? me;
+            var axis = foe - me; axis.y = 0f;
+            if (axis.sqrMagnitude < 0.04f) axis = sideKnown ? Vector3.Cross(sideDir, Vector3.up) : Vector3.forward;
+            // it stays on the stage's open side (where its fixed camera stands), turning at most to the stands' corners
+            var open = Vector3.right; // (the stage's seat is east of the board)
+            var n = Vector3.Cross(Vector3.up, axis.normalized);
+            if (Vector3.Dot(n, open) < 0f) n = -n;
+            float swing = Vector3.SignedAngle(open, n, Vector3.up);
+            n = Quaternion.AngleAxis(Mathf.Clamp(swing, -SideSwing, SideSwing), Vector3.up) * open;
+            if (!sideKnown) { sideDir = n; sideKnown = true; sideDist = 20f; }
+            sideDir = Vector3.Slerp(sideDir, n, Mathf.Min(1f, Time.unscaledDeltaTime * 2.2f)).normalized;
+            // everyone to keep in view: the two foi, and the partners in 2v2
+            var points = new System.Collections.Generic.List<Vector3> { me, foe };
+            if (twoVsTwo) foreach (var (pm, _) in hunt.Partners()) points.Add(pm.position);
+            var mid = Vector3.zero;
+            foreach (var p in points) mid += p;
+            mid /= points.Count;
+            var right = Vector3.Cross(Vector3.up, -sideDir);
+            float half = 0f, depth = 0f;
+            foreach (var p in points) { half = Mathf.Max(half, Mathf.Abs(Vector3.Dot(p - mid, right))); depth = Mathf.Max(depth, Vector3.Dot(p - mid, sideDir)); }
+            half += 3.2f; // (room for an arm, a weapon, a fall, and the floor round them)
+            var cam = cameraRig.Cam;
+            float vfov = 46f * Mathf.Deg2Rad;
+            float hfov = 2f * Mathf.Atan(Mathf.Tan(vfov * 0.5f) * Mathf.Max(0.3f, cam.aspect));
+            float want = Mathf.Clamp(half / Mathf.Tan(hfov * 0.5f) + depth, 14f, 45f);
+            sideDist = Mathf.Lerp(sideDist, want, Mathf.Min(1f, Time.unscaledDeltaTime * 2f));
+            var focus = mid + Vector3.up * 1.1f;
+            pos = mid + sideDir * sideDist + Vector3.up * (2.4f + sideDist * 0.2f);
+            rot = Quaternion.LookRotation(focus - pos);
+        }
+
         private void BoardPose(out Vector3 pos, out Quaternion rot)
         {
+            if (DuelSideCam && chPhase == ChPhase.Duel) { SidePose(out pos, out rot); DancePose(ref pos, ref rot); return; }
+            sideKnown = false;
             var seat = boardCentre + new Vector3(BoardW * 0.5f + 11f, 12.5f, 0f);
             var look = (boardCentre - seat).normalized;
             var me = robot.transform.position;
@@ -782,7 +836,12 @@ namespace SquashBot.Gameplay
             if (DuelStands.IsMade(Stage.theme)) pos += new Vector3(-4.5f, 0f, 0f) - look * 5f; // (and a little further back: all of it in view)
             rot = Quaternion.LookRotation(look) * Quaternion.Euler(-3.5f, 0f, 0f); // (its head up a little: less floor under the platform, still some room under it)
             OrbitPose(ref pos, ref rot, me, foe);
-            // The winner's dance: the camera comes in on it (about halfway), looking at it
+            DancePose(ref pos, ref rot);
+        }
+
+        /// <summary>The winner's dance: the camera comes in on it (about halfway), looking at it.</summary>
+        private void DancePose(ref Vector3 pos, ref Quaternion rot)
+        {
             danceCam = Mathf.MoveTowards(danceCam, danceAt != null && State == GameState.Result ? 1f : 0f, Time.unscaledDeltaTime * 0.8f);
             if (danceCam > 0f && danceAt != null)
             {

@@ -69,6 +69,7 @@ namespace SquashBot.Gameplay
             skillBar = DuelSkillBar.Create(chUi.BattleHud, Loc.T("move.s." + MoveSet.Special)); // (the set's special on its button)
             skillBar.Pressed += OnSkill;
             skillBar.Emoted += e => { ShowEmote(true, e); if (LiveActive) LiveNet.Emote(e); };
+            skillBar.CamSwitched += () => { DuelSideCam = !DuelSideCam; skillBar?.Shout(Loc.T(DuelSideCam ? "duel.camSide" : "duel.camStage"), new Color(0.6f, 0.8f, 1f)); };
             skillBar.SetMeters(0f, 0f);
             DropRings();
             myRing = FootRing.Make(new Color(0.25f, 0.6f, 1f), 3f, true); // (wider than foi with its cape and shield; a soft light over it)
