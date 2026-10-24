@@ -72,6 +72,7 @@ namespace SquashBot.Gameplay
         {
             if (LiveActive || rival == null) { botTuning = null; hunt.FoeWhiff = 0f; hunt.FoeReactScale = 1f; return; }
             botTuning = BotTuning.For(BotTuning.Of(rival.seed), DuelPower.TierOf(rival.Rank), BotDifficulty.Shift, BotDifficulty.FirstFive);
+            if (copyMatch) PlayStyle.Apply(botTuning, rival.style); // a friend's copy: the friend's own way of fighting
             hunt.FoeBoldness = botTuning.aggression;
             hunt.FoeSkill = Mathf.Clamp01(0.25f + 0.6f * botTuning.shield + 0.03f * rival.Rank);
             hunt.FoeWhiff = botTuning.whiff;

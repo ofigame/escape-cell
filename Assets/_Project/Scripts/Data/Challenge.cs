@@ -246,6 +246,8 @@ namespace SquashBot.Data
             public string titleKey;
             /// <summary>Its move set ("special,ulti,passive"; null: a computer rival's, from its personality).</summary>
             public string moves;
+            /// <summary>Its player's fighting style ("aggression,shield,heart"; a friend's copy).</summary>
+            public string style;
 
             /// <summary>Soldiers of each group it brings into the duel.</summary>
             public readonly int[] squad = { SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel };
@@ -323,6 +325,7 @@ namespace SquashBot.Data
             o.armor = Mathf.Clamp(r.armor, 0f, RobotParts.ArmorAt(RobotParts.MaxLevel));
             o.shield = Mathf.Clamp(r.shield, 0, 3);
             o.moves = r.moves;
+            o.style = r.style;
             o.world = r.world;
             o.duelLevel = Mathf.Max(1, r.duelLevel);
             return o;

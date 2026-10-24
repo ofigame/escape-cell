@@ -142,7 +142,7 @@ namespace SquashBot.Gameplay
             chUi.ModePicked += (mode, minutes) =>
             {
                 chUi.HideModes();
-                if (mode == 2 || mode == 3) { cameraRig.StartCoroutine(EventDuel(mode)); return; } // the weekly rule mode, the weekend tournament
+                if (mode >= 2 && mode <= 4) { cameraRig.StartCoroutine(EventDuel(mode)); return; } // the weekly rule mode, the weekend tournament, 2 against 2
                 chMode = 1; chDuelMinutes = 3; chDuelSquads = Challenge.DuelSquads; StartChallenge(false);
             };
             if (liveHooksWired) return;
@@ -611,6 +611,7 @@ namespace SquashBot.Gameplay
             coresWon = cores;
             SaveData.Coins += gold + (draw ? 0 : Earned);
             SettleProgress(won, draw, friendly, gold, cores, firstWinToday);
+            PlayStyle.EndDuel(chDuelMinutes * 60f - chDuelLeft); // (its style: blows, shields, hearts)
             if (lastRewards != null) lastRewards.eventLine = SettleEvent(won); // (the week's wins, the tournament's round)
             // the score with the friend (a friend match or a copy duel); a win over a copy tells the friend
             if (friendly && rival != null)

@@ -144,6 +144,7 @@ namespace SquashBot.UI
                     PaintCell();
                     break;
                 default:
+                    foreach (var id in Monetization.Store.Products) StoreCell(id); // (in-app purchases: soon without the store)
                     AdCoinsCell();
                     foreach (var b in Shop.Counter()) ItemCell((Item)((int)Item.StartShield + (int)b));
                     ItemCell(Item.Life);
@@ -945,6 +946,35 @@ namespace SquashBot.UI
         }
 
         /// <summary>Coins for an ad: a few times a day, the count left shown on the card.</summary>
+        /// <summary>A store product: its name, what it gives, its price (or owned / soon).</summary>
+        private void StoreCell(string id)
+        {
+            var colour = id == Monetization.Store.RemoveAds ? new Color(0.45f, 0.85f, 0.55f) : id == Monetization.Store.SeasonPass ? new Color(0.7f, 0.5f, 1f) : new Color(1f, 0.6f, 0.35f);
+            var card = Cell(id, colour, out var picture);
+            var icon = BigIcon(picture, colour);
+            UiFactory.TextBox("Mark", icon, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(110f, 70f), id == Monetization.Store.RemoveAds ? "AD" : id == Monetization.Store.SeasonPass ? "S" : "★", 50f, Color.white, title: true)
+                .rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            CardName(card, Loc.T("iap." + id));
+            var desc = CardDesc(card);
+            desc.text = Loc.T("iap." + id + ".d");
+            var buy = BuyButton(card, () =>
+            {
+                Monetization.Store.Buy(id, ok =>
+                {
+                    if (ok) { AudioManager.PlaySfx(Sfx.Win, 1f, 1.2f); Pop(card); Purchased?.Invoke(); }
+                    Refresh();
+                });
+            });
+            var label = buy.GetComponentInChildren<TextMeshProUGUI>();
+            refreshers.Add(() =>
+            {
+                bool owned = Monetization.Store.Owns(id);
+                string price = Monetization.Store.Price(id);
+                label.text = owned ? Loc.T("iap.owned") : price ?? Loc.T("iap.soon");
+                Afford(buy, !owned && price != null, true);
+            });
+        }
+
         private void AdCoinsCell()
         {
             var card = Cell("AdCoins", Palette.UiGold, out var picture);

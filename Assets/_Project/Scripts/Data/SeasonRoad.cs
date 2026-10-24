@@ -107,6 +107,27 @@ namespace SquashBot.Data
             return true;
         }
 
+        // ---------- The paid track (the season pass) ----------
+
+        /// <summary>The pass's gift at a step: more gold, a bronze chest every third step, a gold chest every tenth, 10 core-free.</summary>
+        public static (Kind kind, int amount) PassGift(int step) =>
+            step % 10 == 0 ? (Kind.Cape, 1) : step % 3 == 0 ? (Kind.Bronze, 1) : (Kind.Gold, 250 + 50 * step);
+
+        public static bool PassTaken(int step) { Roll(); return Prefs.GetString(TakenKey, "").Contains("|p" + step + "|"); }
+
+        /// <summary>Takes a reached step's pass gift (with the month's pass bought).</summary>
+        public static bool TakePass(int step)
+        {
+            if (!Monetization.Store.HasPass || step < 1 || step > Reached || PassTaken(step)) return false;
+            var g = PassGift(step);
+            if (g.kind == Kind.Gold) SaveData.Coins += g.amount;
+            else if (g.kind == Kind.Bronze) DuelChests.Add(ChestTier.Mid);
+            else DuelChests.Add(ChestTier.Advanced);
+            Prefs.SetString(TakenKey, Prefs.GetString(TakenKey, "") + "|p" + step + "|");
+            Prefs.Save();
+            return true;
+        }
+
         /// <summary>Days left in the month's season.</summary>
         public static int DaysLeft => (int)Math.Ceiling((new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(1) - DateTime.Now).TotalDays);
     }

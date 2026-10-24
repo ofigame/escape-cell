@@ -86,6 +86,8 @@ namespace SquashBot.Data
             /// <summary>Its move set ("special,ulti,passive") and duel level.</summary>
             public string moves;
             public int duelLevel;
+            /// <summary>Its player's fighting style (for a copy).</summary>
+            public string style;
         }
 
         [Serializable]
@@ -125,6 +127,8 @@ namespace SquashBot.Data
             /// <summary>The move set ("special,ulti,passive") and the duel level.</summary>
             public string moves;
             public int duelLevel;
+            /// <summary>How the player fights ("aggression,shield,heart").</summary>
+            public string style;
         }
 
         [Serializable] private class ResultBody { public bool won, draw, left; }
@@ -192,7 +196,7 @@ namespace SquashBot.Data
         /// <summary>Sends the army rivals will face (the groups' points, foi's strength in the duel).</summary>
         public static IEnumerator PutArmy(int[] points, int earned, int world, int foiHp, float foiHit, float boldness, string weapon, int weaponLevel, float armor, int shield, Action<bool> done)
         {
-            var b = new ArmyBody { army = string.Join(",", points), earned = earned, world = world, foiHp = foiHp, foiHit = foiHit, boldness = boldness, weapon = weapon, weaponLevel = weaponLevel, armor = armor, shield = shield, look = Cosmetics.LookText(), moves = MoveSet.Code, duelLevel = DuelLevel.Level };
+            var b = new ArmyBody { army = string.Join(",", points), earned = earned, world = world, foiHp = foiHp, foiHit = foiHit, boldness = boldness, weapon = weapon, weaponLevel = weaponLevel, armor = armor, shield = shield, look = Cosmetics.LookText(), moves = MoveSet.Code, duelLevel = DuelLevel.Level, style = PlayStyle.Code };
             long code = 0;
             yield return Send("PUT", "/army", JsonUtility.ToJson(b), true, (c, _) => code = c);
             done(code == 200);

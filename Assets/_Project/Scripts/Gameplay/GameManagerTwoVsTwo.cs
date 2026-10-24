@@ -1,0 +1,72 @@
+using SquashBot.Core;
+using SquashBot.Data;
+using SquashBot.Visual;
+using UnityEngine;
+
+namespace SquashBot.Gameplay
+{
+    /// <summary>
+    /// 2 against 2 (the scenario's §4.1, phase 6): foi and a partner on one side, the rival and its partner on the other.
+    /// The partners are foi too (in their own outfits and weapons), fought by the AI through the squads' fighting: they
+    /// strike the other side's foi and partner; a partner who falls is back for the next round. A knock-down of a side's
+    /// leader scores, as in the duel. Equal power, no rank points.
+    /// </summary>
+    public partial class GameManager
+    {
+        private bool twoVsTwo;
+        private string myPartner, rivalPartner;
+
+        /// <summary>A partner foi's look: dressed as its name says, its weapon in hand (no shield).</summary>
+        private Transform PartnerLook(string name, string weaponId)
+        {
+            var root = new GameObject("Partner " + name).transform;
+            var outfit = Cosmetics.OutfitFor(name);
+            robot.ApplyOutfit(outfit);
+            var copy = robot.BuildLookalike(root).transform;
+            var own = new System.Collections.Generic.Dictionary<Material, Material>();
+            foreach (var r in copy.GetComponentsInChildren<Renderer>(true))
+            {
+                var mats = r.sharedMaterials;
+                for (int i = 0; i < mats.Length; i++)
+                {
+                    if (mats[i] == null) continue;
+                    if (!own.TryGetValue(mats[i], out var m)) own[mats[i]] = m = new Material(mats[i]);
+                    mats[i] = m;
+                }
+                r.sharedMaterials = mats;
+            }
+            robot.ApplyOutfit(Cosmetics.Outfit());
+            root.localScale = robot.Visual.lossyScale;
+            var drop = new System.Collections.Generic.List<GameObject>();
+            foreach (Transform c in copy.GetComponentsInChildren<Transform>(true)) if (c.name == "HeldWeapon" || c.name == "HeldShield") drop.Add(c.gameObject);
+            foreach (var g in drop) DestroyImmediate(g);
+            foreach (var sh in copy.GetComponentsInChildren<ShieldHold>(true)) DestroyImmediate(sh);
+            HeldWeapon.Attach(copy, Armory.Get(weaponId));
+            return root;
+        }
+
+        /// <summary>The partners on their marks (the first round), or back for a new round if they fell.</summary>
+        private void PlacePartners(bool first)
+        {
+            if (!twoVsTwo || LiveActive) return;
+            var (mine, theirs) = DuelMarks;
+            int back = theirs.y < mine.y ? 1 : -1;
+            if (first)
+            {
+                var rng = new System.Random(rival.seed ^ 0x51ed27);
+                myPartner = Challenge.BotName(rng);
+                rivalPartner = Challenge.BotName(rng);
+            }
+            // a partner deals about half a foi's damage and has about two thirds of its health
+            var w = Armory.Equipped;
+            var stats = new Army.Stats { hp = Mathf.RoundToInt(duelMine.hp * 0.65f), hit = DuelPower.Blow(w, duelMine.weaponTier) * 2.2f, armor = duelMine.armor };
+            var theirStats = new Army.Stats { hp = Mathf.RoundToInt(duelTheirs.hp * 0.65f), hit = DuelPower.Blow(Armory.Get(rival.weapon), duelTheirs.weaponTier) * 2.2f, armor = duelTheirs.armor };
+            if (hunt.SquadAlive(true) == 0)
+                hunt.AddSquadSoldier(true, 0, mine + new GridPos(2, -back), stats, foiModel: PartnerLook(myPartner, w.id));
+            if (hunt.SquadAlive(false) == 0)
+                hunt.AddSquadSoldier(false, 0, theirs + new GridPos(-2, back), theirStats, foiModel: PartnerLook(rivalPartner, rival.weapon));
+            hunt.SetSquadOrder(true, 0, true);
+            hunt.SetSquadOrder(false, 0, true);
+        }
+    }
+}

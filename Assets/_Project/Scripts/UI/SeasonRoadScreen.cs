@@ -95,6 +95,16 @@ namespace SquashBot.UI
                 y -= (big ? 120f : 100f) + 10f;
                 Flat.Label(row, s.ToString(), new Vector2(0f, 0.5f), new Vector2(30f, 0f), new Vector2(90f, 80f), big ? 46f : 38f, got ? Flat.Gold : Flat.Muted, bold: true).rectTransform.pivot = new Vector2(0f, 0.5f);
                 Flat.Label(row, GiftText(s), new Vector2(0f, 0.5f), new Vector2(130f, 0f), new Vector2(560f, 80f), big ? 34f : 30f, got ? Flat.Text : Flat.Muted, bold: big).rectTransform.pivot = new Vector2(0f, 0.5f);
+                // the pass's gift on the step (taken with the month's pass)
+                if (got && Monetization.Store.HasPass && !SeasonRoad.PassTaken(s))
+                {
+                    var pb = Flat.Button(row, Loc.T("sr.pass"), new Vector2(1f, 0.5f), new Vector2(-250f, 0f), new Vector2(150f, 76f), new Color(0.65f, 0.45f, 1f), Color.white, () =>
+                    {
+                        if (SeasonRoad.TakePass(step)) { AudioManager.PlaySfx(Sfx.Coin, 1f, 1.3f); Claimed?.Invoke(); }
+                        Refresh();
+                    }, 24f);
+                    ((RectTransform)pb.transform).pivot = new Vector2(1f, 0.5f);
+                }
                 if (taken) Flat.Label(row, Loc.T("comp.taken"), new Vector2(1f, 0.5f), new Vector2(-110f, 0f), new Vector2(200f, 80f), 28f, new Color(0.4f, 1f, 0.5f), TextAlignmentOptions.Center, true);
                 else if (got)
                 {

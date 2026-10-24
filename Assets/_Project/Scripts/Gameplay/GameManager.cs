@@ -238,6 +238,7 @@ namespace SquashBot.Gameplay
             if (PendingRoad >= LevelCount) Prefs.DeleteKey(RoadLevelKey);
             FrameGovernor.Install(); // picture quality for this device (after the camera's post-processing exists)
             AdMob.Start(); // consent form where required, then AdMob (phones only)
+            Store.Init(); // in-app purchases (with the store package in: FOI_IAP)
             FifiUpgrades.RefundOnce(); // Fifi has left the game: its levels' coins back, once
             SplashScreen.Show(); // OFIGAME studio logo over the menu, fading out
             StartFortressViewIfAsked(); // -arena: the sample fortress battlefield to look around

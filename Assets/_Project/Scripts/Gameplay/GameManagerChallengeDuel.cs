@@ -211,6 +211,7 @@ namespace SquashBot.Gameplay
             }
             // After a knock-down the soldiers left line up behind their foi again (no new ones and no healing until the duel is over).
             else hunt.RegroupSquads();
+            PlacePartners(first); // (2 against 2: the partners on their marks, or back after a fall)
             RoundPassives(); // (each round: the master warrior's bar part, the sturdy's spare life)
             if (capesOff) StripCapes();
 
@@ -557,6 +558,7 @@ namespace SquashBot.Gameplay
         private void UseDuelHeart()
         {
             if (chPhase != ChPhase.Duel || duelHearts <= 0 || health >= 0.999f) return;
+            PlayStyle.Heart(health);
             duelHearts--;
             mcHearts++;
             if (LiveActive) LiveNet.Heal();
@@ -574,6 +576,7 @@ namespace SquashBot.Gameplay
         {
             if (chPhase != ChPhase.Duel || duelShields <= 0 || robot.IsShielded) return;
             duelShields--;
+            PlayStyle.Shield();
             robot.GiveShield(DuelShieldSeconds, DuelShieldHits + (myPassive == PassiveKind.ShieldMaster ? 1 : 0)); // (the shield master: 3 blows)
             if (LiveActive) LiveNet.Shield();
             AudioManager.PlaySfx(Sfx.Shield, 1f, 1.1f);

@@ -58,21 +58,26 @@ namespace SquashBot.Gameplay
         /// <paramref name="id"/> its number in its squad (group × 2 + slot); <paramref name="remote"/> moved by the other
         /// game (the live rival's).
         /// </summary>
-        public void AddSquadSoldier(bool mine, int id, GridPos near, Army.Stats stats, bool remote = false, float hpShare = 1f)
+        public void AddSquadSoldier(bool mine, int id, GridPos near, Army.Stats stats, bool remote = false, float hpShare = 1f, Transform foiModel = null)
         {
             int group = Mathf.Clamp(id / SoldierPool.PerDuel, 0, Army.Groups - 1);
             var kind = Army.KindOf(group);
             var tile = FreeNear(near);
-            if (!tile.HasValue) return;
-            var model = SoldierModel.Build(transform, kind, Army.Heavy(kind) ? (mine ? MineColour : TheirsColour) : Color.Lerp(mine ? MineColour : TheirsColour, Color.white, 0.3f));
-            model.transform.localScale = Vector3.one * Mathf.Max(0.4f, FoiHeight * 0.62f) * (Army.Heavy(kind) ? 1.12f : 1f) * Army.SizeFor(group, stats); // trained soldiers stand taller
+            if (!tile.HasValue) { if (foiModel != null) Destroy(foiModel.gameObject); return; }
+            // a soldier of its group, or (2 against 2) a partner foi in its own look
+            SoldierModel model = null;
+            if (foiModel == null)
+            {
+                model = SoldierModel.Build(transform, kind, Army.Heavy(kind) ? (mine ? MineColour : TheirsColour) : Color.Lerp(mine ? MineColour : TheirsColour, Color.white, 0.3f));
+                model.transform.localScale = Vector3.one * Mathf.Max(0.4f, FoiHeight * 0.62f) * (Army.Heavy(kind) ? 1.12f : 1f) * Army.SizeFor(group, stats); // trained soldiers stand taller
+            }
             int hp = Mathf.Max(1, stats.hp);
             var s = new Guard
             {
                 pos = tile.Value, hp = Mathf.Max(1, Mathf.RoundToInt(hp * Mathf.Clamp01(hpShare))), maxHp = hp, rank = mine ? -1 : 1, ally = mine,
                 squad = true, squadId = id, remote = remote, power = stats.hit, armorShare = stats.armor, cooldown = (float)rng.NextDouble(), soldier = model, soldierKind = kind,
             };
-            s.root = model.transform;
+            s.root = foiModel != null ? foiModel : model.transform;
             s.root.SetParent(transform, true);
             s.home = tile.Value; // where it stands guard (it waits there until called)
             s.root.position = At(tile.Value);
@@ -82,6 +87,14 @@ namespace SquashBot.Gameplay
             if (mine) { MaterialFactory.SetColors(s.barMat, MineColour, MineColour * 1.6f); allies.Add(s); }
             else { grid.SetOccupied(tile.Value, true); guards.Add(s); }
             SquadsOn = true;
+        }
+
+        /// <summary>A side's squad members standing.</summary>
+        public int SquadAlive(bool mine)
+        {
+            int n = 0;
+            foreach (var s in mine ? allies : guards) if (s.squad && !s.dead) n++;
+            return n;
         }
 
         /// <summary>Every squad soldier leaves the floor (the duel is over).</summary>

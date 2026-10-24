@@ -503,6 +503,7 @@ namespace SquashBot.Gameplay
             int damage = RuleDamage(MyBlow(w) * (superLeft > 0f ? 2 : 1)); // the arms add their strength (the duel: its own blow; a combo-only level: from the 4th blow)
             if (challengeRun && chPhase == ChPhase.Duel)
             {
+                PlayStyle.Blow(); // (how the player fights: for its friends' copy of it)
                 // the duel's moves: the piercer, rage, the teleport's next blow; the vampire's share back
                 damage = Mathf.Max(1, Mathf.RoundToInt(damage * MyBlowFactor() * myNextBlow));
                 myNextBlow = 1f;

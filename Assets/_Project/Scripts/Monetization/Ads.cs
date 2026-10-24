@@ -86,7 +86,7 @@ namespace SquashBot.Monetization
         {
             float now = Time.realtimeSinceStartup;
             recent.RemoveAll(t => now - t > 1800f);
-            return Interstitial.IsReady && lossesInRow < 3 && now - lastInterstitial >= gap && now - lastRewarded >= AfterRewarded
+            return !Store.NoAds && Interstitial.IsReady && lossesInRow < 3 && now - lastInterstitial >= gap && now - lastRewarded >= AfterRewarded
                    && recent.Count < PerHalfHour && ShownToday < PerDay;
         }
 

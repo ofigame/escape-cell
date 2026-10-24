@@ -2050,6 +2050,7 @@ namespace SquashBot.UI
         /// <summary>Banners appear only on menu-type screens, never over gameplay.</summary>
         private void SetBanner(bool on)
         {
+            on &= !Store.NoAds; // (ads removed: no banner)
             Ads.BannerWanted = on;
             if (on) Ads.Banner.Show();
             else Ads.Banner.Hide();
