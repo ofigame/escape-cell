@@ -309,6 +309,7 @@ namespace SquashBot.Data
             ["chests.none"] = "아직 없음",
             ["chests.free"] = "오늘 무료 열기: {0}/{1}",
             ["chests.open"] = "열기",
+            ["tvt.withFriend"] = "파트너: {0} (친구의 복제)",
             ["duel.em.6"] = "가자!",
             ["duel.em.7"] = "와!",
             ["duel.em.8"] = "명인이네!",

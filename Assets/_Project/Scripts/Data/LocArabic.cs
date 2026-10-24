@@ -309,6 +309,7 @@ namespace SquashBot.Data
             ["chests.none"] = "لا يوجد بعد",
             ["chests.free"] = "مرات الفتح المجانية اليوم: {0}/{1}",
             ["chests.open"] = "افتح",
+            ["tvt.withFriend"] = "شريكك: {0} (نسخة صديقك)",
             ["duel.em.6"] = "هيا!",
             ["duel.em.7"] = "واو!",
             ["duel.em.8"] = "عمل متقن!",

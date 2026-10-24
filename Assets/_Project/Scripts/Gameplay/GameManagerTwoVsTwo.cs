@@ -15,12 +15,33 @@ namespace SquashBot.Gameplay
     {
         private bool twoVsTwo;
         private string myPartner, rivalPartner;
+        /// <summary>The player's partner when it is a friend's copy (their look and weapon; null: a made-up partner).</summary>
+        private FoiNet.Rival friendPartner;
+
+        /// <summary>A friend for the partner's place: one of the player's friends whose copy may fight (null: none).</summary>
+        private System.Collections.IEnumerator FindFriendPartner()
+        {
+            friendPartner = null;
+            if (!FoiNet.Registered) yield break;
+            FoiNet.FriendList list = null;
+            yield return FoiNet.Friends(l => list = l);
+            if (list?.friends == null || list.friends.Length == 0) yield break;
+            var order = new System.Collections.Generic.List<FoiNet.Friend>(list.friends);
+            // the friend played most first (the score between you), then any
+            order.Sort((a, b) => { var ra = Rivalry.Of(a.name); var rb = Rivalry.Of(b.name); return (rb.wins + rb.losses).CompareTo(ra.wins + ra.losses); });
+            foreach (var f in order)
+            {
+                FoiNet.Rival r = null;
+                yield return FoiNet.FriendCopy(f.name, (rv, e) => r = rv);
+                if (r != null && !string.IsNullOrEmpty(r.name)) { friendPartner = r; yield break; }
+            }
+        }
 
         /// <summary>A partner foi's look: dressed as its name says, its weapon in hand (no shield).</summary>
-        private Transform PartnerLook(string name, string weaponId)
+        private Transform PartnerLook(string name, string weaponId, string look = null)
         {
             var root = new GameObject("Partner " + name).transform;
-            var outfit = Cosmetics.OutfitFor(name);
+            var outfit = look != null ? Cosmetics.OutfitFrom(look) : Cosmetics.OutfitFor(name);
             robot.ApplyOutfit(outfit);
             var copy = robot.BuildLookalike(root).transform;
             var own = new System.Collections.Generic.Dictionary<Material, Material>();
@@ -54,7 +75,7 @@ namespace SquashBot.Gameplay
             if (first)
             {
                 var rng = new System.Random(rival.seed ^ 0x51ed27);
-                myPartner = Challenge.BotName(rng);
+                myPartner = friendPartner != null ? friendPartner.name : Challenge.BotName(rng);
                 rivalPartner = Challenge.BotName(rng);
             }
             // a partner deals about half a foi's damage and has about two thirds of its health
@@ -62,7 +83,9 @@ namespace SquashBot.Gameplay
             var stats = new Army.Stats { hp = Mathf.RoundToInt(duelMine.hp * 0.65f), hit = DuelPower.Blow(w, duelMine.weaponTier) * 2.2f, armor = duelMine.armor };
             var theirStats = new Army.Stats { hp = Mathf.RoundToInt(duelTheirs.hp * 0.65f), hit = DuelPower.Blow(Armory.Get(rival.weapon), duelTheirs.weaponTier) * 2.2f, armor = duelTheirs.armor };
             if (hunt.SquadAlive(true) == 0)
-                hunt.AddSquadSoldier(true, 0, mine + new GridPos(2, -back), stats, foiModel: PartnerLook(myPartner, w.id));
+                hunt.AddSquadSoldier(true, 0, mine + new GridPos(2, -back), stats, foiModel: friendPartner != null
+                    ? PartnerLook(myPartner, Armory.Get(friendPartner.weapon).id, friendPartner.look ?? "")
+                    : PartnerLook(myPartner, w.id));
             if (hunt.SquadAlive(false) == 0)
                 hunt.AddSquadSoldier(false, 0, theirs + new GridPos(-2, back), theirStats, foiModel: PartnerLook(rivalPartner, rival.weapon));
             hunt.SetSquadOrder(true, 0, true);

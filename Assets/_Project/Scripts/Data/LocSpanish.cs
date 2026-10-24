@@ -309,6 +309,7 @@ namespace SquashBot.Data
             ["chests.none"] = "Aún ninguno",
             ["chests.free"] = "Aperturas gratis hoy: {0}/{1}",
             ["chests.open"] = "ABRIR",
+            ["tvt.withFriend"] = "Tu compañero: {0} (copia de tu amigo)",
             ["duel.em.6"] = "¡Vamos!",
             ["duel.em.7"] = "¡Guau!",
             ["duel.em.8"] = "¡Magistral!",
