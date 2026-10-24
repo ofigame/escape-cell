@@ -20,6 +20,9 @@ namespace SquashBot.Monetization
 
         public static readonly string[] Products = { RemoveAds, SeasonPass, PackHeroes, PackCapes };
 
+        /// <summary>Purchases on in the game (off for now: the package is in, the products stay out of sight).</summary>
+        public const bool Enabled = false;
+
         /// <summary>Whether a product can be bought on this build (the store is in and it answered).</summary>
         public static bool Available { get; private set; }
 

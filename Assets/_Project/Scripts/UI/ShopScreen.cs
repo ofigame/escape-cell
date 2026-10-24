@@ -144,7 +144,7 @@ namespace SquashBot.UI
                     PaintCell();
                     break;
                 default:
-                    foreach (var id in Monetization.Store.Products) StoreCell(id); // (in-app purchases: soon without the store)
+                    if (Monetization.Store.Enabled) foreach (var id in Monetization.Store.Products) StoreCell(id); // (in-app purchases: off for now)
                     AdCoinsCell();
                     foreach (var b in Shop.Counter()) ItemCell((Item)((int)Item.StartShield + (int)b));
                     ItemCell(Item.Life);
