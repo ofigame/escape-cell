@@ -251,6 +251,11 @@ namespace SquashBot.UI
         public DuelChestScreen DuelChestsView { get; private set; }
         public DuelRewardsScreen DuelRewardsView { get; private set; }
         public MoveSetScreen MoveSetView { get; private set; }
+        public SeasonRoadScreen SeasonRoadView { get; private set; }
+        private GameObject seasonPing;
+
+        /// <summary>The season road button's red dot: on while a reached step waits.</summary>
+        public void RefreshSeasonRoad() { if (seasonPing != null) seasonPing.SetActive(Data.SeasonRoad.Waiting > 0); }
 
         private TMPro.TextMeshProUGUI menuGoal;
 
@@ -500,6 +505,8 @@ namespace SquashBot.UI
             DuelChestsView = DuelChestScreen.Create(root);
             DuelRewardsView = DuelRewardsScreen.Create(root);
             MoveSetView = MoveSetScreen.Create(root);
+            SeasonRoadView = SeasonRoadScreen.Create(root);
+            SeasonRoadView.Claimed += () => { RefreshMenuCoins(); RefreshChests(); RefreshSeasonRoad(); };
             DuelChestsView.Changed += () => { RefreshMenuCoins(); RefreshChests(); };
             ChallengeStats = ChallengeStatsScreen.Create(root);
             ChallengeStats.SettingsPressed += ShowSettings;
@@ -579,6 +586,16 @@ namespace SquashBot.UI
             UiFactory.Text(lPing, "!", 32f, Color.white);
             loginPing = lPing.gameObject;
             MenuSkin.Orb(login, "orb_blank_gold", keepIcon: true);
+
+            // The season road: on the right under the quests (a red dot while a step waits).
+            var road = MenuArt.DockButton(t, Loc.T("sr.button"), MenuArt.Icon.Profile, new Color(1f, 0.6f, 0.2f), TopRight, new Vector2(-110f, -740f), 120f, () => SeasonRoadView.Show());
+            ((RectTransform)road.transform).pivot = new Vector2(0.5f, 0.5f);
+            var rPing = UiFactory.Box("Ping", road.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(44f, 44f));
+            rPing.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(rPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
+            UiFactory.Text(rPing, "!", 32f, Color.white);
+            seasonPing = rPing.gameObject;
+            MenuSkin.Orb(road, "orb_blank_gold", keepIcon: true);
 
             // The move set: under the friends (the three slots: special, ultimate, passive).
             var moves = MenuArt.DockButton(t, Loc.T("moves.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.45f, 0.3f), TopLeft, new Vector2(110f, -740f), 120f, () => MoveSetView.Show());
@@ -803,6 +820,7 @@ namespace SquashBot.UI
             menuStars.text = Progress.TotalStars(levelCount).ToString();
             armyWorld = SquashBot.Data.LevelCatalog.WorldOf(levelIndex);
             RefreshLogin();
+            RefreshSeasonRoad();
             RefreshQuests();
             RefreshChests();
             RefreshDailyBonus();
@@ -1295,6 +1313,7 @@ namespace SquashBot.UI
             if (DailyBonus != null && DailyBonus.Visible) { DailyBonus.Hide(); return true; }
             if (LoginView != null && LoginView.Visible) { LoginView.Hide(); return true; }
             if (MoveSetView != null && MoveSetView.IsOpen) { MoveSetView.Hide(); return true; }
+            if (SeasonRoadView != null && SeasonRoadView.IsOpen) { SeasonRoadView.Hide(); return true; }
             return false;
         }
 
@@ -2119,6 +2138,7 @@ namespace SquashBot.UI
             DailyBonus.Hide();
             LoginView.Hide();
             MoveSetView.Hide();
+            SeasonRoadView.Hide();
             Guide.Hide();
             if (ArmyView != null) ArmyView.Hide();
             if (ChallengeStats != null) ChallengeStats.Hide();

@@ -345,6 +345,22 @@ namespace SquashBot.UI
             return field;
         }
 
+        /// <summary>A cell goal step taken: its chest (bronze; bronze and 10 core parts; gold).</summary>
+        private IEnumerator TakeCellGoal(int step)
+        {
+            bool ok = false;
+            yield return FoiNet.ClanGoal(step, r => ok = r);
+            if (ok)
+            {
+                DuelChests.Add(step == 2 ? ChestTier.Advanced : ChestTier.Mid);
+                if (step == 1) CoreParts.Add(10);
+                AudioManager.PlaySfx(Sfx.Coin, 1f, 1f);
+                CoinsChanged?.Invoke();
+            }
+            Open(Tab.Clan);
+            if (ok) status.text = Loc.T("cell.gift" + step);
+        }
+
         private void ShowClan(FoiNet.ClanInfo clan)
         {
             var head = Card(180f, Flat.Card);
@@ -352,6 +368,21 @@ namespace SquashBot.UI
             Text(head, clan.name, new Vector2(0f, 0.5f), new Vector2(170f, 25f), new Vector2(560f, 60f), 42f, Flat.Gold, bold: true);
             Text(head, Loc.F("comp.clanLine", clan.size, Competitions.ClanSize, clan.score.ToString("N0")), new Vector2(0f, 0.5f), new Vector2(170f, -35f), new Vector2(560f, 50f), 28f, Flat.Muted);
             if (clan.mine) SmallButton(head, Loc.T("comp.clanLeave"), new Color(0.55f, 0.2f, 0.25f), () => StartCoroutine(LeaveClan()));
+            // the cell's weekly goal: its members' wins together, a cell chest for everyone at each step
+            if (clan.mine && clan.goals != null && clan.goals.Length > 0)
+            {
+                var goal = Card(70f, new Color(0f, 0f, 0f, 0f));
+                Text(goal, Loc.F("cell.goal", clan.weekWins), new Vector2(0f, 0.5f), new Vector2(20f, 0f), new Vector2(900f, 60f), 30f, Flat.Gold, bold: true);
+                for (int s = 0; s < clan.goals.Length; s++)
+                {
+                    int step = s;
+                    bool taken = (clan.goalClaimed & (1 << s)) != 0, reached = clan.weekWins >= clan.goals[s];
+                    var r = Card(100f, taken ? new Color(0.12f, 0.2f, 0.14f) : Flat.Card);
+                    Text(r, Loc.F("cell.step", clan.goals[s]) + "\n<size=24><color=#FFC64D>" + Loc.T("cell.gift" + s) + "</color></size>", new Vector2(0f, 0.5f), new Vector2(30f, 0f), new Vector2(680f, 90f), 30f, reached ? Flat.Text : Flat.Muted, bold: true);
+                    if (taken) Text(r, Loc.T("comp.taken"), new Vector2(1f, 0.5f), new Vector2(-110f, 0f), new Vector2(200f, 80f), 30f, new Color(0.4f, 1f, 0.5f), TextAlignmentOptions.Center, true);
+                    else if (reached) SmallButton(r, Loc.T("comp.claim"), new Color(1f, 0.7f, 0.2f), () => StartCoroutine(TakeCellGoal(step)));
+                }
+            }
             if (clan.members != null)
                 for (int i = 0; i < clan.members.Length; i++)
                 {

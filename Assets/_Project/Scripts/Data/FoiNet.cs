@@ -348,7 +348,7 @@ namespace SquashBot.Data
         [Serializable] public class TopList { public TopEntry[] list; public int place; }
         [Serializable] public class CupInfo { public bool open; public long endsAt; public int wins, claimed; public int[] steps, coins; public TopEntry[] list; }
         [Serializable] public class ClanMember { public string name; public int trophies, rank; public bool leader, me; }
-        [Serializable] public class ClanInfo { public string id, name; public int badge, score, size; public bool mine; public ClanMember[] members; }
+        [Serializable] public class ClanInfo { public string id, name; public int badge, score, size; public bool mine; public ClanMember[] members; public int weekWins, goalClaimed; public int[] goals; }
         [Serializable] private class ClanBody { public ClanInfo clan; }
         [Serializable] private class CoinsBody { public int coins; }
         [Serializable] private class ErrorBody { public string error; }
@@ -489,6 +489,72 @@ namespace SquashBot.Data
             if (code == 200) { done(null, TryParse<AddReply>(body)?.friends ?? false); yield break; }
             var e = TryParse<ErrorReply>(body);
             done(code == 0 ? "offline" : e != null && !string.IsNullOrEmpty(e.error) ? e.error : "notfound", false);
+        }
+
+        [Serializable] private class CopyBody { public string name; public bool won; }
+        [Serializable] private class CopyReply { public Rival rival; }
+        [Serializable] private class CodeReply { public string code, name; }
+        [Serializable] private class GiftsReply { public int gifts; }
+        [Serializable] private class CopySettings { public bool enabled; public bool copyAllowed; public string lang; }
+
+        /// <summary>A friend's copy to duel (their record as a rival), or an error: notfriend, nocopy, offline.</summary>
+        public static IEnumerator FriendCopy(string name, Action<Rival, string> done)
+        {
+            long code = 0; string body = null;
+            yield return Send("POST", "/friends/copy", JsonUtility.ToJson(new CopyBody { name = name }), true, (c, b) => { code = c; body = b; });
+            if (code == 200) { done(TryParse<CopyReply>(body)?.rival, null); yield break; }
+            var e = TryParse<ErrorReply>(body);
+            done(null, code == 0 ? "offline" : e != null && !string.IsNullOrEmpty(e.error) ? e.error : "notfriend");
+        }
+
+        /// <summary>A copy duel's end (a win tells the friend).</summary>
+        public static IEnumerator FriendCopyResult(string name, bool won)
+        {
+            yield return Send("POST", "/friends/copyresult", JsonUtility.ToJson(new CopyBody { name = name, won = won }), true, (c, b) => { });
+        }
+
+        /// <summary>The player's own friend code (null: offline).</summary>
+        public static IEnumerator MyFriendCode(Action<string> done)
+        {
+            long code = 0; string body = null;
+            yield return Authed("GET", "/friends/code", null, (c, b) => { code = c; body = b; });
+            done(code == 200 ? TryParse<CodeReply>(body)?.code : null);
+        }
+
+        /// <summary>A friend added by code: their name, or an error (notfound, self, already, offline).</summary>
+        public static IEnumerator AddFriendCode(string friendCode, Action<string, string> done)
+        {
+            long code = 0; string body = null;
+            yield return Send("POST", "/friends/addcode", JsonUtility.ToJson(new CodeBody { code = friendCode }), true, (c, b) => { code = c; body = b; });
+            if (code == 200) { done(TryParse<CodeReply>(body)?.name, null); yield break; }
+            var e = TryParse<ErrorReply>(body);
+            done(null, code == 0 ? "offline" : e != null && !string.IsNullOrEmpty(e.error) ? e.error : "notfound");
+        }
+
+        /// <summary>Invitation rewards waiting (each a bronze chest and 10 core parts).</summary>
+        public static IEnumerator InviteRewards(Action<int> done)
+        {
+            if (!Registered) { done(0); yield break; }
+            long code = 0; string body = null;
+            yield return Send("POST", "/invite/reward", "{}", true, (c, b) => { code = c; body = b; });
+            done(code == 200 ? TryParse<GiftsReply>(body)?.gifts ?? 0 : 0);
+        }
+
+        /// <summary>Whether friends may duel this player's copy while it is away.</summary>
+        public static IEnumerator SetCopyAllowed(bool allowed, Action<bool> done)
+        {
+            if (!Registered) { done(false); yield break; }
+            long code = 0;
+            yield return Send("PUT", "/settings", JsonUtility.ToJson(new CopySettings { enabled = Challenge.Enabled, copyAllowed = allowed, lang = LangCode }), true, (c, _) => code = c);
+            done(code == 200);
+        }
+
+        /// <summary>A step of the cell's weekly goal taken (true: given now).</summary>
+        public static IEnumerator ClanGoal(int step, Action<bool> done)
+        {
+            long code = 0; string body = null;
+            yield return Send("POST", "/clans/goal", JsonUtility.ToJson(new StepBody { step = step }), true, (c, b) => { code = c; body = b; });
+            done(code == 200 && (TryParse<StepBody>(body)?.step ?? -1) == step);
         }
 
         public static IEnumerator AcceptFriend(string id, Action<bool> done)

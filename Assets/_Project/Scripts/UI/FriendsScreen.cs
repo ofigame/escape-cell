@@ -19,6 +19,11 @@ namespace SquashBot.UI
         public event Action<string> AcceptPressed, RemovePressed;
         /// <summary>A friend invited to a duel: their id, name and the minutes.</summary>
         public event Action<string, string, int> InvitePressed;
+        /// <summary>A copy duel with an away friend (their name).</summary>
+        public event Action<string> CopyPressed;
+        /// <summary>A friend code typed in; the copy setting switched.</summary>
+        public event Action<string> CodePressed;
+        public event Action<bool> CopySettingPressed;
         public event Action<FoiNet.Invitation> InviteAccepted, InviteDeclined;
 
         private UiScreen screen, invitePanel;
@@ -75,6 +80,8 @@ namespace SquashBot.UI
             ((RectTransform)byRank.transform).pivot = new Vector2(0.5f, 0.5f);
             byPower = Flat.Button(root, Loc.T("friends.byPower"), new Vector2(0.5f, 1f), new Vector2(250f, -455f), new Vector2(480f, 84f), Flat.CardHi, Flat.Text, () => SortBy(true), 28f);
             ((RectTransform)byPower.transform).pivot = new Vector2(0.5f, 0.5f);
+            byRank.gameObject.SetActive(false); byPower.gameObject.SetActive(false); // (ranked by rank; the row shows the friend code and the copy setting)
+            BuildCodeRow(root, -455f);
             // The list.
             var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(40f, Monetization.Ads.BannerReserve + 140f), new Vector2(-40f, -510f));
             viewport.gameObject.AddComponent<RectMask2D>();
@@ -141,10 +148,44 @@ namespace SquashBot.UI
             if (name.Length < 3) { status.text = Loc.T("friends.err.notfound"); return; }
             AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f);
             status.text = Loc.T("ch.name.wait");
-            AddPressed?.Invoke(name);
+            // a friend code (six of the code letters, typed in capitals or with a #): added by code
+            string code = name.TrimStart('#').ToUpperInvariant();
+            bool isCode = (name.StartsWith("#") || name == code) && code.Length == 6 && System.Text.RegularExpressions.Regex.IsMatch(code, "^[A-HJ-NP-Z2-9]{6}$");
+            if (isCode) CodePressed?.Invoke(code); else AddPressed?.Invoke(name);
         }
 
         public void SetStatus(string text) => status.text = text;
+
+        private TextMeshProUGUI codeLine;
+        private Button copyToggle;
+
+        /// <summary>The player's own friend code, to share (null: not known yet).</summary>
+        public void SetMyCode(string code)
+        {
+            if (codeLine != null) codeLine.text = string.IsNullOrEmpty(code) ? "" : Loc.F("friends.myCode", code);
+        }
+
+        public void SetCopySetting(bool on)
+        {
+            if (copyToggle == null) return;
+            copyToggle.GetComponentInChildren<TextMeshProUGUI>().text = Loc.T(on ? "friends.copyOn" : "friends.copyOff");
+            copyAllowed = on;
+        }
+
+        private bool copyAllowed = true;
+
+        /// <summary>The friend code line and its field (add by code), and the copy setting: built under the name field.</summary>
+        private void BuildCodeRow(RectTransform p, float y)
+        {
+            codeLine = Flat.Label(p, "", new Vector2(0.5f, 1f), new Vector2(-170f, y), new Vector2(620f, 50f), 28f, Flat.Gold, TextAlignmentOptions.Left, bold: true);
+            codeLine.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            copyToggle = Flat.Button(p, Loc.T("friends.copyOn"), new Vector2(0.5f, 1f), new Vector2(330f, y), new Vector2(330f, 64f), Flat.CardHi, Flat.Text, () =>
+            {
+                AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.2f);
+                CopySettingPressed?.Invoke(!copyAllowed);
+            }, 22f);
+            ((RectTransform)copyToggle.transform).pivot = new Vector2(0.5f, 0.5f);
+        }
         public void ClearInput() => nameInput.text = "";
 
         public void Show()
@@ -231,7 +272,8 @@ namespace SquashBot.UI
             UiFactory.Fill(dot, f.online ? new Color(0.35f, 1f, 0.45f) : new Color(1f, 1f, 1f, 0.2f), UiSprites.Circle).raycastTarget = false;
             var name = Flat.Label(row, (place > 0 ? place + ". " : "") + (kind == 3 ? f.name + " (" + Loc.T("friends.you") + ")" : f.name), new Vector2(0f, 0.5f), new Vector2(150f, 22f), new Vector2(450f, 56f), 38f, kind == 3 ? Flat.Gold : Flat.Text, bold: true);
             name.rectTransform.pivot = new Vector2(0f, 0.5f);
-            var info = Flat.Label(row, Challenge.RankName(f.rank) + " · " + Loc.F("ch.power", f.power) + (f.online && kind != 3 ? " · " + Loc.T("friends.online") : ""), new Vector2(0f, 0.5f), new Vector2(150f, -28f), new Vector2(450f, 40f), 24f, Flat.Muted);
+            string score = kind == 0 ? Rivalry.Text(f.name) : "";
+            var info = Flat.Label(row, Challenge.RankName(f.rank) + " · " + Loc.F("ch.trophies", f.trophies) + (score.Length > 0 ? " · " + score : "") + (f.online && kind != 3 ? " · " + Loc.T("friends.online") : ""), new Vector2(0f, 0.5f), new Vector2(150f, -28f), new Vector2(450f, 40f), 24f, Flat.Muted);
             info.rectTransform.pivot = new Vector2(0f, 0.5f);
             Button Small(string text, float x, float w, Color face, Action onClick)
             {
@@ -242,7 +284,9 @@ namespace SquashBot.UI
             switch (kind)
             {
                 case 0:
-                    Small(Loc.T("friends.duel"), -20f, 240f, new Color(1f, 0.6f, 0.25f), () => InvitePressed?.Invoke(f.id, f.name, 3));
+                    // online: a live duel; away: a duel with its copy
+                    if (f.online) Small(Loc.T("friends.duel"), -20f, 240f, new Color(1f, 0.6f, 0.25f), () => InvitePressed?.Invoke(f.id, f.name, 3));
+                    else Small(Loc.T("friends.copy"), -20f, 240f, new Color(0.55f, 0.5f, 1f), () => CopyPressed?.Invoke(f.name));
                     Small(Loc.T("friends.remove"), -276f, 110f, Flat.CardHi, () => RemovePressed?.Invoke(f.id));
                     break;
                 case 3:

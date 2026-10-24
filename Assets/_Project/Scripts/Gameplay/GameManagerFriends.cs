@@ -31,6 +31,18 @@ namespace SquashBot.Gameplay
                 friendsUi.AcceptPressed += id => cameraRig.StartCoroutine(FoiNet.AcceptFriend(id, _ => RefreshFriends(false)));
                 friendsUi.RemovePressed += id => cameraRig.StartCoroutine(FoiNet.RemoveFriend(id, _ => RefreshFriends(false)));
                 friendsUi.InvitePressed += InviteFriend;
+                friendsUi.CopyPressed += name => cameraRig.StartCoroutine(CopyDuel(name));
+                friendsUi.CodePressed += code => cameraRig.StartCoroutine(FoiNet.AddFriendCode(code, (name, err) =>
+                {
+                    friendsUi.SetStatus(err == null ? Loc.F("friends.addedCode", name) : Loc.T(err == "offline" ? "live.offline" : "friends.err." + err));
+                    if (err == null) { friendsUi.ClearInput(); RefreshFriends(false); }
+                }));
+                friendsUi.CopySettingPressed += on => cameraRig.StartCoroutine(FoiNet.SetCopyAllowed(on, ok =>
+                {
+                    if (!ok) { friendsUi.SetStatus(Loc.T("live.offline")); return; }
+                    Prefs.SetInt("sb_copy_allowed", on ? 1 : 0);
+                    friendsUi.SetCopySetting(on);
+                }));
                 friendsUi.InviteAccepted += AcceptInvite;
                 friendsUi.InviteDeclined += inv => cameraRig.StartCoroutine(FoiNet.DeclineInvite(inv.code));
                 return friendsUi;
@@ -62,6 +74,9 @@ namespace SquashBot.Gameplay
             }
             if (!ok) { FriendsUi.Fill(null); yield break; }
             yield return FoiNet.Friends(list => FriendsUi.Fill(list));
+            FriendsUi.SetCopySetting(Prefs.GetInt("sb_copy_allowed", 1) == 1);
+            yield return FoiNet.MyFriendCode(code => { FriendsUi.SetMyCode(code); if (!string.IsNullOrEmpty(code)) Share.MyCode = code; });
+            yield return GiveInviteRewards();
         }
 
         /// <summary>A friend invited to a duel: a code made for them, the friend panel waits for them.</summary>
@@ -75,6 +90,64 @@ namespace SquashBot.Gameplay
         }
 
         private string invitedName;
+
+        /// <summary>A duel with an away friend's copy (§5.5): their look, weapon, parts and moves, played by the AI (no rank
+        /// points; it counts for the score between you, and a win tells them).</summary>
+        private System.Collections.IEnumerator CopyDuel(string name)
+        {
+            if (chUi == null) InitChallenge();
+            if (challengeRun) yield break;
+            FoiNet.Rival r = null; string err = null;
+            yield return FoiNet.FriendCopy(name, (rv, e) => { r = rv; err = e; });
+            if (r == null || string.IsNullOrEmpty(r.name)) { FriendsUi.SetStatus(Loc.T(err == "offline" ? "live.offline" : err == "nocopy" ? "friends.noCopy" : "friends.err.notfound")); yield break; }
+            FriendsUi.Hide();
+            if (State != GameState.Menu) ShowMenu();
+            chCancelled = false; chFriend = 0; chOnline = false; chLive = false; chMatchId = 0;
+            copyMatch = true;
+            rival = Challenge.FromRival(r);
+            rival.seed = Mathf.Abs(r.name.GetHashCode());
+            chPhase = ChPhase.Lobby;
+            int token = ++chLobbyToken;
+            chUi.ShowLobby(MyCard(), Challenge.Rank, Loc.T("friends.copyMode"));
+            chUi.ShowRival(RivalCard(rival), rival.Rank);
+            chUi.LockLobby();
+            chUi.SetLobbyStatus(Loc.F("friends.copyOf", r.name));
+            yield return new WaitForSecondsRealtime(1.6f);
+            if (token != chLobbyToken) yield break;
+            int stage = rival.seed % DuelStageCount;
+            yield return SpinToStage(stage);
+            if (token != chLobbyToken) yield break;
+            chUi.HideLobby();
+            BuildDuelBoard(stage);
+        }
+
+        /// <summary>A copy duel is being played (no rank points, no chest; it counts for the score between friends).</summary>
+        private bool copyMatch;
+
+        /// <summary>Revenge after a lost friend match or copy duel: the friend's copy again.</summary>
+        private void Revenge(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return;
+            cameraRig.StartCoroutine(RevengeAfterMenu(name));
+        }
+
+        private System.Collections.IEnumerator RevengeAfterMenu(string name)
+        {
+            ShowMenu();
+            yield return new WaitForSecondsRealtime(0.4f);
+            yield return CopyDuel(name);
+        }
+
+        /// <summary>Invitation rewards waiting from the server: a bronze chest and 10 core parts each.</summary>
+        private System.Collections.IEnumerator GiveInviteRewards()
+        {
+            int gifts = 0;
+            yield return FoiNet.InviteRewards(n => gifts = n);
+            if (gifts <= 0) yield break;
+            for (int i = 0; i < gifts; i++) { DuelChests.Add(ChestTier.Mid); CoreParts.Add(10); }
+            ui.ShowIntro(Loc.T("invite.title"), Loc.F("invite.gift", gifts));
+            ui.RefreshChests();
+        }
 
         /// <summary>A friend's invitation accepted: its code entered (the duel's minutes are the inviter's).</summary>
         private void AcceptInvite(FoiNet.Invitation inv)

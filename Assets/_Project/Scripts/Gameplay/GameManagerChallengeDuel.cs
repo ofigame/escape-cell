@@ -101,7 +101,7 @@ namespace SquashBot.Gameplay
         private DuelPower.Stats duelMine, duelTheirs;
 
         /// <summary>A ranked duel (each side under its own ceiling); a friend's match is equal power.</summary>
-        private bool DuelRanked => !(chLive && !liveRanked);
+        private bool DuelRanked => !(chLive && !liveRanked) && !copyMatch && !EventMatch;
 
         /// <summary>The player's blow: the duel's (its weapon's tier under the ceiling, the arms' share), the floors' otherwise.</summary>
         private int MyBlow(WeaponDef w) => challengeRun
@@ -129,6 +129,7 @@ namespace SquashBot.Gameplay
             chUi.ShowBattle();
             BeginDuelSkills();
             LoadMoveSets();
+            ApplyDuelRule(); // (the weekly mode's rule)
             ui.SetHudTitle(Loc.T("ch.mode.duel") + " · " + Loc.T(Stage.key));
             PlaceDuelists(first: true);
             RefreshSquadBar();
@@ -247,6 +248,7 @@ namespace SquashBot.Gameplay
             if (!challengeRun || chPhase != ChPhase.Duel) return;
             if (iWon) chDuelMe++; else chDuelThem++;
             PowerSlow(0.4f, 0.3f); // (the knock-down: slow motion a moment, the crowd up)
+            if (SuddenDeath) { RefreshDuelClock(); chPhase = ChPhase.Break; hunt.Freeze(); ChallengeEnd(); return; } // (sudden death: one knock-down wins)
             if (iWon) OfferFinish(lastFoeAt);
             cameraRig.StartCoroutine(RivalEmote(!iWon));
             chPhase = ChPhase.Break;

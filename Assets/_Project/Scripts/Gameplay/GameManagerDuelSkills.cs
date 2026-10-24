@@ -253,7 +253,7 @@ namespace SquashBot.Gameplay
                     Jump();
                     break;
                 case DuelSkillBar.Move.Ultimate:
-                    if (myMeter < 3f) return;
+                    if (myMeter < UltiCost) return; // (the quick-ulti week: two parts)
                     myMeter = 0f;
                     UseUlti(true, myUlti); // (the set's ultimate)
                     break;
@@ -748,7 +748,7 @@ namespace SquashBot.Gameplay
                 Persona.Ulti => health < 0.4f,
                 _ => Random.value < 0.45f,
             };
-            if (rivalMeter >= 3f && ultiTime)
+            if (rivalMeter >= UltiCost && ultiTime)
             {
                 rivalMeter = 0f;
                 UseUlti(false, rivalUlti); // (its set's ultimate)

@@ -61,7 +61,12 @@ namespace SquashBot.UI
             return (Loc.F("quest." + d.goal, d.target), d.reward, d.progress, d.target, d.Done, d.claimed);
         }
 
-        private static bool Take(Entry e) => e.duel ? ChallengeQuests.Claim(e.weekly, e.index) > 0 : DailyQuests.Claim(e.index);
+        private static bool Take(Entry e)
+        {
+            bool ok = e.duel ? ChallengeQuests.Claim(e.weekly, e.index) > 0 : DailyQuests.Claim(e.index);
+            if (ok) SeasonRoad.Add(e.weekly ? 100 : 25); // (the season road: a day's quest 25, a week's 100)
+            return ok;
+        }
 
         /// <summary>Quests on the screen done and waiting to be taken (the menu button's red dot).</summary>
         public static int Waiting

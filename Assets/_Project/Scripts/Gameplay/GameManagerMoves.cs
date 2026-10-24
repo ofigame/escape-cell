@@ -48,15 +48,15 @@ namespace SquashBot.Gameplay
 
         // ---------- The passives in the numbers ----------
 
-        private float MyComboGap => ComboGap + (myPassive == PassiveKind.ComboMaster ? 0.3f : 0f);
-        private float RivalComboGap => ComboGap + (rivalPassive == PassiveKind.ComboMaster ? 0.3f : 0f);
+        private float MyComboGap => (ComboGap + (myPassive == PassiveKind.ComboMaster ? 0.3f : 0f)) * RuleComboGap;
+        private float RivalComboGap => (ComboGap + (rivalPassive == PassiveKind.ComboMaster ? 0.3f : 0f)) * RuleComboGap;
         private float MyCharge => myPassive == PassiveKind.FastCharge ? 1.15f : 1f;
         private float RivalCharge => rivalPassive == PassiveKind.FastCharge ? 1.15f : 1f;
 
         /// <summary>The player's blow factor in the duel: the piercer's armour cut, rage when low, the teleport's next blow.</summary>
         private float MyBlowFactor()
         {
-            float k = 1f;
+            float k = RuleDamageTimes;
             if (myPassive == PassiveKind.Piercer && duelTheirs.armor > 0f) k *= (1f - 0.75f * duelTheirs.armor) / (1f - duelTheirs.armor);
             if (myPassive == PassiveKind.Rage && health < 0.3f) k *= 1.15f;
             return k;
@@ -65,7 +65,7 @@ namespace SquashBot.Gameplay
         /// <summary>The rival's blow factor on foi: rage when it is low, its teleport's next blow.</summary>
         private float RivalBlowFactor()
         {
-            float k = rivalNextBlow;
+            float k = rivalNextBlow * RuleDamageTimes;
             rivalNextBlow = 1f;
             if (rivalPassive == PassiveKind.Rage && hunt.ChallengeFoeHealth < 0.3f) k *= 1.15f;
             return k;

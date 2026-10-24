@@ -139,7 +139,12 @@ namespace SquashBot.Gameplay
             chUi.NameSubmitted += OnNameSubmitted;
             chUi.NameClosed += () => { profileNaming = false; chCancelled = true; chPhase = ChPhase.Off; chUi.HideAll(); };
             chUi.RenamePressed += () => { chCancelled = true; chPhase = ChPhase.Off; chUi.ShowName(Challenge.PlayerName); };
-            chUi.ModePicked += (_, minutes) => { chDuelMinutes = 3; chDuelSquads = Challenge.DuelSquads; chUi.HideModes(); StartChallenge(false); };
+            chUi.ModePicked += (mode, minutes) =>
+            {
+                chUi.HideModes();
+                if (mode == 2 || mode == 3) { cameraRig.StartCoroutine(EventDuel(mode)); return; } // the weekly rule mode, the weekend tournament
+                chMode = 1; chDuelMinutes = 3; chDuelSquads = Challenge.DuelSquads; StartChallenge(false);
+            };
             if (liveHooksWired) return;
             // The hunt's links (made once: the hunt outlives a language change, the challenge screens do not).
             liveHooksWired = true;
@@ -287,6 +292,8 @@ namespace SquashBot.Gameplay
         /// </summary>
         private IEnumerator Lobby()
         {
+            copyMatch = false;
+            chMode = 1; duelRule = null;
             int token = ++chLobbyToken;
             chMatchId = 0;
             chOnline = false;
@@ -586,7 +593,7 @@ namespace SquashBot.Gameplay
             if (won) { ChallengeQuests.Report(DuelGoal.Win); if (!chDuelSquads) ChallengeQuests.Report(DuelGoal.SoloWin); if (chLive) ChallengeQuests.Report(DuelGoal.LiveWin); }
             // A duel won brings a chest: the better the streak and the health left, the better the chest. A friend's
             // match brings none (nor touches the streak), and pays gold only for the day's first three.
-            bool friendly = chLive && !liveRanked;
+            bool friendly = (chLive && !liveRanked) || copyMatch;
             chestWon = friendly ? null : DuelChests.OnDuelEnd(won, draw, chOnline || chLive, health);
             bool paid = !friendly || FriendMatchesPaid.Take();
             if (colosseum != null) colosseum.Cheer(won ? 0 : draw ? -1 : 1, 1f);
@@ -604,6 +611,13 @@ namespace SquashBot.Gameplay
             coresWon = cores;
             SaveData.Coins += gold + (draw ? 0 : Earned);
             SettleProgress(won, draw, friendly, gold, cores, firstWinToday);
+            if (lastRewards != null) lastRewards.eventLine = SettleEvent(won); // (the week's wins, the tournament's round)
+            // the score with the friend (a friend match or a copy duel); a win over a copy tells the friend
+            if (friendly && rival != null)
+            {
+                Rivalry.Record(rival.name, won, draw);
+                if (copyMatch) cameraRig.StartCoroutine(FoiNet.FriendCopyResult(rival.name, won));
+            }
             State = GameState.Result;
             danceAt = won ? robot.transform : !draw ? hunt.ChallengeFoeModel : null;
             if (won) AudioManager.PlaySfx(Sfx.Win);
@@ -676,7 +690,13 @@ namespace SquashBot.Gameplay
                 lastRewards.trophies = shownChange;
                 lastRewards.trophiesKnown = shownChangeKnown;
                 bool shut = false;
-                ui.DuelRewardsView.Show(lastRewards, won, draw, () => shut = true);
+                bool friendlyLoss = !won && !draw && rival != null && ((chLive && !liveRanked) || copyMatch);
+                string revengeOn = friendlyLoss ? rival.name : null;
+                string shareLine = Loc.F("share.line", Loc.T(won ? "ch.victory" : draw ? "ch.draw" : "ch.defeat"), score, Challenge.RankName(Challenge.Rank))
+                                   + (Share.MyCode.Length > 0 ? " " + Loc.F("share.code", Share.MyCode) : "") + " " + Share.Link;
+                string liveRival = chLive && liveRanked && rival != null ? rival.name : null;
+                ui.DuelRewardsView.SetExtras(shareLine, liveRival, n => cameraRig.StartCoroutine(FoiNet.AddFriend(n, (e, f) => { })));
+                ui.DuelRewardsView.Show(lastRewards, won, draw, () => shut = true, revengeOn, () => { shut = true; Revenge(revengeOn); });
                 while (!shut && challengeRun) yield return null;
             }
             yield return ShowResultDelayed(new UIController.ResultInfo
@@ -715,6 +735,8 @@ namespace SquashBot.Gameplay
         /// <summary>Leaving a challenge (the menu): the board and its screens go; a match the server knows of is lost.</summary>
         private void EndChallenge()
         {
+            copyMatch = false;
+            ClearDuelRule();
             // Walked out of a duel under way: the leaver's penalty (rank points); before it began, a plain loss.
             if (chMatchId != 0 && chPhase != ChPhase.Done) SendChallengeResult(false, left: chPhase == ChPhase.Duel || chPhase == ChPhase.Break);
             chLobbyToken++; // a waiting room still searching stops there

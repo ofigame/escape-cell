@@ -29,6 +29,8 @@ namespace SquashBot.Gameplay
             public int masteryBefore, masteryAfter, masteryPointsBefore, masteryPointsAfter;
             public ChestTier? chest;
             public string goalText;
+            public int seasonPoints;
+            public string eventLine;
         }
 
         private DuelRewards lastRewards;
@@ -105,6 +107,9 @@ namespace SquashBot.Gameplay
             // the streak breaker: a computer rival on a 5+ winning streak beaten
             if (won && !friendly && rival != null && rival.streak >= 5) { r.streakBreaker = true; SaveData.Coins += 200; r.gold += 200; }
             if (botTuning != null) BotDifficulty.Record(won, draw);
+            // the season road
+            r.seasonPoints = won ? SeasonRoad.Win : draw ? SeasonRoad.Draw : SeasonRoad.Loss;
+            SeasonRoad.Add(r.seasonPoints);
             lastRewards = r;
             return r;
         }

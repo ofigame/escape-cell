@@ -147,6 +147,10 @@ namespace SquashBot.UI
             var go = Flat.Button(m, Loc.T("ch.duelGo"), new Vector2(0.5f, 0.5f), new Vector2(0f, -300f), new Vector2(720f, 140f),
                 new Color(1f, 0.6f, 0.25f), new Color(0.12f, 0.06f, 0f), () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(1, 3); }, 46f);
             ((RectTransform)go.transform).pivot = new Vector2(0.5f, 0.5f);
+            // This week's event: the weekly rule mode (Monday–Thursday) or the weekend tournament (Saturday–Sunday).
+            eventButton = Flat.Button(m, "", new Vector2(0.5f, 0.5f), new Vector2(0f, -470f), new Vector2(720f, 120f),
+                new Color(0.55f, 0.45f, 1f), Color.white, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(Tournament.Open ? 3 : 2, 3); }, 34f);
+            ((RectTransform)eventButton.transform).pivot = new Vector2(0.5f, 0.5f);
             // Playing a friend by code, between the lengths and CLOSE (the friends list is on the main menu).
             var friend = Flat.Button(m, Loc.T("live.friend"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 190f), new Vector2(640f, 100f), Flat.Blue, Flat.Text, ShowFriend, 34f);
             ((RectTransform)friend.transform).pivot = new Vector2(0.5f, 0.5f);
@@ -293,8 +297,23 @@ namespace SquashBot.UI
             return card;
         }
 
+        private Button eventButton;
+
+        /// <summary>The event button: this week's rule (and the wins), or the tournament's round; hidden on Fridays.</summary>
+        private void RefreshEvent()
+        {
+            if (eventButton == null) return;
+            bool on = WeeklyMode.Open || Tournament.Open;
+            eventButton.gameObject.SetActive(on);
+            if (!on) return;
+            eventButton.GetComponentInChildren<TextMeshProUGUI>().text = Tournament.Open
+                ? Loc.T("tn.title") + " · " + (Tournament.Champion ? Loc.T("tn.done") : Tournament.Out ? Loc.T("tn.out") : Loc.T("tn.round" + Tournament.Round))
+                : Loc.T("wk.title") + " · " + Loc.T("wk.rule." + WeeklyMode.ThisWeek) + " · " + Loc.F("wk.wins", WeeklyMode.Wins);
+        }
+
         public void ShowModes()
         {
+            RefreshEvent();
             if (friendPanel != null) friendPanel.Hide(true);
             lobby.Hide(true);
             hud.Hide(true);

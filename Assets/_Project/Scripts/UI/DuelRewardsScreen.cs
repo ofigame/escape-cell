@@ -22,9 +22,19 @@ namespace SquashBot.UI
         private UiScreen screen;
         private RectTransform card, list;
         private TextMeshProUGUI title;
-        private Button go;
-        private Action closed;
-        private bool skip;
+        private Button go, revenge, share, addRival;
+        private string shareText, rivalToAdd;
+        private Action<string> addFriend;
+
+        /// <summary>The share line and (a live rival) its name for "add as friend", for the next Show.</summary>
+        public void SetExtras(string text, string rivalName, Action<string> add)
+        {
+            shareText = text;
+            rivalToAdd = rivalName;
+            addFriend = add;
+        }
+        private Action closed, revenged;
+        private bool skip, pendingRevenge;
         private float y;
 
         public bool IsOpen => screen.IsVisible;
@@ -53,11 +63,30 @@ namespace SquashBot.UI
             list.pivot = new Vector2(0.5f, 1f);
             go = UiFactory.MakeButton(card, Loc.T("rw.continue"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 90f), new Vector2(560f, 130f), () => { screen.Hide(); closed?.Invoke(); }, 50f);
             ((RectTransform)go.transform).pivot = new Vector2(0.5f, 0.5f);
+            // after a lost friend match: revenge (the friend's copy again)
+            revenge = UiFactory.MakeButton(card, Loc.T("riv.revenge"), Kind.Gold, new Vector2(0.5f, 0f), new Vector2(0f, 230f), new Vector2(560f, 120f), () => { screen.Hide(); revenged?.Invoke(); }, 44f);
+            ((RectTransform)revenge.transform).pivot = new Vector2(0.5f, 0.5f);
+            // share the result (with the friend code), add a live rival as a friend
+            share = UiFactory.MakeButton(card, Loc.T("rw.share"), Kind.Secondary, new Vector2(0f, 0f), new Vector2(170f, 230f), new Vector2(300f, 100f), () => { if (!string.IsNullOrEmpty(shareText)) Data.Share.Text(shareText); }, 34f);
+            ((RectTransform)share.transform).pivot = new Vector2(0.5f, 0.5f);
+            addRival = UiFactory.MakeButton(card, Loc.T("rw.addRival"), Kind.Secondary, new Vector2(1f, 0f), new Vector2(-170f, 230f), new Vector2(300f, 100f), () =>
+            {
+                if (string.IsNullOrEmpty(rivalToAdd)) return;
+                addFriend?.Invoke(rivalToAdd);
+                addRival.interactable = false;
+            }, 30f);
+            ((RectTransform)addRival.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 
-        public void Show(GameManager.DuelRewards r, bool won, bool draw, Action onClosed)
+        public void Show(GameManager.DuelRewards r, bool won, bool draw, Action onClosed, string revengeOn = null, Action onRevenge = null)
         {
             closed = onClosed;
+            revenged = onRevenge;
+            revenge.gameObject.SetActive(false);
+            share.gameObject.SetActive(false);
+            addRival.gameObject.SetActive(false);
+            addRival.interactable = true;
+            pendingRevenge = !string.IsNullOrEmpty(revengeOn) && onRevenge != null;
             skip = false;
             for (int i = list.childCount - 1; i >= 0; i--) Destroy(list.GetChild(i).gameObject);
             y = 0f;
@@ -93,14 +122,22 @@ namespace SquashBot.UI
             }
             if (r.gold > 0) { Row(Loc.T("rw.gold"), "+" + r.gold, Palette.UiGold, Sfx.Coin); yield return Wait(0.4f); }
             if (r.cores > 0) { Row(Loc.T("rw.cores"), "+" + r.cores, new Color(0.45f, 0.92f, 1f), Sfx.Coin); yield return Wait(0.4f); }
+            if (r.seasonPoints > 0) { Row(Loc.T("sr.title"), "+" + r.seasonPoints, new Color(1f, 0.7f, 0.3f), Sfx.Click); yield return Wait(0.3f); }
             if (r.chest.HasValue) { Row(Loc.T("rw.chest"), DuelChestScreen.TierName(r.chest.Value), ChestModels.StrapColour(r.chest.Value), Sfx.Win); yield return Wait(0.45f); }
             Row(r.goalText, r.goalDone ? Loc.T("rw.done") : Loc.T("rw.notDone"), r.goalDone ? new Color(0.5f, 1f, 0.6f) : new Color(1f, 1f, 1f, 0.45f), r.goalDone ? Sfx.Win : (Sfx?)null);
             yield return Wait(0.35f);
+            if (!string.IsNullOrEmpty(r.eventLine)) { Row(r.eventLine, "", new Color(1f, 0.75f, 0.35f), Sfx.Win); yield return Wait(0.35f); }
             if (r.firstWin) { Row(Loc.T("rw.firstWin"), "×3", Palette.UiGold, Sfx.Win); yield return Wait(0.35f); }
             if (r.comeback) { Row(Loc.T("rw.comeback"), "+" + DuelLevel.Comeback + " XP", new Color(1f, 0.7f, 0.3f), Sfx.Win); yield return Wait(0.35f); }
             if (r.streakBreaker) { Row(Loc.T("rw.breaker"), "+200", new Color(1f, 0.45f, 0.35f), Sfx.Win); yield return Wait(0.35f); }
             go.gameObject.SetActive(true);
             StartCoroutine(PopIn(go.transform));
+            if (pendingRevenge) { revenge.gameObject.SetActive(true); StartCoroutine(PopIn(revenge.transform)); }
+            else
+            {
+                share.gameObject.SetActive(!string.IsNullOrEmpty(shareText));
+                addRival.gameObject.SetActive(!string.IsNullOrEmpty(rivalToAdd));
+            }
         }
 
         /// <summary>A reward's row: what it is on the left, how much on the right (popping in, with its sound).</summary>

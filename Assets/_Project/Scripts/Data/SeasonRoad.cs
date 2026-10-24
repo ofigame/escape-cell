@@ -1,0 +1,113 @@
+using System;
+using System.Globalization;
+using UnityEngine;
+
+namespace SquashBot.Data
+{
+    /// <summary>
+    /// The season road (the scenario's §9.4): 30 steps a calendar month, 100 points each, from duels (a win 10, a draw 6,
+    /// a loss 4) and quests (20–100). Most steps give gold or a plain / bronze chest; 5, 15 and 25 core parts (10 / 15 /
+    /// 25); 10 the season's emote, 20 its armour paint, 30 its cape and a gold chest. The free track only for now.
+    /// </summary>
+    public static class SeasonRoad
+    {
+        public const int Steps = 30, PerStep = 100;
+        public const int Win = 10, Draw = 6, Loss = 4;
+        public enum Kind { Gold, Basic, Bronze, Cores, Emote, Paint, Cape }
+
+        /// <summary>What a step (1..30) gives.</summary>
+        public static (Kind kind, int amount) Gift(int step)
+        {
+            switch (step)
+            {
+                case 5: return (Kind.Cores, 10);
+                case 15: return (Kind.Cores, 15);
+                case 25: return (Kind.Cores, 25);
+                case 10: return (Kind.Emote, 1);
+                case 20: return (Kind.Paint, 1);
+                case 30: return (Kind.Cape, 1);
+            }
+            if (step % 4 == 0) return (Kind.Bronze, 1);
+            if (step % 3 == 0) return (Kind.Basic, 1);
+            return (Kind.Gold, 150 + 25 * step);
+        }
+
+        private static string Month => DateTime.Now.ToString("yyyyMM", CultureInfo.InvariantCulture);
+        private const string MonthKey = "sb_sr_month", PointsKey = "sb_sr_points", TakenKey = "sb_sr_taken";
+
+        /// <summary>A new month: the road starts again.</summary>
+        private static void Roll()
+        {
+            if (Prefs.GetString(MonthKey, "") == Month) return;
+            Prefs.SetString(MonthKey, Month);
+            Prefs.SetInt(PointsKey, 0);
+            Prefs.SetString(TakenKey, "");
+            Prefs.Save();
+        }
+
+        public static int Points { get { Roll(); return Prefs.GetInt(PointsKey, 0); } }
+
+        /// <summary>Steps reached (0..30).</summary>
+        public static int Reached => Mathf.Min(Steps, Points / PerStep);
+
+        public static void Add(int points)
+        {
+            if (points <= 0) return;
+            Roll();
+            Prefs.SetInt(PointsKey, Mathf.Min(Steps * PerStep, Prefs.GetInt(PointsKey, 0) + points));
+            Prefs.Save();
+        }
+
+        public static bool Taken(int step) { Roll(); return Prefs.GetString(TakenKey, "").Contains("|" + step + "|"); }
+
+        /// <summary>Steps reached and not yet taken (for a red dot).</summary>
+        public static int Waiting
+        {
+            get
+            {
+                int n = 0;
+                for (int s = 1; s <= Reached; s++) if (!Taken(s)) n++;
+                return n;
+            }
+        }
+
+        /// <summary>The season's own pieces (the month's theme): its emote, armour paint and cape.</summary>
+        public static string SeasonCape => "back.cape.season";
+
+        /// <summary>Takes a reached step's gift (true when given).</summary>
+        public static bool Take(int step)
+        {
+            if (step < 1 || step > Reached || Taken(step)) return false;
+            var g = Gift(step);
+            switch (g.kind)
+            {
+                case Kind.Gold: SaveData.Coins += g.amount; break;
+                case Kind.Basic: DuelChests.Add(ChestTier.Basic); break;
+                case Kind.Bronze: DuelChests.Add(ChestTier.Mid); break;
+                case Kind.Cores: CoreParts.Add(g.amount); break;
+                case Kind.Emote: SaveData.Coins += 1000; Prefs.SetInt("sb_emote_season_" + Month, 1); break;
+                case Kind.Paint:
+                {
+                    // the season's paint: a paint not owned yet from the workshop (else gold)
+                    var pool = Cosmetics.InSlot(Slot.Color).FindAll(c => !c.IsDefault && !Cosmetics.Owns(c));
+                    if (pool.Count > 0) Cosmetics.Give(pool[(int)(DateTime.Now.Month * 7) % pool.Count].id); else SaveData.Coins += 1500;
+                    break;
+                }
+                case Kind.Cape:
+                {
+                    // the season's cape (a cape not owned yet) and a gold chest
+                    var capes = Cosmetics.InSlot(Slot.Back).FindAll(c => c.id.StartsWith("back.cape") && !c.IsDefault && !Cosmetics.Owns(c) && c.rank <= 0);
+                    if (capes.Count > 0) Cosmetics.Give(capes[(int)(DateTime.Now.Month * 5) % capes.Count].id); else SaveData.Coins += 3000;
+                    DuelChests.Add(ChestTier.Advanced);
+                    break;
+                }
+            }
+            Prefs.SetString(TakenKey, Prefs.GetString(TakenKey, "") + "|" + step + "|");
+            Prefs.Save();
+            return true;
+        }
+
+        /// <summary>Days left in the month's season.</summary>
+        public static int DaysLeft => (int)Math.Ceiling((new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(1) - DateTime.Now).TotalDays);
+    }
+}
