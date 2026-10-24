@@ -526,6 +526,7 @@ namespace SquashBot.Gameplay
         private void ShowMenu()
         {
             robot.StandUp(); // (never lying on the menu after a duel)
+            EndLevelRule();
             robot.SetSize(1f);
             EndChallenge();
             // A rank weapon whose rank was lost (trophies fell) goes from the armory.
@@ -562,7 +563,12 @@ namespace SquashBot.Gameplay
             cameraRig.Showcase(robot.transform, 0.7f);
             ProfileOnMenu();
             ui.SetGoalLine(GoalLine());
-            if (!loginOffered && LoginCalendar.Ready && NextLevel >= 2)
+            if (pendingWorldGift != null)
+            {
+                ui.ShowIntro(Loc.T("world.giftTitle"), pendingWorldGift);
+                pendingWorldGift = null;
+            }
+            else if (!loginOffered && LoginCalendar.Ready && NextLevel >= 2)
             {
                 loginOffered = true;
                 ui.LoginView.Show();
@@ -713,6 +719,7 @@ namespace SquashBot.Gameplay
         }
 
         private bool loginOffered; // (the calendar opens by itself once a session, on the menu, while a gift waits)
+        private string pendingWorldGift; // (a world's monster beaten: its gifts told on the menu)
 
         private void StartLevel(int index, List<Boost> boosts = null)
         {
@@ -741,6 +748,7 @@ namespace SquashBot.Gameplay
             levelIndex = Mathf.Clamp(index, 0, LevelCount - 1);
             Monster.CurrentWorld = World; // (the briefing's vanG as the floor's)
             Monster.CurrentLevel = levelIndex; // (its model, colour and size: spread over the 250 levels)
+            BeginLevelRule(); // (a seventh level's surprise rule)
             levelStartedAt = Time.realtimeSinceStartup;
             Shields.Ready(); // (a new floor: the shield ready)
             level = levelSet.levels[levelIndex].Clone();
@@ -1487,6 +1495,7 @@ namespace SquashBot.Gameplay
             if (level.mission == MissionType.Hunt) weather.SetVisible(false); // nothing but crates falls in the core loop
             else weather.SetIntensity(Mathf.Lerp(0.3f, 1f, Mathf.Clamp01(MissionProgress())));
             elapsed += Time.deltaTime;
+            UpdateLevelRule();
 
             // In an arena fight the arena reads the touches itself.
             input.CircleEnabled = level.mission == MissionType.Hunt && roadPhase == RoadPhase.None;
@@ -2214,6 +2223,13 @@ namespace SquashBot.Gameplay
             chestPending = LevelChest.AddCoins(earned, levelIndex);
 
             pendingEnding = levelIndex == LevelCount - 1 && !Story.Seen(Story.Ending);
+            if (unlockedNew && levelIndex % LevelCatalog.LevelsPerWorld == LevelCatalog.LevelsPerWorld - 1)
+            {
+                int beaten = levelIndex / LevelCatalog.LevelsPerWorld + 1;
+                CoreParts.Add(15);
+                string move = MoveSet.KeyOfWorld(beaten);
+                pendingWorldGift = Loc.F("world.gift", Rescued.PerWorld, Rescued.Count) + (move != null ? "\n" + Loc.F("world.move", Loc.T(move)) : "") + "\n" + Loc.F("login.cores", "+15");
+            }
             Monetization.Ads.NoteResult(true);
             LevelTimes.Record(levelIndex, Time.realtimeSinceStartup - levelStartedAt, true);
             bool hasNext = levelIndex + 1 < LevelCount;
@@ -3305,6 +3321,7 @@ namespace SquashBot.Gameplay
             if (level.mission == MissionType.Hunt)
             {
                 // The core loop, told the same way every time: the crowd, how robots strike, foi's powers, then the monster.
+                if (RuleCard() is string rule) steps.Add((BriefShot.Super, rule)); // a seventh level's surprise rule first
                 steps.Add((BriefShot.HammerHit, Loc.T("brief.huntCrowd")));
                 steps.Add((BriefShot.Stomp, Loc.T("brief.huntFoes")));
                 steps.Add((BriefShot.Super, Loc.T("brief.huntPowers")));

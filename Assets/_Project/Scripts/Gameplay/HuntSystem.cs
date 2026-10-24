@@ -625,7 +625,10 @@ namespace SquashBot.Gameplay
                 RaiseAlarm(g);
                 if (g == challengeFoe && FoeParries()) { Parry(g, p); return true; }
                 if (g.shield > 0) { HitShield(g, p); return true; }
+                if (g == challengeFoe && Time.time < FoeInvulnUntil) { HitShield(g, p); return true; } // (its backflip or iron body)
+                if (g == challengeFoe && Time.time < FoeMirrorUntil) { FoeMirrored?.Invoke(damage); HitShield(g, p); return true; } // (its mirror: back at foi)
                 g.hp -= g.armorShare > 0f ? Mathf.Max(1, Mathf.RoundToInt(damage * (1f - g.armorShare))) : ThroughArmor(p, damage);
+                if (g == challengeFoe && g.hp <= 0 && FoeSturdy) { FoeSturdy = false; g.hp = 1; } // (its sturdy spare life)
                 g.flash = 1f;
                 g.Flash();
                 if (g != challengeFoe) { g.windup = -1f; ClearTelegraph(g); } // (the rival foi trades blows: its own swing goes on)

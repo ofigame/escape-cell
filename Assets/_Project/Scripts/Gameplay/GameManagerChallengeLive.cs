@@ -224,7 +224,7 @@ namespace SquashBot.Gameplay
                         ShowEmote(false, m.e);
                         break;
                     case "sp":
-                        LiveRivalMove(m.k);
+                        LiveRivalMove(m.k, m.m);
                         break;
                     case "ko":
                         LiveKnockdown(m.won, Mathf.RoundToInt(m.mine), Mathf.RoundToInt(m.theirs));

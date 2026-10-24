@@ -150,7 +150,7 @@ namespace SquashBot.UI
                 label.text = Loc.F("rw.level", level);
                 AudioManager.PlaySfx(Sfx.Win, 1f, 1.3f);
                 StartCoroutine(PopIn(row));
-                string gift = "+" + up.gold + " " + Loc.T("ch.gold") + (up.chest ? " · " + DuelChestScreen.TierName(ChestTier.Mid) : "") + (up.title != null ? " · " + Loc.T(up.title) : "");
+                string gift = "+" + up.gold + " " + Loc.T("ch.gold") + (up.chest ? " · " + DuelChestScreen.TierName(ChestTier.Mid) : "") + (up.title != null ? " · " + Loc.T(up.title) : "") + (up.move != null ? " · " + Loc.T(up.move) : "");
                 Row(Loc.F("rw.levelUp", level), gift, Palette.UiGold, Sfx.Win);
                 from = 0f;
             }

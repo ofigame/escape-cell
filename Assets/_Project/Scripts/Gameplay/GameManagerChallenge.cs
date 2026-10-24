@@ -472,6 +472,10 @@ namespace SquashBot.Gameplay
             var floorCells = new bool[BoardW, BoardH];
             for (int y = 0; y < BoardH; y++) for (int x = 0; x < BoardW; x++) floorCells[x, y] = l.layout[y][x] != '.';
             var cell0 = GridView.ToWorld(new GridPos(0, 0));
+            // the stands: the player's filled by its rescued foi, the rival's by its own (a computer rival's about the player's)
+            int mine = Rescued.Count, theirs = rival.world > 0 ? rival.world * Rescued.PerWorld : Mathf.Clamp(mine + (rival.seed % 5 - 2) * Rescued.PerWorld, 0, 1000);
+            DuelStands.Fill[0] = Rescued.Fill(mine); DuelStands.FlagShare[0] = Rescued.Flags(mine);
+            DuelStands.Fill[1] = Rescued.Fill(theirs); DuelStands.FlagShare[1] = Rescued.Flags(theirs);
             colosseum = DuelStands.Build(transform, floorCells, new Vector3(cell0.x, 0f, cell0.z), GridView.SurfaceY - 0.02f, rival.name.GetHashCode(), mark.y < other.y, st.theme);
             if (DuelStands.IsMade(st.theme))
             {

@@ -472,6 +472,22 @@ namespace SquashBot.Gameplay
         /// <summary>A computer rival's humanity: the share of its blows that miss, its wind-up against the usual (its
         /// reaction), how readily it runs off when hurt.</summary>
         public float FoeWhiff, FoeReactScale = 1f, FoeFlee = 0.35f;
+        /// <summary>The rival's moves: untouchable until, mirroring until (the blow goes back at foi: <see cref="FoeMirrored"/>),
+        /// and its sturdy spare life this round.</summary>
+        public float FoeInvulnUntil, FoeMirrorUntil;
+        public bool FoeSturdy;
+        public System.Action<int> FoeMirrored;
+
+        /// <summary>The rival's health points at full.</summary>
+        public int ChallengeFoeMaxHp => challengeFoe != null ? challengeFoe.maxHp : 1;
+
+        /// <summary>A little health back for the rival, without the heart's show (the vampire).</summary>
+        public void HealFoeQuiet(float share)
+        {
+            var g = challengeFoe;
+            if (g == null || g.dead || share <= 0f) return;
+            g.hp = Mathf.Min(g.maxHp, g.hp + Mathf.Max(1, Mathf.RoundToInt(g.maxHp * share)));
+        }
 
         /// <summary>
         /// The rival foi's own sense, before its usual fighting: badly hurt and foi close, it falls back behind its

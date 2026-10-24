@@ -29,7 +29,7 @@ namespace SquashBot.Data
         {
             public int level, gold;
             public bool chest;
-            public string title;
+            public string title, move;
         }
 
         /// <summary>Adds XP: returns the level ups it made (their gifts already given).</summary>
@@ -42,6 +42,7 @@ namespace SquashBot.Data
                 have -= Need(level);
                 level++;
                 var up = new LevelUp { level = level, gold = 100 + 20 * level, chest = level % 5 == 0, title = level % 10 == 0 ? TitleKey(level) : null };
+                if (level % 10 == 0) up.move = MoveSet.GiftNext(); // (a duel-only player is not left behind)
                 SaveData.Coins += up.gold;
                 if (up.chest) DuelChests.Add(ChestTier.Mid);
                 ups.Add(up);

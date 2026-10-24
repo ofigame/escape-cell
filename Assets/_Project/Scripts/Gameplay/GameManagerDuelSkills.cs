@@ -66,7 +66,7 @@ namespace SquashBot.Gameplay
             moveBusy = false;
             rivalHero = 0; // one foi for everyone
             if (skillBar != null) Destroy(skillBar.gameObject);
-            skillBar = DuelSkillBar.Create(chUi.BattleHud, Loc.T("duel.sp." + HeroModels.Skill(SaveData.Hero)));
+            skillBar = DuelSkillBar.Create(chUi.BattleHud, Loc.T("move.s." + MoveSet.Special)); // (the set's special on its button)
             skillBar.Pressed += OnSkill;
             skillBar.Emoted += e => { ShowEmote(true, e); if (LiveActive) LiveNet.Emote(e); };
             skillBar.SetMeters(0f, 0f);
@@ -109,9 +109,9 @@ namespace SquashBot.Gameplay
         private void OnFoeStruck()
         {
             if (specialStrike || !challengeRun || chPhase != ChPhase.Duel) return;
-            myMeter = Mathf.Min(3f, myMeter + MeterGain * MyPace);
-            if (!LiveActive) rivalMeter = Mathf.Min(3f, rivalMeter + MeterHurt * MyPace);
-            myCombo = Time.time - myComboAt < ComboGap ? myCombo + 1 : 1;
+            myMeter = Mathf.Min(3f, myMeter + MeterGain * MyPace * MyCharge);
+            if (!LiveActive) rivalMeter = Mathf.Min(3f, rivalMeter + MeterHurt * MyPace * RivalCharge);
+            myCombo = Time.time - myComboAt < MyComboGap ? myCombo + 1 : 1;
             myComboAt = Time.time;
             rivalCombo = 0;
             if (skillBar != null) skillBar.ShowCombo(myCombo);
@@ -141,9 +141,9 @@ namespace SquashBot.Gameplay
         private void OnFoiStruck()
         {
             if (!challengeRun || chPhase != ChPhase.Duel) return;
-            myMeter = Mathf.Min(3f, myMeter + MeterHurt * RivalPace);
-            if (!LiveActive) rivalMeter = Mathf.Min(3f, rivalMeter + MeterGain * RivalPace);
-            rivalCombo = Time.time - rivalComboAt < ComboGap ? rivalCombo + 1 : 1;
+            myMeter = Mathf.Min(3f, myMeter + MeterHurt * RivalPace * MyCharge);
+            if (!LiveActive) rivalMeter = Mathf.Min(3f, rivalMeter + MeterGain * RivalPace * RivalCharge);
+            rivalCombo = Time.time - rivalComboAt < RivalComboGap ? rivalCombo + 1 : 1;
             rivalComboAt = Time.time;
             myCombo = 0;
             myComboMove = 0;
@@ -160,8 +160,8 @@ namespace SquashBot.Gameplay
             if (hunt.ChallengeFoeAt is Vector3 seen) lastFoeAt = seen;
             if (myRing != null) myRing.Follow(robot.IsAlive && robot.Visual != null && robot.Visual.gameObject.activeInHierarchy ? robot.transform.position : (Vector3?)null);
             if (foeRing != null) foeRing.Follow(hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.position : (Vector3?)null);
-            if (myCombo > 0 && Time.time - myComboAt > ComboGap) myCombo = 0;
-            if (rivalCombo > 0 && Time.time - rivalComboAt > ComboGap) rivalCombo = 0;
+            if (myCombo > 0 && Time.time - myComboAt > MyComboGap) myCombo = 0;
+            if (rivalCombo > 0 && Time.time - rivalComboAt > RivalComboGap) rivalCombo = 0;
             if (myComboMove > 0 && Time.time > comboMoveUntil) myComboMove = 0;
             DuelSkillBar.Move? ctx = null;
             if (Time.time < finishUntil) ctx = DuelSkillBar.Move.Finish;
@@ -200,9 +200,8 @@ namespace SquashBot.Gameplay
             switch (move)
             {
                 case DuelSkillBar.Move.Special:
-                    if (myMeter < 1f) return;
+                    if (myMeter < 1f || !TrySpecial()) return; // (the set's special; out of its reach: nothing spent)
                     myMeter -= 1f;
-                    cameraRig.StartCoroutine(SpecialMove(true));
                     break;
                 case DuelSkillBar.Move.Heavy:
                 case DuelSkillBar.Move.Upper:
@@ -230,6 +229,7 @@ namespace SquashBot.Gameplay
                 }
                 case DuelSkillBar.Move.Breaker:
                     if (myMeter < 1f || rivalCombo < 2) return;
+                    if (Time.time < rivalIronUntil) { skillBar.Shout(Loc.T("move.u.IronBody"), new Color(0.85f, 0.85f, 0.9f)); return; } // (its iron body: no breaking it)
                     myMeter -= 1f;
                     rivalCombo = 0;
                     Shockwave.Create(robot.transform.position, 2.4f, new Color(0.4f, 0.8f, 1f));
@@ -255,7 +255,7 @@ namespace SquashBot.Gameplay
                 case DuelSkillBar.Move.Ultimate:
                     if (myMeter < 3f) return;
                     myMeter = 0f;
-                    cameraRig.StartCoroutine(Ultimate(true, leap: true));
+                    UseUlti(true, myUlti); // (the set's ultimate)
                     break;
             }
         }
@@ -267,10 +267,11 @@ namespace SquashBot.Gameplay
         {
             if (!hunt.ChallengeFoeTile.HasValue) return;
             var w = weapon ?? Armory.Equipped;
-            int damage = Mathf.RoundToInt(MyBlow(w) * times);
+            int damage = Mathf.RoundToInt(MyBlow(w) * times * MyBlowFactor());
             specialStrike = true;
             hunt.Strike(hunt.ChallengeFoeTile.Value, Mathf.Max(1, damage));
             specialStrike = false;
+            MyVampire(damage);
         }
 
         /// <summary>A move's damage on foi from the AI rival: its own blow times this, through foi's shield like a blow.</summary>
@@ -750,13 +751,13 @@ namespace SquashBot.Gameplay
             if (rivalMeter >= 3f && ultiTime)
             {
                 rivalMeter = 0f;
-                cameraRig.StartCoroutine(Ultimate(false, leap: true));
+                UseUlti(false, rivalUlti); // (its set's ultimate)
                 return;
             }
             int breakFrom = t != null ? t.breakerFrom : 3;
             float breakLean = t != null ? t.breaker : 0.3f * bold;
             bool keepsBar = t != null && t.persona == Persona.Ulti; // (the ulti saver never spends its bar on a break)
-            if (myCombo >= breakFrom && !keepsBar && (rivalMeter >= 1f ? Random.value < 0.35f + 0.5f * breakLean : Random.value < 0.1f + 0.2f * breakLean))
+            if (myCombo >= breakFrom && !keepsBar && Time.time >= myIronUntil && (rivalMeter >= 1f ? Random.value < 0.35f + 0.5f * breakLean : Random.value < 0.1f + 0.2f * breakLean))
             {
                 rivalMeter = Mathf.Max(0f, rivalMeter - 1f);
                 myCombo = 0;
@@ -785,8 +786,7 @@ namespace SquashBot.Gameplay
             }
             if (rivalMeter >= 1f && !keepsBar && Random.value < (dist >= 3f ? 0.22f : 0.1f) + 0.15f * bold + (t != null && t.persona == Persona.Runner && dist >= 3f ? 0.2f : 0f))
             {
-                rivalMeter -= 1f;
-                cameraRig.StartCoroutine(SpecialMove(false));
+                if (RivalSpecial()) rivalMeter -= 1f; // (its set's special, when it reaches)
             }
         }
 
@@ -801,10 +801,13 @@ namespace SquashBot.Gameplay
 
         /// <summary>A move of the live rival, as the server passes it on: shown here (its damage comes with the health;
         /// its leaps with its game's positions).</summary>
-        private void LiveRivalMove(int kind)
+        private void LiveRivalMove(int kind, int move = 0)
         {
             if (!challengeRun) return;
             var foeAt = hunt.ChallengeFoeAt ?? robot.transform.position;
+            // a move of its set: shown as this game shows its own (the server keeps the damage)
+            if (kind == 1 && move > 0) { cameraRig.StartCoroutine(DoSpecial(false, (SpecialKind)Mathf.Clamp(move, 0, 7))); return; }
+            if (kind == 4 && move > 0) { UseUlti(false, (UltiKind)Mathf.Clamp(move, 0, 8)); return; }
             switch (kind)
             {
                 case 1:

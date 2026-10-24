@@ -128,6 +128,7 @@ namespace SquashBot.Gameplay
             if (robot.Visual != null) robot.Visual.gameObject.SetActive(true);
             chUi.ShowBattle();
             BeginDuelSkills();
+            LoadMoveSets();
             ui.SetHudTitle(Loc.T("ch.mode.duel") + " · " + Loc.T(Stage.key));
             PlaceDuelists(first: true);
             RefreshSquadBar();
@@ -184,7 +185,8 @@ namespace SquashBot.Gameplay
             // Its health points behind its shell (live: a share of 100, the server keeps the points).
             int hp = LiveActive ? 100 : Mathf.RoundToInt(duelTheirs.hp / Mathf.Max(0.5f, 1f - duelTheirs.armor) * (botTuning != null ? botTuning.hpScale : 1f));
             // Its blow: its weapon's (tier under its ceiling) with its arms' share, less foi's shell, over foi's health.
-            float share = DuelPower.Blow(w, duelTheirs.weaponTier) * (1f + duelTheirs.damage) * (1f - duelMine.armor) / Mathf.Max(1, duelMine.hp);
+            float myArmor = rivalPassive == PassiveKind.Piercer ? duelMine.armor * 0.75f : duelMine.armor; // (its piercer: a quarter of foi's armour ignored)
+            float share = DuelPower.Blow(w, duelTheirs.weaponTier) * (1f + duelTheirs.damage) * (1f - myArmor) / Mathf.Max(1, duelMine.hp);
             hunt.AddChallengeFoe(theirs, hp, share, look, rivalHeld, 0);
             // (no name tags over the two foi: their names and ranks are over the health bars)
             if (myTag != null) { Destroy(myTag.gameObject); myTag = null; }
@@ -208,6 +210,7 @@ namespace SquashBot.Gameplay
             }
             // After a knock-down the soldiers left line up behind their foi again (no new ones and no healing until the duel is over).
             else hunt.RegroupSquads();
+            RoundPassives(); // (each round: the master warrior's bar part, the sturdy's spare life)
             if (capesOff) StripCapes();
 
             RefreshSquadBar();
@@ -530,7 +533,7 @@ namespace SquashBot.Gameplay
             if (rivalHearts > 0 && share < (botTuning != null && Random.value < botTuning.earlyHeart ? 0.7f : 0.4f) && Random.value < 0.6f)
             {
                 rivalHearts--;
-                hunt.HealFoe(DuelHeartHeal);
+                hunt.HealFoe(DuelHeartHeal + (rivalPassive == PassiveKind.HeartMaster ? 0.06f : 0f));
                 chUi.SetStatus(Loc.F("ch.rivalHeart", rivalHearts));
                 rivalPowerUpAt = Time.time + 8f;
                 return;
@@ -538,7 +541,7 @@ namespace SquashBot.Gameplay
             if (rivalShields > 0 && share < 0.75f && hunt.ChallengeFoeAt is Vector3 at && (at - robot.transform.position).sqrMagnitude < 3.5f * 3.5f && Random.value < 0.35f)
             {
                 rivalShields--;
-                hunt.ShieldFoe(DuelShieldHits);
+                hunt.ShieldFoe(DuelShieldHits + (rivalPassive == PassiveKind.ShieldMaster ? 1 : 0));
                 rivalShieldUntil = Time.time + DuelShieldSeconds;
                 rivalPowerUpAt = Time.time + 9f;
                 return;
@@ -555,7 +558,11 @@ namespace SquashBot.Gameplay
             duelHearts--;
             mcHearts++;
             if (LiveActive) LiveNet.Heal();
-            else Heal(robot.Position);
+            else
+            {
+                Heal(robot.Position);
+                if (myPassive == PassiveKind.HeartMaster) { health = Mathf.Min(1f, health + 0.06f); RefreshHealthBar(); } // (36% instead of 30%)
+            }
             AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.6f);
             RefreshSquadBar();
         }
@@ -565,7 +572,7 @@ namespace SquashBot.Gameplay
         {
             if (chPhase != ChPhase.Duel || duelShields <= 0 || robot.IsShielded) return;
             duelShields--;
-            robot.GiveShield(DuelShieldSeconds, DuelShieldHits);
+            robot.GiveShield(DuelShieldSeconds, DuelShieldHits + (myPassive == PassiveKind.ShieldMaster ? 1 : 0)); // (the shield master: 3 blows)
             if (LiveActive) LiveNet.Shield();
             AudioManager.PlaySfx(Sfx.Shield, 1f, 1.1f);
             RefreshSquadBar();

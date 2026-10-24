@@ -242,8 +242,10 @@ namespace SquashBot.Data
             /// <summary>What its foi wears (a player's own outfit; null for a computer rival or an older game).</summary>
             public string look;
             /// <summary>Its seed (a computer rival's personality), its winning streak, duel level, title and best mastery.</summary>
-            public int seed, streak, duelLevel = 1, mastery;
+            public int seed, streak, duelLevel = 1, mastery, world;
             public string titleKey;
+            /// <summary>Its move set ("special,ulti,passive"; null: a computer rival's, from its personality).</summary>
+            public string moves;
 
             /// <summary>Soldiers of each group it brings into the duel.</summary>
             public readonly int[] squad = { SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel };
@@ -320,6 +322,9 @@ namespace SquashBot.Data
             o.weaponLevel = Mathf.Clamp(r.weaponLevel, 0, RobotParts.MaxLevel); // its arms' level
             o.armor = Mathf.Clamp(r.armor, 0f, RobotParts.ArmorAt(RobotParts.MaxLevel));
             o.shield = Mathf.Clamp(r.shield, 0, 3);
+            o.moves = r.moves;
+            o.world = r.world;
+            o.duelLevel = Mathf.Max(1, r.duelLevel);
             return o;
         }
     }

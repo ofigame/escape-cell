@@ -66,6 +66,7 @@ namespace SquashBot.Gameplay
             if (!HealthEnabled) return false;
             if (hurtCooldown > 0f) return true; // still blinking from the last hit
             if (DuelCinematic && !moveHit) return true; // nothing lands while a big moment plays (but the move itself)
+            if (RuleOneLife) { health = 0f; RefreshHealthBar(); return false; } // (one life: the first blow ends it)
             float share = hitShareOverride >= 0f ? hitShareOverride
                 : level != null && level.mission == MissionType.Hunt && crushed ? level.crateShare
                 : HitShare(levelIndex) * weight;
@@ -76,6 +77,11 @@ namespace SquashBot.Gameplay
             // A robot's or vanG's blow is already its points over foi's health (no extra toughness); the floor's own dangers still ease off.
             float damage = challengeRun && chPhase == ChPhase.Duel ? share : share * (hitShareOverride >= 0f ? 1f : toughness) * (1f - Shop.ArmorShare);
             damage = Challenge.RankGuard(damage); // the rank reached takes some off (beside the workshop's armour)
+            if (challengeRun && chPhase == ChPhase.Duel)
+            {
+                damage = MovesOnMyHurt(damage); // the moves: untouchable, the mirror, the rival's rage, the sturdy spare life
+                if (damage <= 0f) return true;
+            }
             // The duel: foi's health gone ends the round (the next one starts with it full again).
             if (challengeRun && chPhase == ChPhase.Duel && health - damage <= 0.001f)
             {

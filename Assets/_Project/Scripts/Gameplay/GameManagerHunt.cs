@@ -500,7 +500,14 @@ namespace SquashBot.Gameplay
             if (heldShown != null && heldShown.kind == WeaponKind.Gun && !arenaRun) ShowHeld(w); // the blade back in hand
             strikeCooldown = Armory.Cooldown(w);
             if (crowd && hunt.IsFighter(at)) NoteFightBlow(); // a blow or two into a fight, Fifi teleports in
-            int damage = MyBlow(w) * (superLeft > 0f ? 2 : 1); // the arms add their strength (the duel: its own blow)
+            int damage = RuleDamage(MyBlow(w) * (superLeft > 0f ? 2 : 1)); // the arms add their strength (the duel: its own blow; a combo-only level: from the 4th blow)
+            if (challengeRun && chPhase == ChPhase.Duel)
+            {
+                // the duel's moves: the piercer, rage, the teleport's next blow; the vampire's share back
+                damage = Mathf.Max(1, Mathf.RoundToInt(damage * MyBlowFactor() * myNextBlow));
+                myNextBlow = 1f;
+                if (hunt.ChallengeFoeTile.HasValue && at == hunt.ChallengeFoeTile.Value) MyVampire(damage);
+            }
             // a heavy weapon staggers the duel's rival a moment on every blow that lands
             if (challengeRun && chPhase == ChPhase.Duel && !LiveActive && DuelPower.Stagger(w) > 0f && hunt.ChallengeFoeTile.HasValue && at == hunt.ChallengeFoeTile.Value)
                 hunt.StunFoe(DuelPower.Stagger(w));

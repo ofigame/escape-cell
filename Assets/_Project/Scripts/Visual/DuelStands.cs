@@ -43,6 +43,9 @@ namespace SquashBot.Visual
         private readonly List<Batch> batches = new List<Batch>();
         /// <summary>How big the fans are (the made stages' stands: bigger, fewer of them).</summary>
         private float crowdSize = 1f;
+
+        /// <summary>Each side's seats taken and flags waving (0: the player's, filled by its rescued foi; 1: the rival's).</summary>
+        public static float[] Fill = { 0.88f, 0.88f }, FlagShare = { 0.1f, 0.1f };
         private const float MadeCrowd = 2.2f;
         private readonly float[] excite = new float[2];
         private bool wave;
@@ -171,14 +174,14 @@ namespace SquashBot.Visual
                     float facing = Mathf.Atan2(lookAt.x - c.x, lookAt.z - c.z) * Mathf.Rad2Deg;
                     for (int k = 0; k < 4; k++)
                     {
-                        if (rng.NextDouble() < 0.06) continue; // an empty seat here and there
+                        if (rng.NextDouble() > Fill[team]) continue; // the seats its rescued foi fill
                         var at = new Vector3(c.x + (k % 2 == 0 ? -0.25f : 0.25f), top, c.z + (k < 2 ? -0.25f : 0.25f));
                         float phase = (float)rng.NextDouble() * 10f;
                         var body = batches[team * 4 + rng.Next(4)];
                         body.pos.Add(at + Vector3.up * 0.18f); body.phase.Add(phase); body.side.Add(team); body.facing.Add(facing);
                         var head = batches[8 + rng.Next(4)];
                         head.pos.Add(at + Vector3.up * 0.46f); head.phase.Add(phase); head.side.Add(team); head.facing.Add(facing);
-                        if (rng.NextDouble() < 0.1)
+                        if (rng.NextDouble() < FlagShare[team])
                         {
                             var flag = batches[12 + team];
                             flag.pos.Add(at + new Vector3(0.1f, 0.85f, 0f)); flag.phase.Add(phase); flag.side.Add(team); flag.facing.Add(facing);
@@ -1366,14 +1369,14 @@ namespace SquashBot.Visual
             var seats = Seats(stand, 0.55f * k); // (bigger fans: further apart, fewer to a step)
             foreach (var at in seats)
             {
-                if (rng.NextDouble() < 0.12) continue; // an empty seat here and there
+                if (rng.NextDouble() > Fill[team]) continue; // the seats its rescued foi fill
                 float facing = Mathf.Atan2(centre.x - at.x, centre.z - at.z) * Mathf.Rad2Deg;
                 float phase = (float)rng.NextDouble() * 10f;
                 var body = batches[team * 4 + rng.Next(4)];
                 body.pos.Add(at + Vector3.up * 0.18f * k); body.phase.Add(phase); body.side.Add(team); body.facing.Add(facing);
                 var head = batches[8 + rng.Next(4)];
                 head.pos.Add(at + Vector3.up * 0.46f * k); head.phase.Add(phase); head.side.Add(team); head.facing.Add(facing);
-                if (rng.NextDouble() < 0.1)
+                if (rng.NextDouble() < FlagShare[team])
                 {
                     var flag = batches[12 + team];
                     flag.pos.Add(at + new Vector3(0.1f, 0.85f, 0f) * k); flag.phase.Add(phase); flag.side.Add(team); flag.facing.Add(facing);

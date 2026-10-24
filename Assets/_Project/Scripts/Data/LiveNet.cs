@@ -26,7 +26,7 @@ namespace SquashBot.Data
         {
             public string t, code, score;
             public long matchId;
-            public int side, seed, min, outcome, change, by, u, d, f;
+            public int side, seed, min, outcome, change, by, u, d, f, m;
             /// <summary>Squads in the match (1) or foi against foi (0); -1: the server did not say.</summary>
             public int sq = -1;
             /// <summary>A move (the duel's specials: 1 special, 2 power hit, 3 knockdown, 4 ultimate, 5 breaker, 6 finish).</summary>
@@ -187,6 +187,8 @@ namespace SquashBot.Data
         public static void Heal() => Send("{\"t\":\"heal\"}");
         /// <summary>A duel move (the server checks the bar, the combo and the reach).</summary>
         public static void Special(int kind) => Send("{\"t\":\"sp\",\"k\":" + kind + "}");
+        /// <summary>A move of the set (1 a special, 4 an ultimate) and which one.</summary>
+        public static void Move(int kind, int move) => Send("{\"t\":\"sp\",\"k\":" + kind + ",\"m\":" + move + "}");
         /// <summary>This game's special reached the rival.</summary>
         public static void SpecialHit() => Send("{\"t\":\"sphit\"}");
         public static void Shield() => Send("{\"t\":\"shield\"}");

@@ -250,6 +250,7 @@ namespace SquashBot.UI
         /// <summary>The duel chests won (open them for gold and weapons).</summary>
         public DuelChestScreen DuelChestsView { get; private set; }
         public DuelRewardsScreen DuelRewardsView { get; private set; }
+        public MoveSetScreen MoveSetView { get; private set; }
 
         private TMPro.TextMeshProUGUI menuGoal;
 
@@ -498,6 +499,7 @@ namespace SquashBot.UI
             ArmyView = ArmyScreen.Create(root);
             DuelChestsView = DuelChestScreen.Create(root);
             DuelRewardsView = DuelRewardsScreen.Create(root);
+            MoveSetView = MoveSetScreen.Create(root);
             DuelChestsView.Changed += () => { RefreshMenuCoins(); RefreshChests(); };
             ChallengeStats = ChallengeStatsScreen.Create(root);
             ChallengeStats.SettingsPressed += ShowSettings;
@@ -577,6 +579,11 @@ namespace SquashBot.UI
             UiFactory.Text(lPing, "!", 32f, Color.white);
             loginPing = lPing.gameObject;
             MenuSkin.Orb(login, "orb_blank_gold", keepIcon: true);
+
+            // The move set: under the friends (the three slots: special, ultimate, passive).
+            var moves = MenuArt.DockButton(t, Loc.T("moves.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.45f, 0.3f), TopLeft, new Vector2(110f, -740f), 120f, () => MoveSetView.Show());
+            ((RectTransform)moves.transform).pivot = new Vector2(0.5f, 0.5f);
+            MenuSkin.Orb(moves, "orb_blank_orange", keepIcon: true);
 
             // Friends: under the calendar (add a friend, invite one to a duel).
             var friends = MenuArt.DockButton(t, Loc.T("friends.button"), MenuArt.Icon.Friends, new Color(0.4f, 0.75f, 1f), TopLeft, new Vector2(110f, -570f), 120f, () => FriendsPressed?.Invoke());
@@ -1287,6 +1294,7 @@ namespace SquashBot.UI
             if (ArmyView != null && ArmyView.IsOpen) { ArmyView.Hide(); return true; }
             if (DailyBonus != null && DailyBonus.Visible) { DailyBonus.Hide(); return true; }
             if (LoginView != null && LoginView.Visible) { LoginView.Hide(); return true; }
+            if (MoveSetView != null && MoveSetView.IsOpen) { MoveSetView.Hide(); return true; }
             return false;
         }
 
@@ -2110,6 +2118,7 @@ namespace SquashBot.UI
             Garage.Hide();
             DailyBonus.Hide();
             LoginView.Hide();
+            MoveSetView.Hide();
             Guide.Hide();
             if (ArmyView != null) ArmyView.Hide();
             if (ChallengeStats != null) ChallengeStats.Hide();
