@@ -1162,6 +1162,7 @@ namespace SquashBot.Gameplay
                         ? (g.brute ? 1.3f : g.soldier != null ? 0.6f + (float)rng.NextDouble() * 0.3f : 0.55f)
                         : (g.brute ? 1.0f : g.soldier != null ? 0.45f + (float)rng.NextDouble() * 0.25f : 0.38f); // the floors: they keep at it
                     FoeStruck(g);
+                    if (g == challengeFoe && FoeWhiff > 0f && rng.NextDouble() < FoeWhiff) g.area.Clear(); // a blow into the air (a human slip)
                     if (g.held != null) g.held.Swing();
                     g.SetRaise(0f);
                     foreach (var t in g.area) view.SetWarning(t, 0f);

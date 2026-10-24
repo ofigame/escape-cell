@@ -119,6 +119,9 @@ namespace SquashBot.Gameplay
             chDuelMe = chDuelThem = 0;
             chDuelLeft = chDuelMinutes * 60f;
             duelHearts = rivalHearts = DuelHearts;
+            lastBeat = -1;
+            BeginMatchProgress(rival != null ? (rival.seed != 0 ? rival.seed : rival.name.GetHashCode()) : 0);
+            TuneBot();
             duelShields = rivalShields = DuelShields;
             rivalShieldUntil = 0f;
             rivalPowerUpAt = Time.time + 20f;
@@ -142,7 +145,7 @@ namespace SquashBot.Gameplay
             chPhase = ChPhase.Duel;
             duelPan = robot.transform.position - boardCentre; duelPan.y = 0f;
             hunt.Resume();
-            chUi.SetStatus(Loc.T("ch.duel"));
+            chUi.SetStatus(Loc.T("ch.duel") + "  ·  " + GoalText(matchGoal)); // the match's small challenge
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 0.8f);
             RefreshDuelClock();
         }
@@ -179,7 +182,7 @@ namespace SquashBot.Gameplay
             hunt.FoeSoldierDamage = DuelPower.Blow(w, duelTheirs.weaponTier);
             hunt.FoiHp = duelMine.hp;
             // Its health points behind its shell (live: a share of 100, the server keeps the points).
-            int hp = LiveActive ? 100 : Mathf.RoundToInt(duelTheirs.hp / Mathf.Max(0.5f, 1f - duelTheirs.armor));
+            int hp = LiveActive ? 100 : Mathf.RoundToInt(duelTheirs.hp / Mathf.Max(0.5f, 1f - duelTheirs.armor) * (botTuning != null ? botTuning.hpScale : 1f));
             // Its blow: its weapon's (tier under its ceiling) with its arms' share, less foi's shell, over foi's health.
             float share = DuelPower.Blow(w, duelTheirs.weaponTier) * (1f + duelTheirs.damage) * (1f - duelMine.armor) / Mathf.Max(1, duelMine.hp);
             hunt.AddChallengeFoe(theirs, hp, share, look, rivalHeld, 0);
@@ -240,6 +243,7 @@ namespace SquashBot.Gameplay
         {
             if (!challengeRun || chPhase != ChPhase.Duel) return;
             if (iWon) chDuelMe++; else chDuelThem++;
+            PowerSlow(0.4f, 0.3f); // (the knock-down: slow motion a moment, the crowd up)
             if (iWon) OfferFinish(lastFoeAt);
             cameraRig.StartCoroutine(RivalEmote(!iWon));
             chPhase = ChPhase.Break;
@@ -523,7 +527,7 @@ namespace SquashBot.Gameplay
         {
             if (Time.time < rivalPowerUpAt) return;
             float share = hunt.ChallengeFoeHealth;
-            if (rivalHearts > 0 && share < 0.4f && Random.value < 0.6f)
+            if (rivalHearts > 0 && share < (botTuning != null && Random.value < botTuning.earlyHeart ? 0.7f : 0.4f) && Random.value < 0.6f)
             {
                 rivalHearts--;
                 hunt.HealFoe(DuelHeartHeal);
@@ -549,6 +553,7 @@ namespace SquashBot.Gameplay
         {
             if (chPhase != ChPhase.Duel || duelHearts <= 0 || health >= 0.999f) return;
             duelHearts--;
+            mcHearts++;
             if (LiveActive) LiveNet.Heal();
             else Heal(robot.Position);
             AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.6f);
@@ -583,7 +588,19 @@ namespace SquashBot.Gameplay
         {
             int s = Mathf.CeilToInt(chDuelLeft);
             chUi.SetClock(s / 60 + ":" + (s % 60).ToString("00"), ScoreText()); // (the time between the names, the score between the bars)
+            matchWorst = Mathf.Max(matchWorst, chDuelThem - chDuelMe);
+            // The last ten seconds: the score grows with every beat, a heartbeat; level, the golden knock-down.
+            if (chPhase == ChPhase.Duel && s <= 10 && s > 0 && s != lastBeat)
+            {
+                lastBeat = s;
+                chUi.PulseScore(1.35f);
+                AudioManager.PlaySfx(Sfx.Bump, 0.8f, 0.55f);
+                AudioManager.SetTension(1f);
+                if (s == 10 && chDuelMe == chDuelThem) chUi.SetStatus(Loc.T("duel.goldenKo"));
+            }
         }
+
+        private int lastBeat = -1;
 
         /// <summary>The score as the board shows it (mine first).</summary>
         private string ScoreText() => chDuelMe + " - " + chDuelThem;

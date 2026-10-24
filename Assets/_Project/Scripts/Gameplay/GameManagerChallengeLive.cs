@@ -131,12 +131,12 @@ namespace SquashBot.Gameplay
             if (chFriend == 1 || chFriend == 2)
             {
                 chUi.HideFriend();
-                chUi.ShowLobby(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore), Challenge.Rank, ModeLabel);
+                chUi.ShowLobby(MyCard(), Challenge.Rank, ModeLabel);
             }
             chUi.LockLobby();
             int rivalPower = 0;
             for (int g = 0; g < Army.Groups; g++) rivalPower += Mathf.RoundToInt(Army.Soldiers * rival.Power(g) * 10f);
-            chUi.ShowRival(SideText(rival.name, rival.Rank, rival.trophies, rivalPower), rival.Rank);
+            chUi.ShowRival(RivalCard(rival), rival.Rank);
             chUi.SetLobbyStatus(Loc.T(liveRanked ? "live.found" : "live.foundFriend"));
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 1.2f);
             yield return new WaitForSecondsRealtime(1.2f);

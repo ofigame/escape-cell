@@ -378,7 +378,7 @@ namespace SquashBot.UI
         private class PlayerCard
         {
             private readonly RectTransform panel;
-            private readonly TextMeshProUGUI name, detail;
+            private readonly TextMeshProUGUI name, detail, extra;
             private RectTransform badge;
             private int badgeRank = -1;
 
@@ -389,10 +389,13 @@ namespace SquashBot.UI
                 var stripe = UiFactory.Box("Stripe", panel, new Vector2(0f, 0.5f), Vector2.zero, new Vector2(12f, 200f));
                 stripe.pivot = new Vector2(0f, 0.5f);
                 UiFactory.Fill(stripe, colour, UiSprites.Rounded, 6f).raycastTarget = false;
-                name = Flat.Label(panel, "", new Vector2(0f, 0.5f), new Vector2(220f, 34f), new Vector2(700f, 64f), 48f, Flat.Text, bold: true);
+                name = Flat.Label(panel, "", new Vector2(0f, 0.5f), new Vector2(220f, 44f), new Vector2(700f, 64f), 48f, Flat.Text, bold: true);
                 name.rectTransform.pivot = new Vector2(0f, 0.5f);
-                detail = Flat.Label(panel, "", new Vector2(0f, 0.5f), new Vector2(220f, -36f), new Vector2(700f, 50f), 28f, Flat.Muted, wrap: true);
+                detail = Flat.Label(panel, "", new Vector2(0f, 0.5f), new Vector2(220f, -14f), new Vector2(700f, 44f), 28f, Flat.Muted, wrap: true);
                 detail.rectTransform.pivot = new Vector2(0f, 0.5f);
+                // its title, winning streak's flame and mastery badge (when it has them)
+                extra = Flat.Label(panel, "", new Vector2(0f, 0.5f), new Vector2(220f, -62f), new Vector2(700f, 40f), 28f, new Color(1f, 0.7f, 0.3f), bold: true);
+                extra.rectTransform.pivot = new Vector2(0f, 0.5f);
             }
 
             /// <summary>The side's text (its name on the first line) and its rank (-1: not known yet: a question mark).</summary>
@@ -401,6 +404,7 @@ namespace SquashBot.UI
                 var parts = (text ?? "").Split('\n');
                 name.text = parts[0];
                 detail.text = parts.Length > 1 ? parts[1] : "";
+                extra.text = parts.Length > 2 ? parts[2] : "";
                 if (rank == badgeRank) return;
                 if (badge != null) UnityEngine.Object.Destroy(badge.gameObject);
                 badge = rank >= 0 ? RankArt.Badge(panel, rank, new Vector2(0f, 0.5f), new Vector2(110f, 0f), 170f) : null;
@@ -726,6 +730,26 @@ namespace SquashBot.UI
 
         private TextMeshProUGUI score;
         public void SetStatus(string text) => status.text = text;
+
+        /// <summary>The score swells and settles back (the last ten seconds' beat).</summary>
+        public void PulseScore(float scale)
+        {
+            if (score == null) return;
+            if (pulse != null) StopCoroutine(pulse);
+            pulse = StartCoroutine(Settle(scale));
+        }
+
+        private Coroutine pulse;
+
+        private System.Collections.IEnumerator Settle(float scale)
+        {
+            for (float k = 0f; k < 1f; k += Time.unscaledDeltaTime / 0.45f)
+            {
+                score.transform.localScale = Vector3.one * Mathf.Lerp(scale, 1.12f, k);
+                yield return null;
+            }
+            score.transform.localScale = Vector3.one * 1.12f;
+        }
 
         private static bool IsSideways => Screen.width > Screen.height;
         private bool sideways;

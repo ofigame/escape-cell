@@ -57,7 +57,7 @@ namespace SquashBot.UI
         // One outlined material per look, shared (one each per label was never let go, and drew each label on its own).
         private static readonly System.Collections.Generic.Dictionary<(Material, Color, float), Material> outlines = new System.Collections.Generic.Dictionary<(Material, Color, float), Material>();
 
-        private static void Outline(TextMeshProUGUI t, Color color, float width)
+        public static void Outline(TextMeshProUGUI t, Color color, float width)
         {
             var key = (t.fontSharedMaterial, color, width);
             if (!outlines.TryGetValue(key, out var m) || m == null)

@@ -249,6 +249,17 @@ namespace SquashBot.UI
         public ArmyScreen ArmyView { get; private set; }
         /// <summary>The duel chests won (open them for gold and weapons).</summary>
         public DuelChestScreen DuelChestsView { get; private set; }
+        public DuelRewardsScreen DuelRewardsView { get; private set; }
+
+        private TMPro.TextMeshProUGUI menuGoal;
+
+        /// <summary>The menu's goal line over the DUEL button: the nearest next goal.</summary>
+        public void SetGoalLine(string text)
+        {
+            if (menuGoal == null) return;
+            menuGoal.text = text;
+            menuGoal.gameObject.SetActive(!string.IsNullOrEmpty(text));
+        }
         private GameObject chestsPing;
         private TextMeshProUGUI chestsPingText;
         private Button menuQuests;
@@ -486,6 +497,7 @@ namespace SquashBot.UI
             Chest = ChestCard.Create(root);
             ArmyView = ArmyScreen.Create(root);
             DuelChestsView = DuelChestScreen.Create(root);
+            DuelRewardsView = DuelRewardsScreen.Create(root);
             DuelChestsView.Changed += () => { RefreshMenuCoins(); RefreshChests(); };
             ChallengeStats = ChallengeStatsScreen.Create(root);
             ChallengeStats.SettingsPressed += ShowSettings;
@@ -631,6 +643,10 @@ namespace SquashBot.UI
             menuMission.fontSizeMin = 20f;
             menuMission.fontSizeMax = 30f;
 
+            // The goal line over the card: the nearest next goal ("2 wins to Yüzbaşı").
+            menuGoal = UiFactory.TextBox("Goal", t, Bottom, new Vector2(0f, Ads.BannerReserve + 236f + 426f), new Vector2(900f, 54f), "", 32f, Palette.UiGold, title: true);
+            menuGoal.rectTransform.pivot = new Vector2(0.5f, 0f);
+            MenuArt.Outline(menuGoal, new Color(0.05f, 0.03f, 0.15f, 0.9f), 0.25f);
             // DUEL first: the game's heart now (left, green, beating, a little bigger); the mission beside it, still.
             var challenge = UiFactory.MakeButton(card, Loc.T("menu.duel"), Kind.Primary, Bottom, new Vector2(-195f, 22f), new Vector2(430f, 150f), () => ChallengePressed?.Invoke(), 84f);
             challenge.gameObject.AddComponent<Pulse>();

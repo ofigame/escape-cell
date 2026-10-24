@@ -116,7 +116,7 @@ namespace SquashBot.Gameplay
             rivalCombo = 0;
             if (skillBar != null) skillBar.ShowCombo(myCombo);
             if (myCombo == HeavyCombo || myCombo == UpperCombo) { myComboMove = myCombo; comboMoveUntil = Time.time + ComboMoveTime; }
-            if (myCombo == HeavyCombo) ChallengeQuests.Report(DuelGoal.Combo5); // (a five-hit combo)
+            if (myCombo == HeavyCombo) NoteDuel(DuelGoal.Combo5); // (a five-hit combo)
             if (Time.time < myJumpUntil) AirStrike(true);
             else Reel(false, myCombo);
             if (colosseum != null && myCombo >= 3) colosseum.Cheer(0, 0.4f + myCombo * 0.08f);
@@ -221,6 +221,7 @@ namespace SquashBot.Gameplay
                     else
                     {
                         HitFoe((upper ? UpperHit : HeavyHit) * DuelPower.ComboTimes(weapon ?? Armory.Equipped)); // (an axe's a fifth harder)
+                        if (upper) PowerSlow(0.3f, 0.35f); // (the knockdown: a breath of slow motion)
                         hunt.StunFoe(upper ? 1.8f : 0.4f); // (short: the rival is back in the fight at once)
                     }
                     if (colosseum != null) colosseum.Cheer(0, 0.9f);
@@ -340,7 +341,7 @@ namespace SquashBot.Gameplay
         private IEnumerator SpecialMove(bool mine)
         {
             moveBusy = true;
-            if (mine) ChallengeQuests.Report(DuelGoal.Special);
+            if (mine) NoteDuel(DuelGoal.Special);
             int hero = mine ? HeroModels.Skill(SaveData.Hero) : rivalHero;
             if (mine) hunt.StunFoe(1.6f);
             strikeCooldown = Mathf.Max(strikeCooldown, mine ? 0.9f : 1.4f);
@@ -564,7 +565,7 @@ namespace SquashBot.Gameplay
             if (colosseum != null) colosseum.Cheer(mine ? 0 : 1, 1f);
             if (mine) hunt.StunFoe(6.5f);
             strikeCooldown = Mathf.Max(strikeCooldown, mine ? 0.5f : 2.5f);
-            if (mine) ChallengeQuests.Report(DuelGoal.Ultimate);
+            if (mine) NoteDuel(DuelGoal.Ultimate);
             // foi leaps in (a plain jump), then the ultimate's own moves through all of it: its combo, and a spin kick to end
             if (leap) yield return LeapTo(mine, mine ? HeroModels.Skill(SaveData.Hero) : rivalHero, true);
             var caster = mine ? robot.Visual : hunt.ChallengeFoeModel;
@@ -730,17 +731,32 @@ namespace SquashBot.Gameplay
         private void RivalMoves()
         {
             if (Time.time < rivalThinkAt || !hunt.ChallengeFoeAt.HasValue) return;
-            rivalThinkAt = Time.time + 0.45f;
+            var t = botTuning;
+            rivalThinkAt = Time.time + (t != null ? Mathf.Max(0.2f, t.React()) : 0.45f); // (never at once: a human's reaction)
             var foeAt = hunt.ChallengeFoeAt.Value;
             float dist = Flat(foeAt - robot.transform.position).magnitude;
-            float bold = Mathf.Clamp01(rival.boldness);
-            if (rivalMeter >= 3f && Random.value < 0.3f + 0.3f * bold)
+            float bold = t != null ? t.aggression : Mathf.Clamp01(rival.boldness);
+            // the ultimate when its personality says so: at once (aggressive), when foi opens up (defensive), at a combo's
+            // end (combo), once apart (runner), with foi low (the ulti saver)
+            bool ultiTime = t == null ? Random.value < 0.3f + 0.3f * bold : t.persona switch
+            {
+                Persona.Aggressive => true,
+                Persona.Defensive => strikeCooldown > 0.05f && dist <= 3.4f,
+                Persona.Combo => rivalCombo >= 3,
+                Persona.Runner => dist >= 3f,
+                Persona.Ulti => health < 0.4f,
+                _ => Random.value < 0.45f,
+            };
+            if (rivalMeter >= 3f && ultiTime)
             {
                 rivalMeter = 0f;
                 cameraRig.StartCoroutine(Ultimate(false, leap: true));
                 return;
             }
-            if (myCombo >= 3 && (rivalMeter >= 1f ? Random.value < 0.5f + 0.3f * bold : Random.value < 0.18f + 0.12f * bold))
+            int breakFrom = t != null ? t.breakerFrom : 3;
+            float breakLean = t != null ? t.breaker : 0.3f * bold;
+            bool keepsBar = t != null && t.persona == Persona.Ulti; // (the ulti saver never spends its bar on a break)
+            if (myCombo >= breakFrom && !keepsBar && (rivalMeter >= 1f ? Random.value < 0.35f + 0.5f * breakLean : Random.value < 0.1f + 0.2f * breakLean))
             {
                 rivalMeter = Mathf.Max(0f, rivalMeter - 1f);
                 myCombo = 0;
@@ -767,7 +783,7 @@ namespace SquashBot.Gameplay
                 HurtMe(HeavyHit);
                 return;
             }
-            if (rivalMeter >= 1f && Random.value < (dist >= 3f ? 0.22f : 0.1f) + 0.15f * bold)
+            if (rivalMeter >= 1f && !keepsBar && Random.value < (dist >= 3f ? 0.22f : 0.1f) + 0.15f * bold + (t != null && t.persona == Persona.Runner && dist >= 3f ? 0.2f : 0f))
             {
                 rivalMeter -= 1f;
                 cameraRig.StartCoroutine(SpecialMove(false));

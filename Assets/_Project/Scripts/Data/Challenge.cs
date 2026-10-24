@@ -241,6 +241,9 @@ namespace SquashBot.Data
             public int shield;
             /// <summary>What its foi wears (a player's own outfit; null for a computer rival or an older game).</summary>
             public string look;
+            /// <summary>Its seed (a computer rival's personality), its winning streak, duel level, title and best mastery.</summary>
+            public int seed, streak, duelLevel = 1, mastery;
+            public string titleKey;
 
             /// <summary>Soldiers of each group it brings into the duel.</summary>
             public readonly int[] squad = { SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel, SoldierPool.PerDuel };
@@ -292,6 +295,12 @@ namespace SquashBot.Data
             o.armor = RobotParts.ArmorAt(Near(RobotPart.Shell));
             o.boldness = (float)rng.NextDouble();
             o.foiHit = 0f;
+            // its card: a streak now and then, a duel level about its trophies, a title with it, a weapon's mastery
+            o.seed = seed;
+            o.streak = rng.Next(10) < 6 ? rng.Next(0, 3) : rng.Next(3, 11);
+            o.duelLevel = Mathf.Clamp(2 + o.trophies / 150 + rng.Next(-2, 3), 1, DuelLevel.Max);
+            o.titleKey = DuelLevel.TitleKey(o.duelLevel);
+            o.mastery = Mathf.Clamp(o.duelLevel / 4 + rng.Next(-1, 3), 0, Mastery.Max);
             return o;
         }
 

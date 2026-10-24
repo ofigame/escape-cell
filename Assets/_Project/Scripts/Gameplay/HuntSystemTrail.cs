@@ -469,6 +469,9 @@ namespace SquashBot.Gameplay
 
         /// <summary>How bold the rival's foi is (its profile): bold ones press on, careful ones step back and dodge more.</summary>
         public float FoeBoldness = 0.5f;
+        /// <summary>A computer rival's humanity: the share of its blows that miss, its wind-up against the usual (its
+        /// reaction), how readily it runs off when hurt.</summary>
+        public float FoeWhiff, FoeReactScale = 1f, FoeFlee = 0.35f;
 
         /// <summary>
         /// The rival foi's own sense, before its usual fighting: badly hurt and foi close, it falls back behind its
@@ -485,7 +488,7 @@ namespace SquashBot.Gameplay
                 g.step = 0f;
                 if (StepInside(g)) return true;
             }
-            if (g.hp < g.maxHp * (0.25f + 0.2f * (1f - FoeBoldness)) && near <= 3 && Time.time > foeFleeUntil + 6f) foeFleeUntil = Time.time + 1.2f; // (a short breather, then back at it)
+            if (g.hp < g.maxHp * (0.15f + 0.35f * FoeFlee) && near <= 3 && Time.time > foeFleeUntil + 6f) foeFleeUntil = Time.time + 1.2f; // (a short breather, then back at it)
             // Between blows, face to face with foi: now and then a step to the side (a dodge), more for a careful one.
             if (near <= DuelGap && g.cooldown > 0.2f && Time.time > foeDodgeAt && g.step <= 0f)
             {
@@ -568,7 +571,7 @@ namespace SquashBot.Gameplay
         private int foeCombo;
 
         /// <summary>The rival foi's wind-up: quicker inside a flurry.</summary>
-        private float FoeWindScale(Guard g) => g != challengeFoe ? 1f : foeCounter ? 0.28f : foeCombo > 0 ? 0.36f : 0.5f;
+        private float FoeWindScale(Guard g) => g != challengeFoe ? 1f : (foeCounter ? 0.28f : foeCombo > 0 ? 0.36f : 0.5f) * FoeReactScale;
 
         private float foeHurtAt = -9f;
         private int foeHurtStreak;

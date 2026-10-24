@@ -561,6 +561,7 @@ namespace SquashBot.Gameplay
             cameraRig.SetMenuFocus(false);
             cameraRig.Showcase(robot.transform, 0.7f);
             ProfileOnMenu();
+            ui.SetGoalLine(GoalLine());
             if (!loginOffered && LoginCalendar.Ready && NextLevel >= 2)
             {
                 loginOffered = true;

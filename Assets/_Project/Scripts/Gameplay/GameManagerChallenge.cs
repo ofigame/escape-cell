@@ -292,7 +292,7 @@ namespace SquashBot.Gameplay
             chOnline = false;
             chLive = false;
             // (Playing a friend, the friend panel stays up until the friend is there.)
-            if (chFriend == 0 || chFriend == 3) chUi.ShowLobby(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore), Challenge.Rank, ModeLabel);
+            if (chFriend == 0 || chFriend == 3) chUi.ShowLobby(MyCard(), Challenge.Rank, ModeLabel);
             float started = Time.realtimeSinceStartup;
             int world = LevelCatalog.WorldOf(Mathf.Max(0, SaveData.UnlockedLevel - 1));
 
@@ -365,7 +365,7 @@ namespace SquashBot.Gameplay
                 if (match != null)
                 {
                     yield return FoiNet.Me(Challenge.Sync);
-                    chUi.SetMyCard(SideText(Challenge.PlayerName, Challenge.Rank, Challenge.Trophies, Army.PowerScore), Challenge.Rank);
+                    chUi.SetMyCard(MyCard(), Challenge.Rank);
                 }
             }
             float waited = Time.realtimeSinceStartup - started;
@@ -381,7 +381,7 @@ namespace SquashBot.Gameplay
             if (!chDuelSquads) for (int g = 0; g < rival.squad.Length; g++) rival.squad[g] = 0; // foi against foi
             int rivalPower = 0;
             for (int g = 0; g < Army.Groups; g++) rivalPower += Mathf.RoundToInt(Army.Soldiers * rival.Power(g) * 10f);
-            chUi.ShowRival(SideText(rival.name, rival.Rank, rival.trophies, rivalPower), rival.Rank);
+            chUi.ShowRival(RivalCard(rival), rival.Rank);
             chUi.SetLobbyStatus(Loc.T(chOnline ? "ch.found" : "ch.offline"));
             yield return new WaitForSecondsRealtime(1.6f);
             if (token != chLobbyToken) yield break;
@@ -565,7 +565,8 @@ namespace SquashBot.Gameplay
         /// <summary>The chest the last duel brought (none: lost, or a draw).</summary>
         private ChestTier? chestWon;
         /// <summary>The last duel's core parts, and whether it was the day's first win.</summary>
-        private int coresWon;
+        private int coresWon, shownChange;
+        private bool shownChangeKnown;
         private bool firstWinToday;
 
         /// <param name="outcome">1 won, 0 a draw, -1 lost.</param>
@@ -598,6 +599,7 @@ namespace SquashBot.Gameplay
             CoreParts.Add(cores);
             coresWon = cores;
             SaveData.Coins += gold + (draw ? 0 : Earned);
+            SettleProgress(won, draw, friendly, gold, cores, firstWinToday);
             State = GameState.Result;
             danceAt = won ? robot.transform : !draw ? hunt.ChallengeFoeModel : null;
             if (won) AudioManager.PlaySfx(Sfx.Win);
@@ -613,12 +615,13 @@ namespace SquashBot.Gameplay
         private IEnumerator ShowChallengeResult(bool won, bool draw, string score, int gold)
         {
             int bestBefore = Challenge.BestRank;
+            shownChange = 0; shownChangeKnown = false;
             string trophies;
             if (chLive && liveLost) trophies = Loc.T("live.lost");
             else if (chLive && liveRanked)
             {
                 if (liveProfile != null) Challenge.Sync(liveProfile);
-                trophies = TrophyLine(liveChange);
+                trophies = TrophyLine(liveChange); shownChange = liveChange; shownChangeKnown = true;
             }
             else if (chLive)
             {
@@ -635,7 +638,7 @@ namespace SquashBot.Gameplay
                 float until = Time.realtimeSinceStartup + 6f;
                 while (!back && Time.realtimeSinceStartup < until) yield return null;
                 if (result != null) Challenge.Sync(result.profile);
-                trophies = result != null ? TrophyLine(result.change) : Loc.T("ch.resultLater");
+                trophies = result != null ? TrophyLine(result.change) : Loc.T("ch.resultLater"); if (result != null) { shownChange = result.change; shownChangeKnown = true; }
             }
             else trophies = Loc.T("ch.offline");
             // A new rank reached for the first time: 30 core parts a step and a gold chest.
@@ -662,6 +665,16 @@ namespace SquashBot.Gameplay
             float danceUntil = Time.realtimeSinceStartup + 9f;
             yield return null;
             while (dancer != null && dancer.PlayingMove && Time.realtimeSinceStartup < danceUntil && challengeRun) yield return null;
+            // The rewards one by one (rank points, XP, mastery, gold, cores, chest), then the card.
+            if (lastRewards != null && challengeRun)
+            {
+                lastRewards.cores = coresWon;
+                lastRewards.trophies = shownChange;
+                lastRewards.trophiesKnown = shownChangeKnown;
+                bool shut = false;
+                ui.DuelRewardsView.Show(lastRewards, won, draw, () => shut = true);
+                while (!shut && challengeRun) yield return null;
+            }
             yield return ShowResultDelayed(new UIController.ResultInfo
             {
                 won = won,
