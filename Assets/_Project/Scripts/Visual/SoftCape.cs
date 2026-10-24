@@ -39,6 +39,9 @@ namespace SquashBot.Visual
         private float wornDepth;
 
         /// <summary>The cape's middle part (not its edges, which wrap round the sides): how far it comes toward the body.</summary>
+        /// <summary>How far the body is puffed out behind (the thicker body): the cape hangs that much further back.</summary>
+        private float PuffBack => SkinnedHero.Puff * 1.4f * unit;
+
         private static float BodySide(Transform worn, bool flip)
         {
             float half = 0f, most = 0f;
@@ -63,7 +66,7 @@ namespace SquashBot.Visual
             wave += dt;
             float sway = Mathf.Sin(wave * 1.5f) * 1.8f + Mathf.Sin(wave * 0.7f) * 1.2f; // a soft breath, standing still or not
             // its body side just behind the back (the armour is broad): never into the body
-            float torso = Mathf.Max(0.09f * unit, span * 0.27f); // (close behind the back, its middle just off it)
+            float torso = Mathf.Max(0.09f * unit, span * 0.27f) + PuffBack; // (close behind the back, its middle just off it; the thicker body too)
             worn.position = shoulders + up * 0.05f * unit + back * (torso + Mathf.Clamp(wornDepth, 0f, span * 0.06f)); // (close on the back)
             var face = wornFlip ? back : -back; // (the model's front made to face the body or away, as it was made)
             worn.rotation = Quaternion.AngleAxis(swing + sway, right) * Quaternion.LookRotation(face, up);
@@ -310,7 +313,7 @@ namespace SquashBot.Visual
                 float side = Mathf.Abs(u) * 2f;
                 top = shoulders + up * (0.04f + 0.05f * side * side) * unit + back * (span * 0.4f * (1f - side * side) + span * 0.08f);
             }
-            return top + right * u * w - Vector3.up * v * length + back * v * 0.05f * unit;
+            return top + right * u * w - Vector3.up * v * length + back * (v * 0.05f * unit + PuffBack);
         }
 
         private void Frame(out Vector3 right, out Vector3 up, out Vector3 back, out Vector3 shoulders)

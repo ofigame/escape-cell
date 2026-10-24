@@ -1007,7 +1007,12 @@ namespace SquashBot.Gameplay
             if (MonsterUp && MonsterAwake) UpdateMonster(dt);
         }
 
-        private bool CanStep(GridPos from, GridPos p) => FloorRelief.StepOk(from, p) && !PartnerAdjacent(from, p) &&
+        /// <summary>The lane duel's line (null: none): the rival only steps along it, or back onto it.</summary>
+        public int? LaneX;
+
+        private bool OffLane(GridPos from, GridPos p) => LaneX is int lx && challengeFoe != null && from == challengeFoe.pos && p.x != lx && Math.Abs(p.x - lx) >= Math.Abs(from.x - lx);
+
+        private bool CanStep(GridPos from, GridPos p) => FloorRelief.StepOk(from, p) && !PartnerAdjacent(from, p) && !OffLane(from, p) &&
             grid.IsStandable(p) && !grid.IsOccupied(p) && !AllyAt(p) && !grid.IsGap(p) && p != robot.Position && (Avoid == null || !Avoid(p)) && (Unsafe == null || !Unsafe(p) || Unsafe(from));
 
         private void UpdateBug(Bug b, float dt)
@@ -1687,7 +1692,7 @@ namespace SquashBot.Gameplay
         public const int AttackReach = 2;
 
         /// <summary>The nearest the two foi come in the duel (in tiles, diagonals as one): a tile always between them.</summary>
-        public const int DuelGap = 2;
+        public const int DuelGap = 3;
 
         public static int Chebyshev(GridPos a, GridPos b) => Mathf.Max(Mathf.Abs(a.x - b.x), Mathf.Abs(a.y - b.y));
     }

@@ -109,6 +109,13 @@ namespace SquashBot.Gameplay
             : Challenge.RankBoost(Armory.Damage(w));
 
         /// <summary>The Duel's board: the stage, the two foi on their marks with their squads, the clock.</summary>
+        /// <summary>The lane duel's line: the board column both foi stand on (the screen's left-right runs along it).</summary>
+        private int laneX;
+
+        /// <summary>The lane duel is on now: the setting, a one-on-one duel against the AI (not 2v2, not live: the server
+        /// keeps a live duel's places).</summary>
+        private bool LaneOn => SaveData.LaneDuel && challengeRun && !twoVsTwo && !LiveActive;
+
         private void BuildDuelBoard(int stage)
         {
             duelStage = Mathf.Clamp(stage, 0, DuelStages.Length - 1);
@@ -164,6 +171,8 @@ namespace SquashBot.Gameplay
             Shields.Ready(); // (each round: the shield ready)
             RefreshHealthBar();
             var (mine, theirs) = DuelMarks;
+            laneX = mine.x;
+            theirs = new GridPos(laneX, theirs.y); // (the lane duel: both on the one line; the marks already share it)
             robot.Spawn(grid, mine);
             bool north = theirs.y < mine.y;
             robot.transform.rotation = Quaternion.identity;
@@ -189,6 +198,7 @@ namespace SquashBot.Gameplay
             float myArmor = rivalPassive == PassiveKind.Piercer ? duelMine.armor * 0.75f : duelMine.armor; // (its piercer: a quarter of foi's armour ignored)
             float share = DuelPower.Blow(w, duelTheirs.weaponTier) * (1f + duelTheirs.damage) * (1f - myArmor) / Mathf.Max(1, duelMine.hp);
             hunt.AddChallengeFoe(theirs, hp, share, look, rivalHeld, 0);
+            hunt.LaneX = LaneOn ? laneX : (int?)null; // (the lane duel: the rival keeps to the line)
             // (no name tags over the two foi: their names and ranks are over the health bars)
             if (myTag != null) { Destroy(myTag.gameObject); myTag = null; }
             if (theirTag != null) { Destroy(theirTag.gameObject); theirTag = null; }

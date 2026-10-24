@@ -21,8 +21,6 @@ namespace SquashBot.UI
         public event Action<Move> Pressed;
         /// <summary>An emote picked (0..5).</summary>
         public event Action<int> Emoted;
-        /// <summary>The camera button: the side view or the stage's fixed view.</summary>
-        public event Action CamSwitched;
         private RectTransform emotes;
 
         private RectTransform root;
@@ -104,17 +102,6 @@ namespace SquashBot.UI
             ctx.gameObject.AddComponent<ButtonPress>();
             contextGroup = ctx.gameObject.AddComponent<CanvasGroup>();
             ctx.gameObject.SetActive(false);
-
-            // The camera: the side view or the stage's view (a small button under foi's health bar)
-            var camBox = UiFactory.Box("CamSwitch", root, new Vector2(0f, 1f), new Vector2(110f, -420f), new Vector2(170f, 70f));
-            camBox.pivot = new Vector2(0.5f, 0.5f);
-            var camFace = UiFactory.Chunky(camBox, UiFactory.StyleOf(new Color(0.35f, 0.55f, 0.95f)), 1f, 0f, UiSprites.Rounded);
-            var camText = UiFactory.OutlinedText("Text", camBox, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(160f, 60f), Loc.T("duel.cam"), 26f, new Color(0.05f, 0.1f, 0.25f));
-            camText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var camButton = camBox.gameObject.AddComponent<Button>();
-            camButton.targetGraphic = camFace;
-            camButton.onClick.AddListener(() => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.2f); CamSwitched?.Invoke(); });
-            camBox.gameObject.AddComponent<ButtonPress>();
 
             // Emotes: a small button above the power bar opens a row of six.
             var talk = UiFactory.Box("Talk", root, new Vector2(0f, 0f), new Vector2(85f, 360f), new Vector2(96f, 96f));

@@ -38,6 +38,7 @@ namespace SquashBot.Visual
         private Vector3 centre;
         private float hw, hd, floorY;
         private readonly List<Material> mats = new List<Material>();
+        private readonly List<Texture2D> marbles = new List<Texture2D>();
 
         private class Batch { public Mesh mesh; public Material mat; public readonly List<Vector3> pos = new List<Vector3>(); public readonly List<float> phase = new List<float>(); public readonly List<int> side = new List<int>(); public readonly List<float> facing = new List<float>(); public Matrix4x4[] m; public int kind; }
         private readonly List<Batch> batches = new List<Batch>();
@@ -508,6 +509,8 @@ namespace SquashBot.Visual
         {
             /// <summary>Its models' folder and names' start (platform, stand, tree_1.., rock).</summary>
             public string folder;
+            /// <summary>How far out the plain marble middle reaches, of the floor's half width (over the emblem, short of the rim).</summary>
+            public float cover = 1.22f;
             public int trees;
             public float treeMin, treeMax;
             public bool rocks, grass, lanterns, snow, glints, dust;
@@ -546,7 +549,7 @@ namespace SquashBot.Visual
         private static readonly Look GroveLook = new Look
         {
             frontGrass = new Color(0.05f, 0.11f, 0.08f), pebbles = new Color(0.22f, 0.26f, 0.3f),
-            folder = "Duel/Grove/grove_", trees = 3, treeMin = 12f, treeMax = 16f, grass = true, lanterns = true, thick = 0.6f, rim = 1.03f,
+            folder = "Duel/Grove/grove_", cover = 1.32f, trees = 3, treeMin = 12f, treeMax = 16f, grass = true, lanterns = true, thick = 0.6f, rim = 1.03f,
             glow = new Color(0.35f, 0.85f, 1f), selfLight = new Color(0.16f, 0.2f, 0.26f),
             ground = new Color(0.07f, 0.12f, 0.1f), mound = new Color(0.1f, 0.17f, 0.13f), bank = new Color(0.05f, 0.09f, 0.08f), grassColour = new Color(0.05f, 0.11f, 0.08f),
             crystal = new Color(0.45f, 0.85f, 1f), mist = new Color(0.55f, 0.8f, 0.95f, 0.17f), lamp = new Color(0.35f, 0.85f, 1f), lampPower = 1f,
@@ -668,6 +671,7 @@ namespace SquashBot.Visual
             }
             if (top == float.MinValue) top = pb.max.y;
             plat.position += Vector3.up * (floorY - top);
+            CoverEmblem(p, plat, look, centre, floorY, Mathf.Max(hw, hd) * look.cover); // (the middle plain: marble of the platform's own stone)
             // The forest floor a little under the platform's top: it stands on the land, sunk in it (not up in the air).
             float ground = floorY - 1.1f;
             var moss = Matte(look.ground, 0.2f); // (a little of its own light: the land reads in the dark)
@@ -1223,6 +1227,93 @@ namespace SquashBot.Visual
         }
 
         /// <summary>One of a made stage's models in its own colour picture (the rune pieces with their runes and crystals glowing).</summary>
+        /// <summary>
+        /// The emblem in the platform's middle (a dragon, runes, a crest) covered by a plain disc of marble in the stone's
+        /// own colour (sampled from the platform's top just outside the disc), lit as the platform is.
+        /// </summary>
+        private void CoverEmblem(Transform p, Transform plat, Look look, Vector3 centre, float y, float radius)
+        {
+            var colour = RingColour(plat, look, centre, y, radius) ?? new Color(0.62f, 0.6f, 0.58f);
+            var tex = Marble(colour);
+            var m = Surface(Color.white, 0f);
+            m.SetFloat("_SpecularHighlights", 0f); m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+            m.SetFloat("_EnvironmentReflections", 0f); m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
+            m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
+            m.EnableKeyword("_EMISSION");
+            m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+            m.SetTexture("_EmissionMap", tex);
+            m.SetColor("_EmissionColor", look.selfLight);
+            var disc = Shapes.Primitive(PrimitiveType.Cylinder, "PlainMiddle", p, Vector3.zero, new Vector3(radius * 2f, 0.02f, radius * 2f), m).transform;
+            disc.position = new Vector3(centre.x, y + 0.025f - 0.02f, centre.z); // (its top just over the walking surface; the foot rings over it)
+            disc.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+        }
+
+        /// <summary>The platform top's colour in a ring just outside <paramref name="radius"/>: its picture sampled where its
+        /// upward faces lie there (null: none found).</summary>
+        private static Color? RingColour(Transform plat, Look look, Vector3 centre, float y, float radius)
+        {
+            var src = Resources.Load<Texture2D>(look.folder + "platform_tex");
+            if (src == null) return null;
+            // a small readable copy of the picture (the original stays unreadable: no doubled memory)
+            var rt = RenderTexture.GetTemporary(128, 128, 0, RenderTextureFormat.ARGB32);
+            Graphics.Blit(src, rt);
+            var was = RenderTexture.active;
+            RenderTexture.active = rt;
+            var small = new Texture2D(128, 128, TextureFormat.RGBA32, false);
+            small.ReadPixels(new Rect(0, 0, 128, 128), 0, 0);
+            small.Apply();
+            RenderTexture.active = was;
+            RenderTexture.ReleaseTemporary(rt);
+            Color sum = Color.black; int n = 0;
+            foreach (var mf in plat.GetComponentsInChildren<MeshFilter>(true))
+            {
+                var mesh = mf.sharedMesh;
+                if (mesh == null || !mesh.isReadable) continue;
+                var v = mesh.vertices; var uv = mesh.uv; var nr = mesh.normals;
+                if (uv.Length != v.Length) continue;
+                for (int i = 0; i < v.Length; i++)
+                {
+                    var w = mf.transform.TransformPoint(v[i]);
+                    if (Mathf.Abs(w.y - y) > 0.25f) continue;
+                    if (nr.Length == v.Length && mf.transform.TransformDirection(nr[i]).y < 0.7f) continue;
+                    float r = new Vector2(w.x - centre.x, w.z - centre.z).magnitude;
+                    if (r < radius * 1.0f || r > radius * 1.14f) continue;
+                    sum += small.GetPixelBilinear(uv[i].x, uv[i].y); n++;
+                }
+            }
+            Object.Destroy(small);
+            if (n < 8) return null;
+            var c = sum / n; c.a = 1f;
+            return c;
+        }
+
+        /// <summary>A marble picture in <paramref name="c"/>: soft clouds and thin veins a little lighter and darker.</summary>
+        private Texture2D Marble(Color c)
+        {
+            const int N = 256;
+            var tex = new Texture2D(N, N, TextureFormat.RGBA32, true) { wrapMode = TextureWrapMode.Repeat, name = "Marble" };
+            var px = new Color[N * N];
+            float seed = c.r * 37f + c.g * 11f;
+            for (int yy = 0; yy < N; yy++)
+                for (int xx = 0; xx < N; xx++)
+                {
+                    float u = xx / (float)N, v = yy / (float)N;
+                    float cloud = Mathf.PerlinNoise(u * 4f + seed, v * 4f) * 0.6f + Mathf.PerlinNoise(u * 11f, v * 11f + seed) * 0.4f;
+                    float turb = Mathf.PerlinNoise(u * 6f + 3.1f, v * 6f + seed) * 5f;
+                    float vein = Mathf.Pow(1f - Mathf.Abs(Mathf.Sin((u * 3f + v * 2f) * Mathf.PI * 2f + turb)), 14f);
+                    float k = 0.92f + (cloud - 0.5f) * 0.16f;
+                    var col = c * k;
+                    col = Color.Lerp(col, Color.Lerp(c, Color.white, 0.45f), vein * 0.55f);
+                    col.a = 1f;
+                    px[yy * N + xx] = col;
+                }
+            tex.SetPixels(px);
+            tex.Apply(true, true);
+            tex.anisoLevel = 2;
+            marbles.Add(tex);
+            return tex;
+        }
+
         private Transform MadeModel(Transform p, Look look, string name, bool runes, bool matte = false)
         {
             var holder = new GameObject(name).transform;
@@ -1437,6 +1528,7 @@ namespace SquashBot.Visual
         {
             foreach (var m in mats) if (m != null) Destroy(m);
             Blockers.Clear();
+            foreach (var mt in marbles) if (mt != null) Destroy(mt);
             if (ownedMesh != null) Destroy(ownedMesh);
             if (grassMesh != null) Destroy(grassMesh);
             if (frontMesh != null) Destroy(frontMesh);

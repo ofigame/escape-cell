@@ -569,7 +569,7 @@ namespace SquashBot.Visual
 
         private static readonly Dictionary<Mesh, Mesh> thick = new Dictionary<Mesh, Mesh>();
         /// <summary>How far the body is puffed out, of its height (arms, legs and body a little thicker).</summary>
-        private const float Puff = 0.009f;
+        public const float Puff = 0.012f;
 
         /// <summary>The body's mesh a little thicker: each point pushed out along its normal, as much as it moves with the
         /// arms, legs or body (the neck, hands and feet as made: the head, the grip and the steps fit as before). Made once.</summary>

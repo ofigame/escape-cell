@@ -407,6 +407,7 @@ namespace SquashBot.Gameplay
         private GridPos FlankGoal(Guard g, int near, int reach)
         {
             var target = robot.Position;
+            if (LaneX.HasValue && g == challengeFoe) return target; // (the lane duel: straight along the line)
             if (near > 6) return FlankSpot(g, target, 4);
             if (near > reach) return FlankSpot(g, target, Mathf.Max(1, reach));
             return target;

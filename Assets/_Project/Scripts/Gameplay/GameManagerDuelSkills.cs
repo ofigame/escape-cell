@@ -44,6 +44,8 @@ namespace SquashBot.Gameplay
         /// <summary>A blow struck in the air takes this much more (half a blow again; the AI game only: a live one is the server's).</summary>
         private const float JumpExtra = 0.5f;
         private float myJumpUntil, myJumpReadyAt, rivalJumpAt;
+        /// <summary>Until when the rival is in the air (its jump): a leap over it meets it there.</summary>
+        private float rivalAirUntil;
 
         private static readonly Color[] SpecialColour = { new Color(1f, 0.5f, 0.12f), new Color(0.45f, 0.85f, 1f), new Color(0.6f, 0.45f, 0.3f), new Color(0.75f, 0.4f, 1f) };
 
@@ -69,7 +71,6 @@ namespace SquashBot.Gameplay
             skillBar = DuelSkillBar.Create(chUi.BattleHud, Loc.T("move.s." + MoveSet.Special)); // (the set's special on its button)
             skillBar.Pressed += OnSkill;
             skillBar.Emoted += e => { ShowEmote(true, e); if (LiveActive) LiveNet.Emote(e); };
-            skillBar.CamSwitched += () => { DuelSideCam = !DuelSideCam; skillBar?.Shout(Loc.T(DuelSideCam ? "duel.camSide" : "duel.camStage"), new Color(0.6f, 0.8f, 1f)); };
             skillBar.SetMeters(0f, 0f);
             DropRings();
             myRing = FootRing.Make(new Color(0.25f, 0.6f, 1f), 3f, true); // (wider than foi with its cape and shield; a soft light over it)
@@ -338,6 +339,7 @@ namespace SquashBot.Gameplay
                 {
                     if (d.x == 0 && d.y == 0) continue;
                     var p = new GridPos(victim.x + d.x * k, victim.y + d.y * k);
+                    if (LaneOn && p.x != laneX) continue;
                     if (grid.InBounds(p) && grid.IsStandable(p) && !grid.IsOccupied(p)) return p;
                 }
             return null;
@@ -572,6 +574,7 @@ namespace SquashBot.Gameplay
             var d = new Vector2(w.x - from.x, w.z - from.z);
             if (d.sqrMagnitude < 1e-4f) return;
             var step = Mathf.Abs(d.x) >= Mathf.Abs(d.y) ? new GridPos(System.Math.Sign(d.x), 0) : new GridPos(0, System.Math.Sign(d.y));
+            if (LaneOn) step = new GridPos(0, d.y >= 0f ? 1 : -1); // (the lane duel: back along the line)
             for (int n = tiles; n >= 1; n--)
             {
                 var to = new GridPos(at.x + step.x * n, at.y + step.y * n);
@@ -672,6 +675,140 @@ namespace SquashBot.Gameplay
             AudioManager.PlaySfx(Sfx.Hop, 1f, 1.1f);
         }
 
+        /// <summary>
+        /// The lane duel's flick: straight up, a jump on the spot (a blow in the air knocks the rival down); leaning, a
+        /// leap that way along the line, further the more it leans (one to three tiles); leaning hard toward the rival,
+        /// a leap right over it, landing behind it.
+        /// </summary>
+        private void LaneJump(Vector2 flick, bool curl = false)
+        {
+            if (Time.time < myJumpReadyAt || !robot.IsAlive || moveBusy || DuelCinematic) return;
+            float lean = Mathf.Atan2(Mathf.Abs(flick.x), flick.y) * Mathf.Rad2Deg; // (0 straight up .. 70 nearly flat)
+            if (lean < 18f && !curl) { Jump(); return; }
+            if (lean < 18f) { myJumpReadyAt = Time.time + 0.9f; myJumpUntil = Time.time + 0.65f; if (challengeRun) PlayStyle.Jump(); cameraRig.StartCoroutine(LaneLeap(robot.Position, true)); return; } // (curled: a somersault on the spot)
+            myJumpReadyAt = Time.time + 0.9f;
+            if (challengeRun) PlayStyle.Jump();
+            int dir = flick.x > 0f ? 1 : -1; // (the screen's right is up the lane)
+            var me = robot.Position;
+            var foe = hunt.ChallengeFoeTile;
+            bool toward = foe.HasValue && System.Math.Sign(foe.Value.y - me.y) == dir;
+            GridPos? land = null;
+            bool over = false;
+            if (lean >= 48f && toward && System.Math.Abs(foe.Value.y - me.y) <= 6)
+            {
+                // over the rival: the first free tile behind it (two, then one, then three)
+                foreach (int k in new[] { HuntSystem.DuelGap, HuntSystem.DuelGap - 1, HuntSystem.DuelGap + 1 })
+                {
+                    var p = new GridPos(laneX, foe.Value.y + dir * k);
+                    if (grid.InBounds(p) && grid.IsStandable(p) && !grid.IsOccupied(p) && !grid.IsGap(p)) { land = p; over = true; break; }
+                }
+            }
+            if (!land.HasValue)
+            {
+                int far = Mathf.Clamp(Mathf.RoundToInt(Mathf.Lerp(1f, 3f, Mathf.InverseLerp(18f, 48f, lean))), 1, 3);
+                for (int k = far; k >= 1 && !land.HasValue; k--)
+                {
+                    var p = new GridPos(laneX, me.y + dir * k);
+                    if (foe.HasValue && toward && System.Math.Abs(foe.Value.y - p.y) < HuntSystem.DuelGap) continue; // (never inside the duel's gap)
+                    if (foe.HasValue && toward && System.Math.Sign(foe.Value.y - p.y) != dir) continue; // (only a hard lean goes over)
+                    if (grid.InBounds(p) && grid.IsStandable(p) && !grid.IsOccupied(p) && !grid.IsGap(p)) land = p;
+                }
+            }
+            if (!land.HasValue) { Jump(); return; }
+            myInvulnUntil = Time.time + (over ? 0.7f : 0.5f); // (in the air: the rival's swing goes under)
+            if (over && !LiveActive && Time.time > rivalAirUntil && Random.value < 0.25f) cameraRig.StartCoroutine(RivalBlockJump()); // (now and then it jumps to meet foi)
+            if (over) cameraRig.StartCoroutine(LeapOver(robot.Position, land.Value, curl));
+            else cameraRig.StartCoroutine(LaneLeap(land.Value, curl));
+        }
+
+        /// <summary>The rival jumps straight up to meet foi's leap over it (a moment after foi takes off).</summary>
+        private IEnumerator RivalBlockJump()
+        {
+            yield return new WaitForSeconds(0.08f);
+            var skin = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
+            if (skin == null || !challengeRun || chPhase != ChPhase.Duel) yield break;
+            skin.Hop(1.4f, 0.65f);
+            rivalAirUntil = Time.time + 0.65f;
+            AudioManager.PlaySfx(Sfx.Hop, 1f, 1.0f);
+        }
+
+        private IEnumerator LaneLeap(GridPos land, bool flip)
+        {
+            moveBusy = true;
+            AudioManager.PlaySfx(Sfx.Hop, 1f, 1.2f);
+            fx.Burst(robot.transform.position + Vector3.up * 0.2f, new Color(0.9f, 0.9f, 1f), new Color(1.5f, 1.5f, 2f), 10, 3f);
+            yield return LeapToTile(true, land, flip ? 2.4f : 1.4f, flip ? 0 : -1); // (curled: higher, with a somersault)
+            FaceEachOther();
+            moveBusy = false;
+        }
+
+        /// <summary>
+        /// The leap over the rival: high, with a somersault, landing behind it. If the rival is in the air as foi comes
+        /// over it (its own jump), they crash: sparks where they meet, both shaken, and foi drops back to its own side.
+        /// </summary>
+        private IEnumerator LeapOver(GridPos start, GridPos land, bool flip)
+        {
+            moveBusy = true;
+            var model = robot.Visual;
+            if (model == null) { moveBusy = false; yield break; }
+            AudioManager.PlaySfx(Sfx.Hop, 1f, 0.9f);
+            fx.Burst(robot.transform.position + Vector3.up * 0.2f, new Color(0.9f, 0.9f, 1f), new Color(1.5f, 1.5f, 2f), 14, 3.5f);
+            var dbl = StuntDouble.Make(model);
+            bool crashed = false;
+            try
+            {
+                var from = dbl.transform.position;
+                var to = GridView.ToWorld(land) + Vector3.up * GridView.SurfaceY;
+                var flat = to - from; flat.y = 0f;
+                var face = flat.sqrMagnitude > 0.001f ? Quaternion.LookRotation(flat) : dbl.transform.rotation;
+                const float T = 0.62f, Height = 5.2f; // (well over the rival's head)
+                float t = 0f;
+                for (; t < 1f; )
+                {
+                    t = Mathf.Min(1f, t + Time.unscaledDeltaTime / T);
+                    float k = t * t * (3f - 2f * t);
+                    dbl.transform.position = Vector3.Lerp(from, to, k) + Vector3.up * Mathf.Sin(t * Mathf.PI) * Height;
+                    dbl.transform.rotation = face * (flip ? Quaternion.Euler(360f * k, 0f, 0f) : Quaternion.Euler(Mathf.Sin(t * Mathf.PI) * -25f, 0f, 0f)); // (curled: a somersault; straight: a leaning leap)
+                    // over the rival while it is up too: they meet in the air
+                    if (t > 0.3f && t < 0.6f && Time.time < rivalAirUntil && !LiveActive) { crashed = true; break; }
+                    yield return null;
+                }
+                if (crashed)
+                {
+                    var meet = dbl.transform.position;
+                    fx.Burst(meet, new Color(1f, 0.9f, 0.6f), new Color(3f, 2.6f, 1.4f), 40, 7f);
+                    Shockwave.Create(meet, 1.6f, new Color(1f, 0.9f, 0.6f));
+                    AudioManager.PlaySfx(Sfx.Impact, 1f, 0.8f);
+                    cameraRig.Shake(0.7f);
+                    skillBar?.Shout(Loc.T("duel.clash"), new Color(1f, 0.8f, 0.4f));
+                    var rs = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
+                    if (rs != null) { rs.Stagger(meet, 0.6f); rs.Shudder(meet, 1f); }
+                    hunt.StunFoe(0.4f);
+                    // foi falls back down to its own side, tumbling
+                    var back = GridView.ToWorld(start) + Vector3.up * GridView.SurfaceY;
+                    var at = dbl.transform.position;
+                    var rot = dbl.transform.rotation;
+                    for (float u = 0f; u < 1f; )
+                    {
+                        u = Mathf.Min(1f, u + Time.unscaledDeltaTime / 0.4f);
+                        var p = Vector3.Lerp(at, back, u);
+                        p.y = Mathf.Lerp(at.y, back.y, u * u) + Mathf.Sin(u * Mathf.PI) * 0.6f;
+                        dbl.transform.position = p;
+                        dbl.transform.rotation = rot * Quaternion.Euler(-200f * u, 0f, 0f);
+                        yield return null;
+                    }
+                    robot.Spawn(grid, start);
+                }
+                else robot.Spawn(grid, land);
+                FaceEachOther();
+            }
+            finally { if (dbl != null) dbl.Done(); }
+            var skin = model.GetComponentInChildren<SkinnedHero>();
+            if (crashed) { if (skin != null) { skin.Stagger(GridView.ToWorld(land), 0.6f); skin.Shudder(GridView.ToWorld(land), 1f); } }
+            else { skillBar?.Shout(Loc.T("duel.over"), new Color(0.6f, 0.9f, 1f)); hunt.StunFoe(0.25f); cameraRig.Shake(0.25f); }
+            moveBusy = false;
+        }
+
         /// <summary>A blow struck in the air: the head of the one struck flies off and comes back, and it takes a little more.</summary>
         private void AirStrike(bool mine)
         {
@@ -694,6 +831,7 @@ namespace SquashBot.Gameplay
             var skin = model != null ? model.GetComponentInChildren<SkinnedHero>() : null;
             if (skin == null) yield break;
             skin.Hop(1.1f, 0.65f);
+            rivalAirUntil = Time.time + 0.65f;
             AudioManager.PlaySfx(Sfx.Hop, 1f, 1.0f);
             yield return new WaitForSeconds(0.32f);
             if (!challengeRun || chPhase != ChPhase.Duel || DuelCinematic || !hunt.ChallengeFoeAt.HasValue) yield break;

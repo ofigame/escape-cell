@@ -56,6 +56,13 @@ namespace SquashBot.Data
 
         /// <summary>How far the play camera stands from the robot: 0 near … 3 far (default 2).</summary>
         /// <summary>The camera drops lower and closer while foi fights robots or vanG (not for bugs).</summary>
+        /// <summary>The lane duel (on, the trial): both foi on one line across the screen, moving only left and right.</summary>
+        public static bool LaneDuel
+        {
+            get => Prefs.GetInt("sb_lane_duel", 1) == 1;
+            set { Prefs.SetInt("sb_lane_duel", value ? 1 : 0); Prefs.Save(); }
+        }
+
         public static bool CombatCamera
         {
             get => Prefs.GetInt("sb_combat_cam", 1) == 1;

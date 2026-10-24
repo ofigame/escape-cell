@@ -32,7 +32,12 @@ namespace SquashBot.Gameplay
         /// <summary>Free walking (stick mode): the floating stick's push, -1..1 on each screen axis.</summary>
         public Vector2? stick;
 
-        public bool IsEmpty => !move.HasValue && !jump && !holdStart && !holdPosition.HasValue && !holdEnd && !tap.HasValue && !spin && !stick.HasValue;
+        /// <summary>A quick flick upward (the lane duel's jump): its direction on the screen, x right, y up (normalised).</summary>
+        public Vector2? flick;
+        /// <summary>The flick ended in a curl (a loop drawn at its end): a somersault.</summary>
+        public bool flickCurl;
+
+        public bool IsEmpty => !move.HasValue && !jump && !holdStart && !holdPosition.HasValue && !holdEnd && !tap.HasValue && !spin && !stick.HasValue && !flick.HasValue;
     }
 
     /// <summary>
@@ -55,6 +60,48 @@ namespace SquashBot.Gameplay
 
         private readonly Camera cam;
         private bool tracking;
+
+        /// <summary>A quick flick upward is a jump (the lane duel: up and down on the stick have no other use).</summary>
+        public bool FlickEnabled;
+        /// <summary>The finger's recent places and times, for a flick's speed.</summary>
+        private readonly Vector2[] trail = new Vector2[16];
+        private readonly float[] trailAt = new float[16];
+        private int trailN;
+        /// <summary>A flick seen, waiting a moment for a curl at its end (or the finger lifted).</summary>
+        private Vector2? pendingFlick;
+        private float pendingAt, curlTurn;
+        private Vector2 curlDir, curlPos;
+        /// <summary>How much the path must turn after the flick to be a curl (degrees): about a half loop.</summary>
+        private const float CurlTurn = 110f;
+
+        /// <summary>The waiting flick goes out (a curl if the path turned enough after it).</summary>
+        private InputCommand FireFlick()
+        {
+            var cmd = new InputCommand { flick = pendingFlick, flickCurl = curlTurn >= CurlTurn };
+            pendingFlick = null;
+            consumed = true;
+            StickActive = false;
+            lastTapTime = -10f;
+            return cmd;
+        }
+
+        /// <summary>A flick: the finger went up at least a third of an inch within the last fifth of a second, more up than
+        /// sideways (up to about 70 degrees from straight up). Its direction, or null.</summary>
+        private Vector2? Flick(Vector2 pos)
+        {
+            float now = Time.unscaledTime;
+            trail[trailN % trail.Length] = pos; trailAt[trailN % trail.Length] = now; trailN++;
+            if (!FlickEnabled) return null;
+            float dpi = Screen.dpi > 0 ? Screen.dpi : 160f;
+            for (int k = 1; k < Mathf.Min(trailN, trail.Length); k++)
+            {
+                int i = (trailN - 1 - k) % trail.Length;
+                if (now - trailAt[i] > 0.2f) break;
+                var v = pos - trail[i];
+                if (v.y > 0.32f * dpi && v.y >= Mathf.Abs(v.x) * 0.36f) { trailN = 0; return v.normalized; }
+            }
+            return null;
+        }
         private bool consumed;
         private bool chained;
         private float lastMoveTime;
@@ -162,6 +209,8 @@ namespace SquashBot.Gameplay
             if (pressed && !tracking)
             {
                 heldDir = null;
+                trailN = 0;
+                pendingFlick = null;
                 tracking = true;
                 consumed = false;
                 chained = false;
@@ -223,6 +272,20 @@ namespace SquashBot.Gameplay
             if (StickMode && !ScreenMode) // never in the tunnels (they keep their swipes and taps)
             {
                 float dpi = Screen.dpi > 0 ? Screen.dpi : 160f;
+                if (!pressed && pendingFlick.HasValue) { tracking = false; return FireFlick(); } // (lifted: the flick goes, curled or not)
+                if (pendingFlick.HasValue)
+                {
+                    // after the flick: how far the path turns (a loop at its end is a somersault)
+                    var seg = pos - curlPos;
+                    if (seg.magnitude > 0.04f * dpi)
+                    {
+                        var d = seg.normalized;
+                        curlTurn += Mathf.Abs(Vector2.SignedAngle(curlDir, d));
+                        curlDir = d; curlPos = pos;
+                    }
+                    if (curlTurn >= CurlTurn || Time.unscaledTime - pendingAt > 0.25f) return FireFlick();
+                    return default;
+                }
                 if (!pressed)
                 {
                     tracking = false;
@@ -233,6 +296,8 @@ namespace SquashBot.Gameplay
                     return new InputCommand { jump = RegisterTap(), tap = quickTap ? (hasPointer ? pos : lastPos) : (Vector2?)null };
                 }
                 if (consumed) return default;
+                // a quick flick upward: a jump (the finger then walks no more until it is lifted)
+                if (Flick(pos) is Vector2 flick) { pendingFlick = flick; pendingAt = Time.unscaledTime; curlTurn = 0f; curlDir = flick; curlPos = pos; StickActive = false; return default; } // (a moment's wait: a curl may follow)
                 var delta = pos - startPos;
                 if (!StickActive && delta.magnitude > 0.08f * dpi) { StickActive = true; lastTapTime = -10f; }
                 if (!StickActive) return default;

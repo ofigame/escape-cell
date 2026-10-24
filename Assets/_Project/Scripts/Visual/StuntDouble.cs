@@ -30,11 +30,11 @@ namespace SquashBot.Visual
             {
                 if (!sk.enabled || sk.sharedMesh == null) continue;
                 var baked = new Mesh();
-                sk.BakeMesh(baked, true);
+                sk.BakeMesh(baked, true); // (the body's scale baked in: the part itself unscaled, never twice)
                 var p = new GameObject("Part").transform;
                 p.SetParent(go.transform, false);
                 p.SetPositionAndRotation(sk.transform.position, sk.transform.rotation);
-                p.localScale = Divide(sk.transform.lossyScale, go.transform.lossyScale);
+                p.localScale = Divide(Vector3.one, go.transform.lossyScale);
                 p.gameObject.AddComponent<MeshFilter>().sharedMesh = baked;
                 var copy = p.gameObject.AddComponent<MeshRenderer>();
                 copy.sharedMaterials = sk.sharedMaterials;

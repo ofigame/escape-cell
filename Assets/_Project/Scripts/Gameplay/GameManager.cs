@@ -672,8 +672,8 @@ namespace SquashBot.Gameplay
             var front = robot.Visual != null ? robot.Visual.forward : robot.transform.forward; // the way its face looks
             front.y = 0f;
             front = front.sqrMagnitude > 0.01f ? front.normalized : Vector3.back;
-            var aim = robot.transform.position + Vector3.up * -0.2f;
-            var eye = aim + front * 5.1f + Vector3.up * 0.45f; // far enough that a dance's jump stays in the picture
+            var aim = robot.transform.position + Vector3.up * -0.35f; // (foi whole between the top bar and the panel, head to feet)
+            var eye = aim + front * 7f + Vector3.up * 0.45f; // far enough that a dance's jump stays in the picture
             cameraRig.Chase(eye, Quaternion.LookRotation(aim - eye), 40f);
             garageView = true;
         }
@@ -1028,6 +1028,9 @@ namespace SquashBot.Gameplay
                 case SettingKind.CombatCamera:
                     SaveData.CombatCamera = !SaveData.CombatCamera;
                     break;
+                case SettingKind.LaneDuel:
+                    SaveData.LaneDuel = !SaveData.LaneDuel;
+                    break;
                 case SettingKind.Challenge:
                     // Off: nobody can fight the player's army any more (the server is told) and the mode closes.
                     Challenge.Enabled = !Challenge.Enabled;
@@ -1319,6 +1322,7 @@ namespace SquashBot.Gameplay
                 var dir = r.normalized * s.x + f.normalized * s.y;
                 if (dir.sqrMagnitude > 0.0001f) vel = dir.normalized * speed;
             }
+            if (LaneOn) { vel.x = Mathf.Clamp((laneX - robot.transform.position.x) * 8f, -6f, 6f); } // (the lane duel: left and right only, held on the line)
             vel = RuleWalk(vel, Time.deltaTime); // (a slippery floor: foi slides on)
             robot.FreeStep(vel, Time.deltaTime, FloorWalkable);
             // Pushing on against a hole: a leap over it (as a swipe into a hole used to).
@@ -1332,7 +1336,8 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>A tile foi may walk onto freely on a floor: solid, free, not fire, not a step too high.</summary>
-        private bool FloorWalkable(GridPos p) => grid.IsStandable(p) && !grid.IsGap(p) && !grid.IsLava(p) && FloorRelief.StepOk(robot.Position, p) && !(twoVsTwo && (hunt.PartnerAt(p) || hunt.NearPartner(robot.Position, p)));
+        private bool FloorWalkable(GridPos p) => grid.IsStandable(p) && !grid.IsGap(p) && !grid.IsLava(p) && FloorRelief.StepOk(robot.Position, p) && !(twoVsTwo && (hunt.PartnerAt(p) || hunt.NearPartner(robot.Position, p))) && !(LaneOn && p.x != laneX && System.Math.Abs(p.x - laneX) >= System.Math.Abs(robot.Position.x - laneX))
+            && !(challengeRun && chPhase == ChPhase.Duel && hunt.ChallengeFoeTile is GridPos foeAt && HuntSystem.Chebyshev(p, foeAt) < HuntSystem.DuelGap && HuntSystem.Chebyshev(p, foeAt) < HuntSystem.Chebyshev(robot.Position, foeAt)); // (the duel: never closer than its gap)
 
         private bool HeldStepOk(Direction dir)
         {
@@ -1541,9 +1546,11 @@ namespace SquashBot.Gameplay
                 else if (command.tap.HasValue && level.mission == MissionType.Hunt && TapStrike(command.tap.Value)) input.CancelTap();
                 else if (command.tap.HasValue && level.mission == MissionType.Hunt && input.StickMode) { KeyStrike(); input.CancelTap(); } // nothing tapped: a blow ahead
                 else if (command.jump) robot.TryJump();
-                else if (command.move.HasValue && (!command.held || HeldStepOk(command.move.Value))) robot.TryMove(command.move.Value, command.pace);
+                else if (command.move.HasValue && (!command.held || HeldStepOk(command.move.Value)) && !(LaneOn && (command.move.Value == Direction.PlusX || command.move.Value == Direction.MinusX))) robot.TryMove(command.move.Value, command.pace);
                 if (input.StickMode) FloorWalk(command.stick);
+                if (command.flick is Vector2 flick && LaneOn && challengeRun && chPhase == ChPhase.Duel) LaneJump(flick, command.flickCurl);
             }
+            input.FlickEnabled = LaneOn && challengeRun && chPhase == ChPhase.Duel;
             ui.ShowStick(input.StickMode && input.StickActive && !hovering, input.StickBase, input.StickFinger);
 
             ui.SetWarning(hazards.AnyWarningActive);

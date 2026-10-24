@@ -188,6 +188,7 @@ namespace SquashBot.Gameplay
                     AudioManager.PlaySfx(Sfx.Hop, 1f, 0.5f);
                     yield return new WaitForSeconds(0.3f);
                     var land = LandingBeside(me, other);
+                    if (land.HasValue && HuntSystem.Chebyshev(land.Value, other) > HuntSystem.Chebyshev(me, other)) land = null; // (already close: never pulled round behind the mover)
                     if (land.HasValue && !LiveActive)
                     {
                         if (mine) { hunt.StunFoe(0.9f); yield return hunt.ShoveFoe(land.Value, 0.3f); }
@@ -275,7 +276,7 @@ namespace SquashBot.Gameplay
                 case SpecialKind.Teleport:
                 {
                     // gone in a purple flash, out at the other's side at once, and a strike from there; the next blow harder
-                    var to = TileSide(other, me, HuntSystem.DuelGap);
+                    var to = LaneOn ? TileAway(other, me, HuntSystem.DuelGap) ?? LandingBeside(other, me) : TileSide(other, me, HuntSystem.DuelGap); // (the lane duel: out behind it on the line, or in front when its back is to the edge)
                     MoveFx.Pillar(meAt, new Color(0.75f, 0.45f, 1f), 0.6f, 3f, 0.4f);
                     fx.Burst(meAt + Vector3.up * 0.8f, new Color(0.75f, 0.5f, 1f), new Color(2f, 1.2f, 3f), 36, 5f);
                     AudioManager.PlaySfx(Sfx.Hop, 1f, 1.6f);

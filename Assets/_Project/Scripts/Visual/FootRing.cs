@@ -47,7 +47,7 @@ namespace SquashBot.Visual
         {
             if (!at.HasValue) { if (gameObject.activeSelf) gameObject.SetActive(false); return; }
             if (!gameObject.activeSelf) gameObject.SetActive(true);
-            transform.position = at.Value + Vector3.up * 0.06f;
+            transform.position = at.Value + Vector3.up * 0.13f; // (over the platform's plain middle)
             float k = 0.85f + 0.15f * Mathf.Sin(Time.unscaledTime * 3f);
             mat.SetColor("_BaseColor", colour * Glow * k);
         }

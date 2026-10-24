@@ -21,6 +21,7 @@ namespace SquashBot.UI
         Language,
         Camera,
         CombatCamera,
+        LaneDuel,
         Graphics,
         TestMode
     }
@@ -1177,6 +1178,7 @@ namespace SquashBot.UI
                 (SettingKind.Language, "settings.language"),
                 (SettingKind.Camera, "settings.camera"),
                 (SettingKind.CombatCamera, "settings.combatCam"),
+                (SettingKind.LaneDuel, "settings.lane"),
                 (SettingKind.Graphics, "settings.graphics"),
                 (SettingKind.Challenge, "settings.challenge"),
 #if !REAL_ADS && (TEST_TOOLS || !((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR))
@@ -1273,6 +1275,7 @@ namespace SquashBot.UI
             settingValues[SettingKind.Language].text = Loc.T("lang.name");
             settingValues[SettingKind.Camera].text = Loc.T("camDist." + SaveData.CameraDistance);
             SetSetting(SettingKind.CombatCamera, SaveData.CombatCamera);
+            SetSetting(SettingKind.LaneDuel, SaveData.LaneDuel);
             var gfx = Loc.T("gfx." + GraphicsQuality.Current);
             settingValues[SettingKind.Graphics].text = GraphicsQuality.Choice.HasValue ? gfx : Loc.F("gfx.auto", gfx);
             settingValues[SettingKind.Graphics].color = Palette.UiCyan;
