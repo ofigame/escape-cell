@@ -412,7 +412,7 @@ namespace SquashBot.Gameplay
         /// Time slows; the one struck (foi's own, or the rival) flies back off its feet and lands flat on its back, then
         /// gets up; the fight goes on. Nothing if it fell for good (the knock-down shows itself).
         /// </summary>
-        private IEnumerator BigMoment(bool meStruck)
+        private IEnumerator BigMoment(bool meStruck, float height = 1.5f, int tiles = 2)
         {
             var model = meStruck ? robot.Visual : hunt.ChallengeFoeModel;
             if (model == null || !challengeRun || (meStruck ? !robot.IsAlive : hunt.ChallengeFoeDown)) yield break;
@@ -425,8 +425,8 @@ namespace SquashBot.Gameplay
             var from = meStruck ? (hunt.ChallengeFoeAt ?? at) : robot.transform.position;
             fx.Burst(at + Vector3.up * 0.6f, new Color(1f, 0.85f, 0.4f), new Color(3f, 2.4f, 0.8f), 26, 5f);
             AudioManager.PlaySfx(Sfx.Impact, 1f, 0.6f);
-            Fling(meStruck, from, 1.5f, 2);
-            yield return new WaitForSecondsRealtime(0.75f);
+            Fling(meStruck, from, height, tiles);
+            yield return new WaitForSecondsRealtime(0.55f + 0.1f * height);
             cameraRig.Shake(0.6f); // (landing)
             cameraRig.StartCoroutine(FaceWhenUp(meStruck));
             fx.Burst(at + Vector3.up * 0.2f, new Color(0.8f, 0.7f, 0.55f), new Color(1.4f, 1.2f, 1f), 16, 3f);
