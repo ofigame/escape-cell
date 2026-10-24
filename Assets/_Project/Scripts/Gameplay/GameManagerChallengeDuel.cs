@@ -519,6 +519,9 @@ namespace SquashBot.Gameplay
             UpdateDuelZone(dt);
             UpdateDuelSkills(dt);
             chDuelLeft = Mathf.Max(0f, chDuelLeft - dt);
+            // the distance the player keeps, sampled once a second (its style, for its friends' copy of it)
+            if (Mathf.FloorToInt(chDuelLeft) != Mathf.FloorToInt(chDuelLeft + dt) && hunt.ChallengeFoeTile.HasValue)
+                PlayStyle.Sample(HuntSystem.Chebyshev(robot.Position, hunt.ChallengeFoeTile.Value));
             RefreshDuelClock();
             RefreshSquadBar();
             if (rivalShieldUntil > 0f && Time.time > rivalShieldUntil) { rivalShieldUntil = 0f; hunt.EndFoeShield(); }

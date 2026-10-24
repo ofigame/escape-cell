@@ -85,7 +85,7 @@ namespace SquashBot.Data
                 case Kind.Basic: DuelChests.Add(ChestTier.Basic); break;
                 case Kind.Bronze: DuelChests.Add(ChestTier.Mid); break;
                 case Kind.Cores: CoreParts.Add(g.amount); break;
-                case Kind.Emote: SaveData.Coins += 1000; Prefs.SetInt("sb_emote_season_" + Month, 1); break;
+                case Kind.Emote: Prefs.SetInt("sb_emote_season_" + Month, 1); break; // (the season's emote, in the duel's emote row)
                 case Kind.Paint:
                 {
                     // the season's paint: a paint not owned yet from the workshop (else gold)

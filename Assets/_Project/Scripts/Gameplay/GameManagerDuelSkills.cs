@@ -230,6 +230,7 @@ namespace SquashBot.Gameplay
                 case DuelSkillBar.Move.Breaker:
                     if (myMeter < 1f || rivalCombo < 2) return;
                     if (Time.time < rivalIronUntil) { skillBar.Shout(Loc.T("move.u.IronBody"), new Color(0.85f, 0.85f, 0.9f)); return; } // (its iron body: no breaking it)
+                    PlayStyle.Breaker();
                     myMeter -= 1f;
                     rivalCombo = 0;
                     Shockwave.Create(robot.transform.position, 2.4f, new Color(0.4f, 0.8f, 1f));
@@ -255,6 +256,7 @@ namespace SquashBot.Gameplay
                 case DuelSkillBar.Move.Ultimate:
                     if (myMeter < UltiCost) return; // (the quick-ulti week: two parts)
                     myMeter = 0f;
+                    PlayStyle.Ulti(hunt.ChallengeFoeHealth);
                     UseUlti(true, myUlti); // (the set's ultimate)
                     break;
             }
@@ -628,6 +630,7 @@ namespace SquashBot.Gameplay
         {
             if (Time.time < myJumpReadyAt || !robot.IsAlive) return;
             myJumpReadyAt = Time.time + 0.9f;
+            if (challengeRun) PlayStyle.Jump();
             myJumpUntil = Time.time + 0.65f;
             var skin = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null;
             if (skin != null) skin.Hop(1.1f, 0.65f);
@@ -713,7 +716,7 @@ namespace SquashBot.Gameplay
             if (mine && Time.unscaledTime < emoteAt) return;
             if (mine) emoteAt = Time.unscaledTime + 1.5f;
             var at = mine ? robot.transform.position : hunt.ChallengeFoeAt ?? lastFoeAt;
-            FloatAt(at + Vector3.up * 1.3f, Loc.T("duel.em." + Mathf.Clamp(e, 0, 5)), mine ? new Color(0.45f, 0.75f, 1f) : new Color(1f, 0.5f, 0.45f));
+            FloatAt(at + Vector3.up * 1.3f, Loc.T("duel.em." + Mathf.Clamp(e, 0, Emotes.Count - 1)), mine ? new Color(0.45f, 0.75f, 1f) : new Color(1f, 0.5f, 0.45f));
             AudioManager.PlaySfx(Sfx.Click, 0.7f, mine ? 1.5f : 1.2f);
         }
 
@@ -768,7 +771,7 @@ namespace SquashBot.Gameplay
                 skillBar?.Shout(Loc.T("duel.broken"), new Color(1f, 0.45f, 0.4f));
                 return;
             }
-            if (dist <= 3.4f && Time.time > rivalJumpAt && Random.value < 0.06f + 0.05f * bold)
+            if (dist <= 3.4f && Time.time > rivalJumpAt && Random.value < (t != null ? 0.03f + 0.12f * t.jump : 0.06f + 0.05f * bold))
             {
                 rivalJumpAt = Time.time + 9f;
                 cameraRig.StartCoroutine(RivalJumpStrike());

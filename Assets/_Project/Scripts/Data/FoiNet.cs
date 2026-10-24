@@ -553,6 +553,24 @@ namespace SquashBot.Data
             done(code == 200);
         }
 
+        [Serializable] public class WeeklyRow { public string name; public int wins; public bool me; }
+        [Serializable] public class WeeklyBoard { public int wins; public WeeklyRow[] list; }
+
+        /// <summary>A weekly rule duel won (the server's board).</summary>
+        public static IEnumerator WeeklyWin()
+        {
+            if (!Registered) yield break;
+            yield return Send("POST", "/weekly/win", "{}", true, (c, b) => { });
+        }
+
+        /// <summary>The weekly rule mode's board (null: offline).</summary>
+        public static IEnumerator Weekly(Action<WeeklyBoard> done)
+        {
+            long code = 0; string body = null;
+            yield return Authed("GET", "/weekly", null, (c, b) => { code = c; body = b; });
+            done(code == 200 ? TryParse<WeeklyBoard>(body) : null);
+        }
+
         /// <summary>A step of the cell's weekly goal taken (true: given now).</summary>
         public static IEnumerator ClanGoal(int step, Action<bool> done)
         {

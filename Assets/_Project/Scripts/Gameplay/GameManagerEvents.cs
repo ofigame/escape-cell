@@ -94,6 +94,7 @@ namespace SquashBot.Gameplay
         {
             if (chMode == 2 && won)
             {
+                cameraRig.StartCoroutine(FoiNet.WeeklyWin()); // (the week's board)
                 int step = WeeklyMode.RecordWin();
                 return step >= 0 ? Loc.T("wk.gift" + step) : Loc.F("wk.progress", WeeklyMode.Wins);
             }

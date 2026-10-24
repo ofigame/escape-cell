@@ -19,6 +19,8 @@ namespace SquashBot.Data
         public float reactMin, reactMax;
         /// <summary>Shares: blows that miss, shields at the wrong moment, a heart used early.</summary>
         public float whiff, badShield, earlyHeart;
+        /// <summary>How often it jumps in for a blow from the air (0..1; a copy takes its player's).</summary>
+        public float jump = 0.3f;
         /// <summary>The combo blow from which it tries to break the player's combo.</summary>
         public int breakerFrom;
         /// <summary>Its health against the usual (the first duels' bots are a little softer).</summary>

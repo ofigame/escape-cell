@@ -114,12 +114,16 @@ namespace SquashBot.UI
             talkButton.targetGraphic = talkFace;
             talkButton.onClick.AddListener(() => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.3f); emotes.gameObject.SetActive(!emotes.gameObject.activeSelf); });
             talk.gameObject.AddComponent<ButtonPress>();
-            emotes = UiFactory.Box("Emotes", root, new Vector2(0f, 0f), new Vector2(40f, 470f), new Vector2(760f, 84f));
+            // every emote owned (six from the start, more from the duel level and the season), six to a row
+            var owned = Data.Emotes.All;
+            int rows = (owned.Count + 5) / 6;
+            emotes = UiFactory.Box("Emotes", root, new Vector2(0f, 0f), new Vector2(40f, 470f + (rows - 1) * 42f), new Vector2(760f, 84f * rows));
             emotes.pivot = new Vector2(0f, 0.5f);
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < owned.Count; i++)
             {
-                int e = i;
-                var chip = Flat.Button(emotes, Loc.T("duel.em." + i), new Vector2(0f, 0.5f), new Vector2(62f + i * 126f, 0f), new Vector2(118f, 76f), Flat.CardHi, Flat.Text, () => { emotes.gameObject.SetActive(false); Emoted?.Invoke(e); }, 24f);
+                int e = owned[i];
+                float y = (rows - 1) * 42f - (i / 6) * 84f;
+                var chip = Flat.Button(emotes, Loc.T("duel.em." + e), new Vector2(0f, 0.5f), new Vector2(62f + (i % 6) * 126f, y), new Vector2(118f, 76f), e == Data.Emotes.Season ? new Color(0.65f, 0.45f, 1f) : Flat.CardHi, Flat.Text, () => { emotes.gameObject.SetActive(false); Emoted?.Invoke(e); }, 22f);
                 ((RectTransform)chip.transform).pivot = new Vector2(0.5f, 0.5f);
             }
             emotes.gameObject.SetActive(false);

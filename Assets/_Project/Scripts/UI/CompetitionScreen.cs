@@ -226,6 +226,19 @@ namespace SquashBot.UI
 
         private IEnumerator Cup()
         {
+            yield return CupOnly();
+            // the weekly rule mode's board under the cup
+            FoiNet.WeeklyBoard board = null;
+            yield return FoiNet.Weekly(b => board = b);
+            if (board?.list == null) yield break;
+            var head = Card(70f, new Color(0f, 0f, 0f, 0f));
+            Text(head, Loc.F("wk.board", Loc.T("wk.rule." + WeeklyMode.ThisWeek), board.wins), new Vector2(0f, 0.5f), new Vector2(20f, 0f), new Vector2(900f, 60f), 30f, Flat.Gold, bold: true);
+            for (int i = 0; i < board.list.Length; i++) Line(i + 1, -1, board.list[i].name, board.list[i].wins.ToString(), board.list[i].me);
+            Fit();
+        }
+
+        private IEnumerator CupOnly()
+        {
             Waiting();
             FoiNet.CupInfo cup = null;
             yield return FoiNet.Cup(r => cup = r);
