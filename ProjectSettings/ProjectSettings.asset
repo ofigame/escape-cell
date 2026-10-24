@@ -241,7 +241,8 @@ PlayerSettings:
   iOSLaunchScreenCustomStoryboardPath: 
   iOSLaunchScreeniPadCustomStoryboardPath: 
   iOSDeviceRequirements: []
-  iOSURLSchemes: []
+  iOSURLSchemes:
+  - foicell
   macOSURLSchemes: []
   iOSBackgroundModes: 0
   iOSMetalForceHardShadows: 0

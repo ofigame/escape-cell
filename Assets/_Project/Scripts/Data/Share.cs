@@ -8,7 +8,8 @@ namespace SquashBot.Data
     /// </summary>
     public static class Share
     {
-        public const string Link = "https://ofigame.com/foi";
+        /// <summary>The link a share carries: the invitation page with the friend code (it opens the game, or the store).</summary>
+        public static string Link => MyCode.Length == 6 ? "https://ofigame.com/foi/davet.html?k=" + MyCode : "https://ofigame.com";
 
         /// <summary>The player's friend code as last heard from the server ("" until then).</summary>
         public static string MyCode

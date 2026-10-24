@@ -19,16 +19,22 @@ public class FoiReminder extends BroadcastReceiver {
     private static final String Channel = "daily";
 
     public static void schedule(Context context, String title, String body, long atMillis) {
+        scheduleSlot(context, 0, title, body, atMillis);
+    }
+
+    /** One of a few notes (a slot each: the reminder, energy full, the weekend cup, the season's end); 0 or less cancels it. */
+    public static void scheduleSlot(Context context, int slot, String title, String body, long atMillis) {
         try {
             Intent intent = new Intent(context, FoiReminder.class);
             intent.putExtra("title", title);
             intent.putExtra("body", body);
-            PendingIntent pending = PendingIntent.getBroadcast(context, 4711, intent,
+            intent.putExtra("slot", slot);
+            PendingIntent pending = PendingIntent.getBroadcast(context, 4711 + slot * 10, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             AlarmManager alarms = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             if (alarms == null) return;
             alarms.cancel(pending);
-            alarms.set(AlarmManager.RTC_WAKEUP, atMillis, pending); // (inexact: no special permission needed)
+            if (atMillis > 0) alarms.set(AlarmManager.RTC_WAKEUP, atMillis, pending); // (inexact: no special permission needed)
         } catch (Throwable t) {
             Log.w("FoiReminder", "not scheduled", t);
         }
@@ -48,7 +54,7 @@ public class FoiReminder extends BroadcastReceiver {
             Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(context, Channel) : new Notification.Builder(context);
             b.setSmallIcon(icon).setContentTitle(intent.getStringExtra("title")).setContentText(intent.getStringExtra("body")).setAutoCancel(true);
             if (tap != null) b.setContentIntent(tap);
-            manager.notify(4713, b.build());
+            manager.notify(4713 + intent.getIntExtra("slot", 0) * 10, b.build());
         } catch (Throwable t) {
             Log.w("FoiReminder", "not shown", t);
         }

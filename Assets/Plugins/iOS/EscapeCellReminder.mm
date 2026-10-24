@@ -15,10 +15,17 @@ static id ReminderCenter()
     return ((id (*)(id, SEL))objc_msgSend)(centerClass, NSSelectorFromString(@"currentNotificationCenter"));
 }
 
-void EscapeCell_ScheduleReminder(const char* title, const char* body, double seconds)
+// One of a few notes (a slot each); seconds under a minute: the slot's note is taken back.
+void EscapeCell_ScheduleNote(int slot, const char* title, const char* body, double seconds)
 {
     id center = ReminderCenter();
-    if (center == nil || seconds < 60) return;
+    if (center == nil) return;
+    NSString* ident = [NSString stringWithFormat:@"foi.note.%d", slot];
+    if (seconds < 60)
+    {
+        ((void (*)(id, SEL, id))objc_msgSend)(center, NSSelectorFromString(@"removePendingNotificationRequestsWithIdentifiers:"), @[ident]);
+        return;
+    }
     NSString* t = [NSString stringWithUTF8String:title ? title : ""];
     NSString* b = [NSString stringWithUTF8String:body ? body : ""];
     // alert | sound | badge
@@ -39,10 +46,15 @@ void EscapeCell_ScheduleReminder(const char* title, const char* body, double sec
             ((void (*)(id, SEL, id))objc_msgSend)(content, NSSelectorFromString(@"setSound:"), sound);
         }
         id trigger = ((id (*)(id, SEL, double, BOOL))objc_msgSend)(triggerClass, NSSelectorFromString(@"triggerWithTimeInterval:repeats:"), seconds, NO);
-        id request = ((id (*)(id, SEL, id, id, id))objc_msgSend)(requestClass, NSSelectorFromString(@"requestWithIdentifier:content:trigger:"), @"foi.daily", content, trigger);
+        id request = ((id (*)(id, SEL, id, id, id))objc_msgSend)(requestClass, NSSelectorFromString(@"requestWithIdentifier:content:trigger:"), ident, content, trigger);
         ((void (*)(id, SEL, id, id))objc_msgSend)(center, NSSelectorFromString(@"addNotificationRequest:withCompletionHandler:"), request, nil);
     };
     ((void (*)(id, SEL, NSUInteger, id))objc_msgSend)(center, NSSelectorFromString(@"requestAuthorizationWithOptions:completionHandler:"), options, asked);
+}
+
+void EscapeCell_ScheduleReminder(const char* title, const char* body, double seconds)
+{
+    EscapeCell_ScheduleNote(0, title, body, seconds);
 }
 
 }

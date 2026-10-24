@@ -91,6 +91,29 @@ namespace SquashBot.Gameplay
 
         private string invitedName;
 
+        /// <summary>An invitation link opened the game: its friend code added (the player and the inviter become friends).</summary>
+        private void OnDeepLink(string url)
+        {
+            if (string.IsNullOrEmpty(url)) return;
+            int at = url.IndexOf("invite/", System.StringComparison.OrdinalIgnoreCase);
+            if (at < 0) return;
+            string code = url.Substring(at + 7).Trim('/', ' ').ToUpperInvariant();
+            if (code.Length > 6) code = code.Substring(0, 6);
+            if (code.Length != 6) return;
+            cameraRig.StartCoroutine(AcceptInviteLink(code));
+        }
+
+        private System.Collections.IEnumerator AcceptInviteLink(string code)
+        {
+            bool ok = false;
+            yield return FoiNet.EnsurePlayer(r => ok = r);
+            if (!ok) yield break;
+            string friend = null, err = null;
+            yield return FoiNet.AddFriendCode(code, (n, e) => { friend = n; err = e; });
+            if (friend != null) ui.ShowIntro(Loc.T("friends.title"), Loc.F("friends.addedCode", friend));
+            else if (err == "already") ui.ShowIntro(Loc.T("friends.title"), Loc.T("friends.err.already"));
+        }
+
         /// <summary>A duel with an away friend's copy (§5.5): their look, weapon, parts and moves, played by the AI (no rank
         /// points; it counts for the score between you, and a win tells them).</summary>
         private System.Collections.IEnumerator CopyDuel(string name)

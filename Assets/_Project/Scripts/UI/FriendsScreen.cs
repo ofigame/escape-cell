@@ -162,7 +162,7 @@ namespace SquashBot.UI
         /// <summary>The player's own friend code, to share (null: not known yet).</summary>
         public void SetMyCode(string code)
         {
-            if (codeLine != null) codeLine.text = string.IsNullOrEmpty(code) ? "" : Loc.F("friends.myCode", code);
+            if (codeLine != null) codeLine.text = string.IsNullOrEmpty(code) ? "" : Loc.F("friends.myCode", code) + "  ↗";
         }
 
         public void SetCopySetting(bool on)
@@ -179,6 +179,16 @@ namespace SquashBot.UI
         {
             codeLine = Flat.Label(p, "", new Vector2(0.5f, 1f), new Vector2(-170f, y), new Vector2(620f, 50f), 28f, Flat.Gold, TextAlignmentOptions.Left, bold: true);
             codeLine.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            // tapped: the invitation shared (the code and its link)
+            codeLine.raycastTarget = true;
+            var share = codeLine.gameObject.AddComponent<Button>();
+            share.transition = Selectable.Transition.None;
+            share.onClick.AddListener(() =>
+            {
+                if (Share.MyCode.Length != 6) return;
+                AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.2f);
+                Share.Text(Loc.F("share.invite", Share.MyCode) + " " + Share.Link);
+            });
             copyToggle = Flat.Button(p, Loc.T("friends.copyOn"), new Vector2(0.5f, 1f), new Vector2(330f, y), new Vector2(330f, 64f), Flat.CardHi, Flat.Text, () =>
             {
                 AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.2f);
