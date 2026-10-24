@@ -1332,7 +1332,7 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>A tile foi may walk onto freely on a floor: solid, free, not fire, not a step too high.</summary>
-        private bool FloorWalkable(GridPos p) => grid.IsStandable(p) && !grid.IsGap(p) && !grid.IsLava(p) && FloorRelief.StepOk(robot.Position, p);
+        private bool FloorWalkable(GridPos p) => grid.IsStandable(p) && !grid.IsGap(p) && !grid.IsLava(p) && FloorRelief.StepOk(robot.Position, p) && !(twoVsTwo && (hunt.PartnerAt(p) || hunt.NearPartner(robot.Position, p)));
 
         private bool HeldStepOk(Direction dir)
         {

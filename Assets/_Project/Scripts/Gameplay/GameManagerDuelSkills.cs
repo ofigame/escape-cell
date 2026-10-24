@@ -83,6 +83,7 @@ namespace SquashBot.Gameplay
             if (myRing != null) Destroy(myRing.gameObject);
             if (foeRing != null) Destroy(foeRing.gameObject);
             myRing = foeRing = null;
+            DropPartnerRings();
         }
 
         private void ResetCombos()
@@ -160,6 +161,7 @@ namespace SquashBot.Gameplay
             if (hunt.ChallengeFoeAt is Vector3 seen) lastFoeAt = seen;
             if (myRing != null) myRing.Follow(robot.IsAlive && robot.Visual != null && robot.Visual.gameObject.activeInHierarchy ? robot.transform.position : (Vector3?)null);
             if (foeRing != null) foeRing.Follow(hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.position : (Vector3?)null);
+            UpdatePartnerRings(); // (2 against 2: smaller rings under the partners)
             if (myCombo > 0 && Time.time - myComboAt > MyComboGap) myCombo = 0;
             if (rivalCombo > 0 && Time.time - rivalComboAt > RivalComboGap) rivalCombo = 0;
             if (myComboMove > 0 && Time.time > comboMoveUntil) myComboMove = 0;

@@ -776,7 +776,7 @@ namespace SquashBot.Gameplay
             var gap = aim - duelPan;
             if (gap.magnitude > 1f) duelPan += gap.normalized * (gap.magnitude - 1f) * Mathf.Min(1f, Time.deltaTime * 2.5f);
             float apart = new Vector2(me.x - foe.x, me.z - foe.z).magnitude;
-            duelBack = Mathf.Lerp(duelBack, 29f + Mathf.Clamp(apart - 3f, 0f, 14f) * 1.2f, Time.unscaledDeltaTime * 2f); // (no closing in, even for the ultimate)
+            duelBack = Mathf.Lerp(duelBack, 26f + Mathf.Clamp(apart - 3f, 0f, 14f) * 1.2f, Time.unscaledDeltaTime * 2f); // (no closing in, even for the ultimate)
             pos = boardCentre + duelPan - look * (duelBack + 11f); // (every stage further back: all of the floor, its stands and the land in view)
             // The grove: the view a little further in (the platform lower on the screen, its stands and trees above it in view)
             if (DuelStands.IsMade(Stage.theme)) pos += new Vector3(-4.5f, 0f, 0f) - look * 5f; // (and a little further back: all of it in view)

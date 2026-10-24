@@ -15,6 +15,28 @@ namespace SquashBot.Gameplay
     {
         private bool twoVsTwo;
         private string myPartner, rivalPartner;
+        /// <summary>The smaller glowing rings under the partners (blue the player's side, red the rival's).</summary>
+        private FootRing myPartnerRing, rivalPartnerRing;
+
+        /// <summary>Each frame: the partners' rings under them (gone with them).</summary>
+        private void UpdatePartnerRings()
+        {
+            if (!twoVsTwo) { DropPartnerRings(); return; }
+            if (myPartnerRing == null) myPartnerRing = FootRing.Make(new Color(0.25f, 0.6f, 1f), 2f, true);
+            if (rivalPartnerRing == null) rivalPartnerRing = FootRing.Make(new Color(1f, 0.25f, 0.2f), 2f, true);
+            Vector3? mine = null, theirs = null;
+            foreach (var (pm, pMine) in hunt.Partners()) { if (pMine) mine = pm.position; else theirs = pm.position; }
+            myPartnerRing.Follow(mine);
+            rivalPartnerRing.Follow(theirs);
+        }
+
+        private void DropPartnerRings()
+        {
+            if (myPartnerRing != null) Destroy(myPartnerRing.gameObject);
+            if (rivalPartnerRing != null) Destroy(rivalPartnerRing.gameObject);
+            myPartnerRing = rivalPartnerRing = null;
+        }
+
         /// <summary>The player's partner when it is a friend's copy (their look and weapon; null: a made-up partner).</summary>
         private FoiNet.Rival friendPartner;
 
@@ -80,16 +102,21 @@ namespace SquashBot.Gameplay
             }
             // a partner deals about half a foi's damage and has about two thirds of its health
             var w = Armory.Equipped;
-            var stats = new Army.Stats { hp = Mathf.RoundToInt(duelMine.hp * 0.65f), hit = DuelPower.Blow(w, duelMine.weaponTier) * 2.2f, armor = duelMine.armor };
-            var theirStats = new Army.Stats { hp = Mathf.RoundToInt(duelTheirs.hp * 0.65f), hit = DuelPower.Blow(Armory.Get(rival.weapon), duelTheirs.weaponTier) * 2.2f, armor = duelTheirs.armor };
+            // a partner strikes about every 0.7 s: each blow about two of a foi's (half a foi's damage a second)
+            var stats = new Army.Stats { hp = Mathf.RoundToInt(duelMine.hp * 0.65f), hit = DuelPower.Blow(w, duelMine.weaponTier) * 2f, armor = duelMine.armor };
+            var theirStats = new Army.Stats { hp = Mathf.RoundToInt(duelTheirs.hp * 0.65f), hit = DuelPower.Blow(Armory.Get(rival.weapon), duelTheirs.weaponTier) * 2f, armor = duelTheirs.armor };
             if (hunt.SquadAlive(true) == 0)
-                hunt.AddSquadSoldier(true, 0, mine + new GridPos(2, -back), stats, foiModel: friendPartner != null
+                hunt.AddSquadSoldier(true, 0, mine + new GridPos(3, 0), stats, foiModel: friendPartner != null
                     ? PartnerLook(myPartner, Armory.Get(friendPartner.weapon).id, friendPartner.look ?? "")
                     : PartnerLook(myPartner, w.id));
             if (hunt.SquadAlive(false) == 0)
-                hunt.AddSquadSoldier(false, 0, theirs + new GridPos(-2, back), theirStats, foiModel: PartnerLook(rivalPartner, rival.weapon));
+                hunt.AddSquadSoldier(false, 0, theirs + new GridPos(-3, 0), theirStats, foiModel: PartnerLook(rivalPartner, rival.weapon));
             hunt.SetSquadOrder(true, 0, true);
             hunt.SetSquadOrder(false, 0, true);
+            // a partner back after a fall: its cape already hangs on the post (it comes without)
+            if (!first && capesOff)
+                foreach (var (pm, _) in hunt.Partners())
+                    foreach (var cape in pm.GetComponentsInChildren<SoftCape>(true)) { var off = cape.TakeOff(); if (off != null) Destroy(off.gameObject); }
         }
     }
 }

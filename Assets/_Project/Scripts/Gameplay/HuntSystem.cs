@@ -118,6 +118,8 @@ namespace SquashBot.Gameplay
             public Vector3 modelScale = Vector3.one;
             /// <summary>The weapon in a plain model's hand (the rival foi's own): it chops when the blow lands.</summary>
             public HeldWeapon held;
+            /// <summary>A partner foi (2 against 2): fights like a foi (the duel's reach and pace), keeps the duel's gap.</summary>
+            public bool partner;
             public float share = -1f;
 
             public void Flash()
@@ -1005,7 +1007,7 @@ namespace SquashBot.Gameplay
             if (MonsterUp && MonsterAwake) UpdateMonster(dt);
         }
 
-        private bool CanStep(GridPos from, GridPos p) => FloorRelief.StepOk(from, p) &&
+        private bool CanStep(GridPos from, GridPos p) => FloorRelief.StepOk(from, p) && !PartnerAdjacent(from, p) &&
             grid.IsStandable(p) && !grid.IsOccupied(p) && !AllyAt(p) && !grid.IsGap(p) && p != robot.Position && (Avoid == null || !Avoid(p)) && (Unsafe == null || !Unsafe(p) || Unsafe(from));
 
         private void UpdateBug(Bug b, float dt)

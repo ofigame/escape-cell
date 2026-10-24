@@ -359,7 +359,9 @@ namespace SquashBot.Gameplay
             capesOff = true;
             if (colosseum == null) return;
             var (mine, theirs) = DuelMarks;
-            foreach (var (model, mark) in new[] { (robot.Visual, mine), (hunt.ChallengeFoeModel, theirs) })
+            var hangers = new System.Collections.Generic.List<(Transform model, GridPos mark, float side)> { (robot.Visual, mine, 0f), (hunt.ChallengeFoeModel, theirs, 0f) };
+            if (twoVsTwo) foreach (var (pm, pMine) in hunt.Partners()) hangers.Add((pm, pMine ? mine : theirs, 0.75f)); // (beside the foi's on the same post)
+            foreach (var (model, mark, side) in hangers)
             {
                 if (model == null) continue;
                 foreach (var cape in model.GetComponentsInChildren<SoftCape>(true))
@@ -372,6 +374,7 @@ namespace SquashBot.Gameplay
                     bool south = mark.y < BoardH / 2;
                     var hook = colosseum.CapeHook(south, b.size.y);
                     var toMiddle = colosseum.Middle - hook; toMiddle.y = 0f;
+                    if (side != 0f && toMiddle.sqrMagnitude > 1e-4f) hook += Vector3.Cross(Vector3.up, toMiddle.normalized) * side;
                     var face = Quaternion.LookRotation(toMiddle.sqrMagnitude > 1e-4f ? -toMiddle.normalized : Vector3.forward, Vector3.up); // (its outside towards the platform)
                     off.SetParent(colosseum.transform, true);
                     if (fly) cameraRig.StartCoroutine(FlyCape(off, hook, face));

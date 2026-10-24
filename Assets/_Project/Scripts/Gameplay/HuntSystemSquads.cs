@@ -78,6 +78,7 @@ namespace SquashBot.Gameplay
                 squad = true, squadId = id, remote = remote, power = stats.hit, armorShare = stats.armor, cooldown = (float)rng.NextDouble(), soldier = model, soldierKind = kind,
             };
             s.root = foiModel != null ? foiModel : model.transform;
+            if (foiModel != null) { s.partner = true; s.held = foiModel.GetComponentInChildren<HeldWeapon>(true); }
             s.root.SetParent(transform, true);
             s.home = tile.Value; // where it stands guard (it waits there until called)
             s.root.position = At(tile.Value);
@@ -208,7 +209,7 @@ namespace SquashBot.Gameplay
             int group = (int)s.soldierKind;
             var enemyFoi = EnemyFoi(s);
             var ownFoi = OwnFoi(s);
-            int reach = SquadReach(s);
+            int reach = s.partner ? DuelGap : SquadReach(s);
 
             // A swing under way: it lands on what it was aimed at, if that is still in reach.
             if (s.windup >= 0f)
@@ -221,7 +222,8 @@ namespace SquashBot.Gameplay
                 s.windup = -1f;
                 s.SetRaise(0f);
                 float cd = SquadStats[group, 4] * (0.85f + (float)rng.NextDouble() * 0.3f);
-                s.cooldown = s.aimFoi ? cd * 1.4f : cd;
+                s.cooldown = s.partner ? 0.55f + (float)rng.NextDouble() * 0.35f : s.aimFoi ? cd * 1.4f : cd;
+                if (s.held != null) s.held.Swing(); // (the partner's weapon swings like a foi's)
                 LandSquadBlow(s, enemyFoi, reach);
                 return;
             }
@@ -295,12 +297,61 @@ namespace SquashBot.Gameplay
             {
                 var n = s.pos + d.ToOffset();
                 if (!CanStep(s.pos, n) || (challengeFoe != null && !challengeFoe.dead && n == challengeFoe.pos)) continue;
+                if (s.partner && TooNearAFoi(s, n)) continue;
                 int nd = Chebyshev(goal, n) * 4 + goal.Manhattan(n);
                 if (nd < bd) { bd = nd; best = n; }
             }
             if (best == s.pos) return false;
             MoveGuard(s, best, period);
             return true;
+        }
+
+        /// <summary>A tile closer than the duel's gap to another foi (the two foi, the other partners): a partner keeps out.</summary>
+        private bool TooNearAFoi(Guard s, GridPos n)
+        {
+            if (Chebyshev(n, robot.Position) < DuelGap) return true;
+            if (challengeFoe != null && !challengeFoe.dead && Chebyshev(n, challengeFoe.pos) < DuelGap) return true;
+            foreach (var list in new[] { guards, allies })
+                foreach (var o in list) if (o != s && o.partner && !o.dead && Chebyshev(n, o.pos) < DuelGap) return true;
+            return false;
+        }
+
+        /// <summary>
+        /// 2 against 2: a step onto (or right beside) a partner foi that brings the stepper closer to it — the rival foi keeps
+        /// a tile from the partners as the two foi keep one from each other (partners check their own gap).
+        /// </summary>
+        private bool PartnerAdjacent(GridPos from, GridPos p)
+        {
+            foreach (var list in new[] { guards, allies })
+                foreach (var o in list)
+                    if (o.partner && !o.dead && o.pos != from && Chebyshev(p, o.pos) < DuelGap && Chebyshev(p, o.pos) < Chebyshev(from, o.pos)) return true;
+            return false;
+        }
+
+        /// <summary>The player's foi beside a partner (closer than the duel's gap, and nearer than before).</summary>
+        public bool NearPartner(GridPos from, GridPos p)
+        {
+            foreach (var list in new[] { guards, allies })
+                foreach (var o in list)
+                    if (o.partner && !o.dead && Chebyshev(p, o.pos) < DuelGap && Chebyshev(p, o.pos) < Chebyshev(from, o.pos)) return true;
+            return false;
+        }
+
+        /// <summary>A partner foi stands here (the player's foi keeps out of it).</summary>
+        public bool PartnerAt(GridPos p)
+        {
+            foreach (var list in new[] { guards, allies })
+                foreach (var o in list) if (o.partner && !o.dead && o.pos == p) return true;
+            return false;
+        }
+
+        /// <summary>The partners' models and sides (2 against 2), for their capes.</summary>
+        public System.Collections.Generic.List<(Transform model, bool mine)> Partners()
+        {
+            var list = new System.Collections.Generic.List<(Transform, bool)>();
+            foreach (var o in allies) if (o.partner && !o.dead && o.root != null) list.Add((o.root, true));
+            foreach (var o in guards) if (o.partner && !o.dead && o.root != null) list.Add((o.root, false));
+            return list;
         }
 
         /// <summary>The damage of a soldier's blow (its kind and power; the fraction a chance of one more).</summary>
