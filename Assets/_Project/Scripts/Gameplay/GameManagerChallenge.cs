@@ -685,11 +685,13 @@ namespace SquashBot.Gameplay
             yield return null;
             while (dancer != null && dancer.PlayingMove && Time.realtimeSinceStartup < danceUntil && challengeRun) yield return null;
             // The rewards one by one (rank points, XP, mastery, gold, cores, chest), then the card.
+            bool rewardsShown = false, revengeTaken = false;
             if (lastRewards != null && challengeRun)
             {
                 lastRewards.cores = coresWon;
                 lastRewards.trophies = shownChange;
                 lastRewards.trophiesKnown = shownChangeKnown;
+                if (rankUp.Length > 0) lastRewards.eventLine = (string.IsNullOrEmpty(lastRewards.eventLine) ? "" : lastRewards.eventLine + "\n") + rankUp.Trim(); // (a new rank's gift: shown here, the old card is gone)
                 bool shut = false;
                 bool friendlyLoss = !won && !draw && rival != null && ((chLive && !liveRanked) || copyMatch);
                 string revengeOn = friendlyLoss ? rival.name : null;
@@ -697,8 +699,18 @@ namespace SquashBot.Gameplay
                                    + (Share.MyCode.Length > 0 ? " " + Loc.F("share.code", Share.MyCode) : "") + " " + Share.Link;
                 string liveRival = chLive && liveRanked && rival != null ? rival.name : null;
                 ui.DuelRewardsView.SetExtras(shareLine, liveRival, n => cameraRig.StartCoroutine(FoiNet.AddFriend(n, (e, f) => { })));
-                ui.DuelRewardsView.Show(lastRewards, won, draw, () => shut = true, revengeOn, () => { shut = true; Revenge(revengeOn); });
+                rewardsShown = true;
+                ui.DuelRewardsView.Show(lastRewards, won, draw, () => shut = true, revengeOn, () => { shut = true; revengeTaken = true; Revenge(revengeOn); });
                 while (!shut && challengeRun) yield return null;
+            }
+            // The rewards were the duel's result: straight back to the menu (an interstitial may come first). Only a live
+            // match with a rematch offered still shows the old card (its REMATCH button).
+            if (rewardsShown && !(chLive && rematchMatch != 0))
+            {
+                if (revengeTaken) yield break; // (revenge chosen: the new match is under way)
+                Time.timeScale = 1f;
+                Monetization.Ads.AfterDuel(ShowMenu);
+                yield break;
             }
             yield return ShowResultDelayed(new UIController.ResultInfo
             {
