@@ -684,8 +684,8 @@ namespace SquashBot.Gameplay
         {
             if (Time.time < myJumpReadyAt || !robot.IsAlive || moveBusy || DuelCinematic) return;
             float lean = Mathf.Atan2(Mathf.Abs(flick.x), flick.y) * Mathf.Rad2Deg; // (0 straight up .. 70 nearly flat)
-            if (lean < 18f && !curl) { Jump(); return; }
-            if (lean < 18f) { myJumpReadyAt = Time.time + 0.9f; myJumpUntil = Time.time + 0.65f; if (challengeRun) PlayStyle.Jump(); cameraRig.StartCoroutine(LaneLeap(robot.Position, true)); return; } // (curled: a somersault on the spot)
+            if (lean < 12f && !curl) { Jump(); return; }
+            if (lean < 12f) { myJumpReadyAt = Time.time + 0.9f; myJumpUntil = Time.time + 0.65f; if (challengeRun) PlayStyle.Jump(); cameraRig.StartCoroutine(LaneLeap(robot.Position, true)); return; } // (curled: a somersault on the spot)
             myJumpReadyAt = Time.time + 0.9f;
             if (challengeRun) PlayStyle.Jump();
             int dir = flick.x > 0f ? 1 : -1; // (the screen's right is up the lane)
@@ -694,7 +694,7 @@ namespace SquashBot.Gameplay
             bool toward = foe.HasValue && System.Math.Sign(foe.Value.y - me.y) == dir;
             GridPos? land = null;
             bool over = false;
-            if (lean >= 48f && toward && System.Math.Abs(foe.Value.y - me.y) <= 6)
+            if (toward && System.Math.Abs(foe.Value.y - me.y) <= 7) // (any lean toward it: over it)
             {
                 // over the rival: the first free tile behind it (two, then one, then three)
                 foreach (int k in new[] { HuntSystem.DuelGap, HuntSystem.DuelGap - 1, HuntSystem.DuelGap + 1 })
@@ -705,7 +705,7 @@ namespace SquashBot.Gameplay
             }
             if (!land.HasValue)
             {
-                int far = Mathf.Clamp(Mathf.RoundToInt(Mathf.Lerp(1f, 3f, Mathf.InverseLerp(18f, 48f, lean))), 1, 3);
+                int far = Mathf.Clamp(Mathf.RoundToInt(Mathf.Lerp(1f, 3f, Mathf.InverseLerp(12f, 45f, lean))), 1, 3);
                 for (int k = far; k >= 1 && !land.HasValue; k--)
                 {
                     var p = new GridPos(laneX, me.y + dir * k);

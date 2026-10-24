@@ -1520,7 +1520,7 @@ namespace SquashBot.Gameplay
             UpdateLevelRule();
 
             // In an arena fight the arena reads the touches itself.
-            input.CircleEnabled = level.mission == MissionType.Hunt && roadPhase == RoadPhase.None;
+            input.CircleEnabled = level.mission == MissionType.Hunt && roadPhase == RoadPhase.None && !input.FlickEnabled; // (the lane duel: a curl is a somersault, never a spin)
             // The floors walk freely too (a floating stick under the finger), like the arenas.
             input.StickMode = level.mission == MissionType.Hunt && roadPhase == RoadPhase.None && !tpsOn && !defenseEditing;
             // A floor fought in TPS when the player picked it (the arenas' controls, sideways); the road after a win

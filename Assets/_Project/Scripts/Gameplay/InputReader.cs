@@ -85,8 +85,8 @@ namespace SquashBot.Gameplay
             return cmd;
         }
 
-        /// <summary>A flick: the finger went up at least a third of an inch within the last fifth of a second, more up than
-        /// sideways (up to about 70 degrees from straight up). Its direction, or null.</summary>
+        /// <summary>A flick: the finger went up at least a quarter of an inch within the last quarter second, more up than
+        /// flat (up to about 75 degrees from straight up), wherever on the screen. Its direction, or null.</summary>
         private Vector2? Flick(Vector2 pos)
         {
             float now = Time.unscaledTime;
@@ -96,12 +96,15 @@ namespace SquashBot.Gameplay
             for (int k = 1; k < Mathf.Min(trailN, trail.Length); k++)
             {
                 int i = (trailN - 1 - k) % trail.Length;
-                if (now - trailAt[i] > 0.2f) break;
+                if (now - trailAt[i] > 0.25f) break;
                 var v = pos - trail[i];
-                if (v.y > 0.32f * dpi && v.y >= Mathf.Abs(v.x) * 0.36f) { trailN = 0; return v.normalized; }
+                if (v.y > 0.25f * dpi && v.y >= Mathf.Abs(v.x) * 0.27f) { trailN = 0; return v.normalized; }
             }
             return null;
         }
+
+        /// <summary>The touch began over the duel's buttons' area: no stick or tap from it, but a flick still counts.</summary>
+        private bool ignoredStart;
         private bool consumed;
         private bool chained;
         private float lastMoveTime;
@@ -211,6 +214,8 @@ namespace SquashBot.Gameplay
                 heldDir = null;
                 trailN = 0;
                 pendingFlick = null;
+                ignoredStart = false;
+                trail[0] = pos; trailAt[0] = Time.unscaledTime; trailN = 1; // (the press itself: a flick measured from its very start)
                 tracking = true;
                 consumed = false;
                 chained = false;
@@ -224,6 +229,7 @@ namespace SquashBot.Gameplay
                 StickActive = false;
                 if (Ignore != null && Ignore(pos))
                 {
+                    ignoredStart = true;
                     consumed = true; // a button press: no swipe, tap or hover from it
                     return default;
                 }
@@ -286,8 +292,11 @@ namespace SquashBot.Gameplay
                     if (curlTurn >= CurlTurn || Time.unscaledTime - pendingAt > 0.25f) return FireFlick();
                     return default;
                 }
+                bool flickable = FlickEnabled && (!consumed || ignoredStart);
                 if (!pressed)
                 {
+                    // a flick released before any frame saw it: judged on the lift too
+                    if (flickable && Flick(hasPointer ? pos : lastPos) is Vector2 late) { tracking = false; pendingFlick = late; curlTurn = 0f; return FireFlick(); }
                     tracking = false;
                     bool walked = StickActive;
                     StickActive = false;
@@ -295,9 +304,9 @@ namespace SquashBot.Gameplay
                     bool quickTap = Time.unscaledTime - pressTime <= TapMaxDuration;
                     return new InputCommand { jump = RegisterTap(), tap = quickTap ? (hasPointer ? pos : lastPos) : (Vector2?)null };
                 }
+                // a quick flick upward, from anywhere: a jump (the finger then walks no more until it is lifted)
+                if (flickable && Flick(pos) is Vector2 flick) { pendingFlick = flick; pendingAt = Time.unscaledTime; curlTurn = 0f; curlDir = flick; curlPos = pos; StickActive = false; return default; } // (a moment's wait: a curl may follow)
                 if (consumed) return default;
-                // a quick flick upward: a jump (the finger then walks no more until it is lifted)
-                if (Flick(pos) is Vector2 flick) { pendingFlick = flick; pendingAt = Time.unscaledTime; curlTurn = 0f; curlDir = flick; curlPos = pos; StickActive = false; return default; } // (a moment's wait: a curl may follow)
                 var delta = pos - startPos;
                 if (!StickActive && delta.magnitude > 0.08f * dpi) { StickActive = true; lastTapTime = -10f; }
                 if (!StickActive) return default;
