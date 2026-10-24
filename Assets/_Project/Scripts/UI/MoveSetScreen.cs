@@ -45,6 +45,7 @@ namespace SquashBot.UI
             about = UiFactory.TextBox("About", card, new Vector2(0.5f, 0f), new Vector2(0f, 190f), new Vector2(880f, 130f), "", 30f, Palette.UiText, FontStyles.Normal);
             about.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             about.textWrappingMode = TextWrappingModes.Normal;
+            about.enableAutoSizing = true; about.fontSizeMin = 18f; about.fontSizeMax = 30f;
             var close = UiFactory.MakeButton(card, Loc.T("btn.close"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 72f), new Vector2(480f, 110f), () => screen.Hide(), 44f);
             ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
         }
@@ -52,10 +53,16 @@ namespace SquashBot.UI
         public void Show()
         {
             Refresh();
-            about.text = Loc.T("moves.hint");
+            about.text = Hint;
             screen.Show();
             transform.SetAsLastSibling();
         }
+
+        /// <summary>How moves are won: two from the start, the worlds' monsters, the duel level's gifts, the passive slot.</summary>
+        private static string Hint => Loc.F("moves.how", Loc.T("move.s.Fly"), Loc.T("move.u.Cinematic"), MoveSet.PassiveLevel);
+
+        /// <summary>How a locked move is won: its world's monster (that world's last level), or a duel level's gift.</summary>
+        private static string HowToWin(int world) => world <= 0 ? "" : Loc.F("moves.howOne", world, world * LevelCatalog.LevelsPerWorld);
 
         private void Refresh()
         {
@@ -94,6 +101,8 @@ namespace SquashBot.UI
             y -= 58f;
         }
 
+        private static PassiveKind PassiveFrom(string key) => Enum.TryParse(key.Substring("move.p.".Length), out PassiveKind p) ? p : PassiveKind.None;
+
         /// <summary>A section's tiles, four to a row.</summary>
         private void Tiles(List<(string key, bool owned, bool chosen, int world, Action pick)> items)
         {
@@ -111,15 +120,23 @@ namespace SquashBot.UI
                 label.enableAutoSizing = true; label.fontSizeMin = 16f; label.fontSizeMax = 26f;
                 if (!it.owned && it.world > 0)
                 {
-                    var lockText = UiFactory.TextBox("Lock", tile, new Vector2(0.5f, 0f), new Vector2(0f, 6f), new Vector2(W - 10f, 34f), Loc.F("moves.world", it.world), 20f, new Color(1f, 0.75f, 0.4f, 0.8f), FontStyles.Normal);
+                    var lockText = UiFactory.TextBox("Lock", tile, new Vector2(0.5f, 0f), new Vector2(0f, 6f), new Vector2(W - 10f, 34f), Loc.F("moves.lockAt", it.world, it.world * LevelCatalog.LevelsPerWorld), 20f, new Color(1f, 0.75f, 0.4f, 0.8f), FontStyles.Normal);
                     lockText.rectTransform.pivot = new Vector2(0.5f, 0f);
+                    lockText.enableAutoSizing = true; lockText.fontSizeMin = 13f; lockText.fontSizeMax = 20f;
                 }
                 var button = tile.gameObject.AddComponent<Button>();
                 button.targetGraphic = face;
                 button.onClick.AddListener(() =>
                 {
                     about.text = Loc.T(it.key) + ": " + Loc.T(it.key + ".d");
-                    if (!it.owned) { AudioManager.PlaySfx(Sfx.Bump, 0.5f); return; }
+                    if (!it.owned)
+                    {
+                        // a locked move: how it is won (and the passive slot's level, when that is shut)
+                        bool slotShut = it.key.StartsWith("move.p.") && !MoveSet.PassiveOpen;
+                        about.text += "\n<color=#FFC066>" + (slotShut && MoveSet.Owned(PassiveFrom(it.key)) ? Loc.F("moves.passiveLocked", MoveSet.PassiveLevel) : HowToWin(it.world) + (slotShut ? " · " + Loc.F("moves.passiveLocked", MoveSet.PassiveLevel) : "")) + "</color>";
+                        AudioManager.PlaySfx(Sfx.Bump, 0.5f);
+                        return;
+                    }
                     AudioManager.PlaySfx(Sfx.Click, 0.8f, 1.2f);
                     it.pick();
                     string keep = about.text;

@@ -1315,7 +1315,7 @@ namespace SquashBot.Gameplay
                 var r = cam.right; r.y = 0f;
                 var s = stick.Value;
                 float push = s.magnitude;
-                float speed = push < 0.2f ? 0f : Mathf.Lerp(3.3f, 8.6f, Mathf.InverseLerp(0.2f, 1f, push));
+                float speed = push < 0.2f ? 0f : Mathf.Lerp(4.3f, 11f, Mathf.InverseLerp(0.2f, 1f, push));
                 var dir = r.normalized * s.x + f.normalized * s.y;
                 if (dir.sqrMagnitude > 0.0001f) vel = dir.normalized * speed;
             }

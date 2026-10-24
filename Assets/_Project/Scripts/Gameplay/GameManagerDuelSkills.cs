@@ -119,7 +119,7 @@ namespace SquashBot.Gameplay
             if (myCombo == HeavyCombo || myCombo == UpperCombo) { myComboMove = myCombo; comboMoveUntil = Time.time + ComboMoveTime; }
             if (myCombo == HeavyCombo) NoteDuel(DuelGoal.Combo5); // (a five-hit combo)
             if (Time.time < myJumpUntil) AirStrike(true);
-            else Reel(false, myCombo);
+            else { Reel(false, myCombo); if (myCombo % 4 == 0) ShieldBash(false); }
             if (colosseum != null && myCombo >= 3) colosseum.Cheer(0, 0.4f + myCombo * 0.08f);
             duelStirAt = Time.time;
         }
@@ -150,6 +150,7 @@ namespace SquashBot.Gameplay
             myComboMove = 0;
             if (colosseum != null && rivalCombo >= 3) colosseum.Cheer(1, 0.4f + rivalCombo * 0.08f);
             Reel(true, rivalCombo);
+            if (rivalCombo % 4 == 0) ShieldBash(true);
             duelStirAt = Time.time;
         }
 
@@ -515,11 +516,42 @@ namespace SquashBot.Gameplay
             var held = striker != null ? striker.GetComponentInChildren<HeldWeapon>() : null;
             bool toHead = (held != null && held.Overhead) || Random.value < 0.25f;
             var at = toHead ? skin.HeadPoint : skin.ChestPoint;
-            fx.Burst(at, new Color(1f, 0.92f, 0.6f), new Color(2.4f, 2.1f, 1.2f), 10, 3.2f);
-            Shockwave.Create(at - Vector3.up * 0.1f, 0.45f, new Color(1f, 0.95f, 0.75f));
+            // the blow seen: a white flash of sparks, the weapon's colour flying off, a ring, the camera knocked (harder in a combo)
+            var wDef = meStruck ? (rival != null ? Armory.Get(rival.weapon) : null) : Armory.Equipped;
+            var glow = wDef != null ? WeaponModels.GlowOf(wDef) : new Color(1f, 0.8f, 0.4f);
+            fx.Burst(at, new Color(1f, 0.95f, 0.7f), new Color(3f, 2.6f, 1.6f), 18, 4.2f);
+            fx.Burst(at, glow, glow * 2.4f, 12 + 2 * Mathf.Min(inARow, 5), 5.5f);
+            Shockwave.Create(at - Vector3.up * 0.1f, 0.6f + 0.08f * Mathf.Min(inARow, 5), Color.Lerp(new Color(1f, 0.95f, 0.75f), glow, 0.4f));
+            cameraRig.Shake(meStruck ? 0.22f + 0.04f * Mathf.Min(inARow, 5) : 0.14f + 0.03f * Mathf.Min(inARow, 5));
+            if (!meStruck) AudioManager.PlaySfx(Sfx.Bump, 0.55f, 0.8f + 0.06f * Mathf.Min(inARow, 5));
             if (toHead) { skin.JoltHead(from); strength *= 0.6f; } // (the head takes it: the body moves less)
             skin.Stagger(from, strength);
+            skin.Shudder(from, Mathf.Clamp01(0.45f + 0.12f * inARow)); // (the body shakes with it)
             if (inARow >= 4 && !LiveActive) Push(meStruck, from, 1);
+        }
+
+        /// <summary>Every fourth blow in a row the striker carrying a shield strikes with it too: thrust out, a thud, the
+        /// one struck reeling harder (foi's shield: <paramref name="meStruck"/> false).</summary>
+        private void ShieldBash(bool meStruck)
+        {
+            var striker = meStruck ? hunt.ChallengeFoeModel : robot.Visual;
+            var target = meStruck ? robot.Visual : hunt.ChallengeFoeModel;
+            var hold = striker != null ? striker.GetComponentInChildren<ShieldHold>() : null;
+            if (hold == null || !hold.Carried || target == null) return;
+            hold.Bash();
+            var skin = target.GetComponentInChildren<SkinnedHero>();
+            var from = striker.position;
+            cameraRig.StartCoroutine(FollowUp(() =>
+            {
+                if (skin == null) return;
+                var at = skin.ChestPoint;
+                fx.Burst(at, new Color(0.75f, 0.9f, 1f), new Color(1.8f, 2.2f, 2.6f), 16, 4f);
+                Shockwave.Create(at, 0.8f, new Color(0.7f, 0.85f, 1f));
+                AudioManager.PlaySfx(Sfx.Bump, 0.8f, 0.6f);
+                cameraRig.Shake(0.3f);
+                skin.Stagger(from, 0.75f);
+                skin.Shudder(from, 1f);
+            }));
         }
 
         /// <summary>The one struck flies back off its feet and lands on its back (and is pushed <paramref name="tiles"/> back).</summary>

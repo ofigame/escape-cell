@@ -677,11 +677,11 @@ namespace SquashBot.Gameplay
                           + (won && chestWon.HasValue ? "\n" + Loc.F("chests.won", DuelChestScreen.TierName(chestWon.Value)) : "")
                           + "\n" + Challenge.RankName(Challenge.Rank) + " · " + Loc.F("ch.trophies", Challenge.Trophies);
             // The winner walks to the middle and finishes its dance first, the duel's camera on it (then the card).
-            float walkUntil = Time.realtimeSinceStartup + 3f;
+            float walkUntil = Time.realtimeSinceStartup + 2.2f;
             while (winnerWalking && challengeRun && Time.realtimeSinceStartup < walkUntil) yield return null;
             var dancer = won ? (robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null)
                 : !draw && hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
-            float danceUntil = Time.realtimeSinceStartup + 9f;
+            float danceUntil = Time.realtimeSinceStartup + 4.5f; // (a long dance never holds the rewards back)
             yield return null;
             while (dancer != null && dancer.PlayingMove && Time.realtimeSinceStartup < danceUntil && challengeRun) yield return null;
             // The rewards one by one (rank points, XP, mastery, gold, cores, chest), then the card.

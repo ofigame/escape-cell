@@ -114,7 +114,7 @@ namespace SquashBot.Visual
             skin.name = "Hero_Skin";
             skin.localPosition = Vector3.zero;
             skin.localRotation = Quaternion.identity;
-            foreach (var sm in skin.GetComponentsInChildren<SkinnedMeshRenderer>(true)) sm.updateWhenOffscreen = true;
+            foreach (var sm in skin.GetComponentsInChildren<SkinnedMeshRenderer>(true)) { sm.updateWhenOffscreen = true; sm.sharedMesh = Thick(sm); }
             var headBone = FindBone(skin, "Head");
             float raw = visual.InverseTransformPoint(headBone.position).y;
             skin.localScale = Vector3.one * (raw > 0.0001f ? HeadJointHeight / raw : 1f);
@@ -567,6 +567,46 @@ namespace SquashBot.Visual
             return i.skin != null ? new Color(i.skin[0], i.skin[1], i.skin[2]) : new Color(0.9f, 0.75f, 0.65f);
         }
 
+        private static readonly Dictionary<Mesh, Mesh> thick = new Dictionary<Mesh, Mesh>();
+        /// <summary>How far the body is puffed out, of its height (arms, legs and body a little thicker).</summary>
+        private const float Puff = 0.009f;
+
+        /// <summary>The body's mesh a little thicker: each point pushed out along its normal, as much as it moves with the
+        /// arms, legs or body (the neck, hands and feet as made: the head, the grip and the steps fit as before). Made once.</summary>
+        private static Mesh Thick(SkinnedMeshRenderer sm)
+        {
+            var src = sm.sharedMesh;
+            if (src == null || !src.isReadable) return src;
+            if (thick.TryGetValue(src, out var done)) return done;
+            var bones = sm.bones;
+            var puffs = new float[bones.Length];
+            for (int i = 0; i < bones.Length; i++)
+            {
+                string n = bones[i] != null ? bones[i].name : "";
+                bool keep = n.Contains("Neck") || n.Contains("Head") || n.Contains("Hand") || n.Contains("Foot") || n.Contains("Toe");
+                puffs[i] = keep ? 0f : 1f;
+            }
+            var mesh = Instantiate(src);
+            mesh.name = src.name + "_thick";
+            var v = mesh.vertices;
+            var nrm = mesh.normals;
+            var w = mesh.boneWeights;
+            if (nrm.Length != v.Length || w.Length != v.Length) { thick[src] = src; Destroy(mesh); return src; }
+            var size = src.bounds.size;
+            float d = Mathf.Max(size.x, Mathf.Max(size.y, size.z)) * Puff;
+            float P(int b) => b >= 0 && b < puffs.Length ? puffs[b] : 0f;
+            for (int i = 0; i < v.Length; i++)
+            {
+                var bw = w[i];
+                float k = bw.weight0 * P(bw.boneIndex0) + bw.weight1 * P(bw.boneIndex1) + bw.weight2 * P(bw.boneIndex2) + bw.weight3 * P(bw.boneIndex3);
+                v[i] += nrm[i] * (d * k);
+            }
+            mesh.vertices = v;
+            mesh.RecalculateBounds();
+            thick[src] = mesh;
+            return mesh;
+        }
+
         /// <summary>Dresses a build already made: its head, hair and skin colours and the armour's paint.</summary>
         public static void Dress(Transform skin, Look look)
         {
@@ -807,6 +847,35 @@ namespace SquashBot.Visual
             }
             head.localRotation = headRest;
             jolt = null;
+        }
+
+        private float shudderT = 1f, shudderPow;
+        private Vector3 shudderAxis;
+
+        /// <summary>A blow felt in the body: the chest and back shake hard away from <paramref name="from"/> and settle,
+        /// the arms jerk (0.4 s; <paramref name="strength"/> 0..1).</summary>
+        public void Shudder(Vector3 from, float strength)
+        {
+            var away = transform.position - from; away.y = 0f;
+            if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
+            shudderAxis = Vector3.Cross(Vector3.up, away.normalized);
+            shudderPow = Mathf.Clamp01(strength);
+            shudderT = 0f;
+        }
+
+        private void Shuddering(float dt)
+        {
+            if (shudderT >= 1f) return;
+            shudderT = Mathf.Min(1f, shudderT + dt / 0.4f);
+            float fade = (1f - shudderT) * (1f - shudderT);
+            float a = (16f + 18f * shudderPow) * fade * Mathf.Cos(shudderT * Mathf.PI * 7f); // (thrown back first, then shaking out)
+            float twist = (9f + 9f * shudderPow) * fade * Mathf.Sin(shudderT * Mathf.PI * 9f);
+            var bend = Quaternion.AngleAxis(a * 0.5f, shudderAxis) * Quaternion.AngleAxis(twist * 0.5f, Vector3.up);
+            if (spine != null) spine.rotation = bend * spine.rotation;
+            if (chest != null) chest.rotation = bend * chest.rotation;
+            if (neck != null) neck.rotation = Quaternion.AngleAxis(-a * 0.35f, shudderAxis) * neck.rotation;
+            if (armL != null) armL.rotation = Quaternion.AngleAxis(a * 0.8f, shudderAxis) * armL.rotation;
+            if (armR != null) armR.rotation = Quaternion.AngleAxis(a * 0.4f, shudderAxis) * armR.rotation; // (the weapon arm less)
         }
 
         /// <summary>Whatever knock it was in, it stands again at once (in its own place, nothing thrown about).</summary>
@@ -1209,6 +1278,7 @@ namespace SquashBot.Visual
                 graph.Evaluate(0f);
             }
             else Pose(time);
+            Shuddering(dt);
             Grip();
 
             // Lids: a blink now and then; half down when angry or striking (the eyes narrow).

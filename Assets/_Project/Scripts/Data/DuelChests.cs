@@ -96,7 +96,8 @@ namespace SquashBot.Data
             }
             int streak = Streak + 1;
             Prefs.SetInt("sb_dchest_streak", streak);
-            var tier = (streak >= 7 && healthLeft >= 0.6f) || streak >= 12 ? ChestTier.Advanced
+            // gold: every 7th win in a row with 60% health left (7, 14, 21..), not every win after the 7th
+            var tier = streak % 7 == 0 && healthLeft >= 0.6f ? ChestTier.Advanced
                 : streak >= 3 || healthLeft >= 0.8f ? ChestTier.Mid
                 : ChestTier.Basic;
             if (!ranked) tier = ChestTier.Basic;

@@ -12,7 +12,7 @@ namespace SquashBot.Visual
     public class ShieldHold : MonoBehaviour
     {
         private Transform arm, fore, hand, hips, neck, holder;
-        private float raise = 1f, size;
+        private float raise = 1f, bash = 1f, size;
         private string shown;
 
         /// <summary>Puts the carried shield on the rigged foi under <paramref name="visual"/> (or takes it off: none carried).</summary>
@@ -67,6 +67,12 @@ namespace SquashBot.Visual
         /// <summary>The block: the shield swung up across the front.</summary>
         public void Raise() => raise = 0f;
 
+        /// <summary>A shield is carried (shown on the arm).</summary>
+        public bool Carried => holder != null;
+
+        /// <summary>A blow with the shield: thrust straight out in front, face first, and back (0.4 s).</summary>
+        public void Bash() => bash = 0f;
+
         private Transform Body => transform.parent != null ? transform.parent : transform;
 
         private void LateUpdate()
@@ -78,12 +84,15 @@ namespace SquashBot.Visual
             // carried: the hand low in front on the left; the block: up and across the front
             float k = 0f;
             if (raise < 1f) { raise = Mathf.Min(1f, raise + Time.deltaTime / 0.5f); k = Mathf.Sin(raise * Mathf.PI); }
+            float b = 0f;
+            if (bash < 1f) { bash = Mathf.Min(1f, bash + Time.deltaTime / 0.4f); b = bash < 0.3f ? bash / 0.3f : 1f - (bash - 0.3f) / 0.7f; b = b * b * (3f - 2f * b); }
             var carry = arm.position + ahead * reach * 0.3f - right * reach * 0.42f - up * reach * 0.72f; // (the arm down at the left side, a little forward)
             var guard = arm.position + ahead * reach * 0.75f + right * reach * 0.25f - up * reach * 0.1f;
             var hero = GetComponent<SkinnedHero>();
-            if (hero == null || (!hero.PlayingMove && !hero.Flailing)) Reach(arm, fore, hand, Vector3.Lerp(carry, guard, k)); // (a move playing or thrown about: the arm is its own, the shield goes with the hand)
+            var thrust = arm.position + ahead * reach * 0.98f + right * reach * 0.1f - up * reach * 0.05f; // (the arm straight out ahead)
+            if (hero == null || (!hero.PlayingMove && !hero.Flailing)) Reach(arm, fore, hand, Vector3.Lerp(Vector3.Lerp(carry, guard, k), thrust, b)); // (a move playing or thrown about: the arm is its own, the shield goes with the hand)
             // the shield: its back on the hand (the grip), its face forward and out to the left
-            var face = (ahead * (0.55f + 0.45f * k) - right * (0.85f - 0.7f * k)).normalized;
+            var face = Vector3.Lerp((ahead * (0.55f + 0.45f * k) - right * (0.85f - 0.7f * k)).normalized, ahead, b).normalized;
             holder.rotation = Quaternion.LookRotation(face, up);
             float s = size * transform.lossyScale.y; // (as big as foi is now)
             holder.position = hand.position + face * s * 0.07f - right * s * 0.08f; // (the hand on its grip, behind its middle)

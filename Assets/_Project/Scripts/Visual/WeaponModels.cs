@@ -62,11 +62,15 @@ namespace SquashBot.Visual
             if (GearFiles.HasWeapon(w.id))
             {
                 float big = w.Special ? Mathf.Min(1.3f, w.size * 0.8f) : 1f;
-                var made = GearFiles.Weapon(parent, w.id, (w.kind == WeaponKind.Hammer ? 0.62f : w.kind == WeaponKind.Mace ? 0.72f : 0.9f) * big, w.Special ? 0.18f : 0f);
+                // a hammer or mace grows with its tier (0.85 the mallet .. 1.05 the nova mace)
+                bool heavy = w.kind == WeaponKind.Hammer || w.kind == WeaponKind.Mace;
+                var made = GearFiles.Weapon(parent, w.id, (heavy ? 0.8f + 0.05f * Mathf.Clamp(w.tier, 1, 5) : 0.9f) * big, w.Special ? 0.18f : 0f);
                 made.localScale = Vector3.one * scale;
                 return made;
             }
-            var root = BuildPlain(parent, w, w.Special ? scale * w.size : scale);
+            // a drawn hammer or mace stays near the made ones' size (a little bigger at its higher tier)
+            float grow = w.kind == WeaponKind.Hammer || w.kind == WeaponKind.Mace ? Mathf.Min(w.size, 1.25f) : w.size;
+            var root = BuildPlain(parent, w, w.Special ? scale * grow : scale);
             if (!w.Special) return root;
             if (w.chest) { ChestTrim(root, w); return root; }
             var c = FxColour(w.fx);

@@ -93,10 +93,55 @@ namespace SquashBot.UI
             title.text = Loc.T(won ? "ch.victory" : draw ? "ch.draw" : "ch.defeat");
             title.color = won ? Palette.UiGold : draw ? new Color(0.8f, 0.85f, 1f) : new Color(1f, 0.5f, 0.45f);
             go.gameObject.SetActive(false);
+            list.localScale = Vector3.one;
+            Time.timeScale = 1f; // (a slow-motion moment at the duel's end never holds the screen)
             screen.Show();
             transform.SetAsLastSibling();
             StopAllCoroutines();
-            StartCoroutine(Play(r));
+            StartCoroutine(Safe(Play(r)));
+            StartCoroutine(Watchdog());
+        }
+
+        /// <summary>The rows' play, a fault in one never leaving the screen without its CONTINUE.</summary>
+        private IEnumerator Safe(IEnumerator play)
+        {
+            while (true)
+            {
+                object step;
+                try
+                {
+                    if (!play.MoveNext()) break;
+                    step = play.Current;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                    break;
+                }
+                yield return step;
+            }
+            Finish();
+        }
+
+        /// <summary>CONTINUE comes in 8 seconds at the latest, whatever the rows do.</summary>
+        private IEnumerator Watchdog()
+        {
+            for (float t = 0f; t < 8f; t += Time.unscaledDeltaTime) yield return null;
+            Finish();
+        }
+
+        /// <summary>The end of the rows: CONTINUE (and revenge, or share and add) shown once.</summary>
+        private void Finish()
+        {
+            if (go.gameObject.activeSelf) return;
+            go.gameObject.SetActive(true);
+            StartCoroutine(PopIn(go.transform));
+            if (pendingRevenge) { revenge.gameObject.SetActive(true); StartCoroutine(PopIn(revenge.transform)); }
+            else
+            {
+                share.gameObject.SetActive(!string.IsNullOrEmpty(shareText));
+                addRival.gameObject.SetActive(!string.IsNullOrEmpty(rivalToAdd));
+            }
         }
 
         private IEnumerator Wait(float s)
@@ -130,14 +175,6 @@ namespace SquashBot.UI
             if (r.firstWin) { Row(Loc.T("rw.firstWin"), "×3", Palette.UiGold, Sfx.Win); yield return Wait(0.35f); }
             if (r.comeback) { Row(Loc.T("rw.comeback"), "+" + DuelLevel.Comeback + " XP", new Color(1f, 0.7f, 0.3f), Sfx.Win); yield return Wait(0.35f); }
             if (r.streakBreaker) { Row(Loc.T("rw.breaker"), "+200", new Color(1f, 0.45f, 0.35f), Sfx.Win); yield return Wait(0.35f); }
-            go.gameObject.SetActive(true);
-            StartCoroutine(PopIn(go.transform));
-            if (pendingRevenge) { revenge.gameObject.SetActive(true); StartCoroutine(PopIn(revenge.transform)); }
-            else
-            {
-                share.gameObject.SetActive(!string.IsNullOrEmpty(shareText));
-                addRival.gameObject.SetActive(!string.IsNullOrEmpty(rivalToAdd));
-            }
         }
 
         /// <summary>A reward's row: what it is on the left, how much on the right (popping in, with its sound).</summary>
@@ -146,6 +183,7 @@ namespace SquashBot.UI
             var row = UiFactory.Box("Row", list, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(860f, 94f));
             row.pivot = new Vector2(0.5f, 1f);
             y -= 104f;
+            Fit();
             UiFactory.Framed(row, Flat.Card, 1.8f).raycastTarget = false;
             var l = UiFactory.TextBox("What", row, new Vector2(0f, 0.5f), new Vector2(28f, 0f), new Vector2(560f, 90f), what, 32f, Palette.UiText, FontStyles.Normal, align: TextAlignmentOptions.Left);
             l.rectTransform.pivot = new Vector2(0f, 0.5f);
@@ -164,6 +202,7 @@ namespace SquashBot.UI
         {
             row.sizeDelta = new Vector2(860f, 124f);
             y -= 30f;
+            Fit();
             var back = UiFactory.Box("Bar", row, new Vector2(0f, 0f), new Vector2(28f, 22f), new Vector2(804f, 24f));
             back.pivot = new Vector2(0f, 0.5f);
             UiFactory.Fill(back, new Color(0f, 0f, 0f, 0.45f), UiSprites.Rounded, 12f).raycastTarget = false;
@@ -172,6 +211,9 @@ namespace SquashBot.UI
             UiFactory.Fill(fill, colour, UiSprites.Rounded, 12f).raycastTarget = false;
             return fill;
         }
+
+        /// <summary>Many rows (level ups, mastery): the list shrinks to stay above CONTINUE.</summary>
+        private void Fit() => list.localScale = Vector3.one * Mathf.Min(1f, 1050f / Mathf.Max(1f, -y));
 
         private IEnumerator XpRow(GameManager.DuelRewards r)
         {
