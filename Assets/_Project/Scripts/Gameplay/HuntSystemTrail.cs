@@ -475,6 +475,15 @@ namespace SquashBot.Gameplay
         /// <summary>The rival's moves: untouchable until, mirroring until (the blow goes back at foi: <see cref="FoeMirrored"/>),
         /// and its sturdy spare life this round.</summary>
         public float FoeInvulnUntil, FoeMirrorUntil;
+        /// <summary>A giant level: the monster takes its blows from behind (the front barely scratches it).</summary>
+        public bool BackOnly;
+        /// <summary>The world's monster's stages (level 10: 2, the big tests 3): crossing a share of its health it changes
+        /// (<see cref="MonsterStage"/>), bigger, faster to attack.</summary>
+        public int MonsterStages = 1;
+        public System.Action<int> MonsterStage;
+        private int monsterStage;
+        private float monsterPace = 1f;
+        public System.Action<Vector3> BackHint;
         public bool FoeSturdy;
         public System.Action<int> FoeMirrored;
 

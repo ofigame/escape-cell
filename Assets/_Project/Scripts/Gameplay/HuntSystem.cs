@@ -596,6 +596,14 @@ namespace SquashBot.Gameplay
                     return true;
                 }
                 int through = ThroughArmor(p, damage);
+                if (BackOnly && monster != null && through > 0)
+                {
+                    // the giant: its weak spot is on its back (from the front a blow barely scratches it)
+                    var toFoi = robot.transform.position - At(monsterPos); toFoi.y = 0f;
+                    bool behind = toFoi.sqrMagnitude > 0.01f && Vector3.Dot(monster.Forward, toFoi.normalized) < -0.2f;
+                    through = behind ? through * 2 : Mathf.Max(1, through / 5);
+                    if (!behind) BackHint?.Invoke(At(monsterPos));
+                }
                 if (through > 0) HitMonster(through);
                 return true;
             }
@@ -913,6 +921,8 @@ namespace SquashBot.Gameplay
             monsterPos = best;
             grid.SetOccupied(monsterPos, true);
             monster = CreateMonster?.Invoke(monsterPos, level.monsterHp);
+            monsterStage = 0;
+            monsterPace = 1f;
             monsterTimer = level.monsterAttack + 1f;
             if (asleep)
             {
@@ -931,6 +941,19 @@ namespace SquashBot.Gameplay
         {
             monsterHp = Mathf.Max(0, monsterHp - damage);
             monster.Hit(monsterHp);
+            // a stage crossed: the monster changes (the next stage's share of its health)
+            if (MonsterStages > 1 && monsterHp > 0 && level.monsterHp > 0)
+            {
+                int stage = Mathf.Clamp((int)((1f - monsterHp / (float)level.monsterHp) * MonsterStages), 0, MonsterStages - 1);
+                if (stage > monsterStage)
+                {
+                    monsterStage = stage;
+                    monsterPace = 1f + 0.25f * stage;
+                    monster.Grow(stage);
+                    monsterTimer = Mathf.Max(monsterTimer, 1.4f); // (a breath while it changes)
+                    MonsterStage?.Invoke(stage);
+                }
+            }
             fx.Burst(At(monsterPos) + Vector3.up * 0.8f, Palette.UiGold, Palette.CoinGlow, 44, 7f);
             Shockwave.Create(At(monsterPos), 1.3f, new Color(1f, 0.85f, 0.45f));
             AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.7f);
@@ -1436,7 +1459,7 @@ namespace SquashBot.Gameplay
                 return;
             }
             if (TrySpecial(dt, hard, enraged)) return; // the world's own big attack, now and then
-            monsterTimer -= dt * (enraged ? 1.35f : 1f);
+            monsterTimer -= dt * (enraged ? 1.35f : 1f) * monsterPace;
             if (monsterTimer > 0f) return;
             monsterTimer = level.monsterAttack * (0.85f + (float)rng.NextDouble() * 0.3f);
             attackTiles.Clear();

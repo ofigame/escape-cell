@@ -28,6 +28,12 @@ namespace SquashBot.Visual
         public static int CurrentWorld = -1;
         /// <summary>The level being played (0-based; -1: none): its vanG's model, colour and size (see <see cref="VanGRig.LookFor"/>).</summary>
         public static int CurrentLevel = -1;
+        /// <summary>The next one is the giant of a giant level: much bigger, slow to turn (so its back can be reached).</summary>
+        public static bool GiantNext;
+        private float turnRate = 4f;
+
+        /// <summary>Where it faces (flat).</summary>
+        public Vector3 Forward => facing * Vector3.forward;
         /// <summary>This one's own size against the usual (a guard chief smaller, a world's monster bigger).</summary>
         private float sizeMul = 1f;
         private Color rigGlow = Color.black;
@@ -137,6 +143,7 @@ namespace SquashBot.Visual
                     break;
             }
             if (kind != Kind.Cage && rig == null) Menace(skinColor);
+            if (GiantNext && kind != Kind.Cage) { sizeMul *= 1.8f; turnRate = 0.45f; } // (the giant)
             body.localScale = Vector3.one * Size * sizeMul;
 
             // The health bar over its head.
@@ -218,6 +225,16 @@ namespace SquashBot.Visual
         }
 
         /// <summary>A magic hit: it reels, flashes white and its health bar drops.</summary>
+        /// <summary>A new stage of the world's monster: bigger, its colour deeper and glowing.</summary>
+        public void Grow(int stage)
+        {
+            sizeMul *= 1.15f;
+            var deeper = Color.Lerp(skinColor, new Color(1f, 0.25f, 0.2f), 0.25f * stage);
+            skinColor = deeper;
+            rigGlow = deeper * (0.15f + 0.1f * stage);
+            if (skin != null) MaterialFactory.SetColors(skin, deeper, rigGlow);
+        }
+
         public void Hit(int remaining)
         {
             rig?.Jolt();
@@ -259,7 +276,7 @@ namespace SquashBot.Visual
                 d.y = 0f;
                 if (!facingSet) { facing = body.rotation; facingSet = true; }
                 if (d.sqrMagnitude > 0.01f)
-                    facing = Quaternion.Slerp(facing, Quaternion.LookRotation(d), Time.deltaTime * 4f);
+                    facing = Quaternion.Slerp(facing, Quaternion.LookRotation(d), Time.deltaTime * turnRate);
                 // Attack poses lean the body: back then forward for a swipe, up and over for a throw.
                 float lean = 0f;
                 if (swipeT >= 0f)

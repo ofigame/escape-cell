@@ -104,6 +104,7 @@ namespace SquashBot.Gameplay
             if (robot == null || !robot.IsAlive || robot.Visual == null) return false;
             if (!Shields.Blocks(from, robot.transform.position, robot.Visual.forward)) return false;
             ShieldShow(from);
+            RuleShieldBlocked(); // (a counter-strike level: the next second's blows count)
             return true;
         }
 

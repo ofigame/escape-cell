@@ -293,6 +293,15 @@ namespace SquashBot.Gameplay
             ui.ShopPressed += ShowShop;
             ui.DailyBonus.PlayPressed += PlayDailyBonus;
             ui.LoginView.Claimed += OnLoginGift;
+            hunt.MonsterStage = stage =>
+            {
+                // the world's monster changes: a breath of slow motion, the stage's name over it
+                PowerSlow(1f, 0.3f);
+                cameraRig.Shake(1f);
+                AudioManager.PlaySfx(Sfx.Impact, 1f, 0.5f);
+                ui.ShowIntro(Loc.F("monster.stage", stage + 1), Loc.T(CardKey("title")));
+            };
+            hunt.BackHint = at => FloatAt(at + Vector3.up * 2f, Loc.T("rule.backHint"), new Color(1f, 0.8f, 0.4f));
             ui.Shop.Purchased += () => robot.ApplyOutfit(Cosmetics.Outfit()); // (a part raised: its look on foi at once)
             ui.DailyBonus.AdPressed += WatchAdForDailyBonus;
             ui.Garage.PreviewChanged += outfit => robot.ApplyOutfit(outfit);
@@ -749,6 +758,9 @@ namespace SquashBot.Gameplay
             levelIndex = Mathf.Clamp(index, 0, LevelCount - 1);
             Monster.CurrentWorld = World; // (the briefing's vanG as the floor's)
             Monster.CurrentLevel = levelIndex; // (its model, colour and size: spread over the 250 levels)
+            // the world's monster (level 10) fights in stages: three for the big tests (worlds 10, 20, 25), else two
+            int wNo = levelIndex / LevelCatalog.LevelsPerWorld + 1;
+            hunt.MonsterStages = levelIndex % LevelCatalog.LevelsPerWorld == LevelCatalog.LevelsPerWorld - 1 ? (wNo == 10 || wNo == 20 || wNo == 25 ? 3 : 2) : 1;
             BeginLevelRule(); // (a seventh level's surprise rule)
             levelStartedAt = Time.realtimeSinceStartup;
             Shields.Ready(); // (a new floor: the shield ready)
@@ -1304,6 +1316,7 @@ namespace SquashBot.Gameplay
                 var dir = r.normalized * s.x + f.normalized * s.y;
                 if (dir.sqrMagnitude > 0.0001f) vel = dir.normalized * speed;
             }
+            vel = RuleWalk(vel, Time.deltaTime); // (a slippery floor: foi slides on)
             robot.FreeStep(vel, Time.deltaTime, FloorWalkable);
             // Pushing on against a hole: a leap over it (as a swipe into a hole used to).
             var ahead = robot.Position + robot.Facing.ToOffset();
