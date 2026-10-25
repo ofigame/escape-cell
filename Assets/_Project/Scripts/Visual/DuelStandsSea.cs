@@ -23,7 +23,7 @@ namespace SquashBot.Visual
 
         /// <summary>The quay's edge behind the floor, how far the water lies under it; the tower's height and distance past
         /// the edge (far: the low fight camera sees it whole over the water); the palace's width and distance.</summary>
-        private const float QuayBack = 4f, QuayDrop = 1.3f, KizHeight = 20f, KizBack = 55f, PalaceWidth = 62f, PalaceBack = 170f, PalaceSide = 18f;
+        private const float QuayBack = 4f, QuayDrop = 1.3f, KizHeight = 24f, KizBack = 55f, PalaceWidth = 62f, PalaceBack = 170f, PalaceSide = 18f;
         /// <summary>Which way the tower model is turned (its annex towards the camera's right, as seen from Üsküdar).</summary>
         private const float KizTurn = 0f;
 

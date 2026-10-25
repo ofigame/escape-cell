@@ -571,7 +571,7 @@ namespace SquashBot.Visual
         private float idleSince, twirlAt = -1f;
 
         /// <summary>The family's rest in a duel: a sword held up and ready (bouncing a little), a spear levelled across,
-        /// an axe on the shoulder, a heavy weapon's head resting on the floor.</summary>
+        /// an axe on the shoulder, a heavy weapon on the other side of the shoulder.</summary>
         private bool DuelRest()
         {
             if (!DuelStance || isGun) return false;
@@ -584,7 +584,7 @@ namespace SquashBot.Visual
                 case WeaponFamily.Sword: p = restPosition + new Vector3(-0.04f, 0.1f + bob, 0.1f); r = Quaternion.Euler(-15f, 0f, -18f); break;
                 case WeaponFamily.Spear: p = restPosition + new Vector3(-0.08f, 0.08f, 0.12f); r = Quaternion.Euler(70f, -20f, 0f); break;
                 case WeaponFamily.Axe: p = new Vector3(0.22f, 0.58f, -0.1f); r = Quaternion.Euler(-60f, 0f, -20f); break;
-                default: p = restPosition + new Vector3(0.06f, -0.12f, 0.12f); r = Quaternion.Euler(155f, 0f, -10f); break;
+                default: p = new Vector3(0.2f, 0.56f, -0.08f); r = Quaternion.Euler(-50f, 10f, -28f); break; // (on the shoulder: a big head never sinks into the floor)
             }
             transform.localPosition = Vector3.Lerp(transform.localPosition, p, Mathf.Min(1f, Time.deltaTime * 10f));
             transform.localRotation = Quaternion.Slerp(transform.localRotation, r, Mathf.Min(1f, Time.deltaTime * 10f));

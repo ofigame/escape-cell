@@ -394,7 +394,7 @@ namespace SquashBot.Gameplay
                     chUi.SetStatus(i.ToString());
                     ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.6f), i.ToString(), Palette.UiGold, 220f);
                     AudioManager.PlaySfx(Sfx.Click, 1f, 0.75f + 0.08f * (5 - i));
-                    if (i == 4) TakeOffCapes(true);
+                    if (i == 3) TakeOffCapes(true); // (at three: the capes fly off onto the screen)
                     yield return new WaitForSeconds(1f);
                     while (challengeRun && State == GameState.Paused) yield return null;
                 }
@@ -426,7 +426,7 @@ namespace SquashBot.Gameplay
             hunt.TurnFoe(Dir(them, me));
         }
 
-        /// <summary>Both foi's capes off and onto their posts (flying there, or at once after a knock-down's new round).</summary>
+        /// <summary>Both foi's capes off and onto the screen, under their bars (at the countdown, or at once after a knock-down's new round).</summary>
         private void TakeOffCapes(bool fly)
         {
             capesOff = true;
@@ -440,20 +440,41 @@ namespace SquashBot.Gameplay
                 {
                     var off = cape.TakeOff();
                     if (off == null) continue;
-                    var rs = off.GetComponentsInChildren<Renderer>(true);
-                    if (rs.Length == 0) { Destroy(off.gameObject); continue; }
-                    var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
-                    bool south = mark.y < BoardH / 2;
-                    var hook = colosseum.CapeHook(south, b.size.y);
-                    var toMiddle = colosseum.Middle - hook; toMiddle.y = 0f;
-                    if (side != 0f && toMiddle.sqrMagnitude > 1e-4f) hook += Vector3.Cross(Vector3.up, toMiddle.normalized) * side;
-                    var face = Quaternion.LookRotation(toMiddle.sqrMagnitude > 1e-4f ? -toMiddle.normalized : Vector3.forward, Vector3.up); // (its outside towards the platform)
-                    off.SetParent(colosseum.transform, true);
-                    if (fly) cameraRig.StartCoroutine(FlyCape(off, hook, face));
-                    else { off.position = hook; off.rotation = face; }
+                    if (off.GetComponentsInChildren<Renderer>(true).Length == 0) { Destroy(off.gameObject); continue; }
+                    // shown on the screen under its foi's bars (no post by the floor)
+                    bool rivalCape = model != robot.Visual;
+                    var view = ui.CapeView(rivalCape);
+                    var outside = -model.forward; // (its outside: the way its foi's back faces)
+                    if (fly && view != null) { view.transform.parent.gameObject.SetActive(false); cameraRig.StartCoroutine(FlyCapeToFrame(off, view, rivalCape ? 1 : 0, outside)); }
+                    else Visual.CapeShowcase.Show(off, view, rivalCape ? 1 : 0, outside);
                 }
             }
             if (fly) AudioManager.PlaySfx(Sfx.Hop, 0.8f, 0.8f);
+        }
+
+        /// <summary>A cape lifted off a foi's shoulders, flying up in an arc towards its frame on the screen (shrinking as it
+        /// goes), then shown there.</summary>
+        private System.Collections.IEnumerator FlyCapeToFrame(Transform cape, UnityEngine.UI.RawImage view, int slot, Vector3 outside)
+        {
+            var cam = cameraRig.Cam;
+            var frame = (RectTransform)view.transform.parent;
+            var screen = RectTransformUtility.WorldToScreenPoint(null, frame.TransformPoint(frame.rect.center));
+            var from = cape.position; var fromRot = cape.rotation; var fromScale = cape.localScale;
+            const float T = 0.65f;
+            for (float e = 0f; e < T && cape != null; e += Time.deltaTime)
+            {
+                float k = Mathf.SmoothStep(0f, 1f, e / T);
+                var to = cam.ScreenToWorldPoint(new Vector3(screen.x, screen.y, 5f)); // (just before the lens, where the frame is)
+                cape.position = Vector3.Lerp(from, to, k) + Vector3.up * (Mathf.Sin(k * Mathf.PI) * 1.2f);
+                cape.rotation = Quaternion.Slerp(fromRot, Quaternion.LookRotation(cam.transform.forward, Vector3.up), k) * Quaternion.Euler(Mathf.Sin(k * Mathf.PI * 2f) * 25f, 0f, 0f);
+                cape.localScale = fromScale * Mathf.Lerp(1f, 0.35f, k);
+                yield return null;
+            }
+            if (cape == null) yield break;
+            cape.localScale = fromScale;
+            cape.rotation = fromRot; // (as it hung on its foi: the showcase turns its outside to its camera)
+            if (challengeRun) Visual.CapeShowcase.Show(cape, view, slot, outside);
+            else Destroy(cape.gameObject);
         }
 
         /// <summary>A cape lifted off a foi's shoulders, flying in an arc to its post and settling there with a swing.</summary>

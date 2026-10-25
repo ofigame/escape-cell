@@ -644,6 +644,7 @@ namespace SquashBot.Gameplay
             if (won) AudioManager.PlaySfx(Sfx.Win);
             if (danceAt != null) { winnerWalking = true; cameraRig.StartCoroutine(WinnerToMiddle(won)); }
             ui.SetRivalHealth(false, 0f); // (the end screen: the health bars go)
+            ui.HideCapeViews();
             ui.SetHealth(false, health, 0f);
             chUi.HideAll();
             cameraRig.StartCoroutine(ShowChallengeResult(won, draw, score, gold));
@@ -799,6 +800,8 @@ namespace SquashBot.Gameplay
             if (colosseum != null) Destroy(colosseum.gameObject);
             if (duelSky) { duelSky = false; cameraRig.SetBackdrop(null); }
             colosseum = null;
+            Visual.CapeShowcase.ClearAll(); // (the capes on the screen go too)
+            ui.HideCapeViews();
             ui.SetRivalHealth(false, 0f);
             hunt.ClearChallengeFoe();
         }
