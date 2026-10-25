@@ -22,7 +22,9 @@ namespace SquashBot.Gameplay
             if (Time.time < spinReadyAt) return;
             spinReadyAt = Time.time + SpinCooldown;
             var w = weapon ?? Armory.Equipped;
-            int damage = Challenge.RankBoost(Armory.Damage(w)) * (superLeft > 0f ? 2 : 1); // the rank reached adds its strength
+            // the weapon's damage a second over the spin's pace (every family alike within a tier: a slow heavy blow no
+            // longer spins harder than a quick sword); the rank reached adds its strength
+            int damage = Mathf.Max(1, Mathf.RoundToInt(Challenge.RankBoost(Armory.Damage(w)) * SpinCooldown / Mathf.Max(0.05f, Armory.Cooldown(w)))) * (superLeft > 0f ? 2 : 1);
             int reach = w.kind == WeaponKind.Whirl ? Mathf.Max(1, w.reach) : 1;
             if (heldWeapon != null) heldWeapon.Spin();
             StartCoroutine(SpinBody(0.32f));

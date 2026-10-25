@@ -160,7 +160,7 @@ namespace SquashBot.Gameplay
 
 
         /// <summary>"Canavar vanG" over the monster's health bar (it turns to face the camera with the bar).</summary>
-        private static void NameTag(Monster m)
+        private static void NameTag(Monster m, string name)
         {
             var bar = m.transform.Find("HealthBar");
             if (bar == null) return;
@@ -170,7 +170,7 @@ namespace SquashBot.Gameplay
             var text = go.AddComponent<TMPro.TextMeshPro>();
             text.font = UiFactory.TitleFont;
             text.fontSharedMaterial = UiFactory.OutlinedTitle(new Color(0.15f, 0.02f, 0.05f));
-            text.text = Loc.T("monster.vanG");
+            text.text = name;
             text.fontSize = 2.6f;
             text.alignment = TMPro.TextAlignmentOptions.Center;
             text.color = new Color(1f, 0.42f, 0.32f);

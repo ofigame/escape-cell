@@ -18,7 +18,7 @@ namespace SquashBot.Gameplay
     {
         /// <summary>How far foi strikes, in tiles between the two tiles' centres (diagonals count as one): two on the floors for
         /// every blade, three in the duel (exactly the gap the two foi keep, see HuntSystem.DuelGap).</summary>
-        private int StrikeReach => challengeRun && chPhase == ChPhase.Duel ? HuntSystem.DuelGap : 2; // (the duel: from the gap kept between the two foi)
+        private int StrikeReach => challengeRun && chPhase == ChPhase.Duel ? DuelReach(weapon ?? Armory.Equipped) : Armory.Reach(weapon ?? Armory.Equipped); // (the duel: the gap, a spear one more; the floors: the spear 3, the rest 2)
         private HuntSystem hunt;
         private float strikeCooldown;
         private WeaponDef weapon;
@@ -152,7 +152,7 @@ namespace SquashBot.Gameplay
             hunt.MonsterAppeared += () =>
             {
                 OpenCage();
-                FloatAt(robot.transform.position + Vector3.up * 0.8f, Loc.T("float.monster"), Palette.UiRed);
+                FloatAt(robot.transform.position + Vector3.up * 0.8f, Loc.T(hunt.Boss == BossKind.Guardian ? "float.guardian" : "float.monster"), Palette.UiRed); // (MUHAFIZ / CANAVAR GELDİ!)
                 AudioManager.PlayMusic(MusicTheme.Monster);
             };
             hunt.MonsterDefeated += OnHuntWon;
@@ -161,7 +161,7 @@ namespace SquashBot.Gameplay
                 MonsterLook(out var kind, out var tint);
                 var m = Monster.Create(kind, GridView.ToWorld(p) + Vector3.up * GridView.SurfaceY, hp, tint, robot.transform, 1, World);
                 GuardianLooks.DressGuardian(m.Body, World);
-                NameTag(m);
+                NameTag(m, BossName());
                 return m;
             };
         }
@@ -210,6 +210,7 @@ namespace SquashBot.Gameplay
             hunt.HpBase = 10f;
             hunt.RosterWorld = challengeRun ? -1 : Mathf.Clamp(arenaRun ? arenaIndex : World, 0, EnemyRoster.Worlds - 1);
             hunt.RosterFloor = arenaRun ? 9 : levelIndex % LevelCatalog.LevelsPerWorld;
+            SetupBoss(); // (a guardian, a world form or vanG itself, before the floor starts)
             hunt.Begin(grid, level, World, levelIndex * 31 + 7);
             ResetScore();
             introPending = true; // the opening shot over the whole floor
@@ -506,6 +507,7 @@ namespace SquashBot.Gameplay
             strikeCooldown = Armory.Cooldown(w);
             if (crowd && hunt.IsFighter(at)) NoteFightBlow(); // a blow or two into a fight, Fifi teleports in
             int damage = RuleDamage(MyBlow(w) * (superLeft > 0f ? 2 : 1)); // the arms add their strength (the duel: its own blow; a combo-only level: from the 4th blow)
+            if (!challengeRun) damage = SwordChain(w, damage); // (the floors: a sword's every fourth blow in a row harder)
             if (FloorGuardOn && myGuard.NextBlowBonus > 0f) damage = Mathf.Max(1, Mathf.RoundToInt(damage * GuardBonusTake())); // (the floors: a perfect guard's next blow harder)
             if (challengeRun && chPhase == ChPhase.Duel)
             {
@@ -538,12 +540,12 @@ namespace SquashBot.Gameplay
             if (crowd)
             {
                 // The target slipped off the tile mid-swing: the blow lands on whatever is in reach that way.
-                if (hunt.Strike(at, damage)) SpecialHit(w, at, damage);
+                if (hunt.Strike(at, damage)) AfterHit(w, at, damage);
                 else
                 {
                     var swing = GridView.ToWorld(at) - GridView.ToWorld(robot.Position);
                     swing.y = 0f;
-                    if (hunt.BestInReach(robot.Position, StrikeReach, swing.normalized, 0.5f, out var other) && hunt.Strike(other, damage)) SpecialHit(w, other, damage);
+                    if (hunt.BestInReach(robot.Position, StrikeReach, swing.normalized, 0.5f, out var other) && hunt.Strike(other, damage)) AfterHit(w, other, damage);
                 }
             }
             else if (hazards.Shatter(at))

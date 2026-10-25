@@ -32,9 +32,12 @@ namespace SquashBot.Gameplay
         /// <summary>Hearts and shields left this duel: the player's and the rival's.</summary>
         private int duelHearts, duelShields, rivalHearts, rivalShields;
         private float rivalShieldUntil, rivalPowerUpAt;
-        private const int DuelHearts = 3, DuelShields = 3;
-        private const float DuelHeartHeal = 0.3f, DuelShieldSeconds = 3f;
-        private const int DuelShieldHits = 2;
+        // (the duel table's: the same as the server's)
+        private static int DuelHearts => DuelBalanceTable.Current.hearts;
+        private static int DuelShields => DuelBalanceTable.Current.shields;
+        private static float DuelHeartHeal => DuelBalanceTable.Current.heartHeal;
+        private static float DuelShieldSeconds => DuelBalanceTable.Current.shieldSeconds;
+        private static int DuelShieldHits => DuelBalanceTable.Current.shieldHits;
 
         // ---------- The six stages ----------
 
@@ -124,6 +127,7 @@ namespace SquashBot.Gameplay
             hunt.Unsafe = null;
             BuildCourtyard();
             chDuelMe = chDuelThem = 0;
+            ResetOvertime();
             chDuelLeft = chDuelMinutes * 60f;
             duelHearts = rivalHearts = DuelHearts;
             lastBeat = -1;
@@ -265,6 +269,7 @@ namespace SquashBot.Gameplay
             AudioManager.DipMusic(DuelMusicSettings.Current.knockDip); // (the music dips, the crowd to the front)
             KnockoutShown(iWon);
             if (SuddenDeath) { RefreshDuelClock(); chPhase = ChPhase.Break; hunt.Freeze(); ChallengeEnd(); return; } // (sudden death: one knock-down wins)
+            if (overtime) { OvertimeKnockdown(iWon); return; } // (the golden knock-down: the first one wins)
             if (iWon) OfferFinish(lastFoeAt);
             if (iWon) skillBar?.ShowTaunt(1.5f); // (the taunt offered a moment)
             cameraRig.StartCoroutine(RivalEmote(!iWon));
@@ -490,7 +495,7 @@ namespace SquashBot.Gameplay
             while (challengeRun && (Time.time < finishUntil || finishing)) yield return null; // the finish offered (or playing) first
             while (challengeRun && State == GameState.Paused) yield return null;
             if (!challengeRun || chPhase != ChPhase.Break || State != GameState.Playing) yield break;
-            if (chDuelLeft <= 0f) { ChallengeEnd(); yield break; }
+            if (chDuelLeft <= 0f) { if (!TryStartOvertime()) ChallengeEnd(); yield break; }
             PlaceDuelists(first: false);
             yield return CountdownThenGo();
         }
@@ -583,7 +588,11 @@ namespace SquashBot.Gameplay
             if (LiveActive) return; // the server keeps the score and the clock
             RivalPowerUps();
             if (hunt.ChallengeFoeDown) { DuelKnockdown(true); return; }
-            if (chDuelLeft <= 0f) { chPhase = ChPhase.Break; hunt.Freeze(); ChallengeEnd(); }
+            if (chDuelLeft <= 0f)
+            {
+                if (overtime) OvertimeEnd(); // (no knock-down in the overtime: health decides)
+                else if (!TryStartOvertime()) { chPhase = ChPhase.Break; hunt.Freeze(); ChallengeEnd(); }
+            }
         }
 
         /// <summary>The AI's hearts and shields: a heart when badly hurt, a shield now and then when foi presses it.</summary>
@@ -594,7 +603,7 @@ namespace SquashBot.Gameplay
             if (rivalHearts > 0 && share < (botTuning != null && Random.value < botTuning.earlyHeart ? 0.7f : 0.4f) && Random.value < 0.6f)
             {
                 rivalHearts--;
-                hunt.HealFoe(DuelHeartHeal + (rivalPassive == PassiveKind.HeartMaster ? 0.06f : 0f));
+                hunt.HealFoe(DuelHeartHeal + (rivalPassive == PassiveKind.HeartMaster ? DuelBalanceTable.Current.heartMasterHeal : 0f));
                 chUi.SetStatus(Loc.F("ch.rivalHeart", rivalHearts));
                 rivalPowerUpAt = Time.time + 8f;
                 return;
@@ -616,7 +625,7 @@ namespace SquashBot.Gameplay
             else
             {
                 Heal(robot.Position);
-                if (myPassive == PassiveKind.HeartMaster) { health = Mathf.Min(1f, health + 0.06f); RefreshHealthBar(); } // (36% instead of 30%)
+                if (myPassive == PassiveKind.HeartMaster) { health = Mathf.Min(1f, health + DuelBalanceTable.Current.heartMasterHeal); RefreshHealthBar(); } // (36% instead of 30%)
             }
             AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.6f);
             RefreshSquadBar();
@@ -628,7 +637,7 @@ namespace SquashBot.Gameplay
             if (chPhase != ChPhase.Duel || duelShields <= 0 || robot.IsShielded) return;
             duelShields--;
             PlayStyle.Shield();
-            robot.GiveShield(DuelShieldSeconds, DuelShieldHits + (myPassive == PassiveKind.ShieldMaster ? 1 : 0)); // (the shield master: 3 blows)
+            robot.GiveShield(DuelShieldSeconds, DuelShieldHits + (myPassive == PassiveKind.ShieldMaster ? DuelBalanceTable.Current.shieldMasterHits : 0)); // (the shield master: 3 blows)
             if (LiveActive) LiveNet.Shield();
             AudioManager.PlaySfx(Sfx.Shield, 1f, 1.1f);
             RefreshSquadBar();
@@ -659,7 +668,7 @@ namespace SquashBot.Gameplay
                 chUi.PulseScore(1.35f);
                 AudioManager.PlaySfx(Sfx.Bump, 0.8f, 0.55f);
                 AudioManager.SetTension(1f);
-                if (s == 10 && chDuelMe == chDuelThem) chUi.SetStatus(Loc.T("duel.goldenKo"));
+                if (s == 10 && chDuelMe == chDuelThem && !overtime && OvertimeAllowed) chUi.SetStatus(Loc.T("duel.goldenKoSoon")); // (level with ten seconds left: the overtime is coming)
             }
         }
 

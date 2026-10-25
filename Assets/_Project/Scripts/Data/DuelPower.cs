@@ -68,25 +68,19 @@ namespace SquashBot.Data
 
         // ---------- The weapons' duel blows ----------
 
-        /// <summary>Seconds between blows of a family: sword 0.12, spear 0.18, axe 0.28, heavy 0.30.</summary>
-        public static float Cooldown(WeaponFamily f) => f == WeaponFamily.Sword ? 0.12f : f == WeaponFamily.Spear ? 0.18f : f == WeaponFamily.Axe ? 0.28f : 0.30f;
+        // (the numbers: the duel's table, DuelBalanceTable, the same file the server reads)
 
-        // A blow's damage by family and tier (1..6): the same damage a second within a tier (30, 40, 55, 75, 100, 130).
-        private static readonly int[,] Blows =
-        {
-            { 4, 5, 7, 9, 12, 16 },     // sword
-            { 5, 7, 10, 14, 18, 23 },   // spear
-            { 8, 11, 15, 21, 28, 36 },  // axe
-            { 9, 12, 17, 23, 30, 39 },  // heavy
-        };
+        /// <summary>Seconds between blows of a family (sword 0.12, spear 0.18, axe 0.28, heavy 0.30 in the table).</summary>
+        public static float Cooldown(WeaponFamily f) => DuelBalanceTable.Current.Cooldown(f);
 
-        /// <summary>One duel blow of a weapon at a tier (its own, or the ceiling's when above it).</summary>
-        public static int Blow(WeaponDef w, int tier) => Blows[(int)Armory.Family(w), Mathf.Clamp(tier, 1, 6) - 1];
+        /// <summary>One duel blow of a weapon at a tier (its own, or the ceiling's when above it): the same damage a second
+        /// within a tier for every family.</summary>
+        public static int Blow(WeaponDef w, int tier) => DuelBalanceTable.Current.Blow(Armory.Family(w), tier);
 
-        /// <summary>The axe's power hit and knockdown hit a fifth harder.</summary>
-        public static float ComboTimes(WeaponDef w) => Armory.Family(w) == WeaponFamily.Axe ? 1.2f : 1f;
+        /// <summary>The power hit's and knockdown's factor by family (the axe's a fifth harder).</summary>
+        public static float ComboTimes(WeaponDef w) => DuelBalanceTable.Current.ComboTimes(Armory.Family(w));
 
-        /// <summary>A heavy weapon staggers the one it hits this long (seconds).</summary>
-        public static float Stagger(WeaponDef w) => Armory.Family(w) == WeaponFamily.Heavy ? 0.15f : 0f;
+        /// <summary>How long a blow of this weapon staggers the one it hits (the heavy ones').</summary>
+        public static float Stagger(WeaponDef w) => DuelBalanceTable.Current.Stagger(Armory.Family(w));
     }
 }

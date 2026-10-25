@@ -225,6 +225,7 @@ namespace SquashBot.UI
                 if (r.firstWin) list2.Add((Loc.T("rw.firstWinBand"), Palette.UiGold));
                 if (r.streak >= 2) list2.Add((Loc.F("rw.streakBand", r.streak), new Color(1f, 0.55f, 0.25f)));
                 if (r.comeback) list2.Add((Loc.T("rw.comebackBand"), new Color(0.5f, 1f, 0.6f)));
+                if (r.goldenKo) list2.Add((Loc.T("rw.goldenKoBand"), Palette.UiGold));
                 if (r.streakBreaker) list2.Add((Loc.T("rw.breakerBand"), new Color(1f, 0.4f, 0.35f)));
                 float total = list2.Count * 250f;
                 foreach (var (text, c) in list2)

@@ -23,7 +23,7 @@ namespace SquashBot.Gameplay
         public class DuelRewards
         {
             public int trophies, gold, cores, xp, levelBefore, xpBefore, levelAfter, xpAfter;
-            public bool trophiesKnown, firstWin, goalDone, comeback, streakBreaker;
+            public bool trophiesKnown, firstWin, goalDone, comeback, streakBreaker, goldenKo;
             public List<DuelLevel.LevelUp> levelUps = new List<DuelLevel.LevelUp>();
             public WeaponDef weapon;
             public int masteryBefore, masteryAfter, masteryPointsBefore, masteryPointsAfter;
@@ -74,9 +74,10 @@ namespace SquashBot.Gameplay
         /// </summary>
         private void TuneBot()
         {
-            if (LiveActive || rival == null) { botTuning = null; hunt.FoeWhiff = 0f; hunt.FoeReactScale = 1f; return; }
+            if (LiveActive || rival == null) { botTuning = null; hunt.FoeWhiff = 0f; hunt.FoeReactScale = 1f; hunt.FoeReach = HuntSystem.DuelGap; return; }
             botTuning = BotTuning.For(BotTuning.Of(rival.seed), DuelPower.TierOf(rival.Rank), BotDifficulty.Shift - (ReturningPlayer.Rusty ? 1 : 0), BotDifficulty.FirstFive); // (back after days away: the first three a step easier)
             if (copyMatch) PlayStyle.Apply(botTuning, rival.style); // a friend's copy: the friend's own way of fighting
+            hunt.FoeReach = DuelBalanceTable.Current.Reach(Armory.Family(Armory.Get(rival.weapon))); // (a spear rival strikes from a tile farther)
             hunt.FoeBoldness = botTuning.aggression;
             hunt.FoeSkill = Mathf.Clamp01(0.25f + 0.6f * botTuning.shield + 0.03f * rival.Rank);
             hunt.FoeWhiff = botTuning.whiff;
@@ -94,6 +95,7 @@ namespace SquashBot.Gameplay
             r.goalText = GoalText(matchGoal);
             r.goalDone = GoalDone(won);
             r.comeback = won && matchWorst >= 2;
+            r.goldenKo = won && wonInOvertime; // (won in the golden knock-down's overtime: its band)
             int xp = won ? DuelLevel.Win : draw ? DuelLevel.Draw : DuelLevel.Loss;
             if (firstWin) xp += DuelLevel.FirstWin;
             if (r.goalDone) xp += DuelLevel.Challenge;
@@ -127,7 +129,7 @@ namespace SquashBot.Gameplay
         {
             string line = o.name + "\n" + Challenge.RankName(o.Rank) + " · " + Loc.F("ch.trophies", o.trophies) + " · " + Loc.F("dl.short", o.duelLevel);
             var extras = new List<string>();
-            if (!string.IsNullOrEmpty(o.titleKey)) extras.Add(Loc.T(o.titleKey));
+            if (!string.IsNullOrEmpty(o.titleWords)) extras.Add(o.titleWords); else if (!string.IsNullOrEmpty(o.titleKey)) extras.Add(Loc.T(o.titleKey));
             if (o.streak >= 3) extras.Add(Loc.F(o.streak >= 10 ? "card.streak3" : o.streak >= 5 ? "card.streak2" : "card.streak1", o.streak));
             if (o.mastery >= 7) extras.Add(Loc.F("card.mastery", o.mastery));
             // its move set, so the player can plan against it
@@ -141,10 +143,10 @@ namespace SquashBot.Gameplay
         private string MyCard()
         {
             string line = Challenge.PlayerName + "\n" + Challenge.RankName(Challenge.Rank) + " · " + Loc.F("ch.trophies", Challenge.Trophies) + " · " + Loc.F("dl.short", DuelLevel.Level);
-            string t = DuelLevel.TitleKey(DuelLevel.Level);
+            string t = TitleBook.Shown; // (the picked title: the duel level's, a master's, a world's conqueror…)
             int m = Mastery.Level(Armory.Equipped);
             var extras = new List<string>();
-            if (t != null) extras.Add(Loc.T(t));
+            if (t != null) extras.Add(t);
             if (m >= 7) extras.Add(Loc.F("card.mastery", m));
             if (extras.Count > 0) line += "\n" + string.Join(" · ", extras);
             return line;

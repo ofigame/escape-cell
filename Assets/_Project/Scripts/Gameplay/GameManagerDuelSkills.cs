@@ -32,20 +32,29 @@ namespace SquashBot.Gameplay
         private bool specialStrike, ultimateOn, finishing, moveBusy;
         private int rivalHero;
 
-        private const float MeterGain = 0.07f, MeterHurt = 0.04f, ComboGap = 1.4f, ComboMoveTime = 2.6f;
-        /// <summary>Blows in a row for the power hit and the knockdown — as the server's Rules.</summary>
-        private const int HeavyCombo = 5, UpperCombo = 8;
+        // The duel's numbers come from its table (DuelBalanceTable: the same file the server reads), the bot duel and the live one alike.
+        private static DuelBalanceTable Bal => DuelBalanceTable.Current;
+        private static float MeterGain => Bal.meterGain;
+        private static float MeterHurt => Bal.meterHurt;
+        private static float ComboGap => Bal.comboGap;
+        private static float ComboMoveTime => Bal.comboMoveSeconds;
+        /// <summary>Blows in a row for the power hit and the knockdown.</summary>
+        private static int HeavyCombo => Bal.heavyCombo;
+        private static int UpperCombo => Bal.upperCombo;
 
         /// <summary>A blow's share of the bar by its weapon's pace (a quick blade's many blows fill it no faster than a
-        /// slow hammer's few) — as the server's Rules.MeterPace.</summary>
-        private static float MeterPace(float cooldown) => Mathf.Clamp(cooldown / 0.25f, 0.45f, 1.3f);
+        /// slow hammer's few).</summary>
+        private static float MeterPace(float cooldown) => Bal.MeterPace(cooldown);
 
         private float MyPace => MeterPace(Armory.Cooldown(weapon ?? Armory.Equipped));
         private float RivalPace => MeterPace(Armory.Cooldown(Armory.Get(rival.weapon), Mathf.Max(1, rival.weaponLevel)));
-        /// <summary>What each move takes off (times one of the mover's own blows) — as the server's Rules.</summary>
-        private const float SpecialTimes = 1.8f, HeavyHit = 1.8f, UpperHit = 4f, UltimateHit = 6f;
-        /// <summary>A blow struck in the air takes this much more (half a blow again; the AI game only: a live one is the server's).</summary>
-        private const float JumpExtra = 0.5f;
+        /// <summary>What each move takes off (times one of the mover's own blows).</summary>
+        private static float SpecialTimes => Bal.flyTimes;
+        private static float HeavyHit => Bal.heavyTimes;
+        private static float UpperHit => Bal.upperTimes;
+        private static float UltimateHit => Bal.UltiTotal(UltiKind.Cinematic);
+        /// <summary>A blow struck in the air takes this much more (half a blow again; live: the server counts it too).</summary>
+        private static float JumpExtra => Bal.jumpExtra;
         private float myJumpUntil, myJumpReadyAt, rivalJumpAt;
         /// <summary>FLY in the air: the stand-in trails the thrusters' blue flame.</summary>
         private bool flyThrusters;
@@ -267,7 +276,7 @@ namespace SquashBot.Gameplay
                         if (landed) TrainingNote(upper ? TrainingEvent.Knockdown : TrainingEvent.PowerHit);
                         else if (!upper && (lastGuardFoe == DefenseOutcome.Blocked || lastGuardFoe == DefenseOutcome.Broke)) TrainingNote(TrainingEvent.PowerThroughBlock);
                         if (upper && landed) PowerSlow(0.3f, 0.35f); // (the knockdown: a breath of slow motion)
-                        if (landed) hunt.StunFoe(upper ? 1.8f : 0.4f); // (short: the rival is back in the fight at once)
+                        if (landed) hunt.StunFoe(upper ? Bal.upperStun : Bal.heavyStun); // (short: the rival is back in the fight at once)
                         else if (lastGuardFoe == DefenseOutcome.Dodged) strikeCooldown = Mathf.Max(strikeCooldown, 0.4f + Def.whiffRecovery); // (into the air: slower back)
                         if (upper && !landed) { if (colosseum != null) colosseum.Cheer(1, 0.6f); break; } // (blocked or dodged: no throw)
                     }
@@ -290,7 +299,7 @@ namespace SquashBot.Gameplay
                     if (LiveActive) LiveNet.Special(5);
                     else
                     {
-                        hunt.StunFoe(1.2f);
+                        hunt.StunFoe(Bal.breakerStun);
                         var away = new GridPos(System.Math.Sign(foeTile.x - robot.Position.x), System.Math.Sign(foeTile.y - robot.Position.y));
                         if (away.x == 0 && away.y == 0) away = new GridPos(0, 1);
                         for (int step = 3; step >= 1; step--)
@@ -1150,13 +1159,14 @@ namespace SquashBot.Gameplay
             int breakFrom = t != null ? t.breakerFrom : 3;
             float breakLean = t != null ? t.breaker : 0.3f * bold;
             bool keepsBar = t != null && t.persona == Persona.Ulti; // (the ulti saver never spends its bar on a break)
-            if (myCombo >= breakFrom && !keepsBar && Time.time >= myIronUntil && (rivalMeter >= 1f ? Random.value < 0.35f + 0.5f * breakLean : Random.value < 0.1f + 0.2f * breakLean))
+            // (the breaker costs the bot its bar part as it costs the player: never free)
+            if (myCombo >= Mathf.Max(breakFrom, Bal.breakerMinCombo) && !keepsBar && Time.time >= myIronUntil && rivalMeter >= Bal.breakerCost && Random.value < 0.35f + 0.5f * breakLean)
             {
-                rivalMeter = Mathf.Max(0f, rivalMeter - 1f);
+                rivalMeter -= Bal.breakerCost;
                 myCombo = 0;
                 myComboMove = 0;
                 stats.mine.brokenByRival++; stats.theirs.breakers++;
-                strikeCooldown = Mathf.Max(strikeCooldown, 0.9f); // foi's swing knocked aside
+                strikeCooldown = Mathf.Max(strikeCooldown, Bal.breakerStun); // foi's swing knocked aside (as long as the player's breaker holds the bot)
                 BreakerShown(true);
                 Shockwave.Create(foeAt, 2.4f, new Color(1f, 0.45f, 0.4f));
                 AudioManager.PlaySfx(Sfx.Shield, 1f, 0.75f);
@@ -1177,7 +1187,8 @@ namespace SquashBot.Gameplay
                 SlashFx.Create(foeAt, robot.transform.position, new Color(1f, 0.35f, 0.3f), 1.8f);
                 Shockwave.Create(robot.transform.position, 1.8f, new Color(1f, 0.4f, 0.3f));
                 cameraRig.Shake(0.45f);
-                HurtMe(HeavyHit, BlowKind.PowerHit);
+                HurtMe(HeavyHit * DuelPower.ComboTimes(Armory.Get(rival.weapon)), BlowKind.PowerHit); // (its axe's a fifth harder, as the player's)
+                if (lastGuardMe == DefenseOutcome.Hit) strikeCooldown = Mathf.Max(strikeCooldown, Bal.heavyStun); // (landed: foi stunned as the bot would be)
                 return;
             }
             if (rivalMeter >= 1f && !keepsBar && Random.value < (dist >= 3f ? 0.22f : 0.1f) + 0.15f * bold + (t != null && t.persona == Persona.Runner && dist >= 3f ? 0.2f : 0f))
@@ -1215,13 +1226,14 @@ namespace SquashBot.Gameplay
                     SlashFx.Create(foeAt, robot.transform.position, new Color(1f, 0.35f, 0.3f), kind == 3 ? 2.4f : 1.8f);
                     Shockwave.Create(robot.transform.position, kind == 3 ? 2.6f : 1.8f, new Color(1f, 0.4f, 0.3f));
                     cameraRig.Shake(kind == 3 ? 0.7f : 0.45f);
+                    strikeCooldown = Mathf.Max(strikeCooldown, kind == 3 ? Bal.upperStun : Bal.heavyStun); // (the server holds foi's blows as long)
                     if (kind == 3) cameraRig.StartCoroutine(BigMoment(true));
                     break;
                 case 4: cameraRig.StartCoroutine(Ultimate(false, leap: false)); break;
                 case 5:
                     myCombo = 0; myComboMove = 0;
                     stats.mine.brokenByRival++;
-                    strikeCooldown = Mathf.Max(strikeCooldown, 0.9f);
+                    strikeCooldown = Mathf.Max(strikeCooldown, Bal.breakerStun);
                     Shockwave.Create(foeAt, 2.4f, new Color(1f, 0.45f, 0.4f));
                     skillBar?.Shout(Loc.T("duel.broken"), new Color(1f, 0.45f, 0.4f));
                     break;

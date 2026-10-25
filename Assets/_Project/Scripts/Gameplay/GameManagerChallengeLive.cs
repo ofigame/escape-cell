@@ -71,6 +71,7 @@ namespace SquashBot.Gameplay
                     switch (m.t)
                     {
                         case "matched":
+                            if (!string.IsNullOrEmpty(m.rules)) DuelBalanceTable.Offer(m.rules); // (the server's newer duel table: kept from now on)
                             done(m);
                             yield break;
                         case "code":
@@ -186,6 +187,12 @@ namespace SquashBot.Gameplay
                     case "resume":
                         LiveDuelGo(m.secs);
                         break;
+                    case "ot":
+                        // the server's golden knock-down: the overtime shown, its 3-2-1 (the server holds the blows as long)
+                        if (!challengeRun) break;
+                        OvertimeShown(m.secs);
+                        cameraRig.StartCoroutine(CountdownThenGo());
+                        break;
                     case "s":
                     {
                         DuelStateMsg s;
@@ -271,6 +278,8 @@ namespace SquashBot.Gameplay
             RefreshHealthBar();
             if (health < before - 0.0001f)
             {
+                // a heavy weapon's blow from the rival staggers foi a moment (the server holds foi's blows as long)
+                if (m.by == 0 && rival != null) strikeCooldown = Mathf.Max(strikeCooldown, DuelPower.Stagger(Armory.Get(rival.weapon)));
                 ui.Flash(new Color(1f, 0.15f, 0.15f), 0.3f);
                 cameraRig.Shake(0.6f);
                 fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(1f, 0.35f, 0.35f), new Color(2.4f, 0.5f, 0.4f), 30, 6f);
@@ -286,6 +295,7 @@ namespace SquashBot.Gameplay
         {
             if (m.profile != null && !string.IsNullOrEmpty(m.profile.name)) liveProfile = m.profile;
             liveChange = m.change;
+            if (overtime && m.outcome > 0) wonInOvertime = true; // (the server's golden knock-down won)
             liveRanked = m.ranked;
             liveLeft = m.left;
             rematchMatch = liveLost || m.left ? 0 : liveMatchId; // a rematch can be asked for (not after a walk-out)

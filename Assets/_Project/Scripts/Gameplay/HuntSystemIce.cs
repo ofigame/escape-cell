@@ -33,6 +33,18 @@ namespace SquashBot.Gameplay
             return n;
         }
 
+        /// <summary>A heavy weapon's blow on the floors: the enemy on that tile reels a moment (its wind-up lost).</summary>
+        public void StaggerAt(GridPos at, float seconds)
+        {
+            foreach (var g in guards)
+            {
+                if (g.dead || g.ally || g.remote || g.squad || g.mon != null || g == challengeFoe || (g.pos != at && g.prevPos != at)) continue;
+                g.staggerUntil = Mathf.Max(g.staggerUntil, Time.time + seconds);
+                g.windup = -1f;
+                if (g.root != null) ClearTelegraph(g);
+            }
+        }
+
         /// <summary>True while the guard is held in its ice (it does nothing this frame); cracks the block when it ends.</summary>
         private bool Iced(Guard g)
         {

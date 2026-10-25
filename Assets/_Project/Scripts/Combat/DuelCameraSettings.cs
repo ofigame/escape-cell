@@ -21,6 +21,8 @@ namespace SquashBot.Combat
         public float focusPerDistance = 0.07f;
         /// <summary>The vertical field of view (degrees) the fit is worked out for.</summary>
         public float fov = 46f;
+        /// <summary>The golden knock-down's overtime: the camera this much nearer.</summary>
+        public float overtimeCloser = 0.9f;
 
         private static DuelCameraSettings loaded;
 

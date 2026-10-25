@@ -301,6 +301,7 @@ namespace SquashBot.Gameplay
             l.armor = 0;
             // vanG: the world's strongest, 100 health points in the first world up to 1500 in the last, more every floor.
             l.monsterHp = EnemyRoster.VanGHp(world, inWorld);
+            if (inWorld < LevelCatalog.LevelsPerWorld - 1) l.monsterHp = Mathf.Max(1, Mathf.RoundToInt(l.monsterHp * FloorTuning.Current.guardianHpShare)); // (floors 1-9: vanG's guardian, weaker)
             l.monsterAttack *= Mathf.Lerp(0.9f, 0.75f, inWorld / 9f);
         }
     }

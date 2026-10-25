@@ -128,7 +128,7 @@ namespace SquashBot.UI
                 button.targetGraphic = face;
                 button.onClick.AddListener(() =>
                 {
-                    about.text = Loc.T(it.key) + ": " + Loc.T(it.key + ".d");
+                    about.text = Loc.T(it.key) + ": " + MoveTexts.Describe(it.key); // (its numbers: the duel table's)
                     if (!it.owned)
                     {
                         // a locked move: how it is won (and the passive slot's level, when that is shut)

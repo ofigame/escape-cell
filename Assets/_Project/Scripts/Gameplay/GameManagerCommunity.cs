@@ -15,12 +15,15 @@ namespace SquashBot.Gameplay
     {
         private float generalAskedAt = -999f;
         private bool generalAsking, generalWired;
+        private bool rulesAsked;
 
         /// <summary>Each frame on the menu: the General asked again after a minute, its bar shown.</summary>
         private void UpdateCommunity()
         {
             if (ui == null || State != GameState.Menu) return;
             if (!generalWired) { generalWired = true; ui.GeneralPressed += TakeGeneral; }
+            // once a session: the server's duel table (a newer one is used from now on, in the bot duels too)
+            if (!rulesAsked) { rulesAsked = true; cameraRig.StartCoroutine(FoiNet.DuelRules(json => { if (json != null) DuelBalanceTable.Offer(json); })); }
             if (!generalAsking && Time.realtimeSinceStartup - generalAskedAt > 60f && Challenge.Open)
             {
                 generalAskedAt = Time.realtimeSinceStartup;
@@ -80,7 +83,7 @@ namespace SquashBot.Gameplay
         {
             var s = DuelMusicSettings.Current;
             bool close = Mathf.Abs(chDuelMe - chDuelThem) <= s.closeScore;
-            if (ultimateOn || chDuelLeft <= s.lastSeconds) return s.peakTension;
+            if (ultimateOn || overtime || chDuelLeft <= s.lastSeconds) return s.peakTension; // (the golden knock-down: the peak throughout)
             if (close && chDuelLeft <= s.lastMinute) return s.closeTension;
             return s.baseTension;
         }

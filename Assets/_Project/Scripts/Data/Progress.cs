@@ -16,6 +16,59 @@ namespace SquashBot.Data
 
         public static int Stars(int level) => Prefs.GetInt(StarsKey + level, 0);
 
+        private const string StarsV2Key = "sb_stars_v2", StarsNoteKey = "sb_stars_note";
+
+        /// <summary>
+        /// Once (and again after an older cloud copy comes back without the mark): the stars move to the floor score — a
+        /// floor with a score kept gets its score's stars; an old three counts as two otherwise (the third is won again
+        /// with a score of the top band). Never fewer than one for a floor won. A note is shown once when anything changed.
+        /// </summary>
+        public static void MigrateStarsToScore(int levelCount)
+        {
+            if (Prefs.GetInt(StarsV2Key, 0) == 1) return;
+            var t = FloorTuning.Current;
+            bool changed = false;
+            for (int l = 0; l < levelCount; l++)
+            {
+                int old = Stars(l);
+                if (old <= 0) continue;
+                int score = BestScore(l);
+                int fromScore = score > 0 ? (score >= t.starThree ? 3 : score >= t.starTwo ? 2 : 1) : 0;
+                int now = Mathf.Max(1, Mathf.Max(fromScore, Mathf.Min(old, 2)));
+                if (now == old) continue;
+                Prefs.SetInt(StarsKey + l, now);
+                changed = true;
+            }
+            Prefs.SetInt(StarsV2Key, 1);
+            if (changed) Prefs.SetInt(StarsNoteKey, 1);
+            Prefs.Save();
+        }
+
+        /// <summary>The move to score stars changed something and the player has not been told yet (true once).</summary>
+        public static bool TakeStarsNote()
+        {
+            if (Prefs.GetInt(StarsNoteKey, 0) != 1) return false;
+            Prefs.SetInt(StarsNoteKey, 0);
+            Prefs.Save();
+            return true;
+        }
+
+        private const string ScoreKey = "sb_lvscore_"; // (the floors' best scores: kept where the army kept them)
+
+        /// <summary>A floor's best score (0..100; 0: none yet).</summary>
+        public static int BestScore(int level) => Prefs.GetInt(ScoreKey + level, 0);
+
+        /// <summary>Keeps a floor's score if it beats the best; returns how much it raised the best.</summary>
+        public static int RecordScore(int level, int score)
+        {
+            score = Mathf.Clamp(score, 0, 100);
+            int best = BestScore(level);
+            if (score <= best) return 0;
+            Prefs.SetInt(ScoreKey + level, score);
+            Prefs.Save();
+            return score - best;
+        }
+
         public static int TotalStars(int levelCount)
         {
             int total = 0;

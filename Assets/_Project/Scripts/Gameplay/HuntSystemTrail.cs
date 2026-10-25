@@ -386,7 +386,7 @@ namespace SquashBot.Gameplay
         /// <summary>How far a robot strikes from: archers 4 tiles, spears 2, swords 1 (others as ever).</summary>
         private int ReachOf(Guard g)
         {
-            if (g == challengeFoe) return DuelGap; // (the duel: it strikes from the gap kept)
+            if (g == challengeFoe) return FoeReach; // (the duel: from the gap kept, a spear one tile more)
             if (g.soldier == null) return g.gunner ? GunReach : AttackReach;
             int fam = Army.Family(g.soldierKind);
             return fam == 2 ? 4 : fam == 1 ? 2 : 1;

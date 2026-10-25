@@ -471,37 +471,6 @@ namespace SquashBot.Gameplay
             }
         }
 
-        /// <summary>
-        /// One of the army's soldiers brought onto a floor: an ally of its group near foi (its kind's own strengths, its
-        /// group's armour and attack), fighting the floor's robots like foi's other allies. Its fall costs the army's
-        /// pool a soldier for an hour.
-        /// </summary>
-        public bool AddLevelSoldier(int group, GridPos near, Army.Stats stats)
-        {
-            var tile = FreeNear(near);
-            if (!tile.HasValue) return false;
-            var kind = Army.KindOf(group);
-            var model = SoldierModel.Build(transform, kind, Army.Heavy(kind) ? MineColour : Color.Lerp(MineColour, Color.white, 0.3f));
-            // As tall as foi at least (trained and heavy soldiers taller), and a plain cape in the team's colour.
-            float h0 = HeightOf(model.transform);
-            if (h0 > 0.05f) CosmeticModels.SimpleCape(model.transform, new Vector3(0f, h0 * 0.66f, -h0 * 0.12f), h0 * 0.34f, h0 * 0.5f, Color.Lerp(MineColour, Color.black, 0.35f));
-            float want = Mathf.Max(0.4f, FoiHeight) * (Army.Heavy(kind) ? 1.12f : 1f) * Army.SizeFor(group, stats);
-            model.transform.localScale = Vector3.one * (h0 > 0.05f ? want / h0 : Mathf.Max(0.4f, FoiHeight * 0.62f));
-            // Its health in the floor robots' blows, its blow in theirs (robots take a few).
-            int hp = Mathf.Max(1, stats.hp);
-            int hit = Mathf.Max(1, Mathf.RoundToInt(stats.hit));
-            var a = new Guard { pos = tile.Value, hp = hp, maxHp = hp, rank = -1, step = 0.2f + (float)rng.NextDouble() * 0.4f, ally = true, poolGroup = group, allyHit = hit, armorShare = stats.armor, soldier = model, soldierKind = kind };
-            a.root = model.transform;
-            a.root.SetParent(transform, true);
-            a.root.position = At(tile.Value);
-            a.from = a.to = a.root.position;
-            AddHealthBar(a);
-            MaterialFactory.SetColors(a.barMat, MineColour, MineColour * 1.6f);
-            allies.Add(a);
-            fx.Burst(At(tile.Value) + Vector3.up * 0.5f, MineColour, MineColour * 2f, 14, 3.5f);
-            return true;
-        }
-
         // ---------- Live: the squads' state ----------
 
         /// <summary>This game's squad for the other game: "id:x,z,h" per soldier standing (x, z in tenths, h its health

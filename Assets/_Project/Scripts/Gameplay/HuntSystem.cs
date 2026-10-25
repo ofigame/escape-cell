@@ -85,6 +85,8 @@ namespace SquashBot.Gameplay
             public float armorShare;
             /// <summary>The ice bomb: until when it stands frozen, and its block of ice.</summary>
             public float iceUntil;
+            /// <summary>A heavy weapon's blow on the floors: until when it reels (no step, no blow).</summary>
+            public float staggerUntil;
             public Transform ice;
             public Transform root;
             public bool dead, brute;
@@ -267,6 +269,7 @@ namespace SquashBot.Gameplay
             comboLeft = 0;
             leapT = -1f;
             ResetSpecial(); // (the big attack's timer starts afresh on every floor)
+            BeginBoss(); // (a guardian, a world form or vanG itself: its moments cleared)
             SetupStages();
             if (stageCount > 1) SpawnStages();
             else SpawnClassic();
@@ -609,6 +612,7 @@ namespace SquashBot.Gameplay
                     through = behind ? through * 2 : Mathf.Max(1, through / 5);
                     if (!behind) BackHint?.Invoke(At(monsterPos));
                 }
+                through = BossTakes(through); // (a form's iron body, mirror, front shield, sturdy spare life)
                 if (through > 0) HitMonster(through);
                 return true;
             }
@@ -971,6 +975,7 @@ namespace SquashBot.Gameplay
                     monster.Grow(stage);
                     monsterTimer = Mathf.Max(monsterTimer, 1.4f); // (a breath while it changes)
                     MonsterStage?.Invoke(stage);
+                    BossStageCrossed();
                 }
             }
             fx.Burst(At(monsterPos) + Vector3.up * 0.8f, Palette.UiGold, Palette.CoinGlow, 44, 7f);
@@ -1190,6 +1195,7 @@ namespace SquashBot.Gameplay
             UpdateHealthBar(g);
             if (g.windup < 0f) { IdleCharge(g); if (g == challengeFoe) FoeWindLeft = -1f; } // a blow cut short (struck, frozen, pushed): its charge and aim go
             if (Iced(g)) return;
+            if (Time.time < g.staggerUntil) return; // (reeling from a heavy blow)
             UpdateShield(g, dt);
             if (g.flash > 0f) g.flash -= dt * 3f;
             g.cooldown -= dt;
@@ -1331,7 +1337,7 @@ namespace SquashBot.Gameplay
             }
             int dist = goal.Manhattan(g.pos);
             g.step -= dt;
-            if (g.step > 0f || (!PlayerAway && (atAlly ? allyD : near) <= Mathf.Max(g == challengeFoe ? DuelGap : 1, reach - 1)) || (PlayerAway && Chebyshev(g.pos, goal) <= 1)) return;
+            if (g.step > 0f || (!PlayerAway && (atAlly ? allyD : near) <= Mathf.Max(g == challengeFoe ? Mathf.Max(DuelGap, FoeReach) : 1, reach - 1)) || (PlayerAway && Chebyshev(g.pos, goal) <= 1)) return;
             float period = 1f / GuardSpeed(g);
             if (g.human != null) g.human.Step();
             // The arena city: round the buildings by the street map (distances from the goal), never stuck behind a block.
@@ -1452,7 +1458,8 @@ namespace SquashBot.Gameplay
         private void UpdateMonster(float dt)
         {
             float hard = level.score / 100f;
-            bool enraged = monsterHp * 2 <= MonsterHpTotal;
+            bool enraged = Boss != BossKind.Guardian && monsterHp * 2 <= MonsterHpTotal; // (a guardian never rages)
+            UpdateBossPassives();
             if (leapT >= 0f)
             {
                 // In the air: a heavy arc onto the new tile, a quake where it lands.
@@ -1464,7 +1471,7 @@ namespace SquashBot.Gameplay
                 fx.Dust(At(monsterPos), new Color(0.55f, 0.5f, 0.45f), 22, 4f);
                 AudioManager.PlaySfx(Sfx.Impact, 1f, 0.5f);
                 rig.Shake(0.6f);
-                if (Chebyshev(robot.Position, monsterPos) <= 1) { BlowFrom = At(monsterPos); Hit?.Invoke(robot.Position, MonsterHitShare); }
+                if (Chebyshev(robot.Position, monsterPos) <= 1) { BlowFrom = At(monsterPos); Hit?.Invoke(robot.Position, MonsterHitShare); BossLanded(); }
                 if (CompanionTile.HasValue && Chebyshev(CompanionTile.Value, monsterPos) <= 1) CompanionHurt?.Invoke(2);
                 monsterTimer = Mathf.Min(monsterTimer, 0.35f); // and straight into an attack
                 return;
@@ -1484,11 +1491,14 @@ namespace SquashBot.Gameplay
                     Shockwave.Create(At(t), 0.8f, new Color(1f, 0.45f, 0.3f));
                     fx.Dust(At(t), new Color(0.55f, 0.5f, 0.45f), 6, 2f);
                 }
-                if (specialKind >= 0) LandSpecial();
                 rig.Shake(attackIsRock ? 0.4f : 0.7f);
                 AudioManager.PlaySfx(Sfx.Impact, 1f, attackIsRock ? 1f : 0.6f);
-                if (attackTiles.Contains(robot.Position)) { BlowFrom = At(monsterPos); Hit?.Invoke(robot.Position, MonsterHitShare); }
+                // the blow first (at the move's share), then the big attack's after-effects (a spin or bolt may follow at once)
+                if (attackTiles.Contains(robot.Position)) { BlowFrom = At(monsterPos); Hit?.Invoke(robot.Position, BossHitShare); BossLanded(); }
                 if (CompanionTile.HasValue && attackTiles.Contains(CompanionTile.Value)) CompanionHurt?.Invoke(2);
+                if (specialKind >= 0) LandSpecial();
+                formTimes = 1f;
+                if (specialKind >= 0) return; // (a form's next spin or bolt is already laid out)
                 attackTiles.Clear();
                 // A combo: the next blow follows almost at once.
                 if (comboLeft > 0)
@@ -1499,7 +1509,7 @@ namespace SquashBot.Gameplay
                 return;
             }
             if (TrySpecial(dt, hard, enraged)) return; // the world's own big attack, now and then
-            monsterTimer -= dt * (enraged ? 1.35f : 1f) * monsterPace;
+            monsterTimer -= dt * RageTimes(enraged) * monsterPace;
             if (monsterTimer > 0f) return;
             monsterTimer = level.monsterAttack * (0.85f + (float)rng.NextDouble() * 0.3f);
             attackTiles.Clear();
@@ -1514,6 +1524,7 @@ namespace SquashBot.Gameplay
                 return;
             }
             if (comboLeft <= 0 && rng.NextDouble() < hard * 0.8f + (enraged ? 0.25f : 0f)) comboLeft = hard > 0.6f ? 2 : 1;
+            if (FormIs(FormMove.ComboMaster) && comboLeft <= 0 && rng.Next(2) == 0) { comboLeft = 3; Shout(FormMove.ComboMaster); } // (the combo master: long series)
             // Right next to it: a stomp all around. Two tiles off: a rock at foi's tile (and, later, its neighbours too).
             if (dist <= 1 && rng.Next(3) > 0)
             {
@@ -1727,6 +1738,10 @@ namespace SquashBot.Gameplay
         /// <summary>The nearest the two foi come in the duel (tiles between their tiles' centres, diagonals as one): two empty
         /// tiles between them, and a duel blow reaches exactly this far.</summary>
         public const int DuelGap = 3;
+
+        /// <summary>How far the duel's computer rival strikes (its weapon family's reach: a spear one tile past the gap, and
+        /// it keeps that far off).</summary>
+        public int FoeReach = DuelGap;
 
         public static int Chebyshev(GridPos a, GridPos b) => Mathf.Max(Mathf.Abs(a.x - b.x), Mathf.Abs(a.y - b.y));
     }

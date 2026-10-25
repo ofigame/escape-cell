@@ -163,6 +163,7 @@ namespace SquashBot.Gameplay
             CloudSave.Install();
             OldNotes.Clear(); // the removed open world's farm notes still waiting on the phones that had it
             Cosmetics.MigrateHeads(); // the new heads: the old ones' buyers refunded, the old skins to the nearest new tones
+            Progress.MigrateStarsToScore(LevelCatalog.LevelCount); // (the stars now come from the floor score; an old three counts as two)
             Reminder.Schedule(); // the daily reminder: tomorrow evening (set again whenever the game is left)
             Prefs.DeleteKey("sb_ow"); Prefs.DeleteKey("sb_km"); Prefs.DeleteKey("sb_intro_seen"); // the removed open world and kingdom: test phones' leftovers
             FramePacer.Busy = () => State == GameState.Playing;
@@ -557,7 +558,6 @@ namespace SquashBot.Gameplay
 #endif
             if (ui.Guide.Visible) return; // the guide closes itself
             if (defenseEditing) { LeaveDefenseEditor(); return; }
-            if (State != GameState.Playing && squadPick != null && squadPick.IsOpen) { squadPick.Hide(); ui.RefreshPrelevelSquad(true); return; }
             if (State != GameState.Playing && friendsUi != null && friendsUi.InviteOpen) { friendsUi.HideInvite(); return; }
             if (State != GameState.Playing && friendsUi != null && friendsUi.IsOpen) { friendsUi.Hide(); return; }
             if (State != GameState.Playing && ui.CloseTopModal()) return; // a card on top closes first
@@ -615,9 +615,17 @@ namespace SquashBot.Gameplay
             ui.SetGoalLine(GoalLine());
             if (pendingWorldGift != null)
             {
-                ui.ShowIntro(Loc.T("world.giftTitle"), pendingWorldGift);
+                if (pendingWorldMove != null)
+                {
+                    // the move the world's monster gave: its card (ADD TO MY SET), the world's gifts under it
+                    if (newMoveCard == null) newMoveCard = UI.NewMoveCard.Create(ui.transform.Find("Canvas/SafeArea") ?? ui.transform.Find("Canvas") ?? ui.transform);
+                    newMoveCard.Show(pendingWorldMove, pendingWorldGift);
+                }
+                else ui.ShowIntro(Loc.T("world.giftTitle"), pendingWorldGift);
                 pendingWorldGift = null;
+                pendingWorldMove = null;
             }
+            else if (Progress.TakeStarsNote()) ui.ShowIntro(Loc.T("stars.noteTitle"), Loc.F("stars.note", FloorTuning.Current.starTwo, FloorTuning.Current.starThree)); // (once: the stars come from the floor score now)
             else if (OfferWelcomeBack()) { } // (back after three days: a welcome, its gifts)
             else if (!loginOffered && LoginCalendar.Ready && NextLevel >= 2 && !FirstSession.Quiet) // (the first session's first ten minutes: nothing pops up)
             {
@@ -777,6 +785,8 @@ namespace SquashBot.Gameplay
 
         private bool loginOffered; // (the calendar opens by itself once a session, on the menu, while a gift waits)
         private string pendingWorldGift; // (a world's monster beaten: its gifts told on the menu)
+        private string pendingWorldMove; // (and the move it gave: its card, to add it to the set)
+        private UI.NewMoveCard newMoveCard;
 
         private void StartLevel(int index, List<Boost> boosts = null)
         {
@@ -1001,7 +1011,6 @@ namespace SquashBot.Gameplay
             // The floors: nothing falls from the sky and nothing appears by itself — gold and skills come from what is beaten.
             bool floorHunt = level.mission == MissionType.Hunt && !arenaRun && !challengeRun && !trailRun;
             hazards.NoFalls = floorHunt;
-            PrepareLevelSquad();
             coins.NoTimed = floorHunt;
             powerUps.NoTimed = floorHunt;
 
@@ -1576,7 +1585,6 @@ namespace SquashBot.Gameplay
             UpdateBip(Time.deltaTime);
             UpdateAlly(Time.deltaTime);
             UpdateChallenge(Time.deltaTime);
-            UpdateLevelSquad();
             UpdateGunSight();
             AudioManager.SetTension(Tension());
             // The hard-rock fight layer: as loud as the fight around foi (and louder when its health runs low).
@@ -2295,9 +2303,9 @@ namespace SquashBot.Gameplay
             Prefs.DeleteKey(FailKey(levelIndex));
             Defenses.ConsumeOnWin(levelIndex); // the defences that stood in it are used up
 
-            // Stars: how well the level went.
-            int stars = StarRules.Evaluate(starGoals, coinsThisRun, elapsed);
-            ScoreFloor(); // the floor score for the army (kept now, shown on the result card)
+            // Stars: how well the level went (a hunt floor: its score, 0..100; the old missions: their own goals).
+            ScoreFloor(); // the floor score (kept now, shown on the result card)
+            int stars = level.mission == MissionType.Hunt && lastScore >= 0 ? ScoreStars(lastScore) : StarRules.Evaluate(starGoals, coinsThisRun, elapsed);
 
             // Every level leads on to the next by a road, and the level only counts as beaten when the robot arrives:
             // until then it is saved as "on the road", so quitting there brings the player back onto the road.
@@ -2324,6 +2332,7 @@ namespace SquashBot.Gameplay
                 SaveData.UnlockedLevel = levelIndex + 1;
 
             Progress.Award(levelIndex, stars, out _); // the stars are kept (no bonus rounds any more)
+            string worldStars = level.mission == MissionType.Hunt ? WorldStarsReward() : null; // (a world's every star: its gold and title)
             // The coins of the floor fill the chest meter; a full meter brings the surprise chest.
             chestPending = LevelChest.AddCoins(earned, levelIndex);
 
@@ -2333,7 +2342,8 @@ namespace SquashBot.Gameplay
                 int beaten = levelIndex / LevelCatalog.LevelsPerWorld + 1;
                 CoreParts.Add(15);
                 string move = MoveSet.KeyOfWorld(beaten);
-                pendingWorldGift = Loc.F("world.gift", Rescued.PerWorld, Rescued.Count) + (move != null ? "\n" + Loc.F("world.move", Loc.T(move)) : "") + "\n" + Loc.F("login.cores", "+15");
+                pendingWorldMove = move; // (its own card shows it)
+                pendingWorldGift = Loc.F("world.gift", Rescued.PerWorld, Rescued.Count) + "\n" + Loc.F("login.cores", "+15");
             }
             Monetization.Ads.NoteResult(true);
             LevelTimes.Record(levelIndex, Time.realtimeSinceStartup - levelStartedAt, true);
@@ -2342,8 +2352,12 @@ namespace SquashBot.Gameplay
             // A good moment for a store rating (first at level 10, then at a world's end; see RatePrompt).
             if (unlockedNew && Monetization.RatePrompt.ShouldAsk(levelIndex + 1, (levelIndex + 1) % LevelCatalog.LevelsPerWorld == 0))
                 StartCoroutine(AskRatingSoon());
-            // The star news (the old cards' hooks were written for missions the floors no longer have: not shown on hunt floors).
-            string note = level.mission != MissionType.Hunt && Loc.Has(CardKey("hook")) ? Loc.T(CardKey("hook"))
+            // A hunt floor: the score's parts (what to do better), the next star's score and a world's every star; the old
+            // missions: their card's hook or the star news (the hooks were written for missions the floors no longer have).
+            string note = level.mission == MissionType.Hunt
+                ? (lastScore >= 0 ? ScoreParts(stars) : stars < 3 ? Loc.F("star.score", stars >= 2 ? FloorTuning.Current.starThree : FloorTuning.Current.starTwo) : Loc.T("star.max"))
+                  + (worldStars != null ? "\n" + worldStars : "")
+                : Loc.Has(CardKey("hook")) ? Loc.T(CardKey("hook"))
                 : stars < 3 ? StarHint(stars)
                 : Loc.T("star.max");
 

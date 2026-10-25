@@ -924,9 +924,6 @@ namespace SquashBot.UI
             preBoostsLabel = UiFactory.TextBox("Boosts", card, Top, new Vector2(0f, -420f), new Vector2(780f, 56f), Loc.T("pre.boosts"), 36f, Palette.UiText);
             foreach (var b in new[] { Boost.StartShield, Boost.StartHammer, Boost.CoinMagnet, Boost.DoubleCoins }) preBoosts.Add(BoostTile(card, new Vector2(0f, -500f), b));
 
-            // The soldiers to bring along (how many, and where they join foi).
-            preSquad = UiFactory.MakeButton(card, "", Kind.Secondary, Bottom, new Vector2(0f, 214f), new Vector2(620f, 96f), () => SquadPressed?.Invoke(preLevel), 34f);
-            preSquadText = preSquad.GetComponentInChildren<TextMeshProUGUI>();
             UiFactory.MakeButton(card, Loc.T("menu.play"), Kind.Primary, Bottom, new Vector2(0f, 30f), new Vector2(620f, 160f),
                 () => PrelevelPlay?.Invoke(preLevel, preBoosts.FindAll(v => v.on).ConvertAll(v => v.boost)), 84f);
 
@@ -1027,27 +1024,13 @@ namespace SquashBot.UI
                 var tag = shown[i].tag.transform as RectTransform;
                 if (tag != null) tag.sizeDelta = new Vector2(Mathf.Min(210f, width - 10f), tag.sizeDelta.y);
             }
-            Data.LevelSquad.Limit = Data.LevelSquad.LimitFor(Data.LevelCatalog.WorldOf(levelIndex));
-            RefreshPrelevelSquad(levelIndex >= 4);
             RefreshBoosts();
             prelevel.Show();
             prelevel.transform.SetAsLastSibling();
         }
 
-        private Button preSquad;
-        private TextMeshProUGUI preSquadText;
-        /// <summary>BRING SOLDIERS on the card before a level (its index).</summary>
-        public event Action<int> SquadPressed;
         /// <summary>FRIENDS on the menu.</summary>
         public event Action FriendsPressed;
-
-        /// <summary>The card's soldiers button: how many come along (hidden on the first floors).</summary>
-        public void RefreshPrelevelSquad(bool show)
-        {
-            if (preSquad == null) return;
-            preSquad.gameObject.SetActive(show);
-            preSquadText.text = Loc.F("pre.squad", Data.LevelSquad.Total);
-        }
 
         public void HidePrelevel() => prelevel.Hide(true);
 

@@ -32,10 +32,17 @@ namespace SquashBot.Gameplay
         /// </summary>
         private static string CardText(int index)
         {
-            var sb = new System.Text.StringBuilder(Loc.T("card.goal.vang"));
+            // the boss at the end: vanG's guardian (floors 1-9), the world's form of vanG (its tenth), vanG itself (the last)
+            int inWorld = index % LevelCatalog.LevelsPerWorld;
+            string goal = inWorld < LevelCatalog.LevelsPerWorld - 1 ? Loc.T("card.goal.guardian")
+                : index >= LevelCatalog.LevelCount - 1 ? Loc.T("card.goal.vang")
+                : Loc.F("card.goal.form", Loc.T("lvl." + (index + 1) + ".title"));
+            var sb = new System.Text.StringBuilder(goal);
             var rule = RuleFor(index);
             if (rule != LevelRule.None) sb.Append('\n').Append(Loc.F("card.rule", Loc.T("rule." + rule), Loc.T("rule." + rule + ".d")));
             sb.Append('\n').Append(Loc.F("card.stages", LevelCatalog.StageCount(index)));
+            int best = Progress.BestScore(index);
+            if (best > 0) sb.Append(" · ").Append(Loc.F("card.best", best)); // (the best floor score: its stars come from it)
             return sb.ToString();
         }
 

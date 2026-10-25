@@ -41,18 +41,9 @@ namespace SquashBot.Data
 
         // ---------- Floor scores ----------
 
-        public static int BestScore(int level) => Prefs.GetInt(ScoreKey + level, 0);
+        public static int BestScore(int level) => Progress.BestScore(level); // (the floors' scores live in Progress now)
 
-        /// <summary>Keeps a floor's score if it beats the best; returns the points it added to the world's total.</summary>
-        public static int RecordScore(int level, int score)
-        {
-            score = Mathf.Clamp(score, 0, 100);
-            int best = BestScore(level);
-            if (score <= best) return 0;
-            Prefs.SetInt(ScoreKey + level, score);
-            Prefs.Save();
-            return score - best;
-        }
+        public static int RecordScore(int level, int score) => Progress.RecordScore(level, score);
 
         /// <summary>A world's floor scores summed (0-1000).</summary>
         public static int WorldScore(int world)

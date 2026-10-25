@@ -159,8 +159,16 @@ namespace SquashBot.Gameplay
         {
             specialTimer -= dt * (enraged ? 1.5f : 1f);
             if (specialTimer > 0f) return false;
-            specialTimer = Mathf.Lerp(9f, 6f, hard) * (0.85f + (float)rng.NextDouble() * 0.3f);
+            specialTimer = BigAttackEvery(hard) * (0.85f + (float)rng.NextDouble() * 0.3f);
             if (grid.IsSafe(robot.Position)) return false;
+            // a world form: the world's own move (vanG itself: its core burst in the last stage); else the world's big attack
+            var bossMove = BigMove();
+            if (bossMove.HasValue)
+            {
+                if (StartFormMove(bossMove.Value)) return true;
+                specialTimer = 1.2f; // (out of its move's reach: it closes in and tries again in a moment, never another attack instead)
+                return false;
+            }
             attackTiles.Clear();
             specialKind = world % 4;
             switch (specialKind)
@@ -225,6 +233,7 @@ namespace SquashBot.Gameplay
         {
             int kind = specialKind;
             specialKind = -1;
+            if (kind >= FormKind) { LandFormMove((FormMove)(kind - FormKind)); return; }
             switch (kind)
             {
                 case 0:

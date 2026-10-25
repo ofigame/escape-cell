@@ -76,15 +76,53 @@ namespace SquashBot.Combat
         public float shieldWarDurability = 2f, shieldWarPerfectMeter = 1f;
 
         private static DefenseSettings loaded;
+        private static int tableVersion = -1;
 
+        /// <summary>
+        /// The settings in use: the asset's (a copy, never written back), with every number the server also counts taken
+        /// from the duel's table (DuelBalanceTable) so the bot duel and the live one defend alike. The bots' and the feel's
+        /// numbers stay the asset's.
+        /// </summary>
         public static DefenseSettings Current
         {
             get
             {
-                if (loaded == null) loaded = Resources.Load<DefenseSettings>("Duel/DefenseSettings");
-                if (loaded == null) loaded = CreateInstance<DefenseSettings>();
+                if (loaded == null)
+                {
+                    var asset = Resources.Load<DefenseSettings>("Duel/DefenseSettings");
+                    loaded = asset != null ? Instantiate(asset) : CreateInstance<DefenseSettings>();
+                }
+                var t = Data.DuelBalanceTable.Current;
+                if (tableVersion != t.version) { tableVersion = t.version; FromTable(loaded, t); }
                 return loaded;
             }
+        }
+
+        private static void FromTable(DefenseSettings s, Data.DuelBalanceTable t)
+        {
+            s.grazeShare = t.grazeShare;
+            s.maxDurability = t.maxDurability;
+            s.shieldMasterDurability = t.shieldMasterDurability;
+            s.blowCost = (float[])t.familyGuardCost.Clone();
+            s.powerHitCost = t.powerHitCost;
+            s.airCost = t.airCost;
+            s.knockdownCost = t.knockdownCost;
+            s.ultiCost = t.ultiGuardCost;
+            s.ultiThrough = t.ultiThrough;
+            s.regenDelay = t.regenDelay;
+            s.regenPerSecond = (float[])t.regenPerSecond.Clone();
+            s.breakDaze = t.breakDaze;
+            s.breakReturn = t.breakReturn;
+            s.breakReturnShare = t.breakReturnShare;
+            s.perfectBefore = t.perfectBefore;
+            s.perfectAfter = t.perfectAfter;
+            s.staggerSeconds = t.staggerSeconds;
+            s.perfectNextBlow = t.perfectNextBlow;
+            s.perfectMeter = t.perfectMeter;
+            s.tapRelease = t.tapRelease;
+            s.tapLockout = t.tapLockout;
+            s.dodgeInvulnerable = t.dodgeInvulnerable;
+            s.dodgeCooldown = t.dodgeCooldown;
         }
 
         /// <summary>The rank band (0..3) of a rank (0 Er .. 12 Mareşal).</summary>

@@ -29,11 +29,11 @@ namespace SquashBot.Visual
             float hue = Mathf.Repeat(0.03f + world * 0.137f, 1f); // (worlds a good way round the colour wheel apart)
             float depth = Mathf.Lerp(0.22f, 0.5f, world / 24f) + (boss ? 0.15f : slot >= 7 ? 0.07f : 0f);
             var tint = Color.Lerp(Color.white, Color.HSVToRGB(hue, 0.85f, 1f), depth);
-            float size = boss ? 1.25f + 0.15f * (world / 24f)
-                : slot >= 7 ? 1f
-                : slot == 6 ? 0.9f
-                : 0.72f + 0.03f * slot; // (the guard chiefs: smaller than a world's monster)
-            return (model, tint, size, boss);
+            float bossSize = 1.25f + 0.15f * (world / 24f);
+            if (boss) return (model, tint, bossSize, true);
+            // floors 1-9: vanG's guardian — grey metal with only a hint of the world's colour, a good deal smaller
+            var metal = Color.Lerp(new Color(0.6f, 0.64f, 0.7f), Color.HSVToRGB(hue, 0.5f, 1f), 0.15f);
+            return (model, metal, bossSize * Data.FloorTuning.Current.guardianScale, false);
         }
 
         /// <summary>Each model's turn so it faces +Z.</summary>

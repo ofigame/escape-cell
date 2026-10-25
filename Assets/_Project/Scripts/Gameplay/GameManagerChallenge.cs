@@ -150,7 +150,7 @@ namespace SquashBot.Gameplay
             if (liveHooksWired) return;
             // The hunt's links (made once: the hunt outlives a language change, the challenge screens do not).
             liveHooksWired = true;
-            hunt.RemoteFoeStruck += () => { if (LiveActive) LiveNet.Hit(); };
+            hunt.RemoteFoeStruck += () => { if (LiveActive) LiveNet.Hit(Time.time < myJumpUntil); }; // (in the air: the server adds the air blow's extra)
             hunt.SquadHitRemote += (id, damage, byFoi) => { if (LiveActive) LiveNet.SquadHit(id, damage, byFoi); };
             hunt.SquadHitFoe += damage => { if (LiveActive) LiveNet.FoeHit(damage); };
             hunt.RivalSentGroup += group =>
@@ -836,6 +836,7 @@ namespace SquashBot.Gameplay
             float vfov = cs.fov * Mathf.Deg2Rad;
             float hfov = 2f * Mathf.Atan(Mathf.Tan(vfov * 0.5f) * Mathf.Max(0.3f, cam.aspect));
             float want = Mathf.Clamp(half / Mathf.Tan(hfov * 0.5f) + depth, cs.minDistance, cs.maxDistance);
+            if (overtime) want *= cs.overtimeCloser; // (the golden knock-down: a touch nearer)
             sideDist = Mathf.Lerp(sideDist, want, Mathf.Min(1f, Time.unscaledDeltaTime * 2f));
             // looked at above their feet: the two stand in the band from about 30% to 60% of the screen's height
             var focus = mid + Vector3.up * (sideDist * cs.focusPerDistance);

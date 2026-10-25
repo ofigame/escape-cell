@@ -88,6 +88,8 @@ namespace SquashBot.Data
             public int duelLevel;
             /// <summary>Its player's fighting style (for a copy).</summary>
             public string style;
+            /// <summary>The title on its card (an id: TitleBook writes it in this game's language).</summary>
+            public string title;
         }
 
         [Serializable]
@@ -129,6 +131,8 @@ namespace SquashBot.Data
             public int duelLevel;
             /// <summary>How the player fights ("aggression,shield,heart").</summary>
             public string style;
+            /// <summary>The title picked for its card (TitleBook's id).</summary>
+            public string title;
         }
 
         [Serializable] private class ResultBody { public bool won, draw, left; }
@@ -196,7 +200,7 @@ namespace SquashBot.Data
         /// <summary>Sends the army rivals will face (the groups' points, foi's strength in the duel).</summary>
         public static IEnumerator PutArmy(int[] points, int earned, int world, int foiHp, float foiHit, float boldness, string weapon, int weaponLevel, float armor, int shield, Action<bool> done)
         {
-            var b = new ArmyBody { army = string.Join(",", points), earned = earned, world = world, foiHp = foiHp, foiHit = foiHit, boldness = boldness, weapon = weapon, weaponLevel = weaponLevel, armor = armor, shield = shield, look = Cosmetics.LookText(), moves = MoveSet.Code, duelLevel = DuelLevel.Level, style = PlayStyle.Code };
+            var b = new ArmyBody { army = string.Join(",", points), earned = earned, world = world, foiHp = foiHp, foiHit = foiHit, boldness = boldness, weapon = weapon, weaponLevel = weaponLevel, armor = armor, shield = shield, look = Cosmetics.LookText(), moves = MoveSet.Code, duelLevel = DuelLevel.Level, style = PlayStyle.Code, title = TitleBook.Picked };
             long code = 0;
             yield return Send("PUT", "/army", JsonUtility.ToJson(b), true, (c, _) => code = c);
             done(code == 200);
@@ -219,6 +223,15 @@ namespace SquashBot.Data
             long code = 0; string body = null;
             yield return Send("GET", "/general", null, Registered, (c, b) => { code = c; body = b; });
             done(code == 200 ? TryParse<GeneralState>(body) : null);
+        }
+
+        /// <summary>The server's duel table (its raw JSON; null when it could not be read): a newer one than the game's is
+        /// kept and used for every duel (DuelBalanceTable.Offer).</summary>
+        public static IEnumerator DuelRules(Action<string> done)
+        {
+            long code = 0; string body = null;
+            yield return Send("GET", "/duel/rules", null, false, (c, b) => { code = c; body = b; });
+            done(code == 200 ? body : null);
         }
 
         /// <summary>Takes a step of the General's reward (true: the server gave it now; the game hands it out).</summary>

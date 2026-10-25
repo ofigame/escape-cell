@@ -365,6 +365,9 @@ namespace SquashBot.Gameplay
 
         /// <summary>foi's ultimate (or power hit) begins: the AI rival may see it coming and dodge it (its rank's chance;
         /// a power hit half as often), or block through it.</summary>
+        /// <summary>When the bot dodges the player's ultimate after it starts (a marked one: as it lands).</summary>
+        private float botUltiDodgeWait = 0.15f;
+
         private void BotReadsBigMove(bool ulti)
         {
             if (LiveActive || !challengeRun || tutorialOn || ((LabOn || trainingOn) && !DummyDefends)) return;
@@ -372,7 +375,7 @@ namespace SquashBot.Gameplay
             float dodge = t != null ? t.ultiDodge : 0.25f;
             if (!ulti) dodge *= 0.5f;
             if (DummyDefends) dodge = 0.5f;
-            if (Random.value < dodge) { cameraRig.StartCoroutine(BotDodgeSoon(ulti ? 0.15f : 0f, ulti)); return; }
+            if (Random.value < dodge) { cameraRig.StartCoroutine(BotDodgeSoon(ulti ? botUltiDodgeWait : 0f, ulti)); return; }
             if (ulti && Random.value < (t != null ? t.block : 0.2f) && rivalGuard.Press(Time.time - Def.perfectBefore - 0.1f)) botHoldUntil = Time.time + 2.5f; // (behind its shield through it)
         }
 
@@ -570,7 +573,7 @@ namespace SquashBot.Gameplay
         {
             grazed = false;
             float now = Time.time;
-            var o = myGuard.Judge(now, BlowKind.Plain, Def.blowCost[2], out float through);
+            var o = myGuard.Judge(now, BlowKind.Plain, Def.blowCost[2] * (hunt.BlowPierces ? 3f : 1f), out float through); // (the piercing form eats the shield three times as fast)
             switch (o)
             {
                 case DefenseOutcome.Perfect:

@@ -396,7 +396,7 @@ namespace SquashBot.UI
                 bool owned = Armory.Owned(w), unlocked = Armory.Unlocked(w), equipped = Armory.IsEquipped(w);
                 int dmg = Armory.Damage(w);
                 float cd = Armory.Cooldown(w);
-                desc.text = Loc.F("weapon.line", dmg, w.reach, Loc.T(cd <= 0.16f ? "weapon.fast" : cd >= 0.3f ? "weapon.slow" : "weapon.normal"))
+                desc.text = Loc.F("weapon.line", dmg, Armory.Reach(w), Loc.T(cd <= 0.16f ? "weapon.fast" : cd >= 0.3f ? "weapon.slow" : "weapon.normal")) + " · " + Loc.F("weapon.dps", Mathf.RoundToInt(dmg / Mathf.Max(0.05f, cd)))
                             + "\n" + (w.kind == WeaponKind.Gun ? Loc.T(w.auto ? "weapon.auto" : "weapon.single") + (w.auto ? " ×" + w.burst : "") : Loc.T("family." + Armory.Family(w)))
                             + "  ·  " + Loc.F("weapon.tier", w.tier);
                 if (w.Special || w.fx != SpecialFx.None) desc.text = "<color=#FFD25A>" + (w.chest ? Loc.T("chests.exclusive") : w.Special ? Loc.F("special.line", Loc.T("rank." + w.rank)) : Loc.T("weapon.fxShop")) + " · " + Loc.T("special.fx." + w.fx) + "</color>\n" + desc.text;

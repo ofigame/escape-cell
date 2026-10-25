@@ -43,23 +43,23 @@ namespace SquashBot.Gameplay
             mySturdy = myPassive == PassiveKind.Sturdy;
             rivalSturdy = rivalPassive == PassiveKind.Sturdy;
             hunt.FoeSturdy = rivalSturdy && !LiveActive;
-            if (myPassive == PassiveKind.MasterWarrior) myMeter = Mathf.Max(myMeter, 1f);
-            if (rivalPassive == PassiveKind.MasterWarrior && !LiveActive) rivalMeter = Mathf.Max(rivalMeter, 1f);
+            if (myPassive == PassiveKind.MasterWarrior) myMeter = Mathf.Max(myMeter, Bal.masterWarriorMeter);
+            if (rivalPassive == PassiveKind.MasterWarrior && !LiveActive) rivalMeter = Mathf.Max(rivalMeter, Bal.masterWarriorMeter);
         }
 
         // ---------- The passives in the numbers ----------
 
-        private float MyComboGap => (ComboGap + (myPassive == PassiveKind.ComboMaster ? 0.3f : 0f)) * RuleComboGap;
-        private float RivalComboGap => (ComboGap + (rivalPassive == PassiveKind.ComboMaster ? 0.3f : 0f)) * RuleComboGap;
-        private float MyCharge => myPassive == PassiveKind.FastCharge ? 1.15f : 1f;
-        private float RivalCharge => rivalPassive == PassiveKind.FastCharge ? 1.15f : 1f;
+        private float MyComboGap => (ComboGap + (myPassive == PassiveKind.ComboMaster ? Bal.comboMasterGap : 0f)) * RuleComboGap;
+        private float RivalComboGap => (ComboGap + (rivalPassive == PassiveKind.ComboMaster ? Bal.comboMasterGap : 0f)) * RuleComboGap;
+        private float MyCharge => myPassive == PassiveKind.FastCharge ? Bal.fastCharge : 1f;
+        private float RivalCharge => rivalPassive == PassiveKind.FastCharge ? Bal.fastCharge : 1f;
 
         /// <summary>The player's blow factor in the duel: the piercer's armour cut, rage when low, the teleport's next blow.</summary>
         private float MyBlowFactor()
         {
             float k = RuleDamageTimes;
-            if (myPassive == PassiveKind.Piercer && duelTheirs.armor > 0f) k *= (1f - 0.75f * duelTheirs.armor) / (1f - duelTheirs.armor);
-            if (myPassive == PassiveKind.Rage && health < 0.3f) k *= 1.15f;
+            if (myPassive == PassiveKind.Piercer && duelTheirs.armor > 0f) k *= (1f - (1f - Bal.piercerArmor) * duelTheirs.armor) / (1f - duelTheirs.armor);
+            if (myPassive == PassiveKind.Rage && health < Bal.rageBelow) k *= Bal.rageTimes;
             return k;
         }
 
@@ -68,7 +68,7 @@ namespace SquashBot.Gameplay
         {
             float k = rivalNextBlow * RuleDamageTimes;
             rivalNextBlow = 1f;
-            if (rivalPassive == PassiveKind.Rage && hunt.ChallengeFoeHealth < 0.3f) k *= 1.15f;
+            if (rivalPassive == PassiveKind.Rage && hunt.ChallengeFoeHealth < Bal.rageBelow) k *= Bal.rageTimes;
             return k;
         }
 
@@ -76,14 +76,14 @@ namespace SquashBot.Gameplay
         private void MyVampire(int damagePoints)
         {
             if (myPassive != PassiveKind.Vampire || LiveActive || duelMine.hp <= 0) return;
-            health = Mathf.Min(1f, health + 0.04f * damagePoints / duelMine.hp);
+            health = Mathf.Min(1f, health + Bal.vampireShare * damagePoints / duelMine.hp);
             RefreshHealthBar();
         }
 
         private void RivalVampire(float shareTaken)
         {
             if (rivalPassive != PassiveKind.Vampire || LiveActive) return;
-            hunt.HealFoeQuiet(0.04f * shareTaken * duelMine.hp / Mathf.Max(1, hunt.ChallengeFoeMaxHp));
+            hunt.HealFoeQuiet(Bal.vampireShare * shareTaken * duelMine.hp / Mathf.Max(1, hunt.ChallengeFoeMaxHp));
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace SquashBot.Gameplay
             if (Time.time < myMirrorUntil)
             {
                 // the mirror: the blow goes back at the rival, half again as hard
-                if (hunt.ChallengeFoeTile.HasValue) { specialStrike = true; hunt.Strike(hunt.ChallengeFoeTile.Value, Mathf.Max(1, Mathf.RoundToInt(share * duelMine.hp * 1.5f))); specialStrike = false; }
+                if (hunt.ChallengeFoeTile.HasValue) { specialStrike = true; hunt.Strike(hunt.ChallengeFoeTile.Value, Mathf.Max(1, Mathf.RoundToInt(share * duelMine.hp * Bal.mirrorReflect))); specialStrike = false; }
                 BlockedFx(robot.transform.position);
                 return 0f;
             }
@@ -112,7 +112,7 @@ namespace SquashBot.Gameplay
         private void OnRivalMirrored(int damagePoints)
         {
             if (!challengeRun || chPhase != ChPhase.Duel) return;
-            hitShareOverride = damagePoints * 1.5f / Mathf.Max(1, duelMine.hp);
+            hitShareOverride = damagePoints * Bal.mirrorReflect / Mathf.Max(1, duelMine.hp);
             moveHit = true;
             OnBlockImpact(robot.Position);
             moveHit = false;
@@ -136,16 +136,16 @@ namespace SquashBot.Gameplay
             return true;
         }
 
-        /// <summary>Whether a special reaches now (the hook 4 tiles, the shock 3).</summary>
+        /// <summary>Whether a special reaches now (its reach in the table: the hook 4 tiles, the shock 3; 0 anywhere).</summary>
         private bool CanUse(bool mine, SpecialKind s)
         {
             if (!hunt.ChallengeFoeTile.HasValue) return false;
             int d = HuntSystem.Chebyshev(robot.Position, hunt.ChallengeFoeTile.Value);
-            return s == SpecialKind.Hook ? d <= 4 : s == SpecialKind.Shock ? d <= 3 : true;
+            float reach = Bal.SpecialReach(s);
+            return reach <= 0f || d <= reach;
         }
 
-        /// <summary>A move's strength by the world that gives it: a later world's move hits harder (1 .. 1.5 at world 25).</summary>
-        private static float MovePower(int world) => 1f + Mathf.Max(0, world) / 50f;
+        // (A move hits as hard whatever world gave it: the duel's table holds one value for the bot duel and the live one.)
 
         private IEnumerator DoSpecial(bool mine, SpecialKind s)
         {
@@ -154,33 +154,34 @@ namespace SquashBot.Gameplay
             if (mine) NoteDuel(DuelGoal.Special);
             if (mine && LiveActive) LiveNet.Move(1, (int)s);
             skillBar?.Shout(Loc.T("move.s." + s), mine ? new Color(0.5f, 0.85f, 1f) : new Color(1f, 0.5f, 0.45f));
-            float power = MovePower(MoveSet.WorldOf(s));
+            float hitTimes = Bal.SpecialHit(s), stun = Bal.SpecialStun(s);
             var me = mine ? robot.Position : hunt.ChallengeFoeTile ?? robot.Position;
             var other = mine ? hunt.ChallengeFoeTile ?? robot.Position : robot.Position;
             var meAt = GridView.ToWorld(me) + Vector3.up * GridView.SurfaceY;
             var otherAt = GridView.ToWorld(other) + Vector3.up * GridView.SurfaceY;
             Transform MeModel() => mine ? robot.Visual : hunt.ChallengeFoeModel;
             Transform OtherModel() => mine ? hunt.ChallengeFoeModel : robot.Visual;
-            void Damage(float times) { if (LiveActive) return; if (mine) HitFoe(times * power); else HurtMe(times * power); }
+            void Damage(float times) { if (LiveActive || times <= 0f) return; if (mine) HitFoe(times); else HurtMe(times); } // (a move with no damage takes nothing)
             void Hold(float seconds) { if (LiveActive) { if (!mine) strikeCooldown = Mathf.Max(strikeCooldown, seconds); return; } if (mine) hunt.StunFoe(seconds); else strikeCooldown = Mathf.Max(strikeCooldown, seconds); }
             void Reels(float strength) { var sk = OtherModel() != null ? OtherModel().GetComponentInChildren<SkinnedHero>() : null; if (sk != null) { sk.Stagger(meAt, strength); sk.Shudder(meAt, 1f); } }
             switch (s)
             {
                 case SpecialKind.Backflip:
                 {
-                    // a kick into the other's chest, then a somersault two tiles back; untouchable on the way
+                    // a kick at the other (a shove, no damage), then a somersault two tiles back; untouchable on the way
                     var mm = MeModel();
                     if (mm != null) robot.Strike(otherAt);
                     fx.Burst(otherAt + Vector3.up * 0.9f, new Color(1f, 0.9f, 0.6f), new Color(3f, 2.4f, 1.2f), 30, 6f);
                     Shockwave.Create(otherAt + Vector3.up * 0.1f, 1.4f, new Color(1f, 0.9f, 0.6f));
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 1.2f);
                     cameraRig.Shake(0.45f);
-                    Damage(1.3f);
+                    Damage(hitTimes);
                     Reels(0.8f);
                     if (!LiveActive) Push(!mine, meAt, 1);
                     var to = TileAway(me, other, 2);
-                    if (mine) myInvulnUntil = Time.time + 0.9f; else rivalInvulnUntil = hunt.FoeInvulnUntil = Time.time + 0.9f;
-                    if (MeModel() != null) StatusFx.On(CombatFeel.RootOf(MeModel())).Shine(0.9f); // (untouchable: it shines)
+                    float safe = Bal.SpecialUntouchable(s);
+                    if (mine) myInvulnUntil = Time.time + safe; else rivalInvulnUntil = hunt.FoeInvulnUntil = Time.time + safe;
+                    if (MeModel() != null) StatusFx.On(CombatFeel.RootOf(MeModel())).Shine(safe); // (untouchable: it shines)
                     if (to.HasValue) yield return LeapToTile(mine, to.Value, 1.6f, 0);
                     var bfSkin = MeModel() != null ? MeModel().GetComponentInChildren<SkinnedHero>() : null;
                     if (bfSkin != null) { bfSkin.Crouch(1f, 0.35f); fx.Dust(MeModel().position, new Color(0.6f, 0.55f, 0.48f), 12, 3f); } // (landing on a knee)
@@ -196,7 +197,7 @@ namespace SquashBot.Gameplay
                     if (land.HasValue && HuntSystem.Chebyshev(land.Value, other) > HuntSystem.Chebyshev(me, other)) land = null; // (already close: never pulled round behind the mover)
                     if (land.HasValue && !LiveActive)
                     {
-                        if (mine) { hunt.StunFoe(0.9f); yield return hunt.ShoveFoe(land.Value, 0.3f); }
+                        if (mine) yield return hunt.ShoveFoe(land.Value, 0.3f);
                         else { robot.Spawn(grid, land.Value); }
                     }
                     FaceEachOther();
@@ -205,7 +206,8 @@ namespace SquashBot.Gameplay
                     Shockwave.Create(hitAt - Vector3.up * 0.8f, 1.6f, new Color(1f, 0.8f, 0.4f));
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 0.9f);
                     cameraRig.Shake(0.55f);
-                    Damage(2f);
+                    Damage(hitTimes);
+                    Hold(stun);
                     Reels(0.9f);
                     break;
                 }
@@ -222,11 +224,11 @@ namespace SquashBot.Gameplay
                         yield return new WaitForSeconds(0.12f);
                     }
                     cameraRig.Shake(0.5f);
-                    Damage(1.4f);
-                    Hold(1.5f);
-                    if (OtherModel() != null) StatusFx.On(CombatFeel.RootOf(OtherModel())).Stun(1.5f); // (sparks circling its head)
+                    Damage(hitTimes);
+                    Hold(stun);
+                    if (OtherModel() != null) StatusFx.On(CombatFeel.RootOf(OtherModel())).Stun(stun); // (sparks circling its head)
                     FaceFor(OtherModel(), FaceMoment.Shocked); // (cross-eyed, the hair on end)
-                    cameraRig.StartCoroutine(Sparks(!mine, new Color(0.6f, 0.9f, 1f), 1.5f));
+                    cameraRig.StartCoroutine(Sparks(!mine, new Color(0.6f, 0.9f, 1f), stun));
                     break;
                 }
                 case SpecialKind.IceWall:
@@ -240,10 +242,10 @@ namespace SquashBot.Gameplay
                     fx.Burst(target + Vector3.up * 0.8f, new Color(0.7f, 0.95f, 1f), new Color(1.4f, 2.4f, 3f), 40, 6f);
                     Shockwave.Create(target, 1.8f, new Color(0.6f, 0.9f, 1f));
                     cameraRig.Shake(0.5f);
-                    Damage(1.8f);
-                    Hold(1.6f);
-                    MoveFx.IceBlock(OtherModel(), 1.6f);
-                    if (OtherModel() != null) StatusFx.On(CombatFeel.RootOf(OtherModel())).Freeze(1.6f);
+                    Damage(hitTimes);
+                    Hold(stun);
+                    MoveFx.IceBlock(OtherModel(), stun);
+                    if (OtherModel() != null) StatusFx.On(CombatFeel.RootOf(OtherModel())).Freeze(stun);
                     FaceFor(OtherModel(), FaceMoment.Frozen); // (teeth chattering, blue)
                     var between = new GridPos(me.x + System.Math.Sign(other.x - me.x), me.y + System.Math.Sign(other.y - me.y));
                     if (grid.InBounds(between) && grid.IsStandable(between) && !grid.IsOccupied(between) && between != other) cameraRig.StartCoroutine(IceWall(between, 2.2f));
@@ -251,8 +253,8 @@ namespace SquashBot.Gameplay
                 }
                 case SpecialKind.Patch:
                 {
-                    // a column of green light: health back (more from a later world's patch)
-                    float heal = Mathf.Min(0.25f, 0.15f * power);
+                    // a column of green light: health back
+                    float heal = Bal.SpecialHeal(s);
                     MoveFx.Pillar(meAt, new Color(0.45f, 1f, 0.55f), 0.8f, 7f, 1f);
                     for (int i = 0; i < 3; i++) fx.Burst(meAt + Vector3.up * (0.3f + i * 0.6f), new Color(0.5f, 1f, 0.6f), new Color(1f, 2.4f, 1.2f), 20, 3f);
                     if (mine) { if (!LiveActive) { health = Mathf.Min(1f, health + heal); RefreshHealthBar(); } }
@@ -279,11 +281,8 @@ namespace SquashBot.Gameplay
                     Shockwave.Create(hit, 1.6f, new Color(1f, 0.9f, 0.6f));
                     cameraRig.Shake(0.9f);
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 0.6f);
-                    if (hunt.ChallengeFoeTile.HasValue && HuntSystem.Chebyshev(robot.Position, hunt.ChallengeFoeTile.Value) <= HuntSystem.DuelGap + 1)
-                    {
-                        Damage(2.6f);
-                        if (!LiveActive) Fling(!mine, mine ? robot.transform.position : hunt.ChallengeFoeAt ?? hit, 1.2f, 1);
-                    }
+                    Damage(hitTimes); // (it lands by the other: no reach to miss by, as on the server)
+                    if (!LiveActive) Fling(!mine, mine ? robot.transform.position : hunt.ChallengeFoeAt ?? hit, 1.2f, 1);
                     break;
                 }
                 case SpecialKind.Teleport:
@@ -303,9 +302,9 @@ namespace SquashBot.Gameplay
                     SlashFx.Create(nowAt + Vector3.up * 0.9f, hit + Vector3.up * 0.9f, new Color(0.8f, 0.55f, 1f), 1.8f);
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 1.3f);
                     cameraRig.Shake(0.4f);
-                    Damage(1.6f);
+                    Damage(hitTimes);
                     Reels(0.8f);
-                    if (mine) myNextBlow = 1.4f; else rivalNextBlow = 1.4f;
+                    if (mine) myNextBlow = Bal.SpecialNextBlow(s); else rivalNextBlow = Bal.SpecialNextBlow(s);
                     break;
                 }
             }
@@ -331,6 +330,8 @@ namespace SquashBot.Gameplay
         /// <summary>The player pressed the ultimate: its own.</summary>
         private void UseUlti(bool mine, UltiKind u, float scale = 1f)
         {
+            // a marked ultimate (the meteor) is dodged as it lands, not as it starts: the bot times its dodge to the mark
+            botUltiDodgeWait = Bal.UltiTelegraph(u) > 0f ? Mathf.Max(0.15f, Bal.UltiTelegraph(u) - Def.dodgeInvulnerable * 0.5f) : 0.15f;
             UltiBegins(mine);
             if (u == UltiKind.Cinematic && scale >= 0.99f) { cameraRig.StartCoroutine(Ultimate(mine, leap: true)); return; }
             cameraRig.StartCoroutine(DoUlti(mine, u, scale));
@@ -349,7 +350,7 @@ namespace SquashBot.Gameplay
                 MoveFx.Shell(self, new Color(0.9f, 0.9f, 1f), 0.6f, 0.4f);
                 CombatFeel.UltiStart(self);
                 if (copied == UltiKind.Cinematic) { yield return Ultimate(mine, leap: true); yield break; }
-                yield return DoUlti(mine, copied, 0.9f * MovePower(MoveSet.WorldOf(UltiKind.Copy)) / MovePower(MoveSet.WorldOf(copied)));
+                yield return DoUlti(mine, copied, Bal.copyShare);
                 yield break;
             }
             moveBusy = true;
@@ -359,13 +360,14 @@ namespace SquashBot.Gameplay
             skillBar?.Shout(Loc.T("move.u." + u), mine ? new Color(0.8f, 0.5f, 1f) : new Color(1f, 0.4f, 0.4f));
             AudioManager.PlaySfx(Sfx.Win, 1f, 0.6f);
             if (colosseum != null) colosseum.Cheer(mine ? 0 : 1, 1f);
-            float power = MovePower(MoveSet.WorldOf(u)) * scale;
+            float power = scale; // (the copy's share; else the table's own numbers)
+            float hitTimes = Bal.UltiHit(u);
             Transform Self() => mine ? robot.Visual : hunt.ChallengeFoeModel;
             Transform Other() => mine ? hunt.ChallengeFoeModel : robot.Visual;
             Vector3 OtherAt() => mine ? hunt.ChallengeFoeAt ?? robot.transform.position : robot.transform.position;
             Vector3 MeAt() => mine ? robot.transform.position : hunt.ChallengeFoeAt ?? robot.transform.position;
             int Gap() => hunt.ChallengeFoeTile.HasValue ? HuntSystem.Chebyshev(robot.Position, hunt.ChallengeFoeTile.Value) : 99;
-            void Damage(float times) { if (LiveActive) return; if (mine) HitFoe(times * power, BlowKind.Ulti, Def.ultiCost * Mathf.Min(1f, times / UltimateHit)); else HurtMe(times * power, BlowKind.Ulti, Def.ultiCost * Mathf.Min(1f, times / UltimateHit)); }
+            void Damage(float times) { if (LiveActive || times <= 0f) return; if (mine) HitFoe(times * power, BlowKind.Ulti, Def.ultiCost * Mathf.Min(1f, times / UltimateHit)); else HurtMe(times * power, BlowKind.Ulti, Def.ultiCost * Mathf.Min(1f, times / UltimateHit)); }
             bool Down() => mine ? hunt.ChallengeFoeDown : !robot.IsAlive;
             bool Flings() => !Down() && Landed(mine); // (blocked or dodged: nobody is thrown)
             void Hold(float seconds) { if (LiveActive) return; if (mine) hunt.StunFoe(seconds); else strikeCooldown = Mathf.Max(strikeCooldown, seconds); }
@@ -374,7 +376,7 @@ namespace SquashBot.Gameplay
                 case UltiKind.Quake:
                 {
                     // a leap and a slam: the floor bursts in rings, rocks fly, the other is thrown high
-                    Hold(1f);
+                    Hold(Bal.UltiHold(u));
                     yield return new WaitForSeconds(0.15f);
                     var at = MeAt();
                     for (int i = 0; i < 4; i++) Shockwave.Create(at, 2.5f + i * 2.2f, new Color(0.85f, 0.65f, 0.4f));
@@ -387,9 +389,9 @@ namespace SquashBot.Gameplay
                     fx.Burst(OtherAt() + Vector3.up * 0.3f, new Color(0.6f, 0.5f, 0.4f), new Color(1f, 0.8f, 0.6f), 50, 10f);
                     cameraRig.Shake(1.5f);
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 0.4f);
-                    Damage(6.5f);
+                    Damage(hitTimes);
                     CombatFeel.UltiFinal(Self(), Other());
-                    if (mine) cameraRig.StartCoroutine(SlowFoe(2f)); else strikeCooldown = Mathf.Max(strikeCooldown, 1.2f);
+                    if (mine) cameraRig.StartCoroutine(SlowFoe(Bal.UltiSlow(u))); else strikeCooldown = Mathf.Max(strikeCooldown, Bal.UltiSlow(u)); // (the other slowed a moment: this game's own)
                     if (Flings()) yield return BigMoment(!mine, 2.4f, 2);
                     break;
                 }
@@ -398,8 +400,9 @@ namespace SquashBot.Gameplay
                     // three seconds of a spinning storm round the mover, the other drawn in and cut again and again, then flung
                     var spinner = Self();
                     MoveFx.Whirl(spinner, new Color(0.7f, 0.95f, 1f), 3.2f);
-                    Hold(3.2f);
-                    for (int i = 0; i < 8 && challengeRun && chPhase == ChPhase.Duel && !Down(); i++)
+                    Hold(Bal.UltiHold(u));
+                    int spins = Bal.UltiHits(u);
+                    for (int i = 0; i < spins && challengeRun && chPhase == ChPhase.Duel && !Down(); i++)
                     {
                         float until = Time.time + 0.375f;
                         while (Time.time < until) { if (spinner != null) spinner.Rotate(0f, 1100f * Time.deltaTime, 0f, Space.World); yield return null; }
@@ -408,33 +411,36 @@ namespace SquashBot.Gameplay
                         fx.Burst(o + Vector3.up * 0.9f, new Color(0.8f, 0.95f, 1f), new Color(2f, 2.6f, 3f), 14, 5f);
                         AudioManager.PlaySfx(Sfx.Hop, 0.8f, 1.8f);
                         cameraRig.Shake(0.25f);
-                        if (Gap() <= HuntSystem.DuelGap + 2) { Damage(1f); var sk = Other() != null ? Other().GetComponentInChildren<SkinnedHero>() : null; if (sk != null) sk.Shudder(MeAt(), 1f); }
+                        { Damage(hitTimes); var sk = Other() != null ? Other().GetComponentInChildren<SkinnedHero>() : null; if (sk != null) sk.Shudder(MeAt(), 1f); }
                     }
                     FaceEachOther();
-                    if (Flings() && Gap() <= HuntSystem.DuelGap + 2) { CombatFeel.UltiFinal(Self(), Other()); yield return BigMoment(!mine, 2f, 2); }
+                    if (Flings()) { CombatFeel.UltiFinal(Self(), Other()); yield return BigMoment(!mine, 2f, 2); }
                     break;
                 }
                 case UltiKind.IronBody:
                 {
-                    // the body turns to iron with a clang that throws the other back; five seconds untouchable
-                    if (mine) myIronUntil = Time.time + 5f; else rivalIronUntil = hunt.FoeInvulnUntil = Time.time + 5f;
-                    if (Self() != null) StatusFx.On(CombatFeel.RootOf(Self())).Shine(5f);
-                    MoveFx.Shell(Self(), new Color(0.8f, 0.82f, 0.9f), 5f, 0.4f);
-                    MoveFx.Pillar(MeAt(), new Color(0.85f, 0.85f, 0.95f), 0.9f, 5f, 0.6f);
-                    cameraRig.StartCoroutine(Glow(mine, new Color(0.85f, 0.85f, 0.9f), 5f));
+                    // the body turns to iron with a clang that pushes the other back (no damage); untouchable a while
+                    float iron = Bal.UltiSeconds(u);
+                    if (mine) myIronUntil = Time.time + iron; else rivalIronUntil = hunt.FoeInvulnUntil = Time.time + iron;
+                    if (Self() != null) StatusFx.On(CombatFeel.RootOf(Self())).Shine(iron);
+                    MoveFx.Shell(Self(), new Color(0.8f, 0.82f, 0.9f), iron, 0.4f);
+                    MoveFx.Pillar(MeAt(), new Color(0.85f, 0.85f, 0.95f), 0.9f, iron, 0.6f);
+                    cameraRig.StartCoroutine(Glow(mine, new Color(0.85f, 0.85f, 0.9f), iron));
                     Shockwave.Create(MeAt(), 4f, new Color(0.85f, 0.85f, 0.95f));
                     AudioManager.PlaySfx(Sfx.Shield, 1f, 0.5f);
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 0.7f);
                     cameraRig.Shake(0.8f);
-                    if (Gap() <= HuntSystem.DuelGap + 2) { Damage(2f); if (Flings() && !LiveActive) Fling(!mine, MeAt(), 1.2f, 2); }
+                    Damage(hitTimes); // (none in the table)
+                    if (Gap() <= HuntSystem.DuelGap + 2 && !LiveActive) Fling(!mine, MeAt(), 1.2f, 2);
                     break;
                 }
                 case UltiKind.Mirror:
                 {
-                    // a shell of mirror glass for four seconds: what comes in goes back half again as hard; its burst stings
-                    if (mine) myMirrorUntil = Time.time + 4f; else hunt.FoeMirrorUntil = Time.time + 4f;
-                    MoveFx.Shell(Self(), new Color(0.65f, 0.95f, 1f), 4f, 0.35f);
-                    cameraRig.StartCoroutine(Glow(mine, new Color(0.7f, 0.95f, 1f), 4f));
+                    // a shell of mirror glass a while: what comes in goes back half again as hard
+                    float glass = Bal.UltiSeconds(u);
+                    if (mine) myMirrorUntil = Time.time + glass; else hunt.FoeMirrorUntil = Time.time + glass;
+                    MoveFx.Shell(Self(), new Color(0.65f, 0.95f, 1f), glass, 0.35f);
+                    cameraRig.StartCoroutine(Glow(mine, new Color(0.7f, 0.95f, 1f), glass));
                     fx.Burst(MeAt() + Vector3.up * 0.9f, new Color(0.7f, 0.95f, 1f), new Color(2f, 2.8f, 3f), 50, 7f);
                     for (int i = 0; i < 6; i++)
                     {
@@ -444,16 +450,17 @@ namespace SquashBot.Gameplay
                     }
                     AudioManager.PlaySfx(Sfx.Shield, 1f, 1.4f);
                     cameraRig.Shake(0.5f);
-                    if (Gap() <= HuntSystem.DuelGap + 1) Damage(1.5f);
+                    Damage(hitTimes); // (none in the table: the mirror only sends blows back)
                     break;
                 }
                 case UltiKind.ChainLightning:
                 {
                     // the sky darkens a moment: three bolts in a chain from the mover, then one huge bolt from the sky,
                     // and the other is flung far
-                    Hold(1.6f);
+                    Hold(Bal.UltiHold(u));
                     var c = new Color(0.55f, 0.85f, 1f);
-                    for (int i = 0; i < 3 && challengeRun && chPhase == ChPhase.Duel && !Down(); i++)
+                    int bolts = Bal.UltiHits(u);
+                    for (int i = 0; i < bolts && challengeRun && chPhase == ChPhase.Duel && !Down(); i++)
                     {
                         var o = OtherAt() + Vector3.up * 0.9f;
                         MoveFx.Bolt(MeAt() + Vector3.up * 1.2f, o, c, 0.18f + 0.06f * i, 0.35f);
@@ -463,7 +470,7 @@ namespace SquashBot.Gameplay
                         cameraRig.Shake(0.4f + 0.1f * i);
                         var sk = Other() != null ? Other().GetComponentInChildren<SkinnedHero>() : null;
                         if (sk != null) { sk.Stagger(MeAt(), 0.5f); sk.Shudder(MeAt(), 1f); }
-                        if (Gap() <= 7) Damage(2f);
+                        Damage(hitTimes);
                         yield return new WaitForSeconds(0.25f);
                     }
                     if (!Down() && challengeRun)
@@ -476,7 +483,6 @@ namespace SquashBot.Gameplay
                         Shockwave.Create(o, 2.5f, Color.white);
                         AudioManager.PlaySfx(Sfx.Impact, 1f, 0.45f);
                         cameraRig.Shake(1.6f);
-                        if (Gap() <= 7) Damage(3f);
                         CombatFeel.UltiFinal(Self(), Other());
                         if (Flings()) yield return BigMoment(!mine, 3.2f, 3);
                     }
@@ -484,12 +490,14 @@ namespace SquashBot.Gameplay
                 }
                 case UltiKind.Meteor:
                 {
-                    // the other is marked (held where it stands); a burning rock falls on it; a blast, and it is flung far
-                    var mark = mine ? hunt.ChallengeFoeTile ?? robot.Position : robot.Position;
-                    var markAt = GridView.ToWorld(mark) + Vector3.up * GridView.SurfaceY;
-                    Hold(1.6f);
-                    MoveFx.Meteor(markAt, 1f, 1.9f);
-                    for (int i = 0; i < 4; i++) { Shockwave.Create(markAt, 2.6f, new Color(1f, 0.35f, 0.15f)); yield return new WaitForSeconds(0.25f); }
+                    // the other is marked: a burning rock falls on it after the mark's moment; only a dodge's untouchable
+                    // moment as it lands escapes it (as on the server, which knows no positions: it follows the other)
+                    float mark = Bal.UltiTelegraph(u);
+                    Hold(Bal.UltiHold(u));
+                    var markAt = OtherAt();
+                    MoveFx.Meteor(markAt, mark, 1.9f);
+                    for (float e = 0f; e < mark; e += 0.25f) { Shockwave.Create(OtherAt(), 2.6f, new Color(1f, 0.35f, 0.15f)); yield return new WaitForSeconds(0.25f); }
+                    markAt = OtherAt();
                     fx.Burst(markAt + Vector3.up * 0.4f, new Color(1f, 0.5f, 0.15f), new Color(3f, 1.4f, 0.3f), 90, 12f);
                     fx.Burst(markAt + Vector3.up * 0.4f, new Color(0.3f, 0.2f, 0.15f), new Color(0.4f, 0.3f, 0.2f), 40, 8f);
                     MoveFx.Blast(markAt + Vector3.up * 0.5f, new Color(1f, 0.5f, 0.15f), 3.5f, 0.05f);
@@ -497,15 +505,15 @@ namespace SquashBot.Gameplay
                     Shockwave.Create(markAt, 3f, new Color(1f, 0.8f, 0.4f));
                     cameraRig.Shake(1.7f);
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 0.35f);
-                    var still = mine ? hunt.ChallengeFoeTile : robot.Position;
-                    if (still.HasValue && HuntSystem.Chebyshev(still.Value, mark) <= 1) { Damage(9f); CombatFeel.UltiFinal(Self(), Other()); if (Flings()) yield return BigMoment(!mine, 3f, 3); }
-                    else ScreenFlash.White(0.05f); // (missed: still a great blast)
+                    Damage(hitTimes);
+                    if (LiveActive || Landed(mine)) { CombatFeel.UltiFinal(Self(), Other()); if (Flings()) yield return BigMoment(!mine, 3f, 3); }
+                    else ScreenFlash.White(0.05f); // (dodged: still a great blast)
                     break;
                 }
                 case UltiKind.CoreBurst:
                 {
                     // the core gathers at the chest, then bursts: a blast of light across the floor, health back
-                    Hold(0.9f);
+                    Hold(Bal.UltiHold(u));
                     MoveFx.Blast(MeAt() + Vector3.up * 0.9f, new Color(0.4f, 0.95f, 1f), 5f, 0.6f);
                     for (int i = 0; i < 4; i++) { fx.Burst(MeAt() + Vector3.up * 0.9f, new Color(0.4f, 0.95f, 1f), new Color(1.2f, 3f, 3.4f), 10, 2f); yield return new WaitForSeconds(0.15f); }
                     fx.Burst(MeAt() + Vector3.up * 0.8f, new Color(0.4f, 0.95f, 1f), new Color(1.2f, 3f, 3.4f), 100, 12f);
@@ -513,9 +521,10 @@ namespace SquashBot.Gameplay
                     Shockwave.Create(MeAt(), 3f, Color.white);
                     cameraRig.Shake(1.4f);
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 0.5f);
-                    Damage(7.5f);
+                    Damage(hitTimes);
                     CombatFeel.UltiFinal(Self(), Other());
-                    if (!LiveActive) { if (mine) { health = Mathf.Min(1f, health + 0.12f); RefreshHealthBar(); } else hunt.HealFoe(0.12f); }
+                    float back = Bal.UltiHeal(u);
+                    if (!LiveActive) { if (mine) { health = Mathf.Min(1f, health + back); RefreshHealthBar(); } else hunt.HealFoe(back); }
                     if (Flings()) yield return BigMoment(!mine, 2.6f, 3);
                     break;
                 }

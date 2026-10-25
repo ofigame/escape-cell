@@ -17,8 +17,8 @@ namespace SquashBot.Data
     public static class LiveNet
     {
         /// <summary>The live protocol this game speaks (the server turns older ones away).</summary>
-        private const int Protocol = 7; // 7: the defence (block, perfect guard, dodge) (6: the league ceiling; 5: harder bars and combos; 4: the duel moves)
-        private static string Url => (FoiNet.DevServer != null ? FoiNet.DevServer.Replace("https://", "wss://").Replace("http://", "ws://") + "/v1/live" : "wss://apifoi.ofigame.com/v1/live") + "?v=" + Protocol;
+        private const int Protocol = 8; // 8: the duel's one table (rv = its version; a newer one comes with "matched"), air blows, the moves' stuns; 7: the defence (block, perfect guard, dodge) (6: the league ceiling; 5: harder bars and combos; 4: the duel moves)
+        private static string Url => (FoiNet.DevServer != null ? FoiNet.DevServer.Replace("https://", "wss://").Replace("http://", "ws://") + "/v1/live" : "wss://apifoi.ofigame.com/v1/live") + "?v=" + Protocol + "&rv=" + DuelBalanceTable.Version;
 
         /// <summary>A message from the server (only the fields its kind uses are set; <see cref="raw"/> is the text itself).</summary>
         [Serializable]
@@ -38,6 +38,8 @@ namespace SquashBot.Data
             public float secs, mine, theirs;
             public bool won, ranked, left;
             public string from;
+            /// <summary>"matched": the server's duel table (JSON) when this game's is another version; else empty.</summary>
+            public string rules;
             public FoiNet.Rival rival;
             public FoiNet.Profile profile;
             [NonSerialized] public string raw;
@@ -178,6 +180,8 @@ namespace SquashBot.Data
 
         /// <summary>The duel: this game's foi landed a blow on the rival.</summary>
         public static void Hit() => Send("{\"t\":\"hit\"}");
+        /// <summary>A blow; <paramref name="air"/>: struck in the air (the server counts the air blow's extra, not too often).</summary>
+        public static void Hit(bool air) => Send(air ? "{\"t\":\"hit\",\"a\":1}" : "{\"t\":\"hit\"}");
 
         /// <summary>A blow on one of the rival's soldiers (its number in its squad, the damage; a foi's blow: it strikes back).</summary>
         public static void SquadHit(int id, int damage, bool byFoi) => Send("{\"t\":\"ah\",\"u\":" + id + ",\"d\":" + damage + ",\"f\":" + (byFoi ? 1 : 0) + "}");

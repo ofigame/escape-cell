@@ -204,11 +204,16 @@ namespace SquashBot.Data
         public static int Level(WeaponDef w) => 1;
 
         /// <summary>The floors' blow of a weapon, in health points (the arms add their share).</summary>
-        public static int Damage(WeaponDef w, int level) => w.damage;
+        public static int Damage(WeaponDef w, int level) => Damage(w);
 
         public static float Cooldown(WeaponDef w, int level) => w.cooldown;
 
-        public static int Damage(WeaponDef w) => w.damage;
+        /// <summary>The floors' blow: a gun's own; a hand weapon's by its family and tier (FloorTuning: the four families
+        /// even within a tier, the difference in how each fights).</summary>
+        public static int Damage(WeaponDef w) => w.kind == WeaponKind.Gun ? w.damage : FloorTuning.Current.FloorBlow(Family(w), w.tier, w.id == "mallet");
+
+        /// <summary>How far a weapon strikes on the floors (the spear farther; a gun its own range).</summary>
+        public static int Reach(WeaponDef w) => w.kind != WeaponKind.Gun && Family(w) == WeaponFamily.Spear ? FloorTuning.Current.spearReach : w.reach;
         public static float Cooldown(WeaponDef w) => w.cooldown;
 
         public static int UpgradePrice(WeaponDef w) => 0;

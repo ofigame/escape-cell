@@ -244,6 +244,8 @@ namespace SquashBot.Data
             /// <summary>Its seed (a computer rival's personality), its winning streak, duel level, title and best mastery.</summary>
             public int seed, streak, duelLevel = 1, mastery, world;
             public string titleKey;
+            /// <summary>A real player's picked title, already in words (null: the title key's).</summary>
+            public string titleWords;
             /// <summary>Its move set ("special,ulti,passive"; null: a computer rival's, from its personality).</summary>
             public string moves;
             /// <summary>Its player's fighting style ("aggression,shield,heart"; a friend's copy).</summary>
@@ -326,6 +328,7 @@ namespace SquashBot.Data
             o.shield = Mathf.Clamp(r.shield, 0, 3);
             o.moves = r.moves;
             o.style = r.style;
+            if (!string.IsNullOrEmpty(r.title) && r.title != "duel") { string words = TitleBook.Text(r.title); if (words != null) o.titleWords = words; } // (a real player's picked title)
             o.world = r.world;
             o.duelLevel = Mathf.Max(1, r.duelLevel);
             return o;

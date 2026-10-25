@@ -82,6 +82,7 @@ namespace SquashBot.UI
             built.Clear();
             y = 0f;
             Head();
+            Titles();
             Record();
             Cups();
             Ladder();
@@ -120,6 +121,18 @@ namespace SquashBot.UI
             Text(head, Challenge.RankName(rank), new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(520f, 64f), 46f, Color.white);
             Text(head, Loc.F("ch.trophies", Challenge.Trophies), new Vector2(0.5f, 1f), new Vector2(0f, -220f), new Vector2(520f, 56f), 40f, Palette.UiGold);
             Text(head, Loc.F("ch.league", Challenge.LeagueName(league)), new Vector2(0.5f, 1f), new Vector2(0f, -280f), new Vector2(520f, 44f), 30f, new Color(1f, 0.85f, 0.5f), bold: false);
+        }
+
+        /// <summary>The title on the player's card: the button shows the next one earned (a world's conqueror, a master…).</summary>
+        private void Titles()
+        {
+            var r = Card(160f, Flat.Card);
+            var earned = TitleBook.Earned();
+            var label = Text(r, TitleBook.Shown ?? Loc.T("profile.noTitle"), new Vector2(0.5f, 0.5f), new Vector2(-130f, 0f), new Vector2(660f, 70f), 38f, Palette.UiGold);
+            label.enableAutoSizing = true; label.fontSizeMin = 22f; label.fontSizeMax = 38f;
+            if (earned.Count < 2) return; // (nothing to choose between)
+            var b = Flat.Button(r, Loc.T("profile.changeTitle"), new Vector2(1f, 0.5f), new Vector2(-150f, 0f), new Vector2(250f, 96f), Flat.CardHi, Flat.Text, () => label.text = TitleBook.PickNext() ?? label.text, 28f);
+            ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 
         /// <summary>The matches: played, won and lost (all kinds together), the details under them.</summary>
