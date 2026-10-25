@@ -23,14 +23,11 @@ namespace SquashBot.Visual
 
         /// <summary>The landmark's height and its distance behind the floor's room (far: the low fight camera sees it whole, at
         /// the street's end), and the houses' heights.</summary>
-        private const float TowerHeight = 30f, TowerBack = 100f, HouseMin = 8f, HouseMax = 11f;
+        private const float TowerHeight = 30f, TowerBack = 100f, HouseMin = 16f, HouseMax = 22f;
         /// <summary>Which way the house model's front faces before it is turned (degrees about up: 0 = +z).</summary>
         private const float HouseFront = 0f;
-        /// <summary>How many rows of fans stand on each pavement, and how far apart (along the street and across it).</summary>
-        private const int FanRows = 4;
-        private const float FanRow = 1f, FanStep = 0.3f;
-        /// <summary>How far up the street the fans stand (beyond it the street is empty up to the tower).</summary>
-        private const float CrowdLength = 46f;
+        /// <summary>The pavements' width, how far up the street the fans stand on them (two rows), and the lamps' spacing.</summary>
+        private const float Walk = 2.6f, CrowdLength = 34f, LampEvery = 32f;
 
         /// <summary>The ground: one big quad, its picture tiled about every 3 m.</summary>
         private void PavedGround(Transform p, Look look, float ground)
@@ -60,9 +57,10 @@ namespace SquashBot.Visual
         }
 
         /// <summary>
-        /// The street (along -x, away from the camera) from beside the fight up to the tower on its cobbled plaza: on each
-        /// side (south -z: <paramref name="southTeam"/>'s fans) stepped pavements full of fans, bollards at the kerb, lamps,
-        /// a row of houses; houses closing the far end behind the tower, the city's domes and minarets beyond.
+        /// A narrow street (along -x, away from the camera) with the fight at its near end and the tower on its cobbled
+        /// plaza at its far end: tall houses right along it either side behind thin pavements (which run on towards the
+        /// camera), two rows of fans on each pavement near the fight (south -z: <paramref name="southTeam"/>'s), lamps here
+        /// and there, a simit cart in the street; houses closing the far end behind the tower, the city's domes beyond.
         /// </summary>
         private void GalataStreet(Transform p, Look look, float ground, float platR, int southTeam, System.Random rng)
         {
@@ -70,7 +68,6 @@ namespace SquashBot.Visual
             crowdSize = MadeCrowd;
             float k = crowdSize;
             var stone = Matte(new Color(0.5f, 0.5f, 0.5f), 0.15f);
-            var iron = Surface(new Color(0.08f, 0.08f, 0.09f), 0.35f);
 
             // the tower on its own cobbled plaza
             var tower = MadeModel(p, look, "tower", false);
@@ -81,46 +78,34 @@ namespace SquashBot.Visual
             tower.position += new Vector3(towerX - tb.center.x, ground - tb.min.y - 0.05f, centre.z - tb.center.z);
             float plaza = BoundsOf(tower).extents.x;
 
-            float front = centre.x + platR * 0.35f; // (the street's near end: a little in front of the fight's middle)
-            float end = towerX - plaza;             // (its far end: the plaza's back)
-            float kerb = platR + 0.6f;              // (the first fans' row, clear of the floor)
-            float fronts = kerb + FanRows * FanRow + 0.6f; // (the houses' fronts)
+            float street = hd + 2f;               // (the street's half width: the floor and a little room)
+            float fronts = street + Walk;         // (the houses' fronts)
+            float near = centre.x + 36f;          // (the pavements run on past the camera)
+            float housesFrom = centre.x + hw;     // (the first houses beside the fight)
+            float end = towerX - plaza;           // (the street's far end: the plaza's back)
 
             for (int side = -1; side <= 1; side += 2)
             {
                 int team = side < 0 ? southTeam : 1 - southTeam;
-                float stepsEnd = Mathf.Max(towerX + plaza * 0.9f, front - CrowdLength); // (the fans near the fight; the pavements stop short of the plaza)
-                // the stepped pavement: each row a step higher, the last reaching the houses
-                for (int r = 0; r < FanRows; r++)
-                {
-                    float top = ground + 0.2f + r * FanStep;
-                    float z0 = kerb + r * FanRow - 0.4f, z1 = r == FanRows - 1 ? fronts + 0.5f : z0 + FanRow;
-                    Shapes.Rounded("Step", p, new Vector3((front + stepsEnd) * 0.5f, (ground + top) * 0.5f, centre.z + side * (z0 + z1) * 0.5f),
-                        new Vector3(front - stepsEnd, top - ground, z1 - z0 + 0.02f), 0.04f, stone);
-                    // its fans, lengthwise, each looking at the fight
-                    for (float x = front - 0.6f; x > stepsEnd + 0.6f; x -= 0.55f * k)
-                        AddFan(new Vector3(x + R(-0.15f, 0.15f) * k, top, centre.z + side * (kerb + r * FanRow + R(-0.1f, 0.1f))), team, rng);
-                }
-                // bollards at the kerb, as in the old streets
-                for (float x = front - 1f; x > stepsEnd + 1f; x -= 2.4f)
-                    Shapes.Primitive(PrimitiveType.Cylinder, "Bollard", p, new Vector3(x, ground + 0.45f, centre.z + side * (kerb - 0.75f)), new Vector3(0.24f, 0.45f, 0.24f), iron);
-                // beyond the fans a plain pavement up to the plaza
-                if (stepsEnd > towerX + plaza)
-                    Shapes.Rounded("Pavement", p, new Vector3((stepsEnd + towerX + plaza) * 0.5f, ground + 0.1f, centre.z + side * (kerb - 0.4f + fronts + 0.5f) * 0.5f),
-                        new Vector3(stepsEnd - towerX - plaza, 0.2f, fronts + 0.9f - kerb), 0.04f, stone);
-                // lamps against the houses, all the way up
-                for (float x = front - 2f; x > towerX + plaza; x -= 9f)
+                // the thin pavement along the houses, from past the camera up to the plaza
+                Shapes.Rounded("Pavement", p, new Vector3((near + towerX + plaza) * 0.5f, ground + 0.1f, centre.z + side * (street + Walk * 0.5f)),
+                    new Vector3(near - towerX - plaza, 0.2f, Walk), 0.04f, stone);
+                // two rows of fans on it beside the fight, lengthwise, each looking at the fight
+                for (int r = 0; r < 2; r++)
+                    for (float x = housesFrom; x > centre.x - CrowdLength; x -= 0.55f * k)
+                        AddFan(new Vector3(x + R(-0.15f, 0.15f) * k, ground + 0.2f, centre.z + side * (street + 0.7f + r * 1.1f + R(-0.08f, 0.08f))), team, rng);
+                // lamps at the kerb here and there (the two sides staggered)
+                for (float x = near - 6f - (side > 0 ? LampEvery * 0.5f : 0f); x > towerX + plaza; x -= LampEvery)
                 {
                     var lamp = MadeModel(p, look, "lamp", false);
                     var lb = BoundsOf(lamp);
                     lamp.localScale = Vector3.one * (4.6f / Mathf.Max(0.01f, lb.size.y));
                     lb = BoundsOf(lamp);
-                    float top = x > stepsEnd ? ground + 0.2f + (FanRows - 1) * FanStep : ground + 0.2f;
-                    lamp.position += new Vector3(x - lb.center.x, top - lb.min.y, centre.z + side * (fronts - 0.5f) - lb.center.z);
+                    lamp.position += new Vector3(x - lb.center.x, ground + 0.2f - lb.min.y, centre.z + side * (street + 0.3f) - lb.center.z);
                 }
-                // the houses along the street, fronts to it, up past the plaza
-                float cursor = front + 4f;
-                while (cursor > end)
+                // tall houses right along the street, fronts to it, from beside the fight up to the plaza
+                float cursor = housesFrom;
+                while (cursor > towerX + plaza * 0.5f)
                 {
                     float hh = R(HouseMin, HouseMax);
                     var house = MadeModel(p, look, "house", false);
@@ -138,7 +123,7 @@ namespace SquashBot.Visual
                 float z = centre.z - 46f;
                 while (z < centre.z + 46f)
                 {
-                    float hh = R(HouseMin + 1f, HouseMax + 3f);
+                    float hh = R(HouseMin + 2f, HouseMax + 2f);
                     var house = MadeModel(p, look, "house", false);
                     var hb = BoundsOf(house);
                     house.localScale = Vector3.one * (hh / Mathf.Max(0.01f, hb.size.y));
@@ -169,13 +154,13 @@ namespace SquashBot.Visual
                 }
             }
 
-            // a simit cart at the street's near end, on the south pavement's corner
+            // a simit cart in the street between the fight and the tower, a little to the left
             var cart = MadeModel(p, look, "prop", false);
             var cb = BoundsOf(cart);
             cart.localScale = Vector3.one * (2.6f / Mathf.Max(0.01f, cb.size.y));
-            cart.rotation = Quaternion.Euler(0f, R(60f, 120f), 0f) * cart.rotation;
+            cart.rotation = Quaternion.Euler(0f, 90f + R(-20f, 20f), 0f) * cart.rotation;
             cb = BoundsOf(cart);
-            var spot = new Vector3(front + 2.5f, ground, centre.z - (kerb + 1.5f));
+            var spot = new Vector3(centre.x - platR - 14f, ground, centre.z - street * 0.35f);
             cart.position += new Vector3(spot.x - cb.center.x, ground - cb.min.y, spot.z - cb.center.z);
         }
     }
