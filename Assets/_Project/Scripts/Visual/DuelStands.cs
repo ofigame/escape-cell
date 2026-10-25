@@ -659,25 +659,31 @@ namespace SquashBot.Visual
             if (batches.Count == 0) MakeBatches();
             float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
 
-            // The platform: round (as made), its stone ring a little wider than the floor, its top where the floor is.
-            var plat = MadeModel(p, look, "platform", true, true);
-            var pb = BoundsOf(plat);
-            float kp = Mathf.Max(hw, hd) * 2f * 1.28f / Mathf.Max(pb.size.x, pb.size.z);
-            plat.localScale = new Vector3(kp, kp * look.thick, kp);
-            pb = BoundsOf(plat);
-            plat.position += new Vector3(centre.x - pb.center.x, 0f, centre.z - pb.center.z);
-            // its walking surface: the highest of several points across it (an inlaid emblem in the middle may sit lower)
-            float top = float.MinValue;
-            for (int i = 0; i <= 8; i++)
+            // The platform: round (as made), its stone ring a little wider than the floor, its top where the floor is (a
+            // street has none: the fight is on its cobbles; the same room is kept round the floor).
+            Bounds pb;
+            if (look.street) pb = new Bounds(new Vector3(centre.x, floorY, centre.z), new Vector3(Mathf.Max(hw, hd) * 2.56f, 0f, Mathf.Max(hw, hd) * 2.56f));
+            else
             {
-                float a = i * Mathf.PI / 4f, rr = i == 8 ? 0f : Mathf.Min(hw, hd) * 0.55f;
-                top = Mathf.Max(top, SurfaceAt(plat, new Vector3(centre.x + Mathf.Cos(a) * rr, pb.max.y + 1f, centre.z + Mathf.Sin(a) * rr), float.MinValue));
+                var plat = MadeModel(p, look, "platform", true, true);
+                pb = BoundsOf(plat);
+                float kp = Mathf.Max(hw, hd) * 2f * 1.28f / Mathf.Max(pb.size.x, pb.size.z);
+                plat.localScale = new Vector3(kp, kp * look.thick, kp);
+                pb = BoundsOf(plat);
+                plat.position += new Vector3(centre.x - pb.center.x, 0f, centre.z - pb.center.z);
+                // its walking surface: the highest of several points across it (an inlaid emblem in the middle may sit lower)
+                float top = float.MinValue;
+                for (int i = 0; i <= 8; i++)
+                {
+                    float a = i * Mathf.PI / 4f, rr = i == 8 ? 0f : Mathf.Min(hw, hd) * 0.55f;
+                    top = Mathf.Max(top, SurfaceAt(plat, new Vector3(centre.x + Mathf.Cos(a) * rr, pb.max.y + 1f, centre.z + Mathf.Sin(a) * rr), float.MinValue));
+                }
+                if (top == float.MinValue) top = pb.max.y;
+                plat.position += Vector3.up * (floorY - top);
+                if (look.cover > 0f) CoverEmblem(p, plat, look, centre, floorY, Mathf.Max(hw, hd) * look.cover); // (the middle plain: marble of the platform's own stone)
             }
-            if (top == float.MinValue) top = pb.max.y;
-            plat.position += Vector3.up * (floorY - top);
-            if (look.cover > 0f) CoverEmblem(p, plat, look, centre, floorY, Mathf.Max(hw, hd) * look.cover); // (the middle plain: marble of the platform's own stone)
             // The forest floor a little under the platform's top: it stands on the land, sunk in it (not up in the air).
-            float ground = floorY - 1.1f;
+            float ground = look.street ? floorY - 0.02f : floorY - 1.1f;
             var moss = Matte(look.ground, 0.2f); // (a little of its own light: the land reads in the dark)
             if (look.paving != null) PavedGround(p, look, ground);
             else Shapes.Rounded("Ground", p, new Vector3(centre.x - 10f, ground - 0.3f, centre.z), new Vector3(110f, 0.6f, 110f), 0.05f, moss);

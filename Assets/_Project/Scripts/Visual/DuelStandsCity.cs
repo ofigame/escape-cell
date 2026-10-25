@@ -3,7 +3,7 @@ using UnityEngine;
 namespace SquashBot.Visual
 {
     /// <summary>
-    /// The city stages (Galata first): no stands; the platform lies in a cobbled street that runs up to the landmark,
+    /// The city stages (Galata first): no stands, no platform; the fight is on a cobbled street that runs up to the landmark,
     /// the fans standing along its pavements lengthwise on low steps, houses either side, lamps, bollards, and the city's
     /// domes and minarets far behind.
     /// </summary>
@@ -21,13 +21,16 @@ namespace SquashBot.Visual
             sun = new Color(1f, 0.84f, 0.62f), sunPower = 1.25f, ambSky = new Color(0.66f, 0.7f, 0.82f), ambHorizon = new Color(0.82f, 0.7f, 0.56f), ambGround = new Color(0.3f, 0.29f, 0.28f),
         };
 
-        /// <summary>The landmark's height, its distance behind the platform's rim, and the houses' heights.</summary>
-        private const float TowerHeight = 42f, TowerBack = 56f, HouseMin = 10f, HouseMax = 13f;
+        /// <summary>The landmark's height and its distance behind the floor's room (far: the low fight camera sees it whole, at
+        /// the street's end), and the houses' heights.</summary>
+        private const float TowerHeight = 30f, TowerBack = 100f, HouseMin = 8f, HouseMax = 11f;
         /// <summary>Which way the house model's front faces before it is turned (degrees about up: 0 = +z).</summary>
         private const float HouseFront = 0f;
         /// <summary>How many rows of fans stand on each pavement, and how far apart (along the street and across it).</summary>
         private const int FanRows = 4;
         private const float FanRow = 1f, FanStep = 0.3f;
+        /// <summary>How far up the street the fans stand (beyond it the street is empty up to the tower).</summary>
+        private const float CrowdLength = 46f;
 
         /// <summary>The ground: one big quad, its picture tiled about every 3 m.</summary>
         private void PavedGround(Transform p, Look look, float ground)
@@ -57,7 +60,7 @@ namespace SquashBot.Visual
         }
 
         /// <summary>
-        /// The street (along -x, away from the camera) from beside the platform up to the tower on its cobbled plaza: on each
+        /// The street (along -x, away from the camera) from beside the fight up to the tower on its cobbled plaza: on each
         /// side (south -z: <paramref name="southTeam"/>'s fans) stepped pavements full of fans, bollards at the kerb, lamps,
         /// a row of houses; houses closing the far end behind the tower, the city's domes and minarets beyond.
         /// </summary>
@@ -78,15 +81,15 @@ namespace SquashBot.Visual
             tower.position += new Vector3(towerX - tb.center.x, ground - tb.min.y - 0.05f, centre.z - tb.center.z);
             float plaza = BoundsOf(tower).extents.x;
 
-            float front = centre.x + platR * 0.35f; // (the street's near end: a little in front of the platform's middle)
+            float front = centre.x + platR * 0.35f; // (the street's near end: a little in front of the fight's middle)
             float end = towerX - plaza;             // (its far end: the plaza's back)
-            float kerb = platR + 0.6f;              // (the first fans' row, off the platform's rim)
+            float kerb = platR + 0.6f;              // (the first fans' row, clear of the floor)
             float fronts = kerb + FanRows * FanRow + 0.6f; // (the houses' fronts)
 
             for (int side = -1; side <= 1; side += 2)
             {
                 int team = side < 0 ? southTeam : 1 - southTeam;
-                float stepsEnd = towerX + plaza * 0.9f; // (the pavements stop at the plaza)
+                float stepsEnd = Mathf.Max(towerX + plaza * 0.9f, front - CrowdLength); // (the fans near the fight; the pavements stop short of the plaza)
                 // the stepped pavement: each row a step higher, the last reaching the houses
                 for (int r = 0; r < FanRows; r++)
                 {
@@ -94,21 +97,25 @@ namespace SquashBot.Visual
                     float z0 = kerb + r * FanRow - 0.4f, z1 = r == FanRows - 1 ? fronts + 0.5f : z0 + FanRow;
                     Shapes.Rounded("Step", p, new Vector3((front + stepsEnd) * 0.5f, (ground + top) * 0.5f, centre.z + side * (z0 + z1) * 0.5f),
                         new Vector3(front - stepsEnd, top - ground, z1 - z0 + 0.02f), 0.04f, stone);
-                    // its fans, lengthwise, each looking at the platform
+                    // its fans, lengthwise, each looking at the fight
                     for (float x = front - 0.6f; x > stepsEnd + 0.6f; x -= 0.55f * k)
                         AddFan(new Vector3(x + R(-0.15f, 0.15f) * k, top, centre.z + side * (kerb + r * FanRow + R(-0.1f, 0.1f))), team, rng);
                 }
                 // bollards at the kerb, as in the old streets
                 for (float x = front - 1f; x > stepsEnd + 1f; x -= 2.4f)
                     Shapes.Primitive(PrimitiveType.Cylinder, "Bollard", p, new Vector3(x, ground + 0.45f, centre.z + side * (kerb - 0.75f)), new Vector3(0.24f, 0.45f, 0.24f), iron);
-                // lamps against the houses
-                for (float x = front - 2f; x > stepsEnd; x -= 9f)
+                // beyond the fans a plain pavement up to the plaza
+                if (stepsEnd > towerX + plaza)
+                    Shapes.Rounded("Pavement", p, new Vector3((stepsEnd + towerX + plaza) * 0.5f, ground + 0.1f, centre.z + side * (kerb - 0.4f + fronts + 0.5f) * 0.5f),
+                        new Vector3(stepsEnd - towerX - plaza, 0.2f, fronts + 0.9f - kerb), 0.04f, stone);
+                // lamps against the houses, all the way up
+                for (float x = front - 2f; x > towerX + plaza; x -= 9f)
                 {
                     var lamp = MadeModel(p, look, "lamp", false);
                     var lb = BoundsOf(lamp);
                     lamp.localScale = Vector3.one * (4.6f / Mathf.Max(0.01f, lb.size.y));
                     lb = BoundsOf(lamp);
-                    float top = ground + 0.2f + (FanRows - 1) * FanStep;
+                    float top = x > stepsEnd ? ground + 0.2f + (FanRows - 1) * FanStep : ground + 0.2f;
                     lamp.position += new Vector3(x - lb.center.x, top - lb.min.y, centre.z + side * (fronts - 0.5f) - lb.center.z);
                 }
                 // the houses along the street, fronts to it, up past the plaza
@@ -145,20 +152,20 @@ namespace SquashBot.Visual
             // the old city's skyline far behind: domes on drums, minarets
             var far = Matte(new Color(0.66f, 0.7f, 0.8f), 0.6f); // (hazy blue in the distance)
             var cone = Cone(12);
-            float farX = end - 40f;
+            float farX = end - 22f; // (inside the camera's reach)
             for (int i = 0; i < 4; i++)
             {
                 var at = new Vector3(farX - R(0f, 8f), ground, centre.z + Mathf.Lerp(-34f, 34f, i / 3f) + R(-4f, 4f));
-                float rad = R(4.5f, 6.5f);
+                float rad = R(3.5f, 5f);
                 Shapes.Primitive(PrimitiveType.Cylinder, "Drum", p, at + Vector3.up * rad * 0.9f, new Vector3(rad * 2.1f, rad * 0.9f, rad * 2.1f), far);
                 Shapes.Primitive(PrimitiveType.Sphere, "Dome", p, at + Vector3.up * rad * 1.8f, new Vector3(rad * 2f, rad * 1.5f, rad * 2f), far);
                 for (int m = -1; m <= 1; m += 2)
                 {
-                    float mh = R(22f, 27f);
+                    float mh = R(13f, 17f);
                     var foot = at + new Vector3(R(-2f, 2f), 0f, m * (rad + 2.5f));
-                    Shapes.Primitive(PrimitiveType.Cylinder, "Minaret", p, foot + Vector3.up * mh * 0.5f, new Vector3(1.1f, mh * 0.5f, 1.1f), far);
-                    Shapes.Primitive(PrimitiveType.Cylinder, "Balcony", p, foot + Vector3.up * mh * 0.78f, new Vector3(1.8f, 0.3f, 1.8f), far);
-                    Piece(p, "MinaretCap", cone, foot + Vector3.up * mh, new Vector3(1.2f, 4f, 1.2f), far);
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Minaret", p, foot + Vector3.up * mh * 0.5f, new Vector3(0.8f, mh * 0.5f, 0.8f), far);
+                    Shapes.Primitive(PrimitiveType.Cylinder, "Balcony", p, foot + Vector3.up * mh * 0.78f, new Vector3(1.3f, 0.25f, 1.3f), far);
+                    Piece(p, "MinaretCap", cone, foot + Vector3.up * mh, new Vector3(0.9f, 2.8f, 0.9f), far);
                 }
             }
 
