@@ -187,15 +187,26 @@ namespace SquashBot.UI
                         return d;
                     };
                 case DuelIcon.SpecialPatch:
-                    return p => Mathf.Max(Mathf.Min(Box(p, new Vector2(0.22f, 0.7f), 0.08f), Box(p, new Vector2(0.7f, 0.22f), 0.08f)), -Circle(p, 0.09f));
-                case DuelIcon.SpecialSkyStrike:
+                    // a sticking plaster, slanted, its middle pad dotted (no cross: no sign of any faith)
                     return p =>
                     {
-                        float blade = Poly(p, new[] { new Vector2(-0.12f, 0.45f), new Vector2(0.12f, 0.45f), new Vector2(0.12f, -0.45f), new Vector2(0f, -0.8f), new Vector2(-0.12f, -0.45f) }, 1f) - 0.02f;
-                        float guard = Box(p - new Vector2(0f, 0.5f), new Vector2(0.38f, 0.07f), 0.04f);
-                        float grip = Box(p - new Vector2(0f, 0.7f), new Vector2(0.08f, 0.16f), 0.04f);
-                        float speed = Mathf.Min(Seg(p, new Vector2(-0.5f, 0.15f), new Vector2(-0.5f, -0.5f)), Seg(p, new Vector2(0.5f, 0.15f), new Vector2(0.5f, -0.5f))) - 0.05f;
-                        return Mathf.Min(Mathf.Min(blade, guard), Mathf.Min(grip, speed));
+                        var q = Rot(p, 40f);
+                        float strip = Box(q, new Vector2(0.78f, 0.24f), 0.22f);
+                        float pad = Box(q, new Vector2(0.24f, 0.17f), 0.05f);
+                        float dots = Mathf.Min(Mathf.Min(Circle(q - new Vector2(-0.1f, 0.07f), 0.045f), Circle(q - new Vector2(0.1f, 0.07f), 0.045f)),
+                            Mathf.Min(Circle(q - new Vector2(-0.1f, -0.07f), 0.045f), Circle(q - new Vector2(0.1f, -0.07f), 0.045f)));
+                        float edge = Mathf.Abs(pad) - 0.025f; // (the pad's outline cut into the strip)
+                        return Mathf.Max(strip, Mathf.Max(-edge, -dots));
+                    };
+                case DuelIcon.SpecialSkyStrike:
+                    // a bolt striking down from a cloud (no sword pointing down: it read as a cross)
+                    return p =>
+                    {
+                        float cloud = Mathf.Min(Mathf.Min(Circle(p - new Vector2(-0.3f, 0.42f), 0.2f), Circle(p - new Vector2(0.02f, 0.55f), 0.27f)),
+                            Mathf.Min(Circle(p - new Vector2(0.32f, 0.42f), 0.2f), Box(p - new Vector2(0.01f, 0.33f), new Vector2(0.5f, 0.11f), 0.1f)));
+                        float bolt = Poly(p, new[] { new Vector2(0.08f, 0.26f), new Vector2(-0.22f, -0.14f), new Vector2(-0.02f, -0.14f), new Vector2(-0.16f, -0.8f),
+                            new Vector2(0.26f, -0.04f), new Vector2(0.06f, -0.04f), new Vector2(0.24f, 0.26f) }, 1f);
+                        return Mathf.Min(cloud, bolt);
                     };
                 case DuelIcon.SpecialTeleport:
                     return p => Mathf.Min(Arc(p, 0.62f, 0.1f, 20f, 160f), Mathf.Min(Arc(p, 0.62f, 0.1f, 200f, 340f), Mathf.Min(Arc(p, 0.32f, 0.09f, 100f, 260f), Circle(p, 0.12f))));

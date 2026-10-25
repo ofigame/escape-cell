@@ -351,7 +351,7 @@ namespace SquashBot.UI
             int from = rank > 0 ? Challenge.RankAt[rank] : 0, to = rank + 1 < Challenge.RankAt.Length ? Challenge.RankAt[rank + 1] : from + 1;
             Bar(row, (trophies - from) / (float)Mathf.Max(1, to - from), new Color(0.5f, 0.9f, 0.6f), note);
             if (!countUp || change <= 0) yield break;
-            var v = row.Find("Value").GetComponent<TextMeshProUGUI>();
+            var v = row.Find("Value").GetComponentInChildren<TextMeshProUGUI>();
             int shown = 0;
             for (float t = 0f; t < 1f && !skip; t += Time.unscaledDeltaTime * speed / 0.5f)
             {
@@ -365,7 +365,7 @@ namespace SquashBot.UI
         private IEnumerator XpRow(GameManager.DuelRewards r)
         {
             var row = Row(Loc.F("rw.level", r.levelBefore), "+" + r.xp + " XP", new Color(0.65f, 0.75f, 1f), Sfx.Click, 126f);
-            var label = row.Find("What").GetComponent<TextMeshProUGUI>();
+            var label = row.Find("What").GetComponentInChildren<TextMeshProUGUI>();
             var fill = Bar(row, r.xpBefore / (float)DuelLevel.Need(r.levelBefore), new Color(0.55f, 0.65f, 1f));
             int level = r.levelBefore;
             float from = r.xpBefore / (float)DuelLevel.Need(level);
@@ -392,7 +392,7 @@ namespace SquashBot.UI
             float K(int points, int level) => level >= Mastery.Max ? 1f : (points - Prev(level)) / (float)Mathf.Max(1, Mastery.NextAt(level) - Prev(level));
             string note = r.masteryAfter >= Mastery.Max ? null : Loc.F("rw.toMastery", r.masteryAfter + 1, Mastery.NextAt(r.masteryAfter) - r.masteryPointsAfter);
             var row = Row(Loc.F("rw.mastery", name, r.masteryBefore), "+" + (r.masteryPointsAfter - r.masteryPointsBefore), new Color(1f, 0.75f, 0.35f), Sfx.Click, 126f);
-            var label = row.Find("What").GetComponent<TextMeshProUGUI>();
+            var label = row.Find("What").GetComponentInChildren<TextMeshProUGUI>();
             var fill = Bar(row, K(r.masteryPointsBefore, r.masteryBefore), new Color(1f, 0.7f, 0.3f), note);
             float from = K(r.masteryPointsBefore, r.masteryBefore);
             for (int l = r.masteryBefore + 1; l <= r.masteryAfter; l++)

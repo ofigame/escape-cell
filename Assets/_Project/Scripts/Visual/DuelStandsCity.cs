@@ -157,7 +157,7 @@ namespace SquashBot.Visual
             // a simit cart in the street between the fight and the tower, a little to the left
             var cart = MadeModel(p, look, "prop", false);
             var cb = BoundsOf(cart);
-            cart.localScale = Vector3.one * (2.6f / Mathf.Max(0.01f, cb.size.y));
+            cart.localScale = Vector3.one * (5.2f / Mathf.Max(0.01f, cb.size.y)); // (big enough to read far up the street)
             cart.rotation = Quaternion.Euler(0f, 90f + R(-20f, 20f), 0f) * cart.rotation;
             cb = BoundsOf(cart);
             var spot = new Vector3(centre.x - platR - 14f, ground, centre.z - street * 0.35f);
