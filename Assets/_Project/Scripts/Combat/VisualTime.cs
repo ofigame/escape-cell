@@ -10,7 +10,7 @@ namespace SquashBot.Combat
     public class VisualTime : MonoBehaviour
     {
         private static float globalScale = 1f, globalUntil;
-        private float freezeUntil;
+        private float freezeUntil, slowUntil, slowScale = 1f;
 
         /// <summary>Every fighter's pictures slowed together for a while (a big moment), real seconds.</summary>
         public static void SlowAll(float scale, float seconds)
@@ -26,7 +26,14 @@ namespace SquashBot.Combat
         public bool Frozen => Time.unscaledTime < freezeUntil;
 
         /// <summary>This body's picture speed now (the freeze times the slow motion).</summary>
-        public float Scale => (Frozen ? CombatLibrary.Settings.hitstopSpeed : 1f) * GlobalScale;
+        public float Scale => (Frozen ? CombatLibrary.Settings.hitstopSpeed : 1f) * (Time.time < slowUntil ? slowScale : 1f) * GlobalScale;
+
+        /// <summary>This body's pictures slowed for a while (frozen by ice: 0.7), game seconds.</summary>
+        public void SlowFor(float scale, float seconds)
+        {
+            slowScale = Mathf.Clamp(scale, 0.1f, 1f);
+            slowUntil = Mathf.Max(slowUntil, Time.time + Mathf.Max(0f, seconds));
+        }
 
         /// <summary>This frame's time for this body's pictures.</summary>
         public float DeltaTime => Time.deltaTime * Scale;

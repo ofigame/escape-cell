@@ -137,6 +137,10 @@ namespace SquashBot.Gameplay
             strikeCooldown = Mathf.Max(strikeCooldown, 0.55f);
             skillBar?.ShowCombo(0);
             skillBar?.Shout(Loc.T("duel.parried"), new Color(0.6f, 0.85f, 1f));
+            if (heldWeapon != null) heldWeapon.Recoil(); // (foi's blade knocked aside)
+            var parrier = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<HeldWeapon>() : null;
+            if (parrier != null) parrier.Swing(CombatLibrary.Family(parrier.Family).Blow(2)); // (its weapon across to meet it)
+            if (hunt.ChallengeFoeAt is Vector3 pAt) CombatFeel.ClashAt((pAt + robot.transform.position) * 0.5f + Vector3.up * 1.2f, pAt - robot.transform.position);
             var skin = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null;
             if (skin != null && hunt.ChallengeFoeAt is Vector3 foeAt) skin.Stagger(foeAt, 0.3f);
             duelStirAt = Time.time;
@@ -163,6 +167,9 @@ namespace SquashBot.Gameplay
         private void UpdateDuelSkills(float dt)
         {
             if (skillBar == null) return;
+            // how hurt each looks: smoke under half health, electric arcs under a quarter
+            if (robot.Visual != null) StatusFx.On(CombatFeel.RootOf(robot.Visual)).SetDamage(health < 0.25f ? 2 : health < 0.5f ? 1 : 0);
+            if (hunt.ChallengeFoeModel != null) { float fh = hunt.ChallengeFoeHealth; StatusFx.On(CombatFeel.RootOf(hunt.ChallengeFoeModel)).SetDamage(fh < 0.25f ? 2 : fh < 0.5f ? 1 : 0); }
             if (hunt.ChallengeFoeAt is Vector3 seen) lastFoeAt = seen;
             if (myRing != null) myRing.Follow(robot.IsAlive && robot.Visual != null && robot.Visual.gameObject.activeInHierarchy ? robot.transform.position : (Vector3?)null);
             if (foeRing != null) foeRing.Follow(hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.position : (Vector3?)null);
@@ -244,6 +251,7 @@ namespace SquashBot.Gameplay
                     fx.Burst(robot.transform.position + Vector3.up * 0.6f, new Color(0.5f, 0.85f, 1f), new Color(1f, 2f, 3f), 30, 6f);
                     AudioManager.PlaySfx(Sfx.Shield, 1f, 0.8f);
                     skillBar.Shout(Loc.T("duel.broken"), new Color(0.5f, 0.85f, 1f));
+                    BreakerShown(false);
                     if (LiveActive) LiveNet.Special(5);
                     else
                     {
@@ -531,11 +539,27 @@ namespace SquashBot.Gameplay
             // the feel (freeze, the camera's knock along the blow, the picture pushed back, the family's impact sound) on
             // the striker's swing's contact: the same for the player and the rival
             var blow = held != null ? (held.Current ?? CombatLibrary.Family(held.Family).Blow(0)) : CombatLibrary.Family(WeaponFamily.Sword).Blow(0);
-            CombatFeel.Hit(striker, model, blow);
-            if (toHead) { skin.JoltHead(from); strength *= 0.6f; } // (the head takes it: the body moves less)
-            skin.Stagger(from, strength);
-            skin.Shudder(from, Mathf.Clamp01(0.45f + 0.12f * inARow)); // (the body shakes with it)
+            // the body's answer (by the blow's direction, height and strength; harder deeper into a combo) on the contact
+            CombatFeel.Hit(striker, model, blow, 1f + 0.12f * Mathf.Min(Mathf.Max(0, inARow - 1), 5));
             if (inARow >= 4 && !LiveActive) Push(meStruck, from, 1);
+        }
+
+        /// <summary>A combo broken (<paramref name="onMe"/>: the rival broke foi's): the one breaking comes forward with its
+        /// shoulder, the one broken is thrown back reeling, its weapon knocked aside.</summary>
+        private void BreakerShown(bool onMe)
+        {
+            var breaker = onMe ? hunt.ChallengeFoeModel : robot.Visual;
+            var broken = onMe ? robot.Visual : hunt.ChallengeFoeModel;
+            if (breaker == null || broken == null) return;
+            var dir = broken.position - breaker.position;
+            VisualRoot.On(CombatFeel.RootOf(breaker)).Push(dir, 0.3f, 0.35f);
+            var skin = broken.GetComponentInChildren<SkinnedHero>();
+            if (skin != null) skin.React(HitDirection.Thrust, HitHeight.Mid, HitStrength.Heavy, breaker.position);
+            var held = broken.GetComponentInChildren<HeldWeapon>();
+            if (held != null) held.Recoil();
+            VisualTime.On(CombatFeel.RootOf(breaker)).Freeze(0.08f);
+            VisualTime.On(CombatFeel.RootOf(broken)).Freeze(0.08f);
+            CameraImpulse.Fire(CameraImpulseLevel.Medium, dir, CombatFeel.ShakeMultiplier);
         }
 
         /// <summary>Every fourth blow in a row the striker carrying a shield strikes with it too: thrust out, a thud, the
@@ -943,6 +967,7 @@ namespace SquashBot.Gameplay
                 myCombo = 0;
                 myComboMove = 0;
                 strikeCooldown = Mathf.Max(strikeCooldown, 0.9f); // foi's swing knocked aside
+                BreakerShown(true);
                 Shockwave.Create(foeAt, 2.4f, new Color(1f, 0.45f, 0.4f));
                 AudioManager.PlaySfx(Sfx.Shield, 1f, 0.75f);
                 skillBar?.Shout(Loc.T("duel.broken"), new Color(1f, 0.45f, 0.4f));

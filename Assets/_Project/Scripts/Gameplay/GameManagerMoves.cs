@@ -1,5 +1,6 @@
 using System.Collections;
 using SquashBot.Audio;
+using SquashBot.Combat;
 using SquashBot.Core;
 using SquashBot.Data;
 using SquashBot.Visual;
@@ -178,6 +179,7 @@ namespace SquashBot.Gameplay
                     if (!LiveActive) Push(!mine, meAt, 1);
                     var to = TileAway(me, other, 2);
                     if (mine) myInvulnUntil = Time.time + 0.9f; else rivalInvulnUntil = hunt.FoeInvulnUntil = Time.time + 0.9f;
+                    if (MeModel() != null) StatusFx.On(CombatFeel.RootOf(MeModel())).Shine(0.9f); // (untouchable: it shines)
                     if (to.HasValue) yield return LeapToTile(mine, to.Value, 1.6f, 3);
                     break;
                 }
@@ -219,6 +221,7 @@ namespace SquashBot.Gameplay
                     cameraRig.Shake(0.5f);
                     Damage(1.4f);
                     Hold(1.5f);
+                    if (OtherModel() != null) StatusFx.On(CombatFeel.RootOf(OtherModel())).Stun(1.5f); // (sparks circling its head)
                     cameraRig.StartCoroutine(Sparks(!mine, new Color(0.6f, 0.9f, 1f), 1.5f));
                     break;
                 }
@@ -236,6 +239,7 @@ namespace SquashBot.Gameplay
                     Damage(1.8f);
                     Hold(1.6f);
                     MoveFx.IceBlock(OtherModel(), 1.6f);
+                    if (OtherModel() != null) StatusFx.On(CombatFeel.RootOf(OtherModel())).Freeze(1.6f);
                     var between = new GridPos(me.x + System.Math.Sign(other.x - me.x), me.y + System.Math.Sign(other.y - me.y));
                     if (grid.InBounds(between) && grid.IsStandable(between) && !grid.IsOccupied(between) && between != other) cameraRig.StartCoroutine(IceWall(between, 2.2f));
                     break;
@@ -400,6 +404,7 @@ namespace SquashBot.Gameplay
                 {
                     // the body turns to iron with a clang that throws the other back; five seconds untouchable
                     if (mine) myIronUntil = Time.time + 5f; else rivalIronUntil = hunt.FoeInvulnUntil = Time.time + 5f;
+                    if (Self() != null) StatusFx.On(CombatFeel.RootOf(Self())).Shine(5f);
                     MoveFx.Shell(Self(), new Color(0.8f, 0.82f, 0.9f), 5f, 0.4f);
                     MoveFx.Pillar(MeAt(), new Color(0.85f, 0.85f, 0.95f), 0.9f, 5f, 0.6f);
                     cameraRig.StartCoroutine(Glow(mine, new Color(0.85f, 0.85f, 0.9f), 5f));

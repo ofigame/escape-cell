@@ -170,6 +170,7 @@ namespace SquashBot.Gameplay
             health = 1f;
             Shields.Ready(); // (each round: the shield ready)
             RefreshHealthBar();
+            RebootShown(first);
             var (mine, theirs) = DuelMarks;
             laneX = mine.x;
             theirs = new GridPos(laneX, theirs.y); // (the lane duel: both on the one line; the marks already share it)
@@ -259,6 +260,7 @@ namespace SquashBot.Gameplay
             if (!challengeRun || chPhase != ChPhase.Duel) return;
             if (iWon) chDuelMe++; else chDuelThem++;
             PowerSlow(0.4f, 0.3f); // (the knock-down: slow motion a moment, the crowd up)
+            KnockoutShown(iWon);
             if (SuddenDeath) { RefreshDuelClock(); chPhase = ChPhase.Break; hunt.Freeze(); ChallengeEnd(); return; } // (sudden death: one knock-down wins)
             if (iWon) OfferFinish(lastFoeAt);
             cameraRig.StartCoroutine(RivalEmote(!iWon));
@@ -270,6 +272,35 @@ namespace SquashBot.Gameplay
             AudioManager.PlaySfx(iWon ? Sfx.Win : Sfx.Warning, 0.8f, 1f);
             if (iWon) fx.Burst(robot.transform.position + Vector3.up * 0.6f, Palette.Coin, Palette.CoinGlow, 24, 5f);
             cameraRig.StartCoroutine(AfterKnockdown());
+        }
+
+        /// <summary>
+        /// The knock-down seen: the pictures in slow motion a moment (the game's clock never), the one down with its eyes
+        /// shut and electric arcs crackling over it.
+        /// </summary>
+        private void KnockoutShown(bool iWon)
+        {
+            Combat.VisualTime.SlowAll(0.3f, 0.4f);
+            var down = iWon ? hunt.ChallengeFoeModel : robot.Visual;
+            var skin = down != null ? down.GetComponentInChildren<SkinnedHero>() : null;
+            if (skin == null) return;
+            skin.EyesShut(3f);
+            skin.Squash(1f);
+            var c = skin.ChestPoint;
+            float s = Mathf.Max(0.3f, down.lossyScale.y) * 0.5f;
+            for (int i = 0; i < 3; i++) MoveFx.Bolt(c + Random.insideUnitSphere * s, c + Random.insideUnitSphere * s, new Color(0.6f, 0.85f, 1f), 0.05f, 0.35f);
+            Combat.ScrapBits.Spawn(c, down.position - robot.transform.position, 3, Mathf.Max(0.3f, down.lossyScale.y), down.position.y);
+        }
+
+        /// <summary>Back on its mark after a knock-down: foi's eyes open again with a glow (starting up anew).</summary>
+        private void RebootShown(bool first)
+        {
+            var skin = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null;
+            if (skin == null) return;
+            skin.EyesShut(0f);
+            if (first) return;
+            Combat.StatusFx.On(Combat.CombatFeel.RootOf(robot.Visual)).Flash(0.18f);
+            fx.Burst(skin.HeadPoint, new Color(0.6f, 0.9f, 1f), new Color(1.5f, 2.4f, 3f), 14, 2.5f);
         }
 
         /// <summary>A live knock-down, as the server tells it: its score; both start again when it says.</summary>

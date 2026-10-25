@@ -116,9 +116,10 @@ namespace SquashBot.Gameplay
             if (hold != null) hold.Raise();
             var at = robot.transform.position + Vector3.up * 0.7f + (from - robot.transform.position).normalized * 0.35f;
             fx.Burst(at, new Color(1f, 0.9f, 0.6f), new Color(3f, 2.6f, 1.6f), 18, 4f);
-            AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.9f);
+            AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.7f); // (a deep "dong")
             Haptics.Light();
             cameraRig.Shake(0.25f);
+            if (challengeRun && hunt.ChallengeFoeModel != null) Combat.CombatFeel.Blocked(hunt.ChallengeFoeModel, robot.Visual);
         }
 
         private void InitHunt()
@@ -512,7 +513,10 @@ namespace SquashBot.Gameplay
             }
             // a heavy weapon staggers the duel's rival a moment on every blow that lands
             if (challengeRun && chPhase == ChPhase.Duel && !LiveActive && DuelPower.Stagger(w) > 0f && hunt.ChallengeFoeTile.HasValue && at == hunt.ChallengeFoeTile.Value)
+            {
                 hunt.StunFoe(DuelPower.Stagger(w));
+                if (DuelPower.Stagger(w) >= 0.3f && hunt.ChallengeFoeModel != null) Combat.StatusFx.On(Combat.CombatFeel.RootOf(hunt.ChallengeFoeModel)).Stun(DuelPower.Stagger(w));
+            }
             if (w.kind == WeaponKind.Whirl)
             {
                 WhirlStrike(w, damage);

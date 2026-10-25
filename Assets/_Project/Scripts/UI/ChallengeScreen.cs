@@ -144,17 +144,14 @@ namespace SquashBot.UI
             ((RectTransform)comp.transform).pivot = new Vector2(0.5f, 0.5f);
             ModeCard(m, 1, new Vector2(0f, 160f), "duel", "ch.mode.duel", "ch.mode.duelText", new Color(1f, 0.6f, 0.25f), tappable: false);
             // One button: a 3-minute duel, foi against foi.
-            var go = Flat.Button(m, Loc.T("ch.duelGo"), new Vector2(0.5f, 0.5f), new Vector2(-125f, -300f), new Vector2(470f, 140f),
+            var go = Flat.Button(m, Loc.T("ch.duelGo"), new Vector2(0.5f, 0.5f), new Vector2(0f, -300f), new Vector2(720f, 140f),
                 new Color(1f, 0.6f, 0.25f), new Color(0.12f, 0.06f, 0f), () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(1, 3); }, 46f);
             ((RectTransform)go.transform).pivot = new Vector2(0.5f, 0.5f);
             // This week's event: the weekly rule mode (Monday–Thursday) or the weekend tournament (Saturday–Sunday).
             eventButton = Flat.Button(m, "", new Vector2(0.5f, 0.5f), new Vector2(0f, -470f), new Vector2(720f, 120f),
                 new Color(0.55f, 0.45f, 1f), Color.white, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(Tournament.Open ? 3 : 2, 3); }, 34f);
             ((RectTransform)eventButton.transform).pivot = new Vector2(0.5f, 0.5f);
-            // 2 against 2: foi and a partner against two
-            var tvt = Flat.Button(m, Loc.T("tvt.title"), new Vector2(0.5f, 0.5f), new Vector2(255f, -300f), new Vector2(230f, 140f), new Color(0.3f, 0.75f, 0.6f), Color.white, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(4, 3); }, 34f);
-            ((RectTransform)tvt.transform).pivot = new Vector2(0.5f, 0.5f);
-            tvtButton = tvt;
+            // (2 against 2 was taken out of the duel: one-on-one only)
             // Playing a friend by code, between the lengths and CLOSE (the friends list is on the main menu).
             var friend = Flat.Button(m, Loc.T("live.friend"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 190f), new Vector2(640f, 100f), Flat.Blue, Flat.Text, ShowFriend, 34f);
             ((RectTransform)friend.transform).pivot = new Vector2(0.5f, 0.5f);
@@ -301,7 +298,7 @@ namespace SquashBot.UI
             return card;
         }
 
-        private Button eventButton, tvtButton;
+        private Button eventButton;
 
         /// <summary>The event button: this week's rule (and the wins), or the tournament's round; hidden on Fridays.</summary>
         private void RefreshEvent()

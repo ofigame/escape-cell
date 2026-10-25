@@ -21,7 +21,7 @@ namespace SquashBot.Combat
             public HeldWeapon weapon;
             public Transform attacker, victim;
             public AttackMotionData data;
-            public float deadline;
+            public float deadline, intensity;
         }
 
         private static readonly List<Pending> pending = new List<Pending>(8);
@@ -60,7 +60,7 @@ namespace SquashBot.Combat
         /// A blow landed: <paramref name="attacker"/>'s (its visual root) <paramref name="data"/> on <paramref name="victim"/>.
         /// Felt on the striker's weapon's contact if its swing is still on the way there, else at once.
         /// </summary>
-        public static void Hit(Transform attacker, Transform victim, AttackMotionData data)
+        public static void Hit(Transform attacker, Transform victim, AttackMotionData data, float intensity = 1f)
         {
             if (victim == null || data == null) return;
             Hook();
@@ -68,11 +68,11 @@ namespace SquashBot.Combat
             float wait = w != null ? w.ContactIn : -1f;
             if (wait > 0f && wait < 0.35f)
             {
-                pending.Add(new Pending { weapon = w, attacker = attacker, victim = victim, data = data, deadline = Time.unscaledTime + wait + 0.15f });
+                pending.Add(new Pending { weapon = w, attacker = attacker, victim = victim, data = data, deadline = Time.unscaledTime + wait + 0.15f, intensity = intensity });
                 CombatFeelRunner.Ensure();
                 return;
             }
-            Apply(attacker, victim, data);
+            Apply(attacker, victim, data, intensity);
         }
 
         /// <summary>A big moment: every fighter's pictures slow for a while (the game's clock does not).</summary>
@@ -107,7 +107,7 @@ namespace SquashBot.Combat
                 if (pending[i].weapon != w) continue;
                 var p = pending[i];
                 pending.RemoveAt(i);
-                Apply(p.attacker, p.victim, p.data);
+                Apply(p.attacker, p.victim, p.data, p.intensity);
             }
         }
 
@@ -119,7 +119,7 @@ namespace SquashBot.Combat
                 if (pending[i].weapon != null && Time.unscaledTime < pending[i].deadline) continue;
                 var p = pending[i];
                 pending.RemoveAt(i);
-                Apply(p.attacker, p.victim, p.data);
+                Apply(p.attacker, p.victim, p.data, p.intensity);
             }
             return pending.Count > 0;
         }
@@ -132,6 +132,25 @@ namespace SquashBot.Combat
             return body != null && body.transform.parent != null ? body.transform.parent : fighter;
         }
 
+        /// <summary>Two weapons ring together at <paramref name="at"/> (a parry): the clash's sound, knock and sparks.</summary>
+        public static void ClashAt(Vector3 at, Vector3 across) => Clash(at, across);
+
+        /// <summary>
+        /// A blow stopped by a shield: the striker's weapon bounces off (its follow-through skipped), both freeze a moment
+        /// (60 ms), the one blocking is pushed back a little (a tenth of a tile).
+        /// </summary>
+        public static void Blocked(Transform attacker, Transform defender)
+        {
+            if (defender == null) return;
+            var w = attacker != null ? attacker.GetComponentInChildren<HeldWeapon>() : null;
+            if (w != null) w.Recoil();
+            float ms = 60f * HitstopMultiplier;
+            if (attacker != null) VisualTime.On(RootOf(attacker)).Freeze(ms / 1000f);
+            VisualTime.On(RootOf(defender)).Freeze(ms / 1000f);
+            var dir = attacker != null ? defender.position - attacker.position : -defender.forward;
+            VisualRoot.On(RootOf(defender)).Push(dir, 0.1f, 0.18f);
+        }
+
         /// <summary>The weapons meet: a big "klang", a sharp knock of the camera, sparks (the game draws them, see <see cref="Clashed"/>).</summary>
         private static void Clash(Vector3 at, Vector3 across)
         {
@@ -140,7 +159,7 @@ namespace SquashBot.Combat
             Clashed?.Invoke(at);
         }
 
-        private static void Apply(Transform attacker, Transform victim, AttackMotionData data)
+        private static void Apply(Transform attacker, Transform victim, AttackMotionData data, float intensity = 1f)
         {
             if (victim == null) return;
             var s = CombatLibrary.Settings;
@@ -170,6 +189,14 @@ namespace SquashBot.Combat
             float knock = data.visualKnockback > 0f ? data.visualKnockback : r.Knockback(data.strength);
             VisualRoot.On(victimRoot).Push(dir, knock, r.Recovery(data.strength));
             AudioManager.PlaySfx(data.impactSfx, 0.55f, data.impactPitch, 0.08f);
+            // the struck body answers (its springy reaction by direction, height and strength), flashes white; a heavy blow
+            // knocks a few bolts off it
+            var body = victim.GetComponentInChildren<SkinnedHero>();
+            var from = attacker != null ? attacker.position : victim.position - victim.forward;
+            if (body != null) body.React(data.direction, data.height, data.strength, from, intensity);
+            if (!(s.lowQualityTrims && GraphicsQuality.Current == GraphicsTier.Low)) StatusFx.On(victimRoot).Flash(s.hitFlashMs / 1000f);
+            if (data.strength >= HitStrength.Heavy && body != null && !(s.lowQualityTrims && GraphicsQuality.Current == GraphicsTier.Low))
+                ScrapBits.Spawn(body.ChestPoint, dir, data.strength == HitStrength.Heavy ? 2 : 3, Mathf.Max(0.3f, victimRoot.lossyScale.y), victim.position.y);
             Contacted?.Invoke(attacker, victim, data);
         }
     }

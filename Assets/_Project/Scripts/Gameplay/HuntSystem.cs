@@ -867,8 +867,12 @@ namespace SquashBot.Gameplay
             CheckCleared();
         }
 
+        /// <summary>The duel's rival is falling (its model about to go): the game shows its fall on a stand-in.</summary>
+        public event Action<Transform> ChallengeFoeFalling;
+
         private void KillGuard(Guard g)
         {
+            if (g == challengeFoe && g.model != null) ChallengeFoeFalling?.Invoke(g.model);
             g.dead = true;
             CheckChestFreed(g);
             grid.SetOccupied(g.pos, false);

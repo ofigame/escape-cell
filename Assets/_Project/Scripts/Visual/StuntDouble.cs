@@ -77,9 +77,14 @@ namespace SquashBot.Visual
         /// Never left behind: gone with the robot it stands in for (a live knock-down can take the rival away mid-moment),
         /// and in any case after a few seconds (no moment lasts that long).
         /// </summary>
+        private bool alone;
+
+        /// <summary>Stays when the robot it stands in for is gone (a knocked-out rival's fall): still gone in a few seconds.</summary>
+        public void Detach() => alone = true;
+
         private void Update()
         {
-            if (source == null || Time.realtimeSinceStartup - bornAt > 6f) Done();
+            if ((source == null && !alone) || Time.realtimeSinceStartup - bornAt > 6f) Done();
         }
 
         private void OnDestroy()

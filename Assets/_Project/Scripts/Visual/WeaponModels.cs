@@ -444,6 +444,15 @@ namespace SquashBot.Visual
             swingTotal = windS + hitS + backS;
         }
 
+        /// <summary>The swing bounces back (off a shield, knocked aside): no follow-through, straight into its recovery.</summary>
+        public void Recoil()
+        {
+            if (swing >= 1f || current == null) return;
+            Mark(SwingPhase.Contact);
+            swingTime = Mathf.Max(swingTime, windS + hitS + backS * 0.3f);
+            TrailOn(false);
+        }
+
         /// <summary>The next blow seen late (a live rival's, known only once struck): from its contact on, no wind-up.</summary>
         public void SwingLate() => Begin(NextBlow(true), true);
 

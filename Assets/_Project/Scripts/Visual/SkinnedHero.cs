@@ -810,6 +810,112 @@ namespace SquashBot.Visual
         /// <summary>This body's frame time on its picture clock (frozen by a hit, slowed in a big moment).</summary>
         private float VDt => vclock != null ? vclock.DeltaTime : Time.deltaTime * VisualTime.GlobalScale;
 
+        // ---------- Struck: the body's springy answer, the face, the squash ----------
+
+        private readonly HitSpring spring = new HitSpring();
+        /// <summary>The last reaction played (direction / height / strength / variant), for the duel lab's readings.</summary>
+        public string LastReaction { get; private set; } = "";
+        private float squintUntil, squintAmount, shutUntil;
+        private float squashT = 1f, squashAmp;
+        private Vector3 skinScale;
+        private bool skinScaleKnown;
+        private Transform brows;
+        private Vector3 browsRest;
+        private bool browsKnown;
+        private float browsDownUntil, browsDown;
+
+        /// <summary>
+        /// A blow felt (its feel's contact): the spine, chest, head and shoulders thrown by its direction, height and
+        /// strength and springing back (a different variant each time); a medium blow adds a step back, a heavy one two
+        /// with the arms out (the stagger), and squashes the body a moment; a launch throws it up and down on its back.
+        /// The eyes squint (hard on a heavy blow), the brows come down. Only the picture: the place is the rules'.
+        /// </summary>
+        public void React(Combat.HitDirection dir, Combat.HitHeight height, Combat.HitStrength strength, Vector3 from, float intensity = 1f)
+        {
+            if (!ready) Setup();
+            var r = Combat.CombatLibrary.Reactions;
+            if (strength == Combat.HitStrength.Launch) { Launch(from, 1.6f); Squint(1f, 0.9f); return; }
+            int variant = spring.Kick(dir, height, r.Degrees(strength) * Mathf.Clamp(intensity, 0.5f, 2f), r.Recovery(strength));
+            LastReaction = dir + "/" + height + "/" + strength + "/v" + variant;
+            switch (strength)
+            {
+                case Combat.HitStrength.Light: Squint(0.45f, 0.15f); break;
+                case Combat.HitStrength.Medium: Stagger(from, 0.35f * intensity); Squint(0.6f, 0.25f); Brows(0.6f, 0.3f); break;
+                default: Stagger(from, 0.85f); Squint(1f, 0.4f); Brows(1f, 0.45f); Squash(1f); break;
+            }
+        }
+
+        /// <summary>The eyes squeezed (0..1) for a while.</summary>
+        public void Squint(float amount, float seconds)
+        {
+            squintAmount = Mathf.Max(Time.time < squintUntil ? squintAmount : 0f, Mathf.Clamp01(amount));
+            squintUntil = Mathf.Max(squintUntil, Time.time + seconds);
+        }
+
+        /// <summary>The eyes shut for a while (knocked out); 0 opens them again at once.</summary>
+        public void EyesShut(float seconds) => shutUntil = seconds <= 0f ? 0f : Time.time + seconds;
+
+        /// <summary>The body squashed (8%) and stretched (4%) back in a moment (a heavy blow, a landing).</summary>
+        public void Squash(float amount) { squashT = 0f; squashAmp = Mathf.Clamp01(amount); }
+
+        private void Brows(float amount, float seconds)
+        {
+            browsDown = Mathf.Clamp01(amount);
+            browsDownUntil = Time.time + seconds;
+        }
+
+        private float ExpressionLids()
+        {
+            if (Time.time < shutUntil) return 1f;
+            if (Time.time < squintUntil) return squintAmount * Mathf.Clamp01((squintUntil - Time.time) / 0.12f + 0.3f);
+            return 0f;
+        }
+
+        private void Reacting(float dt)
+        {
+            // the springy answer on the bones (in the body's own frame: it faces its striker)
+            spring.Step(dt);
+            if (spring.Active && playing == null && knock == null)
+            {
+                var frame = transform.parent != null ? transform.parent : transform;
+                Vector3 up = frame.up, right = frame.right, ahead = frame.forward;
+                var bend = Quaternion.AngleAxis(spring[HitSpring.Yaw] * 0.5f, up) * Quaternion.AngleAxis(spring[HitSpring.Roll] * 0.5f, -ahead) * Quaternion.AngleAxis(spring[HitSpring.Pitch] * 0.5f, right);
+                if (spine != null) spine.rotation = bend * spine.rotation;
+                if (chest != null) chest.rotation = bend * chest.rotation;
+                if (neck != null) neck.rotation = Quaternion.AngleAxis(spring[HitSpring.Head], right) * neck.rotation;
+                if (armL != null) armL.rotation = Quaternion.AngleAxis(spring[HitSpring.ShoulderL], ahead) * armL.rotation;
+                if (armR != null) armR.rotation = Quaternion.AngleAxis(-spring[HitSpring.ShoulderR], ahead) * armR.rotation;
+                if (hips != null && Mathf.Abs(spring[HitSpring.Hips]) > 1e-4f)
+                {
+                    float height = head != null ? Mathf.Max(0.3f, head.position.y - transform.position.y) : 1f;
+                    hips.position += up * spring[HitSpring.Hips] * height;
+                }
+            }
+            // squash and stretch
+            if (!skinScaleKnown) { skinScale = transform.localScale; skinScaleKnown = true; }
+            if (squashT < 1f)
+            {
+                squashT = Mathf.Min(1f, squashT + dt / 0.12f);
+                float y = squashT < 0.25f ? Mathf.Lerp(0f, -0.08f, squashT / 0.25f) : squashT < 0.65f ? Mathf.Lerp(-0.08f, 0.04f, (squashT - 0.25f) / 0.4f) : Mathf.Lerp(0.04f, 0f, (squashT - 0.65f) / 0.35f);
+                float sy = 1f + y * squashAmp;
+                float sx = 1f / Mathf.Sqrt(Mathf.Max(0.5f, sy));
+                transform.localScale = new Vector3(skinScale.x * sx, skinScale.y * sy, skinScale.z * sx);
+                if (squashT >= 1f) transform.localScale = skinScale;
+            }
+            // the brows down a moment (a hard blow)
+            if (!browsKnown && head != null)
+            {
+                browsKnown = true;
+                foreach (var r in head.GetComponentsInChildren<Renderer>(true)) if (r.name.ToLowerInvariant().Contains("brows")) { brows = r.transform; break; }
+                if (brows != null) browsRest = brows.localPosition;
+            }
+            if (brows != null)
+            {
+                float k = Time.time < browsDownUntil ? browsDown : 0f;
+                brows.localPosition = Vector3.Lerp(brows.localPosition, browsRest + Vector3.down * 0.035f * k, Mathf.Min(1f, dt * 25f));
+            }
+        }
+
         // ---------- The body in its own blows (the weapon's swing read each frame) ----------
 
         /// <summary>Every rigged body in play (a weapon stops on the others' bodies, never passing through).</summary>
@@ -1003,6 +1109,7 @@ namespace SquashBot.Visual
         /// <summary>Whatever knock it was in, it stands again at once (in its own place, nothing thrown about).</summary>
         public void StandUp()
         {
+            spring.Clear();
             foreach (var c in new[] { knock, stagger, hop, pop }) if (c != null) StopCoroutine(c);
             knock = stagger = hop = pop = null;
             flail = flat = rise = push = reel = 0f;
@@ -1414,6 +1521,7 @@ namespace SquashBot.Visual
             Shuddering(dt);
             PushedByBlow();
             BodyIntoBlow();
+            Reacting(dt);
             Grip();
 
             // Lids: a blink now and then; half down when angry or striking (the eyes narrow).
@@ -1421,7 +1529,7 @@ namespace SquashBot.Visual
             if (blinkTimer < -0.16f) blinkTimer = Random.Range(2f, 4.5f);
             float shut = blinkTimer < 0f ? Mathf.Sin(-blinkTimer / 0.16f * Mathf.PI) : 0f;
             float narrow = angerLeft > 0f ? 0.45f : punchLeft > 0f ? 0.3f : 0f;
-            shut = Mathf.Max(shut, narrow);
+            shut = Mathf.Max(shut, Mathf.Max(narrow, ExpressionLids()));
             if (lids.Count == 0 && head != null)
                 foreach (Transform t in head) if (t.name == "Lid") lids.Add(t); // (a copy finds its own)
             foreach (var lid in lids)
