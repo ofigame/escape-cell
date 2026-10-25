@@ -407,7 +407,7 @@ namespace SquashBot.Gameplay
             chUi.SetLobbyStatus(Loc.T(chOnline ? "ch.found" : "ch.offline"));
             yield return new WaitForSecondsRealtime(pause < 1f ? 0.7f : 1.6f);
             if (token != chLobbyToken) yield break;
-            int stage = again != null ? duelStage : Mathf.Abs(seed) % DuelStageCount;
+            int stage = again != null ? duelStage : PickedStage(Mathf.Abs(seed) % DuelStageCount);
             if (match != null) FoiNet.AheadUsed(); // (a rival found ahead is fought now)
             yield return SpinToStage(stage); // every stage flashes by, it stops on the one drawn
             if (token != chLobbyToken) yield break;

@@ -72,6 +72,8 @@ namespace SquashBot.Data
             ["btn.close"] = "BAĞLA",
             ["result.win"] = "SƏVİYYƏ KEÇİLDİ!",
             ["float.moreTime"] = "+{0} SANİYƏ!",
+            ["settings.testStage"] = "Test: duel səhnəsi",
+            ["settings.stageRandom"] = "Təsadüfi",
             ["power.lightning"] = "İLDIRIM ZƏNCİRİ",
             ["tool.retiredTitle"] = "DONDURUCU GÖTÜRÜLDÜ",
             ["tool.retired"] = "Dondurma artıq DONDURMA bacarığının və buz bombasınındır. Dondurucun üçün +{0} qızıl qaytarıldı.",

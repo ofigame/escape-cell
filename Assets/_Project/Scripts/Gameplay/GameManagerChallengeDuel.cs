@@ -90,6 +90,20 @@ namespace SquashBot.Gameplay
         private DuelStage Stage => DuelStages[Mathf.Clamp(duelStage, 0, DuelStages.Length - 1)];
         public static int DuelStageCount => DrawnStages;
 
+        /// <summary>Test builds: the duel stage picked in the settings (-1: drawn as usual). Never a live match's (both
+        /// screens draw the same one).</summary>
+        public static int TestStage
+        {
+            get { int s = Prefs.GetInt("sb_test_stage", -1); return s >= 0 && s < DuelStages.Length ? s : -1; }
+            set { Prefs.SetInt("sb_test_stage", value); Prefs.Save(); }
+        }
+
+        /// <summary>The picked test stage's name for the settings (or "random").</summary>
+        public static string TestStageLabel => TestStage < 0 ? Loc.T("settings.stageRandom") : Loc.T(DuelStages[TestStage].key);
+
+        /// <summary>The stage a duel is fought on: the test pick, if one is set, else <paramref name="drawn"/>.</summary>
+        private static int PickedStage(int drawn) => TestStage >= 0 ? TestStage : drawn;
+
         /// <summary>The marks the two foi start from: either side of the middle, the player's to the south (left on screen).</summary>
         private (GridPos mine, GridPos theirs) DuelMarks
         {

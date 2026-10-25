@@ -137,7 +137,7 @@ namespace SquashBot.Gameplay
             chUi.SetLobbyStatus(Loc.F("friends.copyOf", r.name));
             yield return new WaitForSecondsRealtime(1.6f);
             if (token != chLobbyToken) yield break;
-            int stage = rival.seed % DuelStageCount;
+            int stage = PickedStage(rival.seed % DuelStageCount);
             yield return SpinToStage(stage);
             if (token != chLobbyToken) yield break;
             chUi.HideLobby();

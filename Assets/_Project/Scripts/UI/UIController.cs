@@ -27,7 +27,8 @@ namespace SquashBot.UI
         Graphics,
         TestMode,
         DuelLab,
-        FloorButtons
+        FloorButtons,
+        DuelStage
     }
 
     /// <summary>
@@ -1243,6 +1244,7 @@ namespace SquashBot.UI
 #if !REAL_ADS && (TEST_TOOLS || !((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR))
                 (SettingKind.TestMode, "settings.test"), // test builds only (never a Play bundle)
                 (SettingKind.DuelLab, "settings.lab"), // the duel lab: test builds only
+                (SettingKind.DuelStage, "settings.testStage"), // the duels' stage picked: test builds only
 #endif
             };
             // many rows: closer together, so the card still fits the screen
@@ -1347,6 +1349,7 @@ namespace SquashBot.UI
             settingValues[SettingKind.Graphics].text = GraphicsQuality.Choice.HasValue ? gfx : Loc.F("gfx.auto", gfx);
             settingValues[SettingKind.Graphics].color = Palette.UiCyan;
             if (settingValues.ContainsKey(SettingKind.TestMode)) SetSetting(SettingKind.TestMode, SaveData.TestMode);
+            if (settingValues.ContainsKey(SettingKind.DuelStage)) { settingValues[SettingKind.DuelStage].text = SquashBot.Gameplay.GameManager.TestStageLabel; settingValues[SettingKind.DuelStage].color = Palette.UiCyan; }
             SetSetting(SettingKind.Challenge, Data.Challenge.Enabled);
         }
 

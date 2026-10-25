@@ -72,6 +72,8 @@ namespace SquashBot.Data
             ["btn.close"] = "إغلاق",
             ["result.win"] = "اجتزت المرحلة!",
             ["float.moreTime"] = "+{0} ثانية!",
+            ["settings.testStage"] = "اختبار: ساحة المبارزة",
+            ["settings.stageRandom"] = "عشوائي",
             ["power.lightning"] = "سلسلة البرق",
             ["tool.retiredTitle"] = "أُزيل المجمّد",
             ["tool.retired"] = "التجميد الآن لمهارة التجميد وقنبلة الجليد. أُعيد +{0} ذهب مقابل المجمّد.",

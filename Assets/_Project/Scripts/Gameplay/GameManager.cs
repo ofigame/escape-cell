@@ -1103,6 +1103,9 @@ namespace SquashBot.Gameplay
                 case SettingKind.DuelControls:
                     ui.DuelControls.Show();
                     return;
+                case SettingKind.DuelStage:
+                    TestStage = TestStage + 1 >= DuelStageCount ? -1 : TestStage + 1; // random, then each stage in turn
+                    break;
                 case SettingKind.DuelLab:
                     ui.CloseSettings();
                     StartDuelLab();

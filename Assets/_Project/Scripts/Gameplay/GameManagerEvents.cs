@@ -38,7 +38,7 @@ namespace SquashBot.Gameplay
             chUi.SetLobbyStatus(mode == 3 ? Loc.T("tn.round" + Tournament.Round) : Loc.T("wk.rule." + duelRule + ".d"));
             yield return new WaitForSecondsRealtime(1.8f);
             if (token != chLobbyToken) yield break;
-            int stage = Mathf.Abs(seed) % DuelStageCount;
+            int stage = PickedStage(Mathf.Abs(seed) % DuelStageCount);
             yield return SpinToStage(stage);
             if (token != chLobbyToken) yield break;
             chUi.HideLobby();

@@ -72,6 +72,8 @@ namespace SquashBot.Data
             ["btn.close"] = "닫기",
             ["result.win"] = "레벨 클리어!",
             ["float.moreTime"] = "+{0}초!",
+            ["settings.testStage"] = "테스트: 결투 무대",
+            ["settings.stageRandom"] = "무작위",
             ["power.lightning"] = "번개 사슬",
             ["tool.retiredTitle"] = "냉동기 제거",
             ["tool.retired"] = "이제 얼리기는 빙결 스킬과 얼음 폭탄으로 해요. 냉동기 대신 +{0} 골드 환불.",

@@ -72,6 +72,8 @@ namespace SquashBot.Data
             ["btn.close"] = "ZU",
             ["result.win"] = "GESCHAFFT!",
             ["float.moreTime"] = "+{0} SEKUNDEN!",
+            ["settings.testStage"] = "Test: Duell-Arena",
+            ["settings.stageRandom"] = "Zufällig",
             ["power.lightning"] = "BLITZKETTE",
             ["tool.retiredTitle"] = "FROSTER ENTFERNT",
             ["tool.retired"] = "Einfrieren gibt es jetzt mit der FROST-Fähigkeit und der Eisbombe. +{0} Gold zurück für deinen Froster.",

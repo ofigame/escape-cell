@@ -72,6 +72,8 @@ namespace SquashBot.Data
             ["btn.close"] = "CERRAR",
             ["result.win"] = "¡NIVEL SUPERADO!",
             ["float.moreTime"] = "¡+{0} SEGUNDOS!",
+            ["settings.testStage"] = "Prueba: escenario",
+            ["settings.stageRandom"] = "Aleatorio",
             ["power.lightning"] = "CADENA DE RAYOS",
             ["tool.retiredTitle"] = "CONGELADOR RETIRADO",
             ["tool.retired"] = "Congelar es ahora cosa de la habilidad CONGELAR y la bomba de hielo. +{0} de oro devueltos por tu Congelador.",

@@ -72,6 +72,8 @@ namespace SquashBot.Data
             ["btn.close"] = "CHIUDI",
             ["result.win"] = "LIVELLO SUPERATO!",
             ["float.moreTime"] = "+{0} SECONDI!",
+            ["settings.testStage"] = "Test: arena duello",
+            ["settings.stageRandom"] = "Casuale",
             ["power.lightning"] = "CATENA DI FULMINI",
             ["tool.retiredTitle"] = "CONGELATORE RITIRATO",
             ["tool.retired"] = "Ora si congela con l'abilità GELO e la bomba di ghiaccio. +{0} oro restituito per il Congelatore.",
