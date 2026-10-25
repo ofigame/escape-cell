@@ -34,11 +34,13 @@ namespace SquashBot.Visual
         private void PavedGround(Transform p, Look look, float ground)
         {
             const float Size = 220f, Tile = 3.2f;
-            var c = new Vector3(centre.x - 50f, ground, centre.z);
+            // everywhere, or (a quay) from in front of the camera to its edge behind the floor
+            float x0 = centre.x - 50f - Size * 0.5f, x1 = centre.x - 50f + Size * 0.5f;
+            if (look.paveFar >= 0f) { x0 = centre.x - hw - QuayBack - look.paveFar; x1 = centre.x + 80f; }
+            float z0 = centre.z - Size * 0.5f, z1 = centre.z + Size * 0.5f;
             var mesh = new Mesh { name = "Paving" };
-            float h = Size * 0.5f;
-            mesh.vertices = new[] { c + new Vector3(-h, 0f, -h), c + new Vector3(-h, 0f, h), c + new Vector3(h, 0f, h), c + new Vector3(h, 0f, -h) };
-            mesh.uv = new[] { new Vector2(0f, 0f), new Vector2(0f, Size / Tile), new Vector2(Size / Tile, Size / Tile), new Vector2(Size / Tile, 0f) };
+            mesh.vertices = new[] { new Vector3(x0, ground, z0), new Vector3(x0, ground, z1), new Vector3(x1, ground, z1), new Vector3(x1, ground, z0) };
+            mesh.uv = new[] { new Vector2(x0, z0) / Tile, new Vector2(x0, z1) / Tile, new Vector2(x1, z1) / Tile, new Vector2(x1, z0) / Tile };
             mesh.triangles = new[] { 0, 1, 2, 0, 2, 3 };
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();

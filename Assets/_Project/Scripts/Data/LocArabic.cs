@@ -967,6 +967,7 @@ namespace SquashBot.Data
             ["duel.stage.11"] = "ساحة الفرسان",
             ["duel.stage.12"] = "قصر الصحراء",
             ["duel.stage.13"] = "برج غلطة",
+            ["duel.stage.14"] = "برج الفتاة",
             ["ch.squadGo"] = "{0}: هجوم!",
             ["ch.squadBack"] = "{0}: عودة إلى الحراسة",
             ["ch.rivalSends"] = "أرسل {0} فرقة {1} نحوك!",
