@@ -22,13 +22,15 @@ namespace SquashBot.Visual
 
         /// <summary>[type][anim][pose], null: no models (the block fans).</summary>
         private static Mesh[][][] fanMeshes;
-        private static Texture2D[] fanTextures;
+        private static Texture2D[] fanTextures, fanTexturesDark;
+        /// <summary>How many of the fans are dark-skinned (their picture's darker variant).</summary>
+        private const float DarkShare = 0.35f;
         private static bool fanLoaded;
 
-        private struct Fan { public Vector3 pos; public float facing, phase, speed; public int team, type; public bool claps; }
+        private struct Fan { public Vector3 pos; public float facing, phase, speed; public int team, type, skin; public bool claps; }
         private readonly List<Fan> fans = new List<Fan>();
-        private Material[] fanBody;         // [type]
-        private Material[,] fanShirt;       // [type, team]
+        private Material[,] fanBody;        // [type, skin]
+        private Material[,,] fanShirt;      // [type, skin, team]
         private readonly Dictionary<int, List<Matrix4x4>> fanDraw = new Dictionary<int, List<Matrix4x4>>();
 
         private static bool FanModels
@@ -39,10 +41,12 @@ namespace SquashBot.Visual
                 fanLoaded = true;
                 var all = new Mesh[FanTypes.Length][][];
                 var tex = new Texture2D[FanTypes.Length];
+                var dark = new Texture2D[FanTypes.Length];
                 for (int t = 0; t < FanTypes.Length; t++)
                 {
                     var model = Resources.Load<GameObject>("Crowd/crowd_" + FanTypes[t]);
                     tex[t] = Resources.Load<Texture2D>("Crowd/crowd_" + FanTypes[t] + "_tex");
+                    dark[t] = Resources.Load<Texture2D>("Crowd/crowd_" + FanTypes[t] + "_tex_dark") ?? tex[t];
                     if (model == null || tex[t] == null) return false;
                     var byName = new Dictionary<string, Mesh>();
                     foreach (var mf in model.GetComponentsInChildren<MeshFilter>(true)) byName[mf.name] = mf.sharedMesh;
@@ -57,6 +61,7 @@ namespace SquashBot.Visual
                 }
                 fanMeshes = all;
                 fanTextures = tex;
+                fanTexturesDark = dark;
                 return true;
             }
         }
@@ -67,16 +72,18 @@ namespace SquashBot.Visual
             if (!FanModels) return false;
             if (fanBody == null)
             {
-                fanBody = new Material[FanTypes.Length];
-                fanShirt = new Material[FanTypes.Length, 2];
+                fanBody = new Material[FanTypes.Length, 2];
+                fanShirt = new Material[FanTypes.Length, 2, 2];
                 for (int t = 0; t < FanTypes.Length; t++)
-                {
-                    fanBody[t] = FanMaterial(fanTextures[t], Color.white);
-                    fanShirt[t, 0] = FanMaterial(fanTextures[t], new Color(0.35f, 0.6f, 1.25f));  // (the grey shirt times blue)
-                    fanShirt[t, 1] = FanMaterial(fanTextures[t], new Color(1.3f, 0.38f, 0.34f));  // (and red)
-                }
+                    for (int s = 0; s < 2; s++)
+                    {
+                        var tex = s == 0 ? fanTextures[t] : fanTexturesDark[t];
+                        fanBody[t, s] = FanMaterial(tex, Color.white);
+                        fanShirt[t, s, 0] = FanMaterial(tex, new Color(0.35f, 0.6f, 1.25f));  // (the grey shirt times blue)
+                        fanShirt[t, s, 1] = FanMaterial(tex, new Color(1.3f, 0.38f, 0.34f));  // (and red)
+                    }
             }
-            fans.Add(new Fan { pos = at, facing = facing, phase = phase, speed = 0.85f + (float)rng.NextDouble() * 0.3f, team = team, type = TypeBeside(at, rng), claps = rng.NextDouble() < 0.4 });
+            fans.Add(new Fan { pos = at, facing = facing, phase = phase, speed = 0.85f + (float)rng.NextDouble() * 0.3f, team = team, type = TypeBeside(at, rng), skin = rng.NextDouble() < DarkShare ? 1 : 0, claps = rng.NextDouble() < 0.4 });
             return true;
         }
 
@@ -122,20 +129,20 @@ namespace SquashBot.Visual
                 int pose = (int)(time * FanPoseRate[anim] * f.speed + f.phase * FanPoses) % FanPoses;
                 float jump = up ? Mathf.Max(0f, Mathf.Sin(time * (6f + ex * 4f) + f.phase)) * ex * 0.15f * crowdSize : 0f;
                 var m = Matrix4x4.TRS(f.pos + Vector3.up * jump, Quaternion.Euler(0f, f.facing + FanTurn, 0f), Vector3.one * scale);
-                int key = ((f.type * 3 + anim) * FanPoses + pose) * 2 + f.team;
+                int key = (((f.type * 2 + f.skin) * 3 + anim) * FanPoses + pose) * 2 + f.team;
                 if (!fanDraw.TryGetValue(key, out var list)) fanDraw[key] = list = new List<Matrix4x4>();
                 list.Add(m);
             }
             foreach (var kv in fanDraw)
             {
                 if (kv.Value.Count == 0) continue;
-                int key = kv.Key, team = key % 2, pose = (key / 2) % FanPoses, anim = (key / 2 / FanPoses) % 3, type = key / 2 / FanPoses / 3;
+                int key = kv.Key, team = key % 2, pose = (key / 2) % FanPoses, anim = (key / 2 / FanPoses) % 3, skin = (key / 2 / FanPoses / 3) % 2, type = key / 2 / FanPoses / 3 / 2;
                 var mesh = fanMeshes[type][anim][pose];
                 for (int k = 0; k < kv.Value.Count; k += 1023)
                 {
                     var part = k == 0 && kv.Value.Count <= 1023 ? kv.Value : kv.Value.GetRange(k, Mathf.Min(1023, kv.Value.Count - k));
-                    Graphics.DrawMeshInstanced(mesh, 0, fanBody[type], part, null, ShadowCastingMode.Off, true);
-                    if (mesh.subMeshCount > 1) Graphics.DrawMeshInstanced(mesh, 1, fanShirt[type, team], part, null, ShadowCastingMode.Off, true);
+                    Graphics.DrawMeshInstanced(mesh, 0, fanBody[type, skin], part, null, ShadowCastingMode.Off, true);
+                    if (mesh.subMeshCount > 1) Graphics.DrawMeshInstanced(mesh, 1, fanShirt[type, skin, team], part, null, ShadowCastingMode.Off, true);
                 }
             }
         }
