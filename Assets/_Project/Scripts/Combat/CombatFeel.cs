@@ -75,6 +75,24 @@ namespace SquashBot.Combat
             Apply(attacker, victim, data, intensity);
         }
 
+        /// <summary>
+        /// An ultimate starts: the screen dims a moment, the pictures slow (0.3, for 0.3 s; the game's clock never), the
+        /// caster's body and weapon glow.
+        /// </summary>
+        public static void UltiStart(Transform caster)
+        {
+            ScreenFlash.Dim(0.3f, 0.45f);
+            VisualTime.SlowAll(0.3f, 0.3f);
+            if (caster != null) StatusFx.On(RootOf(caster)).Shine(0.6f);
+        }
+
+        /// <summary>An ultimate's final blow: the longest freeze, the strongest knock, a white flash.</summary>
+        public static void UltiFinal(Transform caster, Transform struck)
+        {
+            ScreenFlash.White(0.06f);
+            if (struck != null) Hit(caster, struck, CombatLibrary.UltiFinal);
+        }
+
         /// <summary>A big moment: every fighter's pictures slow for a while (the game's clock does not).</summary>
         public static void BigMoment()
         {
@@ -197,6 +215,7 @@ namespace SquashBot.Combat
             if (!(s.lowQualityTrims && GraphicsQuality.Current == GraphicsTier.Low)) StatusFx.On(victimRoot).Flash(s.hitFlashMs / 1000f);
             if (data.strength >= HitStrength.Heavy && body != null && !(s.lowQualityTrims && GraphicsQuality.Current == GraphicsTier.Low))
                 ScrapBits.Spawn(body.ChestPoint, dir, data.strength == HitStrength.Heavy ? 2 : 3, Mathf.Max(0.3f, victimRoot.lossyScale.y), victim.position.y);
+            if (data.strength >= HitStrength.Heavy) Haptics.Pulse(data.strength >= HitStrength.Finisher ? 90 : 50, data.strength >= HitStrength.Finisher ? 1f : 0.6f);
             Contacted?.Invoke(attacker, victim, data);
         }
     }

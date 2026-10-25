@@ -24,6 +24,7 @@ namespace SquashBot.EditorTools
             }
             Save(CombatDefaults.Settings(), "CombatFeelSettings");
             Save(CombatDefaults.Reactions(), "HitReactions");
+            Save(CombatDefaults.UltiFinal(), "UltiFinal");
             foreach (WeaponFamily f in System.Enum.GetValues(typeof(WeaponFamily)))
             {
                 string path = Folder + "/Family_" + f + ".asset";

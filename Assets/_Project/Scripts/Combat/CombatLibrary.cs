@@ -24,6 +24,18 @@ namespace SquashBot.Combat
             }
         }
 
+        private static AttackMotionData ultiFinal;
+
+        /// <summary>An ultimate's final blow (Resources/Combat/UltiFinal, or the design's).</summary>
+        public static AttackMotionData UltiFinal
+        {
+            get
+            {
+                if (ultiFinal == null) ultiFinal = Resources.Load<AttackMotionData>(Folder + "UltiFinal") ?? CombatDefaults.UltiFinal();
+                return ultiFinal;
+            }
+        }
+
         public static HitReactionProfile Reactions
         {
             get

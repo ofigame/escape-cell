@@ -39,6 +39,8 @@ namespace SquashBot.Audio
         public static AudioManager Instance { get; private set; }
 
         private readonly Dictionary<Sfx, AudioClip> clips = new Dictionary<Sfx, AudioClip>();
+        /// <summary>A sound's variants (one picked each time it plays), where it has some.</summary>
+        private readonly Dictionary<Sfx, AudioClip[]> variants = new Dictionary<Sfx, AudioClip[]>();
         private readonly List<AudioSource> pool = new List<AudioSource>();
         private MusicDirector music;
         private int next;
@@ -77,6 +79,11 @@ namespace SquashBot.Audio
             clips[Sfx.HitAxe] = SoundSynth.HitAxe();
             clips[Sfx.HitHeavy] = SoundSynth.HitHeavy();
             clips[Sfx.Clang] = SoundSynth.Clang();
+            // three of each of the commonest duel sounds (picked at random, the pitch varying too): no blow sounds twice the same
+            variants[Sfx.SwishSword] = new[] { clips[Sfx.SwishSword], SoundSynth.SwishSword(1), SoundSynth.SwishSword(2) };
+            variants[Sfx.HitSword] = new[] { clips[Sfx.HitSword], SoundSynth.HitSword(1), SoundSynth.HitSword(2) };
+            variants[Sfx.HitAxe] = new[] { clips[Sfx.HitAxe], SoundSynth.HitAxe(1), SoundSynth.HitAxe(2) };
+            variants[Sfx.HitHeavy] = new[] { clips[Sfx.HitHeavy], SoundSynth.HitHeavy(1), SoundSynth.HitHeavy(2) };
 
             for (int i = 0; i < Voices; i++)
             {
@@ -95,6 +102,7 @@ namespace SquashBot.Audio
         public void Play(Sfx sfx, float volume = 1f, float pitch = 1f, float pitchJitter = 0f)
         {
             if (!SaveData.Sound || !clips.TryGetValue(sfx, out var clip)) return;
+            if (variants.TryGetValue(sfx, out var vs) && vs.Length > 0) clip = vs[Random.Range(0, vs.Length)]; // (one of its variants)
             var source = pool[next];
             next = (next + 1) % pool.Count;
             source.pitch = pitch + Random.Range(-pitchJitter, pitchJitter);

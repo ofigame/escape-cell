@@ -81,10 +81,13 @@ namespace SquashBot.Audio
         // ---------- The duel's weapons (each family its own swing and its own blow) ----------
 
         /// <summary>A sword's swing: a thin, bright hiss rising ("shiing"), a faint ring of the blade.</summary>
-        public static AudioClip SwishSword() => Build("swish_sword", 0.14f, (b) =>
+        public static AudioClip SwishSword() => SwishSword(0);
+
+        /// <summary>A variant (0, 1, 2): the same sound a little different (its noise, its pitch), so no two swings repeat.</summary>
+        public static AudioClip SwishSword(int v) => Build("swish_sword" + v, 0.14f, (b) =>
         {
-            Tone(b, 0f, 0.13f, 0f, 0f, Wave.Noise, 0.55f, 0.05f, lowpass: 0.35f, lowpassEnd: 0.85f);
-            Tone(b, 0.02f, 0.11f, 2800f, 3400f, Wave.Sine, 0.07f, 0.04f);
+            Tone(b, 0.0004f * v, 0.13f, 0f, 0f, Wave.Noise, 0.55f, 0.05f, lowpass: 0.35f + 0.04f * v, lowpassEnd: 0.85f);
+            Tone(b, 0.02f, 0.11f, 2800f * (1f + 0.05f * v), 3400f * (1f + 0.05f * v), Wave.Sine, 0.07f, 0.04f);
         });
 
         /// <summary>A spear's thrust: a short, middle "voosh".</summary>
@@ -107,12 +110,15 @@ namespace SquashBot.Audio
         });
 
         /// <summary>A sword's blow landing: a sharp metal "tink" (bright, out-of-tune partials) on a click.</summary>
-        public static AudioClip HitSword() => Build("hit_sword", 0.22f, (b) =>
+        public static AudioClip HitSword() => HitSword(0);
+
+        public static AudioClip HitSword(int v) => Build("hit_sword" + v, 0.22f, (b) =>
         {
-            Tone(b, 0f, 0.2f, 2450f, 2440f, Wave.Sine, 0.32f, 0.001f);
-            Tone(b, 0f, 0.16f, 3720f, 3700f, Wave.Sine, 0.22f, 0.001f);
-            Tone(b, 0f, 0.1f, 5150f, 5100f, Wave.Sine, 0.12f, 0.001f);
-            Tone(b, 0f, 0.02f, 0f, 0f, Wave.Noise, 0.3f, 0.0005f, lowpass: 0.9f);
+            float k = 1f + 0.045f * v;
+            Tone(b, 0f, 0.2f, 2450f * k, 2440f * k, Wave.Sine, 0.32f, 0.001f);
+            Tone(b, 0f, 0.16f, 3720f * k, 3700f * k, Wave.Sine, 0.22f, 0.001f);
+            Tone(b, 0f, 0.1f, 5150f * k, 5100f * k, Wave.Sine, 0.12f, 0.001f);
+            Tone(b, 0.0004f * v, 0.02f, 0f, 0f, Wave.Noise, 0.3f, 0.0005f, lowpass: 0.9f);
         });
 
         /// <summary>A spear's blow landing: a piercing "tshak", a short ring.</summary>
@@ -124,17 +130,21 @@ namespace SquashBot.Audio
         });
 
         /// <summary>An axe's blow landing: a solid "tak" (wood and metal), a low thud.</summary>
-        public static AudioClip HitAxe() => Build("hit_axe", 0.26f, (b) =>
+        public static AudioClip HitAxe() => HitAxe(0);
+
+        public static AudioClip HitAxe(int v) => Build("hit_axe" + v, 0.26f, (b) =>
         {
-            Tone(b, 0f, 0.2f, 190f, 115f, Wave.Sine, 0.75f, 0.001f);
+            Tone(b, 0f, 0.2f, 190f * (1f + 0.06f * v), 115f, Wave.Sine, 0.75f, 0.001f);
             Tone(b, 0f, 0.06f, 0f, 0f, Wave.Noise, 0.45f, 0.0008f, lowpass: 0.15f);
             Tone(b, 0f, 0.1f, 900f, 860f, Wave.Sine, 0.12f, 0.001f);
         });
 
         /// <summary>A heavy weapon's blow landing: a deep "GOOM", the floor shaking with it.</summary>
-        public static AudioClip HitHeavy() => Build("hit_heavy", 0.46f, (b) =>
+        public static AudioClip HitHeavy() => HitHeavy(0);
+
+        public static AudioClip HitHeavy(int v) => Build("hit_heavy" + v, 0.46f, (b) =>
         {
-            Tone(b, 0f, 0.42f, 95f, 38f, Wave.Sine, 1f, 0.001f);
+            Tone(b, 0f, 0.42f, 95f * (1f + 0.06f * v), 38f, Wave.Sine, 1f, 0.001f);
             Tone(b, 0f, 0.15f, 0f, 0f, Wave.Noise, 0.6f, 0.001f, lowpass: 0.06f);
             Tone(b, 0f, 0.3f, 60f, 34f, Wave.Triangle, 0.4f, 0.002f);
         });

@@ -244,7 +244,6 @@ namespace SquashBot.Gameplay
             if (!string.IsNullOrEmpty(Application.absoluteURL)) OnDeepLink(Application.absoluteURL);
             FifiUpgrades.RefundOnce(); // Fifi has left the game: its levels' coins back, once
             SplashScreen.Show(); // OFIGAME studio logo over the menu, fading out
-            cameraRig.StartCoroutine(UiShots()); // TEMP-TEST
             StartFortressViewIfAsked(); // -arena: the sample fortress battlefield to look around
             // Developer tool: -sbExport <folder> writes every model as PNG + OBJ (see AssetExporter), then quits.
             var exportFolder = AssetExporter.RequestedFolder();
@@ -1504,6 +1503,7 @@ namespace SquashBot.Gameplay
             if (powerSlowLeft > 0f) { powerSlowLeft -= Time.unscaledDeltaTime; if (State == GameState.Playing) Time.timeScale = Mathf.Min(Time.timeScale, powerSlowScale); } // a floor power's slow motion
             UpdatePowers(Time.deltaTime);
             if (challengeRun && State == GameState.Playing) Time.timeScale = 1f; // (no slow motion in the duels: big moments play at full speed)
+            HeldWeapon.DuelStance = challengeRun && chPhase == ChPhase.Duel; // (the weapons' duel stances)
             if (pendingHp != null && !DuelCinematic) { var hp = pendingHp; pendingHp = null; ApplyLiveHp(hp); } // the live duel's health, held back through it
 
             if (State != GameState.Playing) { if (tpsOn && !arenaRun && State != GameState.Paused) ExitTps(); if (State != GameState.Paused) ui.SetFire(false, false); return; }

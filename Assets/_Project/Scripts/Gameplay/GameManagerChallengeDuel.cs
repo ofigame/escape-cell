@@ -281,6 +281,7 @@ namespace SquashBot.Gameplay
         private void KnockoutShown(bool iWon)
         {
             Combat.VisualTime.SlowAll(0.3f, 0.4f);
+            Haptics.Pulse(120, 1f);
             var down = iWon ? hunt.ChallengeFoeModel : robot.Visual;
             var skin = down != null ? down.GetComponentInChildren<SkinnedHero>() : null;
             if (skin == null) return;

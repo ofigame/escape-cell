@@ -4,6 +4,7 @@ using SquashBot.Data;
 using SquashBot.Combat;
 using UnityEngine;
 using WeaponFamily = SquashBot.Combat.WeaponFamily;
+using Random = UnityEngine.Random;
 
 namespace SquashBot.Visual
 {
@@ -381,7 +382,10 @@ namespace SquashBot.Visual
             if (trail == null) return;
             if (on)
             {
-                trail.widthMultiplier = trailWidth * Mathf.Max(0.2f, transform.lossyScale.y);
+                // deeper into a combo, a thicker trail; the low quality setting a shorter one
+                float combo = 1f + 0.15f * Mathf.Clamp(Combo - 2, 0, 4);
+                trail.widthMultiplier = trailWidth * combo * Mathf.Max(0.2f, transform.lossyScale.y);
+                trail.time = trailTime * (GraphicsQuality.Current == GraphicsTier.Low ? 0.6f : 1f);
                 trail.Clear();
             }
             trail.emitting = on;
@@ -559,6 +563,33 @@ namespace SquashBot.Visual
         public void Spin(int turns) { spin = 0f; spinTurns = Mathf.Max(1, turns); }
 
         private int spinTurns = 1;
+
+        /// <summary>The duel's stance (set by the game while a duel is on): the family's own rest, a twirl now and then.</summary>
+        public static bool DuelStance;
+        /// <summary>The blows in a row now (the duel's combo): from three the trail grows thicker, from four the weapon sparkles.</summary>
+        public int Combo { get; set; }
+        private float idleSince, twirlAt = -1f;
+
+        /// <summary>The family's rest in a duel: a sword held up and ready (bouncing a little), a spear levelled across,
+        /// an axe on the shoulder, a heavy weapon's head resting on the floor.</summary>
+        private bool DuelRest()
+        {
+            if (!DuelStance || isGun) return false;
+            if (twirlAt < 0f) twirlAt = Time.time + Random.Range(5f, 8f);
+            if (Time.time >= twirlAt && Time.time - idleSince > 1.5f) { twirlAt = Time.time + Random.Range(5f, 8f); spin = 0f; spinTurns = 1; return false; } // (a twirl now and then)
+            float bob = Mathf.Sin(Time.time * 6f) * 0.02f;
+            Vector3 p; Quaternion r;
+            switch (family)
+            {
+                case WeaponFamily.Sword: p = restPosition + new Vector3(-0.04f, 0.1f + bob, 0.1f); r = Quaternion.Euler(-15f, 0f, -18f); break;
+                case WeaponFamily.Spear: p = restPosition + new Vector3(-0.08f, 0.08f, 0.12f); r = Quaternion.Euler(70f, -20f, 0f); break;
+                case WeaponFamily.Axe: p = new Vector3(0.22f, 0.58f, -0.1f); r = Quaternion.Euler(-60f, 0f, -20f); break;
+                default: p = restPosition + new Vector3(0.06f, -0.12f, 0.12f); r = Quaternion.Euler(155f, 0f, -10f); break;
+            }
+            transform.localPosition = Vector3.Lerp(transform.localPosition, p, Mathf.Min(1f, Time.deltaTime * 10f));
+            transform.localRotation = Quaternion.Slerp(transform.localRotation, r, Mathf.Min(1f, Time.deltaTime * 10f));
+            return true;
+        }
         private float flourish = -1f;
 
         /// <summary>
@@ -696,7 +727,13 @@ namespace SquashBot.Visual
                 return;
             }
             if (Flourishing(dt)) return;
-            if (swing >= 1f) { Pose(Mathf.Sin(Time.time * 2f) * 3f); return; }
+            if (swing >= 1f)
+            {
+                if (DuelRest()) return;
+                Pose(Mathf.Sin(Time.time * 2f) * 3f);
+                return;
+            }
+            idleSince = Time.time;
             if (isGun)
             {
                 // A shot: the gun kicks up and back, and settles.

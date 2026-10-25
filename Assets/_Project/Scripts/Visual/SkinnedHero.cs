@@ -847,6 +847,9 @@ namespace SquashBot.Visual
 
         private float crouchUntil, crouchAmount, crouchFor = 0.15f;
 
+        /// <summary>Low on health (the game sets it in a duel): the body hunched, the shoulders heaving with its breath.</summary>
+        public bool Weary { get; set; }
+
         /// <summary>The body crouches (0..1: the knees giving, the hips down) for <paramref name="seconds"/>, easing back up.</summary>
         public void Crouch(float amount, float seconds)
         {
@@ -900,6 +903,22 @@ namespace SquashBot.Visual
                     float height = head != null ? Mathf.Max(0.3f, head.position.y - transform.position.y) : 1f;
                     hips.position += up * spring[HitSpring.Hips] * height;
                 }
+            }
+            // in a duel: the weary hunch (low health), a sword fighter's light bounce on its toes
+            if (playing == null && knock == null && speed < 0.4f)
+            {
+                var fr = transform.parent != null ? transform.parent : transform;
+                float hgt = head != null ? Mathf.Max(0.3f, head.position.y - transform.position.y) : 1f;
+                if (Weary)
+                {
+                    float breath = Mathf.Sin(time * 3.2f);
+                    var hunch = Quaternion.AngleAxis(9f + 2f * breath, fr.right);
+                    if (chest != null) chest.rotation = hunch * chest.rotation;
+                    if (armL != null) armL.rotation = Quaternion.AngleAxis(3f * breath, fr.forward) * armL.rotation;
+                    if (armR != null) armR.rotation = Quaternion.AngleAxis(-3f * breath, fr.forward) * armR.rotation;
+                }
+                if (HeldWeapon.DuelStance && hips != null && heldCache != null && heldCache.Family == Combat.WeaponFamily.Sword && heldCache.Current == null)
+                    hips.position += fr.up * hgt * 0.012f * Mathf.Abs(Mathf.Sin(time * 5f));
             }
             // a crouch: down quickly, easing back up
             if (Time.time < crouchUntil && hips != null && playing == null)

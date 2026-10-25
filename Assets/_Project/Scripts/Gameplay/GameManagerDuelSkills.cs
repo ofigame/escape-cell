@@ -172,6 +172,7 @@ namespace SquashBot.Gameplay
             // how hurt each looks: smoke under half health, electric arcs under a quarter
             if (robot.Visual != null) StatusFx.On(CombatFeel.RootOf(robot.Visual)).SetDamage(health < 0.25f ? 2 : health < 0.5f ? 1 : 0);
             if (hunt.ChallengeFoeModel != null) { float fh = hunt.ChallengeFoeHealth; StatusFx.On(CombatFeel.RootOf(hunt.ChallengeFoeModel)).SetDamage(fh < 0.25f ? 2 : fh < 0.5f ? 1 : 0); }
+            DuelBodiesShown();
             if (hunt.ChallengeFoeAt is Vector3 seen) lastFoeAt = seen;
             if (myRing != null) myRing.Follow(robot.IsAlive && robot.Visual != null && robot.Visual.gameObject.activeInHierarchy ? robot.transform.position : (Vector3?)null);
             if (foeRing != null) foeRing.Follow(hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.position : (Vector3?)null);
@@ -626,6 +627,34 @@ namespace SquashBot.Gameplay
             Shockwave.Create(at, 1.6f, new Color(0.85f, 0.75f, 0.6f));
         }
 
+        private float myGlowAt, rivalGlowAt;
+
+        /// <summary>
+        /// Each frame: the bodies tell their state. Low on health, hunched and heaving; deeper into a combo, the trail
+        /// thicker and (from four) the weapon sparkling (the POWER HIT coming); the bar's parts full, the weapon glinting;
+        /// the ultimate ready, a ring of energy round the feet now and then.
+        /// </summary>
+        private void DuelBodiesShown()
+        {
+            ShowState(robot.Visual, health, myCombo, myMeter, ref myGlowAt);
+            if (hunt.ChallengeFoeModel != null) ShowState(hunt.ChallengeFoeModel, hunt.ChallengeFoeHealth, rivalCombo, rivalMeter, ref rivalGlowAt);
+        }
+
+        private void ShowState(Transform who, float hp, int combo, float meter, ref float glowAt)
+        {
+            if (who == null) return;
+            var skin = who.GetComponentInChildren<SkinnedHero>();
+            if (skin != null) skin.Weary = hp < 0.3f;
+            var held = who.GetComponentInChildren<HeldWeapon>();
+            if (held != null) held.Combo = combo;
+            if (Time.time < glowAt) return;
+            glowAt = Time.time + 0.4f;
+            var tip = held != null && held.Tip != null ? held.Tip.position : who.position + Vector3.up;
+            if (meter >= UltiCost) { glowAt = Time.time + 0.7f; Shockwave.Create(who.position, 1.1f, new Color(0.75f, 0.45f, 1f)); fx.Burst(tip, new Color(0.8f, 0.55f, 1f), new Color(2f, 1.3f, 3f), 6, 1.5f); }
+            else if (combo >= 4) fx.Burst(tip, new Color(1f, 0.75f, 0.3f), new Color(3f, 2f, 0.6f), 6, 1.6f);
+            else if (meter >= 1f) fx.Burst(tip, new Color(1f, 0.92f, 0.6f), new Color(2.4f, 2.2f, 1.2f), 3, 1f);
+        }
+
         /// <summary>A combo broken (<paramref name="onMe"/>: the rival broke foi's): the one breaking comes forward with its
         /// shoulder, the one broken is thrown back reeling, its weapon knocked aside.</summary>
         private void BreakerShown(bool onMe)
@@ -726,6 +755,7 @@ namespace SquashBot.Gameplay
             float combo = casterSkin != null ? Mathf.Max(SkinnedHero.MoveLength("cast") / ComboRate, 2.2f) : 0f;
             if (casterSkin != null) casterSkin.PlayMove("cast", ComboRate, true, loop: true); // round and round until the ultimate ends
             if (mine && LiveActive) LiveNet.Special(4);
+            CombatFeel.UltiStart(caster);
             for (int i = 0; i < 5; i++)
             {
                 if (casterSkin == null) yield return new WaitForSecondsRealtime(i == 4 ? 0.35f : 0.2f);
@@ -756,7 +786,7 @@ namespace SquashBot.Gameplay
                     if (mine) HitFoe(part); else HurtMe(part);
                 }
                 if (i < 4) DriveBack(mine); // (struck, it is driven back; the one striking follows it up)
-                if (i == 4) yield return BigMoment(!mine);
+                if (i == 4) { CombatFeel.UltiFinal(caster, mine ? hunt.ChallengeFoeModel : robot.Visual); yield return BigMoment(!mine); } // (the final: the longest freeze, a white flash)
             }
             if (casterSkin != null) casterSkin.StopMove();
             ultimateOn = false;

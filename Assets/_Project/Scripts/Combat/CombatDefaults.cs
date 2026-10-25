@@ -15,6 +15,15 @@ namespace SquashBot.Combat
         public static CombatFeelSettings Settings() => ScriptableObject.CreateInstance<CombatFeelSettings>();
         public static HitReactionProfile Reactions() => ScriptableObject.CreateInstance<HitReactionProfile>();
 
+        /// <summary>An ultimate's final blow: the longest freeze (200 ms), the strongest knock of the camera.</summary>
+        public static AttackMotionData UltiFinal()
+        {
+            var a = Blow(WeaponFamily.Heavy, 10, 2, 2, 10, HitDirection.Overhead, HitHeight.Mid);
+            a.name = "UltiFinal";
+            a.strength = HitStrength.Finisher; a.hitstopMs = 200f; a.cameraImpulse = CameraImpulseLevel.Max; a.visualKnockback = 0.4f;
+            return a;
+        }
+
         /// <summary>A family's four-blow chain, POWER HIT and KNOCKDOWN as the design gives them.</summary>
         public static WeaponFamilyMotionProfile Family(WeaponFamily f)
         {
