@@ -18,6 +18,11 @@ Shader "SquashBot/FoiSkin"
         _Gloss ("Sheen tightness", Float) = 18
         _RimColor ("Rim", Color) = (1, 0.94, 0.86, 0.35)
         _Hair ("Hair (0 skin, 1 hair)", Float) = 0
+        _FaceMap ("Face map (where in the face rectangle; the painted mouth; inside)", 2D) = "black" {}
+        _FaceTex ("Face drawing (the expression in the face rectangle)", 2D) = "black" {}
+        _FaceOn ("Face drawing on", Float) = 0
+        _SkinTone ("Skin under the painted mouth", Color) = (0.78, 0.64, 0.56, 1)
+        _FaceTint ("Face tint (a: how much)", Color) = (0.6, 0.8, 1, 0)
     }
     SubShader
     {
@@ -32,6 +37,8 @@ Shader "SquashBot/FoiSkin"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
             TEXTURE2D(_BumpMap); SAMPLER(sampler_BumpMap);
+            TEXTURE2D(_FaceMap); SAMPLER(sampler_FaceMap);
+            TEXTURE2D(_FaceTex); SAMPLER(sampler_FaceTex);
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseMap_ST;
                 half4 _BaseColor;
@@ -44,6 +51,9 @@ Shader "SquashBot/FoiSkin"
                 half _Gloss;
                 half4 _RimColor;
                 half _Hair;
+                half _FaceOn;
+                half4 _SkinTone;
+                half4 _FaceTint;
             CBUFFER_END
             struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float4 tangentOS : TANGENT; float2 uv : TEXCOORD0; };
             struct Varyings
@@ -71,6 +81,19 @@ Shader "SquashBot/FoiSkin"
             half4 frag(Varyings i) : SV_Target
             {
                 half4 albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, i.uv) * _BaseColor;
+                // the face's expression: the painted mouth hidden under the skin, the drawn mouth and eyes over it (in the face
+                // rectangle, wherever this texel lies in it), then the face's tint (blue when frozen)
+                if (_FaceOn > 0.5h)
+                {
+                    half4 fm = SAMPLE_TEXTURE2D(_FaceMap, sampler_FaceMap, i.uv);
+                    if (fm.a > 0.004h)
+                    {
+                        albedo.rgb = lerp(albedo.rgb, _SkinTone.rgb, fm.b * fm.a);
+                        half4 fd = SAMPLE_TEXTURE2D(_FaceTex, sampler_FaceTex, fm.rg);
+                        albedo.rgb = lerp(albedo.rgb, fd.rgb, fd.a * fm.a);
+                    }
+                }
+                albedo.rgb = lerp(albedo.rgb, albedo.rgb * _FaceTint.rgb * 1.25h, _FaceTint.a * (1.0h - _Hair));
                 half3 nt = UnpackNormalScale(SAMPLE_TEXTURE2D(_BumpMap, sampler_BumpMap, i.uv), _BumpScale);
                 half3 N = normalize(TransformTangentToWorld(nt, half3x3(i.tangentWS, i.bitangentWS, i.normalWS)));
                 half3 V = normalize(i.viewWS);

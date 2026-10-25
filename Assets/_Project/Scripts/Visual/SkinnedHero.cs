@@ -616,6 +616,9 @@ namespace SquashBot.Visual
             if (me != null)
             {
                 me.lidMaterial = LidPaint(SkinOf(n, look.skin));
+                me.SkinColor = SkinOf(n, look.skin);
+                me.HeadFileName = HeadFile(n);
+                me.faceRenderer = null; me.hairPart = null;
                 me.PutHead(n);
                 PaintHead(me.head, n, look.hair, look.skin, look.eyes, me.lidMaterial);
             }
@@ -816,6 +819,35 @@ namespace SquashBot.Visual
         /// <summary>The last reaction played (direction / height / strength / variant), for the duel lab's readings.</summary>
         public string LastReaction { get; private set; } = "";
         private float squintUntil, squintAmount, shutUntil;
+        /// <summary>The face's own lids (0 open .. 1 shut), one lid shut (a wink), the brows (-1 down .. 1 up), the hair on end:
+        /// set by the face's expression.</summary>
+        public float FaceLid { get; set; }
+        public bool FaceWink { get; set; }
+        public float FaceBrows { get; set; }
+        public bool HairUp { get; set; }
+        /// <summary>The head worn (its file) and its skin's colour.</summary>
+        public string HeadFileName { get; private set; } = "head_m";
+        public Color SkinColor { get; private set; } = new Color(0.78f, 0.64f, 0.56f);
+        private Renderer faceRenderer;
+        private Transform hairPart;
+        private Vector3 hairRest;
+
+        /// <summary>The head's own skin (its face: not the hair, the brows or the lids).</summary>
+        public Renderer FaceRenderer
+        {
+            get
+            {
+                if (faceRenderer != null || head == null) return faceRenderer;
+                foreach (var r in head.GetComponentsInChildren<Renderer>(true))
+                {
+                    string nm = r.name.ToLowerInvariant();
+                    if (r.name == "Cover" || nm.Contains("hair") || nm.Contains("brows")) continue;
+                    faceRenderer = r;
+                    break;
+                }
+                return faceRenderer;
+            }
+        }
         private float squashT = 1f, squashAmp;
         private Vector3 skinScale;
         private bool skinScaleKnown;
@@ -950,7 +982,14 @@ namespace SquashBot.Visual
             if (brows != null)
             {
                 float k = Time.time < browsDownUntil ? browsDown : 0f;
-                brows.localPosition = Vector3.Lerp(brows.localPosition, browsRest + Vector3.down * 0.035f * k, Mathf.Min(1f, dt * 25f));
+                brows.localPosition = Vector3.Lerp(brows.localPosition, browsRest + Vector3.down * 0.035f * k + Vector3.up * 0.032f * FaceBrows, Mathf.Min(1f, dt * 25f)); // (the face's brows: up worried or surprised, down angry)
+            }
+            // the hair standing on end (a shock)
+            if (hairPart == null && head != null) foreach (var r in head.GetComponentsInChildren<Renderer>(true)) if (r.name.ToLowerInvariant().Contains("hair")) { hairPart = r.transform; hairRest = hairPart.localScale; break; }
+            if (hairPart != null)
+            {
+                var want = HairUp ? new Vector3(hairRest.x * 1.04f, hairRest.y * (1.16f + 0.03f * Mathf.Sin(Time.time * 60f)), hairRest.z * 1.04f) : hairRest;
+                hairPart.localScale = Vector3.Lerp(hairPart.localScale, want, Mathf.Min(1f, dt * 30f));
             }
         }
 
@@ -1567,14 +1606,16 @@ namespace SquashBot.Visual
             if (blinkTimer < -0.16f) blinkTimer = Random.Range(2f, 4.5f);
             float shut = blinkTimer < 0f ? Mathf.Sin(-blinkTimer / 0.16f * Mathf.PI) : 0f;
             float narrow = angerLeft > 0f ? 0.45f : punchLeft > 0f ? 0.3f : 0f;
-            shut = Mathf.Max(shut, Mathf.Max(narrow, ExpressionLids()));
+            shut = Mathf.Max(shut, Mathf.Max(narrow, Mathf.Max(ExpressionLids(), FaceLid)));
             if (lids.Count == 0 && head != null)
                 foreach (Transform t in head) if (t.name == "Lid") lids.Add(t); // (a copy finds its own)
-            foreach (var lid in lids)
+            for (int li = 0; li < lids.Count; li++)
             {
+                var lid = lids[li];
                 if (lid == null) continue;
-                lid.localScale = new Vector3(1f, Mathf.Max(0.001f, shut), 1f);
-                if (lid.childCount > 0) lid.GetChild(0).gameObject.SetActive(shut > 0.03f);
+                float s = FaceWink && li == 0 ? 1f : shut; // (a wink: the one lid shut)
+                lid.localScale = new Vector3(1f, Mathf.Max(0.001f, s), 1f);
+                if (lid.childCount > 0) lid.GetChild(0).gameObject.SetActive(s > 0.03f);
             }
         }
 

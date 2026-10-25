@@ -635,7 +635,16 @@ namespace SquashBot.Gameplay
                     return true;
                 }
                 RaiseAlarm(g);
-                if (g == challengeFoe && FoeParries()) { Parry(g, p); return true; }
+                // the rival foi's defence (the duel's block, perfect guard and dodge): the game decides it
+                bool guarded = false;
+                if (g == challengeFoe && FoeGuard != null)
+                {
+                    var met = FoeGuard(damage);
+                    if (met == Combat.DefenseOutcome.Perfect) { Parry(g, p); return true; }
+                    if (met == Combat.DefenseOutcome.Dodged) return true;
+                    if (met == Combat.DefenseOutcome.Blocked || met == Combat.DefenseOutcome.Broke) { guarded = true; damage = Mathf.Max(1, Mathf.RoundToInt(damage * FoeGuardThrough)); }
+                }
+                else if (g == challengeFoe && FoeParries()) { Parry(g, p); return true; }
                 if (g.shield > 0) { HitShield(g, p); return true; }
                 if (g == challengeFoe && Time.time < FoeInvulnUntil) { HitShield(g, p); return true; } // (its backflip or iron body)
                 if (g == challengeFoe && Time.time < FoeMirrorUntil) { FoeMirrored?.Invoke(damage); HitShield(g, p); return true; } // (its mirror: back at foi)
@@ -644,7 +653,8 @@ namespace SquashBot.Gameplay
                 g.flash = 1f;
                 g.Flash();
                 if (g != challengeFoe) { g.windup = -1f; ClearTelegraph(g); } // (the rival foi trades blows: its own swing goes on)
-                if (g == challengeFoe) { FoiRanOn(); ChallengeFoeStruck?.Invoke(); }
+                if (g == challengeFoe && guarded) ChallengeFoeBlocked?.Invoke(); // (blocked: no combo, no bar for it)
+                else if (g == challengeFoe) { FoiRanOn(); ChallengeFoeStruck?.Invoke(); }
                 fx.Burst(At(p) + Vector3.up * 0.4f, Palette.UiGold, Palette.CoinGlow, 34, 6f);
                 Shockwave.Create(At(p), 1.4f, new Color(1f, 0.85f, 0.45f));
                 AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.85f);
@@ -658,7 +668,7 @@ namespace SquashBot.Gameplay
                     else KillGuard(g);
                 }
                 else if (g != challengeFoe) KnockBack(g);
-                else FoeHurt(g); // the rival foi stands its ground and hits back
+                else if (!guarded) FoeHurt(g); // the rival foi stands its ground and hits back
                 return true;
             }
             if (StrikeDrone(p)) return true;
@@ -1158,6 +1168,15 @@ namespace SquashBot.Gameplay
         private void UpdateGuard(Guard g, float dt)
         {
             if (g == challengeFoe && FoeRemote) { UpdateHealthBar(g); UpdateRemoteFoe(g, dt); return; }
+            if (g == challengeFoe && FoeHolding && g.windup < 0f)
+            {
+                // blocking: it stands its ground behind its shield, turned to foi, and starts no blow
+                var toFoiG = GridView.ToWorld(robot.Position) - g.root.position; toFoiG.y = 0f;
+                if (toFoiG.sqrMagnitude > 0.01f) g.root.rotation = Quaternion.Slerp(g.root.rotation, Quaternion.LookRotation(toFoiG), Time.deltaTime * 6f);
+                if (g.moveT < 1f) { g.moveT = Mathf.Min(1f, g.moveT + dt / g.moveDur); g.root.position = Vector3.Lerp(g.from, g.to, g.moveT); }
+                UpdateHealthBar(g);
+                return;
+            }
             if (g == challengeFoe && Time.time < foeStunUntil)
             {
                 // stunned: it stands reeling, still turned to foi (never its back to it)
@@ -1168,7 +1187,7 @@ namespace SquashBot.Gameplay
             }
             if (g.squad) { UpdateSquad(g, dt); return; }
             UpdateHealthBar(g);
-            if (g.windup < 0f) IdleCharge(g); // a blow cut short (struck, frozen, pushed): its charge and aim go
+            if (g.windup < 0f) { IdleCharge(g); if (g == challengeFoe) FoeWindLeft = -1f; } // a blow cut short (struck, frozen, pushed): its charge and aim go
             if (Iced(g)) return;
             UpdateShield(g, dt);
             if (g.flash > 0f) g.flash -= dt * 3f;
@@ -1190,6 +1209,7 @@ namespace SquashBot.Gameplay
                 g.windup += dt;
                 float windTotal = (g.brute ? BruteWindTime : WindTime) * FoeWindScale(g);
                 float k = g.windup / windTotal;
+                if (g == challengeFoe) FoeWindLeft = Mathf.Max(0f, windTotal - g.windup); // (the training's perfect guard cue)
                 // the weapon's swing starts early enough for its contact to meet the blow (the blow's moment is the rules')
                 if (g.windup <= dt + 1e-4f) g.preSwung = false;
                 if (g.held != null && !g.preSwung && windTotal - g.windup <= g.held.LeadSeconds) { g.held.SwingToContact(windTotal - g.windup); g.preSwung = true; }
@@ -1200,6 +1220,7 @@ namespace SquashBot.Gameplay
                 if (k >= 1f)
                 {
                     if (g == challengeFoe && toRobot.sqrMagnitude > 0.01f) g.root.rotation = Quaternion.LookRotation(toRobot); // (never a blow with its back turned)
+                    if (g == challengeFoe) FoeWindLeft = -1f;
                     g.windup = -1f;
                     g.cooldown = ChallengeBattle
                         ? (g.brute ? 1.3f : g.soldier != null ? 0.6f + (float)rng.NextDouble() * 0.3f : 0.55f)

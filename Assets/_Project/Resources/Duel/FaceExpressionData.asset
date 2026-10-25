@@ -1,0 +1,244 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f4c111f3f7a2754e8dc1bf89e9a174a, type: 3}
+  m_Name: FaceExpressionData
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Visual.FaceExpressionData
+  blend: 0.09
+  faces:
+  - moment: 0
+    priority: 0
+    seconds: 99
+    mouth: 0
+    eyes: 0
+    lids: 0
+    wink: 0
+    brows: -0.35
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 1
+    priority: 3
+    seconds: 0.12
+    mouth: 0
+    eyes: 0
+    lids: 0.7
+    wink: 0
+    brows: -0.5
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 2
+    priority: 5
+    seconds: 0.45
+    mouth: 6
+    eyes: 0
+    lids: 1
+    wink: 0
+    brows: -1
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 3
+    priority: 7
+    seconds: 0.9
+    mouth: 4
+    eyes: 3
+    lids: 0
+    wink: 0
+    brows: 1
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 4
+    priority: 6
+    seconds: 0.8
+    mouth: 6
+    eyes: 2
+    lids: 0
+    wink: 0
+    brows: 0.6
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 1
+  - moment: 5
+    priority: 6
+    seconds: 1.2
+    mouth: 10
+    eyes: 0
+    lids: 0.5
+    wink: 0
+    brows: 0.5
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0.45
+    sweat: 0
+    hairUp: 0
+  - moment: 6
+    priority: 1
+    seconds: 99
+    mouth: 8
+    eyes: 0
+    lids: 0
+    wink: 0
+    brows: 0.8
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 1
+    hairUp: 0
+  - moment: 7
+    priority: 4
+    seconds: 1
+    mouth: 3
+    eyes: 0
+    lids: 0.5
+    wink: 0
+    brows: -0.4
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 8
+    priority: 6
+    seconds: 1.2
+    mouth: 6
+    eyes: 0
+    lids: 0.5
+    wink: 0
+    brows: -1
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 9
+    priority: 9
+    seconds: 3
+    mouth: 7
+    eyes: 1
+    lids: 0
+    wink: 0
+    brows: 0
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 10
+    priority: 8
+    seconds: 4
+    mouth: 1
+    eyes: 0
+    lids: 0
+    wink: 0
+    brows: 0.8
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 11
+    priority: 8
+    seconds: 4
+    mouth: 5
+    eyes: 0
+    lids: 0
+    wink: 0
+    brows: 0.6
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 12
+    priority: 8
+    seconds: 4
+    mouth: 8
+    eyes: 0
+    lids: 0
+    wink: 0
+    brows: 0.45
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 13
+    priority: 2
+    seconds: 1.2
+    mouth: 7
+    eyes: 0
+    lids: 0
+    wink: 0
+    brows: 0.2
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 14
+    priority: 2
+    seconds: 1.2
+    mouth: 2
+    eyes: 0
+    lids: 0
+    wink: 0
+    brows: 1
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 15
+    priority: 2
+    seconds: 1.2
+    mouth: 3
+    eyes: 0
+    lids: 0
+    wink: 1
+    brows: -0.2
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 16
+    priority: 2
+    seconds: 1.2
+    mouth: 3
+    eyes: 0
+    lids: 0.5
+    wink: 0
+    brows: -0.6
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 17
+    priority: 2
+    seconds: 1.2
+    mouth: 9
+    eyes: 4
+    lids: 0.5
+    wink: 0
+    brows: 0.9
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0
+  - moment: 18
+    priority: 2
+    seconds: 1.2
+    mouth: 4
+    eyes: 3
+    lids: 0
+    wink: 0
+    brows: 1
+    tint: {r: 0.6, g: 0.8, b: 1, a: 1}
+    tintAmount: 0
+    sweat: 0
+    hairUp: 0

@@ -25,6 +25,9 @@ namespace SquashBot.Data
         public int breakerFrom;
         /// <summary>Its health against the usual (the first duels' bots are a little softer).</summary>
         public float hpScale = 1f;
+        /// <summary>The defence (the design's §3.8): the chance to block a plain blow, to guard one perfectly, to dodge an
+        /// ultimate, and how well it lets the shield go before it breaks (0..1).</summary>
+        public float block, perfect, ultiDodge, release;
 
         public float React() => Random.Range(reactMin, reactMax);
 
@@ -60,6 +63,16 @@ namespace SquashBot.Data
             t.reactMax = Mathf.Max(0.16f, t.reactMax - 0.06f * shift);
             t.whiff = Mathf.Clamp(t.whiff - 0.03f * shift, 0f, 0.3f);
             if (firstFive) { t.hpScale = 0.85f; t.reactMin += 0.15f; t.reactMax += 0.15f; } // the first five: the player should just win
+            // the defence by rank, its personality (the defensive one more, the aggressive one less, the runner dodges more)
+            // and the difficulty step
+            var d = Combat.DefenseSettings.Current;
+            float lean = p == Persona.Defensive ? d.defensiveTimes : p == Persona.Aggressive ? d.aggressiveTimes : 1f;
+            float step = 1f + d.difficultyStep * shift;
+            t.block = Mathf.Clamp01(d.botBlock[band] * lean * step);
+            t.perfect = Mathf.Clamp01(d.botPerfect[band] * lean * step);
+            t.ultiDodge = Mathf.Clamp01(d.botUltiDodge[band] * (p == Persona.Runner ? d.runnerDodgeTimes : 1f) * step);
+            t.release = Mathf.Clamp01(d.botRelease[band] * step);
+            if (firstFive) { t.block *= 0.6f; t.perfect *= 0.5f; t.ultiDodge *= 0.6f; }
             return t;
         }
     }

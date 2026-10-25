@@ -17,7 +17,7 @@ namespace SquashBot.Data
     public static class LiveNet
     {
         /// <summary>The live protocol this game speaks (the server turns older ones away).</summary>
-        private const int Protocol = 6; // 6: the league ceiling, carried shields (5: harder bars and combos; 4: the duel moves)
+        private const int Protocol = 7; // 7: the defence (block, perfect guard, dodge) (6: the league ceiling; 5: harder bars and combos; 4: the duel moves)
         private static string Url => (FoiNet.DevServer != null ? FoiNet.DevServer.Replace("https://", "wss://").Replace("http://", "ws://") + "/v1/live" : "wss://apifoi.ofigame.com/v1/live") + "?v=" + Protocol;
 
         /// <summary>A message from the server (only the fields its kind uses are set; <see cref="raw"/> is the text itself).</summary>
@@ -110,7 +110,8 @@ namespace SquashBot.Data
         {
             if (Open && Time.realtimeSinceStartup > pingAt)
             {
-                pingAt = Time.realtimeSinceStartup + 20f;
+                pingAt = Time.realtimeSinceStartup + 5f; // (often enough to know the lag)
+                pingSentAt = Time.realtimeSinceStartup;
                 Send("{\"t\":\"ping\"}");
             }
             while (inbox.TryDequeue(out var json))
@@ -118,6 +119,7 @@ namespace SquashBot.Data
                 Msg m;
                 try { m = JsonUtility.FromJson<Msg>(json); }
                 catch (Exception) { continue; }
+                if (m != null && m.t == "pong" && pingSentAt > 0f) { RttMs = Mathf.Lerp(RttMs, (Time.realtimeSinceStartup - pingSentAt) * 1000f, 0.5f); pingSentAt = -1f; }
                 if (m == null || m.t == "pong") continue;
                 m.raw = json;
                 return m;
@@ -192,6 +194,15 @@ namespace SquashBot.Data
         /// <summary>This game's special reached the rival.</summary>
         public static void SpecialHit() => Send("{\"t\":\"sphit\"}");
         public static void Shield() => Send("{\"t\":\"shield\"}");
+        /// <summary>The shield pressed or let go (the server judges blocks and perfect guards by when it hears this; the
+        /// round trip measured lets it allow for the lag).</summary>
+        public static void Guard(bool on) => Send("{\"t\":\"gd\",\"on\":" + (on ? 1 : 0) + ",\"rt\":" + Mathf.RoundToInt(RttMs) + "}");
+        /// <summary>A dodge (the server keeps its untouchable moment and its wait).</summary>
+        public static void Dodge() => Send("{\"t\":\"dg\"}");
+
+        /// <summary>The last round trip to the server (milliseconds; 120 until measured).</summary>
+        public static float RttMs { get; private set; } = 120f;
+        private static float pingSentAt = -1f;
 
         /// <summary>Leaves the live match (a loss) and closes the connection.</summary>
         public static void Leave()

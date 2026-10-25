@@ -151,6 +151,7 @@ namespace SquashBot.Gameplay
 
         private void Awake()
         {
+            FirstSession.Count();
             if (IconRenderer.TryRun())
             {
                 enabled = false; // icon rendering mode: no game, just the icon scene
@@ -361,6 +362,7 @@ namespace SquashBot.Gameplay
             if (!combatHooked) // (once: the UI is made again on a language change, these are not)
             {
                 combatHooked = true;
+                DuelControlsPanel.TutorialRequested += () => { ui.CloseSettings(); if (!challengeRun) StartTutorial(); };
                 // two weapons meeting in a duel: a burst of sparks and a ring where they met (the sound and camera are the feel's)
                 Combat.CombatFeel.Init();
                 // the duel's rival knocked out: its fall shown on a stand-in of its body (the rules take it away at once)
@@ -368,10 +370,18 @@ namespace SquashBot.Gameplay
                 {
                     var skin = model.GetComponentInChildren<SkinnedHero>();
                     if (skin == null) return;
-                    skin.EyesShut(5f);
+                    FaceFor(model, FaceMoment.KnockedOut); // (spiral eyes, the tongue out: the falling stand-in carries the face)
+                    HatFor(model, 3, robot.transform.position); // (its hat off onto the floor)
                     var dbl = StuntDouble.Make(model);
                     dbl.Detach();
                     Combat.KnockoutFall.Play(dbl.transform, skin.HeadPoint.y - model.position.y, robot.transform.position);
+                };
+                // a blow on a head: a cartoon puff of cloud and a few stars (no sparks or bolts off a face)
+                Combat.CombatFeel.HeadStruck += (at, k) =>
+                {
+                    fx.Burst(at, new Color(0.96f, 0.96f, 0.98f), new Color(1.3f, 1.3f, 1.35f), Mathf.RoundToInt(10 + 8 * k), 2.2f);
+                    fx.Burst(at + Vector3.up * 0.15f, new Color(1f, 0.9f, 0.35f), new Color(2.6f, 2.2f, 0.7f), Mathf.RoundToInt(2 + 2 * k), 1.6f);
+                    AudioManager.PlaySfx(Sfx.Bump, 0.5f, 1.6f);
                 };
                 Combat.CombatFeel.Clashed += at =>
                 {
@@ -607,7 +617,8 @@ namespace SquashBot.Gameplay
                 ui.ShowIntro(Loc.T("world.giftTitle"), pendingWorldGift);
                 pendingWorldGift = null;
             }
-            else if (!loginOffered && LoginCalendar.Ready && NextLevel >= 2)
+            else if (OfferWelcomeBack()) { } // (back after three days: a welcome, its gifts)
+            else if (!loginOffered && LoginCalendar.Ready && NextLevel >= 2 && !FirstSession.Quiet) // (the first session's first ten minutes: nothing pops up)
             {
                 loginOffered = true;
                 ui.LoginView.Show();
@@ -1060,6 +1071,9 @@ namespace SquashBot.Gameplay
                 case SettingKind.ScreenShake:
                     SaveData.ScreenShake = !SaveData.ScreenShake;
                     break;
+                case SettingKind.DuelControls:
+                    ui.DuelControls.Show();
+                    return;
                 case SettingKind.DuelLab:
                     ui.CloseSettings();
                     StartDuelLab();
@@ -1355,6 +1369,7 @@ namespace SquashBot.Gameplay
                 var dir = r.normalized * s.x + f.normalized * s.y;
                 if (dir.sqrMagnitude > 0.0001f) vel = dir.normalized * speed;
             }
+            if ((challengeRun && chPhase == ChPhase.Duel) || FloorGuardOn) vel *= GuardWalkScale; // (blocking: half pace)
             if (LaneOn) { vel.x = Mathf.Clamp((laneX - robot.transform.position.x) * 8f, -6f, 6f); } // (the lane duel: left and right only, held on the line)
             vel = RuleWalk(vel, Time.deltaTime); // (a slippery floor: foi slides on)
             robot.FreeStep(vel, Time.deltaTime, FloorWalkable);
@@ -1492,6 +1507,7 @@ namespace SquashBot.Gameplay
             HandleBackButton();
             WatchArmyFromMenu();
             UpdateLevelRing();
+            UpdateCommunity(); // (the Community General on the menu)
             if (State == GameState.Paused) return;
 
             // Close-call slow motion and the slow-motion tool both bend time; the slower one wins.
@@ -1502,6 +1518,7 @@ namespace SquashBot.Gameplay
             if (blowSlowLeft > 0f) { blowSlowLeft -= Time.unscaledDeltaTime; Time.timeScale = Mathf.Min(Time.timeScale, 0.3f); } // the monster's last blow
             if (powerSlowLeft > 0f) { powerSlowLeft -= Time.unscaledDeltaTime; if (State == GameState.Playing) Time.timeScale = Mathf.Min(Time.timeScale, powerSlowScale); } // a floor power's slow motion
             UpdatePowers(Time.deltaTime);
+            UpdateFloorGuard(); // (the floors' SHIELD: shown only while a floor's fight is on)
             if (challengeRun && State == GameState.Playing) Time.timeScale = 1f; // (no slow motion in the duels: big moments play at full speed)
             HeldWeapon.DuelStance = challengeRun && chPhase == ChPhase.Duel; // (the weapons' duel stances)
             if (pendingHp != null && !DuelCinematic) { var hp = pendingHp; pendingHp = null; ApplyLiveHp(hp); } // the live duel's health, held back through it
@@ -1568,7 +1585,9 @@ namespace SquashBot.Gameplay
                 if (tpsOn) tps.Show(!ArenaActive);
             }
             ui.SetTpsSwitch(!arenaRun && !challengeRun && level.mission == MissionType.Hunt && roadPhase == RoadPhase.None, tpsOn); // (no TPS in the duels)
-            var command = ArenaActive ? default(InputCommand) : tpsOn ? TpsCommand() : input.Poll(robot.transform.position);
+            // The duel reads every finger on its own (walk with one, strike or shield with another).
+            bool duelTouches = DuelTouchesOn;
+            var command = ArenaActive ? default(InputCommand) : tpsOn ? TpsCommand() : duelTouches ? DuelTouches.Poll() : input.Poll(robot.transform.position);
             command = GlassCellGate(command); // foi starts each floor in its glass cell
             bool onMark = duelCountdown || (challengeRun && chPhase == ChPhase.Lobby); // the duel's briefing and its 3, 2, 1: foi stands on its mark
             if (onMark) command = default;
@@ -1583,9 +1602,12 @@ namespace SquashBot.Gameplay
                 else if (command.move.HasValue && (!command.held || HeldStepOk(command.move.Value)) && !(LaneOn && (command.move.Value == Direction.PlusX || command.move.Value == Direction.MinusX))) robot.TryMove(command.move.Value, command.pace);
                 if (input.StickMode) FloorWalk(command.stick);
                 if (command.flick is Vector2 flick && LaneOn && challengeRun && chPhase == ChPhase.Duel) LaneJump(flick, command.flickCurl);
+                if (command.dodge && challengeRun && chPhase == ChPhase.Duel) GuardDodge();
             }
+            if (duelTouches) GuardKeys();
             input.FlickEnabled = LaneOn && challengeRun && chPhase == ChPhase.Duel;
-            ui.ShowStick(input.StickMode && input.StickActive && !hovering, input.StickBase, input.StickFinger);
+            if (duelTouches) ui.ShowStick(DuelTouches.StickActive && !hovering, DuelTouches.StickBase, DuelTouches.StickFinger);
+            else ui.ShowStick(input.StickMode && input.StickActive && !hovering, input.StickBase, input.StickFinger);
 
             ui.SetWarning(hazards.AnyWarningActive);
             ui.SetShield(robot.ShieldLeft, Mathf.Max(level.shieldDuration, ArmorDuration));
@@ -1816,7 +1838,8 @@ namespace SquashBot.Gameplay
                     return;
                 }
                 // an enemy's blow from the front, the shield in hand ready: it lands on the shield
-                if (hitShareOverride >= 0f && level.mission == MissionType.Hunt && ShieldTakes(hunt.BlowFrom)) { hunt.BlowBlocked = true; return; }
+                // (the duel blocks with the shield held instead: see GuardMe)
+                if (hitShareOverride >= 0f && level.mission == MissionType.Hunt && !(challengeRun && chPhase == ChPhase.Duel) && !FloorGuardOn && ShieldTakes(hunt.BlowFrom)) { hunt.BlowBlocked = true; return; }
 
                 if (TryRescue(p, crushed: true)) return;
 
@@ -2757,6 +2780,7 @@ namespace SquashBot.Gameplay
         /// </summary>
         private float Tension()
         {
+            if (challengeRun && (chPhase == ChPhase.Duel || chPhase == ChPhase.Break)) return DuelTension(); // (the duel's music follows the match)
             float t = 0.2f + 0.35f * Mathf.Clamp01(MissionProgress());
             var p = robot.Position;
             bool danger = hazards.IsThreatened(p);

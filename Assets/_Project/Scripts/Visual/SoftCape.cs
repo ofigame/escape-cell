@@ -56,6 +56,9 @@ namespace SquashBot.Visual
             return most * worn.lossyScale.z; // (in the world)
         }
 
+        /// <summary>A blow's gust: the cape flung back (it swings and settles again).</summary>
+        public void Gust(float strength) => swing = Mathf.Min(swing + 9f * strength, 14f);
+
         private void HangWorn()
         {
             Frame(out var right, out var up, out var back, out var shoulders);

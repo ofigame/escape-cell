@@ -696,6 +696,44 @@ namespace SquashBot.Visual
                     transform.RotateAround(grip, axis.normalized, 7f);
                 }
             }
+            OwnHead();
+        }
+
+        /// <summary>
+        /// The blade kept out of its own bearer's head and hat (the big head and short arms: an overhead blow would pass
+        /// through them): turned round its grip, the arm's arc a little wider, until it clears them.
+        /// </summary>
+        private void OwnHead()
+        {
+            if (ownBody == null) return;
+            var face = ownBody.FaceRenderer;
+            if (face == null) return;
+            var hb = face.bounds;
+            var head = hb.center;
+            float r = Mathf.Max(hb.extents.x, hb.extents.z) * 0.95f;
+            var hat = ownBody.HatMount != null && ownBody.HatMount.childCount > 0 ? ownBody.HatMount.position + Vector3.up * r * 0.35f : head;
+            for (int step = 0; step < 10; step++)
+            {
+                var grip = transform.position;
+                var tipNow = Tip.position;
+                Vector3 worstPt = tipNow, worstC = head;
+                float worst = float.MaxValue;
+                for (int s = 0; s < 3; s++)
+                {
+                    var pt = Vector3.Lerp(grip, tipNow, s == 0 ? 0.55f : s == 1 ? 0.8f : 1f);
+                    foreach (var c in new[] { head, hat })
+                    {
+                        float d = (pt - c).magnitude - r;
+                        if (d < worst) { worst = d; worstPt = pt; worstC = c; }
+                    }
+                }
+                if (worst >= 0f) break;
+                var arm = worstPt - grip;
+                var push = (worstPt - worstC).sqrMagnitude > 1e-6f ? (worstPt - worstC).normalized : Vector3.up;
+                var axis = Vector3.Cross(arm, push);
+                if (axis.sqrMagnitude < 1e-8f) axis = transform.right;
+                transform.RotateAround(grip, axis.normalized, 6f);
+            }
         }
 
         private static Vector3 ClosestOnSegment(Vector3 a, Vector3 b, Vector3 p)

@@ -172,6 +172,7 @@ namespace SquashBot.Gameplay
         private void KeyStrike(Vector3 fwd)
         {
             if (level == null || level.mission != MissionType.Hunt || !robot.IsAlive) return;
+            if (!GuardCanStrike) return; // (the duel: blocking, staggered or dazed)
             if (hunt.BestInReach(robot.Position, StrikeReach, fwd, -1.1f, out var at))
             {
                 if (hunt.IsFighter(at)) lastStrikeTap = Time.time;

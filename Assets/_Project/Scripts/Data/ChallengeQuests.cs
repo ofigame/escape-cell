@@ -5,7 +5,7 @@ using UnityEngine;
 namespace SquashBot.Data
 {
     /// <summary>What a challenge quest counts.</summary>
-    public enum DuelGoal { Win, Play, SoloWin, LiveWin, Special, Ultimate, Combo5, Finish }
+    public enum DuelGoal { Win, Play, SoloWin, LiveWin, Special, Ultimate, Combo5, Finish, Perfect, DodgeUlti }
 
     /// <summary>
     /// The challenge's own quests: three a day and three a week (bigger targets, bigger rewards), drawn the same for the
@@ -28,6 +28,7 @@ namespace SquashBot.Data
         {
             (DuelGoal.Win, 2, 3, 200), (DuelGoal.Play, 3, 4, 150), (DuelGoal.SoloWin, 1, 2, 200), (DuelGoal.LiveWin, 1, 1, 250),
             (DuelGoal.Special, 3, 5, 150), (DuelGoal.Ultimate, 1, 2, 200), (DuelGoal.Combo5, 1, 2, 200), (DuelGoal.Finish, 1, 2, 200),
+            (DuelGoal.Perfect, 3, 3, 200), (DuelGoal.DodgeUlti, 1, 1, 250), // (the defence: three perfect guards, an ultimate dodged)
         };
 
         private static string Today => DateTime.Now.ToString("yyyyMMdd", CultureInfo.InvariantCulture);

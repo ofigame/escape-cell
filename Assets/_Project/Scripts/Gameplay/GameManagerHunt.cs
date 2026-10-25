@@ -497,18 +497,23 @@ namespace SquashBot.Gameplay
         private bool TryStrikeNow(GridPos at, bool crowd)
         {
             if (DuelCinematic) return false; // the big moment first
+            if (!GuardCanStrike) return false; // (blocking, staggered or dazed: no blow)
             var w = weapon ?? Armory.Equipped;
             if (strikeCooldown > 0f || !robot.Strike(GridView.ToWorld(at))) return false;
             if (heldShown != null && heldShown.kind == WeaponKind.Gun && !arenaRun) ShowHeld(w); // the blade back in hand
             strikeCooldown = Armory.Cooldown(w);
             if (crowd && hunt.IsFighter(at)) NoteFightBlow(); // a blow or two into a fight, Fifi teleports in
             int damage = RuleDamage(MyBlow(w) * (superLeft > 0f ? 2 : 1)); // the arms add their strength (the duel: its own blow; a combo-only level: from the 4th blow)
+            if (FloorGuardOn && myGuard.NextBlowBonus > 0f) damage = Mathf.Max(1, Mathf.RoundToInt(damage * GuardBonusTake())); // (the floors: a perfect guard's next blow harder)
             if (challengeRun && chPhase == ChPhase.Duel)
             {
                 PlayStyle.Blow(); // (how the player fights: for its friends' copy of it)
                 // the duel's moves: the piercer, rage, the teleport's next blow; the vampire's share back
-                damage = Mathf.Max(1, Mathf.RoundToInt(damage * MyBlowFactor() * myNextBlow));
+                damage = Mathf.Max(1, Mathf.RoundToInt(damage * MyBlowFactor() * myNextBlow * GuardBonusTake())); // (a perfect guard's reward: +30%)
                 myNextBlow = 1f;
+                NoteHabit(myCombo);
+                stats.mine.blows++;
+                if (trainingOn && trainingInfo) FloatAt(GridView.ToWorld(at) + Vector3.up * 1.9f, damage.ToString(), new Color(1f, 0.95f, 0.75f)); // (the training room's damage numbers)
                 if (hunt.ChallengeFoeTile.HasValue && at == hunt.ChallengeFoeTile.Value) MyVampire(damage);
             }
             // a heavy weapon staggers the duel's rival a moment on every blow that lands

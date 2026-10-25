@@ -106,6 +106,10 @@ namespace SquashBot.Audio
         /// <summary>0 = calm, 1 = all-out. Smoothed, so it can be set every frame.</summary>
         public void SetTension(float value) => tensionTarget = Mathf.Clamp01(value);
 
+        /// <summary>The music dips for a moment (a knock-down: the crowd comes to the front), then comes back.</summary>
+        public void Dip(float seconds) => dipUntil = Time.unscaledTime + Mathf.Max(0f, seconds);
+        private float dipUntil, dip = 1f;
+
         public void SetEnabled(bool enabled)
         {
             on = enabled;
@@ -177,7 +181,8 @@ namespace SquashBot.Audio
                 else if (rockMix <= 0.01f && rock.isPlaying && danger < 0.02f) rock.Stop();
                 rock.volume = on ? RockVolume * rockMix * Level : 0f;
             }
-            float duck = 1f - 0.45f * rockMix;
+            dip = Mathf.MoveTowards(dip, Time.unscaledTime < dipUntil ? 0.3f : 1f, dt * (Time.unscaledTime < dipUntil ? 8f : 2.5f));
+            float duck = (1f - 0.45f * rockMix) * dip;
 
             // Layer mix: the groove comes in from a little tension, the intense layer near the top.
             float[] layer = { 1f, Smooth(0.15f, 0.45f, tension), Smooth(0.55f, 0.85f, tension) };

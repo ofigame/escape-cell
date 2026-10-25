@@ -20,6 +20,10 @@ namespace SquashBot.Gameplay
         private float labSlow = 1f;
         private float labWalkUntil;
         private int labWalkDir = 1;
+        /// <summary>The lab's rival defends (blocks, guards perfectly, dodges big moves) to try the defence against.</summary>
+        private bool LabDefends;
+        /// <summary>The lab's rival attacks (its plain blows, telegraphed) to try blocking, perfect guards and dodges.</summary>
+        private bool LabAttacks;
 
         /// <summary>The lab is open (a lab duel under way).</summary>
         private bool LabOn => duelLab != null;
@@ -48,6 +52,8 @@ namespace SquashBot.Gameplay
             lab.Add("VUR", LabStrike, new Color(0.2f, 0.65f, 0.3f));
             lab.Add("4 SERİ", () => cameraRig.StartCoroutine(LabSeries(4)), new Color(0.2f, 0.65f, 0.3f));
             lab.Add("RAKİP VURSUN", LabRivalBlow, new Color(0.75f, 0.3f, 0.3f));
+            lab.Add("KUKLA SAVUNSUN", () => LabDefends = !LabDefends, new Color(0.25f, 0.5f, 0.9f));
+            lab.Add("KUKLA SALDIRSIN", () => LabAttacks = !LabAttacks, new Color(0.85f, 0.35f, 0.25f));
             lab.Add("KILIÇ", () => LabWeapon(WeaponKind.Sword), LabFamily);
             lab.Add("MIZRAK", () => LabWeapon(WeaponKind.Spear), LabFamily);
             lab.Add("BALTA", () => LabWeapon(WeaponKind.Axe), LabFamily);
@@ -76,7 +82,7 @@ namespace SquashBot.Gameplay
             if (!challengeRun) { CloseDuelLab(); return; }
             if (chPhase == ChPhase.Duel)
             {
-                hunt.StunFoe(1f);
+                if (!LabAttacks) hunt.StunFoe(1f);
                 if (health < 1f) { health = 1f; RefreshHealthBar(); }
                 if (hunt.ChallengeFoeHealth < 0.999f) hunt.HealFoeQuiet(1f);
                 if (labSlow < 0.99f) VisualTime.SlowAll(labSlow, 0.5f);

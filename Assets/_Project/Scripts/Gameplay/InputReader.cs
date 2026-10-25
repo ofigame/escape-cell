@@ -36,8 +36,10 @@ namespace SquashBot.Gameplay
         public Vector2? flick;
         /// <summary>The flick ended in a curl (a loop drawn at its end): a somersault.</summary>
         public bool flickCurl;
+        /// <summary>A quick swipe down (the duel's dodge).</summary>
+        public bool dodge;
 
-        public bool IsEmpty => !move.HasValue && !jump && !holdStart && !holdPosition.HasValue && !holdEnd && !tap.HasValue && !spin && !stick.HasValue && !flick.HasValue;
+        public bool IsEmpty => !move.HasValue && !jump && !holdStart && !holdPosition.HasValue && !holdEnd && !tap.HasValue && !spin && !stick.HasValue && !flick.HasValue && !dodge;
     }
 
     /// <summary>

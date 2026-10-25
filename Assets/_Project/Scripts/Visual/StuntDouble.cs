@@ -56,6 +56,7 @@ namespace SquashBot.Visual
                 p.gameObject.AddComponent<MeshFilter>().sharedMesh = mf.sharedMesh;
                 var copy = p.gameObject.AddComponent<MeshRenderer>();
                 copy.sharedMaterials = r.sharedMaterials;
+                if (r.HasPropertyBlock()) { var pb = new MaterialPropertyBlock(); r.GetPropertyBlock(pb); copy.SetPropertyBlock(pb); } // (the face's drawn expression comes along)
                 copy.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 d.parts.Add((p, p.localPosition, p.localRotation));
                 r.enabled = false;

@@ -214,6 +214,14 @@ namespace SquashBot.Gameplay
                             AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.9f);
                         }
                         break;
+                    case "def":
+                        // The server judged a blow against a defence: blocked, broke, perfect, dodged (by 1: mine).
+                        LiveGuard(m.by == 1, m.k, m.d);
+                        break;
+                    case "gr":
+                        // The rival raised or lowered its shield: shown on it.
+                        LiveRivalGuard(m.f == 1);
+                        break;
                     case "hold":
                         chUi.SetStatus(Loc.T("live.rivalDropped"));
                         break;

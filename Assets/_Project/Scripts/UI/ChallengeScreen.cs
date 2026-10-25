@@ -29,6 +29,8 @@ namespace SquashBot.UI
         public event Action NameClosed;
         /// <summary>A kind picked on the modes screen: 0 the Army Battle, 1 the Duel (with its minutes).</summary>
         public event Action<int, int> ModePicked;
+        /// <summary>The duel menu's TRAINING: the training room.</summary>
+        public event Action TrainingPressed;
         /// <summary>A competition's reward was taken (the menu's coins).</summary>
         public event Action CoinsChanged;
         private CompetitionScreen competitions;
@@ -153,7 +155,10 @@ namespace SquashBot.UI
             ((RectTransform)eventButton.transform).pivot = new Vector2(0.5f, 0.5f);
             // (2 against 2 was taken out of the duel: one-on-one only)
             // Playing a friend by code, between the lengths and CLOSE (the friends list is on the main menu).
-            var friend = Flat.Button(m, Loc.T("live.friend"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 190f), new Vector2(640f, 100f), Flat.Blue, Flat.Text, ShowFriend, 34f);
+            var friend = Flat.Button(m, Loc.T("live.friend"), new Vector2(0.5f, 0f), new Vector2(-215f, Monetization.Ads.BannerReserve + 190f), new Vector2(410f, 100f), Flat.Blue, Flat.Text, ShowFriend, 32f);
+            // the training room (no stakes: a dummy, the challenges)
+            var training = Flat.Button(m, Loc.T("tr.button"), new Vector2(0.5f, 0f), new Vector2(215f, Monetization.Ads.BannerReserve + 190f), new Vector2(410f, 100f), new Color(0.3f, 0.7f, 0.5f), Flat.Text, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); modes.Hide(true); TrainingPressed?.Invoke(); }, 32f);
+            ((RectTransform)training.transform).pivot = new Vector2(0.5f, 0.5f);
             ((RectTransform)friend.transform).pivot = new Vector2(0.5f, 0.5f);
             var back = Flat.Button(m, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 70f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => modes.Hide(true), 34f);
             ((RectTransform)back.transform).pivot = new Vector2(0.5f, 0.5f);
@@ -703,6 +708,8 @@ namespace SquashBot.UI
                 Layout();
                 barHearts = barShields = -1;
             }
+            // (the duel's own controls carry the heart and the shield now: these two stay hidden)
+            if (heartButton.gameObject.activeSelf) { heartButton.gameObject.SetActive(false); shieldButton.gameObject.SetActive(false); }
             if (hearts != barHearts) { barHearts = hearts; heartText.text = hearts.ToString(); heartButton.interactable = hearts > 0; }
             if (shields != barShields) { barShields = shields; shieldText.text = shields.ToString(); shieldButton.interactable = shields > 0; }
         }

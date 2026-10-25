@@ -16,7 +16,7 @@ namespace SquashBot.Gameplay
         public enum MatchGoal { Ultis, Specials, Combo, Knockdowns, NoHeart }
 
         private MatchGoal matchGoal;
-        private int mcSpecials, mcUltis, mcCombos, mcHearts, matchWorst;
+        private int mcSpecials, mcUltis, mcCombos, mcHearts, matchWorst, mcPerfects, mcUltiDodges;
         private BotTuning botTuning;
 
         /// <summary>What the last duel brought, for the reward screen.</summary>
@@ -29,8 +29,11 @@ namespace SquashBot.Gameplay
             public int masteryBefore, masteryAfter, masteryPointsBefore, masteryPointsAfter;
             public ChestTier? chest;
             public string goalText;
-            public int seasonPoints;
+            public int seasonPoints, seasonBefore;
             public string eventLine;
+            /// <summary>Wins in a row now (a band from 2), and the losing streak's easing coming (a loss's consolation).</summary>
+            public int streak;
+            public bool consolation;
         }
 
         private DuelRewards lastRewards;
@@ -42,7 +45,8 @@ namespace SquashBot.Gameplay
         /// <summary>The match starts: its challenge drawn, the counts at zero.</summary>
         private void BeginMatchProgress(int seed)
         {
-            mcSpecials = mcUltis = mcCombos = mcHearts = matchWorst = 0;
+            stats.Reset();
+            mcSpecials = mcUltis = mcCombos = mcHearts = matchWorst = mcPerfects = mcUltiDodges = 0;
             matchGoal = (MatchGoal)(Mathf.Abs(seed / 7) % 5);
         }
 
@@ -71,7 +75,7 @@ namespace SquashBot.Gameplay
         private void TuneBot()
         {
             if (LiveActive || rival == null) { botTuning = null; hunt.FoeWhiff = 0f; hunt.FoeReactScale = 1f; return; }
-            botTuning = BotTuning.For(BotTuning.Of(rival.seed), DuelPower.TierOf(rival.Rank), BotDifficulty.Shift, BotDifficulty.FirstFive);
+            botTuning = BotTuning.For(BotTuning.Of(rival.seed), DuelPower.TierOf(rival.Rank), BotDifficulty.Shift - (ReturningPlayer.Rusty ? 1 : 0), BotDifficulty.FirstFive); // (back after days away: the first three a step easier)
             if (copyMatch) PlayStyle.Apply(botTuning, rival.style); // a friend's copy: the friend's own way of fighting
             hunt.FoeBoldness = botTuning.aggression;
             hunt.FoeSkill = Mathf.Clamp01(0.25f + 0.6f * botTuning.shield + 0.03f * rival.Rank);
@@ -107,10 +111,13 @@ namespace SquashBot.Gameplay
             r.masteryAfter = Mastery.Level(r.weapon);
             // the streak breaker: a computer rival on a 5+ winning streak beaten
             if (won && !friendly && rival != null && rival.streak >= 5) { r.streakBreaker = true; SaveData.Coins += 200; r.gold += 200; }
-            if (botTuning != null) BotDifficulty.Record(won, draw);
+            if (botTuning != null) { BotDifficulty.Record(won, draw); ReturningPlayer.BotPlayed(); }
             // the season road
             r.seasonPoints = won ? SeasonRoad.Win : draw ? SeasonRoad.Draw : SeasonRoad.Loss;
+            r.seasonBefore = SeasonRoad.Points;
             SeasonRoad.Add(r.seasonPoints);
+            r.streak = won && !friendly ? DuelChests.Streak : 0;
+            r.consolation = !won && !draw && botTuning != null && BotDifficulty.LossesInRow >= 2;
             lastRewards = r;
             return r;
         }

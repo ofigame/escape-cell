@@ -210,6 +210,43 @@ namespace SquashBot.Data
             done(code == 200 ? TryParse<Match>(body) : null);
         }
 
+        /// <summary>The Community General as the server keeps it: its damage and goal, the steps reached, the ones taken, whether
+        /// the player fought this season.</summary>
+        [Serializable] public class GeneralState { public string season; public long damage, goal; public int reached; public int[] taken; public bool fought; }
+
+        public static IEnumerator General(Action<GeneralState> done)
+        {
+            long code = 0; string body = null;
+            yield return Send("GET", "/general", null, Registered, (c, b) => { code = c; body = b; });
+            done(code == 200 ? TryParse<GeneralState>(body) : null);
+        }
+
+        /// <summary>Takes a step of the General's reward (true: the server gave it now; the game hands it out).</summary>
+        public static IEnumerator GeneralClaim(int step, Action<bool> done)
+        {
+            long code = 0;
+            yield return Send("POST", "/general/claim", "{\"step\":" + step + "}", true, (c, b) => code = c);
+            done(code == 200);
+        }
+
+        private static string AheadKey => "sb_net_ahead" + Dev;
+
+        /// <summary>A virtual rival found ahead (the next duel's, while the last one's rewards show): kept on the phone so an
+        /// unused one is dropped on the server even after a restart (else the server counts it lost).</summary>
+        public static void NoteAhead(long matchId) { Prefs.SetString(AheadKey, matchId.ToString()); Prefs.Save(); }
+
+        /// <summary>The rival found ahead was used (its duel fought): nothing to drop.</summary>
+        public static void AheadUsed() { Prefs.DeleteKey(AheadKey); Prefs.Save(); }
+
+        /// <summary>Drops a rival found ahead and not used (no result for it). Safe to call when there is none.</summary>
+        public static IEnumerator CancelAhead()
+        {
+            if (!long.TryParse(Prefs.GetString(AheadKey, ""), out long id) || id == 0) yield break;
+            long code = 0;
+            yield return Send("POST", "/match/" + id + "/cancel", "{}", true, (c, b) => code = c);
+            if (code >= 200 && code < 500) AheadUsed(); // (gone, or too old: either way nothing more to do)
+        }
+
         /// <summary>Sends a challenge's result. Null: not taken (no network: the server counts it lost later).</summary>
         /// <param name="left">The player walked out of the duel: the leaver's penalty (rank points), not a plain loss.</param>
         public static IEnumerator SendResult(long matchId, bool won, bool draw, Action<Result> done, bool left = false)

@@ -23,6 +23,7 @@ namespace SquashBot.UI
         CombatCamera,
         LaneDuel,
         ScreenShake,
+        DuelControls,
         Graphics,
         TestMode,
         DuelLab
@@ -263,6 +264,23 @@ namespace SquashBot.UI
         private TMPro.TextMeshProUGUI menuGoal;
 
         /// <summary>The menu's goal line over the DUEL button: the nearest next goal.</summary>
+        private RectTransform generalPill;
+        private Image generalFill;
+        private TextMeshProUGUI generalText;
+        /// <summary>The General's bar tapped (a reward reached to take).</summary>
+        public event Action GeneralPressed;
+
+        /// <summary>The Community General's bar on the menu (null text: hidden); <paramref name="k"/> how far (0..1), <paramref name="ready"/> a reward waits (it glows).</summary>
+        public void SetGeneral(string text, float k, bool ready)
+        {
+            if (generalPill == null) return;
+            generalPill.gameObject.SetActive(!string.IsNullOrEmpty(text));
+            if (string.IsNullOrEmpty(text)) return;
+            generalText.text = text;
+            UiFactory.SetBar(generalFill, k);
+            generalText.color = ready ? Palette.UiGold : Palette.UiText;
+        }
+
         public void SetGoalLine(string text)
         {
             if (menuGoal == null) return;
@@ -474,6 +492,7 @@ namespace SquashBot.UI
             BuildPause(root);
             BuildResult(root);
             BuildSettings(root);
+            DuelControls = DuelControlsPanel.Create(root);
             cloud = CloudScreen.Create(root);
             cloud.Restored += () => CloudRestored?.Invoke();
             BuildNoLives(root);
@@ -674,6 +693,17 @@ namespace SquashBot.UI
             menuGoal = UiFactory.TextBox("Goal", t, Bottom, new Vector2(0f, Ads.BannerReserve + 236f + 426f), new Vector2(900f, 54f), "", 32f, Palette.UiGold, title: true);
             menuGoal.rectTransform.pivot = new Vector2(0.5f, 0f);
             MenuArt.Outline(menuGoal, new Color(0.05f, 0.03f, 0.15f, 0.9f), 0.25f);
+            // The Community General over the goal line: everyone's damage on the season's General (a tap takes a reward reached).
+            generalPill = UiFactory.Pill("General", t, Bottom, new Vector2(0f, Ads.BannerReserve + 236f + 426f + 64f), new Vector2(820f, 64f), new Color(0.12f, 0.06f, 0.2f, 0.82f));
+            generalPill.pivot = new Vector2(0.5f, 0f);
+            UiFactory.Bar(generalPill, Bottom, new Vector2(0f, 8f), new Vector2(780f, 10f), new Color(1f, 0.45f, 0.35f), out generalFill);
+            generalText = UiFactory.TextBox("Text", generalPill, new Vector2(0.5f, 0.5f), new Vector2(0f, 6f), new Vector2(790f, 48f), "", 26f, Palette.UiText, title: true);
+            generalText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            generalText.enableAutoSizing = true; generalText.fontSizeMin = 16f; generalText.fontSizeMax = 26f;
+            var gb = generalPill.gameObject.AddComponent<Button>();
+            gb.targetGraphic = generalPill.GetComponentInChildren<Image>();
+            gb.onClick.AddListener(() => GeneralPressed?.Invoke());
+            generalPill.gameObject.SetActive(false);
             // DUEL first: the game's heart now (left, green, beating, a little bigger); the mission beside it, still.
             var challenge = UiFactory.MakeButton(card, Loc.T("menu.duel"), Kind.Primary, Bottom, new Vector2(-195f, 22f), new Vector2(430f, 150f), () => ChallengePressed?.Invoke(), 84f);
             challenge.gameObject.AddComponent<Pulse>();
@@ -1182,6 +1212,7 @@ namespace SquashBot.UI
                 (SettingKind.CombatCamera, "settings.combatCam"),
                 (SettingKind.LaneDuel, "settings.lane"),
                 (SettingKind.ScreenShake, "settings.shake"),
+                (SettingKind.DuelControls, "settings.duelControls"),
                 (SettingKind.Graphics, "settings.graphics"),
                 (SettingKind.Challenge, "settings.challenge"),
 #if !REAL_ADS && (TEST_TOOLS || !((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR))
@@ -1189,17 +1220,19 @@ namespace SquashBot.UI
                 (SettingKind.DuelLab, "settings.lab"), // the duel lab: test builds only
 #endif
             };
+            // many rows: closer together, so the card still fits the screen
+            float rowStep = rows.Length > 10 ? 104f : 120f;
             for (int i = 0; i < rows.Length; i++)
             {
                 var (kind, label) = rows[i];
-                float y = -200f - i * 120f;
+                float y = -200f - i * rowStep;
                 var labelText = UiFactory.TextBox("Label", card, TopLeft, new Vector2(70f, y), new Vector2(380f, 100f), Loc.T(label), 52f,
                     Palette.UiText, FontStyles.Normal, align: TextAlignmentOptions.Left);
                 // Long labels and values (the "auto" graphics tier) shrink to fit instead of running into the button.
                 labelText.enableAutoSizing = true;
                 labelText.fontSizeMin = 30f;
                 labelText.fontSizeMax = 52f;
-                var button = UiFactory.MakeButton(card, "", Kind.Secondary, TopRight, new Vector2(-60f, y), new Vector2(330f, 100f),
+                var button = UiFactory.MakeButton(card, "", Kind.Secondary, TopRight, new Vector2(-60f, y), new Vector2(330f, rowStep - 18f),
                     () => SettingToggled?.Invoke(kind), 46f);
                 settingValues[kind] = button.GetComponentInChildren<TextMeshProUGUI>();
                 settingValues[kind].enableAutoSizing = true;
@@ -1211,9 +1244,9 @@ namespace SquashBot.UI
 
             // Where the ad consent form applies, the player can change their answer here.
             // Under the last row: deleting the online profile, then (where the consent form applies) the ad privacy choice.
-            float underRows = -200f - rows.Length * 120f - 40f;
+            float underRows = -200f - rows.Length * rowStep - 40f;
             // The card fits its rows: under them the account buttons (each in a row of its own), then CLOSE — nothing overlaps.
-            card.sizeDelta = new Vector2(860f, rows.Length * 120f + 700f);
+            card.sizeDelta = new Vector2(860f, rows.Length * rowStep + 700f);
             privacyButton = UiFactory.MakeButton(card, Loc.T("settings.privacy"), Kind.Secondary, Top, new Vector2(0f, underRows - 100f), new Vector2(560f, 74f),
                 Monetization.AdMob.ShowPrivacyOptions, 34f).gameObject;
             // The recovery code (the game kept online, brought back on a new phone).
@@ -1281,6 +1314,8 @@ namespace SquashBot.UI
             SetSetting(SettingKind.CombatCamera, SaveData.CombatCamera);
             SetSetting(SettingKind.LaneDuel, SaveData.LaneDuel);
             SetSetting(SettingKind.ScreenShake, SaveData.ScreenShake);
+            settingValues[SettingKind.DuelControls].text = Loc.T("settings.adjust");
+            settingValues[SettingKind.DuelControls].color = Palette.UiCyan;
             if (settingValues.ContainsKey(SettingKind.DuelLab)) { settingValues[SettingKind.DuelLab].text = Loc.T("settings.labOpen"); settingValues[SettingKind.DuelLab].color = Palette.UiCyan; }
             var gfx = Loc.T("gfx." + GraphicsQuality.Current);
             settingValues[SettingKind.Graphics].text = GraphicsQuality.Choice.HasValue ? gfx : Loc.F("gfx.auto", gfx);
@@ -1343,7 +1378,14 @@ namespace SquashBot.UI
             flash.raycastTarget = false;
             flash.gameObject.AddComponent<IgnoreSafeArea>();
 
-            UiFactory.MakeButton(t, "II", Kind.Icon, TopLeft, new Vector2(36f, -36f), new Vector2(124f, 124f), () => PausePressed?.Invoke(), 52f);
+            pauseButton = UiFactory.MakeButton(t, "II", Kind.Icon, TopLeft, new Vector2(36f, -36f), new Vector2(124f, 124f), () => PausePressed?.Invoke(), 52f).gameObject;
+            // The floors' SHIELD (the duel's defence on the floors too): hold it to block, press it as a blow lands to guard perfectly.
+            floorShield = DuelButton.Create((RectTransform)t, "FloorShield", 190f, new Color(0.25f, 0.55f, 1f), DuelIcon.Shield);
+            floorShield.Rect.anchorMin = floorShield.Rect.anchorMax = new Vector2(1f, 0f);
+            floorShield.Rect.anchoredPosition = new Vector2(-150f, 330f);
+            floorShield.Down += () => FloorShieldDown?.Invoke();
+            floorShield.Up += () => FloorShieldUp?.Invoke();
+            floorShield.gameObject.SetActive(false);
             // TPS on the floors: switches to the arenas' over-the-shoulder fight (sideways) and back.
             tpsSwitch = UiFactory.MakeButton(t, "TPS", Kind.Icon, TopRight, new Vector2(-36f, -176f), new Vector2(220f, 100f), () => TpsSwitchPressed?.Invoke(), 38f);
             tpsSwitchLabel = tpsSwitch.GetComponentInChildren<TextMeshProUGUI>();
@@ -1627,6 +1669,7 @@ namespace SquashBot.UI
         /// <summary>True when a screen point is on a visible tool button (input leaves those presses to the UI).</summary>
         public bool IsOverTool(Vector2 screen)
         {
+            if (floorShield != null && floorShield.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(floorShield.Rect, screen, null)) return true;
             if (SkillBar != null && SkillBar.IsOver(screen)) return true;
             if (IsOverBag(screen)) return true;
             if (IsOverAdHeal(screen)) return true;
@@ -1702,6 +1745,30 @@ namespace SquashBot.UI
             string s = Loc.Current == Language.Turkish || Loc.Current == Language.Azerbaijani ? "%" + pct : pct + "%";
             if (rivalText.text != s) rivalText.text = s;
         }
+
+        private GameObject pauseButton;
+        private DuelButton floorShield;
+        /// <summary>The floors' SHIELD pressed and let go.</summary>
+        public event Action FloorShieldDown, FloorShieldUp;
+
+        /// <summary>The floors' SHIELD shown or not, with its durability (0..1), broken, and the sweep of a short lock.</summary>
+        public void SetFloorShield(bool show, float durability, bool broken, float wait)
+        {
+            if (floorShield == null) return;
+            if (floorShield.gameObject.activeSelf != show) floorShield.gameObject.SetActive(show);
+            if (!show) return;
+            floorShield.SetRing(broken ? 0f : durability, broken ? new Color(0.5f, 0.5f, 0.55f) : durability < 0.25f ? new Color(1f, 0.3f, 0.25f) : new Color(0.45f, 0.8f, 1f));
+            floorShield.SetColour(broken ? new Color(0.3f, 0.32f, 0.4f) : new Color(0.25f, 0.55f, 1f));
+            floorShield.SetWait(wait);
+        }
+
+        public bool FloorShieldHeld => floorShield != null && floorShield.Held;
+
+        /// <summary>The big pause button shown or not (the duel has its own small one).</summary>
+        /// <summary>The settings' duel controls card.</summary>
+        public DuelControlsPanel DuelControls { get; private set; }
+
+        public void SetPauseVisible(bool on) { if (pauseButton != null && pauseButton.activeSelf != on) pauseButton.SetActive(on); }
 
         public void SetHealth(bool enabled, float value, float armor)
         {

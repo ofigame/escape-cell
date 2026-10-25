@@ -134,6 +134,12 @@ namespace SquashBot.Audio
             if (Instance != null) Instance.music.SetTension(tension);
         }
 
+        /// <summary>The music dips for a moment (a knock-down: the crowd to the front).</summary>
+        public static void DipMusic(float seconds)
+        {
+            if (Instance != null) Instance.music.Dip(seconds);
+        }
+
         /// <summary>How much of a fight is on around foi, 0-1: the hard-rock layer rises and falls with it.</summary>
         public static void SetDanger(float danger)
         {

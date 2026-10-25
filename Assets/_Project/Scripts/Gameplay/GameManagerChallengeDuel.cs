@@ -154,6 +154,7 @@ namespace SquashBot.Gameplay
             chPhase = ChPhase.Duel;
             duelPan = robot.transform.position - boardCentre; duelPan.y = 0f;
             hunt.Resume();
+            FirstSession.DuelStarted(); // (time_to_first_duel)
             chUi.SetStatus(Loc.T("ch.duel") + "  ·  " + GoalText(matchGoal)); // the match's small challenge
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 0.8f);
             RefreshDuelClock();
@@ -224,6 +225,7 @@ namespace SquashBot.Gameplay
             else hunt.RegroupSquads();
             PlacePartners(first); // (2 against 2: the partners on their marks, or back after a fall)
             RoundPassives(); // (each round: the master warrior's bar part, the sturdy's spare life)
+            GuardRound(); // (each round: both shields whole)
             if (capesOff) StripCapes();
 
             RefreshSquadBar();
@@ -259,10 +261,13 @@ namespace SquashBot.Gameplay
         {
             if (!challengeRun || chPhase != ChPhase.Duel) return;
             if (iWon) chDuelMe++; else chDuelThem++;
+            if (!iWon && mcHearts == 0 && duelHearts > 0) stats.mine.downWithHeartsUnused++; // (the tip: hearts left unused)
             PowerSlow(0.4f, 0.3f); // (the knock-down: slow motion a moment, the crowd up)
+            AudioManager.DipMusic(DuelMusicSettings.Current.knockDip); // (the music dips, the crowd to the front)
             KnockoutShown(iWon);
             if (SuddenDeath) { RefreshDuelClock(); chPhase = ChPhase.Break; hunt.Freeze(); ChallengeEnd(); return; } // (sudden death: one knock-down wins)
             if (iWon) OfferFinish(lastFoeAt);
+            if (iWon) skillBar?.ShowTaunt(1.5f); // (the taunt offered a moment)
             cameraRig.StartCoroutine(RivalEmote(!iWon));
             chPhase = ChPhase.Break;
             hunt.Freeze();
@@ -285,7 +290,9 @@ namespace SquashBot.Gameplay
             var down = iWon ? hunt.ChallengeFoeModel : robot.Visual;
             var skin = down != null ? down.GetComponentInChildren<SkinnedHero>() : null;
             if (skin == null) return;
-            skin.EyesShut(3f);
+            FaceFor(down, FaceMoment.KnockedOut); // (spiral eyes, the tongue out; stars over the head)
+            HatFor(down, 3, (iWon ? robot.Visual : hunt.ChallengeFoeModel) is Transform kb && kb != null ? kb.position : down.position - down.forward);
+            Combat.StatusFx.On(Combat.CombatFeel.RootOf(down)).Stun(2.5f);
             skin.Squash(1f);
             var c = skin.ChestPoint;
             float s = Mathf.Max(0.3f, down.lossyScale.y) * 0.5f;
@@ -296,6 +303,8 @@ namespace SquashBot.Gameplay
         /// <summary>Back on its mark after a knock-down: foi's eyes open again with a glow (starting up anew).</summary>
         private void RebootShown(bool first)
         {
+            FacesClear();
+            HatsBack();
             var skin = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null;
             if (skin == null) return;
             skin.EyesShut(0f);
@@ -309,6 +318,7 @@ namespace SquashBot.Gameplay
         {
             if (!challengeRun || (chPhase != ChPhase.Duel && chPhase != ChPhase.Wait)) return;
             chDuelMe = mine;
+            AudioManager.DipMusic(DuelMusicSettings.Current.knockDip);
             chDuelThem = theirs;
             chPhase = ChPhase.Break;
             hunt.Freeze();
@@ -560,13 +570,15 @@ namespace SquashBot.Gameplay
 
         private void UpdateDuel(float dt)
         {
+            UpdateTutorial(); // (the guided first duel)
+            UpdateTraining(); // (the training room)
             ui.SetRivalHealth(true, hunt.ChallengeFoeHealth); // the rival's bar at the top right, over its name
             UpdateDuelZone(dt);
             UpdateDuelSkills(dt);
             chDuelLeft = Mathf.Max(0f, chDuelLeft - dt);
             // the distance the player keeps, sampled once a second (its style, for its friends' copy of it)
             if (Mathf.FloorToInt(chDuelLeft) != Mathf.FloorToInt(chDuelLeft + dt) && hunt.ChallengeFoeTile.HasValue)
-                PlayStyle.Sample(HuntSystem.Chebyshev(robot.Position, hunt.ChallengeFoeTile.Value));
+            { PlayStyle.Sample(HuntSystem.Chebyshev(robot.Position, hunt.ChallengeFoeTile.Value)); stats.Distance(HuntSystem.Chebyshev(robot.Position, hunt.ChallengeFoeTile.Value)); }
             RefreshDuelClock();
             RefreshSquadBar();
             if (rivalShieldUntil > 0f && Time.time > rivalShieldUntil) { rivalShieldUntil = 0f; hunt.EndFoeShield(); }
@@ -589,14 +601,6 @@ namespace SquashBot.Gameplay
                 rivalPowerUpAt = Time.time + 8f;
                 return;
             }
-            if (rivalShields > 0 && share < 0.75f && hunt.ChallengeFoeAt is Vector3 at && (at - robot.transform.position).sqrMagnitude < 3.5f * 3.5f && Random.value < 0.35f)
-            {
-                rivalShields--;
-                hunt.ShieldFoe(DuelShieldHits + (rivalPassive == PassiveKind.ShieldMaster ? 1 : 0));
-                rivalShieldUntil = Time.time + DuelShieldSeconds;
-                rivalPowerUpAt = Time.time + 9f;
-                return;
-            }
             rivalPowerUpAt = Time.time + 1.5f;
         }
 
@@ -609,6 +613,7 @@ namespace SquashBot.Gameplay
             PlayStyle.Heart(health);
             duelHearts--;
             mcHearts++;
+            stats.mine.hearts++;
             if (LiveActive) LiveNet.Heal();
             else
             {

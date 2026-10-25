@@ -139,10 +139,12 @@ namespace SquashBot.Gameplay
             chUi.NameSubmitted += OnNameSubmitted;
             chUi.NameClosed += () => { profileNaming = false; chCancelled = true; chPhase = ChPhase.Off; chUi.HideAll(); };
             chUi.RenamePressed += () => { chCancelled = true; chPhase = ChPhase.Off; chUi.ShowName(Challenge.PlayerName); };
+            chUi.TrainingPressed += () => StartTraining(null);
             chUi.ModePicked += (mode, minutes) =>
             {
                 chUi.HideModes();
                 if (mode >= 2 && mode <= 4) { cameraRig.StartCoroutine(EventDuel(mode)); return; } // the weekly rule mode, the weekend tournament, 2 against 2
+                if (TutorialDue) { StartTutorial(); return; } // (a new player's first duel: the guided one)
                 chMode = 1; chDuelMinutes = 3; chDuelSquads = Challenge.DuelSquads; StartChallenge(false);
             };
             if (liveHooksWired) return;
@@ -290,7 +292,10 @@ namespace SquashBot.Gameplay
         /// The waiting room: the player's army and foi go up to the server, a live rival is looked for (a friend waited
         /// for), else a rival played by the AI is found; the rival's card, then onto the board.
         /// </summary>
-        private IEnumerator Lobby()
+        private IEnumerator Lobby() => Lobby(null);
+
+        /// <param name="ahead">A rival found ahead (PLAY AGAIN on the last duel's rewards): straight to it, no search.</param>
+        private IEnumerator Lobby(FoiNet.Match ahead)
         {
             copyMatch = false;
             chMode = 1; duelRule = null;
@@ -304,8 +309,10 @@ namespace SquashBot.Gameplay
             int world = LevelCatalog.WorldOf(Mathf.Max(0, SaveData.UnlockedLevel - 1));
 
             bool ok = false;
+            if (ahead != null) { yield return LobbyAhead(ahead, token, started); yield break; }
             yield return FoiNet.EnsurePlayer(r => ok = r);
             if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
+            if (ok) yield return FoiNet.CancelAhead(); // (a rival found ahead and never fought: dropped, not a loss)
             if (ok && FoiNet.SyncedName != Challenge.PlayerName)
             {
                 // A name chosen offline goes up now; taken meanwhile: pick another.
@@ -375,8 +382,15 @@ namespace SquashBot.Gameplay
                     chUi.SetMyCard(MyCard(), Challenge.Rank);
                 }
             }
+            yield return LobbyFound(match, token, started, 1.6f);
+        }
+
+        /// <summary>The rival found (or none: offline): its card, the stage wheel, onto the board. <paramref name="pause"/>: the
+        /// least time the room stays (a rival found ahead: short).</summary>
+        private IEnumerator LobbyFound(FoiNet.Match match, int token, float started, float pause)
+        {
             float waited = Time.realtimeSinceStartup - started;
-            if (waited < 1.6f) yield return new WaitForSecondsRealtime(1.6f - waited);
+            if (waited < pause) yield return new WaitForSecondsRealtime(pause - waited);
             if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
             // From here the match is on: no leaving the room.
             chUi.LockLobby();
@@ -384,15 +398,18 @@ namespace SquashBot.Gameplay
             chMatchId = match != null ? match.matchId : 0;
             // A virtual rival, made from the server's seed (at about the player's trophies): no real player behind it.
             int seed = match != null ? match.seed : Random.Range(0, 1000000);
-            rival = Challenge.MakeBot(seed, match != null ? match.trophies : -1);
+            var again = rematchBot; // (the computer rival asked for a rematch: the same one again)
+            rematchBot = null;
+            rival = again ?? Challenge.MakeBot(seed, match != null ? match.trophies : -1);
             if (!chDuelSquads) for (int g = 0; g < rival.squad.Length; g++) rival.squad[g] = 0; // foi against foi
             int rivalPower = 0;
             for (int g = 0; g < Army.Groups; g++) rivalPower += Mathf.RoundToInt(Army.Soldiers * rival.Power(g) * 10f);
             chUi.ShowRival(RivalCard(rival), rival.Rank);
             chUi.SetLobbyStatus(Loc.T(chOnline ? "ch.found" : "ch.offline"));
-            yield return new WaitForSecondsRealtime(1.6f);
+            yield return new WaitForSecondsRealtime(pause < 1f ? 0.7f : 1.6f);
             if (token != chLobbyToken) yield break;
-            int stage = Mathf.Abs(seed) % DuelStageCount;
+            int stage = again != null ? duelStage : Mathf.Abs(seed) % DuelStageCount;
+            if (match != null) FoiNet.AheadUsed(); // (a rival found ahead is fought now)
             yield return SpinToStage(stage); // every stage flashes by, it stops on the one drawn
             if (token != chLobbyToken) yield break;
             chUi.HideLobby();
@@ -622,8 +639,13 @@ namespace SquashBot.Gameplay
             }
             State = GameState.Result;
             danceAt = won ? robot.transform : !draw ? hunt.ChallengeFoeModel : null;
+            // the faces: the winner grins, the loser sulks; a draw, both shrug
+            FaceFor(robot.Visual, won ? Visual.FaceMoment.Victory : draw ? Visual.FaceMoment.Draw : Visual.FaceMoment.Defeat);
+            FaceFor(hunt.ChallengeFoeModel, won ? Visual.FaceMoment.Defeat : draw ? Visual.FaceMoment.Draw : Visual.FaceMoment.Victory);
             if (won) AudioManager.PlaySfx(Sfx.Win);
             if (danceAt != null) { winnerWalking = true; cameraRig.StartCoroutine(WinnerToMiddle(won)); }
+            ui.SetRivalHealth(false, 0f); // (the end screen: the health bars go)
+            ui.SetHealth(false, health, 0f);
             chUi.HideAll();
             cameraRig.StartCoroutine(ShowChallengeResult(won, draw, score, gold));
         }
@@ -701,8 +723,12 @@ namespace SquashBot.Gameplay
                 string liveRival = chLive && liveRanked && rival != null ? rival.name : null;
                 ui.DuelRewardsView.SetExtras(shareLine, liveRival, n => cameraRig.StartCoroutine(FoiNet.AddFriend(n, (e, f) => { })));
                 rewardsShown = true;
-                ui.DuelRewardsView.Show(lastRewards, won, draw, () => shut = true, revengeOn, () => { shut = true; revengeTaken = true; Revenge(revengeOn); });
+                int choice = 0;
+                var actions = EndActions(won, draw, gold, c => { choice = c; shut = true; });
+                ui.DuelRewardsView.Show(lastRewards, won, draw, actions, () => shut = true, revengeOn, () => { shut = true; revengeTaken = true; Revenge(revengeOn); });
                 while (!shut && challengeRun) yield return null;
+                if (revengeTaken) yield break; // (revenge chosen: the new match is under way)
+                if (challengeRun) { EndChoice(choice); yield break; } // (play again, a rematch, or the menu)
             }
             // The rewards were the duel's result: straight back to the menu (an interstitial may come first). Only a live
             // match with a rematch offered still shows the old card (its REMATCH button).
@@ -749,6 +775,10 @@ namespace SquashBot.Gameplay
         /// <summary>Leaving a challenge (the menu): the board and its screens go; a match the server knows of is lost.</summary>
         private void EndChallenge()
         {
+            if (ui != null && ui.DuelRewardsView != null) ui.DuelRewardsView.Hide(); // (left another way: the end screen goes too)
+            EndTutorial(false);
+            EndTraining();
+            FacesOff();
             hunt.LaneX = null;
             copyMatch = false;
             ClearDuelRule();
@@ -802,14 +832,16 @@ namespace SquashBot.Gameplay
             var right = Vector3.Cross(Vector3.up, -sideDir);
             float half = 0f, depth = 0f;
             foreach (var p in points) { half = Mathf.Max(half, Mathf.Abs(Vector3.Dot(p - mid, right))); depth = Mathf.Max(depth, Vector3.Dot(p - mid, sideDir)); }
-            half += 3.8f; // (room for an arm, a weapon, a fall, and the floor round them)
+            var cs = Combat.DuelCameraSettings.Current;
+            half += cs.sideRoom; // (room for an arm, a weapon, a fall, and the floor round them)
             var cam = cameraRig.Cam;
-            float vfov = 46f * Mathf.Deg2Rad;
+            float vfov = cs.fov * Mathf.Deg2Rad;
             float hfov = 2f * Mathf.Atan(Mathf.Tan(vfov * 0.5f) * Mathf.Max(0.3f, cam.aspect));
-            float want = Mathf.Clamp(half / Mathf.Tan(hfov * 0.5f) + depth, 15.5f, 48f);
+            float want = Mathf.Clamp(half / Mathf.Tan(hfov * 0.5f) + depth, cs.minDistance, cs.maxDistance);
             sideDist = Mathf.Lerp(sideDist, want, Mathf.Min(1f, Time.unscaledDeltaTime * 2f));
-            var focus = mid + Vector3.up * 1.1f;
-            pos = mid + sideDir * sideDist + Vector3.up * (2.4f + sideDist * 0.2f);
+            // looked at above their feet: the two stand in the band from about 30% to 60% of the screen's height
+            var focus = mid + Vector3.up * (sideDist * cs.focusPerDistance);
+            pos = mid + sideDir * sideDist + Vector3.up * (cs.heightBase + sideDist * cs.heightPerDistance);
             rot = Quaternion.LookRotation(focus - pos);
         }
 

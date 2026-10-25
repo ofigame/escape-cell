@@ -225,6 +225,7 @@ namespace SquashBot.Gameplay
                     Damage(1.4f);
                     Hold(1.5f);
                     if (OtherModel() != null) StatusFx.On(CombatFeel.RootOf(OtherModel())).Stun(1.5f); // (sparks circling its head)
+                    FaceFor(OtherModel(), FaceMoment.Shocked); // (cross-eyed, the hair on end)
                     cameraRig.StartCoroutine(Sparks(!mine, new Color(0.6f, 0.9f, 1f), 1.5f));
                     break;
                 }
@@ -243,6 +244,7 @@ namespace SquashBot.Gameplay
                     Hold(1.6f);
                     MoveFx.IceBlock(OtherModel(), 1.6f);
                     if (OtherModel() != null) StatusFx.On(CombatFeel.RootOf(OtherModel())).Freeze(1.6f);
+                    FaceFor(OtherModel(), FaceMoment.Frozen); // (teeth chattering, blue)
                     var between = new GridPos(me.x + System.Math.Sign(other.x - me.x), me.y + System.Math.Sign(other.y - me.y));
                     if (grid.InBounds(between) && grid.IsStandable(between) && !grid.IsOccupied(between) && between != other) cameraRig.StartCoroutine(IceWall(between, 2.2f));
                     break;
@@ -329,6 +331,7 @@ namespace SquashBot.Gameplay
         /// <summary>The player pressed the ultimate: its own.</summary>
         private void UseUlti(bool mine, UltiKind u, float scale = 1f)
         {
+            UltiBegins(mine);
             if (u == UltiKind.Cinematic && scale >= 0.99f) { cameraRig.StartCoroutine(Ultimate(mine, leap: true)); return; }
             cameraRig.StartCoroutine(DoUlti(mine, u, scale));
         }
@@ -361,9 +364,10 @@ namespace SquashBot.Gameplay
             Transform Other() => mine ? hunt.ChallengeFoeModel : robot.Visual;
             Vector3 OtherAt() => mine ? hunt.ChallengeFoeAt ?? robot.transform.position : robot.transform.position;
             Vector3 MeAt() => mine ? robot.transform.position : hunt.ChallengeFoeAt ?? robot.transform.position;
-            void Damage(float times) { if (LiveActive) return; if (mine) HitFoe(times * power); else HurtMe(times * power); }
             int Gap() => hunt.ChallengeFoeTile.HasValue ? HuntSystem.Chebyshev(robot.Position, hunt.ChallengeFoeTile.Value) : 99;
+            void Damage(float times) { if (LiveActive) return; if (mine) HitFoe(times * power, BlowKind.Ulti, Def.ultiCost * Mathf.Min(1f, times / UltimateHit)); else HurtMe(times * power, BlowKind.Ulti, Def.ultiCost * Mathf.Min(1f, times / UltimateHit)); }
             bool Down() => mine ? hunt.ChallengeFoeDown : !robot.IsAlive;
+            bool Flings() => !Down() && Landed(mine); // (blocked or dodged: nobody is thrown)
             void Hold(float seconds) { if (LiveActive) return; if (mine) hunt.StunFoe(seconds); else strikeCooldown = Mathf.Max(strikeCooldown, seconds); }
             switch (u)
             {
@@ -386,7 +390,7 @@ namespace SquashBot.Gameplay
                     Damage(6.5f);
                     CombatFeel.UltiFinal(Self(), Other());
                     if (mine) cameraRig.StartCoroutine(SlowFoe(2f)); else strikeCooldown = Mathf.Max(strikeCooldown, 1.2f);
-                    if (!Down()) yield return BigMoment(!mine, 2.4f, 2);
+                    if (Flings()) yield return BigMoment(!mine, 2.4f, 2);
                     break;
                 }
                 case UltiKind.Whirlwind:
@@ -407,7 +411,7 @@ namespace SquashBot.Gameplay
                         if (Gap() <= HuntSystem.DuelGap + 2) { Damage(1f); var sk = Other() != null ? Other().GetComponentInChildren<SkinnedHero>() : null; if (sk != null) sk.Shudder(MeAt(), 1f); }
                     }
                     FaceEachOther();
-                    if (!Down() && Gap() <= HuntSystem.DuelGap + 2) { CombatFeel.UltiFinal(Self(), Other()); yield return BigMoment(!mine, 2f, 2); }
+                    if (Flings() && Gap() <= HuntSystem.DuelGap + 2) { CombatFeel.UltiFinal(Self(), Other()); yield return BigMoment(!mine, 2f, 2); }
                     break;
                 }
                 case UltiKind.IronBody:
@@ -422,7 +426,7 @@ namespace SquashBot.Gameplay
                     AudioManager.PlaySfx(Sfx.Shield, 1f, 0.5f);
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 0.7f);
                     cameraRig.Shake(0.8f);
-                    if (Gap() <= HuntSystem.DuelGap + 2) { Damage(2f); if (!Down() && !LiveActive) Fling(!mine, MeAt(), 1.2f, 2); }
+                    if (Gap() <= HuntSystem.DuelGap + 2) { Damage(2f); if (Flings() && !LiveActive) Fling(!mine, MeAt(), 1.2f, 2); }
                     break;
                 }
                 case UltiKind.Mirror:
@@ -474,7 +478,7 @@ namespace SquashBot.Gameplay
                         cameraRig.Shake(1.6f);
                         if (Gap() <= 7) Damage(3f);
                         CombatFeel.UltiFinal(Self(), Other());
-                        if (!Down()) yield return BigMoment(!mine, 3.2f, 3);
+                        if (Flings()) yield return BigMoment(!mine, 3.2f, 3);
                     }
                     break;
                 }
@@ -494,7 +498,7 @@ namespace SquashBot.Gameplay
                     cameraRig.Shake(1.7f);
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 0.35f);
                     var still = mine ? hunt.ChallengeFoeTile : robot.Position;
-                    if (still.HasValue && HuntSystem.Chebyshev(still.Value, mark) <= 1) { Damage(9f); CombatFeel.UltiFinal(Self(), Other()); if (!Down()) yield return BigMoment(!mine, 3f, 3); }
+                    if (still.HasValue && HuntSystem.Chebyshev(still.Value, mark) <= 1) { Damage(9f); CombatFeel.UltiFinal(Self(), Other()); if (Flings()) yield return BigMoment(!mine, 3f, 3); }
                     else ScreenFlash.White(0.05f); // (missed: still a great blast)
                     break;
                 }
@@ -512,7 +516,7 @@ namespace SquashBot.Gameplay
                     Damage(7.5f);
                     CombatFeel.UltiFinal(Self(), Other());
                     if (!LiveActive) { if (mine) { health = Mathf.Min(1f, health + 0.12f); RefreshHealthBar(); } else hunt.HealFoe(0.12f); }
-                    if (!Down()) yield return BigMoment(!mine, 2.6f, 3);
+                    if (Flings()) yield return BigMoment(!mine, 2.6f, 3);
                     break;
                 }
                 default:

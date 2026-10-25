@@ -12,7 +12,7 @@ namespace SquashBot.Visual
     public class ShieldHold : MonoBehaviour
     {
         private Transform arm, fore, hand, hips, neck, holder;
-        private float raise = 1f, bash = 1f, size;
+        private float raise = 1f, bash = 1f, size, guardK;
         private string shown;
 
         /// <summary>Puts the carried shield on the rigged foi under <paramref name="visual"/> (or takes it off: none carried).</summary>
@@ -67,6 +67,9 @@ namespace SquashBot.Visual
         /// <summary>The block: the shield swung up across the front.</summary>
         public void Raise() => raise = 0f;
 
+        /// <summary>Held up across the front for as long as it is set (the duel's block).</summary>
+        public bool Guarding { get; set; }
+
         /// <summary>A shield is carried (shown on the arm).</summary>
         public bool Carried => holder != null;
 
@@ -84,6 +87,8 @@ namespace SquashBot.Visual
             // carried: the hand low in front on the left; the block: up and across the front
             float k = 0f;
             if (raise < 1f) { raise = Mathf.Min(1f, raise + Time.deltaTime / 0.5f); k = Mathf.Sin(raise * Mathf.PI); }
+            guardK = Mathf.MoveTowards(guardK, Guarding ? 1f : 0f, Time.deltaTime / 0.06f); // (up within a few frames, down a little slower)
+            k = Mathf.Max(k, guardK);
             float b = 0f;
             if (bash < 1f) { bash = Mathf.Min(1f, bash + Time.deltaTime / 0.4f); b = bash < 0.3f ? bash / 0.3f : 1f - (bash - 0.3f) / 0.7f; b = b * b * (3f - 2f * b); }
             var carry = arm.position + ahead * reach * 0.3f - right * reach * 0.42f - up * reach * 0.72f; // (the arm down at the left side, a little forward)

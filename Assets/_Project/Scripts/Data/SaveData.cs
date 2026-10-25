@@ -63,6 +63,48 @@ namespace SquashBot.Data
             set { Prefs.SetInt("sb_lane_duel", value ? 1 : 0); Prefs.Save(); }
         }
 
+        /// <summary>The duel's controls for left hands: the button cluster on the left, the heart on the right.</summary>
+        public static bool DuelLeftHanded
+        {
+            get => Prefs.GetInt("sb_duel_left", 0) == 1;
+            set { Prefs.SetInt("sb_duel_left", value ? 1 : 0); Prefs.Save(); }
+        }
+
+        /// <summary>The duel buttons' size: 0 small (85%), 1 normal, 2 large (115%).</summary>
+        public static int DuelButtonSize
+        {
+            get => Mathf.Clamp(Prefs.GetInt("sb_duel_size", 1), 0, 2);
+            set { Prefs.SetInt("sb_duel_size", Mathf.Clamp(value, 0, 2)); Prefs.Save(); }
+        }
+
+        /// <summary>How solid the duel buttons are when not in use: 0 (70%), 1 (85%), 2 (100%).</summary>
+        public static int DuelButtonOpacity
+        {
+            get => Mathf.Clamp(Prefs.GetInt("sb_duel_opacity", 1), 0, 2);
+            set { Prefs.SetInt("sb_duel_opacity", Mathf.Clamp(value, 0, 2)); Prefs.Save(); }
+        }
+
+        /// <summary>The duel's JUMP button shows (for those who do not like swiping up): off by default.</summary>
+        public static bool DuelJumpButton
+        {
+            get => Prefs.GetInt("sb_duel_jumpbtn", 0) == 1;
+            set { Prefs.SetInt("sb_duel_jumpbtn", value ? 1 : 0); Prefs.Save(); }
+        }
+
+        /// <summary>How eagerly the duel reads taps and swipes: 0 calm (longer swipes), 1 normal, 2 eager.</summary>
+        public static int TouchSensitivity
+        {
+            get => Mathf.Clamp(Prefs.GetInt("sb_touch_sense", 1), 0, 2);
+            set { Prefs.SetInt("sb_touch_sense", Mathf.Clamp(value, 0, 2)); Prefs.Save(); }
+        }
+
+        /// <summary>The rival's emotes and taunts are not shown.</summary>
+        public static bool HideRivalEmotes
+        {
+            get => Prefs.GetInt("sb_hide_rival_em", 0) == 1;
+            set { Prefs.SetInt("sb_hide_rival_em", value ? 1 : 0); Prefs.Save(); }
+        }
+
         /// <summary>The camera's knocks and shakes (some players feel unwell with them): on by default.</summary>
         public static bool ScreenShake
         {

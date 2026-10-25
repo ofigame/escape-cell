@@ -24,6 +24,7 @@ namespace SquashBot.Gameplay
     public partial class GameManager
     {
         private DuelSkillBar skillBar;
+        private bool controlsHooked;
         private float myMeter, rivalMeter;
         private int myCombo, rivalCombo, myComboMove;
         private float myComboAt, rivalComboAt, comboMoveUntil, finishUntil, rivalThinkAt;
@@ -72,9 +73,20 @@ namespace SquashBot.Gameplay
             moveBusy = false;
             rivalHero = 0; // one foi for everyone
             if (skillBar != null) Destroy(skillBar.gameObject);
-            skillBar = DuelSkillBar.Create(chUi.BattleHud, Loc.T("move.s." + MoveSet.Special)); // (the set's special on its button)
+            skillBar = DuelSkillBar.Create(chUi.BattleHud, Loc.T("move.s." + MoveSet.Special), MoveSet.Special); // (the set's special on its button)
             skillBar.Pressed += OnSkill;
-            skillBar.Emoted += e => { ShowEmote(true, e); if (LiveActive) LiveNet.Emote(e); };
+            skillBar.ShieldDown += GuardPress;
+            skillBar.ShieldUp += GuardRelease;
+            skillBar.HeartPressed += UseDuelHeart;
+            skillBar.PausePressed += Pause;
+            skillBar.LeaveConfirmed += ShowMenu;
+            skillBar.SetLive(LiveActive);
+            if (!controlsHooked) { controlsHooked = true; DuelControlsPanel.Changed += () => skillBar?.ApplySettings(); }
+            ui.SetPauseVisible(false); // (the duel's own small pause, top left)
+            BeginGuard();
+            skillBar.Emoted += e => { if (ShowEmote(true, e) && LiveActive) LiveNet.Emote(e); };
+            skillBar.TauntPressed += KnockdownTaunt;
+            emotesUsed = 0;
             skillBar.SetMeters(0f, 0f);
             DropRings();
             myRing = FootRing.Make(new Color(0.25f, 0.6f, 1f), 3f, true); // (wider than foi with its cape and shield; a soft light over it)
@@ -102,6 +114,8 @@ namespace SquashBot.Gameplay
         {
             if (pendingHp != null && LiveActive) ApplyLiveHp(pendingHp); // the last word on health still shows
             pendingHp = null;
+            EndGuard();
+            if (ui != null) ui.SetPauseVisible(true);
             if (skillBar != null) Destroy(skillBar.gameObject);
             skillBar = null;
             DropRings();
@@ -118,11 +132,13 @@ namespace SquashBot.Gameplay
             if (specialStrike || !challengeRun || chPhase != ChPhase.Duel) return;
             myMeter = Mathf.Min(3f, myMeter + MeterGain * MyPace * MyCharge);
             if (!LiveActive) rivalMeter = Mathf.Min(3f, rivalMeter + MeterHurt * MyPace * RivalCharge);
+            stats.mine.hits++;
             myCombo = Time.time - myComboAt < MyComboGap ? myCombo + 1 : 1;
             myComboAt = Time.time;
             rivalCombo = 0;
             if (skillBar != null) skillBar.ShowCombo(myCombo);
-            if (myCombo == HeavyCombo || myCombo == UpperCombo) { myComboMove = myCombo; comboMoveUntil = Time.time + ComboMoveTime; }
+            TrainingNote(TrainingEvent.Hit, myCombo);
+            if (myCombo == HeavyCombo || myCombo == UpperCombo) { myComboMove = myCombo; comboMoveUntil = Time.time + ComboMoveTime; stats.mine.comboOffered++; }
             if (myCombo == HeavyCombo) NoteDuel(DuelGoal.Combo5); // (a five-hit combo)
             if (Time.time < myJumpUntil) AirStrike(true);
             else { Reel(false, myCombo); if (myCombo % 4 == 0) ShieldBash(false); }
@@ -134,6 +150,7 @@ namespace SquashBot.Gameplay
         private void OnFoeParried()
         {
             if (!challengeRun || chPhase != ChPhase.Duel) return;
+            if (hunt.FoeGuard != null) return; // (the defence's perfect guard showed itself: see PerfectShown)
             myCombo = 0;
             myComboMove = 0;
             strikeCooldown = Mathf.Max(strikeCooldown, 0.55f);
@@ -154,6 +171,7 @@ namespace SquashBot.Gameplay
             if (!challengeRun || chPhase != ChPhase.Duel) return;
             myMeter = Mathf.Min(3f, myMeter + MeterHurt * RivalPace * MyCharge);
             if (!LiveActive) rivalMeter = Mathf.Min(3f, rivalMeter + MeterGain * RivalPace * RivalCharge);
+            stats.theirs.hits++; stats.theirs.blows++;
             rivalCombo = Time.time - rivalComboAt < RivalComboGap ? rivalCombo + 1 : 1;
             rivalComboAt = Time.time;
             myCombo = 0;
@@ -173,13 +191,16 @@ namespace SquashBot.Gameplay
             if (robot.Visual != null) StatusFx.On(CombatFeel.RootOf(robot.Visual)).SetDamage(health < 0.25f ? 2 : health < 0.5f ? 1 : 0);
             if (hunt.ChallengeFoeModel != null) { float fh = hunt.ChallengeFoeHealth; StatusFx.On(CombatFeel.RootOf(hunt.ChallengeFoeModel)).SetDamage(fh < 0.25f ? 2 : fh < 0.5f ? 1 : 0); }
             DuelBodiesShown();
+            FaceRest(robot.Visual, health < 0.25f ? FaceMoment.LowHealth : FaceMoment.Idle); // (worried, a drop of sweat, when low)
+            if (hunt.ChallengeFoeModel != null) FaceRest(hunt.ChallengeFoeModel, hunt.ChallengeFoeHealth < 0.25f ? FaceMoment.LowHealth : FaceMoment.Idle);
             if (hunt.ChallengeFoeAt is Vector3 seen) lastFoeAt = seen;
             if (myRing != null) myRing.Follow(robot.IsAlive && robot.Visual != null && robot.Visual.gameObject.activeInHierarchy ? robot.transform.position : (Vector3?)null);
             if (foeRing != null) foeRing.Follow(hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.position : (Vector3?)null);
             UpdatePartnerRings(); // (2 against 2: smaller rings under the partners)
             if (myCombo > 0 && Time.time - myComboAt > MyComboGap) myCombo = 0;
             if (rivalCombo > 0 && Time.time - rivalComboAt > RivalComboGap) rivalCombo = 0;
-            if (myComboMove > 0 && Time.time > comboMoveUntil) myComboMove = 0;
+            if (myComboMove > 0 && Time.time > comboMoveUntil) { myComboMove = 0; stats.mine.comboMissed++; }
+            stats.Tick(dt, myMeter >= UltiCost, rivalMeter >= UltiCost);
             DuelSkillBar.Move? ctx = null;
             if (Time.time < finishUntil) ctx = DuelSkillBar.Move.Finish;
             else if (chPhase == ChPhase.Duel && !moveBusy)
@@ -189,7 +210,10 @@ namespace SquashBot.Gameplay
                 else if (myComboMove == HeavyCombo) ctx = DuelSkillBar.Move.Heavy;
             }
             skillBar.SetContext(ctx);
-            skillBar.SetMeters(myMeter, rivalMeter);
+            if (ctx.HasValue) skillBar.SetContextTime(ctx == DuelSkillBar.Move.Finish ? (finishUntil - Time.time) / 2.2f : ctx == DuelSkillBar.Move.Breaker ? 1f : (comboMoveUntil - Time.time) / ComboMoveTime);
+            skillBar.SetMeters(myMeter, rivalMeter, UltiCost);
+            skillBar.SetHearts(duelHearts, chPhase == ChPhase.Duel && health < 0.999f);
+            UpdateGuard(dt);
             if (!LiveActive && chPhase == ChPhase.Duel && !moveBusy && !DuelCinematic) RivalMoves(); // (never inside a big moment)
             // Standing, foi keeps turned to the rival (after a leap, a shove, a step back: never its back to it)
             if (chPhase == ChPhase.Duel && robot.IsIdle && hunt.ChallengeFoeAt is Vector3 rivalAt) robot.TurnTo(rivalAt);
@@ -225,8 +249,11 @@ namespace SquashBot.Gameplay
                 {
                     bool upper = move == DuelSkillBar.Move.Upper;
                     if (myComboMove != (upper ? UpperCombo : HeavyCombo) || HuntSystem.Chebyshev(robot.Position, foeTile) > StrikeReach + 1) return;
+                    if (!GuardCanStrike) return; // (blocking, staggered or dazed)
+                    if (!LiveActive) BotReadsBigMove(false); // (the rival may see it coming and step out of it)
                     myComboMove = 0;
                     myCombo = 0;
+                    stats.mine.comboUsed++;
                     robot.Strike(foeAt);
                     ComboMoveShown(true, upper);
                     SlashFx.Create(robot.transform.position, foeAt, upper ? new Color(1f, 0.3f, 0.2f) : new Color(1f, 0.7f, 0.25f), upper ? 2.4f : 1.8f);
@@ -237,9 +264,14 @@ namespace SquashBot.Gameplay
                     if (LiveActive) LiveNet.Special(upper ? 3 : 2);
                     else
                     {
-                        HitFoe((upper ? UpperHit : HeavyHit) * DuelPower.ComboTimes(weapon ?? Armory.Equipped)); // (an axe's a fifth harder)
-                        if (upper) PowerSlow(0.3f, 0.35f); // (the knockdown: a breath of slow motion)
-                        hunt.StunFoe(upper ? 1.8f : 0.4f); // (short: the rival is back in the fight at once)
+                        HitFoe((upper ? UpperHit : HeavyHit) * DuelPower.ComboTimes(weapon ?? Armory.Equipped), upper ? BlowKind.Knockdown : BlowKind.PowerHit); // (an axe's a fifth harder)
+                        bool landed = lastGuardFoe == DefenseOutcome.Hit;
+                        if (landed) TrainingNote(upper ? TrainingEvent.Knockdown : TrainingEvent.PowerHit);
+                        else if (!upper && (lastGuardFoe == DefenseOutcome.Blocked || lastGuardFoe == DefenseOutcome.Broke)) TrainingNote(TrainingEvent.PowerThroughBlock);
+                        if (upper && landed) PowerSlow(0.3f, 0.35f); // (the knockdown: a breath of slow motion)
+                        if (landed) hunt.StunFoe(upper ? 1.8f : 0.4f); // (short: the rival is back in the fight at once)
+                        else if (lastGuardFoe == DefenseOutcome.Dodged) strikeCooldown = Mathf.Max(strikeCooldown, 0.4f + Def.whiffRecovery); // (into the air: slower back)
+                        if (upper && !landed) { if (colosseum != null) colosseum.Cheer(1, 0.6f); break; } // (blocked or dodged: no throw)
                     }
                     if (colosseum != null) colosseum.Cheer(0, 0.9f);
                     if (upper) cameraRig.StartCoroutine(BigMoment(false)); // the knockdown: a big moment
@@ -249,6 +281,7 @@ namespace SquashBot.Gameplay
                     if (myMeter < 1f || rivalCombo < 2) return;
                     if (Time.time < rivalIronUntil) { skillBar.Shout(Loc.T("move.u.IronBody"), new Color(0.85f, 0.85f, 0.9f)); return; } // (its iron body: no breaking it)
                     PlayStyle.Breaker();
+                    stats.mine.breakers++;
                     myMeter -= 1f;
                     rivalCombo = 0;
                     Shockwave.Create(robot.transform.position, 2.4f, new Color(0.4f, 0.8f, 1f));
@@ -284,9 +317,12 @@ namespace SquashBot.Gameplay
         private static Vector3 Flat(Vector3 v) { v.y = 0f; return v; }
 
         /// <summary>A move's damage on the AI rival: through its shield and health like a blow, but no combo or bar for it.</summary>
-        private void HitFoe(float times)
+        private void HitFoe(float times, BlowKind kind = BlowKind.Special, float cost = -1f)
         {
             if (!hunt.ChallengeFoeTile.HasValue) return;
+            strikeKind = kind;
+            strikeCost = cost;
+            lastGuardFoe = DefenseOutcome.Hit;
             var w = weapon ?? Armory.Equipped;
             int damage = Mathf.RoundToInt(MyBlow(w) * times * MyBlowFactor());
             specialStrike = true;
@@ -296,10 +332,13 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>A move's damage on foi from the AI rival: its own blow times this, through foi's shield like a blow.</summary>
-        private void HurtMe(float times)
+        private void HurtMe(float times, BlowKind kind = BlowKind.Special, float cost = -1f)
         {
             float share = hunt.ChallengeFoeShare * times;
             if (share <= 0f) return;
+            incomingKind = kind;
+            incomingCost = cost;
+            lastGuardMe = DefenseOutcome.Hit;
             hitShareOverride = share;
             moveHit = true;
             OnBlockImpact(robot.Position);
@@ -418,11 +457,11 @@ namespace SquashBot.Gameplay
             if (mine)
             {
                 if (LiveActive) LiveNet.Special(1);
-                else HitFoe(SpecialTimes);
+                else HitFoe(SpecialTimes, BlowKind.Air);
                 if (colosseum != null) colosseum.Cheer(0, 0.9f);
             }
-            else HurtMe(SpecialTimes);
-            yield return BigMoment(!mine);
+            else HurtMe(SpecialTimes, BlowKind.Air);
+            if (LiveActive || Landed(mine)) yield return BigMoment(!mine); // (blocked or dodged: nobody is thrown)
             moveBusy = false;
         }
 
@@ -574,17 +613,23 @@ namespace SquashBot.Gameplay
             // where it lands: the head (a blow from overhead, now and then another) or the body
             var striker = meStruck ? hunt.ChallengeFoeModel : robot.Visual;
             var held = striker != null ? striker.GetComponentInChildren<HeldWeapon>() : null;
-            bool toHead = (held != null && held.Overhead) || Random.value < 0.25f;
-            var at = toHead ? skin.HeadPoint : skin.ChestPoint;
-            // the blow seen: a white flash of sparks, the weapon's colour flying off, a ring, the camera knocked (harder in a combo)
-            var wDef = meStruck ? (rival != null ? Armory.Get(rival.weapon) : null) : Armory.Equipped;
-            var glow = wDef != null ? WeaponModels.GlowOf(wDef) : new Color(1f, 0.8f, 0.4f);
-            fx.Burst(at, new Color(1f, 0.95f, 0.7f), new Color(3f, 2.6f, 1.6f), 18, 4.2f);
-            fx.Burst(at, glow, glow * 2.4f, 12 + 2 * Mathf.Min(inARow, 5), 5.5f);
-            Shockwave.Create(at - Vector3.up * 0.1f, 0.6f + 0.08f * Mathf.Min(inARow, 5), Color.Lerp(new Color(1f, 0.95f, 0.75f), glow, 0.4f));
             // the feel (freeze, the camera's knock along the blow, the picture pushed back, the family's impact sound) on
             // the striker's swing's contact: the same for the player and the rival
             var blow = held != null ? (held.Current ?? CombatLibrary.Family(held.Family).Blow(0)) : CombatLibrary.Family(WeaponFamily.Sword).Blow(0);
+            bool toHead = blow.height == HitHeight.High || (held != null && held.Overhead);
+            var at = toHead ? skin.HeadPoint : skin.ChestPoint;
+            // the blow seen: on the body a white flash of sparks, the weapon's colour flying off, a ring (the camera knocked,
+            // harder in a combo); on the head a cartoon puff and stars instead (CombatFeel.HeadStruck): robots' bits only off the body
+            var wDef = meStruck ? (rival != null ? Armory.Get(rival.weapon) : null) : Armory.Equipped;
+            var glow = wDef != null ? WeaponModels.GlowOf(wDef) : new Color(1f, 0.8f, 0.4f);
+            if (!toHead)
+            {
+                fx.Burst(at, new Color(1f, 0.95f, 0.7f), new Color(3f, 2.6f, 1.6f), 18, 4.2f);
+                fx.Burst(at, glow, glow * 2.4f, 12 + 2 * Mathf.Min(inARow, 5), 5.5f);
+                Shockwave.Create(at - Vector3.up * 0.1f, 0.6f + 0.08f * Mathf.Min(inARow, 5), Color.Lerp(new Color(1f, 0.95f, 0.75f), glow, 0.4f));
+            }
+            FaceFor(model, blow.strength >= HitStrength.Heavy || inARow >= 4 ? FaceMoment.HeavyHit : FaceMoment.LightHit);
+            if (blow.strength >= HitStrength.Heavy || inARow >= 4) HatFor(model, 2, from); else if (blow.strength >= HitStrength.Medium || inARow >= 2) HatFor(model, 1, from);
             // the body's answer (by the blow's direction, height and strength; harder deeper into a combo) on the contact
             CombatFeel.Hit(striker, model, blow, 1f + 0.12f * Mathf.Min(Mathf.Max(0, inARow - 1), 5));
             if (inARow >= 4 && !LiveActive) Push(meStruck, from, 1);
@@ -703,6 +748,8 @@ namespace SquashBot.Gameplay
             var model = meStruck ? robot.Visual : hunt.ChallengeFoeModel;
             var skin = model != null ? model.GetComponentInChildren<SkinnedHero>() : null;
             if (skin != null) skin.Launch(from, height);
+            FaceFor(model, FaceMoment.Launched); // (mouth wide open, eyes big)
+            HatFor(model, 2, from);
             if (!LiveActive) Push(meStruck, from, tiles);
         }
 
@@ -783,10 +830,11 @@ namespace SquashBot.Gameplay
                 if (!LiveActive)
                 {
                     float part = i == 4 ? UltimateHit * 0.5f : UltimateHit * 0.125f;
-                    if (mine) HitFoe(part); else HurtMe(part);
+                    float cost = Def.ultiCost * part / UltimateHit; // (the whole ultimate blocked costs the shield its 60)
+                    if (mine) HitFoe(part, BlowKind.Ulti, cost); else HurtMe(part, BlowKind.Ulti, cost);
                 }
                 if (i < 4) DriveBack(mine); // (struck, it is driven back; the one striking follows it up)
-                if (i == 4) { CombatFeel.UltiFinal(caster, mine ? hunt.ChallengeFoeModel : robot.Visual); yield return BigMoment(!mine); } // (the final: the longest freeze, a white flash)
+                if (i == 4) { CombatFeel.UltiFinal(caster, mine ? hunt.ChallengeFoeModel : robot.Visual); if (LiveActive || Landed(mine)) yield return BigMoment(!mine); } // (the final: the longest freeze, a white flash)
             }
             if (casterSkin != null) casterSkin.StopMove();
             ultimateOn = false;
@@ -808,6 +856,7 @@ namespace SquashBot.Gameplay
         {
             if (Time.time < myJumpReadyAt || !robot.IsAlive) return;
             myJumpReadyAt = Time.time + 0.9f;
+            tutJumped = true;
             if (challengeRun) PlayStyle.Jump();
             myJumpUntil = Time.time + 0.65f;
             var skin = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null;
@@ -823,6 +872,7 @@ namespace SquashBot.Gameplay
         private void LaneJump(Vector2 flick, bool curl = false)
         {
             if (Time.time < myJumpReadyAt || !robot.IsAlive || moveBusy || DuelCinematic) return;
+            tutJumped = true;
             float lean = Mathf.Atan2(Mathf.Abs(flick.x), flick.y) * Mathf.Rad2Deg; // (0 straight up .. 70 nearly flat)
             if (lean < 12f && !curl) { Jump(); return; }
             if (lean < 12f) { myJumpReadyAt = Time.time + 0.9f; myJumpUntil = Time.time + 0.65f; if (challengeRun) PlayStyle.Jump(); cameraRig.StartCoroutine(LaneLeap(robot.Position, true)); return; } // (curled: a somersault on the spot)
@@ -965,13 +1015,15 @@ namespace SquashBot.Gameplay
                 cameraRig.StartCoroutine(DustAfter(airman.position, 0.35f));
             }
             var at = struck != null ? struck.position : robot.transform.position;
+            if (!LiveActive && mine) { HitFoe(JumpExtra, BlowKind.Air); if (!Landed(true)) return; } // (the extra on the rival first: blocked, no throw)
+            if (mine) TrainingNote(TrainingEvent.AirHit);
             Fling(!mine, mine ? robot.transform.position : (hunt.ChallengeFoeAt ?? at), 1f, 1); // knocked off its feet, onto its back
             if (mine) hunt.StunFoe(0.7f);
             fx.Burst(at + Vector3.up * 1.4f, new Color(1f, 0.9f, 0.5f), new Color(3f, 2.6f, 1f), 24, 6f);
             cameraRig.Shake(0.5f);
             AudioManager.PlaySfx(Sfx.Impact, 1f, 1.2f);
             skillBar?.Shout(Loc.T("duel.airHit"), mine ? new Color(1f, 0.85f, 0.3f) : new Color(1f, 0.45f, 0.4f));
-            if (!LiveActive) { if (mine) HitFoe(JumpExtra); else HurtMe(JumpExtra); }
+            if (!LiveActive && !mine) HurtMe(JumpExtra, BlowKind.Air);
         }
 
         /// <summary>The AI rival jumps in and strikes from the air now and then.</summary>
@@ -988,8 +1040,8 @@ namespace SquashBot.Gameplay
             if (Flat(hunt.ChallengeFoeAt.Value - robot.transform.position).magnitude > 3.6f) yield break;
             hunt.TurnFoe(robot.transform.position - hunt.ChallengeFoeAt.Value);
             SlashFx.Create(hunt.ChallengeFoeAt.Value, robot.transform.position, new Color(1f, 0.4f, 0.3f), 1.6f);
-            HurtMe(1f);
-            AirStrike(false);
+            HurtMe(1f, BlowKind.Air);
+            if (Landed(false)) AirStrike(false); // (blocked or dodged: no throw)
         }
 
         // ---------- The finish ----------
@@ -1037,14 +1089,25 @@ namespace SquashBot.Gameplay
         private float emoteAt;
 
         /// <summary>An emote over a foi's head (the player's in blue, the rival's in red), now and then, not a flood.</summary>
-        private void ShowEmote(bool mine, int e)
+        private bool ShowEmote(bool mine, int e)
         {
-            if (mine && Time.unscaledTime < emoteAt) return;
-            if (mine) emoteAt = Time.unscaledTime + 1.5f;
+            if (!mine && SaveData.HideRivalEmotes) return false; // (the setting: the rival's emotes not shown)
+            if (mine && (Time.unscaledTime < emoteAt || emotesUsed >= EmotesAMatch)) return false; // (one every 3 s, 15 a match)
+            if (mine) { emoteAt = Time.unscaledTime + EmoteGap; emotesUsed++; }
+            var who = mine ? robot.Visual : hunt.ChallengeFoeModel;
             var at = mine ? robot.transform.position : hunt.ChallengeFoeAt ?? lastFoeAt;
-            FloatAt(at + Vector3.up * 1.3f, Loc.T("duel.em." + Mathf.Clamp(e, 0, Emotes.Count - 1)), mine ? new Color(0.45f, 0.75f, 1f) : new Color(1f, 0.5f, 0.45f));
+            bool taunt = FaceTaunts.IsTaunt(e);
+            // a face taunt: the face makes it for a moment, its name in a little balloon over the head
+            if (taunt) FaceFor(who, FaceTaunts.Of(e));
+            string text = taunt ? Loc.T("taunt." + FaceTaunts.Of(e)) : Loc.T("duel.em." + Mathf.Clamp(e, 0, Emotes.Count - 1));
+            FloatAt(at + Vector3.up * (taunt ? 2.2f : 1.3f), text, mine ? new Color(0.45f, 0.75f, 1f) : new Color(1f, 0.5f, 0.45f));
             AudioManager.PlaySfx(Sfx.Click, 0.7f, mine ? 1.5f : 1.2f);
+            return true;
         }
+
+        private int emotesUsed;
+        private const float EmoteGap = 3f;
+        private const int EmotesAMatch = 15;
 
         /// <summary>The AI rival's word after a knock-down (now and then): a laugh when it scored, a growl when it fell.</summary>
         private IEnumerator RivalEmote(bool rivalScored)
@@ -1061,6 +1124,9 @@ namespace SquashBot.Gameplay
         private void RivalMoves()
         {
             if (Time.time < rivalThinkAt || !hunt.ChallengeFoeAt.HasValue || LabOn) return; // (the lab's rival never fights back)
+            if (tutorialOn) return; // (the guided duel: the rival only does what the step needs)
+            if (trainingOn) return; // (the training room's dummy does only what its mode says)
+            if (rivalGuard.Holding || rivalGuard.Staggered(Time.time) || rivalGuard.Dazed(Time.time)) return; // (behind its shield, staggered or dazed: no move)
             var t = botTuning;
             rivalThinkAt = Time.time + (t != null ? Mathf.Max(0.2f, t.React()) : 0.45f); // (never at once: a human's reaction)
             var foeAt = hunt.ChallengeFoeAt.Value;
@@ -1091,6 +1157,7 @@ namespace SquashBot.Gameplay
                 rivalMeter = Mathf.Max(0f, rivalMeter - 1f);
                 myCombo = 0;
                 myComboMove = 0;
+                stats.mine.brokenByRival++; stats.theirs.breakers++;
                 strikeCooldown = Mathf.Max(strikeCooldown, 0.9f); // foi's swing knocked aside
                 BreakerShown(true);
                 Shockwave.Create(foeAt, 2.4f, new Color(1f, 0.45f, 0.4f));
@@ -1112,7 +1179,7 @@ namespace SquashBot.Gameplay
                 SlashFx.Create(foeAt, robot.transform.position, new Color(1f, 0.35f, 0.3f), 1.8f);
                 Shockwave.Create(robot.transform.position, 1.8f, new Color(1f, 0.4f, 0.3f));
                 cameraRig.Shake(0.45f);
-                HurtMe(HeavyHit);
+                HurtMe(HeavyHit, BlowKind.PowerHit);
                 return;
             }
             if (rivalMeter >= 1f && !keepsBar && Random.value < (dist >= 3f ? 0.22f : 0.1f) + 0.15f * bold + (t != null && t.persona == Persona.Runner && dist >= 3f ? 0.2f : 0f))
@@ -1155,6 +1222,7 @@ namespace SquashBot.Gameplay
                 case 4: cameraRig.StartCoroutine(Ultimate(false, leap: false)); break;
                 case 5:
                     myCombo = 0; myComboMove = 0;
+                    stats.mine.brokenByRival++;
                     strikeCooldown = Mathf.Max(strikeCooldown, 0.9f);
                     Shockwave.Create(foeAt, 2.4f, new Color(1f, 0.45f, 0.4f));
                     skillBar?.Shout(Loc.T("duel.broken"), new Color(1f, 0.45f, 0.4f));

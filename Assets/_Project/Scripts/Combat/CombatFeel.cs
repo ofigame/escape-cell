@@ -157,6 +157,9 @@ namespace SquashBot.Combat
         /// A blow stopped by a shield: the striker's weapon bounces off (its follow-through skipped), both freeze a moment
         /// (60 ms), the one blocking is pushed back a little (a tenth of a tile).
         /// </summary>
+        /// <summary>A blow landed on a head (where, how hard 0..1): the game shows a puff of cloud and a few stars.</summary>
+        public static event System.Action<Vector3, float> HeadStruck;
+
         public static void Blocked(Transform attacker, Transform defender)
         {
             if (defender == null) return;
@@ -213,7 +216,9 @@ namespace SquashBot.Combat
             var from = attacker != null ? attacker.position : victim.position - victim.forward;
             if (body != null) body.React(data.direction, data.height, data.strength, from, intensity);
             if (!(s.lowQualityTrims && GraphicsQuality.Current == GraphicsTier.Low)) StatusFx.On(victimRoot).Flash(s.hitFlashMs / 1000f);
-            if (data.strength >= HitStrength.Heavy && body != null && !(s.lowQualityTrims && GraphicsQuality.Current == GraphicsTier.Low))
+            // (a robot's bits only off the body: a blow to the head is a cartoon puff and a few stars, the game draws them)
+            if (data.height == HitHeight.High && body != null) HeadStruck?.Invoke(body.HeadPoint, data.strength >= HitStrength.Heavy ? 1f : 0.6f);
+            else if (data.strength >= HitStrength.Heavy && body != null && !(s.lowQualityTrims && GraphicsQuality.Current == GraphicsTier.Low))
                 ScrapBits.Spawn(body.ChestPoint, dir, data.strength == HitStrength.Heavy ? 2 : 3, Mathf.Max(0.3f, victimRoot.lossyScale.y), victim.position.y);
             if (data.strength >= HitStrength.Heavy) Haptics.Pulse(data.strength >= HitStrength.Finisher ? 90 : 50, data.strength >= HitStrength.Finisher ? 1f : 0.6f);
             Contacted?.Invoke(attacker, victim, data);

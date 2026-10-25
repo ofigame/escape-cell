@@ -548,6 +548,39 @@ namespace SquashBot.Gameplay
         /// <summary>How well the AI rival fights back (0..1, by its rank and boldness): how often it parries.</summary>
         public float FoeSkill = 0.5f;
 
+        /// <summary>The duel's defence for the AI rival: asked as foi's blow lands (its damage), it tells how the blow met
+        /// the rival's defence; a blocked blow takes <see cref="FoeGuardThrough"/> of its damage. Null: the old parries.</summary>
+        public Func<int, Combat.DefenseOutcome> FoeGuard;
+        public float FoeGuardThrough = 1f;
+        /// <summary>foi's blow was blocked by the rival (no combo, no bar).</summary>
+        public event Action ChallengeFoeBlocked;
+        /// <summary>The rival holds its shield up: it stands its ground, turned to foi, and starts no blow.</summary>
+        public bool FoeHolding;
+        /// <summary>
+        /// The floors' perfect guard: the robot whose blow it met (the one nearest <paramref name="from"/>) staggers — its next
+        /// blow waits <paramref name="seconds"/>, it flashes and reels.
+        /// </summary>
+        public void StaggerAttacker(Vector3 from, float seconds)
+        {
+            Guard best = null;
+            float bd = 2.5f * 2.5f;
+            foreach (var g in guards)
+            {
+                if (g.dead || g.root == null) continue;
+                float d = (g.root.position - from).sqrMagnitude;
+                if (d < bd) { bd = d; best = g; }
+            }
+            if (best == null) return;
+            best.cooldown = Mathf.Max(best.cooldown, seconds);
+            best.windup = -1f;
+            best.flash = 1f;
+            best.Flash();
+            if (best.model != null) { var sk = best.model.GetComponentInChildren<SkinnedHero>(); if (sk != null) sk.Stagger(robot.transform.position, 0.7f); }
+        }
+
+        /// <summary>Seconds until the rival's blow lands (its wind-up), or -1 when it is not winding up.</summary>
+        public float FoeWindLeft { get; private set; } = -1f;
+
         /// <summary>The AI rival parried a blow of foi's (foi's combo is broken; it strikes straight back).</summary>
         public event Action FoeParried;
 

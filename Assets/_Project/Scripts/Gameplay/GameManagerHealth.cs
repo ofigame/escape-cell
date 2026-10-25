@@ -66,6 +66,14 @@ namespace SquashBot.Gameplay
             if (!HealthEnabled) return false;
             if (hurtCooldown > 0f) return true; // still blinking from the last hit
             if (DuelCinematic && !moveHit) return true; // nothing lands while a big moment plays (but the move itself)
+            // the floors' defence: a robot's blow met by foi's shield (blocked: a quiet graze; guarded perfectly: nothing)
+            float floorThrough = 1f;
+            bool floorGrazed = false;
+            if (FloorGuardOn && hitShareOverride >= 0f && level.mission == MissionType.Hunt)
+            {
+                floorThrough = FloorGuard(out floorGrazed);
+                if (floorThrough <= 0f) return true;
+            }
             if (RuleOneLife) { health = 0f; RefreshHealthBar(); return false; } // (one life: the first blow ends it)
             float share = hitShareOverride >= 0f ? hitShareOverride
                 : level != null && level.mission == MissionType.Hunt && crushed ? level.crateShare
@@ -77,10 +85,25 @@ namespace SquashBot.Gameplay
             // A robot's or vanG's blow is already its points over foi's health (no extra toughness); the floor's own dangers still ease off.
             float damage = challengeRun && chPhase == ChPhase.Duel ? share : share * (hitShareOverride >= 0f ? 1f : toughness) * (1f - Shop.ArmorShare);
             damage = Challenge.RankGuard(damage); // the rank reached takes some off (beside the workshop's armour)
+            damage *= floorThrough;
+            bool grazed = floorGrazed;
             if (challengeRun && chPhase == ChPhase.Duel)
             {
+                damage = GuardMe(damage); // the defence: a block lets a fifth through, a perfect guard or a dodge nothing
+                if (damage <= 0f) return true;
+                grazed = lastGuardMe == Combat.DefenseOutcome.Blocked || lastGuardMe == Combat.DefenseOutcome.Broke;
                 damage = MovesOnMyHurt(damage); // the moves: untouchable, the mirror, the rival's rage, the sturdy spare life
                 if (damage <= 0f) return true;
+                lastHurtAt = Time.time;
+                lastHurtDamage = Mathf.Min(damage, health);
+            }
+            if (grazed && health - damage > 0.001f)
+            {
+                // a blocked blow's graze: the health goes down quietly (the block showed itself)
+                health -= damage;
+                FloatAt(GridView.ToWorld(p), "-" + Mathf.Max(1, Mathf.RoundToInt(damage * 100f)) + "%", new Color(0.6f, 0.85f, 1f));
+                RefreshHealthBar();
+                return true;
             }
             // The duel: foi's health gone ends the round (the next one starts with it full again).
             if (challengeRun && chPhase == ChPhase.Duel && health - damage <= 0.001f)

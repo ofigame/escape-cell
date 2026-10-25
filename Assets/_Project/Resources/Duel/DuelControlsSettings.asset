@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb2055290bec9a74995a5db5db9ca005, type: 3}
+  m_Name: DuelControlsSettings
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.UI.DuelControlsSettings
+  unitsPerDp: 2.63
+  shieldDp: 76
+  ultiDp: 82
+  specialDp: 62
+  contextDp: 62
+  heartDp: 50
+  jumpDp: 56
+  pauseDp: 40
+  emoteDp: 44
+  gapDp: 10
+  edgeDp: 16
+  deadZoneDp: 11
+  sizeSteps:
+  - 0.85
+  - 1
+  - 1.15
+  opacitySteps:
+  - 0.7
+  - 0.85
+  - 1
+  pressScale: 0.9
+  pressSeconds: 0.06
+  meterHeight: 20
+  meterGap: 10

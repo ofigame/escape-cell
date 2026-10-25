@@ -40,6 +40,7 @@ namespace SquashBot.EditorTools
                 AssetDatabase.AddObjectToAsset(p.skyStrike, p);
             }
             AssetDatabase.SaveAssets();
+            DuelAssetsCreator.EnsureAssets(); // (the duel experience's tuning too)
         }
 
         private static void Save(ScriptableObject so, string name)

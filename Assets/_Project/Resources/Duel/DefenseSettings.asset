@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce1fd38fe88621343af4f58338041ef6, type: 3}
+  m_Name: DefenseSettings
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.DefenseSettings
+  grazeShare: 0.2
+  walkWhileBlocking: 0.5
+  maxDurability: 100
+  shieldMasterDurability: 130
+  blowCost:
+  - 5
+  - 7
+  - 10
+  - 12
+  powerHitCost: 35
+  airCost: 25
+  knockdownCost: 50
+  ultiCost: 60
+  ultiThrough: 0.5
+  regenDelay: 0.8
+  regenPerSecond:
+  - 30
+  - 30
+  - 32
+  - 34
+  - 36
+  breakDaze: 1
+  breakReturn: 3
+  breakReturnShare: 0.5
+  lowShare: 0.25
+  perfectBefore: 0.12
+  perfectAfter: 0.03
+  staggerSeconds: 0.5
+  perfectNextBlow: 0.3
+  perfectMeter: 0.5
+  tapRelease: 0.2
+  tapLockout: 0.35
+  tutorialWindow: 0.3
+  dodgeTiles: 1
+  dodgeSeconds: 0.2
+  dodgeInvulnerable: 0.25
+  dodgeCooldown: 1.2
+  leanInvulnerable: 0.15
+  whiffRecovery: 0.3
+  botBlock:
+  - 0.15
+  - 0.25
+  - 0.35
+  - 0.45
+  botPerfect:
+  - 0.03
+  - 0.1
+  - 0.2
+  - 0.3
+  botUltiDodge:
+  - 0.2
+  - 0.35
+  - 0.5
+  - 0.65
+  botRelease:
+  - 0.25
+  - 0.5
+  - 0.75
+  - 0.92
+  defensiveTimes: 1.5
+  aggressiveTimes: 0.5
+  runnerDodgeTimes: 1.5
+  botMistimed: 0.35
+  difficultyStep: 0.12
+  habitWindow: 30
+  habitMax: 0.25
+  botHoldMin: 0.5
+  botHoldMax: 1.4
+  shieldWarDurability: 2
+  shieldWarPerfectMeter: 1
