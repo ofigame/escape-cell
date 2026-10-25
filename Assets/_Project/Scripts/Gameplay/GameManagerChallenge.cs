@@ -817,6 +817,11 @@ namespace SquashBot.Gameplay
         /// The duel's camera: fixed, straight from the stage's open side (east), close and a little above, following the
         /// middle of the two foi and backing off as they move apart (the partners in view in 2v2). It never turns.
         /// </summary>
+        /// <summary>How far the duel camera may slide sideways on a city stage (its landmark kept in the frame).</summary>
+        private const float CityPan = 1.5f;
+        /// <summary>A city stage's first shot: how much lower than the others and how far its head is tilted up.</summary>
+        private const float CityStartLower = 5f, CityStartTilt = 13f;
+
         private void FrontPose(out Vector3 pos, out Quaternion rot)
         {
             var me = robot.transform.position;
@@ -828,6 +833,22 @@ namespace SquashBot.Gameplay
             foreach (var p in points) mid += p;
             mid /= points.Count;
             var right = Vector3.Cross(Vector3.up, -sideDir);
+            // a stage with a wide landmark: the camera slides with the fight, but its view never past the landmark's ends;
+            // a city's tower: the view held on it (the camera barely slides sideways, only nearer and further)
+            if (colosseum != null && colosseum.HasLandmark)
+            {
+                float hf = 2f * Mathf.Atan(Mathf.Tan(Combat.DuelCameraSettings.Current.fov * Mathf.Deg2Rad * 0.5f) * Mathf.Max(0.3f, cameraRig.Cam.aspect));
+                float w = Mathf.Max(5f, mid.x + sideDist - colosseum.LandmarkX) * Mathf.Tan(hf * 0.5f);
+                float lo = colosseum.LandmarkLeft + w, hi = colosseum.LandmarkRight - w;
+                float z = lo <= hi ? Mathf.Clamp(mid.z, lo, hi) : (colosseum.LandmarkLeft + colosseum.LandmarkRight) * 0.5f;
+                mid.z = Mathf.Clamp(z, boardCentre.z - CityPan * 3f, boardCentre.z + CityPan * 3f); // (never so far the fight leaves the view)
+            }
+            else if (Stage.theme == DuelStands.Theme.Istanbul || Stage.theme == DuelStands.Theme.Bosphorus)
+            {
+                float side = Vector3.Dot(mid - boardCentre, right);
+                mid -= right * (side - Mathf.Clamp(side, -CityPan, CityPan));
+            }
+            CityFar();
             float half = 0f, depth = 0f;
             foreach (var p in points) { half = Mathf.Max(half, Mathf.Abs(Vector3.Dot(p - mid, right))); depth = Mathf.Max(depth, Vector3.Dot(p - mid, sideDir)); }
             var cs = Combat.DuelCameraSettings.Current;
@@ -844,8 +865,16 @@ namespace SquashBot.Gameplay
             rot = Quaternion.LookRotation(focus - pos);
         }
 
+        /// <summary>A city stage: the camera sees far (Galata's tower far up its street, the palace far across the Bosphorus),
+        /// from the first shot of the stage on.</summary>
+        private void CityFar()
+        {
+            if ((Stage.theme == DuelStands.Theme.Istanbul || Stage.theme == DuelStands.Theme.Bosphorus) && cameraRig.Cam.farClipPlane < 560f) cameraRig.Cam.farClipPlane = 560f;
+        }
+
         private void BoardPose(out Vector3 pos, out Quaternion rot)
         {
+            CityFar();
             if (chPhase == ChPhase.Duel) { FrontPose(out pos, out rot); DancePose(ref pos, ref rot); return; }
             sideKnown = false;
             var seat = boardCentre + new Vector3(BoardW * 0.5f + 11f, 12.5f, 0f);
@@ -862,6 +891,12 @@ namespace SquashBot.Gameplay
             // The grove: the view a little further in (the platform lower on the screen, its stands and trees above it in view)
             if (DuelStands.IsMade(Stage.theme)) pos += new Vector3(-4.5f, 0f, 0f) - look * 5f; // (and a little further back: all of it in view)
             rot = Quaternion.LookRotation(look) * Quaternion.Euler(-3.5f, 0f, 0f); // (its head up a little: less floor under the platform, still some room under it)
+            // a city stage: lower and its head well up, the landmark in the first shot (Galata's tower, the Maiden's Tower, Big Ben)
+            if (Stage.theme == DuelStands.Theme.Istanbul || Stage.theme == DuelStands.Theme.Bosphorus || Stage.theme == DuelStands.Theme.London)
+            {
+                pos += Vector3.down * CityStartLower;
+                rot *= Quaternion.Euler(-CityStartTilt, 0f, 0f);
+            }
             OrbitPose(ref pos, ref rot, me, foe);
             DancePose(ref pos, ref rot);
         }

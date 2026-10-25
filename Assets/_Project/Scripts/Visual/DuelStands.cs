@@ -249,6 +249,7 @@ namespace SquashBot.Visual
             var flagScale = new Vector3(0.34f, 0.22f, 0.02f) * crowdSize;
             DrawMadeFans(time);
             DriftSea(time);
+            DriveMovers(dt);
             foreach (var b in batches)
             {
                 if (b.m == null) continue;
@@ -696,7 +697,7 @@ namespace SquashBot.Visual
             // mossy mounds and patches here and there (the ground is not a flat board)
             var mossLight = Matte(look.mound, 0.2f);
             var mossDark = Matte(look.bank, 0.2f);
-            for (int i = 0; i < (look.street ? 0 : 34); i++)
+            for (int i = 0; i < (look.city != null ? 0 : 34); i++) // (a city: no mossy mounds)
             {
                 float ang = R(0f, Mathf.PI * 2f), dist = R(Mathf.Max(hw, hd) * 1.15f, 30f);
                 if (Mathf.Cos(ang) > 0.25f) ang += Mathf.PI * 0.5f * Mathf.Sign(Mathf.Sin(ang) + 1e-4f); // (none in front of the camera: flat slabs there)
@@ -721,7 +722,7 @@ namespace SquashBot.Visual
             float platR = Mathf.Max(pb.size.x, pb.size.z) * 0.5f; // (the stands stand clear of the platform's rim)
             platRadius = platR * look.rim;
             int southTeam = playerSouth ? 0 : 1;
-            if (look.street)
+            if (look.city != null) // (a city's own surroundings, with or without its stands)
             {
                 if (look.city == "kiz") MaidenQuay(p, look, ground, platR, southTeam, rng);
                 else if (look.city == "london") BigBenSquare(p, look, ground, platR, southTeam, rng);
@@ -787,7 +788,7 @@ namespace SquashBot.Visual
                 // and behind the middle, between the two stands (big ones: over the stands' roofs)
                 foreach (var deg in new[] { 165f, 180f, 195f }) spots.Add(Around(deg + R(-3f, 3f), platR + R(10f, 13f)));
             }
-            if (look.street) spots.Clear(); // (a street: its houses stand where the trees would)
+            if (look.city != null) spots.Clear(); // (a city: its own trees and houses stand where the land's would)
             foreach (var spot in spots)
             {
                 var tree = MadeModel(p, look, "tree_" + (1 + rng.Next(look.trees)), false);
@@ -890,7 +891,7 @@ namespace SquashBot.Visual
             else if (look.snow)
                 GroveParticles("Snow", Weather.AlphaMaterial, new Vector3(centre.x - 3f, floorY + 11f, centre.z), new Vector3(40f, 1f, 40f),
                     600, 70f, 8f, look.snowColour, 0.08f, 0.17f, look.snowFall > 1f ? 0.4f : 1.1f, look.snowFall); // (petals drift more)
-            else if (!look.street)
+            else if (look.city == null)
                 GroveParticles("Fireflies", Weather.AddMaterial, new Vector3(centre.x - 3f, floorY + 2.2f, centre.z), new Vector3(34f, 4.5f, 34f),
                     90, 26f, 7f, new Color(1.7f, 1.9f, 0.8f), 0.14f, 0.24f, 0.9f);
             GroveParticles("Mist", Weather.AlphaMaterial, new Vector3(centre.x - 6f, ground + 0.7f, centre.z), new Vector3(48f, 0.6f, 48f),
@@ -917,7 +918,7 @@ namespace SquashBot.Visual
         /// </summary>
         private void Foreground(Transform p, Look look, float ground, float platR, System.Random rng)
         {
-            if (look.street) return; // (the street's paving in front: nothing strewn on it)
+            if (look.city != null) return; // (a city's paving or lawn in front: nothing strewn on it)
             float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
             Vector3 Front(float degrees, float dist) => new Vector3(centre.x + Mathf.Cos(degrees * Mathf.Deg2Rad) * dist, ground, centre.z + Mathf.Sin(degrees * Mathf.Deg2Rad) * dist);
             if (look.frontGrass.a > 0f)

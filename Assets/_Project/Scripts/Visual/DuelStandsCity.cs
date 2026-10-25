@@ -12,7 +12,7 @@ namespace SquashBot.Visual
         private static readonly Look GalataLook = new Look
         {
             pebbles = new Color(0.42f, 0.42f, 0.42f),
-            folder = "Duel/Galata/galata_", cover = 0f, street = true, paving = "Duel/Galata/galata_ground", crystals = false, backTree = false,
+            folder = "Duel/Galata/galata_", sky = "Duel/Galata/galata_sky", cover = 0f, street = true, city = "galata", paving = "Duel/Galata/galata_ground", crystals = false, backTree = false,
             thick = 1f, rim = 1f, standRise = 0f,
             glow = new Color(1f, 0.82f, 0.5f), selfLight = new Color(0.3f, 0.28f, 0.26f),
             ground = new Color(0.42f, 0.42f, 0.42f), mound = new Color(0.46f, 0.46f, 0.46f), bank = new Color(0.4f, 0.4f, 0.4f), grassColour = Color.white,
@@ -23,12 +23,33 @@ namespace SquashBot.Visual
 
         /// <summary>The landmark's height and its distance behind the floor's room (far: the low fight camera sees it whole, at
         /// the street's end), and the houses' heights.</summary>
-        private const float TowerHeight = 30f, TowerBack = 100f, HouseMin = 16f, HouseMax = 22f;
+        /// <summary>Where the fight camera stands (ahead of the floor's middle, how high) and how steeply up from it the top
+        /// of its view lies (the tallest thing far up the street must stay under it).</summary>
+        private const float CameraAhead = 28f, CameraHigh = 8f, TopSlope = 0.18f;
+        private const float TowerHeight = 40f, TowerBack = 135f, HouseMin = 16f, HouseMax = 22f;
         /// <summary>Which way the house model's front faces before it is turned (degrees about up: 0 = +z).</summary>
         private const float HouseFront = 0f;
         /// <summary>The pavements' width, how far up the street the fans stand (one row, from behind the fight), how far
         /// apart, and the lamps' spacing.</summary>
         private const float Walk = 2.6f, CrowdLength = 30f, FanGap = 1.25f, LampEvery = 32f;
+
+        /// <summary>How far a model reaches out from its middle (across the view, z) between two heights.</summary>
+        private static float HalfWidthAt(Transform model, float y0, float y1)
+        {
+            var b = BoundsOf(model);
+            float half = 0f;
+            foreach (var mf in model.GetComponentsInChildren<MeshFilter>(true))
+            {
+                var mesh = mf.sharedMesh;
+                if (mesh == null || !mesh.isReadable) continue;
+                foreach (var v in mesh.vertices)
+                {
+                    var w = mf.transform.TransformPoint(v);
+                    if (w.y >= y0 && w.y <= y1) half = Mathf.Max(half, Mathf.Abs(w.z - b.center.z));
+                }
+            }
+            return half > 0f ? half : b.extents.z * 0.4f;
+        }
 
         /// <summary>The ground: one big quad, its picture tiled about every 3 m.</summary>
         private void PavedGround(Transform p, Look look, float ground)
@@ -37,6 +58,7 @@ namespace SquashBot.Visual
             // everywhere, or (a quay) from in front of the camera to its edge behind the floor
             float x0 = centre.x - 50f - Size * 0.5f, x1 = centre.x - 50f + Size * 0.5f;
             if (look.paveFar >= 0f) { x0 = centre.x - hw - QuayBack - look.paveFar; x1 = centre.x + 80f; }
+            if (look.city == "galata") x0 = centre.x - 520f; // (the long street up to the far tower)
             float z0 = centre.z - Size * 0.5f, z1 = centre.z + Size * 0.5f;
             var mesh = new Mesh { name = "Paving" };
             mesh.vertices = new[] { new Vector3(x0, ground, z0), new Vector3(x0, ground, z1), new Vector3(x1, ground, z1), new Vector3(x1, ground, z0) };
@@ -79,13 +101,21 @@ namespace SquashBot.Visual
             tb = BoundsOf(tower);
             float towerX = centre.x - platR - TowerBack;
             tower.position += new Vector3(towerX - tb.center.x, ground - tb.min.y - 0.05f, centre.z - tb.center.z);
-            float plaza = BoundsOf(tower).extents.x;
+            // its body as wide as the street between the houses' fronts (seen up the street, only the tower), in its own
+            // proportions: so tall it stands far up the street, where the low fight camera sees it whole
+            float body = HalfWidthAt(tower, ground + TowerHeight * 0.3f, ground + TowerHeight * 0.55f);
+            float wide = (hd + 2f + Walk) / Mathf.Max(0.1f, body);
+            tower.localScale *= wide;
+            tb = BoundsOf(tower);
+            towerX = centre.x + CameraAhead - (tb.size.y - CameraHigh) / TopSlope;
+            tower.position += new Vector3(towerX - tb.center.x, ground - tb.min.y - 0.05f, centre.z - tb.center.z);
+            float plaza = body * wide; // (the houses and pavements run up to its body)
 
             float street = hd + 2f;               // (the street's half width: the floor and a little room)
             float fronts = street + Walk;         // (the houses' fronts)
             float near = centre.x + 36f;          // (the pavements run on past the camera)
             float housesFrom = centre.x + hw;     // (the first houses beside the fight)
-            float end = towerX - plaza;           // (the street's far end: the plaza's back)
+            float end = towerX - BoundsOf(tower).extents.x; // (the street's far end: the plaza's back)
 
             for (int side = -1; side <= 1; side += 2)
             {
@@ -108,7 +138,7 @@ namespace SquashBot.Visual
                 }
                 // tall houses right along the street, fronts to it, from beside the fight up to the plaza
                 float cursor = housesFrom;
-                while (cursor > towerX + plaza * 0.5f)
+                while (cursor > towerX)
                 {
                     float hh = R(HouseMin, HouseMax);
                     var house = MadeModel(p, look, "house", false);

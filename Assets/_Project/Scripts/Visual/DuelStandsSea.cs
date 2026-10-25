@@ -12,7 +12,7 @@ namespace SquashBot.Visual
         private static readonly Look KizLook = new Look
         {
             pebbles = new Color(0.7f, 0.68f, 0.62f),
-            folder = "Duel/Kiz/kiz_", cover = 0f, street = true, city = "kiz", paving = "Duel/Kiz/kiz_ground", paveFar = 0f, crystals = false, backTree = false,
+            folder = "Duel/Kiz/kiz_", sky = "Duel/Kiz/kiz_sky", cover = 0f, street = true, city = "kiz", paving = "Duel/Kiz/kiz_ground", paveFar = 0f, crystals = false, backTree = false,
             thick = 1f, rim = 1f, standRise = 0f,
             glow = new Color(1f, 0.9f, 0.7f), selfLight = new Color(0.32f, 0.31f, 0.3f),
             ground = new Color(0.8f, 0.77f, 0.7f), mound = new Color(0.82f, 0.79f, 0.72f), bank = new Color(0.7f, 0.68f, 0.62f), grassColour = Color.white,
@@ -23,9 +23,33 @@ namespace SquashBot.Visual
 
         /// <summary>The quay's edge behind the floor, how far the water lies under it; the tower's height and distance past
         /// the edge (far: the low fight camera sees it whole over the water); the palace's width and distance.</summary>
-        private const float QuayBack = 4f, QuayDrop = 1.3f, KizHeight = 26f, KizBack = 85f, PalaceWidth = 54f, PalaceBack = 145f, PalaceSide = 16f;
+        private const float QuayBack = 4f, QuayDrop = 1.3f, KizHeight = 20f, KizBack = 55f, PalaceWidth = 62f, PalaceBack = 170f, PalaceSide = 18f;
         /// <summary>Which way the tower model is turned (its annex towards the camera's right, as seen from Üsküdar).</summary>
         private const float KizTurn = 0f;
+
+        /// <summary>Things driving to and fro (the buses, the ferry): along one axis between two ends, round again.</summary>
+        private struct Mover { public Transform t; public Vector3 dir; public float speed, from, to; }
+        private readonly System.Collections.Generic.List<Mover> movers = new System.Collections.Generic.List<Mover>();
+
+        /// <summary>A made thing set driving: out of the merged decor, along <paramref name="dir"/> from one end to the other.</summary>
+        private void Drive(Transform t, Vector3 dir, float speed, float from, float to)
+        {
+            t.SetParent(transform, true); // (not merged: it moves)
+            movers.Add(new Mover { t = t, dir = dir.normalized, speed = speed, from = from, to = to });
+        }
+
+        /// <summary>Each frame: the drivers move on, back to their start past their end.</summary>
+        private void DriveMovers(float dt)
+        {
+            foreach (var m in movers)
+            {
+                if (m.t == null) continue;
+                var pos = m.t.position + m.dir * m.speed * dt;
+                float along = Vector3.Dot(pos, m.dir);
+                if (along > m.to) pos += m.dir * (m.from - along);
+                m.t.position = pos;
+            }
+        }
 
         private Material seaMat;
 
@@ -95,11 +119,12 @@ namespace SquashBot.Visual
             // a ferry crossing to the left of it, a little lighthouse to its right
             var ferry = MadeModel(p, look, "ferry", false);
             var fb = BoundsOf(ferry);
-            ferry.localScale = Vector3.one * (30f / Mathf.Max(0.01f, Mathf.Max(fb.size.x, fb.size.z)));
+            ferry.localScale = Vector3.one * (24f / Mathf.Max(0.01f, Mathf.Max(fb.size.x, fb.size.z)));
             fb = BoundsOf(ferry);
             if (fb.size.x > fb.size.z) ferry.rotation = Quaternion.Euler(0f, 90f, 0f) * ferry.rotation; // (along the shore)
             fb = BoundsOf(ferry);
-            ferry.position += new Vector3(tx + 18f - fb.center.x, water - fb.min.y - 1.2f, centre.z - 30f - fb.center.z);
+            ferry.position += new Vector3(tx - 45f - fb.center.x, water - fb.min.y - 1.2f, centre.z - 30f - fb.center.z);
+            Drive(ferry, Vector3.forward, 1.6f, centre.z - 70f, centre.z + 70f); // (crossing slowly)
             var white = Matte(new Color(0.95f, 0.95f, 0.93f), 0.3f);
             var red = Matte(new Color(0.85f, 0.15f, 0.12f), 0.3f);
             var rock = Matte(new Color(0.5f, 0.48f, 0.45f), 0.15f);
