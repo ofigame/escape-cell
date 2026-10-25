@@ -68,6 +68,7 @@ namespace SquashBot.Gameplay
             new DuelStage { key = "duel.stage.12", world = 5, shape = BattleArenas.Shape.Round, fx = 0, colosseum = true, theme = DuelStands.Theme.Arabia, wall = new Color(0.86f, 0.68f, 0.48f), fxColour = new Color(0.4f, 0.9f, 1f) },  // the desert palace
             new DuelStage { key = "duel.stage.13", world = 2, shape = BattleArenas.Shape.Round, fx = 0, colosseum = true, theme = DuelStands.Theme.Istanbul, wall = new Color(0.5f, 0.5f, 0.5f), fxColour = new Color(1f, 0.82f, 0.5f) },  // Galata
             new DuelStage { key = "duel.stage.14", world = 2, shape = BattleArenas.Shape.Round, fx = 0, colosseum = true, theme = DuelStands.Theme.Bosphorus, wall = new Color(0.8f, 0.77f, 0.7f), fxColour = new Color(1f, 0.9f, 0.7f) },  // the Maiden's Tower
+            new DuelStage { key = "duel.stage.15", world = 2, shape = BattleArenas.Shape.Round, fx = 0, colosseum = true, theme = DuelStands.Theme.London, wall = new Color(0.32f, 0.5f, 0.22f), fxColour = new Color(1f, 0.9f, 0.7f) },  // Big Ben
         };
 
         /// <summary>The stage wheel before the duel: every stage flashes by and it stops on <paramref name="stage"/>.</summary>

@@ -968,6 +968,7 @@ namespace SquashBot.Data
             ["duel.stage.12"] = "사막 궁전",
             ["duel.stage.13"] = "갈라타 탑",
             ["duel.stage.14"] = "처녀의 탑",
+            ["duel.stage.15"] = "빅벤",
             ["ch.squadGo"] = "{0}: 공격!",
             ["ch.squadBack"] = "{0}: 방어로 복귀",
             ["ch.rivalSends"] = "{0}님이 {1} 부대를 보냈어요!",

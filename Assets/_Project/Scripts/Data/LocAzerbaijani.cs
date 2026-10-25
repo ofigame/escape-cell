@@ -968,6 +968,7 @@ namespace SquashBot.Data
             ["duel.stage.12"] = "Səhra Sarayı",
             ["duel.stage.13"] = "Qalata Qülləsi",
             ["duel.stage.14"] = "Qız Qülləsi",
+            ["duel.stage.15"] = "Big Ben",
             ["ch.squadGo"] = "{0}: hücum!",
             ["ch.squadBack"] = "{0}: mühafizəyə qayıt",
             ["ch.rivalSends"] = "{0} {1} dəstəsini üstünə göndərdi!",

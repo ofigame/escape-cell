@@ -13,7 +13,7 @@ namespace SquashBot.Visual
     /// </summary>
     public partial class DuelStands : MonoBehaviour
     {
-        public enum Theme { City, Glacier, Volcano, Space, Forest, Desert, Grove, Frost, Mars, Cappadocia, Asia, Europe, Arabia, Istanbul, Bosphorus }
+        public enum Theme { City, Glacier, Volcano, Space, Forest, Desert, Grove, Frost, Mars, Cappadocia, Asia, Europe, Arabia, Istanbul, Bosphorus, London }
 
         /// <summary>A stage built of made models (the platform, its stands, the land round it), not of the board's own tiles.</summary>
         public static bool IsMade(Theme t) => t >= Theme.Grove;
@@ -636,7 +636,7 @@ namespace SquashBot.Visual
         private static Look LookOf(Theme t) => t switch
         {
             Theme.Frost => FrostLook, Theme.Mars => MarsLook, Theme.Cappadocia => CappadociaLook, Theme.Asia => AsiaLook, Theme.Europe => EuropeLook,
-            Theme.Arabia => ArabiaLook, Theme.Istanbul => GalataLook, Theme.Bosphorus => KizLook, _ => GroveLook,
+            Theme.Arabia => ArabiaLook, Theme.Istanbul => GalataLook, Theme.Bosphorus => KizLook, Theme.London => LondonLook, _ => GroveLook,
         };
 
         /// <summary>A made stage's light: the sun's colour and strength, the ambient sky, horizon and ground.</summary>
@@ -721,7 +721,12 @@ namespace SquashBot.Visual
             float platR = Mathf.Max(pb.size.x, pb.size.z) * 0.5f; // (the stands stand clear of the platform's rim)
             platRadius = platR * look.rim;
             int southTeam = playerSouth ? 0 : 1;
-            if (look.street) { if (look.city == "kiz") MaidenQuay(p, look, ground, platR, southTeam, rng); else GalataStreet(p, look, ground, platR, southTeam, rng); }
+            if (look.street)
+            {
+                if (look.city == "kiz") MaidenQuay(p, look, ground, platR, southTeam, rng);
+                else if (look.city == "london") BigBenSquare(p, look, ground, platR, southTeam, rng);
+                else GalataStreet(p, look, ground, platR, southTeam, rng);
+            }
             for (int s = 0; s < (look.street ? 0 : 2); s++)
             {
                 float dir = s == 0 ? -1f : 1f; // south (-z), north (+z)
