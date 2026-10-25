@@ -46,6 +46,8 @@ namespace SquashBot.Gameplay
         /// <summary>A blow struck in the air takes this much more (half a blow again; the AI game only: a live one is the server's).</summary>
         private const float JumpExtra = 0.5f;
         private float myJumpUntil, myJumpReadyAt, rivalJumpAt;
+        /// <summary>FLY in the air: the stand-in trails the thrusters' blue flame.</summary>
+        private bool flyThrusters;
         /// <summary>Until when the rival is in the air (its jump): a leap over it meets it there.</summary>
         private float rivalAirUntil;
 
@@ -225,6 +227,7 @@ namespace SquashBot.Gameplay
                     myComboMove = 0;
                     myCombo = 0;
                     robot.Strike(foeAt);
+                    ComboMoveShown(true, upper);
                     SlashFx.Create(robot.transform.position, foeAt, upper ? new Color(1f, 0.3f, 0.2f) : new Color(1f, 0.7f, 0.25f), upper ? 2.4f : 1.8f);
                     Shockwave.Create(foeAt, upper ? 2.6f : 1.8f, upper ? new Color(1f, 0.35f, 0.25f) : new Color(1f, 0.75f, 0.35f));
                     cameraRig.Shake(upper ? 0.7f : 0.45f);
@@ -319,6 +322,7 @@ namespace SquashBot.Gameplay
             var land = LandingBeside(victim, from);
             if (!land.HasValue) yield break;
             var dbl = StuntDouble.Make(model);
+            if (flyThrusters) ThrusterTrail(dbl.transform, model.lossyScale.y);
             try
             {
                 AudioManager.PlaySfx(Sfx.Hop, 1f, stunt == 2 ? 0.7f : 1.2f);
@@ -329,6 +333,24 @@ namespace SquashBot.Gameplay
             }
             finally { if (dbl != null) dbl.Done(); } // the stand-in never stays behind, whatever happened on the way
             if (stunt == 2) { Shockwave.Create(GridView.ToWorld(land.Value) + Vector3.up * GridView.SurfaceY, 1.6f, SpecialColour[2]); cameraRig.Shake(0.4f); }
+        }
+
+        /// <summary>A trail of blue thruster flame on a flying stand-in (FLY).</summary>
+        private static void ThrusterTrail(Transform flier, float scale)
+        {
+            var go = new GameObject("Thrusters");
+            go.transform.SetParent(flier, false);
+            go.transform.localPosition = new Vector3(0f, 0.9f * Mathf.Max(0.3f, scale) / Mathf.Max(0.01f, flier.lossyScale.y), -0.25f);
+            var tr = go.AddComponent<TrailRenderer>();
+            tr.sharedMaterial = Weather.AddMaterial;
+            tr.time = 0.35f;
+            tr.widthMultiplier = 0.35f * Mathf.Max(0.3f, scale);
+            tr.widthCurve = new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 0f));
+            var g = new Gradient();
+            g.SetKeys(new[] { new GradientColorKey(new Color(0.85f, 0.95f, 1f), 0f), new GradientColorKey(new Color(0.3f, 0.6f, 1f), 0.4f), new GradientColorKey(new Color(0.2f, 0.3f, 1f), 1f) },
+                new[] { new GradientAlphaKey(0.95f, 0f), new GradientAlphaKey(0.5f, 0.5f), new GradientAlphaKey(0f, 1f) });
+            tr.colorGradient = g;
+            tr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         }
 
         /// <summary>The two foi turned to each other at once.</summary>
@@ -364,10 +386,33 @@ namespace SquashBot.Gameplay
             int hero = mine ? HeroModels.Skill(SaveData.Hero) : rivalHero;
             if (mine) hunt.StunFoe(1.6f);
             strikeCooldown = Mathf.Max(strikeCooldown, mine ? 0.9f : 1.4f);
+            // the take-off: a crouch, blue flame from the back's thrusters, the weapon drawn back
+            var flier = mine ? robot.Visual : hunt.ChallengeFoeModel;
+            var flierSkin = flier != null ? flier.GetComponentInChildren<SkinnedHero>() : null;
+            if (flierSkin != null)
+            {
+                flierSkin.Crouch(1f, 0.3f);
+                var back = flierSkin.BackMount != null ? flierSkin.BackMount.position : flier.position + Vector3.up;
+                for (int i = 0; i < 3; i++) fx.Burst(back - flier.forward * 0.2f, new Color(0.45f, 0.75f, 1f), new Color(1.2f, 2f, 3.2f), 10, 3f);
+                AudioManager.PlaySfx(Sfx.SwishSpear, 0.8f, 0.7f);
+                yield return new WaitForSeconds(0.15f);
+            }
+            flyThrusters = true;
             yield return LeapTo(mine, hero);
+            flyThrusters = false;
             if (!challengeRun || chPhase != ChPhase.Duel || !hunt.ChallengeFoeAt.HasValue) { moveBusy = false; yield break; }
             var foeAt = hunt.ChallengeFoeAt.Value;
             if (mine) robot.Strike(foeAt);
+            // the flying strike by the weapon's family, and a kneeling landing in dust
+            var flyHeld = flier != null ? flier.GetComponentInChildren<HeldWeapon>() : null;
+            if (flyHeld != null)
+            {
+                var fly = CombatLibrary.Family(flyHeld.Family).flyStrike;
+                flyHeld.SwingQuick(fly, 0.03f);
+                CombatFeel.Hit(flier, mine ? hunt.ChallengeFoeModel : robot.Visual, fly);
+            }
+            if (flierSkin != null) { flierSkin.Crouch(0.9f, 0.3f); flierSkin.Squash(0.7f); }
+            if (flier != null) fx.Dust(flier.position, new Color(0.6f, 0.55f, 0.48f), 16, 3.5f);
             PowerFx(hero, mine ? robot.transform.position : foeAt, mine ? foeAt : robot.transform.position);
             if (mine)
             {
@@ -542,6 +587,43 @@ namespace SquashBot.Gameplay
             // the body's answer (by the blow's direction, height and strength; harder deeper into a combo) on the contact
             CombatFeel.Hit(striker, model, blow, 1f + 0.12f * Mathf.Min(Mathf.Max(0, inARow - 1), 5));
             if (inARow >= 4 && !LiveActive) Push(meStruck, from, 1);
+        }
+
+        /// <summary>
+        /// A combo move by family (<paramref name="upper"/>: KNOCKDOWN, else POWER HIT). POWER HIT: a sword's big two-handed
+        /// slash, a spear's long lunge with the whole body, an axe's two full turns, a heavy weapon's leap and crash down
+        /// (dust round it). KNOCKDOWN: the family's upward blow (the big moment throws the rival). The feel of the blow on
+        /// its contact (POWER HIT: a heavy reaction, 90 ms freeze; KNOCKDOWN's is the big moment's).
+        /// </summary>
+        private void ComboMoveShown(bool mine, bool upper)
+        {
+            var striker = mine ? robot.Visual : hunt.ChallengeFoeModel;
+            var struck = mine ? hunt.ChallengeFoeModel : robot.Visual;
+            var held = striker != null ? striker.GetComponentInChildren<HeldWeapon>() : null;
+            if (held == null || struck == null) return;
+            var family = CombatLibrary.Family(held.Family);
+            var blow = upper ? family.knockdown : family.powerHit;
+            held.SwingQuick(blow, 0.03f);
+            var skin = striker.GetComponentInChildren<SkinnedHero>();
+            var toward = struck.position - striker.position;
+            switch (held.Family)
+            {
+                case WeaponFamily.Axe: if (!upper) held.Spin(2); break; // (two full turns)
+                case WeaponFamily.Spear: VisualRoot.On(CombatFeel.RootOf(striker)).Push(toward, upper ? 0.25f : 0.5f, 0.3f); break; // (the long lunge)
+                case WeaponFamily.Heavy:
+                    if (!upper && skin != null) { skin.Hop(0.9f, 0.32f); cameraRig.StartCoroutine(DustAfter(struck.position, 0.3f)); } // (a leap and a crash down)
+                    break;
+            }
+            if (upper) { cameraRig.Punch(0.45f); return; } // (the knockdown: the camera in a little; the big moment does the rest)
+            CombatFeel.Hit(striker, struck, blow);
+        }
+
+        /// <summary>A ring of dust kicked up at <paramref name="at"/> a moment later (a heavy weapon crashing down, a landing).</summary>
+        private IEnumerator DustAfter(Vector3 at, float seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+            fx.Dust(at, new Color(0.6f, 0.55f, 0.48f), 20, 4.5f);
+            Shockwave.Create(at, 1.6f, new Color(0.85f, 0.75f, 0.6f));
         }
 
         /// <summary>A combo broken (<paramref name="onMe"/>: the rival broke foi's): the one breaking comes forward with its
@@ -842,6 +924,16 @@ namespace SquashBot.Gameplay
         {
             if (mine) myJumpUntil = 0f; else rivalJumpAt = Time.time + 9f; // (one per jump)
             var struck = mine ? hunt.ChallengeFoeModel : robot.Visual;
+            var airman = mine ? robot.Visual : hunt.ChallengeFoeModel;
+            var airHeld = airman != null ? airman.GetComponentInChildren<HeldWeapon>() : null;
+            if (airHeld != null && struck != null)
+            {
+                // down from over the head (every family), a bigger burst, a longer freeze; a cloud of dust as it lands
+                var air = CombatLibrary.Family(airHeld.Family).airStrike;
+                airHeld.SwingQuick(air, 0.03f);
+                CombatFeel.Hit(airman, struck, air, 1.3f);
+                cameraRig.StartCoroutine(DustAfter(airman.position, 0.35f));
+            }
             var at = struck != null ? struck.position : robot.transform.position;
             Fling(!mine, mine ? robot.transform.position : (hunt.ChallengeFoeAt ?? at), 1f, 1); // knocked off its feet, onto its back
             if (mine) hunt.StunFoe(0.7f);
@@ -892,6 +984,9 @@ namespace SquashBot.Gameplay
         private IEnumerator Finisher(Vector3 at, bool mine)
         {
             finishing = true;
+            var winner = mine ? robot.Visual : hunt.ChallengeFoeModel;
+            var winnerHeld = winner != null ? winner.GetComponentInChildren<HeldWeapon>() : null;
+            if (winnerHeld != null) winnerHeld.Flourish(); // (the family's flourish: sheathed, shouldered, planted, struck on the ground)
             skillBar?.Shout(Loc.T("duel.finished"), mine ? new Color(1f, 0.85f, 0.3f) : new Color(1f, 0.4f, 0.4f));
             if (colosseum != null) colosseum.Cheer(mine ? 0 : 1, 1f);
             var bolt = new Color(0.62f, 0.64f, 0.7f);
@@ -983,6 +1078,7 @@ namespace SquashBot.Gameplay
             {
                 rivalCombo = 0;
                 FaceEachOther();
+                ComboMoveShown(false, false);
                 SlashFx.Create(foeAt, robot.transform.position, new Color(1f, 0.35f, 0.3f), 1.8f);
                 Shockwave.Create(robot.transform.position, 1.8f, new Color(1f, 0.4f, 0.3f));
                 cameraRig.Shake(0.45f);

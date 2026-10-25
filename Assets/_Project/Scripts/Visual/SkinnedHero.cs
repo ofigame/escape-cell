@@ -845,6 +845,16 @@ namespace SquashBot.Visual
             }
         }
 
+        private float crouchUntil, crouchAmount, crouchFor = 0.15f;
+
+        /// <summary>The body crouches (0..1: the knees giving, the hips down) for <paramref name="seconds"/>, easing back up.</summary>
+        public void Crouch(float amount, float seconds)
+        {
+            crouchAmount = Mathf.Clamp01(amount);
+            crouchFor = Mathf.Max(0.05f, seconds);
+            crouchUntil = Time.time + crouchFor;
+        }
+
         /// <summary>The eyes squeezed (0..1) for a while.</summary>
         public void Squint(float amount, float seconds)
         {
@@ -890,6 +900,15 @@ namespace SquashBot.Visual
                     float height = head != null ? Mathf.Max(0.3f, head.position.y - transform.position.y) : 1f;
                     hips.position += up * spring[HitSpring.Hips] * height;
                 }
+            }
+            // a crouch: down quickly, easing back up
+            if (Time.time < crouchUntil && hips != null && playing == null)
+            {
+                float left = (crouchUntil - Time.time) / crouchFor;
+                float k = crouchAmount * (left > 0.7f ? (1f - left) / 0.3f : Mathf.SmoothStep(0f, 1f, left / 0.7f)); // (down quickly, easing back up)
+                float height = head != null ? Mathf.Max(0.3f, head.position.y - transform.position.y) : 1f;
+                var frame = transform.parent != null ? transform.parent : transform;
+                hips.position -= frame.up * height * 0.09f * Mathf.Clamp01(k);
             }
             // squash and stretch
             if (!skinScaleKnown) { skinScale = transform.localScale; skinScaleKnown = true; }

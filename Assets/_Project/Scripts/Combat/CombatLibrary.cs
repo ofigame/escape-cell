@@ -37,6 +37,14 @@ namespace SquashBot.Combat
         {
             if (families.TryGetValue(f, out var p) && p != null) return p;
             p = Resources.Load<WeaponFamilyMotionProfile>(Folder + "Family_" + f) ?? CombatDefaults.Family(f);
+            if (p.flyStrike == null || p.airStrike == null || p.skyStrike == null)
+            {
+                // an asset saved before these blows existed: the design's starting ones
+                var d = CombatDefaults.Family(f);
+                if (p.flyStrike == null) p.flyStrike = d.flyStrike;
+                if (p.airStrike == null) p.airStrike = d.airStrike;
+                if (p.skyStrike == null) p.skyStrike = d.skyStrike;
+            }
             families[f] = p;
             return p;
         }

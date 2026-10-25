@@ -70,6 +70,17 @@ namespace SquashBot.Combat
             p.knockdown = Blow(f, 6, 8, 2, 12, HitDirection.Upward, HitHeight.Mid);
             p.knockdown.name = f + "_Knockdown";
             p.knockdown.strength = HitStrength.Launch; p.knockdown.hitstopMs = 140f; p.knockdown.cameraImpulse = CameraImpulseLevel.Heavy; p.knockdown.visualKnockback = 0f;
+            // FLY's blow by family: a sword slashes across in flight, a spear runs it through, an axe spins into it, a heavy one crashes down
+            var flyDir = f == WeaponFamily.Sword ? HitDirection.Horizontal_RightToLeft : f == WeaponFamily.Spear ? HitDirection.Thrust : f == WeaponFamily.Axe ? HitDirection.Spin : HitDirection.Overhead;
+            p.flyStrike = Blow(f, 7, 3, 2, 9, flyDir, HitHeight.Mid);
+            p.flyStrike.name = f + "_Fly";
+            p.flyStrike.strength = HitStrength.Heavy; p.flyStrike.hitstopMs = 100f; p.flyStrike.cameraImpulse = CameraImpulseLevel.Medium; p.flyStrike.visualKnockback = 0.5f;
+            p.airStrike = Blow(f, 8, 3, 2, 8, HitDirection.Overhead, HitHeight.High);
+            p.airStrike.name = f + "_Air";
+            p.airStrike.strength = HitStrength.Medium; p.airStrike.hitstopMs = 70f; p.airStrike.cameraImpulse = CameraImpulseLevel.Medium;
+            p.skyStrike = Blow(f, 9, 4, 2, 10, HitDirection.Overhead, HitHeight.High);
+            p.skyStrike.name = f + "_Sky";
+            p.skyStrike.strength = HitStrength.Heavy; p.skyStrike.hitstopMs = 120f; p.skyStrike.cameraImpulse = CameraImpulseLevel.Heavy; p.skyStrike.visualKnockback = 0.5f;
             return p;
         }
 

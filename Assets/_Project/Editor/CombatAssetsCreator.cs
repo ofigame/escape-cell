@@ -34,6 +34,9 @@ namespace SquashBot.EditorTools
                 foreach (var b in p.chain) AssetDatabase.AddObjectToAsset(b, p);
                 AssetDatabase.AddObjectToAsset(p.powerHit, p);
                 AssetDatabase.AddObjectToAsset(p.knockdown, p);
+                AssetDatabase.AddObjectToAsset(p.flyStrike, p);
+                AssetDatabase.AddObjectToAsset(p.airStrike, p);
+                AssetDatabase.AddObjectToAsset(p.skyStrike, p);
             }
             AssetDatabase.SaveAssets();
         }

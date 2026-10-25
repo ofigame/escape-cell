@@ -262,9 +262,13 @@ namespace SquashBot.Gameplay
                     MoveFx.Pillar(otherAt, new Color(1f, 0.6f, 0.2f), 0.9f, 4f, 0.5f);
                     Shockwave.Create(otherAt, 1.6f, new Color(1f, 0.6f, 0.2f));
                     yield return new WaitForSeconds(0.3f);
-                    if (land.HasValue) yield return LeapToTile(mine, land.Value, 3.2f, 2);
+                    if (land.HasValue) yield return SkyLeap(mine, land.Value);
                     FaceEachOther();
                     var hit = mine ? hunt.ChallengeFoeAt ?? otherAt : robot.transform.position;
+                    var skyHeld = MeModel() != null ? MeModel().GetComponentInChildren<HeldWeapon>() : null;
+                    if (skyHeld != null && OtherModel() != null) { var sky = CombatLibrary.Family(skyHeld.Family).skyStrike; skyHeld.SwingQuick(sky, 0.02f); CombatFeel.Hit(MeModel(), OtherModel(), sky); }
+                    var meSkin = MeModel() != null ? MeModel().GetComponentInChildren<SkinnedHero>() : null;
+                    if (meSkin != null) { meSkin.Crouch(1f, 0.35f); meSkin.Squash(1f); }
                     fx.Burst(hit + Vector3.up * 0.4f, new Color(1f, 0.6f, 0.2f), new Color(3f, 1.6f, 0.4f), 50, 8f);
                     Shockwave.Create(hit, 2.8f, new Color(1f, 0.6f, 0.2f));
                     Shockwave.Create(hit, 1.6f, new Color(1f, 0.9f, 0.6f));
@@ -549,6 +553,46 @@ namespace SquashBot.Gameplay
                 yield return dbl.Leap(GridView.ToWorld(land) + Vector3.up * GridView.SurfaceY, height, 0.5f, stunt);
                 if (mine) robot.Spawn(grid, land); else if (!hunt.ChallengeFoeDown) hunt.PlaceFoe(land);
                 FaceEachOther();
+            }
+            finally { if (dbl != null) dbl.Done(); }
+        }
+
+        /// <summary>
+        /// SKY STRIKE's leap: up high (a body and a half over the floor) toward the landing, a hang at the top (the weapon
+        /// raised over the head, the landing's red circle showing), a straight dive and the crash (the mover lands there).
+        /// </summary>
+        private IEnumerator SkyLeap(bool mine, GridPos land)
+        {
+            var model = mine ? robot.Visual : hunt.ChallengeFoeModel;
+            if (model == null) yield break;
+            var skin = model.GetComponentInChildren<SkinnedHero>();
+            float height = skin != null ? Mathf.Max(1f, (skin.HeadPoint.y - model.position.y) * 1.5f) : 4f;
+            var dbl = StuntDouble.Make(model);
+            try
+            {
+                AudioManager.PlaySfx(Sfx.SwishHeavy, 1f, 1.3f);
+                var from = dbl.transform.position;
+                var to = GridView.ToWorld(land) + Vector3.up * GridView.SurfaceY;
+                var apex = Vector3.Lerp(from, to, 0.8f) + Vector3.up * height;
+                var flat = to - from; flat.y = 0f;
+                var face = flat.sqrMagnitude > 0.01f ? Quaternion.LookRotation(flat) : dbl.transform.rotation;
+                for (float e = 0f; e < 0.32f; e += Time.unscaledDeltaTime)
+                {
+                    float k = Mathf.SmoothStep(0f, 1f, e / 0.32f);
+                    dbl.transform.position = Vector3.Lerp(from, apex, k);
+                    dbl.transform.rotation = face * Quaternion.Euler(-20f * k, 0f, 0f);
+                    yield return null;
+                }
+                Shockwave.Create(to, 1.2f, new Color(1f, 0.25f, 0.2f)); // (where it will land: a red ring)
+                for (float e = 0f; e < 0.15f; e += Time.unscaledDeltaTime) { dbl.transform.position = apex + Vector3.up * Mathf.Sin(e / 0.15f * Mathf.PI) * 0.05f * height; yield return null; }
+                for (float e = 0f; e < 0.12f; e += Time.unscaledDeltaTime)
+                {
+                    float k = e / 0.12f; k *= k; // (diving faster and faster)
+                    dbl.transform.position = Vector3.Lerp(apex, to, k);
+                    dbl.transform.rotation = face * Quaternion.Euler(Mathf.Lerp(-20f, 25f, k), 0f, 0f);
+                    yield return null;
+                }
+                if (mine) robot.Spawn(grid, land); else if (!hunt.ChallengeFoeDown) hunt.PlaceFoe(land);
             }
             finally { if (dbl != null) dbl.Done(); }
         }

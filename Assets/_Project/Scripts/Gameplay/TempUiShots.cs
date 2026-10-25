@@ -1,5 +1,5 @@
-// TEMP-FILE: Faz 3 acceptance: ten sword blows in a row (each reaction different, the rival's tile unchanged by them),
-// the reactions by strength, status effects, the damage states, a knock-out end to end. -sbF3 <dir> ; quits after.
+// TEMP-FILE: Faz 4 acceptance: POWER HIT per family, KNOCKDOWN (the rival's arc, landing, getting up), FLY (take-off,
+// flight, landing), a blow from the air, SKY STRIKE, the winner's flourish. -sbF4 <dir> ; quits after.
 using System;
 using System.Collections;
 using System.IO;
@@ -15,10 +15,20 @@ namespace SquashBot.Gameplay
 {
     public partial class GameManager
     {
+        private IEnumerator Shots(string dir, string name, float[] at)
+        {
+            float start = Time.realtimeSinceStartup;
+            for (int i = 0; i < at.Length; i++)
+            {
+                while (Time.realtimeSinceStartup - start < at[i]) yield return null;
+                ScreenCapture.CaptureScreenshot(dir + "/" + name + "_" + i + ".png");
+            }
+        }
+
         private IEnumerator UiShots()
         {
             var args = Environment.GetCommandLineArgs();
-            int ai = Array.IndexOf(args, "-sbF3");
+            int ai = Array.IndexOf(args, "-sbF4");
             if (ai < 0) yield break;
             string dir = args[ai + 1];
             Directory.CreateDirectory(dir);
@@ -32,61 +42,54 @@ namespace SquashBot.Gameplay
             float until = Time.time + 20f;
             while (chPhase != ChPhase.Duel && Time.time < until) yield return new WaitForSeconds(0.2f);
             yield return new WaitForSeconds(0.8f);
-            LabWeapon(WeaponKind.Sword); yield return new WaitForSeconds(1.6f);
-            var foeSkin = hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>();
-            // 1. ten sword blows in a row (no 4-in-a-row push: a pause after every third)
-            var seq = new StringBuilder();
-            int same = 0, moved = 0; string last = "";
-            for (int i = 0; i < 10; i++)
+            if (duelLab != null) duelLab.gameObject.SetActive(false); // (pictures without the panel)
+            // 1. POWER HIT by family
+            foreach (var k in new[] { WeaponKind.Sword, WeaponKind.Spear, WeaponKind.Axe, WeaponKind.Hammer })
             {
-                var tileBefore = hunt.ChallengeFoeTile;
-                LabStrike();
-                yield return new WaitForSeconds(0.12f);
-                string r = foeSkin != null ? foeSkin.LastReaction : "-";
-                if (r == last) same++;
-                last = r;
-                seq.Append(r + "  ");
-                if (i == 1 || i == 6) ScreenCapture.CaptureScreenshot(dir + "/blow_" + i + ".png");
-                yield return new WaitForSeconds(0.25f);
-                if (hunt.ChallengeFoeTile != tileBefore) moved++;
-                if (i % 3 == 2) yield return new WaitForSeconds(1.6f); // (the combo gap: no rule push)
+                LabWeapon(k); yield return new WaitForSeconds(0.5f);
+                LabStrike(); yield return new WaitForSeconds(0.4f);
+                myComboMove = HeavyCombo; myCombo = HeavyCombo;
+                OnSkill(DuelSkillBar.Move.Heavy);
+                yield return Shots(dir, "power_" + k, new[] { 0.06f, 0.16f, 0.3f });
+                yield return new WaitForSeconds(1.5f);
             }
-            log.Append("10 sword blows: " + seq + "\n  same as the one before: " + same + ", rival tile changed: " + moved + "\n");
-            // 2. reactions by strength, with pictures at their peak
-            foreach (var s in new[] { HitStrength.Medium, HitStrength.Heavy })
+            // 2. KNOCKDOWN: the rival's arc and landing (its tile before / after: the rules' push)
+            LabWeapon(WeaponKind.Sword); yield return new WaitForSeconds(0.4f);
+            LabStrike(); yield return new WaitForSeconds(0.4f);
+            myComboMove = UpperCombo; myCombo = UpperCombo;
+            var tileBefore = hunt.ChallengeFoeTile;
+            OnSkill(DuelSkillBar.Move.Upper);
+            yield return Shots(dir, "knockdown", new[] { 0.15f, 0.45f, 0.9f, 1.6f, 2.6f });
+            yield return new WaitForSeconds(1.5f);
+            log.Append("knockdown: rival tile " + tileBefore + " -> " + hunt.ChallengeFoeTile + "\n");
+            // 3. FLY
+            LabStrike(); yield return new WaitForSeconds(0.3f);
+            robot.Spawn(grid, new GridPos(laneX, Mathf.Max(1, (hunt.ChallengeFoeTile ?? robot.Position).y - 6))); yield return new WaitForSeconds(0.4f);
+            cameraRig.StartCoroutine(DoSpecial(true, SpecialKind.Fly));
+            yield return Shots(dir, "fly", new[] { 0.08f, 0.3f, 0.45f, 0.7f, 1.0f });
+            yield return new WaitForSeconds(3f);
+            // 4. a blow from the air
+            LabStrike(); yield return new WaitForSeconds(0.6f);
+            Jump(); yield return new WaitForSeconds(0.2f);
+            strikeCooldown = 0f; TryStrikeNow(hunt.ChallengeFoeTile.Value, true);
+            yield return Shots(dir, "air", new[] { 0.05f, 0.2f, 0.5f });
+            yield return new WaitForSeconds(2.5f);
+            // 5. SKY STRIKE
+            robot.Spawn(grid, new GridPos(laneX, Mathf.Max(1, (hunt.ChallengeFoeTile ?? robot.Position).y - 5))); yield return new WaitForSeconds(0.4f);
+            cameraRig.StartCoroutine(DoSpecial(true, SpecialKind.SkyStrike));
+            yield return Shots(dir, "sky", new[] { 0.45f, 0.62f, 0.8f, 1.0f, 1.3f });
+            yield return new WaitForSeconds(2.5f);
+            // 6. the winner's flourish by family
+            foreach (var k in new[] { WeaponKind.Sword, WeaponKind.Hammer, WeaponKind.Axe, WeaponKind.Spear })
             {
-                LabReaction(s);
-                yield return new WaitForSeconds(0.1f);
-                ScreenCapture.CaptureScreenshot(dir + "/react_" + s + ".png");
+                LabWeapon(k); yield return new WaitForSeconds(0.4f);
+                heldWeapon.Flourish();
+                yield return Shots(dir, "flourish_" + k, new[] { 0.3f, 1.2f });
                 yield return new WaitForSeconds(1.2f);
             }
-            // 3. statuses
-            var root = CombatFeel.RootOf(hunt.ChallengeFoeModel);
-            StatusFx.On(root).Stun(2f); StatusFx.On(root).Burn(2f);
+            File.WriteAllText(dir + "/f4.txt", log.ToString());
+            CloseDuelLab();
             yield return new WaitForSeconds(0.5f);
-            ScreenCapture.CaptureScreenshot(dir + "/stun_burn.png"); yield return new WaitForSeconds(2f);
-            StatusFx.On(root).Freeze(1.6f); yield return new WaitForSeconds(0.5f);
-            ScreenCapture.CaptureScreenshot(dir + "/freeze.png"); yield return new WaitForSeconds(1.5f);
-            StatusFx.On(root).SetDamage(2); yield return new WaitForSeconds(2.5f);
-            ScreenCapture.CaptureScreenshot(dir + "/damaged.png"); yield return new WaitForSeconds(0.3f);
-            StatusFx.On(root).SetDamage(0);
-            CloseDuelLab(); yield return new WaitForSeconds(1f);
-            // 4. a knock-out end to end in a plain duel
-            if (chUi == null) InitChallenge();
-            rival = Challenge.MakeBot(55, -1); chOnline = false;
-            BuildDuelBoard(4);
-            until = Time.time + 20f;
-            while (chPhase != ChPhase.Duel && Time.time < until) yield return new WaitForSeconds(0.2f);
-            hunt.StunFoe(5f);
-            int scoreBefore = chDuelMe;
-            if (hunt.ChallengeFoeTile is GridPos ft) { robot.Spawn(grid, new GridPos(laneX, ft.y - HuntSystem.DuelGap)); yield return null; }
-            HitFoe(400f);
-            yield return new WaitForSeconds(0.25f);
-            ScreenCapture.CaptureScreenshot(dir + "/ko.png");
-            yield return new WaitForSeconds(5f);
-            log.Append("knock-out: score " + scoreBefore + " -> " + chDuelMe + ", phase now " + chPhase + ", rival back " + (hunt.ChallengeFoeModel != null) + "\n");
-            ScreenCapture.CaptureScreenshot(dir + "/after_ko.png");
-            File.WriteAllText(dir + "/f3.txt", log.ToString());
             Application.Quit();
         }
     }

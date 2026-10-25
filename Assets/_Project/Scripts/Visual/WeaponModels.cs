@@ -400,7 +400,7 @@ namespace SquashBot.Visual
         public float Progress => swing;
 
         /// <summary>The whirl's turn now (degrees), or -1 when not whirling: the body turns with it.</summary>
-        public float SpinAngle => spin < 1f ? spin * 360f : -1f;
+        public float SpinAngle => spin < 1f ? spin * 360f * spinTurns : -1f;
 
         /// <summary>Seconds (on the picture clock) until this swing's contact; -1 when no swing is on its way there.</summary>
         public float ContactIn
@@ -436,9 +436,12 @@ namespace SquashBot.Visual
         /// path still played (drawn back, then through), the wind-up quickened so the contact comes within
         /// <paramref name="contactWithin"/> seconds of the tap; the recovery as designed.
         /// </summary>
-        public void SwingQuick(float contactWithin = 0.02f)
+        public void SwingQuick(float contactWithin = 0.02f) => SwingQuick(NextBlow(true), contactWithin);
+
+        /// <summary>A given blow landing now (a combo move, a flying strike): its wind-up quickened to meet the moment.</summary>
+        public void SwingQuick(AttackMotionData blow, float contactWithin)
         {
-            Begin(NextBlow(true), false);
+            Begin(blow, false);
             if (current == null) return;
             windS = Mathf.Min(windS, Mathf.Max(0.008f, contactWithin * playRate - hitS * 0.5f));
             swingTotal = windS + hitS + backS;
@@ -550,7 +553,58 @@ namespace SquashBot.Visual
         private bool rested;
 
         /// <summary>A whirl: the weapon sweeps a full circle round the robot.</summary>
-        public void Spin() => spin = 0f;
+        public void Spin() { spin = 0f; spinTurns = 1; }
+
+        /// <summary>A whirl of several turns (the axe's POWER HIT: two full turns), the body turning with it.</summary>
+        public void Spin(int turns) { spin = 0f; spinTurns = Mathf.Max(1, turns); }
+
+        private int spinTurns = 1;
+        private float flourish = -1f;
+
+        /// <summary>
+        /// The winner's flourish (1.5 s), by family: a sword twirled and lowered as if sheathed, a heavy weapon swung up
+        /// onto the shoulder, an axe driven into the ground in front, a spear twirled and its butt struck on the ground.
+        /// </summary>
+        public void Flourish() { flourish = 0f; swing = 1f; spin = 1f; TrailOn(false); }
+
+        /// <summary>The flourish's pose now (false once it is over).</summary>
+        private bool Flourishing(float dt)
+        {
+            if (flourish < 0f) return false;
+            flourish += dt;
+            const float T = 1.5f;
+            if (flourish >= T + 0.6f) { flourish = -1f; transform.localPosition = restPosition; return false; }
+            float k = Mathf.Clamp01(flourish / T);
+            float twirl = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(flourish / 0.6f));
+            Vector3 p; Quaternion r;
+            switch (family)
+            {
+                case WeaponFamily.Sword:
+                    // twirled twice in the hand, then point down at the side (sheathed)
+                    p = Vector3.Lerp(restPosition, new Vector3(0.36f, 0.12f, -0.02f), Mathf.SmoothStep(0f, 1f, (k - 0.4f) / 0.4f));
+                    r = Quaternion.Euler(0f, 0f, twirl * 720f) * Quaternion.Slerp(Quaternion.Euler(25f, 0f, -12f), Quaternion.Euler(175f, 0f, -8f), Mathf.SmoothStep(0f, 1f, (k - 0.4f) / 0.4f));
+                    break;
+                case WeaponFamily.Heavy:
+                    // swung up and laid back on the shoulder
+                    p = Vector3.Lerp(restPosition, new Vector3(0.2f, 0.62f, -0.12f), Mathf.SmoothStep(0f, 1f, k / 0.5f));
+                    r = Quaternion.Slerp(Quaternion.Euler(25f, 0f, -12f), Quaternion.Euler(-70f, 0f, -18f), Mathf.SmoothStep(0f, 1f, k / 0.5f));
+                    break;
+                case WeaponFamily.Axe:
+                    // raised, then driven down into the ground in front, held there
+                    float up = Mathf.SmoothStep(0f, 1f, k / 0.35f), down = Mathf.SmoothStep(0f, 1f, (k - 0.35f) / 0.2f);
+                    p = Vector3.Lerp(Vector3.Lerp(restPosition, new Vector3(0.16f, 0.62f, 0.05f), up), new Vector3(0.12f, -0.12f, 0.5f), down);
+                    r = Quaternion.Slerp(Quaternion.Slerp(Quaternion.Euler(25f, 0f, -12f), Quaternion.Euler(-40f, 0f, 0f), up), Quaternion.Euler(150f, 0f, 0f), down);
+                    break;
+                default:
+                    // twirled once, then its butt struck on the ground, upright beside the body
+                    p = Vector3.Lerp(restPosition, new Vector3(0.34f, -0.05f, 0.08f), Mathf.SmoothStep(0f, 1f, (k - 0.4f) / 0.3f));
+                    r = Quaternion.Euler(0f, twirl * 360f, 0f) * Quaternion.Slerp(Quaternion.Euler(80f, 0f, 0f), Quaternion.Euler(0f, 0f, -4f), Mathf.SmoothStep(0f, 1f, (k - 0.4f) / 0.3f));
+                    break;
+            }
+            transform.localPosition = p;
+            transform.localRotation = r;
+            return true;
+        }
 
         private void Pose(float a) => transform.localRotation = isGun ? Quaternion.Euler(-a * 0.25f, 0f, 0f) : Quaternion.Euler(25f + a, 0f, -12f);
 
@@ -635,12 +689,13 @@ namespace SquashBot.Visual
                 bool whirlBlow = current != null && current.direction == HitDirection.Spin && swing < 1f;
                 spin = Mathf.Min(1f, spin + dt / Mathf.Max(0.12f, whirlBlow ? swingTotal / playRate : 0.32f));
                 if (swing < 1f) Advance(dt);
-                float ang = spin * 360f;
+                float ang = spin * 360f * spinTurns;
                 transform.localPosition = Quaternion.Euler(0f, ang, 0f) * restPosition;
                 transform.localRotation = Quaternion.Euler(0f, ang, 0f) * Quaternion.Euler(80f, 0f, -12f);
                 if (spin >= 1f) transform.localPosition = restPosition;
                 return;
             }
+            if (Flourishing(dt)) return;
             if (swing >= 1f) { Pose(Mathf.Sin(Time.time * 2f) * 3f); return; }
             if (isGun)
             {
