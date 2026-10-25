@@ -1,62 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-7930675367454681577
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
-  m_Name: Sword_4
-  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
-  clip: {fileID: 0}
-  anticipationMs: 33.333332
-  activeMs: 16.666666
-  recoveryMs: 83.33333
-  direction: 4
-  height: 1
-  strength: 0
-  hitstopMs: 20
-  cameraImpulse: 1
-  visualKnockback: 0.08
-  impactVfx: {fileID: 0}
-  whooshSfx: 0
-  whooshPitch: 1.9
-  impactSfx: 1
-  impactPitch: 1.3
-  enableTrail: 1
---- !u!114 &-5870752412747116541
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
-  m_Name: Sword_Knockdown
-  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
-  clip: {fileID: 0}
-  anticipationMs: 133.33333
-  activeMs: 33.333332
-  recoveryMs: 200
-  direction: 3
-  height: 1
-  strength: 3
-  hitstopMs: 140
-  cameraImpulse: 3
-  visualKnockback: 0
-  impactVfx: {fileID: 0}
-  whooshSfx: 0
-  whooshPitch: 1.9
-  impactSfx: 1
-  impactPitch: 1.3
-  enableTrail: 1
---- !u!114 &-5836072331587546570
+--- !u!114 &-4383121607640543309
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -79,89 +23,12 @@ MonoBehaviour:
   cameraImpulse: 1
   visualKnockback: 0.08
   impactVfx: {fileID: 0}
-  whooshSfx: 0
-  whooshPitch: 1.9
-  impactSfx: 1
-  impactPitch: 1.3
+  whooshSfx: 13
+  whooshPitch: 1
+  impactSfx: 17
+  impactPitch: 1
   enableTrail: 1
---- !u!114 &-2188432525580188103
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
-  m_Name: Sword_PowerHit
-  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
-  clip: {fileID: 0}
-  anticipationMs: 133.33333
-  activeMs: 33.333332
-  recoveryMs: 166.66666
-  direction: 2
-  height: 0
-  strength: 2
-  hitstopMs: 90
-  cameraImpulse: 2
-  visualKnockback: 0.5
-  impactVfx: {fileID: 0}
-  whooshSfx: 0
-  whooshPitch: 1.9
-  impactSfx: 1
-  impactPitch: 1.3
-  enableTrail: 1
---- !u!114 &11400000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca47bad2afc033e4388c802740f9af5d, type: 3}
-  m_Name: Family_Sword
-  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.WeaponFamilyMotionProfile
-  family: 0
-  chain:
-  - {fileID: 2515501017465624846}
-  - {fileID: -5836072331587546570}
-  - {fileID: 75673995526397276}
-  - {fileID: -7930675367454681577}
-  powerHit: {fileID: -2188432525580188103}
-  knockdown: {fileID: -5870752412747116541}
-  trail: {r: 0.8, g: 0.92, b: 1, a: 1}
---- !u!114 &75673995526397276
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
-  m_Name: Sword_3
-  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
-  clip: {fileID: 0}
-  anticipationMs: 33.333332
-  activeMs: 16.666666
-  recoveryMs: 83.33333
-  direction: 2
-  height: 0
-  strength: 0
-  hitstopMs: 20
-  cameraImpulse: 1
-  visualKnockback: 0.08
-  impactVfx: {fileID: 0}
-  whooshSfx: 0
-  whooshPitch: 1.9
-  impactSfx: 1
-  impactPitch: 1.3
-  enableTrail: 1
---- !u!114 &2515501017465624846
+--- !u!114 &-3208581675796104634
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -184,8 +51,141 @@ MonoBehaviour:
   cameraImpulse: 1
   visualKnockback: 0.08
   impactVfx: {fileID: 0}
-  whooshSfx: 0
-  whooshPitch: 1.9
-  impactSfx: 1
-  impactPitch: 1.3
+  whooshSfx: 13
+  whooshPitch: 1
+  impactSfx: 17
+  impactPitch: 1
+  enableTrail: 1
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca47bad2afc033e4388c802740f9af5d, type: 3}
+  m_Name: Family_Sword
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.WeaponFamilyMotionProfile
+  family: 0
+  chain:
+  - {fileID: -3208581675796104634}
+  - {fileID: -4383121607640543309}
+  - {fileID: 662290233128023928}
+  - {fileID: 6158611701158245236}
+  powerHit: {fileID: 7945061086020272945}
+  knockdown: {fileID: 3453919794178662365}
+  trail: {r: 0.8, g: 0.92, b: 1, a: 1}
+--- !u!114 &662290233128023928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Sword_3
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 33.333332
+  activeMs: 16.666666
+  recoveryMs: 83.33333
+  direction: 2
+  height: 0
+  strength: 0
+  hitstopMs: 20
+  cameraImpulse: 1
+  visualKnockback: 0.08
+  impactVfx: {fileID: 0}
+  whooshSfx: 13
+  whooshPitch: 1
+  impactSfx: 17
+  impactPitch: 1
+  enableTrail: 1
+--- !u!114 &3453919794178662365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Sword_Knockdown
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 133.33333
+  activeMs: 33.333332
+  recoveryMs: 200
+  direction: 3
+  height: 1
+  strength: 3
+  hitstopMs: 140
+  cameraImpulse: 3
+  visualKnockback: 0
+  impactVfx: {fileID: 0}
+  whooshSfx: 13
+  whooshPitch: 1
+  impactSfx: 17
+  impactPitch: 1
+  enableTrail: 1
+--- !u!114 &6158611701158245236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Sword_4
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 33.333332
+  activeMs: 16.666666
+  recoveryMs: 83.33333
+  direction: 4
+  height: 1
+  strength: 0
+  hitstopMs: 20
+  cameraImpulse: 1
+  visualKnockback: 0.08
+  impactVfx: {fileID: 0}
+  whooshSfx: 13
+  whooshPitch: 1
+  impactSfx: 17
+  impactPitch: 1
+  enableTrail: 1
+--- !u!114 &7945061086020272945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Sword_PowerHit
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 133.33333
+  activeMs: 33.333332
+  recoveryMs: 166.66666
+  direction: 2
+  height: 0
+  strength: 2
+  hitstopMs: 90
+  cameraImpulse: 2
+  visualKnockback: 0.5
+  impactVfx: {fileID: 0}
+  whooshSfx: 13
+  whooshPitch: 1
+  impactSfx: 17
+  impactPitch: 1
   enableTrail: 1

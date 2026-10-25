@@ -1,4 +1,5 @@
 using System;
+using SquashBot.Audio;
 using SquashBot.Data;
 using SquashBot.Combat;
 using UnityEngine;
@@ -295,6 +296,7 @@ namespace SquashBot.Visual
     /// (frozen by a hit, slowed in a big moment) and marks its phases (<see cref="PhaseReached"/>) as an animation's
     /// events would.
     /// </summary>
+    [DefaultExecutionOrder(-50)] // (held off the bodies before the body's arm reaches for it)
     public class HeldWeapon : MonoBehaviour
     {
         /// <summary>A swing reached a phase (every weapon's): the weapon, the phase.</summary>
@@ -323,8 +325,66 @@ namespace SquashBot.Visual
             h.family = CombatLibrary.FamilyOf(w.kind);
             h.cooldown = Mathf.Max(0.05f, w.cooldown);
             if (h.isGun) pivot.localPosition = new Vector3(0.3f, 0.32f, 0.14f); // held out ahead, at the hip
+            else h.MakeTrail(w);
             h.Pose(0f);
             return h;
+        }
+
+        /// <summary>The weapon's business end (its tip, along its length): where its trail is drawn from.</summary>
+        public Transform Tip { get; private set; }
+        private TrailRenderer trail;
+        private float trailWidth, trailTime;
+
+        /// <summary>
+        /// The tip (at the far end of the weapon's length as built: grip at the origin, the length up +Y) and a trail on it,
+        /// drawn only from the swing's trail start to its end: thin and long for a sword, short and thick for an axe or a
+        /// heavy weapon; a rank or chest weapon in its own glow, others in the family's colour.
+        /// </summary>
+        private void MakeTrail(WeaponDef w)
+        {
+            float top = 0.6f;
+            foreach (var mf in GetComponentsInChildren<MeshFilter>(true))
+            {
+                if (mf.sharedMesh == null) continue;
+                var bb = mf.sharedMesh.bounds;
+                for (int i = 0; i < 8; i++)
+                {
+                    var c = new Vector3((i & 1) == 0 ? bb.min.x : bb.max.x, (i & 2) == 0 ? bb.min.y : bb.max.y, (i & 4) == 0 ? bb.min.z : bb.max.z);
+                    top = Mathf.Max(top, transform.InverseTransformPoint(mf.transform.TransformPoint(c)).y);
+                }
+            }
+            Tip = new GameObject("Tip").transform;
+            Tip.SetParent(transform, false);
+            Tip.localPosition = new Vector3(0f, top * 0.94f, 0f);
+            var profile = CombatLibrary.Family(family);
+            var colour = w.Special || w.chest ? WeaponModels.GlowOf(w) : profile.trail;
+            trail = Tip.gameObject.AddComponent<TrailRenderer>();
+            trail.sharedMaterial = Weather.AddMaterial;
+            trail.emitting = false;
+            trailTime = family == WeaponFamily.Sword ? 0.12f : family == WeaponFamily.Spear ? 0.12f : family == WeaponFamily.Axe ? 0.16f : 0.18f;
+            trail.time = trailTime;
+            trailWidth = family == WeaponFamily.Sword ? 0.07f : family == WeaponFamily.Spear ? 0.09f : family == WeaponFamily.Axe ? 0.17f : 0.22f;
+            trail.minVertexDistance = 0.02f;
+            trail.numCapVertices = 2;
+            trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            trail.receiveShadows = false;
+            trail.widthCurve = new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 0f));
+            var g = new Gradient();
+            g.SetKeys(new[] { new GradientColorKey(Color.Lerp(colour, Color.white, 0.55f), 0f), new GradientColorKey(colour, 0.4f), new GradientColorKey(colour, 1f) },
+                new[] { new GradientAlphaKey(0.95f, 0f), new GradientAlphaKey(0.55f, 0.5f), new GradientAlphaKey(0f, 1f) });
+            trail.colorGradient = g;
+        }
+
+        /// <summary>The trail on or off (as wide as the weapon is big on screen now).</summary>
+        private void TrailOn(bool on)
+        {
+            if (trail == null) return;
+            if (on)
+            {
+                trail.widthMultiplier = trailWidth * Mathf.Max(0.2f, transform.lossyScale.y);
+                trail.Clear();
+            }
+            trail.emitting = on;
         }
 
         private bool isGun;
@@ -334,6 +394,13 @@ namespace SquashBot.Visual
 
         /// <summary>The blow now swinging (null: at rest).</summary>
         public AttackMotionData Current => swing < 1f ? current : null;
+
+        /// <summary>How far through its swing (0 wound up from rest .. 0.3 wound up, 0.3 .. 0.55 the strike, .. 0.7
+        /// followed through, .. 1 back at rest).</summary>
+        public float Progress => swing;
+
+        /// <summary>The whirl's turn now (degrees), or -1 when not whirling: the body turns with it.</summary>
+        public float SpinAngle => spin < 1f ? spin * 360f : -1f;
 
         /// <summary>Seconds (on the picture clock) until this swing's contact; -1 when no swing is on its way there.</summary>
         public float ContactIn
@@ -363,6 +430,19 @@ namespace SquashBot.Visual
 
         /// <summary>A given blow (its phases, direction and feel).</summary>
         public void Swing(AttackMotionData blow) => Begin(blow, false);
+
+        /// <summary>
+        /// The next blow for a blow already landed this instant (the player's tap: the rules strike at once): its whole
+        /// path still played (drawn back, then through), the wind-up quickened so the contact comes within
+        /// <paramref name="contactWithin"/> seconds of the tap; the recovery as designed.
+        /// </summary>
+        public void SwingQuick(float contactWithin = 0.02f)
+        {
+            Begin(NextBlow(true), false);
+            if (current == null) return;
+            windS = Mathf.Min(windS, Mathf.Max(0.008f, contactWithin * playRate - hitS * 0.5f));
+            swingTotal = windS + hitS + backS;
+        }
 
         /// <summary>The next blow seen late (a live rival's, known only once struck): from its contact on, no wind-up.</summary>
         public void SwingLate() => Begin(NextBlow(true), true);
@@ -426,6 +506,12 @@ namespace SquashBot.Visual
         {
             if ((int)p <= phaseDone) return;
             phaseDone = (int)p;
+            if (p == SwingPhase.TrailStart && current != null)
+            {
+                if (current.enableTrail) TrailOn(true);
+                AudioManager.PlaySfx(current.whooshSfx, 0.45f, current.whooshPitch, 0.08f); // (the family's swing, a little different each time)
+            }
+            if (p == SwingPhase.TrailEnd || p == SwingPhase.WindupStart) TrailOn(false);
             Phase?.Invoke(p);
             PhaseReached?.Invoke(this, p);
         }
@@ -476,10 +562,65 @@ namespace SquashBot.Visual
             if (s >= a + h + backS * 0.5f) Mark(SwingPhase.Recoverable);
         }
 
+        private SkinnedHero ownBody;
+
+        /// <summary>
+        /// The weapon never passes through a rival's body: if its tip is inside another fighter's body capsule, it is
+        /// turned back round its grip, away from that body, a few degrees at a time, until the tip lies on the surface
+        /// (the blow seen to land on the body and stop there).
+        /// </summary>
+        private void StopAtBodies()
+        {
+            if (Tip == null || isGun) return;
+            if (ownBody == null && transform.parent != null) ownBody = transform.root.GetComponentInChildren<SkinnedHero>();
+            var own = ownBody != null ? ownBody.transform.root : transform.root;
+            for (int b = 0; b < SkinnedHero.Live.Count; b++)
+            {
+                var body = SkinnedHero.Live[b];
+                if (body == null || body.transform.root == own) continue;
+                body.BodyCapsule(out var bottom, out var top, out float radius);
+                for (int step = 0; step < 14; step++)
+                {
+                    // the deepest of three points along the blade (its middle, its upper part, its tip) inside the body
+                    var grip = transform.position;
+                    var tipNow = Tip.position;
+                    Vector3 tip = tipNow, onAxis = Vector3.zero, away = Vector3.zero;
+                    float worst = float.MaxValue;
+                    for (int s = 0; s < 3; s++)
+                    {
+                        var pt = Vector3.Lerp(grip, tipNow, s == 0 ? 0.55f : s == 1 ? 0.8f : 1f);
+                        var on = ClosestOnSegment(bottom, top, pt);
+                        float d = (pt - on).sqrMagnitude;
+                        if (d < worst) { worst = d; tip = pt; onAxis = on; away = pt - on; }
+                    }
+                    if (worst >= radius * radius) break;
+                    // turn the weapon round its grip so that point moves away from the body's axis
+                    var arm = tip - grip;
+                    var push = away.sqrMagnitude > 1e-6f ? away.normalized : (grip - onAxis).normalized;
+                    var axis = Vector3.Cross(arm, push);
+                    if (axis.sqrMagnitude < 1e-8f) axis = Vector3.up;
+                    transform.RotateAround(grip, axis.normalized, 7f);
+                }
+            }
+        }
+
+        private static Vector3 ClosestOnSegment(Vector3 a, Vector3 b, Vector3 p)
+        {
+            var ab = b - a;
+            float t = Mathf.Clamp01(Vector3.Dot(p - a, ab) / Mathf.Max(1e-6f, ab.sqrMagnitude));
+            return a + ab * t;
+        }
+
+        private void LateUpdate()
+        {
+            if (swing < 1f || spin < 1f) StopAtBodies();
+        }
+
         private void Update()
         {
             if (!rested) { restPosition = transform.localPosition; rested = true; }
             float dt = VisualTime.DeltaFor(this);
+            if (trail != null && trail.emitting) trail.time = trailTime * Mathf.Clamp(Time.deltaTime > 0f ? Time.deltaTime / Mathf.Max(1e-4f, dt) : 1f, 1f, 20f); // (slowed or frozen: the trail lasts as long on screen)
             if (spin < 1f)
             {
                 bool whirlBlow = current != null && current.direction == HitDirection.Spin && swing < 1f;

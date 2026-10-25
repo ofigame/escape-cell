@@ -518,7 +518,7 @@ namespace SquashBot.Gameplay
                 WhirlStrike(w, damage);
                 return true;
             }
-            if (heldWeapon != null) heldWeapon.Swing();
+            if (heldWeapon != null) heldWeapon.SwingQuick(); // (the blow lands now: the swing's contact comes with it)
             if (w.kind == WeaponKind.Gun) GunShotFx(GridView.ToWorld(at) + Vector3.up * 0.6f, w);
             // A blow you can see: a crescent of the weapon's colour sweeping through the target.
             else SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.GlowOf(w), 1f + 0.015f * Armory.Damage(w));

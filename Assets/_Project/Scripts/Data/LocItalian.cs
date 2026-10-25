@@ -171,6 +171,7 @@ namespace SquashBot.Data
             ["duel.breaker"] = "SPEZZA",
             ["duel.broken"] = "COMBO SPEZZATA!",
             ["duel.parried"] = "PARATA!",
+            ["duel.clashArms"] = "CLANG!",
             ["duel.clash"] = "Scontro!",
             ["duel.over"] = "Scavalcato!",
             ["rehber.sec.duel"] = "DUELLO",

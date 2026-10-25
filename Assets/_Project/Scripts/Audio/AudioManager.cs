@@ -18,7 +18,17 @@ namespace SquashBot.Audio
         CloseCall,
         Win,
         Lose,
-        Click
+        Click,
+        // the duel's weapon families: swings, blows landing, two weapons meeting
+        SwishSword,
+        SwishSpear,
+        SwishAxe,
+        SwishHeavy,
+        HitSword,
+        HitSpear,
+        HitAxe,
+        HitHeavy,
+        Clang
     }
 
     /// <summary>Plays the synthesized effects through a small voice pool, plus the layered music (<see cref="MusicDirector"/>).</summary>
@@ -57,6 +67,16 @@ namespace SquashBot.Audio
             clips[Sfx.Win] = SoundSynth.Win();
             clips[Sfx.Lose] = SoundSynth.Lose();
             clips[Sfx.Click] = SoundSynth.Click();
+            // the duel's weapon families: their swings and their blows landing, and two weapons meeting
+            clips[Sfx.SwishSword] = SoundSynth.SwishSword();
+            clips[Sfx.SwishSpear] = SoundSynth.SwishSpear();
+            clips[Sfx.SwishAxe] = SoundSynth.SwishAxe();
+            clips[Sfx.SwishHeavy] = SoundSynth.SwishHeavy();
+            clips[Sfx.HitSword] = SoundSynth.HitSword();
+            clips[Sfx.HitSpear] = SoundSynth.HitSpear();
+            clips[Sfx.HitAxe] = SoundSynth.HitAxe();
+            clips[Sfx.HitHeavy] = SoundSynth.HitHeavy();
+            clips[Sfx.Clang] = SoundSynth.Clang();
 
             for (int i = 0; i < Voices; i++)
             {

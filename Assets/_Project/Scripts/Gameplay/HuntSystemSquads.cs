@@ -223,7 +223,7 @@ namespace SquashBot.Gameplay
                 s.SetRaise(0f);
                 float cd = SquadStats[group, 4] * (0.85f + (float)rng.NextDouble() * 0.3f);
                 s.cooldown = s.partner ? 0.55f + (float)rng.NextDouble() * 0.35f : s.aimFoi ? cd * 1.4f : cd;
-                if (s.held != null) s.held.Swing(); // (the partner's weapon swings like a foi's)
+                if (s.held != null) s.held.SwingQuick(); // (the partner's weapon swings like a foi's; its blow lands now)
                 LandSquadBlow(s, enemyFoi, reach);
                 return;
             }

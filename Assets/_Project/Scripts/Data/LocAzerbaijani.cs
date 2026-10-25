@@ -171,6 +171,7 @@ namespace SquashBot.Data
             ["duel.breaker"] = "QIR",
             ["duel.broken"] = "KOMBO QIRILDI!",
             ["duel.parried"] = "QARŞILADI!",
+            ["duel.clashArms"] = "KLANQ!",
             ["duel.clash"] = "Toqquşdunuz!",
             ["duel.over"] = "Üstündən!",
             ["rehber.sec.duel"] = "DUEL",

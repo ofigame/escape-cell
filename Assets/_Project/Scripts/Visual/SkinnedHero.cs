@@ -810,6 +810,89 @@ namespace SquashBot.Visual
         /// <summary>This body's frame time on its picture clock (frozen by a hit, slowed in a big moment).</summary>
         private float VDt => vclock != null ? vclock.DeltaTime : Time.deltaTime * VisualTime.GlobalScale;
 
+        // ---------- The body in its own blows (the weapon's swing read each frame) ----------
+
+        /// <summary>Every rigged body in play (a weapon stops on the others' bodies, never passing through).</summary>
+        public static readonly List<SkinnedHero> Live = new List<SkinnedHero>();
+
+        private void OnEnable() { if (!Live.Contains(this)) Live.Add(this); }
+        private void OnDisable() => Live.Remove(this);
+
+        /// <summary>The body as a capsule (world): from above its feet to its neck, and how thick.</summary>
+        public void BodyCapsule(out Vector3 bottom, out Vector3 top, out float radius)
+        {
+            var up = transform.parent != null ? transform.parent.up : Vector3.up;
+            float height = head != null ? Mathf.Max(0.3f, head.position.y - transform.position.y) : 1.2f;
+            var basePos = hips != null ? new Vector3(hips.position.x, transform.position.y, hips.position.z) : transform.position;
+            bottom = basePos + up * height * 0.18f;
+            top = basePos + up * height * 0.95f;
+            radius = height * 0.2f;
+        }
+
+        private HeldWeapon heldCache;
+        private float heldLookAt;
+        private bool spinning;
+        private Quaternion spinBase;
+
+        /// <summary>
+        /// The body goes with the weapon's blow, by the blow's direction and the weapon's family (a sword lightly, an axe and
+        /// a heavy weapon with all its weight): a sweep turns the chest back then through; a blow from overhead leans back,
+        /// then forward with the knees giving (a heavy weapon most); an upward blow crouches, then rises leaning back; a
+        /// thrust lunges forward; a whirl turns the whole body round with the weapon. Only the picture: the place is the rules'.
+        /// </summary>
+        private void BodyIntoBlow()
+        {
+            if ((heldCache == null || !heldCache) && Time.time >= heldLookAt)
+            {
+                heldLookAt = Time.time + 0.5f;
+                heldCache = transform.parent != null ? transform.parent.GetComponentInChildren<HeldWeapon>() : null;
+            }
+            var blow = heldCache != null ? heldCache.Current : null;
+            float spinAng = heldCache != null ? heldCache.SpinAngle : -1f;
+            bool busy = playing != null || Flailing || knock != null;
+            if (spinning && (spinAng < 0f || busy)) { spinning = false; transform.localRotation = spinBase; }
+            if (blow == null || busy) return;
+            var fam = heldCache.Family;
+            float amp = fam == Combat.WeaponFamily.Sword ? 0.8f : fam == Combat.WeaponFamily.Spear ? 0.65f : fam == Combat.WeaponFamily.Axe ? 1.2f : 1.35f;
+            float p = heldCache.Progress;
+            // -1 wound up .. +1 struck through, held, and back to 0 at rest
+            float c = p < 0.3f ? -Mathf.SmoothStep(0f, 1f, p / 0.3f)
+                : p < 0.55f ? Mathf.Lerp(-1f, 1f, Mathf.SmoothStep(0f, 1f, (p - 0.3f) / 0.25f))
+                : p < 0.7f ? 1f : 1f - Mathf.SmoothStep(0f, 1f, (p - 0.7f) / 0.3f);
+            var frame = transform.parent != null ? transform.parent : transform;
+            Vector3 up = frame.up, right = frame.right, ahead = frame.forward;
+            float height = head != null ? Mathf.Max(0.3f, head.position.y - transform.position.y) : 1f;
+            float yaw = 0f, pitch = 0f, drop = 0f, lunge = 0f;
+            switch (blow.direction)
+            {
+                case Combat.HitDirection.Horizontal_RightToLeft: yaw = -c * 32f * amp; break;
+                case Combat.HitDirection.Horizontal_LeftToRight: yaw = c * 32f * amp; break;
+                case Combat.HitDirection.Overhead:
+                    pitch = c * 22f * amp;
+                    drop = Mathf.Max(0f, c) * 0.035f * height * (fam == Combat.WeaponFamily.Heavy || fam == Combat.WeaponFamily.Axe ? 1.3f : 0.5f);
+                    break;
+                case Combat.HitDirection.Upward:
+                    pitch = -c * 18f * amp;
+                    drop = Mathf.Max(0f, -c) * 0.03f * height;
+                    break;
+                case Combat.HitDirection.Thrust:
+                    pitch = Mathf.Max(0f, c) * 14f * amp;
+                    lunge = Mathf.Max(0f, c) * 0.06f * height * amp;
+                    break;
+                case Combat.HitDirection.Spin:
+                    if (spinAng >= 0f)
+                    {
+                        if (!spinning) { spinning = true; spinBase = transform.localRotation; }
+                        transform.localRotation = spinBase * Quaternion.Euler(0f, spinAng, 0f);
+                    }
+                    break;
+            }
+            var bend = Quaternion.AngleAxis(yaw * 0.5f, up) * Quaternion.AngleAxis(pitch * 0.5f, right);
+            if (spine != null) spine.rotation = bend * spine.rotation;
+            if (chest != null) chest.rotation = bend * chest.rotation;
+            if (hips != null && (drop > 0f || lunge > 0f)) hips.position += ahead * lunge - up * drop;
+        }
+
         /// <summary>The blow's push on the body's picture: the hips (and all on them) moved by the visual root's offset.</summary>
         private void PushedByBlow()
         {
@@ -1330,6 +1413,7 @@ namespace SquashBot.Visual
             }
             Shuddering(dt);
             PushedByBlow();
+            BodyIntoBlow();
             Grip();
 
             // Lids: a blink now and then; half down when angry or striking (the eyes narrow).

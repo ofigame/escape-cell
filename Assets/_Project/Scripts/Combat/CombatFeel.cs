@@ -28,6 +28,17 @@ namespace SquashBot.Combat
         private static readonly List<Vector2> lightFreezes = new List<Vector2>(32); // (when, how long ms)
         private static bool hooked;
 
+        /// <summary>Two weapons met (both swings' contacts within a moment of each other, close together): where.</summary>
+        public static event Action<Vector3> Clashed;
+
+        /// <summary>How close together two swings' contacts must come to clash (seconds), and how near their tips.</summary>
+        private const float ClashWindow = 0.08f, ClashReach = 6f;
+        private static HeldWeapon lastContact;
+        private static float lastContactAt = -9f;
+
+        /// <summary>Listens for the swings from the start (the clashes need no blow to have landed).</summary>
+        public static void Init() => Hook();
+
         /// <summary>A blow's feel has played: striker, struck, the attack.</summary>
         public static event Action<Transform, Transform, AttackMotionData> Contacted;
 
@@ -81,6 +92,16 @@ namespace SquashBot.Combat
         private static void OnPhase(HeldWeapon w, SwingPhase phase)
         {
             if (phase != SwingPhase.Contact) return;
+            // two fighters' contacts within a moment of each other, their weapons close: the weapons meet
+            float now = Time.unscaledTime;
+            if (lastContact != null && lastContact != w && lastContact.transform.root != w.transform.root && now - lastContactAt <= ClashWindow)
+            {
+                var a = lastContact.Tip != null ? lastContact.Tip.position : lastContact.transform.position;
+                var b = w.Tip != null ? w.Tip.position : w.transform.position;
+                if ((a - b).sqrMagnitude <= ClashReach * ClashReach) Clash((a + b) * 0.5f, b - a);
+            }
+            lastContact = w;
+            lastContactAt = now;
             for (int i = pending.Count - 1; i >= 0; i--)
             {
                 if (pending[i].weapon != w) continue;
@@ -109,6 +130,14 @@ namespace SquashBot.Combat
             if (fighter == null) return null;
             var body = fighter.GetComponentInChildren<SkinnedHero>(true);
             return body != null && body.transform.parent != null ? body.transform.parent : fighter;
+        }
+
+        /// <summary>The weapons meet: a big "klang", a sharp knock of the camera, sparks (the game draws them, see <see cref="Clashed"/>).</summary>
+        private static void Clash(Vector3 at, Vector3 across)
+        {
+            AudioManager.PlaySfx(Sfx.Clang, 0.85f, 1f, 0.06f);
+            CameraImpulse.Fire(CameraImpulseLevel.Medium, Vector3.Cross(Vector3.up, across), ShakeMultiplier);
+            Clashed?.Invoke(at);
         }
 
         private static void Apply(Transform attacker, Transform victim, AttackMotionData data)

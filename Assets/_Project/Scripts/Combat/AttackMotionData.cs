@@ -24,9 +24,9 @@ namespace SquashBot.Combat
         public float visualKnockback = 0.08f;
         public GameObject impactVfx;
         /// <summary>The sounds (the game's own synthesized ones) and their pitch.</summary>
-        public Sfx whooshSfx = Sfx.Hop;
-        public float whooshPitch = 1.6f;
-        public Sfx impactSfx = Sfx.Bump;
+        public Sfx whooshSfx = Sfx.SwishSword;
+        public float whooshPitch = 1f;
+        public Sfx impactSfx = Sfx.HitSword;
         public float impactPitch = 1f;
         public bool enableTrail = true;
 

@@ -171,6 +171,7 @@ namespace SquashBot.Data
             ["duel.breaker"] = "브레이크",
             ["duel.broken"] = "콤보 브레이커!",
             ["duel.parried"] = "막았다!",
+            ["duel.clashArms"] = "챙!",
             ["duel.clash"] = "충돌!",
             ["duel.over"] = "넘었다!",
             ["rehber.sec.duel"] = "결투",

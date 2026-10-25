@@ -355,6 +355,15 @@ namespace SquashBot.Gameplay
             ui.WeaponBag.Closed += CloseBag;
             ui.ResumePressed += Resume;
             ui.SettingToggled += OnSettingToggled;
+            // two weapons meeting in a duel: a burst of sparks and a ring where they met (the sound and camera are the feel's)
+            Combat.CombatFeel.Init();
+            Combat.CombatFeel.Clashed += at =>
+            {
+                fx.Burst(at, new Color(1f, 0.95f, 0.7f), new Color(3.2f, 3f, 2f), 34, 7f);
+                fx.Burst(at, new Color(0.7f, 0.85f, 1f), new Color(2f, 2.6f, 3.2f), 16, 5f);
+                Visual.Shockwave.Create(new Vector3(at.x, GridView.SurfaceY, at.z), 1.4f, new Color(1f, 0.95f, 0.8f));
+                if (challengeRun && chPhase == ChPhase.Duel) skillBar?.Shout(Loc.T("duel.clashArms"), new Color(1f, 0.92f, 0.6f));
+            };
             ui.Languages.Chosen += language =>
             {
                 Loc.Set(language);

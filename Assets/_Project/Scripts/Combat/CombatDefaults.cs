@@ -88,10 +88,11 @@ namespace SquashBot.Combat
             a.hitstopMs = f == WeaponFamily.Sword ? 20f : f == WeaponFamily.Spear ? 30f : f == WeaponFamily.Axe ? 50f : 65f;
             a.cameraImpulse = CameraImpulseLevel.Light;
             a.visualKnockback = heavy ? 0.2f : 0.08f;
-            a.whooshSfx = Sfx.Hop;
-            a.whooshPitch = f == WeaponFamily.Sword ? 1.9f : f == WeaponFamily.Spear ? 1.5f : f == WeaponFamily.Axe ? 1.0f : 0.75f;
-            a.impactSfx = heavy ? Sfx.Impact : Sfx.Bump;
-            a.impactPitch = f == WeaponFamily.Sword ? 1.3f : f == WeaponFamily.Spear ? 1.1f : f == WeaponFamily.Axe ? 0.8f : 0.6f;
+            // each family its own swing and blow (the game's synthesized sounds; pitch varies a little each time)
+            a.whooshSfx = f == WeaponFamily.Sword ? Sfx.SwishSword : f == WeaponFamily.Spear ? Sfx.SwishSpear : f == WeaponFamily.Axe ? Sfx.SwishAxe : Sfx.SwishHeavy;
+            a.whooshPitch = 1f;
+            a.impactSfx = f == WeaponFamily.Sword ? Sfx.HitSword : f == WeaponFamily.Spear ? Sfx.HitSpear : f == WeaponFamily.Axe ? Sfx.HitAxe : Sfx.HitHeavy;
+            a.impactPitch = 1f;
             return a;
         }
     }
