@@ -63,6 +63,13 @@ namespace SquashBot.Data
             set { Prefs.SetInt("sb_lane_duel", value ? 1 : 0); Prefs.Save(); }
         }
 
+        /// <summary>The camera's knocks and shakes (some players feel unwell with them): on by default.</summary>
+        public static bool ScreenShake
+        {
+            get => Prefs.GetInt("sb_screen_shake", 1) == 1;
+            set { Prefs.SetInt("sb_screen_shake", value ? 1 : 0); Prefs.Save(); }
+        }
+
         public static bool CombatCamera
         {
             get => Prefs.GetInt("sb_combat_cam", 1) == 1;

@@ -1,5 +1,8 @@
+using System;
 using SquashBot.Data;
+using SquashBot.Combat;
 using UnityEngine;
+using WeaponFamily = SquashBot.Combat.WeaponFamily;
 
 namespace SquashBot.Visual
 {
@@ -285,10 +288,29 @@ namespace SquashBot.Visual
         }
     }
 
-    /// <summary>The equipped weapon in the robot's hand on the floor: a rest pose, and a quick chop when it strikes.</summary>
+    /// <summary>
+    /// The equipped weapon in the robot's hand: a rest pose, and its family's blows in turn (the duel's four-blow chain:
+    /// a sword slashes across and back, comes down, thrusts; a heavy weapon comes down from the shoulder ...). Each swing
+    /// has its wind-up, contact and recovery from its <see cref="AttackMotionData"/>, runs on the fighter's picture clock
+    /// (frozen by a hit, slowed in a big moment) and marks its phases (<see cref="PhaseReached"/>) as an animation's
+    /// events would.
+    /// </summary>
     public class HeldWeapon : MonoBehaviour
     {
+        /// <summary>A swing reached a phase (every weapon's): the weapon, the phase.</summary>
+        public static event Action<HeldWeapon, SwingPhase> PhaseReached;
+        /// <summary>This weapon's swing reached a phase.</summary>
+        public event Action<SwingPhase> Phase;
+
         private float swing = 1f;
+        private WeaponFamily family = WeaponFamily.Heavy;
+        private float cooldown = 0.3f;
+        private int chain;
+        private float lastSwingAt = -10f;
+        private AttackMotionData current;
+        private float swingTime, swingTotal = 0.34f, playRate = 1f;
+        private float windS, hitS, backS;
+        private int phaseDone = 5;
 
         public static HeldWeapon Attach(Transform robotVisual, WeaponDef w)
         {
@@ -298,6 +320,8 @@ namespace SquashBot.Visual
             var h = pivot.gameObject.AddComponent<HeldWeapon>();
             WeaponModels.Build(pivot, w, w.kind == WeaponKind.Spear ? 0.95f : w.kind == WeaponKind.Gun ? 1.6f : 1.15f); // big enough to read on the floor
             h.isGun = w.kind == WeaponKind.Gun;
+            h.family = CombatLibrary.FamilyOf(w.kind);
+            h.cooldown = Mathf.Max(0.05f, w.cooldown);
             if (h.isGun) pivot.localPosition = new Vector3(0.3f, 0.32f, 0.14f); // held out ahead, at the hip
             h.Pose(0f);
             return h;
@@ -305,11 +329,105 @@ namespace SquashBot.Visual
 
         private bool isGun;
 
-        public void Swing()
+        /// <summary>The weapon's family (how it swings).</summary>
+        public WeaponFamily Family => family;
+
+        /// <summary>The blow now swinging (null: at rest).</summary>
+        public AttackMotionData Current => swing < 1f ? current : null;
+
+        /// <summary>Seconds (on the picture clock) until this swing's contact; -1 when no swing is on its way there.</summary>
+        public float ContactIn
         {
+            get
+            {
+                if (swing >= 1f || current == null || phaseDone >= (int)SwingPhase.Contact) return -1f;
+                float left = (windS + hitS * 0.5f) - swingTime;
+                return left > 0f ? left / Mathf.Max(0.05f, playRate) : -1f;
+            }
+        }
+
+        /// <summary>From a swing's start to its contact (seconds), for the next blow in the chain: a bot starts its swing that
+        /// much before its blow lands, so the contact meets it.</summary>
+        public float LeadSeconds
+        {
+            get
+            {
+                var next = NextBlow(false);
+                if (next == null) return 0f;
+                return (next.anticipationMs + next.activeMs * 0.5f) / 1000f / RateFor(next);
+            }
+        }
+
+        /// <summary>The next blow in the family's chain (back to the first after a pause as long as the combo's).</summary>
+        public void Swing() => Swing(NextBlow(true));
+
+        /// <summary>A given blow (its phases, direction and feel).</summary>
+        public void Swing(AttackMotionData blow) => Begin(blow, false);
+
+        /// <summary>The next blow seen late (a live rival's, known only once struck): from its contact on, no wind-up.</summary>
+        public void SwingLate() => Begin(NextBlow(true), true);
+
+        /// <summary>The next blow, its contact in <paramref name="seconds"/> (picture time): started part-way through its
+        /// wind-up when the blow comes sooner than a whole wind-up (a bot's quick flurry).</summary>
+        public void SwingToContact(float seconds)
+        {
+            Begin(NextBlow(true), false);
+            if (current == null) return;
+            float toContact = windS + hitS * 0.5f;
+            swingTime = Mathf.Clamp(toContact - Mathf.Max(0f, seconds) * playRate, 0f, toContact);
+        }
+
+        private AttackMotionData NextBlow(bool advance)
+        {
+            var profile = CombatLibrary.Family(family);
+            if (Time.time - lastSwingAt > 1.4f) chain = 0; // (the chain starts over after a pause: the combo's own gap)
+            var b = profile.Blow(chain);
+            if (advance) { chain++; lastSwingAt = Time.time; }
+            return b;
+        }
+
+        /// <summary>How fast a blow plays to fit the weapon's pace (the design's 0.7 .. 1.6; outside it the blow does not fit).</summary>
+        private float RateFor(AttackMotionData b)
+        {
+            float rate = b.TotalSeconds > cooldown ? b.TotalSeconds / cooldown : 1f;
+            if (rate > 1.6f || rate < 0.7f) Debug.LogWarning("[Combat] blow " + b.name + " does not fit the weapon's pace (rate " + rate.ToString("0.00") + ")");
+            return Mathf.Clamp(rate, 0.7f, 1.6f);
+        }
+
+        private void Begin(AttackMotionData blow, bool late)
+        {
+            current = blow;
             swing = 0f;
-            stroke = (stroke + 1) % 4; // the blows in turn: down from overhead, across from the right, a slant, across from the left
-            fromRight = stroke == 1;
+            swingTime = 0f;
+            phaseDone = -1;
+            if (blow != null)
+            {
+                windS = blow.anticipationMs / 1000f; hitS = blow.activeMs / 1000f; backS = blow.recoveryMs / 1000f;
+                playRate = RateFor(blow);
+                stroke = StrokeOf(blow.direction);
+                fromRight = blow.direction != HitDirection.Horizontal_LeftToRight;
+                if (blow.direction == HitDirection.Spin) Spin();
+            }
+            else
+            {
+                windS = 0.102f; hitS = 0.085f; backS = 0.153f; playRate = 1f;
+                stroke = (stroke + 1) % 4; // the blows in turn: down from overhead, across from the right, a slant, across from the left
+                fromRight = stroke == 1;
+            }
+            swingTotal = windS + hitS + backS;
+            Mark(SwingPhase.WindupStart);
+            if (late) { swingTime = windS; Mark(SwingPhase.TrailStart); }
+        }
+
+        private static int StrokeOf(HitDirection d) =>
+            d == HitDirection.Overhead ? 0 : d == HitDirection.Horizontal_RightToLeft ? 1 : d == HitDirection.Upward ? 2 : d == HitDirection.Thrust ? 4 : 3;
+
+        private void Mark(SwingPhase p)
+        {
+            if ((int)p <= phaseDone) return;
+            phaseDone = (int)p;
+            Phase?.Invoke(p);
+            PhaseReached?.Invoke(this, p);
         }
 
         private int stroke = 3;
@@ -341,12 +459,32 @@ namespace SquashBot.Visual
 
         private void Pose(float a) => transform.localRotation = isGun ? Quaternion.Euler(-a * 0.25f, 0f, 0f) : Quaternion.Euler(25f + a, 0f, -12f);
 
+        /// <summary>The swing's seconds turned into the strokes' 0..1 (wind-up to 0.3, contact 0.3..0.55, follow-through
+        /// to 0.7, back to rest to 1), marking the phases as it passes them.</summary>
+        private void Advance(float dt)
+        {
+            swingTime += dt * playRate;
+            float a = windS, h = hitS, f = backS * 0.3f, b = backS * 0.7f;
+            float s = swingTime;
+            if (s < a) swing = 0.3f * s / Mathf.Max(1e-4f, a);
+            else if (s < a + h) swing = 0.3f + 0.25f * (s - a) / Mathf.Max(1e-4f, h);
+            else if (s < a + h + f) swing = 0.55f + 0.15f * (s - a - h) / Mathf.Max(1e-4f, f);
+            else swing = Mathf.Min(1f, 0.7f + 0.3f * (s - a - h - f) / Mathf.Max(1e-4f, b));
+            if (s >= a * 0.6f) Mark(SwingPhase.TrailStart);
+            if (s >= a + h * 0.5f) Mark(SwingPhase.Contact);
+            if (s >= a + h + f) Mark(SwingPhase.TrailEnd);
+            if (s >= a + h + backS * 0.5f) Mark(SwingPhase.Recoverable);
+        }
+
         private void Update()
         {
             if (!rested) { restPosition = transform.localPosition; rested = true; }
+            float dt = VisualTime.DeltaFor(this);
             if (spin < 1f)
             {
-                spin = Mathf.Min(1f, spin + Time.deltaTime / 0.32f);
+                bool whirlBlow = current != null && current.direction == HitDirection.Spin && swing < 1f;
+                spin = Mathf.Min(1f, spin + dt / Mathf.Max(0.12f, whirlBlow ? swingTotal / playRate : 0.32f));
+                if (swing < 1f) Advance(dt);
                 float ang = spin * 360f;
                 transform.localPosition = Quaternion.Euler(0f, ang, 0f) * restPosition;
                 transform.localRotation = Quaternion.Euler(0f, ang, 0f) * Quaternion.Euler(80f, 0f, -12f);
@@ -357,13 +495,13 @@ namespace SquashBot.Visual
             if (isGun)
             {
                 // A shot: the gun kicks up and back, and settles.
-                swing = Mathf.Min(1f, swing + Time.deltaTime / 0.16f);
+                swing = Mathf.Min(1f, swing + dt / 0.16f);
                 float kick = Mathf.Sin(swing * Mathf.PI);
                 transform.localPosition = restPosition - Vector3.forward * 0.06f * kick;
                 Pose(kick * 60f);
                 return;
             }
-            swing = Mathf.Min(1f, swing + Time.deltaTime / 0.34f);
+            Advance(dt);
             if (stroke == 0)
             {
                 // Down from overhead: the blade raised high behind the head, brought down hard in front.
@@ -378,12 +516,19 @@ namespace SquashBot.Visual
                 if (swing >= 1f) transform.localPosition = restPosition;
                 return;
             }
+            if (stroke == 4)
+            {
+                // A thrust: drawn back at the hip, driven straight out ahead (the point first), drawn back.
+                Stroke(new Vector3(0.24f, 0.24f, -0.16f), new Vector3(80f, 0f, -8f), new Vector3(0.1f, 0.3f, 0.62f), new Vector3(90f, 0f, 0f), new Vector3(0.12f, 0.28f, 0.5f), new Vector3(88f, 0f, 0f));
+                if (swing >= 1f) transform.localPosition = restPosition;
+                return;
+            }
             // A sweep across the front: the hand draws back to one side, slashes across to the other (the blade near level,
             // reaching out ahead), then comes back to rest. Every other blow the other way round.
             float side = fromRight ? 1f : -1f;
             float yaw;
-            if (swing < 0.2f) yaw = Mathf.Lerp(0f, 80f * side, swing / 0.2f);
-            else if (swing < 0.6f) yaw = Mathf.Lerp(80f * side, -85f * side, Mathf.SmoothStep(0f, 1f, (swing - 0.2f) / 0.4f));
+            if (swing < 0.3f) yaw = Mathf.Lerp(0f, 80f * side, swing / 0.3f);
+            else if (swing < 0.6f) yaw = Mathf.Lerp(80f * side, -85f * side, Mathf.SmoothStep(0f, 1f, (swing - 0.3f) / 0.3f));
             else yaw = Mathf.Lerp(-85f * side, 0f, (swing - 0.6f) / 0.4f);
             float reach = Mathf.Sin(Mathf.Clamp01((swing - 0.1f) / 0.6f) * Mathf.PI); // out ahead in the middle of the sweep
             var arc = Quaternion.Euler(0f, yaw, 0f);

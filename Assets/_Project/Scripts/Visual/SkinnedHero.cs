@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SquashBot.Combat;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Playables;
@@ -734,9 +735,10 @@ namespace SquashBot.Visual
         // time over the code's poses, from its start to its end (or until foi walks off).
         private static readonly Dictionary<string, AnimationClip> clips = new Dictionary<string, AnimationClip>();
         private AnimationClip playing;
-        private PlayableGraph graph;
-        private AnimationPlayableOutput output;
-        private AnimationClipPlayable clipPlay;
+        /// <summary>The body's animation layers (base, upper body, full body, additive reaction): see <see cref="HeroAnimLayers"/>.</summary>
+        private HeroAnimLayers layers;
+        private AnimationClip upperPlaying;
+        private float upperTime, upperRate = 1f;
         private float playingTime, playingRate = 1f;
         private bool playingReal, playingLoop;
 
@@ -765,21 +767,58 @@ namespace SquashBot.Visual
             if (animator == null) animator = gameObject.AddComponent<Animator>();
             animator.enabled = true;
             animator.applyRootMotion = false;
-            if (!graph.IsValid())
-            {
-                graph = PlayableGraph.Create(name + " moves");
-                graph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
-                output = AnimationPlayableOutput.Create(graph, "out", animator);
-            }
-            if (clipPlay.IsValid()) clipPlay.Destroy();
-            clipPlay = AnimationClipPlayable.Create(graph, c);
-            output.SetSourcePlayable(clipPlay);
+            Layers(animator).Play(HeroAnimLayers.FullBody, c);
             clap = 1f; chop = 1f;
             return true;
         }
 
         /// <summary>The move playing ends now (a looping one included).</summary>
-        public void StopMove() { playing = null; playingLoop = false; }
+        public void StopMove() { playing = null; playingLoop = false; if (layers != null) layers.Stop(HeroAnimLayers.FullBody); }
+
+        private HeroAnimLayers Layers(Animator animator)
+        {
+            if (layers == null || !layers.Valid) layers = new HeroAnimLayers(animator, transform, spine, name);
+            return layers;
+        }
+
+        /// <summary>Plays move <paramref name="name"/> on the upper body only (the spine and up), the legs still the body's own
+        /// (walking, standing); false if there is no such move.</summary>
+        public bool PlayUpper(string name, float rate = 1f)
+        {
+            if (!ready) Setup();
+            var c = ClipOf(name);
+            if (c == null) return false;
+            var animator = GetComponent<Animator>();
+            if (animator == null) animator = gameObject.AddComponent<Animator>();
+            animator.enabled = true;
+            animator.applyRootMotion = false;
+            Layers(animator).Play(HeroAnimLayers.UpperBody, c);
+            upperPlaying = c; upperTime = 0f; upperRate = rate;
+            return true;
+        }
+
+        /// <summary>The upper-body move ends now.</summary>
+        public void StopUpper() { upperPlaying = null; if (layers != null) layers.Stop(HeroAnimLayers.UpperBody); }
+
+        // ---------- The picture clock and layer (the hit freeze, the slow motion, the push of a blow) ----------
+
+        private VisualTime vclock;
+        private VisualRoot vroot;
+        private Vector3 hipsRest;
+        private bool hipsKnown;
+
+        /// <summary>This body's frame time on its picture clock (frozen by a hit, slowed in a big moment).</summary>
+        private float VDt => vclock != null ? vclock.DeltaTime : Time.deltaTime * VisualTime.GlobalScale;
+
+        /// <summary>The blow's push on the body's picture: the hips (and all on them) moved by the visual root's offset.</summary>
+        private void PushedByBlow()
+        {
+            if (hips == null || vroot == null) return;
+            if (!hipsKnown) { hipsRest = hips.localPosition; hipsKnown = true; }
+            if (playing == null) hips.localPosition = hipsRest; // (a clip writes the hips itself)
+            var off = vroot.Offset;
+            if (off.sqrMagnitude > 1e-8f) hips.position += off;
+        }
 
         // ---------- Knocks (the duel's big blows) ----------
 
@@ -837,7 +876,7 @@ namespace SquashBot.Visual
             if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
             var axis = Vector3.Cross(Vector3.up, away.normalized);
             const float T = 0.45f;
-            for (float e = 0f; e < T; e += Time.deltaTime)
+            for (float e = 0f; e < T; e += VDt)
             {
                 float k = e / T;
                 float a = 26f * Mathf.Sin(k * Mathf.PI * 2.5f) * (1f - k); // (snapped back, a wobble, still)
@@ -910,7 +949,7 @@ namespace SquashBot.Visual
             var axis = Vector3.Cross(Vector3.up, away);
             float lean = 3f + 7f * strength, scale = transform.parent != null ? Mathf.Max(0.01f, transform.parent.lossyScale.y) : 1f; // (it rocks, it never topples)
             float outT = 0.09f + 0.05f * strength, backT = 0.28f + 0.25f * strength;
-            for (float e = 0f; e < outT + backT; e += Time.deltaTime)
+            for (float e = 0f; e < outT + backT; e += VDt)
             {
                 float k = e < outT ? Mathf.SmoothStep(0f, 1f, e / outT) : 1f - Mathf.SmoothStep(0f, 1f, (e - outT) / backT);
                 var parentRot = transform.parent != null ? transform.parent.rotation : Quaternion.identity;
@@ -967,7 +1006,7 @@ namespace SquashBot.Visual
                 // off its feet: up in an arc, turning over onto its back on the way, down flat
                 float up = arc / Mathf.Max(0.01f, transform.parent != null ? transform.parent.lossyScale.y : 1f);
                 const float Air = 0.5f;
-                for (float e = 0f; e < Air; e += Time.deltaTime)
+                for (float e = 0f; e < Air; e += VDt)
                 {
                     float k = e / Air;
                     float tk = Tilt(Mathf.SmoothStep(0f, 1f, k));
@@ -977,9 +1016,9 @@ namespace SquashBot.Visual
                 }
             }
             else
-                for (float e = 0f; e < 0.32f; e += Time.deltaTime) { float k = e / 0.32f; Tilt(k * k); yield return null; } // falling faster and faster
+                for (float e = 0f; e < 0.32f; e += VDt) { float k = e / 0.32f; Tilt(k * k); yield return null; } // falling faster and faster
             Tilt(1f);
-            for (float e = 0f; e < lie; e += Time.deltaTime)
+            for (float e = 0f; e < lie; e += VDt)
             {
                 Tilt(1f + Mathf.Sin(e * 20f) * Mathf.Exp(-e * 6f) * 0.06f); // a bounce, then still
                 flail = Mathf.Max(0f, 1f - e * 5f) * 0.8f; // (the arms and legs still going as it lands)
@@ -990,7 +1029,7 @@ namespace SquashBot.Visual
             // drawn up and bent, then stands up from the crouch.
             flail = 0f;
             const float SitUp = 0.32f, StandUp = 0.36f;
-            for (float e = 0f; e < SitUp; e += Time.deltaTime)
+            for (float e = 0f; e < SitUp; e += VDt)
             {
                 float k = Mathf.SmoothStep(0f, 1f, e / SitUp);
                 Tilt(Mathf.Lerp(1f, 0.42f, k)); // (the back off the ground: sitting)
@@ -998,7 +1037,7 @@ namespace SquashBot.Visual
                 rise = k; push = k;
                 yield return null;
             }
-            for (float e = 0f; e < StandUp; e += Time.deltaTime)
+            for (float e = 0f; e < StandUp; e += VDt)
             {
                 float k = Mathf.SmoothStep(0f, 1f, e / StandUp);
                 Tilt(Mathf.Lerp(0.42f, 0f, k)); // (up onto its feet)
@@ -1025,7 +1064,7 @@ namespace SquashBot.Visual
             var neck = head.parent;
             float up = Mathf.Max(0.3f, head.position.y - transform.position.y) * 0.9f; // (about the body's height, in the world)
             const float T = 0.75f;
-            for (float e = 0f; e < T; e += Time.deltaTime)
+            for (float e = 0f; e < T; e += VDt)
             {
                 float k = e / T;
                 // straight up in the world and down again, spinning, wherever the body is meanwhile
@@ -1050,7 +1089,7 @@ namespace SquashBot.Visual
         {
             var restPos = bodyPos;
             float local = height / Mathf.Max(0.01f, transform.parent != null ? transform.parent.lossyScale.y : 1f);
-            for (float e = 0f; e < time; e += Time.deltaTime)
+            for (float e = 0f; e < time; e += VDt)
             {
                 float k = e / time;
                 transform.localPosition = restPos + Vector3.up * (4f * k * (1f - k)) * local;
@@ -1251,7 +1290,8 @@ namespace SquashBot.Visual
         private void LateUpdate()
         {
             if (!ready) Setup();
-            float dt = Mathf.Min(Time.deltaTime, 0.1f);
+            if (vclock == null && transform.parent != null) { vclock = VisualTime.On(transform.parent); vroot = VisualRoot.On(transform.parent); }
+            float dt = Mathf.Min(VDt, 0.1f);
             time += dt;
             Breathe();
 
@@ -1259,7 +1299,7 @@ namespace SquashBot.Visual
             var p = transform.position; var d = p - lastPos; d.y = 0f; lastPos = p;
             var sc = transform.parent != null ? transform.parent.lossyScale : Vector3.one;
             float scale = Mathf.Max(0.01f, Mathf.Pow(Mathf.Abs(sc.x * sc.y * sc.z), 1f / 3f)); // (the hop's squash keeps the volume: no jitter)
-            speed = Mathf.Lerp(speed, dt > 0f ? d.magnitude / dt / scale : 0f, dt * 10f);
+            if (dt > 1e-4f) speed = Mathf.Lerp(speed, d.magnitude / dt / scale, dt * 10f); // (frozen by a hit: the pace held as it was)
             punchLeft -= dt; angerLeft -= dt; clapLeft -= dt;
             walk = Mathf.MoveTowards(walk, speed > 0.15f ? 1f : 0f, dt * 5f);
             stride += dt * Mathf.Clamp(speed * 3.2f, 5f, 16f) * (walk > 0.01f ? 1f : 0f);
@@ -1274,11 +1314,22 @@ namespace SquashBot.Visual
             if (playing != null)
             {
                 Rest();
-                clipPlay.SetTime(playingTime);
-                graph.Evaluate(0f);
+                layers.SetTime(HeroAnimLayers.FullBody, playingTime);
+                layers.Evaluate();
             }
-            else Pose(time);
+            else
+            {
+                Pose(time);
+                if (upperPlaying != null && layers != null)
+                {
+                    // a move on the upper body over the coded pose (the legs keep walking or standing)
+                    upperTime += dt * upperRate;
+                    if (upperTime >= upperPlaying.length) StopUpper();
+                    else { layers.SetTime(HeroAnimLayers.UpperBody, upperTime); layers.EvaluateUpperOverPose(); }
+                }
+            }
             Shuddering(dt);
+            PushedByBlow();
             Grip();
 
             // Lids: a blink now and then; half down when angry or striking (the eyes narrow).
@@ -1371,7 +1422,7 @@ namespace SquashBot.Visual
 
         private void OnDestroy()
         {
-            if (graph.IsValid()) graph.Destroy();
+            if (layers != null) layers.Destroy();
         }
     }
 }

@@ -1,10 +1,12 @@
 using System.Collections;
 using SquashBot.Audio;
+using SquashBot.Combat;
 using SquashBot.Core;
 using SquashBot.Data;
 using SquashBot.UI;
 using SquashBot.Visual;
 using UnityEngine;
+using WeaponFamily = SquashBot.Combat.WeaponFamily;
 
 namespace SquashBot.Gameplay
 {
@@ -420,8 +422,10 @@ namespace SquashBot.Gameplay
             var model = meStruck ? robot.Visual : hunt.ChallengeFoeModel;
             if (model == null || !challengeRun || (meStruck ? !robot.IsAlive : hunt.ChallengeFoeDown)) yield break;
             hunt.StunFoe(1.8f); // the rival stands still through the moment, whoever was struck (and gets up after)
-            float was = Time.timeScale;
-            Time.timeScale = 0.35f;
+            CombatFeel.BigMoment(); // (the pictures slow; the game's clock never does)
+            var flinger = meStruck ? hunt.ChallengeFoeModel : robot.Visual;
+            var flingHeld = flinger != null ? flinger.GetComponentInChildren<HeldWeapon>() : null;
+            CombatFeel.Hit(flinger, model, CombatLibrary.Family(flingHeld != null ? flingHeld.Family : WeaponFamily.Heavy).knockdown);
             SlowCam(model.position, 1.4f); // the big moment's time (slow motion, no blows); the camera stays on the board
             cameraRig.Shake(1.1f);
             var at = model.position;
@@ -433,7 +437,6 @@ namespace SquashBot.Gameplay
             cameraRig.Shake(0.6f); // (landing)
             cameraRig.StartCoroutine(FaceWhenUp(meStruck));
             fx.Burst(at + Vector3.up * 0.2f, new Color(0.8f, 0.7f, 0.55f), new Color(1.4f, 1.2f, 1f), 16, 3f);
-            if (State == GameState.Playing) Time.timeScale = ultimateOn ? 0.35f : (was < 0.99f && was > 0.3f ? was : 1f);
         }
 
         /// <summary>Back on its feet: foi turns straight to its rival (the rival turns by itself as it comes at foi).</summary>
@@ -525,8 +528,10 @@ namespace SquashBot.Gameplay
             fx.Burst(at, new Color(1f, 0.95f, 0.7f), new Color(3f, 2.6f, 1.6f), 18, 4.2f);
             fx.Burst(at, glow, glow * 2.4f, 12 + 2 * Mathf.Min(inARow, 5), 5.5f);
             Shockwave.Create(at - Vector3.up * 0.1f, 0.6f + 0.08f * Mathf.Min(inARow, 5), Color.Lerp(new Color(1f, 0.95f, 0.75f), glow, 0.4f));
-            cameraRig.Shake(meStruck ? 0.22f + 0.04f * Mathf.Min(inARow, 5) : 0.14f + 0.03f * Mathf.Min(inARow, 5));
-            if (!meStruck) AudioManager.PlaySfx(Sfx.Bump, 0.55f, 0.8f + 0.06f * Mathf.Min(inARow, 5));
+            // the feel (freeze, the camera's knock along the blow, the picture pushed back, the family's impact sound) on
+            // the striker's swing's contact: the same for the player and the rival
+            var blow = held != null ? (held.Current ?? CombatLibrary.Family(held.Family).Blow(0)) : CombatLibrary.Family(WeaponFamily.Sword).Blow(0);
+            CombatFeel.Hit(striker, model, blow);
             if (toHead) { skin.JoltHead(from); strength *= 0.6f; } // (the head takes it: the body moves less)
             skin.Stagger(from, strength);
             skin.Shudder(from, Mathf.Clamp01(0.45f + 0.12f * inARow)); // (the body shakes with it)
@@ -615,7 +620,6 @@ namespace SquashBot.Gameplay
             float combo = casterSkin != null ? Mathf.Max(SkinnedHero.MoveLength("cast") / ComboRate, 2.2f) : 0f;
             if (casterSkin != null) casterSkin.PlayMove("cast", ComboRate, true, loop: true); // round and round until the ultimate ends
             if (mine && LiveActive) LiveNet.Special(4);
-            Time.timeScale = 0.35f;
             for (int i = 0; i < 5; i++)
             {
                 if (casterSkin == null) yield return new WaitForSecondsRealtime(i == 4 ? 0.35f : 0.2f);
@@ -907,7 +911,7 @@ namespace SquashBot.Gameplay
 
         private void RivalMoves()
         {
-            if (Time.time < rivalThinkAt || !hunt.ChallengeFoeAt.HasValue) return;
+            if (Time.time < rivalThinkAt || !hunt.ChallengeFoeAt.HasValue || LabOn) return; // (the lab's rival never fights back)
             var t = botTuning;
             rivalThinkAt = Time.time + (t != null ? Mathf.Max(0.2f, t.React()) : 0.45f); // (never at once: a human's reaction)
             var foeAt = hunt.ChallengeFoeAt.Value;

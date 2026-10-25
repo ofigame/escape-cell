@@ -34,6 +34,7 @@ namespace SquashBot.EditorTools
             var levelSet = CreateLevelSet();
             CreateMainScene(levelSet);
             ConfigurePlayer();
+            CombatAssetsCreator.EnsureAssets(); // (the duel's feel assets, the first time)
             AssetDatabase.SaveAssets();
             Debug.Log("[SquashBot] Setup complete. Open Assets/_Project/Scenes/Main.unity and press Play.");
         }

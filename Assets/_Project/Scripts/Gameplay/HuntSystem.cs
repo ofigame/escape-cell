@@ -118,6 +118,8 @@ namespace SquashBot.Gameplay
             public Vector3 modelScale = Vector3.one;
             /// <summary>The weapon in a plain model's hand (the rival foi's own): it chops when the blow lands.</summary>
             public HeldWeapon held;
+            /// <summary>Its weapon already swinging for the blow being wound up (started early: its contact meets the blow).</summary>
+            public bool preSwung;
             /// <summary>A partner foi (2 against 2): fights like a foi (the duel's reach and pace), keeps the duel's gap.</summary>
             public bool partner;
             public float share = -1f;
@@ -1182,7 +1184,11 @@ namespace SquashBot.Gameplay
             {
                 // Winding up: the tiles it will hit glow ever redder; the slam lands on them.
                 g.windup += dt;
-                float k = g.windup / ((g.brute ? BruteWindTime : WindTime) * FoeWindScale(g));
+                float windTotal = (g.brute ? BruteWindTime : WindTime) * FoeWindScale(g);
+                float k = g.windup / windTotal;
+                // the weapon's swing starts early enough for its contact to meet the blow (the blow's moment is the rules')
+                if (g.windup <= dt + 1e-4f) g.preSwung = false;
+                if (g.held != null && !g.preSwung && windTotal - g.windup <= g.held.LeadSeconds) { g.held.SwingToContact(windTotal - g.windup); g.preSwung = true; }
                 TrackFoi(g, k);
                 ShowCharge(g, Mathf.Clamp01(k));
                 g.SetRaise(k * 1.3f);
@@ -1196,7 +1202,8 @@ namespace SquashBot.Gameplay
                         : (g.brute ? 1.0f : g.soldier != null ? 0.45f + (float)rng.NextDouble() * 0.25f : 0.38f); // the floors: they keep at it
                     FoeStruck(g);
                     if (g == challengeFoe && FoeWhiff > 0f && rng.NextDouble() < FoeWhiff) g.area.Clear(); // a blow into the air (a human slip)
-                    if (g.held != null) g.held.Swing();
+                    if (g.held != null && !g.preSwung) g.held.Swing();
+                    g.preSwung = false;
                     g.SetRaise(0f);
                     foreach (var t in g.area) view.SetWarning(t, 0f);
                     bool shot = LandBlow(g); // the floors: a gunner's tracer (its hit lands when it arrives), or a lunge and a slash

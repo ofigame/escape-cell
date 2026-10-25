@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SquashBot.Visual
@@ -17,18 +18,30 @@ namespace SquashBot.Visual
         private Color colour;
         private float t, size;
 
+        private static readonly Stack<SlashFx> free = new Stack<SlashFx>();
+
+        /// <summary>A crescent through <paramref name="target"/> (from a pool: built once at size 1, scaled to its size).</summary>
         public static void Create(Vector3 from, Vector3 target, Color colour, float size = 1f)
         {
-            var go = new GameObject("SlashFx");
             var dir = target - from;
             dir.y = 0f;
             if (dir.sqrMagnitude < 0.0001f) dir = Vector3.forward;
-            go.transform.position = target + Vector3.up * 0.5f * size;
-            go.transform.rotation = Quaternion.LookRotation(dir.normalized);
-            var s = go.AddComponent<SlashFx>();
+            SlashFx s = null;
+            while (free.Count > 0 && s == null) s = free.Pop();
+            if (s == null)
+            {
+                var go = new GameObject("SlashFx");
+                s = go.AddComponent<SlashFx>();
+                s.colour = colour;
+                s.size = 1f;
+                s.Build();
+            }
             s.colour = colour;
-            s.size = size;
-            s.Build();
+            s.t = 0f;
+            s.transform.position = target + Vector3.up * 0.5f * size;
+            s.transform.rotation = Quaternion.LookRotation(dir.normalized);
+            s.transform.localScale = Vector3.one * size;
+            s.gameObject.SetActive(true);
         }
 
         private void Build()
@@ -61,7 +74,7 @@ namespace SquashBot.Visual
             float fade = 1f - k * k;
             MaterialFactory.SetColors(arcMat, new Color(colour.r, colour.g, colour.b, 0.9f * fade), colour * 3f * fade);
             MaterialFactory.SetColors(flashMat, new Color(1f, 1f, 1f, 0.9f * Mathf.Clamp01(1f - k * 1.8f)), new Color(3f, 3f, 3f) * (1f - k));
-            if (t >= Life) Destroy(gameObject);
+            if (t >= Life) { gameObject.SetActive(false); free.Push(this); } // (back to the pool)
         }
     }
 }

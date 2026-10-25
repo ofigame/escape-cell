@@ -1,0 +1,191 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7399915900259385277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Spear_1
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 50
+  activeMs: 16.666666
+  recoveryMs: 100
+  direction: 4
+  height: 1
+  strength: 0
+  hitstopMs: 30
+  cameraImpulse: 1
+  visualKnockback: 0.08
+  impactVfx: {fileID: 0}
+  whooshSfx: 0
+  whooshPitch: 1.5
+  impactSfx: 1
+  impactPitch: 1.1
+  enableTrail: 1
+--- !u!114 &-5013681945185796267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Spear_PowerHit
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 133.33333
+  activeMs: 33.333332
+  recoveryMs: 166.66666
+  direction: 2
+  height: 0
+  strength: 2
+  hitstopMs: 90
+  cameraImpulse: 2
+  visualKnockback: 0.5
+  impactVfx: {fileID: 0}
+  whooshSfx: 0
+  whooshPitch: 1.5
+  impactSfx: 1
+  impactPitch: 1.1
+  enableTrail: 1
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca47bad2afc033e4388c802740f9af5d, type: 3}
+  m_Name: Family_Spear
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.WeaponFamilyMotionProfile
+  family: 1
+  chain:
+  - {fileID: -7399915900259385277}
+  - {fileID: 2128060390508871251}
+  - {fileID: 3333115945729314547}
+  - {fileID: 2912805596235163098}
+  powerHit: {fileID: -5013681945185796267}
+  knockdown: {fileID: 2919492198308367478}
+  trail: {r: 0.9, g: 0.95, b: 1, a: 1}
+--- !u!114 &2128060390508871251
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Spear_2
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 50
+  activeMs: 16.666666
+  recoveryMs: 100
+  direction: 4
+  height: 1
+  strength: 0
+  hitstopMs: 30
+  cameraImpulse: 1
+  visualKnockback: 0.08
+  impactVfx: {fileID: 0}
+  whooshSfx: 0
+  whooshPitch: 1.5
+  impactSfx: 1
+  impactPitch: 1.1
+  enableTrail: 1
+--- !u!114 &2912805596235163098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Spear_4
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 66.666664
+  activeMs: 16.666666
+  recoveryMs: 100
+  direction: 2
+  height: 0
+  strength: 0
+  hitstopMs: 30
+  cameraImpulse: 1
+  visualKnockback: 0.08
+  impactVfx: {fileID: 0}
+  whooshSfx: 0
+  whooshPitch: 1.5
+  impactSfx: 1
+  impactPitch: 1.1
+  enableTrail: 1
+--- !u!114 &2919492198308367478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Spear_Knockdown
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 133.33333
+  activeMs: 33.333332
+  recoveryMs: 200
+  direction: 3
+  height: 1
+  strength: 3
+  hitstopMs: 140
+  cameraImpulse: 3
+  visualKnockback: 0
+  impactVfx: {fileID: 0}
+  whooshSfx: 0
+  whooshPitch: 1.5
+  impactSfx: 1
+  impactPitch: 1.1
+  enableTrail: 1
+--- !u!114 &3333115945729314547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Spear_3
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 66.666664
+  activeMs: 16.666666
+  recoveryMs: 100
+  direction: 0
+  height: 1
+  strength: 0
+  hitstopMs: 30
+  cameraImpulse: 1
+  visualKnockback: 0.08
+  impactVfx: {fileID: 0}
+  whooshSfx: 0
+  whooshPitch: 1.5
+  impactSfx: 1
+  impactPitch: 1.1
+  enableTrail: 1

@@ -562,6 +562,7 @@ namespace SquashBot.Gameplay
         private void UpdateChallenge(float dt)
         {
             UpdateLive();
+            UpdateDuelLab();
             if (!challengeRun || State != GameState.Playing) return;
             if (chPhase == ChPhase.Duel) UpdateDuel(dt);
         }

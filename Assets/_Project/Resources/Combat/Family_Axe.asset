@@ -1,0 +1,191 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7183525319845869757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Axe_4
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 116.666664
+  activeMs: 33.333332
+  recoveryMs: 150
+  direction: 5
+  height: 1
+  strength: 1
+  hitstopMs: 50
+  cameraImpulse: 1
+  visualKnockback: 0.2
+  impactVfx: {fileID: 0}
+  whooshSfx: 0
+  whooshPitch: 1
+  impactSfx: 4
+  impactPitch: 0.8
+  enableTrail: 1
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca47bad2afc033e4388c802740f9af5d, type: 3}
+  m_Name: Family_Axe
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.WeaponFamilyMotionProfile
+  family: 2
+  chain:
+  - {fileID: 6944518200252555720}
+  - {fileID: 479720883055242285}
+  - {fileID: 8251955634868219452}
+  - {fileID: -7183525319845869757}
+  powerHit: {fileID: 7458515519347580254}
+  knockdown: {fileID: 3404859774103168416}
+  trail: {r: 1, g: 0.6, b: 0.3, a: 1}
+--- !u!114 &479720883055242285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Axe_2
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 100
+  activeMs: 33.333332
+  recoveryMs: 150
+  direction: 1
+  height: 1
+  strength: 1
+  hitstopMs: 50
+  cameraImpulse: 1
+  visualKnockback: 0.2
+  impactVfx: {fileID: 0}
+  whooshSfx: 0
+  whooshPitch: 1
+  impactSfx: 4
+  impactPitch: 0.8
+  enableTrail: 1
+--- !u!114 &3404859774103168416
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Axe_Knockdown
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 133.33333
+  activeMs: 33.333332
+  recoveryMs: 200
+  direction: 3
+  height: 1
+  strength: 3
+  hitstopMs: 140
+  cameraImpulse: 3
+  visualKnockback: 0
+  impactVfx: {fileID: 0}
+  whooshSfx: 0
+  whooshPitch: 1
+  impactSfx: 4
+  impactPitch: 0.8
+  enableTrail: 1
+--- !u!114 &6944518200252555720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Axe_1
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 100
+  activeMs: 33.333332
+  recoveryMs: 150
+  direction: 2
+  height: 0
+  strength: 1
+  hitstopMs: 50
+  cameraImpulse: 1
+  visualKnockback: 0.2
+  impactVfx: {fileID: 0}
+  whooshSfx: 0
+  whooshPitch: 1
+  impactSfx: 4
+  impactPitch: 0.8
+  enableTrail: 1
+--- !u!114 &7458515519347580254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Axe_PowerHit
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 133.33333
+  activeMs: 33.333332
+  recoveryMs: 166.66666
+  direction: 2
+  height: 0
+  strength: 2
+  hitstopMs: 90
+  cameraImpulse: 2
+  visualKnockback: 0.5
+  impactVfx: {fileID: 0}
+  whooshSfx: 0
+  whooshPitch: 1
+  impactSfx: 4
+  impactPitch: 0.8
+  enableTrail: 1
+--- !u!114 &8251955634868219452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666c8d9774e43f944a5a4233318ffcfa, type: 3}
+  m_Name: Axe_3
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.AttackMotionData
+  clip: {fileID: 0}
+  anticipationMs: 83.33333
+  activeMs: 33.333332
+  recoveryMs: 150
+  direction: 3
+  height: 1
+  strength: 1
+  hitstopMs: 50
+  cameraImpulse: 1
+  visualKnockback: 0.2
+  impactVfx: {fileID: 0}
+  whooshSfx: 0
+  whooshPitch: 1
+  impactSfx: 4
+  impactPitch: 0.8
+  enableTrail: 1

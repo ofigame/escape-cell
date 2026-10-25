@@ -22,8 +22,10 @@ namespace SquashBot.UI
         Camera,
         CombatCamera,
         LaneDuel,
+        ScreenShake,
         Graphics,
-        TestMode
+        TestMode,
+        DuelLab
     }
 
     /// <summary>
@@ -1179,10 +1181,12 @@ namespace SquashBot.UI
                 (SettingKind.Camera, "settings.camera"),
                 (SettingKind.CombatCamera, "settings.combatCam"),
                 (SettingKind.LaneDuel, "settings.lane"),
+                (SettingKind.ScreenShake, "settings.shake"),
                 (SettingKind.Graphics, "settings.graphics"),
                 (SettingKind.Challenge, "settings.challenge"),
 #if !REAL_ADS && (TEST_TOOLS || !((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR))
                 (SettingKind.TestMode, "settings.test"), // test builds only (never a Play bundle)
+                (SettingKind.DuelLab, "settings.lab"), // the duel lab: test builds only
 #endif
             };
             for (int i = 0; i < rows.Length; i++)
@@ -1276,6 +1280,8 @@ namespace SquashBot.UI
             settingValues[SettingKind.Camera].text = Loc.T("camDist." + SaveData.CameraDistance);
             SetSetting(SettingKind.CombatCamera, SaveData.CombatCamera);
             SetSetting(SettingKind.LaneDuel, SaveData.LaneDuel);
+            SetSetting(SettingKind.ScreenShake, SaveData.ScreenShake);
+            if (settingValues.ContainsKey(SettingKind.DuelLab)) { settingValues[SettingKind.DuelLab].text = Loc.T("settings.labOpen"); settingValues[SettingKind.DuelLab].color = Palette.UiCyan; }
             var gfx = Loc.T("gfx." + GraphicsQuality.Current);
             settingValues[SettingKind.Graphics].text = GraphicsQuality.Choice.HasValue ? gfx : Loc.F("gfx.auto", gfx);
             settingValues[SettingKind.Graphics].color = Palette.UiCyan;
@@ -1304,6 +1310,9 @@ namespace SquashBot.UI
         }
 
         private void HideSettings() => settings.Hide();
+
+        /// <summary>The settings card closed (the duel lab opens from it).</summary>
+        public void CloseSettings() { if (settings != null && settings.IsVisible) HideSettings(); }
 
         /// <summary>The back button on a card over the menu: closes the top-most one. False when none is up.</summary>
         public bool CloseTopModal()

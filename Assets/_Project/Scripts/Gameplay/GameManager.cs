@@ -365,7 +365,7 @@ namespace SquashBot.Gameplay
             };
             ui.WatchAdPressed += WatchAdForLife;
             ui.ToolPressed += OnToolPressed;
-            input.Ignore = p => ui != null && (ui.IsOverTool(p) || (chUi != null && chUi.IsOverControls(p)));
+            input.Ignore = p => ui != null && (ui.IsOverTool(p) || (chUi != null && chUi.IsOverControls(p)) || DuelLabOver(p));
         }
 
         private static void EnsureLight()
@@ -1031,6 +1031,13 @@ namespace SquashBot.Gameplay
                 case SettingKind.LaneDuel:
                     SaveData.LaneDuel = !SaveData.LaneDuel;
                     break;
+                case SettingKind.ScreenShake:
+                    SaveData.ScreenShake = !SaveData.ScreenShake;
+                    break;
+                case SettingKind.DuelLab:
+                    ui.CloseSettings();
+                    StartDuelLab();
+                    return;
                 case SettingKind.Challenge:
                     // Off: nobody can fight the player's army any more (the server is told) and the mode closes.
                     Challenge.Enabled = !Challenge.Enabled;

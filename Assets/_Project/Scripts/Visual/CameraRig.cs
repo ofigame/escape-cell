@@ -193,7 +193,7 @@ namespace SquashBot.Visual
         /// <summary>Swoop in from high above and to the side.</summary>
         public void PlayIntro() => introT = 0f;
 
-        public void Shake(float amount) => shake = Mathf.Max(shake, amount);
+        public void Shake(float amount) => shake = Mathf.Max(shake, Data.SaveData.ScreenShake ? amount : 0f); // (the player may turn shaking off)
 
         /// <summary>Brief zoom-in kick (impacts, pickups).</summary>
         public void Punch(float amount) => punch = Mathf.Max(punch, amount);

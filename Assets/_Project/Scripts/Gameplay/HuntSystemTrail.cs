@@ -181,7 +181,7 @@ namespace SquashBot.Gameplay
             if (swings > remoteSwings && remoteSwings >= 0)
             {
                 // It swung: the blow shows here (the damage, if any, comes from the server).
-                if (g.held != null) g.held.Swing();
+                if (g.held != null) g.held.SwingLate(); // (known only once swung: from its contact on, no wind-up)
                 g.SetRaise(1f);
                 foeRaiseUntil = Time.time + 0.15f;
             }
