@@ -238,6 +238,7 @@ namespace SquashBot.Visual
             t.key = ForWorld(world).key;
             t.utopian = true;
             t.variant = null;
+            RegionThemeData.For(world)?.Paint(t, world); // (its big region's own colours over the city: sea, snow, crystal, clouds, stars)
             utopiaCache[levelIndex] = t;
             return t;
         }

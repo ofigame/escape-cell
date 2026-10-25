@@ -41,10 +41,13 @@ namespace SquashBot.EditorTools
             }
             Make(FloorFolder);
             Save(ScriptableObject.CreateInstance<FloorTuning>(), "FloorTuning", FloorFolder);
+            Make(RegionFolder);
+            foreach (var r in RegionThemeData.Defaults()) Save(r, r.name, RegionFolder); // (the perfect city's five regions)
             AssetDatabase.SaveAssets();
         }
 
         private const string FloorFolder = "Assets/_Project/Resources/Floors";
+        private const string RegionFolder = "Assets/_Project/Resources/Regions";
 
         private static void Make(string folder)
         {

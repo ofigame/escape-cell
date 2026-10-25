@@ -311,7 +311,7 @@ namespace SquashBot.Gameplay
             foreach (var u in new[] { Upgrade.Armor, Upgrade.Shield })
                 if (Shop.Unlocked(u) && !Shop.IsMaxed(u)) { upgrade = u; break; }
             Tool? tool = null;
-            foreach (var t in new[] { Tool.Freeze, Tool.SlowMo })
+            foreach (var t in new[] { Tool.SlowMo })
                 if (Tools.Unlocked(t) && !Tools.Owned(t)) { tool = t; break; }
 
             void GoShop(int shelf)

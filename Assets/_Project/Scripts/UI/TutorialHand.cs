@@ -9,7 +9,7 @@ namespace SquashBot.UI
     /// </summary>
     public class TutorialHand : MonoBehaviour
     {
-        public enum Gesture { None, Tap, Drag, SwipeUp, SwipeDown, Hold, Press }
+        public enum Gesture { None, Tap, Drag, SwipeUp, SwipeDown, Hold, Press, Circle }
 
         private RectTransform rect, finger, ring;
         private Image ringImage;
@@ -61,6 +61,7 @@ namespace SquashBot.UI
                 case Gesture.Drag: offset = new Vector2(Mathf.Sin(k * Mathf.PI * 2f) * 180f, 0f); press = 1f; break;
                 case Gesture.SwipeUp: offset = new Vector2(0f, Mathf.Lerp(-120f, 160f, Mathf.SmoothStep(0f, 1f, k))); press = k < 0.8f ? 1f : 0f; break;
                 case Gesture.SwipeDown: offset = new Vector2(0f, Mathf.Lerp(120f, -160f, Mathf.SmoothStep(0f, 1f, k))); press = k < 0.8f ? 1f : 0f; break;
+                case Gesture.Circle: offset = new Vector2(Mathf.Cos(k * Mathf.PI * 2f), Mathf.Sin(k * Mathf.PI * 2f)) * 150f; press = 1f; break; // (a circle drawn: the floors' spin)
             }
             rect.anchoredPosition = at + offset;
             finger.localScale = Vector3.one * Mathf.Lerp(1f, 0.8f, press);

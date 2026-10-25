@@ -132,7 +132,7 @@ namespace SquashBot.UI
                     break;
                 case Tab.Tools:
                     BagCell();
-                    foreach (var t in Tools.All) ToolCell(t);
+                    foreach (var t in Tools.Offered) ToolCell(t); // (the retired freezer no longer sold)
                     break;
                 case Tab.Defense:
                     foreach (var k in Defenses.All) { DefensePackCell(k); DefenseStepCell(k); }

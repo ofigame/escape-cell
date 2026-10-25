@@ -26,7 +26,8 @@ namespace SquashBot.UI
         DuelControls,
         Graphics,
         TestMode,
-        DuelLab
+        DuelLab,
+        FloorButtons
     }
 
     /// <summary>
@@ -299,6 +300,24 @@ namespace SquashBot.UI
 
         public void SetBagVisible(bool on) { if (bagButton != null && bagButton.gameObject.activeSelf != on) bagButton.gameObject.SetActive(on); }
 
+        private RectTransform floorSkillButtons;
+        /// <summary>The floors' SPIN and FLY buttons pressed (shown when the setting is on).</summary>
+        public event Action FloorSpinPressed, FloorFlyPressed;
+
+        public void SetFloorSkillButtons(bool on) { if (floorSkillButtons != null && floorSkillButtons.gameObject.activeSelf != on) floorSkillButtons.gameObject.SetActive(on); }
+
+        private static void FloorSkillButton(RectTransform parent, float x, string label, Color colour, Action onClick)
+        {
+            var b = UiFactory.Box("Btn", parent, new Vector2(0f, 0f), new Vector2(x, 0f), new Vector2(130f, 130f));
+            var face = UiFactory.Chunky(b, UiFactory.StyleOf(colour), 1f, 0f, UiSprites.Circle);
+            var text = UiFactory.OutlinedText("Label", b, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(126f, 50f), label, 30f, new Color(0.1f, 0.06f, 0.2f));
+            text.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            var btn = b.gameObject.AddComponent<Button>();
+            btn.targetGraphic = face;
+            btn.onClick.AddListener(() => onClick());
+            b.gameObject.AddComponent<ButtonPress>();
+        }
+
         /// <summary>The screen point is on the bag button (the play area ignores it).</summary>
         private RectTransform bombButton;
         private TMPro.TextMeshProUGUI bombCount;
@@ -376,7 +395,7 @@ namespace SquashBot.UI
         /// <summary>The powers' buttons drawn smaller still when sideways.</summary>
         private float actionScaleSide = 1f;
 
-        /// <summary>The crowd skill's button (0 fire ball, 1 ice ball, 2 rusty chain), shown while it is offered.</summary>
+        /// <summary>The crowd skill's button (0 fire ball, 1 lightning chain, 2 rusty chain), shown while it is offered.</summary>
         public void SetCrowdSkill(int kind, bool show)
         {
             if (crowdButton == null) return;
@@ -388,7 +407,7 @@ namespace SquashBot.UI
             crowdOrb.color = kind == 0 ? new Color(1f, 0.85f, 0.3f) : kind == 1 ? new Color(0.9f, 0.98f, 1f) : new Color(0.35f, 0.22f, 0.14f);
             crowdOrb.sprite = kind == 2 ? UiSprites.Ring : UiSprites.Circle;
             crowdOrb.type = kind == 2 ? Image.Type.Sliced : Image.Type.Simple;
-            string label = Loc.T(kind == 0 ? "power.fire" : kind == 1 ? "power.ice" : "power.chain");
+            string label = Loc.T(kind == 0 ? "power.fire" : kind == 1 ? "power.lightning" : "power.chain");
             if (crowdText.text != label) crowdText.text = label;
             LayoutActions();
             float s = ActionScale * actionScaleSide * (1f + Mathf.Sin(Time.unscaledTime * 7f) * 0.12f);
@@ -1217,6 +1236,7 @@ namespace SquashBot.UI
                 (SettingKind.CombatCamera, "settings.combatCam"),
                 (SettingKind.LaneDuel, "settings.lane"),
                 (SettingKind.ScreenShake, "settings.shake"),
+                (SettingKind.FloorButtons, "settings.floorButtons"), // (the floors' SPIN and FLY buttons)
                 (SettingKind.DuelControls, "settings.duelControls"),
                 (SettingKind.Graphics, "settings.graphics"),
                 (SettingKind.Challenge, "settings.challenge"),
@@ -1319,6 +1339,7 @@ namespace SquashBot.UI
             SetSetting(SettingKind.CombatCamera, SaveData.CombatCamera);
             SetSetting(SettingKind.LaneDuel, SaveData.LaneDuel);
             SetSetting(SettingKind.ScreenShake, SaveData.ScreenShake);
+            SetSetting(SettingKind.FloorButtons, SaveData.FloorSkillButtons);
             settingValues[SettingKind.DuelControls].text = Loc.T("settings.adjust");
             settingValues[SettingKind.DuelControls].color = Palette.UiCyan;
             if (settingValues.ContainsKey(SettingKind.DuelLab)) { settingValues[SettingKind.DuelLab].text = Loc.T("settings.labOpen"); settingValues[SettingKind.DuelLab].color = Palette.UiCyan; }
@@ -1416,6 +1437,12 @@ namespace SquashBot.UI
             bagBtn.onClick.AddListener(() => BagPressed?.Invoke());
             bagButton.gameObject.AddComponent<ButtonPress>();
             bagButton.gameObject.SetActive(false);
+
+            // The floors' SPIN and FLY buttons (a setting): above the bag, for the circle and the hold made easy.
+            floorSkillButtons = UiFactory.Box("FloorSkills", t, new Vector2(0f, 0f), new Vector2(40f, 660f), new Vector2(300f, 140f));
+            FloorSkillButton(floorSkillButtons, 0f, Loc.T("floor.spinBtn"), new Color(1f, 0.62f, 0.25f), () => FloorSpinPressed?.Invoke());
+            FloorSkillButton(floorSkillButtons, 160f, Loc.T("floor.flyBtn"), new Color(0.35f, 0.75f, 1f), () => FloorFlyPressed?.Invoke());
+            floorSkillButtons.gameObject.SetActive(false);
 
             // Bombs (from level 31, three a floor): bottom right, a round black bomb with its count.
             bombButton = UiFactory.Box("Bomb", t, new Vector2(1f, 0.5f), new Vector2(-270f, 20f), new Vector2(150f, 150f)); // the action column, beside the skills
@@ -1676,6 +1703,7 @@ namespace SquashBot.UI
             if (floorShield != null && floorShield.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(floorShield.Rect, screen, null)) return true;
             if (SkillBar != null && SkillBar.IsOver(screen)) return true;
             if (IsOverBag(screen)) return true;
+            if (floorSkillButtons != null && floorSkillButtons.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(floorSkillButtons, screen, null)) return true;
             if (IsOverAdHeal(screen)) return true;
             if (IsOverBomb(screen)) return true;
             foreach (var b in toolButtons)

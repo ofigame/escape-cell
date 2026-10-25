@@ -164,6 +164,7 @@ namespace SquashBot.Gameplay
             OldNotes.Clear(); // the removed open world's farm notes still waiting on the phones that had it
             Cosmetics.MigrateHeads(); // the new heads: the old ones' buyers refunded, the old skins to the nearest new tones
             Progress.MigrateStarsToScore(LevelCatalog.LevelCount); // (the stars now come from the floor score; an old three counts as two)
+            toolRefund += Tools.RefundRetired(); // (the retired freezer: its coins back, told on the menu)
             Reminder.Schedule(); // the daily reminder: tomorrow evening (set again whenever the game is left)
             Prefs.DeleteKey("sb_ow"); Prefs.DeleteKey("sb_km"); Prefs.DeleteKey("sb_intro_seen"); // the removed open world and kingdom: test phones' leftovers
             FramePacer.Busy = () => State == GameState.Playing;
@@ -575,6 +576,8 @@ namespace SquashBot.Gameplay
 
         private void ShowMenu()
         {
+            Audio.AmbientLoop.Play(Audio.AmbientKind.None); // (a region's sound stays on its floors)
+            RenderSettings.fog = false;
             robot.StandUp(); // (never lying on the menu after a duel)
             EndLevelRule();
             robot.SetSize(1f);
@@ -625,6 +628,7 @@ namespace SquashBot.Gameplay
                 pendingWorldGift = null;
                 pendingWorldMove = null;
             }
+            else if (toolRefund > 0) { ui.ShowIntro(Loc.T("tool.retiredTitle"), Loc.F("tool.retired", toolRefund)); toolRefund = 0; ui.RefreshMenuCoins(); }
             else if (Progress.TakeStarsNote()) ui.ShowIntro(Loc.T("stars.noteTitle"), Loc.F("stars.note", FloorTuning.Current.starTwo, FloorTuning.Current.starThree)); // (once: the stars come from the floor score now)
             else if (OfferWelcomeBack()) { } // (back after three days: a welcome, its gifts)
             else if (!loginOffered && LoginCalendar.Ready && NextLevel >= 2 && !FirstSession.Quiet) // (the first session's first ten minutes: nothing pops up)
@@ -787,6 +791,7 @@ namespace SquashBot.Gameplay
         private string pendingWorldGift; // (a world's monster beaten: its gifts told on the menu)
         private string pendingWorldMove; // (and the move it gave: its card, to add it to the set)
         private UI.NewMoveCard newMoveCard;
+        private int toolRefund; // (coins given back for a retired tool, told once on the menu)
 
         private void StartLevel(int index, List<Boost> boosts = null)
         {
@@ -1092,6 +1097,9 @@ namespace SquashBot.Gameplay
                 case SettingKind.ScreenShake:
                     SaveData.ScreenShake = !SaveData.ScreenShake;
                     break;
+                case SettingKind.FloorButtons:
+                    SaveData.FloorSkillButtons = !SaveData.FloorSkillButtons;
+                    break;
                 case SettingKind.DuelControls:
                     ui.DuelControls.Show();
                     return;
@@ -1327,10 +1335,13 @@ namespace SquashBot.Gameplay
 
             if (!hovering)
             {
-                if (command.holdStart && HoverEnabled && hoverCooldown <= 0f && robot.IsAlive && !robot.IsHopping
+                bool fromButton = TakeFlyStart(); // (the FLY button: a setting)
+                if ((command.holdStart || fromButton) && HoverEnabled && hoverCooldown <= 0f && robot.IsAlive && !robot.IsHopping
                     && robot.StartHover()) // false mid-bump: no hover this time (and no lock-up)
                 {
                     hovering = true;
+                    hoverFromButton = fromButton;
+                    FloorTipDone(FloorTip.Hover); // (the sixth floor's lesson learnt)
                     hoverLeft = Shop.HoverSeconds;
                     hoverTarget = robot.Position;
                     ShowHoverMarker(true);
@@ -1342,13 +1353,14 @@ namespace SquashBot.Gameplay
 
             if (!robot.IsAlive) { EndHover(); return; }
             if (command.holdPosition.HasValue && TryScreenToGrid(command.holdPosition.Value, out var cell)) hoverTarget = cell;
+            else if (hoverFromButton) FlyButtonTarget();
 
             hoverLeft -= Time.deltaTime;
             hoverMarker.transform.position = GridView.ToWorld(hoverTarget) + Vector3.up * (GridView.SurfaceY + 0.03f);
             float pulse = 1f + Mathf.Sin(Time.time * 10f) * 0.06f;
             hoverMarker.transform.localScale = new Vector3(pulse, 1f, pulse);
 
-            if (command.holdEnd || hoverLeft <= 0f) EndHover();
+            if (command.holdEnd || hoverLeft <= 0f || TakeFlyEnd()) EndHover();
         }
 
         private void EndHover()
@@ -1534,6 +1546,7 @@ namespace SquashBot.Gameplay
             WatchArmyFromMenu();
             UpdateLevelRing();
             UpdateCommunity(); // (the Community General on the menu)
+            UpdateFloorTips(); // (the floors' lessons and the SPIN / FLY buttons)
             if (State == GameState.Paused) return;
 
             // Close-call slow motion and the slow-motion tool both bend time; the slower one wins.

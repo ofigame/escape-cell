@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 997d32b0af07fe54e8baf3780497ea18, type: 3}
+  m_Name: Crystal
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Visual.RegionThemeData
+  firstWorld: 14
+  lastWorld: 16
+  bgTop: {r: 0.101960786, g: 0.05490196, b: 0.1882353, a: 1}
+  bgBottom: {r: 0.22745098, g: 0.101960786, b: 0.34509805, a: 1}
+  bgGlow: {r: 0.7529412, g: 0.4392157, b: 1, a: 1}
+  bgLines: {r: 1, g: 0.61960787, b: 0.9411765, a: 1}
+  ambient: {r: 0.23529412, g: 0.14117648, b: 0.3764706, a: 1}
+  accent: {r: 0.8784314, g: 0.4862745, b: 1, a: 1}
+  slab: {r: 0.2901961, g: 0.18039216, b: 0.43137255, a: 1}
+  tileTop: {r: 0.84705883, g: 0.78431374, b: 0.9411765, a: 1}
+  tileGlow: {r: 0.8784314, g: 0.6117647, b: 1, a: 1}
+  sun: {r: 0.9098039, g: 0.78431374, b: 1, a: 1}
+  sunIntensity: 0.95
+  sunAngles: {x: 55, y: -25}
+  fog: {r: 0.16470589, g: 0.08627451, b: 0.2509804, a: 1}
+  fogDensity: 0.014
+  weather: 14
+  decor: 3
+  decorCount: 14
+  decorColour: {r: 0.7529412, g: 0.5019608, b: 1, a: 1}
+  decorGlow: {r: 1.5058824, g: 1.0039216, b: 1.6, a: 1.6}
+  ambience: 3
+  worldAccent:
+  - {r: 0, g: 0, b: 0, a: 0}
+  - {r: 0, g: 0, b: 0, a: 0}
+  - {r: 0.4862745, g: 1, b: 0.41568628, a: 1}
+  worldWeather: 00000000000000000a000000i
+  worldGlow: []

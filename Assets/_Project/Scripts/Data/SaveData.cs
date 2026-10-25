@@ -57,6 +57,13 @@ namespace SquashBot.Data
         /// <summary>How far the play camera stands from the robot: 0 near … 3 far (default 2).</summary>
         /// <summary>The camera drops lower and closer while foi fights robots or vanG (not for bugs).</summary>
         /// <summary>The lane duel (on, the trial): both foi on one line across the screen, moving only left and right.</summary>
+        /// <summary>The floors show a SPIN and a FLY button (for those who find the circle and the hold hard).</summary>
+        public static bool FloorSkillButtons
+        {
+            get => Prefs.GetInt("sb_floor_btns", 0) == 1;
+            set { Prefs.SetInt("sb_floor_btns", value ? 1 : 0); Prefs.Save(); }
+        }
+
         public static bool LaneDuel
         {
             get => Prefs.GetInt("sb_lane_duel", 1) == 1;

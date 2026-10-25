@@ -79,7 +79,7 @@ namespace SquashBot.Data
                 int p = Shop.NextPrice(u);
                 if (!Shop.IsMaxed(u) && Shop.Unlocked(u) && p > coins && p < price) { price = p; name = Loc.T("shop." + u); }
             }
-            foreach (var t in Tools.All)
+            foreach (var t in Tools.Offered)
             {
                 int p = Tools.NextPrice(t);
                 if (!Tools.IsMaxed(t) && Tools.Unlocked(t) && p > coins && p < price) { price = p; name = Loc.T("tool." + t); }

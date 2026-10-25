@@ -41,6 +41,32 @@ namespace SquashBot.Data
 
         public static Tool[] All => (Tool[])System.Enum.GetValues(typeof(Tool));
 
+        /// <summary>A tool no longer sold (the freezer: freezing is the DONDURMA skill's and the ice bomb's now). Its number
+        /// stays in the enum so the bag's saved slots keep meaning the same tools.</summary>
+        public static bool Retired(Tool t) => t == Tool.Freeze;
+
+        /// <summary>The tools the workshop offers (every one but the retired).</summary>
+        public static Tool[] Offered => System.Array.FindAll(All, t => !Retired(t));
+
+        /// <summary>
+        /// The retired tools bought before: every coin spent on their levels back, the tool gone from the bag (run at every
+        /// start: an older cloud copy brought back could hold one again). Returns the coins given back (0: none).
+        /// </summary>
+        public static int RefundRetired()
+        {
+            int back = 0;
+            foreach (var t in All)
+            {
+                if (!Retired(t)) continue;
+                int level = Level(t);
+                for (int i = 0; i < level && i < Prices.Length; i++) back += Prices[i];
+                if (level > 0) Prefs.SetInt("sb_tool_" + t, 0);
+                for (int s = 0; s < 2; s++) if (Prefs.GetInt("sb_tool_bag" + s, -1) == (int)t) Prefs.SetInt("sb_tool_bag" + s, -1);
+            }
+            if (back > 0) { SaveData.Coins += back; Prefs.Save(); }
+            return back;
+        }
+
         public static int Level(Tool t) => Prefs.GetInt("sb_tool_" + t, 0);
         public static bool Owned(Tool t) => Level(t) > 0;
         public static bool IsMaxed(Tool t) => Level(t) >= MaxLevel;
@@ -127,7 +153,7 @@ namespace SquashBot.Data
         /// <summary>A tool the player has neither bought nor tried yet, to offer as a free trial.</summary>
         public static Tool? NextTrial()
         {
-            foreach (var t in All)
+            foreach (var t in Offered)
                 if (!Owned(t) && !TrialUsed(t) && Unlocked(t)) return t;
             return null;
         }

@@ -21,6 +21,7 @@ namespace SquashBot.Gameplay
             if (level == null || level.mission != MissionType.Hunt || roadPhase != RoadPhase.None || !robot.IsAlive) return;
             if (Time.time < spinReadyAt) return;
             spinReadyAt = Time.time + SpinCooldown;
+            FloorTipDone(FloorTip.Spin); // (the third floor's lesson learnt)
             var w = weapon ?? Armory.Equipped;
             // the weapon's damage a second over the spin's pace (every family alike within a tier: a slow heavy blow no
             // longer spins harder than a quick sword); the rank reached adds its strength

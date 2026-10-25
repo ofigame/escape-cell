@@ -17,7 +17,7 @@ namespace SquashBot.Gameplay
     /// </summary>
     public partial class GameManager
     {
-        public enum CrowdSkill { Fire, Ice, Chain }
+        public enum CrowdSkill { Fire, Lightning, Chain } // (the second was an ice ball: freezing is the DONDURMA skill's and the ice bomb's now)
 
         /// <summary>The ultimate's bar (0..1) and its share filled by one robot felled.</summary>
         private float ultiMeter;
@@ -231,17 +231,17 @@ namespace SquashBot.Gameplay
             crowdUses--;
             crowdCooldown = 12f;
             ui.SetCrowdSkill((int)crowdKind, false);
-            StartCoroutine(crowdKind == CrowdSkill.Chain ? ChainWhip() : BallBurst(crowdKind == CrowdSkill.Fire));
+            StartCoroutine(crowdKind == CrowdSkill.Chain ? ChainWhip() : crowdKind == CrowdSkill.Lightning ? LightningChain() : BallBurst(true));
         }
 
         private static Color SkillColour(CrowdSkill k) =>
-            k == CrowdSkill.Fire ? new Color(1f, 0.5f, 0.15f) : k == CrowdSkill.Ice ? new Color(0.55f, 0.9f, 1f) : new Color(0.62f, 0.38f, 0.22f);
+            k == CrowdSkill.Fire ? new Color(1f, 0.5f, 0.15f) : k == CrowdSkill.Lightning ? new Color(0.55f, 0.85f, 1f) : new Color(0.62f, 0.38f, 0.22f);
 
         /// <summary>A fire or ice ball: out of foi, growing as it climbs, down into the middle of the crowd, and a burst.</summary>
         private IEnumerator BallBurst(bool fire)
         {
             powerBusy = true;
-            var colour = SkillColour(fire ? CrowdSkill.Fire : CrowdSkill.Ice);
+            var colour = SkillColour(CrowdSkill.Fire);
             if (!hunt.BombSpot(robot.Position, 7, 2, out var centre))
             {
                 var near = hunt.FightersAround(robot.Position, 6);
@@ -285,6 +285,36 @@ namespace SquashBot.Gameplay
                     hunt.Strike(centre + new GridPos(x, y), PowerDamage(fire ? 5f : 3f));
             if (fire) StartCoroutine(FireUp(centre, 0f, r)); // the ground burns a while
             else hunt.IceAround(centre, r, 4f, PowerDamage(1f));
+            powerBusy = false;
+        }
+
+        /// <summary>
+        /// The lightning chain (the crowd skill that replaced the ice ball): a bolt from foi to the nearest enemy, on to the
+        /// next nearest and so on (five), each struck three of foi's blows.
+        /// </summary>
+        private IEnumerator LightningChain()
+        {
+            powerBusy = true;
+            var colour = SkillColour(CrowdSkill.Lightning);
+            var targets = hunt.FightersAround(robot.Position, 6);
+            var from = robot.transform.position + Vector3.up * 1f;
+            PowerSlow(0.6f, 0.4f);
+            AudioManager.PlaySfx(Sfx.Shield, 1f, 0.5f);
+            for (int i = 0; i < Mathf.Min(5, targets.Count); i++)
+            {
+                while (State == GameState.Paused) yield return null;
+                if (!PowerFloor) break;
+                var p = targets[i];
+                var to = GridView.ToWorld(p) + Vector3.up * (GridView.SurfaceY + 0.8f);
+                MoveFx.Bolt(from, to, colour, 0.32f, 0.35f);
+                fx.Burst(to, colour, colour * 2.6f, 24, 5f);
+                hunt.Strike(p, PowerDamage(3f));
+                cameraRig.Shake(0.35f);
+                AudioManager.PlaySfx(Sfx.Impact, 0.7f, 1.4f + 0.1f * i);
+                from = to;
+                yield return new WaitForSeconds(0.12f);
+            }
+            Haptics.Medium();
             powerBusy = false;
         }
 
