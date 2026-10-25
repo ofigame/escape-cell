@@ -16,7 +16,7 @@ namespace SquashBot.Visual
         private const int FanIdle = 0, FanCheer = 1, FanClap = 2, FanPoses = 8;
         /// <summary>Each animation's poses a second (its loop's length over the 8 poses), and a fan's height (times the crowd size).</summary>
         private static readonly float[] FanPoseRate = { 3f, 3.6f, 6.5f };
-        private const float FanHeight = 1.05f;
+        private const float FanHeight = 1.4f;
         /// <summary>How the made fan is turned so its face looks where its facing says.</summary>
         private const float FanTurn = 0f;
 
@@ -76,8 +76,24 @@ namespace SquashBot.Visual
                     fanShirt[t, 1] = FanMaterial(fanTextures[t], new Color(1.3f, 0.38f, 0.34f));  // (and red)
                 }
             }
-            fans.Add(new Fan { pos = at, facing = facing, phase = phase, speed = 0.85f + (float)rng.NextDouble() * 0.3f, team = team, type = rng.Next(FanTypes.Length), claps = rng.NextDouble() < 0.4 });
+            fans.Add(new Fan { pos = at, facing = facing, phase = phase, speed = 0.85f + (float)rng.NextDouble() * 0.3f, team = team, type = TypeBeside(at, rng), claps = rng.NextDouble() < 0.4 });
             return true;
+        }
+
+        /// <summary>A type none of the fans next to <paramref name="at"/> has (never the same person side by side).</summary>
+        private int TypeBeside(Vector3 at, System.Random rng)
+        {
+            float near = 1.6f * crowdSize; // (a little over the fans' spacing: the ones right beside and behind)
+            int used = 0;
+            foreach (var f in fans)
+                if ((f.pos - at).sqrMagnitude < near * near) used |= 1 << f.type;
+            int start = rng.Next(FanTypes.Length);
+            for (int i = 0; i < FanTypes.Length; i++)
+            {
+                int t = (start + i) % FanTypes.Length;
+                if ((used & (1 << t)) == 0) return t;
+            }
+            return start; // (all three beside it already: any)
         }
 
         private Material FanMaterial(Texture2D tex, Color tint)

@@ -26,8 +26,9 @@ namespace SquashBot.Visual
         private const float TowerHeight = 30f, TowerBack = 100f, HouseMin = 16f, HouseMax = 22f;
         /// <summary>Which way the house model's front faces before it is turned (degrees about up: 0 = +z).</summary>
         private const float HouseFront = 0f;
-        /// <summary>The pavements' width, how far up the street the fans stand on them (two rows), and the lamps' spacing.</summary>
-        private const float Walk = 2.6f, CrowdLength = 34f, LampEvery = 32f;
+        /// <summary>The pavements' width, how far up the street the fans stand (one row, from behind the fight), how far
+        /// apart, and the lamps' spacing.</summary>
+        private const float Walk = 2.6f, CrowdLength = 30f, FanGap = 1.25f, LampEvery = 32f;
 
         /// <summary>The ground: one big quad, its picture tiled about every 3 m.</summary>
         private void PavedGround(Transform p, Look look, float ground)
@@ -59,7 +60,7 @@ namespace SquashBot.Visual
         /// <summary>
         /// A narrow street (along -x, away from the camera) with the fight at its near end and the tower on its cobbled
         /// plaza at its far end: tall houses right along it either side behind thin pavements (which run on towards the
-        /// camera), two rows of fans on each pavement near the fight (south -z: <paramref name="southTeam"/>'s), lamps here
+        /// camera), a row of fans on each pavement up the street from the fight (south -z: <paramref name="southTeam"/>'s), lamps here
         /// and there, a simit cart in the street; houses closing the far end behind the tower, the city's domes beyond.
         /// </summary>
         private void GalataStreet(Transform p, Look look, float ground, float platR, int southTeam, System.Random rng)
@@ -90,10 +91,10 @@ namespace SquashBot.Visual
                 // the thin pavement along the houses, from past the camera up to the plaza
                 Shapes.Rounded("Pavement", p, new Vector3((near + towerX + plaza) * 0.5f, ground + 0.1f, centre.z + side * (street + Walk * 0.5f)),
                     new Vector3(near - towerX - plaza, 0.2f, Walk), 0.04f, stone);
-                // two rows of fans on it beside the fight, lengthwise, each looking at the fight
-                for (int r = 0; r < 2; r++)
-                    for (float x = housesFrom; x > centre.x - CrowdLength; x -= (FanModels ? 0.85f : 0.55f) * k)
-                        AddFan(new Vector3(x + R(-0.15f, 0.15f) * k, ground + 0.2f, centre.z + side * (street + 0.7f + r * 1.1f + R(-0.08f, 0.08f))), team, rng);
+                // one row of fans on it up the street towards the tower (beside the fight they would stand outside the
+                // low camera's view), lengthwise, each looking at the fight
+                for (float x = centre.x - hw; x > centre.x - hw - CrowdLength; x -= FanGap * k)
+                    AddFan(new Vector3(x + R(-0.2f, 0.2f) * k, ground + 0.2f, centre.z + side * (street + 1.1f + R(-0.1f, 0.1f))), team, rng);
                 // lamps at the kerb here and there (the two sides staggered)
                 for (float x = near - 6f - (side > 0 ? LampEvery * 0.5f : 0f); x > towerX + plaza; x -= LampEvery)
                 {
