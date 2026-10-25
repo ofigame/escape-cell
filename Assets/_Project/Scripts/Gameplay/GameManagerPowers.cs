@@ -63,6 +63,13 @@ namespace SquashBot.Gameplay
             powerSlowLeft = 0f;
         }
 
+        /// <summary>A boost's head start: the ULTI bar begins this full (0..1).</summary>
+        private void StartUltiAt(float share)
+        {
+            ultiMeter = Mathf.Clamp01(Mathf.Max(ultiMeter, share));
+            FloatAt(robot.transform.position + Vector3.up * 1.2f, Loc.T("float.ultiHalf"), UltiColour);
+        }
+
         private void OnFoeFelledForPowers()
         {
             if (!PowerFloor || powerBusy) return;

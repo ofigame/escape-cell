@@ -37,7 +37,7 @@ namespace SquashBot.Gameplay
             if (challengeRun) return;
             ShowMenu();
             if (chUi == null) InitChallenge();
-            chDuelMinutes = 3; chOnline = false; chLive = false; chMode = 1; twoVsTwo = false;
+            chDuelMinutes = 3; chOnline = false; chLive = false; chMode = 1;
             rival = Challenge.MakeBot(4242, -1);
             BuildDuelBoard(4);
             duelLab = DuelLabPanel.Create();

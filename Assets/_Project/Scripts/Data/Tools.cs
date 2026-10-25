@@ -9,11 +9,11 @@ namespace SquashBot.Data
         SlowMo,
         /// <summary>Mends the holes and fire around the robot and keeps those tiles from breaking for a while.</summary>
         Bridge,
-        /// <summary>Wipes every block in the air and on the ground (and, upgraded, lasers and barrels too).</summary>
+        /// <summary>Breaks the robots' energy shields round foi and knocks the repair drones out (and, upgraded, lasers and barrels too).</summary>
         Emp,
-        /// <summary>Freezes the falling blocks (and everything else that moves) in mid-air for a few seconds.</summary>
+        /// <summary>Freezes every robot, vanG and floor danger for a few seconds.</summary>
         Freeze,
-        /// <summary>Blasts the blocks around the robot: a plus, then a square, then a big square.</summary>
+        /// <summary>A heavy blow on every robot round foi: a square, then a big square.</summary>
         Blast
     }
 
@@ -147,11 +147,10 @@ namespace SquashBot.Data
 
         public static float FreezeSeconds(int level) => 1f + level; // 2, 3, 4 s
 
-        /// <summary>Blast shape: 1 = a plus, 2 = a 3x3 square, 3 = a 5x5 square.</summary>
+        /// <summary>Blast shape: a 3x3 square, a 5x5 square at level 3.</summary>
         public static bool BlastHits(int level, int dx, int dy)
         {
             int ax = System.Math.Abs(dx), ay = System.Math.Abs(dy);
-            if (level <= 1) return ax + ay <= 1;
             int r = level >= 3 ? 2 : 1;
             return ax <= r && ay <= r;
         }

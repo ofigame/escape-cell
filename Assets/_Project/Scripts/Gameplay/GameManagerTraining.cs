@@ -31,7 +31,7 @@ namespace SquashBot.Gameplay
             if (challengeRun) { EndChallenge(); }
             ShowMenu();
             if (chUi == null) InitChallenge();
-            chDuelMinutes = 3; chOnline = false; chLive = false; chMode = 1; chFriend = 0; copyMatch = false; twoVsTwo = false; duelRule = null; chMatchId = 0;
+            chDuelMinutes = 3; chOnline = false; chLive = false; chMode = 1; chFriend = 0; copyMatch = false; duelRule = null; chMatchId = 0;
             chDuelSquads = false;
             rival = Challenge.MakeBot(5151, Mathf.Max(0, Challenge.Rank - 1));
             for (int g = 0; g < rival.squad.Length; g++) rival.squad[g] = 0;

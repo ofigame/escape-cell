@@ -143,8 +143,16 @@ namespace SquashBot.Gameplay
         /// <summary>The big attack under way (-1 none): 0 a cross of fire along the rows, 1 a rain of rocks round foi, 2 a
         /// charge in a line, 3 a call for reinforcements.</summary>
         private int specialKind = -1;
-        private float specialTimer = 7f;
+        private const float FirstSpecialSeconds = 7f;
+        private float specialTimer = FirstSpecialSeconds;
         private GridPos chargeEnd;
+
+        /// <summary>A new floor: no big attack under way, the first one a while off (not what the last floor left).</summary>
+        private void ResetSpecial()
+        {
+            specialKind = -1;
+            specialTimer = FirstSpecialSeconds;
+        }
 
         /// <summary>Now and then (more often when hurt), instead of an ordinary blow, the world's own big attack.</summary>
         private bool TrySpecial(float dt, float hard, bool enraged)

@@ -266,6 +266,7 @@ namespace SquashBot.Gameplay
             monsterHp = level.monsterHp;
             comboLeft = 0;
             leapT = -1f;
+            ResetSpecial(); // (the big attack's timer starts afresh on every floor)
             SetupStages();
             if (stageCount > 1) SpawnStages();
             else SpawnClassic();
@@ -1723,7 +1724,8 @@ namespace SquashBot.Gameplay
         /// <summary>How far the robots and vanG reach with a blow: two tiles, like foi; three is out of reach.</summary>
         public const int AttackReach = 2;
 
-        /// <summary>The nearest the two foi come in the duel (in tiles, diagonals as one): a tile always between them.</summary>
+        /// <summary>The nearest the two foi come in the duel (tiles between their tiles' centres, diagonals as one): two empty
+        /// tiles between them, and a duel blow reaches exactly this far.</summary>
         public const int DuelGap = 3;
 
         public static int Chebyshev(GridPos a, GridPos b) => Mathf.Max(Mathf.Abs(a.x - b.x), Mathf.Abs(a.y - b.y));

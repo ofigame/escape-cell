@@ -249,8 +249,6 @@ namespace SquashBot.UI
         public AdOfferCard AdOffer { get; private set; }
         public ChestCard Chest { get; private set; }
         public QuestsScreen Quests { get; private set; }
-        /// <summary>foi's army: the six soldier groups and their development points.</summary>
-        public ArmyScreen ArmyView { get; private set; }
         /// <summary>The duel chests won (open them for gold and weapons).</summary>
         public DuelChestScreen DuelChestsView { get; private set; }
         public DuelRewardsScreen DuelRewardsView { get; private set; }
@@ -523,7 +521,6 @@ namespace SquashBot.UI
             HeroPicker.RestorePressed += () => cloud.Show();
             AdOffer = AdOfferCard.Create(root);
             Chest = ChestCard.Create(root);
-            ArmyView = ArmyScreen.Create(root);
             DuelChestsView = DuelChestScreen.Create(root);
             DuelRewardsView = DuelRewardsScreen.Create(root);
             MoveSetView = MoveSetScreen.Create(root);
@@ -906,12 +903,20 @@ namespace SquashBot.UI
             }, 48f);
             preWorld = UiFactory.TextBox("World", card, Top, new Vector2(0f, -40f), new Vector2(640f, 56f), "", 32f, Palette.UiCyan);
             preWorld.characterSpacing = 4f;
-            preTitle = UiFactory.TextBox("Title", card, Top, new Vector2(0f, -90f), new Vector2(760f, 120f), "", 90f, Palette.UiText, title: true);
-            preMission = UiFactory.TextBox("Mission", card, Top, new Vector2(0f, -215f), new Vector2(780f, 70f), "", 38f, new Color(0.85f, 0.86f, 1f, 0.85f), FontStyles.Normal);
+            preTitle = UiFactory.TextBox("Title", card, Top, new Vector2(0f, -86f), new Vector2(760f, 100f), "", 72f, Palette.UiText, title: true);
+            preTitle.enableAutoSizing = true;
+            preTitle.fontSizeMin = 44f;
+            preTitle.fontSizeMax = 72f;
+            // the mission, a seventh level's rule and the stages (up to three short lines)
+            preMission = UiFactory.TextBox("Mission", card, Top, new Vector2(0f, -186f), new Vector2(780f, 120f), "", 32f, new Color(0.85f, 0.86f, 1f, 0.85f), FontStyles.Normal);
+            preMission.textWrappingMode = TextWrappingModes.Normal;
+            preMission.enableAutoSizing = true;
+            preMission.fontSizeMin = 22f;
+            preMission.fontSizeMax = 32f;
 
             for (int i = 0; i < 3; i++)
             {
-                var star = UiFactory.Box("Star" + i, card, Top, new Vector2((i - 1) * 110f, -300f), new Vector2(90f, 90f));
+                var star = UiFactory.Box("Star" + i, card, Top, new Vector2((i - 1) * 110f, -314f), new Vector2(90f, 90f));
                 preStars[i] = UiFactory.Fill(star, Color.white, UiSprites.Star);
                 preStars[i].raycastTarget = false;
             }
@@ -937,7 +942,7 @@ namespace SquashBot.UI
             var name = UiFactory.TextBox("Name", tile, Top, new Vector2(0f, -22f), new Vector2(230f, 110f), Loc.T("shop." + boost), 32f, Palette.UiText);
             name.textWrappingMode = TextWrappingModes.Normal;
             name.enableAutoSizing = true;
-            name.fontSizeMin = 22f;
+            name.fontSizeMin = 18f;
             name.fontSizeMax = 32f;
             view.info = UiFactory.TextBox("Info", tile, Bottom, new Vector2(0f, 20f), new Vector2(230f, 60f), "", 36f, Palette.UiGold);
             // "Suggested" ribbon over the tile that fits this level best.
@@ -999,15 +1004,29 @@ namespace SquashBot.UI
             foreach (var v in preBoosts)
             {
                 v.on = false;
-                // Three tiles: the hammer stands in for double coins on monster levels; none at all on boss and marathon levels.
-                bool show = boostsAllowed && (v.boost == Boost.StartHammer ? monsterLevel : v.boost != Boost.DoubleCoins || !monsterLevel);
+                // Every tile (the hammer fills half the ULTI bar); on the old monster levels it stands in for double coins;
+                // none at all on boss and marathon levels.
+                bool show = boostsAllowed && (v.boost != Boost.DoubleCoins || !monsterLevel);
                 v.root.SetActive(show);
                 v.tag.SetActive(v.boost == suggested);
                 if (show) shown.Add(v);
             }
             preBoostsLabel.text = Loc.T(boostsAllowed ? "pre.boosts" : "pre.noBoosts");
+            // Up to three tiles in a row at full width; four narrower ones still fit the card's row.
+            float width = shown.Count > 3 ? 190f : 250f, step = shown.Count > 3 ? 200f : 270f;
             for (int i = 0; i < shown.Count; i++)
-                ((RectTransform)shown[i].root.transform).anchoredPosition = new Vector2((i - (shown.Count - 1) * 0.5f) * 270f, -500f);
+            {
+                var rt = (RectTransform)shown[i].root.transform;
+                rt.anchoredPosition = new Vector2((i - (shown.Count - 1) * 0.5f) * step, -500f);
+                rt.sizeDelta = new Vector2(width, rt.sizeDelta.y);
+                foreach (var part in new[] { "Name", "Info" })
+                {
+                    var child = rt.Find(part) as RectTransform;
+                    if (child != null) child.sizeDelta = new Vector2(width - 20f, child.sizeDelta.y);
+                }
+                var tag = shown[i].tag.transform as RectTransform;
+                if (tag != null) tag.sizeDelta = new Vector2(Mathf.Min(210f, width - 10f), tag.sizeDelta.y);
+            }
             Data.LevelSquad.Limit = Data.LevelSquad.LimitFor(Data.LevelCatalog.WorldOf(levelIndex));
             RefreshPrelevelSquad(levelIndex >= 4);
             RefreshBoosts();
@@ -1031,6 +1050,9 @@ namespace SquashBot.UI
         }
 
         public void HidePrelevel() => prelevel.Hide(true);
+
+        /// <summary>The card's title in place of "Level n" (a hunt floor: "World n · Level m").</summary>
+        public void SetPrelevelTitle(string title) => preTitle.text = title;
         public bool PrelevelOpen => prelevel != null && prelevel.IsVisible;
 
         // ---------- "Set up defences?" after PLAY ----------
@@ -1356,7 +1378,6 @@ namespace SquashBot.UI
             if (noLives != null && noLives.IsVisible) { noLives.Hide(); return true; }
             if (Quests != null && Quests.IsOpen) { Quests.Hide(); return true; }
             if (ChallengeStats != null && ChallengeStats.IsOpen) { ChallengeStats.Hide(); return true; }
-            if (ArmyView != null && ArmyView.IsOpen) { ArmyView.Hide(); return true; }
             if (DailyBonus != null && DailyBonus.Visible) { DailyBonus.Hide(); return true; }
             if (LoginView != null && LoginView.Visible) { LoginView.Hide(); return true; }
             if (MoveSetView != null && MoveSetView.IsOpen) { MoveSetView.Hide(); return true; }
@@ -2220,7 +2241,6 @@ namespace SquashBot.UI
             MoveSetView.Hide();
             SeasonRoadView.Hide();
             Guide.Hide();
-            if (ArmyView != null) ArmyView.Hide();
             if (ChallengeStats != null) ChallengeStats.Hide();
             // The cards over a screen go with it (else the back button would leave them on top of the next one).
             if (Quests != null) Quests.Hide();

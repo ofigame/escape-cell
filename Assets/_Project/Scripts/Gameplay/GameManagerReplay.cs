@@ -111,7 +111,7 @@ namespace SquashBot.Gameplay
                     preToken++;
                     preMatch = null;
                     EndChallenge();
-                    if (mode >= 2 && mode <= 4) { cameraRig.StartCoroutine(EventDuel(mode)); return; }
+                    if (mode >= 2 && mode <= 3) { cameraRig.StartCoroutine(EventDuel(mode)); return; }
                     if (ahead != null) { StartAhead(ahead); return; }
                     StartChallenge(false);
                     return;

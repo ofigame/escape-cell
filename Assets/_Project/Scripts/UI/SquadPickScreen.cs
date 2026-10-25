@@ -64,7 +64,7 @@ namespace SquashBot.UI
         private void Row(int g)
         {
             var kind = Army.KindOf(g);
-            var colour = ArmyScreen.FamilyColour(kind);
+            var colour = Army.FamilyColour(kind);
             var row = Flat.Panel(list, "Row" + g, new Vector2(0.5f, 1f), new Vector2(0f, -g * RowH), new Vector2(1000f, RowH - 16f), Flat.Card);
             row.pivot = new Vector2(0.5f, 1f);
             var tile = Flat.Panel(row, "Tile", new Vector2(0f, 0.5f), new Vector2(20f, 0f), new Vector2(140f, 140f), new Color(colour.r, colour.g, colour.b, 0.18f), 2f);

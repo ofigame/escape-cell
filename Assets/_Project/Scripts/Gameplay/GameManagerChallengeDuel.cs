@@ -114,7 +114,7 @@ namespace SquashBot.Gameplay
 
         /// <summary>The lane duel is on now: the setting, a one-on-one duel against the AI (not 2v2, not live: the server
         /// keeps a live duel's places).</summary>
-        private bool LaneOn => SaveData.LaneDuel && challengeRun && !twoVsTwo && !LiveActive;
+        private bool LaneOn => SaveData.LaneDuel && challengeRun && !LiveActive;
 
         private void BuildDuelBoard(int stage)
         {
@@ -223,7 +223,6 @@ namespace SquashBot.Gameplay
             }
             // After a knock-down the soldiers left line up behind their foi again (no new ones and no healing until the duel is over).
             else hunt.RegroupSquads();
-            PlacePartners(first); // (2 against 2: the partners on their marks, or back after a fall)
             RoundPassives(); // (each round: the master warrior's bar part, the sturdy's spare life)
             GuardRound(); // (each round: both shields whole)
             if (capesOff) StripCapes();
@@ -412,7 +411,6 @@ namespace SquashBot.Gameplay
             if (colosseum == null) return;
             var (mine, theirs) = DuelMarks;
             var hangers = new System.Collections.Generic.List<(Transform model, GridPos mark, float side)> { (robot.Visual, mine, 0f), (hunt.ChallengeFoeModel, theirs, 0f) };
-            if (twoVsTwo) foreach (var (pm, pMine) in hunt.Partners()) hangers.Add((pm, pMine ? mine : theirs, 0.75f)); // (beside the foi's on the same post)
             foreach (var (model, mark, side) in hangers)
             {
                 if (model == null) continue;

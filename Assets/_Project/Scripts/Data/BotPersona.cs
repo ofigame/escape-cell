@@ -110,8 +110,14 @@ namespace SquashBot.Data
             return n;
         }
 
-        /// <summary>Losses in a row (the consolation: the next bot easier, the trophy loss halved).</summary>
+        /// <summary>Losses in a row.</summary>
         public static int LossesInRow => Tail('L');
+
+        /// <summary>Losses in a row that make the next bot a step easier.</summary>
+        public const int LossesToEase = 3;
+
+        /// <summary>The losing streak eases the next bot (the one condition the consolation line and <see cref="Shift"/> share).</summary>
+        public static bool NextEasier => Tail('L') >= LossesToEase;
 
         /// <summary>The next bot's difficulty step: negative easier, positive harder.</summary>
         public static int Shift
@@ -128,7 +134,7 @@ namespace SquashBot.Data
                     if (rate > 0.65f) shift++;
                     else if (rate < 0.4f) shift--;
                 }
-                if (Tail('L') >= 3) shift--;
+                if (NextEasier) shift--;
                 if (Tail('W') >= 5) shift++;
                 return shift;
             }

@@ -16,8 +16,8 @@ namespace SquashBot.Gameplay
     /// </summary>
     public partial class GameManager
     {
-        /// <summary>How far a blow reaches (diagonals count as one step), for every weapon and the super skill alike.</summary>
-        /// <summary>How far foi strikes: two tiles (diagonals count as one) for every blade, the range of a gun.</summary>
+        /// <summary>How far foi strikes, in tiles between the two tiles' centres (diagonals count as one): two on the floors for
+        /// every blade, three in the duel (exactly the gap the two foi keep, see HuntSystem.DuelGap).</summary>
         private int StrikeReach => challengeRun && chPhase == ChPhase.Duel ? HuntSystem.DuelGap : 2; // (the duel: from the gap kept between the two foi)
         private HuntSystem hunt;
         private float strikeCooldown;
@@ -206,6 +206,7 @@ namespace SquashBot.Gameplay
             hunt.FoiHp = Challenge.FoiMaxHp;
             // The floors' blows grow with the campaign (foi's health does too): three times the table early, nine by the last world.
             hunt.FoeHitScale = challengeRun ? 1f : Mathf.Lerp(3f, 9f, Mathf.Clamp01((arenaRun ? arenaIndex : World) / (float)(EnemyRoster.Worlds - 1)));
+            if (assistOn && !challengeRun && !arenaRun && !trailRun && !bonusRun) hunt.FoeHitScale *= FloorTuning.Current.assistFoeHit; // (the difficulty help: softer blows)
             hunt.HpBase = 10f;
             hunt.RosterWorld = challengeRun ? -1 : Mathf.Clamp(arenaRun ? arenaIndex : World, 0, EnemyRoster.Worlds - 1);
             hunt.RosterFloor = arenaRun ? 9 : levelIndex % LevelCatalog.LevelsPerWorld;
@@ -223,7 +224,8 @@ namespace SquashBot.Gameplay
 
         private void UpdateHunt(float dt)
         {
-            strikeCooldown -= dt;
+            // The slow-motion tool slows the world, not foi: its swing comes back in real time then.
+            strikeCooldown -= toolSlowLeft > 0f ? Time.unscaledDeltaTime : dt;
             UpdatePendingStrike();
             UpdateFifi(dt);
             UpdateBridgeGuide();
@@ -444,7 +446,7 @@ namespace SquashBot.Gameplay
             }
             if (!crowd && !crate) return false;
 
-            // Two tiles away (diagonals count as one) is in reach for every weapon; three is not.
+            // In reach: two tiles away on the floors (three in the duel), diagonals counting as one.
             bool inReach = HuntSystem.Chebyshev(at, robot.Position) <= StrikeReach;
             TapMarker.Create(GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY, inReach ? new Color(1f, 0.82f, 0.3f) : new Color(0.6f, 0.9f, 1f));
             if (!inReach)

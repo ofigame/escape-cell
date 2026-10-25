@@ -53,6 +53,32 @@ namespace SquashBot.Gameplay
             ShieldHit?.Invoke(p, broke);
         }
 
+        /// <summary>
+        /// The EMP tool: every robot's energy shield within <paramref name="radius"/> tiles of <paramref name="at"/>
+        /// (a square) breaks at once, and every repair drone there stops mending for <paramref name="droneSeconds"/>.
+        /// Returns how many shields and drones it reached.
+        /// </summary>
+        public int EmpAround(GridPos at, int radius, float droneSeconds)
+        {
+            int hit = 0;
+            foreach (var g in guards)
+            {
+                if (g.dead || g.ally || g.squad || g == challengeFoe || g.shield <= 0) continue;
+                if (Mathf.Abs(g.pos.x - at.x) > radius || Mathf.Abs(g.pos.y - at.y) > radius) continue;
+                g.shield = 1;
+                HitShield(g, g.pos);
+                hit++;
+            }
+            foreach (var d in drones)
+            {
+                if (d.dead || Mathf.Abs(d.pos.x - at.x) > radius || Mathf.Abs(d.pos.y - at.y) > radius) continue;
+                d.offUntil = Time.time + droneSeconds;
+                fx.Burst(d.root.position, ShieldColour, ShieldColour * 2.4f, 16, 3f);
+                hit++;
+            }
+            return hit;
+        }
+
         private void UpdateShield(Guard g, float dt)
         {
             if (g.bubble == null) return;
@@ -74,6 +100,8 @@ namespace SquashBot.Gameplay
             public Transform root, rotor;
             public Vector3 from, to;
             public float moveT = 1f, wander, repair;
+            /// <summary>Until when an EMP has knocked it out (it hangs still and mends nothing).</summary>
+            public float offUntil;
             public bool dead;
         }
 
@@ -132,6 +160,7 @@ namespace SquashBot.Gameplay
             foreach (var d in drones)
             {
                 if (d.dead) continue;
+                if (Time.time < d.offUntil) { d.root.position = DroneAt(d.pos, 0f) + Vector3.down * 0.25f; continue; } // (knocked out by an EMP)
                 d.rotor.localRotation = Quaternion.Euler(0f, Time.time * 1100f, 0f);
                 if (d.moveT < 1f)
                 {

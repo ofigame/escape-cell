@@ -49,6 +49,27 @@ namespace SquashBot.Data
         private static readonly float[] SuitChance = { 0.03f, 0.08f }, ShopChance = { 0.10f, 0.14f }; // (plain, bronze)
         private const float GoldOutfit = 0.30f, GoldShield = 0.04f, GoldChestWeapon = 0.08f, GoldShopWeapon = 0.08f;
         private const int GoldChestGold = 1500;
+        /// <summary>The shop weapons' tiers a chest draws from, and its gold and core parts when gold comes out (plain, bronze, gold).</summary>
+        private static readonly (int lo, int hi)[] ShopTiers = { (1, 2), (2, 3), (3, 5) };
+        private static readonly (int lo, int hi)[] GoldRange = { (60, 160), (200, 450), (GoldChestGold, GoldChestGold) };
+        private static readonly (int lo, int hi)[] CoreRange = { (0, 0), (2, 5), (10, 20) };
+
+        /// <summary>The shop weapons' tiers this chest draws from (the contents screen lists the same).</summary>
+        public static (int lo, int hi) ShopTierRange(ChestTier t) => ShopTiers[(int)t];
+
+        /// <summary>The chest's ranges, worked out from the same numbers as its draw, e.g. "Weapons tier 2–3 · Gold
+        /// 200–450 · Core parts 2–5", and the note that gold comes instead of a kind there is nothing left of.</summary>
+        public static string DetailText(ChestTier t)
+        {
+            var (lo, hi) = ShopTiers[(int)t];
+            var g = GoldRange[(int)t];
+            var c = CoreRange[(int)t];
+            string text = Loc.F("odds.tiers", lo, hi) + " · " + Loc.F("odds.goldRange", Span(g.lo, g.hi));
+            if (c.hi > 0) text += " · " + Loc.F("odds.coreRange", Span(c.lo, c.hi));
+            return text + "\n" + Loc.T("odds.fallback");
+        }
+
+        private static string Span(int lo, int hi) => lo == hi ? lo.ToString() : lo + "–" + hi;
 
         /// <summary>What may come out of a chest and how likely, e.g. "Gold 86% · Weapon 12% · Outfit 2%".</summary>
         public static string OddsText(ChestTier t)
@@ -74,7 +95,7 @@ namespace SquashBot.Data
             foreach (var x in parts)
             {
                 if (sb.Length > 0) sb.Append(" · ");
-                sb.Append(Loc.T(x.key)).Append(' ').Append(Mathf.RoundToInt(x.p * 100f)).Append('%');
+                sb.Append(Loc.T(x.key)).Append(' ').Append(Loc.F("fmt.pct", Mathf.RoundToInt(x.p * 100f)));
             }
             return sb.ToString();
         }
@@ -189,8 +210,8 @@ namespace SquashBot.Data
         }
 
         /// <summary>
-        /// The golden chest: an outfit 34%, a shield 4%, a chest sword 5% (the best rarest), a shop weapon 7%, else
-        /// 2000 gold (at least half the time; more once there is nothing of a kind left to give).
+        /// The golden chest: an outfit 30%, a shield 4%, a chest sword 8% (the best rarest), a shop weapon 8% (tier 3–5),
+        /// else 1,500 gold and 10–20 core parts (about half the time; more once there is nothing of a kind left to give).
         /// </summary>
         private static ChestReward RollGolden()
         {
@@ -213,10 +234,10 @@ namespace SquashBot.Data
             }
             else if (roll < GoldOutfit + GoldShield + GoldChestWeapon + GoldShopWeapon)
             {
-                var w = Pick(Armory.All.FindAll(x => !x.Special && !x.chest && x.kind != WeaponKind.Gun && x.price > 0 && !Armory.Owned(x) && x.tier >= 3 && x.tier <= 5));
+                var w = Pick(Armory.All.FindAll(x => !x.Special && !x.chest && x.kind != WeaponKind.Gun && x.price > 0 && !Armory.Owned(x) && x.tier >= ShopTiers[2].lo && x.tier <= ShopTiers[2].hi));
                 if (w != null) return new ChestReward { weapon = w };
             }
-            return new ChestReward { gold = GoldChestGold, cores = UnityEngine.Random.Range(10, 21) };
+            return new ChestReward { gold = GoldRange[2].lo, cores = UnityEngine.Random.Range(CoreRange[2].lo, CoreRange[2].hi + 1) };
         }
 
         private static ChestReward Roll(ChestTier t)
@@ -237,15 +258,16 @@ namespace SquashBot.Data
             if (wantChest) w = PickWeighted(Armory.All.FindAll(x => x.chest && !Armory.Owned(x)));
             if (w == null && (wantChest || wantShop))
             {
-                int lo = t == ChestTier.Mid ? 2 : 1, hi = t == ChestTier.Mid ? 3 : 2;
+                var (lo, hi) = ShopTiers[(int)t];
                 w = Pick(Armory.All.FindAll(x => !x.Special && !x.chest && x.kind != WeaponKind.Gun && x.price > 0 && !Armory.Owned(x) && x.tier >= lo && x.tier <= hi));
             }
             if (w != null) return new ChestReward { weapon = w };
             // Gold (more of it when a weapon was due but none was left to give); the bronze chest's with 2–5 core parts.
-            var range = t == ChestTier.Mid ? (200, 450) : (60, 160);
+            var range = GoldRange[(int)t];
             float k = wantChest || wantShop ? 1.5f : 1f;
-            int gold = Mathf.RoundToInt(UnityEngine.Random.Range(range.Item1, range.Item2) * k / 10f) * 10;
-            return new ChestReward { gold = gold, cores = t == ChestTier.Mid ? UnityEngine.Random.Range(2, 6) : 0 };
+            int gold = Mathf.RoundToInt(UnityEngine.Random.Range(range.lo, range.hi) * k / 10f) * 10;
+            var cores = CoreRange[(int)t];
+            return new ChestReward { gold = gold, cores = cores.hi > 0 ? UnityEngine.Random.Range(cores.lo, cores.hi + 1) : 0 };
         }
 
         private static WeaponDef Pick(List<WeaponDef> list) => list.Count == 0 ? null : list[UnityEngine.Random.Range(0, list.Count)];

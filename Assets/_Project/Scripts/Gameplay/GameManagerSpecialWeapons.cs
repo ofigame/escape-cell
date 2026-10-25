@@ -17,13 +17,14 @@ namespace SquashBot.Gameplay
         private void SpecialHit(WeaponDef w, GridPos at, int damage)
         {
             // Not in the duels: the server counts plain blows only (and ice would hold the rival foi still).
-            if (w == null || !w.Special || hunt == null || challengeRun) return;
+            // Every weapon with an effect has it here (the rank and chest weapons, and the shop's lava axe and frost lance).
+            if (w == null || !w.HasFx || hunt == null || challengeRun) return;
             var c = WeaponModels.FxColour(w.fx);
             var spot = GridView.ToWorld(at) + Vector3.up * (GridView.SurfaceY + 0.5f);
             switch (w.fx)
             {
                 case SpecialFx.Burn:
-                    StartCoroutine(BurnTile(at, Mathf.Max(1, damage / 5), 3));
+                    StartCoroutine(BurnTile(at, Mathf.Max(1, damage / 5), w.fxTicks > 0 ? w.fxTicks : 3));
                     break;
                 case SpecialFx.Freeze:
                     fx.Burst(spot, c, c * 2f, 18, 4f);

@@ -26,6 +26,9 @@ namespace SquashBot.Data
 
         /// <summary>The family a kind belongs to: 0 sword, 1 spear, 2 bow.</summary>
         public static int Family(GroupKind k) => (int)k / 2;
+        /// <summary>A family's colour on the screens: swords red, spears teal, bows gold.</summary>
+        public static Color FamilyColour(GroupKind k) =>
+            Family(k) == 0 ? new Color(0.95f, 0.42f, 0.4f) : Family(k) == 1 ? new Color(0.25f, 0.78f, 0.7f) : new Color(1f, 0.76f, 0.3f);
         public static bool Heavy(GroupKind k) => (int)k % 2 == 1;
 
         /// <summary>Sword beats bow, spear beats sword, bow beats spear: +1 the attacker has the edge, -1 the defender, 0 even.</summary>

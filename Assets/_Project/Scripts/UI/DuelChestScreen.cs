@@ -103,9 +103,9 @@ namespace SquashBot.UI
             var top = new Vector2(0.5f, 1f);
             contentsTitle = Flat.Label(root, "", top, new Vector2(0f, -80f), new Vector2(960f, 80f), 54f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
             contentsTitle.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            contentsOdds = Flat.Label(root, "", top, new Vector2(0f, -150f), new Vector2(960f, 60f), 28f, Flat.Muted, TextAlignmentOptions.Center, wrap: true);
+            contentsOdds = Flat.Label(root, "", top, new Vector2(0f, -200f), new Vector2(960f, 140f), 26f, Flat.Muted, TextAlignmentOptions.Center, wrap: true);
             contentsOdds.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(30f, Ads.BannerReserve + 150f), new Vector2(-30f, -200f));
+            var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(30f, Ads.BannerReserve + 150f), new Vector2(-30f, -350f));
             viewport.gameObject.AddComponent<RectMask2D>();
             UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
             contentsGrid = UiFactory.Rect("Grid", viewport, new Vector2(0f, 1f), Vector2.one);
@@ -122,7 +122,7 @@ namespace SquashBot.UI
         {
             for (int i = contentsGrid.childCount - 1; i >= 0; i--) Destroy(contentsGrid.GetChild(i).gameObject);
             contentsTitle.text = TierName(t);
-            contentsOdds.text = DuelChests.OddsText(t);
+            contentsOdds.text = DuelChests.OddsText(t) + "\n" + DuelChests.DetailText(t);
             int n = 0;
             void Cell(Texture pic, string name, bool rare)
             {
@@ -142,9 +142,9 @@ namespace SquashBot.UI
                 foreach (var w in Armory.All) if (w.chest) Cell(ItemPreview.Weapon(w), Loc.T("weapon." + w.id), true);
                 foreach (var s in Shields.All) if (s.chest) Cell(ItemPreview.Shield(s), Loc.T(s.id), true);
             }
-            if (t != ChestTier.Basic)
-                foreach (var c in Cosmetics.All) if (c.chest) Cell(ItemPreview.Cosmetic(c), Loc.T("cos." + c.id), true);
-            int lo = t == ChestTier.Advanced ? 4 : t == ChestTier.Mid ? 3 : 1, hi = t == ChestTier.Advanced ? 6 : t == ChestTier.Mid ? 4 : 2;
+            // (the chests' own outfits: every chest may hold one, the plain one more rarely)
+            foreach (var c in Cosmetics.All) if (c.chest) Cell(ItemPreview.Cosmetic(c), Loc.T("cos." + c.id), true);
+            var (lo, hi) = DuelChests.ShopTierRange(t); // (the very tiers the chest draws from)
             foreach (var w in Armory.All)
                 if (!w.Special && !w.chest && w.price > 0 && w.tier >= lo && w.tier <= hi && w.kind != WeaponKind.Gun) Cell(ItemPreview.Weapon(w), Loc.T("weapon." + w.id), false);
             contentsGrid.sizeDelta = new Vector2(0f, ((n + 2) / 3) * 378f + 30f);

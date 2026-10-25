@@ -34,7 +34,8 @@ namespace SquashBot.Gameplay
         private const int CoinsPerRescue = 8;
         private static int MaxRescues => Shop.MaxRescues;
         private const float HoverCooldown = 0f; // no wait between flights
-        private const int FailsForAssist = 5;
+        /// <summary>The difficulty help is on for this floor (lost again and again): weaker blows, a weaker vanG.</summary>
+        private bool assistOn;
 
         // Features unlock as the player progresses (world index, 0-based).
         private const int RescueFromWorld = 1;
@@ -681,12 +682,17 @@ namespace SquashBot.Gameplay
             }
             // Bought rescues need no slot here: they wait in reserve and step in by themselves (see TryRescue).
             var data = levelSet.levels[index];
-            ui.ShowPrelevel(index, LevelCatalog.WorldName(index), MissionText(data), Progress.Stars(index), data.mission == MissionType.Monster, SuggestedBoost(data), Shop.BoostsAllowed(data));
+            // A hunt floor's card: the world's name over "World n · Level m", the shared mission, a seventh level's rule, the stages.
+            bool hunt = data.mission == MissionType.Hunt;
+            string world = hunt ? Loc.T(WorldTheme.ForWorld(LevelCatalog.WorldOf(index)).key) : LevelCatalog.WorldName(index);
+            ui.ShowPrelevel(index, world, hunt ? CardText(index) : MissionText(data), Progress.Stars(index), data.mission == MissionType.Monster, SuggestedBoost(data), Shop.BoostsAllowed(data));
+            if (hunt) ui.SetPrelevelTitle(Loc.F("card.title", LevelCatalog.WorldOf(index) + 1, index + 1));
             ui.SetPrelevelDefense(PrelevelDefenseLabel(index));
             OfferArcherAd(index);
         }
 
-        /// <summary>The boost that helps most on this level: the hammer for a monster, double coins for coin hunts, else a shield.</summary>
+        /// <summary>The boost that helps most on this level: the hammer for a monster or a world's monster floor (the ULTI
+        /// bar half full), double coins for coin hunts, else a shield.</summary>
         private static Boost SuggestedBoost(LevelData data)
         {
             switch (data.mission)
@@ -695,6 +701,7 @@ namespace SquashBot.Gameplay
                 case MissionType.Thief:
                 case MissionType.CollectCoins:
                 case MissionType.CoinRain: return Boost.DoubleCoins;
+                case MissionType.Hunt when data.number % LevelCatalog.LevelsPerWorld == 0: return Boost.StartHammer;
                 default: return Boost.StartShield;
             }
         }
@@ -807,6 +814,7 @@ namespace SquashBot.Gameplay
             level = levelSet.levels[levelIndex].Clone();
             bool assisted = ApplyAssist(level);
             Toughen(level);
+            if (assisted) level.monsterHp = Mathf.Max(1, Mathf.RoundToInt(level.monsterHp * FloorTuning.Current.assistMonsterHp)); // (the help: a weaker vanG)
             BeginRun();
 
             // Boosts picked on the before-level card are spent now (never on boss or marathon levels).
@@ -814,8 +822,12 @@ namespace SquashBot.Gameplay
             {
                 if (boosts.Contains(Boost.StartShield) && Shop.TryUse(Boost.StartShield))
                     GiveArmor(ArmorDuration, robot.Position, Loc.T("float.shield"), Palette.UiCyan);
-                if (boosts.Contains(Boost.StartHammer) && level.mission == MissionType.Monster && Shop.TryUse(Boost.StartHammer))
-                    FillHammerBag();
+                if (boosts.Contains(Boost.StartHammer) && Shop.TryUse(Boost.StartHammer))
+                {
+                    // The thunder hammer: a monster level's hammer in hand, a hunt floor's ULTI bar half full.
+                    if (level.mission == MissionType.Monster) FillHammerBag();
+                    else StartUltiAt(FloorTuning.Current.startHammerUlti);
+                }
                 if (boosts.Contains(Boost.DoubleCoins) && Shop.TryUse(Boost.DoubleCoins))
                 {
                     doubleCoins = true;
@@ -1384,7 +1396,7 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>A tile foi may walk onto freely on a floor: solid, free, not fire, not a step too high.</summary>
-        private bool FloorWalkable(GridPos p) => grid.IsStandable(p) && !grid.IsGap(p) && !grid.IsLava(p) && FloorRelief.StepOk(robot.Position, p) && !(twoVsTwo && (hunt.PartnerAt(p) || hunt.NearPartner(robot.Position, p))) && !(LaneOn && p.x != laneX && System.Math.Abs(p.x - laneX) >= System.Math.Abs(robot.Position.x - laneX))
+        private bool FloorWalkable(GridPos p) => grid.IsStandable(p) && !grid.IsGap(p) && !grid.IsLava(p) && FloorRelief.StepOk(robot.Position, p) && !(LaneOn && p.x != laneX && System.Math.Abs(p.x - laneX) >= System.Math.Abs(robot.Position.x - laneX))
             && !(challengeRun && chPhase == ChPhase.Duel && hunt.ChallengeFoeTile is GridPos foeAt && HuntSystem.Chebyshev(p, foeAt) < HuntSystem.DuelGap && HuntSystem.Chebyshev(p, foeAt) < HuntSystem.Chebyshev(robot.Position, foeAt)); // (the duel: never closer than its gap)
 
         private bool HeldStepOk(Direction dir)
@@ -1426,10 +1438,15 @@ namespace SquashBot.Gameplay
 
         private static string FailKey(int index) => "sb_fails_" + index;
 
-        /// <summary>After several failed attempts in a row, the level eases off a little so nobody gets stuck.</summary>
+        /// <summary>
+        /// After several failed attempts in a row, the level eases off a little so nobody gets stuck: the robots' blows and
+        /// vanG's health go down (see <see cref="FloorTuning"/>; applied after the floor is toughened, in SetupHunt and
+        /// AssistMonster), and the old falling-block levels slow their blocks. It lasts until the floor is won.
+        /// </summary>
         private bool ApplyAssist(LevelData data)
         {
-            if (Prefs.GetInt(FailKey(levelIndex), 0) < FailsForAssist) return false;
+            assistOn = Prefs.GetInt(FailKey(levelIndex), 0) >= FloorTuning.Current.assistAfterFails;
+            if (!assistOn) return false;
             data.warningTime *= 1.15f;
             data.spawnInterval *= 1.12f;
             data.blocksPerWave = Mathf.Max(1, data.blocksPerWave - 1);
@@ -1849,7 +1866,8 @@ namespace SquashBot.Gameplay
                 fx.Burst(robot.transform.position + Vector3.up * 0.3f, Palette.RobotBody, Palette.RobotEye, 24, 5f);
                 AudioManager.PlaySfx(Sfx.Squash);
                 Haptics.Death();
-                Lose(Loc.T("lose.block"));
+                // (the hunt floors drop no blocks: there the robots' and vanG's blows took the last of foi's health)
+                Lose(Loc.T(level.mission == MissionType.Hunt ? "lose.knocked" : "lose.block"));
                 return;
             }
 
@@ -2167,13 +2185,17 @@ namespace SquashBot.Gameplay
 
                 case Tool.Blast:
                 {
-                    // The colour miners' powder: blocks around the robot burst (a plus, a square, a big square).
+                    // The colour miners' powder: the robots around foi take a heavy blow (a square, a big square at the
+                    // top level), and any blocks there burst too.
                     var at = robot.Position;
+                    int blow = PowerDamage(FloorTuning.Current.blastTimes);
                     for (int x = -2; x <= 2; x++)
                         for (int y = -2; y <= 2; y++)
                         {
                             var t = new GridPos(at.x + x, at.y + y);
-                            if (Tools.BlastHits(lvl, x, y) && grid.InBounds(t)) hazards.Shatter(t);
+                            if (!Tools.BlastHits(lvl, x, y) || !grid.InBounds(t)) continue;
+                            hazards.Shatter(t);
+                            hunt.Strike(t, blow);
                         }
                     fx.Burst(robot.transform.position + Vector3.up * 0.5f, new Color(1f, 0.5f, 0.3f), new Color(3f, 1.2f, 0.3f), 50, 8f);
                     cameraRig.Shake(0.8f);
@@ -2184,7 +2206,9 @@ namespace SquashBot.Gameplay
 
                 default:
                 {
-                    int hit = hazards.Emp();
+                    // The robots' energy shields round foi break and the repair drones there fall still (and any blocks go).
+                    var tune = FloorTuning.Current;
+                    int hit = hazards.Emp() + hunt.EmpAround(robot.Position, tune.empRadius, tune.EmpDroneSeconds(lvl));
                     if (Tools.EmpClearsRules(lvl)) floorRules.ClearActive();
                     cameraRig.Shake(1f);
                     cameraRig.Punch(1f);
@@ -2318,8 +2342,8 @@ namespace SquashBot.Gameplay
             // A good moment for a store rating (first at level 10, then at a world's end; see RatePrompt).
             if (unlockedNew && Monetization.RatePrompt.ShouldAsk(levelIndex + 1, (levelIndex + 1) % LevelCatalog.LevelsPerWorld == 0))
                 StartCoroutine(AskRatingSoon());
-            // The card's hook (a teaser for the next cell) comes first; otherwise the bonus or star news.
-            string note = Loc.Has(CardKey("hook")) ? Loc.T(CardKey("hook"))
+            // The star news (the old cards' hooks were written for missions the floors no longer have: not shown on hunt floors).
+            string note = level.mission != MissionType.Hunt && Loc.Has(CardKey("hook")) ? Loc.T(CardKey("hook"))
                 : stars < 3 ? StarHint(stars)
                 : Loc.T("star.max");
 

@@ -43,7 +43,7 @@ namespace SquashBot.Visual
             ["kingsBlade"] = new Color(1f, 0.45f, 0.2f),  // the marshal's red-gold
             ["nightBlade"] = new Color(0.45f, 0.5f, 1f),  // night blue
             ["dawnBlade"] = new Color(1f, 0.4f, 0.12f),   // fire
-            ["emeraldBlade"] = new Color(1f, 0.7f, 0.25f), // ember thorn
+            ["emeraldBlade"] = new Color(1f, 0.32f, 0.14f), // ember thorn: red embers
             ["novaMace"] = new Color(1f, 0.5f, 0.15f),    // lava
         };
 
@@ -54,6 +54,7 @@ namespace SquashBot.Visual
             ["frostEdge"] = new Color(0.2f, 0.55f, 1f),  // blue
             ["nightBlade"] = new Color(0.25f, 0.45f, 1f), // blue
             ["novaMace"] = new Color(1f, 0.32f, 0.06f),   // red-orange, off the head
+            ["emeraldBlade"] = new Color(0.95f, 0.16f, 0.06f), // deep red
         };
 
         /// <summary>A weapon's own light colour (a = 0: none).</summary>

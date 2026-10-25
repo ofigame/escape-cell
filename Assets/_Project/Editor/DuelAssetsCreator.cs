@@ -1,6 +1,7 @@
 using System.IO;
 using SquashBot.Audio;
 using SquashBot.Combat;
+using SquashBot.Data;
 using SquashBot.Gameplay;
 using SquashBot.UI;
 using SquashBot.Visual;
@@ -38,8 +39,12 @@ namespace SquashBot.EditorTools
                 if (File.Exists(path)) continue;
                 AssetDatabase.CreateAsset(c, path);
             }
+            Make(FloorFolder);
+            Save(ScriptableObject.CreateInstance<FloorTuning>(), "FloorTuning", FloorFolder);
             AssetDatabase.SaveAssets();
         }
+
+        private const string FloorFolder = "Assets/_Project/Resources/Floors";
 
         private static void Make(string folder)
         {
@@ -48,9 +53,9 @@ namespace SquashBot.EditorTools
             AssetDatabase.Refresh();
         }
 
-        private static void Save(ScriptableObject o, string name)
+        private static void Save(ScriptableObject o, string name, string folder = Folder)
         {
-            string path = Folder + "/" + name + ".asset";
+            string path = folder + "/" + name + ".asset";
             if (File.Exists(path)) return;
             AssetDatabase.CreateAsset(o, path);
         }

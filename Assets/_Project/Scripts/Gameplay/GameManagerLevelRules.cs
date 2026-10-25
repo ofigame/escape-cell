@@ -26,6 +26,19 @@ namespace SquashBot.Gameplay
         private static LevelRule RuleFor(int index) =>
             index >= LevelCatalog.LevelsPerWorld && index % LevelCatalog.LevelsPerWorld == 6 ? (LevelRule)(1 + (index / LevelCatalog.LevelsPerWorld) % 8) : LevelRule.None;
 
+        /// <summary>
+        /// The card before a hunt floor (every campaign level): the one mission all of them share, a seventh level's rule
+        /// with its one line, and how many fortress stages the floor has.
+        /// </summary>
+        private static string CardText(int index)
+        {
+            var sb = new System.Text.StringBuilder(Loc.T("card.goal.vang"));
+            var rule = RuleFor(index);
+            if (rule != LevelRule.None) sb.Append('\n').Append(Loc.F("card.rule", Loc.T("rule." + rule), Loc.T("rule." + rule + ".d")));
+            sb.Append('\n').Append(Loc.F("card.stages", LevelCatalog.StageCount(index)));
+            return sb.ToString();
+        }
+
         private float counterUntil;
         private bool captivePlaced;
         private Vector3 slideVel;

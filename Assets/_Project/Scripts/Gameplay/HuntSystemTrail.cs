@@ -294,63 +294,6 @@ namespace SquashBot.Gameplay
             return null;
         }
 
-        /// <summary>
-        /// A soldier of the rival's army carried into the duel: its own model (<paramref name="body"/>, the soldier as it
-        /// stood) moved onto the nearest free tile, fighting as a robot of the given health.
-        /// </summary>
-        public void AddChallengeSoldier(Vector3 at, int hp, Transform body, SoldierModel model, GroupKind kind)
-        {
-            var tile = FreeNear(new GridPos(Mathf.RoundToInt(at.x), Mathf.RoundToInt(at.z)));
-            if (!tile.HasValue) { Destroy(body.gameObject); return; }
-            var g = new Guard { pos = tile.Value, hp = Mathf.Max(1, hp), maxHp = Mathf.Max(1, hp), rank = 1, step = 0.2f + (float)rng.NextDouble() * 0.5f, cooldown = 0.5f + (float)rng.NextDouble() };
-            g.root = body;
-            g.root.SetParent(transform, true);
-            g.root.position = At(tile.Value);
-            g.soldier = model;
-            g.soldierKind = kind;
-            AddHealthBar(g);
-            g.from = g.to = At(tile.Value);
-            grid.SetOccupied(tile.Value, true);
-            guards.Add(g);
-            Total++;
-        }
-
-        /// <summary>One of the player's soldiers carried into the duel as an ally (its own model).</summary>
-        public void AddChallengeAlly(Vector3 at, int hp, Transform body, SoldierModel model, GroupKind kind)
-        {
-            var tile = FreeNear(new GridPos(Mathf.RoundToInt(at.x), Mathf.RoundToInt(at.z)));
-            if (!tile.HasValue) { Destroy(body.gameObject); return; }
-            var a = new Guard { pos = tile.Value, hp = Mathf.Max(1, hp), maxHp = Mathf.Max(1, hp), rank = -1, step = 0.2f + (float)rng.NextDouble() * 0.4f, ally = true };
-            a.root = body;
-            a.root.SetParent(transform, true);
-            a.root.position = At(tile.Value);
-            a.soldier = model;
-            a.soldierKind = kind;
-            AddHealthBar(a);
-            a.from = a.to = At(tile.Value);
-            allies.Add(a);
-        }
-
-        /// <summary>The rival's soldiers still standing on foi's stage (the stage battle).</summary>
-        public int ChallengeSoldiersLeft
-        {
-            get { int n = 0; foreach (var g in guards) if (!g.dead && g.soldier != null) n++; return n; }
-        }
-
-        /// <summary>The soldiers still on foi's stage leave it (gone in a puff, no coins).</summary>
-        public void RemoveChallengeSoldiers()
-        {
-            foreach (var g in guards)
-            {
-                if (g.dead || g.soldier == null) continue;
-                g.dead = true;
-                ClearTelegraph(g); // a swing at foi caught halfway: its red tiles go too
-                grid.SetOccupied(g.pos, false);
-                fx.Burst(g.root.position + Vector3.up * 0.4f, new Color(0.9f, 0.9f, 1f), new Color(1.6f, 1.6f, 2f), 12, 3f);
-                Destroy(g.root.gameObject);
-            }
-        }
-
         /// <summary>The rival foi leaves the ring (between the duel's rounds): gone at once, its tile free.</summary>
         public void RemoveChallengeFoe()
         {

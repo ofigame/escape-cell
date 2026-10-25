@@ -117,7 +117,7 @@ namespace SquashBot.Gameplay
             r.seasonBefore = SeasonRoad.Points;
             SeasonRoad.Add(r.seasonPoints);
             r.streak = won && !friendly ? DuelChests.Streak : 0;
-            r.consolation = !won && !draw && botTuning != null && BotDifficulty.LossesInRow >= 2;
+            r.consolation = !won && !draw && botTuning != null && BotDifficulty.NextEasier; // (shown exactly when the next bot does get easier)
             lastRewards = r;
             return r;
         }

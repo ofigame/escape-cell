@@ -31,8 +31,12 @@ namespace SquashBot.Data
         /// <summary>A rank weapon: the trophy rank (league) it needs (-1: an ordinary weapon), its effect and its size.</summary>
         public int rank = -1;
         public SpecialFx fx;
+        /// <summary>How many times its burn ticks (0: the usual three).</summary>
+        public int fxTicks;
         public float size = 1f;
         public bool Special => rank >= 0;
+        /// <summary>It carries an effect on the floors (rank and chest weapons, and the shop's lava axe and frost lance).</summary>
+        public bool HasFx => fx != SpecialFx.None;
         /// <summary>Only ever found in a duel chest (never sold): its own glowing metal and its trim's colour.</summary>
         public bool chest;
         public Color tint, trim, gem;
@@ -40,7 +44,7 @@ namespace SquashBot.Data
 
     /// <summary>
     /// The armory of Bip's workshop: hammers, swords, axes, maces and spears, each opening at a level of the campaign.
-    /// Swords swing fast, axes and maces hit hard but slowly, spears reach a tile farther. The robot carries one
+    /// Swords swing fast, axes and maces hit hard but slowly, spears in between (every blade reaches the same). The robot carries one
     /// (the equipped one); the wooden mallet is owned from the start.
     /// </summary>
     public static class Armory
@@ -96,7 +100,7 @@ namespace SquashBot.Data
             // The chest swords: only in the gold chest. Shining metal with raised patterns and set gems.
             new WeaponDef { id = "dawnBlade", kind = WeaponKind.Sword, tier = 4, damage = 30, reach = 2, cooldown = 0.12f, price = 40000, rank = 0, fx = SpecialFx.Burn, size = 1.5f, chest = true, tint = new Color(1f, 0.85f, 0.5f), trim = new Color(1f, 0.78f, 0.3f), gem = new Color(1f, 0.42f, 0.18f) },
             new WeaponDef { id = "nightBlade", kind = WeaponKind.Sword, tier = 5, damage = 40, reach = 2, cooldown = 0.12f, price = 45000, rank = 0, fx = SpecialFx.Chain, size = 1.55f, chest = true, tint = new Color(0.45f, 0.35f, 0.95f), trim = new Color(0.85f, 0.9f, 1f), gem = new Color(0.45f, 0.95f, 1f) },
-            new WeaponDef { id = "emeraldBlade", kind = WeaponKind.Sword, tier = 5, damage = 40, reach = 2, cooldown = 0.12f, price = 45000, rank = 0, fx = SpecialFx.Freeze, size = 1.5f, chest = true, tint = new Color(0.3f, 0.95f, 0.6f), trim = new Color(1f, 0.82f, 0.35f), gem = new Color(0.55f, 1f, 0.7f) },
+            new WeaponDef { id = "emeraldBlade", kind = WeaponKind.Sword, tier = 5, damage = 40, reach = 2, cooldown = 0.12f, price = 45000, rank = 0, fx = SpecialFx.Burn, fxTicks = 5, size = 1.5f, chest = true, tint = new Color(1f, 0.3f, 0.16f), trim = new Color(1f, 0.82f, 0.35f), gem = new Color(1f, 0.38f, 0.2f) }, // the ember thorn: a red, long-burning blade
         };
 
         /// <summary>A weapon's family (hammers and maces are both heavy; guns count as heavy, unused in the duel).</summary>

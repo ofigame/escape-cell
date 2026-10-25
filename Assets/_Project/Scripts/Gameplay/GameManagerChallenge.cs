@@ -143,7 +143,7 @@ namespace SquashBot.Gameplay
             chUi.ModePicked += (mode, minutes) =>
             {
                 chUi.HideModes();
-                if (mode >= 2 && mode <= 4) { cameraRig.StartCoroutine(EventDuel(mode)); return; } // the weekly rule mode, the weekend tournament, 2 against 2
+                if (mode >= 2 && mode <= 3) { cameraRig.StartCoroutine(EventDuel(mode)); return; } // the weekly rule mode, the weekend tournament
                 if (TutorialDue) { StartTutorial(); return; } // (a new player's first duel: the guided one)
                 chMode = 1; chDuelMinutes = 3; chDuelSquads = Challenge.DuelSquads; StartChallenge(false);
             };
@@ -180,7 +180,6 @@ namespace SquashBot.Gameplay
             Notifications.AskOnce(token => cameraRig.StartCoroutine(FoiNet.PutSettings(Challenge.Enabled, token, FoiNet.LangCode, _ => { })));
             if (chUi == null) InitChallenge();
             ui.ChallengeStats.Hide();
-            ui.ArmyView.Hide();
             if (State != GameState.Menu) ShowMenu();
             if (!Challenge.NameChosen)
             {
@@ -825,7 +824,6 @@ namespace SquashBot.Gameplay
             if (!sideKnown) { sideKnown = true; sideDist = 22f; }
             // everyone to keep in view: the two foi, and the partners in 2v2
             var points = new System.Collections.Generic.List<Vector3> { me, foe };
-            if (twoVsTwo) foreach (var (pm, _) in hunt.Partners()) points.Add(pm.position);
             var mid = Vector3.zero;
             foreach (var p in points) mid += p;
             mid /= points.Count;

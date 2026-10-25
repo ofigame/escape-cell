@@ -24,20 +24,18 @@ namespace SquashBot.Gameplay
             if (challengeRun) yield break;
             if (mode == 3 && (Tournament.Out || Tournament.Champion)) { ui.ShowIntro(Loc.T("tn.title"), Loc.T(Tournament.Champion ? "tn.done" : "tn.out")); yield break; }
             chMode = mode;
-            twoVsTwo = mode == 4;
             duelRule = mode == 2 ? WeeklyMode.ThisWeek : (WeeklyMode.Rule?)null;
             chCancelled = false; chFriend = 0; chOnline = false; chLive = false; chMatchId = 0; copyMatch = false;
             chDuelMinutes = mode == 3 ? 2 : duelRule == WeeklyMode.Rule.SuddenDeath ? 1 : 3;
-            if (mode == 4) yield return FindFriendPartner(); // (2 against 2: a friend's copy at the player's side, if there is one)
             int seed = mode == 3 ? Tournament.SeedFor(Tournament.Round) : Random.Range(0, 1000000);
             rival = Challenge.MakeBot(seed, -1);
             chPhase = ChPhase.Lobby;
             int token = ++chLobbyToken;
-            string label = mode == 3 ? Loc.T("tn.title") + " · " + Loc.T("tn.round" + Tournament.Round) : mode == 4 ? Loc.T("tvt.title") : Loc.T("wk.title") + " · " + Loc.T("wk.rule." + duelRule);
+            string label = mode == 3 ? Loc.T("tn.title") + " · " + Loc.T("tn.round" + Tournament.Round) : Loc.T("wk.title") + " · " + Loc.T("wk.rule." + duelRule);
             chUi.ShowLobby(MyCard(), Challenge.Rank, label);
             chUi.ShowRival(RivalCard(rival), rival.Rank);
             chUi.LockLobby();
-            chUi.SetLobbyStatus(mode == 3 ? Loc.T("tn.round" + Tournament.Round) : mode == 4 ? (friendPartner != null ? Loc.F("tvt.withFriend", friendPartner.name) : Loc.T("tvt.text")) : Loc.T("wk.rule." + duelRule + ".d"));
+            chUi.SetLobbyStatus(mode == 3 ? Loc.T("tn.round" + Tournament.Round) : Loc.T("wk.rule." + duelRule + ".d"));
             yield return new WaitForSecondsRealtime(1.8f);
             if (token != chLobbyToken) yield break;
             int stage = Mathf.Abs(seed) % DuelStageCount;
@@ -81,7 +79,6 @@ namespace SquashBot.Gameplay
             if (duelRule == WeeklyMode.Rule.OneWeapon) { weapon = weaponBeforeRule; weaponBeforeRule = null; }
             duelRule = null;
             chMode = 1;
-            if (twoVsTwo) { twoVsTwo = false; hunt.ClearSquads(); }
         }
 
         // The rules in the numbers
