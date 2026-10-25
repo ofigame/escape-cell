@@ -247,6 +247,7 @@ namespace SquashBot.Visual
             var headScale = Vector3.one * 0.2f * crowdSize;
             var bodyScale = new Vector3(0.3f, 0.36f, 0.22f) * crowdSize;
             var flagScale = new Vector3(0.34f, 0.22f, 0.02f) * crowdSize;
+            DrawMadeFans(time);
             foreach (var b in batches)
             {
                 if (b.m == null) continue;
@@ -1471,7 +1472,7 @@ namespace SquashBot.Visual
         {
             crowdSize = MadeCrowd;
             float k = crowdSize;
-            var seats = Seats(stand, 0.55f * k); // (bigger fans: further apart, fewer to a step)
+            var seats = Seats(stand, (FanModels ? 0.85f : 0.55f) * k); // (bigger fans: further apart, fewer to a step; the made people bigger still)
             foreach (var at in seats) AddFan(at, team, rng);
         }
 
@@ -1482,6 +1483,7 @@ namespace SquashBot.Visual
             if (rng.NextDouble() > Fill[team]) return; // the seats its rescued foi fill
             float facing = Mathf.Atan2(centre.x - at.x, centre.z - at.z) * Mathf.Rad2Deg;
             float phase = (float)rng.NextDouble() * 10f;
+            if (AddMadeFan(at, team, facing, phase, rng)) return; // (the made people, where their models are)
             var body = batches[team * 4 + rng.Next(4)];
             body.pos.Add(at + Vector3.up * 0.18f * k); body.phase.Add(phase); body.side.Add(team); body.facing.Add(facing);
             var head = batches[8 + rng.Next(4)];

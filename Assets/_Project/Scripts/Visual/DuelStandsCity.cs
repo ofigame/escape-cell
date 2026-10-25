@@ -92,7 +92,7 @@ namespace SquashBot.Visual
                     new Vector3(near - towerX - plaza, 0.2f, Walk), 0.04f, stone);
                 // two rows of fans on it beside the fight, lengthwise, each looking at the fight
                 for (int r = 0; r < 2; r++)
-                    for (float x = housesFrom; x > centre.x - CrowdLength; x -= 0.55f * k)
+                    for (float x = housesFrom; x > centre.x - CrowdLength; x -= (FanModels ? 0.85f : 0.55f) * k)
                         AddFan(new Vector3(x + R(-0.15f, 0.15f) * k, ground + 0.2f, centre.z + side * (street + 0.7f + r * 1.1f + R(-0.08f, 0.08f))), team, rng);
                 // lamps at the kerb here and there (the two sides staggered)
                 for (float x = near - 6f - (side > 0 ? LampEvery * 0.5f : 0f); x > towerX + plaza; x -= LampEvery)
