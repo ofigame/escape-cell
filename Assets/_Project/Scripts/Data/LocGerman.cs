@@ -964,6 +964,7 @@ namespace SquashBot.Data
             ["duel.stage.10"] = "Blütentempel",
             ["duel.stage.11"] = "Ritterhof",
             ["duel.stage.12"] = "Wüstenpalast",
+            ["duel.stage.13"] = "Galataturm",
             ["ch.squadGo"] = "{0}: Angriff!",
             ["ch.squadBack"] = "{0}: zurück zur Wache",
             ["ch.rivalSends"] = "{0} hat {1} auf dich gehetzt!",

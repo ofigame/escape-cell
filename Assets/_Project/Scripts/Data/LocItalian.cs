@@ -964,6 +964,7 @@ namespace SquashBot.Data
             ["duel.stage.10"] = "Tempio dei Fiori",
             ["duel.stage.11"] = "Corte dei Cavalieri",
             ["duel.stage.12"] = "Palazzo del Deserto",
+            ["duel.stage.13"] = "Torre di Galata",
             ["ch.squadGo"] = "{0}: all'attacco!",
             ["ch.squadBack"] = "{0}: torna di guardia",
             ["ch.rivalSends"] = "{0} ti ha mandato contro {1}!",

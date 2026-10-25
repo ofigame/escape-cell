@@ -11,9 +11,9 @@ namespace SquashBot.Visual
     /// the camera, a backdrop in the stage's theme: a city skyline, a glacier, a volcano, deep space, a forest with a
     /// temple, or a desert with pyramids. The crowd is drawn instanced and cheers for its side; a murmur plays under it.
     /// </summary>
-    public class DuelStands : MonoBehaviour
+    public partial class DuelStands : MonoBehaviour
     {
-        public enum Theme { City, Glacier, Volcano, Space, Forest, Desert, Grove, Frost, Mars, Cappadocia, Asia, Europe, Arabia }
+        public enum Theme { City, Glacier, Volcano, Space, Forest, Desert, Grove, Frost, Mars, Cappadocia, Asia, Europe, Arabia, Istanbul }
 
         /// <summary>A stage built of made models (the platform, its stands, the land round it), not of the board's own tiles.</summary>
         public static bool IsMade(Theme t) => t >= Theme.Grove;
@@ -534,6 +534,10 @@ namespace SquashBot.Visual
             public bool standTrees;
             /// <summary>The grass in front of the platform (none: alpha 0) and the pebbles' colour there.</summary>
             public Color frontGrass, pebbles = new Color(0.4f, 0.4f, 0.42f);
+            /// <summary>A city street instead of stands and land (Galata): the fans along its pavements, houses, its landmark.</summary>
+            public bool street;
+            /// <summary>The ground's tiled picture (Resources), or none: the land's own colour.</summary>
+            public string paving;
             /// <summary>Its sky picture behind it all (Resources; its landscape as designed), or none.</summary>
             public string sky;
             /// <summary>The colour its sky picture fades into at its foot: a haze of it where the land ends, so the land and
@@ -626,7 +630,7 @@ namespace SquashBot.Visual
         private static Look LookOf(Theme t) => t switch
         {
             Theme.Frost => FrostLook, Theme.Mars => MarsLook, Theme.Cappadocia => CappadociaLook, Theme.Asia => AsiaLook, Theme.Europe => EuropeLook,
-            Theme.Arabia => ArabiaLook, _ => GroveLook,
+            Theme.Arabia => ArabiaLook, Theme.Istanbul => GalataLook, _ => GroveLook,
         };
 
         /// <summary>A made stage's light: the sun's colour and strength, the ambient sky, horizon and ground.</summary>
@@ -671,15 +675,16 @@ namespace SquashBot.Visual
             }
             if (top == float.MinValue) top = pb.max.y;
             plat.position += Vector3.up * (floorY - top);
-            CoverEmblem(p, plat, look, centre, floorY, Mathf.Max(hw, hd) * look.cover); // (the middle plain: marble of the platform's own stone)
+            if (look.cover > 0f) CoverEmblem(p, plat, look, centre, floorY, Mathf.Max(hw, hd) * look.cover); // (the middle plain: marble of the platform's own stone)
             // The forest floor a little under the platform's top: it stands on the land, sunk in it (not up in the air).
             float ground = floorY - 1.1f;
             var moss = Matte(look.ground, 0.2f); // (a little of its own light: the land reads in the dark)
-            Shapes.Rounded("Ground", p, new Vector3(centre.x - 10f, ground - 0.3f, centre.z), new Vector3(110f, 0.6f, 110f), 0.05f, moss);
+            if (look.paving != null) PavedGround(p, look, ground);
+            else Shapes.Rounded("Ground", p, new Vector3(centre.x - 10f, ground - 0.3f, centre.z), new Vector3(110f, 0.6f, 110f), 0.05f, moss);
             // mossy mounds and patches here and there (the ground is not a flat board)
             var mossLight = Matte(look.mound, 0.2f);
             var mossDark = Matte(look.bank, 0.2f);
-            for (int i = 0; i < 34; i++)
+            for (int i = 0; i < (look.street ? 0 : 34); i++)
             {
                 float ang = R(0f, Mathf.PI * 2f), dist = R(Mathf.Max(hw, hd) * 1.15f, 30f);
                 if (Mathf.Cos(ang) > 0.25f) ang += Mathf.PI * 0.5f * Mathf.Sign(Mathf.Sin(ang) + 1e-4f); // (none in front of the camera: flat slabs there)
@@ -704,7 +709,8 @@ namespace SquashBot.Visual
             float platR = Mathf.Max(pb.size.x, pb.size.z) * 0.5f; // (the stands stand clear of the platform's rim)
             platRadius = platR * look.rim;
             int southTeam = playerSouth ? 0 : 1;
-            for (int s = 0; s < 2; s++)
+            if (look.street) GalataStreet(p, look, ground, platR, southTeam, rng);
+            for (int s = 0; s < (look.street ? 0 : 2); s++)
             {
                 float dir = s == 0 ? -1f : 1f; // south (-z), north (+z)
                 int team = s == 0 ? southTeam : 1 - southTeam;
@@ -764,6 +770,7 @@ namespace SquashBot.Visual
                 // and behind the middle, between the two stands (big ones: over the stands' roofs)
                 foreach (var deg in new[] { 165f, 180f, 195f }) spots.Add(Around(deg + R(-3f, 3f), platR + R(10f, 13f)));
             }
+            if (look.street) spots.Clear(); // (a street: its houses stand where the trees would)
             foreach (var spot in spots)
             {
                 var tree = MadeModel(p, look, "tree_" + (1 + rng.Next(look.trees)), false);
@@ -866,7 +873,7 @@ namespace SquashBot.Visual
             else if (look.snow)
                 GroveParticles("Snow", Weather.AlphaMaterial, new Vector3(centre.x - 3f, floorY + 11f, centre.z), new Vector3(40f, 1f, 40f),
                     600, 70f, 8f, look.snowColour, 0.08f, 0.17f, look.snowFall > 1f ? 0.4f : 1.1f, look.snowFall); // (petals drift more)
-            else
+            else if (!look.street)
                 GroveParticles("Fireflies", Weather.AddMaterial, new Vector3(centre.x - 3f, floorY + 2.2f, centre.z), new Vector3(34f, 4.5f, 34f),
                     90, 26f, 7f, new Color(1.7f, 1.9f, 0.8f), 0.14f, 0.24f, 0.9f);
             GroveParticles("Mist", Weather.AlphaMaterial, new Vector3(centre.x - 6f, ground + 0.7f, centre.z), new Vector3(48f, 0.6f, 48f),
@@ -893,6 +900,7 @@ namespace SquashBot.Visual
         /// </summary>
         private void Foreground(Transform p, Look look, float ground, float platR, System.Random rng)
         {
+            if (look.street) return; // (the street's paving in front: nothing strewn on it)
             float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
             Vector3 Front(float degrees, float dist) => new Vector3(centre.x + Mathf.Cos(degrees * Mathf.Deg2Rad) * dist, ground, centre.z + Mathf.Sin(degrees * Mathf.Deg2Rad) * dist);
             if (look.frontGrass.a > 0f)
@@ -1458,20 +1466,24 @@ namespace SquashBot.Visual
             crowdSize = MadeCrowd;
             float k = crowdSize;
             var seats = Seats(stand, 0.55f * k); // (bigger fans: further apart, fewer to a step)
-            foreach (var at in seats)
+            foreach (var at in seats) AddFan(at, team, rng);
+        }
+
+        /// <summary>One fan standing (or sitting) at <paramref name="at"/>, looking at the floor (a seat its rescued foi fill, or none).</summary>
+        private void AddFan(Vector3 at, int team, System.Random rng)
+        {
+            float k = crowdSize;
+            if (rng.NextDouble() > Fill[team]) return; // the seats its rescued foi fill
+            float facing = Mathf.Atan2(centre.x - at.x, centre.z - at.z) * Mathf.Rad2Deg;
+            float phase = (float)rng.NextDouble() * 10f;
+            var body = batches[team * 4 + rng.Next(4)];
+            body.pos.Add(at + Vector3.up * 0.18f * k); body.phase.Add(phase); body.side.Add(team); body.facing.Add(facing);
+            var head = batches[8 + rng.Next(4)];
+            head.pos.Add(at + Vector3.up * 0.46f * k); head.phase.Add(phase); head.side.Add(team); head.facing.Add(facing);
+            if (rng.NextDouble() < FlagShare[team])
             {
-                if (rng.NextDouble() > Fill[team]) continue; // the seats its rescued foi fill
-                float facing = Mathf.Atan2(centre.x - at.x, centre.z - at.z) * Mathf.Rad2Deg;
-                float phase = (float)rng.NextDouble() * 10f;
-                var body = batches[team * 4 + rng.Next(4)];
-                body.pos.Add(at + Vector3.up * 0.18f * k); body.phase.Add(phase); body.side.Add(team); body.facing.Add(facing);
-                var head = batches[8 + rng.Next(4)];
-                head.pos.Add(at + Vector3.up * 0.46f * k); head.phase.Add(phase); head.side.Add(team); head.facing.Add(facing);
-                if (rng.NextDouble() < FlagShare[team])
-                {
-                    var flag = batches[12 + team];
-                    flag.pos.Add(at + new Vector3(0.1f, 0.85f, 0f) * k); flag.phase.Add(phase); flag.side.Add(team); flag.facing.Add(facing);
-                }
+                var flag = batches[12 + team];
+                flag.pos.Add(at + new Vector3(0.1f, 0.85f, 0f) * k); flag.phase.Add(phase); flag.side.Add(team); flag.facing.Add(facing);
             }
         }
 
