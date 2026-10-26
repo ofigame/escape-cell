@@ -124,8 +124,12 @@ namespace SquashBot.Gameplay
         private const int BoardW = 25, BoardH = 11; // (11 across the screen: the stands round its two ends in view)
         private bool liveHooksWired;
 
+        private static bool footDustWired;
+
         private void InitChallenge()
         {
+            // the struck bodies' dragged feet and landings raise dust (the reactions' library)
+            if (!footDustWired) { footDustWired = true; SkinnedHero.FootDust += p => { if (fx != null) fx.Dust(p, new Color(0.62f, 0.58f, 0.52f), 10, 2.2f); }; }
             // the duel's lunges: each fighter's weapon aims at the other (the contact rule)
             HeldWeapon.TargetOf = h =>
             {

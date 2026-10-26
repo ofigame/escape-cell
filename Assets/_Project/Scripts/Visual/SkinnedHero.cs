@@ -16,7 +16,7 @@ namespace SquashBot.Visual
     /// weapon in its right hand. It reads what the body does from how it moves (and from <see cref="Punch"/> /
     /// <see cref="Anger"/> / <see cref="Clap"/>), so copies of it (lookalikes, rivals) come alive too.
     /// </summary>
-    public class SkinnedHero : MonoBehaviour
+    public partial class SkinnedHero : MonoBehaviour
     {
         private const string Folder = "Heroes/Foi/";
         /// <summary>The head joint's height in the build (about 1.05 tall in all, the head included).</summary>
@@ -866,14 +866,14 @@ namespace SquashBot.Visual
         {
             if (!ready) Setup();
             var r = Combat.CombatLibrary.Reactions;
-            if (strength == Combat.HitStrength.Launch) { Launch(from, 1.6f); Squint(1f, 0.9f); return; }
+            if (strength == Combat.HitStrength.Launch) { LaunchUp(from); Squint(1f, 0.9f); return; } // (the design's 1 s in the air, a back flip)
             int variant = spring.Kick(dir, height, r.Degrees(strength) * Mathf.Clamp(intensity, 0.5f, 2f), r.Recovery(strength));
             LastReaction = dir + "/" + height + "/" + strength + "/v" + variant;
             switch (strength)
             {
                 case Combat.HitStrength.Light: Squint(0.45f, 0.15f); break;
-                case Combat.HitStrength.Medium: Stagger(from, 0.35f * intensity); Squint(0.6f, 0.25f); Brows(0.6f, 0.3f); break;
-                default: Stagger(from, 0.85f); Squint(1f, 0.4f); Brows(1f, 0.45f); Squash(1f); break;
+                case Combat.HitStrength.Medium: Rock(from, intensity); Squint(0.6f, 0.25f); Brows(0.6f, 0.3f); break; // (the stagger: a step back, rocking)
+                default: DriveBack(from); Squint(1f, 0.4f); Brows(1f, 0.45f); Squash(1f); break; // (driven back two steps, onto a knee)
             }
         }
 
@@ -1599,6 +1599,7 @@ namespace SquashBot.Visual
             PushedByBlow();
             BodyIntoBlow();
             Reacting(dt);
+            ReactionPose(dt);
             Grip();
 
             // Lids: a blink now and then; half down when angry or striking (the eyes narrow).

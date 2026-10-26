@@ -62,6 +62,8 @@ namespace SquashBot.Gameplay
             lab.Add("T: ORTA", () => LabReaction(HitStrength.Medium), LabReact);
             lab.Add("T: AĞIR", () => LabReaction(HitStrength.Heavy), LabReact);
             lab.Add("T: FIRLAT", () => LabReaction(HitStrength.Launch), LabReact);
+            lab.Add("T: SÜPÜR", LabSweep, LabReact);
+            lab.Add("T: HAVADA VUR", () => cameraRig.StartCoroutine(LabJuggle(1)), LabReact);
             lab.Add("DONMA −", () => CombatFeel.HitstopMultiplier -= 0.5f, LabTune);
             lab.Add("DONMA +", () => CombatFeel.HitstopMultiplier += 0.5f, LabTune);
             lab.Add("SARSINTI", () => SaveData.ScreenShake = !SaveData.ScreenShake, LabTune);
@@ -168,6 +170,29 @@ namespace SquashBot.Gameplay
             var skin = foeModel.GetComponentInChildren<SkinnedHero>();
             if (skin != null) { skin.Stagger(robot.transform.position, s == HitStrength.Heavy ? 0.8f : s == HitStrength.Medium ? 0.5f : 0.25f); skin.Shudder(robot.transform.position, s == HitStrength.Light ? 0.5f : 1f); }
             CombatFeel.Hit(robot.Visual, foeModel, blow);
+        }
+
+        /// <summary>The leg sweep's reaction on the rival (its legs out along the sweep, onto its back, up again).</summary>
+        private void LabSweep()
+        {
+            var skin = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
+            if (skin == null) return;
+            var across = Vector3.Cross(Vector3.up, skin.transform.position - robot.transform.position).normalized;
+            skin.SweptOff(robot.transform.position, across);
+        }
+
+        /// <summary>The rival thrown up and hit <paramref name="hits"/> times in the air (the juggle's reaction).</summary>
+        private System.Collections.IEnumerator LabJuggle(int hits)
+        {
+            var skin = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
+            if (skin == null) yield break;
+            skin.LaunchUp(robot.transform.position);
+            for (int i = 0; i < hits; i++)
+            {
+                yield return new WaitForSeconds(0.3f);
+                if (heldWeapon != null) heldWeapon.Swing();
+                skin.AirHit(robot.transform.position);
+            }
         }
 
         private void LabSlow(float s)
