@@ -22,7 +22,7 @@ namespace SquashBot.Visual
         /// <summary>The head joint's height in the build (about 1.05 tall in all, the head included).</summary>
         private const float HeadJointHeight = 0.67f;
         /// <summary>The head's height against the body's (headless) height: a big, cartoon head.</summary>
-        private const float HeadShare = 0.7f;
+        private const float HeadShare = 0.5f;
 
         /// <summary>True while foi is off duty (menus, garage): it stands with its arms folded; in play, at ease.</summary>
         public static System.Func<bool> OffDuty = () => true;
@@ -744,6 +744,9 @@ namespace SquashBot.Visual
         private float upperTime, upperRate = 1f;
         private float playingTime, playingRate = 1f;
         private bool playingReal, playingLoop;
+        /// <summary>The clip playing holds its last frame once done (a fall: lying until the get-up), and its body's own
+        /// travel (a lunge, a dodge) never ends it as walking off would.</summary>
+        private bool playingHold, playingStay;
 
         private static AnimationClip ClipOf(string name)
         {
@@ -762,7 +765,7 @@ namespace SquashBot.Visual
             if (!ready) Setup();
             var c = ClipOf(name);
             if (c == null) return false;
-            playing = c; playingTime = 0f; playingRate = rate; playingReal = realTime; playingLoop = loop;
+            playing = c; playingTime = 0f; playingRate = rate; playingReal = realTime; playingLoop = loop; playingHold = playingStay = false;
             // (from where it stands now: a leap's landing just before must not read as walking off and end the move at once)
             lastPos = transform.position; speed = 0f;
             // played through the body's animator (a graph of its own, evaluated by hand)
@@ -776,7 +779,19 @@ namespace SquashBot.Visual
         }
 
         /// <summary>The move playing ends now (a looping one included).</summary>
-        public void StopMove() { if (playing != null) ClipEnded(playing, Mathf.Min(playingTime, playing.length)); playing = null; playingLoop = false; }
+        public void StopMove() { if (playing != null) ClipEnded(playing, Mathf.Min(playingTime, playing.length)); playing = null; playingLoop = playingHold = playingStay = false; }
+
+        /// <summary>A clip played that holds its last frame (<paramref name="hold"/>) and is not ended by the body's own
+        /// travel (<paramref name="stay"/>).</summary>
+        private bool PlayClip(string name, float rate, bool hold, bool stay)
+        {
+            if (!PlayMove(name, rate)) return false;
+            playingHold = hold; playingStay = stay;
+            return true;
+        }
+
+        /// <summary>The clip playing is done (a held one on its last frame).</summary>
+        private bool ClipDone => playing == null || playingHold && playingTime >= playing.length;
 
         private HeroAnimLayers Layers(Animator animator)
         {
@@ -1191,6 +1206,7 @@ namespace SquashBot.Visual
             knock = stagger = hop = pop = null;
             flail = flat = rise = push = reel = 0f;
             InAir = false; kneelLean = 0f; ReactionClip = "";
+            if (playingHold) StopMove(); // (a fall's clip held lying: let go)
             if (bodyKnown) { transform.localPosition = bodyPos; transform.localRotation = bodyRot; }
         }
 
@@ -1374,7 +1390,7 @@ namespace SquashBot.Visual
         public void Celebrate(string dance)
         {
             string move = dance != null && dance.StartsWith("dance.d") ? "dance" + dance.Substring(7) : null;
-            if (move == null || !PlayMove(move)) Clap();
+            if ((move == null || !PlayMove(move)) && !PlayMove("victory")) Clap(); // (no dance chosen: the victory's clip)
         }
 
         private static Transform FindBone(Transform root, string bone)
@@ -1565,6 +1581,7 @@ namespace SquashBot.Visual
 
             // What the body does: walking (how fast), chopping, clapping, or standing.
             var p = transform.position; var d = p - lastPos; d.y = 0f; lastPos = p;
+            if (d.sqrMagnitude > 1e-6f) walkBack = Vector3.Dot(d, transform.forward) < -0.3f * d.magnitude; // (stepping back: the walk's clip runs backwards)
             var sc = transform.parent != null ? transform.parent.lossyScale : Vector3.one;
             float scale = Mathf.Max(0.01f, Mathf.Pow(Mathf.Abs(sc.x * sc.y * sc.z), 1f / 3f)); // (the hop's squash keeps the volume: no jitter)
             if (dt > 1e-4f) speed = Mathf.Lerp(speed, d.magnitude / dt / scale, dt * 10f); // (frozen by a hit: the pace held as it was)
@@ -1577,7 +1594,8 @@ namespace SquashBot.Visual
             {
                 playingTime += (playingReal || Time.timeScale <= 0.01f ? Time.unscaledDeltaTime : dt) * playingRate;
                 if (playingLoop && playingTime >= playing.length) playingTime %= playing.length; // round again
-                else if (playingTime >= playing.length || speed > 0.6f) { ClipEnded(playing, Mathf.Min(playingTime, playing.length)); playing = null; } // done, or it walked off (eased back into the pose)
+                else if (playingHold && playingTime >= playing.length) playingTime = playing.length; // (held on its last frame)
+                else if (playingTime >= playing.length || speed > 0.6f && !playingStay) { ClipEnded(playing, Mathf.Min(playingTime, playing.length)); playing = null; } // done, or it walked off (eased back into the pose)
             }
             HealPose();
             if (playing != null && clipWeight >= 0.999f)

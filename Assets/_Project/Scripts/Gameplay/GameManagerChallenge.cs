@@ -95,6 +95,7 @@ namespace SquashBot.Gameplay
                 fx.Burst(mid + Vector3.up * 0.6f, Palette.Coin, Palette.CoinGlow, 40, 6f);
                 if (won) robot.Cheer(); // (its dance, if it has one: claps otherwise)
                 else if (wSkin != null) wSkin.Celebrate(rival.bot ? "dance.d" + (1 + Mathf.Abs(rival.name.GetHashCode()) % 4) : null); // the rival's dance of its own
+                if (lSkin != null) lSkin.Defeated(); // (the other down on its knees, beaten)
                 winnerWalking = false;
                 // through the dance: the winner kept turned to the duel's camera, the other to the winner (nothing else turns them)
                 for (float e = 0f; e < 10f && challengeRun && State == GameState.Result && winner != null; e += Time.unscaledDeltaTime)

@@ -178,6 +178,8 @@ namespace SquashBot.Gameplay
             }
             else if (robot.Visual != null) VisualRoot.On(CombatFeel.RootOf(robot.Visual)).Push(Vector3.Cross(Vector3.up, GridView.ToWorld(foe) - from), 0.35f, 0.25f); // (a lean aside)
             fx.Dust(from, new Color(0.65f, 0.6f, 0.52f), 10, 2.6f);
+            var mySkin = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null;
+            if (mySkin != null) mySkin.DodgeClip(); // (the body's own step back out of the way)
             AudioManager.PlaySfx(Sfx.Hop, 0.7f, 1.45f);
             Haptics.Light();
         }
@@ -215,8 +217,9 @@ namespace SquashBot.Gameplay
             if (who == null) return;
             var hold = who.GetComponentInChildren<ShieldHold>();
             if (hold != null) hold.Guarding = on;
-            if (!on) return;
             var skin = who.GetComponentInChildren<SkinnedHero>();
+            if (skin != null) skin.Guarding = on; // (the block's stance)
+            if (!on) return;
             if (skin != null) skin.Crouch(0.3f, 0.15f);
         }
 
@@ -360,6 +363,8 @@ namespace SquashBot.Gameplay
             if (room) cameraRig.StartCoroutine(hunt.ShoveFoe(to, Def.dodgeSeconds));
             var at = hunt.ChallengeFoeAt ?? GridView.ToWorld(foe);
             fx.Dust(at, new Color(0.65f, 0.6f, 0.52f), 10, 2.6f);
+            var foeSkin = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
+            if (foeSkin != null) foeSkin.DodgeClip();
             AudioManager.PlaySfx(Sfx.Hop, 0.7f, 1.3f);
         }
 

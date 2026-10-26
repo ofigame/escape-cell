@@ -15,6 +15,9 @@ namespace SquashBot.Visual
         private Vector3 moveToward;
         private Coroutine moveLift;
 
+        /// <summary>The quake clip's slam, seconds from its start (bl_mixamo_strikes.py cuts it so).</summary>
+        private const float QuakeSlam = 0.53f;
+
         /// <summary>The body move playing now (None: none).</summary>
         public BodyMove Performing => moveNow;
 
@@ -30,7 +33,9 @@ namespace SquashBot.Visual
             moveFor = Mathf.Max(0.1f, seconds);
             moveToward = toward;
             ReactionClip = "move_" + move.ToString().ToLowerInvariant();
-            if (ClipInstead(ReactionClip)) { moveNow = BodyMove.None; return; } // (a made clip: it does the move)
+            // a made clip does the move: the quake's slam (QuakeSlam in) on the coded slam's moment, any other over its time
+            float rate = move == BodyMove.Quake ? QuakeSlam / (0.6f * moveFor) : MoveLength(ReactionClip) / moveFor;
+            if (ClipOf(ReactionClip) != null && PlayClip(ReactionClip, Mathf.Clamp(rate, 0.5f, 2.5f), false, true)) { moveNow = BodyMove.None; return; }
             KnowRest();
             if (moveLift != null) { StopCoroutine(moveLift); moveLift = null; transform.localPosition = bodyPos; }
             var root = transform.parent != null ? transform.parent : transform;

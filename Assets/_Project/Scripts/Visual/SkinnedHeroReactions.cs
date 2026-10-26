@@ -120,7 +120,7 @@ namespace SquashBot.Visual
         private System.Collections.IEnumerator Swept(Vector3 from, Vector3 sweepDir, float lie)
         {
             ReactionClip = "sweep_fall";
-            if (ClipInstead("sweep_fall")) { Face(FaceMoment.Surprise); yield return WhileClip(); yield return Lying(lie); yield return GetUp(Vector3.Cross(Vector3.up, -transform.forward), 82f, false); ReactionClip = ""; knock = null; yield break; }
+            if (ClipOf("sweep_fall") != null && PlayClip("sweep_fall", 1.6f, true, true)) { /* (held lying on its last frame until the get-up) */ Face(FaceMoment.Surprise); yield return WhileClip(); yield return Lying(lie); yield return GetUp(Vector3.Cross(Vector3.up, -transform.forward), 82f, false); ReactionClip = ""; knock = null; yield break; }
             var away = transform.position - from; away.y = 0f;
             if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
             away.Normalize();
@@ -263,6 +263,7 @@ namespace SquashBot.Visual
                 transform.localRotation = bodyRot; transform.localPosition = bodyPos; bodyRollOffset = Vector3.zero;
                 if (ClipFor(ReactionClip, 0.9f)) { yield return WhileClip(); yield break; } // (about the rules' get-up: never lying while free)
             }
+            if (playingHold) StopMove(); // (a fall's clip held lying: the coded get-up from here)
             float lift = Lift;
             var restPos = bodyPos;
             var offset = bodyRollOffset;
@@ -303,7 +304,7 @@ namespace SquashBot.Visual
         /// <summary>Waits while a reaction's made clip plays.</summary>
         private System.Collections.IEnumerator WhileClip()
         {
-            while (playing != null) yield return null;
+            while (!ClipDone) yield return null;
         }
 
         // ---------- Helpers ----------

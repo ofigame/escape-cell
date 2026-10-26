@@ -159,8 +159,7 @@ namespace SquashBot.Gameplay
                 return;
             }
             if (f.swiped) return;
-            int side = SideFlick(f, pos);
-            if (side != 0) { f.swiped = true; StopWalking(id); queued.Enqueue(new InputCommand { charge = side }); return; }
+            // (a sideways flick is judged when the finger lifts: held on, the same motion is a walk)
             var swipe = Swipe(f, pos);
             if (swipe > 0) { f.pendingUp = (pos - f.start).normalized; StartCurl(f, pos); StopWalking(id); return; }
             if (swipe < 0) { f.downAt = Time.unscaledTime; f.crouchAt = f.trailN; StopWalking(id); return; } // (a dodge if let go soon, else a crouch)
@@ -205,6 +204,9 @@ namespace SquashBot.Gameplay
             if (f.pendingUp.HasValue) { FireUp(f); return; }
             if (f.downAt >= 0f && !f.crouching) { queued.Enqueue(new InputCommand { dodge = true }); return; } // (let go soon: a dodge)
             if (f.crouching) return; // (the crouch ends with the finger)
+            // flicked sideways and let go at once: the charge (a finger held on walked instead)
+            int side = f.swiped ? 0 : SideFlick(f, pos);
+            if (side != 0) { queued.Enqueue(new InputCommand { charge = side }); return; }
             if (f.swiped || f.walking) return;
             // a swipe let go before any frame saw it: judged on the lift too
             Note(f, pos);
@@ -248,7 +250,7 @@ namespace SquashBot.Gameplay
         private static int SideFlick(Finger f, Vector2 pos)
         {
             var s = DuelTouchSettings.Current;
-            if (Time.unscaledTime - f.pressAt > s.swipeMaxMs / 1000f) return 0; // (a slow drag walks)
+            if (Time.unscaledTime - f.pressAt > s.swipeMaxMs * 1.6f / 1000f) return 0; // (pressed to lifted: a slow drag walks)
             float min = s.swipeMinDp * s.chargeLengthTimes * PixelsPerDp;
             var v = pos - f.start;
             if (Mathf.Abs(v.x) >= min && Mathf.Abs(v.x) >= Mathf.Abs(v.y) * s.swipeRatio) return v.x > 0f ? 1 : -1;

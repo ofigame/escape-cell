@@ -15,6 +15,9 @@ namespace SquashBot.Visual
 
         private bool crouchHeld;
 
+        /// <summary>A made strike clip's impact, seconds from its start (bl_mixamo_strikes.py cuts each so).</summary>
+        private const float ClipImpact = 0.2f;
+
         /// <summary>The duel's crouch held (the game sets it each frame from the player's finger, or the rival's AI).</summary>
         public bool CrouchHeld { get => crouchHeld; set { crouchHeld = value; if (value) Crouch(0.75f, 0.12f); } }
 
@@ -27,7 +30,8 @@ namespace SquashBot.Visual
         {
             if (!ready) Setup();
             string clip = "strike_" + part.ToString().ToLowerInvariant();
-            if (ClipInstead(clip)) return;
+            // a made clip: played at the rate that puts its impact (ClipImpact in) on the blow's contact
+            if (ClipOf(clip) != null && PlayClip(clip, Mathf.Clamp(ClipImpact / Mathf.Max(0.02f, wind + hit * 0.5f), 0.6f, 2.6f), false, true)) { ReactionClip = clip; return; }
             strikeNow = part;
             strikeT = 0f;
             strikeWind = Mathf.Max(0.04f, wind); strikeHit = Mathf.Max(0.02f, hit); strikeBack = Mathf.Max(0.08f, back);
