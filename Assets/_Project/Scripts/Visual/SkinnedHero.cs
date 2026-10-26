@@ -776,7 +776,7 @@ namespace SquashBot.Visual
         }
 
         /// <summary>The move playing ends now (a looping one included).</summary>
-        public void StopMove() { playing = null; playingLoop = false; if (layers != null) layers.Stop(HeroAnimLayers.FullBody); }
+        public void StopMove() { if (playing != null) ClipEnded(playing, Mathf.Min(playingTime, playing.length)); playing = null; playingLoop = false; }
 
         private HeroAnimLayers Layers(Animator animator)
         {
@@ -871,7 +871,7 @@ namespace SquashBot.Visual
             LastReaction = dir + "/" + height + "/" + strength + "/v" + variant;
             switch (strength)
             {
-                case Combat.HitStrength.Light: Squint(0.45f, 0.15f); break;
+                case Combat.HitStrength.Light: Squint(0.45f, 0.15f); if (ClipOf("hit_small") != null && PlayMove("hit_small", 1.7f)) ReactionClip = "hit_small"; break;
                 case Combat.HitStrength.Medium: Rock(from, intensity); Squint(0.6f, 0.25f); Brows(0.6f, 0.3f); break; // (the stagger: a step back, rocking)
                 default: DriveBack(from); Squint(1f, 0.4f); Brows(1f, 0.45f); Squash(1f); break; // (driven back two steps, onto a knee)
             }
@@ -920,7 +920,7 @@ namespace SquashBot.Visual
         {
             // the springy answer on the bones (in the body's own frame: it faces its striker)
             spring.Step(dt);
-            if (spring.Active && playing == null && knock == null)
+            if (spring.Active && (playing == null || ReactionClip == "hit_small" || ReactionClip == "stagger") && knock == null)
             {
                 var frame = transform.parent != null ? transform.parent : transform;
                 Vector3 up = frame.up, right = frame.right, ahead = frame.forward;
@@ -999,7 +999,7 @@ namespace SquashBot.Visual
         public static readonly List<SkinnedHero> Live = new List<SkinnedHero>();
 
         private void OnEnable() { if (!Live.Contains(this)) Live.Add(this); }
-        private void OnDisable() => Live.Remove(this);
+        private void OnDisable() { Live.Remove(this); if (knock != null || stagger != null || hop != null) StandUp(); } // (its knock cut short: up at once, never stuck lying)
 
         /// <summary>The body as a capsule (world): from above its feet to its neck, and how thick.</summary>
         public void BodyCapsule(out Vector3 bottom, out Vector3 top, out float radius)
@@ -1081,7 +1081,7 @@ namespace SquashBot.Visual
         {
             if (hips == null || vroot == null) return;
             if (!hipsKnown) { hipsRest = hips.localPosition; hipsKnown = true; }
-            if (playing == null) hips.localPosition = hipsRest; // (a clip writes the hips itself)
+            if (playing == null && !clipsWrote) hips.localPosition = hipsRest; // (a clip writes the hips itself)
             var off = vroot.Offset;
             if (off.sqrMagnitude > 1e-8f) hips.position += off;
         }
@@ -1190,6 +1190,7 @@ namespace SquashBot.Visual
             foreach (var c in new[] { knock, stagger, hop, pop }) if (c != null) StopCoroutine(c);
             knock = stagger = hop = pop = null;
             flail = flat = rise = push = reel = 0f;
+            InAir = false; kneelLean = 0f; ReactionClip = "";
             if (bodyKnown) { transform.localPosition = bodyPos; transform.localRotation = bodyRot; }
         }
 
@@ -1576,13 +1577,19 @@ namespace SquashBot.Visual
             {
                 playingTime += (playingReal || Time.timeScale <= 0.01f ? Time.unscaledDeltaTime : dt) * playingRate;
                 if (playingLoop && playingTime >= playing.length) playingTime %= playing.length; // round again
-                else if (playingTime >= playing.length || speed > 0.6f) playing = null; // done, or it walked off
+                else if (playingTime >= playing.length || speed > 0.6f) { ClipEnded(playing, Mathf.Min(playingTime, playing.length)); playing = null; } // done, or it walked off (eased back into the pose)
             }
-            if (playing != null)
+            HealPose();
+            if (playing != null && clipWeight >= 0.999f)
             {
                 Rest();
                 layers.SetTime(HeroAnimLayers.FullBody, playingTime);
                 layers.Evaluate();
+            }
+            else if (playing != null)
+            {
+                Pose(time); // (the coded pose under the clip as it eases in)
+                LayClips(dt, walk > 0.5f);
             }
             else
             {
@@ -1594,6 +1601,7 @@ namespace SquashBot.Visual
                     if (upperTime >= upperPlaying.length) StopUpper();
                     else { layers.SetTime(HeroAnimLayers.UpperBody, upperTime); layers.EvaluateUpperOverPose(); }
                 }
+                else LayClips(dt, walk > 0.5f); // (the fighting stance, a reaction easing out)
             }
             Shuddering(dt);
             PushedByBlow();

@@ -40,7 +40,7 @@ namespace SquashBot.Visual
             swayAxis = Vector3.Cross(Vector3.up, away.normalized);
             swayPow = Mathf.Clamp01(strength);
             ReactionClip = "stagger";
-            if (ClipInstead("stagger")) return; // (a made clip: it rocks by itself)
+            if (ClipInstead("stagger", 1.3f)) return; // (a made clip: it rocks by itself)
             swayT = 0f;
         }
 
@@ -256,7 +256,13 @@ namespace SquashBot.Visual
         {
             LastGetUp = fromFace ? "faceDown" : "faceUp";
             ReactionClip = fromFace ? "getup_face_down" : "getup_face_up";
-            if (ClipInstead(ReactionClip)) { yield return WhileClip(); flail = flat = rise = push = 0f; kneelLean = 0f; transform.localRotation = bodyRot; transform.localPosition = bodyPos; bodyRollOffset = Vector3.zero; yield break; }
+            if (ClipOf(ReactionClip) != null)
+            {
+                // the clip starts from lying itself: the body upright under it, the coded lying let go
+                flail = flat = rise = push = 0f; kneelLean = 0f;
+                transform.localRotation = bodyRot; transform.localPosition = bodyPos; bodyRollOffset = Vector3.zero;
+                if (ClipFor(ReactionClip, 0.9f)) { yield return WhileClip(); yield break; } // (about the rules' get-up: never lying while free)
+            }
             float lift = Lift;
             var restPos = bodyPos;
             var offset = bodyRollOffset;
@@ -289,7 +295,10 @@ namespace SquashBot.Visual
 
         /// <summary>A made clip for reaction <paramref name="name"/> (Resources/Heroes/Foi/hero_&lt;name&gt;) starts playing in its
         /// place: true if there is one (the procedural reaction then waits for it).</summary>
-        private bool ClipInstead(string name) => ClipOf(name) != null && PlayMove(name);
+        private bool ClipInstead(string name, float rate = 1f) => ClipOf(name) != null && PlayMove(name, rate);
+
+        /// <summary>A clip played to last about <paramref name="seconds"/>.</summary>
+        private bool ClipFor(string name, float seconds) { var c = ClipOf(name); return c != null && PlayMove(name, Mathf.Max(0.5f, c.length / Mathf.Max(0.1f, seconds))); }
 
         /// <summary>Waits while a reaction's made clip plays.</summary>
         private System.Collections.IEnumerator WhileClip()

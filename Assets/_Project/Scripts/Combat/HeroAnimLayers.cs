@@ -80,6 +80,12 @@ namespace SquashBot.Combat
             if (Valid) mixer.SetInputWeight(layer, 0f);
         }
 
+        /// <summary>A layer's weight (a clip easing in over another, or out of it).</summary>
+        public void Weight(int layer, float w)
+        {
+            if (Valid && clips[layer].IsValid()) mixer.SetInputWeight(layer, Mathf.Clamp01(w));
+        }
+
         public bool Playing(int layer) => Valid && clips[layer].IsValid() && mixer.GetInputWeight(layer) > 0f;
 
         public void SetTime(int layer, float seconds)
