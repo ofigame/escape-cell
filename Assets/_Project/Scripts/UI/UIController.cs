@@ -1244,8 +1244,8 @@ namespace SquashBot.UI
 #if !REAL_ADS && (TEST_TOOLS || !((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR))
                 (SettingKind.TestMode, "settings.test"), // test builds only (never a Play bundle)
                 (SettingKind.DuelLab, "settings.lab"), // the duel lab: test builds only
-                (SettingKind.DuelStage, "settings.testStage"), // the duels' stage picked: test builds only
 #endif
+                (SettingKind.DuelStage, "settings.testStage"), // the duels' stage picked (TEMPORARY: on every build for the testers; to go back under the test builds' #if)
             };
             // many rows: closer together, so the card still fits the screen
             float rowStep = rows.Length > 10 ? 104f : 120f;
