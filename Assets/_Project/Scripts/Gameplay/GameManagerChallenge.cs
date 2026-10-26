@@ -126,6 +126,14 @@ namespace SquashBot.Gameplay
 
         private void InitChallenge()
         {
+            // the duel's lunges: each fighter's weapon aims at the other (the contact rule)
+            HeldWeapon.TargetOf = h =>
+            {
+                if (!challengeRun || hunt == null || h == null) return null;
+                var foeModel = hunt.ChallengeFoeModel;
+                if (h == heldWeapon) return foeModel;
+                return foeModel != null && h.transform.IsChildOf(foeModel) ? robot.Visual : null;
+            };
             chUi = ChallengeScreen.Create(ui.transform.Find("Canvas/SafeArea") ?? ui.transform.Find("Canvas") ?? ui.transform);
             chUi.CoinsChanged += ui.RefreshMenuCoins;
             // (No group tags in the duel: the soldiers all fight from the start and are never called back.)

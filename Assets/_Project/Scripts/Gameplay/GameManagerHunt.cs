@@ -531,7 +531,50 @@ namespace SquashBot.Gameplay
                 WhirlStrike(w, damage);
                 return true;
             }
-            if (heldWeapon != null) heldWeapon.SwingQuick(); // (the blow lands now: the swing's contact comes with it)
+            // The duel: a short wind-up you can see (the picture lunges at the rival), the blow's look, sound and feel all at
+            // its contact, once (the design's sync rule); the rules counted it at the tap. The floors: it lands now.
+            bool sync = challengeRun && chPhase == ChPhase.Duel && heldWeapon != null && w.kind != WeaponKind.Gun;
+            if (heldWeapon != null) heldWeapon.SwingQuick(sync ? ContactLead : 0.02f);
+            if (sync) { AtContact(heldWeapon, () => LandStrike(at, crowd, w, damage)); return true; }
+            LandStrike(at, crowd, w, damage);
+            return true;
+        }
+
+        /// <summary>The duel blow's wind-up you can see: its contact this long after the tap (data: the feel settings).</summary>
+        private static float ContactLead => (Combat.CombatLibrary.Settings != null ? Combat.CombatLibrary.Settings.contactLeadMs : 75f) / 1000f;
+
+        /// <summary>Runs <paramref name="land"/> at the weapon's contact (once; at the latest a little after, if the swing
+        /// is cut short).</summary>
+        private void AtContact(HeldWeapon held, System.Action land)
+        {
+            bool done = false;
+            System.Action<Combat.SwingPhase> on = null;
+            on = p =>
+            {
+                if (p != Combat.SwingPhase.Contact || done) return;
+                done = true;
+                held.Phase -= on;
+                land();
+            };
+            held.Phase += on;
+            cameraRig.StartCoroutine(ContactDeadline(() =>
+            {
+                if (done) return;
+                done = true;
+                if (held != null) held.Phase -= on;
+                land();
+            }, ContactLead + 0.25f));
+        }
+
+        private System.Collections.IEnumerator ContactDeadline(System.Action then, float seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+            then();
+        }
+
+        /// <summary>The blow's landing: its look (the slash, the lean, the shake) and its hit on whatever is in reach.</summary>
+        private void LandStrike(GridPos at, bool crowd, WeaponDef w, int damage)
+        {
             if (w.kind == WeaponKind.Gun) GunShotFx(GridView.ToWorld(at) + Vector3.up * 0.6f, w);
             // A blow you can see: a crescent of the weapon's colour sweeping through the target.
             else SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.GlowOf(w), 1f + 0.015f * Armory.Damage(w));
@@ -553,7 +596,6 @@ namespace SquashBot.Gameplay
                 AudioManager.PlaySfx(Sfx.Blocked, 0.9f, 1.1f);
                 cameraRig.Shake(0.25f);
             }
-            return true;
         }
 
         /// <summary>A gun fires: a streak of light from its muzzle to <paramref name="to"/>, a flash, a crack.</summary>

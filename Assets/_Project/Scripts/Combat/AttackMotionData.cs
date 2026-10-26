@@ -29,6 +29,8 @@ namespace SquashBot.Combat
         public Sfx impactSfx = Sfx.HitSword;
         public float impactPitch = 1f;
         public bool enableTrail = true;
+        [Tooltip("How far the striker's picture slides toward the rival so this blow touches its body at contact (m, at most 1.5 tiles); below 0: the family's default (CombatLibrary.ContactOffset)")]
+        public float contactOffset = -1f;
 
         /// <summary>The whole swing in seconds.</summary>
         public float TotalSeconds => (anticipationMs + activeMs + recoveryMs) / 1000f;

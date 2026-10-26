@@ -23,6 +23,12 @@ namespace SquashBot.Combat
         public float bigMomentSlowSeconds = 0.6f;
         /// <summary>The struck body's white flash (ms).</summary>
         public float hitFlashMs = 60f;
+        [Tooltip("The duel blow's visible wind-up: its contact this long after the tap (the blow's look and feel land then; the rules count it at the tap)")]
+        public float contactLeadMs = 75f;
+        [Tooltip("How far the struck fighter's picture leans into a blow just before it lands (m; the design's 0.3 tile)")]
+        public float catchOffset = 0.3f;
+        [Tooltip("The most a striker's picture slides toward its rival (m; the design's 1.5 tiles)")]
+        public float maxLunge = 1.5f;
         /// <summary>The low quality setting: no camera knock below Medium, no flash.</summary>
         public bool lowQualityTrims = true;
     }

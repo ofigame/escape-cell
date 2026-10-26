@@ -317,10 +317,14 @@ namespace SquashBot.Visual
 
         public static HeldWeapon Attach(Transform robotVisual, WeaponDef w)
         {
+            // a carrier between the fighter and its weapon: the weapon goes where the body's picture is pushed or lunges
+            var carrier = new GameObject("WeaponCarrier").transform;
+            carrier.SetParent(robotVisual, false);
             var pivot = new GameObject("HeldWeapon").transform;
-            pivot.SetParent(robotVisual, false);
+            pivot.SetParent(carrier, false);
             pivot.localPosition = new Vector3(0.32f, 0.22f, 0.06f);
             var h = pivot.gameObject.AddComponent<HeldWeapon>();
+            h.carrier = carrier;
             WeaponModels.Build(pivot, w, w.kind == WeaponKind.Spear ? 0.95f : w.kind == WeaponKind.Gun ? 1.6f : 1.15f); // big enough to read on the floor
             h.isGun = w.kind == WeaponKind.Gun;
             h.family = CombatLibrary.FamilyOf(w.kind);
@@ -433,7 +437,7 @@ namespace SquashBot.Visual
         public void Swing() => Swing(NextBlow(true));
 
         /// <summary>A given blow (its phases, direction and feel).</summary>
-        public void Swing(AttackMotionData blow) => Begin(blow, false);
+        public void Swing(AttackMotionData blow) { Begin(blow, false); Lunge(); }
 
         /// <summary>
         /// The next blow for a blow already landed this instant (the player's tap: the rules strike at once): its whole
@@ -449,6 +453,7 @@ namespace SquashBot.Visual
             if (current == null) return;
             windS = Mathf.Min(windS, Mathf.Max(0.008f, contactWithin * playRate - hitS * 0.5f));
             swingTotal = windS + hitS + backS;
+            Lunge();
         }
 
         /// <summary>The swing bounces back (off a shield, knocked aside): no follow-through, straight into its recovery.</summary>
@@ -471,6 +476,47 @@ namespace SquashBot.Visual
             if (current == null) return;
             float toContact = windS + hitS * 0.5f;
             swingTime = Mathf.Clamp(toContact - Mathf.Max(0f, seconds) * playRate, 0f, toContact);
+            Lunge();
+        }
+
+        /// <summary>Who this weapon's blows are aimed at, for its lunge (the duel sets it: the rival's model, or foi's;
+        /// none: no lunge).</summary>
+        public static Func<HeldWeapon, Transform> TargetOf;
+        private Transform carrier;
+        private VisualRoot ownRoot;
+
+        /// <summary>
+        /// The design's contact rule (2.1): the striker's picture slides toward its target as the blow winds up, so the
+        /// weapon touches the body at contact, holds through the strike and comes home in the recovery; the target leans
+        /// into it a little just before. Pictures only: the places, the rules' and the server's, never move.
+        /// </summary>
+        private void Lunge()
+        {
+            if (current == null || TargetOf == null || carrier == null) return;
+            var target = TargetOf(this);
+            if (target == null) return;
+            var me = CombatFeel.RootOf(carrier.parent);
+            if (me == null) return;
+            var dir = target.position - me.position; dir.y = 0f;
+            float offset = CombatLibrary.ContactOffset(family, current);
+            if (offset <= 0f || dir.sqrMagnitude < 1e-4f) return;
+            float rate = Mathf.Max(0.1f, playRate);
+            float toContact = Mathf.Max(0.02f, (windS + hitS * 0.5f - swingTime) / rate);
+            float hold = hitS * 0.5f / rate + 0.05f, back = Mathf.Max(0.08f, backS * 0.8f / rate);
+            VisualRoot.On(me).Lunge(dir, offset, toContact, hold, back);
+            var feel = CombatLibrary.Settings;
+            float lean = feel != null ? feel.catchOffset : 0.3f;
+            var them = CombatFeel.RootOf(target);
+            if (them != null && lean > 0f) VisualRoot.On(them).Lunge(-dir, lean, toContact, 0.02f, 0.12f);
+        }
+
+        /// <summary>Each frame: the weapon carried where the body's picture is (pushed by a blow, or lunging).</summary>
+        private void FollowBody()
+        {
+            if (carrier == null) return;
+            if (ownRoot == null) { var root = CombatFeel.RootOf(carrier.parent); if (root != null) ownRoot = root.GetComponent<VisualRoot>(); }
+            var off = ownRoot != null ? ownRoot.Offset : Vector3.zero;
+            carrier.localPosition = carrier.parent != null ? carrier.parent.InverseTransformVector(off) : off;
         }
 
         private AttackMotionData NextBlow(bool advance)
@@ -745,11 +791,47 @@ namespace SquashBot.Visual
 
         private void LateUpdate()
         {
+            if (swing < 1f) ReachBody();
             if (swing < 1f || spin < 1f) StopAtBodies();
+        }
+
+        /// <summary>How far round its grip the blade may be turned onto its target's body at contact (degrees).</summary>
+        private const float ReachTurn = 75f;
+
+        /// <summary>
+        /// The contact rule's last inches (2.1): around the blow's contact (its strike, 0.3 .. 0.58 of the swing) the blade is
+        /// turned round its grip onto the target's body, at most <see cref="ReachTurn"/> degrees: what
+        /// the lunge leaves short, the arm makes up. (A blade already inside the body is set back by StopAtBodies.)
+        /// </summary>
+        private void ReachBody()
+        {
+            if (Tip == null || isGun || TargetOf == null || current == null) return;
+            // full through the strike and its first follow-through (a strike is shorter than a frame: the contact frame's swing is
+            // already past it), faded in from the wind-up's end and out before the recovery
+            float w = swing < 0.3f ? (swing - 0.22f) / 0.08f : swing <= 0.58f ? 1f : 1f - (swing - 0.58f) / 0.1f;
+            if (w <= 0f) return;
+            var target = TargetOf(this);
+            var body = target != null ? target.GetComponentInChildren<SkinnedHero>() : null;
+            if (body == null) return;
+            body.BodyCapsule(out var bottom, out var top, out float radius);
+            var grip = transform.position;
+            var tip = Tip.position;
+            var onAxis = ClosestOnSegment(bottom, top, tip);
+            var out_ = tip - onAxis;
+            if (out_.magnitude <= radius) return; // (already on it)
+            var surface = onAxis + (out_.sqrMagnitude > 1e-6f ? out_.normalized : (grip - onAxis).normalized) * radius * 0.85f;
+            var arm = tip - grip; var want = surface - grip;
+            if (arm.sqrMagnitude < 1e-6f || want.sqrMagnitude < 1e-6f) return;
+            float angle = Vector3.Angle(arm, want);
+            if (angle > 150f) return; // (the blade pointing away: the blow is aimed elsewhere)
+            var turn = Quaternion.FromToRotation(arm, want);
+            turn.ToAngleAxis(out float deg, out var axis);
+            transform.RotateAround(grip, axis, Mathf.Min(deg, ReachTurn) * Mathf.SmoothStep(0f, 1f, w));
         }
 
         private void Update()
         {
+            FollowBody();
             if (!rested) { restPosition = transform.localPosition; rested = true; }
             float dt = VisualTime.DeltaFor(this);
             if (trail != null && trail.emitting) trail.time = trailTime * Mathf.Clamp(Time.deltaTime > 0f ? Time.deltaTime / Mathf.Max(1e-4f, dt) : 1f, 1f, 20f); // (slowed or frozen: the trail lasts as long on screen)
@@ -758,7 +840,9 @@ namespace SquashBot.Visual
                 bool whirlBlow = current != null && current.direction == HitDirection.Spin && swing < 1f;
                 spin = Mathf.Min(1f, spin + dt / Mathf.Max(0.12f, whirlBlow ? swingTotal / playRate : 0.32f));
                 if (swing < 1f) Advance(dt);
-                float ang = spin * 360f * spinTurns;
+                // a spinning blow: the turn timed so the blade points at the rival at the contact (the contact rule)
+                float atContact = whirlBlow && swingTotal > 1e-4f ? (windS + hitS * 0.5f) / swingTotal : 0f;
+                float ang = (spin - atContact) * 360f * spinTurns;
                 transform.localPosition = Quaternion.Euler(0f, ang, 0f) * restPosition;
                 transform.localRotation = Quaternion.Euler(0f, ang, 0f) * Quaternion.Euler(80f, 0f, -12f);
                 if (spin >= 1f) transform.localPosition = restPosition;

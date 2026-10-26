@@ -62,6 +62,29 @@ namespace SquashBot.Combat
         }
 
         /// <summary>The family a weapon kind fights as (hammers, maces and anything else heavy: the heavy family).</summary>
+        /// <summary>
+        /// How far a striker's picture slides toward the rival so the blow touches its body at contact (the design's 2.1):
+        /// the blow's own value, or the family's default by the blow's direction (from the phase 0 measures: the gap at
+        /// contact from the duel's 3 tiles, less the struck one's lean into it).
+        /// </summary>
+        public static float ContactOffset(WeaponFamily family, AttackMotionData blow)
+        {
+            float max = Settings != null ? Settings.maxLunge : 1.5f;
+            if (blow == null) return 0f;
+            if (blow.contactOffset >= 0f) return Mathf.Min(blow.contactOffset, max);
+            float d;
+            switch (blow.direction)
+            {
+                case HitDirection.Thrust: d = family == WeaponFamily.Spear ? 0.2f : 1.5f; break; // (a spear's thrust already reaches)
+                case HitDirection.Overhead: d = 1.5f; break;
+                case HitDirection.Upward: d = 1.5f; break;
+                case HitDirection.Spin: d = 1.5f; break;
+                case HitDirection.Horizontal_LeftToRight: d = 1.5f; break;
+                default: d = family == WeaponFamily.Axe ? 1.45f : 1.3f; break;
+            }
+            return Mathf.Min(d, max);
+        }
+
         public static WeaponFamily FamilyOf(WeaponKind k) =>
             k == WeaponKind.Sword ? WeaponFamily.Sword : k == WeaponKind.Spear ? WeaponFamily.Spear : k == WeaponKind.Axe ? WeaponFamily.Axe : WeaponFamily.Heavy;
     }

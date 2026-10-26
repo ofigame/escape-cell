@@ -281,6 +281,7 @@ namespace SquashBot.Gameplay
                 // a heavy weapon's blow from the rival staggers foi a moment (the server holds foi's blows as long)
                 if (m.by == 0 && rival != null) strikeCooldown = Mathf.Max(strikeCooldown, DuelPower.Stagger(Armory.Get(rival.weapon)));
                 ui.Flash(new Color(1f, 0.15f, 0.15f), 0.3f);
+                if (m.by == 0) Reel(true, 1); // (foi's body takes the rival's blow too, here on this screen)
                 cameraRig.Shake(0.6f);
                 fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(1f, 0.35f, 0.35f), new Color(2.4f, 0.5f, 0.4f), 30, 6f);
                 Haptics.Light();
