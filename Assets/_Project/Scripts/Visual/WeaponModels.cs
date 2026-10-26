@@ -521,12 +521,18 @@ namespace SquashBot.Visual
             if (current == null) return;
             var target = TargetOf != null ? TargetOf(this) : null;
             float rate0 = Mathf.Max(0.1f, playRate);
-            if (current.body != BodyStrike.Weapon)
+            var body = Fighter != null ? Fighter.GetComponentInChildren<SkinnedHero>() : null;
+            float untilContact = Mathf.Max(0f, (windS + hitS * 0.5f - swingTime) / rate0);
+            if (body != null && SkinnedHero.ChainByClips && IsChainBlow(current))
+            {
+                // the plain chain by the animation map: the cut and the thrust in turn, the contact frame on this swing's
+                // (no body blow in the chain: the rules' 3.1)
+                body.PlayChainBlow(untilContact);
+            }
+            else if (current.body != BodyStrike.Weapon && body != null)
             {
                 // the body's own blow (the chain's third): its pose timed to this swing's contact, from now
-                var bodyOf = Fighter != null ? Fighter.GetComponentInChildren<SkinnedHero>() : null;
-                float untilContact = Mathf.Max(0f, (windS + hitS * 0.5f - swingTime) / rate0);
-                if (bodyOf != null) bodyOf.StrikeWithBody(current.body, Mathf.Max(0f, untilContact - hitS * 0.5f / rate0), hitS / rate0, backS / rate0, target != null ? target.position : transform.position + transform.forward);
+                body.StrikeWithBody(current.body, Mathf.Max(0f, untilContact - hitS * 0.5f / rate0), hitS / rate0, backS / rate0, target != null ? target.position : transform.position + transform.forward);
             }
             if (target == null) return;
             var me = CombatFeel.RootOf(Fighter);
@@ -550,6 +556,15 @@ namespace SquashBot.Visual
         }
 
 
+
+        /// <summary>A blow of the family's plain chain (not its POWER HIT, KNOCKDOWN or flying blows).</summary>
+        private bool IsChainBlow(AttackMotionData b)
+        {
+            var chainOf = CombatLibrary.Family(family).chain;
+            if (chainOf == null || b == null) return false;
+            foreach (var x in chainOf) if (x == b) return true;
+            return false;
+        }
 
         private AttackMotionData NextBlow(bool advance)
         {
@@ -641,6 +656,10 @@ namespace SquashBot.Visual
         public void Spin(int turns) { spin = 0f; spinTurns = Mathf.Max(1, turns); }
 
         private int spinTurns = 1;
+
+        /// <summary>The body's clip swings it now (the fighter's mapped move): held still in the fist, its blow's phases
+        /// (contact, trail, sound) kept. Set by the body each frame.</summary>
+        public bool BodyDriven { get; set; }
 
         /// <summary>The duel's stance (set by the game while a duel is on): the family's own rest, a twirl now and then.</summary>
         public static bool DuelStance;
@@ -874,6 +893,7 @@ namespace SquashBot.Visual
             if (!rested) { restPosition = transform.localPosition; rested = true; }
             float dt = VisualTime.DeltaFor(this);
             if (trail != null && trail.emitting) trail.time = trailTime * Mathf.Clamp(Time.deltaTime > 0f ? Time.deltaTime / Mathf.Max(1e-4f, dt) : 1f, 1f, 20f); // (slowed or frozen: the trail lasts as long on screen)
+            if (BodyDriven) { spin = 1f; if (swing < 1f) Advance(dt); transform.localPosition = restPosition; Pose(0f); return; } // (the body's clip swings it: held still in the fist, its phases kept)
             if (spin < 1f)
             {
                 bool whirlBlow = current != null && current.direction == HitDirection.Spin && swing < 1f;

@@ -288,6 +288,7 @@ namespace SquashBot.Gameplay
         {
             if (!challengeRun || chPhase != ChPhase.Duel) return;
             if (iWon) chDuelMe++; else chDuelThem++;
+            if (!iWon) { var koSkin = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null; if (koSkin != null) koSkin.PlayAction(Combat.DuelAction.Knockout); } // (foi down: its knockout clip, held lying until the next round)
             if (!iWon && mcHearts == 0 && duelHearts > 0) stats.mine.downWithHeartsUnused++; // (the tip: hearts left unused)
             PowerSlow(0.4f, 0.3f); // (the knock-down: slow motion a moment, the crowd up)
             AudioManager.DipMusic(DuelMusicSettings.Current.knockDip); // (the music dips, the crowd to the front)
@@ -345,6 +346,7 @@ namespace SquashBot.Gameplay
         private void LiveKnockdown(bool iWon, int mine, int theirs)
         {
             if (!challengeRun || (chPhase != ChPhase.Duel && chPhase != ChPhase.Wait)) return;
+            if (!iWon) { var koSkin = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null; if (koSkin != null) koSkin.PlayAction(Combat.DuelAction.Knockout); } // (foi down: its knockout clip)
             chDuelMe = mine;
             AudioManager.DipMusic(DuelMusicSettings.Current.knockDip);
             chDuelThem = theirs;

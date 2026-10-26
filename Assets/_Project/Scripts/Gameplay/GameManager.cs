@@ -375,6 +375,16 @@ namespace SquashBot.Gameplay
                     if (skin == null) return;
                     FaceFor(model, FaceMoment.KnockedOut); // (spiral eyes, the tongue out: the falling stand-in carries the face)
                     HatFor(model, 3, robot.transform.position); // (its hat off onto the floor)
+                    if (SkinnedHero.HasAction(Combat.DuelAction.Knockout))
+                    {
+                        // its knockout clip on a live copy of its body (the rules take the fighter away at once)
+                        var copy = Instantiate(model.gameObject, model.position, model.rotation);
+                        copy.name = model.name + "_KO";
+                        copy.transform.localScale = model.lossyScale;
+                        var copySkin = copy.GetComponentInChildren<SkinnedHero>();
+                        if (copySkin != null && copySkin.PlayAction(Combat.DuelAction.Knockout)) { Combat.KnockoutFall.Play(copy.transform, skin.HeadPoint.y - model.position.y, robot.transform.position, true); return; }
+                        Destroy(copy);
+                    }
                     var dbl = StuntDouble.Make(model);
                     dbl.Detach();
                     Combat.KnockoutFall.Play(dbl.transform, skin.HeadPoint.y - model.position.y, robot.transform.position);

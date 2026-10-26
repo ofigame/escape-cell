@@ -15,8 +15,26 @@ namespace SquashBot.Visual
         private Vector3 moveToward;
         private Coroutine moveLift;
 
-        /// <summary>The quake clip's slam, seconds from its start (bl_mixamo_strikes.py cuts it so).</summary>
-        private const float QuakeSlam = 0.53f;
+        /// <summary>The animation map's move for a body move (each special and ultimate its own row).</summary>
+        private static Combat.DuelAction? ActionOf(BodyMove m)
+        {
+            switch (m)
+            {
+                case BodyMove.Whirl: return Combat.DuelAction.UltiWhirlwind;
+                case BodyMove.Quake: return Combat.DuelAction.UltiQuake;
+                case BodyMove.SkyRaise: return Combat.DuelAction.UltiChainLightning;
+                case BodyMove.PullDown: return Combat.DuelAction.UltiMeteor;
+                case BodyMove.CoreBurst: return Combat.DuelAction.UltiCoreBurst;
+                case BodyMove.IronFlex: return Combat.DuelAction.UltiIronBody;
+                case BodyMove.MirrorGuard: return Combat.DuelAction.UltiMirror;
+                case BodyMove.HookHaul: return Combat.DuelAction.SpecialHook;
+                case BodyMove.ShockPush: return Combat.DuelAction.SpecialShock;
+                case BodyMove.GroundPunch: return Combat.DuelAction.SpecialIceWall;
+                case BodyMove.ChestPatch: return Combat.DuelAction.SpecialPatch;
+                case BodyMove.ShoulderPush: return Combat.DuelAction.SpecialTeleport;
+                default: return null;
+            }
+        }
 
         /// <summary>The body move playing now (None: none).</summary>
         public BodyMove Performing => moveNow;
@@ -33,9 +51,9 @@ namespace SquashBot.Visual
             moveFor = Mathf.Max(0.1f, seconds);
             moveToward = toward;
             ReactionClip = "move_" + move.ToString().ToLowerInvariant();
-            // a made clip does the move: the quake's slam (QuakeSlam in) on the coded slam's moment, any other over its time
-            float rate = move == BodyMove.Quake ? QuakeSlam / (0.6f * moveFor) : MoveLength(ReactionClip) / moveFor;
-            if (ClipOf(ReactionClip) != null && PlayClip(ReactionClip, Mathf.Clamp(rate, 0.5f, 2.5f), false, true)) { moveNow = BodyMove.None; return; }
+            // the move's clip from the animation map does it: the quake's landing on the coded slam (at 0.6 of its time), any
+            // other fitted to its time
+            if (ActionOf(move) is Combat.DuelAction act && (move == BodyMove.Quake ? PlayAction(act, 0f, 0.6f * moveFor) : PlayAction(act, moveFor))) { moveNow = BodyMove.None; return; }
             KnowRest();
             if (moveLift != null) { StopCoroutine(moveLift); moveLift = null; transform.localPosition = bodyPos; }
             var root = transform.parent != null ? transform.parent : transform;

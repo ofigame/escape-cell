@@ -262,6 +262,7 @@ namespace SquashBot.Gameplay
                     myComboMove = 0;
                     myCombo = 0;
                     stats.mine.comboUsed++;
+                    { var cs = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null; if (cs != null) cs.PlayAction(upper ? DuelAction.ComboKnockdown : DuelAction.ComboHeavy, 0f, 0.1f); } // (its own clip, its contact now)
                     robot.Strike(foeAt);
                     ComboMoveShown(true, upper);
                     SlashFx.Create(robot.transform.position, foeAt, upper ? new Color(1f, 0.3f, 0.2f) : new Color(1f, 0.7f, 0.25f), upper ? 2.4f : 1.8f);
@@ -293,6 +294,7 @@ namespace SquashBot.Gameplay
                     stats.mine.breakers++;
                     myMeter -= 1f;
                     rivalCombo = 0;
+                    { var ks = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null; if (ks != null && ks.PlayAction(DuelAction.ComboBreaker)) VisualRoot.On(CombatFeel.RootOf(robot.Visual)).Lunge(foeAt - robot.transform.position, VisualRoot.KeptApart(robot.transform.position, foeAt, 0.5f), 0.12f, 0.06f, 0.25f); } // (KIR: the cut, quicker, and a shoulder pushed in)
                     Shockwave.Create(robot.transform.position, 2.4f, new Color(0.4f, 0.8f, 1f));
                     fx.Burst(robot.transform.position + Vector3.up * 0.6f, new Color(0.5f, 0.85f, 1f), new Color(1f, 2f, 3f), 30, 6f);
                     AudioManager.PlaySfx(Sfx.Shield, 1f, 0.8f);
@@ -441,6 +443,7 @@ namespace SquashBot.Gameplay
             // the take-off: a crouch, blue flame from the back's thrusters, the weapon drawn back
             var flier = mine ? robot.Visual : hunt.ChallengeFoeModel;
             var flierSkin = flier != null ? flier.GetComponentInChildren<SkinnedHero>() : null;
+            if (flierSkin != null) flierSkin.PlayAction(DuelAction.SpecialFly, 0f, 0.65f); // (FLY: the flying punch, its punch on the strike after the leap)
             if (flierSkin != null)
             {
                 flierSkin.Crouch(1f, 0.3f);
@@ -812,7 +815,7 @@ namespace SquashBot.Gameplay
             var casterSkin = caster != null ? caster.GetComponentInChildren<SkinnedHero>() : null;
             const float ComboRate = 1.6f;
             float combo = casterSkin != null ? Mathf.Max(SkinnedHero.MoveLength("cast") / ComboRate, 2.2f) : 0f;
-            if (casterSkin != null) casterSkin.PlayMove("cast", ComboRate, true, loop: true); // round and round until the ultimate ends
+            if (casterSkin != null && !casterSkin.PlayAction(DuelAction.UltiCinematic, combo)) casterSkin.PlayMove("cast", ComboRate, true, loop: true); // (its own clip over the combo; the old one round and round otherwise)
             if (mine && LiveActive) LiveNet.Special(4);
             CombatFeel.UltiStart(caster);
             for (int i = 0; i < 5; i++)

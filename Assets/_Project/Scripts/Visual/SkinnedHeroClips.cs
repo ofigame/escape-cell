@@ -22,7 +22,7 @@ namespace SquashBot.Visual
         private float fadingTime;
         private bool idleLoaded;
         private AnimationClip idleClip, crouchClip, blockClip, walkClip, stanceClip;
-        private bool stanceSwapped, walkBack;
+        private bool stanceSwapped, walkBack, blockLoops;
 
         /// <summary>Behind its shield now (the duel sets it each frame): the block's stance.</summary>
         public bool Guarding { get => guarding && Time.time - guardAt < 0.3f; set { guarding = value; if (value) guardAt = Time.time; } } // (told each frame: not told, not guarding)
@@ -42,6 +42,7 @@ namespace SquashBot.Visual
             moveNow = BodyMove.None; strikeNow = Combat.BodyStrike.Weapon;
             if (moveLift != null) { StopCoroutine(moveLift); moveLift = null; }
             stanceClip = idleClip; idleTime = 0f; stanceSwapped = true;
+            actionNow = null; snapLeft = 0f;
             if (ready) Rest();
         }
         /// <summary>The clips wrote the bones this frame (the hips then hold their place: no reset to rest).</summary>
@@ -68,8 +69,9 @@ namespace SquashBot.Visual
             if (!idleLoaded)
             {
                 idleLoaded = true;
-                idleClip = ClipOf(IdleClip);
-                crouchClip = ClipOf("crouch_idle"); blockClip = ClipOf("block"); walkClip = ClipOf("walk_fight");
+                idleClip = MapClip(Combat.DuelAction.Idle) is string idn ? ClipOf(idn) : null; // (the stances from the animation map)
+                crouchClip = MapClip(Combat.DuelAction.Crouch) is string cn ? ClipOf(cn) : null; blockClip = MapClip(Combat.DuelAction.Block) is string bn ? ClipOf(bn) : null; walkClip = MapClip(Combat.DuelAction.Walk) is string wn ? ClipOf(wn) : null;
+                var blockRow = Combat.DuelAnimationMap.Current.Get(Combat.DuelAction.Block); blockLoops = blockRow != null && blockRow.loop;
                 stanceClip = idleClip;
             }
             KnowBones();
@@ -100,7 +102,7 @@ namespace SquashBot.Visual
                 if (stanceSwapped || !l.Playing(Combat.HeroAnimLayers.Base)) { l.Play(Combat.HeroAnimLayers.Base, stanceClip); stanceSwapped = false; }
                 // the walk's steps by the body's pace; the block held raised (its last frame); the others round and round
                 float rate = stanceClip == walkClip ? Mathf.Clamp(speed / 1.4f, 0.6f, 1.8f) * (walkBack ? -1f : 1f) : 1f;
-                idleTime = stanceClip == blockClip ? Mathf.Min(idleTime + dt, stanceClip.length) : Mathf.Repeat(idleTime + dt * rate, Mathf.Max(0.1f, stanceClip.length));
+                idleTime = stanceClip == blockClip && !blockLoops ? Mathf.Min(idleTime + dt, stanceClip.length) : Mathf.Repeat(idleTime + dt * rate, Mathf.Max(0.1f, stanceClip.length));
                 l.SetTime(Combat.HeroAnimLayers.Base, idleTime);
             }
             var full = playing != null ? playing : fadingClip;
@@ -126,7 +128,7 @@ namespace SquashBot.Visual
 
         /// <summary>A quick step back out of a blow's way (the dodge's clip, about <paramref name="seconds"/> long); false if
         /// there is none.</summary>
-        public bool DodgeClip(float seconds = 0.9f) => ClipOf("dodge") != null && PlayClip("dodge", Mathf.Clamp(MoveLength("dodge") / Mathf.Max(0.2f, seconds), 1f, ReadableRate * 1.3f), false, true);
+        public bool DodgeClip(float seconds = 0.5f) => PlayAction(Combat.DuelAction.Dodge, seconds); // (its section fitted to the dodge's time)
 
         /// <summary>The duel lost: down on its knees, beaten (the clip; false if there is none).</summary>
         public bool Defeated() => ClipOf("defeated") != null && PlayClip("defeated", 1f, false, true);

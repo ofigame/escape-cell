@@ -1,0 +1,431 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2370faf5dbf38fa4b837b51425fe27c1, type: 3}
+  m_Name: DuelAnimationMap
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.DuelAnimationMap
+  rows:
+  - action: 0
+    clips:
+    - idle_fight
+    start: 0
+    end: 0
+    timing: 0
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 1
+    hold: 0
+    temporary: 0
+    note: Unarmed Idle
+  - action: 1
+    clips:
+    - walk_fight
+    start: 0
+    end: 0
+    timing: 0
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 1
+    hold: 0
+    temporary: 0
+    note: 'Standing Walk Forward (backwards: played in reverse)'
+  - action: 2
+    clips:
+    - crouch_idle
+    start: 0
+    end: 0
+    timing: 0
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 1
+    hold: 0
+    temporary: 0
+    note: Crouch Idle
+  - action: 3
+    clips:
+    - block
+    start: 0
+    end: 0
+    timing: 0
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 1
+    hold: 0
+    temporary: 0
+    note: Sword And Shield Block Idle
+  - action: 4
+    clips:
+    - dodge
+    start: 0.25
+    end: 0.95
+    timing: 1
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: 'Standing Dodge Backward: the leap back, fitted to the dodge''s time'
+  - action: 5
+    clips:
+    - hit_small
+    start: 0
+    end: 0
+    timing: 0
+    speed: 1.15
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: Standing React Small From Front
+  - action: 6
+    clips:
+    - stagger
+    start: 0
+    end: 0
+    timing: 0
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: Standing React Large From Front
+  - action: 7
+    clips:
+    - sweep_fall
+    start: 1
+    end: 2.25
+    timing: 1
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 1
+    temporary: 0
+    note: 'Sweep Fall: the fall only, fitted to the rules'' time down'
+  - action: 8
+    clips:
+    - getup_face_up
+    start: 0.9
+    end: 1.9
+    timing: 1
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: 'Getting Up: the rising, fitted to the rules'' get-up (about 2x)'
+  - action: 9
+    clips:
+    - getup_face_down
+    start: 3.4
+    end: 4.6
+    timing: 1
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: 'Getting Up (1): from the knees, the push up and rise'
+  - action: 10
+    clips:
+    - ko_fall
+    start: 1
+    end: 2.6
+    timing: 0
+    speed: 1.8
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 1
+    temporary: 0
+    note: 'Standing React Death Backward: down to lying in about 1.1 s, before the next round (the stumble before and the rest after cut)'
+  - action: 11
+    clips:
+    - chain_slash
+    start: 0.62
+    end: 1.05
+    timing: 2
+    speed: 1
+    contact: 0.85
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: 'Stable Sword Outward Slash: the cut only'
+  - action: 12
+    clips:
+    - chain_stab
+    start: 0.7
+    end: 1.12
+    timing: 2
+    speed: 1
+    contact: 0.92
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: 'Bayonet Stab: the thrust only'
+  - action: 13
+    clips:
+    - ulti_1
+    start: 1.85
+    end: 2.55
+    timing: 2
+    speed: 1
+    contact: 2.17
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: 'ULTI_1: one wide turning swing'
+  - action: 14
+    clips:
+    - ozel_2
+    start: 3.05
+    end: 3.8
+    timing: 2
+    speed: 1
+    contact: 3.3
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: 'OZEL 2: rising with the fist up (until an uppercut clip)'
+  - action: 15
+    clips:
+    - chain_slash
+    start: 0.62
+    end: 1.05
+    timing: 0
+    speed: 1.3
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: the cut, 1.3x, and a shoulder push (coded)
+  - action: 16
+    clips:
+    - ozel_3
+    start: 0.55
+    end: 2.43
+    timing: 2
+    speed: 1
+    contact: 1.33
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: 'OZEL 3: the flying punch (the side step cut)'
+  - action: 17
+    clips:
+    - dodge
+    start: 0
+    end: 0
+    timing: 0
+    speed: 0.8
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: Standing Dodge Backward at 0.8x, further (the dodge's own clip, slower)
+  - action: 18
+    clips:
+    - ozel_1
+    start: 0
+    end: 2.9
+    timing: 2
+    speed: 1
+    contact: 2.23
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: 'OZEL 1: the somersault and the landing (the landing the contact)'
+  - action: 19
+    clips:
+    - chain_slash
+    start: 0.62
+    end: 1.05
+    timing: 0
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: 'stand-in: the cut, and the hook''s own effect'
+  - action: 20
+    clips:
+    - chain_stab
+    start: 0.7
+    end: 1.12
+    timing: 0
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: 'stand-in: the thrust, and the shock''s own effect'
+  - action: 21
+    clips:
+    - chain_slash
+    start: 0.62
+    end: 1.05
+    timing: 0
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: 'stand-in: the cut, and the ice wall'
+  - action: 22
+    clips:
+    - chain_stab
+    start: 0.7
+    end: 1.12
+    timing: 0
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: 'stand-in: the thrust, and the patch''s own effect'
+  - action: 23
+    clips:
+    - chain_slash
+    start: 0.62
+    end: 1.05
+    timing: 0
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: 'stand-in: the cut, and the teleport''s flash'
+  - action: 24
+    clips:
+    - ulti_1
+    start: 0
+    end: 0
+    timing: 1
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: ULTI_1 whole, over the ultimate's combo time
+  - action: 25
+    clips:
+    - ulti_3
+    start: 0
+    end: 0
+    timing: 1
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: 'ULTI_3: the body itself spins (no storm model); about 1.2x'
+  - action: 26
+    clips:
+    - ozel_2
+    start: 0.9
+    end: 2.9
+    timing: 2
+    speed: 1
+    contact: 1.67
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: 'OZEL 2: the jump and the slam (the landing on the coded slam)'
+  - action: 27
+    clips:
+    - ulti_2
+    start: 1.6
+    end: 3.3
+    timing: 1
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 0
+    note: 'ULTI_2: the punches (one bolt each; the wind-up cut)'
+  - action: 28
+    clips:
+    - ulti_1
+    start: 0
+    end: 0.6
+    timing: 1
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: 'stand-in: ULTI_1''s wind-up, and the mirror''s shell'
+  - action: 29
+    clips:
+    - ulti_1
+    start: 0
+    end: 0.6
+    timing: 1
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: 'stand-in: ULTI_1''s wind-up, and the meteor'
+  - action: 30
+    clips:
+    - ulti_1
+    start: 0
+    end: 0.6
+    timing: 1
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: 'stand-in: ULTI_1''s wind-up, and the burst'
+  - action: 31
+    clips:
+    - ulti_1
+    start: 0
+    end: 0.6
+    timing: 1
+    speed: 1
+    contact: 0
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: 'stand-in: ULTI_1''s wind-up, and the iron shell'

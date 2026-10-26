@@ -769,7 +769,7 @@ namespace SquashBot.Visual
             if (!ready) Setup();
             var c = ClipOf(name);
             if (c == null) return false;
-            playing = c; playingTime = 0f; playingRate = rate; playingReal = realTime; playingLoop = loop; playingHold = playingStay = false;
+            playing = c; playingTime = 0f; playingFrom = 0f; playingTo = c.length; playingRate = rate; playingReal = realTime; playingLoop = loop; playingHold = playingStay = false;
             // (from where it stands now: a leap's landing just before must not read as walking off and end the move at once)
             lastPos = transform.position; speed = 0f;
             // played through the body's animator (a graph of its own, evaluated by hand)
@@ -783,7 +783,7 @@ namespace SquashBot.Visual
         }
 
         /// <summary>The move playing ends now (a looping one included).</summary>
-        public void StopMove() { if (playing != null) ClipEnded(playing, Mathf.Min(playingTime, playing.length)); playing = null; playingLoop = playingHold = playingStay = false; }
+        public void StopMove() { if (playing != null) ClipEnded(playing, Mathf.Min(playingTime, playingTo)); playing = null; playingLoop = playingHold = playingStay = false; }
 
         /// <summary>A clip played that holds its last frame (<paramref name="hold"/>) and is not ended by the body's own
         /// travel (<paramref name="stay"/>).</summary>
@@ -795,7 +795,7 @@ namespace SquashBot.Visual
         }
 
         /// <summary>The clip playing is done (a held one on its last frame).</summary>
-        private bool ClipDone => playing == null || playingHold && playingTime >= playing.length;
+        private bool ClipDone => playing == null || playingHold && playingTime >= playingTo;
 
         private HeroAnimLayers Layers(Animator animator)
         {
@@ -890,7 +890,7 @@ namespace SquashBot.Visual
             LastReaction = dir + "/" + height + "/" + strength + "/v" + variant;
             switch (strength)
             {
-                case Combat.HitStrength.Light: Squint(0.45f, 0.15f); if (ClipOf("hit_small") != null && PlayMove("hit_small", 1.15f)) ReactionClip = "hit_small"; break;
+                case Combat.HitStrength.Light: Squint(0.45f, 0.15f); if (PlayAction(Combat.DuelAction.HitLight)) ReactionClip = "hit_small"; break;
                 case Combat.HitStrength.Medium: Rock(from, intensity); Squint(0.6f, 0.25f); Brows(0.6f, 0.3f); break; // (the stagger: a step back, rocking)
                 default: DriveBack(from); Squint(1f, 0.4f); Brows(1f, 0.45f); Squash(1f); break; // (driven back two steps, onto a knee)
             }
@@ -1598,9 +1598,9 @@ namespace SquashBot.Visual
             if (playing != null)
             {
                 playingTime += (playingReal || Time.timeScale <= 0.01f ? Time.unscaledDeltaTime : dt) * playingRate;
-                if (playingLoop && playingTime >= playing.length) playingTime %= playing.length; // round again
-                else if (playingHold && playingTime >= playing.length) playingTime = playing.length; // (held on its last frame)
-                else if (playingTime >= playing.length || speed > 0.6f && !playingStay) { ClipEnded(playing, Mathf.Min(playingTime, playing.length)); playing = null; } // done, or it walked off (eased back into the pose)
+                if (playingLoop && playingTime >= playingTo) playingTime = playingFrom + Mathf.Repeat(playingTime - playingFrom, Mathf.Max(0.05f, playingTo - playingFrom)); // round again
+                else if (playingHold && playingTime >= playingTo) playingTime = playingTo; // (held on its last frame)
+                else if (playingTime >= playingTo || speed > 0.6f && !playingStay) { ClipEnded(playing, Mathf.Min(playingTime, playingTo)); playing = null; actionNow = null; } // done, or it walked off (eased back into the pose)
             }
             HealPose();
             if (playing != null && clipWeight >= 0.999f)
@@ -1608,6 +1608,7 @@ namespace SquashBot.Visual
                 Rest();
                 layers.SetTime(HeroAnimLayers.FullBody, playingTime);
                 layers.Evaluate();
+                BlendFromSnapshot(dt); // (a section cut in on another: from the pose it left)
             }
             else if (playing != null)
             {
@@ -1710,7 +1711,7 @@ namespace SquashBot.Visual
             weapon.parent.position += palm - weapon.position;
             if (playing == null && !Flailing) gripTurn = Quaternion.Inverse(handR.rotation) * weapon.parent.rotation; // (how it sits in the hand at rest: a move keeps it so)
             var held = weapon.GetComponentInChildren<HeldWeapon>();
-            if (held != null) held.AfterGrip(); // (the blade onto its target from where the hand holds it)
+            if (held != null) { held.BodyDriven = AttackPlaying; held.AfterGrip(); } // (a mapped attack swings it with the hand; the blade onto its target from where the hand holds it)
         }
 
         /// <summary>Two-joint reach: the elbow bends (on the side it already bends to) so the hand comes to the target.</summary>

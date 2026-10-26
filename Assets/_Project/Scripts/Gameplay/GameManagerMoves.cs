@@ -169,6 +169,7 @@ namespace SquashBot.Gameplay
                 case SpecialKind.Backflip:
                 {
                     // a kick at the other (a shove, no damage), then a somersault two tiles back; untouchable on the way
+                    { var bs = MeModel() != null ? MeModel().GetComponentInChildren<SkinnedHero>() : null; if (bs != null) bs.PlayAction(DuelAction.SpecialBackflip); } // (its own clip)
                     var mm = MeModel();
                     if (mm != null) robot.Strike(otherAt);
                     fx.Burst(otherAt + Vector3.up * 0.9f, new Color(1f, 0.9f, 0.6f), new Color(3f, 2.4f, 1.2f), 30, 6f);
@@ -269,6 +270,7 @@ namespace SquashBot.Gameplay
                 case SpecialKind.SkyStrike:
                 {
                     // where it lands glows first; then the high jump, a crash down and the other thrown back
+                    { var ss = MeModel() != null ? MeModel().GetComponentInChildren<SkinnedHero>() : null; if (ss != null) ss.PlayAction(DuelAction.SpecialSkyStrike, 0f, 0.3f + 0.59f); } // (its own clip: the landing on the crash)
                     var land = LandingBeside(other, me);
                     MoveFx.Pillar(otherAt, new Color(1f, 0.6f, 0.2f), 0.9f, 4f, 0.5f);
                     Shockwave.Create(otherAt, 1.6f, new Color(1f, 0.6f, 0.2f));
@@ -417,6 +419,8 @@ namespace SquashBot.Gameplay
                     var wHeld = HeldOf(spinner);
                     if (wHeld != null) { wHeld.HoldOut(true); wHeld.Trail(true); } // (a ring from its tip)
                     Body(spinner, BodyMove.Whirl, spins * Turn + 0.15f, OtherAt());
+                    var whirlSkin = spinner != null ? spinner.GetComponentInChildren<SkinnedHero>() : null;
+                    bool bodySpins = whirlSkin != null && whirlSkin.Acting == DuelAction.UltiWhirlwind; // (its clip: the body turns itself, the root only faces the other)
                     var startRot = spinner != null ? spinner.rotation : Quaternion.identity;
                     if (spinner != null) { var drift = OtherAt() - MeAt(); VisualRoot.On(CombatFeel.RootOf(spinner)).Lunge(drift, VisualRoot.KeptApart(MeAt(), OtherAt(), 1.5f), spins * Turn * 0.6f, spins * Turn * 0.3f, 0.35f); }
                     for (int i = 0; i < spins && challengeRun && chPhase == ChPhase.Duel && !Down(); i++)
@@ -425,10 +429,10 @@ namespace SquashBot.Gameplay
                         {
                             float k = e / Turn;
                             float f = i == 0 ? k * k : i == spins - 1 ? 1f - (1f - k) * (1f - k) : k; // (gathering speed, losing it)
-                            if (spinner != null) spinner.rotation = Quaternion.AngleAxis(360f * f - 90f, Vector3.up) * startRot; // (each turn ends with the weapon arm's side to the other)
+                            if (spinner != null && !bodySpins) spinner.rotation = Quaternion.AngleAxis(360f * f - 90f, Vector3.up) * startRot; // (each turn ends with the weapon arm's side to the other)
                             yield return null;
                         }
-                        if (spinner != null) spinner.rotation = Quaternion.AngleAxis(-90f, Vector3.up) * startRot;
+                        if (spinner != null && !bodySpins) spinner.rotation = Quaternion.AngleAxis(-90f, Vector3.up) * startRot;
                         fx.Dust(MeAt(), new Color(0.7f, 0.75f, 0.8f), 8, 3f); // (a swirl of dust at its feet)
                         var o = OtherAt();
                         SlashFx.Create(o + Vector3.left * 1f + Vector3.up * 0.9f, o + Vector3.right * 1f + Vector3.up * 0.9f, new Color(0.7f, 0.95f, 1f), 1.8f);

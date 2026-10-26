@@ -9,16 +9,23 @@ namespace SquashBot.Combat
     /// </summary>
     public class KnockoutFall : MonoBehaviour
     {
-        private const float Kneel = 0.35f, Topple = 0.45f, Lie = 1.1f, Sink = 0.4f;
+        private const float Kneel = 0.35f, Topple = 0.45f, Lie = 1.1f, Sink = 0.4f, BodyFall = 1.2f;
         private Vector3 start, side;
         private Quaternion startRot;
         private float t, height, arcAt;
+        private bool bodyFalls;
 
         /// <summary>The fall on <paramref name="standIn"/> (its height <paramref name="bodyHeight"/>), toppling away from <paramref name="from"/>.</summary>
-        public static void Play(Transform standIn, float bodyHeight, Vector3 from)
+        public static void Play(Transform standIn, float bodyHeight, Vector3 from) => Play(standIn, bodyHeight, from, false);
+
+        /// <summary>The same; <paramref name="bodyFalls"/>: the stand-in's own knockout clip does the falling (it is not
+        /// toppled), only the arcs while it lies and the sinking away are added.</summary>
+        public static void Play(Transform standIn, float bodyHeight, Vector3 from, bool bodyFalls)
         {
             if (standIn == null) return;
             var f = standIn.gameObject.AddComponent<KnockoutFall>();
+            f.bodyFalls = bodyFalls;
+            if (bodyFalls) f.t = Kneel + Topple - BodyFall; // (its clip's fall takes longer: the arcs and the sinking after it)
             f.start = standIn.position;
             f.startRot = standIn.rotation;
             f.height = Mathf.Max(0.3f, bodyHeight);
@@ -30,6 +37,7 @@ namespace SquashBot.Combat
         {
             t += Time.deltaTime * VisualTime.GlobalScale;
             var axis = Vector3.Cross(Vector3.up, side); // (it topples away from the blow)
+            if (bodyFalls && t < Kneel + Topple) { if (t >= Kneel + Topple * 0.9f && arcAt <= 0f) arcAt = t; return; } // (its clip falls)
             if (t < Kneel)
             {
                 float k = Mathf.SmoothStep(0f, 1f, t / Kneel);
