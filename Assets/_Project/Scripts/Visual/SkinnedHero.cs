@@ -21,6 +21,9 @@ namespace SquashBot.Visual
         private const string Folder = "Heroes/Foi/";
         /// <summary>The head joint's height in the build (about 1.05 tall in all, the head included).</summary>
         private const float HeadJointHeight = 0.67f;
+        /// <summary>The remade body (branch foi-yeni-beden) wears its own paint: the old suits' pictures are laid out for the
+        /// old body and do not fit it; nor is it thickened (it is broad as made).</summary>
+        private const bool OwnPaint = true;
         /// <summary>The head's height against the body's (headless) height: a big, cartoon head.</summary>
         private const float HeadShare = 0.5f;
 
@@ -115,7 +118,7 @@ namespace SquashBot.Visual
             skin.name = "Hero_Skin";
             skin.localPosition = Vector3.zero;
             skin.localRotation = Quaternion.identity;
-            foreach (var sm in skin.GetComponentsInChildren<SkinnedMeshRenderer>(true)) { sm.updateWhenOffscreen = true; sm.sharedMesh = Thick(sm); }
+            foreach (var sm in skin.GetComponentsInChildren<SkinnedMeshRenderer>(true)) { sm.updateWhenOffscreen = true; if (!OwnPaint) sm.sharedMesh = Thick(sm); }
             var headBone = FindBone(skin, "Head");
             float raw = visual.InverseTransformPoint(headBone.position).y;
             skin.localScale = Vector3.one * (raw > 0.0001f ? HeadJointHeight / raw : 1f);
@@ -277,6 +280,7 @@ namespace SquashBot.Visual
 
         private static Material Armour(string suit)
         {
+            if (OwnPaint) suit = null;
             string key = "armour" + (suit ?? "");
             if (materials.TryGetValue(key, out var m) && m != null) return m;
             var tex = suit != null ? Resources.Load<Texture2D>(Folder + "armour_" + suit) : null;
