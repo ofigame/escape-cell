@@ -83,6 +83,47 @@ namespace SquashBot.Gameplay
 
         /// <summary>A body attack by the player (<paramref name="mine"/>) or the computer rival, if it may: its cooldown,
         /// its reach, not down or in the air, the flying headbutt only from the air.</summary>
+        // ---------- The body special offered on the button over the ultimate ----------
+
+        /// <summary>How long a body special stays offered (seconds), and the pause between offers (from .. to).</summary>
+        private const float BodyOfferTime = 2.5f, BodyOfferGapMin = 6f, BodyOfferGapMax = 11f;
+        private float bodyOfferUntil, bodyOfferNext;
+        private PhysKind bodyOfferKind;
+
+        /// <summary>The body special offered now (null: none): every few seconds one that is ready and in reach (the sweep,
+        /// the uppercut, the shoulder charge), for a short moment; not taken, it goes.</summary>
+        private PhysKind? BodyOffer()
+        {
+            float now = Time.time;
+            if (!PhysDuel || moveBusy || MeOutOfIt || !hunt.ChallengeFoeTile.HasValue) return null;
+            if (now < bodyOfferUntil) return bodyOfferKind;
+            if (bodyOfferNext <= 0f) bodyOfferNext = now + BodyOfferGapMin;
+            if (now < bodyOfferNext) return null;
+            bodyOfferNext = now + Random.Range(BodyOfferGapMin, BodyOfferGapMax);
+            int gap = HuntSystem.Chebyshev(robot.Position, hunt.ChallengeFoeTile.Value);
+            int start = Random.Range(0, 3);
+            for (int n = 0; n < 3; n++)
+            {
+                var k = (n + start) % 3 == 0 ? PhysKind.Sweep : (n + start) % 3 == 1 ? PhysKind.Uppercut : PhysKind.Shoulder;
+                if (now < myPhysReady[(int)k] || gap > Mathf.RoundToInt(PhysTab.physReach[(int)k])) continue;
+                bodyOfferKind = k;
+                bodyOfferUntil = now + BodyOfferTime;
+                return k;
+            }
+            return null;
+        }
+
+        /// <summary>The offer's time left (1 .. 0), for its ring.</summary>
+        private float BodyOfferLeft => Mathf.Clamp01((bodyOfferUntil - Time.time) / BodyOfferTime);
+
+        /// <summary>The offered body special pressed: it is done (and the offer gone either way).</summary>
+        private void TakeBodyOffer()
+        {
+            if (Time.time >= bodyOfferUntil) return;
+            bodyOfferUntil = 0f;
+            TryPhys(true, bodyOfferKind);
+        }
+
         private bool TryPhys(bool mine, PhysKind k)
         {
             if (!PhysDuel || !hunt.ChallengeFoeTile.HasValue) return false;
@@ -119,7 +160,7 @@ namespace SquashBot.Gameplay
             var (wind, hit, back) = PhysTiming(k);
             if (!mine && k == PhysKind.Headbutt && skin != null) { skin.Hop(1.1f, 0.5f); yield return new WaitForSeconds(0.18f); } // (the bot jumps first)
             if (skin != null && them != null) skin.StrikeWithBody(StrikeOf(k), wind, hit, back, them.position);
-            if (me != null && them != null) VisualRoot.On(CombatFeel.RootOf(me)).Lunge(them.position - me.position, 1.5f, wind + hit * 0.5f, hit * 0.5f + 0.05f, back);
+            if (me != null && them != null) VisualRoot.On(CombatFeel.RootOf(me)).Lunge(them.position - me.position, VisualRoot.KeptApart(me.position, them.position, 1.5f), wind + hit * 0.5f, hit * 0.5f + 0.05f, back);
             AudioManager.PlaySfx(Sfx.Hop, 0.8f, k == PhysKind.Headbutt ? 0.8f : 1.2f);
             skillBar?.Shout(Loc.T("duel.phys." + (int)k), mine ? new Color(1f, 0.75f, 0.35f) : new Color(1f, 0.45f, 0.4f));
             yield return new WaitForSeconds(wind + hit * 0.5f); // (the contact: the rules' moment and the picture's, together)
@@ -180,6 +221,7 @@ namespace SquashBot.Gameplay
                     if (mine) { rivalDownUntil = now + lie; if (!LiveActive) { hunt.FoeInvulnUntil = Mathf.Max(hunt.FoeInvulnUntil, now + lie); hunt.StunFoe(lie); } }
                     else { myDownUntil = now + lie; myInvulnUntil = Mathf.Max(myInvulnUntil, now + lie); }
                     var across = them != null ? Vector3.Cross(Vector3.up, them.position - from).normalized : Vector3.right;
+                    SkinnedHero.GetUpSeconds = tab.getUpSeconds; // (the get-up clip played over the rules' get-up)
                     if (theirSkin != null) theirSkin.SweptOff(from, across, tab.downSeconds);
                     FaceFor(them, FaceMoment.Surprise);
                     PhysCameraMoment(k, them != null ? them.position : from);
@@ -400,6 +442,7 @@ namespace SquashBot.Gameplay
             rivalCrouchUntil = rivalHopUntil = myDownUntil = rivalDownUntil = myLaunchUntil = rivalLaunchUntil = 0f;
             myAirHits = rivalAirHits = 0;
             for (int i = 0; i < 4; i++) { myPhysReady[i] = 0f; rivalPhysReady[i] = 0f; }
+            bodyOfferUntil = 0f; bodyOfferNext = 0f;
         }
 
         // ---------- A live match: the server's word ----------

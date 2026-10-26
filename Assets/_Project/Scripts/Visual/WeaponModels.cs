@@ -508,6 +508,9 @@ namespace SquashBot.Visual
         /// none: no lunge).</summary>
         public static Func<HeldWeapon, Transform> TargetOf;
 
+        /// <summary>The most the struck one leans into the blow (a small give, not a step into the striker).</summary>
+        private const float MaxCatchLean = 0.12f;
+
         /// <summary>
         /// The design's contact rule (2.1): the striker's picture slides toward its target as the blow winds up, so the
         /// weapon touches the body at contact, holds through the strike and comes home in the recovery; the target leans
@@ -531,12 +534,17 @@ namespace SquashBot.Visual
             var dir = target.position - me.position; dir.y = 0f;
             float offset = CombatLibrary.ContactOffset(family, current);
             if (offset <= 0f || dir.sqrMagnitude < 1e-4f) return;
+            // never into the other: the two bodies keep at least MinBodyGap between their middles at the contact (the
+            // target's lean in included)
+            var feelNow = CombatLibrary.Settings;
+            float leanNow = Mathf.Min(feelNow != null ? feelNow.catchOffset : 0.3f, MaxCatchLean);
+            offset = VisualRoot.KeptApart(me.position, target.position, offset, leanNow);
+            if (offset <= 0.01f) return;
             float rate = Mathf.Max(0.1f, playRate);
             float toContact = Mathf.Max(0.02f, (windS + hitS * 0.5f - swingTime) / rate);
             float hold = hitS * 0.5f / rate + 0.05f, back = Mathf.Max(0.08f, backS * 0.8f / rate);
             VisualRoot.On(me).Lunge(dir, offset, toContact, hold, back);
-            var feel = CombatLibrary.Settings;
-            float lean = feel != null ? feel.catchOffset : 0.3f;
+            float lean = leanNow;
             var them = CombatFeel.RootOf(target);
             if (them != null && lean > 0f) VisualRoot.On(them).Lunge(-dir, lean, toContact, 0.02f, 0.12f);
         }

@@ -45,7 +45,7 @@ namespace SquashBot.Visual
                 case BodyMove.Quake: moveLift = StartCoroutine(Lifted(0.35f, 0.6f, 0.9f)); break; // (a jump, the slam at its end)
                 case BodyMove.CoreBurst: moveLift = StartCoroutine(Lifted(0.25f, 0.75f, 1.1f)); break; // (rising as the arms open)
                 case BodyMove.ShockPush: Combat.VisualRoot.On(root).Push(-ahead, 0.35f, 0.3f); break; // (the recoil: a step back)
-                case BodyMove.ShoulderPush: Combat.VisualRoot.On(root).Lunge(ahead, 0.7f, 0.08f, 0.06f, 0.25f); break;
+                case BodyMove.ShoulderPush: Combat.VisualRoot.On(root).Lunge(ahead, Combat.VisualRoot.KeptApart(root.position, toward, 0.7f), 0.08f, 0.06f, 0.25f); break;
             }
         }
 

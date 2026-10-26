@@ -20,7 +20,7 @@ namespace SquashBot.UI
     /// </summary>
     public class DuelSkillBar : MonoBehaviour
     {
-        public enum Move { Special, Heavy, Upper, Ultimate, Breaker, Finish, Jump }
+        public enum Move { Special, Heavy, Upper, Ultimate, Breaker, Finish, Jump, Body }
         public event Action<Move> Pressed;
         /// <summary>An emote picked (a written one 0..13, a face taunt from FaceTaunts.First).</summary>
         public event Action<int> Emoted;
@@ -154,7 +154,7 @@ namespace SquashBot.UI
             var shieldAt = new Vector2(edge + rShield * 1.1f, edge + rShield * 1.1f) * size;
             var ultiAt = new Vector2(shieldAt.x, shieldAt.y + (rShield + rUlti) * 1.12f * size + gap * size);
             var specialAt = new Vector2(shieldAt.x + (rShield + rSpecial) * 1.12f * size + gap * size, shieldAt.y - (rShield - rSpecial) * size);
-            var contextAt = new Vector2(specialAt.x, specialAt.y + rSpecial * 2.24f * size + gap * size);
+            var contextAt = new Vector2(ultiAt.x, ultiAt.y + (rUlti + rContext) * 1.12f * size + gap * size); // (over the ultimate: the move that comes and goes)
             var jumpAt = new Vector2(specialAt.x + (rSpecial + rJump) * 1.12f * size + gap * size, specialAt.y);
             Corner(shield, shieldAt, left, size, alpha);
             Corner(ultimate, ultiAt, left, size, alpha);
@@ -374,13 +374,22 @@ namespace SquashBot.UI
             if (contextMove == move.Value && context.isActiveAndEnabled && contextSet) return;
             contextSet = true;
             contextMove = move.Value;
-            context.SetIcon(move.Value switch { Move.Heavy => DuelIcon.Heavy, Move.Upper => DuelIcon.Upper, Move.Breaker => DuelIcon.Breaker, _ => DuelIcon.Finish });
-            context.SetColour(move.Value switch { Move.Heavy => AttackOrange, Move.Upper => new Color(1f, 0.3f, 0.25f), Move.Breaker => BreakerBlue, _ => new Color(0.95f, 0.2f, 0.35f) });
+            context.SetIcon(move.Value switch { Move.Heavy => DuelIcon.Heavy, Move.Upper => DuelIcon.Upper, Move.Breaker => DuelIcon.Breaker, Move.Body => bodyUpper ? DuelIcon.Upper : DuelIcon.Heavy, _ => DuelIcon.Finish });
+            context.SetColour(move.Value switch { Move.Heavy => AttackOrange, Move.Upper => new Color(1f, 0.3f, 0.25f), Move.Breaker => BreakerBlue, Move.Body => SpecialPurple, _ => new Color(0.95f, 0.2f, 0.35f) });
             context.SetPulse(true);
             context.SetRing(1f, Color.white);
         }
 
         private bool contextSet;
+        private bool bodyUpper;
+
+        /// <summary>The body's special offered on the button (an uppercut shows its own picture); a new one refreshes it.</summary>
+        public void SetBodyOffer(bool upper)
+        {
+            if (bodyUpper == upper) return;
+            bodyUpper = upper;
+            contextSet = false;
+        }
 
         /// <summary>
         /// A finger on a button or in the dead ring round it (screen pixels): no blow, walk or swipe from it. The open

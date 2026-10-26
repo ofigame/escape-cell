@@ -31,6 +31,17 @@ namespace SquashBot.Combat
             t = 0f;
         }
 
+        /// <summary>The least distance kept between two fighters' middles when one lunges at the other.</summary>
+        public const float MinBodyGap = 1.0f;
+
+        /// <summary>A lunge of <paramref name="distance"/> from <paramref name="from"/> toward <paramref name="to"/>, cut so the
+        /// two keep <see cref="MinBodyGap"/> (and <paramref name="spare"/> more) apart: never into the other.</summary>
+        public static float KeptApart(Vector3 from, Vector3 to, float distance, float spare = 0f)
+        {
+            var d = to - from; d.y = 0f;
+            return Mathf.Min(distance, Mathf.Max(0f, d.magnitude - MinBodyGap - spare));
+        }
+
         /// <summary>Slid <paramref name="distance"/> along <paramref name="direction"/> over <paramref name="outSeconds"/>, held
         /// <paramref name="holdSeconds"/>, home in <paramref name="backSeconds"/> (a blow's lunge; the place never moves).</summary>
         public void Lunge(Vector3 direction, float distance, float outSeconds, float holdSeconds, float backSeconds)

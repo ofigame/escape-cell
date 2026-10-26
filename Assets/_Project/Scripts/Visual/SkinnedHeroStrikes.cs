@@ -19,7 +19,12 @@ namespace SquashBot.Visual
         private const float ClipImpact = 0.2f;
 
         /// <summary>The duel's crouch held (the game sets it each frame from the player's finger, or the rival's AI).</summary>
-        public bool CrouchHeld { get => crouchHeld; set { crouchHeld = value; if (value) Crouch(0.75f, 0.12f); } }
+        public bool CrouchHeld { get => crouchHeld; set { crouchHeld = value; if (value) { crouchAt = Time.time; Crouch(0.75f, 0.12f); } } }
+        private float crouchAt = -9f;
+
+        /// <summary>Crouched now: held, and told so within the last moment (the duel sets it each frame; when it stops
+        /// telling, a round's end, the body stands rather than staying crouched).</summary>
+        private bool Crouched => crouchHeld && Time.time - crouchAt < 0.3f;
 
         /// <summary>The body's blow playing now (Weapon: none).</summary>
         public Combat.BodyStrike Striking => strikeNow;
@@ -31,7 +36,7 @@ namespace SquashBot.Visual
             if (!ready) Setup();
             string clip = "strike_" + part.ToString().ToLowerInvariant();
             // a made clip: played at the rate that puts its impact (ClipImpact in) on the blow's contact
-            if (ClipOf(clip) != null && PlayClip(clip, Mathf.Clamp(ClipImpact / Mathf.Max(0.02f, wind + hit * 0.5f), 0.6f, 2.6f), false, true)) { ReactionClip = clip; return; }
+            if (ClipOf(clip) != null && PlayClip(clip, Mathf.Clamp(ClipImpact / Mathf.Max(0.02f, wind + hit * 0.5f), 0.7f, ReadableRate), false, true)) { ReactionClip = clip; return; }
             strikeNow = part;
             strikeT = 0f;
             strikeWind = Mathf.Max(0.04f, wind); strikeHit = Mathf.Max(0.02f, hit); strikeBack = Mathf.Max(0.08f, back);

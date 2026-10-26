@@ -418,7 +418,7 @@ namespace SquashBot.Gameplay
                     if (wHeld != null) { wHeld.HoldOut(true); wHeld.Trail(true); } // (a ring from its tip)
                     Body(spinner, BodyMove.Whirl, spins * Turn + 0.15f, OtherAt());
                     var startRot = spinner != null ? spinner.rotation : Quaternion.identity;
-                    if (spinner != null) { var drift = OtherAt() - MeAt(); VisualRoot.On(CombatFeel.RootOf(spinner)).Lunge(drift, 1.5f, spins * Turn * 0.6f, spins * Turn * 0.3f, 0.35f); }
+                    if (spinner != null) { var drift = OtherAt() - MeAt(); VisualRoot.On(CombatFeel.RootOf(spinner)).Lunge(drift, VisualRoot.KeptApart(MeAt(), OtherAt(), 1.5f), spins * Turn * 0.6f, spins * Turn * 0.3f, 0.35f); }
                     for (int i = 0; i < spins && challengeRun && chPhase == ChPhase.Duel && !Down(); i++)
                     {
                         for (float e = 0f; e < Turn; e += Time.deltaTime)

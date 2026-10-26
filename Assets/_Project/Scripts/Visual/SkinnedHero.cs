@@ -890,7 +890,7 @@ namespace SquashBot.Visual
             LastReaction = dir + "/" + height + "/" + strength + "/v" + variant;
             switch (strength)
             {
-                case Combat.HitStrength.Light: Squint(0.45f, 0.15f); if (ClipOf("hit_small") != null && PlayMove("hit_small", 1.7f)) ReactionClip = "hit_small"; break;
+                case Combat.HitStrength.Light: Squint(0.45f, 0.15f); if (ClipOf("hit_small") != null && PlayMove("hit_small", 1.15f)) ReactionClip = "hit_small"; break;
                 case Combat.HitStrength.Medium: Rock(from, intensity); Squint(0.6f, 0.25f); Brows(0.6f, 0.3f); break; // (the stagger: a step back, rocking)
                 default: DriveBack(from); Squint(1f, 0.4f); Brows(1f, 0.45f); Squash(1f); break; // (driven back two steps, onto a knee)
             }
@@ -1458,6 +1458,7 @@ namespace SquashBot.Visual
                 restLocal[bone] = asMade.TryGetValue(bone.name, out var q) ? q : bone.localRotation;
             }
             Rest();
+            KnowFingers(); // (the fingers' turns toward the palms, worked out at rest)
             var frameInv = Quaternion.Inverse(Frame);
             foreach (var kv in restLocal) restRel[kv.Key] = frameInv * kv.Key.rotation;
             if (head == null) head = FindHead();
@@ -1632,6 +1633,7 @@ namespace SquashBot.Visual
             ReactionPose(dt);
             MovePose(dt);
             StrikePose(dt);
+            KeepAboveGround(dt); // (never into the floor: before the grip, so the weapon follows the lifted hand)
             Grip();
 
             // Lids: a blink now and then; half down when angry or striking (the eyes narrow).
@@ -1689,6 +1691,7 @@ namespace SquashBot.Visual
                     if (c.GetChild(0).gameObject.activeInHierarchy) weapon = c.GetChild(0);
                 }
             }
+            CloseHands(); // (both fists closed: on the weapon's grip, on the shield's strap)
             if (weapon == null) return;
             weapon.parent.localPosition = gripRest; // each frame from its own place (the snap below must not add up)
             if (playing != null || Flailing)
@@ -1700,9 +1703,10 @@ namespace SquashBot.Visual
             {
                 weapon.parent.localRotation = Quaternion.identity;
                 Reach(armR, foreR, handR, weapon.position);
+                HandAlong(weapon.up); // (the grip through the fist, not across the arm)
             }
-            // then the weapon into the palm itself (between the wrist and the middle finger's root), so the fist closes on it
-            var palm = fingerR != null ? Vector3.Lerp(handR.position, fingerR.position, 0.65f) : handR.position;
+            // then the weapon into the fist itself, so the fingers close round its grip
+            var palm = FistMiddle;
             weapon.parent.position += palm - weapon.position;
             if (playing == null && !Flailing) gripTurn = Quaternion.Inverse(handR.rotation) * weapon.parent.rotation; // (how it sits in the hand at rest: a move keeps it so)
             var held = weapon.GetComponentInChildren<HeldWeapon>();

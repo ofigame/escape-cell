@@ -543,7 +543,10 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>The duel blow's wind-up you can see: its contact this long after the tap (data: the feel settings).</summary>
-        private static float ContactLead => (Combat.CombatLibrary.Settings != null ? Combat.CombatLibrary.Settings.contactLeadMs : 75f) / 1000f;
+        private static float ContactLead => Mathf.Max(ReadableLead, (Combat.CombatLibrary.Settings != null ? Combat.CombatLibrary.Settings.contactLeadMs : 75f) / 1000f);
+
+        /// <summary>The least wind-up the eye can follow: the arm goes back before the blow comes (seconds tap to contact).</summary>
+        private const float ReadableLead = 0.22f;
 
         // the duel blow waiting for its contact (one at a time: a new blow lands the last first); no allocation per blow
         private bool landPending;

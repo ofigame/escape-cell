@@ -215,9 +215,10 @@ namespace SquashBot.Gameplay
                 if (rivalCombo >= 2 && myMeter >= 1f) ctx = DuelSkillBar.Move.Breaker;
                 else if (myComboMove == UpperCombo) ctx = DuelSkillBar.Move.Upper;
                 else if (myComboMove == HeavyCombo) ctx = DuelSkillBar.Move.Heavy;
+                else if (BodyOffer() is PhysKind offered) { ctx = DuelSkillBar.Move.Body; skillBar.SetBodyOffer(offered == PhysKind.Uppercut); } // (a body special, now and then)
             }
             skillBar.SetContext(ctx);
-            if (ctx.HasValue) skillBar.SetContextTime(ctx == DuelSkillBar.Move.Finish ? (finishUntil - Time.time) / 2.2f : ctx == DuelSkillBar.Move.Breaker ? 1f : (comboMoveUntil - Time.time) / ComboMoveTime);
+            if (ctx.HasValue) skillBar.SetContextTime(ctx == DuelSkillBar.Move.Finish ? (finishUntil - Time.time) / 2.2f : ctx == DuelSkillBar.Move.Breaker ? 1f : ctx == DuelSkillBar.Move.Body ? BodyOfferLeft : (comboMoveUntil - Time.time) / ComboMoveTime);
             skillBar.SetMeters(myMeter, rivalMeter, UltiCost);
             skillBar.SetHearts(duelHearts, chPhase == ChPhase.Duel && health < 0.999f);
             UpdateGuard(dt);
@@ -312,6 +313,9 @@ namespace SquashBot.Gameplay
                     break;
                 case DuelSkillBar.Move.Jump:
                     Jump();
+                    break;
+                case DuelSkillBar.Move.Body:
+                    TakeBodyOffer();
                     break;
                 case DuelSkillBar.Move.Ultimate:
                     if (myMeter < UltiCost) return; // (the quick-ulti week: two parts)

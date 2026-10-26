@@ -25,7 +25,25 @@ namespace SquashBot.Visual
         private bool stanceSwapped, walkBack;
 
         /// <summary>Behind its shield now (the duel sets it each frame): the block's stance.</summary>
-        public bool Guarding { get; set; }
+        public bool Guarding { get => guarding && Time.time - guardAt < 0.3f; set { guarding = value; if (value) guardAt = Time.time; } } // (told each frame: not told, not guarding)
+        private bool guarding;
+        private float guardAt = -9f;
+
+        /// <summary>
+        /// The body back to standing at rest, every move, clip, stance and reaction let go (a round starts again on the
+        /// marks: nothing of the last moment of the round before stays on it).
+        /// </summary>
+        public void ResetPose()
+        {
+            StandUp();
+            StopMove(); StopUpper();
+            fadingClip = null; fadeOutLeft = 0f; clipWeight = 0f;
+            crouchHeld = false; guarding = false;
+            moveNow = BodyMove.None; strikeNow = Combat.BodyStrike.Weapon;
+            if (moveLift != null) { StopCoroutine(moveLift); moveLift = null; }
+            stanceClip = idleClip; idleTime = 0f; stanceSwapped = true;
+            if (ready) Rest();
+        }
         /// <summary>The clips wrote the bones this frame (the hips then hold their place: no reset to rest).</summary>
         private bool clipsWrote;
 
@@ -57,7 +75,7 @@ namespace SquashBot.Visual
             KnowBones();
             if (bones == null) return false;
             // the stance: a duel, nothing else moving the body; crouched, behind the shield, walking or standing still
-            var want = crouchHeld && crouchClip != null ? crouchClip : Guarding && blockClip != null ? blockClip : walking ? walkClip : idleClip;
+            var want = Crouched && crouchClip != null ? crouchClip : Guarding && blockClip != null ? blockClip : walking ? walkClip : idleClip;
             bool stance = want != null && HeldWeapon.DuelStance && upperPlaying == null && knock == null && !Flailing && moveNow == BodyMove.None && strikeNow == Combat.BodyStrike.Weapon;
             // another stance wanted: the one now eased out quickly, the new one in (each from its start)
             bool swap = want != stanceClip;
@@ -108,10 +126,49 @@ namespace SquashBot.Visual
 
         /// <summary>A quick step back out of a blow's way (the dodge's clip, about <paramref name="seconds"/> long); false if
         /// there is none.</summary>
-        public bool DodgeClip(float seconds = 0.6f) => ClipOf("dodge") != null && PlayClip("dodge", Mathf.Clamp(MoveLength("dodge") / Mathf.Max(0.2f, seconds), 1f, 3.5f), false, true);
+        public bool DodgeClip(float seconds = 0.9f) => ClipOf("dodge") != null && PlayClip("dodge", Mathf.Clamp(MoveLength("dodge") / Mathf.Max(0.2f, seconds), 1f, ReadableRate * 1.3f), false, true);
 
         /// <summary>The duel lost: down on its knees, beaten (the clip; false if there is none).</summary>
         public bool Defeated() => ClipOf("defeated") != null && PlayClip("defeated", 1f, false, true);
+
+        private Renderer[] bodyRenderers;
+        private readonly List<Renderer> headRenderers = new List<Renderer>();
+        private Transform headSeen;
+        private float groundLift;
+        /// <summary>The most the body is lifted off the floor (in its own units: about a lying body's thickness).</summary>
+        private const float MaxGroundLift = 0.25f;
+
+        /// <summary>
+        /// Never into the ground: the body's lowest point (its armour as it lies, its head) kept on the floor it stands on
+        /// (its visual root's height), the whole body lifted from the hips by what went under, eased. The skinned bounds
+        /// are last frame's (they carry last frame's lift); the head's are this frame's. No allocation per frame.
+        /// </summary>
+        private void KeepAboveGround(float dt)
+        {
+            if (hips == null || transform.parent == null) return;
+            if (bodyRenderers == null)
+            {
+                // only what the hips carry (the body; not a cape or a piece hung elsewhere, which the lift does not move:
+                // measured, it would ask for more lift each frame without end)
+                var carried = new List<Renderer>();
+                foreach (var sm in GetComponentsInChildren<SkinnedMeshRenderer>(true)) if (sm.rootBone != null && (sm.rootBone == hips || sm.rootBone.IsChildOf(hips))) carried.Add(sm);
+                bodyRenderers = carried.ToArray();
+            }
+            if (headSeen != head) { headSeen = head; headRenderers.Clear(); if (head != null) head.GetComponentsInChildren(true, headRenderers); }
+            float ground = transform.parent.position.y;
+            float low = float.MaxValue;
+            for (int i = 0; i < bodyRenderers.Length; i++)
+                if (bodyRenderers[i] != null && bodyRenderers[i].enabled) low = Mathf.Min(low, bodyRenderers[i].bounds.min.y - groundLift);
+            for (int i = 0; i < headRenderers.Count; i++)
+                if (headRenderers[i] != null && headRenderers[i].enabled && headRenderers[i].gameObject.activeInHierarchy) low = Mathf.Min(low, headRenderers[i].bounds.min.y);
+            if (low == float.MaxValue) return;
+            // only while it is down (falling, lying, getting up): standing, its feet are on the floor already (and the
+            // skinned bounds reach a little under them)
+            bool down = knock != null || playingHold || Flailing;
+            float need = down ? Mathf.Clamp(ground + 0.004f - low, 0f, MaxGroundLift * ParentScale) : 0f; // (never more than a lying body's thickness)
+            groundLift = need > groundLift ? need : Mathf.MoveTowards(groundLift, need, dt * 1.5f); // (up at once, down gently)
+            if (groundLift > 0.0005f) hips.position += Vector3.up * groundLift;
+        }
 
         /// <summary>A reaction's clip ends: held on its last frame, eased back into the pose.</summary>
         private void ClipEnded(AnimationClip c, float at)

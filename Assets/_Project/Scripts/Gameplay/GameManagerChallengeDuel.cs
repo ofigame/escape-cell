@@ -222,6 +222,12 @@ namespace SquashBot.Gameplay
             float myArmor = rivalPassive == PassiveKind.Piercer ? duelMine.armor * 0.75f : duelMine.armor; // (its piercer: a quarter of foi's armour ignored)
             float share = DuelPower.Blow(w, duelTheirs.weaponTier) * (1f + duelTheirs.damage) * (1f - myArmor) / Mathf.Max(1, duelMine.hp);
             hunt.AddChallengeFoe(theirs, hp, share, look, rivalHeld, 0);
+            // both bodies back to standing at rest: nothing of the round before (a crouch, a guard, a fall) stays on them
+            ResetPhysical();
+            var mySkin = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null;
+            if (mySkin != null) mySkin.ResetPose();
+            var foeSkin = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
+            if (foeSkin != null) foeSkin.ResetPose();
             hunt.LaneX = LaneOn ? laneX : (int?)null; // (the lane duel: the rival keeps to the line)
             // (no name tags over the two foi: their names and ranks are over the health bars)
             if (myTag != null) { Destroy(myTag.gameObject); myTag = null; }

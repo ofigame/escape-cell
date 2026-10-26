@@ -40,7 +40,7 @@ namespace SquashBot.Visual
             swayAxis = Vector3.Cross(Vector3.up, away.normalized);
             swayPow = Mathf.Clamp01(strength);
             ReactionClip = "stagger";
-            if (ClipInstead("stagger", 1.3f)) return; // (a made clip: it rocks by itself)
+            if (ClipInstead("stagger", 1.0f)) return; // (a made clip: it rocks by itself)
             swayT = 0f;
         }
 
@@ -120,7 +120,11 @@ namespace SquashBot.Visual
         private System.Collections.IEnumerator Swept(Vector3 from, Vector3 sweepDir, float lie)
         {
             ReactionClip = "sweep_fall";
-            if (ClipOf("sweep_fall") != null && PlayClip("sweep_fall", 1.6f, true, true)) { /* (held lying on its last frame until the get-up) */ Face(FaceMoment.Surprise); yield return WhileClip(); yield return Lying(lie); yield return GetUp(Vector3.Cross(Vector3.up, -transform.forward), 82f, false); ReactionClip = ""; knock = null; yield break; }
+            // the fall's clip over most of the rules' time down (no faster than ReadableRate), held lying on its last frame
+            // for the rest of it, then the get-up
+            var fallClip = ClipOf("sweep_fall");
+            float fallRate = fallClip != null ? Mathf.Clamp(fallClip.length / Mathf.Max(0.3f, lie * 0.9f), 1f, ReadableRate) : 1f;
+            if (fallClip != null && PlayClip("sweep_fall", fallRate, true, true)) { Face(FaceMoment.Surprise); yield return WhileClip(); yield return Lying(Mathf.Max(0f, lie - fallClip.length / fallRate)); yield return GetUp(Vector3.Cross(Vector3.up, -transform.forward), 82f, false); ReactionClip = ""; knock = null; yield break; }
             var away = transform.position - from; away.y = 0f;
             if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
             away.Normalize();
@@ -261,7 +265,7 @@ namespace SquashBot.Visual
                 // the clip starts from lying itself: the body upright under it, the coded lying let go
                 flail = flat = rise = push = 0f; kneelLean = 0f;
                 transform.localRotation = bodyRot; transform.localPosition = bodyPos; bodyRollOffset = Vector3.zero;
-                if (ClipFor(ReactionClip, 0.9f)) { yield return WhileClip(); yield break; } // (about the rules' get-up: never lying while free)
+                if (ClipFor(ReactionClip, GetUpSeconds)) { yield return WhileClip(); yield break; } // (about the rules' get-up: never lying while free)
             }
             if (playingHold) StopMove(); // (a fall's clip held lying: the coded get-up from here)
             float lift = Lift;
@@ -299,7 +303,13 @@ namespace SquashBot.Visual
         private bool ClipInstead(string name, float rate = 1f) => ClipOf(name) != null && PlayMove(name, rate);
 
         /// <summary>A clip played to last about <paramref name="seconds"/>.</summary>
-        private bool ClipFor(string name, float seconds) { var c = ClipOf(name); return c != null && PlayMove(name, Mathf.Max(0.5f, c.length / Mathf.Max(0.1f, seconds))); }
+        private bool ClipFor(string name, float seconds) { var c = ClipOf(name); return c != null && PlayMove(name, Mathf.Clamp(c.length / Mathf.Max(0.1f, seconds), 0.5f, ReadableRate)); }
+
+        /// <summary>The fastest a made clip plays (faster and the eye cannot follow the move).</summary>
+        private const float ReadableRate = 1.4f;
+
+        /// <summary>The rules' get-up time (the duel sets it): the get-up clip played over it.</summary>
+        public static float GetUpSeconds = 0.9f;
 
         /// <summary>Waits while a reaction's made clip plays.</summary>
         private System.Collections.IEnumerator WhileClip()
