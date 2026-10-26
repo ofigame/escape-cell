@@ -182,14 +182,14 @@ namespace SquashBot.Gameplay
                     var across = them != null ? Vector3.Cross(Vector3.up, them.position - from).normalized : Vector3.right;
                     if (theirSkin != null) theirSkin.SweptOff(from, across, tab.downSeconds);
                     FaceFor(them, FaceMoment.Surprise);
-                    cameraRig.Shake(0.5f);
-                    AudioManager.PlaySfx(Sfx.Impact, 1f, 0.8f);
+                    PhysCameraMoment(k, them != null ? them.position : from);
+                    AudioManager.PlaySfx(Sfx.Impact, 1f, 0.8f, 0.08f);
                     break;
                 }
                 case PhysKind.Uppercut:
                     PhysLaunch(mine);
-                    cameraRig.Shake(0.6f);
-                    AudioManager.PlaySfx(Sfx.Impact, 1f, 0.7f);
+                    PhysCameraMoment(k, them != null ? them.position : from);
+                    AudioManager.PlaySfx(Sfx.Impact, 1f, 0.7f, 0.08f);
                     break;
                 case PhysKind.Headbutt:
                 {
@@ -199,15 +199,16 @@ namespace SquashBot.Gameplay
                     FaceFor(them, FaceMoment.KnockedOut); // (the eyes rolling)
                     FaceFor(me, FaceMoment.SlyGrin); // (it hurt, but it was worth it)
                     PowerSlow(0.3f, 0.15f); // (the knock: a breath of slow motion)
-                    cameraRig.Shake(0.7f);
-                    AudioManager.PlaySfx(Sfx.Impact, 1f, 0.55f);
+                    PhysCameraMoment(k, them != null ? them.position : from);
+                    AudioManager.PlaySfx(Sfx.Impact, 1f, 0.55f, 0.08f);
+                    AudioManager.PlaySfx(Sfx.Clang, 0.5f, 0.7f, 0.1f); // (the big "tok" of two heads)
                     break;
                 }
                 default: // the shoulder: its combo broken
                     if (mine) rivalCombo = 0; else myCombo = 0;
                     if (theirSkin != null) theirSkin.Rock(from, 1f);
-                    cameraRig.Shake(0.35f);
-                    AudioManager.PlaySfx(Sfx.Impact, 0.9f, 1f);
+                    PhysCameraMoment(k, them != null ? them.position : from);
+                    AudioManager.PlaySfx(Sfx.Impact, 0.9f, 1f, 0.08f);
                     break;
             }
         }
@@ -244,7 +245,7 @@ namespace SquashBot.Gameplay
                 var skin = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
                 if (skin != null) skin.AirHit(robot.transform.position);
                 TrainingNote(TrainingEvent.AirHit);
-                if (rivalAirHits >= PhysTab.airHitsMax) hunt.FoeInvulnUntil = Mathf.Max(hunt.FoeInvulnUntil, now + 0.6f); // (the last: down it comes)
+                if (rivalAirHits >= PhysTab.airHitsMax) { hunt.FoeInvulnUntil = Mathf.Max(hunt.FoeInvulnUntil, now + 0.6f); CameraImpulse.Fire(CameraImpulseLevel.Heavy, Vector3.down); } // (the last: down it comes)
                 return Mathf.Max(1, Mathf.RoundToInt(damage * times));
             }
             if (height == HitHeight.High && RivalCrouching)
@@ -285,6 +286,50 @@ namespace SquashBot.Gameplay
                 HurtMe(times, BlowKind.Air);
                 if (skin != null) skin.AirHit(hunt.ChallengeFoeAt ?? robot.transform.position);
             }
+        }
+
+        // ---------- The camera's moments (the design's section 6) ----------
+
+        private float camTiltUntil, camZoomUntil;
+
+        /// <summary>
+        /// Over the duel's camera: after a sweep's contact, tilted down a little for a second; while a launched one is in the
+        /// air, raised to keep it in the frame; at a flying headbutt's contact, 8% nearer for 0.15 s. Pictures only.
+        /// </summary>
+        private void PhysCamera(ref Vector3 pos, ref Quaternion rot, Vector3 focus)
+        {
+            float now = Time.time;
+            if (now < camZoomUntil) pos = Vector3.Lerp(pos, focus, 0.08f);
+            bool aloft = now < rivalLaunchUntil - PhysTab.getUpSeconds || now < myLaunchUntil - PhysTab.getUpSeconds;
+            camRise = Mathf.MoveTowards(camRise, aloft ? 1f : 0f, Time.unscaledDeltaTime * 3f);
+            if (camRise > 0f) { pos += Vector3.up * 1.2f * camRise; rot = Quaternion.AngleAxis(-4f * camRise, rot * Vector3.right) * rot; }
+            if (now < camTiltUntil) rot = Quaternion.AngleAxis(4f * Mathf.Sin(Mathf.Clamp01((camTiltUntil - now) / 1f) * Mathf.PI), rot * Vector3.right) * rot;
+        }
+
+        private float camRise;
+
+        /// <summary>The body attack's camera: the sweep's tilt and its fall's thud, the uppercut's kick from below, the
+        /// headbutt's zoom; each with a sound a little different every time.</summary>
+        private void PhysCameraMoment(PhysKind k, Vector3 at)
+        {
+            switch (k)
+            {
+                case PhysKind.Sweep:
+                    camTiltUntil = Time.time + 1f;
+                    cameraRig.StartCoroutine(Thud(0.3f, at));
+                    break;
+                case PhysKind.Uppercut: CameraImpulse.Fire(CameraImpulseLevel.Medium, Vector3.up); break;
+                case PhysKind.Headbutt: camZoomUntil = Time.time + 0.15f; CameraImpulse.Fire(CameraImpulseLevel.Medium, Vector3.back); break;
+                default: CameraImpulse.Fire(CameraImpulseLevel.Light, Vector3.back); break;
+            }
+        }
+
+        /// <summary>A fall's thud as it reaches the ground: a short vertical shake, dust.</summary>
+        private System.Collections.IEnumerator Thud(float after, Vector3 at)
+        {
+            yield return new WaitForSeconds(after);
+            CameraImpulse.Fire(CameraImpulseLevel.Medium, Vector3.down);
+            AudioManager.PlaySfx(Sfx.Impact, 0.8f, 0.6f, 0.08f);
         }
 
         // ---------- The computer rival ----------

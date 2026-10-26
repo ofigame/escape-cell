@@ -537,7 +537,7 @@ namespace SquashBot.Gameplay
             bool sync = challengeRun && chPhase == ChPhase.Duel && heldWeapon != null && w.kind != WeaponKind.Gun;
             if (heldWeapon != null) heldWeapon.SwingQuick(sync ? ContactLead : 0.02f);
             if (sync && heldWeapon.Current != null) RivalReads(null, heldWeapon.Current.height); // (the rival may crouch under a high one)
-            if (sync) { AtContact(heldWeapon, () => LandStrike(at, crowd, w, damage)); return true; }
+            if (sync) { AtContact(heldWeapon, at, crowd, w, damage); return true; }
             LandStrike(at, crowd, w, damage);
             return true;
         }
@@ -545,33 +545,40 @@ namespace SquashBot.Gameplay
         /// <summary>The duel blow's wind-up you can see: its contact this long after the tap (data: the feel settings).</summary>
         private static float ContactLead => (Combat.CombatLibrary.Settings != null ? Combat.CombatLibrary.Settings.contactLeadMs : 75f) / 1000f;
 
-        /// <summary>Runs <paramref name="land"/> at the weapon's contact (once; at the latest a little after, if the swing
-        /// is cut short).</summary>
-        private void AtContact(HeldWeapon held, System.Action land)
+        // the duel blow waiting for its contact (one at a time: a new blow lands the last first); no allocation per blow
+        private bool landPending;
+        private GridPos landAt;
+        private bool landCrowd;
+        private WeaponDef landWeapon;
+        private int landDamage;
+        private float landDeadline;
+        private HeldWeapon landHeld;
+        private bool landWired;
+
+        /// <summary>The blow lands at the weapon's contact (or at the latest a little after, if the swing is cut short).</summary>
+        private void AtContact(HeldWeapon held, GridPos at, bool crowd, WeaponDef w, int damage)
         {
-            bool done = false;
-            System.Action<Combat.SwingPhase> on = null;
-            on = p =>
-            {
-                if (p != Combat.SwingPhase.Contact || done) return;
-                done = true;
-                held.Phase -= on;
-                land();
-            };
-            held.Phase += on;
-            cameraRig.StartCoroutine(ContactDeadline(() =>
-            {
-                if (done) return;
-                done = true;
-                if (held != null) held.Phase -= on;
-                land();
-            }, ContactLead + 0.25f));
+            if (landPending) LandNow(); // (the last one first)
+            if (!landWired) { landWired = true; HeldWeapon.PhaseReached += OnLandPhase; }
+            landPending = true; landAt = at; landCrowd = crowd; landWeapon = w; landDamage = damage; landHeld = held;
+            landDeadline = Time.time + ContactLead + 0.25f;
         }
 
-        private System.Collections.IEnumerator ContactDeadline(System.Action then, float seconds)
+        private void OnLandPhase(HeldWeapon h, Combat.SwingPhase p)
         {
-            yield return new WaitForSeconds(seconds);
-            then();
+            if (landPending && p == Combat.SwingPhase.Contact && h == landHeld) LandNow();
+        }
+
+        private void LandNow()
+        {
+            landPending = false;
+            LandStrike(landAt, landCrowd, landWeapon, landDamage);
+        }
+
+        /// <summary>Each frame: a pending landing whose contact never came (the swing cut short) lands at its deadline.</summary>
+        private void LandDeadline()
+        {
+            if (landPending && Time.time >= landDeadline) LandNow();
         }
 
         /// <summary>The blow's landing: its look (the slash, the lean, the shake) and its hit on whatever is in reach.</summary>

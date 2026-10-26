@@ -590,6 +590,7 @@ namespace SquashBot.Gameplay
         private void UpdateChallenge(float dt)
         {
             UpdatePhysical();
+            LandDeadline();
             UpdateLive();
             UpdateDuelLab();
             if (!challengeRun || State != GameState.Playing) return;
@@ -879,6 +880,7 @@ namespace SquashBot.Gameplay
             var focus = mid + Vector3.up * (sideDist * cs.focusPerDistance);
             pos = mid + sideDir * sideDist + Vector3.up * (cs.heightBase + sideDist * cs.heightPerDistance);
             rot = Quaternion.LookRotation(focus - pos);
+            PhysCamera(ref pos, ref rot, focus); // (the body attacks' moments: a tilt, a rise after a launched one, a zoom)
         }
 
         /// <summary>A city stage: the camera sees far (Galata's tower far up its street, the palace far across the Bosphorus),
