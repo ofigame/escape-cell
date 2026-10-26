@@ -14,6 +14,14 @@ namespace SquashBot.Combat
     {
         public DuelAnimationRow[] rows = new DuelAnimationRow[0];
 
+        [Header("The plain chain by weapon mastery (looks only; the rules' section 5)")]
+        /// <summary>From this mastery the chain has a third blow: the family's body blow (a kick, a shoulder, a headbutt).</summary>
+        public int bodyBlowMastery = 3;
+        /// <summary>From this mastery the chain's last blow is the family's finishing blow instead.</summary>
+        public int finishMastery = 5;
+        /// <summary>From this mastery (the golden weapon's) the blows' trails glow gold.</summary>
+        public int glowMastery = 10;
+
         private Dictionary<DuelAction, DuelAnimationRow> byAction;
         private static DuelAnimationMap current;
 

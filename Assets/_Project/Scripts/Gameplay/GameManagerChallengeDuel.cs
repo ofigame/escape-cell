@@ -228,6 +228,10 @@ namespace SquashBot.Gameplay
             if (mySkin != null) mySkin.ResetPose();
             var foeSkin = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
             if (foeSkin != null) foeSkin.ResetPose();
+            // each one's weapon mastery: how rich its plain chain looks (the player's own, the rival's card's)
+            if (heldWeapon != null) heldWeapon.MasteryLevel = Mastery.Level(Armory.Equipped);
+            var foeHeld = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<HeldWeapon>() : null;
+            if (foeHeld != null) foeHeld.MasteryLevel = rival != null ? rival.mastery : 0;
             hunt.LaneX = LaneOn ? laneX : (int?)null; // (the lane duel: the rival keeps to the line)
             // (no name tags over the two foi: their names and ranks are over the health bars)
             if (myTag != null) { Destroy(myTag.gameObject); myTag = null; }

@@ -13,5 +13,7 @@ namespace SquashBot.Combat
         ComboHeavy, ComboKnockdown, ComboBreaker,
         SpecialFly, SpecialBackflip, SpecialSkyStrike, SpecialHook, SpecialShock, SpecialIceWall, SpecialPatch, SpecialTeleport,
         UltiCinematic, UltiWhirlwind, UltiQuake, UltiChainLightning, UltiMirror, UltiMeteor, UltiCoreBurst, UltiIronBody,
+        // (added after: the mastery chain's finishing blows, by family; new moves always at the end, the map keeps their numbers)
+        ChainFinishSword, ChainFinishSpear, ChainFinishAxe, ChainFinishHeavy,
     }
 }

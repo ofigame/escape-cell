@@ -525,9 +525,20 @@ namespace SquashBot.Visual
             float untilContact = Mathf.Max(0f, (windS + hitS * 0.5f - swingTime) / rate0);
             if (body != null && SkinnedHero.ChainByClips && IsChainBlow(current))
             {
-                // the plain chain by the animation map: the cut and the thrust in turn, the contact frame on this swing's
-                // (no body blow in the chain: the rules' 3.1)
-                body.PlayChainBlow(untilContact);
+                // the plain chain by the animation map, by the weapon's mastery (looks only, the rules' section 5): the cut
+                // and the thrust; from bodyBlowMastery a third, the family's body blow; from finishMastery the last the
+                // family's finishing blow; the contact frame on this swing's
+                var map = DuelAnimationMap.Current;
+                int length = MasteryLevel >= map.bodyBlowMastery ? 3 : 2;
+                int step = Mathf.Max(0, chain - 1) % length;
+                bool last = step == length - 1 && length == 3;
+                if (last && MasteryLevel >= map.finishMastery && body.PlayChainAction(FinishOf(family), untilContact)) { }
+                else if (step == 2)
+                {
+                    var bodyBlow = BodyBlowOf(family);
+                    body.StrikeWithBody(bodyBlow, Mathf.Max(0f, untilContact - hitS * 0.5f / rate0), hitS / rate0, backS / rate0, target != null ? target.position : transform.position + transform.forward);
+                }
+                else body.PlayChainAction(step == 0 ? DuelAction.ChainSlash : DuelAction.ChainStab, untilContact);
             }
             else if (current.body != BodyStrike.Weapon && body != null)
             {
@@ -556,6 +567,42 @@ namespace SquashBot.Visual
         }
 
 
+
+        /// <summary>The wielder's mastery of this weapon (0 .. 10; the game sets it: the player's, the rival's card's): how rich
+        /// its plain chain looks.</summary>
+        public int MasteryLevel
+        {
+            get => mastery;
+            set { mastery = value; GlowTrail(); }
+        }
+        private int mastery;
+        private bool glowing;
+
+        /// <summary>The family's finishing blow in the mastery chain.</summary>
+        private static DuelAction FinishOf(WeaponFamily f) =>
+            f == WeaponFamily.Sword ? DuelAction.ChainFinishSword : f == WeaponFamily.Spear ? DuelAction.ChainFinishSpear : f == WeaponFamily.Axe ? DuelAction.ChainFinishAxe : DuelAction.ChainFinishHeavy;
+
+        /// <summary>The family's body blow (its chain's own: the sword's heel kick, the spear's front kick, the axe's
+        /// shoulder, the heavy weapon's headbutt).</summary>
+        private BodyStrike BodyBlowOf(WeaponFamily f)
+        {
+            var chainOf = CombatLibrary.Family(f).chain;
+            if (chainOf != null) foreach (var b in chainOf) if (b != null && b.body != BodyStrike.Weapon) return b.body;
+            return f == WeaponFamily.Sword ? BodyStrike.HeelKick : f == WeaponFamily.Spear ? BodyStrike.FrontKick : f == WeaponFamily.Axe ? BodyStrike.Shoulder : BodyStrike.Headbutt;
+        }
+
+        /// <summary>A master's trail (the golden weapon's mastery): gold, brighter.</summary>
+        private void GlowTrail()
+        {
+            if (trail == null || glowing || mastery < DuelAnimationMap.Current.glowMastery) return;
+            glowing = true;
+            var gold = new Color(1f, 0.82f, 0.3f);
+            var g = new Gradient();
+            g.SetKeys(new[] { new GradientColorKey(Color.Lerp(gold, Color.white, 0.6f), 0f), new GradientColorKey(gold, 0.4f), new GradientColorKey(gold, 1f) },
+                new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.75f, 0.5f), new GradientAlphaKey(0f, 1f) });
+            trail.colorGradient = g;
+            trailWidth *= 1.25f;
+        }
 
         /// <summary>A blow of the family's plain chain (not its POWER HIT, KNOCKDOWN or flying blows).</summary>
         private bool IsChainBlow(AttackMotionData b)

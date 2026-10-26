@@ -49,6 +49,11 @@ namespace SquashBot.Combat
             DuelAnimationRow.Of(A.UltiMeteor, "ulti_1", 0f, 0.6f, T.Fit, temporary: true, note: "stand-in: ULTI_1's wind-up, and the meteor"),
             DuelAnimationRow.Of(A.UltiCoreBurst, "ulti_1", 0f, 0.6f, T.Fit, temporary: true, note: "stand-in: ULTI_1's wind-up, and the burst"),
             DuelAnimationRow.Of(A.UltiIronBody, "ulti_1", 0f, 0.6f, T.Fit, temporary: true, note: "stand-in: ULTI_1's wind-up, and the iron shell"),
+            // the mastery chain's finishing blows by family (section 5; stand-ins until each family's own)
+            DuelAnimationRow.Of(A.ChainFinishSword, "ulti_3", 1.0f, 1.95f, T.Contact, 1f, 1.77f, temporary: true, note: "stand-in: ULTI_3's turning swing"),
+            DuelAnimationRow.Of(A.ChainFinishSpear, "chain_stab", 0.35f, 1.25f, T.Contact, 1f, 0.92f, temporary: true, note: "stand-in: the thrust with its whole drawing back"),
+            DuelAnimationRow.Of(A.ChainFinishAxe, "ulti_1", 0.25f, 0.85f, T.Contact, 1f, 0.53f, temporary: true, note: "stand-in: ULTI_1's first wide swing"),
+            DuelAnimationRow.Of(A.ChainFinishHeavy, "ulti_2", 2.6f, 3.25f, T.Contact, 1f, 2.95f, temporary: true, note: "stand-in: ULTI_2's big punch"),
         };
     }
 }

@@ -72,12 +72,17 @@ namespace SquashBot.Visual
 
         /// <summary>The plain chain's next blow (the cut and the thrust in turn), its contact <paramref name="untilContact"/>
         /// seconds from now; never over a bigger move playing (an ultimate's own blows are its clip's).</summary>
-        public bool PlayChainBlow(float untilContact)
+        public bool PlayChainBlow(float untilContact) => PlayChainAction((chainTurn++ % 2) == 0 ? DuelAction.ChainSlash : DuelAction.ChainStab, untilContact);
+
+        /// <summary>A given blow of the plain chain (the cut, the thrust, a family's finish), its contact
+        /// <paramref name="untilContact"/> seconds from now; never over a bigger move playing.</summary>
+        public bool PlayChainAction(DuelAction a, float untilContact)
         {
-            if (playing != null && actionNow.HasValue && actionNow.Value != DuelAction.ChainSlash && actionNow.Value != DuelAction.ChainStab) return false;
-            var a = (chainTurn++ % 2) == 0 ? DuelAction.ChainSlash : DuelAction.ChainStab;
+            if (playing != null && actionNow.HasValue && !IsChainAction(actionNow.Value)) return false;
             return PlayAction(a, 0f, untilContact);
         }
+
+        private static bool IsChainAction(DuelAction a) => a == DuelAction.ChainSlash || a == DuelAction.ChainStab || a >= DuelAction.ChainFinishSword;
 
         /// <summary>Whether the plain chain is played by clips (then the body's coded blows are not).</summary>
         public static bool ChainByClips => HasAction(DuelAction.ChainSlash) && HasAction(DuelAction.ChainStab);

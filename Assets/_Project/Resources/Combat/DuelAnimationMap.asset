@@ -429,3 +429,58 @@ MonoBehaviour:
     hold: 0
     temporary: 1
     note: 'stand-in: ULTI_1''s wind-up, and the iron shell'
+  - action: 32
+    clips:
+    - ulti_3
+    start: 1
+    end: 1.95
+    timing: 2
+    speed: 1
+    contact: 1.77
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: 'stand-in: ULTI_3''s turning swing'
+  - action: 33
+    clips:
+    - chain_stab
+    start: 0.35
+    end: 1.25
+    timing: 2
+    speed: 1
+    contact: 0.92
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: 'stand-in: the thrust with its whole drawing back'
+  - action: 34
+    clips:
+    - ulti_1
+    start: 0.25
+    end: 0.85
+    timing: 2
+    speed: 1
+    contact: 0.53
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: 'stand-in: ULTI_1''s first wide swing'
+  - action: 35
+    clips:
+    - ulti_2
+    start: 2.6
+    end: 3.25
+    timing: 2
+    speed: 1
+    contact: 2.95
+    maxSpeed: 2.5
+    loop: 0
+    hold: 0
+    temporary: 1
+    note: 'stand-in: ULTI_2''s big punch'
+  bodyBlowMastery: 3
+  finishMastery: 5
+  glowMastery: 10
