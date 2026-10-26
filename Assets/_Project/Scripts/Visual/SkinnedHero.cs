@@ -1600,6 +1600,7 @@ namespace SquashBot.Visual
             BodyIntoBlow();
             Reacting(dt);
             ReactionPose(dt);
+            MovePose(dt);
             Grip();
 
             // Lids: a blink now and then; half down when angry or striking (the eyes narrow).
@@ -1673,6 +1674,8 @@ namespace SquashBot.Visual
             var palm = fingerR != null ? Vector3.Lerp(handR.position, fingerR.position, 0.65f) : handR.position;
             weapon.parent.position += palm - weapon.position;
             if (playing == null && !Flailing) gripTurn = Quaternion.Inverse(handR.rotation) * weapon.parent.rotation; // (how it sits in the hand at rest: a move keeps it so)
+            var held = weapon.GetComponentInChildren<HeldWeapon>();
+            if (held != null) held.AfterGrip(); // (the blade onto its target from where the hand holds it)
         }
 
         /// <summary>Two-joint reach: the elbow bends (on the side it already bends to) so the hand comes to the target.</summary>

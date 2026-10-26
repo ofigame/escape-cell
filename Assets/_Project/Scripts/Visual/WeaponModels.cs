@@ -317,14 +317,10 @@ namespace SquashBot.Visual
 
         public static HeldWeapon Attach(Transform robotVisual, WeaponDef w)
         {
-            // a carrier between the fighter and its weapon: the weapon goes where the body's picture is pushed or lunges
-            var carrier = new GameObject("WeaponCarrier").transform;
-            carrier.SetParent(robotVisual, false);
             var pivot = new GameObject("HeldWeapon").transform;
-            pivot.SetParent(carrier, false);
+            pivot.SetParent(robotVisual, false); // (the body's grip keeps it in the hand: it goes where the body's picture is pushed or lunges)
             pivot.localPosition = new Vector3(0.32f, 0.22f, 0.06f);
             var h = pivot.gameObject.AddComponent<HeldWeapon>();
-            h.carrier = carrier;
             WeaponModels.Build(pivot, w, w.kind == WeaponKind.Spear ? 0.95f : w.kind == WeaponKind.Gun ? 1.6f : 1.15f); // big enough to read on the floor
             h.isGun = w.kind == WeaponKind.Gun;
             h.family = CombatLibrary.FamilyOf(w.kind);
@@ -479,11 +475,34 @@ namespace SquashBot.Visual
             Lunge();
         }
 
+        // the hold a move asks for over the rest: straight out to the side (the whirlwind), raised over the head (the
+        // quake, the chain lightning)
+        private int holdPose;
+
+        /// <summary>The weapon held straight out to the side (the whirlwind's spin), or back at rest.</summary>
+        public void HoldOut(bool on) => holdPose = on ? 1 : holdPose == 1 ? 0 : holdPose;
+
+        /// <summary>The weapon raised over the head (the quake, the chain lightning), or back at rest.</summary>
+        public void HoldUp(bool on) => holdPose = on ? 2 : holdPose == 2 ? 0 : holdPose;
+
+        /// <summary>The weapon's trail on or off (the whirlwind's ring from its tip).</summary>
+        public void Trail(bool on) => TrailOn(on);
+
+        private bool HeldPose()
+        {
+            if (holdPose == 0) return false;
+            Vector3 p; Quaternion r;
+            if (holdPose == 1) { p = new Vector3(0.78f, 0.42f, 0.0f); r = Quaternion.Euler(0f, 0f, -90f); } // (its length out along the arm)
+            else { p = new Vector3(0.18f, 0.82f, 0.02f); r = Quaternion.Euler(-15f, 0f, 0f); } // (straight up, a little back)
+            float k = Mathf.Min(1f, VisualTime.DeltaFor(this) * 14f);
+            transform.localPosition = Vector3.Lerp(transform.localPosition, p, k);
+            transform.localRotation = Quaternion.Slerp(transform.localRotation, r, k);
+            return true;
+        }
+
         /// <summary>Who this weapon's blows are aimed at, for its lunge (the duel sets it: the rival's model, or foi's;
         /// none: no lunge).</summary>
         public static Func<HeldWeapon, Transform> TargetOf;
-        private Transform carrier;
-        private VisualRoot ownRoot;
 
         /// <summary>
         /// The design's contact rule (2.1): the striker's picture slides toward its target as the blow winds up, so the
@@ -492,10 +511,10 @@ namespace SquashBot.Visual
         /// </summary>
         private void Lunge()
         {
-            if (current == null || TargetOf == null || carrier == null) return;
+            if (current == null || TargetOf == null) return;
             var target = TargetOf(this);
             if (target == null) return;
-            var me = CombatFeel.RootOf(carrier.parent);
+            var me = CombatFeel.RootOf(transform.parent); // (its fighter: the weapon hangs on the fighter's visual)
             if (me == null) return;
             var dir = target.position - me.position; dir.y = 0f;
             float offset = CombatLibrary.ContactOffset(family, current);
@@ -510,14 +529,7 @@ namespace SquashBot.Visual
             if (them != null && lean > 0f) VisualRoot.On(them).Lunge(-dir, lean, toContact, 0.02f, 0.12f);
         }
 
-        /// <summary>Each frame: the weapon carried where the body's picture is (pushed by a blow, or lunging).</summary>
-        private void FollowBody()
-        {
-            if (carrier == null) return;
-            if (ownRoot == null) { var root = CombatFeel.RootOf(carrier.parent); if (root != null) ownRoot = root.GetComponent<VisualRoot>(); }
-            var off = ownRoot != null ? ownRoot.Offset : Vector3.zero;
-            carrier.localPosition = carrier.parent != null ? carrier.parent.InverseTransformVector(off) : off;
-        }
+
 
         private AttackMotionData NextBlow(bool advance)
         {
@@ -795,6 +807,14 @@ namespace SquashBot.Visual
             if (swing < 1f || spin < 1f) StopAtBodies();
         }
 
+        /// <summary>The body's grip has put the weapon in the hand (after this weapon's own frame): the blade turned onto
+        /// its target and kept out of the bodies once more, from where the hand now holds it.</summary>
+        public void AfterGrip()
+        {
+            if (swing < 1f) ReachBody();
+            if (swing < 1f || spin < 1f) StopAtBodies();
+        }
+
         /// <summary>How far round its grip the blade may be turned onto its target's body at contact (degrees).</summary>
         private const float ReachTurn = 75f;
 
@@ -831,7 +851,6 @@ namespace SquashBot.Visual
 
         private void Update()
         {
-            FollowBody();
             if (!rested) { restPosition = transform.localPosition; rested = true; }
             float dt = VisualTime.DeltaFor(this);
             if (trail != null && trail.emitting) trail.time = trailTime * Mathf.Clamp(Time.deltaTime > 0f ? Time.deltaTime / Mathf.Max(1e-4f, dt) : 1f, 1f, 20f); // (slowed or frozen: the trail lasts as long on screen)
@@ -851,6 +870,7 @@ namespace SquashBot.Visual
             if (Flourishing(dt)) return;
             if (swing >= 1f)
             {
+                if (HeldPose()) return; // (a move's hold)
                 if (DuelRest()) return;
                 Pose(Mathf.Sin(Time.time * 2f) * 3f);
                 return;
