@@ -15,5 +15,13 @@ namespace SquashBot.Combat
         Shoulder,
         /// <summary>A headbutt (high, straight): the heavy weapon's.</summary>
         Headbutt,
+        /// <summary>The leg sweep (4.3): down on one knee, the back leg sweeping a half circle at the ankles.</summary>
+        Sweep,
+        /// <summary>The uppercut (4.4): from the crouch, the legs springing, the fist rising from below.</summary>
+        Uppercut,
+        /// <summary>The flying headbutt (4.5): in the air, the body drawn back, then thrown forward head first.</summary>
+        FlyingHeadbutt,
+        /// <summary>The shoulder charge (4.6): the shoulder forward, a quick lunge.</summary>
+        ShoulderCharge,
     }
 }

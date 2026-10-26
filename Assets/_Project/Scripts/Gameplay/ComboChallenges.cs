@@ -42,7 +42,10 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>The challenge's name: the family's (or the defence's) and its number.</summary>
-        public static string Name(ComboChallengeData c) => Loc.F("cc.name", Loc.T(c.family < 0 ? "cc.defense" : "cc.family." + c.family), c.number);
+        public static string Name(ComboChallengeData c) => Loc.F("cc.name", Loc.T(c.family == BodyFamily ? "cc.body" : c.family < 0 ? "cc.defense" : "cc.family." + c.family), c.number);
+
+        /// <summary>The body attacks' challenges' family (the sweep, the uppercut, the headbutt, the shoulder, the crouch).</summary>
+        public const int BodyFamily = -2;
 
         public static string StepText(ComboStep s) => Loc.F("cc.step." + s.kind, s.count);
 
@@ -66,6 +69,11 @@ namespace SquashBot.Gameplay
             list.Add(ComboChallengeData.Make("defense3", -1, 3, TrainingDummy.Attacking, 200, 0, null, new ComboStep(ComboStepKind.Perfects, 3)));
             list.Add(ComboChallengeData.Make("defense4", -1, 4, TrainingDummy.Ulti, 200, 0, null, new ComboStep(ComboStepKind.DodgeUlti)));
             list.Add(ComboChallengeData.Make("defense5", -1, 5, TrainingDummy.Attacking, 0, 5, "title.wall", new ComboStep(ComboStepKind.PerfectCounter), new ComboStep(ComboStepKind.PowerHit)));
+            // the body's attacks (the choreography design's 4.1: the training extended with them)
+            list.Add(ComboChallengeData.Make("body1", BodyFamily, 1, TrainingDummy.Standing, 100, 0, null, new ComboStep(ComboStepKind.Sweep, 3)));
+            list.Add(ComboChallengeData.Make("body2", BodyFamily, 2, TrainingDummy.Standing, 150, 0, null, new ComboStep(ComboStepKind.Uppercut), new ComboStep(ComboStepKind.AirHit, 2)));
+            list.Add(ComboChallengeData.Make("body3", BodyFamily, 3, TrainingDummy.Standing, 150, 0, null, new ComboStep(ComboStepKind.Headbutt), new ComboStep(ComboStepKind.ShoulderCharge)));
+            list.Add(ComboChallengeData.Make("body4", BodyFamily, 4, TrainingDummy.Attacking, 200, 0, null, new ComboStep(ComboStepKind.CrouchUnder, 3)));
             return list;
         }
     }

@@ -63,6 +63,11 @@ namespace SquashBot.Gameplay
             lab.Add("T: AĞIR", () => LabReaction(HitStrength.Heavy), LabReact);
             lab.Add("T: FIRLAT", () => LabReaction(HitStrength.Launch), LabReact);
             lab.Add("T: SÜPÜR", LabSweep, LabReact);
+            lab.Add("SÜPÜRME!", () => { myPhysReady[0] = 0f; LabPhys(PhysKind.Sweep); }, new Color(0.8f, 0.55f, 0.2f));
+            lab.Add("APARKAT", () => { myPhysReady[1] = 0f; LabPhys(PhysKind.Uppercut); }, new Color(0.8f, 0.55f, 0.2f));
+            lab.Add("KAFA ATMA", () => { myPhysReady[2] = 0f; myJumpUntil = Time.time + 0.6f; LabPhys(PhysKind.Headbutt); }, new Color(0.8f, 0.55f, 0.2f));
+            lab.Add("OMUZ", () => { myPhysReady[3] = 0f; LabPhys(PhysKind.Shoulder); }, new Color(0.8f, 0.55f, 0.2f));
+            lab.Add("KUKLA ÇÖMEL", () => rivalCrouchUntil = Time.time + 3f, LabTune);
             lab.Add("T: HAVADA VUR", () => cameraRig.StartCoroutine(LabJuggle(1)), LabReact);
             lab.Add("DONMA −", () => CombatFeel.HitstopMultiplier -= 0.5f, LabTune);
             lab.Add("DONMA +", () => CombatFeel.HitstopMultiplier += 0.5f, LabTune);
@@ -193,6 +198,17 @@ namespace SquashBot.Gameplay
                 if (heldWeapon != null) heldWeapon.Swing();
                 skin.AirHit(robot.transform.position);
             }
+        }
+
+        /// <summary>The player's body attack from the duel's gap (foi stepped there first), its cooldown cleared.</summary>
+        private void LabPhys(PhysKind k)
+        {
+            if (chPhase != ChPhase.Duel || !(hunt.ChallengeFoeTile is GridPos foe)) return;
+            int dir = robot.Position.y <= foe.y ? -1 : 1;
+            var spot = new GridPos(laneX, foe.y + dir * HuntSystem.DuelGap);
+            if (robot.Position != spot && grid.InBounds(spot) && grid.IsStandable(spot)) robot.Spawn(grid, spot);
+            strikeCooldown = 0f;
+            TryPhys(true, k);
         }
 
         private void LabSlow(float s)

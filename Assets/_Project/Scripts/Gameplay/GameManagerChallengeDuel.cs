@@ -139,6 +139,7 @@ namespace SquashBot.Gameplay
         private void BuildDuelBoard(int stage)
         {
             duelStage = Mathf.Clamp(stage, 0, DuelStages.Length - 1);
+            ResetPhysical(); // (nobody down, in the air or crouched)
             levelTps = false; // (the duel is always seen from the board's camera)
             zoneRadius = 99f; zoneDrawn = -1; zoneHurtMe = zoneHurtFoe = 0f; zoneAnnounced = false;
             hunt.Unsafe = null;

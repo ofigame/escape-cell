@@ -13,6 +13,11 @@ namespace SquashBot.Visual
         private Combat.BodyStrike strikeNow = Combat.BodyStrike.Weapon;
         private float strikeT, strikeWind, strikeHit, strikeBack;
 
+        private bool crouchHeld;
+
+        /// <summary>The duel's crouch held (the game sets it each frame from the player's finger, or the rival's AI).</summary>
+        public bool CrouchHeld { get => crouchHeld; set { crouchHeld = value; if (value) Crouch(0.75f, 0.12f); } }
+
         /// <summary>The body's blow playing now (Weapon: none).</summary>
         public Combat.BodyStrike Striking => strikeNow;
 
@@ -37,7 +42,11 @@ namespace SquashBot.Visual
                 switch (strikeNow)
                 {
                     case Combat.BodyStrike.HeelKick:
-                    case Combat.BodyStrike.FrontKick: return kneeR != null && kneeR.childCount > 0 ? kneeR.GetChild(0) : kneeR;
+                    case Combat.BodyStrike.FrontKick:
+                    case Combat.BodyStrike.Sweep: return kneeR != null && kneeR.childCount > 0 ? kneeR.GetChild(0) : kneeR;
+                    case Combat.BodyStrike.Uppercut: return foreL != null && foreL.childCount > 0 ? foreL.GetChild(0) : foreL;
+                    case Combat.BodyStrike.FlyingHeadbutt: return head;
+                    case Combat.BodyStrike.ShoulderCharge: goto case Combat.BodyStrike.Shoulder;
                     case Combat.BodyStrike.Shoulder:
                     {
                         // the shoulder leading into the blow (whichever is further ahead)
@@ -108,6 +117,47 @@ namespace SquashBot.Visual
                         hips.position += fr.forward * 0.3f * hgt * strike; // (the forehead thrown in with the body behind it)
                     }
                     break;
+            }
+            var frame = transform.parent != null ? transform.parent : transform;
+            float height = head != null ? Mathf.Max(0.3f, head.position.y - transform.position.y) : 1f;
+            switch (strikeNow)
+            {
+                case Combat.BodyStrike.Sweep:
+                {
+                    // down on one knee (the wind-up), the back leg swept round low at the ankles, the body turning with it
+                    float low = Mathf.Max(wind, strike);
+                    Crouch(0.9f * low, 0.06f);
+                    Turn(legR, fwd, -30f * low); Turn(legR, right, kneeBack * 35f * strike); // (straight out, near the ground)
+                    Turn(kneeR, right, kneeBack * 20f * (1f - strike) * low);
+                    Turn(spine, up, (25f * wind - 60f * strike) * forward); // (round with the sweep)
+                    Turn(armL, fwd, -downL * 45f * low); // (the free arm out for balance)
+                    break;
+                }
+                case Combat.BodyStrike.Uppercut:
+                {
+                    // gathered low (the wind-up), then springing up, the free fist driving up from below to the chin
+                    Crouch(0.85f * wind * (1f - strike), 0.06f);
+                    Turn(armL, right, forward * (-20f * wind + 150f * strike)); Turn(foreL, fwd, -downL * 70f * strike);
+                    Turn(spine, right, forward * (18f * wind - 15f * strike));
+                    if (hips != null) hips.position += Vector3.up * 0.22f * height * strike; // (off the ground with it)
+                    break;
+                }
+                case Combat.BodyStrike.FlyingHeadbutt:
+                {
+                    // drawn back in the air, the arms back (the wind-up), then thrown forward head first, flying low at the other
+                    Turn(spine, right, forward * (-25f * wind + 55f * strike)); Turn(neck, right, forward * (-20f * wind + 25f * strike));
+                    Turn(armL, right, -forward * 60f * Mathf.Max(wind, strike)); Turn(armR, right, -forward * 40f * Mathf.Max(wind, strike));
+                    Turn(legL, right, kneeBack * 30f * strike); Turn(legR, right, kneeBack * 30f * strike); // (the legs trailing)
+                    if (hips != null) hips.position += (Vector3.up * 0.35f * (wind + strike * 0.3f) + frame.forward * 0.3f * strike) * height;
+                    if (wind > 0.5f) Squint(1f, 0.2f);
+                    break;
+                }
+                case Combat.BodyStrike.ShoulderCharge:
+                {
+                    Turn(spine, up, 60f * strike * forward); Turn(spine, right, forward * 30f * strike);
+                    if (hips != null) hips.position += frame.forward * 0.25f * height * strike;
+                    break;
+                }
             }
             if (strikeT >= total) { strikeNow = Combat.BodyStrike.Weapon; ReactionClip = ""; }
         }

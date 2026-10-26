@@ -21,7 +21,8 @@ namespace SquashBot.Gameplay
         {
             public Vector2 start, last, stickBase;
             public float pressAt;
-            public bool ignored, walking, swiped, moved;
+            public bool ignored, walking, swiped, moved, crouching;
+            public float downAt = -1f;
             public readonly Vector2[] trail = new Vector2[16];
             public readonly float[] trailAt = new float[16];
             public int trailN;
@@ -29,6 +30,7 @@ namespace SquashBot.Gameplay
             public Vector2? pendingUp;
             public float pendingAt, curl;
             public Vector2 curlDir, curlPos;
+            public int crouchAt;
         }
 
         private readonly Dictionary<int, Finger> fingers = new Dictionary<int, Finger>();
@@ -101,6 +103,7 @@ namespace SquashBot.Gameplay
             foreach (int id in gone) Lift(id, fingers[id].last);
 
             var cmd = queued.Count > 0 ? queued.Dequeue() : default;
+            foreach (var kv in fingers) if (kv.Value.crouching) cmd.crouch = true; // (while any finger holds its crouch)
             if (walker != int.MinValue && fingers.TryGetValue(walker, out var w) && w.walking && !w.swiped)
             {
                 float radius = DuelTouchSettings.Current.stickRadiusDp * PixelsPerDp;
@@ -148,10 +151,19 @@ namespace SquashBot.Gameplay
                 if (f.curl >= s.curlTurn || Time.unscaledTime - f.pendingAt > s.curlWaitMs / 1000f) FireUp(f);
                 return;
             }
+            if (f.downAt >= 0f && !f.crouching && Time.unscaledTime - f.downAt > CrouchHold) f.crouching = true; // (held: a crouch)
+            if (f.crouching)
+            {
+                // crouched: a swipe up from here is the uppercut (once)
+                if (!f.swiped && SwipeFrom(f, pos, f.crouchAt) > 0) { f.swiped = true; queued.Enqueue(new InputCommand { upper = true }); }
+                return;
+            }
             if (f.swiped) return;
+            int side = SideFlick(f, pos);
+            if (side != 0) { f.swiped = true; StopWalking(id); queued.Enqueue(new InputCommand { charge = side }); return; }
             var swipe = Swipe(f, pos);
             if (swipe > 0) { f.pendingUp = (pos - f.start).normalized; StartCurl(f, pos); StopWalking(id); return; }
-            if (swipe < 0) { f.swiped = true; StopWalking(id); queued.Enqueue(new InputCommand { dodge = true }); return; }
+            if (swipe < 0) { f.downAt = Time.unscaledTime; f.crouchAt = f.trailN; StopWalking(id); return; } // (a dodge if let go soon, else a crouch)
             if (!f.walking && walker == int.MinValue)
             {
                 var d = pos - f.start;
@@ -191,6 +203,8 @@ namespace SquashBot.Gameplay
             if (walker == id) walker = int.MinValue;
             if (f.ignored) return;
             if (f.pendingUp.HasValue) { FireUp(f); return; }
+            if (f.downAt >= 0f && !f.crouching) { queued.Enqueue(new InputCommand { dodge = true }); return; } // (let go soon: a dodge)
+            if (f.crouching) return; // (the crouch ends with the finger)
             if (f.swiped || f.walking) return;
             // a swipe let go before any frame saw it: judged on the lift too
             Note(f, pos);
@@ -200,6 +214,45 @@ namespace SquashBot.Gameplay
             var s = DuelTouchSettings.Current;
             bool quick = Time.unscaledTime - f.pressAt <= s.tapMaxMs / 1000f;
             if (!f.moved && (pos - f.start).magnitude <= s.tapMaxDp * PixelsPerDp && quick) queued.Enqueue(new InputCommand { tap = pos });
+        }
+
+        /// <summary>How long a swipe down must be held to crouch (the sensitivity's steps scale it).</summary>
+        private static float CrouchHold
+        {
+            get
+            {
+                var s = DuelTouchSettings.Current;
+                int sense = SaveData.TouchSensitivity;
+                return s.crouchHoldMs / 1000f * s.swipeLengthSteps[Mathf.Clamp(sense, 0, s.swipeLengthSteps.Length - 1)];
+            }
+        }
+
+        /// <summary>A quick swipe since trail point <paramref name="from"/> (the crouch's start): up (1), down (-1) or none.</summary>
+        private static int SwipeFrom(Finger f, Vector2 pos, int from)
+        {
+            var s = DuelTouchSettings.Current;
+            float min = s.swipeMinDp * PixelsPerDp;
+            float now = Time.unscaledTime, window = s.swipeMaxMs / 1000f;
+            int n = Mathf.Min(f.trailN - from, f.trail.Length);
+            for (int k = 1; k < n; k++)
+            {
+                int i = ((f.trailN - 1 - k) % f.trail.Length + f.trail.Length) % f.trail.Length;
+                if (now - f.trailAt[i] > window) break;
+                var v = pos - f.trail[i];
+                if (Mathf.Abs(v.y) >= min && Mathf.Abs(v.y) >= Mathf.Abs(v.x) * s.swipeRatio) return v.y > 0f ? 1 : -1;
+            }
+            return 0;
+        }
+
+        /// <summary>A quick flick sideways within the swipe's time from the press (the shoulder charge): -1, 1 or 0.</summary>
+        private static int SideFlick(Finger f, Vector2 pos)
+        {
+            var s = DuelTouchSettings.Current;
+            if (Time.unscaledTime - f.pressAt > s.swipeMaxMs / 1000f) return 0; // (a slow drag walks)
+            float min = s.swipeMinDp * s.chargeLengthTimes * PixelsPerDp;
+            var v = pos - f.start;
+            if (Mathf.Abs(v.x) >= min && Mathf.Abs(v.x) >= Mathf.Abs(v.y) * s.swipeRatio) return v.x > 0f ? 1 : -1;
+            return 0;
         }
 
         private static void Note(Finger f, Vector2 pos)
@@ -230,6 +283,8 @@ namespace SquashBot.Gameplay
         }
 
         private bool upWas, downWas;
+        private float downKeyAt = -1f, sideKeyAt = -10f;
+        private int sideKeyWas, lastSide;
 
         /// <summary>The computer's keys: A/D or the arrows walk, W/up jumps, S/down dodges.</summary>
         private void Keys(ref InputCommand cmd)
@@ -243,9 +298,21 @@ namespace SquashBot.Gameplay
             float x = Input.GetAxisRaw("Horizontal");
             bool up = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow), down = Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow);
 #endif
-            if (x != 0f && !cmd.stick.HasValue) cmd.stick = new Vector2(x, 0f);
-            if (up && !upWas && !cmd.flick.HasValue) cmd.flick = Vector2.up;
-            if (down && !downWas) cmd.dodge = true;
+            // S held: a crouch (let go soon: a dodge); S + W: the uppercut; D/A twice quickly: the shoulder charge
+            if (down && !downWas) downKeyAt = Time.unscaledTime;
+            bool crouchKey = down && downKeyAt >= 0f && Time.unscaledTime - downKeyAt > CrouchHold;
+            if (!down && downWas && downKeyAt >= 0f && Time.unscaledTime - downKeyAt <= CrouchHold) cmd.dodge = true;
+            if (!down) downKeyAt = -1f;
+            if (crouchKey) cmd.crouch = true;
+            int side = x > 0f ? 1 : x < 0f ? -1 : 0;
+            if (side != 0 && sideKeyWas == 0)
+            {
+                if (side == lastSide && Time.unscaledTime - sideKeyAt < 0.3f) cmd.charge = side; // (twice quickly)
+                sideKeyAt = Time.unscaledTime; lastSide = side;
+            }
+            sideKeyWas = side;
+            if (x != 0f && !cmd.stick.HasValue && !crouchKey) cmd.stick = new Vector2(x, 0f);
+            if (up && !upWas && !cmd.flick.HasValue) { if (crouchKey) cmd.upper = true; else cmd.flick = Vector2.up; }
             upWas = up; downWas = down;
         }
     }

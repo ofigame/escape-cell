@@ -39,6 +39,7 @@ namespace SquashBot.Gameplay
             tutorialOn = true;
             tutStep = 0;
             tutJumped = false;
+            tutSwept = false;
             BuildDuelBoard(3);
             tutHand = TutorialHand.Create(skillBar.Root);
             var skip = UI.Flat.Button(skillBar.Root, Loc.T("tut.skip"), new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(240f, 84f), new Color(0.15f, 0.18f, 0.3f, 0.9f), UI.Flat.Text, () => EndTutorial(true), 32f);
@@ -51,7 +52,7 @@ namespace SquashBot.Gameplay
         {
             while (tutorialOn && challengeRun && chPhase != ChPhase.Duel) yield return null;
             var bar = skillBar;
-            for (tutStep = 1; tutStep <= 8 && tutorialOn && challengeRun; tutStep++)
+            for (tutStep = 1; tutStep <= 9 && tutorialOn && challengeRun; tutStep++)
             {
                 Vector2 mid = new Vector2(120f, -200f);
                 var (gesture, at) = tutStep switch
@@ -63,10 +64,11 @@ namespace SquashBot.Gameplay
                     5 => (TutorialHand.Gesture.Press, bar.PointOf(0)),
                     6 => (TutorialHand.Gesture.SwipeDown, mid),
                     7 => (TutorialHand.Gesture.Tap, mid),
+                    9 => (TutorialHand.Gesture.SwipeDown, mid), // (down and held: a crouch; then a tap sweeps)
                     _ => (TutorialHand.Gesture.Press, bar.PointOf(1)),
                 };
                 if (tutHand != null) tutHand.Show(gesture, at);
-                skillBar?.SetTip(Loc.T("story.bip"), Loc.T("tut." + tutStep));
+                skillBar?.SetTip(Loc.T("story.bip"), Loc.T(tutStep == 9 ? "tut.sweep" : "tut." + tutStep));
                 tutFrom = robot.transform.position;
                 if (tutStep == 8) myMeter = 3f; // (the bar given full for it)
                 while (tutorialOn && challengeRun && !TutorialStepDone(tutStep))
@@ -82,7 +84,7 @@ namespace SquashBot.Gameplay
             if (!tutorialOn || !challengeRun) yield break;
             // the end: the rival loses by a hair (one more blow puts it down), the duel is over
             skillBar?.SetTip(Loc.T("story.bip"), Loc.T("tut.9"));
-            tutStep = 9;
+            tutStep = 10;
             chDuelLeft = 0.5f; // (the duel ends at the knock-down)
             while (tutorialOn && challengeRun && chPhase == ChPhase.Duel && hunt.ChallengeFoeHealth > 0.12f) { HitFoe(0.4f, Combat.BlowKind.None); yield return new WaitForSeconds(0.25f); }
             Prefs.SetInt(TutorialKey, 1);
@@ -99,6 +101,7 @@ namespace SquashBot.Gameplay
             5 => stats.mine.perfects >= 1,
             6 => stats.mine.dodges >= 1,
             7 => stats.mine.comboUsed >= 1,
+            9 => tutSwept,
             _ => stats.mine.ultis >= 1 && !ultimateOn && !moveBusy,
         };
 
@@ -112,9 +115,9 @@ namespace SquashBot.Gameplay
             if (!tutorialOn) return;
             if (!challengeRun) { EndTutorial(false); return; }
             if (chPhase != ChPhase.Duel) return;
-            if (tutStep < 9) chDuelLeft = Mathf.Max(chDuelLeft, 170f);
+            if (tutStep < 10) chDuelLeft = Mathf.Max(chDuelLeft, 170f);
             if (health < 0.5f) { health = 0.5f; RefreshHealthBar(); }
-            if (tutStep < 9 && hunt.ChallengeFoeHealth < 0.35f) hunt.HealFoe(0.4f);
+            if (tutStep < 10 && hunt.ChallengeFoeHealth < 0.35f) hunt.HealFoe(0.4f);
             bool attacks = tutStep >= 4 && tutStep <= 6;
             if (!attacks) hunt.StunFoe(0.5f);
             hunt.FoeReactScale = attacks ? 2.4f : 1f; // (slow blows to learn on)

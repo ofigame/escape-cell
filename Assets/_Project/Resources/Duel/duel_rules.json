@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "familyCooldown": [0.12, 0.18, 0.28, 0.30],
   "familyBlows": [4, 5, 7, 9, 12, 16, 5, 6, 9, 13, 16, 21, 8, 11, 15, 21, 28, 36, 9, 12, 17, 23, 30, 39],
   "familyComboTimes": [1, 1, 1.2, 1],
@@ -80,5 +80,18 @@
   "dodgeInvulnerable": 0.25,
   "dodgeCooldown": 1.2,
   "overtimeSeconds": 30,
-  "overtimeHealthTie": 0.01
+  "overtimeHealthTie": 0.01,
+  "physTimes": [1.5, 1.5, 1.6, 1.2],
+  "physCooldown": [2.5, 4, 3, 2],
+  "physGuardCost": [20, 30, 25, 10],
+  "physHeight": [2, 1, 0, 1],
+  "physStun": [0, 0, 0.3, 0],
+  "physOpen": [0, 0, 0, 0.3],
+  "physReach": [3, 3, 3, 3],
+  "downSeconds": 0.9,
+  "getUpSeconds": 0.5,
+  "airSeconds": 1,
+  "airHitsMax": 3,
+  "airHitTimes": [1, 0.8, 0.6],
+  "jumpAirSeconds": 0.65
 }

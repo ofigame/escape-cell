@@ -162,7 +162,7 @@ namespace SquashBot.Gameplay
             if (liveHooksWired) return;
             // The hunt's links (made once: the hunt outlives a language change, the challenge screens do not).
             liveHooksWired = true;
-            hunt.RemoteFoeStruck += () => { if (LiveActive) LiveNet.Hit(Time.time < myJumpUntil); }; // (in the air: the server adds the air blow's extra)
+            hunt.RemoteFoeStruck += () => { if (LiveActive) LiveNet.Hit(Time.time < myJumpUntil, heldWeapon != null && heldWeapon.Current != null ? (int)heldWeapon.Current.height : 1); }; // (in the air: the server adds the air blow's extra; its height: a crouch lets high ones by)
             hunt.SquadHitRemote += (id, damage, byFoi) => { if (LiveActive) LiveNet.SquadHit(id, damage, byFoi); };
             hunt.SquadHitFoe += damage => { if (LiveActive) LiveNet.FoeHit(damage); };
             hunt.RivalSentGroup += group =>
@@ -589,6 +589,7 @@ namespace SquashBot.Gameplay
         /// <summary>Each frame of a challenge: the live link, the duel being fought.</summary>
         private void UpdateChallenge(float dt)
         {
+            UpdatePhysical();
             UpdateLive();
             UpdateDuelLab();
             if (!challengeRun || State != GameState.Playing) return;

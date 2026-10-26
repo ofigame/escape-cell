@@ -5,5 +5,5 @@ namespace SquashBot.Gameplay
     /// HIT or a KNOCKDOWN, a blow in the air, a POWER HIT through a block; blocks in a row (or without the shield
     /// breaking), perfect guards, a perfect guard answered by a blow, a dodged ultimate.
     /// </summary>
-    public enum ComboStepKind { Chain, PowerHit, Knockdown, AirHit, PowerThroughBlock, BlockInRow, BlockNoBreak, Perfects, PerfectCounter, DodgeUlti }
+    public enum ComboStepKind { Chain, PowerHit, Knockdown, AirHit, PowerThroughBlock, BlockInRow, BlockNoBreak, Perfects, PerfectCounter, DodgeUlti, Sweep, Uppercut, Headbutt, ShoulderCharge, CrouchUnder }
 }

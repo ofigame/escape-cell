@@ -38,8 +38,14 @@ namespace SquashBot.Gameplay
         public bool flickCurl;
         /// <summary>A quick swipe down (the duel's dodge).</summary>
         public bool dodge;
+        /// <summary>A swipe down held (the duel's crouch): true every frame while the finger stays down.</summary>
+        public bool crouch;
+        /// <summary>A swipe up from a crouch (the duel's uppercut).</summary>
+        public bool upper;
+        /// <summary>A quick flick sideways (the duel's shoulder charge, or in the air its flying headbutt): -1 left, 1 right.</summary>
+        public int charge;
 
-        public bool IsEmpty => !move.HasValue && !jump && !holdStart && !holdPosition.HasValue && !holdEnd && !tap.HasValue && !spin && !stick.HasValue && !flick.HasValue && !dodge;
+        public bool IsEmpty => !move.HasValue && !jump && !holdStart && !holdPosition.HasValue && !holdEnd && !tap.HasValue && !spin && !stick.HasValue && !flick.HasValue && !dodge && !crouch && !upper && charge == 0;
     }
 
     /// <summary>

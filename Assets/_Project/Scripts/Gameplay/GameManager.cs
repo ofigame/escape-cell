@@ -1632,10 +1632,11 @@ namespace SquashBot.Gameplay
             command = GlassCellGate(command); // foi starts each floor in its glass cell
             bool onMark = duelCountdown || (challengeRun && chPhase == ChPhase.Lobby); // the duel's briefing and its 3, 2, 1: foi stands on its mark
             if (onMark) command = default;
+            command = PhysicalInput(command); // (the duel's crouch, sweep, uppercut, headbutt, shoulder)
             UpdateHover(command);
             if (!hovering && !onMark)
             {
-                if (!tpsOn && !ArenaActive && level.mission == MissionType.Hunt && InputReader.AttackKey()) KeyStrike(); // computers: space strikes
+                if (!tpsOn && !ArenaActive && level.mission == MissionType.Hunt && !physAte && InputReader.AttackKey()) KeyStrike(); // computers: space strikes
                 if (command.spin) SpinAttack();
                 else if (command.tap.HasValue && level.mission == MissionType.Hunt && TapStrike(command.tap.Value)) input.CancelTap();
                 else if (command.tap.HasValue && level.mission == MissionType.Hunt && input.StickMode) { KeyStrike(); input.CancelTap(); } // nothing tapped: a blow ahead

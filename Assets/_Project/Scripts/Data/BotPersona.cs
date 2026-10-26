@@ -28,6 +28,8 @@ namespace SquashBot.Data
         /// <summary>The defence (the design's §3.8): the chance to block a plain blow, to guard one perfectly, to dodge an
         /// ultimate, and how well it lets the shield go before it breaks (0..1).</summary>
         public float block, perfect, ultiDodge, release;
+        /// <summary>How often it reads a high blow (a crouch) or a sweep (a jump) as it starts: Er 5% .. Mareşal 35%.</summary>
+        public float read;
 
         public float React() => Random.Range(reactMin, reactMax);
 
@@ -58,6 +60,8 @@ namespace SquashBot.Data
             t.reactMin = rMin[band]; t.reactMax = rMax[band];
             t.whiff = whiff[band]; t.badShield = bad[band]; t.earlyHeart = early[band];
             t.breakerFrom = from[band];
+            float[] reads = { 0.05f, 0.15f, 0.25f, 0.35f };
+            t.read = Mathf.Clamp01(reads[band] * (p == Persona.Defensive ? 1.5f : 1f));
             // the dynamic difficulty: each step easier +60 ms and 3% more misses (harder: the other way)
             t.reactMin = Mathf.Max(0.12f, t.reactMin - 0.06f * shift);
             t.reactMax = Mathf.Max(0.16f, t.reactMax - 0.06f * shift);

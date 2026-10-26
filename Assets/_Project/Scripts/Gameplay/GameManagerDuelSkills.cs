@@ -281,7 +281,8 @@ namespace SquashBot.Gameplay
                         if (upper && !landed) { if (colosseum != null) colosseum.Cheer(1, 0.6f); break; } // (blocked or dodged: no throw)
                     }
                     if (colosseum != null) colosseum.Cheer(0, 0.9f);
-                    if (upper) cameraRig.StartCoroutine(BigMoment(false)); // the knockdown: a big moment
+                    if (upper && LiveActive) cameraRig.StartCoroutine(BigMoment(false)); // the knockdown: a big moment
+                    else if (upper) PhysLaunch(true); // (the knockdown launches it like the uppercut: it can be hit in the air)
                     break;
                 }
                 case DuelSkillBar.Move.Breaker:
@@ -1173,6 +1174,7 @@ namespace SquashBot.Gameplay
                 skillBar?.Shout(Loc.T("duel.broken"), new Color(1f, 0.45f, 0.4f));
                 return;
             }
+            if (RivalPhysical(dist)) return; // (a sweep, an uppercut, a headbutt, a shoulder: its personality's)
             if (dist <= 3.4f && Time.time > rivalJumpAt && Random.value < (t != null ? 0.03f + 0.12f * t.jump : 0.06f + 0.05f * bold))
             {
                 rivalJumpAt = Time.time + 9f;

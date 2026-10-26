@@ -17,6 +17,10 @@ namespace SquashBot.Gameplay
         public float swipeMinDp = 40f, swipeMaxMs = 250f, swipeRatio = 1.5f;
         /// <summary>The floating stick's reach (dp).</summary>
         public float stickRadiusDp = 72f;
+        [Tooltip("A swipe down let go within this long is a dodge; held longer, a crouch (ms; the sensitivity's steps scale it)")]
+        public float crouchHoldMs = 180f;
+        [Tooltip("A sideways flick (the shoulder charge): this many times a swipe's length, within the swipe's time")]
+        public float chargeLengthTimes = 1.4f;
         /// <summary>After a swipe up, how long to watch for a curl at its end (a somersault), and how much it must turn (degrees).</summary>
         public float curlWaitMs = 250f, curlTurn = 110f;
         /// <summary>The sensitivity steps: the swipe's length and its upright share are multiplied by these (calm, normal, eager).</summary>

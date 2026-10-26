@@ -128,6 +128,7 @@ namespace SquashBot.Gameplay
             hunt.Init(gridView, robot, fx, cameraRig);
             hunt.Hit += (p, share) =>
             {
+                if (PhysDodgesRivalBlow()) return; // (crouched under a high blow, or down: it goes by)
                 // A robot's or the monster's blow: its own share of health, not a crate's.
                 hitShareOverride = share;
                 OnBlockImpact(p);
@@ -535,6 +536,7 @@ namespace SquashBot.Gameplay
             // its contact, once (the design's sync rule); the rules counted it at the tap. The floors: it lands now.
             bool sync = challengeRun && chPhase == ChPhase.Duel && heldWeapon != null && w.kind != WeaponKind.Gun;
             if (heldWeapon != null) heldWeapon.SwingQuick(sync ? ContactLead : 0.02f);
+            if (sync && heldWeapon.Current != null) RivalReads(null, heldWeapon.Current.height); // (the rival may crouch under a high one)
             if (sync) { AtContact(heldWeapon, () => LandStrike(at, crowd, w, damage)); return true; }
             LandStrike(at, crowd, w, damage);
             return true;
@@ -575,6 +577,12 @@ namespace SquashBot.Gameplay
         /// <summary>The blow's landing: its look (the slash, the lean, the shake) and its hit on whatever is in reach.</summary>
         private void LandStrike(GridPos at, bool crowd, WeaponDef w, int damage)
         {
+            if (challengeRun && hunt.ChallengeFoeTile.HasValue && at == hunt.ChallengeFoeTile.Value)
+            {
+                var blow = heldWeapon != null ? heldWeapon.Current : null;
+                damage = PhysOnMyBlow(damage, blow != null ? blow.height : Combat.HitHeight.Mid); // (down, juggled, crouched under)
+                if (damage <= 0) { LeanTowardsBlow(GridView.ToWorld(at)); return; } // (no hit: only the swing)
+            }
             if (w.kind == WeaponKind.Gun) GunShotFx(GridView.ToWorld(at) + Vector3.up * 0.6f, w);
             // A blow you can see: a crescent of the weapon's colour sweeping through the target.
             else SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.GlowOf(w), 1f + 0.015f * Armory.Damage(w));

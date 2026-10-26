@@ -47,6 +47,11 @@ namespace SquashBot.Gameplay
                     else if (e == TrainingEvent.Hit && Time.time - perfectAt <= CounterWindow) Progress++;
                     break;
                 case ComboStepKind.DodgeUlti: if (e == TrainingEvent.DodgeUlti) Progress++; break;
+                case ComboStepKind.Sweep: if (e == TrainingEvent.Sweep) Progress++; break;
+                case ComboStepKind.Uppercut: if (e == TrainingEvent.Uppercut) Progress++; break;
+                case ComboStepKind.Headbutt: if (e == TrainingEvent.Headbutt) Progress++; break;
+                case ComboStepKind.ShoulderCharge: if (e == TrainingEvent.ShoulderCharge) Progress++; break;
+                case ComboStepKind.CrouchUnder: if (e == TrainingEvent.CrouchUnder) Progress++; break;
             }
             if (Progress < s.count) return false;
             Step++;

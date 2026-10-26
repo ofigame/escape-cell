@@ -17,7 +17,7 @@ namespace SquashBot.Data
     public static class LiveNet
     {
         /// <summary>The live protocol this game speaks (the server turns older ones away).</summary>
-        private const int Protocol = 8; // 8: the duel's one table (rv = its version; a newer one comes with "matched"), air blows, the moves' stuns; 7: the defence (block, perfect guard, dodge) (6: the league ceiling; 5: harder bars and combos; 4: the duel moves)
+        private const int Protocol = 9; // 9: the body's attacks (pa), the crouch (cr), the jump (jp), the blow's height (h); 8: the duel's one table (rv = its version; a newer one comes with "matched"), air blows, the moves' stuns; 7: the defence (block, perfect guard, dodge) (6: the league ceiling; 5: harder bars and combos; 4: the duel moves)
         private static string Url => (FoiNet.DevServer != null ? FoiNet.DevServer.Replace("https://", "wss://").Replace("http://", "ws://") + "/v1/live" : "wss://apifoi.ofigame.com/v1/live") + "?v=" + Protocol + "&rv=" + DuelBalanceTable.Version;
 
         /// <summary>A message from the server (only the fields its kind uses are set; <see cref="raw"/> is the text itself).</summary>
@@ -182,6 +182,18 @@ namespace SquashBot.Data
         public static void Hit() => Send("{\"t\":\"hit\"}");
         /// <summary>A blow; <paramref name="air"/>: struck in the air (the server counts the air blow's extra, not too often).</summary>
         public static void Hit(bool air) => Send(air ? "{\"t\":\"hit\",\"a\":1}" : "{\"t\":\"hit\"}");
+
+        /// <summary>A blow landing, with its height (HitHeight: 0 high, 1 middle, 2 low: a crouch lets high ones by).</summary>
+        public static void Hit(bool air, int height) => Send("{\"t\":\"hit\"" + (air ? ",\"a\":1" : "") + (height != 1 ? ",\"h\":" + height : "") + "}");
+
+        /// <summary>A body attack (PhysKind: 0 sweep, 1 uppercut, 2 flying headbutt, 3 shoulder charge) at its contact.</summary>
+        public static void Phys(int kind) => Send("{\"t\":\"pa\",\"k\":" + kind + "}");
+
+        /// <summary>Crouched or standing again.</summary>
+        public static void Crouch(bool on) => Send("{\"t\":\"cr\",\"on\":" + (on ? 1 : 0) + "}");
+
+        /// <summary>A jump on the spot (low blows go under it a moment).</summary>
+        public static void Jump() => Send("{\"t\":\"jp\"}");
 
         /// <summary>A blow on one of the rival's soldiers (its number in its squad, the damage; a foi's blow: it strikes back).</summary>
         public static void SquadHit(int id, int damage, bool byFoi) => Send("{\"t\":\"ah\",\"u\":" + id + ",\"d\":" + damage + ",\"f\":" + (byFoi ? 1 : 0) + "}");

@@ -65,6 +65,19 @@ namespace SquashBot.Data
         // share of health wins; closer than this share it is a draw.
         public float overtimeSeconds, overtimeHealthTie;
 
+        // The body's attacks (the choreography design's 4.3 .. 4.7), in PhysKind's order (sweep, uppercut, flying headbutt,
+        // shoulder charge): the blow's times, the cooldown, the shield's durability it costs, its height (HitHeight: 0 high,
+        // 1 middle, 2 low: a crouch lets high ones by, a jump low ones), the stun it leaves, how long the striker stands open
+        // when it is blocked, its reach in tiles. A swept fighter lies down this long and gets up in this long (untouchable,
+        // nothing to do); a launched one is in the air this long, hit at most this often there, each hit times this.
+        public float[] physTimes, physCooldown, physGuardCost, physStun, physOpen, physReach;
+        public int[] physHeight;
+        public float downSeconds, getUpSeconds, airSeconds;
+        public int airHitsMax;
+        public float[] airHitTimes;
+        /// <summary>How long a jump keeps its jumper in the air (low blows go under it).</summary>
+        public float jumpAirSeconds;
+
         private const string CacheKey = "sb_net_duel_rules"; // (kept on this phone only)
         private static DuelBalanceTable current;
 
@@ -106,7 +119,7 @@ namespace SquashBot.Data
             try
             {
                 var t = JsonUtility.FromJson<DuelBalanceTable>(json);
-                return t != null && t.familyBlows != null && t.familyBlows.Length == 24 && t.specialHit != null && t.ultiHit != null ? t : null;
+                return t != null && t.familyBlows != null && t.familyBlows.Length == 24 && t.specialHit != null && t.ultiHit != null && (t.version < 2 || (t.physTimes != null && t.physTimes.Length == 4 && t.airHitTimes != null)) ? t : null;
             }
             catch (Exception) { return null; }
         }
