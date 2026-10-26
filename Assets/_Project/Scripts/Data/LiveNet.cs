@@ -38,6 +38,10 @@ namespace SquashBot.Data
             public float secs, mine, theirs;
             public bool won, ranked, left;
             public string from;
+            /// <summary>Protocol 9: a body attack's outcome (hit, block, perfect, dodge, miss), the side it is about (absolute: 0/1),
+            /// a crouch on or off.</summary>
+            public string r;
+            public int w = -1, on;
             /// <summary>"matched": the server's duel table (JSON) when this game's is another version; else empty.</summary>
             public string rules;
             public FoiNet.Rival rival;

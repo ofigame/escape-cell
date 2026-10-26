@@ -414,7 +414,14 @@ namespace SquashBot.Gameplay
                 var (wind, hit, back) = PhysTiming((PhysKind)k);
                 if (skin != null) skin.StrikeWithBody(StrikeOf((PhysKind)k), 0.02f, hit, back, robot.transform.position);
             }
-            PhysShown(mine, (PhysKind)k, r, r == "miss" ? "duel.under" : null);
+            PhysShown(mine, (PhysKind)k, r, r == "miss" ? (k == (int)PhysKind.Sweep ? "duel.over" : "duel.under") : null);
+        }
+
+        /// <summary>A launched side came down early on its last juggle hit (protocol 9): its get-up from now.</summary>
+        private void LandedFromServer(bool me)
+        {
+            float end = Time.time + PhysTab.getUpSeconds;
+            if (me) myLaunchUntil = Mathf.Min(myLaunchUntil, end); else rivalLaunchUntil = Mathf.Min(rivalLaunchUntil, end);
         }
 
         /// <summary>The live rival crouched or stood (protocol 9).</summary>

@@ -221,6 +221,20 @@ namespace SquashBot.Gameplay
                             AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.9f);
                         }
                         break;
+                    case "ph":
+                        // Protocol 9: a body attack judged (by: the attacker's side; k -1: a chain blow missing a crouch or a jump)
+                        if (m.k < 0) FloatAt((m.by == liveSide ? hunt.ChallengeFoeAt ?? robot.transform.position : robot.transform.position) + Vector3.up * 2f, Loc.T("duel.under"), new Color(0.75f, 0.9f, 1f));
+                        else PhysFromServer(m.by == liveSide, m.k, m.r);
+                        break;
+                    case "cr":
+                        if (m.w >= 0 && m.w != liveSide) RivalCrouchFromServer(m.on == 1); // (the rival crouched or stood)
+                        break;
+                    case "jp":
+                        if (m.w >= 0 && m.w != liveSide) RivalJumpFromServer();
+                        break;
+                    case "ld":
+                        LandedFromServer(m.w == liveSide); // (a launched side down early: its last juggle hit)
+                        break;
                     case "def":
                         // The server judged a blow against a defence: blocked, broke, perfect, dodged (by 1: mine).
                         LiveGuard(m.by == 1, m.k, m.d);
