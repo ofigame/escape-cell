@@ -39,8 +39,9 @@ namespace SquashBot.Visual
             if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
             swayAxis = Vector3.Cross(Vector3.up, away.normalized);
             swayPow = Mathf.Clamp01(strength);
-            swayT = 0f;
             ReactionClip = "stagger";
+            if (ClipInstead("stagger")) return; // (a made clip: it rocks by itself)
+            swayT = 0f;
         }
 
         // ---------- Driven back (heavy) ----------
@@ -57,6 +58,7 @@ namespace SquashBot.Visual
         private System.Collections.IEnumerator DrivenBack(Vector3 from)
         {
             ReactionClip = "knockback";
+            if (ClipInstead("knockback")) { FootDust?.Invoke(transform.position); yield return WhileClip(); ReactionClip = ""; knock = null; yield break; }
             var away = transform.position - from; away.y = 0f;
             if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
             away.Normalize();
@@ -118,6 +120,7 @@ namespace SquashBot.Visual
         private System.Collections.IEnumerator Swept(Vector3 from, Vector3 sweepDir, float lie)
         {
             ReactionClip = "sweep_fall";
+            if (ClipInstead("sweep_fall")) { Face(FaceMoment.Surprise); yield return WhileClip(); yield return Lying(lie); yield return GetUp(Vector3.Cross(Vector3.up, -transform.forward), 82f, false); ReactionClip = ""; knock = null; yield break; }
             var away = transform.position - from; away.y = 0f;
             if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
             away.Normalize();
@@ -173,6 +176,7 @@ namespace SquashBot.Visual
         private System.Collections.IEnumerator Launching(Vector3 from, float air, float lie)
         {
             ReactionClip = "launch_air";
+            if (ClipInstead("launch_air")) { Face(FaceMoment.Launched); InAir = true; yield return WhileClip(); InAir = false; LandedOnFace = Mathf.RoundToInt(airSpin / 180f) % 2 == 1; yield return Lying(lie); yield return GetUp(Vector3.Cross(Vector3.up, -transform.forward), LandedOnFace ? -82f : 82f, LandedOnFace); ReactionClip = ""; knock = null; yield break; }
             var away = transform.position - from; away.y = 0f;
             if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
             away.Normalize();
@@ -238,12 +242,21 @@ namespace SquashBot.Visual
 
         private Vector3 bodyRollOffset;
 
+        /// <summary>Lies still a while after a made clip's fall (the landing's dust and squash; the clip left it lying).</summary>
+        private System.Collections.IEnumerator Lying(float lie)
+        {
+            FootDust?.Invoke(transform.position);
+            if (ClipInstead(LandedOnFace ? "land_face" : "land_back")) yield return WhileClip();
+            for (float e = 0f; e < lie; e += VDt) yield return null;
+        }
+
         /// <summary>Up again from how it lies: from its back, sitting up with a hand behind it; from its face, pushing up
         /// onto its knees first; then standing (0.5 s).</summary>
         private System.Collections.IEnumerator GetUp(Vector3 axis, float lay, bool fromFace)
         {
             LastGetUp = fromFace ? "faceDown" : "faceUp";
             ReactionClip = fromFace ? "getup_face_down" : "getup_face_up";
+            if (ClipInstead(ReactionClip)) { yield return WhileClip(); flail = flat = rise = push = 0f; kneelLean = 0f; transform.localRotation = bodyRot; transform.localPosition = bodyPos; bodyRollOffset = Vector3.zero; yield break; }
             float lift = Lift;
             var restPos = bodyPos;
             var offset = bodyRollOffset;
@@ -270,6 +283,18 @@ namespace SquashBot.Visual
             transform.localRotation = bodyRot; transform.localPosition = restPos;
             bodyRollOffset = Vector3.zero;
             reel = 0f;
+        }
+
+        // ---------- Made clips in the reactions' place ----------
+
+        /// <summary>A made clip for reaction <paramref name="name"/> (Resources/Heroes/Foi/hero_&lt;name&gt;) starts playing in its
+        /// place: true if there is one (the procedural reaction then waits for it).</summary>
+        private bool ClipInstead(string name) => ClipOf(name) != null && PlayMove(name);
+
+        /// <summary>Waits while a reaction's made clip plays.</summary>
+        private System.Collections.IEnumerator WhileClip()
+        {
+            while (playing != null) yield return null;
         }
 
         // ---------- Helpers ----------
