@@ -31,6 +31,8 @@ namespace SquashBot.Combat
         public bool enableTrail = true;
         [Tooltip("How far the striker's picture slides toward the rival so this blow touches its body at contact (m, at most 1.5 tiles); below 0: the family's default (CombatLibrary.ContactOffset)")]
         public float contactOffset = -1f;
+        [Tooltip("What strikes: the weapon, or the body itself (a kick, a shoulder, a headbutt) with the weapon still in hand")]
+        public BodyStrike body = BodyStrike.Weapon;
 
         /// <summary>The whole swing in seconds.</summary>
         public float TotalSeconds => (anticipationMs + activeMs + recoveryMs) / 1000f;

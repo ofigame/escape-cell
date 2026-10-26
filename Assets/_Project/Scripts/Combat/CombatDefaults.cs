@@ -24,7 +24,7 @@ namespace SquashBot.Combat
             return a;
         }
 
-        /// <summary>A family's four-blow chain, POWER HIT and KNOCKDOWN as the design gives them.</summary>
+        /// <summary>A family's five-blow chain (its third the body's: the choreography design's 4.2), POWER HIT and KNOCKDOWN.</summary>
         public static WeaponFamilyMotionProfile Family(WeaponFamily f)
         {
             var p = ScriptableObject.CreateInstance<WeaponFamilyMotionProfile>();
@@ -35,10 +35,11 @@ namespace SquashBot.Combat
                 case WeaponFamily.Sword:
                     p.chain = new[]
                     {
-                        Blow(f, 1, 2, 1, 4, HitDirection.Horizontal_RightToLeft, HitHeight.Mid),
-                        Blow(f, 2, 1, 1, 4, HitDirection.Horizontal_LeftToRight, HitHeight.Mid),
-                        Blow(f, 3, 2, 1, 5, HitDirection.Overhead, HitHeight.High),
-                        Blow(f, 4, 2, 1, 5, HitDirection.Thrust, HitHeight.Mid),
+                        Blow(f, 1, 2, 1, 4, HitDirection.Horizontal_RightToLeft, HitHeight.High), // (a level cut: high)
+                        Blow(f, 2, 1, 1, 4, HitDirection.Horizontal_LeftToRight, HitHeight.High),
+                        BodyBlow(f, 3, 3, 1, 6, HitDirection.Horizontal_RightToLeft, HitHeight.High, BodyStrike.HeelKick),
+                        Blow(f, 4, 2, 1, 5, HitDirection.Overhead, HitHeight.High),
+                        Blow(f, 5, 2, 1, 5, HitDirection.Thrust, HitHeight.Mid),
                     };
                     p.trail = new Color(0.8f, 0.92f, 1f);
                     break;
@@ -46,9 +47,10 @@ namespace SquashBot.Combat
                     p.chain = new[]
                     {
                         Blow(f, 1, 3, 1, 6, HitDirection.Thrust, HitHeight.Mid),
-                        Blow(f, 2, 3, 1, 6, HitDirection.Thrust, HitHeight.Mid),
-                        Blow(f, 3, 4, 1, 6, HitDirection.Horizontal_LeftToRight, HitHeight.Mid),
-                        Blow(f, 4, 4, 1, 6, HitDirection.Overhead, HitHeight.High),
+                        Blow(f, 2, 3, 1, 6, HitDirection.Horizontal_LeftToRight, HitHeight.Mid), // (the shaft swung)
+                        BodyBlow(f, 3, 3, 1, 6, HitDirection.Thrust, HitHeight.Mid, BodyStrike.FrontKick),
+                        Blow(f, 4, 3, 1, 6, HitDirection.Thrust, HitHeight.Mid), // (a double thrust)
+                        Blow(f, 5, 4, 1, 6, HitDirection.Overhead, HitHeight.High),
                     };
                     p.trail = new Color(0.9f, 0.95f, 1f);
                     break;
@@ -57,8 +59,9 @@ namespace SquashBot.Combat
                     {
                         Blow(f, 1, 6, 2, 9, HitDirection.Overhead, HitHeight.High),
                         Blow(f, 2, 6, 2, 9, HitDirection.Horizontal_RightToLeft, HitHeight.Mid),
-                        Blow(f, 3, 5, 2, 9, HitDirection.Upward, HitHeight.Mid),
-                        Blow(f, 4, 7, 2, 9, HitDirection.Spin, HitHeight.Mid),
+                        BodyBlow(f, 3, 5, 2, 9, HitDirection.Thrust, HitHeight.Mid, BodyStrike.Shoulder),
+                        Blow(f, 4, 6, 2, 9, HitDirection.Horizontal_LeftToRight, HitHeight.Mid), // (swung back)
+                        Blow(f, 5, 7, 2, 9, HitDirection.Spin, HitHeight.Mid),
                     };
                     p.trail = new Color(1f, 0.6f, 0.3f);
                     break;
@@ -67,8 +70,9 @@ namespace SquashBot.Combat
                     {
                         Blow(f, 1, 7, 2, 9, HitDirection.Overhead, HitHeight.High),
                         Blow(f, 2, 6, 2, 9, HitDirection.Horizontal_LeftToRight, HitHeight.Mid),
-                        Blow(f, 3, 6, 2, 9, HitDirection.Upward, HitHeight.High),
-                        Blow(f, 4, 8, 2, 10, HitDirection.Overhead, HitHeight.Mid),
+                        BodyBlow(f, 3, 6, 2, 9, HitDirection.Thrust, HitHeight.High, BodyStrike.Headbutt),
+                        Blow(f, 4, 6, 2, 9, HitDirection.Upward, HitHeight.High),
+                        Blow(f, 5, 8, 2, 10, HitDirection.Overhead, HitHeight.Mid), // (a ground smash)
                     };
                     p.trail = new Color(1f, 0.82f, 0.45f);
                     break;
@@ -91,6 +95,22 @@ namespace SquashBot.Combat
             p.skyStrike.name = f + "_Sky";
             p.skyStrike.strength = HitStrength.Heavy; p.skyStrike.hitstopMs = 120f; p.skyStrike.cameraImpulse = CameraImpulseLevel.Heavy; p.skyStrike.visualKnockback = 0.5f;
             return p;
+        }
+
+        /// <summary>A blow by the body (the weapon still in hand): always at least a medium reaction, a firmer freeze.</summary>
+        private static AttackMotionData BodyBlow(WeaponFamily f, int n, int windFrames, int hitFrames, int backFrames, HitDirection dir, HitHeight height, BodyStrike body)
+        {
+            var a = Blow(f, n, windFrames, hitFrames, backFrames, dir, height);
+            a.body = body;
+            a.strength = HitStrength.Medium;
+            a.hitstopMs = Mathf.Max(a.hitstopMs, 70f);
+            a.cameraImpulse = CameraImpulseLevel.Medium;
+            a.visualKnockback = 0.25f;
+            a.contactOffset = 1.5f; // (a limb is short: the body goes all the way in)
+            a.enableTrail = false;
+            a.impactSfx = Sfx.Impact;
+            a.impactPitch = body == BodyStrike.Headbutt ? 0.7f : 1.1f;
+            return a;
         }
 
         /// <summary>One blow (wind-up / contact / recovery in frames), with the family's strength, freeze and sounds.</summary>

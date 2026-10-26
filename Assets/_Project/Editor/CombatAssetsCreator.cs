@@ -28,7 +28,7 @@ namespace SquashBot.EditorTools
             foreach (WeaponFamily f in System.Enum.GetValues(typeof(WeaponFamily)))
             {
                 string path = Folder + "/Family_" + f + ".asset";
-                if (File.Exists(path)) continue;
+                if (File.Exists(path)) { UpgradeChain(path, f); continue; }
                 var p = CombatDefaults.Family(f);
                 AssetDatabase.CreateAsset(p, path);
                 // its blows inside the family's file (one file a family, tidy in the project)
@@ -41,6 +41,22 @@ namespace SquashBot.EditorTools
             }
             AssetDatabase.SaveAssets();
             DuelAssetsCreator.EnsureAssets(); // (the duel experience's tuning too)
+        }
+
+        /// <summary>
+        /// A family made before the five-blow chain (the choreography's 4.2): its chain's blows replaced by the design's
+        /// five (the third the body's), in the same file; its other blows (POWER HIT, KNOCKDOWN, the flying ones) kept.
+        /// </summary>
+        private static void UpgradeChain(string path, WeaponFamily f)
+        {
+            var have = AssetDatabase.LoadAssetAtPath<WeaponFamilyMotionProfile>(path);
+            var made = CombatDefaults.Family(f);
+            if (have == null || have.chain == null || have.chain.Length >= made.chain.Length) return;
+            foreach (var old in have.chain) if (old != null) Object.DestroyImmediate(old, true);
+            foreach (var b in made.chain) AssetDatabase.AddObjectToAsset(b, have);
+            have.chain = made.chain;
+            EditorUtility.SetDirty(have);
+            Debug.Log("[Combat] " + path + ": chain of " + made.chain.Length + " blows");
         }
 
         private static void Save(ScriptableObject so, string name)

@@ -500,6 +500,10 @@ namespace SquashBot.Visual
             return true;
         }
 
+        /// <summary>The fighter's visual this weapon is held by (the body's grip puts the weapon under a Grip_ holder on it).</summary>
+        private Transform Fighter => transform.parent != null && transform.parent.name.StartsWith("Grip_") ? transform.parent.parent : transform.parent;
+
+
         /// <summary>Who this weapon's blows are aimed at, for its lunge (the duel sets it: the rival's model, or foi's;
         /// none: no lunge).</summary>
         public static Func<HeldWeapon, Transform> TargetOf;
@@ -511,10 +515,18 @@ namespace SquashBot.Visual
         /// </summary>
         private void Lunge()
         {
-            if (current == null || TargetOf == null) return;
-            var target = TargetOf(this);
+            if (current == null) return;
+            var target = TargetOf != null ? TargetOf(this) : null;
+            float rate0 = Mathf.Max(0.1f, playRate);
+            if (current.body != BodyStrike.Weapon)
+            {
+                // the body's own blow (the chain's third): its pose timed to this swing's contact, from now
+                var bodyOf = Fighter != null ? Fighter.GetComponentInChildren<SkinnedHero>() : null;
+                float untilContact = Mathf.Max(0f, (windS + hitS * 0.5f - swingTime) / rate0);
+                if (bodyOf != null) bodyOf.StrikeWithBody(current.body, Mathf.Max(0f, untilContact - hitS * 0.5f / rate0), hitS / rate0, backS / rate0, target != null ? target.position : transform.position + transform.forward);
+            }
             if (target == null) return;
-            var me = CombatFeel.RootOf(transform.parent); // (its fighter: the weapon hangs on the fighter's visual)
+            var me = CombatFeel.RootOf(Fighter);
             if (me == null) return;
             var dir = target.position - me.position; dir.y = 0f;
             float offset = CombatLibrary.ContactOffset(family, current);
@@ -825,7 +837,7 @@ namespace SquashBot.Visual
         /// </summary>
         private void ReachBody()
         {
-            if (Tip == null || isGun || TargetOf == null || current == null) return;
+            if (Tip == null || isGun || TargetOf == null || current == null || current.body != BodyStrike.Weapon) return;
             // full through the strike and its first follow-through (a strike is shorter than a frame: the contact frame's swing is
             // already past it), faded in from the wind-up's end and out before the recovery
             float w = swing < 0.3f ? (swing - 0.22f) / 0.08f : swing <= 0.58f ? 1f : 1f - (swing - 0.58f) / 0.1f;
@@ -886,6 +898,12 @@ namespace SquashBot.Visual
                 return;
             }
             Advance(dt);
+            if (current != null && current.body != BodyStrike.Weapon)
+            {
+                // the body strikes (a kick, a shoulder, a headbutt): the weapon kept in hand at rest
+                if (!DuelRest()) Pose(0f);
+                return;
+            }
             if (stroke == 0)
             {
                 // Down from overhead: the blade raised high behind the head, brought down hard in front.

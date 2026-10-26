@@ -1601,6 +1601,7 @@ namespace SquashBot.Visual
             Reacting(dt);
             ReactionPose(dt);
             MovePose(dt);
+            StrikePose(dt);
             Grip();
 
             // Lids: a blink now and then; half down when angry or striking (the eyes narrow).
