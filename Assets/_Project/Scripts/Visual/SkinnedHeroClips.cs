@@ -189,6 +189,24 @@ namespace SquashBot.Visual
             limbFrom = from.ToArray(); limbTo = to.ToArray(); limbRadius = radius.ToArray();
         }
 
+        /// <summary>How wide its trunk is, as a radius in the world (its hips and spine as thick as their armour, measured from
+        /// the mesh); its big head left out. 0 until known.</summary>
+        public float TrunkRadius
+        {
+            get
+            {
+                if (!limbsKnown) { if (!ready) Setup(); KnowLimbs(); }
+                float r = 0f;
+                if (limbFrom != null)
+                    for (int i = 0; i < limbFrom.Length; i++)
+                    {
+                        var n = limbFrom[i] != null ? limbFrom[i].name : "";
+                        if (n.EndsWith(":Hips") || n.EndsWith(":Spine") || n.EndsWith(":Spine1") || n.EndsWith(":Spine2")) r = Mathf.Max(r, limbRadius[i] * limbFrom[i].lossyScale.x);
+                    }
+                return r;
+            }
+        }
+
         private static float DistanceToSegment(Vector3 p, Vector3 a, Vector3 b)
         {
             var ab = b - a;

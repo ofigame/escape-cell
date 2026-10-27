@@ -15,6 +15,9 @@ namespace SquashBot.Visual
         private readonly List<Renderer> hidden = new List<Renderer>();
         private readonly List<Mesh> baked = new List<Mesh>();
         private Transform source;
+
+        /// <summary>The model it stands in for.</summary>
+        public Transform Source => source;
         private float bornAt;
         private readonly List<(Transform t, Vector3 pos, Quaternion rot)> parts = new List<(Transform, Vector3, Quaternion)>();
 
