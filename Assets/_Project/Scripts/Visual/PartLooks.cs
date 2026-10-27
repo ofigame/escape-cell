@@ -25,6 +25,7 @@ namespace SquashBot.Visual
         public static void Apply(Transform skin, int body, int arms, int shell)
         {
             if (skin == null) return;
+            BodyShape.Apply(skin, body, arms, false); // (thin or big by the levels: a rival's own, no floor)
             var old = new List<GameObject>();
             foreach (var t in skin.GetComponentsInChildren<Transform>(true)) if (t.name == Holder) old.Add(t.gameObject);
             foreach (var g in old) Object.DestroyImmediate(g); // (at once: a lookalike may be copied right after)

@@ -313,6 +313,8 @@ namespace SquashBot.Gameplay
             };
             hunt.BackHint = at => FloatAt(at + Vector3.up * 2f, Loc.T("rule.backHint"), new Color(1f, 0.8f, 0.4f));
             ui.Shop.Purchased += () => robot.ApplyOutfit(Cosmetics.Outfit()); // (a part raised: its look on foi at once)
+            ui.BagView.Changed += () => robot.ApplyOutfit(Cosmetics.Outfit()); // (items used, a part levelled: foi's body at once)
+            ui.BagView.ModelMaker = t => robot.BuildLookalike(t); // (the bag's close look: foi as it is now)
             ui.DailyBonus.AdPressed += WatchAdForDailyBonus;
             ui.Garage.PreviewChanged += outfit => robot.ApplyOutfit(outfit);
             ui.Garage.DancePreview += robot.Cheer;

@@ -203,6 +203,23 @@ namespace SquashBot.UI
             return viewRt;
         }
 
+        /// <summary>foi itself in the close look (the bag's: its body by its parts, its battle wear), made by
+        /// <paramref name="make"/> on the stage, turned to the camera.</summary>
+        public static Texture ViewHero(System.Func<Transform, GameObject> make)
+        {
+            var holder = OpenView();
+            var model = make != null ? make(holder) : null;
+            if (model != null)
+            {
+                foreach (var t in model.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = holder.gameObject.layer;
+                viewSize = Centre(holder, model.transform) * 0.55f;
+            }
+            else viewSize = 1f;
+            ViewYaw = 180f; ViewPitch = 6f;
+            DrawView();
+            return viewRt;
+        }
+
         /// <summary>The close look is gone: its model and its picture go (nothing is drawn for it any more).</summary>
         public static void CloseView(int number)
         {

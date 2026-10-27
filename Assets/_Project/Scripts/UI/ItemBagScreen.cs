@@ -42,6 +42,9 @@ namespace SquashBot.UI
 
         private static readonly RobotPart[] Parts = { RobotPart.Body, RobotPart.Arms, RobotPart.Shell };
 
+        /// <summary>Makes a copy of foi as it looks now under a holder (the game sets it): the close look turns it.</summary>
+        public Func<Transform, GameObject> ModelMaker;
+
         public static ItemBagScreen Create(Transform canvasRoot)
         {
             var screen = UiScreen.Create("ItemBag", canvasRoot, out var root);
@@ -62,6 +65,9 @@ namespace SquashBot.UI
             screen.SetPopTarget(card);
             UiFactory.MakeButton(card, "X", Kind.Icon, new Vector2(1f, 1f), new Vector2(-22f, -22f), new Vector2(100f, 100f), Hide, 48f);
             UiFactory.TextBox("Title", card, new Vector2(0.5f, 1f), new Vector2(0f, -36f), new Vector2(700f, 100f), Loc.T("ibag.title"), 64f, Palette.UiGold, title: true);
+            // foi itself: its body by its parts and its battle wear, turned by the finger in the close look
+            UiFactory.MakeButton(card, Loc.T("ibag.foi"), Kind.Secondary, new Vector2(0f, 1f), new Vector2(22f, -22f), new Vector2(170f, 100f),
+                () => ItemViewer.Show(transform, Loc.T("ibag.foiTitle"), () => ItemPreview.ViewHero(ModelMaker)), 34f);
             toast = UiFactory.TextBox("Toast", card, new Vector2(0.5f, 1f), new Vector2(0f, -128f), new Vector2(900f, 56f), "", 32f, Palette.UiCyan);
 
             // the three parts' bars

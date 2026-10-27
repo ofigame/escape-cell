@@ -44,6 +44,7 @@ namespace SquashBot.EditorTools
             DuelAnimationMapCreator.EnsureAsset(); // (each move's clip)
             CollisionSettingsCreator.EnsureAsset(); // (the bodies as solid things)
             ItemCatalogCreator.EnsureAsset(); // (the bag's items)
+            BodyShapeSettingsCreator.EnsureAsset(); // (foi thin or big by its parts)
         }
 
         /// <summary>

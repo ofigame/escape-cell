@@ -336,6 +336,7 @@ namespace SquashBot.Gameplay
             SkinnedHero.Gear(skin.transform, arms.IsDefault ? null : arms.id, arms.color, null, legs.color);
             // its parts' look (a rival's copy is given the rival's own after it is made)
             PartLooks.Apply(skin.transform, Data.RobotParts.Level(Data.RobotPart.Body), Data.RobotParts.Level(Data.RobotPart.Arms), Data.RobotParts.Level(Data.RobotPart.Shell));
+            BodyShape.Apply(skin.transform, Data.RobotParts.Level(Data.RobotPart.Body), Data.RobotParts.Level(Data.RobotPart.Arms), true); // (the player's own: never thinner than before the bag came)
         }
 
         /// <summary>A holder for garage gear, <paramref name="y"/> higher than the gear was made for.</summary>
