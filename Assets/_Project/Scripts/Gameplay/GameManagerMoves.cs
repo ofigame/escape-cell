@@ -294,7 +294,7 @@ namespace SquashBot.Gameplay
                 case SpecialKind.Teleport:
                 {
                     // gone in a purple flash, out at the other's side at once, and a strike from there; the next blow harder
-                    var to = LaneOn ? TileAway(other, me, HuntSystem.DuelGap) ?? LandingBeside(other, me) : TileSide(other, me, HuntSystem.DuelGap); // (the lane duel: out behind it on the line, or in front when its back is to the edge)
+                    var to = LandingBeside(other, me); // (in front of it, at the touch: never behind it, the line's order is kept; the collision rules 3.3)
                     MoveFx.Pillar(meAt, new Color(0.75f, 0.45f, 1f), 0.6f, 3f, 0.4f);
                     fx.Burst(meAt + Vector3.up * 0.8f, new Color(0.75f, 0.5f, 1f), new Color(2f, 1.2f, 3f), 36, 5f);
                     AudioManager.PlaySfx(Sfx.Hop, 1f, 1.6f);

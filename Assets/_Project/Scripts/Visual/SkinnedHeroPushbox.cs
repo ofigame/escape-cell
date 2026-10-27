@@ -138,6 +138,8 @@ namespace SquashBot.Visual
                     a.pushComing = aComes; b.pushComing = bComes;
                 }
             }
+            // the platform's edge: a thrown body meets an invisible wall there and bounces (never off the platform)
+            KeepOnPlatform(a); KeepOnPlatform(b);
             a.pushPrev = pa; b.pushPrev = pb;
             a.pushFinal = a.hips.position; b.pushFinal = b.hips.position;
             a.pushFrame = b.pushFrame = Time.frameCount;
@@ -147,6 +149,23 @@ namespace SquashBot.Visual
                 float over = Mathf.Abs(gap.y); gap.y = 0f;
                 if (over < Mathf.Max(a.heightCache, 0.1f) * CollisionSettings.Current.overHeadShare && gap.magnitude < (a.PushRadius + b.PushRadius) * 0.97f) OverlapFrames++;
             }
+        }
+
+        /// <summary>The duel's platform in the world (x, z), inside which every body stays (none: no wall).</summary>
+        public static Rect? DuelArea;
+        private float edgeBounceAt = -9f;
+
+        private static void KeepOnPlatform(SkinnedHero s)
+        {
+            if (!DuelArea.HasValue || s == null || s.hips == null || !s.BodyShown) return;
+            var area = DuelArea.Value;
+            float r = s.PushRadius;
+            var p = s.hips.position;
+            float x = Mathf.Clamp(p.x, area.xMin + r, area.xMax - r), z = Mathf.Clamp(p.z, area.yMin + r, area.yMax - r);
+            if (Mathf.Abs(x - p.x) < 1e-4f && Mathf.Abs(z - p.z) < 1e-4f) return;
+            var wall = new Vector3(p.x - x, 0f, p.z - z);
+            s.hips.position = new Vector3(x, p.y, z);
+            if (wall.magnitude > r * 0.05f && Time.time - s.edgeBounceAt > 0.6f) { s.edgeBounceAt = Time.time; s.Shudder(s.hips.position + wall.normalized * r * 2f, 1f); } // (it bounces off the edge)
         }
 
         /// <summary>Both came at each other and met in the middle this frame: where, and across (the game shows a clash).</summary>

@@ -670,7 +670,7 @@ namespace SquashBot.Gameplay
             switch (held.Family)
             {
                 case WeaponFamily.Axe: if (!upper) held.Spin(2); break; // (two full turns)
-                case WeaponFamily.Spear: VisualRoot.On(CombatFeel.RootOf(striker)).Push(toward, upper ? 0.25f : 0.5f, 0.3f); break; // (the long lunge)
+                case WeaponFamily.Spear: VisualRoot.On(CombatFeel.RootOf(striker)).Push(toward, VisualRoot.KeptApart(striker.position, struck.position, upper ? 0.25f : 0.5f), 0.3f); break; // (the long lunge, never into the other)
                 case WeaponFamily.Heavy:
                     if (!upper && skin != null) { skin.Hop(0.9f, 0.32f); cameraRig.StartCoroutine(DustAfter(struck.position, 0.3f)); } // (a leap and a crash down)
                     break;

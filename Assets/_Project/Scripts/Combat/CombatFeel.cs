@@ -207,8 +207,20 @@ namespace SquashBot.Combat
             var dir = attacker != null ? victim.position - attacker.position : -victim.forward;
             if (data.cameraImpulse >= CameraImpulseLevel.Heavy) CameraImpulse.Fire(data.cameraImpulse, dir, ShakeMultiplier); // (only a heavy blow knocks the camera: every blow doing it looked unsteady)
             var r = CombatLibrary.Reactions;
-            float knock = data.visualKnockback > 0f ? data.visualKnockback : r.Knockback(data.strength);
-            VisualRoot.On(victimRoot).Push(dir, knock, r.Recovery(data.strength));
+            // thrown by the blow as its reaction says (the collision rules' section 4: shaken, staggered, knocked back, flung,
+            // an ultimate's last), fast then slowing; the striker following it in as far as the push box lets it
+            var cs = CollisionSettings.Current;
+            float throwDist, throwSecs;
+            if (data == CombatLibrary.UltiFinal) { throwDist = cs.ultiFinalDistance; throwSecs = cs.ultiFinalSeconds; }
+            else switch (data.strength)
+            {
+                case HitStrength.Light: throwDist = cs.shakeDistance; throwSecs = cs.shakeSeconds; break;
+                case HitStrength.Medium: throwDist = cs.staggerDistance; throwSecs = cs.staggerSeconds; break;
+                case HitStrength.Launch: throwDist = cs.launchDistance; throwSecs = cs.knockbackSeconds; break;
+                default: throwDist = cs.knockbackDistance; throwSecs = cs.knockbackSeconds; break; // (heavy, a finisher)
+            }
+            VisualRoot.On(victimRoot).Throw(dir, throwDist * intensity, throwSecs);
+            if (attackerRoot != null && cs.followShare > 0f) VisualRoot.On(attackerRoot).Throw(dir, throwDist * intensity * cs.followShare, throwSecs);
             AudioManager.PlaySfx(data.impactSfx, 0.55f, data.impactPitch, 0.08f);
             // the struck body answers (its springy reaction by direction, height and strength), flashes white; a heavy blow
             // knocks a few bolts off it

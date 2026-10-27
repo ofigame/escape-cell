@@ -39,11 +39,28 @@ namespace SquashBot.Combat
         public static float KeptApart(Vector3 from, Vector3 to, float distance, float spare = 0f)
         {
             var d = to - from; d.y = 0f;
-            return Mathf.Min(distance, Mathf.Max(0f, d.magnitude - MinBodyGap - spare));
+            float gap = SquashBot.Visual.SkinnedHero.ContactDistance > 0.01f ? SquashBot.Visual.SkinnedHero.ContactDistance : MinBodyGap; // (the bodies' own contact distance once known)
+            return Mathf.Min(distance, Mathf.Max(0f, d.magnitude - gap - spare));
         }
 
         /// <summary>Slid <paramref name="distance"/> along <paramref name="direction"/> over <paramref name="outSeconds"/>, held
         /// <paramref name="holdSeconds"/>, home in <paramref name="backSeconds"/> (a blow's lunge; the place never moves).</summary>
+        // a throw by a blow (the collision rules' section 4): out along its curve, fast then slowing, then home
+        private Vector3 thrown;
+        private float tt = -1f, tOut, tBack;
+
+        /// <summary>Thrown <paramref name="distance"/> along <paramref name="direction"/> over <paramref name="seconds"/> by
+        /// the settings' curve (fast at first, slowing), then home smoothly (a picture: its place never moves).</summary>
+        public void Throw(Vector3 direction, float distance, float seconds)
+        {
+            direction.y = 0f;
+            if (direction.sqrMagnitude < 1e-6f || distance <= 0f) return;
+            thrown = direction.normalized * distance;
+            tOut = Mathf.Max(0.04f, seconds);
+            tBack = Mathf.Max(0.2f, seconds);
+            tt = 0f;
+        }
+
         public void Lunge(Vector3 direction, float distance, float outSeconds, float holdSeconds, float backSeconds)
         {
             direction.y = 0f;
@@ -55,7 +72,7 @@ namespace SquashBot.Combat
 
         private void Update()
         {
-            if (t >= 1f && lt < 0f) { Offset = Vector3.zero; return; }
+            if (t >= 1f && lt < 0f && tt < 0f) { Offset = Vector3.zero; return; }
             if (clock == null) clock = GetComponent<VisualTime>();
             float dt = clock != null ? clock.DeltaTime : Time.deltaTime;
             var off = Vector3.zero;
@@ -75,6 +92,14 @@ namespace SquashBot.Combat
                     : 1f - Mathf.SmoothStep(0f, 1f, (lt - lOut - lHold) / lBack);
                 off += lunge * k;
                 if (lt >= lOut + lHold + lBack) lt = -1f;
+            }
+            if (tt >= 0f)
+            {
+                tt += dt;
+                var curve = CollisionSettings.Current.throwCurve;
+                float k = tt < tOut ? curve.Evaluate(tt / tOut) : 1f - Mathf.SmoothStep(0f, 1f, (tt - tOut) / tBack);
+                off += thrown * k;
+                if (tt >= tOut + tBack) tt = -1f;
             }
             Offset = off;
         }

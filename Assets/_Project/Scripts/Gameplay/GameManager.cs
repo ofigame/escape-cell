@@ -366,6 +366,12 @@ namespace SquashBot.Gameplay
             {
                 combatHooked = true;
                 DuelControlsPanel.TutorialRequested += () => { ui.CloseSettings(); if (!challengeRun) StartTutorial(); };
+                // the two rushing in at once: they meet in the middle (the push boxes), a clash of weapons there, both rocked
+                SkinnedHero.BothCame = (at, across) =>
+                {
+                    Combat.CombatFeel.ClashAt(at, across);
+                    foreach (var m in new[] { robot.Visual, hunt.ChallengeFoeModel }) { var s = m != null ? m.GetComponentInChildren<SkinnedHero>() : null; if (s != null) s.Stagger(at, 0.4f); }
+                };
                 // two weapons meeting in a duel: a burst of sparks and a ring where they met (the sound and camera are the feel's)
                 Combat.CombatFeel.Init();
                 // the duel's rival knocked out: its fall shown on a stand-in of its body (the rules take it away at once)
