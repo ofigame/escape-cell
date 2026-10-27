@@ -65,7 +65,7 @@ namespace SquashBot.UI
                 splash.sparkles.Add((rt, img, (float)rng.NextDouble() * 6f, 1.5f + (float)rng.NextDouble() * 2.5f));
             }
 
-            float width = 860f;
+            float width = 640f; // (a little smaller, as asked: 860 before)
             float height = width * texture.height / texture.width;
             splash.logo = UiFactory.Box("Logo", canvas.transform, new Vector2(0.5f, 0.55f), Vector2.zero, new Vector2(width, height));
             splash.logo.pivot = new Vector2(0.5f, 0.5f);

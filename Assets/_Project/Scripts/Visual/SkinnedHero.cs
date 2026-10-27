@@ -20,7 +20,7 @@ namespace SquashBot.Visual
     {
         private const string Folder = "Heroes/Foi/";
         /// <summary>The head joint's height in the build (about 1.05 tall in all, the head included).</summary>
-        private const float HeadJointHeight = 0.80f; // (a fifth bigger than before: the remade body with its smaller head had come out small)
+        private const float HeadJointHeight = 0.92f; // (0.80 then 15% bigger again, as asked: the remade body with its smaller head had come out small)
         /// <summary>The remade body (branch foi-yeni-beden) wears its own paint: the old suits' pictures are laid out for the
         /// old body and do not fit it; nor is it thickened (it is broad as made).</summary>
         private const bool OwnPaint = true;
