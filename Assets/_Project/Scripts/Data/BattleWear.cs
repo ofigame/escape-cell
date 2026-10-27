@@ -29,7 +29,7 @@ namespace SquashBot.Data
         public static bool Keep
         {
             get => Prefs.GetInt(KeepKey, 0) == 1;
-            set { Prefs.SetInt(KeepKey, value ? 1 : 0); Prefs.Save(); }
+            set { Prefs.SetInt(KeepKey, value ? 1 : 0); Prefs.Save(); ItemEvents.KeepToggled(value); }
         }
 
         /// <summary>A ranked duel ended (the others never touch the wear): a loss counts, a win repairs a step (not when
@@ -37,21 +37,24 @@ namespace SquashBot.Data
         public static int OnRankedEnd(bool won, bool draw)
         {
             int was = Level;
-            if (won) { if (!Keep) Repair(1); }
+            if (won) { if (!Keep) Repair(1, "win"); }
             else if (!draw)
             {
                 int losses = Losses + 1;
                 Set(losses, Mathf.Min(MaxLevel, Mathf.Max(was, losses / LossesPerStep)));
+                ItemEvents.WearChanged(was, Level, "loss");
             }
             return was;
         }
 
-        /// <summary>Takes <paramref name="steps"/> steps of wear off (the losses' count with it); the steps taken.</summary>
-        public static int Repair(int steps)
+        /// <summary>Takes <paramref name="steps"/> steps of wear off (the losses' count with it); the steps taken.
+        /// <paramref name="way"/>: the repair's way for the analytics (win, potion, great_potion, bip).</summary>
+        public static int Repair(int steps, string way = null)
         {
             int was = Level;
             int now = Mathf.Max(0, was - Mathf.Max(0, steps));
             Set(Mathf.Min(Losses, now * LossesPerStep), now);
+            if (way != null && now != was) { ItemEvents.RepairUsed(way); ItemEvents.WearChanged(was, now, way); }
             return was - now;
         }
 
@@ -63,7 +66,7 @@ namespace SquashBot.Data
         {
             if (!ServiceReady) return false;
             Prefs.SetString(ServiceKey, GameClock.Today);
-            Repair(1);
+            Repair(1, "bip");
             return true;
         }
 

@@ -47,6 +47,7 @@ namespace SquashBot.Data
             CoreParts.Spend(cores);
             PartPoints.Take(p, points);
             Prefs.SetInt(Key(p), Level(p) + 1);
+            ItemEvents.LevelUp(p, Level(p));
             Prefs.Save();
             return true;
         }

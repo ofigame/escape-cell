@@ -549,7 +549,17 @@ namespace SquashBot.UI
                 box.localScale = Vector3.one;
                 AudioManager.PlaySfx(g.rarity == ItemRarity.Epic ? Sfx.Win : Sfx.Coin, 0.7f, 1.1f + 0.15f * (int)g.rarity);
             }
-            UiFactory.MakeButton(row, Loc.T("ibag.goTo"), UiFactory.ButtonKind.Secondary, new Vector2(1f, 0f), new Vector2(-16f, 14f), new Vector2(250f, 80f), () => BagRequested?.Invoke(), 26f);
+            var go = UiFactory.MakeButton(row, Loc.T("ibag.goTo"), UiFactory.ButtonKind.Secondary, new Vector2(1f, 0f), new Vector2(-16f, 14f), new Vector2(250f, 80f), () => BagRequested?.Invoke(), 26f);
+            // the first items ever: Bip tells of the bag, the hand shows the way (once)
+            if (Prefs.GetInt("sb_tut_items", 0) == 0)
+            {
+                Prefs.SetInt("sb_tut_items", 1);
+                var hand = TutorialHand.Create(row);
+                var b = (RectTransform)go.transform;
+                hand.Show(TutorialHand.Gesture.Tap, (Vector2)row.InverseTransformPoint(b.TransformPoint(b.rect.center)));
+                yield return Wait(0.2f);
+                Row(Loc.T("tut.items"), "", new Color(0.55f, 1f, 0.7f), Sfx.Click, 96f);
+            }
         }
 
         private IEnumerator SeasonRow(GameManager.DuelRewards r)

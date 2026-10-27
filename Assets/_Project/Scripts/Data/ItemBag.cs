@@ -95,7 +95,7 @@ namespace SquashBot.Data
                 Apply(k, value);
                 used++;
             }
-            if (used > 0) { Prefs.Save(); Changed?.Invoke(); }
+            if (used > 0) { ItemEvents.Used(k, used, bulk); Prefs.Save(); Changed?.Invoke(); }
             return used;
         }
 
@@ -107,21 +107,29 @@ namespace SquashBot.Data
             {
                 case ItemKind.Whet: Mastery.Add(Armory.Equipped, value); break;
                 case ItemKind.Xp: DuelLevel.Add(value); break;
-                case ItemKind.RepairSmall: BattleWear.Repair(1); break;
-                case ItemKind.RepairLarge: BattleWear.Repair(BattleWear.MaxLevel); break;
+                case ItemKind.RepairSmall: BattleWear.Repair(1, "potion"); break;
+                case ItemKind.RepairLarge: BattleWear.Repair(BattleWear.MaxLevel, "great_potion"); break;
             }
         }
+
+        /// <summary>The uses under way are USE ALL's (counted as one bulk use each).</summary>
+        private static bool bulk;
 
         /// <summary>USE ALL: every part item, whetstone and experience potion (never the repair potions: the player picks
         /// when to repair). How many were used.</summary>
         public static int UseAll()
         {
             int used = 0;
-            foreach (var k in Kinds)
+            bulk = true;
+            try
             {
-                if (!HasRarity(k)) continue;
-                for (int i = Rarities.Length - 1; i >= 0; i--) used += Use(k, Rarities[i], int.MaxValue);
+                foreach (var k in Kinds)
+                {
+                    if (!HasRarity(k)) continue;
+                    for (int i = Rarities.Length - 1; i >= 0; i--) used += Use(k, Rarities[i], int.MaxValue);
+                }
             }
+            finally { bulk = false; }
             return used;
         }
     }

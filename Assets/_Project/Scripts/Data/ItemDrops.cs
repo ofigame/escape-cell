@@ -25,7 +25,7 @@ namespace SquashBot.Data
         /// <summary>Puts the items in the bag and tells of them (empty: nothing).</summary>
         public static List<ItemGrant> Give(string source, List<ItemGrant> items)
         {
-            foreach (var g in items) ItemBag.Add(g.kind, g.rarity, g.count);
+            foreach (var g in items) { ItemBag.Add(g.kind, g.rarity, g.count); ItemEvents.Dropped(source, g.kind, g.rarity, g.count); }
             if (items.Count > 0) Dropped?.Invoke(source, items);
             return items;
         }
