@@ -160,8 +160,13 @@ namespace SquashBot.UI
         private static float Centre(Transform holder, Transform model)
         {
             var rs = model.GetComponentsInChildren<Renderer>(true);
-            if (rs.Length == 0) return 1f;
-            var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
+            Bounds b = default; bool any = false;
+            foreach (var r in rs)
+            {
+                if (r is ParticleSystemRenderer) continue; // (smoke and sparks: not the thing framed)
+                if (!any) { b = r.bounds; any = true; } else b.Encapsulate(r.bounds);
+            }
+            if (!any) return 1f;
             model.position += holder.position - b.center;
             float k = Mathf.Max(1e-4f, holder.lossyScale.y);
             return Mathf.Max(b.size.x, Mathf.Max(b.size.y, b.size.z)) / k;

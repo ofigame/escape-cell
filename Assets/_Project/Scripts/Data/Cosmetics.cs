@@ -385,6 +385,7 @@ namespace SquashBot.Data
                 var c = Equipped(s);
                 if (!c.IsDefault) ids.Add(c.id);
             }
+            if (BattleWear.Shown > 0) ids.Add("wear" + BattleWear.Shown); // (the battle wear the rival sees: rust as wear; older games skip it)
             return string.Join(",", ids);
         }
 

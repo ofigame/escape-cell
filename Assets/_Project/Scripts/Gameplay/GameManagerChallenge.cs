@@ -582,6 +582,7 @@ namespace SquashBot.Gameplay
             rivalHeld = HeldWeapon.Attach(copy, Armory.Get(rival.weapon));
             var rivalSkin = copy.GetComponentInChildren<SkinnedHero>(true);
             if (rivalSkin != null) PartLooks.Apply(rivalSkin.transform, rival.Body, rival.Arms, rival.Shell); // its own parts' look
+            if (rivalSkin != null) WearLook.Apply(rivalSkin.transform, BattleWear.OfRival(rival.look, rival.seed, rival.look == null)); // its own battle wear (a computer rival's from its seed)
             return root;
         }
 
@@ -647,8 +648,18 @@ namespace SquashBot.Gameplay
             var itemMode = chMode == 2 || chMode == 3 ? ItemDrops.DuelMode.Event : !(chOnline || chLive) ? ItemDrops.DuelMode.Practice : friendly ? ItemDrops.DuelMode.Friend : ItemDrops.DuelMode.Ranked;
             var duelItems = ItemDrops.AfterDuel(itemMode, won, draw, firstWinToday);
             if (lastRewards != null) lastRewards.items = duelItems;
+            // the battle wear: ranked duels only (a loss leaves marks, a win repairs a step)
+            string wearLine = null;
+            if (itemMode == ItemDrops.DuelMode.Ranked)
+            {
+                int wearWas = BattleWear.OnRankedEnd(won, draw);
+                if (BattleWear.Level > wearWas) wearLine = Loc.T("wear.more");
+                else if (BattleWear.Level < wearWas) wearLine = Loc.T("wear.fixedByWin");
+                if (BattleWear.Level != wearWas) { var mySkin = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null; if (mySkin != null) WearLook.Apply(mySkin.transform, BattleWear.Level); }
+            }
             PlayStyle.EndDuel(chDuelMinutes * 60f - chDuelLeft); // (its style: blows, shields, hearts)
             if (lastRewards != null) lastRewards.eventLine = SettleEvent(won); // (the week's wins, the tournament's round)
+            if (lastRewards != null && wearLine != null) lastRewards.eventLine = (string.IsNullOrEmpty(lastRewards.eventLine) ? "" : lastRewards.eventLine + "\n") + wearLine; // (the battle wear's change)
             // the score with the friend (a friend match or a copy duel); a win over a copy tells the friend
             if (friendly && rival != null)
             {

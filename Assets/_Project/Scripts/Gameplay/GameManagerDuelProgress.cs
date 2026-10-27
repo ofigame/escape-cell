@@ -134,6 +134,7 @@ namespace SquashBot.Gameplay
             if (!string.IsNullOrEmpty(o.titleWords)) extras.Add(o.titleWords); else if (!string.IsNullOrEmpty(o.titleKey)) extras.Add(Loc.T(o.titleKey));
             if (o.streak >= 3) extras.Add(Loc.F(o.streak >= 10 ? "card.streak3" : o.streak >= 5 ? "card.streak2" : "card.streak1", o.streak));
             if (o.mastery >= 7) extras.Add(Loc.F("card.mastery", o.mastery));
+            if (BattleWear.OfRival(o.look, o.seed, o.look == null) >= 2) extras.Add(Loc.T("card.wear")); // (battle-worn: a mark of honour)
             // its move set, so the player can plan against it
             var set = !string.IsNullOrEmpty(o.moves) ? MoveSet.Parse(o.moves) : MoveSet.ForBot(BotTuning.Of(o.seed), o.seed, o.duelLevel);
             extras.Add(Loc.T("move.s." + set.s) + " / " + Loc.T("move.u." + set.u) + (set.p != PassiveKind.None ? " / " + Loc.T("move.p." + set.p) : ""));

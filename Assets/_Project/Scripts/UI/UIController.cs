@@ -28,7 +28,8 @@ namespace SquashBot.UI
         TestMode,
         DuelLab,
         FloorButtons,
-        DuelStage
+        DuelStage,
+        KeepWear
     }
 
     /// <summary>
@@ -657,6 +658,9 @@ namespace SquashBot.UI
             bagPingText = UiFactory.Text(bPing, "0", 30f, Color.white);
             bagPing = bPing.gameObject;
             MenuSkin.Orb(bag, "orb_blank_gold", keepIcon: true);
+            // Bip's daily service under it: shown while the armour has battle wear and today's service waits
+            bipService = UiFactory.MakeButton(t, Loc.T("wear.service"), Kind.Secondary, TopLeft, new Vector2(110f, -1040f), new Vector2(200f, 64f), () => BipServicePressed?.Invoke(), 22f);
+            ((RectTransform)bipService.transform).pivot = new Vector2(0.5f, 0.5f);
 
             // Friends: under the calendar (add a friend, invite one to a duel).
             var friends = MenuArt.DockButton(t, Loc.T("friends.button"), MenuArt.Icon.Friends, new Color(0.4f, 0.75f, 1f), TopLeft, new Vector2(110f, -570f), 120f, () => FriendsPressed?.Invoke());
@@ -904,9 +908,14 @@ namespace SquashBot.UI
             chestsPingText.text = n > 9 ? "9+" : n.ToString();
         }
 
-        /// <summary>The bag button's count of items waiting to be used.</summary>
+        /// <summary>Bip's daily service was asked for (the menu's pill).</summary>
+        public event Action BipServicePressed;
+        private Button bipService;
+
+        /// <summary>The bag button's count of items waiting to be used, and Bip's service pill.</summary>
         public void RefreshBag()
         {
+            if (bipService != null) bipService.gameObject.SetActive(SquashBot.Data.BattleWear.ServiceReady);
             if (bagPing == null) return;
             int n = SquashBot.Data.ItemBag.Total;
             bagPing.SetActive(n > 0);
@@ -1265,6 +1274,7 @@ namespace SquashBot.UI
                 (SettingKind.ScreenShake, "settings.shake"),
                 (SettingKind.FloorButtons, "settings.floorButtons"), // (the floors' SPIN and FLY buttons)
                 (SettingKind.DuelControls, "settings.duelControls"),
+                (SettingKind.KeepWear, "settings.keepWear"), // (the battle wear kept: wins and Bip do not repair it)
                 (SettingKind.Graphics, "settings.graphics"),
                 (SettingKind.Challenge, "settings.challenge"),
 #if !REAL_ADS && (TEST_TOOLS || !((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR))
@@ -1367,6 +1377,7 @@ namespace SquashBot.UI
             SetSetting(SettingKind.CombatCamera, SaveData.CombatCamera);
             SetSetting(SettingKind.LaneDuel, SaveData.LaneDuel);
             SetSetting(SettingKind.ScreenShake, SaveData.ScreenShake);
+            SetSetting(SettingKind.KeepWear, SquashBot.Data.BattleWear.Keep);
             SetSetting(SettingKind.FloorButtons, SaveData.FloorSkillButtons);
             settingValues[SettingKind.DuelControls].text = Loc.T("settings.adjust");
             settingValues[SettingKind.DuelControls].color = Palette.UiCyan;

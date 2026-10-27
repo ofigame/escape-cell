@@ -144,7 +144,8 @@ namespace SquashBot.UI
         private void Repair()
         {
             var k = ItemBag.Count(ItemKind.RepairSmall) > 0 ? ItemKind.RepairSmall : ItemKind.RepairLarge;
-            if (BattleWear.Level > 0 && ItemBag.Use(k, ItemRarity.Common) > 0)
+            if (ItemBag.Count(k) == 0 && BattleWear.Service()) { AudioManager.PlaySfx(Sfx.Coin, 0.8f, 1.5f); Say(Loc.T("wear.serviceDone")); Changed?.Invoke(); } // (no potion: Bip's daily service)
+            else if (BattleWear.Level > 0 && ItemBag.Use(k, ItemRarity.Common) > 0)
             {
                 AudioManager.PlaySfx(Sfx.Coin, 0.8f, 1.5f);
                 Say(Loc.T("ibag.repaired"));
@@ -227,7 +228,7 @@ namespace SquashBot.UI
             }
             int wear = BattleWear.Level;
             wearText.text = Loc.T("ibag.wear") + "  " + Dots(wear) + "  " + Loc.T("wear." + wear);
-            repair.gameObject.SetActive(wear > 0 && (ItemBag.Count(ItemKind.RepairSmall) + ItemBag.Count(ItemKind.RepairLarge)) > 0);
+            repair.gameObject.SetActive(wear > 0 && ((ItemBag.Count(ItemKind.RepairSmall) + ItemBag.Count(ItemKind.RepairLarge)) > 0 || BattleWear.ServiceReady));
 
             // the grid: every kind and rarity there is one of
             for (int i = grid.childCount - 1; i >= 0; i--) Destroy(grid.GetChild(i).gameObject);

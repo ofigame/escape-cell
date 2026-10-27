@@ -315,6 +315,15 @@ namespace SquashBot.Gameplay
             ui.Shop.Purchased += () => robot.ApplyOutfit(Cosmetics.Outfit()); // (a part raised: its look on foi at once)
             ui.BagView.Changed += () => robot.ApplyOutfit(Cosmetics.Outfit()); // (items used, a part levelled: foi's body at once)
             ui.BagView.ModelMaker = t => robot.BuildLookalike(t); // (the bag's close look: foi as it is now)
+            ui.BipServicePressed += () =>
+            {
+                // Bip's daily service: a step of battle wear off, free, once a day
+                if (!BattleWear.Service()) return;
+                AudioManager.PlaySfx(Sfx.Coin, 0.8f, 1.4f);
+                robot.ApplyOutfit(Cosmetics.Outfit());
+                ui.RefreshBag();
+                ui.ShowIntro(Loc.T("wear.serviceTitle"), Loc.T("wear.serviceDone"));
+            };
             ui.DailyBonus.AdPressed += WatchAdForDailyBonus;
             ui.Garage.PreviewChanged += outfit => robot.ApplyOutfit(outfit);
             ui.Garage.DancePreview += robot.Cheer;
@@ -1116,6 +1125,10 @@ namespace SquashBot.Gameplay
                     break;
                 case SettingKind.ScreenShake:
                     SaveData.ScreenShake = !SaveData.ScreenShake;
+                    break;
+                case SettingKind.KeepWear:
+                    BattleWear.Keep = !BattleWear.Keep;
+                    ui.RefreshBag();
                     break;
                 case SettingKind.FloorButtons:
                     SaveData.FloorSkillButtons = !SaveData.FloorSkillButtons;
