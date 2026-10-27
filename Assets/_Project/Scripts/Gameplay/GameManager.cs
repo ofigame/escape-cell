@@ -2378,7 +2378,7 @@ namespace SquashBot.Gameplay
                 CoreParts.Add(15);
                 string move = MoveSet.KeyOfWorld(beaten);
                 pendingWorldMove = move; // (its own card shows it)
-                pendingWorldGift = Loc.F("world.gift", Rescued.PerWorld, Rescued.Count) + "\n" + Loc.F("login.cores", "+15");
+                pendingWorldGift = Loc.F("world.gift", Rescued.PerWorld, Rescued.Count) + "\n" + Loc.F("login.cores", "+15") + "\n" + ItemDrops.Text(ItemDrops.FromWorldMonster());
             }
             Monetization.Ads.NoteResult(true);
             LevelTimes.Record(levelIndex, Time.realtimeSinceStartup - levelStartedAt, true);

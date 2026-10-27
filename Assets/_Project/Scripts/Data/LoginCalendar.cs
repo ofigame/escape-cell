@@ -41,6 +41,7 @@ namespace SquashBot.Data
             if (g.kind == Kind.Gold) SaveData.Coins += g.amount;
             else if (g.kind == Kind.Cores) CoreParts.Add(g.amount);
             else DuelChests.Add(g.tier);
+            ItemDrops.FromLogin(day); // (the items beside the day's gift)
             Prefs.SetInt(DayKey, (day + 1) % Days);
             Prefs.SetString(LastKey, GameClock.Today);
             Prefs.Save();

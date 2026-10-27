@@ -257,6 +257,7 @@ namespace SquashBot.UI
             if (r.weapon != null) { yield return MasteryRow(r); yield return Wait(0.2f); }
             if (r.gold > 0 || r.cores > 0) { yield return GoldCores(r, won); yield return Wait(0.25f); }
             if (r.chest.HasValue) { yield return ChestRow(r.chest.Value); yield return Wait(0.25f); }
+            if (r.items != null && r.items.Count > 0) { yield return ItemsRow(r.items); yield return Wait(0.25f); }
             yield return SeasonRow(r);
             yield return Wait(0.2f);
             QuestRow(r);
@@ -523,6 +524,32 @@ namespace SquashBot.UI
                     yield return null;
                 }
             chest.localEulerAngles = Vector3.zero;
+        }
+
+        /// <summary>The bag is asked for (the items row's GO TO BAG).</summary>
+        public static event System.Action BagRequested;
+
+        /// <summary>The duel's items (Docs/ESYA_CANTA_VE_BEDEN_SISTEMI.md, section 8): each comes out as from a chest,
+        /// the rarest last, and GO TO BAG under them.</summary>
+        private IEnumerator ItemsRow(System.Collections.Generic.List<ItemGrant> items)
+        {
+            var row = Row(Loc.T("ibag.won"), "", new Color(0.55f, 1f, 0.7f), null, 150f);
+            var sorted = new System.Collections.Generic.List<ItemGrant>(items);
+            sorted.Sort((a, b) => ((int)a.rarity).CompareTo((int)b.rarity));
+            for (int i = 0; i < sorted.Count && i < 6; i++)
+            {
+                var g = sorted[i];
+                var box = UiFactory.Box("Item", row, new Vector2(0f, 0f), new Vector2(26f + i * 96f, 12f), new Vector2(86f, 86f));
+                ItemIcon.Draw(box, g.kind, g.rarity);
+                for (float t = 0f; t < 1f && !skip; t += Time.unscaledDeltaTime * speed / 0.18f)
+                {
+                    box.localScale = Vector3.one * Mathf.Lerp(0.2f, 1f, 1f - (1f - t) * (1f - t));
+                    yield return null;
+                }
+                box.localScale = Vector3.one;
+                AudioManager.PlaySfx(g.rarity == ItemRarity.Epic ? Sfx.Win : Sfx.Coin, 0.7f, 1.1f + 0.15f * (int)g.rarity);
+            }
+            UiFactory.MakeButton(row, Loc.T("ibag.goTo"), UiFactory.ButtonKind.Secondary, new Vector2(1f, 0f), new Vector2(-16f, 14f), new Vector2(250f, 80f), () => BagRequested?.Invoke(), 26f);
         }
 
         private IEnumerator SeasonRow(GameManager.DuelRewards r)

@@ -102,6 +102,7 @@ namespace SquashBot.Data
             if (!q.Done || q.claimed) return 0;
             Prefs.SetInt(Key(weekly, i, "c"), 1);
             SaveData.Coins += q.coins;
+            ItemDrops.FromQuest(weekly, q.goal); // (a rare item a day, an epic a week)
             Prefs.Save();
             return q.coins;
         }

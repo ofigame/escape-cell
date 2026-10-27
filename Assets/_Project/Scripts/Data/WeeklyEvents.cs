@@ -67,6 +67,7 @@ namespace SquashBot.Data
                 if (s == 0) SaveData.Coins += 500;
                 else if (s == 1) CoreParts.Add(15);
                 else DuelChests.Add(ChestTier.Mid);
+                ItemDrops.FromWeekly(s);
                 Prefs.Save();
                 return s;
             }
@@ -126,6 +127,7 @@ namespace SquashBot.Data
             if (!won) { Prefs.SetInt(KeyOut, 1); Prefs.Save(); return null; }
             int round = Prefs.GetInt(KeyRound, 0);
             Prefs.SetInt(KeyRound, round + 1);
+            ItemDrops.FromTournament(round);
             string gift = null;
             if (round == 0) { SaveData.Coins += 300; gift = "tn.gift0"; }
             else if (round == 1) { DuelChests.Add(ChestTier.Mid); gift = "tn.gift1"; }

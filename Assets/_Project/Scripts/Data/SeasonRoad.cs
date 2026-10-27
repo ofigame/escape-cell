@@ -79,6 +79,7 @@ namespace SquashBot.Data
         {
             if (step < 1 || step > Reached || Taken(step)) return false;
             var g = Gift(step);
+            ItemDrops.FromSeasonStep(step); // (the items beside the step's gift)
             switch (g.kind)
             {
                 case Kind.Gold: SaveData.Coins += g.amount; break;

@@ -551,6 +551,7 @@ namespace SquashBot.UI
             SeasonRoadView = SeasonRoadScreen.Create(root);
             BagView = ItemBagScreen.Create(root);
             BagView.Changed += RefreshBag;
+            DuelRewardsScreen.BagRequested += () => BagView.Show();
             SeasonRoadView.Claimed += () => { RefreshMenuCoins(); RefreshChests(); RefreshSeasonRoad(); };
             DuelChestsView.Changed += () => { RefreshMenuCoins(); RefreshChests(); };
             ChallengeStats = ChallengeStatsScreen.Create(root);

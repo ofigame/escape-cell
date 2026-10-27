@@ -16,6 +16,9 @@ namespace SquashBot.Data
         public WeaponDef weapon;
         public Cosmetic outfit;
         public ShieldDef shield;
+        /// <summary>The items beside it (Docs/ESYA_CANTA_VE_BEDEN_SISTEMI.md, section 4): in the bag already as the chest
+        /// opens; an ad's second draw keeps them (never redrawn for an ad).</summary>
+        public System.Collections.Generic.List<ItemGrant> items = new System.Collections.Generic.List<ItemGrant>();
     }
 
     /// <summary>
@@ -66,7 +69,7 @@ namespace SquashBot.Data
             var c = CoreRange[(int)t];
             string text = Loc.F("odds.tiers", lo, hi) + " · " + Loc.F("odds.goldRange", Span(g.lo, g.hi));
             if (c.hi > 0) text += " · " + Loc.F("odds.coreRange", Span(c.lo, c.hi));
-            return text + "\n" + Loc.T("odds.fallback");
+            return text + "\n" + Loc.T("odds.fallback") + "\n" + ItemDrops.ChestText(t);
         }
 
         private static string Span(int lo, int hi) => lo == hi ? lo.ToString() : lo + "–" + hi;
@@ -97,6 +100,7 @@ namespace SquashBot.Data
                 if (sb.Length > 0) sb.Append(" · ");
                 sb.Append(Loc.T(x.key)).Append(' ').Append(Loc.F("fmt.pct", Mathf.RoundToInt(x.p * 100f)));
             }
+            sb.Append(" · +").Append(Loc.F("drop.chestItems", ItemCatalog.Current.chestItems[(int)t])); // (the items beside the draw)
             return sb.ToString();
         }
 
@@ -149,6 +153,7 @@ namespace SquashBot.Data
             if (Count(t) <= 0) return null;
             SetCount(t, Count(t) - 1);
             var r = Roll(t);
+            r.items = ItemDrops.FromChest(t);
             Hold(r);
             return r;
         }
@@ -163,6 +168,7 @@ namespace SquashBot.Data
                 bool same = was != null && (r.weapon != null ? r.weapon == was.weapon : r.outfit != null ? r.outfit == was.outfit : r.shield != null ? r.shield == was.shield : was.weapon == null && was.outfit == null && was.shield == null);
                 if (!same) break;
             }
+            if (was != null) r.items = was.items; // (the items stay: an ad never draws them again)
             Hold(r);
             return r;
         }

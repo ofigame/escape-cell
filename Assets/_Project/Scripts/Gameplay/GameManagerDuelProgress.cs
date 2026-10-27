@@ -26,6 +26,8 @@ namespace SquashBot.Gameplay
             public bool trophiesKnown, firstWin, goalDone, comeback, streakBreaker, goldenKo;
             public List<DuelLevel.LevelUp> levelUps = new List<DuelLevel.LevelUp>();
             public WeaponDef weapon;
+            /// <summary>The duel's items (Docs/ESYA_CANTA_VE_BEDEN_SISTEMI.md, 3.1), already in the bag.</summary>
+            public List<ItemGrant> items = new List<ItemGrant>();
             public int masteryBefore, masteryAfter, masteryPointsBefore, masteryPointsAfter;
             public ChestTier? chest;
             public string goalText;

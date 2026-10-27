@@ -165,7 +165,8 @@ namespace SquashBot.UI
             raw.raycastTarget = false;
             openGift = Flat.Label(root, "", mid, new Vector2(0f, -440f), new Vector2(960f, 90f), 56f, Color.white, TextAlignmentOptions.Center, bold: true);
             openGift.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            openNote = Flat.Label(root, "", mid, new Vector2(0f, -520f), new Vector2(960f, 60f), 32f, Flat.Gold, TextAlignmentOptions.Center);
+            openNote = Flat.Label(root, "", mid, new Vector2(0f, -540f), new Vector2(960f, 110f), 30f, Flat.Gold, TextAlignmentOptions.Center);
+            openNote.textWrappingMode = TextWrappingModes.Normal; openNote.enableAutoSizing = true; openNote.fontSizeMin = 18f; openNote.fontSizeMax = 30f; // (with the items it may run to two lines)
             openNote.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             takeButton = Flat.Button(root, Loc.T("chests.take"), new Vector2(0.5f, 0f), new Vector2(0f, Ads.BannerReserve + 120f), new Vector2(600f, 130f), new Color(0.2f, 0.72f, 0.36f), Color.white, Take, 46f);
             ((RectTransform)takeButton.transform).pivot = new Vector2(0.5f, 0.5f);
@@ -274,6 +275,8 @@ namespace SquashBot.UI
                     openNote.text = Loc.T("chests.exclusive");
                 }
                 else openGift.text = Loc.F("chests.gold", reward.gold) + (reward.cores > 0 ? " + " + Loc.F("login.cores", reward.cores) : "");
+                // the items beside it (already in the bag)
+                if (reward.items != null && reward.items.Count > 0) openNote.text = (openNote.text.Length > 0 ? openNote.text + "\n" : "") + "+ " + ItemDrops.Text(reward.items);
                 // A weapon: EQUIP on the left, TAKE THE GIFT on the right; gold: TAKE THE GIFT alone, in the middle.
                 var take = (RectTransform)takeButton.transform;
                 bool wearable = gifted != null || giftedOutfit != null || reward.shield != null;

@@ -643,6 +643,10 @@ namespace SquashBot.Gameplay
             coresWon = cores;
             SaveData.Coins += gold + (draw ? 0 : Earned);
             SettleProgress(won, draw, friendly, gold, cores, firstWinToday);
+            // the duel's items: a ranked one by its result, a friend's the day's first few, the events and practice none
+            var itemMode = chMode == 2 || chMode == 3 ? ItemDrops.DuelMode.Event : !(chOnline || chLive) ? ItemDrops.DuelMode.Practice : friendly ? ItemDrops.DuelMode.Friend : ItemDrops.DuelMode.Ranked;
+            var duelItems = ItemDrops.AfterDuel(itemMode, won, draw, firstWinToday);
+            if (lastRewards != null) lastRewards.items = duelItems;
             PlayStyle.EndDuel(chDuelMinutes * 60f - chDuelLeft); // (its style: blows, shields, hearts)
             if (lastRewards != null) lastRewards.eventLine = SettleEvent(won); // (the week's wins, the tournament's round)
             // the score with the friend (a friend match or a copy duel); a win over a copy tells the friend
@@ -705,6 +709,7 @@ namespace SquashBot.Gameplay
                 int steps = Challenge.BestRank - bestBefore;
                 CoreParts.Add(30 * steps);
                 DuelChests.Add(ChestTier.Advanced);
+                for (int s = 0; s < steps; s++) ItemDrops.FromRankUp(); // (two epic part items a rank)
                 coresWon += 30 * steps;
                 rankUp = "\n" + Loc.F("ch.rankUpGift", Challenge.RankName(Challenge.BestRank));
             }
