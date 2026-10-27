@@ -333,6 +333,9 @@ namespace SquashBot.Visual
 
         /// <summary>The weapon's business end (its tip, along its length): where its trail is drawn from.</summary>
         public Transform Tip { get; private set; }
+
+        /// <summary>Its blow is live now (between its trail's start and end: the hit box open).</summary>
+        public bool Striking => current != null && swing < 1f && phaseDone >= (int)SwingPhase.TrailStart && phaseDone < (int)SwingPhase.TrailEnd;
         private TrailRenderer trail;
         private float trailWidth, trailTime;
 

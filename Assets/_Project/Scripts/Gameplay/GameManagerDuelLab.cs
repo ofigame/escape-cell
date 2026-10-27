@@ -79,6 +79,13 @@ namespace SquashBot.Gameplay
             lab.Add("0,1×", () => LabSlow(0.1f), LabTune);
             lab.Add("ÜST GÖVDE", LabUpperBody);
             lab.Add("TAM GÖVDE", () => { var s = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null; if (s != null) s.PlayMove("dance1"); });
+            // the collision tools (Docs/DUELLO_CARPISMA_VE_TEMAS.md, section 6)
+            lab.Add("KUTULAR", LabBoxes, LabCollide);
+            lab.Add("KARE ▶", () => cameraRig.StartCoroutine(LabStep()), LabCollide);
+            lab.Add("DEVAM", () => { Time.timeScale = 1f; labStepping = false; }, LabCollide);
+            lab.Add("GECİKME", () => LabLatencyMs = LabLatencyMs >= 200 ? 0 : LabLatencyMs + 100, LabCollide);
+            lab.Add("SAYAÇ SIFIRLA", SkinnedHero.ResetOverlapCount, LabCollide);
+            AddCollisionScenarios(lab);
             lab.Add("ÇIK", CloseDuelLab, new Color(0.45f, 0.45f, 0.5f));
         }
 
@@ -112,12 +119,16 @@ namespace SquashBot.Gameplay
                 "Maç saati " + secs / 60 + ":" + (secs % 60).ToString("00") + "   Time.timeScale " + Time.timeScale.ToString("0.00") + "\n"
                 + "Görsel zaman: foi " + (vt != null ? vt.Scale.ToString("0.00") : "-") + (vt != null && vt.Frozen ? " (DONMA)" : "") + "   genel " + VisualTime.GlobalScale.ToString("0.00") + "\n"
                 + "Donma ×" + CombatFeel.HitstopMultiplier.ToString("0.0") + "   Sarsıntı " + (SaveData.ScreenShake ? "açık ×" + CombatFeel.ShakeMultiplier.ToString("0.0") : "kapalı") + "\n"
-                + "Silah: " + (heldWeapon != null ? heldWeapon.Family.ToString() : "-") + "   itme foi " + (vr != null ? vr.Offset.magnitude.ToString("0.00") : "0") + " / rakip " + (foeVr != null ? foeVr.Offset.magnitude.ToString("0.00") : "0"));
+                + "Silah: " + (heldWeapon != null ? heldWeapon.Family.ToString() : "-") + "   itme foi " + (vr != null ? vr.Offset.magnitude.ToString("0.00") : "0") + " / rakip " + (foeVr != null ? foeVr.Offset.magnitude.ToString("0.00") : "0") + "\n"
+                + (SkinnedHero.OverlapFrames > 0 ? "<color=#FF5544>İÇ İÇE: " + SkinnedHero.OverlapFrames + " kare</color>" : "İç içe: 0 kare") + "   temas mesafesi " + SkinnedHero.ContactDistance.ToString("0.00") + "   gecikme " + LabLatencyMs + " ms" + (labStepping ? "   (KARE KARE)" : ""));
         }
 
         private void CloseDuelLab()
         {
             if (duelLab != null) duelLab.Close();
+            if (labBoxes != null) { Destroy(labBoxes.gameObject); labBoxes = null; }
+            if (labStepping) { Time.timeScale = 1f; labStepping = false; }
+            LabLatencyMs = 0;
             duelLab = null;
             labSlow = 1f;
             VisualTime.SlowAll(1f, 0f);

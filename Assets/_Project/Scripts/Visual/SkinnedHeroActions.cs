@@ -18,6 +18,7 @@ namespace SquashBot.Visual
         private Vector3[] snapPos;
         private float snapLeft;
         private int chainTurn;
+        private float actionContact = -1f;
 
         /// <summary>The mapped move playing now (null: none).</summary>
         public DuelAction? Acting => playing != null ? actionNow : null;
@@ -79,6 +80,7 @@ namespace SquashBot.Visual
             if (!PlayMove(name, rate, false, row.loop)) return false;
             playingTime = playingFrom = from; playingTo = to;
             playingHold = row.hold; playingStay = true;
+            actionContact = row.timing == DuelAnimTiming.Contact && row.contact > from ? row.contact : -1f; // (a rush stopped on the body jumps here)
             actionNow = a;
             return true;
         }

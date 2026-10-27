@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38c387f9ab601f94f89d19f9b3d63a83, type: 3}
+  m_Name: CollisionSettings
+  m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.CollisionSettings
+  trunkScale: 1
+  fallbackRadiusShare: 0.12
+  overHeadShare: 0.6
+  shakeDistance: 0.05
+  shakeSeconds: 0.1
+  staggerDistance: 0.25
+  staggerSeconds: 0.25
+  knockbackDistance: 0.6
+  knockbackSeconds: 0.4
+  launchDistance: 1.2
+  ultiFinalDistance: 1
+  ultiFinalSeconds: 0.5
+  throwCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 3
+      outSlope: 3
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  followShare: 0.5
+  maxHitEffects: 3
+  ultiMiddleScale: 0.6

@@ -1635,7 +1635,8 @@ namespace SquashBot.Visual
             MovePose(dt);
             StrikePose(dt);
             KeepAboveGround(dt); // (never into the floor: before the grip, so the weapon follows the lifted hand)
-            Grip();
+            if (DuelOther != null && HeldWeapon.DuelStance) { finishPending = true; if (late == null) late = gameObject.AddComponent<SkinnedHeroLate>(); } // (the duel: kept out of the other first, then the grip)
+            else Grip();
 
             // Lids: a blink now and then; half down when angry or striking (the eyes narrow).
             blinkTimer -= dt;

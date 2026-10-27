@@ -228,6 +228,7 @@ namespace SquashBot.Gameplay
             if (mySkin != null) mySkin.ResetPose();
             var foeSkin = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
             if (foeSkin != null) foeSkin.ResetPose();
+            SkinnedHero.PairForDuel(mySkin, foeSkin); // (the two bodies kept out of each other)
             // each one's weapon mastery: how rich its plain chain looks (the player's own, the rival's card's)
             if (heldWeapon != null) heldWeapon.MasteryLevel = Mastery.Level(Armory.Equipped);
             var foeHeld = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<HeldWeapon>() : null;
