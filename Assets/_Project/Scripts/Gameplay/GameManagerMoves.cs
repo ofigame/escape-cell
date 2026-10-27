@@ -204,11 +204,13 @@ namespace SquashBot.Gameplay
                     }
                     FaceEachOther();
                     var hitAt = (mine ? hunt.ChallengeFoeAt ?? otherAt : robot.transform.position) + Vector3.up * 0.9f;
-                    fx.Burst(hitAt, new Color(1f, 0.8f, 0.4f), new Color(3f, 2f, 0.6f), 36, 6f);
+                    RushToTouch(OtherModel(), MeModel()); // (dragged in to the mover's body, never into it; the blow as it arrives)
+                    yield return WaitForTouch(OtherModel(), MeModel());
                     Shockwave.Create(hitAt - Vector3.up * 0.8f, 1.6f, new Color(1f, 0.8f, 0.4f));
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 0.9f);
                     cameraRig.Shake(0.55f);
                     Damage(hitTimes);
+                    if (LiveActive || Landed(mine)) ShowHitOn(MeModel(), OtherModel(), HitHeight.Mid, 3); // (a hit: its effect on the contact point; blocked or dodged: none)
                     Hold(stun);
                     Reels(0.9f);
                     break;
@@ -277,17 +279,19 @@ namespace SquashBot.Gameplay
                     yield return new WaitForSeconds(0.3f);
                     if (land.HasValue) yield return SkyLeap(mine, land.Value);
                     FaceEachOther();
+                    RushToTouch(MeModel(), OtherModel()); // (it lands before the other and rushes onto its body: the landing's blow as it touches)
+                    yield return WaitForTouch(MeModel(), OtherModel());
                     var hit = mine ? hunt.ChallengeFoeAt ?? otherAt : robot.transform.position;
                     var skyHeld = MeModel() != null ? MeModel().GetComponentInChildren<HeldWeapon>() : null;
                     if (skyHeld != null && OtherModel() != null) { var sky = CombatLibrary.Family(skyHeld.Family).skyStrike; skyHeld.SwingQuick(sky, 0.02f); CombatFeel.Hit(MeModel(), OtherModel(), sky); }
                     var meSkin = MeModel() != null ? MeModel().GetComponentInChildren<SkinnedHero>() : null;
                     if (meSkin != null) { meSkin.Crouch(1f, 0.35f); meSkin.Squash(1f); }
-                    fx.Burst(hit + Vector3.up * 0.4f, new Color(1f, 0.6f, 0.2f), new Color(3f, 1.6f, 0.4f), 50, 8f);
                     Shockwave.Create(hit, 2.8f, new Color(1f, 0.6f, 0.2f));
                     Shockwave.Create(hit, 1.6f, new Color(1f, 0.9f, 0.6f));
                     cameraRig.Shake(0.9f);
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 0.6f);
                     Damage(hitTimes); // (it lands by the other: no reach to miss by, as on the server)
+                    if (LiveActive || Landed(mine)) ShowHitOn(MeModel(), OtherModel(), HitHeight.High, 4); // (the crash down: on the contact point, once; blocked or dodged: none)
                     if (!LiveActive) Fling(!mine, mine ? robot.transform.position : hunt.ChallengeFoeAt ?? hit, 1.2f, 1);
                     break;
                 }
@@ -306,10 +310,12 @@ namespace SquashBot.Gameplay
                     MoveFx.Pillar(nowAt, new Color(0.75f, 0.45f, 1f), 0.6f, 3f, 0.4f);
                     fx.Burst(nowAt + Vector3.up * 0.8f, new Color(0.75f, 0.5f, 1f), new Color(2f, 1.2f, 3f), 36, 5f);
                     var hit = mine ? hunt.ChallengeFoeAt ?? otherAt : robot.transform.position;
-                    SlashFx.Create(nowAt + Vector3.up * 0.9f, hit + Vector3.up * 0.9f, new Color(0.8f, 0.55f, 1f), 1.8f);
+                    RushToTouch(MeModel(), OtherModel()); // (out at its side, onto its body: the blow as it touches)
+                    yield return WaitForTouch(MeModel(), OtherModel());
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 1.3f);
                     cameraRig.Shake(0.4f);
                     Damage(hitTimes);
+                    if (LiveActive || Landed(mine)) ShowHitOn(MeModel(), OtherModel(), HitHeight.Mid, 3); // (a hit: its effect on the contact point; blocked or dodged: none)
                     Reels(0.8f);
                     if (mine) myNextBlow = Bal.SpecialNextBlow(s); else rivalNextBlow = Bal.SpecialNextBlow(s);
                     break;
@@ -422,7 +428,7 @@ namespace SquashBot.Gameplay
                     var whirlSkin = spinner != null ? spinner.GetComponentInChildren<SkinnedHero>() : null;
                     bool bodySpins = whirlSkin != null && whirlSkin.Acting == DuelAction.UltiWhirlwind; // (its clip: the body turns itself, the root only faces the other)
                     var startRot = spinner != null ? spinner.rotation : Quaternion.identity;
-                    if (spinner != null) { var drift = OtherAt() - MeAt(); VisualRoot.On(CombatFeel.RootOf(spinner)).Lunge(drift, VisualRoot.KeptApart(MeAt(), OtherAt(), 1.5f), spins * Turn * 0.6f, spins * Turn * 0.3f, 0.35f); }
+                    if (spinner != null) { var drift = OtherAt() - MeAt(); VisualRoot.On(CombatFeel.RootOf(spinner)).Lunge(drift, VisualRoot.KeptApart(MeAt(), OtherAt(), 99f), Mathf.Min(0.15f, Turn * 0.5f), spins * Turn, 0.35f); } // (it spins its way onto the other at once and keeps spinning there, never into it)
                     for (int i = 0; i < spins && challengeRun && chPhase == ChPhase.Duel && !Down(); i++)
                     {
                         for (float e = 0f; e < Turn; e += Time.deltaTime)
@@ -435,11 +441,11 @@ namespace SquashBot.Gameplay
                         if (spinner != null && !bodySpins) spinner.rotation = Quaternion.AngleAxis(-90f, Vector3.up) * startRot;
                         fx.Dust(MeAt(), new Color(0.7f, 0.75f, 0.8f), 8, 3f); // (a swirl of dust at its feet)
                         var o = OtherAt();
-                        SlashFx.Create(o + Vector3.left * 1f + Vector3.up * 0.9f, o + Vector3.right * 1f + Vector3.up * 0.9f, new Color(0.7f, 0.95f, 1f), 1.8f);
-                        fx.Burst(o + Vector3.up * 0.9f, new Color(0.8f, 0.95f, 1f), new Color(2f, 2.6f, 3f), 14, 5f);
+                        if (i == 0) yield return WaitForTouch(spinner, Other(), 0.2f); // (the first cut only once the bodies touch)
                         AudioManager.PlaySfx(Sfx.Hop, 0.8f, 1.8f);
                         cameraRig.Shake(0.25f);
                         { Damage(hitTimes); var sk = Other() != null ? Other().GetComponentInChildren<SkinnedHero>() : null; if (sk != null) sk.Shudder(MeAt(), 1f); }
+                        if (LiveActive || Landed(mine)) ShowHitOn(spinner, Other(), HitHeight.Mid, 1); // (each turn's cut on the contact point, once; small: the middle of an ultimate; blocked: none)
                     }
                     if (wHeld != null) { wHeld.HoldOut(false); wHeld.Trail(false); }
                     if (spinner != null) spinner.rotation = startRot;

@@ -88,7 +88,7 @@ namespace SquashBot.Gameplay
                 case 8: yield return LabPlace(HuntSystem.DuelGap, true); myComboMove = HeavyCombo; comboMoveUntil = Time.time + 3f; OnSkill(DuelSkillBar.Move.Heavy); break; // POWER HIT at the edge
                 case 9: yield return LabPlace(5); yield return DoSpecial(true, SpecialKind.Hook); break; // HOOK
                 case 10: yield return LabPlace(5); yield return DoSpecial(true, SpecialKind.Teleport); break; // TELEPORT
-                case 11: yield return LabPlace(7); rivalGuard.Press(Time.time - 0.3f); yield return DoSpecial(true, SpecialKind.Fly); break; // FLY into a raised shield
+                case 11: { yield return LabPlace(7); bool d = LabDefends; LabDefends = true; rivalGuard.Press(Time.time - 0.3f); yield return DoSpecial(true, SpecialKind.Fly); LabDefends = d; } break; // FLY into a raised shield
                 case 12: LabLatencyMs = 200; yield return CollisionScenario(1); yield return new WaitForSeconds(1.5f); yield return CollisionScenario(5); yield return new WaitForSeconds(4f); yield return CollisionScenario(6); LabLatencyMs = 0; break; // 1, 5, 6 with 200 ms
             }
         }

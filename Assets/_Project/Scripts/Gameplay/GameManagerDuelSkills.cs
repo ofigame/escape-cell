@@ -128,7 +128,7 @@ namespace SquashBot.Gameplay
             skillBar = null;
             DropRings();
             moveBusy = false;
-            if (ultimateOn || Time.timeScale < 0.99f) { ultimateOn = false; if (State == GameState.Playing) Time.timeScale = 1f; }
+            if (ultimateOn || Time.timeScale < 0.99f) { ultimateOn = false; SkinnedHero.ClashOff = false; if (State == GameState.Playing) Time.timeScale = 1f; }
             slowCamUntil = slowCamWeight = 0f;
         }
 
@@ -265,7 +265,7 @@ namespace SquashBot.Gameplay
                     { var cs = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null; if (cs != null) cs.PlayAction(upper ? DuelAction.ComboKnockdown : DuelAction.ComboHeavy, 0f, 0.1f); } // (its own clip, its contact now)
                     robot.Strike(foeAt);
                     ComboMoveShown(true, upper);
-                    SlashFx.Create(robot.transform.position, foeAt, upper ? new Color(1f, 0.3f, 0.2f) : new Color(1f, 0.7f, 0.25f), upper ? 2.4f : 1.8f);
+                    cameraRig.StartCoroutine(RushThenHit(robot.Visual, hunt.ChallengeFoeModel, upper ? HitHeight.Low : HitHeight.Mid, 5)); // (onto its body, the blow's effect as it touches)
                     Shockwave.Create(foeAt, upper ? 2.6f : 1.8f, upper ? new Color(1f, 0.35f, 0.25f) : new Color(1f, 0.75f, 0.35f));
                     cameraRig.Shake(upper ? 0.7f : 0.45f);
                     AudioManager.PlaySfx(Sfx.Impact, 1f, upper ? 0.7f : 0.85f);
@@ -436,6 +436,8 @@ namespace SquashBot.Gameplay
         private IEnumerator SpecialMove(bool mine)
         {
             moveBusy = true;
+            if (mine) myFlying = true; else rivalFlying = true;
+            if (mine ? rivalFlying : myFlying) cameraRig.StartCoroutine(AirClash()); // (both flying at once: they meet in the air)
             if (mine) NoteDuel(DuelGoal.Special);
             int hero = mine ? HeroModels.Skill(SaveData.Hero) : rivalHero;
             if (mine) hunt.StunFoe(1.6f);
@@ -455,8 +457,14 @@ namespace SquashBot.Gameplay
             flyThrusters = true;
             yield return LeapTo(mine, hero);
             flyThrusters = false;
+            if (mine) myFlying = false; else rivalFlying = false;
+            if (Time.time - airClashAt < 1.5f) { moveBusy = false; yield break; } // (met in the air: a clash, no blow)
             if (!challengeRun || chPhase != ChPhase.Duel || !hunt.ChallengeFoeAt.HasValue) { moveBusy = false; yield break; }
             var foeAt = hunt.ChallengeFoeAt.Value;
+            // it rushes onto the other's body and stops there: the blow lands as it touches (the collision rules 3.1)
+            var flyStruck = mine ? hunt.ChallengeFoeModel : robot.Visual;
+            RushToTouch(flier, flyStruck);
+            yield return WaitForTouch(flier, flyStruck);
             if (mine) robot.Strike(foeAt);
             // the flying strike by the weapon's family, and a kneeling landing in dust
             var flyHeld = flier != null ? flier.GetComponentInChildren<HeldWeapon>() : null;
@@ -464,8 +472,9 @@ namespace SquashBot.Gameplay
             {
                 var fly = CombatLibrary.Family(flyHeld.Family).flyStrike;
                 flyHeld.SwingQuick(fly, 0.03f);
-                CombatFeel.Hit(flier, mine ? hunt.ChallengeFoeModel : robot.Visual, fly);
+                CombatFeel.Hit(flier, flyStruck, fly);
             }
+
             if (flierSkin != null) { flierSkin.Crouch(0.9f, 0.3f); flierSkin.Squash(0.7f); }
             if (flier != null) fx.Dust(flier.position, new Color(0.6f, 0.55f, 0.48f), 16, 3.5f);
             PowerFx(hero, mine ? robot.transform.position : foeAt, mine ? foeAt : robot.transform.position);
@@ -476,6 +485,7 @@ namespace SquashBot.Gameplay
                 if (colosseum != null) colosseum.Cheer(0, 0.9f);
             }
             else HurtMe(SpecialTimes, BlowKind.Air);
+            if (LiveActive || Landed(mine)) ShowHitOn(flier, flyStruck, HitHeight.Mid, 3); // (a hit: its effect on the contact point; a blocked or dodged one: none)
             if (LiveActive || Landed(mine)) yield return BigMoment(!mine); // (blocked or dodged: nobody is thrown)
             moveBusy = false;
         }
@@ -831,7 +841,7 @@ namespace SquashBot.Gameplay
         private IEnumerator Ultimate(bool mine, bool leap)
         {
             moveBusy = true;
-            ultimateOn = true;
+            ultimateOn = true; SkinnedHero.ClashOff = true;
             skillBar?.Shout(Loc.T("duel.ultTitle"), mine ? new Color(0.8f, 0.5f, 1f) : new Color(1f, 0.4f, 0.4f));
             AudioManager.PlaySfx(Sfx.Win, 1f, 0.6f);
             if (colosseum != null) colosseum.Cheer(mine ? 0 : 1, 1f);
@@ -865,9 +875,10 @@ namespace SquashBot.Gameplay
                 else if (mine) robot.Strike(to);
                 // its weapon strikes each blow (swinging in the hand the move carries)
                 var held = caster != null ? caster.GetComponentInChildren<HeldWeapon>() : null;
+                var ultiStruck = mine ? hunt.ChallengeFoeModel : robot.Visual;
+                RushToTouch(caster, ultiStruck, 0.06f); // (step by step onto the other's body, never into it)
                 if (held != null) held.Swing();
-                SlashFx.Create(from, to, colour, i == 4 ? 3f : 1.6f);
-                fx.Burst(to + Vector3.up * 0.6f, colour, colour * 2.5f, i == 4 ? 60 : 20, i == 4 ? 9f : 5f);
+                yield return WaitForTouch(caster, ultiStruck, 0.2f); // (the effect as the bodies touch, never before)
                 if (i == 4) Shockwave.Create(to, 3.2f, colour);
                 cameraRig.Shake(i == 4 ? 0.9f : 0.3f);
                 AudioManager.PlaySfx(Sfx.Impact, 1f, i == 4 ? 0.55f : 1.1f);
@@ -877,11 +888,12 @@ namespace SquashBot.Gameplay
                     float cost = Def.ultiCost * part / UltimateHit; // (the whole ultimate blocked costs the shield its 60)
                     if (mine) HitFoe(part, BlowKind.Ulti, cost); else HurtMe(part, BlowKind.Ulti, cost);
                 }
+                if (LiveActive || Landed(mine)) ShowHitOn(caster, ultiStruck, HitHeight.Mid, i == 4 ? 5 : 1); // (the middle blows' effects small, the last big; blocked: none)
                 if (i < 4) DriveBack(mine); // (struck, it is driven back; the one striking follows it up)
                 if (i == 4) { CombatFeel.UltiFinal(caster, mine ? hunt.ChallengeFoeModel : robot.Visual); if (LiveActive || Landed(mine)) yield return BigMoment(!mine); } // (the final: the longest freeze, a white flash)
             }
             if (casterSkin != null) casterSkin.StopMove();
-            ultimateOn = false;
+            ultimateOn = false; SkinnedHero.ClashOff = false;
             if (State == GameState.Playing) Time.timeScale = 1f;
             moveBusy = false;
         }

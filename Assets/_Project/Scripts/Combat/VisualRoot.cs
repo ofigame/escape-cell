@@ -61,10 +61,14 @@ namespace SquashBot.Combat
             tt = 0f;
         }
 
+        /// <summary>Rushing out (or held there) on a lunge, not on its way home.</summary>
+        public bool Lunging => lt >= 0f && lt < lOut + lHold;
+
         public void Lunge(Vector3 direction, float distance, float outSeconds, float holdSeconds, float backSeconds)
         {
             direction.y = 0f;
             if (direction.sqrMagnitude < 1e-6f || distance <= 0f) return;
+            if (lt >= 0f && lt < lOut + lHold && lunge.magnitude >= distance && Vector3.Dot(lunge, direction) > 0f) return; // (already rushing further that way: a blow's own small lunge never pulls it back)
             lunge = direction.normalized * distance;
             lOut = Mathf.Max(0.01f, outSeconds); lHold = Mathf.Max(0f, holdSeconds); lBack = Mathf.Max(0.03f, backSeconds);
             lt = 0f;

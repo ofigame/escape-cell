@@ -52,7 +52,13 @@ namespace SquashBot.Visual
         }
 
         /// <summary>The lab's counter back to 0.</summary>
-        public static void ResetOverlapCount() => OverlapFrames = 0;
+        public static void ResetOverlapCount() { OverlapFrames = 0; AllocatedBytes = 0; }
+
+        /// <summary>The lab's measure: the bytes the pair's resolving has allocated since the counter's reset (0 wanted).</summary>
+        public static long AllocatedBytes { get; private set; }
+
+        /// <summary>The lab measures the allocations (off in play).</summary>
+        public static bool MeasureAllocations;
 
         private SkinnedHero DuelOther => this == duelA ? duelB : this == duelB ? duelA : null;
 
@@ -86,10 +92,15 @@ namespace SquashBot.Visual
         private bool finishPending;
         private static int resolvedFrame = -1;
         private static float clashAt = -9f;
+
+        /// <summary>No clash meanwhile (an ultimate's beating: one strikes, the other takes it).</summary>
+        public static bool ClashOff;
+        /// <summary>When it last reeled from a blow (one being struck is not rushing in: no clash).</summary>
+        private float reactedAt = -9f;
         private SkinnedHeroLate late;
 
         /// <summary>Coming at the other with a blow (a mapped attack or a body blow playing).</summary>
-        private bool Rushing => AttackPlaying || strikeNow != Combat.BodyStrike.Weapon;
+        private bool Rushing => AttackPlaying || strikeNow != Combat.BodyStrike.Weapon || (vroot != null && vroot.Lunging); // (a rush onto the other counts too: two flying in at once clash)
 
         /// <summary>
         /// Both bodies posed this frame: the two trunks kept a contact distance apart along the line between their places
@@ -100,7 +111,12 @@ namespace SquashBot.Visual
         public void FinishFrame()
         {
             if (!finishPending) return;
-            if (resolvedFrame != Time.frameCount) { resolvedFrame = Time.frameCount; ResolvePair(); }
+            if (resolvedFrame != Time.frameCount)
+            {
+                resolvedFrame = Time.frameCount;
+                if (!MeasureAllocations) ResolvePair();
+                else { long was = System.GC.GetAllocatedBytesForCurrentThread(); ResolvePair(); AllocatedBytes += System.GC.GetAllocatedBytesForCurrentThread() - was; }
+            }
             finishPending = false;
             Grip();
         }
@@ -110,6 +126,11 @@ namespace SquashBot.Visual
             var a = duelA; var b = duelB;
             if (a == null || b == null || !HeldWeapon.DuelStance || a.hips == null || b.hips == null || a.transform.parent == null || b.transform.parent == null) return;
             var pa = a.hips.position; var pb = b.hips.position;
+            // the platform's edge first: a thrown body meets an invisible wall there and bounces (never off the platform);
+            // one against its wall does not give way to the other, the other takes all of it
+            var aWas = pa; var bWas = pb; // (where they stood before the walls: their coming, from last frame)
+            bool aWall = KeepOnPlatform(a), bWall = KeepOnPlatform(b);
+            pa = a.hips.position; pb = b.hips.position;
             bool shown = a.BodyShown && b.BodyShown;
             if (shown)
             {
@@ -120,27 +141,26 @@ namespace SquashBot.Visual
                 if (side.sqrMagnitude > 1e-6f)
                 {
                     side.Normalize();
-                    float tall = Mathf.Max(a.heightCache, b.heightCache, 0.1f);
+                    float tall = Mathf.Max(Mathf.Max(a.heightCache, b.heightCache), 0.1f); // (two by two: the three-value Max makes an array each call)
                     float contact = a.PushRadius + b.PushRadius;
                     ContactDistance = contact;
-                    bool aComes = a.pushFrame >= 0 && Vector3.Dot(pa - a.pushPrev, -side) > 1e-4f;
-                    bool bComes = b.pushFrame >= 0 && Vector3.Dot(pb - b.pushPrev, side) > 1e-4f;
+                    bool aComes = a.pushFrame >= 0 && Vector3.Dot(aWas - a.pushPrev, -side) > 1e-4f;
+                    bool bComes = b.pushFrame >= 0 && Vector3.Dot(bWas - b.pushPrev, side) > 1e-4f;
                     float along = Vector3.Dot(flat, side);
                     if (Mathf.Abs(pa.y - pb.y) < tall * CollisionSettings.Current.overHeadShare && along < contact) // (one over the other's head: no clash)
                     {
                         float need = contact - along;
                         float shareA = aComes && bComes ? 0.5f : aComes ? 1f : bComes ? 0f : 0.5f;
+                        if (aWall && !bWall) shareA = 0f; else if (bWall && !aWall) shareA = 1f; // (against the wall: the other gives way)
                         a.hips.position += side * need * shareA;
                         b.hips.position -= side * need * (1f - shareA);
-                        if (aComes && bComes && a.Rushing && b.Rushing && Time.time - clashAt > 0.5f) { clashAt = Time.time; BothCame?.Invoke((a.hips.position + b.hips.position) * 0.5f + Vector3.up * a.PushRadius, Vector3.Cross(Vector3.up, side)); } // (both rushed in: they meet in the middle, a clash)
+                        if (aComes && bComes && !ClashOff && a.Rushing && b.Rushing && Time.time - a.reactedAt > 0.4f && Time.time - b.reactedAt > 0.4f && Time.time - clashAt > 0.5f) { clashAt = Time.time; BothCame?.Invoke((a.hips.position + b.hips.position) * 0.5f + Vector3.up * a.PushRadius, Vector3.Cross(Vector3.up, side)); } // (both rushed in: they meet in the middle, a clash)
                         (aComes ? a : bComes ? b : null)?.Struck();
                     }
                     a.pushComing = aComes; b.pushComing = bComes;
                 }
             }
-            // the platform's edge: a thrown body meets an invisible wall there and bounces (never off the platform)
-            KeepOnPlatform(a); KeepOnPlatform(b);
-            a.pushPrev = pa; b.pushPrev = pb;
+            a.pushPrev = aWas; b.pushPrev = bWas;
             a.pushFinal = a.hips.position; b.pushFinal = b.hips.position;
             a.pushFrame = b.pushFrame = Time.frameCount;
             if (shown)
@@ -155,17 +175,18 @@ namespace SquashBot.Visual
         public static Rect? DuelArea;
         private float edgeBounceAt = -9f;
 
-        private static void KeepOnPlatform(SkinnedHero s)
+        private static bool KeepOnPlatform(SkinnedHero s)
         {
-            if (!DuelArea.HasValue || s == null || s.hips == null || !s.BodyShown) return;
+            if (!DuelArea.HasValue || s == null || s.hips == null || !s.BodyShown) return false;
             var area = DuelArea.Value;
             float r = s.PushRadius;
             var p = s.hips.position;
             float x = Mathf.Clamp(p.x, area.xMin + r, area.xMax - r), z = Mathf.Clamp(p.z, area.yMin + r, area.yMax - r);
-            if (Mathf.Abs(x - p.x) < 1e-4f && Mathf.Abs(z - p.z) < 1e-4f) return;
+            if (Mathf.Abs(x - p.x) < 1e-4f && Mathf.Abs(z - p.z) < 1e-4f) return false;
             var wall = new Vector3(p.x - x, 0f, p.z - z);
             s.hips.position = new Vector3(x, p.y, z);
             if (wall.magnitude > r * 0.05f && Time.time - s.edgeBounceAt > 0.6f) { s.edgeBounceAt = Time.time; s.Shudder(s.hips.position + wall.normalized * r * 2f, 1f); } // (it bounces off the edge)
+            return true;
         }
 
         /// <summary>Both came at each other and met in the middle this frame: where, and across (the game shows a clash).</summary>

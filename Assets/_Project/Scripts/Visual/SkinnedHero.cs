@@ -1126,6 +1126,7 @@ namespace SquashBot.Visual
         /// </summary>
         public void Stagger(Vector3 from, float strength)
         {
+            reactedAt = Time.time;
             if (knock != null) return; // (already going down)
             KnowRest();
             if (stagger != null) StopCoroutine(stagger);
@@ -1180,6 +1181,7 @@ namespace SquashBot.Visual
         /// the arms jerk (0.4 s; <paramref name="strength"/> 0..1).</summary>
         public void Shudder(Vector3 from, float strength)
         {
+            reactedAt = Time.time;
             var away = transform.position - from; away.y = 0f;
             if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
             shudderAxis = Vector3.Cross(Vector3.up, away.normalized);

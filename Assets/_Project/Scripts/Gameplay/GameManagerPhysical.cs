@@ -160,7 +160,7 @@ namespace SquashBot.Gameplay
             var (wind, hit, back) = PhysTiming(k);
             if (!mine && k == PhysKind.Headbutt && skin != null) { skin.Hop(1.1f, 0.5f); yield return new WaitForSeconds(0.18f); } // (the bot jumps first)
             if (skin != null && them != null) skin.StrikeWithBody(StrikeOf(k), wind, hit, back, them.position);
-            if (me != null && them != null) VisualRoot.On(CombatFeel.RootOf(me)).Lunge(them.position - me.position, VisualRoot.KeptApart(me.position, them.position, 1.5f), wind + hit * 0.5f, hit * 0.5f + 0.05f, back);
+            if (me != null && them != null) VisualRoot.On(CombatFeel.RootOf(me)).Lunge(them.position - me.position, VisualRoot.KeptApart(me.position, them.position, 99f), wind + hit * 0.5f, hit * 0.5f + 0.05f, back);
             AudioManager.PlaySfx(Sfx.Hop, 0.8f, k == PhysKind.Headbutt ? 0.8f : 1.2f);
             skillBar?.Shout(Loc.T("duel.phys." + (int)k), mine ? new Color(1f, 0.75f, 0.35f) : new Color(1f, 0.45f, 0.4f));
             yield return new WaitForSeconds(wind + hit * 0.5f); // (the contact: the rules' moment and the picture's, together)
@@ -192,6 +192,7 @@ namespace SquashBot.Gameplay
                 return;
             }
             PhysShown(mine, k, "hit", null);
+            ShowHitOn(mine ? robot.Visual : hunt.ChallengeFoeModel, mine ? hunt.ChallengeFoeModel : robot.Visual, height, 3); // (its effect on the contact point, once)
         }
 
         /// <summary>

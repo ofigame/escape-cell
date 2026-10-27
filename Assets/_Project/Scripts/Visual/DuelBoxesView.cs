@@ -82,8 +82,9 @@ namespace SquashBot.Visual
                 between.SetPosition(1, b.TrunkPoint);
             }
             else between.enabled = false;
-            foreach (var s in new[] { a, b })
+            for (int si = 0; si < 2; si++)
             {
+                var s = si == 0 ? a : b;
                 if (s == null) continue;
                 float r = s.PushBoxRadius;
                 var t = s.TrunkPoint;
