@@ -13,7 +13,7 @@ namespace SquashBot.UI
     /// </summary>
     public static class MenuArt
     {
-        public enum Icon { Garage, Shop, Map, Guide, Chest, Swords, Friends, House, Profile }
+        public enum Icon { Garage, Shop, Map, Guide, Chest, Swords, Friends, House, Profile, Calendar, Backpack }
 
         /// <summary>
         /// The logo in the game's card look (like the level card): a navy plate in a gold frame with a parchment on it,
@@ -236,6 +236,36 @@ namespace SquashBot.UI
                     Part(box, c, new Vector2(0f, s * 0.04f), new Vector2(s * 0.86f, s * 0.07f), Palette.UiGold, UiSprites.Rounded);
                     Part(box, c, new Vector2(0f, -s * 0.02f), new Vector2(s * 0.18f, s * 0.22f), Palette.UiGold, UiSprites.Rounded);
                     break;
+                case Icon.Calendar:
+                {
+                    // A calendar page: a red band on top with two rings, the days in rows, today marked in gold.
+                    var red = new Color(0.9f, 0.27f, 0.25f);
+                    var ink = new Color(0.3f, 0.32f, 0.45f);
+                    Part(box, c, new Vector2(0f, -s * 0.06f), new Vector2(s * 0.8f, s * 0.74f), Color.white, UiSprites.Rounded);
+                    Part(box, c, new Vector2(0f, s * 0.22f), new Vector2(s * 0.8f, s * 0.2f), red, UiSprites.Rounded);
+                    foreach (float x in new[] { -0.2f, 0.2f }) Part(box, c, new Vector2(s * x, s * 0.33f), new Vector2(s * 0.08f, s * 0.18f), ink, UiSprites.Rounded);
+                    for (int row = 0; row < 3; row++)
+                        for (int col = 0; col < 4; col++)
+                        {
+                            bool today = row == 1 && col == 2;
+                            Part(box, c, new Vector2(s * (-0.255f + col * 0.17f), s * (0.03f - row * 0.15f)), new Vector2(s * (today ? 0.15f : 0.11f), s * (today ? 0.13f : 0.09f)),
+                                today ? Palette.UiGold : new Color(ink.r, ink.g, ink.b, 0.55f), today ? UiSprites.Circle : UiSprites.Rounded);
+                        }
+                    break;
+                }
+                case Icon.Backpack:
+                {
+                    // A backpack: its body, the flap over the top with a gold buckle, a front pocket, the carrying loop.
+                    var cloth = new Color(0.2f, 0.62f, 0.55f);
+                    var deep = new Color(0.12f, 0.42f, 0.38f);
+                    Part(box, c, new Vector2(0f, s * 0.36f), new Vector2(s * 0.26f, s * 0.2f), deep, UiSprites.Ring);
+                    Part(box, c, new Vector2(0f, -s * 0.06f), new Vector2(s * 0.72f, s * 0.78f), cloth, UiSprites.Rounded);
+                    Part(box, c, new Vector2(0f, s * 0.17f), new Vector2(s * 0.74f, s * 0.3f), deep, UiSprites.Rounded);
+                    Part(box, c, new Vector2(0f, -s * 0.24f), new Vector2(s * 0.48f, s * 0.26f), deep, UiSprites.Rounded);
+                    Part(box, c, new Vector2(0f, -s * 0.2f), new Vector2(s * 0.36f, s * 0.04f), new Color(1f, 1f, 1f, 0.35f), UiSprites.Rounded);
+                    Part(box, c, new Vector2(0f, s * 0.04f), new Vector2(s * 0.14f, s * 0.14f), Palette.UiGold, UiSprites.Rounded);
+                    break;
+                }
                 case Icon.Swords:
                     // Two crossed swords.
                     foreach (float sgn in new[] { -1f, 1f })

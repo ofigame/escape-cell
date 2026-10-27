@@ -625,7 +625,7 @@ namespace SquashBot.UI
             MenuSkin.Orb(menuQuests, "orb_quests");
 
             // The login calendar (where the army was): a red dot while today's gift waits.
-            var login = MenuArt.DockButton(t, Loc.T("login.button"), MenuArt.Icon.Chest, new Color(1f, 0.72f, 0.25f), TopLeft, new Vector2(110f, -400f), 120f, () => LoginView.Show());
+            var login = MenuArt.DockButton(t, Loc.T("login.button"), MenuArt.Icon.Calendar, new Color(1f, 0.72f, 0.25f), TopLeft, new Vector2(110f, -400f), 120f, () => LoginView.Show());
             ((RectTransform)login.transform).pivot = new Vector2(0.5f, 0.5f);
             var lPing = UiFactory.Box("Ping", login.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(44f, 44f));
             lPing.pivot = new Vector2(0.5f, 0.5f);
@@ -650,14 +650,14 @@ namespace SquashBot.UI
             MenuSkin.Orb(moves, "orb_blank_orange", keepIcon: true);
 
             // The bag: under the move set, with how many items wait to be used.
-            var bag = MenuArt.DockButton(t, Loc.T("ibag.button"), MenuArt.Icon.Chest, new Color(0.35f, 0.8f, 0.55f), TopLeft, new Vector2(110f, -910f), 120f, () => BagView.Show());
+            var bag = MenuArt.DockButton(t, Loc.T("ibag.button"), MenuArt.Icon.Backpack, new Color(0.35f, 0.8f, 0.55f), TopLeft, new Vector2(110f, -910f), 120f, () => BagView.Show());
             ((RectTransform)bag.transform).pivot = new Vector2(0.5f, 0.5f);
             var bPing = UiFactory.Box("Ping", bag.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(48f, 48f));
             bPing.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.Fill(bPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
             bagPingText = UiFactory.Text(bPing, "0", 30f, Color.white);
             bagPing = bPing.gameObject;
-            MenuSkin.Orb(bag, "orb_blank_gold", keepIcon: true);
+            MenuSkin.Orb(bag, "orb_blank_brown", keepIcon: true); // (its own colour: not the calendar's gold)
             // Bip's daily service under it: shown while the armour has battle wear and today's service waits
             bipService = UiFactory.MakeButton(t, Loc.T("wear.service"), Kind.Secondary, TopLeft, new Vector2(110f, -1040f), new Vector2(200f, 64f), () => BipServicePressed?.Invoke(), 22f);
             ((RectTransform)bipService.transform).pivot = new Vector2(0.5f, 0.5f);
