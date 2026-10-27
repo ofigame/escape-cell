@@ -104,6 +104,10 @@ namespace SquashBot.Gameplay
         private InputReader input;
         private FxSystem fx;
         private Transform visual, shadow;
+        /// <summary>foi on the road: a little smaller than on the floors, hands empty (its weapon and shield put away), its
+        /// glow under it as small.</summary>
+        private const float RoadSize = 0.8f;
+        private readonly List<GameObject> putAway = new List<GameObject>();
         private readonly List<(Transform t, Vector3 pos, Quaternion rot)> limbs = new List<(Transform, Vector3, Quaternion)>();
         private Transform legL, legR, armL, armR;
 
@@ -290,8 +294,12 @@ namespace SquashBot.Gameplay
             visual = robot.Visual;
             visual.localPosition = Vector3.zero;
             visual.localRotation = Quaternion.identity;
-            visual.localScale = Vector3.one;
+            visual.localScale = Vector3.one * RoadSize;
             shadow = robot.transform.Find("Shadow");
+            putAway.Clear();
+            var dd = visual.GetComponentInChildren<DanceDrop>(); if (dd != null) dd.Restore(); // (a victory dance's gear back off the ground first)
+            foreach (var c in visual.GetComponentsInChildren<Transform>(false))
+                if (c.name == "HeldWeapon" || c.name == "HeldShield" || c.name == "HeldHammer" || c.name == "ArenaHammer") { c.gameObject.SetActive(false); putAway.Add(c.gameObject); }
             limbs.Clear();
             foreach (var name in new[] { "LegL", "LegR", "FootL", "FootR", "ArmL", "ArmR" })
             {
@@ -340,6 +348,8 @@ namespace SquashBot.Gameplay
                 t.localRotation = rot;
             }
             limbs.Clear();
+            foreach (var g in putAway) if (g != null) g.SetActive(true); // (back in its hands on the floor)
+            putAway.Clear();
             if (visual != null)
             {
                 visual.gameObject.SetActive(true);
@@ -1828,7 +1838,7 @@ namespace SquashBot.Gameplay
 
             if (crashed)
             {
-                visual.localScale = Vector3.Lerp(visual.localScale, new Vector3(1.5f, 0.12f, 1.5f), dt * 14f);
+                visual.localScale = Vector3.Lerp(visual.localScale, new Vector3(1.5f, 0.12f, 1.5f) * RoadSize, dt * 14f);
                 return;
             }
 
@@ -1840,7 +1850,7 @@ namespace SquashBot.Gameplay
             float s = 1f + squash;
             float sx = 1f / Mathf.Sqrt(Mathf.Max(0.3f, s));
             float sy = Mathf.Max(0.3f, 1f - squash * 0.6f) * (sliding ? 0.5f : 1f);
-            var targetScale = new Vector3(sx * (sliding ? 1.15f : 1f), sy, sx);
+            var targetScale = new Vector3(sx * (sliding ? 1.15f : 1f), sy, sx) * RoadSize;
             visual.localScale = dt >= 1f ? targetScale : Vector3.Lerp(visual.localScale, targetScale, Mathf.Clamp01(dt * 18f));
             if (ended && escaped) visual.localRotation = Quaternion.Euler(0f, endTimer * 540f, 0f);
             // Blinking while a road bump's safety lasts.
@@ -1871,7 +1881,7 @@ namespace SquashBot.Gameplay
                 bool floor = row < 0 || row >= totalRows || floorPlan[row, under];
                 shadow.gameObject.SetActive(floor && !falling);
                 shadow.SetPositionAndRotation(World(x, GridView.SurfaceY + 0.004f, z), Rotation(z));
-                float k = 0.48f * (1f - Mathf.Clamp01(y) * 0.4f);
+                float k = 0.48f * RoadSize * 0.85f * (1f - Mathf.Clamp01(y) * 0.4f);
                 shadow.localScale = new Vector3(k, 0.004f, k);
             }
         }

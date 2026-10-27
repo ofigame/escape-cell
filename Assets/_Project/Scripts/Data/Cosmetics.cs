@@ -129,15 +129,13 @@ namespace SquashBot.Data
             C("trail.fire", Slot.Trail, 600, 5, new Color(2.6f, 0.9f, 0.2f)),
             C("trail.bolt", Slot.Trail, 800, 19, new Color(1.8f, 2f, 2.6f)),
 
+            // foi's own dances (made on its body: Resources/Heroes/Foi/hero_dance0..5); the first is everyone's
             C("dance.spin", Slot.Dance, 0, 0, new Color(0.5f, 0.5f, 0.6f)),
-            C("dance.jump", Slot.Dance, 300, 0, new Color(0.55f, 0.9f, 0.75f)),
-            C("dance.wobble", Slot.Dance, 400, 1, new Color(1f, 0.7f, 0.4f)),
-            C("dance.flip", Slot.Dance, 500, 2, new Color(0.62f, 0.45f, 0.95f)),
-            // foi's own dances (made on its body)
             C("dance.d1", Slot.Dance, 300, 0, new Color(0.4f, 0.8f, 1f)),
             C("dance.d2", Slot.Dance, 400, 1, new Color(1f, 0.6f, 0.3f)),
             C("dance.d3", Slot.Dance, 500, 2, new Color(0.7f, 0.45f, 1f)),
             C("dance.d4", Slot.Dance, 600, 3, new Color(1f, 0.85f, 0.3f)),
+            C("dance.d5", Slot.Dance, 700, 4, new Color(0.45f, 1f, 0.6f)),
 
             // The paint on foi's armour: camouflage and colours.
             C("suit.none", Slot.Suit, 0, 0, new Color(0.74f, 0.76f, 0.81f)),
@@ -365,6 +363,23 @@ namespace SquashBot.Data
             if (skin == "skin.light") Prefs.SetString("sb_eq_Skin", "skin.fair");
             else if (skin == "skin.brown" || skin == "skin.olive") Prefs.SetString("sb_eq_Skin", "skin.tan");
             Prefs.SetInt("sb_heads2", 1);
+            Prefs.Save();
+        }
+
+        /// <summary>
+        /// Once, on the new dances' first start: the old made-up dances (jump, wobble, backflip) are gone, their buyers get
+        /// their gold back; whoever wore a dance that is no more dances the first one.
+        /// </summary>
+        public static void MigrateDances()
+        {
+            if (Prefs.GetInt("sb_dances2", 0) == 1) return;
+            int refund = 0;
+            foreach (var (id, price) in new[] { ("dance.jump", 300), ("dance.wobble", 400), ("dance.flip", 500) })
+                if (Prefs.GetInt("sb_cos_" + id, 0) == 1) { refund += price; Prefs.DeleteKey("sb_cos_" + id); }
+            if (refund > 0) SaveData.Coins += refund;
+            string worn = Prefs.GetString("sb_eq_Dance", "");
+            if (worn != "" && !worn.StartsWith("dance.d")) Prefs.SetString("sb_eq_Dance", "dance.spin");
+            Prefs.SetInt("sb_dances2", 1);
             Prefs.Save();
         }
 

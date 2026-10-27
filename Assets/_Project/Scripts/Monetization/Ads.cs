@@ -58,11 +58,14 @@ namespace SquashBot.Monetization
         public static bool BannerWanted;
 
         // The ad plan (the scenario's §11): interstitials only at natural breaks, paced and capped.
-        //  - after a level, back to the map: from level 11, every 2nd level, at least 120 s after the last one;
-        //  - after a duel, back to the menu: every 3rd duel (the first 5 are free), at least 180 s after the last one;
-        //  - never within 90 s of a rewarded ad; never after 3 losses in a row; at most 3 in 30 minutes and 20 a day.
-        private const int FreeLevels = 10, LevelsBetween = 2, FreeDuels = 5, DuelsBetween = 3, PerHalfHour = 3, PerDay = 20;
-        private const float LevelGap = 120f, DuelGap = 180f, AfterRewarded = 90f;
+        //  - after a level, back to the map: from level 6, every 2nd level, at least 90 s after the last one;
+        //  - after a duel (back to the menu or on to the next one): every 2nd duel (the first 2 are free), at least
+        //    120 s after the last one;
+        //  - never within 90 s of a rewarded ad; never after 3 losses in a row; at most 4 in 30 minutes and 25 a day.
+        //  (AdMob / Unity Ads: full-screen ads only at natural breaks, never at the start, mid-play or on leaving; the
+        //  rewarded ones always the player's own choice, the reward said before.)
+        private const int FreeLevels = 5, LevelsBetween = 2, FreeDuels = 2, DuelsBetween = 2, PerHalfHour = 4, PerDay = 25;
+        private const float LevelGap = 90f, DuelGap = 120f, AfterRewarded = 90f;
         private static int levelsSince, duelsSince, lossesInRow;
         private static float lastInterstitial = -999f, lastRewarded = -999f;
         private static readonly System.Collections.Generic.List<float> recent = new System.Collections.Generic.List<float>();

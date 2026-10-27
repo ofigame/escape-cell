@@ -96,7 +96,11 @@ namespace SquashBot.Gameplay
         /// screens draw the same one).</summary>
         public static int TestStage
         {
+#if REAL_ADS || ((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR && !TEST_TOOLS)
+            get => -1; // (a store build: always drawn; a tester's old pick never sticks)
+#else
             get { int s = Prefs.GetInt("sb_test_stage", -1); return s >= 0 && s < DuelStages.Length ? s : -1; }
+#endif
             set { Prefs.SetInt("sb_test_stage", value); Prefs.Save(); }
         }
 

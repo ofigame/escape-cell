@@ -876,9 +876,9 @@ namespace SquashBot.Gameplay
                 // its weapon strikes each blow (swinging in the hand the move carries)
                 var held = caster != null ? caster.GetComponentInChildren<HeldWeapon>() : null;
                 var ultiStruck = mine ? hunt.ChallengeFoeModel : robot.Visual;
-                RushToTouch(caster, ultiStruck, 0.06f); // (step by step onto the other's body, never into it)
+                RushToTouch(caster, ultiStruck, 0.12f); // (step by step onto the other's body, never into it)
                 if (held != null) held.Swing();
-                yield return WaitForTouch(caster, ultiStruck, 0.2f); // (the effect as the bodies touch, never before)
+                yield return WaitForTouch(caster, ultiStruck, 0.3f); // (the effect as the bodies touch, never before)
                 if (i == 4) Shockwave.Create(to, 3.2f, colour);
                 cameraRig.Shake(i == 4 ? 0.9f : 0.3f);
                 AudioManager.PlaySfx(Sfx.Impact, 1f, i == 4 ? 0.55f : 1.1f);

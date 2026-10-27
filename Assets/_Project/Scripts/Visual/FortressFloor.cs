@@ -231,7 +231,9 @@ namespace SquashBot.Visual
         public static Func<GridPos, float> WallScaleAt;
         /// <summary>No rampart on the edge towards this tile (the arena city: its buildings are the walls).</summary>
         public static Func<GridPos, bool> SkipWall;
-        private static float TowerWide => 1f + (TowerGrow - 1f) * 0.4f;
+        private static float TowerWide => (1f + (TowerGrow - 1f) * 0.4f) * TowerBulk;
+        /// <summary>The corner towers' own size over the first design's (they read too small): wider, and taller still.</summary>
+        private const float TowerBulk = 1.3f, TowerTall = 1.5f;
         public static readonly (int sx, int sz)[] Corners = { (-1, -1), (1, -1), (-1, 1), (1, 1) };
 
         /// <summary>The foot of a stage's corner tower and its height (the front ones are shorter).</summary>
@@ -262,7 +264,7 @@ namespace SquashBot.Visual
         {
             var (sx, sz) = Corners[corner];
             var at = CornerTowerBase(b, s, sx, sz, out float height);
-            float top = (LastStage == 2 ? 4.15f : 4.78f) * 0.8f * height * TowerGrow * 1.15f;
+            float top = (LastStage == 2 ? 4.15f : 4.78f) * 0.8f * height * TowerGrow * 1.15f * TowerTall;
             return at + Vector3.up * top - new Vector3(sx, 0f, sz).normalized * (LastStage == 2 ? 0.15f : 0.5f);
         }
 
@@ -420,7 +422,7 @@ namespace SquashBot.Visual
             var s = new GameObject("Spire").transform;
             s.SetParent(root, false);
             s.position = at;
-            s.localScale = new Vector3(0.8f * TowerWide, 0.8f * height * 1.15f * TowerGrow, 0.8f * TowerWide); // much taller, a little wider
+            s.localScale = new Vector3(0.8f * TowerWide, 0.8f * height * 1.15f * TowerGrow * TowerTall, 0.8f * TowerWide); // much taller, a little wider
             Box("Base", s, new Vector3(0f, 0.6f, 0f), new Vector3(1.9f, 1.2f, 1.9f), k.stoneDark, 0.1f);
             Box("BaseTrim", s, new Vector3(0f, 1.22f, 0f), new Vector3(2f, 0.1f, 2f), k.copper, 0.03f);
             Shapes.Primitive(PrimitiveType.Cylinder, "Shaft", s, new Vector3(0f, 2.9f, 0f), new Vector3(1.25f, 1.7f, 1.25f), stage == 1 ? k.stoneDark : k.stone);
@@ -457,7 +459,7 @@ namespace SquashBot.Visual
             var s = new GameObject("TechTower").transform;
             s.SetParent(root, false);
             s.position = at;
-            s.localScale = new Vector3(0.8f * TowerWide, 0.8f * height * 1.15f * TowerGrow, 0.8f * TowerWide); // much taller, a little wider
+            s.localScale = new Vector3(0.8f * TowerWide, 0.8f * height * 1.15f * TowerGrow * TowerTall, 0.8f * TowerWide); // much taller, a little wider
             Box("Base", s, new Vector3(0f, 0.5f, 0f), new Vector3(1.9f, 1f, 1.9f), k.stoneDark, 0.3f);
             Box("Band", s, new Vector3(0f, 1.02f, 0f), new Vector3(1.95f, 0.06f, 1.95f), k.light, 0.02f);
             Box("Mid", s, new Vector3(0f, 2.3f, 0f), new Vector3(1.35f, 2.5f, 1.35f), k.stone, 0.4f);

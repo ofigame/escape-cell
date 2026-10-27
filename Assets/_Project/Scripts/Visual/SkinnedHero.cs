@@ -1392,11 +1392,14 @@ namespace SquashBot.Visual
         /// <summary>The length of move <paramref name="name"/> in seconds (0: none).</summary>
         public static float MoveLength(string name) { var c = ClipOf(name); return c != null ? c.length : 0f; }
 
-        /// <summary>A win: the dance chosen in the workshop (or clapping).</summary>
-        public void Celebrate(string dance)
+        /// <summary>A win: the dance chosen in the workshop (the first one by default; clapping if there is no clip). True
+        /// when a dance clip plays (the body moves itself then: no spinning it around).</summary>
+        public bool Celebrate(string dance)
         {
-            string move = dance != null && dance.StartsWith("dance.d") ? "dance" + dance.Substring(7) : null;
-            if ((move == null || !PlayMove(move)) && !PlayMove("victory")) Clap(); // (no dance chosen: the victory's clip)
+            string move = dance != null && dance.StartsWith("dance.d") ? "dance" + dance.Substring(7) : "dance0";
+            if (PlayMove(move)) { DanceDrop.Drop(this); return true; } // (danced with free hands: the weapon and the shield on the ground)
+            if (!PlayMove("victory")) Clap();
+            return false;
         }
 
         private static Transform FindBone(Transform root, string bone)

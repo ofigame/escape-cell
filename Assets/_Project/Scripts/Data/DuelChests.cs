@@ -39,6 +39,34 @@ namespace SquashBot.Data
 
         private static void SetCount(ChestTier t, int n) => Prefs.SetInt("sb_dchest_" + (int)t, Mathf.Clamp(n, 0, Cap));
 
+        /// <summary>A plain chest for a rewarded ad: <see cref="AdChestsADay"/> a day, <see cref="AdChestGapMinutes"/> apart.</summary>
+        public const int AdChestsADay = 3, AdChestGapMinutes = 20;
+
+        /// <summary>Ad chests left today.</summary>
+        public static int AdChestsLeft => Prefs.GetString("sb_adchest_day", "") == Today ? Mathf.Max(0, AdChestsADay - Prefs.GetInt("sb_adchest_n", 0)) : AdChestsADay;
+
+        /// <summary>Minutes until the next ad chest (0: now).</summary>
+        public static int AdChestWait
+        {
+            get
+            {
+                if (!long.TryParse(Prefs.GetString("sb_adchest_at", "0"), out long at) || at <= 0) return 0;
+                double left = AdChestGapMinutes - (System.DateTime.UtcNow - new System.DateTime(at, System.DateTimeKind.Utc)).TotalMinutes;
+                return left > 0 ? Mathf.CeilToInt((float)left) : 0;
+            }
+        }
+
+        /// <summary>The ad was watched: the plain chest given.</summary>
+        public static void TakeAdChest()
+        {
+            if (AdChestsLeft <= 0) return;
+            int n = Prefs.GetString("sb_adchest_day", "") == Today ? Prefs.GetInt("sb_adchest_n", 0) : 0;
+            Prefs.SetString("sb_adchest_day", Today);
+            Prefs.SetInt("sb_adchest_n", n + 1);
+            Prefs.SetString("sb_adchest_at", System.DateTime.UtcNow.Ticks.ToString());
+            Add(ChestTier.Basic);
+        }
+
         /// <summary>A chest given outright (the login calendar, quests).</summary>
         public static void Add(ChestTier t)
         {

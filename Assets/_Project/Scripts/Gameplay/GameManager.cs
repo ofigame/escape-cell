@@ -164,6 +164,7 @@ namespace SquashBot.Gameplay
             CloudSave.Install();
             OldNotes.Clear(); // the removed open world's farm notes still waiting on the phones that had it
             Cosmetics.MigrateHeads(); // the new heads: the old ones' buyers refunded, the old skins to the nearest new tones
+            Cosmetics.MigrateDances(); // the new dances: the old made-up ones' buyers refunded
             Progress.MigrateStarsToScore(LevelCatalog.LevelCount); // (the stars now come from the floor score; an old three counts as two)
             toolRefund += Tools.RefundRetired(); // (the retired freezer: its coins back, told on the menu)
             Reminder.Schedule(); // the daily reminder: tomorrow evening (set again whenever the game is left)

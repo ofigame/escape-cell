@@ -30,16 +30,15 @@ namespace SquashBot.Combat
         public static bool Claim(int id)
         {
             if (id > 0)
-            {
                 for (int i = 0; i < shown.Length; i++) if (shown[i] == id) { Repeats++; return false; }
-                shown[shownAt] = id; shownAt = (shownAt + 1) % shown.Length;
-            }
+            // room on screen: a free place, else the oldest's (it is nearly gone): a new blow never goes unseen, and an id
+            // is only taken once its effect is shown (one refused never blocks its own confirmation after)
             float now = Time.unscaledTime;
             int max = Mathf.Clamp(CollisionSettings.Current.maxHitEffects, 1, busyUntil.Length);
-            int busy = 0, free = -1;
-            for (int i = 0; i < max; i++) { if (busyUntil[i] > now) busy++; else if (free < 0) free = i; }
-            if (free < 0) return false; // (already the most there may be on screen)
-            busyUntil[free] = now + EffectSeconds;
+            int slot = 0;
+            for (int i = 0; i < max; i++) { if (busyUntil[i] <= now) { slot = i; break; } if (busyUntil[i] < busyUntil[slot]) slot = i; }
+            busyUntil[slot] = now + EffectSeconds;
+            if (id > 0) { shown[shownAt] = id; shownAt = (shownAt + 1) % shown.Length; }
             Shown++;
             return true;
         }

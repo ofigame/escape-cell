@@ -40,6 +40,9 @@ namespace SquashBot.Visual
         /// <summary>Its push box's radius in the world.</summary>
         public float PushBoxRadius => PushRadius;
 
+        /// <summary>A head's keep-out radius, as a share of the push box's: the heads never meet.</summary>
+        private const float HeadKeep = 0.6f;
+
         /// <summary>Its trunk's middle at the hips now (the push box's centre).</summary>
         public Vector3 TrunkPoint => hips != null ? hips.position : transform.position;
 
@@ -147,9 +150,16 @@ namespace SquashBot.Visual
                     bool aComes = a.pushFrame >= 0 && Vector3.Dot(aWas - a.pushPrev, -side) > 1e-4f;
                     bool bComes = b.pushFrame >= 0 && Vector3.Dot(bWas - b.pushPrev, side) > 1e-4f;
                     float along = Vector3.Dot(flat, side);
-                    if (Mathf.Abs(pa.y - pb.y) < tall * CollisionSettings.Current.overHeadShare && along < contact) // (one over the other's head: no clash)
+                    // the heads too: a clip leaning in (a blow, a lunge, a stagger) brings the head out past the trunk, so
+                    // the two heads (and a head into the other's chest) are kept apart along the same line as well
+                    float headR = HeadKeep * Mathf.Max(a.PushRadius, b.PushRadius);
+                    float headNeed = Mathf.Max(Mathf.Max(
+                        2f * headR - Vector3.Dot(a.HeadPoint - b.HeadPoint, side),
+                        headR + b.PushRadius - Vector3.Dot(a.HeadPoint - b.ChestPoint, side)),
+                        headR + a.PushRadius - Vector3.Dot(a.ChestPoint - b.HeadPoint, side));
+                    if (Mathf.Abs(pa.y - pb.y) < tall * CollisionSettings.Current.overHeadShare && (along < contact || headNeed > 0f)) // (one over the other's head: no clash)
                     {
-                        float need = contact - along;
+                        float need = Mathf.Max(contact - along, headNeed);
                         float shareA = aComes && bComes ? 0.5f : aComes ? 1f : bComes ? 0f : 0.5f;
                         if (aWall && !bWall) shareA = 0f; else if (bWall && !aWall) shareA = 1f; // (against the wall: the other gives way)
                         a.hips.position += side * need * shareA;

@@ -236,34 +236,6 @@ namespace SquashBot.Gameplay
 
         private bool LobbyOver(int token) => chCancelled || token != chLobbyToken;
 
-        /// <summary>True while the challenge's briefing cards are up (the match waits).</summary>
-        private bool chBriefing;
-
-        /// <summary>
-        /// The challenge's briefing: the floors' tap-through cards over the kind's own picture (ch.brief.KIND.0 …), then
-        /// <paramref name="then"/>. Leaving the challenge meanwhile drops it.
-        /// </summary>
-        private IEnumerator ChallengeBriefing(string kind, int cards, System.Action then)
-        {
-            var texts = new System.Collections.Generic.List<string>();
-            for (int i = 0; i < cards; i++) texts.Add(Loc.T("ch.brief." + kind + "." + i));
-            bool done = false;
-            void OnDone() => done = true;
-            chBriefing = true;
-            ui.Briefing.Finished += OnDone;
-            try
-            {
-                ui.Briefing.Show(texts, Resources.Load<Texture2D>("ChallengeModes/" + kind));
-                while (!done && challengeRun) yield return null;
-            }
-            finally
-            {
-                ui.Briefing.Finished -= OnDone;
-                chBriefing = false;
-            }
-            if (challengeRun) then();
-        }
-
         /// <summary>Tells the server whether challenges are on, the phone's notification token and the language.</summary>
         private void SyncChallengeSettings()
         {
@@ -759,7 +731,14 @@ namespace SquashBot.Gameplay
                 ui.DuelRewardsView.Show(lastRewards, won, draw, actions, () => shut = true, revengeOn, () => { shut = true; revengeTaken = true; Revenge(revengeOn); });
                 while (!shut && challengeRun) yield return null;
                 if (revengeTaken) yield break; // (revenge chosen: the new match is under way)
-                if (challengeRun) { EndChoice(choice); yield break; } // (play again, a rematch, or the menu)
+                if (challengeRun)
+                {
+                    // (play again, a rematch, or the menu; the next duel after a break's interstitial, paced as the menu's,
+                    // unless a rival is already waiting: a live rematch or one found ahead)
+                    if ((choice == 1 || choice == 3) && !(preSearch >= 1 && preMatch != null)) { int c = choice; Monetization.Ads.AfterDuel(() => { if (challengeRun) EndChoice(c); }); }
+                    else EndChoice(choice);
+                    yield break;
+                }
             }
             // The rewards were the duel's result: straight back to the menu (an interstitial may come first). Only a live
             // match with a rematch offered still shows the old card (its REMATCH button).

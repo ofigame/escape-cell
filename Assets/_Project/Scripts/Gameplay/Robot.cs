@@ -225,6 +225,8 @@ namespace SquashBot.Gameplay
 
         private Transform cosmetics;
         private string dance = "dance.spin";
+        /// <summary>The victory's dance is a clip on the body (it moves itself: no spin, hop or squash on top).</summary>
+        private bool clipDance;
 
         /// <summary>Hop trail colour from the garage (null = none).</summary>
         public Color? TrailColor { get; private set; }
@@ -876,14 +878,14 @@ namespace SquashBot.Gameplay
         public void CheerBrief()
         {
             cheerBrief = true;
-            Skin?.Celebrate(dance);
+            clipDance = Skin != null && Skin.Celebrate(dance);
             StartAnim(Anim.Cheer, transform.position, transform.position);
         }
 
         public void Cheer()
         {
             cheerBrief = false;
-            Skin?.Celebrate(dance);
+            clipDance = Skin != null && Skin.Celebrate(dance);
             IsAlive = false; // freezes input
             targetFacing = FacingCamera;
             var from = GroundedPosition;
@@ -986,16 +988,14 @@ namespace SquashBot.Gameplay
                 }
                 case Anim.Cheer:
                 {
-                    // Victory dance (the garage picks the style): spin, big jumps, a wobble or a backflip.
+                    // Victory dance: the garage's dance clip on the body (or, without one, a spin and hops).
                     float fade = Mathf.Clamp01(1.6f - animTime);
                     float ease = 1f - Mathf.Pow(1f - Mathf.Clamp01(animTime / 1.1f), 3f);
                     float bounce = Mathf.Abs(Mathf.Sin(animTime * 7.5f)) * 0.45f * fade;
                     var pose = Quaternion.Euler(0f, 720f * ease, 0f);
-                    if (dance == "dance.jump") { bounce = Mathf.Abs(Mathf.Sin(animTime * 5f)) * 0.38f * fade; pose = Quaternion.identity; }
-                    else if (dance == "dance.wobble") pose = Quaternion.Euler(0f, Mathf.Sin(animTime * 9f) * 35f * fade, Mathf.Sin(animTime * 12f) * 20f * fade);
+                    if (clipDance) { bounce = 0f; pose = Quaternion.identity; }
                     else if (dance == "dance.swim") { bounce = 0.25f + Mathf.Sin(animTime * 4f) * 0.12f * fade; pose = Quaternion.Euler(Mathf.Sin(animTime * 8f) * 20f * fade, Mathf.Sin(animTime * 4f) * 40f * fade, 0f); }
                     else if (dance == "dance.sugar") { bounce = Mathf.Abs(Mathf.Sin(animTime * 14f)) * 0.3f * fade; pose = Quaternion.Euler(0f, animTime * 540f, Mathf.Sin(animTime * 14f) * 12f * fade); }
-                    else if (dance == "dance.flip") { bounce = Mathf.Sin(Mathf.Clamp01(animTime / 0.8f) * Mathf.PI) * 0.5f; pose = Quaternion.Euler(-360f * Mathf.Clamp01(animTime / 0.8f), 0f, 0f); }
                     transform.position = from + Vector3.up * bounce;
                     visual.localRotation = FacingCamera * pose;
                     if (cheerBrief && animTime >= 1.6f)
@@ -1006,7 +1006,7 @@ namespace SquashBot.Gameplay
                         anim = Anim.Idle;
                         break;
                     }
-                    float stretch = 1f + Mathf.Sin(animTime * 15f) * 0.08f * Mathf.Clamp01(1.6f - animTime);
+                    float stretch = clipDance ? 1f : 1f + Mathf.Sin(animTime * 15f) * 0.08f * Mathf.Clamp01(1.6f - animTime);
                     visual.localScale = new Vector3(1f / stretch, stretch, 1f / stretch);
                     break;
                 }

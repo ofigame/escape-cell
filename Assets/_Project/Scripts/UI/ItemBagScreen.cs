@@ -167,9 +167,36 @@ namespace SquashBot.UI
             Refresh();
         }
 
+        /// <summary>Repairs by ad today (three a day at most).</summary>
+        private static int AdRepairsToday
+        {
+            get => Prefs.GetString("sb_adrep_day", "") == GameClock.Today ? Prefs.GetInt("sb_adrep_n", 0) : 0;
+            set { Prefs.SetString("sb_adrep_day", GameClock.Today); Prefs.SetInt("sb_adrep_n", value); Prefs.Save(); }
+        }
+
+        private static bool AdRepairOffered => BattleWear.Level > 0 && AdRepairsToday < 3 && Monetization.Ads.Rewarded.IsReady;
+
         private void Repair()
         {
             var k = ItemBag.Count(ItemKind.RepairSmall) > 0 ? ItemKind.RepairSmall : ItemKind.RepairLarge;
+            if (ItemBag.Count(k) == 0 && !BattleWear.ServiceReady && AdRepairOffered)
+            {
+                // nothing else to repair with: a step off for a rewarded ad (the player's choice; three a day)
+                repair.interactable = false;
+                Monetization.Ads.Rewarded.Show(ok =>
+                {
+                    repair.interactable = true;
+                    if (!ok) return;
+                    Monetization.Ads.MarkFullScreenShown();
+                    AdRepairsToday++;
+                    BattleWear.Repair(1, "ad");
+                    AudioManager.PlaySfx(Sfx.Coin, 0.8f, 1.5f);
+                    Say(Loc.T("ibag.repaired"));
+                    Changed?.Invoke();
+                    Refresh();
+                });
+                return;
+            }
             if (ItemBag.Count(k) == 0 && BattleWear.Service()) { AudioManager.PlaySfx(Sfx.Coin, 0.8f, 1.5f); Say(Loc.T("wear.serviceDone")); Changed?.Invoke(); } // (no potion: Bip's daily service)
             else if (BattleWear.Level > 0 && ItemBag.Use(k, ItemRarity.Common) > 0)
             {
@@ -271,7 +298,9 @@ namespace SquashBot.UI
             }
             int wear = BattleWear.Level;
             wearText.text = Loc.T("ibag.wear") + "  " + Dots(wear) + "  " + Loc.T("wear." + wear);
-            repair.gameObject.SetActive(wear > 0 && ((ItemBag.Count(ItemKind.RepairSmall) + ItemBag.Count(ItemKind.RepairLarge)) > 0 || BattleWear.ServiceReady));
+            bool potions = (ItemBag.Count(ItemKind.RepairSmall) + ItemBag.Count(ItemKind.RepairLarge)) > 0;
+            repair.gameObject.SetActive(wear > 0 && (potions || BattleWear.ServiceReady || AdRepairOffered));
+            repair.GetComponentInChildren<TextMeshProUGUI>().text = !potions && !BattleWear.ServiceReady ? "▶ " + Loc.T("ibag.repair") : Loc.T("ibag.repair"); // (the arrow: by an ad)
 
             // the grid: every kind and rarity there is one of
             for (int i = grid.childCount - 1; i >= 0; i--) Destroy(grid.GetChild(i).gameObject);
@@ -288,7 +317,7 @@ namespace SquashBot.UI
                     var kk = k; var rr = r;
                     var hit = tile.gameObject.AddComponent<Button>();
                     hit.targetGraphic = tile.GetComponent<Image>();
-                    hit.onClick.AddListener(() => { chosen = kk; chosenRarity = rr; AudioManager.PlaySfx(Sfx.Click, 0.6f, 1.2f); Refresh(); });
+                    hit.onClick.AddListener(() => { if (showing > 0) return; chosen = kk; chosenRarity = rr; Use(1); }); // (a tap uses that one item, one of it; USE ALL for the lot)
                     var c = UiFactory.TextBox("Count", tile, new Vector2(1f, 0f), new Vector2(-8f, 4f), new Vector2(110f, 44f), "×" + count, 30f, Color.white, title: true, align: TextAlignmentOptions.Right);
                     c.raycastTarget = false;
                     if (chosen == k && chosenRarity == r) tile.localScale = Vector3.one * 1.08f;
@@ -305,7 +334,7 @@ namespace SquashBot.UI
                 detailName.text = NameOf(k) + (ItemBag.HasRarity(k) ? "  <size=26><color=#" + ColorUtility.ToHtmlStringRGB(ItemIcon.RarityColour(chosenRarity)) + ">" + RarityName(chosenRarity) + "</color></size>" : "");
                 var why = ItemBag.Blocked(k);
                 detailText.text = Effect(k, ItemCatalog.Current.Value(k, chosenRarity)) + "  ·  " + Loc.F("ibag.have", count) + (why != null ? "\n<color=#FF7A85>" + Loc.T(why) + "</color>" : "");
-                useOne.interactable = why == null;
+                useOne.gameObject.SetActive(false); // (the tile's own tap uses one)
                 useTen.gameObject.SetActive(count > 1);
                 useTen.interactable = why == null;
             }
@@ -315,20 +344,17 @@ namespace SquashBot.UI
 
         // ---------- The tutorial (section 10) ----------
 
-        /// <summary>The first bag: pick an item, USE it (the hand shows where); the first full bar: LEVEL UP.</summary>
+        /// <summary>The first bag: tap an item to use it (the hand shows where); the first full bar: LEVEL UP.</summary>
         private void Tutorial()
         {
             if (showing > 0) return;
             if (Prefs.GetInt(TutBagKey, 0) == 0 && tiles.Count > 0)
             {
-                if (!chosen.HasValue)
-                {
-                    var first = tiles.Find(t => ItemBag.PartOf(t.kind).HasValue && ItemBag.Blocked(t.kind) == null);
-                    if (first.tile == null) first = tiles[0];
-                    hand.Show(TutorialHand.Gesture.Tap, CardPoint(first.tile));
-                    Say(Loc.T("tut.bag.pick"), 30f);
-                }
-                else { hand.Show(TutorialHand.Gesture.Tap, CardPoint((RectTransform)useOne.transform)); Say(Loc.T("tut.bag.use"), 30f); }
+                // (a tap on an item uses it: the hand points at one)
+                var first = tiles.Find(t => ItemBag.PartOf(t.kind).HasValue && ItemBag.Blocked(t.kind) == null);
+                if (first.tile == null) first = tiles[0];
+                hand.Show(TutorialHand.Gesture.Tap, CardPoint(first.tile));
+                Say(Loc.T("tut.bag.pick"), 30f);
                 return;
             }
             if (Prefs.GetInt(TutLevelKey, 0) == 0)

@@ -13,7 +13,7 @@ namespace SquashBot.Gameplay
     public partial class GameManager
     {
         /// <summary>How long a rush takes to reach the other's body (seconds; the blow lands then).</summary>
-        private const float RushSeconds = 0.1f;
+        private const float RushSeconds = 0.2f; // (0.1 was too quick to follow: the eye must see the rush)
 
         /// <summary>Each side's FLY under way (leaping), and when two met in the air.</summary>
         private bool myFlying, rivalFlying;
@@ -47,7 +47,7 @@ namespace SquashBot.Gameplay
 
         /// <summary>Waits until the two bodies touch (their push boxes meet), or <paramref name="most"/> seconds: the moment
         /// a rushing blow lands.</summary>
-        private static System.Collections.IEnumerator WaitForTouch(Transform a, Transform b, float most = 0.35f)
+        private static System.Collections.IEnumerator WaitForTouch(Transform a, Transform b, float most = 0.45f)
         {
             var sa = a != null ? a.GetComponentInChildren<SkinnedHero>() : null;
             var sb = b != null ? b.GetComponentInChildren<SkinnedHero>() : null;

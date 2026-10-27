@@ -58,8 +58,10 @@ namespace SquashBot.UI
             freeLine.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             for (int i = 0; i < DuelChests.Tiers; i++) Card(root, (ChestTier)i, -190f - i * 300f);
             var bottom = new Vector2(0.5f, 0f);
-            var hint = Flat.Label(root, Loc.T("chests.hint"), bottom, new Vector2(0f, Ads.BannerReserve + 200f), new Vector2(940f, 100f), 28f, Flat.Muted, TextAlignmentOptions.Center, wrap: true);
-            hint.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            // a plain chest for an ad (the player's choice); the hint moves up under the title
+            adChest = Flat.Button(root, "", bottom, new Vector2(0f, Ads.BannerReserve + 200f), new Vector2(720f, 100f), new Color(0.62f, 0.4f, 1f), Color.white, AdChest, 32f);
+            ((RectTransform)adChest.transform).pivot = new Vector2(0.5f, 0.5f);
+            adChestLabel = adChest.GetComponentInChildren<TextMeshProUGUI>();
             var close = Flat.Button(root, Loc.T("btn.close"), bottom, new Vector2(0f, Ads.BannerReserve + 70f), new Vector2(520f, 110f), Flat.Blue, Color.white, () => screen.Hide(), 42f);
             ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
         }
@@ -124,7 +126,8 @@ namespace SquashBot.UI
             contentsTitle.text = TierName(t);
             contentsOdds.text = DuelChests.OddsText(t) + "\n" + DuelChests.DetailText(t);
             int n = 0;
-            void Cell(Texture pic, string name, bool rare)
+            void Cell(Texture pic, string name, bool rare) => CellDrawn(box => { var raw = box.gameObject.AddComponent<RawImage>(); raw.texture = pic; raw.raycastTarget = false; }, name, rare);
+            void CellDrawn(System.Action<RectTransform> draw, string name, bool rare)
             {
                 const int Cols = 3; const float W = 300f, H = 360f, Gap = 18f;
                 float x = (n % Cols - (Cols - 1) * 0.5f) * (W + Gap), y = -(n / Cols) * (H + Gap);
@@ -132,7 +135,7 @@ namespace SquashBot.UI
                 card.pivot = new Vector2(0.5f, 1f);
                 var box = UiFactory.Box("Picture", card, new Vector2(0.5f, 1f), new Vector2(0f, -140f), new Vector2(250f, 250f));
                 box.pivot = new Vector2(0.5f, 0.5f);
-                var raw = box.gameObject.AddComponent<RawImage>(); raw.texture = pic; raw.raycastTarget = false;
+                draw(box);
                 var label = Flat.Label(card, name, new Vector2(0.5f, 0f), new Vector2(0f, 50f), new Vector2(W - 20f, 70f), 26f, rare ? Flat.Gold : Flat.Text, TextAlignmentOptions.Center, bold: true, wrap: true);
                 label.rectTransform.pivot = new Vector2(0.5f, 0.5f);
                 n++;
@@ -141,6 +144,16 @@ namespace SquashBot.UI
             {
                 foreach (var w in Armory.All) if (w.chest) Cell(ItemPreview.Weapon(w), Loc.T("weapon." + w.id), true);
                 foreach (var s in Shields.All) if (s.chest) Cell(ItemPreview.Shield(s), Loc.T(s.id), true);
+            }
+            // the bag's items beside every draw (the best rarity this chest can hold each in; the repair potions it gives)
+            var cat = ItemCatalog.Current;
+            int ti = (int)t;
+            var best = cat.chestEpic[ti] > 0f ? ItemRarity.Epic : cat.chestRare[ti] > 0f ? ItemRarity.Rare : ItemRarity.Common;
+            foreach (var k in ItemBag.Kinds)
+            {
+                if (k == ItemKind.RepairSmall && cat.chestRepair[ti] <= 0f || k == ItemKind.RepairLarge && cat.chestGreatRepair[ti] <= 0f) continue;
+                var r = ItemBag.HasRarity(k) ? best : ItemRarity.Common;
+                CellDrawn(box => { ItemIcon.Draw(box, k, r); foreach (var g in box.GetComponentsInChildren<Graphic>()) g.raycastTarget = false; }, ItemBagScreen.NameOf(k), r == ItemRarity.Epic);
             }
             // (the chests' own outfits: every chest may hold one, the plain one more rarely)
             foreach (var c in Cosmetics.All) if (c.chest) Cell(ItemPreview.Cosmetic(c), Loc.T("cos." + c.id), true);
@@ -200,7 +213,12 @@ namespace SquashBot.UI
         private void Refresh()
         {
             int free = DuelChests.FreeLeft;
-            freeLine.text = DuelChests.FreePerDay > 0 ? Loc.F("chests.free", free, DuelChests.FreePerDay) : "";
+            freeLine.text = DuelChests.FreePerDay > 0 ? Loc.F("chests.free", free, DuelChests.FreePerDay) : Loc.T("chests.hint");
+            freeLine.fontSize = DuelChests.FreePerDay > 0 ? 30f : 24f;
+            int left = DuelChests.AdChestsLeft, wait = DuelChests.AdChestWait;
+            adChest.gameObject.SetActive(left > 0 && Ads.Rewarded.IsReady);
+            adChest.interactable = wait == 0;
+            adChestLabel.text = wait == 0 ? Loc.F("chests.adFree", left, DuelChests.AdChestsADay) : Loc.F("chests.adWait", wait);
             for (int i = 0; i < DuelChests.Tiers; i++)
             {
                 int n = DuelChests.Count((ChestTier)i);
@@ -209,6 +227,22 @@ namespace SquashBot.UI
                 openLabels[i].text = Loc.T("chests.open");
                 pictures[i].color = n > 0 ? Color.white : new Color(1f, 1f, 1f, 0.35f);
             }
+        }
+
+        private Button adChest;
+        private TextMeshProUGUI adChestLabel;
+
+        /// <summary>FREE CHEST: an ad watched to the end gives a plain chest.</summary>
+        private void AdChest()
+        {
+            if (busy || DuelChests.AdChestsLeft <= 0 || DuelChests.AdChestWait > 0) return;
+            if (!Ads.Rewarded.IsReady) { Refresh(); return; }
+            adChest.interactable = false;
+            Ads.Rewarded.Show(rewarded =>
+            {
+                if (rewarded) { Ads.MarkFullScreenShown(); DuelChests.TakeAdChest(); Audio.AudioManager.PlaySfx(Audio.Sfx.Coin, 1f, 1.1f); Changed?.Invoke(); }
+                Refresh();
+            });
         }
 
         /// <summary>OPEN: free, always (an ad only swaps what came out, if the player wants).</summary>

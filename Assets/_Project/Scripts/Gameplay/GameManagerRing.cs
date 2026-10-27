@@ -7,6 +7,7 @@ namespace SquashBot.Gameplay
     public partial class GameManager
     {
         private FootRing levelRing;
+        private const float RoadRingSize = 1.1f;
 
         private void UpdateLevelRing()
         {
@@ -17,6 +18,9 @@ namespace SquashBot.Gameplay
                 levelRing = FootRing.Make(new Color(0.25f, 0.6f, 1f), 2.1f);
             }
             levelRing.Follow(show ? robot.transform.position : (Vector3?)null);
+            // the road: foi smaller there, its ring too (little more than its feet)
+            float size = roadPhase == RoadPhase.Run ? RoadRingSize : 2.1f;
+            if (Mathf.Abs(levelRing.transform.localScale.x - size) > 0.01f) levelRing.transform.localScale = new Vector3(size, 1f, size);
         }
     }
 }

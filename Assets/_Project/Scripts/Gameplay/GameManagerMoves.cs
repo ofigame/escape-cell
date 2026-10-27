@@ -428,7 +428,7 @@ namespace SquashBot.Gameplay
                     var whirlSkin = spinner != null ? spinner.GetComponentInChildren<SkinnedHero>() : null;
                     bool bodySpins = whirlSkin != null && whirlSkin.Acting == DuelAction.UltiWhirlwind; // (its clip: the body turns itself, the root only faces the other)
                     var startRot = spinner != null ? spinner.rotation : Quaternion.identity;
-                    if (spinner != null) { var drift = OtherAt() - MeAt(); VisualRoot.On(CombatFeel.RootOf(spinner)).Lunge(drift, VisualRoot.KeptApart(MeAt(), OtherAt(), 99f), Mathf.Min(0.15f, Turn * 0.5f), spins * Turn, 0.35f); } // (it spins its way onto the other at once and keeps spinning there, never into it)
+                    if (spinner != null) { var drift = OtherAt() - MeAt(); VisualRoot.On(CombatFeel.RootOf(spinner)).Lunge(drift, VisualRoot.KeptApart(MeAt(), OtherAt(), 99f), Mathf.Min(0.22f, Turn * 0.7f), spins * Turn, 0.35f); } // (it spins its way onto the other at once and keeps spinning there, never into it)
                     for (int i = 0; i < spins && challengeRun && chPhase == ChPhase.Duel && !Down(); i++)
                     {
                         for (float e = 0f; e < Turn; e += Time.deltaTime)

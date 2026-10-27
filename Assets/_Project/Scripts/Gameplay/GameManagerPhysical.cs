@@ -146,10 +146,10 @@ namespace SquashBot.Gameplay
         /// <summary>Its wind-up, strike and recovery (the design's frames at 60 per second).</summary>
         private static (float wind, float hit, float back) PhysTiming(PhysKind k) => k switch
         {
-            PhysKind.Sweep => (0.083f, 0.067f, 0.13f),
-            PhysKind.Uppercut => (0.1f, 0.067f, 0.2f),
-            PhysKind.Headbutt => (0.067f, 0.083f, 0.25f),
-            _ => (0.05f, 0.033f, 0.2f),
+            PhysKind.Sweep => (0.15f, 0.067f, 0.13f), // (the wind-ups long enough to see the body go in)
+            PhysKind.Uppercut => (0.17f, 0.067f, 0.2f),
+            PhysKind.Headbutt => (0.15f, 0.083f, 0.25f),
+            _ => (0.14f, 0.033f, 0.2f),
         };
 
         private System.Collections.IEnumerator PhysAttack(bool mine, PhysKind k)
