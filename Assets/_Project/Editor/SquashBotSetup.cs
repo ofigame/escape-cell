@@ -297,6 +297,10 @@ namespace SquashBot.EditorTools
                 PlayerSettings.SetScriptingBackend(target, ScriptingImplementation.IL2CPP);
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
                 PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
+                // OpenGL ES 3 only: Huawei's Kirin phones (Mali GPUs) showed only a black screen on Vulkan (AppGallery's
+                // review, 2026-10-26); the project's own setting is put back by the build script afterwards
+                PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
+                PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { GraphicsDeviceType.OpenGLES3 });
                 // The store version as on Play and the App Store; the code one more than the last AppGallery upload
                 // (E:/OFIGAME/Tools/huawei-version.txt keeps it; 1 went up first as 0.2).
                 const string HuaweiCodeFile = "../Tools/huawei-version.txt";

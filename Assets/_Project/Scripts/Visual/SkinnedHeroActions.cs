@@ -25,6 +25,19 @@ namespace SquashBot.Visual
         /// <summary>The clip playing now (its name; null: none).</summary>
         public string PlayingClip => playing != null ? playing.name : null;
 
+        /// <summary>How tall it stands, its feet to the top of its head (its hair or hat included; its weapon not).</summary>
+        public float TopHeight
+        {
+            get
+            {
+                float baseY = transform.parent != null ? transform.parent.position.y : transform.position.y;
+                float top = baseY;
+                if (head != null) foreach (var r in head.GetComponentsInChildren<Renderer>()) if (r.enabled) top = Mathf.Max(top, r.bounds.max.y);
+                if (top <= baseY + 0.01f) top = HeadPoint.y;
+                return top - baseY;
+            }
+        }
+
         /// <summary>The clip of <paramref name="a"/> in the map (null: none).</summary>
         private static string MapClip(DuelAction a)
         {

@@ -840,16 +840,24 @@ namespace SquashBot.Gameplay
         /// <summary>A city stage's first shot: how much lower than the others and how far its head is tilted up.</summary>
         private const float CityStartLower = 5f, CityStartTilt = 13f;
 
+        private Vector3 frontMid;
+        /// <summary>How fast the duel's view follows the two (per second; a place's jump glides over about half a second).</summary>
+        private const float FrontFollow = 5f;
+
         private void FrontPose(out Vector3 pos, out Quaternion rot)
         {
             var me = robot.transform.position;
             var foe = hunt.ChallengeFoeAt ?? me;
+            bool fresh = !sideKnown;
             if (!sideKnown) { sideKnown = true; sideDist = 22f; }
             // everyone to keep in view: the two foi, and the partners in 2v2
             var points = new System.Collections.Generic.List<Vector3> { me, foe };
             var mid = Vector3.zero;
             foreach (var p in points) mid += p;
             mid /= points.Count;
+            // followed smoothly: a leap over the other (or any jump of a place) glides the view there, never a cut
+            frontMid = fresh ? mid : Vector3.Lerp(frontMid, mid, 1f - Mathf.Exp(-FrontFollow * Time.unscaledDeltaTime));
+            mid = frontMid;
             var right = Vector3.Cross(Vector3.up, -sideDir);
             // a stage with a wide landmark: the camera slides with the fight, but its view never past the landmark's ends;
             // a city's tower: the view held on it (the camera barely slides sideways, only nearer and further)

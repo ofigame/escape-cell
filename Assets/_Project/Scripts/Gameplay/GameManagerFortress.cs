@@ -78,6 +78,14 @@ namespace SquashBot.Gameplay
         /// The fortress round the floor (its stage grows with the worlds; level 1 is the stone one), its stairs set on
         /// fire, and foi's glass cell on the start tile.
         /// </summary>
+        /// <summary>foi's glass cell sized to foi: a little head room over its head (its hair or hat), whatever its body.</summary>
+        private float FoiCellScale()
+        {
+            var skin = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null;
+            float h = skin != null ? skin.TopHeight : 0f;
+            return h > 0.2f ? h * 1.15f / GlassCell.InnerHeight : Mathf.Max(robot.transform.localScale.x, robot.transform.localScale.y) * 0.62f;
+        }
+
         private void SetupFortressFloor()
         {
             ClearFortressFloor();
@@ -177,7 +185,7 @@ namespace SquashBot.Gameplay
             if (stage >= 1 && !challengeRun) // (not over the challenge board)
                 SkyTraffic.Create(fortressFloor, () => robot != null ? robot.transform.position : Vector3.zero,
                     Color.Lerp(new Color(1f, 0.55f, 0.22f), WorldTheme.Current.accent, 0.25f), stage == 2 ? 5 : 3, levelIndex * 17 + 3);
-            if (!challengeRun) glassCell = GlassCell.Create(GridView.ToWorld(robot.Position) + Vector3.up * GridView.SurfaceY, Mathf.Max(robot.transform.localScale.x, robot.transform.localScale.y) * 0.62f);
+            if (!challengeRun) glassCell = GlassCell.Create(GridView.ToWorld(robot.Position) + Vector3.up * GridView.SurfaceY, FoiCellScale());
             glassSince = -1f;
             foreach (var p in grid.LavaTiles)
             {

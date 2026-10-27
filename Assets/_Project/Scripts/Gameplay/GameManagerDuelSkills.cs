@@ -751,7 +751,7 @@ namespace SquashBot.Gameplay
                 fx.Burst(at, new Color(0.75f, 0.9f, 1f), new Color(1.8f, 2.2f, 2.6f), 16, 4f);
                 Shockwave.Create(at, 0.8f, new Color(0.7f, 0.85f, 1f));
                 AudioManager.PlaySfx(Sfx.Bump, 0.8f, 0.6f);
-                cameraRig.Shake(0.3f);
+                // (no shake: every fourth blow shaking the view looked unsteady)
                 skin.Stagger(from, 0.75f);
                 skin.Shudder(from, 1f);
             }));

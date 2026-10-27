@@ -162,9 +162,20 @@ namespace SquashBot.Gameplay
                 MonsterLook(out var kind, out var tint);
                 var m = Monster.Create(kind, GridView.ToWorld(p) + Vector3.up * GridView.SurfaceY, hp, tint, robot.transform, 1, World);
                 GuardianLooks.DressGuardian(m.Body, World);
+                if (cageView != null) cageView.FitTo(HeightOf(m.Body)); // (its cage as tall as this vanG: its body, not its bar)
                 NameTag(m, BossName());
                 return m;
             };
+        }
+
+        /// <summary>How tall a model stands over its feet (its renderers, a name tag or a bar over it left out).</summary>
+        private static float HeightOf(Transform model)
+        {
+            if (model == null) return 0f;
+            float top = model.position.y;
+            foreach (var r in model.GetComponentsInChildren<Renderer>())
+                if (r.enabled && !(r is ParticleSystemRenderer) && !(r is LineRenderer) && !(r is TrailRenderer) && r.GetComponentInParent<Canvas>() == null) top = Mathf.Max(top, r.bounds.max.y);
+            return top - model.position.y;
         }
 
         private void SetupHunt()
@@ -597,7 +608,7 @@ namespace SquashBot.Gameplay
             // A blow you can see: a crescent of the weapon's colour sweeping through the target.
             else SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.GlowOf(w), 1f + 0.015f * Armory.Damage(w));
             LeanTowardsBlow(GridView.ToWorld(at));
-            cameraRig.Shake(0.15f + 0.008f * damage);
+            if (!challengeRun) cameraRig.Shake(0.15f + 0.008f * damage); // (the duel: no shake on every blow)
             if (crowd)
             {
                 // The target slipped off the tile mid-swing: the blow lands on whatever is in reach that way.

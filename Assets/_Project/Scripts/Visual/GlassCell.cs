@@ -14,6 +14,8 @@ namespace SquashBot.Visual
         private void Start() => OwnedMaterials.OwnAllUnder(gameObject);
 
         private const float Size = 1.25f, Height = 1.7f;
+        /// <summary>Its inside height at scale 1 (the game sizes it to foi by it).</summary>
+        public const float InnerHeight = Height;
         private Material glass, frame;
         private readonly List<Transform> panes = new List<Transform>();
         private float time, crack = -1f;

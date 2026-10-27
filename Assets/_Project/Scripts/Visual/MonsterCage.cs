@@ -13,6 +13,22 @@ namespace SquashBot.Visual
         private readonly List<Vector3> barHome = new List<Vector3>();
         private Material glow;
         private float openT = -1f;
+        private Vector3 min, max;
+        private Color accent;
+        /// <summary>How tall it stands: a little over vanG (see <see cref="FitTo"/>).</summary>
+        private float height = 2.2f;
+
+        /// <summary>Made again as tall as <paramref name="monsterHeight"/> needs (a little head room over vanG; never lower than
+        /// its first height).</summary>
+        public void FitTo(float monsterHeight)
+        {
+            float h = Mathf.Max(2.2f, monsterHeight * 1.15f + 0.2f);
+            if (Mathf.Abs(h - height) < 0.05f) return;
+            height = h;
+            for (int i = transform.childCount - 1; i >= 0; i--) Destroy(transform.GetChild(i).gameObject);
+            bars.Clear(); barHome.Clear();
+            Build(min, max, accent);
+        }
 
         /// <param name="min">World centre of the cage's lowest-x, lowest-z tile.</param>
         /// <param name="max">World centre of its highest-x, highest-z tile.</param>
@@ -20,6 +36,7 @@ namespace SquashBot.Visual
         {
             var go = new GameObject("MonsterCage");
             var c = go.AddComponent<MonsterCage>();
+            c.min = min; c.max = max; c.accent = accent;
             c.Build(min, max, accent);
             return c;
         }
@@ -31,7 +48,7 @@ namespace SquashBot.Visual
             var trim = MaterialFactory.Create(accent, accent * 1.2f);
             float y = min.y;
             float x0 = min.x - 0.5f, x1 = max.x + 0.5f, z0 = min.z - 0.5f, z1 = max.z + 0.5f;
-            const float height = 2.2f;
+            float height = this.height;
             foreach (var (x, z) in new[] { (x0, z0), (x1, z0), (x0, z1), (x1, z1) })
             {
                 Shapes.Rounded("Post", transform, new Vector3(x, y + height * 0.5f, z), new Vector3(0.2f, height, 0.2f), 0.05f, post);
@@ -75,7 +92,7 @@ namespace SquashBot.Visual
             float k = openT * openT;
             for (int i = 0; i < bars.Count; i++)
             {
-                bars[i].localPosition = barHome[i] + Vector3.down * 2.2f * k;
+                bars[i].localPosition = barHome[i] + Vector3.down * height * k;
                 bars[i].gameObject.SetActive(openT < 1f);
             }
         }

@@ -126,15 +126,14 @@ namespace SquashBot.Gameplay
             bool duel = challengeRun && chPhase == ChPhase.Duel;
             float grace = hitShareOverride >= 0f ? FoeHurtGrace : HurtGrace;
             hurtCooldown = duel ? 0.12f : grace;
-            ui.Flash(new Color(1f, 0.15f, 0.15f), 0.3f);
+            ui.Flash(new Color(1f, 0.15f, 0.15f), duel ? 0.12f : 0.3f); // (the duel: a faint red only)
             BreakCombo();
 
             if (crushed) hazards.Shatter(p);
             else if (!duel) robot.RescueTo(SafeTileNear(robot.LastLeftTile, p));
             if (!duel) robot.GiveShield(grace); // the blink: nothing hurts for a moment
 
-            cameraRig.Shake(0.9f);
-            cameraRig.Punch(0.7f);
+            if (!duel) { cameraRig.Shake(0.9f); cameraRig.Punch(0.7f); } // (the duel: no shaking or zooming on every blow, it only looks unsteady)
             fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(1f, 0.35f, 0.35f), new Color(2.4f, 0.5f, 0.4f), duel ? 40 : 22, duel ? 7f : 5f);
             if (duel)
             {

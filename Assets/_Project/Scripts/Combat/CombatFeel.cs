@@ -176,7 +176,7 @@ namespace SquashBot.Combat
         private static void Clash(Vector3 at, Vector3 across)
         {
             AudioManager.PlaySfx(Sfx.Clang, 0.85f, 1f, 0.06f);
-            CameraImpulse.Fire(CameraImpulseLevel.Medium, Vector3.Cross(Vector3.up, across), ShakeMultiplier);
+            // (the weapons meeting: the klang and the sparks, no knock of the camera)
             Clashed?.Invoke(at);
         }
 
@@ -205,7 +205,7 @@ namespace SquashBot.Combat
                 VisualTime.On(victimRoot).Freeze(ms / 1000f);
             }
             var dir = attacker != null ? victim.position - attacker.position : -victim.forward;
-            CameraImpulse.Fire(data.cameraImpulse, dir, ShakeMultiplier);
+            if (data.cameraImpulse >= CameraImpulseLevel.Heavy) CameraImpulse.Fire(data.cameraImpulse, dir, ShakeMultiplier); // (only a heavy blow knocks the camera: every blow doing it looked unsteady)
             var r = CombatLibrary.Reactions;
             float knock = data.visualKnockback > 0f ? data.visualKnockback : r.Knockback(data.strength);
             VisualRoot.On(victimRoot).Push(dir, knock, r.Recovery(data.strength));

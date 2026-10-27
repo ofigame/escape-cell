@@ -417,7 +417,7 @@ namespace SquashBot.Gameplay
             GuardFx.Hex(at, toward, guard.Low || broke ? new Color(1f, 0.45f, 0.35f) : GuardBlue, 0.5f * Mathf.Max(0.6f, defender.lossyScale.y));
             AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.7f); // (a deep "dong")
             if (mine) Haptics.Light();
-            cameraRig.Shake(0.2f);
+            // (a block: no shake, the shield's own ring and sound show it)
             if (!broke) return;
             fx.Burst(at, new Color(0.8f, 0.7f, 0.55f), new Color(1.6f, 1.4f, 1.1f), 26, 6f); // (the shield in pieces)
             AudioManager.PlaySfx(Sfx.Impact, 1f, 0.6f);
