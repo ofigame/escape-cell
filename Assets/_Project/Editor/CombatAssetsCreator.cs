@@ -43,6 +43,7 @@ namespace SquashBot.EditorTools
             DuelAssetsCreator.EnsureAssets(); // (the duel experience's tuning too)
             DuelAnimationMapCreator.EnsureAsset(); // (each move's clip)
             CollisionSettingsCreator.EnsureAsset(); // (the bodies as solid things)
+            ItemCatalogCreator.EnsureAsset(); // (the bag's items)
         }
 
         /// <summary>

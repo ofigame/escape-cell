@@ -256,6 +256,10 @@ namespace SquashBot.UI
         public DuelRewardsScreen DuelRewardsView { get; private set; }
         public MoveSetScreen MoveSetView { get; private set; }
         public SeasonRoadScreen SeasonRoadView { get; private set; }
+        /// <summary>The items' bag (Docs/ESYA_CANTA_VE_BEDEN_SISTEMI.md, section 5).</summary>
+        public ItemBagScreen BagView { get; private set; }
+        private GameObject bagPing;
+        private TextMeshProUGUI bagPingText;
         private GameObject seasonPing;
 
         /// <summary>The season road button's red dot: on while a reached step waits.</summary>
@@ -545,6 +549,8 @@ namespace SquashBot.UI
             DuelRewardsView = DuelRewardsScreen.Create(root);
             MoveSetView = MoveSetScreen.Create(root);
             SeasonRoadView = SeasonRoadScreen.Create(root);
+            BagView = ItemBagScreen.Create(root);
+            BagView.Changed += RefreshBag;
             SeasonRoadView.Claimed += () => { RefreshMenuCoins(); RefreshChests(); RefreshSeasonRoad(); };
             DuelChestsView.Changed += () => { RefreshMenuCoins(); RefreshChests(); };
             ChallengeStats = ChallengeStatsScreen.Create(root);
@@ -640,6 +646,16 @@ namespace SquashBot.UI
             var moves = MenuArt.DockButton(t, Loc.T("moves.button"), MenuArt.Icon.Swords, new Color(0.95f, 0.45f, 0.3f), TopLeft, new Vector2(110f, -740f), 120f, () => MoveSetView.Show());
             ((RectTransform)moves.transform).pivot = new Vector2(0.5f, 0.5f);
             MenuSkin.Orb(moves, "orb_blank_orange", keepIcon: true);
+
+            // The bag: under the move set, with how many items wait to be used.
+            var bag = MenuArt.DockButton(t, Loc.T("ibag.button"), MenuArt.Icon.Chest, new Color(0.35f, 0.8f, 0.55f), TopLeft, new Vector2(110f, -910f), 120f, () => BagView.Show());
+            ((RectTransform)bag.transform).pivot = new Vector2(0.5f, 0.5f);
+            var bPing = UiFactory.Box("Ping", bag.transform.Find("Orb"), new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(48f, 48f));
+            bPing.pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.Fill(bPing, Palette.UiRed, UiSprites.Circle).raycastTarget = false;
+            bagPingText = UiFactory.Text(bPing, "0", 30f, Color.white);
+            bagPing = bPing.gameObject;
+            MenuSkin.Orb(bag, "orb_blank_gold", keepIcon: true);
 
             // Friends: under the calendar (add a friend, invite one to a duel).
             var friends = MenuArt.DockButton(t, Loc.T("friends.button"), MenuArt.Icon.Friends, new Color(0.4f, 0.75f, 1f), TopLeft, new Vector2(110f, -570f), 120f, () => FriendsPressed?.Invoke());
@@ -885,6 +901,15 @@ namespace SquashBot.UI
             int n = SquashBot.Data.DuelChests.Total;
             chestsPing.SetActive(n > 0);
             chestsPingText.text = n > 9 ? "9+" : n.ToString();
+        }
+
+        /// <summary>The bag button's count of items waiting to be used.</summary>
+        public void RefreshBag()
+        {
+            if (bagPing == null) return;
+            int n = SquashBot.Data.ItemBag.Total;
+            bagPing.SetActive(n > 0);
+            bagPingText.text = n > 99 ? "99+" : n.ToString();
         }
 
         /// <summary>Coins changed while the menu is up (daily chest, shop).</summary>

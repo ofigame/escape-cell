@@ -707,7 +707,16 @@ namespace SquashBot.UI
             var buy = BuyButton(card, () =>
             {
                 int before = RobotParts.Level(part);
-                if (RobotParts.TryUpgrade(part))
+                if (!PartPoints.Full(part))
+                {
+                    // the bag's shortcut: the part's items used at once (the best first)
+                    int used = 0;
+                    var item = ItemBag.ItemOf(part);
+                    for (int r = 2; r >= 0; r--) used += ItemBag.Use(item, (ItemRarity)r, int.MaxValue);
+                    if (used > 0) { AudioManager.PlaySfx(Sfx.Coin, 0.8f, 1.2f); Haptics.Light(); Pop(card); Purchased?.Invoke(); }
+                    else { AudioManager.PlaySfx(Sfx.Bump, 0.6f); bip.Queue(Loc.T("ibag.bip.noItems")); }
+                }
+                else if (RobotParts.TryUpgrade(part))
                 {
                     AudioManager.PlaySfx(Sfx.Coin, 1f, 1.3f);
                     Haptics.Medium();
@@ -730,14 +739,18 @@ namespace SquashBot.UI
                 level.text = lv.ToString();
                 int nextLook = Mathf.Min(RobotParts.MaxLevel, (lv / 5 + 1) * 5);
                 desc.text = (maxed ? RobotParts.Value(part, lv) : RobotParts.Value(part, lv) + "  →  " + RobotParts.Value(part, lv + 1))
-                            + "\n" + (maxed ? Loc.T("part.top") : Loc.F("part.nextLook", nextLook)) + "  ·  " + Loc.F("part.cores", CoreParts.Count);
+                            + "\n" + (maxed ? Loc.T("part.top") : Loc.F("part.nextLook", nextLook)) + "  ·  " + Loc.F("part.cores", CoreParts.Count)
+                            + (maxed ? "" : "\n" + Loc.F("part.points", PartPoints.Points(part), PartPoints.Need(part)) + "  ·  " + Loc.F("ibag.inBag", ItemBag.Count(ItemBag.ItemOf(part))));
                 // at the league ceiling: the duel counts no more of it until the next tier (an achievement, not a wall)
                 int tier = DuelPower.TierOf(Challenge.Rank);
                 if (lv >= DuelPower.PartCap(tier) && tier < DuelPower.Tiers)
                     desc.text += "\n<color=#FFD25A>" + Loc.F("part.ceiling", Challenge.RankName(DuelPower.FirstRankOf(tier + 1))) + "</color>";
                 int gold = RobotParts.NextGold(part), cores = RobotParts.NextCores(part);
-                label.text = maxed ? Loc.T("shop.max") : cores > 0 ? Loc.F("part.price2", gold, cores) : gold.ToString();
-                Afford(buy, !maxed, RobotParts.CanAfford(part));
+                bool full = PartPoints.Full(part);
+                int bagged = ItemBag.Count(ItemBag.ItemOf(part));
+                label.text = maxed ? Loc.T("shop.max") : full ? (cores > 0 ? Loc.F("part.price2", gold, cores) : gold.ToString())
+                    : bagged > 0 ? Loc.F("ibag.useN", bagged) : PartPoints.Points(part) + "/" + PartPoints.Need(part);
+                Afford(buy, !maxed && (full || bagged > 0), full ? RobotParts.CanAfford(part) : bagged > 0);
             });
         }
 

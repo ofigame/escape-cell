@@ -632,6 +632,7 @@ namespace SquashBot.Gameplay
             cameraRig.Showcase(robot.transform, 0.7f);
             ProfileOnMenu();
             ui.SetGoalLine(GoalLine());
+            ui.RefreshBag();
             if (pendingWorldGift != null)
             {
                 if (pendingWorldMove != null)
@@ -646,6 +647,7 @@ namespace SquashBot.Gameplay
             }
             else if (toolRefund > 0) { ui.ShowIntro(Loc.T("tool.retiredTitle"), Loc.F("tool.retired", toolRefund)); toolRefund = 0; ui.RefreshMenuCoins(); }
             else if (Progress.TakeStarsNote()) ui.ShowIntro(Loc.T("stars.noteTitle"), Loc.F("stars.note", FloorTuning.Current.starTwo, FloorTuning.Current.starThree)); // (once: the stars come from the floor score now)
+            else if (!FirstSession.Quiet && NewSystemGift.GiveOnce()) { ui.ShowIntro(Loc.T("newsys.title"), Loc.T("newsys.body")); ui.RefreshBag(); ui.RefreshChests(); } // (the items' arrival: once, Bip tells of it)
             else if (OfferWelcomeBack()) { } // (back after three days: a welcome, its gifts)
             else if (!loginOffered && LoginCalendar.Ready && NextLevel >= 2 && !FirstSession.Quiet) // (the first session's first ten minutes: nothing pops up)
             {

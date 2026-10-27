@@ -7,7 +7,8 @@ namespace SquashBot.Data
 
     /// <summary>
     /// foi's strength, part by part (the scenario's §3.3): the body adds 40 health a level (150 to start, 950 at 20), the
-    /// arms 1% damage a level, the shell 1.25% armour a level. Levels 1–10 cost gold only, 11–20 gold and core parts. The
+    /// arms 1% damage a level, the shell 1.25% armour a level. A level asks its part points first (items from the bag:
+    /// <see cref="PartPoints"/>), then gold (from level 11 core parts too; the numbers in <see cref="ItemCatalog"/>). The
     /// look changes at levels 5, 10, 15 and 20 (the rival sees it too). Full strength on the floors; in a ranked duel the
     /// league ceiling cuts it down (see <see cref="DuelPower"/>).
     /// </summary>
@@ -23,24 +24,28 @@ namespace SquashBot.Data
 
         public static bool IsMaxed(RobotPart p) => Level(p) >= MaxLevel;
 
-        /// <summary>The gold for reaching <paramref name="level"/> (1..20): 200 a level up to 10, then 2,500 + 500 a level.</summary>
-        public static int GoldFor(int level) => level <= 10 ? 200 * level : 2500 + 500 * (level - 11);
+        /// <summary>The gold for reaching <paramref name="level"/> (1..20): 100 a level up to 10, then 1,250 + 250 a level
+        /// (half the old prices: the items are needed too).</summary>
+        public static int GoldFor(int level) => ItemCatalog.Current.GoldFor(level);
 
         /// <summary>The core parts for reaching <paramref name="level"/>: none up to 10, then 10 + 5 a level.</summary>
-        public static int CoresFor(int level) => level <= 10 ? 0 : 10 + 5 * (level - 11);
+        public static int CoresFor(int level) => ItemCatalog.Current.CoresFor(level);
 
         public static int NextGold(RobotPart p) => IsMaxed(p) ? 0 : GoldFor(Level(p) + 1);
         public static int NextCores(RobotPart p) => IsMaxed(p) ? 0 : CoresFor(Level(p) + 1);
 
-        public static bool CanAfford(RobotPart p) => !IsMaxed(p) && SaveData.Coins >= NextGold(p) && CoreParts.Count >= NextCores(p);
+        /// <summary>The part's points bar is full and its gold and core parts are there.</summary>
+        public static bool CanAfford(RobotPart p) => PartPoints.Full(p) && SaveData.Coins >= NextGold(p) && CoreParts.Count >= NextCores(p);
 
-        /// <summary>Raises the part a level (true), paying its gold and core parts; false when maxed or short.</summary>
+        /// <summary>Raises the part a level (true), taking its points and paying its gold and core parts; false when maxed,
+        /// the bar is not full yet, or short of gold or core parts.</summary>
         public static bool TryUpgrade(RobotPart p)
         {
             if (!CanAfford(p)) return false;
-            int gold = NextGold(p), cores = NextCores(p);
+            int gold = NextGold(p), cores = NextCores(p), points = PartPoints.Need(p);
             if (!Shop.Spend(gold)) return false;
             CoreParts.Spend(cores);
+            PartPoints.Take(p, points);
             Prefs.SetInt(Key(p), Level(p) + 1);
             Prefs.Save();
             return true;
