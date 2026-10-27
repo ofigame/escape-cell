@@ -40,6 +40,27 @@ namespace SquashBot.Visual
             }
         }
 
+        /// <summary>A burst thrown along <paramref name="along"/> (a blow's sparks flying on the way it struck): a cone about
+        /// it, a little upward.</summary>
+        public void BurstAlong(Vector3 position, Vector3 along, Color color, Color glow, int count, float speed = 4f)
+        {
+            along = along.sqrMagnitude > 1e-6f ? along.normalized : Vector3.up;
+            for (int i = 0; i < count; i++)
+            {
+                var shard = NextShard();
+                shard.transform.gameObject.SetActive(true);
+                shard.transform.position = position + Random.insideUnitSphere * 0.08f;
+                shard.transform.rotation = Random.rotation;
+                MaterialFactory.SetColors(shard.material, color, glow);
+                var dir = along + Random.insideUnitSphere * 0.55f + Vector3.up * 0.25f;
+                shard.velocity = dir.normalized * speed * Random.Range(0.6f, 1.2f);
+                shard.spin = Random.insideUnitSphere * 720f;
+                shard.maxLife = shard.life = Random.Range(0.3f, 0.6f);
+                shard.size = Random.Range(0.06f, 0.13f);
+                active.Add(shard);
+            }
+        }
+
         /// <summary>A low, outward ring of puffs: footsteps, landings, blocks hitting the floor.</summary>
         public void Dust(Vector3 position, Color color, int count, float speed = 1.6f)
         {

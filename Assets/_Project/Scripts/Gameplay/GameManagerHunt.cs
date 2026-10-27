@@ -606,7 +606,8 @@ namespace SquashBot.Gameplay
             }
             if (w.kind == WeaponKind.Gun) GunShotFx(GridView.ToWorld(at) + Vector3.up * 0.6f, w);
             // A blow you can see: a crescent of the weapon's colour sweeping through the target.
-            else SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.GlowOf(w), 1f + 0.015f * Armory.Damage(w));
+            else if (!challengeRun) SlashFx.Create(robot.transform.position, GridView.ToWorld(at), WeaponModels.GlowOf(w), 1f + 0.015f * Armory.Damage(w)); // (the duel: the slash only on a hit, through its contact point: HitShown)
+            if (challengeRun) Combat.HitEffects.CurrentBlow = Combat.HitEffects.NewBlow(); // (this landing is one blow: its effect once)
             LeanTowardsBlow(GridView.ToWorld(at));
             if (!challengeRun) cameraRig.Shake(0.15f + 0.008f * damage); // (the duel: no shake on every blow)
             if (crowd)

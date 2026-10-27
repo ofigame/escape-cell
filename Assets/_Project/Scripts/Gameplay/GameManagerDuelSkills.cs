@@ -618,6 +618,30 @@ namespace SquashBot.Gameplay
         /// A blow landed on foi (<paramref name="meStruck"/>) or the rival: it reels, harder the more blows came in a row;
         /// from the fourth in a row it is knocked a step back (the AI game: a live one's places are the server's).
         /// </summary>
+        /// <summary>A landed blow's effect (once per blow, a few on screen at most): the sparks thrown on the way it struck,
+        /// the weapon's slash through the contact point, a ring — sized by its strength and how far the camera is.</summary>
+        private void HitShown(int blowId, Vector3 at, Vector3 along, Color glow, int inARow, bool toHead)
+        {
+            if (!HitEffects.Claim(blowId)) return;
+            DuelBoxesView.LastContact = at; DuelBoxesView.LastContactAt = Time.time;
+            var cam = Camera.main;
+            float k = cam != null ? Mathf.Clamp(Vector3.Distance(cam.transform.position, at) / 22f, 0.7f, 1.6f) : 1f; // (as big on screen near or far)
+            int more = Mathf.Min(inARow, 5);
+            var dir = along.sqrMagnitude > 1e-6f ? along.normalized : Vector3.forward;
+            SlashFx.Create(at - dir * 0.9f * k + Vector3.up * 0.15f * k, at + dir * 0.5f * k - Vector3.up * 0.1f * k, glow, (1f + 0.1f * more) * k);
+            if (toHead) return; // (the head: the cartoon puff and stars, CombatFeel.HeadStruck)
+            fx.BurstAlong(at, dir, new Color(1f, 0.95f, 0.7f), new Color(3f, 2.6f, 1.6f), Mathf.RoundToInt(14 * k), 4.2f * k);
+            fx.BurstAlong(at, dir, glow, glow * 2.4f, Mathf.RoundToInt((10 + 2 * more) * k), 5.5f * k);
+            Shockwave.Create(at - Vector3.up * 0.1f, (0.6f + 0.08f * more) * k, Color.Lerp(new Color(1f, 0.95f, 0.75f), glow, 0.4f));
+        }
+
+        /// <summary>The same blow confirmed again later (the lab's simulated server): its effect must not show twice.</summary>
+        private IEnumerator HitConfirmedLater(float seconds, int blowId, Vector3 at, Vector3 along, Color glow, int inARow, bool toHead)
+        {
+            yield return new WaitForSecondsRealtime(seconds);
+            HitShown(blowId, at, along, glow, inARow, toHead);
+        }
+
         private void Reel(bool meStruck, int inARow)
         {
             var model = meStruck ? robot.Visual : hunt.ChallengeFoeModel;
@@ -632,17 +656,22 @@ namespace SquashBot.Gameplay
             // the striker's swing's contact: the same for the player and the rival
             var blow = held != null ? (held.Current ?? CombatLibrary.Family(held.Family).Blow(0)) : CombatLibrary.Family(WeaponFamily.Sword).Blow(0);
             bool toHead = blow.height == HitHeight.High || (held != null && held.Overhead);
-            var at = toHead ? skin.HeadPoint : skin.ChestPoint;
-            // the blow seen: on the body a white flash of sparks, the weapon's colour flying off, a ring (the camera knocked,
-            // harder in a combo); on the head a cartoon puff and stars instead (CombatFeel.HeadStruck): robots' bits only off the body
+            // where it lands: where the hit box (the weapon's tip; a body blow: the striker) meets the struck part (its head,
+            // its chest, its legs) — on that part's surface toward the weapon (the collision rules 5.2)
+            skin.HurtSpots(out var headAt, out var chestAt, out var legsAt);
+            var part = toHead ? headAt : blow.height == HitHeight.Low ? legsAt : chestAt;
+            var weaponAt = held != null && held.Tip != null && blow.body == BodyStrike.Weapon ? held.Tip.position : striker != null ? striker.position + Vector3.up * skin.PushBoxRadius * 2f : part;
+            var at = HitEffects.ContactPoint(weaponAt, part, skin.PushBoxRadius * (toHead ? 0.55f : 0.6f));
+            var along = model.position - (striker != null ? striker.position : from); along.y = 0f;
+            // the blow seen: on the body a white flash of sparks and the weapon's colour flying on the way it struck, a ring;
+            // on the head a cartoon puff and stars instead (CombatFeel.HeadStruck): robots' bits only off the body. One blow,
+            // one effect: a confirmation arriving later is the same blow (the lab's delay shows it)
             var wDef = meStruck ? (rival != null ? Armory.Get(rival.weapon) : null) : Armory.Equipped;
             var glow = wDef != null ? WeaponModels.GlowOf(wDef) : new Color(1f, 0.8f, 0.4f);
-            if (!toHead)
-            {
-                fx.Burst(at, new Color(1f, 0.95f, 0.7f), new Color(3f, 2.6f, 1.6f), 18, 4.2f);
-                fx.Burst(at, glow, glow * 2.4f, 12 + 2 * Mathf.Min(inARow, 5), 5.5f);
-                Shockwave.Create(at - Vector3.up * 0.1f, 0.6f + 0.08f * Mathf.Min(inARow, 5), Color.Lerp(new Color(1f, 0.95f, 0.75f), glow, 0.4f));
-            }
+            int blowId = !meStruck && HitEffects.CurrentBlow > 0 ? HitEffects.CurrentBlow : HitEffects.NewBlow(); // (foi's landing named it; the rival's blow a new one)
+            if (!meStruck) HitEffects.CurrentBlow = 0;
+            HitShown(blowId, at, along, glow, inARow, toHead);
+            if (LabLatencyMs > 0) cameraRig.StartCoroutine(HitConfirmedLater(LabLatencyMs / 1000f, blowId, at, along, glow, inARow, toHead));
             FaceFor(model, blow.strength >= HitStrength.Heavy || inARow >= 4 ? FaceMoment.HeavyHit : FaceMoment.LightHit);
             if (blow.strength >= HitStrength.Heavy || inARow >= 4) HatFor(model, 2, from); else if (blow.strength >= HitStrength.Medium || inARow >= 2) HatFor(model, 1, from);
             // the body's answer (by the blow's direction, height and strength; harder deeper into a combo) on the contact
