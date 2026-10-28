@@ -159,7 +159,7 @@ namespace SquashBot.Data
         public static bool TestMode
         {
 #if REAL_ADS || ((UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR && !TEST_TOOLS)
-            get => false; // levels open one by one on every phone build
+            get => TestUnlock.All; // levels open one by one on every phone build (TEMPORARY: the iOS test build opens all)
 #else
             get => GetBool(TestModeKey, TestModeDefault);
 #endif
