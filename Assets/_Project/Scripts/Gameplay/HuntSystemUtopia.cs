@@ -54,6 +54,19 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>
+        /// The duel rival untouchable (its backflip, iron body or mirror): the blow glances off with grey sparks and a
+        /// metal ricochet, its swing broken off as a shield's blow would (the same rule), but no shield of its spent and
+        /// no "shield gone" words (section 3.2: NO EFFECT is its own outcome).
+        /// </summary>
+        private void Glance(Guard g, GridPos p)
+        {
+            g.windup = -1f;
+            ClearTelegraph(g);
+            fx.Burst(At(p) + Vector3.up * 0.9f, new Color(0.85f, 0.87f, 0.92f), new Color(1.8f, 1.8f, 2f), 14, 4f);
+            AudioManager.PlaySfx(Sfx.Blocked, 0.7f, 1.7f);
+        }
+
+        /// <summary>
         /// The EMP tool: every robot's energy shield within <paramref name="radius"/> tiles of <paramref name="at"/>
         /// (a square) breaks at once, and every repair drone there stops mending for <paramref name="droneSeconds"/>.
         /// Returns how many shields and drones it reached.

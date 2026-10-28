@@ -473,8 +473,19 @@ namespace SquashBot.Gameplay
                 return true;
             }
             if (crowd && hunt.IsFighter(at)) lastStrikeTap = Time.time; // the fight view comes in while foi attacks a robot or vanG (not bugs)
-            if (!TryStrikeNow(at, crowd)) pendingStrike = (at, crowd, Time.time); // mid-hop or between swings: strike as soon as foi can
+            if (!TryStrikeNow(at, crowd)) BufferStrike(at, crowd); // mid-hop or between swings: strike as soon as foi can
             return true;
+        }
+
+        /// <summary>The duel is being fought now (the blows' outcomes shown, the input buffer by the data).</summary>
+        private bool DuelOn => challengeRun && chPhase == ChPhase.Duel;
+
+        /// <summary>A blow that could not go now kept for when it can: the floors, a moment's wait; the duel, the input
+        /// buffer's last part of the cooldown only (earlier: the "not ready" tremble, nothing kept).</summary>
+        private void BufferStrike(GridPos at, bool crowd)
+        {
+            if (DuelOn && strikeCooldown > InputBuffer) { NotReady("cooldown " + (strikeCooldown * 1000f).ToString("0") + " ms > buffer " + (InputBuffer * 1000f).ToString("0")); return; }
+            pendingStrike = (at, crowd, Time.time);
         }
 
         /// <summary>Did the finger land on foi's own body on the screen (feet to head)?</summary>
@@ -501,7 +512,12 @@ namespace SquashBot.Gameplay
             var (at, crowd, time) = pendingStrike.Value;
             // The target stepped on meanwhile: follow it to its new tile.
             if (crowd && !hunt.HasTargetAt(at) && hunt.TargetNear(at, out var moved)) at = moved;
-            if (Time.time - time > 0.35f || HuntSystem.Chebyshev(at, robot.Position) > StrikeReach) { pendingStrike = null; return; }
+            if (Time.time - time > (DuelOn ? InputBuffer + 0.1f : 0.35f) || HuntSystem.Chebyshev(at, robot.Position) > StrikeReach)
+            {
+                pendingStrike = null;
+                if (DuelOn) ShowOutcome(Combat.HitOutcome.Missed, 0, "kept blow dropped: " + (HuntSystem.Chebyshev(at, robot.Position) > StrikeReach ? "the rival out of reach" : "never ready"));
+                return;
+            }
             if (TryStrikeNow(at, crowd)) pendingStrike = null;
         }
 

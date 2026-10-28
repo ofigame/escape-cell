@@ -172,11 +172,11 @@ namespace SquashBot.Gameplay
         private void KeyStrike(Vector3 fwd)
         {
             if (level == null || level.mission != MissionType.Hunt || !robot.IsAlive) return;
-            if (!GuardCanStrike) return; // (the duel: blocking, staggered or dazed)
+            if (!GuardCanStrike) { if (DuelOn) NotReady("guarding, staggered or dazed"); return; } // (the duel: blocking, staggered or dazed)
             if (hunt.BestInReach(robot.Position, StrikeReach, fwd, -1.1f, out var at))
             {
                 if (hunt.IsFighter(at)) lastStrikeTap = Time.time;
-                if (!TryStrikeNow(at, true)) pendingStrike = (at, true, Time.time);
+                if (!TryStrikeNow(at, true)) BufferStrike(at, true);
                 return;
             }
             var ahead = robot.Position + new GridPos(Mathf.RoundToInt(fwd.x), Mathf.RoundToInt(fwd.z));
@@ -186,6 +186,7 @@ namespace SquashBot.Gameplay
                 // Nothing in reach: a swing at the air all the same (the blade flashes, a whoosh), so every tap answers.
                 strikeCooldown = 0.25f;
                 var w = weapon ?? Armory.Equipped;
+                if (DuelOn && hunt.ChallengeFoeTile is GridPos foeTile) ShowOutcome(Combat.HitOutcome.Missed, 0, "distance " + HuntSystem.Chebyshev(foeTile, robot.Position) + " > reach " + StrikeReach);
                 if (heldWeapon != null) heldWeapon.Swing();
                 SlashFx.Create(robot.transform.position, robot.transform.position + fwd * 1.6f, WeaponModels.GlowOf(w), 1f);
                 AudioManager.PlaySfx(Sfx.Hop, 0.5f, 1.6f);

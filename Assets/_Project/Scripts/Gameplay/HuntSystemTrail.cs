@@ -497,6 +497,8 @@ namespace SquashBot.Gameplay
         public float FoeGuardThrough = 1f;
         /// <summary>foi's blow was blocked by the rival (no combo, no bar).</summary>
         public event Action ChallengeFoeBlocked;
+        /// <summary>A blow on the duel's rival and what became of it (the damage that went through, why: the blow log).</summary>
+        public event Action<Combat.HitOutcome, int, string> ChallengeFoeOutcome;
         /// <summary>The rival holds its shield up: it stands its ground, turned to foi, and starts no blow.</summary>
         public bool FoeHolding;
         /// <summary>

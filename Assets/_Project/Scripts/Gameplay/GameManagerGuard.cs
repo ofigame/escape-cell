@@ -92,6 +92,7 @@ namespace SquashBot.Gameplay
             {
                 guardWired = true;
                 hunt.ChallengeFoeBlocked += () => duelStirAt = Time.time;
+                hunt.ChallengeFoeOutcome += (o, dmg, why) => ShowOutcome(o, dmg, why, o == HitOutcome.Hit && heldWeapon != null && heldWeapon.Current != null && heldWeapon.Current.strength >= HitStrength.Heavy);
             }
         }
 
@@ -207,6 +208,17 @@ namespace SquashBot.Gameplay
                 skillBar.SetGuardBar(sp.z > 0f ? (Vector2)sp : (Vector2?)null, share, share < Def.lowShare);
             }
             else skillBar.SetGuardBar(null, 0f, false);
+            // and the rival's, over its head while it blocks (section 3.2: the player sees its shield wearing down)
+            if (rivalGuard.Holding && cameraRig != null && hunt.ChallengeFoeModel != null)
+            {
+                var fskin = hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>();
+                var fface = fskin != null ? fskin.FaceRenderer : null;
+                var ftop = fface != null ? new Vector3(fface.bounds.center.x, fface.bounds.max.y + 0.35f, fface.bounds.center.z) : hunt.ChallengeFoeModel.position + Vector3.up * 2.6f;
+                var fsp = cameraRig.Cam.WorldToScreenPoint(ftop);
+                float fshare = LiveActive ? liveDurability[1] : rivalGuard.Share;
+                skillBar.SetGuardBar(1, fsp.z > 0f ? (Vector2)fsp : (Vector2?)null, fshare, fshare < Def.lowShare);
+            }
+            else skillBar.SetGuardBar(1, null, 0f, false);
             // a key or button let go while not looking (the button hidden): the press ends
             if (myGuard.Holding && !keyGuard && !skillBar.ShieldHeld) GuardRelease();
         }

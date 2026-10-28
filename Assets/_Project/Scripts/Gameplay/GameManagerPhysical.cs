@@ -279,10 +279,10 @@ namespace SquashBot.Gameplay
         {
             if (!PhysDuel || LiveActive) return damage;
             float now = Time.time;
-            if (now < rivalDownUntil && now >= rivalLaunchUntil - PhysTab.getUpSeconds) return 0; // (lying or getting up: untouchable)
+            if (now < rivalDownUntil && now >= rivalLaunchUntil - PhysTab.getUpSeconds) { ShowOutcome(HitOutcome.Immune, 0, "lying or getting up"); return 0; } // (lying or getting up: untouchable)
             if (now < rivalLaunchUntil - PhysTab.getUpSeconds)
             {
-                if (rivalAirHits >= PhysTab.airHitsMax) return 0;
+                if (rivalAirHits >= PhysTab.airHitsMax) { ShowOutcome(HitOutcome.Immune, 0, "air hits used up"); return 0; }
                 float times = PhysTab.airHitTimes[Mathf.Min(rivalAirHits, PhysTab.airHitTimes.Length - 1)];
                 rivalAirHits++;
                 var skin = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
@@ -293,7 +293,7 @@ namespace SquashBot.Gameplay
             }
             if (height == HitHeight.High && RivalCrouching)
             {
-                FloatAt((hunt.ChallengeFoeAt ?? robot.transform.position) + Vector3.up * 2f, Loc.T("duel.under"), new Color(0.75f, 0.9f, 1f));
+                ShowOutcome(HitOutcome.Missed, 0, "a high blow over a crouch");
                 return 0;
             }
             return damage;

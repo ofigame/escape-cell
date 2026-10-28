@@ -911,7 +911,20 @@ namespace SquashBot.Visual
         {
             if (swing < 1f) ReachBody();
             if (swing < 1f || spin < 1f) StopAtBodies();
+            if (trembleLeft > 0f)
+            {
+                // the "not ready" tremble: a quick small shake of the weapon in the hand
+                trembleLeft -= Time.deltaTime;
+                float k = Mathf.Max(0f, trembleLeft) / TrembleSeconds;
+                transform.localRotation *= Quaternion.Euler(0f, 0f, Mathf.Sin(trembleLeft * 90f) * 7f * k);
+            }
         }
+
+        private const float TrembleSeconds = 0.22f;
+        private float trembleLeft;
+
+        /// <summary>A tap too early for a blow: the weapon shakes a little in the hand (no words, section 3.3).</summary>
+        public void Tremble() => trembleLeft = TrembleSeconds;
 
         /// <summary>The body's grip has put the weapon in the hand (after this weapon's own frame): the blade turned onto
         /// its target and kept out of the bodies once more, from where the hand now holds it.</summary>

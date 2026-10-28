@@ -246,28 +246,37 @@ namespace SquashBot.UI
         private Image guardFill;
 
         /// <summary>The thin durability bar over foi's head while it blocks (<paramref name="screen"/> null: hidden).</summary>
-        public void SetGuardBar(Vector2? screen, float share, bool low)
+        public void SetGuardBar(Vector2? screen, float share, bool low) => SetGuardBar(0, screen, share, low);
+
+        // (the second bar: over the rival's head while it blocks, so the player sees its shield wearing down)
+        private readonly RectTransform[] guardBars = new RectTransform[2];
+        private readonly Image[] guardFills = new Image[2];
+
+        /// <summary>A shield's thin durability bar over a head (<paramref name="who"/> 0: foi's, 1: the rival's), or hidden.</summary>
+        public void SetGuardBar(int who, Vector2? screen, float share, bool low)
         {
+            var bar = guardBars[who];
             if (screen == null)
             {
-                if (guardBar != null && guardBar.gameObject.activeSelf) guardBar.gameObject.SetActive(false);
+                if (bar != null && bar.gameObject.activeSelf) bar.gameObject.SetActive(false);
                 return;
             }
-            if (guardBar == null)
+            if (bar == null)
             {
-                guardBar = UiFactory.Box("GuardBar", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(150f, 16f));
-                guardBar.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(guardBar, new Color(0.04f, 0.05f, 0.12f, 0.8f), UiSprites.Rounded, 6f).raycastTarget = false;
-                var f = UiFactory.Rect("Fill", guardBar, Vector2.zero, new Vector2(1f, 1f), new Vector2(3f, 3f), new Vector2(-3f, -3f));
-                guardFill = UiFactory.Fill(f, ShieldBlue, UiSprites.Rounded, 6f);
-                guardFill.raycastTarget = false;
+                bar = guardBars[who] = UiFactory.Box("GuardBar" + who, root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(150f, 16f));
+                bar.pivot = new Vector2(0.5f, 0.5f);
+                UiFactory.Fill(bar, new Color(0.04f, 0.05f, 0.12f, 0.8f), UiSprites.Rounded, 6f).raycastTarget = false;
+                var f = UiFactory.Rect("Fill", bar, Vector2.zero, new Vector2(1f, 1f), new Vector2(3f, 3f), new Vector2(-3f, -3f));
+                guardFills[who] = UiFactory.Fill(f, ShieldBlue, UiSprites.Rounded, 6f);
+                guardFills[who].raycastTarget = false;
+                if (who == 0) { guardBar = bar; guardFill = guardFills[0]; }
             }
-            if (!guardBar.gameObject.activeSelf) guardBar.gameObject.SetActive(true);
-            var parent = (RectTransform)guardBar.parent;
+            if (!bar.gameObject.activeSelf) bar.gameObject.SetActive(true);
+            var parent = (RectTransform)bar.parent;
             if (RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screen.Value, null, out var local))
-                guardBar.anchoredPosition = local + parent.rect.size * (parent.pivot - new Vector2(0.5f, 0.5f)); // (from the pivot to the middle anchor)
-            guardFill.rectTransform.anchorMax = new Vector2(Mathf.Clamp01(share), 1f);
-            guardFill.color = low ? new Color(1f, 0.3f, 0.25f) : new Color(0.45f, 0.8f, 1f);
+                bar.anchoredPosition = local + parent.rect.size * (parent.pivot - new Vector2(0.5f, 0.5f)); // (from the pivot to the middle anchor)
+            guardFills[who].rectTransform.anchorMax = new Vector2(Mathf.Clamp01(share), 1f);
+            guardFills[who].color = low ? new Color(1f, 0.3f, 0.25f) : new Color(0.45f, 0.8f, 1f);
         }
 
         private Image cue;

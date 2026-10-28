@@ -795,6 +795,7 @@ namespace SquashBot.Gameplay
             SkinnedHero.DuelArea = null;
             HeldWeapon.DuelStance = false;
             FoiPoseReset.CleanAll(robot != null ? robot.Visual : null);
+            ShowHitLog(false);
             hunt.LaneX = null;
             copyMatch = false;
             ClearDuelRule();

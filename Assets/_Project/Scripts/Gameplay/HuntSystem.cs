@@ -645,25 +645,37 @@ namespace SquashBot.Gameplay
                 if (g == challengeFoe && FoeGuard != null)
                 {
                     var met = FoeGuard(damage);
-                    if (met == Combat.DefenseOutcome.Perfect) { Parry(g, p); return true; }
-                    if (met == Combat.DefenseOutcome.Dodged) return true;
+                    if (met == Combat.DefenseOutcome.Perfect) { ChallengeFoeOutcome?.Invoke(Combat.HitOutcome.Parried, 0, "perfect guard"); Parry(g, p); return true; }
+                    if (met == Combat.DefenseOutcome.Dodged) { ChallengeFoeOutcome?.Invoke(Combat.HitOutcome.Dodged, 0, "dodge"); return true; }
                     if (met == Combat.DefenseOutcome.Blocked || met == Combat.DefenseOutcome.Broke) { guarded = true; damage = Mathf.Max(1, Mathf.RoundToInt(damage * FoeGuardThrough)); }
                 }
-                else if (g == challengeFoe && FoeParries()) { Parry(g, p); return true; }
-                if (g.shield > 0) { HitShield(g, p); return true; }
-                if (g == challengeFoe && Time.time < FoeInvulnUntil) { HitShield(g, p); return true; } // (its backflip or iron body)
-                if (g == challengeFoe && Time.time < FoeMirrorUntil) { FoeMirrored?.Invoke(damage); HitShield(g, p); return true; } // (its mirror: back at foi)
+                else if (g == challengeFoe && FoeParries()) { ChallengeFoeOutcome?.Invoke(Combat.HitOutcome.Parried, 0, "parry"); Parry(g, p); return true; }
+                if (g.shield > 0) { if (g == challengeFoe) ChallengeFoeOutcome?.Invoke(Combat.HitOutcome.Blocked, 0, "shield bubble " + g.shield + " left"); HitShield(g, p); return true; }
+                if (g == challengeFoe && Time.time < FoeInvulnUntil) { ChallengeFoeOutcome?.Invoke(Combat.HitOutcome.Immune, 0, "untouchable " + (FoeInvulnUntil - Time.time).ToString("0.0") + " s more"); Glance(g, p); return true; } // (its backflip or iron body)
+                if (g == challengeFoe && Time.time < FoeMirrorUntil) { ChallengeFoeOutcome?.Invoke(Combat.HitOutcome.Reflected, damage, "mirror"); FoeMirrored?.Invoke(damage); Glance(g, p); return true; } // (its mirror: back at foi)
+                int hpWas = g.hp;
                 g.hp -= g.armorShare > 0f ? Mathf.Max(1, Mathf.RoundToInt(damage * (1f - g.armorShare))) : ThroughArmor(p, damage);
+                if (g == challengeFoe) ChallengeFoeOutcome?.Invoke(guarded ? Combat.HitOutcome.Blocked : Combat.HitOutcome.Hit, hpWas - g.hp, guarded ? "shield: " + (hpWas - g.hp) + " through" : "hp " + hpWas + " -> " + g.hp);
                 if (g == challengeFoe && g.hp <= 0 && FoeSturdy) { FoeSturdy = false; g.hp = 1; } // (its sturdy spare life)
                 g.flash = 1f;
                 g.Flash();
                 if (g != challengeFoe) { g.windup = -1f; ClearTelegraph(g); } // (the rival foi trades blows: its own swing goes on)
                 if (g == challengeFoe && guarded) ChallengeFoeBlocked?.Invoke(); // (blocked: no combo, no bar for it)
                 else if (g == challengeFoe) { FoiRanOn(); ChallengeFoeStruck?.Invoke(); }
-                fx.Burst(At(p) + Vector3.up * 0.4f, Palette.UiGold, Palette.CoinGlow, 34, 6f);
-                Shockwave.Create(At(p), 1.4f, new Color(1f, 0.85f, 0.45f));
-                AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.85f);
-                rig.Shake(0.35f);
+                if (g == challengeFoe && guarded)
+                {
+                    // blocked: the shield's blue hexagon flash, never the hit's gold (section 3.2)
+                    fx.Burst(At(p) + Vector3.up * 0.8f, ShieldColour, ShieldColour * 2.2f, 16, 3.5f);
+                    Shockwave.Create(At(p) + Vector3.up * 0.8f, 0.9f, ShieldColour);
+                    if (g.model != null) { var hold = g.model.GetComponentInChildren<ShieldHold>(); if (hold != null) hold.Raise(); }
+                }
+                else
+                {
+                    fx.Burst(At(p) + Vector3.up * 0.4f, Palette.UiGold, Palette.CoinGlow, 34, 6f);
+                    Shockwave.Create(At(p), 1.4f, new Color(1f, 0.85f, 0.45f));
+                    AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.85f);
+                    rig.Shake(0.35f);
+                }
                 if (g.hp <= 0)
                 {
                     // A finishing blow by the burning stairs sends it tumbling into the flames.

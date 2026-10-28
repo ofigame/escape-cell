@@ -36,6 +36,8 @@ namespace SquashBot.Gameplay
         {
             if (challengeRun) return;
             ShowMenu();
+            HitLog.Clear();
+            ShowHitLog(true); // (the developer's blow log: the lab's)
             if (chUi == null) InitChallenge();
             chDuelMinutes = 3; chOnline = false; chLive = false; chMode = 1;
             rival = Challenge.MakeBot(4242, -1);

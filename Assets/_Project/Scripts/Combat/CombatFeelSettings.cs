@@ -25,6 +25,8 @@ namespace SquashBot.Combat
         public float hitFlashMs = 60f;
         [Tooltip("The duel blow's visible wind-up: its contact this long after the tap (the blow's look and feel land then; the rules count it at the tap)")]
         public float contactLeadMs = 75f;
+        [Tooltip("The input buffer: a tap this long (ms) before the weapon is ready is kept and struck the moment it is (earlier: the 'not ready' tremble)")]
+        public float inputBufferMs = 120f;
         [Tooltip("How far the struck fighter's picture leans into a blow just before it lands (m; the design's 0.3 tile)")]
         public float catchOffset = 0.3f;
         [Tooltip("The most a striker's picture slides toward its rival (m; the design's 1.5 tiles)")]
