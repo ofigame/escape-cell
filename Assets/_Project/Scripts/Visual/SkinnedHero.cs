@@ -1634,6 +1634,10 @@ namespace SquashBot.Visual
             // then the weapon into the fist itself, so the fingers close round its grip
             var palm = FistMiddle;
             weapon.parent.position += palm - weapon.position;
+            // a two-handed weapon: the left hand on its second grip too (its shield on the back meanwhile: ShieldHold)
+            if (weapon != gripSeen) { gripSeen = weapon; gripOf = weapon.GetComponentInChildren<WeaponGrip>(); }
+            TwoHandedNow = gripOf != null && gripOf.TwoHanded;
+            if (TwoHandedNow && playing == null && !Flailing && !OffHandOnShield) OffHandOnGrip(gripOf.Off, weapon.up);
             if (playing == null && !Flailing) gripTurn = Quaternion.Inverse(handR.rotation) * weapon.parent.rotation; // (how it sits in the hand at rest: a move keeps it so)
             var held = weapon.GetComponentInChildren<HeldWeapon>();
             if (held != null) { held.BodyDriven = AttackPlaying; held.AfterGrip(); } // (a mapped attack swings it with the hand; the blade onto its target from where the hand holds it)

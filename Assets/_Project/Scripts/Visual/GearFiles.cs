@@ -157,12 +157,16 @@ namespace SquashBot.Visual
         }
 
         /// <summary>A weapon's model: <paramref name="length"/> long, the hand's place on its grip at the origin (12% up).</summary>
-        public static Transform Weapon(Transform parent, string id, float length, float glow)
+        public static Transform Weapon(Transform parent, string id, float length, float glow) => Weapon(parent, id, length, glow, 0.12f);
+
+        /// <summary>A weapon's model, <paramref name="length"/> long up +y, its origin <paramref name="grip"/> of its length
+        /// from the butt (where the main hand holds it: <see cref="Combat.WeaponGripData"/>).</summary>
+        public static Transform Weapon(Transform parent, string id, float length, float glow, float grip)
         {
             string model = weapons[id];
             var lit = LightOf(id);
             var paint = lit.a > 0f ? GlowPaint(model, lit) : Paint(model, glow);
-            var root = Place(parent, id, model, length, 0.12f, paint, true, hiltUp.Contains(id));
+            var root = Place(parent, id, model, length, grip, paint, true, hiltUp.Contains(id));
             if (lit.a > 0f)
             {
                 // its glow round the blade: a soft light of its own colour, and a breath in it

@@ -68,6 +68,29 @@ namespace SquashBot.Visual
             handR.rotation = Quaternion.FromToRotation(across, length) * handR.rotation;
         }
 
+        private Transform gripSeen, handL, indexL, pinkyL, middleL1, middleL3;
+        private WeaponGrip gripOf;
+
+        /// <summary>A two-handed weapon in the hand now (the left hand on its second grip, the shield on the back).</summary>
+        public bool TwoHandedNow { get; private set; }
+
+        /// <summary>The left hand wanted by the shield now (a block, a bash): it leaves the second grip.</summary>
+        public bool OffHandOnShield { get; set; }
+
+        /// <summary>The left fist onto <paramref name="at"/> (the weapon's second grip), the grip through it along <paramref name="length"/>.</summary>
+        private void OffHandOnGrip(Vector3 at, Vector3 length)
+        {
+            if (handL == null) { handL = FindBone(transform, "LeftHand"); indexL = FindBone(transform, "LeftHandIndex1"); pinkyL = FindBone(transform, "LeftHandPinky1"); middleL1 = FindBone(transform, "LeftHandMiddle1"); middleL3 = FindBone(transform, "LeftHandMiddle3"); }
+            if (handL == null || armL == null || foreL == null) return;
+            var fist = middleL1 != null && middleL3 != null ? (middleL1.position + middleL3.position) * 0.5f : handL.position;
+            Reach(armL, foreL, handL, at - (fist - handL.position));
+            if (indexL != null && pinkyL != null)
+            {
+                var across = indexL.position - pinkyL.position;
+                if (across.sqrMagnitude > 1e-8f && length.sqrMagnitude > 1e-8f) handL.rotation = Quaternion.FromToRotation(across, length) * handL.rotation;
+            }
+        }
+
         /// <summary>The middle of the closed fist (where a grip goes): between the middle finger's root and its curled tip.</summary>
         private Vector3 FistMiddle => fingerR != null && middleR3 != null ? (fingerR.position + middleR3.position) * 0.5f
             : fingerR != null ? Vector3.Lerp(handR.position, fingerR.position, 0.65f) : handR.position;

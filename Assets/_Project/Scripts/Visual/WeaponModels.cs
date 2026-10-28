@@ -63,14 +63,39 @@ namespace SquashBot.Visual
         /// <summary>A weapon's model; a rank weapon is bigger, made of its effect's glowing metal, with a glowing orb set in it.</summary>
         public static Transform Build(Transform parent, WeaponDef w, float scale = 1f)
         {
+            var made = BuildModel(parent, w, scale);
+            if (made != null && made.GetComponent<WeaponGrip>() == null && w.kind != WeaponKind.Gun)
+            {
+                // a drawn weapon (its grip at its origin, its length up +y): its second grip from its own height
+                var grip = Combat.WeaponGripData.Current.For(w.id, Data.Armory.Family(w).ToString());
+                float top = 0f;
+                foreach (var r in made.GetComponentsInChildren<Renderer>(true)) top = Mathf.Max(top, made.InverseTransformPoint(r.bounds.max).y);
+                float length = top / Mathf.Max(0.3f, 1f - grip.main);
+                var gp = made.gameObject.AddComponent<WeaponGrip>();
+                gp.TwoHanded = grip.twoHanded;
+                gp.OffLocal = new Vector3(0f, (grip.off - grip.main) * length, 0f);
+                gp.Curl = grip.curl;
+            }
+            return made;
+        }
+
+        private static Transform BuildModel(Transform parent, WeaponDef w, float scale)
+        {
             // a weapon made as a model wears it (no orb or trim added: its picture has its own)
             if (GearFiles.HasWeapon(w.id))
             {
                 float big = w.Special ? Mathf.Min(1.3f, w.size * 0.8f) : 1f;
                 // a hammer or mace grows with its tier (0.85 the mallet .. 1.05 the nova mace)
                 bool heavy = w.kind == WeaponKind.Hammer || w.kind == WeaponKind.Mace;
-                var made = GearFiles.Weapon(parent, w.id, (heavy ? 0.8f + 0.05f * Mathf.Clamp(w.tier, 1, 5) : 0.9f) * big, w.Special ? 0.18f : 0f);
+                float length = (heavy ? 0.8f + 0.05f * Mathf.Clamp(w.tier, 1, 5) : 0.9f) * big;
+                // held where its grip data says (Grip_Main at the origin; a two-handed one's Grip_Off up the length)
+                var grip = Combat.WeaponGripData.Current.For(w.id, Data.Armory.Family(w).ToString());
+                var made = GearFiles.Weapon(parent, w.id, length, w.Special ? 0.18f : 0f, grip.main);
                 made.localScale = Vector3.one * scale;
+                var gp = made.gameObject.AddComponent<WeaponGrip>();
+                gp.TwoHanded = grip.twoHanded;
+                gp.OffLocal = new Vector3(0f, (grip.off - grip.main) * length, 0f);
+                gp.Curl = grip.curl;
                 return made;
             }
             // a drawn hammer or mace stays near the made ones' size (a little bigger at its higher tier)

@@ -94,6 +94,17 @@ namespace SquashBot.Visual
             var carry = arm.position + ahead * reach * 0.3f - right * reach * 0.42f - up * reach * 0.72f; // (the arm down at the left side, a little forward)
             var guard = arm.position + ahead * reach * 0.75f + right * reach * 0.25f - up * reach * 0.1f;
             var hero = GetComponent<SkinnedHero>();
+            // a two-handed weapon in the hands: the shield rides on the back (its hand on the weapon) until it is wanted
+            bool wanted = k > 0.01f || b > 0.01f;
+            if (hero != null) hero.OffHandOnShield = wanted;
+            if (hero != null && hero.TwoHandedNow && !wanted)
+            {
+                var spine = neck != null ? neck.parent : null;
+                var backAt = (spine != null ? spine.position : neck.position) - ahead * size * transform.lossyScale.y * 0.16f - up * size * transform.lossyScale.y * 0.12f;
+                holder.rotation = Quaternion.LookRotation(-ahead, up);
+                holder.position = backAt;
+                return;
+            }
             var thrust = arm.position + ahead * reach * 0.98f + right * reach * 0.1f - up * reach * 0.05f; // (the arm straight out ahead)
             if (hero == null || (!hero.PlayingMove && !hero.Flailing)) Reach(arm, fore, hand, Vector3.Lerp(Vector3.Lerp(carry, guard, k), thrust, b)); // (a move playing or thrown about: the arm is its own, the shield goes with the hand)
             // the shield: its back on the hand (the grip), its face forward and out to the left
