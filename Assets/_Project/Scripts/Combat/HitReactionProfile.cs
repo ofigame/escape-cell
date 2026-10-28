@@ -14,7 +14,6 @@ namespace SquashBot.Combat
         public float[] recoveryMs = { 120f, 250f, 450f, 900f, 900f };
 
         public float Degrees(HitStrength s) => Pick(springDegrees, s);
-        public float Knockback(HitStrength s) => Pick(knockbackTiles, s);
         public float Recovery(HitStrength s) => Pick(recoveryMs, s) / 1000f;
 
         private static float Pick(float[] a, HitStrength s) => a == null || a.Length == 0 ? 0f : a[Mathf.Clamp((int)s, 0, a.Length - 1)];

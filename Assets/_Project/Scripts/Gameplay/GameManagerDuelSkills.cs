@@ -900,13 +900,6 @@ namespace SquashBot.Gameplay
 
         // ---------- The knockdown's fall, the jump ----------
 
-        /// <summary>A foi (its model) knocked flat on its back, away from <paramref name="from"/>, and back up.</summary>
-        private static void KnockOver(Transform model, Vector3 from)
-        {
-            var skin = model != null ? model.GetComponentInChildren<SkinnedHero>() : null;
-            if (skin != null) skin.KnockDown(from, 1.2f);
-        }
-
         /// <summary>foi jumps: a blow landed in the air knocks the rival's head off its neck (for a moment) and takes more.</summary>
         private void Jump()
         {

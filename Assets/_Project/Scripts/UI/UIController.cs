@@ -1157,17 +1157,6 @@ namespace SquashBot.UI
             Story.Play(scene, world, onDone);
         }
 
-        /// <summary>Three bars: a simple, universally understood "settings" glyph.</summary>
-        private static void SettingsIcon(Transform button)
-        {
-            var face = button.Find("Face");
-            for (int i = -1; i <= 1; i++)
-            {
-                var bar = UiFactory.Box("Bar", face, Middle, new Vector2(0f, i * 18f), new Vector2(52f, 9f));
-                UiFactory.Fill(bar, Palette.UiText, UiSprites.Rounded, 12f).raycastTarget = false;
-            }
-        }
-
         // ---------- Lives ----------
 
         /// <summary>"5" when full, otherwise "3  07:12" (count and time to the next life).</summary>

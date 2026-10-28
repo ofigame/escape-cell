@@ -25,11 +25,5 @@ namespace SquashBot.Data
             catch (System.Exception) { } // (only a note: never in the way of the game)
         }
 
-        /// <summary>The average seconds of a level's plays (0: never played to its end).</summary>
-        public static float Average(int level)
-        {
-            int n = Prefs.GetInt(K(level, "n"), 0);
-            return n == 0 ? 0f : Prefs.GetInt(K(level, "s"), 0) / (float)n;
-        }
     }
 }

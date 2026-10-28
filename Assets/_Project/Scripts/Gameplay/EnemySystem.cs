@@ -111,13 +111,6 @@ namespace SquashBot.Gameplay
             enemies.Clear();
         }
 
-        /// <summary>True when an enemy stands on the tile (blocks don't land there, the robot can't stand there).</summary>
-        public bool Occupies(GridPos p)
-        {
-            foreach (var e in enemies) if (e.pos == p && e.kind != EnemyKind.Sandworm && e.kind != EnemyKind.Drone) return true;
-            return false;
-        }
-
         /// <summary>The robot landed on <paramref name="p"/>: an eraser there is toppled for a while.</summary>
         public void OnRobotArrived(GridPos p)
         {

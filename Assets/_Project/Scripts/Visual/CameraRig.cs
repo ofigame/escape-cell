@@ -167,12 +167,6 @@ namespace SquashBot.Visual
             RegenerateBackground();
         }
 
-        public void SetMode(ViewMode mode)
-        {
-            Mode = mode;
-            Refit();
-        }
-
         public void Frame(int width, int height)
         {
             gridWidth = width;

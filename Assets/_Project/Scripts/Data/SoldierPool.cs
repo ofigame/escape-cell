@@ -51,13 +51,5 @@ namespace SquashBot.Data
             Save(group, list);
         }
 
-        /// <summary>Time until the next soldier of a group is back (zero: none away).</summary>
-        public static TimeSpan NextBack(int group)
-        {
-            var list = Returns(group);
-            if (list.Count == 0) return TimeSpan.Zero;
-            list.Sort();
-            return new TimeSpan(Math.Max(0L, list[0] - DateTime.UtcNow.Ticks));
-        }
     }
 }

@@ -396,29 +396,6 @@ namespace SquashBot.Visual
             }
         }
 
-        /// <summary>A plain waving cape (soldiers): a few cloth strips hanging from <paramref name="top"/>, in the colour.</summary>
-        public static void SimpleCape(Transform parent, Vector3 top, float width, float length, Color colour)
-        {
-            var cloth = MaterialFactory.Create(colour, colour * 0.08f);
-            var holder = new GameObject("CapeTop").transform;
-            holder.SetParent(parent, false);
-            holder.localPosition = top;
-            var wave = holder.gameObject.AddComponent<CapeWave>();
-            Transform p = holder;
-            const int strips = 4;
-            float h = length / strips;
-            for (int i = 0; i < strips; i++)
-            {
-                var seg = new GameObject("Seg" + i).transform;
-                seg.SetParent(p, false);
-                seg.localPosition = i == 0 ? Vector3.zero : new Vector3(0f, -h, 0f);
-                float w = width * Mathf.Lerp(1f, 1.25f, i / (strips - 1f));
-                var piece = Shapes.Primitive(PrimitiveType.Cube, "Cloth", seg, new Vector3(0f, -h * 0.5f, 0f), new Vector3(w, h * 1.08f, width * 0.06f), cloth);
-                wave.segments.Add(seg);
-                p = seg;
-            }
-        }
-
         public static void Back(Transform root, string id, Color color)
         {
             switch (id)

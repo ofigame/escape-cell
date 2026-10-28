@@ -164,17 +164,6 @@ namespace SquashBot.Data
         /// <summary>Free openings left today.</summary>
         public static int FreeLeft => Prefs.GetString("sb_dchest_day", "") == Today ? Mathf.Max(0, FreePerDay - Prefs.GetInt("sb_dchest_used", 0)) : FreePerDay;
 
-        public static void UseFree()
-        {
-            if (Prefs.GetString("sb_dchest_day", "") != Today)
-            {
-                Prefs.SetString("sb_dchest_day", Today);
-                Prefs.SetInt("sb_dchest_used", 0);
-            }
-            Prefs.SetInt("sb_dchest_used", Prefs.GetInt("sb_dchest_used", 0) + 1);
-            Prefs.Save();
-        }
-
         /// <summary>Opens one chest of the kind: takes it and draws what is inside (not given yet: <see cref="Give"/>).</summary>
         public static ChestReward Open(ChestTier t)
         {

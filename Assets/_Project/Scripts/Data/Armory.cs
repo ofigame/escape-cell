@@ -216,8 +216,6 @@ namespace SquashBot.Data
         public static int Reach(WeaponDef w) => w.kind != WeaponKind.Gun && Family(w) == WeaponFamily.Spear ? FloorTuning.Current.spearReach : w.reach;
         public static float Cooldown(WeaponDef w) => w.cooldown;
 
-        public static int UpgradePrice(WeaponDef w) => 0;
-
         public static bool TryUpgrade(WeaponDef w) => false;
 
         /// <summary>Weapons are no longer sold back (there is no backpack to make room in).</summary>

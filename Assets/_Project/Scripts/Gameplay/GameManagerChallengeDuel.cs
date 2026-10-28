@@ -495,27 +495,6 @@ namespace SquashBot.Gameplay
             else Destroy(cape.gameObject);
         }
 
-        /// <summary>A cape lifted off a foi's shoulders, flying in an arc to its post and settling there with a swing.</summary>
-        private System.Collections.IEnumerator FlyCape(Transform cape, Vector3 hook, Quaternion face)
-        {
-            var from = cape.position; var fromRot = cape.rotation;
-            const float T = 0.7f;
-            for (float e = 0f; e < T && cape != null; e += Time.deltaTime)
-            {
-                float k = Mathf.SmoothStep(0f, 1f, e / T);
-                cape.position = Vector3.Lerp(from, hook, k) + Vector3.up * (Mathf.Sin(k * Mathf.PI) * 1.6f);
-                cape.rotation = Quaternion.Slerp(fromRot, face, k) * Quaternion.Euler(Mathf.Sin(k * Mathf.PI * 2f) * 25f, 0f, 0f);
-                yield return null;
-            }
-            for (float e = 0f; e < 1.2f && cape != null; e += Time.deltaTime) // (a swing as it settles on the hook)
-            {
-                cape.position = hook;
-                cape.rotation = face * Quaternion.Euler(Mathf.Sin(e * 9f) * 14f * Mathf.Exp(-e * 3f), 0f, 0f);
-                yield return null;
-            }
-            if (cape != null) { cape.position = hook; cape.rotation = face; }
-        }
-
         /// <summary>3, 2, 1 over the two foi on their marks (everything still), then the duel goes on.</summary>
         /// <summary>The 3, 2, 1 is on: no moves, no blows.</summary>
         private bool duelCountdown;

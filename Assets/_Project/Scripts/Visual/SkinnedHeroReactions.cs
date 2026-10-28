@@ -302,9 +302,6 @@ namespace SquashBot.Visual
         /// place: true if there is one (the procedural reaction then waits for it).</summary>
         private bool ClipInstead(string name, float rate = 1f) => ClipOf(name) != null && PlayMove(name, rate);
 
-        /// <summary>A clip played to last about <paramref name="seconds"/>.</summary>
-        private bool ClipFor(string name, float seconds) { var c = ClipOf(name); return c != null && PlayMove(name, Mathf.Clamp(c.length / Mathf.Max(0.1f, seconds), 0.5f, ReadableRate)); }
-
         /// <summary>The fastest a made clip plays (faster and the eye cannot follow the move).</summary>
         private const float ReadableRate = 1.4f;
 

@@ -295,12 +295,6 @@ namespace SquashBot.Gameplay
             return false;
         }
 
-        private bool TowerNear(GridPos p, int range)
-        {
-            foreach (var t in towers) if (!t.dead && Chebyshev(t.pos, p) <= range) return true;
-            return false;
-        }
-
         /// <summary>Screen picking for towers (see PickOnScreen).</summary>
         private void PickTowers(System.Action<Vector3, float, GridPos, float> tryBody)
         {

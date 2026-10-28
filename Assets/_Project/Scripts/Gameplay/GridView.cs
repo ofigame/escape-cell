@@ -59,9 +59,6 @@ namespace SquashBot.Gameplay
 
         private void Wake(GridPos p) => busy.Add(p);
 
-        /// <summary>Every tile looked at again next frame (a change to the whole floor's look).</summary>
-        public void WakeAll() => allBusy = true;
-
         /// <summary>The tile's own transform (null for empty cells): floor rules hang their markings on it.</summary>
         public Transform Surface(GridPos p) => tiles != null && InRange(p) && tiles[p.x, p.y] != null ? tiles[p.x, p.y].tile.transform : null;
 

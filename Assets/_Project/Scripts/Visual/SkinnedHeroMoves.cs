@@ -82,14 +82,6 @@ namespace SquashBot.Visual
             moveLift = null;
         }
 
-        /// <summary>The move ends now (the duel over, the move cut short).</summary>
-        public void StopPerforming()
-        {
-            moveNow = BodyMove.None;
-            if (moveLift != null) { StopCoroutine(moveLift); moveLift = null; transform.localPosition = bodyPos; }
-            transform.localScale = Vector3.one * moveScaleRest;
-        }
-
         private float moveScaleRest = 1f;
         private bool scaleKnown;
 

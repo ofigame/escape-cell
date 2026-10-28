@@ -43,8 +43,6 @@ namespace SquashBot.Combat
             return true;
         }
 
-        public static void ResetCounts() { Repeats = 0; Shown = 0; }
-
         /// <summary>
         /// Where a blow lands: the weapon's tip (or the striker's chest, a body blow) against the struck part (its head, its
         /// chest or its legs): the point on that part's surface nearest the weapon, a little toward the camera.

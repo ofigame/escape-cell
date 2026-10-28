@@ -79,27 +79,6 @@ namespace SquashBot.Visual
         private static readonly Dictionary<Material[], Material[]> fadedSets = new Dictionary<Material[], Material[]>();
         private Material[] solid;
 
-        /// <summary>Standing by (the army battle's groups not in the fight): see-through, a step back from the fight.</summary>
-        public void SetFaded(bool on)
-        {
-            if (solid == null) solid = own;
-            if (on && !fadedSets.TryGetValue(solid, out var set))
-            {
-                set = new Material[solid.Length];
-                for (int i = 0; i < solid.Length; i++)
-                {
-                    var m = solid[i];
-                    var col = m.HasProperty("_BaseColor") ? m.GetColor("_BaseColor") : Color.white;
-                    var glow = m.HasProperty("_EmissionColor") ? m.GetColor("_EmissionColor") : Color.black;
-                    set[i] = MaterialFactory.CreateTransparent(new Color(col.r, col.g, col.b, 0.38f), glow * 0.4f);
-                }
-                fadedSets[solid] = set;
-            }
-            own = on ? fadedSets[solid] : solid;
-            bodyR.sharedMaterials = Pick(own, bodyR.sharedMaterials.Length);
-            armR.sharedMaterials = Pick(own, armR.sharedMaterials.Length);
-        }
-
         private void LateUpdate()
         {
             float dt = Time.deltaTime;

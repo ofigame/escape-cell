@@ -156,27 +156,6 @@ namespace SquashBot.Visual
                 MaterialFactory.SetColors(g.m, g.c * 0.25f, g.c * (0.75f + 0.25f * Mathf.Sin(time * 1.3f + g.phase)));
         }
 
-        /// <summary>Streaming water: pale streaks of different widths and brightness, soft at the sides (tiles up and down).</summary>
-        private static Texture2D WaterTexture()
-        {
-            const int W = 64, H = 256;
-            var tex = new Texture2D(W, H, TextureFormat.RGBA32, true) { wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Bilinear };
-            var px = new Color[W * H];
-            for (int y = 0; y < H; y++)
-                for (int x = 0; x < W; x++)
-                {
-                    float u = x / (float)W, v = y / (float)H;
-                    float streak = Mathf.PerlinNoise(u * 18f, v * 2.5f * 4f) * 0.6f + Mathf.PerlinNoise(u * 40f + 7f, v * 6f) * 0.4f;
-                    float edge = Mathf.Sin(u * Mathf.PI);
-                    float a = Mathf.Clamp01((streak - 0.3f) * 1.8f) * Mathf.Pow(edge, 0.6f);
-                    float b = 0.75f + streak * 0.25f;
-                    px[y * W + x] = new Color(b, b, 1f, a);
-                }
-            tex.SetPixels(px);
-            tex.Apply(true, true);
-            return tex;
-        }
-
         /// <summary>The far view: a deep navy night, the logo's blue glowing round the falls, dark tree tops, a few stars.</summary>
         private static Texture2D Backdrop()
         {

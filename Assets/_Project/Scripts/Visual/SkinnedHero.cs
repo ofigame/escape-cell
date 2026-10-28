@@ -344,23 +344,6 @@ namespace SquashBot.Visual
             return new Color32((byte)Mathf.Clamp(r, 0f, 255f), (byte)Mathf.Clamp(g, 0f, 255f), (byte)Mathf.Clamp(b, 0f, 255f), 255);
         }
 
-        /// <summary>
-        /// A truer look for the whole head: a little more contrast (the shading of the hair's strands and the face's shapes
-        /// shows, not a flat toy colour) and, for hair, richer colour.
-        /// </summary>
-        private static Color32 Grade(Color32 p, float hair)
-        {
-            float r = p.r, g = p.g, b = p.b;
-            const float Contrast = 1.12f;
-            r = 128f + (r - 128f) * Contrast; g = 128f + (g - 128f) * Contrast; b = 128f + (b - 128f) * Contrast;
-            if (hair > 0.01f)
-            {
-                float lum = r * 0.3f + g * 0.59f + b * 0.11f, sat = 1f + 0.22f * hair;
-                r = lum + (r - lum) * sat; g = lum + (g - lum) * sat; b = lum + (b - lum) * sat;
-            }
-            return new Color32((byte)Mathf.Clamp(r, 0f, 255f), (byte)Mathf.Clamp(g, 0f, 255f), (byte)Mathf.Clamp(b, 0f, 255f), 255);
-        }
-
         /// <summary>The head's own light: most of its colour, which no light or shadow takes away, so the face keeps the
         /// same skin in every scene (orange suns, blue ice, the menu) and never darkens as the lights round it change.</summary>
         private const float HeadGlow = 0.72f;
@@ -440,9 +423,6 @@ namespace SquashBot.Visual
             }
             return m;
         }
-
-        /// <summary>Head <paramref name="n"/> as made (for its picture in the workshop).</summary>
-        public static Material HeadMaterial(int n) => HeadPaint(Mathf.Clamp(n, 1, Heads), null, null);
 
         /// <summary>The hair's paint: its grey strand picture in the hair's colour, matte, mostly its own light (some of the
         /// scene's, so its locks' shapes show).</summary>
@@ -1145,35 +1125,8 @@ namespace SquashBot.Visual
 
         private Coroutine jolt;
 
-        /// <summary>A blow to the head: it snaps back (away from <paramref name="from"/>) and wobbles back to rest.</summary>
-        public void JoltHead(Vector3 from)
-        {
-            if (head == null || pop != null) return;
-            if (jolt != null) { StopCoroutine(jolt); if (headRestKnown) { head.localRotation = headRest; } }
-            jolt = StartCoroutine(Jolting(from));
-        }
-
         private Quaternion headRest;
         private bool headRestKnown;
-
-        private System.Collections.IEnumerator Jolting(Vector3 from)
-        {
-            if (!headRestKnown) { headRest = head.localRotation; headRestKnown = true; }
-            var away = head.position - from; away.y = 0f;
-            if (away.sqrMagnitude < 1e-4f) away = -transform.forward;
-            var axis = Vector3.Cross(Vector3.up, away.normalized);
-            const float T = 0.45f;
-            for (float e = 0f; e < T; e += VDt)
-            {
-                float k = e / T;
-                float a = 26f * Mathf.Sin(k * Mathf.PI * 2.5f) * (1f - k); // (snapped back, a wobble, still)
-                head.localRotation = headRest;
-                head.rotation = Quaternion.AngleAxis(a, axis) * head.rotation;
-                yield return null;
-            }
-            head.localRotation = headRest;
-            jolt = null;
-        }
 
         private float shudderT = 1f, shudderPow;
         private Vector3 shudderAxis;
@@ -1268,15 +1221,6 @@ namespace SquashBot.Visual
             knock = StartCoroutine(Knocked(from, lie, height));
         }
 
-        /// <summary>Knocked down: falls over backwards (away from <paramref name="from"/>), lies there, gets back up.</summary>
-        public void KnockDown(Vector3 from, float lie = 1.1f)
-        {
-            if (knock != null) return;
-            KnowRest();
-            if (knock != null) StopCoroutine(knock);
-            knock = StartCoroutine(Knocked(from, lie));
-        }
-
         private System.Collections.IEnumerator Knocked(Vector3 from, float lie, float arc = 0f)
         {
             var away = transform.position - from; away.y = 0f;
@@ -1340,32 +1284,6 @@ namespace SquashBot.Visual
             transform.localPosition = restPos;
             reel = 0f;
             knock = null;
-        }
-
-        /// <summary>Struck from above: the head flies off (up, spinning) and comes back down onto its neck.</summary>
-        public void PopHead()
-        {
-            if (head == null || pop != null) return;
-            pop = StartCoroutine(Popped());
-        }
-
-        private System.Collections.IEnumerator Popped()
-        {
-            var restPos = head.localPosition; var restRot = head.localRotation;
-            var neck = head.parent;
-            float up = Mathf.Max(0.3f, head.position.y - transform.position.y) * 0.9f; // (about the body's height, in the world)
-            const float T = 0.75f;
-            for (float e = 0f; e < T; e += VDt)
-            {
-                float k = e / T;
-                // straight up in the world and down again, spinning, wherever the body is meanwhile
-                head.localPosition = restPos; head.localRotation = restRot;
-                head.position = (neck != null ? neck.TransformPoint(restPos) : head.position) + Vector3.up * (4f * k * (1f - k)) * up;
-                head.rotation = Quaternion.AngleAxis(k * 720f, Vector3.up) * head.rotation;
-                yield return null;
-            }
-            head.localPosition = restPos; head.localRotation = restRot;
-            pop = null;
         }
 
         /// <summary>A jump straight up and down (<paramref name="height"/> in world units, <paramref name="time"/> seconds).</summary>

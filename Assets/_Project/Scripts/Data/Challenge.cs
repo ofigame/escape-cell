@@ -202,14 +202,6 @@ namespace SquashBot.Data
             return change;
         }
 
-        /// <summary>A drawn challenge (1-1): played, nothing gained or lost. Returns the change (none).</summary>
-        public static int RecordDraw()
-        {
-            Prefs.SetInt(PlayedKey, Played + 1);
-            Prefs.Save();
-            return 0;
-        }
-
         /// <summary>Gold a win, a draw and a loss bring (more the higher the rank).</summary>
         public static int WinGold => 80 + Rank * 20;
         public static int DrawGold => 40 + Rank * 10;
@@ -309,7 +301,6 @@ namespace SquashBot.Data
             o.mastery = Mathf.Clamp(o.duelLevel / 4 + rng.Next(-1, 3), 0, Mastery.Max);
             return o;
         }
-
 
         /// <summary>A live rival as the server sent it (its own game plays it).</summary>
         public static Opponent FromRival(FoiNet.Rival r)

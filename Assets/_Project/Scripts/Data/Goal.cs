@@ -21,8 +21,6 @@ namespace SquashBot.Data
             Prefs.Save();
         }
 
-        public static string ForUpgrade(Upgrade u) => "up:" + u;
-        public static string ForBoost(Boost b) => "boost:" + b;
         public static string ForCosmetic(Cosmetic c) => "cos:" + c.id;
 
         /// <summary>The goal's name and price right now: the one picked, else the next thing within reach (false when nothing is left).</summary>

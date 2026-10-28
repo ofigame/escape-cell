@@ -236,9 +236,6 @@ namespace SquashBot.UI
             heart.SetUsable(usable && left > 0);
         }
 
-        /// <summary>The special's icon (the set's move).</summary>
-        public void SetSpecial(SpecialKind k) => special.SetIcon(DuelIcons.ForSpecial(k));
-
         /// <summary>The move that comes and goes: its time left (1 .. 0) on its ring.</summary>
         public void SetContextTime(float k) => context.SetRing(k, contextMove == Move.Breaker ? UiKit.Style.cyan : UiKit.Style.gold);
 

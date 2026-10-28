@@ -15,11 +15,7 @@ namespace SquashBot.Visual
         /// <summary>The menu's picture (tall).</summary>
         public static Texture2D Portrait => portrait != null ? portrait : portrait = Resources.Load<Texture2D>("Forest/forest_portrait") ?? Paint(PortraitW, PortraitH, 7, false);
 
-
         public const int PortraitW = 768, PortraitH = 1536;
-
-        /// <summary>Paints both afresh (to be saved as the shipped pictures).</summary>
-        public static Texture2D PaintPortrait() => Paint(PortraitW, PortraitH, 7, false, true);
 
         private static float Fbm(float x, float y)
         {

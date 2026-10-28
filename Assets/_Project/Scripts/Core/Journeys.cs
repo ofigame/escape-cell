@@ -105,43 +105,6 @@ namespace SquashBot.Core
         }
 
         /// <summary>
-        /// A two-tile-wide path that winds left and right as it climbs. Used for the collapsing-floor levels:
-        /// key at the start, door at the end, no way back.
-        /// </summary>
-        public static string[] Winding(int length, int seed)
-        {
-            var rng = new Random(seed);
-            const int width = 6;
-            var cv = new Canvas(width, length);
-            int x = 2;
-            int runLeft = 2 + rng.Next(2);
-            for (int y = 0; y < length; y++)
-            {
-                cv.Set(x, y, '#');
-                cv.Set(x + 1, y, '#');
-                if (--runLeft <= 0 && y < length - 3)
-                {
-                    // Step sideways by two, filling the corner so the path stays connected.
-                    int dir = x <= 0 ? 1 : x >= width - 2 ? -1 : (rng.Next(2) == 0 ? -1 : 1);
-                    int nx = Math.Max(0, Math.Min(width - 2, x + dir * 2));
-                    int lo = Math.Min(x, nx), hi = Math.Max(x, nx) + 1;
-                    for (int fx = lo; fx <= hi; fx++) cv.Set(fx, y, '#');
-                    x = nx;
-                    runLeft = 2 + rng.Next(3);
-                }
-            }
-            // Start and key on the first row, door on the last.
-            int sx = 0;
-            while (sx < width && cv.c[sx, 0] != '#') sx++;
-            cv.Set(sx, 0, 'S');
-            cv.Set(sx + 1, 0, 'K');
-            int dx = 0;
-            while (dx < width && cv.c[dx, length - 1] != '#') dx++;
-            cv.Set(dx, length - 1, 'D');
-            return cv.Rows();
-        }
-
-        /// <summary>
         /// A braided maze (some walls knocked out, so there are loops to dodge through). Walls are low hedges.
         /// The door sits on the farthest cell; the key in a dead end well away from both.
         /// </summary>

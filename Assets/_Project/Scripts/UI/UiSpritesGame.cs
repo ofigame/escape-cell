@@ -93,15 +93,6 @@ namespace SquashBot.UI
 
         private static float Band(float d, float from, float to) => Mathf.Clamp01(d - from + 0.5f) * Mathf.Clamp01(to - d + 0.5f);
 
-        /// <summary>Polished gold: deep at the bottom, pale at the top, with a bright streak where <paramref name="shine"/> is high.</summary>
-        private static Color GoldAt(float t, float shine)
-        {
-            var dark = new Color(0.52f, 0.33f, 0.12f);
-            var light = new Color(1f, 0.87f, 0.55f);
-            var c = Color.Lerp(dark, light, Mathf.SmoothStep(0f, 1f, t));
-            return Color.Lerp(c, new Color(1f, 0.96f, 0.82f), shine * 0.55f);
-        }
-
         private static Sprite MakeFrame(FrameKind kind)
         {
             var tex = new Texture2D(FS, FS, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };

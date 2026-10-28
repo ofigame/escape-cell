@@ -85,10 +85,6 @@ namespace SquashBot.Visual
             return true;
         }
 
-        /// <summary>The plain chain's next blow (the cut and the thrust in turn), its contact <paramref name="untilContact"/>
-        /// seconds from now; never over a bigger move playing (an ultimate's own blows are its clip's).</summary>
-        public bool PlayChainBlow(float untilContact) => PlayChainAction((chainTurn++ % 2) == 0 ? DuelAction.ChainSlash : DuelAction.ChainStab, untilContact);
-
         /// <summary>A given blow of the plain chain (the cut, the thrust, a family's finish), its contact
         /// <paramref name="untilContact"/> seconds from now; never over a bigger move playing.</summary>
         public bool PlayChainAction(DuelAction a, float untilContact)

@@ -94,21 +94,6 @@ namespace SquashBot.UI
             return img;
         }
 
-        /// <summary>A small count in the corner (the hearts left), or none.</summary>
-        public void SetBadge(string text)
-        {
-            if (badge == null)
-            {
-                var b = UiFactory.Box("Badge", rect, new Vector2(1f, 1f), new Vector2(6f, 6f), new Vector2(46f, 46f));
-                b.pivot = new Vector2(1f, 1f);
-                UiFactory.Fill(UiFactory.Stretch("Face", b), UiKit.A(UiKit.Style.back, 0.95f), UiSprites.Circle).raycastTarget = false;
-                badge = UiFactory.OutlinedText("Count", b, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(46f, 42f), "", 28f, UiKit.Style.backDeep);
-                badge.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            }
-            badge.transform.parent.gameObject.SetActive(!string.IsNullOrEmpty(text));
-            badge.text = text;
-        }
-
         public void SetIcon(DuelIcon i) => icon.sprite = DuelIcons.Get(i);
 
         public void SetColour(Color c)

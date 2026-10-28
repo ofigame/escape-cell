@@ -328,32 +328,6 @@ namespace SquashBot.Gameplay
             return false;
         }
 
-        /// <summary>The player's foi beside a partner (closer than the duel's gap, and nearer than before).</summary>
-        public bool NearPartner(GridPos from, GridPos p)
-        {
-            foreach (var list in new[] { guards, allies })
-                foreach (var o in list)
-                    if (o.partner && !o.dead && Chebyshev(p, o.pos) < DuelGap && Chebyshev(p, o.pos) < Chebyshev(from, o.pos)) return true;
-            return false;
-        }
-
-        /// <summary>A partner foi stands here (the player's foi keeps out of it).</summary>
-        public bool PartnerAt(GridPos p)
-        {
-            foreach (var list in new[] { guards, allies })
-                foreach (var o in list) if (o.partner && !o.dead && o.pos == p) return true;
-            return false;
-        }
-
-        /// <summary>The partners' models and sides (2 against 2), for their capes.</summary>
-        public System.Collections.Generic.List<(Transform model, bool mine)> Partners()
-        {
-            var list = new System.Collections.Generic.List<(Transform, bool)>();
-            foreach (var o in allies) if (o.partner && !o.dead && o.root != null) list.Add((o.root, true));
-            foreach (var o in guards) if (o.partner && !o.dead && o.root != null) list.Add((o.root, false));
-            return list;
-        }
-
         /// <summary>The damage of a soldier's blow (its kind and power; the fraction a chance of one more).</summary>
         private int SquadDamage(Guard s, Guard target)
         {

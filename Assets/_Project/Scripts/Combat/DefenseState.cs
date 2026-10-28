@@ -140,8 +140,6 @@ namespace SquashBot.Combat
             return true;
         }
 
-        public float DodgeWait(float now) => Mathf.Clamp01((dodgeReadyAt - now) / Mathf.Max(0.01f, S.dodgeCooldown));
-
         /// <summary>The cost of blocking a blow (its family's for a plain blow).</summary>
         public static float Cost(BlowKind kind, WeaponFamily family)
         {

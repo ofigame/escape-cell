@@ -107,16 +107,6 @@ namespace SquashBot.Visual
                 new Vector3(width, length * 0.5f, width), m).localRotation = Quaternion.Euler(tilt, 0f, 0f);
         }
 
-        private void Crenels(float y, float radius, int count, Material m, float size = 0.13f)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                float a = i * Mathf.PI * 2f / count;
-                Box("Merlon", transform, new Vector3(Mathf.Cos(a) * radius, y, Mathf.Sin(a) * radius), new Vector3(size, size * 1.3f, size * 0.8f), m)
-                    .localRotation = Quaternion.Euler(0f, -a * Mathf.Rad2Deg + 90f, 0f);
-            }
-        }
-
         private void SquareCrenels(float y, float half, Material m)
         {
             for (int i = 0; i < 4; i++)

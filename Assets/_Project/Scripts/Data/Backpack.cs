@@ -28,8 +28,6 @@ namespace SquashBot.Data
 
         public static int Capacity => Capacities[Level - 1];
 
-        public static int CapacityAt(int level) => Capacities[Mathf.Clamp(level, 1, MaxLevel) - 1];
-
         public static int NextPrice => IsMaxed ? 0 : Prices[Level];
 
         /// <summary>How many orbs of one skill fit.</summary>

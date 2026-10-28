@@ -32,7 +32,6 @@ namespace SquashBot.Data
         public static int HitDamage => Damage[Level - 1];
         public static int MaxAmmo => Ammo[Level - 1];
         public static int DamageAt(int level) => Damage[Mathf.Clamp(level, 1, MaxLevel) - 1];
-        public static int AmmoAt(int level) => Ammo[Mathf.Clamp(level, 1, MaxLevel) - 1];
 
         public static bool TryUpgrade()
         {

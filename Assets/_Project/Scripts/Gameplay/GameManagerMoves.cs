@@ -605,19 +605,6 @@ namespace SquashBot.Gameplay
             return null;
         }
 
-        /// <summary>A tile <paramref name="n"/> to the side of the line between them.</summary>
-        private GridPos? TileSide(GridPos me, GridPos other, int n)
-        {
-            int dx = System.Math.Sign(other.x - me.x), dy = System.Math.Sign(other.y - me.y);
-            foreach (var side in new[] { new GridPos(-dy, dx), new GridPos(dy, -dx) })
-                for (int k = n; k >= 1; k--)
-                {
-                    var p = new GridPos(me.x + side.x * k, me.y + side.y * k);
-                    if (grid.InBounds(p) && grid.IsStandable(p) && !grid.IsOccupied(p)) return p;
-                }
-            return null;
-        }
-
         /// <summary>The mover leaps to a tile (a stand-in does the flying; the mover lands there).</summary>
         private IEnumerator LeapToTile(bool mine, GridPos land, float height, int stunt = -1)
         {

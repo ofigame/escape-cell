@@ -331,17 +331,6 @@ namespace SquashBot.Data
         [Serializable] private class RecoveryCode { public string code; }
         [Serializable] private class ConflictBody { public long version; }
 
-        /// <summary>The game's copy on the server (null: none reachable).</summary>
-        public static IEnumerator GetSave(Action<SaveBody> done)
-        {
-            bool ok = Registered;
-            if (!ok) yield return EnsurePlayer(r => ok = r);
-            if (!ok) { done(null); yield break; }
-            long code = 0; string body = null;
-            yield return Send("GET", "/save", null, true, (c, b) => { code = c; body = b; });
-            done(code == 200 ? TryParse<SaveBody>(body) : null);
-        }
-
         /// <summary>Sends the game's copy. Done with 200 (kept), 409 and the server's newer version, or 0 (no network).</summary>
         public static IEnumerator PutSave(long version, string json, Action<long, long> done)
         {

@@ -170,14 +170,6 @@ namespace SquashBot.Gameplay
             rig.EndChase();
         }
 
-        /// <summary>The robot is thrown out of the ring (one-hit levels: a blow knocks it out instead of killing it).</summary>
-        public void Eject()
-        {
-            if (!Active) return;
-            var at = RobotPos;
-            Exited?.Invoke(at);
-        }
-
         private Vector3 Ground(Vector3 p) => new Vector3(p.x, centre.y, p.z);
 
         private void Update()

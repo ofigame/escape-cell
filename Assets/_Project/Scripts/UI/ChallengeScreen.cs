@@ -436,67 +436,6 @@ namespace SquashBot.UI
             return text;
         }
 
-        /// <summary>
-        /// A soldier of a kind drawn small: legs, a body in the player's blue, a head with a glowing visor, its weapon
-        /// (sword, spear or bow) and, for a heavy one, a round shield and shoulder plates.
-        /// </summary>
-        public static void UnitPicture(Transform parent, GroupKind kind, Vector2 at, float size)
-        {
-            var box = UiFactory.Box("Unit", parent, new Vector2(0.5f, 0.5f), at, new Vector2(size, size));
-            box.pivot = new Vector2(0.5f, 0.5f);
-            float s = size;
-            bool heavy = Army.Heavy(kind);
-            int fam = Army.Family(kind);
-            var team = ArmyBattleColours.Mine;
-            var dark = UiKit.Style.panelSuccess;
-            var metal = UiKit.Style.text;
-            var wood = UiKit.Style.bronze;
-            Image P(Vector2 p, Vector2 sz, Color c, Sprite sp, float rot = 0f)
-            {
-                var r = UiFactory.Box("P", box, new Vector2(0.5f, 0.5f), p * s, sz * s);
-                r.pivot = new Vector2(0.5f, 0.5f);
-                r.localRotation = Quaternion.Euler(0f, 0f, rot);
-                var img = UiFactory.Fill(r, c, sp, sp == UiSprites.Rounded ? 5f : 1f);
-                img.raycastTarget = false;
-                return img;
-            }
-            float w = heavy ? 1.15f : 1f;
-            // The weapon behind the arm.
-            if (fam == 0)
-            {
-                P(new Vector2(0.27f, 0.12f), new Vector2(0.07f, heavy ? 0.52f : 0.44f), metal, UiSprites.Rounded, -18f);
-                P(new Vector2(0.22f, -0.1f), new Vector2(0.16f, 0.04f), wood, UiSprites.Rounded, -18f);
-            }
-            else if (fam == 1)
-            {
-                P(new Vector2(0.27f, 0.05f), new Vector2(0.04f, 0.86f), wood, UiSprites.Rounded);
-                P(new Vector2(0.27f, 0.47f), new Vector2(0.09f, 0.14f), metal, UiSprites.Rounded, 45f);
-            }
-            else
-            {
-                for (int i = -2; i <= 2; i++)
-                    P(new Vector2(0.3f - Mathf.Abs(i) * 0.035f, i * 0.1f), new Vector2(0.04f, 0.12f), wood, UiSprites.Rounded, i * 16f);
-                P(new Vector2(0.24f, 0f), new Vector2(0.012f, 0.44f), metal, UiSprites.Rounded);
-            }
-            // Legs, body, belt, arms, head, visor.
-            P(new Vector2(-0.07f * w, -0.3f), new Vector2(0.1f * w, 0.26f), dark, UiSprites.Rounded);
-            P(new Vector2(0.07f * w, -0.3f), new Vector2(0.1f * w, 0.26f), dark, UiSprites.Rounded);
-            P(new Vector2(0f, -0.02f), new Vector2(0.34f * w, 0.34f), team, UiSprites.Rounded);
-            P(new Vector2(0f, -0.15f), new Vector2(0.36f * w, 0.05f), dark, UiSprites.Rounded);
-            P(new Vector2(0.22f * w, -0.02f), new Vector2(0.08f, 0.26f), dark, UiSprites.Rounded);
-            P(new Vector2(0f, 0.27f), new Vector2(0.24f, 0.2f), metal, UiSprites.Rounded);
-            P(new Vector2(0f, 0.27f), new Vector2(0.18f, 0.05f), Color.Lerp(team, Color.white, 0.6f), UiSprites.Rounded);
-            if (heavy)
-            {
-                P(new Vector2(-0.2f, 0.14f), new Vector2(0.13f, 0.07f), team, UiSprites.Rounded);
-                P(new Vector2(0.2f, 0.14f), new Vector2(0.13f, 0.07f), team, UiSprites.Rounded);
-                P(new Vector2(0f, 0.4f), new Vector2(0.04f, 0.09f), team, UiSprites.Rounded);
-                P(new Vector2(-0.24f, -0.06f), new Vector2(0.3f, 0.3f), Color.Lerp(team, Color.black, 0.2f), UiSprites.Circle);
-                P(new Vector2(-0.24f, -0.06f), new Vector2(0.12f, 0.12f), metal, UiSprites.Circle);
-            }
-            else P(new Vector2(-0.22f * w, -0.02f), new Vector2(0.08f, 0.26f), dark, UiSprites.Rounded);
-        }
-
         // ---------- The waiting room ----------
 
         public void ShowLobby(string me, int myRank, string mode)

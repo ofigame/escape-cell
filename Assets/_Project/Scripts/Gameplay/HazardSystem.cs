@@ -629,8 +629,6 @@ namespace SquashBot.Gameplay
             sheltered[p] = seconds;
         }
 
-        public bool IsSheltered(GridPos p) => sheltered.ContainsKey(p);
-
         private void UpdateShelters(float dt)
         {
             if (sheltered.Count == 0) return;

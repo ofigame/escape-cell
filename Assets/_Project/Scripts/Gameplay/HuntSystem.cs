@@ -1109,7 +1109,6 @@ namespace SquashBot.Gameplay
             return v;
         }
 
-
         /// <summary>A small health bar over a guard's head: dark back, a fill that empties and turns from green to red.</summary>
         /// <summary>
         /// No bar over a robot or a soldier (a crowd of bars was a clutter): its colours fade towards a dull grey as it
@@ -1734,14 +1733,6 @@ namespace SquashBot.Gameplay
             if (TowerAt(p)) return true;
             foreach (var g in guards) if (!g.dead && g.pos == p) return true;
             return false;
-        }
-
-        public bool InCombat(GridPos p, int range)
-        {
-            if (!running) return false;
-            foreach (var g in guards) if (!g.dead && Chebyshev(g.pos, p) <= range) return true;
-            if (TowerNear(p, range)) return true;
-            return MonsterUp && MonsterAwake && Chebyshev(monsterPos, p) <= range + 2;
         }
 
         /// <summary>How far the robots and vanG reach with a blow: two tiles, like foi; three is out of reach.</summary>

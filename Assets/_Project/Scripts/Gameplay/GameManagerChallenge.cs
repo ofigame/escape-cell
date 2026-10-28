@@ -213,9 +213,6 @@ namespace SquashBot.Gameplay
             cameraRig.StartCoroutine(Lobby());
         }
 
-        private string SideText(string name, int rank, int trophies, int power) =>
-            name + "\n" + Challenge.RankName(rank) + " · " + Loc.F("ch.trophies", trophies) + " · " + Loc.F("ch.power", power);
-
         /// <summary>A name typed on the name screen: checked here, then claimed on the server (offline: kept for later).</summary>
         private void OnNameSubmitted(string name)
         {
@@ -245,15 +242,6 @@ namespace SquashBot.Gameplay
         }
 
         private float menuWatchNext;
-
-        /// <summary>The last defence news, in the current language (empty when there is none).</summary>
-        private static string DefenseNews()
-        {
-            var p = Prefs.GetString(DefenseNewsKey, "").Split('|');
-            if (p.Length != 4 || !int.TryParse(p[0], out int n) || !int.TryParse(p[1], out int held) || !int.TryParse(p[2], out int fell) || !int.TryParse(p[3], out int change))
-                return ""; // none yet, or an old text-shaped entry (in the language of its day)
-            return Loc.F("ch.defense", n, held, fell, (change >= 0 ? "+" : "") + change);
-        }
 
         /// <summary>While the menu is up: a friend's duel invitation is looked for now and then (see GameManagerFriends).</summary>
         private void WatchArmyFromMenu() => WatchInvites();

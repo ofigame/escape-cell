@@ -1094,7 +1094,6 @@ namespace SquashBot.Visual
             ps.Play();
         }
 
-
         private Mesh hazeMesh;
         private static Texture2D hazeFade;
 
@@ -1152,24 +1151,6 @@ namespace SquashBot.Visual
         }
 
         private float platRadius;
-
-        /// <summary>
-        /// A post with a crossbar at the platform's back corner on one side (in front of its stand) (<paramref name="south"/>: the south end's),
-        /// tall enough for <paramref name="length"/> of cape; returns the hook a cape's top hangs from.
-        /// </summary>
-        public Vector3 CapeHook(bool south, float length)
-        {
-            float r = platRadius > 0f ? platRadius : Mathf.Max(hw, hd);
-            float a = (south ? -1f : 1f) * 128f * Mathf.Deg2Rad; // (the back corner, in front of that side's stand)
-            var foot = new Vector3(centre.x + Mathf.Cos(a) * r * 0.9f, floorY, centre.z + Mathf.Sin(a) * r * 0.9f); // (on the platform's edge)
-            float h = length + 0.45f;
-            var wood = Surface(new Color(0.32f, 0.2f, 0.12f), 0.3f);
-            var brass = Surface(new Color(0.85f, 0.65f, 0.3f), 0.7f);
-            Shapes.Rounded("CapePost", transform, foot + Vector3.up * h * 0.5f, new Vector3(0.14f, h, 0.14f), 0.04f, wood);
-            Shapes.Rounded("CapeBar", transform, foot + Vector3.up * h, new Vector3(0.12f, 0.1f, 0.9f), 0.03f, wood);
-            Shapes.Rounded("CapeKnob", transform, foot + Vector3.up * (h + 0.1f), new Vector3(0.2f, 0.16f, 0.2f), 0.08f, brass);
-            return foot + Vector3.up * (h - 0.05f) + new Vector3(0.1f, 0f, 0f);
-        }
 
         /// <summary>The middle of the platform (on the floor).</summary>
         public Vector3 Middle => new Vector3(centre.x, floorY, centre.z);
