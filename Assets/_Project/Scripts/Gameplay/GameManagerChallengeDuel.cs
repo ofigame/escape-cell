@@ -395,6 +395,7 @@ namespace SquashBot.Gameplay
                 {
                     if (!challengeRun || chPhase != ChPhase.Lobby) yield break; // (over, or the server started it meanwhile)
                     FaceForCountdown(true);
+                    if (i == 3) CrownsShine(); // (the crowns' glint; the Marshal's ring of light)
                     chUi.SetStatus(i.ToString());
                     ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.6f), i.ToString(), Palette.UiGold, 220f);
                     AudioManager.PlaySfx(Sfx.Click, 1f, 0.75f + 0.08f * (5 - i));
@@ -443,6 +444,7 @@ namespace SquashBot.Gameplay
                 for (int i = 3; i >= 1; i--)
                 {
                     if (!challengeRun || chPhase == ChPhase.Done) yield break;
+                    if (i == 3) CrownsShine();
                     chUi.SetStatus(i.ToString());
                     ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.6f), i.ToString(), Palette.UiGold, 220f);
                     AudioManager.PlaySfx(Sfx.Click, 1f, 0.8f + 0.1f * (3 - i));

@@ -520,8 +520,10 @@ namespace SquashBot.Gameplay
         {
             var root = new GameObject("RivalLook").transform;
             var outfit = rival.bot ? Cosmetics.OutfitFor(rival.name) : Cosmetics.OutfitFrom(rival.look); // a player's own (plain if it wears nothing), a made-up one for the computer
+            robot.RankTierShown = RankGear.ForRank(rival.Rank); // (its gear from its own rank: section 2.7)
             robot.ApplyOutfit(outfit);
             var copy = robot.BuildLookalike(root).transform;
+            robot.RankTierShown = null;
             // The copy shares foi's paint and eye materials: give it its own before foi dresses back.
             var own = new System.Collections.Generic.Dictionary<Material, Material>();
             foreach (var r in copy.GetComponentsInChildren<Renderer>(true))

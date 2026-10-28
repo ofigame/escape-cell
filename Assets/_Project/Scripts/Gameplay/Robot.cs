@@ -311,8 +311,17 @@ namespace SquashBot.Gameplay
             // its parts' look (a rival's copy is given the rival's own after it is made)
             PartLooks.Apply(skin.transform, Data.RobotParts.Level(Data.RobotPart.Body), Data.RobotParts.Level(Data.RobotPart.Arms), Data.RobotParts.Level(Data.RobotPart.Shell));
             BodyShape.Apply(skin.transform, Data.RobotParts.Level(Data.RobotPart.Body), Data.RobotParts.Level(Data.RobotPart.Arms), true); // (the player's own: never thinner than before the bag came)
+            // the rank gear: the crown on the head, the bracers, pauldrons and kneepads (before the wear: it reaches them too)
+            int tier = RankTierShown ?? Data.RankGear.Worn;
+            Transform headT = null;
+            foreach (var t in skin.GetComponentsInChildren<Transform>(true)) if (t.name == "Hero_Head") { headT = t; break; }
+            RankCrown.Put(headT, SkinnedHero.HeadNumber(headPiece.id), tier);
+            RankGearParts.Put(skin.transform, tier);
             WearLook.Apply(skin.transform, Data.BattleWear.Level); // (its battle wear: rust on its own screen)
         }
+
+        /// <summary>The rank gear tier dressed instead of the player's own (a rival's look being made); null: the player's.</summary>
+        public int? RankTierShown { get; set; }
 
         /// <summary>A holder for garage gear, <paramref name="y"/> higher than the gear was made for.</summary>
         private Transform Raised(float y)
@@ -495,7 +504,7 @@ namespace SquashBot.Gameplay
             copy.transform.localPosition = Vector3.zero;
             copy.transform.localRotation = Quaternion.identity;
             copy.transform.localScale = Vector3.one;
-            foreach (var b in copy.GetComponentsInChildren<MonoBehaviour>()) if (!(b is SkinnedHero || b is ShieldHold)) Destroy(b); // (a rigged build still moves, its shield stays in hand)
+            foreach (var b in copy.GetComponentsInChildren<MonoBehaviour>()) if (!(b is SkinnedHero || b is ShieldHold || b is RankCrown)) Destroy(b); // (a rigged build still moves, its shield stays in hand, its crown beats)
             if (HeroModels.IsSkinned(hero))
                 foreach (var r in copy.GetComponentsInChildren<Renderer>(true)) r.enabled = true; // (a stand-in may have hidden its pieces at the moment it was copied)
             return copy;

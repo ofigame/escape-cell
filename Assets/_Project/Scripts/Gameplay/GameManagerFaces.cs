@@ -20,9 +20,21 @@ namespace SquashBot.Gameplay
         /// knock-out): always a light hop, it stays on the head (the crown never falls: the old hats' flying is gone).</summary>
         private static void HatFor(Transform who, int how, Vector3 from)
         {
+            var crown = who != null ? who.GetComponentInChildren<RankCrown>() : null;
+            if (crown != null) crown.Hop(); // (the rank crown: a light hop, it never falls)
             var skin = who != null ? who.GetComponentInChildren<SkinnedHero>() : null;
             if (skin == null || skin.HatMount == null || skin.HatMount.childCount == 0) return;
             HatBounce.On(skin.HatMount).Hop();
+        }
+
+        /// <summary>The duel's countdown: both crowns glint (the Marshal's spreads a ring of light).</summary>
+        private void CrownsShine()
+        {
+            foreach (var m in new[] { robot != null ? robot.Visual : null, hunt.ChallengeFoeModel })
+            {
+                var crown = m != null ? m.GetComponentInChildren<RankCrown>() : null;
+                if (crown != null) crown.Shine();
+            }
         }
 
         /// <summary>
