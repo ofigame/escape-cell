@@ -21,14 +21,15 @@ namespace SquashBot.Data
     /// <summary>
     /// The shields. Carried on foi's left arm (on the menu, in the workshop, on the floors and in the duels); a blow
     /// that comes from the front, while the shield is ready, lands on it instead: no health lost, the shield needs a
-    /// moment before the next. Better shields cover more and are ready sooner. The plain wooden one is foi's from the
-    /// start; the steel one is bought; the two golden ones come only from the chests.
+    /// moment before the next. Better shields cover more and are ready sooner. The wooden and the steel ones are bought
+    /// (a new player starts with none: the user's word, 2026-10-28; players from before keep their wooden one); the two
+    /// golden ones come only from the chests.
     /// </summary>
     public static class Shields
     {
         public static readonly List<ShieldDef> All = new List<ShieldDef>
         {
-            new ShieldDef { id = "shield.wood", model = "basit_baslangic_kalkan", price = 0, recharge = 3.2f, arc = 55f },
+            new ShieldDef { id = "shield.wood", model = "basit_baslangic_kalkan", price = 1500, recharge = 3.2f, arc = 55f },
             new ShieldDef { id = "shield.steel", model = "ikinci_seviye_kalkan", price = 6500, recharge = 2.4f, arc = 65f },
             new ShieldDef { id = "shield.stag", model = "altin_kasa_kalkan", chest = true, recharge = 1.7f, arc = 75f, size = 1.25f },
             new ShieldDef { id = "shield.amethyst", model = "altin_kasa_kalkan_2", chest = true, recharge = 1.5f, arc = 80f, size = 1.3f },
@@ -45,14 +46,25 @@ namespace SquashBot.Data
             Prefs.Save();
         }
 
-        /// <summary>The shield carried (the wooden one unless another was chosen; null only if none is owned).</summary>
+        /// <summary>The shield carried (the one chosen, else the best owned; null when none is owned: a new player buys one).</summary>
         public static ShieldDef Equipped
         {
             get
             {
                 var s = Get(Prefs.GetString("sb_shield_eq", "shield.wood"));
-                return Owned(s) ? s : Get("shield.wood");
+                if (Owned(s)) return s;
+                for (int i = All.Count - 1; i >= 0; i--) if (Owned(All[i])) return All[i];
+                return null;
             }
+        }
+
+        /// <summary>Once: the players from before the wooden shield had a price keep it (a new player has none).</summary>
+        public static void KeepOldStarter(bool playedBefore)
+        {
+            if (Prefs.GetInt("sb_shield_starter_v2", 0) == 1) return;
+            if (playedBefore) Grant(Get("shield.wood"));
+            Prefs.SetInt("sb_shield_starter_v2", 1);
+            Prefs.Save();
         }
 
         public static void Equip(ShieldDef s)

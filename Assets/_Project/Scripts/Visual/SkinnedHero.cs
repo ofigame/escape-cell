@@ -871,7 +871,7 @@ namespace SquashBot.Visual
             LastReaction = dir + "/" + height + "/" + strength + "/v" + variant;
             switch (strength)
             {
-                case Combat.HitStrength.Light: Squint(0.45f, 0.15f); if (PlayAction(Combat.DuelAction.HitLight)) ReactionClip = "hit_small"; break;
+                case Combat.HitStrength.Light: Squint(0.45f, 0.15f); Shudder(from, 0.35f * Mathf.Clamp(intensity, 0.5f, 2f)); if (NormalReactionClips && PlayAction(Combat.DuelAction.HitLight)) ReactionClip = "hit_small"; break; // (always seen: the spring and a short shudder)
                 case Combat.HitStrength.Medium: Rock(from, intensity); Squint(0.6f, 0.25f); Brows(0.6f, 0.3f); break; // (the stagger: a step back, rocking)
                 default: DriveBack(from); Squint(1f, 0.4f); Brows(1f, 0.45f); Squash(1f); break; // (driven back two steps, onto a knee)
             }

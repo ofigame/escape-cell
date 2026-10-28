@@ -40,7 +40,7 @@ namespace SquashBot.Visual
             swayAxis = Vector3.Cross(Vector3.up, away.normalized);
             swayPow = Mathf.Clamp01(strength);
             ReactionClip = "stagger";
-            if (PlayAction(Combat.DuelAction.HitHeavy)) { ReactionClip = "stagger"; return; } // (its clip from the map: it rocks by itself)
+            if (NormalReactionClips && PlayAction(Combat.DuelAction.HitHeavy)) { ReactionClip = "stagger"; return; } // (its clip from the map: it rocks by itself)
             swayT = 0f;
         }
 

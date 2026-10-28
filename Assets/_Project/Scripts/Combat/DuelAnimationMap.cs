@@ -14,6 +14,13 @@ namespace SquashBot.Combat
     {
         public DuelAnimationRow[] rows = new DuelAnimationRow[0];
 
+        [Header("Which moves play the made clips")]
+        [Tooltip("The plain blows (the chain's cuts and thrusts, the finishing blows) and the light and medium hit reactions by "
+               + "the made clips. Off (the user's word, 2026-10-28): those are the code's own swings and reactions (they never carry "
+               + "the bodies into each other); the context button's moves (power hit, knockdown, break), the specials and the "
+               + "ultimates still play their made clips.")]
+        public bool normalBlowClips = false;
+
         [Header("The plain chain by weapon mastery (looks only; the rules' section 5)")]
         /// <summary>From this mastery the chain has a third blow: the family's body blow (a kick, a shoulder, a headbutt).</summary>
         public int bodyBlowMastery = 3;

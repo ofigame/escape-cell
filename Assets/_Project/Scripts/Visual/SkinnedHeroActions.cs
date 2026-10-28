@@ -96,7 +96,10 @@ namespace SquashBot.Visual
         private static bool IsChainAction(DuelAction a) => a == DuelAction.ChainSlash || a == DuelAction.ChainStab || a >= DuelAction.ChainFinishSword;
 
         /// <summary>Whether the plain chain is played by clips (then the body's coded blows are not).</summary>
-        public static bool ChainByClips => HasAction(DuelAction.ChainSlash) && HasAction(DuelAction.ChainStab);
+        public static bool ChainByClips => DuelAnimationMap.Current.normalBlowClips && HasAction(DuelAction.ChainSlash) && HasAction(DuelAction.ChainStab);
+
+        /// <summary>The plain hits' reactions by clips too (else the code's own: the spring, the rock, the step back).</summary>
+        private static bool NormalReactionClips => DuelAnimationMap.Current.normalBlowClips;
 
         /// <summary>A mapped attack plays (the weapon then rides in the fist: the body swings it, not its own stroke).</summary>
         private bool AttackPlaying => playing != null && actionNow.HasValue && actionNow.Value >= DuelAction.ChainSlash;
