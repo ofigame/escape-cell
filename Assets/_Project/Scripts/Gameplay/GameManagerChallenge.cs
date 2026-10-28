@@ -448,7 +448,7 @@ namespace SquashBot.Gameplay
             arenaRun = false;
             trailRun = false;
             dailyRun = false;
-            robot.SetSize(DuelFoiSize, HeldWeapon.PlainDuelBlows ? 0.32f : 0.1f); // foi big in the duels (the camera stands well back to show the whole stage; the rival copies its size)
+            robot.SetSize(DuelFoiSize, HeldWeapon.PlainDuelBlows ? 0.32f : 0.1f); // foi big in the duels (the rival copies its size)
             BeginRun();
             ui.SetChallengeHud(true);
             ui.SkillBar.Refresh(false);
@@ -513,7 +513,8 @@ namespace SquashBot.Gameplay
         private bool duelSky;
 
         /// <summary>The rival's foi: foi as the rival dresses it (its own outfit; a made-up one for a computer rival), with the rival's weapon.</summary>
-        /// <summary>foi's size in the duels (the rival copies it): 1.58, then 10% bigger (the user's word, 2026-10-28).</summary>
+        /// <summary>foi's size in the duels (the rival copies it): 1.58, then 10% bigger (the user's word, 2026-10-28; tried at the
+        /// floors' 1.2 and taken back the same day).</summary>
         private const float DuelFoiSize = 1.58f * 1.1f;
 
         private Transform RivalLook()
@@ -836,6 +837,36 @@ namespace SquashBot.Gameplay
         /// <summary>How fast the duel's view follows the two (per second; a place's jump glides over about half a second).</summary>
         private const float FrontFollow = 5f;
 
+        /// <summary>The fixed duel camera's turn: how far along the stands' line it looks off the middle (world units, eased).</summary>
+        private float duelPanYaw, duelPanVelocity;
+        private const float DuelPan = 4.5f;
+
+        /// <summary>
+        /// The fight filmed as the floors are (the user's call, 2026-10-28): from one place in the middle between the two
+        /// stands (the stage's open side, east), at the floors' distance and height for the chosen camera setting, with
+        /// their lens; it never follows, only turns a little toward where the two fight (as much as the floors' lean).
+        /// </summary>
+        private void DuelFixedPose(out Vector3 pos, out Quaternion rot)
+        {
+            CityFar();
+            float scale = CamDistanceScale[Mathf.Clamp(SaveData.CameraDistance, 0, CamDistanceScale.Length - 1)];
+            float back = new Vector2(CloseCamOffset.x, CloseCamOffset.z).magnitude * scale, high = CloseCamOffset.y * scale;
+            // never so near that the line across the floor (between the stands) leaves the screen's sides: the big duel foi at both ends
+            float hfov = 2f * Mathf.Atan(Mathf.Tan(CloseCamFov * Mathf.Deg2Rad * 0.5f) * Mathf.Max(0.3f, cameraRig.Cam.aspect));
+            float need = (BoardH * 0.5f + 1f - DuelPan * 0.5f) / Mathf.Tan(hfov * 0.5f), slant = Mathf.Sqrt(back * back + high * high);
+            if (slant < need) { back *= need / slant; high *= need / slant; }
+            var look = boardCentre + Vector3.up * 0.35f;
+            pos = look + sideDir * back + Vector3.up * high;
+            // turned toward the two's middle along the stands' line (at most DuelPan either way), never moving itself
+            var me = robot.transform.position;
+            var mid = (me + (hunt.ChallengeFoeAt ?? me)) * 0.5f;
+            var across = Vector3.Cross(Vector3.up, -sideDir);
+            float goal = Mathf.Clamp(Vector3.Dot(mid - look, across), -DuelPan, DuelPan);
+            duelPanYaw = Mathf.SmoothDamp(duelPanYaw, goal, ref duelPanVelocity, 0.6f, 30f, Time.unscaledDeltaTime);
+            rot = Quaternion.LookRotation(look + across * duelPanYaw - pos);
+            PhysCamera(ref pos, ref rot, look); // (the body attacks' moments: a tilt, a rise, a zoom)
+        }
+
         private void FrontPose(out Vector3 pos, out Quaternion rot)
         {
             var me = robot.transform.position;
@@ -894,7 +925,7 @@ namespace SquashBot.Gameplay
         private void BoardPose(out Vector3 pos, out Quaternion rot)
         {
             CityFar();
-            if (chPhase == ChPhase.Duel) { FrontPose(out pos, out rot); DancePose(ref pos, ref rot); return; }
+            if (chPhase == ChPhase.Duel) { if (DuelFloorView) DuelFixedPose(out pos, out rot); else FrontPose(out pos, out rot); DancePose(ref pos, ref rot); return; }
             sideKnown = false;
             var seat = boardCentre + new Vector3(BoardW * 0.5f + 11f, 12.5f, 0f);
             var look = (boardCentre - seat).normalized;
@@ -941,6 +972,10 @@ namespace SquashBot.Gameplay
         private Vector3 slowCamCentre;
 
         /// <summary>The camera goes in close and circles the two foi while the duel is in slow motion (a big blow, the ultimate).</summary>
+        /// <summary>The fight itself filmed as the floors are (the user's call, 2026-10-28): their distance, angle and lens, from
+        /// one place between the two stands (<see cref="DuelFixedPose"/>); the east view's fitting only before and after it.</summary>
+        private bool DuelFloorView => challengeRun && chPhase == ChPhase.Duel && !TpsActive;
+
         private bool SlowCamOn => false; // (the duel's camera stays on the board in a big moment: it shakes instead)
 
         /// <summary>

@@ -232,14 +232,18 @@ namespace SquashBot.Visual
 
         // method B: the hair inside the ring pressed down under its rim, the hair under the ring's wall drawn in to it;
         // made once per hair and crown, and the hair's own mesh put back when the crown goes
+        /// <summary>The hair kept over the scalp when a crown presses it (head units).</summary>
+        private const float KeepHair = 0.035f;
+
         private void PressHair(Transform head, int headN, Fit fit)
         {
             var data = RankGearData.Current;
+            var bald = Profile("head_" + (headN <= 3 ? "m" : "f")); // (the scalp: the hair is never pressed into it)
             foreach (var mf in head.GetComponentsInChildren<MeshFilter>(true))
             {
                 if (!mf.name.ToLowerInvariant().Contains("hair") || mf.sharedMesh == null) continue;
                 var asMade = mf.sharedMesh;
-                string key = asMade.name + "|" + headN + "|" + Tier;
+                string key = asMade.name + "|" + headN + "|" + Tier + "|k";
                 if (!pressed.TryGetValue(key, out var mesh) || mesh == null)
                 {
                     if (!asMade.isReadable) continue;
@@ -262,8 +266,12 @@ namespace SquashBot.Visual
                             float nd = Mathf.Lerp(d, inner, w);
                             p.x *= nd / d; p.z *= nd / d;
                         }
-                        // and pressed down inside it
-                        if (p.y > fit.seat) p.y = fit.seat + (p.y - fit.seat) * squeeze;
+                        // and pressed down inside it, never through the scalp (a thin layer kept on it: no bald top under a crown)
+                        if (p.y > fit.seat)
+                        {
+                            float scalp = bald != null ? RestOn(bald, d) : fit.seat;
+                            p.y = Mathf.Max(fit.seat + (p.y - fit.seat) * squeeze, Mathf.Min(p.y, scalp + KeepHair));
+                        }
                         vs[i] = mf.transform.InverseTransformPoint(head.TransformPoint(p));
                     }
                     mesh.vertices = vs;

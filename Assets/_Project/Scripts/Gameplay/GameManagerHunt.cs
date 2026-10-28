@@ -561,7 +561,7 @@ namespace SquashBot.Gameplay
             }
             // The duel: a short wind-up you can see (the picture lunges at the rival), the blow's look, sound and feel all at
             // its contact, once (the design's sync rule); the rules counted it at the tap. The floors: it lands now.
-            bool sync = challengeRun && chPhase == ChPhase.Duel && heldWeapon != null && w.kind != WeaponKind.Gun; // (plain blows too: the arm drawn back before it comes, never a flick with no wind-up)
+            bool sync = challengeRun && chPhase == ChPhase.Duel && heldWeapon != null && w.kind != WeaponKind.Gun && !HeldWeapon.PlainDuelBlows; // (plain blows: it lands now, as on the floors)
             if (heldWeapon != null) heldWeapon.SwingQuick(sync ? ContactLead : 0.02f, sync);
             if (sync && heldWeapon.Current != null) RivalReads(null, heldWeapon.Current.height); // (the rival may crouch under a high one)
             if (sync) { AtContact(heldWeapon, at, crowd, w, damage); return true; }
@@ -705,9 +705,10 @@ namespace SquashBot.Gameplay
             float dt = Time.unscaledDeltaTime;
             if (challengeRun && chPhase != ChPhase.Off && (!TpsActive || SlowCamOn))
             {
-                // The challenge's duel: filmed from the east, both foi in view (or over foi's shoulder, in TPS).
+                // The challenge's duel: filmed from the east, both foi in view (or over foi's shoulder, in TPS); the fight
+                // itself from the floors' distance and angle, from one place, turning a little after the fight.
                 BoardPose(out var bpos, out var brot);
-                cameraRig.Chase(bpos, brot, Mathf.Lerp(46f, 52f, slowCamWeight)); // (a big moment: circling close, a little wider)
+                cameraRig.Chase(bpos, brot, DuelFloorView ? CloseCamFov : Mathf.Lerp(46f, 52f, slowCamWeight)); // (a big moment: circling close, a little wider)
                 if (cameraRig.Cam.farClipPlane < 200f) cameraRig.Cam.farClipPlane = 200f;
                 closeCamOn = true;
                 closeCamFocus = robot.transform.position;
