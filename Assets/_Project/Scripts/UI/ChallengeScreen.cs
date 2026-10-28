@@ -421,6 +421,27 @@ namespace SquashBot.UI
                 if (badge != null) UnityEngine.Object.Destroy(badge.gameObject);
                 badge = rank >= 0 ? RankArt.Badge(panel, rank, new Vector2(0f, 0.5f), new Vector2(110f, 0f), 170f) : null;
                 badgeRank = rank;
+                if (crown != null) UnityEngine.Object.Destroy(crown.gameObject);
+                crown = rank >= 0 ? Crown(panel, RankGear.ForRank(rank)) : null;
+            }
+
+            private RectTransform crown;
+
+            // its rank gear's crown in the corner (the Marshal's in a gold frame, glowing a little: section 2.4)
+            private static RectTransform Crown(RectTransform panel, int tier)
+            {
+                var box = UiFactory.Box("Crown", panel, new Vector2(1f, 1f), new Vector2(-70f, -62f), new Vector2(104f, 104f));
+                box.pivot = new Vector2(0.5f, 0.5f);
+                if (tier >= 6)
+                {
+                    UiFactory.Fill(UiFactory.Stretch("Glow", box), UiKit.A(Palette.UiGold, 0.22f), UiSprites.Circle, 1f).raycastTarget = false;
+                    UiFactory.Fill(UiFactory.Stretch("Frame", box), Palette.UiGold, UiSprites.Ring, 1.2f).raycastTarget = false;
+                }
+                var pic = UiFactory.Stretch("Picture", box);
+                var raw = pic.gameObject.AddComponent<RawImage>();
+                raw.texture = ItemPreview.Crown(tier);
+                raw.raycastTarget = false;
+                return box;
             }
         }
 

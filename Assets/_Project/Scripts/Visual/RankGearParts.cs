@@ -40,7 +40,7 @@ namespace SquashBot.Visual
         {
             float len = Vector3.Distance(from, to);
             var root = Frame(Prefix + "Bracer", Vector3.Lerp(from, to, 0.62f), to - from, bone);
-            float w = len * 0.36f;
+            float w = len * 0.66f; // (round the armoured forearm, not inside it)
             Part(PrimitiveType.Cylinder, "Band", root, Vector3.zero, new Vector3(w, len * 0.17f, w), metal);
             Part(PrimitiveType.Cylinder, "Rim", root, Vector3.up * len * 0.17f, new Vector3(w * 1.06f, len * 0.025f, w * 1.06f), trim);
             Part(PrimitiveType.Cylinder, "Rim", root, -Vector3.up * len * 0.17f, new Vector3(w * 1.06f, len * 0.025f, w * 1.06f), trim);
@@ -51,11 +51,11 @@ namespace SquashBot.Visual
         {
             float len = Vector3.Distance(from, to);
             var root = new GameObject(Prefix + "Pauldron").transform;
-            root.position = from + outward * len * 0.08f + up * len * 0.1f;
+            root.position = from + outward * len * 0.16f + up * len * 0.16f;
             root.rotation = Quaternion.LookRotation(outward, up);
             root.SetParent(bone, true);
-            Part(PrimitiveType.Sphere, "Plate", root, Vector3.zero, new Vector3(len * 0.62f, len * 0.36f, len * 0.5f), metal);
-            Part(PrimitiveType.Sphere, "Stud", root, new Vector3(0f, len * 0.12f, len * 0.22f), Vector3.one * len * 0.09f, trim);
+            Part(PrimitiveType.Sphere, "Plate", root, Vector3.zero, new Vector3(len * 0.95f, len * 0.5f, len * 0.8f), metal);
+            Part(PrimitiveType.Sphere, "Stud", root, new Vector3(0f, len * 0.18f, len * 0.36f), Vector3.one * len * 0.14f, trim);
         }
 
         // a plate on the front of the knee
@@ -65,11 +65,11 @@ namespace SquashBot.Visual
             var along = (hip - foot).normalized;
             var fwd = Vector3.ProjectOnPlane(facing, along).normalized;
             var root = new GameObject(Prefix + "Knee").transform;
-            root.position = knee + fwd * len * 0.11f;
+            root.position = knee + fwd * len * 0.2f;
             root.rotation = Quaternion.LookRotation(fwd, along);
             root.SetParent(bone, true);
-            Part(PrimitiveType.Sphere, "Plate", root, Vector3.zero, new Vector3(len * 0.3f, len * 0.32f, len * 0.14f), metal);
-            Part(PrimitiveType.Sphere, "Stud", root, new Vector3(0f, 0f, len * 0.06f), Vector3.one * len * 0.08f, trim);
+            Part(PrimitiveType.Sphere, "Plate", root, Vector3.zero, new Vector3(len * 0.46f, len * 0.46f, len * 0.2f), metal);
+            Part(PrimitiveType.Sphere, "Stud", root, new Vector3(0f, 0f, len * 0.09f), Vector3.one * len * 0.12f, trim);
         }
 
         private static Transform Frame(string name, Vector3 at, Vector3 along, Transform bone)

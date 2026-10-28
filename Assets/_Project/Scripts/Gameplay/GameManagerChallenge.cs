@@ -702,6 +702,7 @@ namespace SquashBot.Gameplay
             float danceUntil = Time.realtimeSinceStartup + 4.5f; // (a long dance never holds the rewards back)
             yield return null;
             while (dancer != null && dancer.PlayingMove && Time.realtimeSinceStartup < danceUntil && challengeRun) yield return null;
+            if (challengeRun && rankUp.Length > 0) yield return RankGearCeremony(); // (a new tier of rank gear: its ceremony)
             // The rewards one by one (rank points, XP, mastery, gold, cores, chest), then the card.
             bool rewardsShown = false, revengeTaken = false;
             if (lastRewards != null && challengeRun)

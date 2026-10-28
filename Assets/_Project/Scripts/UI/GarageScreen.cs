@@ -25,6 +25,11 @@ namespace SquashBot.UI
         /// <summary>The "change build" button (foi's four builds) was pressed.</summary>
         public event Action HeroPressed;
 
+        /// <summary>The rank gear tier foi shows while the RANK tab is open (a tier tapped, the next one locked too); null: its own.</summary>
+        public int? RankShown { get; private set; }
+        private bool rankTab;
+        private int rankPicked;
+
         private const int TabsPerRow = 6;
 
         private UiScreen screen;
@@ -36,6 +41,7 @@ namespace SquashBot.UI
         private BipTip bip;
         private readonly List<(Slot slot, Image bg)> tabs = new List<(Slot, Image)>();
         private Slot slot = Slot.Head;
+        private Image rankTabBg;
         private Cosmetic selected;
         private int reachedWorld;
 
@@ -89,6 +95,9 @@ namespace SquashBot.UI
                 var tab = UiFactory.MakeButton(tabRow, Loc.T("garage." + s), Kind.Secondary, new Vector2(0f, 1f), new Vector2(col * 157f, -row * 96f), new Vector2(150f, 88f), () => SelectSlot(s), 24f);
                 tabs.Add((s, tab.targetGraphic as Image));
             }
+            // the rank gear: its own tab on the second row (crown, bracers, pauldrons, kneepads come with the rank)
+            var rankButton = UiFactory.MakeButton(tabRow, Loc.T("garage.rank"), Kind.Secondary, new Vector2(0f, 1f), new Vector2(0f, -96f), new Vector2(307f, 88f), SelectRank, 24f);
+            rankTabBg = rankButton.targetGraphic as Image;
 
             // The item grid shows two rows and scrolls for the rest.
             var viewport = UiFactory.Box("GridView", panel, new Vector2(0.5f, 1f), new Vector2(0f, -300f), new Vector2(950f, 372f));
@@ -122,17 +131,20 @@ namespace SquashBot.UI
         {
             reachedWorld = worldReached;
             screen.Show();
-            SelectSlot(slot);
+            if (rankTab) SelectRank(); else SelectSlot(slot);
         }
 
         public void Hide()
         {
             bip.Hide();
             screen.Hide(true);
+            if (RankShown != null) { RankShown = null; PreviewChanged?.Invoke(Cosmetics.Outfit()); } // (foi back in its own gear)
         }
 
         private void SelectSlot(Slot s)
         {
+            rankTab = false; RankShown = null;
+            if (rankTabBg != null) rankTabBg.color = UiKit.A(UiKit.Style.textMuted, 0.2f);
             slot = s;
             selected = Cosmetics.Equipped(s);
             foreach (var (ts, bg) in tabs)
@@ -210,8 +222,78 @@ namespace SquashBot.UI
             if (c.slot == Slot.Dance) DancePreview?.Invoke();
         }
 
+        // ---------- The rank gear (Docs/RUTBE_KUSAMI_TAC_SAC_BIRLESIK.md, section 2.5) ----------
+
+        private void SelectRank()
+        {
+            rankTab = true;
+            rankPicked = RankGear.Worn;
+            foreach (var (_, bg) in tabs) if (bg != null) bg.color = UiKit.A(UiKit.Style.textMuted, 0.2f);
+            if (rankTabBg != null) rankTabBg.color = UiKit.A(UiKit.Style.cyan, 0.55f);
+            RebuildRank();
+            grid.anchoredPosition = Vector2.zero;
+            ShowRank(rankPicked);
+        }
+
+        private void RebuildRank()
+        {
+            for (int i = grid.childCount - 1; i >= 0; i--) Destroy(grid.GetChild(i).gameObject);
+            var data = RankGearData.Current;
+            int opened = RankGear.Opened, worn = RankGear.Worn;
+            const int columns = 3;
+            const float cellW = 300f, cellH = 172f, gap = 14f;
+            for (int t = 1; t <= data.tiers.Length; t++)
+            {
+                int tier = t;
+                int col = (t - 1) % columns, row = (t - 1) / columns;
+                var tile = UiFactory.Box("Tier" + t, grid, new Vector2(0f, 1f), new Vector2(col * (cellW + gap) + 12f, -row * (cellH + gap) - 4f), new Vector2(cellW, cellH));
+                var bg = UiFactory.Fill(tile, UiKit.A(UiKit.Style.backDeep, 0.6f), UiSprites.Rounded, 1.2f);
+                bool open = t <= opened;
+                var pic = UiFactory.Box("Crown", tile, new Vector2(0.5f, 1f), new Vector2(0f, -4f), new Vector2(120f, 120f));
+                var raw = pic.gameObject.AddComponent<RawImage>();
+                raw.texture = ItemPreview.Crown(t);
+                raw.color = open ? Color.white : new Color(0.05f, 0.05f, 0.08f, 0.85f); // (a closed one: its silhouette)
+                raw.raycastTarget = false;
+                string label = t == worn ? Loc.T("garage.on") : open ? "" : Challenge.RankName(data.FirstRank(t));
+                UiFactory.TextBox("Label", tile, new Vector2(0.5f, 0f), new Vector2(0f, 8f), new Vector2(cellW - 16f, 44f), label, 26f,
+                    open ? Palette.UiCyan : UiKit.A(UiKit.Style.white, 0.5f));
+                if (rankPicked == t) UiFactory.Fill(UiFactory.Stretch("Selected", tile), Palette.UiGold, UiSprites.Ring, 1.2f).raycastTarget = false;
+                var button = tile.gameObject.AddComponent<Button>();
+                button.targetGraphic = bg;
+                button.onClick.AddListener(() => { AudioManager.PlaySfx(Sfx.Click, 0.7f, 1.1f); rankPicked = tier; var keep = grid.anchoredPosition; RebuildRank(); grid.anchoredPosition = keep; ShowRank(tier); });
+                tile.gameObject.AddComponent<ButtonPress>();
+            }
+            int rows = (data.tiers.Length + columns - 1) / columns;
+            grid.sizeDelta = new Vector2(0f, rows * (cellH + gap) + 10f);
+        }
+
+        // tier t on foi, its name and the button: WEAR (opened), WORN, or when it opens
+        private void ShowRank(int t)
+        {
+            var data = RankGearData.Current;
+            int first = data.FirstRank(t), last = data.tiers[t - 1].lastRank;
+            string ranks = first == last ? Challenge.RankName(first) : Challenge.RankName(first) + " – " + Challenge.RankName(last);
+            itemName.text = Loc.F("garage.rankTier", ranks);
+            bool open = t <= RankGear.Opened, worn = t == RankGear.Worn;
+            actionLabel.text = worn ? Loc.T("garage.equipped") : open ? Loc.T("garage.equip") : Loc.F("garage.rankOpens", Challenge.RankName(first));
+            actionButton.interactable = open && !worn;
+            goalButton.gameObject.SetActive(false);
+            coinsText.text = SaveData.Coins.ToString();
+            RankShown = t;
+            PreviewChanged?.Invoke(Cosmetics.Outfit());
+        }
+
         private void Act()
         {
+            if (rankTab)
+            {
+                if (rankPicked > RankGear.Opened) return;
+                RankGear.Worn = rankPicked;
+                AudioManager.PlaySfx(Sfx.Shield, 0.7f, 1.3f);
+                var keep = grid.anchoredPosition; RebuildRank(); grid.anchoredPosition = keep;
+                ShowRank(rankPicked);
+                return;
+            }
             if (selected == null) return;
             if (Cosmetics.Owns(selected))
             {

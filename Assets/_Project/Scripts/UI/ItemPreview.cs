@@ -91,6 +91,24 @@ namespace SquashBot.UI
             return rt;
         }
 
+        /// <summary>Rank crown <paramref name="tier"/>'s still picture: from the front and a little above, its gem showing.</summary>
+        public static Texture Crown(int tier)
+        {
+            string key = "crown:" + tier;
+            if (cache.TryGetValue(key, out var rt) && rt != null && rt.IsCreated()) return rt;
+            Setup();
+            var holder = new GameObject("Preview").transform;
+            holder.SetParent(stage, false);
+            var model = RankCrown.Model(holder, tier);
+            holder.localRotation = Quaternion.Euler(14f, 180f, 0f); // (its front is +z: turned to the camera)
+            if (model != null) Centre(holder, model);
+            cam.orthographicSize = 0.62f;
+            rt = Snapshot.Take(cam, 256, "Crown " + tier);
+            Object.DestroyImmediate(holder.gameObject);
+            cache[key] = rt;
+            return rt;
+        }
+
         /// <summary>A shield's still picture, a little turned so its face and rim both show.</summary>
         public static Texture Shield(ShieldDef s)
         {

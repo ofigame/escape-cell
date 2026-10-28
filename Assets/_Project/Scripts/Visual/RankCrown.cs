@@ -74,9 +74,32 @@ namespace SquashBot.Visual
             var mount = new GameObject("Mount_Crown").transform;
             var crown = mount.gameObject.AddComponent<RankCrown>();
             crown.Tier = tier;
-            // made upright at the world's origin first: its bottom centre at the mount, outer width 1, its front toward +z
+            var squash = Model(mount, tier);
+            crown.model = squash;
+
+            var fit = FitOf(headN, tier);
+            crown.Seat = fit;
+            mount.SetParent(head, false);
+            mount.localScale = Vector3.one * fit.scale * row.crownScale;
+            mount.localRotation = Quaternion.Euler(data.tilt, 0f, 0f);
+            crown.seatPos = new Vector3(0f, fit.seat + row.crownLift, 0f);
+            mount.localPosition = crown.seatPos;
+            if (fit.pressed) crown.PressHair(head, headN, fit);
+            if (tier >= 6) crown.MakeMarshal(info);
+            return crown;
+        }
+
+        /// <summary>
+        /// Crown <paramref name="tier"/>'s model alone under <paramref name="parent"/>: its bottom centre at the parent's
+        /// origin, outer width 1, its front toward +z (its height squashed by the tier's row). Null when it is missing.
+        /// </summary>
+        public static Transform Model(Transform parent, int tier)
+        {
+            var row = RankGearData.Current.Of(tier);
+            var prefab = Resources.Load<GameObject>(Folder + row.crown);
+            if (prefab == null) return null;
+            // made upright at the world's origin first, then put under the parent
             var squash = new GameObject("Crown").transform;
-            squash.SetParent(mount, false);
             var m = Instantiate(prefab, squash, false).transform;
             m.name = "Model";
             var paint = PaintOf(tier, row.crown);
@@ -91,18 +114,8 @@ namespace SquashBot.Visual
                 m.localPosition -= new Vector3(bb.center.x, bb.min.y, bb.center.z);
             }
             squash.localScale = new Vector3(1f, row.crownHeight, 1f);
-            crown.model = squash;
-
-            var fit = FitOf(headN, tier);
-            crown.Seat = fit;
-            mount.SetParent(head, false);
-            mount.localScale = Vector3.one * fit.scale * row.crownScale;
-            mount.localRotation = Quaternion.Euler(data.tilt, 0f, 0f);
-            crown.seatPos = new Vector3(0f, fit.seat + row.crownLift, 0f);
-            mount.localPosition = crown.seatPos;
-            if (fit.pressed) crown.PressHair(head, headN, fit);
-            if (tier >= 6) crown.MakeMarshal(info);
-            return crown;
+            squash.SetParent(parent, false);
+            return squash;
         }
 
         /// <summary>Where crown <paramref name="tier"/> sits on head <paramref name="headN"/> with its hair.</summary>
@@ -139,6 +152,11 @@ namespace SquashBot.Visual
         /// <summary>A light hop on a blow (it never flies off or falls).</summary>
         public void Hop() => hopLeft = 0.22f;
 
+        private float dropLeft, dropTime;
+
+        /// <summary>The ceremony: it comes down onto the head from above over <paramref name="seconds"/>.</summary>
+        public void Descend(float seconds) { dropTime = Mathf.Max(0.05f, seconds); dropLeft = dropTime; }
+
         /// <summary>The duel's countdown: a short glint (the Marshal's: a ring of light spreads from it).</summary>
         public void Shine()
         {
@@ -158,6 +176,7 @@ namespace SquashBot.Visual
             var data = RankGearData.Current;
             float lift = 0f;
             if (hopLeft > 0f) { hopLeft -= dt; float t = 1f - Mathf.Clamp01(hopLeft / 0.22f); lift = Mathf.Sin(t * Mathf.PI) * data.hop; }
+            if (dropLeft > 0f) { dropLeft -= Time.unscaledDeltaTime; lift += Mathf.SmoothStep(0f, 1.2f, Mathf.Clamp01(dropLeft / dropTime)); }
             transform.localPosition = seatPos + Vector3.up * lift;
             if (flashLeft > 0f)
             {

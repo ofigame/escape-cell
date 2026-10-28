@@ -165,6 +165,7 @@ namespace SquashBot.Gameplay
             OldNotes.Clear(); // the removed open world's farm notes still waiting on the phones that had it
             Cosmetics.MigrateHeads(); // the new heads: the old ones' buyers refunded, the old skins to the nearest new tones
             Cosmetics.MigrateDances(); // the new dances: the old made-up ones' buyers refunded
+            RankGear.TakeNewTier(); // (the first run: what they have already is no news)
             Cosmetics.MigrateGarage(); // the renewed garage: the hats, paints, capes and limb gear paid back (told on the menu)
             Shields.KeepOldStarter(SaveData.UnlockedLevel > 0 || Prefs.GetInt("sb_ads_duels", 0) > 0 || Prefs.HasKey("sb_shield_eq")); // (the wooden shield now bought: those who played before keep theirs)
             Progress.MigrateStarsToScore(LevelCatalog.LevelCount); // (the stars now come from the floor score; an old three counts as two)
@@ -330,7 +331,7 @@ namespace SquashBot.Gameplay
                 ui.ShowIntro(Loc.T("wear.serviceTitle"), Loc.T("wear.serviceDone"));
             };
             ui.DailyBonus.AdPressed += WatchAdForDailyBonus;
-            ui.Garage.PreviewChanged += outfit => robot.ApplyOutfit(outfit);
+            ui.Garage.PreviewChanged += outfit => { robot.RankTierShown = ui.Garage.RankShown; robot.ApplyOutfit(outfit); }; // (the RANK tab: the tier tapped on foi)
             ui.Garage.DancePreview += robot.Cheer;
             ui.DuelChestsView.OutfitWorn += () => { robot.ApplyOutfit(Cosmetics.Outfit()); if (lobby != null) { Destroy(lobby.gameObject); lobby = null; } }; // (the menu's foi wears it when it opens again)
             ui.SkillBar.Pressed += OnSkillPressed;
