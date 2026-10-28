@@ -203,6 +203,7 @@ namespace SquashBot.Visual
             hat.localPosition = new Vector3(0f, crown - FoiHeadTop * hatScale, 0f);
             HatMount = hat;
             head.SetParent(bone, true);
+            headMadeRot = head.localRotation; headMadePos = head.localPosition; headMadeKnown = true; // (its place on the neck as made: the pose reset puts it back)
         }
 
         /// <summary>
@@ -1018,7 +1019,7 @@ namespace SquashBot.Visual
         public static readonly List<SkinnedHero> Live = new List<SkinnedHero>();
 
         private void OnEnable() { if (!Live.Contains(this)) Live.Add(this); }
-        private void OnDisable() { Live.Remove(this); if (knock != null || stagger != null || hop != null) StandUp(); } // (its knock cut short: up at once, never stuck lying)
+        private void OnDisable() { Live.Remove(this); if (ready) CleanSlate(); } // (hidden mid-reaction: its coroutines stop here, so nothing they set may stay behind)
 
         /// <summary>The body as a capsule (world): from above its feet to its neck, and how thick.</summary>
         public void BodyCapsule(out Vector3 bottom, out Vector3 top, out float radius)

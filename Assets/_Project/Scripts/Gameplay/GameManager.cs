@@ -316,6 +316,7 @@ namespace SquashBot.Gameplay
             hunt.BackHint = at => FloatAt(at + Vector3.up * 2f, Loc.T("rule.backHint"), new Color(1f, 0.8f, 0.4f));
             ui.Shop.Purchased += () => robot.ApplyOutfit(Cosmetics.Outfit()); // (a part raised: its look on foi at once)
             ui.BagView.Changed += () => robot.ApplyOutfit(Cosmetics.Outfit()); // (items used, a part levelled: foi's body at once)
+            ui.BagView.Opened += () => { if (robot.Visual != null && State != GameState.Playing) FoiPoseReset.Clean(robot.Visual); }; // (the bag: foi clean behind it)
             ui.BagView.ModelMaker = t => robot.BuildLookalike(t); // (the bag's close look: foi as it is now)
             ui.BipServicePressed += () =>
             {
@@ -608,6 +609,7 @@ namespace SquashBot.Gameplay
             Audio.AmbientLoop.Play(Audio.AmbientKind.None); // (a region's sound stays on its floors)
             RenderSettings.fog = false;
             robot.StandUp(); // (never lying on the menu after a duel)
+            if (robot.Visual != null) FoiPoseReset.CleanAll(robot.Visual); // (nothing a duel left on foi comes to the menu: the pose reset)
             EndLevelRule();
             robot.SetSize(1f);
             EndChallenge();
@@ -753,6 +755,7 @@ namespace SquashBot.Gameplay
         private void ShowGarage()
         {
             if (State != GameState.Menu) ShowMenu();
+            if (robot.Visual != null) FoiPoseReset.Clean(robot.Visual); // (the garage shows foi close: clean)
             ui.ShowGarage(LevelCatalog.WorldOf(SaveData.UnlockedLevel));
             robot.FaceCamera();
             cameraRig.SetMenuFocus(false);
@@ -1097,6 +1100,7 @@ namespace SquashBot.Gameplay
         {
             if (paused) Reminder.Schedule();
             if (paused) Pause();
+            else if (robot != null && robot.Visual != null && State != GameState.Playing) FoiPoseReset.Clean(robot.Visual); // (back from the background: clean)
         }
 
         private void OnSettingToggled(SettingKind kind)

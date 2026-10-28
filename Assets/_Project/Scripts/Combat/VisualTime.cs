@@ -41,6 +41,12 @@ namespace SquashBot.Combat
         /// <summary>Holds this body all but still for <paramref name="seconds"/> (real time; a longer freeze wins).</summary>
         public void Freeze(float seconds) => freezeUntil = Mathf.Max(freezeUntil, Time.unscaledTime + Mathf.Max(0f, seconds));
 
+        /// <summary>Its own pace back to 1 at once: no hit-stop, no slow motion (the pose reset).</summary>
+        public void Clear() { freezeUntil = 0f; slowUntil = 0f; slowScale = 1f; }
+
+        /// <summary>The whole game's slow motion ended at once (a duel left mid-ultimate).</summary>
+        public static void ClearAll() { globalUntil = 0f; globalScale = 1f; }
+
         /// <summary>The clock on a visual root (made the first time it is asked for).</summary>
         public static VisualTime On(Transform visualRoot)
         {

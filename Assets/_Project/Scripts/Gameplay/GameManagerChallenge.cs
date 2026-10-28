@@ -789,6 +789,12 @@ namespace SquashBot.Gameplay
             EndTutorial(false);
             EndTraining();
             FacesOff();
+            // the duel's pairing and platform let go at once (left set, the menu's frame of the change still kept foi
+            // inside the old platform: its hips pushed, an edge bounce's shudder), then foi clean whatever screen comes next
+            SkinnedHero.PairForDuel(null, null);
+            SkinnedHero.DuelArea = null;
+            HeldWeapon.DuelStance = false;
+            FoiPoseReset.CleanAll(robot != null ? robot.Visual : null);
             hunt.LaneX = null;
             copyMatch = false;
             ClearDuelRule();

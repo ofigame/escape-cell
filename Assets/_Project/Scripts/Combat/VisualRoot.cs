@@ -21,6 +21,16 @@ namespace SquashBot.Combat
         /// <summary>Where the body's picture is pushed to now (world), from where it stands.</summary>
         public Vector3 Offset { get; private set; }
 
+        /// <summary>Back home at once: no push, lunge or throw under way (the pose reset).</summary>
+        public void Clear()
+        {
+            t = 1f; lt = -1f; tt = -1f;
+            Offset = Vector3.zero;
+        }
+
+        /// <summary>Nothing under way and home (the pose reset's check).</summary>
+        public bool AtRest => t >= 1f && lt < 0f && tt < 0f && Offset.sqrMagnitude < 1e-6f;
+
         /// <summary>Pushed <paramref name="distance"/> along <paramref name="direction"/>, home again in <paramref name="recovery"/> seconds.</summary>
         public void Push(Vector3 direction, float distance, float recovery)
         {

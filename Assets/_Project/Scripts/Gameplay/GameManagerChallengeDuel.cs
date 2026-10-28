@@ -228,10 +228,9 @@ namespace SquashBot.Gameplay
             hunt.AddChallengeFoe(theirs, hp, share, look, rivalHeld, 0);
             // both bodies back to standing at rest: nothing of the round before (a crouch, a guard, a fall) stays on them
             ResetPhysical();
+            FoiPoseReset.CleanAll(robot.Visual, hunt.ChallengeFoeModel); // (the pose reset: every round and the match's start)
             var mySkin = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null;
-            if (mySkin != null) mySkin.ResetPose();
             var foeSkin = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
-            if (foeSkin != null) foeSkin.ResetPose();
             SkinnedHero.PairForDuel(mySkin, foeSkin); // (the two bodies kept out of each other)
             { var lo = GridView.ToWorld(new GridPos(0, 0)); var hi = GridView.ToWorld(new GridPos(BoardW - 1, BoardH - 1)); SkinnedHero.DuelArea = Rect.MinMaxRect(Mathf.Min(lo.x, hi.x) - 0.5f, Mathf.Min(lo.z, hi.z) - 0.5f, Mathf.Max(lo.x, hi.x) + 0.5f, Mathf.Max(lo.z, hi.z) + 0.5f); } // (the platform: none of them off it)
             // each one's weapon mastery: how rich its plain chain looks (the player's own, the rival's card's)

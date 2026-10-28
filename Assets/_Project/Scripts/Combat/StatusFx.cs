@@ -31,6 +31,9 @@ namespace SquashBot.Combat
         /// <summary>The body flashes white for <paramref name="seconds"/> (a blow landing).</summary>
         public void Flash(float seconds) => flashUntil = Mathf.Max(flashUntil, Time.unscaledTime + seconds);
 
+        /// <summary>Every status ended at once: no flash, flames, frost, stars or shine (the pose reset).</summary>
+        public void Clear() { flashUntil = burnUntil = freezeUntil = stunUntil = shineUntil = 0f; }
+
         /// <summary>Little flames on it for a while.</summary>
         public void Burn(float seconds)
         {

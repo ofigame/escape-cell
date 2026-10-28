@@ -21,6 +21,8 @@ namespace SquashBot.UI
     {
         /// <summary>Something was used or a part levelled (the menu's counts, foi's look).</summary>
         public event Action Changed;
+        /// <summary>The bag opened (foi's pose is cleaned behind it).</summary>
+        public event Action Opened;
 
         private const int PerRow = 5;
         private const float Tile = 168f, Step = 184f;
@@ -128,6 +130,7 @@ namespace SquashBot.UI
             chosen = null;
             showing = 0; showLayer.gameObject.SetActive(false);
             ItemEvents.BagOpened();
+            Opened?.Invoke();
             Refresh();
         }
 
