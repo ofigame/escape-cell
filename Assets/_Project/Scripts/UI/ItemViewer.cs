@@ -38,7 +38,7 @@ namespace SquashBot.UI
             layer.overrideSorting = true;
             layer.sortingOrder = 500;
             root.gameObject.AddComponent<GraphicRaycaster>();
-            UiFactory.Fill(UiFactory.Stretch("Backdrop", root), new Color(0.02f, 0.02f, 0.06f, 1f)).gameObject.AddComponent<IgnoreSafeArea>(); // (takes the finger: drags reach the viewer)
+            UiFactory.Fill(UiFactory.Stretch("Backdrop", root), UiKit.Style.backDeep).gameObject.AddComponent<IgnoreSafeArea>(); // (takes the finger: drags reach the viewer)
             var view = root.gameObject.AddComponent<ItemViewer>();
 
             var box = UiFactory.Box("Picture", root, new Vector2(0.5f, 0.5f), new Vector2(0f, 40f), new Vector2(1040f, 1040f));
@@ -50,7 +50,7 @@ namespace SquashBot.UI
 
             UiFactory.TextBox("Title", root, new Vector2(0.5f, 1f), new Vector2(0f, -250f), new Vector2(900f, 110f), title, 60f, Palette.UiText, title: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.TextBox("Hint", root, new Vector2(0.5f, 0f), new Vector2(0f, 330f), new Vector2(900f, 70f), Loc.T("viewer.hint"), 36f, new Color(1f, 1f, 1f, 0.6f))
+            UiFactory.TextBox("Hint", root, new Vector2(0.5f, 0f), new Vector2(0f, 330f), new Vector2(900f, 70f), Loc.T("viewer.hint"), 36f, UiKit.A(UiKit.Style.white, 0.6f))
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.MakeButton(root, "X", Kind.Icon, new Vector2(1f, 1f), new Vector2(-150f, -200f), new Vector2(124f, 124f), () =>
             {

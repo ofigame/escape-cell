@@ -582,7 +582,7 @@ namespace SquashBot.Gameplay
             if (!zoneAnnounced)
             {
                 zoneAnnounced = true;
-                FloatAt(robot.transform.position + Vector3.up * 1.6f, Loc.T("duel.zone"), new Color(1f, 0.4f, 0.35f));
+                FloatAt(robot.transform.position + Vector3.up * 1.6f, Loc.T("duel.zone"), UI.UiKit.Style.theirs);
                 AudioManager.PlaySfx(Sfx.Blocked, 0.9f, 0.6f);
             }
             zoneRadius = Mathf.Lerp(13.5f, 2.6f, k);

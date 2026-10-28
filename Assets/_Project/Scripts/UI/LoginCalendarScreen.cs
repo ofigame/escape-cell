@@ -36,7 +36,7 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            UiFactory.Dim(root, new Color(0.06f, 0.05f, 0.18f, 0.55f));
+            UiFactory.Dim(root, UiKit.A(UiKit.Style.back, 0.55f));
             var card = UiFactory.Card("Card", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(940f, 1240f));
             card.pivot = new Vector2(0.5f, 0.5f);
             screen.SetPopTarget(card);
@@ -59,8 +59,8 @@ namespace SquashBot.UI
             }
 
             claim = UiFactory.MakeButton(card, Loc.T("login.claim"), Kind.Gold, new Vector2(0.5f, 0f), new Vector2(0f, 250f), new Vector2(680f, 150f), Claim, 46f);
-            countdown = UiFactory.TextBox("Countdown", card, new Vector2(0.5f, 0f), new Vector2(0f, 290f), new Vector2(820f, 80f), "", 36f, new Color(0.85f, 0.86f, 1f, 0.9f), FontStyles.Normal);
-            var note = UiFactory.TextBox("Note", card, new Vector2(0.5f, 0f), new Vector2(0f, 60f), new Vector2(820f, 120f), Loc.T("login.note"), 28f, new Color(1f, 1f, 1f, 0.6f), FontStyles.Normal);
+            countdown = UiFactory.TextBox("Countdown", card, new Vector2(0.5f, 0f), new Vector2(0f, 290f), new Vector2(820f, 80f), "", 36f, UiKit.A(UiKit.Style.silver, 0.9f), FontStyles.Normal);
+            var note = UiFactory.TextBox("Note", card, new Vector2(0.5f, 0f), new Vector2(0f, 60f), new Vector2(820f, 120f), Loc.T("login.note"), 28f, UiKit.A(UiKit.Style.white, 0.6f), FontStyles.Normal);
             note.textWrappingMode = TextWrappingModes.Normal;
         }
 
@@ -70,7 +70,7 @@ namespace SquashBot.UI
             var disc = UiFactory.Box("Gift", tile, new Vector2(0.5f, 0.5f), new Vector2(0f, 12f), new Vector2(110f, 110f));
             disc.pivot = new Vector2(0.5f, 0.5f);
             var colour = g.kind == LoginCalendar.Kind.Gold ? Palette.Coin
-                : g.kind == LoginCalendar.Kind.Cores ? new Color(0.35f, 0.9f, 1f)
+                : g.kind == LoginCalendar.Kind.Cores ? UiKit.Style.info
                 : ChestModels.StrapColour(g.tier);
             UiFactory.Fill(disc, colour, g.kind == LoginCalendar.Kind.Chest ? UiSprites.Rounded : UiSprites.Circle, 1.4f).raycastTarget = false;
             if (g.kind == LoginCalendar.Kind.Chest)
@@ -78,7 +78,7 @@ namespace SquashBot.UI
                 // a chest's lid line and lock on the box
                 var lid = UiFactory.Box("Lid", disc, new Vector2(0.5f, 0.5f), new Vector2(0f, 14f), new Vector2(110f, 8f));
                 lid.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(lid, new Color(0f, 0f, 0f, 0.35f)).raycastTarget = false;
+                UiFactory.Fill(lid, UiKit.A(UiKit.Style.black, 0.35f)).raycastTarget = false;
                 var lockBox = UiFactory.Box("Lock", disc, new Vector2(0.5f, 0.5f), new Vector2(0f, 4f), new Vector2(26f, 30f));
                 lockBox.pivot = new Vector2(0.5f, 0.5f);
                 UiFactory.Fill(lockBox, Palette.UiGold, UiSprites.Rounded, 4f).raycastTarget = false;
@@ -120,11 +120,11 @@ namespace SquashBot.UI
                 // the days before the next one were taken this round (all of them when the round has just come full circle)
                 bool taken = i < next || (!ready && next == 0 && LoginCalendar.Started);
                 bool today = ready && i == next;
-                tiles[i].color = today ? new Color(0.95f, 0.66f, 0.15f, 0.95f)
-                    : taken ? new Color(0.12f, 0.45f, 0.25f, 0.55f)
-                    : new Color(0.04f, 0.04f, 0.09f, 0.6f);
+                tiles[i].color = today ? UiKit.A(UiKit.Style.warning, 0.95f)
+                    : taken ? UiKit.A(UiKit.Style.green, 0.55f)
+                    : UiKit.A(UiKit.Style.backDeep, 0.6f);
                 states[i].text = taken ? Loc.T("login.taken") : today ? Loc.T("login.got") : "";
-                states[i].color = taken ? new Color(0.6f, 1f, 0.7f) : Color.white;
+                states[i].color = taken ? UiKit.Style.successLight : Color.white;
             }
             claim.gameObject.SetActive(ready);
             UpdateCountdown();

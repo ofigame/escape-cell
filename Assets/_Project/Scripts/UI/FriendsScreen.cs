@@ -61,7 +61,7 @@ namespace SquashBot.UI
             var text = UiFactory.Text(area, "", 44f, Color.white);
             text.enableAutoSizing = false;
             text.textPreprocessor = null;
-            var placeholder = UiFactory.Text(area, Loc.T("friends.namePlaceholder"), 40f, new Color(1f, 1f, 1f, 0.3f));
+            var placeholder = UiFactory.Text(area, Loc.T("friends.namePlaceholder"), 40f, UiKit.A(UiKit.Style.white, 0.3f));
             placeholder.enableAutoSizing = false;
             nameInput = box.gameObject.AddComponent<TMP_InputField>();
             nameInput.textViewport = area;
@@ -85,7 +85,7 @@ namespace SquashBot.UI
             // The list.
             var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(40f, Monetization.Ads.BannerReserve + 140f), new Vector2(-40f, -510f));
             viewport.gameObject.AddComponent<RectMask2D>();
-            UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
+            UiFactory.Fill(viewport, UiKit.A(UiKit.Style.black, 0.001f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
             content.pivot = new Vector2(0.5f, 1f);
             var scroll = viewport.gameObject.AddComponent<ScrollRect>();
@@ -97,7 +97,7 @@ namespace SquashBot.UI
 
             // A friend's invitation that came in.
             invitePanel = UiScreen.Create("FriendInvite", parent, out var ip);
-            UiFactory.Dim(ip, new Color(0.02f, 0.02f, 0.07f, 0.85f)).gameObject.AddComponent<IgnoreSafeArea>();
+            UiFactory.Dim(ip, UiKit.A(UiKit.Style.backDeep, 0.85f)).gameObject.AddComponent<IgnoreSafeArea>();
             var card = Flat.Panel(ip, "Card", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(920f, 560f), Flat.Card);
             card.pivot = new Vector2(0.5f, 0.5f);
             Flat.Label(card, Loc.T("friends.inviteTitle"), new Vector2(0.5f, 1f), new Vector2(0f, -80f), new Vector2(860f, 70f), 48f, Flat.Gold, TextAlignmentOptions.Center, bold: true)
@@ -136,8 +136,8 @@ namespace SquashBot.UI
 
         private void LightSort()
         {
-            ((Image)byRank.targetGraphic).color = rankByPower ? Flat.CardHi : new Color(1f, 0.6f, 0.25f);
-            ((Image)byPower.targetGraphic).color = rankByPower ? new Color(1f, 0.6f, 0.25f) : Flat.CardHi;
+            ((Image)byRank.targetGraphic).color = rankByPower ? Flat.CardHi : UiKit.Style.orange;
+            ((Image)byPower.targetGraphic).color = rankByPower ? UiKit.Style.orange : Flat.CardHi;
         }
 
         private void Add()
@@ -278,7 +278,7 @@ namespace SquashBot.UI
             RankArt.Badge(row, Mathf.Clamp(f.rank, 0, RankArt.Count - 1), new Vector2(0f, 0.5f), new Vector2(66f, 0f), 96f);
             var dot = UiFactory.Box("Online", row, new Vector2(0f, 0.5f), new Vector2(130f, 26f), new Vector2(22f, 22f));
             dot.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(dot, f.online ? new Color(0.35f, 1f, 0.45f) : new Color(1f, 1f, 1f, 0.2f), UiSprites.Circle).raycastTarget = false;
+            UiFactory.Fill(dot, f.online ? UiKit.Style.successLight : UiKit.A(UiKit.Style.white, 0.2f), UiSprites.Circle).raycastTarget = false;
             var name = Flat.Label(row, (place > 0 ? place + ". " : "") + (kind == 3 ? f.name + " (" + Loc.T("friends.you") + ")" : f.name), new Vector2(0f, 0.5f), new Vector2(150f, 22f), new Vector2(450f, 56f), 38f, kind == 3 ? Flat.Gold : Flat.Text, bold: true);
             name.rectTransform.pivot = new Vector2(0f, 0.5f);
             string score = kind == 0 ? Rivalry.Text(f.name) : "";
@@ -294,8 +294,8 @@ namespace SquashBot.UI
             {
                 case 0:
                     // online: a live duel; away: a duel with its copy
-                    if (f.online) Small(Loc.T("friends.duel"), -20f, 240f, new Color(1f, 0.6f, 0.25f), () => InvitePressed?.Invoke(f.id, f.name, 3));
-                    else Small(Loc.T("friends.copy"), -20f, 240f, new Color(0.55f, 0.5f, 1f), () => CopyPressed?.Invoke(f.name));
+                    if (f.online) Small(Loc.T("friends.duel"), -20f, 240f, UiKit.Style.orange, () => InvitePressed?.Invoke(f.id, f.name, 3));
+                    else Small(Loc.T("friends.copy"), -20f, 240f, UiKit.Style.purple, () => CopyPressed?.Invoke(f.name));
                     Small(Loc.T("friends.remove"), -276f, 110f, Flat.CardHi, () => RemovePressed?.Invoke(f.id));
                     break;
                 case 3:

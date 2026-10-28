@@ -223,7 +223,7 @@ namespace SquashBot.Gameplay
                         break;
                     case "ph":
                         // Protocol 9: a body attack judged (by: the attacker's side; k -1: a chain blow missing a crouch or a jump)
-                        if (m.k < 0) FloatAt((m.by == liveSide ? hunt.ChallengeFoeAt ?? robot.transform.position : robot.transform.position) + Vector3.up * 2f, Loc.T("duel.under"), new Color(0.75f, 0.9f, 1f));
+                        if (m.k < 0) FloatAt((m.by == liveSide ? hunt.ChallengeFoeAt ?? robot.transform.position : robot.transform.position) + Vector3.up * 2f, Loc.T("duel.under"), UI.UiKit.Style.cyan);
                         else PhysFromServer(m.by == liveSide, m.k, m.r);
                         break;
                     case "cr":
@@ -294,13 +294,13 @@ namespace SquashBot.Gameplay
             {
                 // a heavy weapon's blow from the rival staggers foi a moment (the server holds foi's blows as long)
                 if (m.by == 0 && rival != null) strikeCooldown = Mathf.Max(strikeCooldown, DuelPower.Stagger(Armory.Get(rival.weapon)));
-                ui.Flash(new Color(1f, 0.15f, 0.15f), 0.3f);
+                ui.Flash(UI.UiKit.Style.red, 0.3f);
                 if (m.by == 0) Reel(true, 1); // (foi's body takes the rival's blow too, here on this screen)
                 cameraRig.Shake(0.6f);
                 fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(1f, 0.35f, 0.35f), new Color(2.4f, 0.5f, 0.4f), 30, 6f);
                 Haptics.Light();
             }
-            else if (health > before + 0.0001f) FloatAt(robot.transform.position, "+" + Mathf.RoundToInt((health - before) * 100f) + "%", new Color(1f, 0.5f, 0.6f));
+            else if (health > before + 0.0001f) FloatAt(robot.transform.position, "+" + Mathf.RoundToInt((health - before) * 100f) + "%", UI.UiKit.Style.danger);
             hunt.SetFoeHealth(m.theirs / 100f);
             LiveMeters(m.mm, m.tm);
         }

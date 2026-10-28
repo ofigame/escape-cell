@@ -44,7 +44,7 @@ namespace SquashBot.UI
             float buttons = Monetization.Ads.BannerReserve + 70f;
             var viewport = UiFactory.Rect("Viewport", p, Vector2.zero, Vector2.one, new Vector2(30f, buttons + 80f), new Vector2(-30f, -200f)); // clear below the header
             viewport.gameObject.AddComponent<RectMask2D>();
-            UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0f));
+            UiFactory.Fill(viewport, UiKit.A(UiKit.Style.black, 0f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
             content.pivot = new Vector2(0.5f, 1f);
             scroll = viewport.gameObject.AddComponent<ScrollRect>();
@@ -113,14 +113,14 @@ namespace SquashBot.UI
         private void Head()
         {
             int rank = Challenge.Rank, league = Challenge.League;
-            var head = Card(380f, new Color(0.22f, 0.16f, 0.45f, 0.85f));
+            var head = Card(380f, UiKit.A(UiKit.Style.panel, 0.85f));
             RankArt.Badge(head, rank, new Vector2(0f, 0.5f), new Vector2(130f, 0f), 210f);
             RankArt.Trophy(head, league, new Vector2(1f, 0.5f), new Vector2(-130f, 0f), 200f);
             string name = string.IsNullOrEmpty(Challenge.PlayerName) ? "foi" : Challenge.PlayerName;
             Text(head, name, new Vector2(0.5f, 1f), new Vector2(0f, -70f), new Vector2(520f, 80f), 60f, Palette.UiCyan);
             Text(head, Challenge.RankName(rank), new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(520f, 64f), 46f, Color.white);
             Text(head, Loc.F("ch.trophies", Challenge.Trophies), new Vector2(0.5f, 1f), new Vector2(0f, -220f), new Vector2(520f, 56f), 40f, Palette.UiGold);
-            Text(head, Loc.F("ch.league", Challenge.LeagueName(league)), new Vector2(0.5f, 1f), new Vector2(0f, -280f), new Vector2(520f, 44f), 30f, new Color(1f, 0.85f, 0.5f), bold: false);
+            Text(head, Loc.F("ch.league", Challenge.LeagueName(league)), new Vector2(0.5f, 1f), new Vector2(0f, -280f), new Vector2(520f, 44f), 30f, UiKit.Style.gold, bold: false);
         }
 
         /// <summary>The title on the player's card: the button shows the next one earned (a world's conqueror, a master…).</summary>
@@ -144,7 +144,7 @@ namespace SquashBot.UI
             int lost = Mathf.Max(0, played - won);
             var r = Card(300f, Flat.Card);
             Stat(r, -320f, played, Loc.T("profile.played"), Color.white);
-            Stat(r, 0f, won, Loc.T("profile.won"), new Color(0.45f, 1f, 0.55f));
+            Stat(r, 0f, won, Loc.T("profile.won"), UiKit.Style.successLight);
             Stat(r, 320f, lost, Loc.T("profile.lost"), Flat.Red);
             Text(r, Loc.F("ch.record", Challenge.Wins, Challenge.Played) + "   ·   " + Loc.F("ch.defRecord", Challenge.DefWins, Challenge.DefLosses)
                 + "\n" + Loc.F("ch.otherRecord", o.aiWins, o.aiPlayed, o.friendWins, o.friendPlayed),
@@ -194,24 +194,24 @@ namespace SquashBot.UI
         private void Ladder()
         {
             int rank = Challenge.Rank;
-            var head = Card(80f, new Color(0f, 0f, 0f, 0f));
+            var head = Card(80f, UiKit.A(UiKit.Style.black, 0f));
             Text(head, Loc.T("ch.ladder"), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 56f), 34f, Palette.UiCyan);
             for (int i = 0; i < RankArt.Count; i++)
             {
                 int r = RankArt.Count - 1 - i;
                 bool reached = r <= rank, current = r == rank;
-                var row = Card(84f, current ? new Color(1f, 0.8f, 0.3f, 0.28f) : reached ? new Color(1f, 1f, 1f, 0.08f) : new Color(1f, 1f, 1f, 0.03f));
+                var row = Card(84f, current ? UiKit.A(UiKit.Style.gold, 0.28f) : reached ? UiKit.A(UiKit.Style.white, 0.08f) : UiKit.A(UiKit.Style.white, 0.03f));
                 var badge = RankArt.Badge(row, r, new Vector2(0f, 0.5f), new Vector2(50f, 0f), 62f);
                 var cup = RankArt.Trophy(row, r, new Vector2(1f, 0.5f), new Vector2(-50f, 0f), 58f);
                 if (!reached) { Dim(badge); Dim(cup); }
                 var label = Flat.Label(row, Challenge.RankName(r) + (current ? "  (" + Loc.T("ch.you") + ")" : ""), new Vector2(0f, 0.5f), new Vector2(110f, 0f), new Vector2(360f, 60f), 32f,
-                    reached ? Color.white : new Color(1f, 1f, 1f, 0.45f), TextAlignmentOptions.Left, bold: true);
+                    reached ? Color.white : UiKit.A(UiKit.Style.white, 0.45f), TextAlignmentOptions.Left, bold: true);
                 label.rectTransform.pivot = new Vector2(0f, 0.5f);
                 var needs = Flat.Label(row, Loc.F("ch.needs", Challenge.RankAt[r]), new Vector2(1f, 0.5f), new Vector2(-104f, 13f), new Vector2(380f, 34f), 26f,
-                    reached ? Palette.UiGold : new Color(1f, 0.85f, 0.4f, 0.4f), TextAlignmentOptions.Right, bold: true);
+                    reached ? Palette.UiGold : UiKit.A(UiKit.Style.gold, 0.4f), TextAlignmentOptions.Right, bold: true);
                 needs.rectTransform.pivot = new Vector2(1f, 0.5f);
                 var lg = Flat.Label(row, Loc.F("ch.league", Challenge.LeagueName(r)), new Vector2(1f, 0.5f), new Vector2(-104f, -15f), new Vector2(380f, 28f), 20f,
-                    reached ? new Color(1f, 0.9f, 0.7f, 0.85f) : new Color(1f, 1f, 1f, 0.3f), TextAlignmentOptions.Right);
+                    reached ? UiKit.A(UiKit.Style.parchment, 0.85f) : UiKit.A(UiKit.Style.white, 0.3f), TextAlignmentOptions.Right);
                 lg.rectTransform.pivot = new Vector2(1f, 0.5f);
             }
         }

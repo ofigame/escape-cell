@@ -26,7 +26,7 @@ namespace SquashBot.UI
         private readonly Dictionary<TrainingDummy, Image> chips = new Dictionary<TrainingDummy, Image>();
         private Image infoChip;
 
-        private static readonly Color Chip = new Color(0.15f, 0.22f, 0.42f, 0.92f), ChipOn = new Color(0.95f, 0.6f, 0.2f, 0.95f);
+        private static readonly Color Chip = UiKit.A(UiKit.Style.panel, 0.92f), ChipOn = UiKit.A(UiKit.Style.orange, 0.95f);
 
         public static TrainingPanel Create(RectTransform parent)
         {
@@ -53,12 +53,12 @@ namespace SquashBot.UI
             var info = Flat.Button(row, Loc.T("tr.info"), new Vector2(0f, 0.5f), new Vector2(80f + 4 * 142f, 0f), new Vector2(136f, 76f), Chip, Flat.Text, () => InfoToggled?.Invoke(), 22f);
             ((RectTransform)info.transform).pivot = new Vector2(0.5f, 0.5f);
             infoChip = (Image)info.targetGraphic;
-            var list = Flat.Button(row, Loc.T("tr.challenges"), new Vector2(0f, 0.5f), new Vector2(80f + 5 * 142f + 30f, 0f), new Vector2(170f, 76f), new Color(0.65f, 0.4f, 1f), Flat.Text, () => ShowList(true), 22f);
+            var list = Flat.Button(row, Loc.T("tr.challenges"), new Vector2(0f, 0.5f), new Vector2(80f + 5 * 142f + 30f, 0f), new Vector2(170f, 76f), UiKit.Style.purple, Flat.Text, () => ShowList(true), 22f);
             ((RectTransform)list.transform).pivot = new Vector2(0.5f, 0.5f);
-            var exit = Flat.Button(row, Loc.T("tr.exit"), new Vector2(1f, 0.5f), new Vector2(-65f, 0f), new Vector2(120f, 76f), new Color(0.45f, 0.45f, 0.5f), Flat.Text, () => ExitPressed?.Invoke(), 22f);
+            var exit = Flat.Button(row, Loc.T("tr.exit"), new Vector2(1f, 0.5f), new Vector2(-65f, 0f), new Vector2(120f, 76f), UiKit.Style.steel, Flat.Text, () => ExitPressed?.Invoke(), 22f);
             ((RectTransform)exit.transform).pivot = new Vector2(0.5f, 0.5f);
             // the challenge under way: its name, its steps, its reward
-            card = Flat.Panel(root, "Challenge", new Vector2(0f, 0.5f), new Vector2(24f, 260f), new Vector2(540f, 320f), new Color(0.05f, 0.08f, 0.2f, 0.88f));
+            card = Flat.Panel(root, "Challenge", new Vector2(0f, 0.5f), new Vector2(24f, 260f), new Vector2(540f, 320f), UiKit.A(UiKit.Style.back, 0.88f));
             card.pivot = new Vector2(0f, 0.5f);
             cardTitle = Flat.Label(card, "", new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(500f, 56f), 34f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
             cardTitle.rectTransform.pivot = new Vector2(0.5f, 0.5f);
@@ -71,7 +71,7 @@ namespace SquashBot.UI
         private void BuildList()
         {
             listScreen = UiFactory.Stretch("List", root);
-            var dim = UiFactory.Fill(listScreen, new Color(0.02f, 0.02f, 0.08f, 0.85f));
+            var dim = UiFactory.Fill(listScreen, UiKit.A(UiKit.Style.backDeep, 0.85f));
             dim.gameObject.AddComponent<IgnoreSafeArea>();
             var title = Flat.Label(listScreen, Loc.T("tr.challenges"), new Vector2(0.5f, 1f), new Vector2(0f, -120f), new Vector2(900f, 80f), 54f, Flat.Text, TextAlignmentOptions.Center, bold: true);
             title.rectTransform.pivot = new Vector2(0.5f, 0.5f);
@@ -97,7 +97,7 @@ namespace SquashBot.UI
                 bool done = ComboChallenges.Done(c);
                 string id = c.id;
                 var b = Flat.Button(listContent, ComboChallenges.Name(c), new Vector2(0f, 1f), new Vector2(98f + col * 196f, -50f - grp * 250f), new Vector2(186f, 90f),
-                    done ? new Color(0.25f, 0.6f, 0.35f) : Flat.CardHi, Flat.Text, () => { ShowList(false); ChallengePicked?.Invoke(id); }, 22f);
+                    done ? UiKit.Style.green : Flat.CardHi, Flat.Text, () => { ShowList(false); ChallengePicked?.Invoke(id); }, 22f);
                 ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0.5f);
                 var steps = new List<string>();
                 foreach (var s in c.steps) steps.Add(ComboChallenges.StepText(s));
@@ -136,7 +136,7 @@ namespace SquashBot.UI
                 if (i >= c.steps.Count) continue;
                 bool done = i < step;
                 stepTexts[i].text = (done ? "+ " : i == step ? "> " : "- ") + ComboChallenges.StepText(c.steps[i]) + (i == step && c.steps[i].count > 1 ? "  " + progress + "/" + c.steps[i].count : "");
-                stepTexts[i].color = done ? new Color(0.45f, 1f, 0.55f) : i == step ? Flat.Text : Flat.Muted;
+                stepTexts[i].color = done ? UiKit.Style.successLight : i == step ? Flat.Text : Flat.Muted;
             }
         }
 

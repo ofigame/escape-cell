@@ -51,7 +51,7 @@ namespace SquashBot.Gameplay
                 RefreshHealthBar();
                 var at = robot.transform.position + Vector3.up * 0.6f;
                 fx.Burst(at, new Color(0.4f, 1f, 0.6f), new Color(0.5f, 2.2f, 0.8f), 36, 5f);
-                FloatAt(at + Vector3.up * 0.4f, Loc.T("float.potion"), new Color(0.5f, 1f, 0.65f));
+                FloatAt(at + Vector3.up * 0.4f, Loc.T("float.potion"), UI.UiKit.Style.successLight);
                 AudioManager.PlaySfx(Sfx.Shield, 1f, 1.3f);
                 Haptics.Medium();
             });

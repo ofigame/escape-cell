@@ -30,23 +30,23 @@ namespace SquashBot.Gameplay
                     if (damage > 0) FloatSized(at, damage.ToString(), strong ? Palette.UiGold : Color.white, strong ? 78f : 56f);
                     break;
                 case HitOutcome.Blocked:
-                    FloatSized(at, Loc.T("hit.blocked") + (damage > 0 ? "  " + damage : ""), new Color(0.6f, 0.85f, 1f), 50f);
+                    FloatSized(at, Loc.T("hit.blocked") + (damage > 0 ? "  " + damage : ""), UI.UiKit.Style.info, 50f);
                     AudioManager.PlaySfx(Sfx.Shield, 0.9f, 0.8f); // (the metal "dong")
                     break;
                 case HitOutcome.Parried:
                     break; // (its big "PARRIED!" and foi's reel are the guard's own: GameManagerDuelSkills)
                 case HitOutcome.Dodged:
-                    FloatSized(at, Loc.T("hit.dodged"), new Color(0.75f, 0.9f, 1f), 50f); // (its air sound and puff: DodgedShown)
+                    FloatSized(at, Loc.T("hit.dodged"), UI.UiKit.Style.cyan, 50f); // (its air sound and puff: DodgedShown)
                     break;
                 case HitOutcome.Missed:
-                    FloatSized(at, Loc.T("hit.missed"), new Color(1f, 1f, 1f, 0.55f), 44f);
+                    FloatSized(at, Loc.T("hit.missed"), UI.UiKit.A(UI.UiKit.Style.white, 0.55f), 44f);
                     break;
                 case HitOutcome.Immune:
-                    FloatSized(at, Loc.T("hit.immune"), new Color(0.8f, 0.82f, 0.88f), 46f);
+                    FloatSized(at, Loc.T("hit.immune"), UI.UiKit.Style.silver, 46f);
                     AudioManager.PlaySfx(Sfx.Blocked, 0.6f, 1.6f); // (the metal ricochet)
                     break;
                 case HitOutcome.Reflected:
-                    FloatSized(at, Loc.T("hit.reflected"), new Color(0.75f, 0.95f, 1f), 54f);
+                    FloatSized(at, Loc.T("hit.reflected"), UI.UiKit.Style.cyan, 54f);
                     break;
             }
         }

@@ -55,22 +55,22 @@ namespace SquashBot.UI
             // The gun post's aim: a crosshair in the middle and the bullets left (shown only up on a post).
             c.crosshair = UiFactory.Box("Crosshair", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(90f, 90f));
             c.crosshair.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(UiFactory.Stretch("Ring", c.crosshair), new Color(1f, 0.35f, 0.25f, 0.95f), UiSprites.Ring, 0.35f).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Stretch("Ring", c.crosshair), UiKit.A(UiKit.Style.theirs, 0.95f), UiSprites.Ring, 0.35f).raycastTarget = false;
             var dot = UiFactory.Box("Dot", c.crosshair, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(14f, 14f));
             dot.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(dot, new Color(1f, 0.35f, 0.25f), UiSprites.Circle).raycastTarget = false;
+            UiFactory.Fill(dot, UiKit.Style.theirs, UiSprites.Circle).raycastTarget = false;
             foreach (var (pos, size) in new[] { (new Vector2(0f, 62f), new Vector2(6f, 30f)), (new Vector2(0f, -62f), new Vector2(6f, 30f)), (new Vector2(62f, 0f), new Vector2(30f, 6f)), (new Vector2(-62f, 0f), new Vector2(30f, 6f)) })
             {
                 var tick = UiFactory.Box("Tick", c.crosshair, new Vector2(0.5f, 0.5f), pos, size);
                 tick.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(tick, new Color(1f, 0.35f, 0.25f, 0.95f), UiSprites.Rounded, 3f).raycastTarget = false;
+                UiFactory.Fill(tick, UiKit.A(UiKit.Style.theirs, 0.95f), UiSprites.Rounded, 3f).raycastTarget = false;
             }
             c.ammoText = UiFactory.TextBox("Ammo", root, new Vector2(1f, 0f), new Vector2(-190f, 330f), new Vector2(260f, 70f), "100", 56f, Color.white);
             c.ammoText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             c.ammoText.raycastTarget = false;
-            c.strikeButton = Button(root, "Strike", new Vector2(-190f, 200f), 200f, new Color(1f, 0.55f, 0.25f, 0.85f), 0, () => c.Strike?.Invoke()).GetComponent<PressButton>();
-            c.spinButton = Button(root, "Spin", new Vector2(-440f, 150f), 135f, new Color(0.45f, 0.75f, 1f, 0.8f), 1, () => c.Spin?.Invoke());
-            c.jumpButton = Button(root, "Jump", new Vector2(-420f, 360f), 130f, new Color(0.55f, 1f, 0.6f, 0.8f), 2, () => c.Jump?.Invoke());
+            c.strikeButton = Button(root, "Strike", new Vector2(-190f, 200f), 200f, UiKit.A(UiKit.Style.orange, 0.85f), 0, () => c.Strike?.Invoke()).GetComponent<PressButton>();
+            c.spinButton = Button(root, "Spin", new Vector2(-440f, 150f), 135f, UiKit.A(UiKit.Style.info, 0.8f), 1, () => c.Spin?.Invoke());
+            c.jumpButton = Button(root, "Jump", new Vector2(-420f, 360f), 130f, UiKit.A(UiKit.Style.successLight, 0.8f), 2, () => c.Jump?.Invoke());
             c.Minimap = ArenaMinimap.Create(root);
             c.SetGunMode(false, 0);
             c.Show(false);
@@ -86,7 +86,7 @@ namespace SquashBot.UI
         private static T Area<T>(string name, Transform parent, Vector2 min, Vector2 max) where T : Component
         {
             var area = UiFactory.Rect(name, parent, min, max);
-            area.gameObject.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
+            area.gameObject.AddComponent<Image>().color = UiKit.A(UiKit.Style.black, 0f);
             return area.gameObject.AddComponent<T>();
         }
 
@@ -115,7 +115,7 @@ namespace SquashBot.UI
             if (on) crosshair.anchoredPosition = Vector2.zero; // the gun post aims through the middle of the screen
             ammoText.gameObject.SetActive(on);
             ammoText.text = ammo.ToString();
-            ammoText.color = ammo <= 15 ? new Color(1f, 0.45f, 0.35f) : Color.white;
+            ammoText.color = ammo <= 15 ? UiKit.Style.danger : Color.white;
             stickArea.gameObject.SetActive(!on);
             spinButton.gameObject.SetActive(!on);
             jumpButton.localRotation = Quaternion.Euler(0f, 0f, on ? 180f : 0f); // the chevron points down: climb down
@@ -140,7 +140,7 @@ namespace SquashBot.UI
             var r = UiFactory.Box(name, parent, new Vector2(1f, 0f), fromBottomRight, new Vector2(size, size));
             r.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.Fill(r, colour, UiSprites.Circle);
-            UiFactory.Fill(UiFactory.Stretch("Rim", r), new Color(1f, 1f, 1f, 0.6f), UiSprites.Ring, 0.4f).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Stretch("Rim", r), UiKit.A(UiKit.Style.white, 0.6f), UiSprites.Ring, 0.4f).raycastTarget = false;
             // Drawn symbols (no font glyphs needed): a sword, a ring for the spin, a chevron for the jump.
             if (symbol == 0)
             {
@@ -220,11 +220,11 @@ namespace SquashBot.UI
                 baseRect = UiFactory.Box("Base", area, Vector2.zero, home, new Vector2(r * 2.3f, r * 2.3f));
                 baseRect.pivot = new Vector2(0.5f, 0.5f);
                 baseRect.anchoredPosition = home;
-                UiFactory.Fill(baseRect, new Color(1f, 1f, 1f, 0.14f), UiSprites.Circle).raycastTarget = false;
-                UiFactory.Fill(UiFactory.Stretch("Rim", baseRect), new Color(1f, 1f, 1f, 0.45f), UiSprites.Ring, 0.2f).raycastTarget = false;
+                UiFactory.Fill(baseRect, UiKit.A(UiKit.Style.white, 0.14f), UiSprites.Circle).raycastTarget = false;
+                UiFactory.Fill(UiFactory.Stretch("Rim", baseRect), UiKit.A(UiKit.Style.white, 0.45f), UiSprites.Ring, 0.2f).raycastTarget = false;
                 knob = UiFactory.Box("Knob", baseRect, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(r * 0.95f, r * 0.95f));
                 knob.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(knob, new Color(1f, 1f, 1f, 0.75f), UiSprites.Circle).raycastTarget = false;
+                UiFactory.Fill(knob, UiKit.A(UiKit.Style.white, 0.75f), UiSprites.Circle).raycastTarget = false;
             }
 
             public void OnInitializePotentialDrag(PointerEventData e) => e.useDragThreshold = false;

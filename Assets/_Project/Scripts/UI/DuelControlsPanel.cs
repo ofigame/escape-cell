@@ -26,7 +26,7 @@ namespace SquashBot.UI
         public static DuelControlsPanel Create(Transform root)
         {
             var s = UiScreen.Create("DuelControls", root, out var t);
-            UiFactory.Dim(t, new Color(0.06f, 0.05f, 0.18f, 0.55f));
+            UiFactory.Dim(t, UiKit.A(UiKit.Style.back, 0.55f));
             var card = UiFactory.Card("Card", t, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 200f + Rows.Length * 130f + 340f));
             card.pivot = new Vector2(0.5f, 0.5f);
             var p = s.gameObject.AddComponent<DuelControlsPanel>();

@@ -36,15 +36,15 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            UiFactory.Dim(root, new Color(0.02f, 0.02f, 0.06f, 0.78f));
+            UiFactory.Dim(root, UiKit.A(UiKit.Style.backDeep, 0.78f));
             UiFactory.TextBox("Title", root, new Vector2(0.5f, 1f), new Vector2(0f, -170f), new Vector2(900f, 110f), Loc.T("bag.title"), 72f, Palette.UiGold, title: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.TextBox("Hint", root, new Vector2(0.5f, 1f), new Vector2(0f, -250f), new Vector2(900f, 60f), Loc.T("bag.hint"), 32f, new Color(1f, 1f, 1f, 0.75f), FontStyles.Normal)
+            UiFactory.TextBox("Hint", root, new Vector2(0.5f, 1f), new Vector2(0f, -250f), new Vector2(900f, 60f), Loc.T("bag.hint"), 32f, UiKit.A(UiKit.Style.white, 0.75f), FontStyles.Normal)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
             // The cards scroll (many weapons, or the short landscape screen of the arenas): a masked view over the grid.
             var view = UiFactory.Rect("View", root, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(30f, 200f), new Vector2(-30f, -300f));
             view.gameObject.AddComponent<RectMask2D>();
-            view.gameObject.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0f); // takes the drag
+            view.gameObject.AddComponent<Image>().color = UiKit.A(UiKit.Style.black, 0f); // takes the drag
             grid = UiFactory.Rect("Grid", view, new Vector2(0f, 1f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero);
             grid.pivot = new Vector2(0.5f, 1f);
             var scroll = view.gameObject.AddComponent<ScrollRect>();
@@ -87,7 +87,7 @@ namespace SquashBot.UI
                 bool inHand = weapon == current || (currentGun != null && weapon == currentGun);
                 bool usable = gunsAllowed || weapon.kind != WeaponKind.Gun;
                 if (inHand)
-                    UiFactory.Fill(UiFactory.Stretch("InHand", card), new Color(0.3f, 1f, 0.55f, 0.9f), UiSprites.Ring, 0.6f).raycastTarget = false;
+                    UiFactory.Fill(UiFactory.Stretch("InHand", card), UiKit.A(UiKit.Style.successLight, 0.9f), UiSprites.Ring, 0.6f).raycastTarget = false;
                 var halo = UiFactory.Box("Halo", card, new Vector2(0.5f, 1f), new Vector2(0f, -140f), new Vector2(280f, 280f));
                 halo.pivot = new Vector2(0.5f, 0.5f);
                 var glow = WeaponModels.Glow(weapon.tier);
@@ -100,26 +100,26 @@ namespace SquashBot.UI
                 UiFactory.TextBox("Name", card, new Vector2(0.5f, 0f), new Vector2(0f, 96f), new Vector2(300f, 50f), Loc.T("weapon." + weapon.id), 30f, Palette.UiText, title: true)
                     .rectTransform.pivot = new Vector2(0.5f, 0.5f);
                 UiFactory.TextBox("Stats", card, new Vector2(0.5f, 0f), new Vector2(0f, 50f), new Vector2(300f, 40f),
-                    Loc.F("bag.stats", Armory.Damage(weapon), Armory.Reach(weapon)), 24f, new Color(0.85f, 0.9f, 1f, 0.85f), FontStyles.Normal).rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                    Loc.F("bag.stats", Armory.Damage(weapon), Armory.Reach(weapon)), 24f, UiKit.A(UiKit.Style.text, 0.85f), FontStyles.Normal).rectTransform.pivot = new Vector2(0.5f, 0.5f);
                 if (inHand)
-                    UiFactory.TextBox("InHandLabel", card, new Vector2(0.5f, 1f), new Vector2(0f, -22f), new Vector2(280f, 40f), Loc.T("weapon.equipped"), 24f, new Color(0.4f, 1f, 0.6f), title: true)
+                    UiFactory.TextBox("InHandLabel", card, new Vector2(0.5f, 1f), new Vector2(0f, -22f), new Vector2(280f, 40f), Loc.T("weapon.equipped"), 24f, UiKit.Style.successLight, title: true)
                         .rectTransform.pivot = new Vector2(0.5f, 0.5f);
                 if (weapon.chest)
                 {
                     var badge = UiFactory.Box("ChestBadge", card, new Vector2(1f, 1f), new Vector2(-12f, -64f), new Vector2(120f, 42f)); // under the "in hand" line
                     badge.pivot = new Vector2(1f, 1f);
                     UiFactory.Fill(badge, Palette.UiGold, UiSprites.Rounded, 2f).raycastTarget = false;
-                    UiFactory.Text(badge, Loc.T("chests.badge"), 22f, new Color(0.3f, 0.16f, 0.06f), title: true).raycastTarget = false;
+                    UiFactory.Text(badge, Loc.T("chests.badge"), 22f, UiKit.Style.panelDanger, title: true).raycastTarget = false;
                 }
                 bool dropGun = inHand && weapon.kind == WeaponKind.Gun && gunsAllowed;
                 if (dropGun)
-                    UiFactory.TextBox("DropLabel", card, new Vector2(0.5f, 0f), new Vector2(0f, 14f), new Vector2(300f, 34f), Loc.T("bag.dropGun"), 22f, new Color(1f, 0.75f, 0.45f), title: true)
+                    UiFactory.TextBox("DropLabel", card, new Vector2(0.5f, 0f), new Vector2(0f, 14f), new Vector2(300f, 34f), Loc.T("bag.dropGun"), 22f, UiKit.Style.gold, title: true)
                         .rectTransform.pivot = new Vector2(0.5f, 0.5f);
                 if (!usable)
                 {
                     // A gun on the floors: shown, not taken (the battle arenas only).
                     card.gameObject.AddComponent<CanvasGroup>().alpha = 0.4f;
-                    UiFactory.TextBox("ArenaOnly", card, new Vector2(0.5f, 1f), new Vector2(0f, -22f), new Vector2(300f, 40f), Loc.T("bag.arenaOnly"), 22f, new Color(1f, 0.8f, 0.4f), title: true)
+                    UiFactory.TextBox("ArenaOnly", card, new Vector2(0.5f, 1f), new Vector2(0f, -22f), new Vector2(300f, 40f), Loc.T("bag.arenaOnly"), 22f, UiKit.Style.gold, title: true)
                         .rectTransform.pivot = new Vector2(0.5f, 0.5f);
                     continue;
                 }

@@ -153,7 +153,7 @@ namespace SquashBot.Gameplay
         {
             if ((!grid.IsGate(p) && !StageLocked(p)) || Time.unscaledTime - lastGateNote < 2f) return;
             lastGateNote = Time.unscaledTime;
-            FloatAt(GridView.ToWorld(p) + Vector3.up * 1.1f, Loc.T("float.gateShut"), new Color(1f, 0.6f, 0.4f));
+            FloatAt(GridView.ToWorld(p) + Vector3.up * 1.1f, Loc.T("float.gateShut"), UI.UiKit.Style.orange);
         }
         private float lastGateNote = -10f;
 

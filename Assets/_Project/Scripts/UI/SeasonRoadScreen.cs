@@ -39,13 +39,13 @@ namespace SquashBot.UI
             head.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var bar = UiFactory.Box("Bar", p, new Vector2(0.5f, 1f), new Vector2(0f, -268f), new Vector2(900f, 30f));
             bar.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(bar, new Color(0f, 0f, 0f, 0.45f), UiSprites.Rounded, 15f).raycastTarget = false;
+            UiFactory.Fill(bar, UiKit.A(UiKit.Style.black, 0.45f), UiSprites.Rounded, 15f).raycastTarget = false;
             barFill = UiFactory.Box("Fill", bar, new Vector2(0f, 0.5f), Vector2.zero, new Vector2(30f, 30f));
             barFill.pivot = new Vector2(0f, 0.5f);
-            UiFactory.Fill(barFill, new Color(1f, 0.7f, 0.25f), UiSprites.Rounded, 15f).raycastTarget = false;
+            UiFactory.Fill(barFill, UiKit.Style.warning, UiSprites.Rounded, 15f).raycastTarget = false;
             var viewport = UiFactory.Rect("Viewport", p, Vector2.zero, Vector2.one, new Vector2(40f, Monetization.Ads.BannerReserve + 30f), new Vector2(-40f, -305f));
             viewport.gameObject.AddComponent<RectMask2D>();
-            UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0f));
+            UiFactory.Fill(viewport, UiKit.A(UiKit.Style.black, 0f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
             content.pivot = new Vector2(0.5f, 1f);
             var scroll = viewport.gameObject.AddComponent<ScrollRect>();
@@ -89,7 +89,7 @@ namespace SquashBot.UI
                 int step = s;
                 bool got = reached >= s, taken = SeasonRoad.Taken(s);
                 bool big = s % 5 == 0;
-                var row = Flat.Panel(content, "Step" + s, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(960f, big ? 120f : 100f), taken ? new Color(0.12f, 0.2f, 0.14f) : got ? Flat.CardHi : Flat.Card);
+                var row = Flat.Panel(content, "Step" + s, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(960f, big ? 120f : 100f), taken ? UiKit.Style.panelSuccess : got ? Flat.CardHi : Flat.Card);
                 row.pivot = new Vector2(0.5f, 1f);
                 y -= (big ? 120f : 100f) + 10f;
                 Flat.Label(row, s.ToString(), new Vector2(0f, 0.5f), new Vector2(30f, 0f), new Vector2(90f, 80f), big ? 46f : 38f, got ? Flat.Gold : Flat.Muted, bold: true).rectTransform.pivot = new Vector2(0f, 0.5f);
@@ -97,17 +97,17 @@ namespace SquashBot.UI
                 // the pass's gift on the step (taken with the month's pass)
                 if (got && Monetization.Store.HasPass && !SeasonRoad.PassTaken(s))
                 {
-                    var pb = Flat.Button(row, Loc.T("sr.pass"), new Vector2(1f, 0.5f), new Vector2(-250f, 0f), new Vector2(150f, 76f), new Color(0.65f, 0.45f, 1f), Color.white, () =>
+                    var pb = Flat.Button(row, Loc.T("sr.pass"), new Vector2(1f, 0.5f), new Vector2(-250f, 0f), new Vector2(150f, 76f), UiKit.Style.purple, Color.white, () =>
                     {
                         if (SeasonRoad.TakePass(step)) { AudioManager.PlaySfx(Sfx.Coin, 1f, 1.3f); Claimed?.Invoke(); }
                         Refresh();
                     }, 24f);
                     ((RectTransform)pb.transform).pivot = new Vector2(1f, 0.5f);
                 }
-                if (taken) Flat.Label(row, Loc.T("comp.taken"), new Vector2(1f, 0.5f), new Vector2(-110f, 0f), new Vector2(200f, 80f), 28f, new Color(0.4f, 1f, 0.5f), TextAlignmentOptions.Center, true);
+                if (taken) Flat.Label(row, Loc.T("comp.taken"), new Vector2(1f, 0.5f), new Vector2(-110f, 0f), new Vector2(200f, 80f), 28f, UiKit.Style.successLight, TextAlignmentOptions.Center, true);
                 else if (got)
                 {
-                    var b = Flat.Button(row, Loc.T("comp.claim"), new Vector2(1f, 0.5f), new Vector2(-30f, 0f), new Vector2(200f, 76f), new Color(1f, 0.7f, 0.2f), Color.white, () =>
+                    var b = Flat.Button(row, Loc.T("comp.claim"), new Vector2(1f, 0.5f), new Vector2(-30f, 0f), new Vector2(200f, 76f), UiKit.Style.warning, Color.white, () =>
                     {
                         if (SeasonRoad.Take(step)) { AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f); Haptics.Medium(); Claimed?.Invoke(); }
                         Refresh();

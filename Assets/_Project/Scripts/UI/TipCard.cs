@@ -34,14 +34,14 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            UiFactory.Dim(root, new Color(0.02f, 0.02f, 0.06f, 0.7f));
+            UiFactory.Dim(root, UiKit.A(UiKit.Style.backDeep, 0.7f));
             var card = UiFactory.Card("Card", root, new Vector2(0.5f, 0.5f), new Vector2(0f, 40f), new Vector2(900f, 1180f));
             card.pivot = new Vector2(0.5f, 0.5f);
             title = UiFactory.TextBox("Title", card, new Vector2(0.5f, 1f), new Vector2(0f, -60f), new Vector2(820f, 90f), Loc.T("tip.title"), 52f, Palette.UiGold, title: true);
             title.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var halo = UiFactory.Box("Halo", card, new Vector2(0.5f, 1f), new Vector2(0f, -360f), new Vector2(560f, 560f));
             halo.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(halo, new Color(1f, 0.8f, 0.4f, 0.35f), UiSprites.Shadow, 0.4f).raycastTarget = false;
+            UiFactory.Fill(halo, UiKit.A(UiKit.Style.gold, 0.35f), UiSprites.Shadow, 0.4f).raycastTarget = false;
             picture = UiFactory.Box("Picture", card, new Vector2(0.5f, 1f), new Vector2(0f, -360f), new Vector2(420f, 420f));
             picture.pivot = new Vector2(0.5f, 0.5f);
             text = UiFactory.TextBox("Text", card, new Vector2(0.5f, 1f), new Vector2(0f, -680f), new Vector2(800f, 190f), "", 34f, Color.white);

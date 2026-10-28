@@ -82,7 +82,7 @@ namespace SquashBot.UI
             typed.enableAutoSizing = false;
             typed.textPreprocessor = null;
             typed.characterSpacing = 6f;
-            var placeholder = UiFactory.Text(area, "XXXX-XXXX-XXXX", 54f, new Color(1f, 1f, 1f, 0.25f));
+            var placeholder = UiFactory.Text(area, "XXXX-XXXX-XXXX", 54f, UiKit.A(UiKit.Style.white, 0.25f));
             placeholder.enableAutoSizing = false;
             input = box.gameObject.AddComponent<TMP_InputField>();
             input.textViewport = area;
@@ -95,7 +95,7 @@ namespace SquashBot.UI
             input.onValidateInput = (s, i, ch) => char.IsLetterOrDigit(ch) || ch == '-' ? char.ToUpperInvariant(ch) : '\0';
             input.lineType = TMP_InputField.LineType.SingleLine;
             input.onValueChanged.AddListener(_ => sure = false);
-            restoreButton = Flat.Button(join, Loc.T("cloud.restore"), new Vector2(0.5f, 0f), new Vector2(0f, 80f), new Vector2(560f, 100f), new Color(0.85f, 0.45f, 0.2f), Flat.Text, Restore, 34f);
+            restoreButton = Flat.Button(join, Loc.T("cloud.restore"), new Vector2(0.5f, 0f), new Vector2(0f, 80f), new Vector2(560f, 100f), UiKit.Style.bronze, Flat.Text, Restore, 34f);
             ((RectTransform)restoreButton.transform).pivot = new Vector2(0.5f, 0.5f);
 
             status = Flat.Label(p, "", new Vector2(0.5f, 0.5f), new Vector2(0f, -490f), new Vector2(940f, 120f), 32f, Flat.Text, TextAlignmentOptions.Center, bold: true, wrap: true);

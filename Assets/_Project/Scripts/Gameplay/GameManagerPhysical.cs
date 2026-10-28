@@ -162,7 +162,7 @@ namespace SquashBot.Gameplay
             if (skin != null && them != null) skin.StrikeWithBody(StrikeOf(k), wind, hit, back, them.position);
             if (me != null && them != null) VisualRoot.On(CombatFeel.RootOf(me)).Lunge(them.position - me.position, VisualRoot.KeptApart(me.position, them.position, 99f), wind + hit * 0.5f, hit * 0.5f + 0.05f, back);
             AudioManager.PlaySfx(Sfx.Hop, 0.8f, k == PhysKind.Headbutt ? 0.8f : 1.2f);
-            skillBar?.Shout(Loc.T("duel.phys." + (int)k), mine ? new Color(1f, 0.75f, 0.35f) : new Color(1f, 0.45f, 0.4f));
+            skillBar?.Shout(Loc.T("duel.phys." + (int)k), mine ? UI.UiKit.Style.gold : UI.UiKit.Style.danger);
             yield return new WaitForSeconds(wind + hit * 0.5f); // (the contact: the rules' moment and the picture's, together)
             if (!challengeRun || chPhase != ChPhase.Duel) yield break;
             if (LiveActive) { if (mine) LiveNet.Phys((int)k); yield break; } // (the server judges it; its word animates it)
@@ -207,7 +207,7 @@ namespace SquashBot.Gameplay
             var from = me != null ? me.position : robot.transform.position;
             if (r != "hit")
             {
-                if (missWord != null && them != null) FloatAt(them.position + Vector3.up * 2f, Loc.T(missWord), new Color(0.75f, 0.9f, 1f));
+                if (missWord != null && them != null) FloatAt(them.position + Vector3.up * 2f, Loc.T(missWord), UI.UiKit.Style.cyan);
                 return;
             }
             var tab = PhysTab;
@@ -309,7 +309,7 @@ namespace SquashBot.Gameplay
             if (myCrouch && blow != null && blow.height == HitHeight.High)
             {
                 TrainingNote(TrainingEvent.CrouchUnder);
-                FloatAt(robot.transform.position + Vector3.up * 2f, Loc.T("duel.under"), new Color(0.75f, 0.9f, 1f));
+                FloatAt(robot.transform.position + Vector3.up * 2f, Loc.T("duel.under"), UI.UiKit.Style.cyan);
                 return true;
             }
             return false;

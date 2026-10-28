@@ -36,7 +36,7 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            UiFactory.Dim(root, new Color(0.02f, 0.02f, 0.06f, 0.75f)).gameObject.AddComponent<IgnoreSafeArea>();
+            UiFactory.Dim(root, UiKit.A(UiKit.Style.backDeep, 0.75f)).gameObject.AddComponent<IgnoreSafeArea>();
             var card = UiFactory.Card("Card", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(960f, 1660f));
             card.pivot = new Vector2(0.5f, 0.5f);
             screen.SetPopTarget(card);
@@ -47,8 +47,7 @@ namespace SquashBot.UI
             about.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             about.textWrappingMode = TextWrappingModes.Normal;
             about.enableAutoSizing = true; about.fontSizeMin = 18f; about.fontSizeMax = 30f;
-            var close = UiFactory.MakeButton(card, Loc.T("btn.close"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 72f), new Vector2(480f, 110f), () => screen.Hide(), 44f);
-            ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.MakeButton(card, "X", Kind.Icon, new Vector2(1f, 1f), new Vector2(-22f, -22f), new Vector2(100f, 100f), () => screen.Hide(), 48f); // (the kit's popup close: X at the top right, as on every popup)
         }
 
         public void Show()
@@ -115,13 +114,13 @@ namespace SquashBot.UI
                 float x = -1.5f * (W + Gap) + col * (W + Gap);
                 var tile = UiFactory.Box("Tile", list, new Vector2(0.5f, 1f), new Vector2(x, y - row * (H + Gap)), new Vector2(W, H));
                 tile.pivot = new Vector2(0.5f, 1f);
-                var face = UiFactory.Fill(tile, it.chosen ? new Color(0.95f, 0.66f, 0.15f) : it.owned ? Flat.Card : new Color(0.08f, 0.09f, 0.16f, 0.9f), UiSprites.Rounded, 1.4f);
-                var label = UiFactory.TextBox("Name", tile, new Vector2(0.5f, 0.5f), new Vector2(0f, it.owned ? 0f : 12f), new Vector2(W - 14f, 56f), Loc.T(it.key), 26f, it.owned ? Color.white : new Color(1f, 1f, 1f, 0.4f), title: true);
+                var face = UiFactory.Fill(tile, it.chosen ? UiKit.Style.warning : it.owned ? Flat.Card : UiKit.A(UiKit.Style.back, 0.9f), UiSprites.Rounded, 1.4f);
+                var label = UiFactory.TextBox("Name", tile, new Vector2(0.5f, 0.5f), new Vector2(0f, it.owned ? 0f : 12f), new Vector2(W - 14f, 56f), Loc.T(it.key), 26f, it.owned ? Color.white : UiKit.A(UiKit.Style.white, 0.4f), title: true);
                 label.rectTransform.pivot = new Vector2(0.5f, 0.5f);
                 label.enableAutoSizing = true; label.fontSizeMin = 16f; label.fontSizeMax = 26f;
                 if (!it.owned && it.world > 0)
                 {
-                    var lockText = UiFactory.TextBox("Lock", tile, new Vector2(0.5f, 0f), new Vector2(0f, 6f), new Vector2(W - 10f, 34f), Loc.F("moves.lockAt", it.world, it.world * LevelCatalog.LevelsPerWorld), 20f, new Color(1f, 0.75f, 0.4f, 0.8f), FontStyles.Normal);
+                    var lockText = UiFactory.TextBox("Lock", tile, new Vector2(0.5f, 0f), new Vector2(0f, 6f), new Vector2(W - 10f, 34f), Loc.F("moves.lockAt", it.world, it.world * LevelCatalog.LevelsPerWorld), 20f, UiKit.A(UiKit.Style.gold, 0.8f), FontStyles.Normal);
                     lockText.rectTransform.pivot = new Vector2(0.5f, 0f);
                     lockText.enableAutoSizing = true; lockText.fontSizeMin = 13f; lockText.fontSizeMax = 20f;
                 }

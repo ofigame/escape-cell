@@ -96,7 +96,7 @@ namespace SquashBot.Gameplay
             crowdKind = (CrowdSkill)((levelIndex + crowdUses) % 3);
             crowdOffer = CrowdOfferSeconds;
             ui.SetCrowdSkill((int)crowdKind, true);
-            FloatAt(robot.transform.position + Vector3.up * 1.4f, Loc.T("power.crowd"), new Color(1f, 0.8f, 0.35f));
+            FloatAt(robot.transform.position + Vector3.up * 1.4f, Loc.T("power.crowd"), UI.UiKit.Style.gold);
             AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.3f);
         }
 

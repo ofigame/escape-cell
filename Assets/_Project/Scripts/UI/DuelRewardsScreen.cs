@@ -70,15 +70,15 @@ namespace SquashBot.UI
         private void Build(RectTransform r)
         {
             // a see-through layer over the whole screen: taps on it speed the rows up (the scene shows through)
-            var tapLayer = UiFactory.Fill(UiFactory.Stretch("Tap", r), new Color(0f, 0f, 0f, 0.001f));
+            var tapLayer = UiFactory.Fill(UiFactory.Stretch("Tap", r), UiKit.A(UiKit.Style.black, 0.001f));
             tapLayer.gameObject.AddComponent<IgnoreSafeArea>();
             var tap = tapLayer.gameObject.AddComponent<Button>();
             tap.transition = Selectable.Transition.None;
             tap.onClick.AddListener(Tapped);
             // the result at the top, big
-            title = UiFactory.OutlinedText("Title", r, new Vector2(0.5f, 1f), new Vector2(0f, -330f), new Vector2(1000f, 190f), "", 150f, new Color(0.3f, 0.15f, 0f));
+            title = UiFactory.OutlinedText("Title", r, new Vector2(0.5f, 1f), new Vector2(0f, -330f), new Vector2(1000f, 190f), "", 150f, UiKit.Style.panelDanger);
             title.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            scoreText = UiFactory.OutlinedText("Score", r, new Vector2(0.5f, 1f), new Vector2(0f, -460f), new Vector2(800f, 100f), "", 80f, new Color(0.1f, 0.08f, 0.2f));
+            scoreText = UiFactory.OutlinedText("Score", r, new Vector2(0.5f, 1f), new Vector2(0f, -460f), new Vector2(800f, 100f), "", 80f, UiKit.Style.back);
             scoreText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             bands = UiFactory.Box("Bands", r, new Vector2(0.5f, 1f), new Vector2(0f, -560f), new Vector2(1000f, 80f));
             bands.pivot = new Vector2(0.5f, 1f);
@@ -92,15 +92,15 @@ namespace SquashBot.UI
 
             // the rewards panel: the bottom 55% (it slides up)
             panel = UiFactory.Rect("Panel", r, new Vector2(0f, 0f), new Vector2(1f, PanelShare), Vector2.zero, Vector2.zero);
-            UiFactory.Fill(panel, new Color(0.05f, 0.08f, 0.2f, 0.94f), UiSprites.Rounded, 1.2f);
+            UiFactory.Fill(panel, UiKit.A(UiKit.Style.back, 0.94f), UiSprites.Rounded, 1.2f);
             var rim = UiFactory.Rect("Rim", panel, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -6f), Vector2.zero);
-            UiFactory.Fill(rim, new Color(1f, 0.8f, 0.35f, 0.9f)).raycastTarget = false;
+            UiFactory.Fill(rim, UiKit.A(UiKit.Style.gold, 0.9f)).raycastTarget = false;
             list = UiFactory.Box("List", panel, new Vector2(0.5f, 1f), new Vector2(0f, -24f), new Vector2(ListWidth, 700f));
             list.pivot = new Vector2(0.5f, 1f);
             // the buttons along its bottom: MENU · PLAY AGAIN · SHARE, the REMATCH over them
             replay = UiFactory.MakeButton(panel, Loc.T("rw.replay"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 120f), new Vector2(560f, 150f), () => Act(actions?.replay), 52f);
             ((RectTransform)replay.transform).pivot = new Vector2(0.5f, 0.5f);
-            searchText = UiFactory.TextBox("Search", panel, new Vector2(0.5f, 0f), new Vector2(0f, 26f), new Vector2(700f, 50f), "", 30f, new Color(1f, 1f, 1f, 0.75f));
+            searchText = UiFactory.TextBox("Search", panel, new Vector2(0.5f, 0f), new Vector2(0f, 26f), new Vector2(700f, 50f), "", 30f, UiKit.A(UiKit.Style.white, 0.75f));
             searchText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             menu = UiFactory.MakeButton(panel, Loc.T("btn.menu"), Kind.Secondary, new Vector2(0f, 0f), new Vector2(130f, 120f), new Vector2(210f, 120f), () => { Act(actions?.menu ?? closed); }, 36f);
             ((RectTransform)menu.transform).pivot = new Vector2(0.5f, 0.5f);
@@ -151,7 +151,7 @@ namespace SquashBot.UI
             list.localScale = Vector3.one;
             // the tone by the result: gold, calm blue, soft grey
             title.text = Loc.T(won ? "rw.victory" : draw ? "ch.draw" : "ch.defeat");
-            title.color = won ? new Color(1f, 0.82f, 0.25f) : draw ? new Color(0.6f, 0.82f, 1f) : new Color(0.78f, 0.8f, 0.85f);
+            title.color = won ? UiKit.Style.gold : draw ? UiKit.Style.info : UiKit.Style.silver;
             scoreText.text = actions.score ?? "";
             panel.anchoredPosition = new Vector2(0f, -2000f);
             replay.gameObject.SetActive(actions.replay != null);
@@ -223,10 +223,10 @@ namespace SquashBot.UI
                 float bx = 0f;
                 var list2 = new List<(string text, Color c)>();
                 if (r.firstWin) list2.Add((Loc.T("rw.firstWinBand"), Palette.UiGold));
-                if (r.streak >= 2) list2.Add((Loc.F("rw.streakBand", r.streak), new Color(1f, 0.55f, 0.25f)));
-                if (r.comeback) list2.Add((Loc.T("rw.comebackBand"), new Color(0.5f, 1f, 0.6f)));
+                if (r.streak >= 2) list2.Add((Loc.F("rw.streakBand", r.streak), UiKit.Style.orange));
+                if (r.comeback) list2.Add((Loc.T("rw.comebackBand"), UiKit.Style.successLight));
                 if (r.goldenKo) list2.Add((Loc.T("rw.goldenKoBand"), Palette.UiGold));
-                if (r.streakBreaker) list2.Add((Loc.T("rw.breakerBand"), new Color(1f, 0.4f, 0.35f)));
+                if (r.streakBreaker) list2.Add((Loc.T("rw.breakerBand"), UiKit.Style.theirs));
                 float total = list2.Count * 250f;
                 foreach (var (text, c) in list2)
                 {
@@ -248,7 +248,7 @@ namespace SquashBot.UI
             if (r == null) yield break;
             // the loss's tip on top (and the draw's word of cheer)
             if (!won && !draw && !string.IsNullOrEmpty(actions.tip)) TipRow(actions.tip, actions.tipHow);
-            else if (draw) { Row(Loc.T("rw.drawCheer"), "", new Color(0.6f, 0.82f, 1f), Sfx.Click); yield return Wait(0.2f); }
+            else if (draw) { Row(Loc.T("rw.drawCheer"), "", UiKit.Style.info, Sfx.Click); yield return Wait(0.2f); }
             // rank points: counting up (a loss: shown plainly)
             if (r.trophiesKnown) yield return RankRow(r.trophies, won || draw);
             yield return Wait(0.2f);
@@ -261,8 +261,8 @@ namespace SquashBot.UI
             yield return SeasonRow(r);
             yield return Wait(0.2f);
             QuestRow(r);
-            if (!string.IsNullOrEmpty(r.eventLine)) { yield return Wait(0.2f); Row(r.eventLine, "", new Color(1f, 0.75f, 0.35f), Sfx.Win); }
-            if (r.consolation) { yield return Wait(0.2f); Row(Loc.T("rw.consolation"), "", new Color(0.75f, 0.85f, 1f), Sfx.Click); }
+            if (!string.IsNullOrEmpty(r.eventLine)) { yield return Wait(0.2f); Row(r.eventLine, "", UiKit.Style.gold, Sfx.Win); }
+            if (r.consolation) { yield return Wait(0.2f); Row(Loc.T("rw.consolation"), "", UiKit.Style.silver, Sfx.Click); }
         }
 
         private float PanelHeight => ((RectTransform)root).rect.height * PanelShare + 40f;
@@ -305,13 +305,13 @@ namespace SquashBot.UI
         {
             var back = UiFactory.Box("Bar", row, new Vector2(0f, 0f), new Vector2(26f, 14f), new Vector2(ListWidth - 52f, 18f));
             back.pivot = new Vector2(0f, 0.5f);
-            UiFactory.Fill(back, new Color(0f, 0f, 0f, 0.45f), UiSprites.Rounded, 10f).raycastTarget = false;
+            UiFactory.Fill(back, UiKit.A(UiKit.Style.black, 0.45f), UiSprites.Rounded, 10f).raycastTarget = false;
             var fill = UiFactory.Box("Fill", back, new Vector2(0f, 0.5f), Vector2.zero, new Vector2(Mathf.Max(20f, (ListWidth - 52f) * Mathf.Clamp01(k)), 20f));
             fill.pivot = new Vector2(0f, 0.5f);
             UiFactory.Fill(fill, colour, UiSprites.Rounded, 10f).raycastTarget = false;
             if (note != null)
             {
-                var n = UiFactory.TextBox("Note", row, new Vector2(0f, 0f), new Vector2(26f, 44f), new Vector2(700f, 32f), note, 22f, new Color(1f, 1f, 1f, 0.7f), FontStyles.Normal, align: TextAlignmentOptions.Left);
+                var n = UiFactory.TextBox("Note", row, new Vector2(0f, 0f), new Vector2(26f, 44f), new Vector2(700f, 32f), note, 22f, UiKit.A(UiKit.Style.white, 0.7f), FontStyles.Normal, align: TextAlignmentOptions.Left);
                 n.rectTransform.pivot = new Vector2(0f, 0.5f);
                 n.enableAutoSizing = true; n.fontSizeMin = 16f; n.fontSizeMax = 24f;
             }
@@ -328,7 +328,7 @@ namespace SquashBot.UI
         private void TipRow(string tip, Action how)
         {
             var row = NewRow(124f);
-            UiFactory.Fill(UiFactory.Stretch("Glow", row), new Color(1f, 0.75f, 0.3f, 0.12f)).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Stretch("Glow", row), UiKit.A(UiKit.Style.warning, 0.12f)).raycastTarget = false;
             var head = UiFactory.TextBox("Head", row, new Vector2(0f, 1f), new Vector2(26f, -22f), new Vector2(640f, 36f), Loc.T("tip.title"), 26f, Palette.UiGold, title: true, align: TextAlignmentOptions.Left);
             head.rectTransform.pivot = new Vector2(0f, 0.5f);
             var t = UiFactory.TextBox("Tip", row, new Vector2(0f, 1f), new Vector2(26f, -78f), new Vector2(how != null ? 700f : 880f, 76f), tip, 26f, Palette.UiText, FontStyles.Normal, align: TextAlignmentOptions.Left);
@@ -348,9 +348,9 @@ namespace SquashBot.UI
         {
             int trophies = Challenge.Trophies, rank = Challenge.Rank;
             string note = rank + 1 < Challenge.RankAt.Length ? Loc.F("rw.toRank", Challenge.RankName(rank + 1), Challenge.RankAt[rank + 1] - trophies) : null;
-            var row = Row(Loc.T("rw.trophies"), (change >= 0 ? "+" : "") + (countUp ? 0 : change), change >= 0 ? new Color(0.5f, 1f, 0.6f) : new Color(0.85f, 0.7f, 0.7f), Sfx.Click, 126f);
+            var row = Row(Loc.T("rw.trophies"), (change >= 0 ? "+" : "") + (countUp ? 0 : change), change >= 0 ? UiKit.Style.successLight : UiKit.Style.tan, Sfx.Click, 126f);
             int from = rank > 0 ? Challenge.RankAt[rank] : 0, to = rank + 1 < Challenge.RankAt.Length ? Challenge.RankAt[rank + 1] : from + 1;
-            Bar(row, (trophies - from) / (float)Mathf.Max(1, to - from), new Color(0.5f, 0.9f, 0.6f), note);
+            Bar(row, (trophies - from) / (float)Mathf.Max(1, to - from), UiKit.Style.successLight, note);
             if (!countUp || change <= 0) yield break;
             var v = row.Find("Value").GetComponentInChildren<TextMeshProUGUI>();
             int shown = 0;
@@ -365,9 +365,9 @@ namespace SquashBot.UI
 
         private IEnumerator XpRow(GameManager.DuelRewards r)
         {
-            var row = Row(Loc.F("rw.level", r.levelBefore), "+" + r.xp + " XP", new Color(0.65f, 0.75f, 1f), Sfx.Click, 126f);
+            var row = Row(Loc.F("rw.level", r.levelBefore), "+" + r.xp + " XP", UiKit.Style.silver, Sfx.Click, 126f);
             var label = row.Find("What").GetComponentInChildren<TextMeshProUGUI>();
-            var fill = Bar(row, r.xpBefore / (float)DuelLevel.Need(r.levelBefore), new Color(0.55f, 0.65f, 1f));
+            var fill = Bar(row, r.xpBefore / (float)DuelLevel.Need(r.levelBefore), UiKit.Style.textMuted);
             int level = r.levelBefore;
             float from = r.xpBefore / (float)DuelLevel.Need(level);
             foreach (var up in r.levelUps)
@@ -392,9 +392,9 @@ namespace SquashBot.UI
             int Prev(int level) => level == 0 ? 0 : Mastery.NextAt(level - 1);
             float K(int points, int level) => level >= Mastery.Max ? 1f : (points - Prev(level)) / (float)Mathf.Max(1, Mastery.NextAt(level) - Prev(level));
             string note = r.masteryAfter >= Mastery.Max ? null : Loc.F("rw.toMastery", r.masteryAfter + 1, Mastery.NextAt(r.masteryAfter) - r.masteryPointsAfter);
-            var row = Row(Loc.F("rw.mastery", name, r.masteryBefore), "+" + (r.masteryPointsAfter - r.masteryPointsBefore), new Color(1f, 0.75f, 0.35f), Sfx.Click, 126f);
+            var row = Row(Loc.F("rw.mastery", name, r.masteryBefore), "+" + (r.masteryPointsAfter - r.masteryPointsBefore), UiKit.Style.gold, Sfx.Click, 126f);
             var label = row.Find("What").GetComponentInChildren<TextMeshProUGUI>();
-            var fill = Bar(row, K(r.masteryPointsBefore, r.masteryBefore), new Color(1f, 0.7f, 0.3f), note);
+            var fill = Bar(row, K(r.masteryPointsBefore, r.masteryBefore), UiKit.Style.warning, note);
             float from = K(r.masteryPointsBefore, r.masteryBefore);
             for (int l = r.masteryBefore + 1; l <= r.masteryAfter; l++)
             {
@@ -407,7 +407,7 @@ namespace SquashBot.UI
                 if (g.cores > 0) parts.Add(Loc.F("login.cores", "+" + g.cores));
                 if (l == 7) parts.Add(Loc.T("rw.badge"));
                 if (l == 10) parts.Add(Loc.T(Mastery.TitleKey(r.weapon)));
-                Row(Loc.F("rw.masteryUp", name, l), string.Join(" · ", parts), new Color(1f, 0.75f, 0.35f), Sfx.Win);
+                Row(Loc.F("rw.masteryUp", name, l), string.Join(" · ", parts), UiKit.Style.gold, Sfx.Win);
                 from = 0f;
             }
             yield return Grow(fill, from, K(r.masteryPointsAfter, r.masteryAfter));
@@ -419,7 +419,7 @@ namespace SquashBot.UI
         {
             var row = NewRow(120f);
             var gold = Box(row, 0, Loc.T("rw.gold"), Palette.UiGold, out var goldValue);
-            var cores = Box(row, 1, Loc.T("rw.cores"), new Color(0.45f, 0.92f, 1f), out var coreValue);
+            var cores = Box(row, 1, Loc.T("rw.cores"), UiKit.Style.info, out var coreValue);
             AudioManager.PlaySfx(Sfx.Coin, 0.8f, 1.1f);
             if (won && actions.doubleGold != null && r.gold > 0)
             {
@@ -453,7 +453,7 @@ namespace SquashBot.UI
         {
             var box = UiFactory.Box(side == 0 ? "Gold" : "Cores", row, new Vector2(side == 0 ? 0.25f : 0.75f, 0.5f), Vector2.zero, new Vector2(ListWidth * 0.5f - 20f, 108f));
             box.pivot = new Vector2(0.5f, 0.5f);
-            var l = UiFactory.TextBox("Label", box, new Vector2(0f, 1f), new Vector2(24f, -28f), new Vector2(300f, 40f), label, 26f, new Color(1f, 1f, 1f, 0.8f), FontStyles.Normal, align: TextAlignmentOptions.Left);
+            var l = UiFactory.TextBox("Label", box, new Vector2(0f, 1f), new Vector2(24f, -28f), new Vector2(300f, 40f), label, 26f, UiKit.A(UiKit.Style.white, 0.8f), FontStyles.Normal, align: TextAlignmentOptions.Left);
             l.rectTransform.pivot = new Vector2(0f, 0.5f);
             value = UiFactory.TextBox("Value", box, new Vector2(0f, 0f), new Vector2(24f, 36f), new Vector2(260f, 60f), "+0", 50f, c, title: true, align: TextAlignmentOptions.Left);
             value.rectTransform.pivot = new Vector2(0f, 0.5f);
@@ -533,7 +533,7 @@ namespace SquashBot.UI
         /// the rarest last, and GO TO BAG under them.</summary>
         private IEnumerator ItemsRow(System.Collections.Generic.List<ItemGrant> items)
         {
-            var row = Row(Loc.T("ibag.won"), "", new Color(0.55f, 1f, 0.7f), null, 150f);
+            var row = Row(Loc.T("ibag.won"), "", UiKit.Style.successLight, null, 150f);
             var sorted = new System.Collections.Generic.List<ItemGrant>(items);
             sorted.Sort((a, b) => ((int)a.rarity).CompareTo((int)b.rarity));
             for (int i = 0; i < sorted.Count && i < 6; i++)
@@ -558,7 +558,7 @@ namespace SquashBot.UI
                 var b = (RectTransform)go.transform;
                 hand.Show(TutorialHand.Gesture.Tap, (Vector2)row.InverseTransformPoint(b.TransformPoint(b.rect.center)));
                 yield return Wait(0.2f);
-                Row(Loc.T("tut.items"), "", new Color(0.55f, 1f, 0.7f), Sfx.Click, 96f);
+                Row(Loc.T("tut.items"), "", UiKit.Style.successLight, Sfx.Click, 96f);
             }
         }
 
@@ -566,8 +566,8 @@ namespace SquashBot.UI
         {
             int per = SeasonRoad.PerStep;
             int before = r.seasonBefore, after = Mathf.Min(SeasonRoad.Steps * per, before + r.seasonPoints);
-            var row = Row(Loc.F("rw.seasonStep", Mathf.Min(SeasonRoad.Steps, after / per + 1)), "+" + r.seasonPoints, new Color(1f, 0.7f, 0.3f), Sfx.Click, 126f);
-            var fill = Bar(row, (before % per) / (float)per, new Color(1f, 0.6f, 0.25f));
+            var row = Row(Loc.F("rw.seasonStep", Mathf.Min(SeasonRoad.Steps, after / per + 1)), "+" + r.seasonPoints, UiKit.Style.warning, Sfx.Click, 126f);
+            var fill = Bar(row, (before % per) / (float)per, UiKit.Style.orange);
             bool stepped = after / per > before / per;
             if (stepped) { yield return Grow(fill, (before % per) / (float)per, 1f); AudioManager.PlaySfx(Sfx.Win, 0.8f, 1.5f); StartCoroutine(PopIn(row)); yield return Grow(fill, 0f, (after % per) / (float)per); }
             else yield return Grow(fill, (before % per) / (float)per, (after % per) / (float)per);
@@ -591,8 +591,8 @@ namespace SquashBot.UI
             string text = (day.HasValue ? Loc.F("rw.questDay", ChallengeQuests.Text(day.Value), day.Value.progress, day.Value.target) : "")
                           + (day.HasValue && week.HasValue ? "  ·  " : "")
                           + (week.HasValue ? Loc.F("rw.questWeek", week.Value.progress, week.Value.target) : "");
-            var row = Row(text, "", anyDone ? Palette.UiGold : new Color(1f, 1f, 1f, 0.85f), anyDone ? Sfx.Win : Sfx.Click);
-            if (anyDone) UiFactory.Fill(UiFactory.Stretch("Glow", row), new Color(1f, 0.8f, 0.3f, 0.15f)).raycastTarget = false;
+            var row = Row(text, "", anyDone ? Palette.UiGold : UiKit.A(UiKit.Style.white, 0.85f), anyDone ? Sfx.Win : Sfx.Click);
+            if (anyDone) UiFactory.Fill(UiFactory.Stretch("Glow", row), UiKit.A(UiKit.Style.gold, 0.15f)).raycastTarget = false;
         }
 
         private void Band(string text, Color c, float x)
@@ -628,7 +628,7 @@ namespace SquashBot.UI
         {
             var pieces = new List<(RectTransform r, Vector2 v, float spin)>();
             var size = ((RectTransform)root).rect.size;
-            Color[] colours = { Palette.UiGold, new Color(1f, 0.45f, 0.4f), new Color(0.45f, 0.8f, 1f), new Color(0.55f, 1f, 0.55f), Color.white };
+            Color[] colours = { Palette.UiGold, UiKit.Style.danger, UiKit.Style.info, UiKit.Style.successLight, Color.white };
             for (int i = 0; i < 46; i++)
             {
                 var p = UiFactory.Box("Confetti", root, new Vector2(0.5f, 1f), new Vector2(UnityEngine.Random.Range(-size.x * 0.5f, size.x * 0.5f), UnityEngine.Random.Range(0f, 300f)), new Vector2(18f, 30f));

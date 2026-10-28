@@ -152,7 +152,7 @@ namespace SquashBot.Gameplay
                 var at = GridView.ToWorld(p) + Vector3.up * 0.6f;
                 fx.Burst(at, new Color(1f, 0.35f, 0.45f), new Color(2.2f, 0.4f, 0.55f), 36, 5f);
                 Shockwave.Create(GridView.ToWorld(p), 1.4f, new Color(1f, 0.45f, 0.55f));
-                FloatAt(at + Vector3.up * 0.4f, Loc.T("float.potion"), new Color(1f, 0.55f, 0.65f));
+                FloatAt(at + Vector3.up * 0.4f, Loc.T("float.potion"), UI.UiKit.Style.danger);
                 AudioManager.PlaySfx(Sfx.Shield, 1f, 1.3f);
                 Haptics.Medium();
             }
@@ -237,7 +237,7 @@ namespace SquashBot.Gameplay
         {
             if (Time.unscaledTime - lastSleepNote < 2.5f) return;
             lastSleepNote = Time.unscaledTime;
-            FloatAt(GridView.ToWorld(p) + Vector3.up * 1.4f, Loc.T("float.asleep"), new Color(0.75f, 0.85f, 1f));
+            FloatAt(GridView.ToWorld(p) + Vector3.up * 1.4f, Loc.T("float.asleep"), UI.UiKit.Style.silver);
         }
     }
 }

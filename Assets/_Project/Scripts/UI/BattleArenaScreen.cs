@@ -36,7 +36,7 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            UiFactory.Fill(UiFactory.Stretch("Backdrop", root), new Color(0.03f, 0.03f, 0.07f, 0.95f)).gameObject.AddComponent<IgnoreSafeArea>();
+            UiFactory.Fill(UiFactory.Stretch("Backdrop", root), UiKit.A(UiKit.Style.backDeep, 0.95f)).gameObject.AddComponent<IgnoreSafeArea>();
             Flat.Backdrop(root); // the game look's galaxy and gold corners
             var bar = UiFactory.Rect("TopBar", root, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -190f), Vector2.zero);
             UiFactory.MakeButton(bar, "<", Kind.Icon, new Vector2(0f, 0.5f), new Vector2(36f, 0f), new Vector2(124f, 124f), () => BackPressed?.Invoke(), 64f);
@@ -44,7 +44,7 @@ namespace SquashBot.UI
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(0f, Monetization.Ads.BannerReserve), new Vector2(0f, -200f));
             viewport.gameObject.AddComponent<RectMask2D>();
-            UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
+            UiFactory.Fill(viewport, UiKit.A(UiKit.Style.black, 0.001f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
             content.pivot = new Vector2(0.5f, 1f);
             var scroll = root.gameObject.AddComponent<ScrollRect>();
@@ -84,7 +84,7 @@ namespace SquashBot.UI
             pic.pivot = new Vector2(0.5f, 1f);
             var raw = pic.gameObject.AddComponent<RawImage>();
             raw.texture = Resources.Load<Texture2D>("Arenas/arena_" + i);
-            raw.color = open ? Color.white : new Color(0.35f, 0.35f, 0.4f);
+            raw.color = open ? Color.white : UiKit.Style.steel;
             raw.raycastTarget = false;
             UiFactory.TextBox("Name", card, new Vector2(0.5f, 1f), new Vector2(0f, -(CellW - 6f)), new Vector2(CellW - 30f, 56f), Loc.T(BattleArenas.NameKey(i)), 36f, Palette.UiText, title: true);
             // Difficulty stars.
@@ -92,10 +92,10 @@ namespace SquashBot.UI
             {
                 var star = UiFactory.Box("Star", card, new Vector2(0.5f, 1f), new Vector2((s - 2) * 46f, -(CellW + 50f)), new Vector2(40f, 40f));
                 star.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(star, s < BattleArenas.Stars(i) ? new Color(1f, 0.45f, 0.3f) : new Color(1f, 1f, 1f, 0.15f), UiSprites.Star).raycastTarget = false;
+                UiFactory.Fill(star, s < BattleArenas.Stars(i) ? UiKit.Style.theirs : UiKit.A(UiKit.Style.white, 0.15f), UiSprites.Star).raycastTarget = false;
             }
             string info = open ? Loc.F("arena.best", BattleArenas.BestStreak(i), BattleArenas.Wins(i)) : Loc.F("arena.locked", BattleArenas.UnlockAt(i) + 1);
-            UiFactory.TextBox("Info", card, new Vector2(0.5f, 0f), new Vector2(0f, 96f), new Vector2(CellW - 30f, 40f), info, 24f, new Color(0.85f, 0.88f, 1f, 0.85f), FontStyles.Normal);
+            UiFactory.TextBox("Info", card, new Vector2(0.5f, 0f), new Vector2(0f, 96f), new Vector2(CellW - 30f, 40f), info, 24f, UiKit.A(UiKit.Style.text, 0.85f), FontStyles.Normal);
             var play = UiFactory.MakeButton(card, open ? Loc.T("arena.play") : Loc.F("arena.locked", BattleArenas.UnlockAt(i) + 1), open ? Kind.Gold : Kind.Secondary,
                 new Vector2(0.5f, 0f), new Vector2(0f, 18f), new Vector2(CellW - 60f, 76f), () =>
                 {

@@ -64,18 +64,12 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            var bar = UiFactory.Rect("TopBar", root, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -190f), Vector2.zero);
-            UiFactory.MakeButton(bar, "<", Kind.Icon, new Vector2(0f, 0.5f), new Vector2(36f, 0f), new Vector2(124f, 124f), () => BackPressed?.Invoke(), 64f);
-            UiFactory.Pill("TitleBack", bar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(440f, 96f), UiFactory.PillColor);
-            UiFactory.TextBox("Title", bar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(420f, 110f), Loc.T("garage.title"), 56f, Palette.UiText, title: true)
-                .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var coins = UiFactory.Pill("Coins", bar, new Vector2(1f, 0.5f), new Vector2(-36f, 0f), new Vector2(260f, 100f), UiFactory.PillColor);
-            UIController.CoinIcon(coins, new Vector2(56f, 0f));
-            coinsText = UiFactory.TextBox("Value", coins, new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Vector2(150f, 90f), "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
+            coinsText = UiKit.ScreenHeader(root, screen, Loc.T("garage.title"), () => BackPressed?.Invoke()); // (the kit's header: back, title, gold)
+            var bar = (RectTransform)root.Find("Header");
 
             // A drag across the open space above the panel turns foi round (all the way: see its back and its outfit).
             var turn = UiFactory.Rect("TurnArea", root, Vector2.zero, Vector2.one);
-            UiFactory.Fill(turn, new Color(0f, 0f, 0f, 0f));
+            UiFactory.Fill(turn, UiKit.A(UiKit.Style.black, 0f));
             turn.gameObject.AddComponent<DragTurn>().turned = dx => Turned?.Invoke(dx);
             turn.SetAsFirstSibling();
 
@@ -100,7 +94,7 @@ namespace SquashBot.UI
             // The item grid shows two rows and scrolls for the rest.
             var viewport = UiFactory.Box("GridView", panel, new Vector2(0.5f, 1f), new Vector2(0f, -300f), new Vector2(950f, 372f));
             viewport.gameObject.AddComponent<RectMask2D>();
-            UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
+            UiFactory.Fill(viewport, UiKit.A(UiKit.Style.black, 0.001f));
             grid = UiFactory.Rect("Grid", viewport, new Vector2(0f, 1f), Vector2.one);
             grid.pivot = new Vector2(0.5f, 1f);
             gridScroll = viewport.gameObject.AddComponent<ScrollRect>();
@@ -146,7 +140,7 @@ namespace SquashBot.UI
             slot = s;
             selected = Cosmetics.Equipped(s);
             foreach (var (ts, bg) in tabs)
-                if (bg != null) bg.color = ts == s ? new Color(0.62f, 0.95f, 1f, 0.55f) : new Color(0.62f, 0.62f, 1f, 0.2f);
+                if (bg != null) bg.color = ts == s ? UiKit.A(UiKit.Style.cyan, 0.55f) : UiKit.A(UiKit.Style.textMuted, 0.2f);
             RebuildGrid();
             grid.anchoredPosition = Vector2.zero;
             Refresh();
@@ -182,7 +176,7 @@ namespace SquashBot.UI
                 var c = items[i];
                 int col = i % columns, row = i / columns;
                 var tile = UiFactory.Box(c.id, grid, new Vector2(0f, 1f), new Vector2(col * (cell + gap) + 12f, -row * (cell + gap) - 4f), new Vector2(cell, cell));
-                var bg = UiFactory.Fill(tile, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 1.2f);
+                var bg = UiFactory.Fill(tile, UiKit.A(UiKit.Style.backDeep, 0.6f) /* glass */, UiSprites.Rounded, 1.2f);
                 var swatch = UiFactory.Box("Swatch", tile, new Vector2(0.5f, 1f), new Vector2(0f, -16f), new Vector2(96f, 96f));
                 var sc = c.color;
                 float m = Mathf.Max(1f, Mathf.Max(sc.r, Mathf.Max(sc.g, sc.b)));
@@ -216,7 +210,7 @@ namespace SquashBot.UI
                 bool locked = Locked(c);
                 string label = owned ? (Cosmetics.Equipped(slot) == c ? Loc.T("garage.on") : "") : locked ? LockText(c) : c.reward ? Loc.T("garage.prize") : c.price.ToString();
                 UiFactory.TextBox("Price", tile, new Vector2(0.5f, 0f), new Vector2(0f, 10f), new Vector2(160f, 46f), label, 28f,
-                    locked ? new Color(1f, 1f, 1f, 0.5f) : owned ? Palette.UiCyan : Palette.UiGold);
+                    locked ? UiKit.A(UiKit.Style.white, 0.5f) : owned ? Palette.UiCyan : Palette.UiGold);
                 if (selected == c) UiFactory.Fill(UiFactory.Stretch("Selected", tile), Palette.UiGold, UiSprites.Ring, 1.2f).raycastTarget = false;
 
                 var button = tile.gameObject.AddComponent<Button>();

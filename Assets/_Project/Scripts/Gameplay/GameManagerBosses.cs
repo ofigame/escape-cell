@@ -21,7 +21,7 @@ namespace SquashBot.Gameplay
             if (!bossWired)
             {
                 bossWired = true;
-                hunt.FormShout += (at, m) => FloatAt(at, Loc.T(MoveKey(m)), new Color(1f, 0.55f, 0.35f));
+                hunt.FormShout += (at, m) => FloatAt(at, Loc.T(MoveKey(m)), UI.UiKit.Style.orange);
                 hunt.FoiHeld += s => strikeCooldown = Mathf.Max(strikeCooldown, s);
                 hunt.FoiSlowed += s => StartCoroutine(SlowFoi(s));
             }

@@ -24,7 +24,7 @@ namespace SquashBot.Gameplay
             swordChain = Time.time - swordChainAt <= t.swordChainGap ? swordChain + 1 : 1;
             swordChainAt = Time.time;
             if (swordChain % Mathf.Max(1, t.swordEvery) != 0) return damage;
-            FloatAt(robot.transform.position + Vector3.up * 1.3f, "×" + MoveTexts.N(t.swordTimes), new Color(1f, 0.85f, 0.4f));
+            FloatAt(robot.transform.position + Vector3.up * 1.3f, "×" + MoveTexts.N(t.swordTimes), UI.UiKit.Style.gold);
             return Mathf.Max(1, Mathf.RoundToInt(damage * t.swordTimes));
         }
 

@@ -283,7 +283,7 @@ namespace SquashBot.UI
                 if (Data.Loc.Current != Data.Language.Arabic) style &= ~FontStyles.Bold;
             }
             label.text = text;
-            label.fontSize = size;
+            label.fontSize = UiKit.TypeSize(size); // (every size asked for is one of the style's type scale)
             label.fontStyle = style;
             label.color = color;
             label.alignment = align;

@@ -44,7 +44,7 @@ namespace SquashBot.UI
         {
             var t = UiFactory.TextBox("Label", parent, anchor, position, size, text, fontSize, colour, bold ? FontStyles.Bold : FontStyles.Normal, title: bold, align: align);
             t.enableAutoSizing = true;
-            t.fontSizeMax = fontSize;
+            t.fontSizeMax = UiKit.TypeSize(fontSize);
             t.fontSizeMin = fontSize * 0.6f;
             t.textWrappingMode = wrap ? TextWrappingModes.Normal : TextWrappingModes.NoWrap;
             t.overflowMode = TextOverflowModes.Ellipsis;

@@ -9,9 +9,9 @@ namespace SquashBot.UI
     /// </summary>
     public static class WorkshopTalk
     {
-        public static readonly Color BipColor = new Color(0.55f, 1f, 0.6f);
-        public static readonly Color VangColor = new Color(1f, 0.42f, 0.42f);
-        public static readonly Color KuzgunColor = new Color(1f, 0.82f, 0.4f);
+        public static readonly Color BipColor = UiKit.Style.successLight;
+        public static readonly Color VangColor = UiKit.Style.theirs;
+        public static readonly Color KuzgunColor = UiKit.Style.gold;
 
         private const string IntroKey = "sb_ws_intro";
         /// <summary>The workshop opens after the escape from the test cell (level 10).</summary>

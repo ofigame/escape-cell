@@ -101,7 +101,7 @@ namespace SquashBot.Gameplay
             {
                 // a blocked blow's graze: the health goes down quietly (the block showed itself)
                 health -= damage;
-                FloatAt(GridView.ToWorld(p), "-" + Mathf.Max(1, Mathf.RoundToInt(damage * 100f)) + "%", new Color(0.6f, 0.85f, 1f));
+                FloatAt(GridView.ToWorld(p), "-" + Mathf.Max(1, Mathf.RoundToInt(damage * 100f)) + "%", UI.UiKit.Style.info);
                 RefreshHealthBar();
                 return true;
             }
@@ -110,7 +110,7 @@ namespace SquashBot.Gameplay
             {
                 health = 0f;
                 RefreshHealthBar();
-                ui.Flash(new Color(1f, 0.15f, 0.15f), 0.4f);
+                ui.Flash(UI.UiKit.Style.red, 0.4f);
                 DuelKnockdown(false);
                 return true;
             }
@@ -126,7 +126,7 @@ namespace SquashBot.Gameplay
             bool duel = challengeRun && chPhase == ChPhase.Duel;
             float grace = hitShareOverride >= 0f ? FoeHurtGrace : HurtGrace;
             hurtCooldown = duel ? 0.12f : grace;
-            ui.Flash(new Color(1f, 0.15f, 0.15f), duel ? 0.12f : 0.3f); // (the duel: a faint red only)
+            ui.Flash(UI.UiKit.Style.red, duel ? 0.12f : 0.3f); // (the duel: a faint red only)
             BreakCombo();
 
             if (crushed) hazards.Shatter(p);
@@ -156,7 +156,7 @@ namespace SquashBot.Gameplay
             health = Mathf.Min(1f, health + HeartHeal);
             fx.Burst(GridView.ToWorld(p) + Vector3.up * 0.5f, new Color(1f, 0.45f, 0.55f), new Color(2.4f, 0.6f, 0.8f), 20, 4f);
             AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.6f);
-            FloatAt(GridView.ToWorld(p), "+" + Mathf.RoundToInt((health - before) * 100f) + "%", new Color(1f, 0.5f, 0.6f));
+            FloatAt(GridView.ToWorld(p), "+" + Mathf.RoundToInt((health - before) * 100f) + "%", UI.UiKit.Style.danger);
             RefreshHealthBar();
         }
 

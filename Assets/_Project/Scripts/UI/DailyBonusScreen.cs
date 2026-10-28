@@ -36,7 +36,7 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            UiFactory.Dim(root, new Color(0.06f, 0.05f, 0.18f, 0.55f));
+            UiFactory.Dim(root, UiKit.A(UiKit.Style.back, 0.55f));
             var card = UiFactory.Card("Card", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 1180f));
             card.pivot = new Vector2(0.5f, 0.5f);
             screen.SetPopTarget(card);
@@ -47,7 +47,7 @@ namespace SquashBot.UI
             for (int i = 0; i < rows.Length; i++)
             {
                 var row = UiFactory.Box("Row" + i, card, new Vector2(0.5f, 1f), new Vector2(0f, -270f - i * 120f), new Vector2(780f, 104f));
-                UiFactory.Fill(row, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 1.4f).raycastTarget = false;
+                UiFactory.Fill(row, UiKit.A(UiKit.Style.backDeep, 0.6f) /* glass */, UiSprites.Rounded, 1.4f).raycastTarget = false;
                 rows[i] = UiFactory.TextBox("Text", row, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(740f, 90f), "", 38f, Palette.UiText);
                 rows[i].rectTransform.pivot = new Vector2(0.5f, 0.5f);
             }
@@ -55,8 +55,8 @@ namespace SquashBot.UI
             play = UiFactory.MakeButton(card, "", Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 250f), new Vector2(620f, 150f), () => PlayPressed?.Invoke(null), 60f);
             playLabel = play.GetComponentInChildren<TextMeshProUGUI>();
             ad = UiFactory.MakeButton(card, Loc.T("daily.watchAd"), Kind.Gold, new Vector2(0.5f, 0f), new Vector2(0f, 250f), new Vector2(620f, 150f), () => AdPressed?.Invoke(), 46f);
-            countdown = UiFactory.TextBox("Countdown", card, new Vector2(0.5f, 0f), new Vector2(0f, 120f), new Vector2(820f, 80f), "", 34f, new Color(0.85f, 0.86f, 1f, 0.85f), FontStyles.Normal);
-            UiFactory.TextBox("Note", card, new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(820f, 60f), Loc.T("daily.note"), 26f, new Color(1f, 1f, 1f, 0.55f), FontStyles.Normal);
+            countdown = UiFactory.TextBox("Countdown", card, new Vector2(0.5f, 0f), new Vector2(0f, 120f), new Vector2(820f, 80f), "", 34f, UiKit.A(UiKit.Style.silver, 0.85f), FontStyles.Normal);
+            UiFactory.TextBox("Note", card, new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(820f, 60f), Loc.T("daily.note"), 26f, UiKit.A(UiKit.Style.white, 0.55f), FontStyles.Normal);
         }
 
         public void Show()
@@ -81,7 +81,7 @@ namespace SquashBot.UI
                 rows[i].text = (i + 1) + ".  " + Loc.T("bonusGame." + games[i]);
                 if (done) rows[i].fontStyle |= FontStyles.Strikethrough;
                 else rows[i].fontStyle &= ~FontStyles.Strikethrough;
-                rows[i].color = done ? new Color(1f, 1f, 1f, 0.4f) : Palette.UiText;
+                rows[i].color = done ? UiKit.A(UiKit.Style.white, 0.4f) : Palette.UiText;
             }
             int left = DailyBonus.Left;
             subtitle.text = Loc.F("daily.left", left, DailyBonus.FreePlays);

@@ -21,7 +21,7 @@ namespace SquashBot.Gameplay
             {
                 if (!broke && Time.unscaledTime - lastShieldNote < 0.8f) return;
                 lastShieldNote = Time.unscaledTime;
-                FloatAt(GridView.ToWorld(p) + Vector3.up * 1.1f, Loc.T(broke ? "float.shieldDown" : "float.energyShield"), new Color(0.55f, 0.9f, 1f));
+                FloatAt(GridView.ToWorld(p) + Vector3.up * 1.1f, Loc.T(broke ? "float.shieldDown" : "float.energyShield"), UI.UiKit.Style.cyan);
             };
             hunt.ReactorDown += p =>
             {

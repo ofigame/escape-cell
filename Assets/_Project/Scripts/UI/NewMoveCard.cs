@@ -29,7 +29,7 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            UiFactory.Dim(root, new Color(0.02f, 0.02f, 0.06f, 0.65f)).gameObject.AddComponent<IgnoreSafeArea>();
+            UiFactory.Dim(root, UiKit.A(UiKit.Style.backDeep, 0.65f)).gameObject.AddComponent<IgnoreSafeArea>();
             var card = UiFactory.Card("Card", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(880f, 900f));
             card.pivot = new Vector2(0.5f, 0.5f);
             title = UiFactory.TextBox("Title", card, new Vector2(0.5f, 1f), new Vector2(0f, -70f), new Vector2(800f, 110f), "", 62f, Palette.UiGold, title: true);
@@ -39,7 +39,7 @@ namespace SquashBot.UI
             body.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             body.textWrappingMode = TextWrappingModes.Normal;
             body.enableAutoSizing = true; body.fontSizeMin = 26f; body.fontSizeMax = 40f;
-            gifts = UiFactory.TextBox("Gifts", card, new Vector2(0.5f, 1f), new Vector2(0f, -440f), new Vector2(780f, 200f), "", 32f, new Color(0.8f, 0.85f, 1f), FontStyles.Normal);
+            gifts = UiFactory.TextBox("Gifts", card, new Vector2(0.5f, 1f), new Vector2(0f, -440f), new Vector2(780f, 200f), "", 32f, UiKit.Style.silver, FontStyles.Normal);
             gifts.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             gifts.textWrappingMode = TextWrappingModes.Normal;
             add = UiFactory.MakeButton(card, Loc.T("newmove.add"), Kind.Gold, new Vector2(0.5f, 0f), new Vector2(0f, 190f), new Vector2(640f, 130f), Add, 48f);

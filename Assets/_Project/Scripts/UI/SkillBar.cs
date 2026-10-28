@@ -47,12 +47,12 @@ namespace SquashBot.UI
         {
             switch (t)
             {
-                case PowerUpType.Super: return new Color(1f, 0.8f, 0.3f);
-                case PowerUpType.Shield: return new Color(0.45f, 0.75f, 1f);
-                case PowerUpType.Heart: return new Color(1f, 0.5f, 0.62f);
-                case PowerUpType.Freeze: return new Color(0.6f, 0.9f, 1f);
-                case PowerUpType.Blast: return new Color(1f, 0.6f, 0.35f);
-                default: return new Color(1f, 0.45f, 0.5f);
+                case PowerUpType.Super: return UiKit.Style.gold;
+                case PowerUpType.Shield: return UiKit.Style.info;
+                case PowerUpType.Heart: return UiKit.Style.danger;
+                case PowerUpType.Freeze: return UiKit.Style.cyan;
+                case PowerUpType.Blast: return UiKit.Style.orange;
+                default: return UiKit.Style.danger;
             }
         }
 
@@ -72,15 +72,15 @@ namespace SquashBot.UI
             // The name on a small glass tag across the bottom of the button, edged in the skill's colour.
             var ribbon = UiFactory.Box("Ribbon", s.root, new Vector2(0.5f, 0f), new Vector2(0f, -20f), new Vector2(176f, 48f));
             ribbon.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(UiFactory.Stretch("RibbonFace", ribbon), new Color(0.03f, 0.03f, 0.08f, 0.72f), UiSprites.Rounded, 1.8f).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Stretch("RibbonFace", ribbon), UiKit.A(UiKit.Style.backDeep, 0.72f), UiSprites.Rounded, 1.8f).raycastTarget = false;
             UiFactory.Fill(UiFactory.Stretch("RibbonRim", ribbon), new Color(c.r, c.g, c.b, 0.7f), UiSprites.Ring, 1.8f).raycastTarget = false;
-            var name = UiFactory.OutlinedText("Name", ribbon, new Vector2(0.5f, 0.5f), new Vector2(0f, 1f), new Vector2(166f, 44f), Loc.T("skillName." + t), 28f, new Color(0.05f, 0.04f, 0.14f));
+            var name = UiFactory.OutlinedText("Name", ribbon, new Vector2(0.5f, 0.5f), new Vector2(0f, 1f), new Vector2(166f, 44f), Loc.T("skillName." + t), 28f, UiKit.Style.backDeep);
             name.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             // How many are left: a red badge with a white number.
             var badge = UiFactory.Box("Badge", s.root, new Vector2(1f, 1f), new Vector2(14f, 14f), new Vector2(62f, 62f));
             badge.pivot = new Vector2(1f, 1f);
-            UiFactory.Fill(UiFactory.Stretch("BadgeFace", badge), new Color(1f, 0.3f, 0.36f, 1f), UiSprites.Circle).raycastTarget = false;
-            s.count = UiFactory.OutlinedText("Count", badge, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(60f, 56f), "", 38f, new Color(0.3f, 0.02f, 0.08f));
+            UiFactory.Fill(UiFactory.Stretch("BadgeFace", badge), UiKit.Style.theirs, UiSprites.Circle).raycastTarget = false;
+            s.count = UiFactory.OutlinedText("Count", badge, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(60f, 56f), "", 38f, UiKit.Style.panelDanger);
             s.count.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var button = s.root.gameObject.AddComponent<Button>();
             button.targetGraphic = bg;

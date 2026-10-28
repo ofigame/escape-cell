@@ -148,7 +148,7 @@ namespace SquashBot.Gameplay
                 // Too weak a weapon for this floor's armour: say so (not on every blow, never for a defence's shot).
                 if (defenseStrike || Time.unscaledTime - lastArmorNote < 2.5f) return;
                 lastArmorNote = Time.unscaledTime;
-                FloatAt(GridView.ToWorld(p) + Vector3.up * 1.1f, Loc.F("float.armored", level.armor + 1), new Color(0.75f, 0.85f, 1f));
+                FloatAt(GridView.ToWorld(p) + Vector3.up * 1.1f, Loc.F("float.armored", level.armor + 1), UI.UiKit.Style.silver);
             };
             hunt.MonsterAppeared += () =>
             {
@@ -401,7 +401,7 @@ namespace SquashBot.Gameplay
             ShowHeld(weapon ?? Armory.Equipped);
             heldWeapon.Swing();
             CloseBag();
-            FloatAt(robot.transform.position + Vector3.up * 0.6f, Loc.T("bag.gunDropped"), new Color(1f, 0.75f, 0.45f));
+            FloatAt(robot.transform.position + Vector3.up * 0.6f, Loc.T("bag.gunDropped"), UI.UiKit.Style.gold);
             AudioManager.PlaySfx(Sfx.Click, 0.9f, 0.8f);
         }
 
@@ -545,7 +545,7 @@ namespace SquashBot.Gameplay
                 myNextBlow = 1f;
                 NoteHabit(myCombo);
                 stats.mine.blows++;
-                if (trainingOn && trainingInfo) FloatAt(GridView.ToWorld(at) + Vector3.up * 1.9f, damage.ToString(), new Color(1f, 0.95f, 0.75f)); // (the training room's damage numbers)
+                if (trainingOn && trainingInfo) FloatAt(GridView.ToWorld(at) + Vector3.up * 1.9f, damage.ToString(), UI.UiKit.Style.parchment); // (the training room's damage numbers)
                 if (hunt.ChallengeFoeTile.HasValue && at == hunt.ChallengeFoeTile.Value) MyVampire(damage);
             }
             // a heavy weapon staggers the duel's rival a moment on every blow that lands

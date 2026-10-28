@@ -67,11 +67,11 @@ namespace SquashBot.UI
         }
 
         /// <summary>The part's colour (as in the workshop).</summary>
-        public static Color PartColour(RobotPart p) => p == RobotPart.Body ? new Color(1f, 0.45f, 0.5f) : p == RobotPart.Arms ? new Color(1f, 0.66f, 0.25f) : new Color(0.45f, 0.75f, 1f);
+        public static Color PartColour(RobotPart p) => p == RobotPart.Body ? UiKit.Style.danger : p == RobotPart.Arms ? UiKit.Style.warning : UiKit.Style.info;
 
         private void Build(RectTransform root)
         {
-            UiFactory.Dim(root, new Color(0.04f, 0.04f, 0.12f, 0.88f));
+            UiFactory.Dim(root, UiKit.A(UiKit.Style.backDeep, 0.88f));
             card = UiFactory.Card("Card", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 1800f));
             card.pivot = new Vector2(0.5f, 0.5f);
             screen.SetPopTarget(card);
@@ -92,7 +92,7 @@ namespace SquashBot.UI
                 name.enableAutoSizing = true; name.fontSizeMin = 20f; name.fontSizeMax = 36f;
                 partLevel[i] = UiFactory.TextBox("Level", card, new Vector2(0f, 1f), new Vector2(40f, y - 56f), new Vector2(220f, 44f), "", 28f, Color.white, align: TextAlignmentOptions.Left);
                 UiFactory.Bar(card, new Vector2(0f, 1f), new Vector2(270f, y - 18f), new Vector2(400f, 44f), PartColour(p), out partFill[i]);
-                partPoints[i] = UiFactory.TextBox("Points", card, new Vector2(0f, 1f), new Vector2(270f, y - 66f), new Vector2(400f, 40f), "", 26f, new Color(1f, 1f, 1f, 0.85f));
+                partPoints[i] = UiFactory.TextBox("Points", card, new Vector2(0f, 1f), new Vector2(270f, y - 66f), new Vector2(400f, 40f), "", 26f, UiKit.A(UiKit.Style.white, 0.85f));
                 levelUp[i] = UiFactory.MakeButton(card, Loc.T("ibag.levelUp"), Kind.Gold, new Vector2(1f, 1f), new Vector2(-30f, y), new Vector2(270f, 104f), () => LevelUp(idx), 30f);
                 levelUpLabel[i] = levelUp[i].GetComponentInChildren<TextMeshProUGUI>();
                 levelUpLabel[i].enableAutoSizing = true; levelUpLabel[i].fontSizeMin = 16f; levelUpLabel[i].fontSizeMax = 30f;
@@ -106,9 +106,9 @@ namespace SquashBot.UI
 
             // the chosen item: its name, what it does, USE and ×10 USE
             detail = UiFactory.Box("Detail", card, new Vector2(0.5f, 0f), new Vector2(0f, 170f), new Vector2(920f, 230f));
-            UiFactory.Fill(detail, new Color(0.03f, 0.06f, 0.16f, 0.85f), UiSprites.Rounded, 1.6f).raycastTarget = false;
+            UiFactory.Fill(detail, UiKit.A(UiKit.Style.back, 0.85f), UiSprites.Rounded, 1.6f).raycastTarget = false;
             detailName = UiFactory.TextBox("Name", detail, new Vector2(0f, 1f), new Vector2(26f, -14f), new Vector2(560f, 60f), "", 36f, Color.white, title: true, align: TextAlignmentOptions.Left);
-            detailText = UiFactory.TextBox("Text", detail, new Vector2(0f, 1f), new Vector2(26f, -78f), new Vector2(560f, 140f), "", 28f, new Color(1f, 1f, 1f, 0.85f), FontStyles.Normal, align: TextAlignmentOptions.TopLeft);
+            detailText = UiFactory.TextBox("Text", detail, new Vector2(0f, 1f), new Vector2(26f, -78f), new Vector2(560f, 140f), "", 28f, UiKit.A(UiKit.Style.white, 0.85f), FontStyles.Normal, align: TextAlignmentOptions.TopLeft);
             detailText.textWrappingMode = TextWrappingModes.Normal;
             useOne = UiFactory.MakeButton(detail, Loc.T("ibag.use"), Kind.Primary, new Vector2(1f, 1f), new Vector2(-20f, -14f), new Vector2(290f, 96f), () => Use(1), 34f);
             useTen = UiFactory.MakeButton(detail, Loc.T("ibag.use10"), Kind.Secondary, new Vector2(1f, 0f), new Vector2(-20f, 14f), new Vector2(290f, 90f), () => Use(10), 30f);
@@ -116,7 +116,7 @@ namespace SquashBot.UI
 
             // the shows' layer (catches the finger only while one plays: a tap skips it)
             showLayer = UiFactory.Stretch("Shows", card);
-            UiFactory.Fill(showLayer, new Color(0f, 0f, 0f, 0.001f));
+            UiFactory.Fill(showLayer, UiKit.A(UiKit.Style.black, 0.001f));
             var skipButton = showLayer.gameObject.AddComponent<Button>();
             skipButton.transition = Selectable.Transition.None;
             skipButton.onClick.AddListener(() => skip = true);
@@ -328,7 +328,7 @@ namespace SquashBot.UI
                     tiles.Add((tile, k, r));
                     n++;
                 }
-            if (n == 0) UiFactory.TextBox("Empty", grid, new Vector2(0.5f, 1f), new Vector2(0f, -60f), new Vector2(860f, 160f), Loc.T("ibag.empty"), 32f, new Color(1f, 1f, 1f, 0.6f), FontStyles.Normal).textWrappingMode = TextWrappingModes.Normal;
+            if (n == 0) UiFactory.TextBox("Empty", grid, new Vector2(0.5f, 1f), new Vector2(0f, -60f), new Vector2(860f, 160f), Loc.T("ibag.empty"), 32f, UiKit.A(UiKit.Style.white, 0.6f), FontStyles.Normal).textWrappingMode = TextWrappingModes.Normal;
 
             detail.gameObject.SetActive(chosen.HasValue);
             if (chosen.HasValue)
@@ -419,7 +419,7 @@ namespace SquashBot.UI
                 Image flash = null;
                 if (epic)
                 {
-                    flash = UiFactory.Fill(UiFactory.Stretch("Flash", showLayer), new Color(1f, 0.82f, 0.3f, 0.55f));
+                    flash = UiFactory.Fill(UiFactory.Stretch("Flash", showLayer), UiKit.A(UiKit.Style.gold, 0.55f));
                     flash.raycastTarget = false;
                     flash.transform.SetSiblingIndex(0);
                     AudioManager.PlaySfx(Sfx.Win, 0.9f, 1.2f);
@@ -518,7 +518,7 @@ namespace SquashBot.UI
             // the row lit, the level popping
             var glow = UiFactory.Box("Glow", showLayer, new Vector2(0.5f, 0.5f), row + new Vector2(-180f, -20f), new Vector2(960f, 120f));
             glow.pivot = new Vector2(0.5f, 0.5f);
-            var gi = UiFactory.Fill(glow, new Color(1f, 1f, 1f, 0.5f), UiSprites.Rounded, 2f);
+            var gi = UiFactory.Fill(glow, UiKit.A(UiKit.Style.white, 0.5f), UiSprites.Rounded, 2f);
             gi.raycastTarget = false;
             AudioManager.PlaySfx(Sfx.Win, 0.8f, 1.1f);
             for (float t = 0f; t < 1f && !skip; t += Time.unscaledDeltaTime / 0.4f)

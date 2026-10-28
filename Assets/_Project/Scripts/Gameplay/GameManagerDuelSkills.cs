@@ -163,7 +163,7 @@ namespace SquashBot.Gameplay
             myComboMove = 0;
             strikeCooldown = Mathf.Max(strikeCooldown, 0.55f);
             skillBar?.ShowCombo(0);
-            skillBar?.Shout(Loc.T("duel.parried"), new Color(0.6f, 0.85f, 1f));
+            skillBar?.Shout(Loc.T("duel.parried"), UI.UiKit.Style.info);
             if (heldWeapon != null) heldWeapon.Recoil(); // (foi's blade knocked aside)
             var parrier = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<HeldWeapon>() : null;
             if (parrier != null) parrier.Swing(CombatLibrary.Family(parrier.Family).Blow(2)); // (its weapon across to meet it)
@@ -269,7 +269,7 @@ namespace SquashBot.Gameplay
                     Shockwave.Create(foeAt, upper ? 2.6f : 1.8f, upper ? new Color(1f, 0.35f, 0.25f) : new Color(1f, 0.75f, 0.35f));
                     cameraRig.Shake(upper ? 0.7f : 0.45f);
                     AudioManager.PlaySfx(Sfx.Impact, 1f, upper ? 0.7f : 0.85f);
-                    skillBar.Shout(Loc.T(upper ? "duel.upper" : "duel.heavy") + "!", new Color(1f, 0.6f, 0.25f));
+                    skillBar.Shout(Loc.T(upper ? "duel.upper" : "duel.heavy") + "!", UI.UiKit.Style.orange);
                     if (LiveActive) LiveNet.Special(upper ? 3 : 2);
                     else
                     {
@@ -289,7 +289,7 @@ namespace SquashBot.Gameplay
                 }
                 case DuelSkillBar.Move.Breaker:
                     if (myMeter < 1f || rivalCombo < 2) return;
-                    if (Time.time < rivalIronUntil) { skillBar.Shout(Loc.T("move.u.IronBody"), new Color(0.85f, 0.85f, 0.9f)); return; } // (its iron body: no breaking it)
+                    if (Time.time < rivalIronUntil) { skillBar.Shout(Loc.T("move.u.IronBody"), UI.UiKit.Style.silver); return; } // (its iron body: no breaking it)
                     PlayStyle.Breaker();
                     stats.mine.breakers++;
                     myMeter -= 1f;
@@ -298,7 +298,7 @@ namespace SquashBot.Gameplay
                     Shockwave.Create(robot.transform.position, 2.4f, new Color(0.4f, 0.8f, 1f));
                     fx.Burst(robot.transform.position + Vector3.up * 0.6f, new Color(0.5f, 0.85f, 1f), new Color(1f, 2f, 3f), 30, 6f);
                     AudioManager.PlaySfx(Sfx.Shield, 1f, 0.8f);
-                    skillBar.Shout(Loc.T("duel.broken"), new Color(0.5f, 0.85f, 1f));
+                    skillBar.Shout(Loc.T("duel.broken"), UI.UiKit.Style.info);
                     BreakerShown(false);
                     if (LiveActive) LiveNet.Special(5);
                     else
@@ -842,7 +842,7 @@ namespace SquashBot.Gameplay
         {
             moveBusy = true;
             ultimateOn = true; SkinnedHero.ClashOff = true;
-            skillBar?.Shout(Loc.T("duel.ultTitle"), mine ? new Color(0.8f, 0.5f, 1f) : new Color(1f, 0.4f, 0.4f));
+            skillBar?.Shout(Loc.T("duel.ultTitle"), mine ? UI.UiKit.Style.purple : UI.UiKit.Style.theirs);
             AudioManager.PlaySfx(Sfx.Win, 1f, 0.6f);
             if (colosseum != null) colosseum.Cheer(mine ? 0 : 1, 1f);
             if (mine) hunt.StunFoe(6.5f);
@@ -1026,7 +1026,7 @@ namespace SquashBot.Gameplay
                     Shockwave.Create(meet, 1.6f, new Color(1f, 0.9f, 0.6f));
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 0.8f);
                     cameraRig.Shake(0.7f);
-                    skillBar?.Shout(Loc.T("duel.clash"), new Color(1f, 0.8f, 0.4f));
+                    skillBar?.Shout(Loc.T("duel.clash"), UI.UiKit.Style.gold);
                     var rs = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
                     if (rs != null) { rs.Stagger(meet, 0.6f); rs.Shudder(meet, 1f); }
                     hunt.StunFoe(0.4f);
@@ -1051,7 +1051,7 @@ namespace SquashBot.Gameplay
             finally { if (dbl != null) dbl.Done(); }
             var skin = model.GetComponentInChildren<SkinnedHero>();
             if (crashed) { if (skin != null) { skin.Stagger(GridView.ToWorld(land), 0.6f); skin.Shudder(GridView.ToWorld(land), 1f); } }
-            else { skillBar?.Shout(Loc.T("duel.over"), new Color(0.6f, 0.9f, 1f)); hunt.StunFoe(0.25f); cameraRig.Shake(0.25f); }
+            else { skillBar?.Shout(Loc.T("duel.over"), UI.UiKit.Style.cyan); hunt.StunFoe(0.25f); cameraRig.Shake(0.25f); }
             moveBusy = false;
         }
 
@@ -1078,7 +1078,7 @@ namespace SquashBot.Gameplay
             fx.Burst(at + Vector3.up * 1.4f, new Color(1f, 0.9f, 0.5f), new Color(3f, 2.6f, 1f), 24, 6f);
             cameraRig.Shake(0.5f);
             AudioManager.PlaySfx(Sfx.Impact, 1f, 1.2f);
-            skillBar?.Shout(Loc.T("duel.airHit"), mine ? new Color(1f, 0.85f, 0.3f) : new Color(1f, 0.45f, 0.4f));
+            skillBar?.Shout(Loc.T("duel.airHit"), mine ? UI.UiKit.Style.gold : UI.UiKit.Style.danger);
             if (!LiveActive && !mine) HurtMe(JumpExtra, BlowKind.Air);
         }
 
@@ -1125,7 +1125,7 @@ namespace SquashBot.Gameplay
             var winner = mine ? robot.Visual : hunt.ChallengeFoeModel;
             var winnerHeld = winner != null ? winner.GetComponentInChildren<HeldWeapon>() : null;
             if (winnerHeld != null) winnerHeld.Flourish(); // (the family's flourish: sheathed, shouldered, planted, struck on the ground)
-            skillBar?.Shout(Loc.T("duel.finished"), mine ? new Color(1f, 0.85f, 0.3f) : new Color(1f, 0.4f, 0.4f));
+            skillBar?.Shout(Loc.T("duel.finished"), mine ? UI.UiKit.Style.gold : UI.UiKit.Style.theirs);
             if (colosseum != null) colosseum.Cheer(mine ? 0 : 1, 1f);
             var bolt = new Color(0.62f, 0.64f, 0.7f);
             for (int i = 0; i < 4; i++)
@@ -1156,7 +1156,7 @@ namespace SquashBot.Gameplay
             // a face taunt: the face makes it for a moment, its name in a little balloon over the head
             if (taunt) FaceFor(who, FaceTaunts.Of(e));
             string text = taunt ? Loc.T("taunt." + FaceTaunts.Of(e)) : Loc.T("duel.em." + Mathf.Clamp(e, 0, Emotes.Count - 1));
-            FloatAt(at + Vector3.up * (taunt ? 2.2f : 1.3f), text, mine ? new Color(0.45f, 0.75f, 1f) : new Color(1f, 0.5f, 0.45f));
+            FloatAt(at + Vector3.up * (taunt ? 2.2f : 1.3f), text, mine ? UI.UiKit.Style.info : UI.UiKit.Style.danger);
             AudioManager.PlaySfx(Sfx.Click, 0.7f, mine ? 1.5f : 1.2f);
             return true;
         }
@@ -1219,7 +1219,7 @@ namespace SquashBot.Gameplay
                 BreakerShown(true);
                 Shockwave.Create(foeAt, 2.4f, new Color(1f, 0.45f, 0.4f));
                 AudioManager.PlaySfx(Sfx.Shield, 1f, 0.75f);
-                skillBar?.Shout(Loc.T("duel.broken"), new Color(1f, 0.45f, 0.4f));
+                skillBar?.Shout(Loc.T("duel.broken"), UI.UiKit.Style.danger);
                 return;
             }
             if (RivalPhysical(dist)) return; // (a sweep, an uppercut, a headbutt, a shoulder: its personality's)
@@ -1285,7 +1285,7 @@ namespace SquashBot.Gameplay
                     stats.mine.brokenByRival++;
                     strikeCooldown = Mathf.Max(strikeCooldown, Bal.breakerStun);
                     Shockwave.Create(foeAt, 2.4f, new Color(1f, 0.45f, 0.4f));
-                    skillBar?.Shout(Loc.T("duel.broken"), new Color(1f, 0.45f, 0.4f));
+                    skillBar?.Shout(Loc.T("duel.broken"), UI.UiKit.Style.danger);
                     break;
                 case 6: cameraRig.StartCoroutine(Finisher(robot.transform.position, false)); break;
             }

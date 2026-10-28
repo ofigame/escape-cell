@@ -103,7 +103,7 @@ namespace SquashBot.Gameplay
                 return 0f;
             }
             share *= RivalBlowFactor();
-            if (mySturdy && health - share <= 0.001f) { mySturdy = false; skillBar?.Shout(Loc.T("move.p.Sturdy"), new Color(1f, 0.8f, 0.3f)); return Mathf.Max(0f, health - 1f / Mathf.Max(1, duelMine.hp)); }
+            if (mySturdy && health - share <= 0.001f) { mySturdy = false; skillBar?.Shout(Loc.T("move.p.Sturdy"), UI.UiKit.Style.gold); return Mathf.Max(0f, health - 1f / Mathf.Max(1, duelMine.hp)); }
             RivalVampire(share);
             return share;
         }
@@ -131,7 +131,7 @@ namespace SquashBot.Gameplay
         /// <summary>The player pressed the special: its own move (false when it cannot be used now: out of reach).</summary>
         private bool TrySpecial()
         {
-            if (!CanUse(true, mySpecial)) { skillBar?.Shout(Loc.T("move.far"), new Color(1f, 1f, 1f, 0.8f)); return false; }
+            if (!CanUse(true, mySpecial)) { skillBar?.Shout(Loc.T("move.far"), UI.UiKit.A(UI.UiKit.Style.white, 0.8f)); return false; }
             cameraRig.StartCoroutine(DoSpecial(true, mySpecial));
             return true;
         }
@@ -153,7 +153,7 @@ namespace SquashBot.Gameplay
             moveBusy = true;
             if (mine) NoteDuel(DuelGoal.Special);
             if (mine && LiveActive) LiveNet.Move(1, (int)s);
-            skillBar?.Shout(Loc.T("move.s." + s), mine ? new Color(0.5f, 0.85f, 1f) : new Color(1f, 0.5f, 0.45f));
+            skillBar?.Shout(Loc.T("move.s." + s), mine ? UI.UiKit.Style.info : UI.UiKit.Style.danger);
             float hitTimes = Bal.SpecialHit(s), stun = Bal.SpecialStun(s);
             var me = mine ? robot.Position : hunt.ChallengeFoeTile ?? robot.Position;
             var other = mine ? hunt.ChallengeFoeTile ?? robot.Position : robot.Position;
@@ -357,7 +357,7 @@ namespace SquashBot.Gameplay
                 // the other's own ultimate, at 90%
                 var copied = mine ? rivalUlti : myUlti;
                 if (copied == UltiKind.Copy) copied = UltiKind.Cinematic;
-                skillBar?.Shout(Loc.T("move.u.Copy"), new Color(0.9f, 0.9f, 1f));
+                skillBar?.Shout(Loc.T("move.u.Copy"), UI.UiKit.Style.text);
                 if (mine && LiveActive) LiveNet.Move(4, (int)UltiKind.Copy);
                 var self = mine ? robot.Visual : hunt.ChallengeFoeModel;
                 MoveFx.Shell(self, new Color(0.9f, 0.9f, 1f), 0.6f, 0.4f);
@@ -371,7 +371,7 @@ namespace SquashBot.Gameplay
             if (mine) NoteDuel(DuelGoal.Ultimate);
             if (mine && LiveActive && scale >= 0.99f) LiveNet.Move(4, (int)u);
             CombatFeel.UltiStart(mine ? robot.Visual : hunt.ChallengeFoeModel); // (the screen dims, the pictures slow a breath, the caster glows)
-            skillBar?.Shout(Loc.T("move.u." + u), mine ? new Color(0.8f, 0.5f, 1f) : new Color(1f, 0.4f, 0.4f));
+            skillBar?.Shout(Loc.T("move.u." + u), mine ? UI.UiKit.Style.purple : UI.UiKit.Style.theirs);
             AudioManager.PlaySfx(Sfx.Win, 1f, 0.6f);
             if (colosseum != null) colosseum.Cheer(mine ? 0 : 1, 1f);
             float power = scale; // (the copy's share; else the table's own numbers)

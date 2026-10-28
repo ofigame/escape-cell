@@ -28,7 +28,7 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            UiFactory.Dim(root, new Color(0.02f, 0.02f, 0.06f, 0.6f)).gameObject.AddComponent<IgnoreSafeArea>();
+            UiFactory.Dim(root, UiKit.A(UiKit.Style.backDeep, 0.6f)).gameObject.AddComponent<IgnoreSafeArea>();
             var card = UiFactory.Card("Card", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(860f, 620f));
             card.pivot = new Vector2(0.5f, 0.5f);
             title = UiFactory.TextBox("Title", card, new Vector2(0.5f, 1f), new Vector2(0f, -60f), new Vector2(780f, 100f), "", 64f, Palette.UiGold, title: true);

@@ -286,7 +286,7 @@ namespace SquashBot.UI
             cam = camGo.AddComponent<Camera>();
             cam.orthographic = true;
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(0f, 0f, 0f, 0f);
+            cam.backgroundColor = UiKit.A(UiKit.Style.black, 0f);
             cam.nearClipPlane = 0.1f;
             cam.farClipPlane = 10f;
             cam.enabled = false;

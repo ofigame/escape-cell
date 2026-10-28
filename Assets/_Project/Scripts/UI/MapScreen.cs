@@ -59,15 +59,17 @@ namespace SquashBot.UI
         {
             // The map's 3D camera draws the background; this layer only catches drags and holds the buttons.
             overlay = UiFactory.Rect("Overlay", root, Vector2.zero, Vector2.one, new Vector2(0f, Monetization.Ads.BannerReserve), new Vector2(0f, -190f));
-            UiFactory.Fill(overlay, new Color(0f, 0f, 0f, 0.001f));
+            UiFactory.Fill(overlay, UiKit.A(UiKit.Style.black, 0.001f));
             var drag = overlay.gameObject.AddComponent<MapDragArea>();
             drag.Dragged += px => world?.Drag(px);
             drag.Released += () => world?.EndDrag();
 
             // Fixed top bar over the map
-            var bar = UiFactory.Rect("TopBar", root, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -190f), Vector2.zero);
-            UiFactory.Fill(bar, new Color(0.08f, 0.07f, 0.18f, 0.88f)).raycastTarget = false;
-            UiFactory.MakeButton(bar, "<", Kind.Icon, new Vector2(0f, 0.5f), new Vector2(36f, 0f), new Vector2(124f, 124f), () => BackPressed?.Invoke(), 64f);
+            // (the kit's header: back and gold; its middle the energy, not a title; a dark band under it over the map)
+            coinsText = UiKit.ScreenHeader(root, screen, "", () => BackPressed?.Invoke());
+            var bar = (RectTransform)root.Find("Header");
+            var band = UiFactory.Fill(UiFactory.Stretch("Band", bar), UiKit.A(UiKit.Style.back, 0.88f));
+            band.raycastTarget = false; band.transform.SetAsFirstSibling();
             var lives = UiFactory.Pill("Lives", bar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300f, 100f), UiFactory.PillColor);
             lives.pivot = new Vector2(0.5f, 0.5f);
             lives.anchoredPosition = Vector2.zero;
@@ -84,10 +86,7 @@ namespace SquashBot.UI
             bonusCount = UiFactory.Text(badge, "1", 34f, Color.white);
             bonusButton.gameObject.AddComponent<Pulse>();
 
-            var coins = UiFactory.Pill("Coins", bar, new Vector2(1f, 0.5f), new Vector2(-36f, 0f), new Vector2(240f, 100f), UiFactory.PillColor);
-            UIController.CoinIcon(coins, new Vector2(56f, 0f));
-            coinsText = UiFactory.TextBox("Value", coins, new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Vector2(130f, 90f),
-                "0", 50f, Palette.UiGold, align: TextAlignmentOptions.Left);
+
         }
 
         /// <summary>(Re)builds the map for the current progress and shows it around <paramref name="focusLevel"/>.</summary>
@@ -186,16 +185,16 @@ namespace SquashBot.UI
             var banner = UiFactory.Box("Banner " + (w + 1), overlay, new Vector2(0f, 0f), Vector2.zero, new Vector2(780f, 176f));
             banner.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.Fill(UiFactory.Stretch("Body", banner), Color.white, UiSprites.Parchment, 1.1f);
-            if (!locked) MenuArt.Emblem(banner, MenuArt.Icon.Map, new Color(0.42f, 0.36f, 0.88f), new Vector2(1f, 0.5f), new Vector2(-86f, 0f), 112f);
+            if (!locked) MenuArt.Emblem(banner, MenuArt.Icon.Map, UiKit.Style.violet, new Vector2(1f, 0.5f), new Vector2(-86f, 0f), 112f);
             var title = UiFactory.TextBox("Name", banner, new Vector2(0.5f, 1f), new Vector2(-50f, -22f), new Vector2(600f, 54f),
-                Loc.F("world", w + 1, Loc.T(theme.key)).ToUpper(Loc.Culture), 32f, new Color(0.45f, 0.24f, 0.08f), title: true);
+                Loc.F("world", w + 1, Loc.T(theme.key)).ToUpper(Loc.Culture), 32f, UiKit.Style.brown, title: true);
             title.characterSpacing = 2f;
             title.enableAutoSizing = true;
             title.fontSizeMin = 20f;
             title.fontSizeMax = 32f;
             string sub = locked ? Loc.F("map.locked", w) : $"{w * LevelCatalog.LevelsPerWorld + 1} - {(w + 1) * LevelCatalog.LevelsPerWorld}";
             UiFactory.TextBox("Sub", banner, new Vector2(0.5f, 0f), new Vector2(-50f, 22f), new Vector2(600f, 80f), sub, locked ? 34f : 62f,
-                new Color(0.28f, 0.15f, 0.05f), title: true);
+                UiKit.Style.panelDanger, title: true);
             if (locked) Lock(banner, new Vector2(0f, 0.5f), new Vector2(54f, 0f), 0.7f);
             else
             {
@@ -222,7 +221,7 @@ namespace SquashBot.UI
             bool locked = level > unlocked && !openAll;
             var node = UiFactory.Box($"Level {level + 1}", overlay, new Vector2(0f, 0f), Vector2.zero, new Vector2(180f, 150f));
             node.pivot = new Vector2(0.5f, 0.5f);
-            var hit = UiFactory.Fill(node, new Color(1f, 1f, 1f, 0.001f), UiSprites.Circle);
+            var hit = UiFactory.Fill(node, UiKit.A(UiKit.Style.white, 0.001f), UiSprites.Circle);
 
             if (locked)
             {
@@ -245,7 +244,7 @@ namespace SquashBot.UI
                     num.rectTransform.anchoredPosition = new Vector2(0f, 8f);
                     num.fontSharedMaterial = NumberMaterial;
                     num.enableVertexGradient = true;
-                    var gold = new Color(1f, 0.86f, 0.45f);
+                    var gold = UiKit.Style.gold;
                     num.colorGradient = new VertexGradient(Color.white, Color.white, gold, gold);
                 }
                 if (completed) NodeStars(node, Progress.Stars(level), -26f);
@@ -279,9 +278,9 @@ namespace SquashBot.UI
                 numberMaterial = new Material(UiFactory.TitleFont.material) { name = "Map Numbers" };
                 numberMaterial.EnableKeyword("OUTLINE_ON");
                 numberMaterial.SetFloat(ShaderUtilities.ID_OutlineWidth, 0.3f);
-                numberMaterial.SetColor(ShaderUtilities.ID_OutlineColor, new Color(0.14f, 0.08f, 0.3f));
+                numberMaterial.SetColor(ShaderUtilities.ID_OutlineColor, UiKit.Style.back);
                 numberMaterial.EnableKeyword("UNDERLAY_ON");
-                numberMaterial.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0.05f, 0.02f, 0.12f, 0.7f));
+                numberMaterial.SetColor(ShaderUtilities.ID_UnderlayColor, UiKit.A(UiKit.Style.backDeep, 0.7f));
                 numberMaterial.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0.5f);
                 numberMaterial.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, -0.8f);
                 numberMaterial.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.3f);
@@ -324,7 +323,7 @@ namespace SquashBot.UI
             {
                 var star = UiFactory.Box("Star", node, new Vector2(0.5f, 0f), new Vector2((i - 1) * 46f, i == 1 ? y - 8f : y), new Vector2(50f, 50f));
                 star.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(star, i < stars ? Palette.UiGold : new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Star).raycastTarget = false;
+                UiFactory.Fill(star, i < stars ? Palette.UiGold : UiKit.A(UiKit.Style.backDeep, 0.6f) /* glass */, UiSprites.Star).raycastTarget = false;
             }
         }
 
@@ -352,12 +351,12 @@ namespace SquashBot.UI
             root.pivot = new Vector2(0.5f, 0.5f);
             var shackle = UiFactory.Box("Shackle", root, new Vector2(0.5f, 1f), new Vector2(0f, 4f * scale), new Vector2(46f, 50f) * scale);
             shackle.pivot = new Vector2(0.5f, 1f);
-            UiFactory.Fill(shackle, new Color(1f, 1f, 1f, 0.75f), UiSprites.Ring, 0.35f / scale).raycastTarget = false;
+            UiFactory.Fill(shackle, UiKit.A(UiKit.Style.white, 0.75f), UiSprites.Ring, 0.35f / scale).raycastTarget = false;
             var body = UiFactory.Box("Body", root, new Vector2(0.5f, 0f), Vector2.zero, new Vector2(70f, 50f) * scale);
             body.pivot = new Vector2(0.5f, 0f);
-            UiFactory.Fill(body, new Color(1f, 1f, 1f, 0.85f), UiSprites.Rounded, 2.5f / scale).raycastTarget = false;
+            UiFactory.Fill(body, UiKit.A(UiKit.Style.white, 0.85f), UiSprites.Rounded, 2.5f / scale).raycastTarget = false;
             var hole = UiFactory.Box("Hole", body, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(12f, 18f) * scale);
-            UiFactory.Fill(hole, new Color(0.04f, 0.04f, 0.09f, 0.6f) /* glass */, UiSprites.Rounded, 6f).raycastTarget = false;
+            UiFactory.Fill(hole, UiKit.A(UiKit.Style.backDeep, 0.6f) /* glass */, UiSprites.Rounded, 6f).raycastTarget = false;
         }
 
     }

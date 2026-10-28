@@ -59,7 +59,7 @@ namespace SquashBot.UI
             for (int i = 0; i < DuelChests.Tiers; i++) Card(root, (ChestTier)i, -250f - i * 296f);
             var bottom = new Vector2(0.5f, 0f);
             // a plain chest for an ad (the player's choice); the hint moves up under the title
-            adChest = Flat.Button(root, "", bottom, new Vector2(0f, Ads.BannerReserve + 80f), new Vector2(720f, 100f), new Color(0.62f, 0.4f, 1f), Color.white, AdChest, 32f);
+            adChest = Flat.Button(root, "", bottom, new Vector2(0f, Ads.BannerReserve + 80f), new Vector2(720f, 100f), UiKit.Style.purple, Color.white, AdChest, 32f);
             ((RectTransform)adChest.transform).pivot = new Vector2(0.5f, 0.5f);
             adChestLabel = adChest.GetComponentInChildren<TextMeshProUGUI>();
         }
@@ -88,7 +88,7 @@ namespace SquashBot.UI
             // what may come out of it, with pictures (a reason to win the next duel)
             var see = Flat.Button(row, Loc.T("chests.contents"), new Vector2(1f, 0.5f), new Vector2(-30f, -92f), new Vector2(250f, 64f), Flat.CardHi, Flat.Text, () => ShowContents(t), 24f);
             ((RectTransform)see.transform).pivot = new Vector2(1f, 0.5f);
-            openButtons[i] = Flat.Button(row, Loc.T("chests.open"), new Vector2(1f, 0.5f), new Vector2(-30f, 0f), new Vector2(250f, 120f), new Color(0.2f, 0.72f, 0.36f), Color.white, () => TryOpen(t), 38f);
+            openButtons[i] = Flat.Button(row, Loc.T("chests.open"), new Vector2(1f, 0.5f), new Vector2(-30f, 0f), new Vector2(250f, 120f), UiKit.Style.success, Color.white, () => TryOpen(t), 38f);
             ((RectTransform)openButtons[i].transform).pivot = new Vector2(1f, 0.5f);
             openLabels[i] = openButtons[i].GetComponentInChildren<TextMeshProUGUI>();
         }
@@ -109,7 +109,7 @@ namespace SquashBot.UI
             contentsOdds.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var viewport = UiFactory.Rect("Viewport", root, Vector2.zero, Vector2.one, new Vector2(30f, Ads.BannerReserve + 150f), new Vector2(-30f, -350f));
             viewport.gameObject.AddComponent<RectMask2D>();
-            UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
+            UiFactory.Fill(viewport, UiKit.A(UiKit.Style.black, 0.001f));
             contentsGrid = UiFactory.Rect("Grid", viewport, new Vector2(0f, 1f), Vector2.one);
             contentsGrid.pivot = new Vector2(0.5f, 1f);
             var scroll = root.gameObject.AddComponent<ScrollRect>();
@@ -131,7 +131,7 @@ namespace SquashBot.UI
             {
                 const int Cols = 3; const float W = 300f, H = 360f, Gap = 18f;
                 float x = (n % Cols - (Cols - 1) * 0.5f) * (W + Gap), y = -(n / Cols) * (H + Gap);
-                var card = Flat.Panel(contentsGrid, "Gift", new Vector2(0.5f, 1f), new Vector2(x, y), new Vector2(W, H), rare ? new Color(0.32f, 0.22f, 0.08f) : Flat.Card);
+                var card = Flat.Panel(contentsGrid, "Gift", new Vector2(0.5f, 1f), new Vector2(x, y), new Vector2(W, H), rare ? UiKit.Style.brown : Flat.Card);
                 card.pivot = new Vector2(0.5f, 1f);
                 var box = UiFactory.Box("Picture", card, new Vector2(0.5f, 1f), new Vector2(0f, -140f), new Vector2(250f, 250f));
                 box.pivot = new Vector2(0.5f, 0.5f);
@@ -181,12 +181,12 @@ namespace SquashBot.UI
             openNote = Flat.Label(root, "", mid, new Vector2(0f, -540f), new Vector2(960f, 110f), 30f, Flat.Gold, TextAlignmentOptions.Center);
             openNote.textWrappingMode = TextWrappingModes.Normal; openNote.enableAutoSizing = true; openNote.fontSizeMin = 18f; openNote.fontSizeMax = 30f; // (with the items it may run to two lines)
             openNote.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            takeButton = Flat.Button(root, Loc.T("chests.take"), new Vector2(0.5f, 0f), new Vector2(0f, Ads.BannerReserve + 120f), new Vector2(600f, 130f), new Color(0.2f, 0.72f, 0.36f), Color.white, Take, 46f);
+            takeButton = Flat.Button(root, Loc.T("chests.take"), new Vector2(0.5f, 0f), new Vector2(0f, Ads.BannerReserve + 120f), new Vector2(600f, 130f), UiKit.Style.success, Color.white, Take, 46f);
             ((RectTransform)takeButton.transform).pivot = new Vector2(0.5f, 0.5f);
-            equipButton = Flat.Button(root, Loc.T("chests.equip"), new Vector2(0.5f, 0f), new Vector2(-180f, Ads.BannerReserve + 120f), new Vector2(340f, 130f), new Color(0.62f, 0.4f, 1f), Color.white, Equip, 44f);
+            equipButton = Flat.Button(root, Loc.T("chests.equip"), new Vector2(0.5f, 0f), new Vector2(-180f, Ads.BannerReserve + 120f), new Vector2(340f, 130f), UiKit.Style.purple, Color.white, Equip, 44f);
             ((RectTransform)equipButton.transform).pivot = new Vector2(0.5f, 0.5f);
             // Not happy with it? An ad swaps it for another draw (once).
-            swapButton = Flat.Button(root, "▶ " + Loc.T("chests.swap"), new Vector2(0.5f, 0f), new Vector2(0f, Ads.BannerReserve + 270f), new Vector2(600f, 110f), new Color(0.95f, 0.6f, 0.15f), Color.white, Swap, 38f);
+            swapButton = Flat.Button(root, "▶ " + Loc.T("chests.swap"), new Vector2(0.5f, 0f), new Vector2(0f, Ads.BannerReserve + 270f), new Vector2(600f, 110f), UiKit.Style.orange, Color.white, Swap, 38f);
             ((RectTransform)swapButton.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 
@@ -226,7 +226,7 @@ namespace SquashBot.UI
                 counts[i].text = n > 0 ? "x" + n : Loc.T("chests.none");
                 openButtons[i].interactable = n > 0;
                 openLabels[i].text = Loc.T("chests.open");
-                pictures[i].color = n > 0 ? Color.white : new Color(1f, 1f, 1f, 0.35f);
+                pictures[i].color = n > 0 ? Color.white : UiKit.A(UiKit.Style.white, 0.35f);
             }
         }
 

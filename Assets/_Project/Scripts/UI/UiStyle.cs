@@ -28,6 +28,26 @@ namespace SquashBot.UI
         public Color theirs = new Color(1f, 0.36f, 0.34f);
         public Color dim = new Color(0.2f, 0.19f, 0.36f, 0.55f);
         public Color pill = new Color(0.05f, 0.12f, 0.3f, 0.78f);
+        [Header("Role colours (every screen's colour is one of these)")]
+        public Color white = Color.white;
+        public Color black = Color.black;
+        public Color backDeep = new Color(0.04f, 0.04f, 0.1f);
+        public Color successLight = new Color(0.5f, 1f, 0.6f);
+        public Color orange = new Color(1f, 0.58f, 0.25f);
+        public Color info = new Color(0.5f, 0.8f, 1f);
+        public Color purple = new Color(0.65f, 0.45f, 1f);
+        public Color panelSuccess = new Color(0.12f, 0.22f, 0.17f);
+        public Color panelDanger = new Color(0.3f, 0.04f, 0.1f);
+        public Color bronze = new Color(0.72f, 0.48f, 0.25f);
+        public Color parchment = new Color(0.92f, 0.85f, 0.7f);
+        public Color steel = new Color(0.4f, 0.42f, 0.5f);
+        public Color red = new Color(0.72f, 0.16f, 0.12f);
+        public Color brown = new Color(0.45f, 0.28f, 0.12f);
+        public Color violet = new Color(0.42f, 0.36f, 0.88f);
+        public Color green = new Color(0.25f, 0.6f, 0.35f);
+        public Color royal = new Color(0.22f, 0.42f, 0.88f);
+        public Color silver = new Color(0.78f, 0.8f, 0.9f);
+        public Color tan = new Color(0.85f, 0.7f, 0.45f);
 
         [Header("Type (on the 1080-wide canvas)")]
         public float titleSize = 56f;
@@ -35,6 +55,8 @@ namespace SquashBot.UI
         public float bodySize = 30f;
         public float smallSize = 24f;
         public float numberSize = 46f;
+        [Tooltip("The type scale: every text's size is the largest of these not over the size its screen asked for (no text grows past its box)")]
+        public float[] typeScale = { 16f, 20f, 24f, 28f, 30f, 34f, 38f, 42f, 46f, 50f, 56f, 64f, 72f, 84f, 110f };
 
         [Header("Spacing")]
         public float headerHeight = 190f;

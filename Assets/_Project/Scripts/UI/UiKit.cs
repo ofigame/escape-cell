@@ -17,6 +17,20 @@ namespace SquashBot.UI
     {
         public static UiStyle Style => UiStyle.Current;
 
+        /// <summary>A size asked for, as the style's type scale has it: the largest step not over it (so a text never
+        /// grows past the box its screen made for it), the smallest step at least.</summary>
+        public static float TypeSize(float asked)
+        {
+            var scale = Style.typeScale;
+            if (scale == null || scale.Length == 0) return asked;
+            float best = scale[0];
+            for (int i = 0; i < scale.Length; i++) if (scale[i] <= asked + 0.01f) best = scale[i];
+            return best;
+        }
+
+        /// <summary>A role colour at another opacity (a shadow, a dim, a glass face).</summary>
+        public static Color A(Color c, float alpha) => new Color(c.r, c.g, c.b, alpha);
+
         // ---------- UiScreenHeader ----------
 
         /// <summary>

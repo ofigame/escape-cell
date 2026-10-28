@@ -26,7 +26,7 @@ namespace SquashBot.UI
             r.pivot = new Vector2(0.5f, 0.5f);
             var w = r.gameObject.AddComponent<EmoteWheel>();
             w.root = r;
-            var disc = UiFactory.Fill(r, new Color(0.04f, 0.05f, 0.12f, 0.72f), UiSprites.Circle);
+            var disc = UiFactory.Fill(r, UiKit.A(UiKit.Style.backDeep, 0.72f), UiSprites.Circle);
             disc.raycastTarget = true;
             r.gameObject.SetActive(false);
             return w;
@@ -61,7 +61,7 @@ namespace SquashBot.UI
                 var at = new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * Radius;
                 bool taunt = FaceTaunts.IsTaunt(e);
                 string label = taunt ? Loc.T("taunt." + FaceTaunts.Of(e)) : Loc.T("duel.em." + e);
-                var b = Flat.Button(root, taunt ? "" : label, new Vector2(0.5f, 0.5f), at, new Vector2(150f, 112f), taunt ? new Color(0.95f, 0.55f, 0.3f) : (e == Emotes.Season ? new Color(0.65f, 0.45f, 1f) : Flat.CardHi), Flat.Text, () => { Close(); Picked?.Invoke(e); }, 22f);
+                var b = Flat.Button(root, taunt ? "" : label, new Vector2(0.5f, 0.5f), at, new Vector2(150f, 112f), taunt ? UiKit.Style.orange : (e == Emotes.Season ? UiKit.Style.purple : Flat.CardHi), Flat.Text, () => { Close(); Picked?.Invoke(e); }, 22f);
                 var rt = (RectTransform)b.transform;
                 rt.pivot = new Vector2(0.5f, 0.5f);
                 if (taunt)
@@ -79,7 +79,7 @@ namespace SquashBot.UI
             }
             if (pages > 1)
             {
-                var more = Flat.Button(root, (page + 1) + "/" + pages, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(110f, 110f), new Color(0.3f, 0.75f, 0.55f), Flat.Text, () => { page++; Fill(); }, 28f);
+                var more = Flat.Button(root, (page + 1) + "/" + pages, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(110f, 110f), UiKit.Style.success, Flat.Text, () => { page++; Fill(); }, 28f);
                 ((RectTransform)more.transform).pivot = new Vector2(0.5f, 0.5f);
                 slots.Add(more.gameObject);
             }

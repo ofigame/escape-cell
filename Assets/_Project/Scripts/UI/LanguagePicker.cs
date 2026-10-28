@@ -28,7 +28,7 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            var dim = UiFactory.Dim(root, new Color(0.04f, 0.03f, 0.12f, 0.6f));
+            var dim = UiFactory.Dim(root, UiKit.A(UiKit.Style.backDeep, 0.6f));
             var close = dim.gameObject.AddComponent<UnityEngine.UI.Button>();
             close.transition = UnityEngine.UI.Selectable.Transition.None;
             close.onClick.AddListener(Hide);

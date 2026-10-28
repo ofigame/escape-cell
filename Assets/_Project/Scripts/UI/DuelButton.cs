@@ -39,8 +39,8 @@ namespace SquashBot.UI
             b.colour = colour;
             b.group = rt.gameObject.AddComponent<CanvasGroup>();
             // the glow behind (a ready ultimate), the ring's track and fill, the face, the icon, the waiting sweep
-            b.glow = Img("Glow", rt, UiSprites.Circle, new Color(1f, 0.85f, 0.3f, 0f), 1.32f);
-            b.ringBack = Img("RingBack", rt, DuelIcons.Ring, new Color(0f, 0f, 0f, 0.45f), 1.18f);
+            b.glow = Img("Glow", rt, UiSprites.Circle, UiKit.A(UiKit.Style.gold, 0f), 1.32f);
+            b.ringBack = Img("RingBack", rt, DuelIcons.Ring, UiKit.A(UiKit.Style.black, 0.45f), 1.18f);
             if (ringParts > 1)
             {
                 b.parts = new Image[ringParts];
@@ -71,7 +71,7 @@ namespace SquashBot.UI
             b.face = UiFactory.Chunky(faceRt, UiFactory.StyleOf(colour), 1f, 0f, UiSprites.Circle);
             b.face.raycastTarget = true;
             b.icon = Img("Icon", rt, DuelIcons.Get(icon), Color.white, 0.68f);
-            b.wait = Img("Wait", rt, UiSprites.Circle, new Color(0.05f, 0.05f, 0.1f, 0.55f), 1f);
+            b.wait = Img("Wait", rt, UiSprites.Circle, UiKit.A(UiKit.Style.backDeep, 0.55f), 1f);
             b.wait.type = Image.Type.Filled;
             b.wait.fillMethod = Image.FillMethod.Radial360;
             b.wait.fillOrigin = (int)Image.Origin360.Top;
@@ -101,8 +101,8 @@ namespace SquashBot.UI
             {
                 var b = UiFactory.Box("Badge", rect, new Vector2(1f, 1f), new Vector2(6f, 6f), new Vector2(46f, 46f));
                 b.pivot = new Vector2(1f, 1f);
-                UiFactory.Fill(UiFactory.Stretch("Face", b), new Color(0.12f, 0.1f, 0.2f, 0.95f), UiSprites.Circle).raycastTarget = false;
-                badge = UiFactory.OutlinedText("Count", b, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(46f, 42f), "", 28f, new Color(0.05f, 0.03f, 0.1f));
+                UiFactory.Fill(UiFactory.Stretch("Face", b), UiKit.A(UiKit.Style.back, 0.95f), UiSprites.Circle).raycastTarget = false;
+                badge = UiFactory.OutlinedText("Count", b, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(46f, 42f), "", 28f, UiKit.Style.backDeep);
                 badge.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             }
             badge.transform.parent.gameObject.SetActive(!string.IsNullOrEmpty(text));

@@ -42,7 +42,7 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            UiFactory.Dim(root, new Color(0.02f, 0.02f, 0.06f, 0.72f)).gameObject.AddComponent<IgnoreSafeArea>();
+            UiFactory.Dim(root, UiKit.A(UiKit.Style.backDeep, 0.72f)).gameObject.AddComponent<IgnoreSafeArea>();
             var card = UiFactory.Card("Card", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(860f, 1040f));
             card.pivot = new Vector2(0.5f, 0.5f);
             title = UiFactory.TextBox("Title", card, new Vector2(0.5f, 1f), new Vector2(0f, -70f), new Vector2(780f, 100f), Loc.T("chest.title"), 64f, Palette.UiGold, title: true);
@@ -52,7 +52,7 @@ namespace SquashBot.UI
 
             glow = UiFactory.Box("Glow", card, new Vector2(0.5f, 0.5f), new Vector2(0f, 90f), new Vector2(640f, 640f));
             glow.pivot = new Vector2(0.5f, 0.5f);
-            glowImage = UiFactory.Fill(glow, new Color(1f, 0.85f, 0.4f, 0.4f), UiSprites.Circle);
+            glowImage = UiFactory.Fill(glow, UiKit.A(UiKit.Style.gold, 0.4f), UiSprites.Circle);
             glowImage.raycastTarget = false;
 
             // The chest: a body with a metal band and lock, and its lid on top (it flies off when opened).
@@ -68,7 +68,7 @@ namespace SquashBot.UI
             band.raycastTarget = false;
             var lk = UiFactory.Box("Lock", chest, new Vector2(0.5f, 0f), new Vector2(0f, 120f), new Vector2(64f, 76f));
             lk.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(lk, new Color(1f, 0.85f, 0.35f), UiSprites.Rounded, 14f).raycastTarget = false;
+            UiFactory.Fill(lk, UiKit.Style.gold, UiSprites.Rounded, 14f).raycastTarget = false;
             lid = UiFactory.Box("Lid", chest, new Vector2(0.5f, 0f), new Vector2(0f, 188f), new Vector2(384f, 96f));
             lid.pivot = new Vector2(0.5f, 0f);
             lidFace = UiFactory.Fill(lid, Color.white, UiSprites.Rounded, 30f);
@@ -93,7 +93,7 @@ namespace SquashBot.UI
             tap.transition = Selectable.Transition.None;
             tap.onClick.AddListener(() => { if (openedAt < 0f) Open(); });
             var hit = chest.gameObject.AddComponent<Image>();
-            hit.color = new Color(0f, 0f, 0f, 0f);
+            hit.color = UiKit.A(UiKit.Style.black, 0f);
         }
 
         /// <param name="opened">Called on the tap: grants the reward and returns the line to show.</param>
@@ -102,7 +102,7 @@ namespace SquashBot.UI
         {
             onOpen = opened;
             onDouble = watchToDouble;
-            tint = rarity == ChestRarity.Epic ? new Color(1f, 0.78f, 0.25f) : rarity == ChestRarity.Rare ? new Color(0.78f, 0.84f, 0.95f) : new Color(0.62f, 0.4f, 0.22f);
+            tint = rarity == ChestRarity.Epic ? UiKit.Style.gold : rarity == ChestRarity.Rare ? UiKit.Style.silver : UiKit.Style.bronze;
             body.color = tint;
             lidFace.color = Color.Lerp(tint, Color.white, 0.2f);
             band.color = Color.Lerp(tint, Color.black, 0.35f);

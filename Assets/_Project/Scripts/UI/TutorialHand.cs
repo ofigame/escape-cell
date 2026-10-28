@@ -30,7 +30,7 @@ namespace SquashBot.UI
             h.ringImage.raycastTarget = false;
             h.finger = UiFactory.Box("Finger", r, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(70f, 70f));
             h.finger.pivot = new Vector2(0.5f, 0.5f);
-            var f = UiFactory.Fill(h.finger, new Color(1f, 1f, 1f, 0.95f), UiSprites.Circle);
+            var f = UiFactory.Fill(h.finger, UiKit.A(UiKit.Style.white, 0.95f), UiSprites.Circle);
             f.raycastTarget = false;
             var shadow = r.gameObject.AddComponent<CanvasGroup>();
             shadow.blocksRaycasts = false;

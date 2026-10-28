@@ -92,17 +92,16 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            UiFactory.Dim(root, new Color(0.02f, 0.02f, 0.06f, 0.72f)).gameObject.AddComponent<IgnoreSafeArea>();
+            UiFactory.Dim(root, UiKit.A(UiKit.Style.backDeep, 0.72f)).gameObject.AddComponent<IgnoreSafeArea>();
             var card = UiFactory.Card("Card", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(940f, 1560f));
             card.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.TextBox("Title", card, new Vector2(0.5f, 1f), new Vector2(0f, -70f), new Vector2(820f, 100f), Loc.T("comp.quests"), 64f, Palette.UiGold, title: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
             list = UiFactory.Box("List", card, new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(860f, 1200f));
             list.pivot = new Vector2(0.5f, 1f);
-            renew = UiFactory.TextBox("Renew", card, new Vector2(0.5f, 0f), new Vector2(0f, 175f), new Vector2(820f, 50f), "", 30f, new Color(1f, 1f, 1f, 0.7f), FontStyles.Normal);
+            renew = UiFactory.TextBox("Renew", card, new Vector2(0.5f, 0f), new Vector2(0f, 175f), new Vector2(820f, 50f), "", 30f, UiKit.A(UiKit.Style.white, 0.7f), FontStyles.Normal);
             renew.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var close = UiFactory.MakeButton(card, Loc.T("btn.close"), Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 80f), new Vector2(480f, 110f), () => screen.Hide(), 46f);
-            ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
+            UiFactory.MakeButton(card, "X", Kind.Icon, new Vector2(1f, 1f), new Vector2(-22f, -22f), new Vector2(100f, 100f), () => screen.Hide(), 48f); // (the kit's popup close: X at the top right, as on every popup)
         }
 
         private float y;
@@ -120,7 +119,7 @@ namespace SquashBot.UI
             var row = UiFactory.Box("Quest", list, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(860f, 160f));
             row.pivot = new Vector2(0.5f, 1f);
             y -= 174f;
-            UiFactory.Framed(row, q.claimed ? new Color(0.12f, 0.2f, 0.14f) : Flat.Card, 1.8f).raycastTarget = false;
+            UiFactory.Framed(row, q.claimed ? UiKit.Style.panelSuccess : Flat.Card, 1.8f).raycastTarget = false;
             var text = UiFactory.TextBox("Text", row, new Vector2(0f, 1f), new Vector2(26f, -16f), new Vector2(560f, 84f), q.text, 32f, Palette.UiText, FontStyles.Normal, align: TextAlignmentOptions.TopLeft);
             text.rectTransform.pivot = new Vector2(0f, 1f);
             text.textWrappingMode = TextWrappingModes.Normal;
@@ -131,13 +130,13 @@ namespace SquashBot.UI
             coins.rectTransform.pivot = new Vector2(1f, 1f);
             var back = UiFactory.Box("Bar", row, new Vector2(0f, 0f), new Vector2(26f, 32f), new Vector2(540f, 32f));
             back.pivot = new Vector2(0f, 0.5f);
-            UiFactory.Fill(back, new Color(0f, 0f, 0f, 0.4f), UiSprites.Rounded, 16f).raycastTarget = false;
+            UiFactory.Fill(back, UiKit.A(UiKit.Style.black, 0.4f), UiSprites.Rounded, 16f).raycastTarget = false;
             float k = Mathf.Clamp01(q.progress / (float)Mathf.Max(1, q.target));
             if (k > 0f)
             {
                 var fill = UiFactory.Box("Fill", back, new Vector2(0f, 0.5f), Vector2.zero, new Vector2(Mathf.Max(32f, 540f * k), 32f));
                 fill.pivot = new Vector2(0f, 0.5f);
-                UiFactory.Fill(fill, new Color(0.36f, 0.85f, 0.6f), UiSprites.Rounded, 16f).raycastTarget = false;
+                UiFactory.Fill(fill, UiKit.Style.success, UiSprites.Rounded, 16f).raycastTarget = false;
             }
             UiFactory.TextBox("Count", back, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(540f, 32f), q.claimed ? Loc.T("quests.done") : q.progress + " / " + q.target, 24f, Color.white, title: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);

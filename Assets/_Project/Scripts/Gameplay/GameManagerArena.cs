@@ -453,7 +453,7 @@ namespace SquashBot.Gameplay
         private bool ArenaDamage(float weight, bool knockOut)
         {
             BreakCombo();
-            ui.Flash(new Color(1f, 0.15f, 0.15f), 0.35f);
+            ui.Flash(UI.UiKit.Style.red, 0.35f);
             cameraRig.Shake(1f);
             Haptics.Medium();
             fx.Burst(robot.transform.position + Vector3.up * 0.4f, new Color(1f, 0.35f, 0.35f), new Color(2.4f, 0.5f, 0.4f), 22, 5f);

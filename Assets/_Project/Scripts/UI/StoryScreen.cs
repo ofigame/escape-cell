@@ -48,7 +48,7 @@ namespace SquashBot.UI
         private void Build(RectTransform root)
         {
             // The whole screen is the "next" button.
-            dim = UiFactory.Dim(root, new Color(0.05f, 0.04f, 0.14f, 0.55f));
+            dim = UiFactory.Dim(root, UiKit.A(UiKit.Style.backDeep, 0.55f));
             var tap = dim.gameObject.AddComponent<Button>();
             tap.transition = Selectable.Transition.None;
             tap.onClick.AddListener(Advance);
@@ -63,7 +63,7 @@ namespace SquashBot.UI
             bubble = UiFactory.Card("Bubble", root, new Vector2(0.5f, 0.5f), new Vector2(0f, 120f), new Vector2(940f, 520f));
             bubbleRim = UiFactory.Fill(UiFactory.Stretch("Rim", bubble), Palette.UiCyan, UiSprites.Ring, 0.9f);
             bubbleRim.raycastTarget = false;
-            var namePill = UiFactory.Pill("Name", bubble, new Vector2(0.5f, 1f), new Vector2(0f, 40f), new Vector2(420f, 90f), new Color(0.04f, 0.04f, 0.09f, 0.66f) /* glass */);
+            var namePill = UiFactory.Pill("Name", bubble, new Vector2(0.5f, 1f), new Vector2(0f, 40f), new Vector2(420f, 90f), UiKit.A(UiKit.Style.backDeep, 0.66f) /* glass */);
             speakerName = UiFactory.Text(namePill, "", 44f, Palette.UiCyan);
             speakerName.characterSpacing = 4f;
             line = UiFactory.TextBox("Line", bubble, new Vector2(0.5f, 0.5f), new Vector2(0f, 10f), new Vector2(840f, 380f), "", 54f, Palette.UiText, FontStyles.Bold);
@@ -73,7 +73,7 @@ namespace SquashBot.UI
             line.fontSizeMax = 54f;
             line.raycastTarget = false;
             tapHint = UiFactory.TextBox("Tap", bubble, new Vector2(0.5f, 0f), new Vector2(0f, 46f), new Vector2(800f, 50f), Loc.T("story.tap"), 32f,
-                new Color(1f, 1f, 1f, 0.6f), FontStyles.Normal);
+                UiKit.A(UiKit.Style.white, 0.6f), FontStyles.Normal);
             tapHint.raycastTarget = false;
 
             bipAvatar = BuildBip(root);
@@ -102,7 +102,7 @@ namespace SquashBot.UI
             robotFace.raycastTarget = false;
             var visor = UiFactory.Box("Visor", head, new Vector2(0.5f, 0.5f), new Vector2(0f, 6f), new Vector2(200f, 120f));
             visor.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(visor, new Color(0.2f, 0.22f, 0.36f), UiSprites.Rounded, 1.6f).raycastTarget = false;
+            UiFactory.Fill(visor, UiKit.Style.panel, UiSprites.Rounded, 1.6f).raycastTarget = false;
             robotEyes = new Image[2];
             for (int i = 0; i < 2; i++)
             {
@@ -113,7 +113,7 @@ namespace SquashBot.UI
             }
             var stick = UiFactory.Box("Antenna", avatar, new Vector2(0.5f, 0.5f), new Vector2(0f, 120f), new Vector2(14f, 50f));
             stick.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(stick, new Color(0.75f, 0.78f, 0.9f), UiSprites.Rounded, 10f).raycastTarget = false;
+            UiFactory.Fill(stick, UiKit.Style.silver, UiSprites.Rounded, 10f).raycastTarget = false;
             var tip = UiFactory.Box("Tip", avatar, new Vector2(0.5f, 0.5f), new Vector2(0f, 150f), new Vector2(34f, 34f));
             tip.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.Fill(tip, Palette.UiGold, UiSprites.Circle).raycastTarget = false;
@@ -127,28 +127,28 @@ namespace SquashBot.UI
             avatar.pivot = new Vector2(0.5f, 0.5f);
             var stand = UiFactory.Box("Stand", avatar, new Vector2(0.5f, 0.5f), new Vector2(0f, -130f), new Vector2(40f, 60f));
             stand.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(stand, new Color(0.2f, 0.18f, 0.3f), UiSprites.Rounded, 6f).raycastTarget = false;
+            UiFactory.Fill(stand, UiKit.Style.panelSuccess, UiSprites.Rounded, 6f).raycastTarget = false;
             var monitor = UiFactory.Box("Monitor", avatar, new Vector2(0.5f, 0.5f), new Vector2(0f, 10f), new Vector2(300f, 230f));
             monitor.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(monitor, new Color(0.18f, 0.15f, 0.28f), UiSprites.Rounded, 1.2f).raycastTarget = false;
-            UiFactory.Fill(UiFactory.Stretch("Rim", monitor), new Color(1f, 0.35f, 0.45f, 0.9f), UiSprites.Ring, 1.2f).raycastTarget = false;
+            UiFactory.Fill(monitor, UiKit.Style.panel, UiSprites.Rounded, 1.2f).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Stretch("Rim", monitor), UiKit.A(UiKit.Style.theirs, 0.9f), UiSprites.Ring, 1.2f).raycastTarget = false;
             var glass = UiFactory.Box("Screen", monitor, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(250f, 180f));
             glass.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(glass, new Color(0.3f, 0.06f, 0.12f), UiSprites.Rounded, 1.6f).raycastTarget = false;
+            UiFactory.Fill(glass, UiKit.Style.panelDanger, UiSprites.Rounded, 1.6f).raycastTarget = false;
             var brow = UiFactory.Box("Brow", glass, new Vector2(0.5f, 0.5f), new Vector2(0f, 62f), new Vector2(120f, 16f));
             brow.pivot = new Vector2(0.5f, 0.5f);
             brow.localRotation = Quaternion.Euler(0f, 0f, -8f);
-            UiFactory.Fill(brow, new Color(1f, 0.4f, 0.45f), UiSprites.Rounded, 12f).raycastTarget = false;
+            UiFactory.Fill(brow, UiKit.Style.theirs, UiSprites.Rounded, 12f).raycastTarget = false;
             var eye = UiFactory.Box("Eye", glass, new Vector2(0.5f, 0.5f), new Vector2(0f, 18f), new Vector2(84f, 84f));
             eye.pivot = new Vector2(0.5f, 0.5f);
-            wardenEye = UiFactory.Fill(eye, new Color(1f, 0.3f, 0.35f), UiSprites.Circle);
+            wardenEye = UiFactory.Fill(eye, UiKit.Style.theirs, UiSprites.Circle);
             wardenEye.raycastTarget = false;
             var pupil = UiFactory.Box("Pupil", eye, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(30f, 30f));
             pupil.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(pupil, new Color(1f, 0.9f, 0.9f), UiSprites.Circle).raycastTarget = false;
+            UiFactory.Fill(pupil, UiKit.Style.text, UiSprites.Circle).raycastTarget = false;
             wardenMouth = UiFactory.Box("Mouth", glass, new Vector2(0.5f, 0.5f), new Vector2(0f, -54f), new Vector2(110f, 12f));
             wardenMouth.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(wardenMouth, new Color(1f, 0.4f, 0.45f), UiSprites.Rounded, 12f).raycastTarget = false;
+            UiFactory.Fill(wardenMouth, UiKit.Style.theirs, UiSprites.Rounded, 12f).raycastTarget = false;
             return avatar;
         }
 
@@ -159,21 +159,21 @@ namespace SquashBot.UI
             avatar.pivot = new Vector2(0.5f, 0.5f);
             var wheel = UiFactory.Box("Wheel", avatar, new Vector2(0.5f, 0.5f), new Vector2(0f, -112f), new Vector2(86f, 86f));
             wheel.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(wheel, new Color(0.62f, 0.4f, 0.28f), UiSprites.Circle).raycastTarget = false;
+            UiFactory.Fill(wheel, UiKit.Style.bronze, UiSprites.Circle).raycastTarget = false;
             var hub = UiFactory.Box("Hub", wheel, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(34f, 34f));
             hub.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(hub, new Color(0.35f, 0.27f, 0.24f), UiSprites.Circle).raycastTarget = false;
+            UiFactory.Fill(hub, UiKit.Style.brown, UiSprites.Circle).raycastTarget = false;
             var body = UiFactory.Box("Body", avatar, new Vector2(0.5f, 0.5f), new Vector2(0f, -6f), new Vector2(230f, 200f));
             body.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(body, new Color(0.93f, 0.86f, 0.7f), UiSprites.Rounded, 0.7f).raycastTarget = false;
+            UiFactory.Fill(body, UiKit.Style.parchment, UiSprites.Rounded, 0.7f).raycastTarget = false;
             var screenBox = UiFactory.Box("Screen", body, new Vector2(0.5f, 0.5f), new Vector2(0f, 8f), new Vector2(176f, 128f));
             screenBox.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(screenBox, new Color(0.12f, 0.24f, 0.2f), UiSprites.Rounded, 1.4f).raycastTarget = false;
+            UiFactory.Fill(screenBox, UiKit.Style.panelSuccess, UiSprites.Rounded, 1.4f).raycastTarget = false;
             foreach (float x in new[] { -34f, 34f })
             {
                 var eye = UiFactory.Box("Eye", screenBox, new Vector2(0.5f, 0.5f), new Vector2(x, 6f), new Vector2(34f, 34f));
                 eye.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(eye, new Color(0.55f, 1f, 0.6f), UiSprites.Circle).raycastTarget = false;
+                UiFactory.Fill(eye, UiKit.Style.successLight, UiSprites.Circle).raycastTarget = false;
             }
             // The crack across the screen.
             foreach (var (pos, angle, len) in new[] { (new Vector2(40f, 30f), -55f, 70f), (new Vector2(58f, -4f), -20f, 40f) })
@@ -181,15 +181,15 @@ namespace SquashBot.UI
                 var crack = UiFactory.Box("Crack", screenBox, new Vector2(0.5f, 0.5f), pos, new Vector2(5f, len));
                 crack.pivot = new Vector2(0.5f, 0.5f);
                 crack.localRotation = Quaternion.Euler(0f, 0f, angle);
-                UiFactory.Fill(crack, new Color(0.75f, 0.9f, 0.85f, 0.7f), UiSprites.Rounded, 20f).raycastTarget = false;
+                UiFactory.Fill(crack, UiKit.A(UiKit.Style.silver, 0.7f), UiSprites.Rounded, 20f).raycastTarget = false;
             }
             var stick = UiFactory.Box("Antenna", avatar, new Vector2(0.5f, 0.5f), new Vector2(-50f, 118f), new Vector2(10f, 44f));
             stick.pivot = new Vector2(0.5f, 0.5f);
             stick.localRotation = Quaternion.Euler(0f, 0f, 14f);
-            UiFactory.Fill(stick, new Color(0.62f, 0.55f, 0.45f), UiSprites.Rounded, 10f).raycastTarget = false;
+            UiFactory.Fill(stick, UiKit.Style.bronze, UiSprites.Rounded, 10f).raycastTarget = false;
             var tip = UiFactory.Box("Tip", avatar, new Vector2(0.5f, 0.5f), new Vector2(-56f, 142f), new Vector2(26f, 26f));
             tip.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(tip, new Color(0.55f, 1f, 0.6f), UiSprites.Circle).raycastTarget = false;
+            UiFactory.Fill(tip, UiKit.Style.successLight, UiSprites.Circle).raycastTarget = false;
             return avatar;
         }
 
@@ -219,10 +219,10 @@ namespace SquashBot.UI
             avatar.pivot = new Vector2(0.5f, 0.5f);
             var head = UiFactory.Box("Head", avatar, new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(260f, 230f));
             head.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(head, new Color(0.62f, 0.6f, 0.66f), UiSprites.Rounded, 1.2f).raycastTarget = false;
+            UiFactory.Fill(head, UiKit.Style.textMuted, UiSprites.Rounded, 1.2f).raycastTarget = false;
             var visor = UiFactory.Box("Visor", head, new Vector2(0.5f, 0.5f), new Vector2(0f, 6f), new Vector2(200f, 120f));
             visor.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(visor, new Color(0.18f, 0.18f, 0.26f), UiSprites.Rounded, 1.6f).raycastTarget = false;
+            UiFactory.Fill(visor, UiKit.Style.panelSuccess, UiSprites.Rounded, 1.6f).raycastTarget = false;
             foreach (float x in new[] { -44f, 44f })
             {
                 var eye = UiFactory.Box("Eye", visor, new Vector2(0.5f, 0.5f), new Vector2(x, 4f), new Vector2(38f, 46f));
@@ -235,16 +235,16 @@ namespace SquashBot.UI
                 var scratch = UiFactory.Box("Scratch", head, new Vector2(0.5f, 0.5f), pos, new Vector2(6f, 46f));
                 scratch.pivot = new Vector2(0.5f, 0.5f);
                 scratch.localRotation = Quaternion.Euler(0f, 0f, angle);
-                UiFactory.Fill(scratch, new Color(0.38f, 0.36f, 0.42f), UiSprites.Rounded, 20f).raycastTarget = false;
+                UiFactory.Fill(scratch, UiKit.Style.steel, UiSprites.Rounded, 20f).raycastTarget = false;
             }
             thiefMask = UiFactory.Box("Mask", head, new Vector2(0.5f, 0.5f), new Vector2(0f, 8f), new Vector2(250f, 70f));
             thiefMask.pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(thiefMask, new Color(0.08f, 0.07f, 0.12f), UiSprites.Rounded, 2f).raycastTarget = false;
+            UiFactory.Fill(thiefMask, UiKit.Style.back, UiSprites.Rounded, 2f).raycastTarget = false;
             foreach (float x in new[] { -44f, 44f })
             {
                 var hole = UiFactory.Box("Hole", thiefMask, new Vector2(0.5f, 0.5f), new Vector2(x, 0f), new Vector2(40f, 22f));
                 hole.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(hole, new Color(1f, 0.85f, 0.4f), UiSprites.Rounded, 8f).raycastTarget = false;
+                UiFactory.Fill(hole, UiKit.Style.gold, UiSprites.Rounded, 8f).raycastTarget = false;
             }
             return avatar;
         }
@@ -283,10 +283,10 @@ namespace SquashBot.UI
             line.maxVisibleCharacters = 0;
             line.fontStyle = who == Speaker.Narrator ? FontStyles.Italic : FontStyles.Bold;
 
-            Color accent = who == Speaker.VanG ? new Color(1f, 0.45f, 0.5f)
-                : who == Speaker.Bip ? new Color(0.55f, 1f, 0.6f)
+            Color accent = who == Speaker.VanG ? UiKit.Style.danger
+                : who == Speaker.Bip ? UiKit.Style.successLight
                 : who == Speaker.Thief ? Palette.UiGold
-                : who == Speaker.Lumi ? new Color(1f, 0.8f, 0.95f)
+                : who == Speaker.Lumi ? UiKit.Style.parchment
                 : Palette.UiCyan;
             speakerName.text = who == Speaker.VanG ? Loc.T("story.warden")
                 : who == Speaker.Bip ? Loc.T("story.bip")

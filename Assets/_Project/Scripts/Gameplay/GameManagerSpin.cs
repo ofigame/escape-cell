@@ -71,8 +71,8 @@ namespace SquashBot.Gameplay
             if (level == null || level.mission != MissionType.Hunt || !robot.IsAlive) return;
             furyReadyAt = Time.time + FuryRest;
             furyUntil = Time.time + FurySeconds;
-            ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.7f), Loc.T("streak.fury"), new Color(1f, 0.75f, 0.2f), 120f);
-            ui.Flash(new Color(1f, 0.8f, 0.3f), 0.15f);
+            ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.7f), Loc.T("streak.fury"), UI.UiKit.Style.warning, 120f);
+            ui.Flash(UI.UiKit.Style.gold, 0.15f);
             AudioManager.PlaySfx(Sfx.Win, 0.9f, 0.7f);
             Haptics.Medium();
             StartCoroutine(Fury());

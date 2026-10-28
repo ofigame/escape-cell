@@ -42,11 +42,11 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            UiFactory.Fill(UiFactory.Stretch("Backdrop", root), new Color(0.03f, 0.03f, 0.08f, 0.96f)).gameObject.AddComponent<IgnoreSafeArea>();
+            UiFactory.Fill(UiFactory.Stretch("Backdrop", root), UiKit.A(UiKit.Style.backDeep, 0.96f)).gameObject.AddComponent<IgnoreSafeArea>();
             Flat.Backdrop(root); // the game look's galaxy and gold corners
             title = UiFactory.TextBox("Title", root, new Vector2(0.5f, 1f), new Vector2(0f, -170f), new Vector2(980f, 120f), "", 76f, Palette.UiGold, title: true);
             title.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            sub = UiFactory.TextBox("Sub", root, new Vector2(0.5f, 1f), new Vector2(0f, -260f), new Vector2(960f, 70f), "", 34f, new Color(1f, 1f, 1f, 0.8f), FontStyles.Normal);
+            sub = UiFactory.TextBox("Sub", root, new Vector2(0.5f, 1f), new Vector2(0f, -260f), new Vector2(960f, 70f), "", 34f, UiKit.A(UiKit.Style.white, 0.8f), FontStyles.Normal);
             sub.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             grid = UiFactory.Rect("Grid", root, Vector2.zero, Vector2.one, new Vector2(20f, 220f), new Vector2(-20f, -320f));
             var close = UiFactory.MakeButton(root, Loc.T("btn.close"), Kind.Secondary, new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 60f), new Vector2(480f, 110f), () => screen.Hide(), 48f);
@@ -81,7 +81,7 @@ namespace SquashBot.UI
                 card.pivot = new Vector2(0.5f, 1f);
                 var halo = UiFactory.Box("Halo", card, new Vector2(0.5f, 1f), new Vector2(0f, -205f), new Vector2(400f, 400f));
                 halo.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(halo, new Color(0.4f, 0.9f, 1f, 0.4f), UiSprites.Shadow, 0.5f).raycastTarget = false;
+                UiFactory.Fill(halo, UiKit.A(UiKit.Style.info, 0.4f), UiSprites.Shadow, 0.5f).raycastTarget = false;
                 var pic = UiFactory.Box("Picture", card, new Vector2(0.5f, 1f), new Vector2(0f, -205f), new Vector2(350f, 350f));
                 pic.pivot = new Vector2(0.5f, 0.5f);
                 var raw = pic.gameObject.AddComponent<RawImage>();
@@ -136,7 +136,7 @@ namespace SquashBot.UI
                     .rectTransform.pivot = new Vector2(0.5f, 0.5f);
                 bool current = switching && SaveData.Hero == hero;
                 if (current)
-                    UiFactory.Fill(UiFactory.Stretch("InUse", card), new Color(0.3f, 1f, 0.55f, 0.9f), UiSprites.Ring, 0.6f).raycastTarget = false;
+                    UiFactory.Fill(UiFactory.Stretch("InUse", card), UiKit.A(UiKit.Style.successLight, 0.9f), UiSprites.Ring, 0.6f).raycastTarget = false;
                 bool priced = switching && SwitchPrice > 0;
                 string label = current ? Loc.T("hero.inUse") : priced ? SwitchPrice.ToString() : Loc.T("hero.pick");
                 var b = UiFactory.MakeButton(card, label, current ? Kind.Secondary : priced ? Kind.Gold : Kind.Primary, new Vector2(0.5f, 0f), new Vector2(0f, 34f), new Vector2(400f, 96f), () => Choose(hero), 42f);

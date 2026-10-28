@@ -41,10 +41,10 @@ namespace SquashBot.UI
 
             badge = UiFactory.Box("Charges", root, new Vector2(1f, 1f), new Vector2(10f, 10f), new Vector2(64f, 64f)).gameObject;
             ((RectTransform)badge.transform).pivot = new Vector2(0.5f, 0.5f);
-            UiFactory.Fill(UiFactory.Rect("BadgeOutline", (RectTransform)badge.transform, Vector2.zero, Vector2.one, new Vector2(-4f, -4f), new Vector2(4f, 4f)), new Color(0.3f, 0.02f, 0.08f), UiSprites.Circle).raycastTarget = false;
-            UiFactory.Fill(UiFactory.Stretch("BadgeFace", (RectTransform)badge.transform), new Color(1f, 0.3f, 0.36f), UiSprites.Circle).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Rect("BadgeOutline", (RectTransform)badge.transform, Vector2.zero, Vector2.one, new Vector2(-4f, -4f), new Vector2(4f, 4f)), UiKit.Style.panelDanger, UiSprites.Circle).raycastTarget = false;
+            UiFactory.Fill(UiFactory.Stretch("BadgeFace", (RectTransform)badge.transform), UiKit.Style.theirs, UiSprites.Circle).raycastTarget = false;
             charges = UiFactory.Text(badge.transform, "1", 38f, Color.white, title: true);
-            charges.fontSharedMaterial = UiFactory.OutlinedTitle(new Color(0.3f, 0.02f, 0.08f));
+            charges.fontSharedMaterial = UiFactory.OutlinedTitle(UiKit.Style.panelDanger);
 
             trialBadge = UiFactory.TextBox("Trial", root, new Vector2(0.5f, 0f), new Vector2(0f, -36f), new Vector2(170f, 40f), Loc.T("tool.try"), 28f, Palette.UiGold);
             activeBar = UiFactory.Bar(root, new Vector2(0.5f, 0f), new Vector2(0f, -22f), new Vector2(150f, 12f), Palette.UiCyan, out activeFill).gameObject;
@@ -73,7 +73,7 @@ namespace SquashBot.UI
             bool working = active > 0f;
             activeBar.SetActive(working);
             if (working) UiFactory.SetBar(activeFill, active);
-            face.color = count > 0 ? UiFactory.GoldStyle.face : new Color(0.45f, 0.42f, 0.55f);
+            face.color = count > 0 ? UiFactory.GoldStyle.face : UiKit.Style.steel;
             float s = 1f + punch * 0.2f;
             root.localScale = new Vector3(s, s, 1f);
         }

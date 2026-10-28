@@ -434,7 +434,7 @@ namespace SquashBot.Gameplay
             fx.Burst(at, new Color(0.8f, 0.7f, 0.55f), new Color(1.6f, 1.4f, 1.1f), 26, 6f); // (the shield in pieces)
             AudioManager.PlaySfx(Sfx.Impact, 1f, 0.6f);
             AudioManager.PlaySfx(Sfx.Clang, 0.8f, 0.7f);
-            skillBar?.Shout(Loc.T("duel.guardBroke"), mine ? new Color(1f, 0.45f, 0.4f) : new Color(0.6f, 0.85f, 1f));
+            skillBar?.Shout(Loc.T("duel.guardBroke"), mine ? UI.UiKit.Style.danger : UI.UiKit.Style.info);
             var skin = defender.GetComponentInChildren<SkinnedHero>();
             if (skin != null) skin.Stagger(attacker != null ? attacker.position : defender.position - defender.forward, 0.8f);
             StatusFx.On(CombatFeel.RootOf(defender)).Stun(Def.breakDaze);
@@ -466,7 +466,7 @@ namespace SquashBot.Gameplay
             }
             AudioManager.PlaySfx(Sfx.Clang, 1f, 1.55f);
             AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.8f);
-            skillBar?.Shout(Loc.T("duel.perfect"), mine ? PerfectGold : new Color(1f, 0.5f, 0.45f));
+            skillBar?.Shout(Loc.T("duel.perfect"), mine ? PerfectGold : UI.UiKit.Style.danger);
             FaceFor(mine ? robot.Visual : hunt.ChallengeFoeModel, FaceMoment.PerfectGuard); // (a sly grin)
             float meter = duelRule == WeeklyMode.Rule.ShieldWar ? Def.shieldWarPerfectMeter : Def.perfectMeter;
             if (mine)
@@ -504,7 +504,7 @@ namespace SquashBot.Gameplay
             {
                 if (dodgedShoutAt > Time.time) return;
                 dodgedShoutAt = Time.time + 1.5f;
-                skillBar?.Shout(Loc.T("duel.dodged"), mine ? new Color(0.6f, 0.9f, 1f) : new Color(1f, 0.5f, 0.45f));
+                skillBar?.Shout(Loc.T("duel.dodged"), mine ? UI.UiKit.Style.cyan : UI.UiKit.Style.danger);
                 if (mine) { mcUltiDodges += kind == BlowKind.Ulti ? 1 : 0; if (kind == BlowKind.Ulti) NoteDuel(DuelGoal.DodgeUlti); }
                 if (!mine && (kind == BlowKind.PowerHit || kind == BlowKind.Knockdown)) strikeCooldown = Mathf.Max(strikeCooldown, 0.4f + Def.whiffRecovery); // (a big blow into the air: slower back)
             }
@@ -616,7 +616,7 @@ namespace SquashBot.Gameplay
                     Haptics.Light();
                     if (o == DefenseOutcome.Broke)
                     {
-                        FloatAt(robot.transform.position + Vector3.up * 1.8f, Loc.T("duel.guardBroke"), new Color(1f, 0.45f, 0.4f));
+                        FloatAt(robot.transform.position + Vector3.up * 1.8f, Loc.T("duel.guardBroke"), UI.UiKit.Style.danger);
                         strikeCooldown = Mathf.Max(strikeCooldown, Def.breakDaze);
                     }
                     grazed = true;

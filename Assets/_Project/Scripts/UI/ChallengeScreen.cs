@@ -129,22 +129,22 @@ namespace SquashBot.UI
             // The competitions: the season, the leaderboards, the weekend cup, the clan, the quests.
             competitions = CompetitionScreen.Create(root);
             competitions.CoinsChanged += () => CoinsChanged?.Invoke();
-            var comp = Flat.Button(m, Loc.T("comp.button"), new Vector2(0.5f, 1f), new Vector2(0f, -265f), new Vector2(640f, 96f), new Color(0.75f, 0.45f, 1f), Flat.Text, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); competitions.Show(); }, 32f);
+            var comp = Flat.Button(m, Loc.T("comp.button"), new Vector2(0.5f, 1f), new Vector2(0f, -265f), new Vector2(640f, 96f), UiKit.Style.purple, Flat.Text, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); competitions.Show(); }, 32f);
             ((RectTransform)comp.transform).pivot = new Vector2(0.5f, 0.5f);
-            ModeCard(m, 1, new Vector2(0f, 160f), "duel", "ch.mode.duel", "ch.mode.duelText", new Color(1f, 0.6f, 0.25f), tappable: false);
+            ModeCard(m, 1, new Vector2(0f, 160f), "duel", "ch.mode.duel", "ch.mode.duelText", UiKit.Style.orange, tappable: false);
             // One button: a 3-minute duel, foi against foi.
             var go = Flat.Button(m, Loc.T("ch.duelGo"), new Vector2(0.5f, 0.5f), new Vector2(0f, -300f), new Vector2(720f, 140f),
-                new Color(1f, 0.6f, 0.25f), new Color(0.12f, 0.06f, 0f), () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(1, 3); }, 46f);
+                UiKit.Style.orange, UiKit.Style.backDeep, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(1, 3); }, 46f);
             ((RectTransform)go.transform).pivot = new Vector2(0.5f, 0.5f);
             // This week's event: the weekly rule mode (Monday–Thursday) or the weekend tournament (Saturday–Sunday).
             eventButton = Flat.Button(m, "", new Vector2(0.5f, 0.5f), new Vector2(0f, -470f), new Vector2(720f, 120f),
-                new Color(0.55f, 0.45f, 1f), Color.white, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(Tournament.Open ? 3 : 2, 3); }, 34f);
+                UiKit.Style.purple, Color.white, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); ModePicked?.Invoke(Tournament.Open ? 3 : 2, 3); }, 34f);
             ((RectTransform)eventButton.transform).pivot = new Vector2(0.5f, 0.5f);
             // (2 against 2 was taken out of the duel: one-on-one only)
             // Playing a friend by code, between the lengths and CLOSE (the friends list is on the main menu).
             var friend = Flat.Button(m, Loc.T("live.friend"), new Vector2(0.5f, 0f), new Vector2(-215f, Monetization.Ads.BannerReserve + 190f), new Vector2(410f, 100f), Flat.Blue, Flat.Text, ShowFriend, 32f);
             // the training room (no stakes: a dummy, the challenges)
-            var training = Flat.Button(m, Loc.T("tr.button"), new Vector2(0.5f, 0f), new Vector2(215f, Monetization.Ads.BannerReserve + 190f), new Vector2(410f, 100f), new Color(0.3f, 0.7f, 0.5f), Flat.Text, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); modes.Hide(true); TrainingPressed?.Invoke(); }, 32f);
+            var training = Flat.Button(m, Loc.T("tr.button"), new Vector2(0.5f, 0f), new Vector2(215f, Monetization.Ads.BannerReserve + 190f), new Vector2(410f, 100f), UiKit.Style.green, Flat.Text, () => { AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f); modes.Hide(true); TrainingPressed?.Invoke(); }, 32f);
             ((RectTransform)training.transform).pivot = new Vector2(0.5f, 0.5f);
             ((RectTransform)friend.transform).pivot = new Vector2(0.5f, 0.5f);
             var back = Flat.Button(m, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 70f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => modes.Hide(true), 34f);
@@ -189,7 +189,7 @@ namespace SquashBot.UI
             text.enableAutoSizing = false;
             text.textPreprocessor = null;
             text.characterSpacing = 20f;
-            var placeholder = UiFactory.Text(area, "0000", 64f, new Color(1f, 1f, 1f, 0.25f));
+            var placeholder = UiFactory.Text(area, "0000", 64f, UiKit.A(UiKit.Style.white, 0.25f));
             placeholder.enableAutoSizing = false;
             codeInput = box.gameObject.AddComponent<TMP_InputField>();
             codeInput.textViewport = area;
@@ -321,24 +321,24 @@ namespace SquashBot.UI
         private void BuildNamePanel(RectTransform root)
         {
             namePanel = UiScreen.Create("ChallengeName", root, out var n);
-            UiFactory.Dim(n, new Color(0.03f, 0.03f, 0.1f, 1f)).gameObject.AddComponent<IgnoreSafeArea>();
+            UiFactory.Dim(n, UiKit.Style.backDeep).gameObject.AddComponent<IgnoreSafeArea>();
             Flat.Backdrop(n); // the game look's galaxy and gold corners
             UiFactory.TextBox("Title", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 760f), new Vector2(900f, 110f), Loc.T("ch.nameTitle"), 72f, Palette.UiGold, title: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var hint = UiFactory.TextBox("Hint", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 650f), new Vector2(900f, 90f), Loc.T("ch.nameHint"), 34f, new Color(1f, 1f, 1f, 0.75f));
+            var hint = UiFactory.TextBox("Hint", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 650f), new Vector2(900f, 90f), Loc.T("ch.nameHint"), 34f, UiKit.A(UiKit.Style.white, 0.75f));
             hint.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             hint.textWrappingMode = TextWrappingModes.Normal;
 
             var box = UiFactory.Box("Input", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 510f), new Vector2(780f, 140f));
             box.pivot = new Vector2(0.5f, 0.5f);
-            var bg = UiFactory.Fill(box, new Color(1f, 1f, 1f, 0.12f), UiSprites.Rounded, 1.2f);
+            var bg = UiFactory.Fill(box, UiKit.A(UiKit.Style.white, 0.12f), UiSprites.Rounded, 1.2f);
             UiFactory.Fill(UiFactory.Stretch("Rim", box), new Color(ArmyBattleColours.Mine.r, ArmyBattleColours.Mine.g, ArmyBattleColours.Mine.b, 0.9f), UiSprites.Ring, 1.2f).raycastTarget = false;
             var area = UiFactory.Rect("TextArea", box, Vector2.zero, Vector2.one, new Vector2(36f, 14f), new Vector2(-36f, -14f));
             area.gameObject.AddComponent<RectMask2D>();
             var text = UiFactory.Text(area, "", 56f, Color.white);
             text.enableAutoSizing = false;
             text.textPreprocessor = null; // typed text is shown as typed
-            var placeholder = UiFactory.Text(area, "foi1234", 56f, new Color(1f, 1f, 1f, 0.3f));
+            var placeholder = UiFactory.Text(area, "foi1234", 56f, UiKit.A(UiKit.Style.white, 0.3f));
             placeholder.enableAutoSizing = false;
             nameInput = box.gameObject.AddComponent<TMP_InputField>();
             nameInput.textViewport = area;
@@ -351,7 +351,7 @@ namespace SquashBot.UI
             nameInput.onSubmit.AddListener(_ => SubmitName());
             nameInput.onValueChanged.AddListener(_ => nameError.text = "");
 
-            nameError = UiFactory.TextBox("Error", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 390f), new Vector2(900f, 70f), "", 34f, new Color(1f, 0.45f, 0.5f), title: true);
+            nameError = UiFactory.TextBox("Error", n, new Vector2(0.5f, 0.5f), new Vector2(0f, 390f), new Vector2(900f, 70f), "", 34f, UiKit.Style.danger, title: true);
             nameError.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             nameOk = UiFactory.MakeButton(n, Loc.T("ch.nameOk"), Kind.Primary, new Vector2(0.5f, 0.5f), new Vector2(0f, 250f), new Vector2(460f, 130f), SubmitName, 48f);
             ((RectTransform)nameOk.transform).pivot = new Vector2(0.5f, 0.5f);
@@ -406,7 +406,7 @@ namespace SquashBot.UI
                 detail = Flat.Label(panel, "", new Vector2(0f, 0.5f), new Vector2(220f, -14f), new Vector2(700f, 44f), 28f, Flat.Muted, wrap: true);
                 detail.rectTransform.pivot = new Vector2(0f, 0.5f);
                 // its title, winning streak's flame and mastery badge (when it has them)
-                extra = Flat.Label(panel, "", new Vector2(0f, 0.5f), new Vector2(220f, -62f), new Vector2(700f, 40f), 28f, new Color(1f, 0.7f, 0.3f), bold: true);
+                extra = Flat.Label(panel, "", new Vector2(0f, 0.5f), new Vector2(220f, -62f), new Vector2(700f, 40f), 28f, UiKit.Style.warning, bold: true);
                 extra.rectTransform.pivot = new Vector2(0f, 0.5f);
             }
 
@@ -448,9 +448,9 @@ namespace SquashBot.UI
             bool heavy = Army.Heavy(kind);
             int fam = Army.Family(kind);
             var team = ArmyBattleColours.Mine;
-            var dark = new Color(0.16f, 0.17f, 0.24f);
-            var metal = new Color(0.86f, 0.89f, 0.95f);
-            var wood = new Color(0.6f, 0.4f, 0.22f);
+            var dark = UiKit.Style.panelSuccess;
+            var metal = UiKit.Style.text;
+            var wood = UiKit.Style.bronze;
             Image P(Vector2 p, Vector2 sz, Color c, Sprite sp, float rot = 0f)
             {
                 var r = UiFactory.Box("P", box, new Vector2(0.5f, 0.5f), p * s, sz * s);
@@ -598,7 +598,7 @@ namespace SquashBot.UI
             var root = UiFactory.Stretch("StageWheel", transform);
             var layer = root.gameObject.AddComponent<Canvas>(); layer.overrideSorting = true; layer.sortingOrder = 400;
             root.gameObject.AddComponent<GraphicRaycaster>();
-            UiFactory.Fill(UiFactory.Stretch("Dim", root), new Color(0.02f, 0.02f, 0.07f, 0.94f)).gameObject.AddComponent<IgnoreSafeArea>();
+            UiFactory.Fill(UiFactory.Stretch("Dim", root), UiKit.A(UiKit.Style.backDeep, 0.94f)).gameObject.AddComponent<IgnoreSafeArea>();
             var title = Flat.Label(root, Loc.T("ch.stagePick"), new Vector2(0.5f, 0.5f), new Vector2(0f, 520f), new Vector2(900f, 80f), 48f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
             title.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var frame = UiFactory.Box("Frame", root, new Vector2(0.5f, 0.5f), new Vector2(0f, 60f), new Vector2(930f, 640f));
@@ -681,7 +681,7 @@ namespace SquashBot.UI
         {
             var root = UiFactory.Box(type + "Button", BattleHud, new Vector2(1f, 0f), at, new Vector2(110f, 110f)); // (small: the floor stays in view)
             root.pivot = new Vector2(0.5f, 0.5f);
-            var colour = type == PowerUpType.Heart ? new Color(1f, 0.5f, 0.62f) : new Color(0.45f, 0.75f, 1f);
+            var colour = type == PowerUpType.Heart ? UiKit.Style.danger : UiKit.Style.info;
             var bg = UiFactory.Chunky(root, UiFactory.StyleOf(colour), 1f, 0f, UiSprites.Circle);
             var icon = UiFactory.Box("Icon", root, new Vector2(0.5f, 0.5f), new Vector2(0f, 4f), new Vector2(SkillBar.IconBase, SkillBar.IconBase));
             icon.pivot = new Vector2(0.5f, 0.5f);
@@ -689,8 +689,8 @@ namespace SquashBot.UI
             SkillBar.DrawIcon(icon, type);
             var badge = UiFactory.Box("Badge", root, new Vector2(1f, 1f), new Vector2(12f, 12f), new Vector2(46f, 46f));
             badge.pivot = new Vector2(1f, 1f);
-            UiFactory.Fill(UiFactory.Stretch("BadgeFace", badge), new Color(1f, 0.3f, 0.36f, 1f), UiSprites.Circle).raycastTarget = false;
-            count = UiFactory.OutlinedText("Count", badge, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(46f, 42f), "", 28f, new Color(0.3f, 0.02f, 0.08f));
+            UiFactory.Fill(UiFactory.Stretch("BadgeFace", badge), UiKit.Style.theirs, UiSprites.Circle).raycastTarget = false;
+            count = UiFactory.OutlinedText("Count", badge, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(46f, 42f), "", 28f, UiKit.Style.panelDanger);
             count.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var button = root.gameObject.AddComponent<Button>();
             button.targetGraphic = bg;

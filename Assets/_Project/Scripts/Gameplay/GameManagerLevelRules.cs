@@ -117,13 +117,13 @@ namespace SquashBot.Gameplay
             if (levelRule == LevelRule.CounterStrike)
             {
                 if (Time.time <= counterUntil) return damage;
-                FloatAt(robot.transform.position + Vector3.up, Loc.T("rule.counterHint"), new Color(0.6f, 0.85f, 1f));
+                FloatAt(robot.transform.position + Vector3.up, Loc.T("rule.counterHint"), UI.UiKit.Style.info);
                 return 0;
             }
             if (levelRule != LevelRule.ComboOnly) return damage;
             ruleCombo = Time.time - ruleComboAt < 1.4f ? ruleCombo + 1 : 1;
             ruleComboAt = Time.time;
-            if (ruleCombo <= 3) { FloatAt(robot.transform.position + Vector3.up, ruleCombo + "/3", new Color(1f, 0.85f, 0.4f)); return 0; }
+            if (ruleCombo <= 3) { FloatAt(robot.transform.position + Vector3.up, ruleCombo + "/3", UI.UiKit.Style.gold); return 0; }
             return damage;
         }
 

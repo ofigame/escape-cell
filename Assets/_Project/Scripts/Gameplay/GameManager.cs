@@ -199,7 +199,7 @@ namespace SquashBot.Gameplay
             {
                 // The rhythm is felt: a breather is announced, and so is the next storm.
                 if (State != GameState.Playing || roadPhase != RoadPhase.None) return;
-                FloatAt(robot.transform.position + Vector3.up * 0.9f, Loc.T(calm ? "float.calm" : "float.storm"), calm ? new Color(0.55f, 1f, 0.75f) : Palette.UiRed);
+                FloatAt(robot.transform.position + Vector3.up * 0.9f, Loc.T(calm ? "float.calm" : "float.storm"), calm ? UI.UiKit.Style.successLight : Palette.UiRed);
                 if (!calm) cameraRig.Shake(0.4f);
             };
             hazards.TileBroken += OnTileBroken;
@@ -313,7 +313,7 @@ namespace SquashBot.Gameplay
                 AudioManager.PlaySfx(Sfx.Impact, 1f, 0.5f);
                 ui.ShowIntro(Loc.F("monster.stage", stage + 1), Loc.T(CardKey("title")));
             };
-            hunt.BackHint = at => FloatAt(at + Vector3.up * 2f, Loc.T("rule.backHint"), new Color(1f, 0.8f, 0.4f));
+            hunt.BackHint = at => FloatAt(at + Vector3.up * 2f, Loc.T("rule.backHint"), UI.UiKit.Style.gold);
             ui.Shop.Purchased += () => robot.ApplyOutfit(Cosmetics.Outfit()); // (a part raised: its look on foi at once)
             ui.BagView.Changed += () => robot.ApplyOutfit(Cosmetics.Outfit()); // (items used, a part levelled: foi's body at once)
             ui.BagView.Opened += () => { if (robot.Visual != null && State != GameState.Playing) FoiPoseReset.Clean(robot.Visual); }; // (the bag: foi clean behind it)
@@ -421,7 +421,7 @@ namespace SquashBot.Gameplay
                     fx.Burst(at, new Color(1f, 0.95f, 0.7f), new Color(3.2f, 3f, 2f), 34, 7f);
                     fx.Burst(at, new Color(0.7f, 0.85f, 1f), new Color(2f, 2.6f, 3.2f), 16, 5f);
                     Visual.Shockwave.Create(new Vector3(at.x, GridView.SurfaceY, at.z), 1.4f, new Color(1f, 0.95f, 0.8f));
-                    if (challengeRun && chPhase == ChPhase.Duel) skillBar?.Shout(Loc.T("duel.clashArms"), new Color(1f, 0.92f, 0.6f));
+                    if (challengeRun && chPhase == ChPhase.Duel) skillBar?.Shout(Loc.T("duel.clashArms"), UI.UiKit.Style.parchment);
                 };
             }
             ui.Languages.Chosen += language =>
@@ -887,7 +887,7 @@ namespace SquashBot.Gameplay
                 if (boosts.Contains(Boost.CoinMagnet) && Shop.TryUse(Boost.CoinMagnet))
                 {
                     skillMagnetLeft = 99999f; // the whole level
-                    FloatAt(robot.transform.position + Vector3.up * 0.9f, Loc.T("float.skillMagnet"), new Color(1f, 0.4f, 0.45f));
+                    FloatAt(robot.transform.position + Vector3.up * 0.9f, Loc.T("float.skillMagnet"), UI.UiKit.Style.theirs);
                 }
             }
 
@@ -1414,7 +1414,7 @@ namespace SquashBot.Gameplay
             ShowHoverMarker(false);
             if (!robot.IsAlive) return;
             var target = grid.IsStandable(hoverTarget) && !StageLocked(hoverTarget) ? hoverTarget : SafeTileNear(robot.Position, robot.Position);
-            if (StageLocked(hoverTarget)) FloatAt(GridView.ToWorld(hoverTarget) + Vector3.up * 1.1f, Loc.T("float.gateShut"), new Color(1f, 0.6f, 0.4f));
+            if (StageLocked(hoverTarget)) FloatAt(GridView.ToWorld(hoverTarget) + Vector3.up * 1.1f, Loc.T("float.gateShut"), UI.UiKit.Style.orange);
             robot.EndHover(target);
             AudioManager.PlaySfx(Sfx.Hop, 0.7f, 0.8f);
         }
@@ -2060,7 +2060,7 @@ namespace SquashBot.Gameplay
                     break;
                 case PowerUpType.Rescue:
                     rescues = Mathf.Min(MaxRescues, rescues + 1);
-                    FloatAt(GridView.ToWorld(p), Loc.T("float.skillRescue"), new Color(0.4f, 1f, 0.6f));
+                    FloatAt(GridView.ToWorld(p), Loc.T("float.skillRescue"), UI.UiKit.Style.successLight);
                     AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.3f);
                     break;
                 case PowerUpType.Freeze:
@@ -2070,7 +2070,7 @@ namespace SquashBot.Gameplay
                     floorRules.Freeze();
             enemies.Freeze();
             hunt.Freeze();
-                    FloatAt(GridView.ToWorld(p), Loc.T("float.skillFreeze"), new Color(0.55f, 0.85f, 1f));
+                    FloatAt(GridView.ToWorld(p), Loc.T("float.skillFreeze"), UI.UiKit.Style.info);
                     AudioManager.PlaySfx(Sfx.Shield, 0.9f, 0.7f);
                     break;
                 case PowerUpType.Blast:
@@ -2084,7 +2084,7 @@ namespace SquashBot.Gameplay
                         }
                     fx.Burst(GridView.ToWorld(p) + Vector3.up * 0.5f, new Color(1f, 0.5f, 0.3f), new Color(3f, 1.2f, 0.3f), 50, 8f);
                     cameraRig.Shake(0.8f);
-                    FloatAt(GridView.ToWorld(p), Loc.T("float.skillBlast"), new Color(1f, 0.6f, 0.3f));
+                    FloatAt(GridView.ToWorld(p), Loc.T("float.skillBlast"), UI.UiKit.Style.orange);
                     AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.7f);
                     break;
                 case PowerUpType.Heart:
@@ -2095,7 +2095,7 @@ namespace SquashBot.Gameplay
                     break;
                 case PowerUpType.Magnet:
                     skillMagnetLeft = Mathf.Max(skillMagnetLeft, 8f);
-                    FloatAt(GridView.ToWorld(p), Loc.T("float.skillMagnet"), new Color(1f, 0.4f, 0.45f));
+                    FloatAt(GridView.ToWorld(p), Loc.T("float.skillMagnet"), UI.UiKit.Style.theirs);
                     AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.5f);
                     break;
             }
@@ -2245,7 +2245,7 @@ namespace SquashBot.Gameplay
                     hunt.Freeze();
                     fx.Burst(robot.transform.position + Vector3.up * 0.5f, new Color(0.7f, 0.9f, 1f), new Color(0.8f, 1.6f, 2.4f), 40, 6f);
                     AudioManager.PlaySfx(Sfx.Shield, 0.9f, 0.7f);
-                    FloatAt(robot.transform.position, Loc.T("float.skillFreeze"), new Color(0.55f, 0.85f, 1f));
+                    FloatAt(robot.transform.position, Loc.T("float.skillFreeze"), UI.UiKit.Style.info);
                     break;
                 }
 
@@ -2266,7 +2266,7 @@ namespace SquashBot.Gameplay
                     fx.Burst(robot.transform.position + Vector3.up * 0.5f, new Color(1f, 0.5f, 0.3f), new Color(3f, 1.2f, 0.3f), 50, 8f);
                     cameraRig.Shake(0.8f);
                     AudioManager.PlaySfx(Sfx.Blocked, 1f, 0.7f);
-                    FloatAt(robot.transform.position, Loc.T("float.skillBlast"), new Color(1f, 0.6f, 0.3f));
+                    FloatAt(robot.transform.position, Loc.T("float.skillBlast"), UI.UiKit.Style.orange);
                     break;
                 }
 

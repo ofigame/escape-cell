@@ -91,7 +91,7 @@ namespace SquashBot.Gameplay
             int radius = Bombs.RadiusOf(kind);
             if (!hunt.BombSpot(robot.Position, Bombs.ThrowRange, radius, out var at))
             {
-                FloatAt(robot.transform.position + Vector3.up * 1.2f, Loc.T("float.noBombTarget"), new Color(1f, 0.75f, 0.5f));
+                FloatAt(robot.transform.position + Vector3.up * 1.2f, Loc.T("float.noBombTarget"), UI.UiKit.Style.gold);
                 AudioManager.PlaySfx(Sfx.Bump, 0.6f);
                 return;
             }

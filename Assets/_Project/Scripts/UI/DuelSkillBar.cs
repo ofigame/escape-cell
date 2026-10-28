@@ -64,9 +64,9 @@ namespace SquashBot.UI
 
         // ---------- Colours (the effects' language: attack orange-red, defence blue, healing green-pink, ultimate gold, special purple) ----------
 
-        private static readonly Color ShieldBlue = new Color(0.25f, 0.55f, 1f), UltiGold = new Color(1f, 0.72f, 0.18f), SpecialPurple = new Color(0.62f, 0.35f, 0.95f);
-        private static readonly Color AttackOrange = new Color(1f, 0.5f, 0.15f), BreakerBlue = new Color(0.35f, 0.75f, 1f), HeartPink = new Color(1f, 0.45f, 0.62f);
-        private static readonly Color JumpGreen = new Color(0.3f, 0.8f, 0.5f), Calm = new Color(0.22f, 0.24f, 0.36f);
+        private static readonly Color ShieldBlue = UiKit.Style.mine, UltiGold = UiKit.Style.warning, SpecialPurple = UiKit.Style.purple;
+        private static readonly Color AttackOrange = UiKit.Style.orange, BreakerBlue = UiKit.Style.info, HeartPink = UiKit.Style.danger;
+        private static readonly Color JumpGreen = UiKit.Style.success, Calm = UiKit.Style.panel;
 
         private void Build(SpecialKind specialMove)
         {
@@ -94,9 +94,9 @@ namespace SquashBot.UI
                 heartDots[i] = UiFactory.Fill(d, Color.white, UiSprites.Circle);
                 heartDots[i].raycastTarget = false;
             }
-            pause = DuelButton.Create(cluster, "Pause", s.Units(s.pauseDp), new Color(0.2f, 0.45f, 0.9f), DuelIcon.Pause);
+            pause = DuelButton.Create(cluster, "Pause", s.Units(s.pauseDp), UiKit.Style.royal, DuelIcon.Pause);
             pause.Down += () => { if (live) AskLeave(); else PausePressed?.Invoke(); };
-            talk = DuelButton.Create(cluster, "Talk", s.Units(s.emoteDp), new Color(0.3f, 0.75f, 0.55f), DuelIcon.Emote);
+            talk = DuelButton.Create(cluster, "Talk", s.Units(s.emoteDp), UiKit.Style.success, DuelIcon.Emote);
             talk.Down += () => wheel.Toggle();
 
             // The emote wheel: six slots round a circle under the emote button (face taunts and written emotes).
@@ -108,9 +108,9 @@ namespace SquashBot.UI
             rivalParts = Meter("RivalPower", new Vector2(1f, 1f), new Vector2(-36f, -282f - 70f - s.meterGap), true);
 
             // The combo count, big in the middle.
-            comboText = UiFactory.OutlinedText("Combo", root, new Vector2(0.5f, 0.5f), new Vector2(0f, 260f), new Vector2(900f, 140f), "", 96f, new Color(0.35f, 0.08f, 0f));
+            comboText = UiFactory.OutlinedText("Combo", root, new Vector2(0.5f, 0.5f), new Vector2(0f, 260f), new Vector2(900f, 140f), "", 96f, UiKit.Style.panelDanger);
             comboText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            comboText.color = new Color(1f, 0.82f, 0.25f);
+            comboText.color = UiKit.Style.gold;
             comboGroup = comboText.gameObject.AddComponent<CanvasGroup>();
             comboGroup.alpha = 0f;
             comboGroup.blocksRaycasts = false;
@@ -129,7 +129,7 @@ namespace SquashBot.UI
                 float x = (mirrored ? -1f : 1f) * i * 115f;
                 var slot = UiFactory.Box("Part" + i, bar, new Vector2(mirrored ? 1f : 0f, 0.5f), new Vector2(x, 0f), new Vector2(108f, s.meterHeight));
                 slot.pivot = new Vector2(mirrored ? 1f : 0f, 0.5f);
-                UiFactory.Fill(slot, new Color(0.06f, 0.06f, 0.14f, 0.8f), UiSprites.Rounded, 4f).raycastTarget = false;
+                UiFactory.Fill(slot, UiKit.A(UiKit.Style.back, 0.8f), UiSprites.Rounded, 4f).raycastTarget = false;
                 var fill = UiFactory.Rect("Fill", slot, Vector2.zero, new Vector2(0f, 1f), new Vector2(3f, 3f), new Vector2(-3f, -3f));
                 parts[i] = UiFactory.Fill(fill, UltiGold, UiSprites.Rounded, 4f);
                 parts[i].raycastTarget = false;
@@ -192,9 +192,9 @@ namespace SquashBot.UI
             if (Mathf.Abs(mine - shownMeter) > 0.004f)
             {
                 shownMeter = mine;
-                Fill(myParts, mine, UltiGold, new Color(0.85f, 0.55f, 0.15f));
-                ultimate.SetParts(mine * 3f / Mathf.Max(1f, ultiCost), UltiGold, new Color(0.85f, 0.55f, 0.15f));
-                special.SetRing(Mathf.Clamp01(mine), mine >= 1f ? SpecialPurple * 1.3f : new Color(0.55f, 0.4f, 0.8f));
+                Fill(myParts, mine, UltiGold, UiKit.Style.orange);
+                ultimate.SetParts(mine * 3f / Mathf.Max(1f, ultiCost), UltiGold, UiKit.Style.orange);
+                special.SetRing(Mathf.Clamp01(mine), mine >= 1f ? SpecialPurple * 1.3f : UiKit.Style.violet);
                 bool canSpecial = mine >= 1f, canUlt = mine >= ultiCost;
                 special.SetUsable(canSpecial);
                 ultimate.SetUsable(canUlt);
@@ -203,7 +203,7 @@ namespace SquashBot.UI
             if (Mathf.Abs(rival - shownRival) > 0.004f)
             {
                 shownRival = rival;
-                Fill(rivalParts, rival, new Color(1f, 0.38f, 0.32f), new Color(0.7f, 0.25f, 0.2f));
+                Fill(rivalParts, rival, UiKit.Style.theirs, UiKit.Style.red);
             }
         }
 
@@ -223,16 +223,16 @@ namespace SquashBot.UI
         /// </summary>
         public void SetShield(float durability, bool broken, float wait)
         {
-            var c = broken ? new Color(0.5f, 0.5f, 0.55f) : durability < 0.25f ? new Color(1f, 0.3f, 0.25f) : new Color(0.45f, 0.8f, 1f);
+            var c = broken ? UiKit.Style.steel : durability < 0.25f ? UiKit.Style.theirs : UiKit.Style.info;
             shield.SetRing(broken ? 0f : durability, c);
-            shield.SetColour(broken ? new Color(0.3f, 0.32f, 0.4f) : ShieldBlue);
+            shield.SetColour(broken ? UiKit.Style.panelHi : ShieldBlue);
             shield.SetWait(wait);
         }
 
         /// <summary>The hearts left (three dots under it); <paramref name="usable"/> false: soft (health full or none left).</summary>
         public void SetHearts(int left, bool usable)
         {
-            for (int i = 0; i < heartDots.Length; i++) heartDots[i].color = i < left ? Color.white : new Color(1f, 1f, 1f, 0.2f);
+            for (int i = 0; i < heartDots.Length; i++) heartDots[i].color = i < left ? Color.white : UiKit.A(UiKit.Style.white, 0.2f);
             heart.SetUsable(usable && left > 0);
         }
 
@@ -240,7 +240,7 @@ namespace SquashBot.UI
         public void SetSpecial(SpecialKind k) => special.SetIcon(DuelIcons.ForSpecial(k));
 
         /// <summary>The move that comes and goes: its time left (1 .. 0) on its ring.</summary>
-        public void SetContextTime(float k) => context.SetRing(k, contextMove == Move.Breaker ? new Color(0.7f, 0.9f, 1f) : new Color(1f, 0.9f, 0.5f));
+        public void SetContextTime(float k) => context.SetRing(k, contextMove == Move.Breaker ? UiKit.Style.cyan : UiKit.Style.gold);
 
         private RectTransform guardBar;
         private Image guardFill;
@@ -265,7 +265,7 @@ namespace SquashBot.UI
             {
                 bar = guardBars[who] = UiFactory.Box("GuardBar" + who, root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(150f, 16f));
                 bar.pivot = new Vector2(0.5f, 0.5f);
-                UiFactory.Fill(bar, new Color(0.04f, 0.05f, 0.12f, 0.8f), UiSprites.Rounded, 6f).raycastTarget = false;
+                UiFactory.Fill(bar, UiKit.A(UiKit.Style.backDeep, 0.8f), UiSprites.Rounded, 6f).raycastTarget = false;
                 var f = UiFactory.Rect("Fill", bar, Vector2.zero, new Vector2(1f, 1f), new Vector2(3f, 3f), new Vector2(-3f, -3f));
                 guardFills[who] = UiFactory.Fill(f, ShieldBlue, UiSprites.Rounded, 6f);
                 guardFills[who].raycastTarget = false;
@@ -276,7 +276,7 @@ namespace SquashBot.UI
             if (RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screen.Value, null, out var local))
                 bar.anchoredPosition = local + parent.rect.size * (parent.pivot - new Vector2(0.5f, 0.5f)); // (from the pivot to the middle anchor)
             guardFills[who].rectTransform.anchorMax = new Vector2(Mathf.Clamp01(share), 1f);
-            guardFills[who].color = low ? new Color(1f, 0.3f, 0.25f) : new Color(0.45f, 0.8f, 1f);
+            guardFills[who].color = low ? UiKit.Style.theirs : UiKit.Style.info;
         }
 
         private Image cue;
@@ -299,7 +299,7 @@ namespace SquashBot.UI
             if (cue.gameObject.activeSelf != on) cue.gameObject.SetActive(on);
             if (!on) return;
             cue.rectTransform.localScale = Vector3.one * (1.1f + Mathf.Clamp01(left / 0.7f) * 1.4f);
-            cue.color = left <= window ? new Color(0.4f, 1f, 0.45f, 1f) : new Color(1f, 1f, 1f, 0.75f);
+            cue.color = left <= window ? UiKit.Style.successLight : UiKit.A(UiKit.Style.white, 0.75f);
         }
 
         private Button tauntButton;
@@ -310,7 +310,7 @@ namespace SquashBot.UI
         {
             if (tauntButton == null)
             {
-                tauntButton = Flat.Button(root, Loc.T("taunt.button"), new Vector2(0.5f, 0.5f), new Vector2(0f, -60f), new Vector2(300f, 110f), new Color(0.95f, 0.55f, 0.3f), Flat.Text, () => { tauntButton.gameObject.SetActive(false); TauntPressed?.Invoke(); }, 36f);
+                tauntButton = Flat.Button(root, Loc.T("taunt.button"), new Vector2(0.5f, 0.5f), new Vector2(0f, -60f), new Vector2(300f, 110f), UiKit.Style.orange, Flat.Text, () => { tauntButton.gameObject.SetActive(false); TauntPressed?.Invoke(); }, 36f);
                 ((RectTransform)tauntButton.transform).pivot = new Vector2(0.5f, 0.5f);
             }
             tauntButton.gameObject.SetActive(true);
@@ -326,7 +326,7 @@ namespace SquashBot.UI
             if (string.IsNullOrEmpty(text)) { if (tipPanel != null) tipPanel.gameObject.SetActive(false); return; }
             if (tipPanel == null)
             {
-                tipPanel = Flat.Panel(root, "Tip", new Vector2(0.5f, 1f), new Vector2(0f, -440f), new Vector2(940f, 150f), new Color(0.05f, 0.12f, 0.3f, 0.92f), 1.4f);
+                tipPanel = Flat.Panel(root, "Tip", new Vector2(0.5f, 1f), new Vector2(0f, -440f), new Vector2(940f, 150f), UiKit.A(UiKit.Style.back, 0.92f), 1.4f);
                 tipPanel.pivot = new Vector2(0.5f, 1f);
                 tipText = Flat.Label(tipPanel, "", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 130f), 40f, Flat.Text, TextAlignmentOptions.Center, bold: true, wrap: true);
                 tipText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
@@ -384,7 +384,7 @@ namespace SquashBot.UI
             contextSet = true;
             contextMove = move.Value;
             context.SetIcon(move.Value switch { Move.Heavy => DuelIcon.Heavy, Move.Upper => DuelIcon.Upper, Move.Breaker => DuelIcon.Breaker, Move.Body => bodyUpper ? DuelIcon.Upper : DuelIcon.Heavy, _ => DuelIcon.Finish });
-            context.SetColour(move.Value switch { Move.Heavy => AttackOrange, Move.Upper => new Color(1f, 0.3f, 0.25f), Move.Breaker => BreakerBlue, Move.Body => SpecialPurple, _ => new Color(0.95f, 0.2f, 0.35f) });
+            context.SetColour(move.Value switch { Move.Heavy => AttackOrange, Move.Upper => UiKit.Style.theirs, Move.Breaker => BreakerBlue, Move.Body => SpecialPurple, _ => UiKit.Style.theirs });
             context.SetPulse(true);
             context.SetRing(1f, Color.white);
         }
@@ -427,13 +427,13 @@ namespace SquashBot.UI
             if (leaveAsk == null)
             {
                 leaveAsk = UiFactory.Stretch("LeaveAsk", root);
-                var dim = UiFactory.Fill(leaveAsk, new Color(0.02f, 0.02f, 0.08f, 0.6f));
+                var dim = UiFactory.Fill(leaveAsk, UiKit.A(UiKit.Style.backDeep, 0.6f));
                 dim.gameObject.AddComponent<IgnoreSafeArea>();
                 var card = Flat.Panel(leaveAsk, "Card", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(820f, 420f), Flat.Card, 1.4f);
                 card.pivot = new Vector2(0.5f, 0.5f);
                 var q = Flat.Label(card, Loc.T("duel.leaveAsk"), new Vector2(0.5f, 1f), new Vector2(0f, -110f), new Vector2(740f, 150f), 46f, Flat.Text, TextAlignmentOptions.Center, bold: true, wrap: true);
                 q.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-                var yes = Flat.Button(card, Loc.T("duel.leaveYes"), new Vector2(0.5f, 0f), new Vector2(-190f, 90f), new Vector2(340f, 110f), new Color(0.85f, 0.25f, 0.3f), Flat.Text, () => { leaveAsk.gameObject.SetActive(false); LeaveConfirmed?.Invoke(); }, 36f);
+                var yes = Flat.Button(card, Loc.T("duel.leaveYes"), new Vector2(0.5f, 0f), new Vector2(-190f, 90f), new Vector2(340f, 110f), UiKit.Style.red, Flat.Text, () => { leaveAsk.gameObject.SetActive(false); LeaveConfirmed?.Invoke(); }, 36f);
                 ((RectTransform)yes.transform).pivot = new Vector2(0.5f, 0.5f);
                 var no = Flat.Button(card, Loc.T("duel.leaveNo"), new Vector2(0.5f, 0f), new Vector2(190f, 90f), new Vector2(340f, 110f), Flat.CardHi, Flat.Text, () => leaveAsk.gameObject.SetActive(false), 36f);
                 ((RectTransform)no.transform).pivot = new Vector2(0.5f, 0.5f);
@@ -453,7 +453,7 @@ namespace SquashBot.UI
                 comboGroup.alpha = Mathf.Clamp01(comboShow / 0.35f);
                 float pop = 1f + Mathf.Max(0f, comboShow - 1.2f) * 1.2f;
                 comboText.rectTransform.localScale = new Vector3(pop, pop, 1f);
-                if (comboShow <= 0f) { shownCombo = -1; comboText.color = new Color(1f, 0.82f, 0.25f); }
+                if (comboShow <= 0f) { shownCombo = -1; comboText.color = UiKit.Style.gold; }
             }
         }
     }

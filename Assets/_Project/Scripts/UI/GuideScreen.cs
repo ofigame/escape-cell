@@ -58,7 +58,7 @@ namespace SquashBot.UI
 
         private void Build(RectTransform root)
         {
-            UiFactory.Dim(root, new Color(0.06f, 0.05f, 0.18f, 0.7f));
+            UiFactory.Dim(root, UiKit.A(UiKit.Style.back, 0.7f));
             // The card fills the screen under the top bar whatever its height (tablets are much shorter than phones),
             // so it never covers the back button.
             var card = UiFactory.Card("Card", root, new Vector2(0.5f, 0f), Vector2.zero, Vector2.zero);
@@ -68,7 +68,7 @@ namespace SquashBot.UI
             card.offsetMax = new Vector2(-40f, -190f);
             var viewport = UiFactory.Rect("Viewport", card, Vector2.zero, Vector2.one, new Vector2(16f, 16f), new Vector2(-16f, -16f));
             viewport.gameObject.AddComponent<RectMask2D>();
-            UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0.001f));
+            UiFactory.Fill(viewport, UiKit.A(UiKit.Style.black, 0.001f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
             content.pivot = new Vector2(0.5f, 1f);
             // Paragraphs stack under each other at their own text height.
@@ -108,7 +108,7 @@ namespace SquashBot.UI
         private void BuildBar(RectTransform root)
         {
             var bar = UiFactory.Rect("TopBar", root, new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -170f), Vector2.zero);
-            UiFactory.Fill(bar, new Color(0.08f, 0.07f, 0.18f, 0.96f));
+            UiFactory.Fill(bar, UiKit.A(UiKit.Style.back, 0.96f));
             UiFactory.MakeButton(bar, "<", Kind.Icon, new Vector2(0f, 0.5f), new Vector2(36f, 0f), new Vector2(120f, 120f), () => BackPressed?.Invoke(), 64f);
             UiFactory.TextBox("Title", bar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(600f, 110f), Loc.T("guide.title"), 64f, Palette.UiText, title: true)
                 .rectTransform.pivot = new Vector2(0.5f, 0.5f);

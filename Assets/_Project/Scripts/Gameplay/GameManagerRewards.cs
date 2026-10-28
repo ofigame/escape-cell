@@ -55,7 +55,7 @@ namespace SquashBot.Gameplay
         {
             if (bonusRun || !DailyQuests.Report(goal, amount)) return;
             if (robot != null && State == GameState.Playing)
-                FloatAt(robot.transform.position + Vector3.up * 1.6f, Loc.T("quests.complete"), new Color(0.55f, 0.85f, 1f));
+                FloatAt(robot.transform.position + Vector3.up * 1.6f, Loc.T("quests.complete"), UI.UiKit.Style.info);
             AudioManager.PlaySfx(Sfx.Coin, 0.8f, 1.6f);
         }
 

@@ -50,7 +50,7 @@ namespace SquashBot.UI
                 fitter.aspectRatio = ice.width / (float)ice.height;
             }
             else UiFactory.Fill(bgRect, Color.white);
-            UiFactory.Fill(UiFactory.Stretch("Tap", canvas.transform), new Color(1f, 1f, 1f, 0.001f)); // catches the skip tap
+            UiFactory.Fill(UiFactory.Stretch("Tap", canvas.transform), UiKit.A(UiKit.Style.white, 0.001f)); // catches the skip tap
 
             // Twinkling ice crystals scattered over the frost.
             var rng = new System.Random(5);
@@ -60,7 +60,7 @@ namespace SquashBot.UI
                 var rt = UiFactory.Box("Sparkle", canvas.transform, new Vector2((float)rng.NextDouble(), (float)rng.NextDouble()), Vector2.zero, new Vector2(size, size));
                 rt.pivot = new Vector2(0.5f, 0.5f);
                 rt.localRotation = Quaternion.Euler(0f, 0f, 45f);
-                var img = UiFactory.Fill(rt, new Color(1f, 1f, 1f, 0f), UiSprites.Rounded, 6f);
+                var img = UiFactory.Fill(rt, UiKit.A(UiKit.Style.white, 0f), UiSprites.Rounded, 6f);
                 img.raycastTarget = false;
                 splash.sparkles.Add((rt, img, (float)rng.NextDouble() * 6f, 1.5f + (float)rng.NextDouble() * 2.5f));
             }

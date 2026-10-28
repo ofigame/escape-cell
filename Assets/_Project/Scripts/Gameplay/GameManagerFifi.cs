@@ -263,7 +263,7 @@ namespace SquashBot.Gameplay
             var at = fifi.transform.position + Vector3.up * 0.5f;
             fx.Burst(at, new Color(0.6f, 0.9f, 0.8f), new Color(0.6f, 1.6f, 1.2f), 40, 5f);
             fx.Dust(fifi.transform.position, new Color(0.5f, 0.5f, 0.55f), 16, 3f);
-            FloatAt(at + Vector3.up * 0.4f, Loc.T("float.fifiDown"), new Color(0.6f, 0.9f, 1f));
+            FloatAt(at + Vector3.up * 0.4f, Loc.T("float.fifiDown"), UI.UiKit.Style.cyan);
             AudioManager.PlaySfx(Sfx.Fall, 0.8f, 1.3f);
             fifi.gameObject.SetActive(false);
         }

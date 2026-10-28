@@ -66,7 +66,7 @@ namespace SquashBot.UI
             status.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var viewport = UiFactory.Rect("Viewport", p, Vector2.zero, Vector2.one, new Vector2(40f, Monetization.Ads.BannerReserve + 110f), new Vector2(-40f, -390f));
             viewport.gameObject.AddComponent<RectMask2D>();
-            UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0f));
+            UiFactory.Fill(viewport, UiKit.A(UiKit.Style.black, 0f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
             content.pivot = new Vector2(0.5f, 1f);
             var scroll = viewport.gameObject.AddComponent<ScrollRect>();
@@ -84,7 +84,7 @@ namespace SquashBot.UI
         private void Open(Tab t)
         {
             tab = t;
-            for (int i = 0; i < tabs.Length; i++) ((Image)tabs[i].targetGraphic).color = i == (int)t ? new Color(1f, 0.6f, 0.25f) : Flat.CardHi;
+            for (int i = 0; i < tabs.Length; i++) ((Image)tabs[i].targetGraphic).color = i == (int)t ? UiKit.Style.orange : Flat.CardHi;
             Clear();
             for (int i = subBar.childCount - 1; i >= 0; i--) Destroy(subBar.GetChild(i).gameObject);
             status.text = "";
@@ -139,7 +139,7 @@ namespace SquashBot.UI
         /// <summary>A leaderboard line: place, rank badge, name, points (the player's own lit).</summary>
         private void Line(int place, int rank, string name, string value, bool me)
         {
-            var row = Card(96f, me ? new Color(0.2f, 0.3f, 0.5f) : Flat.Card);
+            var row = Card(96f, me ? UiKit.Style.panelHi : Flat.Card);
             Text(row, place + ".", new Vector2(0f, 0.5f), new Vector2(30f, 0f), new Vector2(90f, 80f), 32f, Flat.Gold, bold: true);
             if (rank >= 0) RankArt.Badge(row, rank, new Vector2(0f, 0.5f), new Vector2(160f, 0f), 72f);
             Text(row, name, new Vector2(0f, 0.5f), new Vector2(215f, 0f), new Vector2(520f, 80f), 32f, Flat.Text, bold: me);
@@ -166,11 +166,11 @@ namespace SquashBot.UI
             Text(best, Loc.F("comp.worth", 200 + 150 * Mathf.Clamp(s.bestRank, 0, 12)), new Vector2(1f, 0.5f), new Vector2(-30f, 0f), new Vector2(300f, 90f), 30f, Flat.Gold, TextAlignmentOptions.Right, true);
             if (s.reward != null && s.reward.coins > 0)
             {
-                var r = Card(150f, new Color(0.35f, 0.25f, 0.08f));
+                var r = Card(150f, UiKit.Style.brown);
                 int rm = s.reward.season % 12 + 1;
                 Text(r, Loc.F("comp.reward", Loc.T("month." + rm), Challenge.RankName(s.reward.rank), s.reward.coins), new Vector2(0f, 0.5f), new Vector2(30f, 0f), new Vector2(680f, 130f), 30f, Flat.Text, bold: true);
                 int cupRank = s.reward.rank;
-                SmallButton(r, Loc.T("comp.claim"), new Color(1f, 0.7f, 0.2f), () => StartCoroutine(ClaimSeason(cupRank)));
+                SmallButton(r, Loc.T("comp.claim"), UiKit.Style.warning, () => StartCoroutine(ClaimSeason(cupRank)));
             }
             var info = Card(220f, Flat.Card);
             Text(info, Loc.T("comp.seasonHelp"), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(920f, 200f), 27f, Flat.Muted, TextAlignmentOptions.Center);
@@ -230,7 +230,7 @@ namespace SquashBot.UI
             FoiNet.WeeklyBoard board = null;
             yield return FoiNet.Weekly(b => board = b);
             if (board?.list == null) yield break;
-            var head = Card(70f, new Color(0f, 0f, 0f, 0f));
+            var head = Card(70f, UiKit.A(UiKit.Style.black, 0f));
             Text(head, Loc.F("wk.board", Loc.T("wk.rule." + WeeklyMode.ThisWeek), board.wins), new Vector2(0f, 0.5f), new Vector2(20f, 0f), new Vector2(900f, 60f), 30f, Flat.Gold, bold: true);
             for (int i = 0; i < board.list.Length; i++) Line(i + 1, -1, board.list[i].name, board.list[i].wins.ToString(), board.list[i].me);
             Fit();
@@ -253,14 +253,14 @@ namespace SquashBot.UI
                 {
                     int step = i;
                     bool taken = (cup.claimed & (1 << i)) != 0, ready = cup.wins >= cup.steps[i];
-                    var r = Card(110f, taken ? new Color(0.12f, 0.2f, 0.14f) : Flat.Card);
+                    var r = Card(110f, taken ? UiKit.Style.panelSuccess : Flat.Card);
                     Text(r, Loc.F("comp.cupStep", cup.steps[i], cup.coins[i]), new Vector2(0f, 0.5f), new Vector2(30f, 0f), new Vector2(650f, 90f), 30f, ready ? Flat.Text : Flat.Muted, bold: ready);
-                    if (taken) Text(r, Loc.T("comp.taken"), new Vector2(1f, 0.5f), new Vector2(-110f, 0f), new Vector2(200f, 80f), 30f, new Color(0.4f, 1f, 0.5f), TextAlignmentOptions.Center, true);
-                    else if (ready) SmallButton(r, Loc.T("comp.claim"), new Color(1f, 0.7f, 0.2f), () => StartCoroutine(ClaimCup(step)));
+                    if (taken) Text(r, Loc.T("comp.taken"), new Vector2(1f, 0.5f), new Vector2(-110f, 0f), new Vector2(200f, 80f), 30f, UiKit.Style.successLight, TextAlignmentOptions.Center, true);
+                    else if (ready) SmallButton(r, Loc.T("comp.claim"), UiKit.Style.warning, () => StartCoroutine(ClaimCup(step)));
                 }
             if (cup.list != null && cup.list.Length > 0)
             {
-                var t = Card(70f, new Color(0f, 0f, 0f, 0f));
+                var t = Card(70f, UiKit.A(UiKit.Style.black, 0f));
                 Text(t, Loc.T("comp.cupTop"), new Vector2(0f, 0.5f), new Vector2(20f, 0f), new Vector2(900f, 60f), 30f, Flat.Muted, bold: true);
                 for (int i = 0; i < cup.list.Length; i++) Line(i + 1, -1, cup.list[i].name, Loc.F("comp.cupWinsShort", cup.list[i].wins), cup.list[i].me);
             }
@@ -284,9 +284,9 @@ namespace SquashBot.UI
 
         private static readonly Color[] BadgeColours =
         {
-            new Color(0.3f, 0.6f, 1f), new Color(1f, 0.35f, 0.3f), new Color(0.35f, 0.85f, 0.45f), new Color(1f, 0.75f, 0.2f),
-            new Color(0.7f, 0.4f, 1f), new Color(0.3f, 0.85f, 0.9f), new Color(1f, 0.5f, 0.75f), new Color(0.9f, 0.9f, 0.95f),
-            new Color(0.55f, 0.4f, 0.25f), new Color(0.2f, 0.25f, 0.35f), new Color(1f, 0.55f, 0.15f), new Color(0.5f, 0.7f, 0.3f),
+            UiKit.Style.mine, UiKit.Style.theirs, UiKit.Style.success, UiKit.Style.warning,
+            UiKit.Style.purple, UiKit.Style.info, UiKit.Style.danger, UiKit.Style.text,
+            UiKit.Style.bronze, UiKit.Style.panelSuccess, UiKit.Style.orange, UiKit.Style.green,
         };
 
         private void Badge(RectTransform parent, int badge, string name, Vector2 at, float size)
@@ -319,7 +319,7 @@ namespace SquashBot.UI
             }
             var create = Flat.Button(make, Loc.T("comp.clanCreate"), new Vector2(0.5f, 0f), new Vector2(300f, 50f), new Vector2(280f, 84f), Flat.Blue, Flat.Text, () => { Click(); StartCoroutine(CreateClan()); }, 28f);
             ((RectTransform)create.transform).pivot = new Vector2(0.5f, 0.5f);
-            var find = Card(70f, new Color(0f, 0f, 0f, 0f));
+            var find = Card(70f, UiKit.A(UiKit.Style.black, 0f));
             Text(find, Loc.T("comp.clanFind"), new Vector2(0f, 0.5f), new Vector2(20f, 0f), new Vector2(900f, 60f), 30f, Flat.Muted, bold: true);
             FoiNet.TopList list = null;
             yield return FoiNet.Clans(null, r => list = r);
@@ -330,7 +330,7 @@ namespace SquashBot.UI
                     Badge(row, e.badge, e.name, new Vector2(60f, 0f), 64f);
                     Text(row, e.name + "\n<size=24><color=#9EA6C2>" + Loc.F("comp.clanLine", e.size, Competitions.ClanSize, e.score.ToString("N0")) + "</color></size>", new Vector2(0f, 0.5f), new Vector2(110f, 0f), new Vector2(560f, 90f), 30f, Flat.Text, bold: true);
                     string id = e.id;
-                    if (e.size < Competitions.ClanSize) SmallButton(row, Loc.T("comp.clanJoin"), new Color(0.35f, 0.8f, 0.45f), () => StartCoroutine(JoinClan(id)));
+                    if (e.size < Competitions.ClanSize) SmallButton(row, Loc.T("comp.clanJoin"), UiKit.Style.success, () => StartCoroutine(JoinClan(id)));
                 }
             Fit();
         }
@@ -345,7 +345,7 @@ namespace SquashBot.UI
             var text = UiFactory.Text(area, "", 38f, Color.white);
             text.enableAutoSizing = false;
             text.textPreprocessor = null;
-            var ph = UiFactory.Text(area, Loc.T("comp.clanName"), 34f, new Color(1f, 1f, 1f, 0.3f));
+            var ph = UiFactory.Text(area, Loc.T("comp.clanName"), 34f, UiKit.A(UiKit.Style.white, 0.3f));
             ph.enableAutoSizing = false;
             var field = box.gameObject.AddComponent<TMP_InputField>();
             field.textViewport = area;
@@ -379,20 +379,20 @@ namespace SquashBot.UI
             Badge(head, clan.badge, clan.name, new Vector2(90f, 0f), 110f);
             Text(head, clan.name, new Vector2(0f, 0.5f), new Vector2(170f, 25f), new Vector2(560f, 60f), 42f, Flat.Gold, bold: true);
             Text(head, Loc.F("comp.clanLine", clan.size, Competitions.ClanSize, clan.score.ToString("N0")), new Vector2(0f, 0.5f), new Vector2(170f, -35f), new Vector2(560f, 50f), 28f, Flat.Muted);
-            if (clan.mine) SmallButton(head, Loc.T("comp.clanLeave"), new Color(0.55f, 0.2f, 0.25f), () => StartCoroutine(LeaveClan()));
+            if (clan.mine) SmallButton(head, Loc.T("comp.clanLeave"), UiKit.Style.brown, () => StartCoroutine(LeaveClan()));
             // the cell's weekly goal: its members' wins together, a cell chest for everyone at each step
             if (clan.mine && clan.goals != null && clan.goals.Length > 0)
             {
-                var goal = Card(70f, new Color(0f, 0f, 0f, 0f));
+                var goal = Card(70f, UiKit.A(UiKit.Style.black, 0f));
                 Text(goal, Loc.F("cell.goal", clan.weekWins), new Vector2(0f, 0.5f), new Vector2(20f, 0f), new Vector2(900f, 60f), 30f, Flat.Gold, bold: true);
                 for (int s = 0; s < clan.goals.Length; s++)
                 {
                     int step = s;
                     bool taken = (clan.goalClaimed & (1 << s)) != 0, reached = clan.weekWins >= clan.goals[s];
-                    var r = Card(100f, taken ? new Color(0.12f, 0.2f, 0.14f) : Flat.Card);
+                    var r = Card(100f, taken ? UiKit.Style.panelSuccess : Flat.Card);
                     Text(r, Loc.F("cell.step", clan.goals[s]) + "\n<size=24><color=#FFC64D>" + Loc.T("cell.gift" + s) + "</color></size>", new Vector2(0f, 0.5f), new Vector2(30f, 0f), new Vector2(680f, 90f), 30f, reached ? Flat.Text : Flat.Muted, bold: true);
-                    if (taken) Text(r, Loc.T("comp.taken"), new Vector2(1f, 0.5f), new Vector2(-110f, 0f), new Vector2(200f, 80f), 30f, new Color(0.4f, 1f, 0.5f), TextAlignmentOptions.Center, true);
-                    else if (reached) SmallButton(r, Loc.T("comp.claim"), new Color(1f, 0.7f, 0.2f), () => StartCoroutine(TakeCellGoal(step)));
+                    if (taken) Text(r, Loc.T("comp.taken"), new Vector2(1f, 0.5f), new Vector2(-110f, 0f), new Vector2(200f, 80f), 30f, UiKit.Style.successLight, TextAlignmentOptions.Center, true);
+                    else if (reached) SmallButton(r, Loc.T("comp.claim"), UiKit.Style.warning, () => StartCoroutine(TakeCellGoal(step)));
                 }
             }
             if (clan.members != null)
