@@ -29,7 +29,7 @@ namespace SquashBot.Data
                 case "move.s.Hook": return new object[] { N(t.SpecialReach(SpecialKind.Hook)), N(t.SpecialHit(SpecialKind.Hook)), N(t.SpecialStun(SpecialKind.Hook)) };
                 case "move.s.Shock": return new object[] { N(t.SpecialReach(SpecialKind.Shock)), N(t.SpecialStun(SpecialKind.Shock)) };
                 case "move.s.IceWall": return new object[] { N(t.SpecialStun(SpecialKind.IceWall)) };
-                case "move.s.Patch": return new object[] { P(t.SpecialHeal(SpecialKind.Patch)) };
+                case "move.s.Patch": return new object[] { N(t.SpecialUntouchable(SpecialKind.Patch)) };
                 case "move.s.SkyStrike": return new object[] { N(t.SpecialHit(SpecialKind.SkyStrike)) };
                 case "move.s.Teleport": return new object[] { P(t.SpecialNextBlow(SpecialKind.Teleport) - 1f) };
                 case "move.u.Cinematic": return new object[] { N(t.UltiTotal(UltiKind.Cinematic)) };
@@ -40,7 +40,7 @@ namespace SquashBot.Data
                 case "move.u.Copy": return new object[] { P(t.copyShare) };
                 case "move.u.ChainLightning": return new object[] { N(t.UltiHits(UltiKind.ChainLightning)), N(t.UltiHit(UltiKind.ChainLightning)) };
                 case "move.u.Meteor": return new object[] { N(t.UltiTelegraph(UltiKind.Meteor)), N(t.UltiTotal(UltiKind.Meteor)) };
-                case "move.u.CoreBurst": return new object[] { N(t.UltiTotal(UltiKind.CoreBurst)), P(t.UltiHeal(UltiKind.CoreBurst)) };
+                case "move.u.CoreBurst": return new object[] { N(t.UltiTotal(UltiKind.CoreBurst)) };
                 case "move.p.ComboMaster": return new object[] { N(t.comboMasterGap) };
                 case "move.p.HeartMaster": return new object[] { P(t.heartHeal + t.heartMasterHeal) };
                 case "move.p.Piercer": return new object[] { P(t.piercerArmor) };

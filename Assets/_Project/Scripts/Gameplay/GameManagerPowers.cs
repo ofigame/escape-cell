@@ -134,11 +134,13 @@ namespace SquashBot.Gameplay
             cameraRig.Punch(1f);
             AudioManager.PlaySfx(Sfx.Win, 1f, 0.6f);
             fx.Burst(robot.transform.position + Vector3.up * 0.6f, UltiColour, UltiColour * 2.5f, 40, 6f);
-            // For five seconds foi fights on its own: the nearest enemy each time, left and right in turn, foi turning to
-            // each while it plays its combo (the ultimate's own move, through all of it), then a spin kick to finish.
+            // As the duel's ultimate (the user's call, 2026-10-28): the ultimate's own clip over all of it, the screen dimmed
+            // and the pictures slowed a breath; for five seconds foi fights on its own, the nearest enemy each time, left and
+            // right in turn, its weapon swinging at each; then the final blow's white flash and a big moment.
             var moves = robot.Moves;
-            float comboLength = SkinnedHero.MoveLength("cast");
-            moves?.PlayMove("cast", comboLength > 0f ? comboLength / (UltiSeconds - 0.3f) : 1f, true);
+            bool clip = moves != null && moves.PlayAction(Combat.DuelAction.UltiCinematic, (UltiSeconds - 0.3f) * 0.75f); // (in game time: the floor's slow round it)
+            FaceFor(robot.Visual, FaceMoment.UltiStart); // (angry, teeth clenched)
+            Combat.CombatFeel.UltiStart(robot.Visual);
             float until = Time.unscaledTime + UltiSeconds;
             for (int i = 0; Time.unscaledTime < until; i++)
             {
@@ -151,29 +153,21 @@ namespace SquashBot.Gameplay
                 var at = near[i % 2 == 0 || near.Count == 1 ? 0 : 1];
                 var to = GridView.ToWorld(at) + Vector3.up * GridView.SurfaceY;
                 bool flip = i % 2 == 0;
-                if (moves != null)
-                {
-                    robot.Face(to);
-                    yield return new WaitForSecondsRealtime(0.36f); // (the combo's rhythm)
-                }
-                else
-                {
-                    robot.Strike(to);
-                    if (flip) yield return Somersault();
-                    else
-                    {
-                        if (heldWeapon != null) heldWeapon.Swing();
-                        yield return new WaitForSecondsRealtime(0.12f);
-                    }
-                }
+                if (clip) robot.Face(to); else robot.Strike(to); // (the clip carries the body: only turned to each)
+                if (heldWeapon != null) heldWeapon.Swing(); // its weapon strikes each blow (in the hand the move carries)
+                yield return new WaitForSecondsRealtime(clip ? 0.36f : 0.2f); // (the combo's rhythm)
                 SlashFx.Create(robot.transform.position + Vector3.up * 0.5f, to, UltiColour, flip ? 2.4f : 1.8f);
                 fx.Burst(to + Vector3.up * 0.6f, UltiColour, UltiColour * 2.5f, 22, 5f);
                 cameraRig.Shake(flip ? 0.45f : 0.3f);
                 AudioManager.PlaySfx(Sfx.Impact, 1f, flip ? 0.9f : 1.2f);
                 hunt.Strike(at, PowerDamage(4f));
             }
-            if (moves != null && moves.PlayMove("kick", 1.3f, true)) yield return new WaitForSecondsRealtime(SkinnedHero.MoveLength("kick") / 1.3f * 0.55f); // the spin kick lands
-            else yield return new WaitForSecondsRealtime(0.3f);
+            if (clip) moves.StopMove();
+            // the final blow: the duel's (its last swing, the white flash, the pictures slowed)
+            if (moves != null && moves.PlayAction(Combat.DuelAction.ComboHeavy, 0f, 0.25f)) yield return new WaitForSecondsRealtime(0.3f);
+            else { if (heldWeapon != null) heldWeapon.Swing(); yield return new WaitForSecondsRealtime(0.3f); }
+            Combat.CombatFeel.UltiFinal(robot.Visual, null);
+            Combat.CombatFeel.BigMoment();
             while (State == GameState.Paused) yield return null;
             if (PowerFloor)
             {
@@ -203,23 +197,6 @@ namespace SquashBot.Gameplay
                 if (i < right.Count) targets.Add(right[i]);
                 if (i < left.Count) targets.Add(left[i]);
             }
-        }
-
-        /// <summary>A quick forward somersault: foi's body turns over once in the air and lands.</summary>
-        private IEnumerator Somersault()
-        {
-            var vis = robot.Visual;
-            if (vis == null) yield break;
-            const float time = 0.2f;
-            for (float k = 0f; k < 1f; k += Time.unscaledDeltaTime / time)
-            {
-                if (vis == null) yield break;
-                float e = Mathf.SmoothStep(0f, 1f, k);
-                vis.localRotation = Quaternion.Euler(-360f * e, 0f, 0f);
-                vis.localPosition = Vector3.up * Mathf.Sin(e * Mathf.PI) * 0.6f; // up and over
-                yield return null;
-            }
-            if (vis != null) { vis.localRotation = Quaternion.identity; vis.localPosition = Vector3.zero; }
         }
 
         // ---------- The crowd skills ----------

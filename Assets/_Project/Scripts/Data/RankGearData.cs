@@ -42,18 +42,18 @@ namespace SquashBot.Data
         };
 
         [Header("The crown on the head (head units: the bald head is ~0.98 tall, its neck at 0)")]
-        [Tooltip("Where the crown's ring sits on the bald head: high on the skull, over the forehead (the crowns' walls are thick: lower, they stand far out)")]
-        public float socket = 0.86f;
+        [Tooltip("Where the crown's ring sits on the bald head: on the skull over the forehead, down on the head (0.86 sat on top of the hair)")]
+        public float socket = 0.8f;
         [Tooltip("The ring's inner width over the head's there (+3%)")]
-        public float ringPad = 1.03f;
+        public float ringPad = 1.02f;
         [Tooltip("Tilted forward a little (degrees)")]
         public float tilt = 3f;
         [Tooltip("Method A: the crown may grow at most this much to sit on the hair")]
         public float maxGrow = 1.15f;
         [Tooltip("Method A: and rise at most this much over its bald place; past either, method B")]
-        public float maxLift = 0.1f;
-        [Tooltip("Method B: the crown rises this much over its bald place (the pressed hair under it)")]
-        public float pressLift = 0.035f;
+        public float maxLift = 0f;
+        [Tooltip("Method B: the crown rises this much over its bald place (the pressed hair under it; 0: down on the head itself)")]
+        public float pressLift = 0f;
         [Tooltip("Method B: the crown a little wider than on the bald head")]
         public float pressGrow = 1.06f;
         [Tooltip("Method B: hair inside the ring may rise this share of the crown's height over its bottom")]

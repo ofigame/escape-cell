@@ -664,7 +664,7 @@ namespace SquashBot.Visual
         {
             float rate = RateFor(b);
             float w = b.anticipationMs / 1000f, h = b.activeMs / 1000f, k = b.recoveryMs / 1000f;
-            if (DuelStance) { rate = Mathf.Min(rate, 1f); w *= DuelSlow; h *= DuelSlow; k *= DuelSlowBack; }
+            if (DuelLook) { rate = Mathf.Min(rate, 1f); w *= DuelSlow; h *= DuelSlow; k *= DuelSlowBack; }
             return (w, h, k, rate);
         }
 
@@ -755,6 +755,12 @@ namespace SquashBot.Visual
 
         /// <summary>The duel's stance (set by the game while a duel is on): the family's own rest, a twirl now and then.</summary>
         public static bool DuelStance;
+        /// <summary>The duel's plain blows and steps (the user's call, 2026-10-28): its weapon blows, rest and walk as on the
+        /// floors (no slower duel swings, no family rest or twirl, no stance clips, no picture lunge onto the rival); its
+        /// specials, ultis and combo moves keep their own. False: the old duel look back.</summary>
+        public static bool PlainDuelBlows = true;
+        /// <summary>The duel's own look of the plain blows and stance (off while <see cref="PlainDuelBlows"/>).</summary>
+        public static bool DuelLook => DuelStance && !PlainDuelBlows;
         /// <summary>The blows in a row now (the duel's combo): from three the trail grows thicker, from four the weapon sparkles.</summary>
         public int Combo { get; set; }
         private float idleSince, twirlAt = -1f;
@@ -763,7 +769,7 @@ namespace SquashBot.Visual
         /// an axe on the shoulder, a heavy weapon held up at its side.</summary>
         private bool DuelRest()
         {
-            if (!DuelStance || isGun) return false;
+            if (!DuelLook || isGun) return false;
             if (twirlAt < 0f) twirlAt = Time.time + Random.Range(5f, 8f);
             if (Time.time >= twirlAt && Time.time - idleSince > 1.5f) { twirlAt = Time.time + Random.Range(5f, 8f); spin = 0f; spinTurns = 1; return false; } // (a twirl now and then)
             float bob = Mathf.Sin(Time.time * 6f) * 0.02f;

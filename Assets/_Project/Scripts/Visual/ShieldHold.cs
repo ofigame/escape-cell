@@ -106,7 +106,7 @@ namespace SquashBot.Visual
                 return;
             }
             var thrust = arm.position + ahead * reach * 0.98f + right * reach * 0.1f - up * reach * 0.05f; // (the arm straight out ahead)
-            if (hero == null || (!hero.PlayingMove && !hero.Flailing)) Reach(arm, fore, hand, Vector3.Lerp(Vector3.Lerp(carry, guard, k), thrust, b)); // (a move playing or thrown about: the arm is its own, the shield goes with the hand)
+            if (hero == null || !hero.Flailing) Reach(arm, fore, hand, Vector3.Lerp(Vector3.Lerp(carry, guard, k), thrust, b)); // (the shield arm always its own, a clip playing too: a clip's hand at the chest took the shield into the body; thrown about: the shield goes with the hand)
             // the shield: its back on the hand (the grip), its face forward and out to the left
             var face = Vector3.Lerp((ahead * (0.55f + 0.45f * k) - right * (0.85f - 0.7f * k)).normalized, ahead, b).normalized;
             holder.rotation = Quaternion.LookRotation(face, up);

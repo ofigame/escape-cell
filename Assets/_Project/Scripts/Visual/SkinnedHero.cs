@@ -869,7 +869,7 @@ namespace SquashBot.Visual
                     if (armL != null) armL.rotation = Quaternion.AngleAxis(3f * breath, fr.forward) * armL.rotation;
                     if (armR != null) armR.rotation = Quaternion.AngleAxis(-3f * breath, fr.forward) * armR.rotation;
                 }
-                if (HeldWeapon.DuelStance && hips != null && heldCache != null && heldCache.Family == Combat.WeaponFamily.Sword && heldCache.Current == null)
+                if (HeldWeapon.DuelLook && hips != null && heldCache != null && heldCache.Family == Combat.WeaponFamily.Sword && heldCache.Current == null)
                     hips.position += fr.up * hgt * 0.012f * Mathf.Abs(Mathf.Sin(time * 5f));
             }
             // a crouch: down quickly, easing back up
@@ -1506,6 +1506,7 @@ namespace SquashBot.Visual
         /// <summary>A move (a dance, the ultimate's combo) is playing: the arms are its own.</summary>
         public bool PlayingMove => playing != null;
         private bool gripKnown;
+        private ShieldHold shieldHold;
         /// <summary>What the game hangs by the body to be held (a weapon, a hammer).</summary>
         private static readonly string[] HeldNames = { "HeldWeapon", "ArenaHammer", "HeldHammer" };
 
@@ -1553,9 +1554,10 @@ namespace SquashBot.Visual
             // then the weapon into the fist itself, so the fingers close round its grip
             var palm = FistMiddle;
             weapon.parent.position += palm - weapon.position;
-            // a two-handed weapon: the left hand on its second grip too (its shield on the back meanwhile: ShieldHold)
+            // a two-handed weapon: the left hand on its second grip too; a shield carried keeps that hand (held one-handed then)
             if (weapon != gripSeen) { gripSeen = weapon; gripOf = weapon.GetComponentInChildren<WeaponGrip>(); }
-            TwoHandedNow = gripOf != null && gripOf.TwoHanded;
+            if (shieldHold == null) shieldHold = GetComponent<ShieldHold>();
+            TwoHandedNow = gripOf != null && gripOf.TwoHanded && (shieldHold == null || !shieldHold.Carried);
             if (TwoHandedNow && playing == null && !Flailing && !OffHandOnShield) OffHandOnGrip(gripOf.Off, weapon.up);
             if (playing == null && !Flailing) gripTurn = Quaternion.Inverse(handR.rotation) * weapon.parent.rotation; // (how it sits in the hand at rest: a move keeps it so)
             var held = weapon.GetComponentInChildren<HeldWeapon>();

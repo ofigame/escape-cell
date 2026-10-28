@@ -78,7 +78,7 @@ namespace SquashBot.Visual
             if (bones == null) return false;
             // the stance: a duel, nothing else moving the body; crouched, behind the shield, walking or standing still
             var want = Crouched && crouchClip != null ? crouchClip : Guarding && blockClip != null ? blockClip : walking ? walkClip : idleClip;
-            bool stance = want != null && HeldWeapon.DuelStance && upperPlaying == null && knock == null && !Flailing && moveNow == BodyMove.None && strikeNow == Combat.BodyStrike.Weapon;
+            bool stance = want != null && HeldWeapon.DuelLook && upperPlaying == null && knock == null && !Flailing && moveNow == BodyMove.None && strikeNow == Combat.BodyStrike.Weapon;
             // another stance wanted: the one now eased out quickly, the new one in (each from its start)
             bool swap = want != stanceClip;
             idleWeight = Mathf.MoveTowards(idleWeight, stance && !swap ? 1f : 0f, dt / (swap ? 0.07f : 0.15f));

@@ -72,18 +72,19 @@ namespace SquashBot.Gameplay
             return k;
         }
 
-        /// <summary>The vampire heals 4% of the damage it deals.</summary>
+        /// <summary>The vampire steals a share of a full ULTI bar from the other with every blow (no health back: only the hearts give that).</summary>
         private void MyVampire(int damagePoints)
         {
-            if (myPassive != PassiveKind.Vampire || LiveActive || duelMine.hp <= 0) return;
-            health = Mathf.Min(1f, health + Bal.vampireShare * damagePoints / duelMine.hp);
-            RefreshHealthBar();
+            if (myPassive != PassiveKind.Vampire || LiveActive || damagePoints <= 0) return;
+            float take = Mathf.Min(rivalMeter, Bal.vampireShare * UltiCost);
+            rivalMeter -= take; myMeter = Mathf.Min(3f, myMeter + take);
         }
 
         private void RivalVampire(float shareTaken)
         {
-            if (rivalPassive != PassiveKind.Vampire || LiveActive) return;
-            hunt.HealFoeQuiet(Bal.vampireShare * shareTaken * duelMine.hp / Mathf.Max(1, hunt.ChallengeFoeMaxHp));
+            if (rivalPassive != PassiveKind.Vampire || LiveActive || shareTaken <= 0f) return;
+            float take = Mathf.Min(myMeter, Bal.vampireShare * UltiCost);
+            myMeter -= take; rivalMeter = Mathf.Min(3f, rivalMeter + take);
         }
 
         /// <summary>
@@ -259,14 +260,14 @@ namespace SquashBot.Gameplay
                 }
                 case SpecialKind.Patch:
                 {
-                    // a column of green light: health back
-                    float heal = Bal.SpecialHeal(s);
+                    // a column of green light: patched up, untouchable a while (no health back: only the hearts give that)
+                    float safe = Bal.SpecialUntouchable(s);
                     Body(MeModel(), BodyMove.ChestPatch, 1f, otherAt); // (its chest opened, a part turned in, a shrug)
                     MoveFx.Pillar(meAt, new Color(0.45f, 1f, 0.55f), 0.8f, 7f, 1f);
                     for (int i = 0; i < 3; i++) fx.Burst(meAt + Vector3.up * (0.3f + i * 0.6f), new Color(0.5f, 1f, 0.6f), new Color(1f, 2.4f, 1.2f), 20, 3f);
-                    if (mine) { if (!LiveActive) { health = Mathf.Min(1f, health + heal); RefreshHealthBar(); } }
-                    else if (!LiveActive) hunt.HealFoe(heal);
-                    FloatSized(meAt + Vector3.up * 2.1f, Loc.F("hit.patch", Mathf.RoundToInt(heal * 100f)), UI.UiKit.Style.successLight, 50f); // (told apart from a heart: the patch's own words)
+                    if (mine) myInvulnUntil = Time.time + safe; else rivalInvulnUntil = hunt.FoeInvulnUntil = Time.time + safe;
+                    if (MeModel() != null) StatusFx.On(CombatFeel.RootOf(MeModel())).Shine(safe); // (untouchable: it shines)
+                    FloatSized(meAt + Vector3.up * 2.1f, Loc.T("hit.patch"), UI.UiKit.Style.successLight, 50f); // (told apart from a heart: the patch's own words)
                     AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.5f);
                     break;
                 }
@@ -558,7 +559,7 @@ namespace SquashBot.Gameplay
                 }
                 case UltiKind.CoreBurst:
                 {
-                    // the core gathers at the chest, then bursts: a blast of light across the floor, health back
+                    // the core gathers at the chest, then bursts: a blast of light across the floor
                     Hold(Bal.UltiHold(u));
                     Body(Self(), BodyMove.CoreBurst, 1.2f, OtherAt()); // (a fist on its chest, rising with the arms flung open, down on a knee)
                     MoveFx.Blast(MeAt() + Vector3.up * 0.9f, new Color(0.4f, 0.95f, 1f), 5f, 0.6f);
@@ -569,9 +570,7 @@ namespace SquashBot.Gameplay
                     cameraRig.Shake(1.4f);
                     AudioManager.PlaySfx(Sfx.Impact, 1f, 0.5f);
                     Damage(hitTimes);
-                    CombatFeel.UltiFinal(Self(), Other());
-                    float back = Bal.UltiHeal(u);
-                    if (!LiveActive) { if (mine) { health = Mathf.Min(1f, health + back); RefreshHealthBar(); } else hunt.HealFoe(back); }
+                    CombatFeel.UltiFinal(Self(), Other()); // (no health back: only the hearts give that)
                     if (Flings()) yield return BigMoment(!mine, 2.6f, 3);
                     break;
                 }

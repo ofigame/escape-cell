@@ -134,7 +134,7 @@ namespace SquashBot.Gameplay
             // the duel's lunges: each fighter's weapon aims at the other (the contact rule)
             HeldWeapon.TargetOf = h =>
             {
-                if (!challengeRun || hunt == null || h == null) return null;
+                if (!challengeRun || hunt == null || h == null || HeldWeapon.PlainDuelBlows) return null; // (plain blows: no lunge onto the other, as on the floors)
                 var foeModel = hunt.ChallengeFoeModel;
                 if (h == heldWeapon) return foeModel;
                 return foeModel != null && h.transform.IsChildOf(foeModel) ? robot.Visual : null;
@@ -448,7 +448,7 @@ namespace SquashBot.Gameplay
             arenaRun = false;
             trailRun = false;
             dailyRun = false;
-            robot.SetSize(DuelFoiSize, 0.1f); // foi big in the duels (the camera stands well back to show the whole stage; the rival copies its size)
+            robot.SetSize(DuelFoiSize, HeldWeapon.PlainDuelBlows ? 0.32f : 0.1f); // foi big in the duels (the camera stands well back to show the whole stage; the rival copies its size)
             BeginRun();
             ui.SetChallengeHud(true);
             ui.SkillBar.Refresh(false);
