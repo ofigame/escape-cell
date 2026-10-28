@@ -13,12 +13,12 @@ namespace SquashBot.Combat
     {
         /// <summary>Room either side of the outermost foi (tiles: an arm, a weapon, a fall).</summary>
         public float sideRoom = 3.1f;
-        /// <summary>The nearest and furthest the camera stands (the old nearest was 15.5: 18% nearer now).</summary>
-        public float minDistance = 12.7f, maxDistance = 46f;
+        /// <summary>The nearest and furthest the camera stands (back and up a little: the whole floor to move on in view).</summary>
+        public float minDistance = 21f, maxDistance = 46f;
         /// <summary>The camera's height: this much plus this share of its distance.</summary>
-        public float heightBase = 2.2f, heightPerDistance = 0.2f;
+        public float heightBase = 6f, heightPerDistance = 0.32f;
         /// <summary>The point looked at stands this share of the distance above the feet (higher: the foi lower on the screen).</summary>
-        public float focusPerDistance = 0.07f;
+        public float focusPerDistance = 0.05f;
         /// <summary>The vertical field of view (degrees) the fit is worked out for.</summary>
         public float fov = 46f;
         /// <summary>The golden knock-down's overtime: the camera this much nearer.</summary>

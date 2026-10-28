@@ -786,7 +786,7 @@ namespace SquashBot.Visual
         {
             if (!ready) Setup();
             var r = Combat.CombatLibrary.Reactions;
-            if (strength == Combat.HitStrength.Launch) { LaunchUp(from); Squint(1f, 0.9f); return; } // (the design's 1 s in the air, a back flip)
+            if (strength == Combat.HitStrength.Launch) { DriveBack(from); Squint(1f, 0.9f); Brows(1f, 0.45f); Squash(1f); return; } // (the biggest blows: driven back onto a knee, never a somersault in the air)
             int variant = spring.Kick(dir, height, r.Degrees(strength) * Mathf.Clamp(intensity, 0.5f, 2f), r.Recovery(strength));
             LastReaction = dir + "/" + height + "/" + strength + "/v" + variant;
             switch (strength)

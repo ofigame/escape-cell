@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: DuelCameraSettings
   m_EditorClassIdentifier: Assembly-CSharp::SquashBot.Combat.DuelCameraSettings
   sideRoom: 3.1
-  minDistance: 12.7
+  minDistance: 21
   maxDistance: 46
-  heightBase: 2.2
-  heightPerDistance: 0.2
-  focusPerDistance: 0.07
+  heightBase: 6
+  heightPerDistance: 0.32
+  focusPerDistance: 0.05
   fov: 46

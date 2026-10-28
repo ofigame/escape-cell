@@ -268,13 +268,8 @@ namespace SquashBot.Gameplay
                 cosmetics.SetParent(visual, false);
             }
             for (int i = cosmetics.childCount - 1; i >= 0; i--) DestroyImmediate(cosmetics.GetChild(i).gameObject); // at once: a lookalike may be copied right after
-            // A build with a longer body wears its badge that much higher (half of it), the longer legs lift it too.
-            float extra = HeroModels.TorsoExtra(hero);
-            float lift = HeroModels.LegLift(hero);
             accessories.gameObject.SetActive(true); // (the world's own gear: the garage's hats and back pieces are gone)
             // Shaped eyes replace the plain eye blocks.
-            var badge = outfit[Data.Slot.Badge];
-            if (!badge.IsDefault) CosmeticModels.Badge(Raised(extra * 0.5f + lift), badge.id, badge.color);
 
             bool shaped = Data.Cosmetics.ShapedEyes(eyes.id);
             foreach (var e in new[] { eyeL, eyeR })
@@ -306,8 +301,7 @@ namespace SquashBot.Gameplay
             foreach (var mount in new[] { skin.HatMount, skin.BackMount, skin.BadgeMount })
                 if (mount != null)
                     for (int i = mount.childCount - 1; i >= 0; i--) DestroyImmediate(mount.GetChild(i).gameObject); // at once: a lookalike may be copied right after
-            var badge = outfit[Data.Slot.Badge];
-            if (!badge.IsDefault && skin.BadgeMount != null) CosmeticModels.Badge(skin.BadgeMount, badge.id, badge.color); // (a story badge on the chest)
+            // (the story badges on the chest are gone with the garage's badge tab)
             // its parts' look (a rival's copy is given the rival's own after it is made)
             PartLooks.Apply(skin.transform, Data.RobotParts.Level(Data.RobotPart.Body), Data.RobotParts.Level(Data.RobotPart.Arms), Data.RobotParts.Level(Data.RobotPart.Shell));
             BodyShape.Apply(skin.transform, Data.RobotParts.Level(Data.RobotPart.Body), Data.RobotParts.Level(Data.RobotPart.Arms), true); // (the player's own: never thinner than before the bag came)
@@ -322,16 +316,6 @@ namespace SquashBot.Gameplay
 
         /// <summary>The rank gear tier dressed instead of the player's own (a rival's look being made); null: the player's.</summary>
         public int? RankTierShown { get; set; }
-
-        /// <summary>A holder for garage gear, <paramref name="y"/> higher than the gear was made for.</summary>
-        private Transform Raised(float y)
-        {
-            if (y == 0f) return cosmetics;
-            var t = new GameObject("Raised").transform;
-            t.SetParent(cosmetics, false);
-            t.localPosition = new Vector3(0f, y, 0f);
-            return t;
-        }
 
         /// <summary>Step mark from the paint workshop (null = none) and its colour.</summary>
         public string StepId { get; private set; }

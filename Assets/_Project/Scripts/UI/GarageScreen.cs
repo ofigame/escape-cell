@@ -12,8 +12,8 @@ namespace SquashBot.UI
 {
     /// <summary>
     /// Bip's workshop: the real robot stands in the upper half (the camera leans in on it), the lower half holds the
-    /// categories (head, hair, skin, eye colour, badge, dance) and a scrolling grid of their items. Tapping an item tries
-    /// it on at once; the button buys or equips it. The badges come with the story.
+    /// categories (head, hair, skin, eye colour, dance) and a scrolling grid of their items. Tapping an item tries
+    /// it on at once; the button buys or equips it.
     /// </summary>
     public class GarageScreen : MonoBehaviour
     {
@@ -30,7 +30,7 @@ namespace SquashBot.UI
         private bool rankTab;
         private int rankPicked;
 
-        private const int TabsPerRow = 6;
+        private const int TabsPerRow = 5;
 
         private UiScreen screen;
         private TextMeshProUGUI coinsText, itemName, actionLabel;
@@ -85,14 +85,14 @@ namespace SquashBot.UI
             itemName.fontSizeMax = 42f;
 
             var tabRow = UiFactory.Box("Tabs", panel, new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(940f, 190f));
-            // foi's tabs: its head first, its looks, its story badges, its dances (the hats, armour paints, capes and arm
-            // gear are gone: the rank gear comes with the rank; paint, eyes, step marks, trails and legs were the old robot's)
-            var slots = new[] { Slot.Head, Slot.Hair, Slot.Skin, Slot.Iris, Slot.Badge, Slot.Dance };
+            // foi's tabs: its head first, its looks, its dances (the hats, armour paints, capes, arm gear and story badges
+            // are gone: the rank gear comes with the rank; paint, eyes, step marks, trails and legs were the old robot's)
+            var slots = new[] { Slot.Head, Slot.Hair, Slot.Skin, Slot.Iris, Slot.Dance };
             for (int i = 0; i < slots.Length; i++)
             {
                 var s = slots[i];
                 int col = i % TabsPerRow, row = i / TabsPerRow;
-                var tab = UiFactory.MakeButton(tabRow, Loc.T("garage." + s), Kind.Secondary, new Vector2(0f, 1f), new Vector2(col * 157f, -row * 96f), new Vector2(150f, 88f), () => SelectSlot(s), 24f);
+                var tab = UiFactory.MakeButton(tabRow, Loc.T("garage." + s), Kind.Secondary, new Vector2(0f, 1f), new Vector2(col * 189f, -row * 96f), new Vector2(182f, 88f), () => SelectSlot(s), 24f);
                 tabs.Add((s, tab.targetGraphic as Image));
             }
             // the rank gear: its own tab on the second row (crown, bracers, pauldrons, kneepads come with the rank)

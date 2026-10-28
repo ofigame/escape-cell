@@ -19,6 +19,9 @@ namespace SquashBot.Gameplay
         private bool myCrouch, rivalCrouchShown;
         private float rivalCrouchUntil, rivalHopUntil;
         private float myDownUntil, rivalDownUntil, myLaunchUntil, rivalLaunchUntil;
+        /// <summary>When each side last got up from a sweep (a sweep again this soon only rocks it: falling is never easy).</summary>
+        private float myUpAt = -99f, rivalUpAt = -99f;
+        private const float FallAgainAfter = 6f;
         private int myAirHits, rivalAirHits;
         private readonly float[] myPhysReady = new float[4], rivalPhysReady = new float[4];
         /// <summary>The guided duel's sweep step done (a sweep landed).</summary>
@@ -219,6 +222,14 @@ namespace SquashBot.Gameplay
                 case PhysKind.Sweep:
                 {
                     float lie = tab.downSeconds + tab.getUpSeconds;
+                    if (now < (mine ? rivalUpAt : myUpAt) + FallAgainAfter) // (just up again: only rocked this time)
+                    {
+                        if (theirSkin != null) theirSkin.Rock(from, 1f);
+                        PhysCameraMoment(PhysKind.Shoulder, them != null ? them.position : from);
+                        AudioManager.PlaySfx(Sfx.Impact, 0.9f, 1f, 0.08f);
+                        break;
+                    }
+                    if (mine) rivalUpAt = now + lie; else myUpAt = now + lie;
                     if (mine) { rivalDownUntil = now + lie; if (!LiveActive) { hunt.FoeInvulnUntil = Mathf.Max(hunt.FoeInvulnUntil, now + lie); hunt.StunFoe(lie); } }
                     else { myDownUntil = now + lie; myInvulnUntil = Mathf.Max(myInvulnUntil, now + lie); }
                     var across = them != null ? Vector3.Cross(Vector3.up, them.position - from).normalized : Vector3.right;
@@ -256,19 +267,17 @@ namespace SquashBot.Gameplay
             }
         }
 
-        /// <summary>The other thrown up into the air (the uppercut, the knockdown): a second up there, hit at most three times.</summary>
+        /// <summary>The other struck hard (the uppercut, the knockdown): driven back onto a knee and stunned a moment, never
+        /// thrown into the air with a somersault (it kept a fighter tumbling and never back on its feet).</summary>
         private void PhysLaunch(bool mine)
         {
-            var tab = PhysTab;
-            float now = Time.time;
             var them = mine ? hunt.ChallengeFoeModel : robot.Visual;
             var me = mine ? robot.Visual : hunt.ChallengeFoeModel;
-            if (mine) { rivalLaunchUntil = now + tab.airSeconds + tab.getUpSeconds; rivalAirHits = 0; if (!LiveActive) hunt.StunFoe(tab.airSeconds + tab.getUpSeconds); }
-            else { myLaunchUntil = now + tab.airSeconds + tab.getUpSeconds; myAirHits = 0; }
+            if (mine) { if (!LiveActive) hunt.StunFoe(Bal.upperStun); }
+            else strikeCooldown = Mathf.Max(strikeCooldown, Bal.upperStun);
             var skin = them != null ? them.GetComponentInChildren<SkinnedHero>() : null;
-            if (skin != null) skin.LaunchUp(me != null ? me.position : robot.transform.position, tab.airSeconds);
-            FaceFor(them, FaceMoment.Launched);
-            if (!mine && !LiveActive) cameraRig.StartCoroutine(RivalJuggle()); // (the computer follows it up in the air)
+            if (skin != null) skin.DriveBack(me != null ? me.position : robot.transform.position);
+            FaceFor(them, FaceMoment.HeavyHit);
         }
 
         /// <summary>
@@ -313,22 +322,6 @@ namespace SquashBot.Gameplay
                 return true;
             }
             return false;
-        }
-
-        /// <summary>The computer follows its uppercut up with blows in the air (each less, at most three).</summary>
-        private System.Collections.IEnumerator RivalJuggle()
-        {
-            var held = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<HeldWeapon>() : null;
-            var skin = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null;
-            for (int i = 0; i < PhysTab.airHitsMax && Time.time < myLaunchUntil - PhysTab.getUpSeconds && challengeRun; i++)
-            {
-                yield return new WaitForSeconds(0.28f);
-                if (held != null) held.Swing();
-                yield return new WaitForSeconds(0.08f);
-                float times = PhysTab.airHitTimes[Mathf.Min(i, PhysTab.airHitTimes.Length - 1)];
-                HurtMe(times, BlowKind.Air);
-                if (skin != null) skin.AirHit(hunt.ChallengeFoeAt ?? robot.transform.position);
-            }
         }
 
         // ---------- The camera's moments (the design's section 6) ----------
@@ -382,13 +375,13 @@ namespace SquashBot.Gameplay
         {
             var t = botTuning;
             if (t == null || dist > 3.4f || RivalOutOfIt) return false;
-            float sweep = 0.06f, upper = 0.05f, head = 0.04f, shoulder = 0.05f;
+            float sweep = 0.02f, upper = 0.03f, head = 0.04f, shoulder = 0.05f; // (a sweep now and then only: falling is never easy)
             switch (t.persona)
             {
-                case Persona.Aggressive: sweep = 0.2f; head = 0.16f; break;
-                case Persona.Combo: upper = 0.25f; break;
+                case Persona.Aggressive: sweep = 0.05f; head = 0.16f; break;
+                case Persona.Combo: upper = 0.1f; break;
                 case Persona.Runner: shoulder = 0.25f; break;
-                case Persona.Defensive: sweep = 0.1f; break;
+                case Persona.Defensive: sweep = 0.03f; break;
             }
             float roll = Random.value;
             if (MeOutOfIt) return false; // (never on a fighter that is down)
@@ -441,6 +434,7 @@ namespace SquashBot.Gameplay
         {
             myCrouch = false; rivalCrouchShown = false;
             rivalCrouchUntil = rivalHopUntil = myDownUntil = rivalDownUntil = myLaunchUntil = rivalLaunchUntil = 0f;
+            myUpAt = rivalUpAt = -99f;
             myAirHits = rivalAirHits = 0;
             for (int i = 0; i < 4; i++) { myPhysReady[i] = 0f; rivalPhysReady[i] = 0f; }
             bodyOfferUntil = 0f; bodyOfferNext = 0f;
