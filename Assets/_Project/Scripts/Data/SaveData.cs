@@ -64,11 +64,10 @@ namespace SquashBot.Data
             set { Prefs.SetInt("sb_floor_btns", value ? 1 : 0); Prefs.Save(); }
         }
 
-        /// <summary>The duel on one line (off by default now: the whole floor to move on; the old "sb_lane_duel" left as it was).</summary>
         public static bool LaneDuel
         {
-            get => Prefs.GetInt("sb_lane_duel2", 0) == 1;
-            set { Prefs.SetInt("sb_lane_duel2", value ? 1 : 0); Prefs.Save(); }
+            get => Prefs.GetInt("sb_lane_duel", 1) == 1;
+            set { Prefs.SetInt("sb_lane_duel", value ? 1 : 0); Prefs.Save(); }
         }
 
         /// <summary>The duel's controls for left hands: the button cluster on the left, the heart on the right.</summary>

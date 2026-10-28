@@ -922,6 +922,15 @@ namespace SquashBot.Visual
         private void OnDisable() { Live.Remove(this); if (ready) CleanSlate(); } // (hidden mid-reaction: its coroutines stop here, so nothing they set may stay behind)
 
         /// <summary>The body as a capsule (world): from above its feet to its neck, and how thick.</summary>
+        /// <summary>A point inside the body's trunk (a little within its capsule).</summary>
+        private bool InsideBody(Vector3 p)
+        {
+            BodyCapsule(out var bottom, out var top, out float radius);
+            var axis = top - bottom;
+            float k = Mathf.Clamp01(Vector3.Dot(p - bottom, axis) / Mathf.Max(1e-6f, axis.sqrMagnitude));
+            return (p - (bottom + axis * k)).magnitude < radius * 0.9f;
+        }
+
         public void BodyCapsule(out Vector3 bottom, out Vector3 top, out float radius)
         {
             var up = transform.parent != null ? transform.parent.up : Vector3.up;
@@ -1558,7 +1567,7 @@ namespace SquashBot.Visual
             if (weapon != gripSeen) { gripSeen = weapon; gripOf = weapon.GetComponentInChildren<WeaponGrip>(); }
             if (shieldHold == null) shieldHold = GetComponent<ShieldHold>();
             TwoHandedNow = gripOf != null && gripOf.TwoHanded && (shieldHold == null || !shieldHold.Carried);
-            if (TwoHandedNow && playing == null && !Flailing && !OffHandOnShield) OffHandOnGrip(gripOf.Off, weapon.up);
+            if (TwoHandedNow && playing == null && !Flailing && !OffHandOnShield && !InsideBody(gripOf.Off)) OffHandOnGrip(gripOf.Off, weapon.up); // (a second grip inside the chest: that hand left free, never sunk into the body)
             if (playing == null && !Flailing) gripTurn = Quaternion.Inverse(handR.rotation) * weapon.parent.rotation; // (how it sits in the hand at rest: a move keeps it so)
             var held = weapon.GetComponentInChildren<HeldWeapon>();
             if (held != null) { held.BodyDriven = AttackPlaying; held.AfterGrip(); } // (a mapped attack swings it with the hand; the blade onto its target from where the hand holds it)
