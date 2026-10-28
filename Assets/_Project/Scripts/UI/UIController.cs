@@ -1241,6 +1241,7 @@ namespace SquashBot.UI
         private void BuildSettings(Transform root)
         {
             settings = UiScreen.Create("Settings", root, out var t);
+            settings.BackAction = () => settings.Hide(); // (the Android back key: the same on every screen)
             UiFactory.Dim(t, new Color(0.06f, 0.05f, 0.18f, 0.5f));
             var card = UiFactory.Card("Card", t, Middle, Vector2.zero, new Vector2(860f, 1590f));
             settingsCard = card;

@@ -42,6 +42,7 @@ namespace SquashBot.UI
             d.opening = UiScreen.Create("ChestOpening", canvasRoot, out var openRoot);
             d.BuildOpening(openRoot);
             d.contents = UiScreen.Create("ChestContents", canvasRoot, out var contentsRoot);
+            d.contents.BackAction = () => d.contents.Hide(); // (the Android back key: the same on every screen)
             d.BuildContents(contentsRoot);
             return d;
         }
@@ -52,19 +53,18 @@ namespace SquashBot.UI
         {
             Flat.Background(root);
             var top = new Vector2(0.5f, 1f);
-            Flat.Label(root, Loc.T("chests.title"), top, new Vector2(0f, -70f), new Vector2(960f, 80f), 58f, Flat.Text, TextAlignmentOptions.Center, bold: true)
-                .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            freeLine = Flat.Label(root, "", top, new Vector2(0f, -140f), new Vector2(960f, 50f), 30f, Flat.Gold, TextAlignmentOptions.Center);
+            headerCoins = UiKit.ScreenHeader(root, screen, Loc.T("chests.title"), null);
+            freeLine = Flat.Label(root, "", top, new Vector2(0f, -212f), new Vector2(960f, 50f), 30f, Flat.Gold, TextAlignmentOptions.Center);
             freeLine.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            for (int i = 0; i < DuelChests.Tiers; i++) Card(root, (ChestTier)i, -190f - i * 300f);
+            for (int i = 0; i < DuelChests.Tiers; i++) Card(root, (ChestTier)i, -250f - i * 296f);
             var bottom = new Vector2(0.5f, 0f);
             // a plain chest for an ad (the player's choice); the hint moves up under the title
-            adChest = Flat.Button(root, "", bottom, new Vector2(0f, Ads.BannerReserve + 200f), new Vector2(720f, 100f), new Color(0.62f, 0.4f, 1f), Color.white, AdChest, 32f);
+            adChest = Flat.Button(root, "", bottom, new Vector2(0f, Ads.BannerReserve + 80f), new Vector2(720f, 100f), new Color(0.62f, 0.4f, 1f), Color.white, AdChest, 32f);
             ((RectTransform)adChest.transform).pivot = new Vector2(0.5f, 0.5f);
             adChestLabel = adChest.GetComponentInChildren<TextMeshProUGUI>();
-            var close = Flat.Button(root, Loc.T("btn.close"), bottom, new Vector2(0f, Ads.BannerReserve + 70f), new Vector2(520f, 110f), Flat.Blue, Color.white, () => screen.Hide(), 42f);
-            ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
         }
+
+        private TMPro.TextMeshProUGUI headerCoins;
 
         private void Card(RectTransform root, ChestTier t, float y)
         {
@@ -208,6 +208,7 @@ namespace SquashBot.UI
             for (int i = 0; i < DuelChests.Tiers; i++) pictures[i].texture = ChestStage.Thumbnail((ChestTier)i);
             Refresh();
             screen.Show();
+            UiKit.RefreshCurrency(headerCoins);
         }
 
         private void Refresh()

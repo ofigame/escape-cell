@@ -13,18 +13,20 @@ namespace SquashBot.UI
     /// </summary>
     public static class Flat
     {
-        public static readonly Color Back = new Color(0.04f, 0.07f, 0.16f);
-        public static readonly Color Card = new Color(0.09f, 0.19f, 0.4f);
-        public static readonly Color CardHi = new Color(0.15f, 0.29f, 0.55f);
-        public static readonly Color Line = new Color(1f, 1f, 1f, 0.08f);
-        public static readonly Color Text = Color.white;
-        public static readonly Color Muted = new Color(0.62f, 0.65f, 0.76f);
-        public static readonly Color Gold = new Color(1f, 0.78f, 0.3f);
-        public static readonly Color Blue = new Color(0.3f, 0.6f, 1f);
-        public static readonly Color Red = new Color(1f, 0.36f, 0.34f);
+        // (the colours are the one style's: Docs/TasarimSistemi.md, UiStyle)
+        public static Color Back => UiStyle.Current.back;
+        public static Color Card => UiStyle.Current.panel;
+        public static Color CardHi => UiStyle.Current.panelHi;
+        public static Color Line => UiStyle.Current.line;
+        public static Color Text => UiStyle.Current.text;
+        public static Color Muted => UiStyle.Current.textMuted;
+        public static Color Gold => UiStyle.Current.gold;
+        public static Color Blue => UiStyle.Current.mine;
+        public static Color Red => UiStyle.Current.theirs;
 
         /// <summary>The space between things: one step is 8 units; most gaps are 2 or 3 steps.</summary>
-        public const float Gap = 16f, Pad = 24f;
+        public static float Gap => UiStyle.Current.gap;
+        public static float Pad => UiStyle.Current.pad;
 
         /// <summary>A solid rounded panel. A larger <paramref name="round"/> rounds less.</summary>
         public static RectTransform Panel(Transform parent, string name, Vector2 anchor, Vector2 position, Vector2 size, Color colour, float round = 1.6f)

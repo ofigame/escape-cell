@@ -592,6 +592,7 @@ namespace SquashBot.Gameplay
             if (State != GameState.Playing && friendsUi != null && friendsUi.InviteOpen) { friendsUi.HideInvite(); return; }
             if (State != GameState.Playing && friendsUi != null && friendsUi.IsOpen) { friendsUi.Hide(); return; }
             if (State != GameState.Playing && ui.CloseTopModal()) return; // a card on top closes first
+            if (State != GameState.Playing && UiScreen.CloseTop()) return; // (a kit screen's own back: the same as its header's)
             switch (State)
             {
                 case GameState.Playing: Pause(); return;

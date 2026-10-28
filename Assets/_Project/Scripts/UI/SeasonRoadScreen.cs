@@ -14,6 +14,7 @@ namespace SquashBot.UI
         public event Action Claimed;
 
         private UiScreen screen;
+        private TMPro.TextMeshProUGUI headerCoins;
         private RectTransform content;
         private TextMeshProUGUI head;
         private RectTransform barFill;
@@ -33,17 +34,16 @@ namespace SquashBot.UI
         private void Build(RectTransform p)
         {
             Flat.Background(p);
-            Flat.Label(p, Loc.T("sr.title"), new Vector2(0.5f, 1f), new Vector2(0f, -85f), new Vector2(960f, 80f), 50f, Flat.Text, TextAlignmentOptions.Center, bold: true)
-                .rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            head = Flat.Label(p, "", new Vector2(0.5f, 1f), new Vector2(0f, -170f), new Vector2(960f, 60f), 30f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
+            headerCoins = UiKit.ScreenHeader(p, screen, Loc.T("sr.title"), null);
+            head = Flat.Label(p, "", new Vector2(0.5f, 1f), new Vector2(0f, -215f), new Vector2(960f, 60f), 30f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
             head.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var bar = UiFactory.Box("Bar", p, new Vector2(0.5f, 1f), new Vector2(0f, -225f), new Vector2(900f, 30f));
+            var bar = UiFactory.Box("Bar", p, new Vector2(0.5f, 1f), new Vector2(0f, -268f), new Vector2(900f, 30f));
             bar.pivot = new Vector2(0.5f, 0.5f);
             UiFactory.Fill(bar, new Color(0f, 0f, 0f, 0.45f), UiSprites.Rounded, 15f).raycastTarget = false;
             barFill = UiFactory.Box("Fill", bar, new Vector2(0f, 0.5f), Vector2.zero, new Vector2(30f, 30f));
             barFill.pivot = new Vector2(0f, 0.5f);
             UiFactory.Fill(barFill, new Color(1f, 0.7f, 0.25f), UiSprites.Rounded, 15f).raycastTarget = false;
-            var viewport = UiFactory.Rect("Viewport", p, Vector2.zero, Vector2.one, new Vector2(40f, Monetization.Ads.BannerReserve + 160f), new Vector2(-40f, -270f));
+            var viewport = UiFactory.Rect("Viewport", p, Vector2.zero, Vector2.one, new Vector2(40f, Monetization.Ads.BannerReserve + 30f), new Vector2(-40f, -305f));
             viewport.gameObject.AddComponent<RectMask2D>();
             UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
@@ -54,14 +54,13 @@ namespace SquashBot.UI
             scroll.horizontal = false;
             scroll.decelerationRate = 0.12f;
             scroll.scrollSensitivity = 60f;
-            var close = Flat.Button(p, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 70f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => screen.Hide(), 34f);
-            ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 
         public void Show()
         {
             transform.SetAsLastSibling();
             screen.Show();
+            UiKit.RefreshCurrency(headerCoins);
             Refresh();
         }
 

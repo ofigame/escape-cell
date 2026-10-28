@@ -83,6 +83,7 @@ namespace SquashBot.UI
         public static QuestsScreen Create(Transform canvasRoot)
         {
             var s = UiScreen.Create("Quests", canvasRoot, out var root);
+            s.BackAction = () => s.Hide(); // (the Android back key: the same on every screen)
             var q = root.gameObject.AddComponent<QuestsScreen>();
             q.screen = s;
             q.Build(root);

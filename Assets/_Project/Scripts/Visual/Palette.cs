@@ -53,11 +53,12 @@ namespace SquashBot.Visual
         public static readonly Color RobotEye = new Color(0.4f, 1.6f, 2.2f);
 
         // UI
-        public static readonly Color UiText = Hex("#EEF0FF");
-        public static readonly Color UiCyan = Hex("#9FF3FF");
-        public static readonly Color UiRed = Hex("#FF7A85");
-        public static readonly Color UiGold = Hex("#FFD45C");
+        // (the UI's colours are the one style's: Docs/TasarimSistemi.md, UI.UiStyle)
+        public static Color UiText => UI.UiStyle.Current.text;
+        public static Color UiCyan => UI.UiStyle.Current.cyan;
+        public static Color UiRed => UI.UiStyle.Current.danger;
+        public static Color UiGold => UI.UiStyle.Current.gold;
         public static readonly Color UiButton = new Color(0.93f, 0.94f, 1f, 0.16f);
-        public static readonly Color UiDim = new Color(0.2f, 0.19f, 0.36f, 0.55f);
+        public static Color UiDim => UI.UiStyle.Current.dim;
     }
 }

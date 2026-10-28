@@ -27,6 +27,7 @@ namespace SquashBot.UI
         public static MoveSetScreen Create(Transform canvasRoot)
         {
             var s = UiScreen.Create("MoveSet", canvasRoot, out var root);
+            s.BackAction = () => s.Hide(); // (the Android back key: the same on every screen)
             var m = root.gameObject.AddComponent<MoveSetScreen>();
             m.screen = s;
             m.Build(root);

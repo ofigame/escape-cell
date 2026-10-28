@@ -21,6 +21,7 @@ namespace SquashBot.UI
         public event System.Action SettingsPressed;
 
         private UiScreen screen;
+        private TMPro.TextMeshProUGUI headerCoins;
         private RectTransform content;
         private ScrollRect scroll;
         private float y;
@@ -38,11 +39,10 @@ namespace SquashBot.UI
         private void Build(RectTransform p)
         {
             Flat.Background(p);
-            var title = Flat.Label(p, Loc.T("profile.title"), new Vector2(0.5f, 1f), new Vector2(0f, -80f), new Vector2(960f, 90f), 58f, Flat.Gold, TextAlignmentOptions.Center, bold: true);
-            title.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            headerCoins = UiKit.ScreenHeader(p, screen, Loc.T("profile.title"), null);
             // The buttons stay above the banner's place; the rest scrolls between them and the title.
             float buttons = Monetization.Ads.BannerReserve + 70f;
-            var viewport = UiFactory.Rect("Viewport", p, Vector2.zero, Vector2.one, new Vector2(30f, buttons + 80f), new Vector2(-30f, -185f)); // clear below the title
+            var viewport = UiFactory.Rect("Viewport", p, Vector2.zero, Vector2.one, new Vector2(30f, buttons + 80f), new Vector2(-30f, -200f)); // clear below the header
             viewport.gameObject.AddComponent<RectMask2D>();
             UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
@@ -53,9 +53,8 @@ namespace SquashBot.UI
             scroll.horizontal = false;
             scroll.decelerationRate = 0.12f;
             scroll.scrollSensitivity = 60f;
-            Bottom(p, Loc.T("settings.title"), -340f, Flat.CardHi, () => SettingsPressed?.Invoke());
-            Bottom(p, Loc.T("profile.rename"), 0f, Flat.CardHi, () => RenamePressed?.Invoke());
-            Bottom(p, Loc.T("btn.close"), 340f, new Color(1f, 0.6f, 0.25f), () => screen.Hide());
+            Bottom(p, Loc.T("settings.title"), -200f, Flat.CardHi, () => SettingsPressed?.Invoke());
+            Bottom(p, Loc.T("profile.rename"), 200f, Flat.CardHi, () => RenamePressed?.Invoke()); // (the way out: the header's back)
         }
 
         private static void Bottom(RectTransform p, string text, float x, Color face, System.Action onClick)
@@ -72,6 +71,7 @@ namespace SquashBot.UI
         {
             Refresh();
             screen.Show();
+            UiKit.RefreshCurrency(headerCoins);
             transform.SetAsLastSibling();
         }
 

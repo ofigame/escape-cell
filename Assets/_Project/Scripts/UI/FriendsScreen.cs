@@ -27,6 +27,7 @@ namespace SquashBot.UI
         public event Action<FoiNet.Invitation> InviteAccepted, InviteDeclined;
 
         private UiScreen screen, invitePanel;
+        private TMPro.TextMeshProUGUI headerCoins;
         private RectTransform content;
         private TMP_InputField nameInput;
         private TextMeshProUGUI status, inviteText;
@@ -50,8 +51,7 @@ namespace SquashBot.UI
         {
             screen = UiScreen.Create("Friends", parent, out var root);
             Flat.Background(root);
-            Flat.Label(root, Loc.T("friends.title"), new Vector2(0.5f, 1f), new Vector2(0f, -110f), new Vector2(960f, 80f), 56f, Flat.Text, TextAlignmentOptions.Center, bold: true)
-                .rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            headerCoins = UiKit.ScreenHeader(root, screen, Loc.T("friends.title"), Hide);
             // Adding a friend by name.
             var box = UiFactory.Box("Input", root, new Vector2(0.5f, 1f), new Vector2(-150f, -270f), new Vector2(620f, 110f));
             box.pivot = new Vector2(0.5f, 0.5f);
@@ -94,8 +94,6 @@ namespace SquashBot.UI
             scroll.horizontal = false;
             scroll.decelerationRate = 0.12f;
             scroll.scrollSensitivity = 60f;
-            var close = Flat.Button(root, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 70f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, Hide, 34f);
-            ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
 
             // A friend's invitation that came in.
             invitePanel = UiScreen.Create("FriendInvite", parent, out var ip);
@@ -202,6 +200,7 @@ namespace SquashBot.UI
         {
             status.text = Loc.T("ch.name.wait");
             screen.Show();
+            UiKit.RefreshCurrency(headerCoins);
             transform.SetAsLastSibling();
         }
 

@@ -16,7 +16,7 @@ namespace SquashBot.UI
     public static class UiFactory
     {
         public static readonly Color CardColor = new Color(0.08f, 0.18f, 0.4f, 0.96f); // (the new look's deep blue)
-        public static readonly Color PillColor = new Color(0.05f, 0.12f, 0.3f, 0.78f);
+        public static Color PillColor => UiStyle.Current.pill;
         public static readonly Color TextDark = new Color(0.13f, 0.12f, 0.29f);
 
         private static TMP_FontAsset font, titleFont;
@@ -557,6 +557,28 @@ namespace SquashBot.UI
 
         public bool IsVisible => showing;
 
+        /// <summary>What the Android back key does on this screen (the kit's header and popup set it: the same as their
+        /// own back or close button); null: the screen leaves the back key to the game.</summary>
+        public System.Action BackAction { get; set; }
+
+        // the screens shown, newest last: the back key goes to the top one that has a back action
+        private static readonly System.Collections.Generic.List<UiScreen> shown = new System.Collections.Generic.List<UiScreen>();
+
+        /// <summary>The Android back key: the newest screen still showing that has a back action takes it (true), the
+        /// same everywhere (section 1.3).</summary>
+        public static bool CloseTop()
+        {
+            for (int i = shown.Count - 1; i >= 0; i--)
+            {
+                var s = shown[i];
+                if (s == null || !s.showing) { shown.RemoveAt(i); continue; }
+                if (s.BackAction == null) continue;
+                s.BackAction();
+                return true;
+            }
+            return false;
+        }
+
         public static UiScreen Create(string name, Transform parent, out RectTransform root)
         {
             root = UiFactory.Stretch(name, parent);
@@ -575,6 +597,7 @@ namespace SquashBot.UI
         {
             gameObject.SetActive(true);
             showing = true;
+            shown.Remove(this); shown.Add(this);
             t = 0f;
             group.interactable = true;
             group.blocksRaycasts = true;

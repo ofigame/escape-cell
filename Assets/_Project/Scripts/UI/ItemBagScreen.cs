@@ -61,6 +61,7 @@ namespace SquashBot.UI
             var screen = UiScreen.Create("ItemBag", canvasRoot, out var root);
             var b = root.gameObject.AddComponent<ItemBagScreen>();
             b.screen = screen;
+            screen.BackAction = b.Hide; // (the Android back key: the same on every screen)
             b.Build(root);
             return b;
         }

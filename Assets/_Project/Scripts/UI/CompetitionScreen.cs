@@ -23,6 +23,7 @@ namespace SquashBot.UI
         public event Action CoinsChanged;
 
         private UiScreen screen;
+        private TMPro.TextMeshProUGUI headerCoins;
         private RectTransform content, subBar;
         private TextMeshProUGUI status;
         private readonly Button[] tabs = new Button[4];
@@ -44,14 +45,14 @@ namespace SquashBot.UI
         {
             transform.SetAsLastSibling();
             screen.Show();
+            UiKit.RefreshCurrency(headerCoins);
             Open(Tab.Season);
         }
 
         private void Build(RectTransform p)
         {
             Flat.Background(p);
-            Flat.Label(p, Loc.T("comp.title"), new Vector2(0.5f, 1f), new Vector2(0f, -85f), new Vector2(960f, 80f), 50f, Flat.Text, TextAlignmentOptions.Center, bold: true)
-                .rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            headerCoins = UiKit.ScreenHeader(p, screen, Loc.T("comp.title"), null);
             string[] names = { "comp.season", "comp.top", "comp.cup", "comp.clan" };
             for (int i = 0; i < names.Length; i++)
             {
@@ -61,9 +62,9 @@ namespace SquashBot.UI
             }
             subBar = UiFactory.Box("Sub", p, new Vector2(0.5f, 1f), new Vector2(0f, -335f), new Vector2(1000f, 90f));
             subBar.pivot = new Vector2(0.5f, 0.5f);
-            status = Flat.Label(p, "", new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 150f), new Vector2(940f, 60f), 28f, Flat.Gold, TextAlignmentOptions.Center, wrap: true);
+            status = Flat.Label(p, "", new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 60f), new Vector2(940f, 60f), 28f, Flat.Gold, TextAlignmentOptions.Center, wrap: true);
             status.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var viewport = UiFactory.Rect("Viewport", p, Vector2.zero, Vector2.one, new Vector2(40f, Monetization.Ads.BannerReserve + 190f), new Vector2(-40f, -390f));
+            var viewport = UiFactory.Rect("Viewport", p, Vector2.zero, Vector2.one, new Vector2(40f, Monetization.Ads.BannerReserve + 110f), new Vector2(-40f, -390f));
             viewport.gameObject.AddComponent<RectMask2D>();
             UiFactory.Fill(viewport, new Color(0f, 0f, 0f, 0f));
             content = UiFactory.Rect("Content", viewport, new Vector2(0f, 1f), Vector2.one);
@@ -74,8 +75,6 @@ namespace SquashBot.UI
             scroll.horizontal = false;
             scroll.decelerationRate = 0.12f;
             scroll.scrollSensitivity = 60f;
-            var close = Flat.Button(p, Loc.T("btn.close"), new Vector2(0.5f, 0f), new Vector2(0f, Monetization.Ads.BannerReserve + 70f), new Vector2(440f, 104f), Flat.CardHi, Flat.Text, () => screen.Hide(), 34f);
-            ((RectTransform)close.transform).pivot = new Vector2(0.5f, 0.5f);
         }
 
         private static void Click() => AudioManager.PlaySfx(Sfx.Click, 0.9f, 1.1f);

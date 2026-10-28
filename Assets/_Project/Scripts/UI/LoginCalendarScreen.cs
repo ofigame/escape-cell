@@ -27,6 +27,7 @@ namespace SquashBot.UI
         public static LoginCalendarScreen Create(Transform canvasRoot)
         {
             var screen = UiScreen.Create("LoginCalendar", canvasRoot, out var root);
+            screen.BackAction = () => screen.Hide(); // (the Android back key: the same on every screen)
             var d = root.gameObject.AddComponent<LoginCalendarScreen>();
             d.screen = screen;
             d.Build(root);
