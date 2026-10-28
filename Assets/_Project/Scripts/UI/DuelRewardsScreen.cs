@@ -15,7 +15,7 @@ namespace SquashBot.UI
     /// <summary>
     /// The duel's end (the design's §5): no panel at first — the result drops in big at the top (VICTORY!, DEFEAT,
     /// DRAW, the score under it) while the winner dances; the special bands pop in under it one by one (the day's first
-    /// win ×3, a streak, a comeback, the streak breaker); then the rewards panel slides up over only the bottom 55% of
+    /// win ×2, a streak, a comeback, the streak breaker); then the rewards panel slides up over only the bottom 55% of
     /// the screen (the two foi stay in view) and its rows open one after another, each its own small celebration: rank
     /// points counting up, the XP bar (a burst on a level up), the weapon's mastery with the points to its next level,
     /// gold and core parts side by side (the coins fly up to the counter), the chest dropping in, the season road, the

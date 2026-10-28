@@ -51,8 +51,8 @@ namespace SquashBot.Data
             switch (step)
             {
                 case 1:
-                    SaveData.Coins += 500;
-                    return "+500 " + Loc.T("ch.gold");
+                    SaveData.Coins += 300;
+                    return "+300 " + Loc.T("ch.gold");
                 case 2:
                     DuelChests.Add(ChestTier.Mid);
                     return Loc.T("chests.tier1");

@@ -1,6 +1,6 @@
 namespace SquashBot.Data
 {
-    /// <summary>The duel's daily moments: the day's first win (triple gold, 10 core parts and a bronze chest).</summary>
+    /// <summary>The duel's daily moments: the day's first win (double gold, 10 core parts and a bronze chest).</summary>
     public static class DuelDay
     {
         private const string FirstWinKey = "sb_duel_firstwin";

@@ -32,6 +32,19 @@ namespace SquashBot.Data
         /// <summary>A blow struck in the air takes this much more, at most once in this long.</summary>
         public float jumpExtra, airEvery;
         public float specialCost, breakerCost, ultiCost;
+        /// <summary>Each special's wait before it can be used again (SpecialKind order; table version 3: the specials no
+        /// longer spend the power bar, the user's word 2026-10-28).</summary>
+        public float[] specialCooldown;
+        /// <summary>The weapon's mastery in the blow (table version 3, the user's word 2026-10-28): this much more a level,
+        /// at most this much a league-ceiling tier (tier 5: +10%); none at equal power (friends, events).</summary>
+        public float masteryDamagePerLevel, masteryDamagePerTier;
+
+        /// <summary>A blow's factor for a weapon's mastery <paramref name="level"/> under ceiling tier <paramref name="tier"/>.</summary>
+        public float MasteryTimes(int level, int tier, bool equalPower) =>
+            equalPower ? 1f : 1f + Mathf.Min(Mathf.Max(0, level) * masteryDamagePerLevel, Mathf.Max(1, tier) * masteryDamagePerTier);
+
+        /// <summary>Special <paramref name="kind"/>'s cooldown (8 s when the table has none).</summary>
+        public float SpecialCooldown(int kind) => specialCooldown != null && kind >= 0 && kind < specialCooldown.Length ? specialCooldown[kind] : 8f;
 
         // Hearts and shields.
         public int hearts, shields, shieldHits;

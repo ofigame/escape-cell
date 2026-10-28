@@ -210,6 +210,17 @@ namespace SquashBot.UI
         /// <summary>The bars (0..3 each), redrawn only when they changed: both power bars, the ultimate's and special's rings.</summary>
         public void SetMeters(float mine, float rival) => SetMeters(mine, rival, 3f);
 
+        private float shownSpecial = -1f;
+
+        /// <summary>The special's ring as its cooldown fills (1: ready; the table's version 3, no power spent).</summary>
+        public void SetSpecialCooldown(float ready)
+        {
+            if (Mathf.Abs(ready - shownSpecial) < 0.004f) return;
+            shownSpecial = ready;
+            special.SetRing(Mathf.Clamp01(ready), ready >= 1f ? SpecialPurple * 1.3f : UiKit.Style.violet);
+            special.SetUsable(ready >= 1f);
+        }
+
         public void SetMeters(float mine, float rival, float ultiCost)
         {
             if (Mathf.Abs(mine - shownMeter) > 0.004f)
@@ -217,9 +228,7 @@ namespace SquashBot.UI
                 shownMeter = mine;
                 Fill(myParts, mine, UltiGold, UiKit.Style.orange);
                 ultimate.SetParts(mine * 3f / Mathf.Max(1f, ultiCost), UltiGold, UiKit.Style.orange);
-                special.SetRing(Mathf.Clamp01(mine), mine >= 1f ? SpecialPurple * 1.3f : UiKit.Style.violet);
-                bool canSpecial = mine >= 1f, canUlt = mine >= ultiCost;
-                special.SetUsable(canSpecial);
+                bool canUlt = mine >= ultiCost; // (the special: its own cooldown, SetSpecialCooldown)
                 ultimate.SetUsable(canUlt);
                 ultimate.SetPulse(canUlt);
             }

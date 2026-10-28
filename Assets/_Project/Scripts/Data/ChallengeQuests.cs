@@ -26,9 +26,9 @@ namespace SquashBot.Data
 
         private static readonly (DuelGoal goal, int min, int max, int coins)[] Pool =
         {
-            (DuelGoal.Win, 2, 3, 200), (DuelGoal.Play, 3, 4, 150), (DuelGoal.SoloWin, 1, 2, 200), (DuelGoal.LiveWin, 1, 1, 250),
-            (DuelGoal.Special, 3, 5, 150), (DuelGoal.Ultimate, 1, 2, 200), (DuelGoal.Combo5, 1, 2, 200), (DuelGoal.Finish, 1, 2, 200),
-            (DuelGoal.Perfect, 3, 3, 200), (DuelGoal.DodgeUlti, 1, 1, 250), // (the defence: three perfect guards, an ultimate dodged)
+            (DuelGoal.Win, 2, 3, 125), (DuelGoal.Play, 3, 4, 100), (DuelGoal.SoloWin, 1, 2, 125), (DuelGoal.LiveWin, 1, 1, 150),
+            (DuelGoal.Special, 3, 5, 100), (DuelGoal.Ultimate, 1, 2, 125), (DuelGoal.Combo5, 1, 2, 125), (DuelGoal.Finish, 1, 2, 125),
+            (DuelGoal.Perfect, 3, 3, 125), (DuelGoal.DodgeUlti, 1, 1, 150), // (the defence: three perfect guards, an ultimate dodged)
         };
 
         private static string Today => DateTime.Now.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
@@ -77,7 +77,7 @@ namespace SquashBot.Data
             {
                 goal = def.goal,
                 target = target,
-                coins = weekly ? def.coins * 5 : def.coins,
+                coins = weekly ? def.coins * 3 : def.coins,
                 progress = Mathf.Min(target, Prefs.GetInt(Key(weekly, i, "p"), 0)),
                 claimed = Prefs.GetInt(Key(weekly, i, "c"), 0) == 1,
             };

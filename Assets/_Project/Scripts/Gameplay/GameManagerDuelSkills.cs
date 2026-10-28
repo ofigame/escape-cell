@@ -208,9 +208,13 @@ namespace SquashBot.Gameplay
             if (rivalStuckDown > StuckDownSeconds) { them.StandUpStuck(); rivalStuckDown = 0f; }
         }
 
+        /// <summary>When each side's special can be used again (table version 3: a cooldown, no power spent).</summary>
+        private float mySpecialReadyAt, rivalSpecialReadyAt;
+
         private void UpdateDuelSkills(float dt)
         {
             if (challengeRun && chPhase == ChPhase.Duel) WatchStuckDown(dt);
+            if (skillBar != null) { float cd = Bal.SpecialCooldown((int)mySpecial); skillBar.SetSpecialCooldown(cd > 0f ? 1f - Mathf.Clamp01((mySpecialReadyAt - Time.time) / cd) : 1f); }
             if (skillBar != null) skillBar.SetRivalHearts(rivalHearts, DuelHearts); // (the rival's hearts left under its bar)
             if (skillBar == null) return;
             // how hurt each looks: smoke under half health, electric arcs under a quarter
@@ -267,8 +271,8 @@ namespace SquashBot.Gameplay
             switch (move)
             {
                 case DuelSkillBar.Move.Special:
-                    if (myMeter < 1f || !TrySpecial()) return; // (the set's special; out of its reach: nothing spent)
-                    myMeter -= 1f;
+                    if (Time.time < mySpecialReadyAt || !TrySpecial()) return; // (the set's special; out of its reach: no wait started)
+                    mySpecialReadyAt = Time.time + Bal.SpecialCooldown((int)mySpecial); // (no power spent: its cooldown instead)
                     break;
                 case DuelSkillBar.Move.Heavy:
                 case DuelSkillBar.Move.Upper:
@@ -1252,9 +1256,9 @@ namespace SquashBot.Gameplay
                 if (lastGuardMe == DefenseOutcome.Hit) strikeCooldown = Mathf.Max(strikeCooldown, Bal.heavyStun); // (landed: foi stunned as the bot would be)
                 return;
             }
-            if (rivalMeter >= 1f && !keepsBar && Random.value < (dist >= 3f ? 0.22f : 0.1f) + 0.15f * bold + (t != null && t.persona == Persona.Runner && dist >= 3f ? 0.2f : 0f))
+            if (Time.time >= rivalSpecialReadyAt && Random.value < (dist >= 3f ? 0.22f : 0.1f) + 0.15f * bold + (t != null && t.persona == Persona.Runner && dist >= 3f ? 0.2f : 0f))
             {
-                if (RivalSpecial()) rivalMeter -= 1f; // (its set's special, when it reaches)
+                if (RivalSpecial()) rivalSpecialReadyAt = Time.time + Bal.SpecialCooldown((int)rivalSpecial); // (its set's special, when it reaches: no power spent, its cooldown)
             }
         }
 

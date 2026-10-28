@@ -5,7 +5,7 @@ namespace SquashBot.Data
     /// <summary>
     /// The duel level (§3.7): foi's experience in the arena. Every duel brings XP — a win 100, a draw 60, a loss 40 (so a
     /// lost duel is never wasted), the day's first win 100 more, the match's own challenge 50, a comeback win 50. Level n
-    /// needs 300 + 50 n. Each level brings 100 + 20 × level gold, every fifth a bronze chest; levels 10, 20, 30, 40 and 50
+    /// needs 300 + 50 n. Each level brings 50 + 10 × level gold, every fifth a bronze chest; levels 10, 20, 30, 40 and 50
     /// a title; level 5 opens the passive slot.
     /// </summary>
     public static class DuelLevel
@@ -41,7 +41,7 @@ namespace SquashBot.Data
             {
                 have -= Need(level);
                 level++;
-                var up = new LevelUp { level = level, gold = 100 + 20 * level, chest = level % 5 == 0, title = level % 10 == 0 ? TitleKey(level) : null };
+                var up = new LevelUp { level = level, gold = 50 + 10 * level, chest = level % 5 == 0, title = level % 10 == 0 ? TitleKey(level) : null };
                 if (level % 10 == 0) up.move = MoveSet.GiftNext(); // (a duel-only player is not left behind)
                 SaveData.Coins += up.gold;
                 if (up.chest) DuelChests.Add(ChestTier.Mid);
@@ -83,7 +83,7 @@ namespace SquashBot.Data
 
         /// <summary>A level's gift: (gold, core parts).</summary>
         public static (int gold, int cores) GiftOf(int level) =>
-            level == 1 ? (150, 0) : level == 2 ? (250, 0) : level == 4 ? (500, 0) : level == 6 ? (0, 15) : level == 8 ? (1000, 10) : level == 9 ? (1500, 15) : level == 10 ? (2500, 25) : (0, 0);
+            level == 2 ? (100, 0) : level == 4 ? (250, 0) : level == 6 ? (0, 15) : level == 8 ? (500, 10) : level == 9 ? (750, 15) : level == 10 ? (1250, 25) : (0, 0);
 
         /// <summary>Adds a duel's points to the weapon: returns the levels reached (their gifts already given).</summary>
         public static System.Collections.Generic.List<int> Add(WeaponDef w, int points)

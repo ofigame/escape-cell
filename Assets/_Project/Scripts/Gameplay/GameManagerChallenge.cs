@@ -597,11 +597,11 @@ namespace SquashBot.Gameplay
             bool prized = (chOnline || chLive) && paid; // offline practice pays no prize
             int gold = !prized ? 0 : won ? Challenge.WinGold : draw ? Challenge.DrawGold : Challenge.LossGold;
             if (!paid) { coinsThisRun = 0; comboBonus = 0; } // (nor the coins picked up in it)
-            // Core parts: 3 a win, 2 a draw, 1 a loss; the day's first win triples its gold, brings 10 more and a bronze
+            // Core parts: 3 a win, 2 a draw, 1 a loss; the day's first win doubles its gold, brings 10 more and a bronze
             // chest; every fifth win in a row 5 more. (A friend's match brings none.)
             int cores = friendly || !(chOnline || chLive) ? 0 : won ? 3 : draw ? 2 : 1;
             firstWinToday = won && cores > 0 && DuelDay.TakeFirstWin();
-            if (firstWinToday) { gold *= 3; cores += 10; DuelChests.Add(ChestTier.Mid); }
+            if (firstWinToday) { gold *= 2;cores += 10; DuelChests.Add(ChestTier.Mid); }
             if (won && cores > 0 && DuelChests.Streak > 0 && DuelChests.Streak % 5 == 0) cores += 5;
             CoreParts.Add(cores);
             coresWon = cores;

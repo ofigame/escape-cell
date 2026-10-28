@@ -21,7 +21,7 @@ namespace SquashBot.Gameplay
         private int preToken;
         /// <summary>The computer rival that asked for a rematch (the next lobby takes it).</summary>
         private Challenge.Opponent rematchBot;
-        private const float BotRematchChance = 0.3f, DoubleGoldADay = 5f;
+        private const float BotRematchChance = 0.3f, DoubleGoldADay = 3f;
 
         /// <summary>The next ordinary duel's rival got ready while the rewards show (nothing for a friend's or an event's).</summary>
         private IEnumerator PreSearch(int token)
@@ -88,7 +88,7 @@ namespace SquashBot.Gameplay
             return a;
         }
 
-        /// <summary>Gold doubled for an ad today (five a day at most).</summary>
+        /// <summary>Gold doubled for an ad today (three a day at most).</summary>
         private static int DoubleGoldToday
         {
             get => Prefs.GetString("sb_dbl_day", "") == System.DateTime.Now.ToString("yyyyMMdd") ? Prefs.GetInt("sb_dbl_n", 0) : 0;

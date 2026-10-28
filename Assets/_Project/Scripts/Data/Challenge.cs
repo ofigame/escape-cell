@@ -203,9 +203,9 @@ namespace SquashBot.Data
         }
 
         /// <summary>Gold a win, a draw and a loss bring (more the higher the rank).</summary>
-        public static int WinGold => 80 + Rank * 20;
-        public static int DrawGold => 40 + Rank * 10;
-        public static int LossGold => 20 + Rank * 5;
+        public static int WinGold => 50 + Rank * 12;
+        public static int DrawGold => 25 + Rank * 6;
+        public static int LossGold => 10 + Rank * 3;
 
         // ---------- Opponents ----------
 

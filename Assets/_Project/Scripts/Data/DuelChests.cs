@@ -76,20 +76,20 @@ namespace SquashBot.Data
 
         // The chances (the odds shown on the chests' screen are worked out from these same numbers).
         // (the scenario's §4.5: plain 3% outfit, 10% shop weapon of tier 1–2; bronze 8%, 14% of tier 2–3, core parts 2–5;
-        // gold 30% outfit, 8% chest sword, 4% chest shield, 8% shop weapon of tier 3–5, else 1,500 gold and 10–20 core parts)
+        // gold 30% outfit, 8% chest sword, 4% chest shield, 8% shop weapon of tier 3–5, else 800 gold and 10–20 core parts)
         private static readonly float[] SuitChance = { 0.03f, 0.08f }, ShopChance = { 0.10f, 0.14f }; // (plain, bronze)
         private const float GoldOutfit = 0.30f, GoldShield = 0.04f, GoldChestWeapon = 0.08f, GoldShopWeapon = 0.08f;
-        private const int GoldChestGold = 1500;
+        private const int GoldChestGold = 800;
         /// <summary>The shop weapons' tiers a chest draws from, and its gold and core parts when gold comes out (plain, bronze, gold).</summary>
         private static readonly (int lo, int hi)[] ShopTiers = { (1, 2), (2, 3), (3, 5) };
-        private static readonly (int lo, int hi)[] GoldRange = { (60, 160), (200, 450), (GoldChestGold, GoldChestGold) };
+        private static readonly (int lo, int hi)[] GoldRange = { (30, 80), (100, 250), (GoldChestGold, GoldChestGold) };
         private static readonly (int lo, int hi)[] CoreRange = { (0, 0), (2, 5), (10, 20) };
 
         /// <summary>The shop weapons' tiers this chest draws from (the contents screen lists the same).</summary>
         public static (int lo, int hi) ShopTierRange(ChestTier t) => ShopTiers[(int)t];
 
         /// <summary>The chest's ranges, worked out from the same numbers as its draw, e.g. "Weapons tier 2–3 · Gold
-        /// 200–450 · Core parts 2–5", and the note that gold comes instead of a kind there is nothing left of.</summary>
+        /// 100–250 · Core parts 2–5", and the note that gold comes instead of a kind there is nothing left of.</summary>
         public static string DetailText(ChestTier t)
         {
             var (lo, hi) = ShopTiers[(int)t];
@@ -234,7 +234,7 @@ namespace SquashBot.Data
 
         /// <summary>
         /// The golden chest: an outfit 30%, a shield 4%, a chest sword 8% (the best rarest), a shop weapon 8% (tier 3–5),
-        /// else 1,500 gold and 10–20 core parts (about half the time; more once there is nothing of a kind left to give).
+        /// else 800 gold and 10–20 core parts (about half the time; more once there is nothing of a kind left to give).
         /// </summary>
         private static ChestReward RollGolden()
         {

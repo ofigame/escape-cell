@@ -163,7 +163,7 @@ namespace SquashBot.UI
             var best = Card(140f, Flat.Card);
             RankArt.Badge(best, s.bestRank, new Vector2(0f, 0.5f), new Vector2(80f, 0f), 96f);
             Text(best, Loc.F("comp.best", Challenge.RankName(s.bestRank), s.best), new Vector2(0f, 0.5f), new Vector2(150f, 0f), new Vector2(480f, 110f), 30f, Flat.Text);
-            Text(best, Loc.F("comp.worth", 200 + 150 * Mathf.Clamp(s.bestRank, 0, 12)), new Vector2(1f, 0.5f), new Vector2(-30f, 0f), new Vector2(300f, 90f), 30f, Flat.Gold, TextAlignmentOptions.Right, true);
+            Text(best, Loc.F("comp.worth", 100 + 75 * Mathf.Clamp(s.bestRank, 0, 12)), new Vector2(1f, 0.5f), new Vector2(-30f, 0f), new Vector2(300f, 90f), 30f, Flat.Gold, TextAlignmentOptions.Right, true);
             if (s.reward != null && s.reward.coins > 0)
             {
                 var r = Card(150f, UiKit.Style.brown);

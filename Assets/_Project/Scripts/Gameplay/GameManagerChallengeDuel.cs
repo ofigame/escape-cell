@@ -127,9 +127,12 @@ namespace SquashBot.Gameplay
         /// <summary>A ranked duel (each side under its own ceiling); a friend's match is equal power.</summary>
         private bool DuelRanked => !(chLive && !liveRanked) && !copyMatch && !EventMatch;
 
+        /// <summary>The player's weapon mastery in its blow (the bot duels; the live server does not know mastery yet).</summary>
+        private float MyMasteryTimes(WeaponDef w) => LiveActive ? 1f : DuelBalanceTable.Current.MasteryTimes(Mastery.Level(w), DuelPower.TierOf(Challenge.Rank), !DuelRanked);
+
         /// <summary>The player's blow: the duel's (its weapon's tier under the ceiling, the arms' share), the floors' otherwise.</summary>
         private int MyBlow(WeaponDef w) => challengeRun
-            ? Mathf.Max(1, Mathf.RoundToInt(DuelPower.Blow(w, duelMine.weaponTier) * (1f + duelMine.damage)))
+            ? Mathf.Max(1, Mathf.RoundToInt(DuelPower.Blow(w, duelMine.weaponTier) * (1f + duelMine.damage) * MyMasteryTimes(w)))
             : Challenge.RankBoost(Armory.Damage(w));
 
         /// <summary>The Duel's board: the stage, the two foi on their marks with their squads, the clock.</summary>
@@ -224,7 +227,8 @@ namespace SquashBot.Gameplay
             int hp = LiveActive ? 100 : Mathf.RoundToInt(duelTheirs.hp / Mathf.Max(0.5f, 1f - duelTheirs.armor) * (botTuning != null ? botTuning.hpScale : 1f));
             // Its blow: its weapon's (tier under its ceiling) with its arms' share, less foi's shell, over foi's health.
             float myArmor = rivalPassive == PassiveKind.Piercer ? duelMine.armor * 0.75f : duelMine.armor; // (its piercer: a quarter of foi's armour ignored)
-            float share = DuelPower.Blow(w, duelTheirs.weaponTier) * (1f + duelTheirs.damage) * (1f - myArmor) / Mathf.Max(1, duelMine.hp);
+            float share = DuelPower.Blow(w, duelTheirs.weaponTier) * (1f + duelTheirs.damage) * (1f - myArmor) / Mathf.Max(1, duelMine.hp)
+                * DuelBalanceTable.Current.MasteryTimes(rival.mastery, DuelPower.TierOf(rival.Rank), !ranked); // (its weapon's mastery too, as foi's)
             hunt.AddChallengeFoe(theirs, hp, share, look, rivalHeld, 0);
             // both bodies back to standing at rest: nothing of the round before (a crouch, a guard, a fall) stays on them
             ResetPhysical();

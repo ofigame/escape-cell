@@ -64,7 +64,7 @@ namespace SquashBot.Data
             {
                 if (wins < Steps[s] || (taken & (1 << s)) != 0) continue;
                 Prefs.SetInt(TakenKey, taken | (1 << s));
-                if (s == 0) SaveData.Coins += 500;
+                if (s == 0) SaveData.Coins += 300;
                 else if (s == 1) CoreParts.Add(15);
                 else DuelChests.Add(ChestTier.Mid);
                 ItemDrops.FromWeekly(s);
@@ -78,7 +78,7 @@ namespace SquashBot.Data
 
     /// <summary>
     /// The weekend tournament (§4.1, Saturday and Sunday): an eight-player knockout, three rounds of 2-minute duels, the
-    /// empty places filled with bots. A first-round win brings 300 gold, the final a bronze chest, the title a gold chest
+    /// empty places filled with bots. A first-round win brings 200 gold, the final a bronze chest, the title a gold chest
     /// and the "Champion" title. One bracket a weekend.
     /// </summary>
     public static class Tournament
@@ -129,7 +129,7 @@ namespace SquashBot.Data
             Prefs.SetInt(KeyRound, round + 1);
             ItemDrops.FromTournament(round);
             string gift = null;
-            if (round == 0) { SaveData.Coins += 300; gift = "tn.gift0"; }
+            if (round == 0) { SaveData.Coins += 200; gift = "tn.gift0"; }
             else if (round == 1) { DuelChests.Add(ChestTier.Mid); gift = "tn.gift1"; }
             else if (round == 2) { DuelChests.Add(ChestTier.Advanced); Prefs.SetInt("sb_title_champion", 1); gift = "tn.gift2"; }
             Prefs.Save();

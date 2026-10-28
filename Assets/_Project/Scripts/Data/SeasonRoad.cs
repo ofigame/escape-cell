@@ -29,7 +29,7 @@ namespace SquashBot.Data
             }
             if (step % 4 == 0) return (Kind.Bronze, 1);
             if (step % 3 == 0) return (Kind.Basic, 1);
-            return (Kind.Gold, 150 + 25 * step);
+            return (Kind.Gold, 100 + 15 * step);
         }
 
         private static string Month => DateTime.Now.ToString("yyyyMM", CultureInfo.InvariantCulture);

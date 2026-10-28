@@ -9,15 +9,15 @@ namespace SquashBot.Data
         public const int Days = 7;
         public enum Kind { Gold, Chest, Cores }
 
-        /// <summary>What each day brings: 300 gold, a plain chest, 500 gold, 10 core parts, a bronze chest, 800 gold, a gold chest.</summary>
+        /// <summary>What each day brings: 200 gold, a plain chest, 300 gold, 10 core parts, a bronze chest, 500 gold, a gold chest.</summary>
         public static readonly (Kind kind, int amount, ChestTier tier)[] Gifts =
         {
-            (Kind.Gold, 300, ChestTier.Basic),
+            (Kind.Gold, 200, ChestTier.Basic),
             (Kind.Chest, 1, ChestTier.Basic),
-            (Kind.Gold, 500, ChestTier.Basic),
+            (Kind.Gold, 300, ChestTier.Basic),
             (Kind.Cores, 10, ChestTier.Basic),
             (Kind.Chest, 1, ChestTier.Mid),
-            (Kind.Gold, 800, ChestTier.Basic),
+            (Kind.Gold, 500, ChestTier.Basic),
             (Kind.Chest, 1, ChestTier.Advanced),
         };
 
