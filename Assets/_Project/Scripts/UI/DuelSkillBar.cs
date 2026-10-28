@@ -119,6 +119,29 @@ namespace SquashBot.UI
             SetHearts(3, false);
         }
 
+        // ---------- the rival's hearts (9th doc 3.2: the player sees its hearts run out) ----------
+
+        private RectTransform rivalHeartRow;
+        private int shownRivalHearts = -1;
+
+        /// <summary>The rival's hearts left, as small hearts under its power bar (spent ones dim).</summary>
+        public void SetRivalHearts(int left, int most)
+        {
+            if (left == shownRivalHearts) return;
+            shownRivalHearts = left;
+            var s = DuelControlsSettings.Current;
+            if (rivalHeartRow == null)
+            {
+                rivalHeartRow = UiFactory.Box("RivalHearts", root, new Vector2(1f, 1f), new Vector2(-36f, -282f - 70f - s.meterGap - s.meterHeight - 14f), new Vector2(150f, 44f));
+                rivalHeartRow.pivot = new Vector2(1f, 1f);
+                for (int i = 0; i < Mathf.Max(1, most); i++) UIController.HeartIcon(rivalHeartRow, new Vector2(-22f - i * 48f, -22f), 40f);
+            }
+            int n = 0;
+            for (int i = rivalHeartRow.childCount - 1; i >= 0; i--, n++)
+                foreach (var g in rivalHeartRow.GetChild(i).GetComponentsInChildren<Graphic>()) g.color = UiKit.A(g.color, n < left ? 1f : 0.22f);
+            rivalHeartRow.gameObject.SetActive(most > 0);
+        }
+
         private Image[] Meter(string name, Vector2 anchor, Vector2 at, bool mirrored)
         {
             var s = DuelControlsSettings.Current;

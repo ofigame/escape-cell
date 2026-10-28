@@ -1449,6 +1449,7 @@ namespace SquashBot.Data
             ["hit.missed"] = "빗나감",
             ["hit.immune"] = "효과 없음",
             ["hit.reflected"] = "반사!",
+            ["hit.patch"] = "패치 +{0}%",
             ["chests.adFree"] = "▶ 광고 보기: 무료 상자 ({0}/{1})",
             ["chests.adWait"] = "다음 무료 상자까지 {0}분",
             ["part.points"] = "포인트 {0}/{1}",

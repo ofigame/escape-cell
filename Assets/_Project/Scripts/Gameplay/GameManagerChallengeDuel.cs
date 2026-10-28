@@ -635,7 +635,8 @@ namespace SquashBot.Gameplay
         {
             if (Time.time < rivalPowerUpAt) return;
             float share = hunt.ChallengeFoeHealth;
-            if (rivalHearts > 0 && share < (botTuning != null && Random.value < botTuning.earlyHeart ? 0.7f : 0.4f) && Random.value < 0.6f)
+            float heartBelow = rivalHearts == 1 ? 0.25f : botTuning != null && Random.value < botTuning.earlyHeart ? 0.7f : 0.4f; // (its last heart kept for later: only when badly hurt)
+            if (rivalHearts > 0 && share < heartBelow && Random.value < 0.6f)
             {
                 rivalHearts--;
                 hunt.HealFoe(DuelHeartHeal + (rivalPassive == PassiveKind.HeartMaster ? DuelBalanceTable.Current.heartMasterHeal : 0f));

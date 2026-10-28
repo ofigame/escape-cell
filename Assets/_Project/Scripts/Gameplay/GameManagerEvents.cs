@@ -68,7 +68,7 @@ namespace SquashBot.Gameplay
                     rivalSpecial = (SpecialKind)Random.Range(0, 8); rivalUlti = (UltiKind)Random.Range(0, 9); rivalPassive = (PassiveKind)Random.Range(1, 10);
                     break;
                 case WeeklyMode.Rule.GiantFoi:
-                    robot.SetSize(1.5f);
+                    robot.SetSize(DuelFoiSize * 1.25f); // (a giant: a quarter over the duel's own size, never under it)
                     break;
             }
         }

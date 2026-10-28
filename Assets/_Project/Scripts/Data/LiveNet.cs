@@ -35,6 +35,8 @@ namespace SquashBot.Data
             public int e;
             /// <summary>The two power bars (0..3) with the health; -1: not sent.</summary>
             public float mm = -1f, tm = -1f;
+            /// <summary>The hearts left (the player's, the rival's); -1: an older server did not send them.</summary>
+            public int mh = -1, th = -1;
             public float secs, mine, theirs;
             public bool won, ranked, left;
             public string from;

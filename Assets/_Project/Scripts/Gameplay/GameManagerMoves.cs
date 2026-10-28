@@ -266,6 +266,7 @@ namespace SquashBot.Gameplay
                     for (int i = 0; i < 3; i++) fx.Burst(meAt + Vector3.up * (0.3f + i * 0.6f), new Color(0.5f, 1f, 0.6f), new Color(1f, 2.4f, 1.2f), 20, 3f);
                     if (mine) { if (!LiveActive) { health = Mathf.Min(1f, health + heal); RefreshHealthBar(); } }
                     else if (!LiveActive) hunt.HealFoe(heal);
+                    FloatSized(meAt + Vector3.up * 2.1f, Loc.F("hit.patch", Mathf.RoundToInt(heal * 100f)), UI.UiKit.Style.successLight, 50f); // (told apart from a heart: the patch's own words)
                     AudioManager.PlaySfx(Sfx.Shield, 0.8f, 1.5f);
                     break;
                 }

@@ -1449,6 +1449,7 @@ namespace SquashBot.Data
             ["hit.missed"] = "MANCATO",
             ["hit.immune"] = "NESSUN EFFETTO",
             ["hit.reflected"] = "RIFLESSO!",
+            ["hit.patch"] = "TOPPA +{0}%",
             ["chests.adFree"] = "▶ Guarda una pubblicità: forziere gratis ({0}/{1})",
             ["chests.adWait"] = "Prossimo forziere gratis tra {0} min",
             ["part.points"] = "Punti {0}/{1}",

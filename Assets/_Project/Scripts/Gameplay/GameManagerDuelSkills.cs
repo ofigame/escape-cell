@@ -192,8 +192,26 @@ namespace SquashBot.Gameplay
 
         // ---------- Each frame ----------
 
+        // the safety net: a body seen lying this long while the rules have it standing is stood up (no fall lies and gets
+        // up for longer than this, 9th doc: "foi falls and never gets up")
+        private const float StuckDownSeconds = 3f;
+        private float myStuckDown, rivalStuckDown;
+
+        private void WatchStuckDown(float dt)
+        {
+            if (DuelCinematic || ultimateOn) { myStuckDown = rivalStuckDown = 0f; return; }
+            var me = robot.Visual != null ? robot.Visual.GetComponentInChildren<SkinnedHero>() : null;
+            var them = hunt.ChallengeFoeModel != null ? hunt.ChallengeFoeModel.GetComponentInChildren<SkinnedHero>() : null;
+            myStuckDown = me != null && !MeOutOfIt && me.LooksDown ? myStuckDown + dt : 0f;
+            rivalStuckDown = them != null && !RivalOutOfIt && them.LooksDown ? rivalStuckDown + dt : 0f;
+            if (myStuckDown > StuckDownSeconds) { me.StandUpStuck(); myStuckDown = 0f; }
+            if (rivalStuckDown > StuckDownSeconds) { them.StandUpStuck(); rivalStuckDown = 0f; }
+        }
+
         private void UpdateDuelSkills(float dt)
         {
+            if (challengeRun && chPhase == ChPhase.Duel) WatchStuckDown(dt);
+            if (skillBar != null) skillBar.SetRivalHearts(rivalHearts, DuelHearts); // (the rival's hearts left under its bar)
             if (skillBar == null) return;
             // how hurt each looks: smoke under half health, electric arcs under a quarter
             if (robot.Visual != null) StatusFx.On(CombatFeel.RootOf(robot.Visual)).SetDamage(health < 0.25f ? 2 : health < 0.5f ? 1 : 0);

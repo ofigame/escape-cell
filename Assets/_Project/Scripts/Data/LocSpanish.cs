@@ -1449,6 +1449,7 @@ namespace SquashBot.Data
             ["hit.missed"] = "FALLO",
             ["hit.immune"] = "SIN EFECTO",
             ["hit.reflected"] = "¡REFLEJADO!",
+            ["hit.patch"] = "PARCHE +{0}%",
             ["chests.adFree"] = "▶ Ver un anuncio: cofre gratis ({0}/{1})",
             ["chests.adWait"] = "Próximo cofre gratis en {0} min",
             ["part.points"] = "Puntos {0}/{1}",

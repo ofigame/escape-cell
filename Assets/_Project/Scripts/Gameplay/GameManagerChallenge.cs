@@ -448,7 +448,7 @@ namespace SquashBot.Gameplay
             arenaRun = false;
             trailRun = false;
             dailyRun = false;
-            robot.SetSize(1.58f, 0.1f); // foi big in the duels (the camera stands well back to show the whole stage)
+            robot.SetSize(DuelFoiSize, 0.1f); // foi big in the duels (the camera stands well back to show the whole stage; the rival copies its size)
             BeginRun();
             ui.SetChallengeHud(true);
             ui.SkillBar.Refresh(false);
@@ -513,6 +513,9 @@ namespace SquashBot.Gameplay
         private bool duelSky;
 
         /// <summary>The rival's foi: foi as the rival dresses it (its own outfit; a made-up one for a computer rival), with the rival's weapon.</summary>
+        /// <summary>foi's size in the duels (the rival copies it): 1.58, then 10% bigger (the user's word, 2026-10-28).</summary>
+        private const float DuelFoiSize = 1.58f * 1.1f;
+
         private Transform RivalLook()
         {
             var root = new GameObject("RivalLook").transform;

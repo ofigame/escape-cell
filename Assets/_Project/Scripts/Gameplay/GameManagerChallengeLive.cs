@@ -302,6 +302,7 @@ namespace SquashBot.Gameplay
             }
             else if (health > before + 0.0001f) FloatAt(robot.transform.position, "+" + Mathf.RoundToInt((health - before) * 100f) + "%", UI.UiKit.Style.danger);
             hunt.SetFoeHealth(m.theirs / 100f);
+            if (m.th >= 0) rivalHearts = m.th; // (the server's count of the rival's hearts: shown under its bar)
             LiveMeters(m.mm, m.tm);
         }
 

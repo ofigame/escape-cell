@@ -36,6 +36,20 @@ namespace SquashBot.Visual
             if (ready) Rest();
         }
 
+        /// <summary>Lying on the ground as the picture shows it (laid flat, or a fall's clip held on its last frame).</summary>
+        public bool LooksDown => flat > 0.5f || (playingHold && playing != null && ClipDone);
+
+        /// <summary>Times a body was found lying while the rules had it up, and stood up (the duel's safety net; the
+        /// tests count it).</summary>
+        public static int StuckDownFixes { get; private set; }
+
+        /// <summary>Up at once: the rules say it stands but the picture kept lying (a fall's coroutine cut short).</summary>
+        public void StandUpStuck()
+        {
+            StuckDownFixes++;
+            CleanSlate();
+        }
+
         /// <summary>
         /// What is not clean on the body now (null: all of it), the check of section 2.4: no reaction or move under way,
         /// no clip held, no procedural lean, the head where it was made, its picture home and at its own pace.

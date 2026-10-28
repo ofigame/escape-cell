@@ -1449,6 +1449,7 @@ namespace SquashBot.Data
             ["hit.missed"] = "خطأ",
             ["hit.immune"] = "بلا تأثير",
             ["hit.reflected"] = "انعكس!",
+            ["hit.patch"] = "رقعة +{0}%",
             ["chests.adFree"] = "▶ شاهد إعلانًا: صندوق مجاني ({0}/{1})",
             ["chests.adWait"] = "الصندوق المجاني التالي بعد {0} دقيقة",
             ["part.points"] = "النقاط {0}/{1}",

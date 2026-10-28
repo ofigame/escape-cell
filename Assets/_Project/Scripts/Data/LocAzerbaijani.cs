@@ -1449,6 +1449,7 @@ namespace SquashBot.Data
             ["hit.missed"] = "BOŞA",
             ["hit.immune"] = "TƏSİRSİZ",
             ["hit.reflected"] = "ƏKS OLUNDU!",
+            ["hit.patch"] = "YAMAQ +%{0}",
             ["chests.adFree"] = "▶ Reklama bax: pulsuz sandıq ({0}/{1})",
             ["chests.adWait"] = "Növbəti pulsuz sandıq {0} dəq sonra",
             ["part.points"] = "Xal {0}/{1}",
