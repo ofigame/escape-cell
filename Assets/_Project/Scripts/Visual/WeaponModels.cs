@@ -428,7 +428,8 @@ namespace SquashBot.Visual
             {
                 var next = NextBlow(false);
                 if (next == null) return 0f;
-                return (next.anticipationMs + next.activeMs * 0.5f) / 1000f / RateFor(next);
+                var (w, h, _, rate) = Timing(next);
+                return (w + h * 0.5f) / rate;
             }
         }
 
@@ -443,14 +444,15 @@ namespace SquashBot.Visual
         /// path still played (drawn back, then through), the wind-up quickened so the contact comes within
         /// <paramref name="contactWithin"/> seconds of the tap; the recovery as designed.
         /// </summary>
-        public void SwingQuick(float contactWithin = 0.02f) => SwingQuick(NextBlow(true), contactWithin);
+        public void SwingQuick(float contactWithin = 0.02f, bool exact = false) => SwingQuick(NextBlow(true), contactWithin, exact);
 
         /// <summary>A given blow landing now (a combo move, a flying strike): its wind-up quickened to meet the moment.</summary>
-        public void SwingQuick(AttackMotionData blow, float contactWithin)
+        public void SwingQuick(AttackMotionData blow, float contactWithin, bool exact = false)
         {
             Begin(blow, false);
             if (current == null) return;
-            windS = Mathf.Min(windS, Mathf.Max(0.008f, contactWithin * playRate - hitS * 0.5f));
+            float fits = Mathf.Max(0.008f, contactWithin * playRate - hitS * 0.5f);
+            windS = exact ? fits : Mathf.Min(windS, fits); // (exact: the wind-up drawn over the whole wait, the arm well back before it comes)
             swingTotal = windS + hitS + backS;
             Lunge();
         }
@@ -625,6 +627,22 @@ namespace SquashBot.Visual
             return b;
         }
 
+        /// <summary>
+        /// The duel's swings drawn slower than the design's frames, for the eye to follow them (the user's word: too quick
+        /// to read): the wind-up and the strike this much longer, never sped up past their own pace. Pictures only: the
+        /// rules' moments (the tap, the bot's blow) never move; the swing is started early enough to meet them.
+        /// </summary>
+        private const float DuelSlow = 1.6f, DuelSlowBack = 1.25f;
+
+        /// <summary>A blow's wind-up, strike and recovery (seconds) and its play rate, as drawn here (slower in a duel).</summary>
+        private (float wind, float hit, float back, float rate) Timing(AttackMotionData b)
+        {
+            float rate = RateFor(b);
+            float w = b.anticipationMs / 1000f, h = b.activeMs / 1000f, k = b.recoveryMs / 1000f;
+            if (DuelStance) { rate = Mathf.Min(rate, 1f); w *= DuelSlow; h *= DuelSlow; k *= DuelSlowBack; }
+            return (w, h, k, rate);
+        }
+
         /// <summary>How fast a blow plays to fit the weapon's pace (the design's 0.7 .. 1.6; outside it the blow does not fit).</summary>
         private float RateFor(AttackMotionData b)
         {
@@ -641,8 +659,7 @@ namespace SquashBot.Visual
             phaseDone = -1;
             if (blow != null)
             {
-                windS = blow.anticipationMs / 1000f; hitS = blow.activeMs / 1000f; backS = blow.recoveryMs / 1000f;
-                playRate = RateFor(blow);
+                (windS, hitS, backS, playRate) = Timing(blow);
                 stroke = StrokeOf(blow.direction);
                 fromRight = blow.direction != HitDirection.Horizontal_LeftToRight;
                 if (blow.direction == HitDirection.Spin) Spin();

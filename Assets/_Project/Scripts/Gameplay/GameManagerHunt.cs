@@ -546,7 +546,7 @@ namespace SquashBot.Gameplay
             // The duel: a short wind-up you can see (the picture lunges at the rival), the blow's look, sound and feel all at
             // its contact, once (the design's sync rule); the rules counted it at the tap. The floors: it lands now.
             bool sync = challengeRun && chPhase == ChPhase.Duel && heldWeapon != null && w.kind != WeaponKind.Gun;
-            if (heldWeapon != null) heldWeapon.SwingQuick(sync ? ContactLead : 0.02f);
+            if (heldWeapon != null) heldWeapon.SwingQuick(sync ? ContactLead : 0.02f, sync);
             if (sync && heldWeapon.Current != null) RivalReads(null, heldWeapon.Current.height); // (the rival may crouch under a high one)
             if (sync) { AtContact(heldWeapon, at, crowd, w, damage); return true; }
             LandStrike(at, crowd, w, damage);
@@ -557,7 +557,7 @@ namespace SquashBot.Gameplay
         private static float ContactLead => Mathf.Max(ReadableLead, (Combat.CombatLibrary.Settings != null ? Combat.CombatLibrary.Settings.contactLeadMs : 75f) / 1000f);
 
         /// <summary>The least wind-up the eye can follow: the arm goes back before the blow comes (seconds tap to contact).</summary>
-        private const float ReadableLead = 0.22f;
+        private const float ReadableLead = 0.3f; // (0.22 still read as a flick)
 
         // the duel blow waiting for its contact (one at a time: a new blow lands the last first); no allocation per blow
         private bool landPending;
