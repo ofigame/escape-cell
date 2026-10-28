@@ -30,12 +30,11 @@ namespace SquashBot.Visual
         /// <summary>True while foi is off duty (menus, garage): it stands with its arms folded; in play, at ease.</summary>
         public static System.Func<bool> OffDuty = () => true;
 
-        /// <summary>What foi looks like: its head (1..), hair and skin colour (null = the head's own), the armour's paint (null = plain).</summary>
+        /// <summary>What foi looks like: its head (1..), hair, skin and eye colour (null = the head's own).</summary>
         public struct Look
         {
             public int head;
             public Color? hair, skin, eyes;
-            public string suit;
         }
 
         /// <summary>
@@ -261,47 +260,15 @@ namespace SquashBot.Visual
             return m;
         }
 
-        /// <summary>The chests' own armour paints: they shine and glow.</summary>
-        private static readonly string[] Premium = { "elite", "ghost", "ranger", "crimson", "fox" };
-        private static readonly Dictionary<Material, Color> glowing = new Dictionary<Material, Color>();
-        private static int glowFrame = -1;
-
-        private static Color PremiumGlow(string suit) =>
-            suit == "elite" ? new Color(1.6f, 1.1f, 0.3f) : suit == "ghost" ? new Color(0.7f, 1.2f, 1.6f) : suit == "ranger" ? new Color(0.4f, 1.4f, 0.5f)
-            : suit == "crimson" ? new Color(1.6f, 0.2f, 0.3f) : new Color(1.6f, 0.7f, 0.2f);
-
-        /// <summary>The premium paints' glow breathing (once a frame, however many wear them).</summary>
-        private static void Breathe()
+        /// <summary>The armour's one material (the paints are gone: the remade body wears its own picture).</summary>
+        private static Material Armour()
         {
-            if (glowFrame == Time.frameCount || glowing.Count == 0) return;
-            glowFrame = Time.frameCount;
-            float k = 0.45f + 0.35f * Mathf.Sin(Time.time * 2.4f);
-            foreach (var kv in glowing) if (kv.Key != null) kv.Key.SetColor("_EmissionColor", kv.Value * k);
-        }
-
-        private static Material Armour(string suit)
-        {
-            if (OwnPaint) suit = null;
-            string key = "armour" + (suit ?? "");
+            const string key = "armour";
             if (materials.TryGetValue(key, out var m) && m != null) return m;
-            var tex = suit != null ? Resources.Load<Texture2D>(Folder + "armour_" + suit) : null;
-            if (tex == null) tex = Resources.Load<Texture2D>(Folder + "armour");
-            bool premium = System.Array.IndexOf(Premium, suit) >= 0;
-            m = MaterialFactory.CreateSurface(Color.white, Color.black, premium ? 0.75f : 0.5f, premium ? 0.45f : 0.25f); // (polished, but lit by its own colour: a dark arena with nothing to reflect does not dull it)
-            if (premium)
-            {
-                var mask = Resources.Load<Texture2D>(Folder + "armour_mask");
-                if (mask != null)
-                {
-                    m.EnableKeyword("_EMISSION");
-                    m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
-                    m.SetTexture("_EmissionMap", mask);
-                    m.SetColor("_EmissionColor", PremiumGlow(suit) * 0.6f);
-                    glowing[m] = PremiumGlow(suit);
-                }
-            }
+            var tex = Resources.Load<Texture2D>(Folder + "armour");
+            m = MaterialFactory.CreateSurface(Color.white, Color.black, 0.5f, 0.25f); // (polished, but lit by its own colour: a dark arena with nothing to reflect does not dull it)
             m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
-            if (!premium && tex != null)
+            if (tex != null)
             {
                 // a little of its own light, as the icon shows it: the brushed metal never goes dull in a dark arena
                 m.EnableKeyword("_EMISSION");
@@ -593,7 +560,7 @@ namespace SquashBot.Visual
             return mesh;
         }
 
-        /// <summary>Dresses a build already made: its head, hair and skin colours and the armour's paint.</summary>
+        /// <summary>Dresses a build already made: its head, hair, skin and eye colours, the armour's material.</summary>
         public static void Dress(Transform skin, Look look)
         {
             var me = skin.GetComponent<SkinnedHero>();
@@ -607,7 +574,7 @@ namespace SquashBot.Visual
                 me.PutHead(n);
                 PaintHead(me.head, n, look.hair, look.skin, look.eyes, me.lidMaterial);
             }
-            var armour = Armour(look.suit);
+            var armour = Armour();
             foreach (var r in skin.GetComponentsInChildren<SkinnedMeshRenderer>(true))
             {
                 r.sharedMaterial = armour;
@@ -616,55 +583,8 @@ namespace SquashBot.Visual
             }
         }
 
-        [System.Serializable]
-        private class HoodInfo { public float width, depth, height, hoodHeight; }
-        private static HoodInfo hoodInfo;
-
-        /// <summary>The hooded cloak over the head (null: none), sized to the head worn, its cape on the shoulders.</summary>
-        public static void Hood(Transform skin, Color? color)
-        {
-            var me = skin.GetComponent<SkinnedHero>();
-            if (me == null) return;
-            if (me.head == null) me.head = me.FindHead();
-            if (me.head == null) return;
-            var old = me.head.Find("Hero_Hood");
-            if (old != null) DestroyImmediate(old.gameObject);
-            foreach (var r in me.head.GetComponentsInChildren<Renderer>(true)) if (r.name.ToLowerInvariant().Contains("hair")) r.enabled = !color.HasValue; // (under a hood: no hair)
-            if (!color.HasValue) return;
-            var prefab = Resources.Load<GameObject>(Folder + "hood");
-            if (prefab == null) return;
-            if (hoodInfo == null) { var text = Resources.Load<TextAsset>(Folder + "hood"); hoodInfo = text != null ? JsonUtility.FromJson<HoodInfo>(text.text) : new HoodInfo { width = 0.57f, depth = 0.6f, height = 0.76f }; }
-            var info = InfoOf(Mathf.Max(1, me.headShown));
-            var hood = new GameObject("Hero_Hood").transform;
-            hood.SetParent(me.head, false);
-            var model = Instantiate(prefab, hood, false).transform;
-            var rs = model.GetComponentsInChildren<Renderer>(true);
-            if (rs.Length > 0)
-            {
-                var bb = rs[0].bounds; foreach (var r in rs) bb.Encapsulate(r.bounds);
-                float hb = bb.size.y / Mathf.Max(1e-6f, hood.lossyScale.y);
-                if (hb > 1e-5f) model.localScale *= hoodInfo.height / hb; // (its units: the measures')
-            }
-            // a little bigger than the head all round, its top just over the head's
-            float s = Mathf.Max(info.width * 1.2f / hoodInfo.width, info.depth * 1.16f / hoodInfo.depth); // (roomy: the hair stays inside)
-            hood.localScale = Vector3.one * s;
-            hood.localPosition = new Vector3(0f, info.top + 0.07f, 0.0f);
-            string key = "hood" + color.Value;
-            if (!materials.TryGetValue(key, out var m) || m == null)
-            {
-                m = MaterialFactory.CreateSurface(color.Value, Color.black, 0.15f, 0f);
-                var tex = Resources.Load<Texture2D>(Folder + "hood");
-                if (tex != null) { m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex); }
-                materials[key] = m;
-            }
-            foreach (var r in model.GetComponentsInChildren<Renderer>(true))
-            {
-                r.sharedMaterial = m;
-                r.shadowCastingMode = Shapes.CastShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
-            }
-        }
-
-        /// <summary>The workshop's arm and leg gear on the bones (what was there before goes).</summary>
+        /// <summary>Gear on the bones, made by <see cref="GearModels"/> (what was there before goes; the workshop's own arm
+        /// and leg gear is gone: kept for the rank gear).</summary>
         public static void Gear(Transform skin, string arms, Color armsColor, string legs, Color legsColor)
         {
             var old = new List<GameObject>();
@@ -1506,7 +1426,6 @@ namespace SquashBot.Visual
             if (vclock == null && transform.parent != null) { vclock = VisualTime.On(transform.parent); vroot = VisualRoot.On(transform.parent); }
             float dt = Mathf.Min(VDt, 0.1f);
             time += dt;
-            Breathe();
 
             // What the body does: walking (how fast), chopping, clapping, or standing.
             var p = transform.position; var d = p - lastPos; d.y = 0f; lastPos = p;

@@ -98,7 +98,7 @@ namespace SquashBot.Gameplay
             emotesUsed = 0;
             skillBar.SetMeters(0f, 0f);
             DropRings();
-            myRing = FootRing.Make(new Color(0.25f, 0.6f, 1f), 3f, true); // (wider than foi with its cape and shield; a soft light over it)
+            myRing = FootRing.Make(new Color(0.25f, 0.6f, 1f), 3f, true); // (wider than foi with its shield; a soft light over it)
             foeRing = FootRing.Make(new Color(1f, 0.25f, 0.2f), 3f, true);
         }
 

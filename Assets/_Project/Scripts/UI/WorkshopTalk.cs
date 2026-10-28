@@ -22,14 +22,12 @@ namespace SquashBot.UI
 
         public static bool IntroDue => Reached >= OpensAt && Prefs.GetInt(IntroKey, 0) == 0;
 
-        /// <summary>The first visit: Bip shows the hidden workshop, explains the gold and hands over a paint tube.</summary>
+        /// <summary>The first visit: Bip shows the hidden workshop and explains the gold (the paint tube it gave is gone with the paints).</summary>
         public static void Welcome(BipTip tip)
         {
             Prefs.SetInt(IntroKey, 1);
-            Cosmetics.Give(Cosmetics.GiftId);
             tip.Queue(Loc.T("ws.bip.welcome"));
             tip.Queue(Loc.T("ws.bip.gold"));
-            tip.Queue(Loc.T("ws.bip.gift"));
         }
 
         public static void Poor(BipTip tip) => tip.Queue(Loc.T("ws.bip.poor"));
@@ -45,20 +43,14 @@ namespace SquashBot.UI
 
         public static void CounterBought(BipTip tip) => tip.Queue(Loc.T("ws.bip.counter"));
 
-        public static void SetDone(BipTip tip) => tip.Queue(Loc.T("ws.bip.set"));
-
-        /// <summary>A colour or a part was bought: Bip is delighted, vanG is not, Kuzgun has an opinion.</summary>
+        /// <summary>A look was bought: Bip is delighted, vanG is not, Kuzgun has an opinion.</summary>
         public static void CosmeticBought(BipTip tip, Cosmetic c)
         {
-            string bip = c.slot == Slot.Color ? "ws.bip.color" : c.slot == Slot.Legs ? "ws.bip.legs" : Random.value < 0.5f ? "ws.bip.look1" : "ws.bip.look2";
-            tip.Queue(Loc.T(bip));
+            tip.Queue(Loc.T(Random.value < 0.5f ? "ws.bip.look1" : "ws.bip.look2"));
 
             if (Random.value < 0.6f)
             {
-                string vang;
-                if (Reached >= 200) vang = c.id == "color.sunset" ? "ws.vang.orange" : "ws.vang.soft";
-                else if (c.id.StartsWith("hat.antenna")) vang = "ws.vang.antenna";
-                else vang = Random.value < 0.5f ? "ws.vang.grey" : "ws.vang.error";
+                string vang = Reached >= 200 ? "ws.vang.soft" : Random.value < 0.5f ? "ws.vang.grey" : "ws.vang.error";
                 tip.Queue(Loc.T(vang), Loc.T("story.warden"), VangColor);
             }
 
@@ -66,10 +58,10 @@ namespace SquashBot.UI
                 tip.Queue(Loc.T("ws.kuzgun.prices"), Loc.T("story.kuzgun"), KuzgunColor);
         }
 
-        /// <summary>A piece was put on: Kuzgun notices his own cape.</summary>
+        /// <summary>A piece was put on: Kuzgun notices his own seal.</summary>
         public static void Worn(BipTip tip, Cosmetic c)
         {
-            if (c.id == "back.raven") tip.Queue(Loc.T("ws.kuzgun.cape"), Loc.T("story.kuzgun"), KuzgunColor);
+            if (c.id == "badge.raven") tip.Queue(Loc.T("ws.kuzgun.seal"), Loc.T("story.kuzgun"), KuzgunColor);
         }
     }
 }

@@ -1614,7 +1614,6 @@ namespace SquashBot.UI
             healthText.rectTransform.pivot = new Vector2(1f, 0.5f);
             healthPill.gameObject.SetActive(false);
             // The duel's rival: the same bar mirrored at the top right (its heart on the right).
-            capeParent = t;
             rivalPill = UiFactory.Pill("RivalHealth", t, TopRight, new Vector2(-36f, -282f), new Vector2(340f, 70f), UiFactory.PillColor);
             HeartIcon(rivalPill, new Vector2(300f, 0f), 46f);
             UiFactory.Bar(rivalPill, new Vector2(0f, 0.5f), new Vector2(94f, 0f), new Vector2(170f, 22f), UiKit.Style.danger, out rivalFill);
@@ -1796,36 +1795,6 @@ namespace SquashBot.UI
         private RectTransform rivalPill;
         private Image rivalFill;
         private TextMeshProUGUI rivalText;
-
-        /// <summary>The duel's rival health at the top right (hidden off the duel).</summary>
-        private Transform capeParent;
-        private readonly RawImage[] capeViews = new RawImage[2];
-
-        /// <summary>The duel's cape frame under a foi's health and ulti bars (the player's on the left, the rival's on the
-        /// right): its picture is the cape's own camera's (see <see cref="Visual.CapeShowcase"/>).</summary>
-        public RawImage CapeView(bool rival)
-        {
-            int i = rival ? 1 : 0;
-            if (capeViews[i] == null && capeParent != null)
-            {
-                var frame = UiFactory.Box(rival ? "RivalCape" : "Cape", capeParent, rival ? TopRight : TopLeft, new Vector2(rival ? -36f : 36f, -392f), new Vector2(144f, 180f)); // (no frame: the cape alone)
-                frame.pivot = rival ? new Vector2(1f, 1f) : new Vector2(0f, 1f);
-                var img = new GameObject("Picture").AddComponent<RawImage>();
-                img.transform.SetParent(frame, false);
-                var rt = img.rectTransform;
-                rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
-                img.raycastTarget = false;
-                capeViews[i] = img;
-            }
-            if (capeViews[i] != null) capeViews[i].transform.parent.gameObject.SetActive(true);
-            return capeViews[i];
-        }
-
-        /// <summary>The cape frames hidden (the duel over).</summary>
-        public void HideCapeViews()
-        {
-            foreach (var v in capeViews) if (v != null) v.transform.parent.gameObject.SetActive(false);
-        }
 
         public void SetRivalHealth(bool show, float value)
         {

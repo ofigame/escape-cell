@@ -10,15 +10,15 @@ namespace SquashBot.Monetization
 {
     /// <summary>
     /// In-app purchases (the scenario's phase 6): remove ads (interstitials and the banner go; rewarded ads stay a
-    /// choice), the season road's paid track (the month's pass) and cosmetic packs. Core parts are never sold (the duel
+    /// choice) and the season road's paid track (the month's pass); the cosmetic packs went with the paints and capes. Core parts are never sold (the duel
     /// stays fair). The store itself is Unity IAP, compiled in with the FOI_IAP define once the package is installed and
     /// the products exist in Google Play and App Store Connect; without it every product shows as "soon".
     /// </summary>
     public static class Store
     {
-        public const string RemoveAds = "foi.removeads", SeasonPass = "foi.seasonpass", PackHeroes = "foi.pack.heroes", PackCapes = "foi.pack.capes";
+        public const string RemoveAds = "foi.removeads", SeasonPass = "foi.seasonpass";
 
-        public static readonly string[] Products = { RemoveAds, SeasonPass, PackHeroes, PackCapes };
+        public static readonly string[] Products = { RemoveAds, SeasonPass };
 
         /// <summary>Purchases on in the game (off for now: the package is in, the products stay out of sight).</summary>
         public const bool Enabled = false;
@@ -39,12 +39,6 @@ namespace SquashBot.Monetization
             {
                 case RemoveAds: Prefs.SetInt("sb_iap_noads", 1); break;
                 case SeasonPass: Prefs.SetString("sb_iap_pass", DateTime.Now.ToString("yyyyMM")); break;
-                case PackHeroes:
-                    foreach (var c in Cosmetics.InSlot(Slot.Suit)) if (!c.IsDefault && !Cosmetics.Owns(c) && c.rank <= 0) Cosmetics.Give(c.id);
-                    break;
-                case PackCapes:
-                    foreach (var c in Cosmetics.InSlot(Slot.Back)) if (c.id.StartsWith("back.cape") && !c.IsDefault && !Cosmetics.Owns(c) && c.rank <= 0) Cosmetics.Give(c.id);
-                    break;
             }
             Prefs.Save();
             Bought?.Invoke(id);
@@ -87,8 +81,6 @@ namespace SquashBot.Monetization
             var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
             builder.AddProduct(RemoveAds, ProductType.NonConsumable);
             builder.AddProduct(SeasonPass, ProductType.Consumable);
-            builder.AddProduct(PackHeroes, ProductType.NonConsumable);
-            builder.AddProduct(PackCapes, ProductType.NonConsumable);
             UnityPurchasing.Initialize(listener, builder);
 #endif
         }

@@ -7,14 +7,13 @@ namespace SquashBot.Data
     /// <summary>The three duel chests: a plain one (green strap), a middle one (bronze, yellow strap), a great one (gold, red strap).</summary>
     public enum ChestTier { Basic, Mid, Advanced }
 
-    /// <summary>What came out of a chest: gold, a weapon (a shop one, or one only chests hold) or an outfit for foi.</summary>
+    /// <summary>What came out of a chest: gold, a weapon (a shop one, or one only chests hold) or a shield, and the items beside it.</summary>
     public class ChestReward
     {
         public int gold;
         /// <summary>Core parts beside the gold (the bronze and gold chests).</summary>
         public int cores;
         public WeaponDef weapon;
-        public Cosmetic outfit;
         public ShieldDef shield;
         /// <summary>The items beside it (Docs/ESYA_CANTA_VE_BEDEN_SISTEMI.md, section 4): in the bag already as the chest
         /// opens; an ad's second draw keeps them (never redrawn for an ad).</summary>
@@ -24,8 +23,8 @@ namespace SquashBot.Data
     /// <summary>
     /// Duel chests: every duel won brings one, and the better the play the better the chest — a winning streak and
     /// health to spare. Each opens free; what came out can be swapped once for another draw after an ad. Inside: gold, a weapon from the
-    /// shop, or (in the better chests, for winning streaks) a weapon no shop sells; now and then a surprise outfit for foi
-    /// (one only chests hold, or one from the workshop not yet owned).
+    /// shop, or (in the golden chest) a weapon or shield no shop sells; and items beside it, now and then extra ones (the
+    /// share the outfits had: Docs/RUTBE_KUSAMI_TAC_SAC_BIRLESIK.md, 1.3).
     /// </summary>
     public static class DuelChests
     {
@@ -75,10 +74,11 @@ namespace SquashBot.Data
         }
 
         // The chances (the odds shown on the chests' screen are worked out from these same numbers).
-        // (the scenario's §4.5: plain 3% outfit, 10% shop weapon of tier 1–2; bronze 8%, 14% of tier 2–3, core parts 2–5;
-        // gold 30% outfit, 8% chest sword, 4% chest shield, 8% shop weapon of tier 3–5, else 800 gold and 10–20 core parts)
-        private static readonly float[] SuitChance = { 0.03f, 0.08f }, ShopChance = { 0.10f, 0.14f }; // (plain, bronze)
-        private const float GoldOutfit = 0.30f, GoldShield = 0.04f, GoldChestWeapon = 0.08f, GoldShopWeapon = 0.08f;
+        // (the scenario's §4.5: plain 10% shop weapon of tier 1–2; bronze 14% of tier 2–3, core parts 2–5; gold 8% chest
+        // sword, 4% chest shield, 8% shop weapon of tier 3–5, else 800 gold and 10–20 core parts. The outfits' old share,
+        // 3% / 8% / 30%, is extra items now: ItemCatalog.chestBonus)
+        private static readonly float[] ShopChance = { 0.10f, 0.14f }; // (plain, bronze)
+        private const float GoldShield = 0.04f, GoldChestWeapon = 0.08f, GoldShopWeapon = 0.08f;
         private const int GoldChestGold = 800;
         /// <summary>The shop weapons' tiers a chest draws from, and its gold and core parts when gold comes out (plain, bronze, gold).</summary>
         private static readonly (int lo, int hi)[] ShopTiers = { (1, 2), (2, 3), (3, 5) };
@@ -102,23 +102,17 @@ namespace SquashBot.Data
 
         private static string Span(int lo, int hi) => lo == hi ? lo.ToString() : lo + "–" + hi;
 
-        /// <summary>What may come out of a chest and how likely, e.g. "Gold 86% · Weapon 12% · Outfit 2%".</summary>
+        /// <summary>What may come out of a chest and how likely, e.g. "Gold 90% · Weapon 10% · +2 items · Extra item +1 3%".</summary>
         public static string OddsText(ChestTier t)
         {
             var parts = new List<(string key, float p)>();
             if (t == ChestTier.Advanced)
             {
-                parts.Add(("odds.outfit", GoldOutfit));
                 parts.Add(("odds.chestWeapon", GoldChestWeapon));
                 parts.Add(("odds.weapon", GoldShopWeapon));
                 parts.Add(("odds.shield", GoldShield));
             }
-            else
-            {
-                int i = (int)t;
-                parts.Add(("odds.weapon", (1f - SuitChance[i]) * ShopChance[i]));
-                parts.Add(("odds.outfit", SuitChance[i]));
-            }
+            else parts.Add(("odds.weapon", ShopChance[(int)t]));
             float rest = 1f;
             foreach (var x in parts) rest -= x.p;
             parts.Insert(0, ("odds.gold", rest));
@@ -128,7 +122,10 @@ namespace SquashBot.Data
                 if (sb.Length > 0) sb.Append(" · ");
                 sb.Append(Loc.T(x.key)).Append(' ').Append(Loc.F("fmt.pct", Mathf.RoundToInt(x.p * 100f)));
             }
-            sb.Append(" · +").Append(Loc.F("drop.chestItems", ItemCatalog.Current.chestItems[(int)t])); // (the items beside the draw)
+            var c = ItemCatalog.Current;
+            sb.Append(" · +").Append(Loc.F("drop.chestItems", c.chestItems[(int)t])); // (the items beside the draw)
+            if (c.chestBonus[(int)t] > 0f) // (now and then more of them)
+                sb.Append(" · ").Append(Loc.F("odds.extraItems", c.chestBonusItems[(int)t])).Append(' ').Append(Loc.F("fmt.pct", Mathf.RoundToInt(c.chestBonus[(int)t] * 100f)));
             return sb.ToString();
         }
 
@@ -182,7 +179,7 @@ namespace SquashBot.Data
             for (int i = 0; i < 8; i++)
             {
                 r = Roll(t);
-                bool same = was != null && (r.weapon != null ? r.weapon == was.weapon : r.outfit != null ? r.outfit == was.outfit : r.shield != null ? r.shield == was.shield : was.weapon == null && was.outfit == null && was.shield == null);
+                bool same = was != null && (r.weapon != null ? r.weapon == was.weapon : r.shield != null ? r.shield == was.shield : was.weapon == null && was.shield == null);
                 if (!same) break;
             }
             if (was != null) r.items = was.items; // (the items stay: an ad never draws them again)
@@ -192,11 +189,11 @@ namespace SquashBot.Data
 
         // What came out and is not given yet is kept on the phone: if the game closes while it is shown (or while an ad
         // swaps it), it is given the next time (the chest was already spent).
-        private const string PendingKey = "sb_dchest_pending";
+        public const string PendingKey = "sb_dchest_pending";
 
         private static void Hold(ChestReward r)
         {
-            Prefs.SetString(PendingKey, r == null ? "" : r.weapon != null ? "w:" + r.weapon.id : r.shield != null ? "s:" + r.shield.id : r.outfit != null ? "o:" + r.outfit.id : "g:" + r.gold + ":" + r.cores);
+            Prefs.SetString(PendingKey, r == null ? "" : r.weapon != null ? "w:" + r.weapon.id : r.shield != null ? "s:" + r.shield.id : "g:" + r.gold + ":" + r.cores);
             Prefs.Save();
         }
 
@@ -209,7 +206,7 @@ namespace SquashBot.Data
             var r = new ChestReward();
             if (p[0] == 'w') r.weapon = Armory.Get(v);
             else if (p[0] == 's') r.shield = Shields.Get(v);
-            else if (p[0] == 'o') r.outfit = Cosmetics.Find(v);
+            else if (p[0] == 'o') { } // (an outfit: gone, paid back by Cosmetics.MigrateGarage)
             else
             {
                 var gc = v.Split(':');
@@ -227,35 +224,28 @@ namespace SquashBot.Data
             if (r == null) { Prefs.Save(); return; }
             if (r.weapon != null) Armory.Grant(r.weapon);
             else if (r.shield != null) Shields.Grant(r.shield);
-            else if (r.outfit != null) Cosmetics.Give(r.outfit.id);
             else { SaveData.Coins += r.gold; CoreParts.Add(r.cores); }
             Prefs.Save();
         }
 
         /// <summary>
-        /// The golden chest: an outfit 30%, a shield 4%, a chest sword 8% (the best rarest), a shop weapon 8% (tier 3–5),
-        /// else 800 gold and 10–20 core parts (about half the time; more once there is nothing of a kind left to give).
+        /// The golden chest: a shield 4%, a chest sword 8% (the best rarest), a shop weapon 8% (tier 3–5), else 800 gold
+        /// and 10–20 core parts (more often once there is nothing of a kind left to give).
         /// </summary>
         private static ChestReward RollGolden()
         {
             float roll = UnityEngine.Random.value;
-            if (roll < GoldOutfit)
-            {
-                var own = Cosmetics.ChestOnly();
-                var pool = own.Count > 0 ? own : Cosmetics.InSlot(Slot.Suit).FindAll(c => !c.IsDefault && !c.chest && !Cosmetics.Owns(c));
-                if (pool.Count > 0) return new ChestReward { outfit = pool[UnityEngine.Random.Range(0, pool.Count)] };
-            }
-            else if (roll < GoldOutfit + GoldShield)
+            if (roll < GoldShield)
             {
                 var left = Shields.ChestLeft();
                 if (left.Count > 0) return new ChestReward { shield = left[UnityEngine.Random.Range(0, left.Count)] };
             }
-            else if (roll < GoldOutfit + GoldShield + GoldChestWeapon)
+            else if (roll < GoldShield + GoldChestWeapon)
             {
                 var w = PickWeighted(Armory.All.FindAll(x => x.chest && !Armory.Owned(x)));
                 if (w != null) return new ChestReward { weapon = w };
             }
-            else if (roll < GoldOutfit + GoldShield + GoldChestWeapon + GoldShopWeapon)
+            else if (roll < GoldShield + GoldChestWeapon + GoldShopWeapon)
             {
                 var w = Pick(Armory.All.FindAll(x => !x.Special && !x.chest && x.kind != WeaponKind.Gun && x.price > 0 && !Armory.Owned(x) && x.tier >= ShopTiers[2].lo && x.tier <= ShopTiers[2].hi));
                 if (w != null) return new ChestReward { weapon = w };
@@ -266,14 +256,6 @@ namespace SquashBot.Data
         private static ChestReward Roll(ChestTier t)
         {
             if (t == ChestTier.Advanced) return RollGolden();
-            // A surprise outfit first: the chests' own ones, or a suit from the workshop not owned yet.
-            if (UnityEngine.Random.value < SuitChance[(int)t])
-            {
-                var own = Cosmetics.ChestOnly();
-                var pool = own.Count > 0 && (t != ChestTier.Basic || UnityEngine.Random.value < 0.3f) ? own
-                    : Cosmetics.InSlot(Slot.Suit).FindAll(c => !c.IsDefault && !c.chest && !Cosmetics.Owns(c));
-                if (pool.Count > 0) return new ChestReward { outfit = pool[UnityEngine.Random.Range(0, pool.Count)] };
-            }
             float roll = UnityEngine.Random.value;
             bool wantChest = false; // (the chest swords: the golden chest only)
             bool wantShop = roll < ShopChance[(int)t];

@@ -42,14 +42,19 @@ namespace SquashBot.Data
 
         [Header("Chests (section 4): plain, bronze, gold")]
         public int[] chestItems = { 2, 4, 8 };
-        public float[] chestCommon = { 0.90f, 0.70f, 0.40f };
+        public float[] chestCommon = { 0.90f, 0.70f, 0.35f };
         public float[] chestRare = { 0.10f, 0.27f, 0.45f };
-        public float[] chestEpic = { 0f, 0.03f, 0.15f };
+        public float[] chestEpic = { 0f, 0.03f, 0.20f }; // (the gold chest's epic 15% → 20%: the outfits' share, Docs/RUTBE_KUSAMI_TAC_SAC_BIRLESIK.md 1.3)
         /// <summary>At least one of this rarity (0: none, 1: rare, 2: epic).</summary>
         public int[] chestAtLeast = { 0, 1, 2 };
         /// <summary>The repair potion's chance (1: always), and the great one's.</summary>
         public float[] chestRepair = { 0.30f, 1f, 0f };
         public float[] chestGreatRepair = { 0f, 0.10f, 1f };
+        /// <summary>The share the outfits had, now extra items: their chance, how many, and the first one's rarity at least
+        /// (plain 3%: one common, bronze 8%: one rare, gold 30%: two, one of them rare at least).</summary>
+        public float[] chestBonus = { 0.03f, 0.08f, 0.30f };
+        public int[] chestBonusItems = { 1, 1, 2 };
+        public int[] chestBonusRarity = { 0, 1, 1 };
         /// <summary>The gold chest's kinds' weights (richer in whetstones and experience).</summary>
         public int[] goldChestWeights = { 20, 20, 20, 20, 20 };
 

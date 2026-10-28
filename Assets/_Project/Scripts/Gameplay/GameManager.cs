@@ -165,6 +165,7 @@ namespace SquashBot.Gameplay
             OldNotes.Clear(); // the removed open world's farm notes still waiting on the phones that had it
             Cosmetics.MigrateHeads(); // the new heads: the old ones' buyers refunded, the old skins to the nearest new tones
             Cosmetics.MigrateDances(); // the new dances: the old made-up ones' buyers refunded
+            Cosmetics.MigrateGarage(); // the renewed garage: the hats, paints, capes and limb gear paid back (told on the menu)
             Shields.KeepOldStarter(SaveData.UnlockedLevel > 0 || Prefs.GetInt("sb_ads_duels", 0) > 0 || Prefs.HasKey("sb_shield_eq")); // (the wooden shield now bought: those who played before keep theirs)
             Progress.MigrateStarsToScore(LevelCatalog.LevelCount); // (the stars now come from the floor score; an old three counts as two)
             toolRefund += Tools.RefundRetired(); // (the retired freezer: its coins back, told on the menu)
@@ -663,6 +664,7 @@ namespace SquashBot.Gameplay
                 pendingWorldMove = null;
             }
             else if (toolRefund > 0) { ui.ShowIntro(Loc.T("tool.retiredTitle"), Loc.F("tool.retired", toolRefund)); toolRefund = 0; ui.RefreshMenuCoins(); }
+            else if (ShowGarageRefund()) { } // (once: the renewed garage, what was paid back)
             else if (Progress.TakeStarsNote()) ui.ShowIntro(Loc.T("stars.noteTitle"), Loc.F("stars.note", FloorTuning.Current.starTwo, FloorTuning.Current.starThree)); // (once: the stars come from the floor score now)
             else if (!FirstSession.Quiet && NewSystemGift.GiveOnce()) { ui.ShowIntro(Loc.T("newsys.title"), Loc.T("newsys.body")); ui.RefreshBag(); ui.RefreshChests(); } // (the items' arrival: once, Bip tells of it)
             else if (BattleWear.Level >= 1 && Prefs.GetInt("sb_tut_wear", 0) == 0) { Prefs.SetInt("sb_tut_wear", 1); ui.ShowIntro(Loc.T("tut.wearTitle"), Loc.T("tut.wear")); } // (the first battle wear: Bip tells how it goes away, once)
@@ -828,6 +830,17 @@ namespace SquashBot.Gameplay
         private string pendingWorldGift; // (a world's monster beaten: its gifts told on the menu)
         private string pendingWorldMove; // (and the move it gave: its card, to add it to the set)
         private UI.NewMoveCard newMoveCard;
+
+        /// <summary>The renewed garage's card, once (Cosmetics.MigrateGarage paid back what was gone): true if shown.</summary>
+        private bool ShowGarageRefund()
+        {
+            var (gold, cores) = Cosmetics.TakeRefundNote();
+            if (gold <= 0 && cores <= 0) return false;
+            var card = UI.GarageRenewedCard.Create(ui.transform.Find("Canvas/SafeArea") ?? ui.transform.Find("Canvas") ?? ui.transform);
+            card.Show(gold, cores);
+            ui.RefreshMenuCoins();
+            return true;
+        }
         private int toolRefund; // (coins given back for a retired tool, told once on the menu)
 
         private void StartLevel(int index, List<Boost> boosts = null)

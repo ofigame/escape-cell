@@ -144,22 +144,16 @@ namespace SquashBot.Gameplay
             foreach (QuestKind q in Enum.GetValues(typeof(QuestKind)))
                 Export("06_Toplanabilir_ve_Nesneler/Gorev_Esyalari", "gorev_" + q, t => Adopt(QuestItem.Create(q, t.position).gameObject, t));
 
-            // ---------- Garage cosmetics ----------
+            // ---------- Garage cosmetics (the badges: the hats, back pieces and arm and leg gear are gone) ----------
             foreach (var c in Cosmetics.All)
             {
-                if (c.IsDefault) continue;
-                string sub = c.slot == Slot.Hat ? "Sapkalar" : c.slot == Slot.Back ? "Sirt" : c.slot == Slot.Arms ? "Kollar" : c.slot == Slot.Legs ? "Bacaklar" : c.slot == Slot.Badge ? "Rozetler" : null;
-                if (sub == null) continue;
+                if (c.IsDefault || c.slot != Slot.Badge) continue;
                 var item = c;
-                Export("07_Kozmetik/" + sub, item.id.Replace('.', '_'), t =>
+                Export("07_Kozmetik/Rozetler", item.id.Replace('.', '_'), t =>
                 {
                     var holder = new GameObject(item.id).transform;
                     holder.SetParent(t, false);
-                    if (item.slot == Slot.Hat) CosmeticModels.Hat(holder, item.id, item.color);
-                    else if (item.slot == Slot.Back) CosmeticModels.Back(holder, item.id, item.color);
-                    else if (item.slot == Slot.Arms) CosmeticModels.Arms(holder, item.id, item.color);
-                    else if (item.slot == Slot.Legs) CosmeticModels.Legs(holder, item.id, item.color);
-                    else CosmeticModels.Badge(holder, item.id, item.color);
+                    CosmeticModels.Badge(holder, item.id, item.color);
                     return holder.childCount > 0 ? holder.gameObject : null;
                 });
             }

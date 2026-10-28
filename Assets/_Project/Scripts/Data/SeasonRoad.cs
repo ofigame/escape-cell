@@ -7,13 +7,13 @@ namespace SquashBot.Data
     /// <summary>
     /// The season road (the scenario's §9.4): 30 steps a calendar month, 100 points each, from duels (a win 10, a draw 6,
     /// a loss 4) and quests (20–100). Most steps give gold or a plain / bronze chest; 5, 15 and 25 core parts (10 / 15 /
-    /// 25); 10 the season's emote, 20 its armour paint, 30 its cape and a gold chest. The free track only for now.
+    /// 25); 10 the season's emote, 20 two epic items, 30 a gold chest and 3,000 gold. The free track only for now.
     /// </summary>
     public static class SeasonRoad
     {
         public const int Steps = 30, PerStep = 100;
         public const int Win = 10, Draw = 6, Loss = 4;
-        public enum Kind { Gold, Basic, Bronze, Cores, Emote, Paint, Cape }
+        public enum Kind { Gold, Basic, Bronze, Cores, Emote, Items, GoldChest }
 
         /// <summary>What a step (1..30) gives.</summary>
         public static (Kind kind, int amount) Gift(int step)
@@ -24,8 +24,8 @@ namespace SquashBot.Data
                 case 15: return (Kind.Cores, 15);
                 case 25: return (Kind.Cores, 25);
                 case 10: return (Kind.Emote, 1);
-                case 20: return (Kind.Paint, 1);
-                case 30: return (Kind.Cape, 1);
+                case 20: return (Kind.Items, 2); // (two epic items: the season's armour paint's place)
+                case 30: return (Kind.GoldChest, 3000); // (a gold chest and the gold: the season's cape's place)
             }
             if (step % 4 == 0) return (Kind.Bronze, 1);
             if (step % 3 == 0) return (Kind.Basic, 1);
@@ -71,9 +71,6 @@ namespace SquashBot.Data
             }
         }
 
-        /// <summary>The season's own pieces (the month's theme): its emote, armour paint and cape.</summary>
-        public static string SeasonCape => "back.cape.season";
-
         /// <summary>Takes a reached step's gift (true when given).</summary>
         public static bool Take(int step)
         {
@@ -87,21 +84,17 @@ namespace SquashBot.Data
                 case Kind.Bronze: DuelChests.Add(ChestTier.Mid); break;
                 case Kind.Cores: CoreParts.Add(g.amount); break;
                 case Kind.Emote: Prefs.SetInt("sb_emote_season_" + Month, 1); break; // (the season's emote, in the duel's emote row)
-                case Kind.Paint:
+                case Kind.Items:
                 {
-                    // the season's paint: a paint not owned yet from the workshop (else gold)
-                    var pool = Cosmetics.InSlot(Slot.Color).FindAll(c => !c.IsDefault && !Cosmetics.Owns(c));
-                    if (pool.Count > 0) Cosmetics.Give(pool[(int)(DateTime.Now.Month * 7) % pool.Count].id); else SaveData.Coins += 1500;
+                    var items = new System.Collections.Generic.List<ItemGrant>();
+                    for (int i = 0; i < g.amount; i++) items.Add(ItemDrops.AnyItem(ItemRarity.Epic));
+                    ItemDrops.Give("season", items);
                     break;
                 }
-                case Kind.Cape:
-                {
-                    // the season's cape (a cape not owned yet) and a gold chest
-                    var capes = Cosmetics.InSlot(Slot.Back).FindAll(c => c.id.StartsWith("back.cape") && !c.IsDefault && !Cosmetics.Owns(c) && c.rank <= 0);
-                    if (capes.Count > 0) Cosmetics.Give(capes[(int)(DateTime.Now.Month * 5) % capes.Count].id); else SaveData.Coins += 3000;
+                case Kind.GoldChest:
                     DuelChests.Add(ChestTier.Advanced);
+                    SaveData.Coins += g.amount;
                     break;
-                }
             }
             Prefs.SetString(TakenKey, Prefs.GetString(TakenKey, "") + "|" + step + "|");
             Prefs.Save();
@@ -112,7 +105,7 @@ namespace SquashBot.Data
 
         /// <summary>The pass's gift at a step: more gold, a bronze chest every third step, a gold chest every tenth, 10 core-free.</summary>
         public static (Kind kind, int amount) PassGift(int step) =>
-            step % 10 == 0 ? (Kind.Cape, 1) : step % 3 == 0 ? (Kind.Bronze, 1) : (Kind.Gold, 250 + 50 * step);
+            step % 10 == 0 ? (Kind.GoldChest, 0) : step % 3 == 0 ? (Kind.Bronze, 1) : (Kind.Gold, 250 + 50 * step);
 
         public static bool PassTaken(int step) { Roll(); return Prefs.GetString(TakenKey, "").Contains("|p" + step + "|"); }
 

@@ -73,7 +73,7 @@ namespace SquashBot.UI
                 case SeasonRoad.Kind.Basic: return DuelChestScreen.TierName(ChestTier.Basic);
                 case SeasonRoad.Kind.Bronze: return DuelChestScreen.TierName(ChestTier.Mid);
                 case SeasonRoad.Kind.Cores: return Loc.F("login.cores", g.amount);
-                default: return Loc.T("sr." + g.kind);
+                default: return Loc.F("sr." + g.kind, g.amount); // (the emote; the epic items' count; the gold chest's gold)
             }
         }
 

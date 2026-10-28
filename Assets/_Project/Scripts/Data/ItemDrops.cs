@@ -111,6 +111,15 @@ namespace SquashBot.Data
             // the guarantee: at least one of its rarity (the best drawn raised if none reached it)
             if (c.chestAtLeast[i] > 0 && rarities.Count > 0 && !rarities.Exists(r => (int)r >= c.chestAtLeast[i]))
                 rarities[rarities.Count - 1] = (ItemRarity)c.chestAtLeast[i];
+            // now and then extra ones (the outfits' old share): the first at least of its rarity, the rest as the chest draws
+            if (UnityEngine.Random.value < c.chestBonus[i])
+                for (int n = 0; n < c.chestBonusItems[i]; n++)
+                {
+                    var extra = c.chestBonusItems[i] == 1 ? (ItemRarity)c.chestBonusRarity[i] // (a single extra one: just that rarity)
+                        : RollRarity(c.chestCommon[i], c.chestRare[i], c.chestEpic[i]);
+                    if (n == 0 && (int)extra < c.chestBonusRarity[i]) extra = (ItemRarity)c.chestBonusRarity[i];
+                    rarities.Add(extra);
+                }
             rarities.Sort();
             var items = new List<ItemGrant>();
             foreach (var r in rarities) items.Add(new ItemGrant(RollKind(weights, true), r));
@@ -120,7 +129,7 @@ namespace SquashBot.Data
         }
 
         /// <summary>The chest's items as its contents screen shows them ("4 items · Common 70% · Rare 27% · Epic 3% · at
-        /// least 1 Rare · Repair Potion"), from the same table as the draw.</summary>
+        /// least 1 Rare · Repair Potion · Extra item +1 8%"), from the same table as the draw.</summary>
         public static string ChestText(ChestTier t)
         {
             var c = ItemCatalog.Current;
@@ -131,6 +140,7 @@ namespace SquashBot.Data
             if (c.chestAtLeast[i] > 0) s += " · " + Loc.F("drop.atLeast", Loc.T("rarity." + (ItemRarity)c.chestAtLeast[i]));
             if (c.chestRepair[i] > 0f) s += " · " + Loc.T("item.RepairSmall") + (c.chestRepair[i] >= 1f ? "" : " " + Pct(c.chestRepair[i]));
             if (c.chestGreatRepair[i] > 0f) s += " · " + Loc.T("item.RepairLarge") + (c.chestGreatRepair[i] >= 1f ? "" : " " + Pct(c.chestGreatRepair[i]));
+            if (c.chestBonus[i] > 0f) s += " · " + Loc.F("odds.extraItems", c.chestBonusItems[i]) + " " + Pct(c.chestBonus[i]);
             return s;
         }
 

@@ -171,7 +171,6 @@ namespace SquashBot.Gameplay
             RefreshSquadBar();
             hunt.Freeze(); // nobody moves while it counts down
             chPhase = ChPhase.Lobby; // the count first
-            capesOff = false;
             cameraRig.StartCoroutine(DuelOpening());
             AudioManager.PlaySfx(Sfx.Win, 0.6f, 0.9f);
         }
@@ -266,7 +265,6 @@ namespace SquashBot.Gameplay
             else hunt.RegroupSquads();
             RoundPassives(); // (each round: the master warrior's bar part, the sturdy's spare life)
             GuardRound(); // (each round: both shields whole)
-            if (capesOff) StripCapes();
 
             RefreshSquadBar();
         }
@@ -385,24 +383,8 @@ namespace SquashBot.Gameplay
             cameraRig.StartCoroutine(CountdownThenGo());
         }
 
-        /// <summary>A new round's foi dressed again (the rival's copy, foi's own outfit): their capes simply go (theirs hang on the posts already).</summary>
-        private void StripCapes()
-        {
-            foreach (var model in new[] { robot.Visual, hunt.ChallengeFoeModel })
-                if (model != null)
-                    foreach (var cape in model.GetComponentsInChildren<SoftCape>(true))
-                    {
-                        var off = cape.TakeOff();
-                        if (off != null) Destroy(off.gameObject);
-                    }
-        }
-
-        /// <summary>Both foi have hung their capes up (they stay off until the duel is over).</summary>
-        private bool capesOff;
-
         /// <summary>
-        /// The duel's opening, straight on the board: 5, 4, 3, 2, 1 over the two foi on their marks; at the second count
-        /// each foi takes its cape off and it flies to a post at its corner of the platform, hanging there. Then the fight.
+        /// The duel's opening, straight on the board: 5, 4, 3, 2, 1 over the two foi on their marks, then the fight.
         /// </summary>
         private System.Collections.IEnumerator DuelOpening()
         {
@@ -416,7 +398,6 @@ namespace SquashBot.Gameplay
                     chUi.SetStatus(i.ToString());
                     ui.Float(new Vector2(Screen.width * 0.5f, Screen.height * 0.6f), i.ToString(), Palette.UiGold, 220f);
                     AudioManager.PlaySfx(Sfx.Click, 1f, 0.75f + 0.08f * (5 - i));
-                    if (i == 3) TakeOffCapes(true); // (at three: the capes fly off onto the screen)
                     yield return new WaitForSeconds(1f);
                     while (challengeRun && State == GameState.Paused) yield return null;
                 }
@@ -446,57 +427,6 @@ namespace SquashBot.Gameplay
             var me = robot.transform.position; var them = foe.position;
             robot.Face(me + Dir(me, them));
             hunt.TurnFoe(Dir(them, me));
-        }
-
-        /// <summary>Both foi's capes off and onto the screen, under their bars (at the countdown, or at once after a knock-down's new round).</summary>
-        private void TakeOffCapes(bool fly)
-        {
-            capesOff = true;
-            if (colosseum == null) return;
-            var (mine, theirs) = DuelMarks;
-            var hangers = new System.Collections.Generic.List<(Transform model, GridPos mark, float side)> { (robot.Visual, mine, 0f), (hunt.ChallengeFoeModel, theirs, 0f) };
-            foreach (var (model, mark, side) in hangers)
-            {
-                if (model == null) continue;
-                foreach (var cape in model.GetComponentsInChildren<SoftCape>(true))
-                {
-                    var off = cape.TakeOff();
-                    if (off == null) continue;
-                    if (off.GetComponentsInChildren<Renderer>(true).Length == 0) { Destroy(off.gameObject); continue; }
-                    // shown on the screen under its foi's bars (no post by the floor)
-                    bool rivalCape = model != robot.Visual;
-                    var view = ui.CapeView(rivalCape);
-                    var outside = -model.forward; // (its outside: the way its foi's back faces)
-                    if (fly && view != null) { view.transform.parent.gameObject.SetActive(false); cameraRig.StartCoroutine(FlyCapeToFrame(off, view, rivalCape ? 1 : 0, outside)); }
-                    else Visual.CapeShowcase.Show(off, view, rivalCape ? 1 : 0, outside);
-                }
-            }
-            if (fly) AudioManager.PlaySfx(Sfx.Hop, 0.8f, 0.8f);
-        }
-
-        /// <summary>A cape lifted off a foi's shoulders, flying up in an arc towards its frame on the screen (shrinking as it
-        /// goes), then shown there.</summary>
-        private System.Collections.IEnumerator FlyCapeToFrame(Transform cape, UnityEngine.UI.RawImage view, int slot, Vector3 outside)
-        {
-            var cam = cameraRig.Cam;
-            var frame = (RectTransform)view.transform.parent;
-            var screen = RectTransformUtility.WorldToScreenPoint(null, frame.TransformPoint(frame.rect.center));
-            var from = cape.position; var fromRot = cape.rotation; var fromScale = cape.localScale;
-            const float T = 0.65f;
-            for (float e = 0f; e < T && cape != null; e += Time.deltaTime)
-            {
-                float k = Mathf.SmoothStep(0f, 1f, e / T);
-                var to = cam.ScreenToWorldPoint(new Vector3(screen.x, screen.y, 5f)); // (just before the lens, where the frame is)
-                cape.position = Vector3.Lerp(from, to, k) + Vector3.up * (Mathf.Sin(k * Mathf.PI) * 1.2f);
-                cape.rotation = Quaternion.Slerp(fromRot, Quaternion.LookRotation(cam.transform.forward, Vector3.up), k) * Quaternion.Euler(Mathf.Sin(k * Mathf.PI * 2f) * 25f, 0f, 0f);
-                cape.localScale = fromScale * Mathf.Lerp(1f, 0.35f, k);
-                yield return null;
-            }
-            if (cape == null) yield break;
-            cape.localScale = fromScale;
-            cape.rotation = fromRot; // (as it hung on its foi: the showcase turns its outside to its camera)
-            if (challengeRun) Visual.CapeShowcase.Show(cape, view, slot, outside);
-            else Destroy(cape.gameObject);
         }
 
         /// <summary>3, 2, 1 over the two foi on their marks (everything still), then the duel goes on.</summary>

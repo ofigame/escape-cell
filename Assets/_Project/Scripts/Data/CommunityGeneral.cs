@@ -6,7 +6,7 @@ namespace SquashBot.Data
     /// The Community General (the design's §11.2): the season's General every player fights together — each duel won by
     /// anyone is a point of damage on it (the server counts). At a quarter, a half, three quarters and the whole, everyone
     /// who fought a duel this season takes a reward (once each: the server keeps who took what): gold, a bronze chest, a
-    /// gold chest, a cape of the season.
+    /// gold chest, and a gold chest again (the season's cape was the last one: the capes are gone).
     /// </summary>
     public static class CommunityGeneral
     {
@@ -60,18 +60,8 @@ namespace SquashBot.Data
                     DuelChests.Add(ChestTier.Advanced);
                     return Loc.T("chests.tier2");
                 default:
-                {
-                    // a cape of the season (one not owned yet), else gold
-                    var capes = Cosmetics.InSlot(Slot.Back).FindAll(c => c.id.StartsWith("back.cape") && !c.IsDefault && !Cosmetics.Owns(c) && c.rank <= 0);
-                    if (capes.Count > 0)
-                    {
-                        var c = capes[(DateTime.Now.Month * 11) % capes.Count];
-                        Cosmetics.Give(c.id);
-                        return Loc.T("cos." + c.id);
-                    }
-                    SaveData.Coins += 3000;
-                    return "+3000 " + Loc.T("ch.gold");
-                }
+                    DuelChests.Add(ChestTier.Advanced);
+                    return Loc.T("chests.tier2");
             }
         }
     }

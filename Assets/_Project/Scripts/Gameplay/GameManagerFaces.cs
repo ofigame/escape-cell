@@ -16,14 +16,13 @@ namespace SquashBot.Gameplay
             face.ApplyNow();
         }
 
-        /// <summary>The hat on <paramref name="who"/>'s head answers a blow: 1 a hop, 2 off and back on, 3 knocked off to the floor.</summary>
+        /// <summary>What sits on <paramref name="who"/>'s head answers a blow (1 a medium one, 2 a heavy one or a throw, 3 a
+        /// knock-out): always a light hop, it stays on the head (the crown never falls: the old hats' flying is gone).</summary>
         private static void HatFor(Transform who, int how, Vector3 from)
         {
             var skin = who != null ? who.GetComponentInChildren<SkinnedHero>() : null;
             if (skin == null || skin.HatMount == null || skin.HatMount.childCount == 0) return;
-            var hat = HatBounce.On(skin.HatMount);
-            if (how == 1) hat.Hop(); else if (how == 2) hat.Fly(from); else hat.KnockOff(from);
-            if (how >= 2) foreach (var cape in who.GetComponentsInChildren<SoftCape>()) cape.Gust(1f); // (the cape flung with it)
+            HatBounce.On(skin.HatMount).Hop();
         }
 
         /// <summary>
@@ -52,7 +51,6 @@ namespace SquashBot.Gameplay
                 var hat = skin != null && skin.HatMount != null ? skin.HatMount.GetComponent<HatBounce>() : null;
                 if (hat != null) hat.Restore();
             }
-            foreach (var h in FindObjectsByType<HatBounce>(FindObjectsInactive.Exclude)) if (h.transform.parent == null) Destroy(h.gameObject); // (one left lying from a stand-in)
         }
 
         /// <summary>The face under the moments for <paramref name="who"/> (worried at low health, else set).</summary>

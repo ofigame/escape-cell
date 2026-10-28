@@ -11,9 +11,9 @@ using Kind = SquashBot.UI.UiFactory.ButtonKind;
 namespace SquashBot.UI
 {
     /// <summary>
-    /// Bip's paint workshop: the real robot stands in the upper half (the camera leans in on it), the lower half holds
-    /// the categories (two rows of tabs) and a scrolling grid of their items. Tapping an item tries it on at once; the
-    /// button buys or equips it. A world set can be bought whole, 20% cheaper; story rewards come with the story.
+    /// Bip's workshop: the real robot stands in the upper half (the camera leans in on it), the lower half holds the
+    /// categories (head, hair, skin, eye colour, badge, dance) and a scrolling grid of their items. Tapping an item tries
+    /// it on at once; the button buys or equips it. The badges come with the story.
     /// </summary>
     public class GarageScreen : MonoBehaviour
     {
@@ -24,14 +24,13 @@ namespace SquashBot.UI
         public event Action DancePreview;
         /// <summary>The "change build" button (foi's four builds) was pressed.</summary>
         public event Action HeroPressed;
-        /// <summary>Vega's hood on/off, and its next suit colour.</summary>
 
         private const int TabsPerRow = 6;
 
         private UiScreen screen;
         private TextMeshProUGUI coinsText, itemName, actionLabel;
-        private Button actionButton, goalButton, setButton;
-        private TextMeshProUGUI goalLabel, setLabel;
+        private Button actionButton, goalButton;
+        private TextMeshProUGUI goalLabel;
         private RectTransform grid;
         private ScrollRect gridScroll;
         private BipTip bip;
@@ -39,7 +38,6 @@ namespace SquashBot.UI
         private Slot slot = Slot.Head;
         private Cosmetic selected;
         private int reachedWorld;
-        private string setJustDone;
 
         public UiScreen Screen => screen;
 
@@ -81,8 +79,9 @@ namespace SquashBot.UI
             itemName.fontSizeMax = 42f;
 
             var tabRow = UiFactory.Box("Tabs", panel, new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(940f, 190f));
-            // foi's tabs (paint and eyes belonged to the old robot): its head first, its looks, then its gear and the rest
-            var slots = new[] { Slot.Head, Slot.Hair, Slot.Skin, Slot.Iris, Slot.Suit, Slot.Hat, Slot.Back, Slot.Arms, Slot.Dance }; // (step marks, trails, badges and leg pieces: gone)
+            // foi's tabs: its head first, its looks, its story badges, its dances (the hats, armour paints, capes and arm
+            // gear are gone: the rank gear comes with the rank; paint, eyes, step marks, trails and legs were the old robot's)
+            var slots = new[] { Slot.Head, Slot.Hair, Slot.Skin, Slot.Iris, Slot.Badge, Slot.Dance };
             for (int i = 0; i < slots.Length; i++)
             {
                 var s = slots[i];
@@ -113,9 +112,6 @@ namespace SquashBot.UI
                 Refresh();
             }, 30f);
             goalLabel = goalButton.GetComponentInChildren<TextMeshProUGUI>();
-            setButton = UiFactory.MakeButton(panel, "", Kind.Gold, new Vector2(1f, 0f), new Vector2(-26f, 55f), new Vector2(230f, 110f), BuySet, 28f);
-            setLabel = setButton.GetComponentInChildren<TextMeshProUGUI>();
-            setLabel.textWrappingMode = TextWrappingModes.Normal;
             actionLabel = actionButton.GetComponentInChildren<TextMeshProUGUI>();
 
             bip = BipTip.Create(root);
@@ -147,28 +143,17 @@ namespace SquashBot.UI
             PreviewChanged?.Invoke(Cosmetics.Outfit());
         }
 
-        private bool Locked(Cosmetic c) => !Cosmetics.Owns(c) && (c.storyLevel > 0 || c.rank > 0 || c.chest || reachedWorld < c.world);
+        private bool Locked(Cosmetic c) => !Cosmetics.Owns(c) && (c.storyLevel > 0 || reachedWorld < c.world);
 
-        private string LockText(Cosmetic c) => c.chest ? Loc.T("garage.chest") : c.rank > 0 ? Challenge.RankName(c.rank).ToUpper(Loc.Culture) : c.storyLevel > 0 ? Loc.F("garage.story", c.storyLevel) : Loc.F("garage.world", c.world + 1);
+        private string LockText(Cosmetic c) => c.storyLevel > 0 ? Loc.F("garage.story", c.storyLevel) : Loc.F("garage.world", c.world + 1);
 
-        /// <summary>What foi can wear: on its back only capes (or nothing), no hats that would cover its face.</summary>
-        private static bool Fits(Cosmetic c) =>
-            c.slot == Slot.Back ? c.IsDefault || c.id.StartsWith("back.cape")
-            : c.slot == Slot.Dance ? c.IsDefault || c.id.StartsWith("dance.d")
-            : c.slot == Slot.Hat ? !(c.id == "hat.diver" || c.id == "hat.astro" || c.id == "hat.visor" || c.id == "hat.cloud")
-            : true;
+        /// <summary>What foi can wear: its own dances (made on its body) only.</summary>
+        private static bool Fits(Cosmetic c) => c.slot != Slot.Dance || c.IsDefault || c.id.StartsWith("dance.d");
 
         private void RebuildGrid()
         {
             for (int i = grid.childCount - 1; i >= 0; i--) Destroy(grid.GetChild(i).gameObject);
             var items = Cosmetics.InSlot(slot).FindAll(Fits);
-            if (slot == Slot.Back)
-            {
-                // the capes made as models first (the plain one stays first of all), the older ones after
-                int Rank(Cosmetic c) => c.IsDefault ? 0 : SquashBot.Visual.GearFiles.CapeModel(c.id) != null ? 1 : 2;
-                var sorted = new System.Collections.Generic.List<Cosmetic>(items);
-                items.Sort((x, y) => Rank(x) != Rank(y) ? Rank(x).CompareTo(Rank(y)) : sorted.IndexOf(x).CompareTo(sorted.IndexOf(y)));
-            }
             const int columns = 5;
             const float cell = 172f, gap = 14f;
             for (int i = 0; i < items.Count; i++)
@@ -180,7 +165,7 @@ namespace SquashBot.UI
                 var swatch = UiFactory.Box("Swatch", tile, new Vector2(0.5f, 1f), new Vector2(0f, -16f), new Vector2(96f, 96f));
                 var sc = c.color;
                 float m = Mathf.Max(1f, Mathf.Max(sc.r, Mathf.Max(sc.g, sc.b)));
-                var picture = ItemPreview.Cosmetic(c); // hats, capes, arms and legs show themselves
+                var picture = ItemPreview.Cosmetic(c); // heads and badges show themselves
                 if (picture != null)
                 {
                     swatch.sizeDelta = new Vector2(124f, 124f);
@@ -188,27 +173,18 @@ namespace SquashBot.UI
                     var raw = swatch.gameObject.AddComponent<RawImage>();
                     raw.texture = picture;
                     raw.raycastTarget = false;
-                    if (slot == Slot.Suit && !c.IsDefault)
-                    {
-                        // the paints are mostly the same polished white (the colour sits in the grooves): a dot of it tells them apart
-                        var dot = UiFactory.Box("Paint", tile, new Vector2(0f, 1f), new Vector2(12f, -12f), new Vector2(36f, 36f));
-                        UiFactory.Fill(dot, Color.white, UiSprites.Circle).raycastTarget = false;
-                        var inner = UiFactory.Box("Colour", dot, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(28f, 28f));
-                        inner.pivot = new Vector2(0.5f, 0.5f);
-                        UiFactory.Fill(inner, new Color(sc.r / m, sc.g / m, sc.b / m, 1f), UiSprites.Circle).raycastTarget = false;
-                    }
                 }
-                else UiFactory.Fill(swatch, new Color(sc.r / m, sc.g / m, sc.b / m, 1f), slot == Slot.Color || slot == Slot.Eyes || slot == Slot.Iris ? UiSprites.Circle : UiSprites.Rounded, 2f).raycastTarget = false;
-                if (c.set != null || c.storyLevel > 0)
+                else UiFactory.Fill(swatch, new Color(sc.r / m, sc.g / m, sc.b / m, 1f), slot == Slot.Iris ? UiSprites.Circle : UiSprites.Rounded, 2f).raycastTarget = false;
+                if (c.storyLevel > 0)
                 {
-                    // A little star marks set pieces and story rewards.
+                    // A little star marks the story rewards.
                     var mark = UiFactory.Box("Mark", tile, new Vector2(1f, 1f), new Vector2(-10f, -10f), new Vector2(34f, 34f));
-                    UiFactory.Fill(mark, c.storyLevel > 0 ? Palette.UiCyan : Palette.UiGold, UiSprites.Star).raycastTarget = false;
+                    UiFactory.Fill(mark, Palette.UiCyan, UiSprites.Star).raycastTarget = false;
                 }
 
                 bool owned = Cosmetics.Owns(c);
                 bool locked = Locked(c);
-                string label = owned ? (Cosmetics.Equipped(slot) == c ? Loc.T("garage.on") : "") : locked ? LockText(c) : c.reward ? Loc.T("garage.prize") : c.price.ToString();
+                string label = owned ? (Cosmetics.Equipped(slot) == c ? Loc.T("garage.on") : "") : locked ? LockText(c) : c.price.ToString();
                 UiFactory.TextBox("Price", tile, new Vector2(0.5f, 0f), new Vector2(0f, 10f), new Vector2(160f, 46f), label, 28f,
                     locked ? UiKit.A(UiKit.Style.white, 0.5f) : owned ? Palette.UiCyan : Palette.UiGold);
                 if (selected == c) UiFactory.Fill(UiFactory.Stretch("Selected", tile), Palette.UiGold, UiSprites.Ring, 1.2f).raycastTarget = false;
@@ -249,31 +225,13 @@ namespace SquashBot.UI
                 AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
                 Haptics.Medium();
                 WorkshopTalk.CosmeticBought(bip, selected);
-                if (selected.set != null && Cosmetics.SetComplete(selected.set)) setJustDone = selected.set;
             }
             else
             {
                 AudioManager.PlaySfx(Sfx.Bump, 0.6f);
-                if (!Locked(selected) && !selected.reward && SaveData.Coins < selected.price) WorkshopTalk.Poor(bip);
+                if (!Locked(selected) && SaveData.Coins < selected.price) WorkshopTalk.Poor(bip);
                 return;
             }
-            AfterChange();
-        }
-
-        /// <summary>The rest of the selected piece's set, bought together at a discount.</summary>
-        private void BuySet()
-        {
-            if (selected == null || selected.set == null) return;
-            if (!Cosmetics.TryBuySet(selected.set, reachedWorld))
-            {
-                AudioManager.PlaySfx(Sfx.Bump, 0.6f);
-                if (SaveData.Coins < Cosmetics.SetPrice(selected.set)) WorkshopTalk.Poor(bip);
-                return;
-            }
-            if (!selected.reward) Cosmetics.Equip(selected);
-            AudioManager.PlaySfx(Sfx.Coin, 1f, 1.2f);
-            Haptics.Medium();
-            setJustDone = selected.set;
             AfterChange();
         }
 
@@ -284,39 +242,24 @@ namespace SquashBot.UI
             grid.anchoredPosition = keep;
             Refresh();
             PreviewChanged?.Invoke(Cosmetics.Outfit());
-            if (setJustDone != null)
-            {
-                // The set is complete: its prize is unlocked.
-                itemName.text = Loc.F("garage.setDone", Loc.T("set." + setJustDone));
-                AudioManager.PlaySfx(Sfx.Win, 0.9f, 1.2f);
-                WorkshopTalk.SetDone(bip);
-                setJustDone = null;
-            }
         }
 
         private void Refresh()
         {
             coinsText.text = SaveData.Coins.ToString();
             if (selected == null) return;
-            itemName.text = selected.set == null ? Loc.T("cos." + selected.id)
-                : Loc.T("cos." + selected.id) + "  ·  " + Loc.F("garage.set", Loc.T("set." + selected.set), Cosmetics.SetOwned(selected.set), Cosmetics.SetSize(selected.set));
+            itemName.text = Loc.T("cos." + selected.id);
             bool owned = Cosmetics.Owns(selected);
             bool equipped = owned && Cosmetics.Equipped(selected.slot) == selected;
             bool locked = Locked(selected);
             actionLabel.text = equipped ? Loc.T("garage.equipped") : owned ? Loc.T("garage.equip")
-                : locked ? LockText(selected) : selected.reward ? Loc.T("garage.completeSet") : Loc.F("garage.buy", selected.price);
-            actionButton.interactable = !equipped && !locked && (owned || !selected.reward);
-            bool sellable = !owned && !selected.reward && selected.storyLevel == 0 && selected.rank == 0;
+                : locked ? LockText(selected) : Loc.F("garage.buy", selected.price);
+            actionButton.interactable = !equipped && !locked;
+            bool sellable = !owned && selected.storyLevel == 0;
             goalButton.gameObject.SetActive(sellable);
             bool isGoal = Goal.Is(Goal.ForCosmetic(selected));
             goalLabel.text = Loc.T(isGoal ? "goal.on" : "goal.set");
             goalLabel.color = isGoal ? Palette.UiGold : Palette.UiText;
-
-            // The whole set, cheaper: only while two or more pieces are still missing and the set's world is reached.
-            string set = selected.set;
-            bool offer = set != null && reachedWorld >= selected.world && Cosmetics.SetSize(set) - Cosmetics.SetOwned(set) >= 2;
-            setButton.gameObject.SetActive(offer);
-            if (offer) setLabel.text = Loc.F("garage.buySet", Cosmetics.SetPrice(set));
         }
     }
 }

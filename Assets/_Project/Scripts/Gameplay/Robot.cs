@@ -232,8 +232,8 @@ namespace SquashBot.Gameplay
         public Color? TrailColor { get; private set; }
 
         /// <summary>
-        /// Dress the robot in a garage outfit on top of its world look: paint, eye colour, a hat, back gear, a hop trail
-        /// and a victory dance. A garage hat or back piece replaces the world's own gear.
+        /// Dress the robot in a garage outfit on top of its world look: eye colour, a badge, a hop trail and a victory
+        /// dance (foi: its head, hair, skin and eye colours and a badge).
         /// </summary>
         public void ApplyOutfit(System.Collections.Generic.Dictionary<Data.Slot, Data.Cosmetic> outfit)
         {
@@ -268,26 +268,11 @@ namespace SquashBot.Gameplay
                 cosmetics.SetParent(visual, false);
             }
             for (int i = cosmetics.childCount - 1; i >= 0; i--) DestroyImmediate(cosmetics.GetChild(i).gameObject); // at once: a lookalike may be copied right after
-            var hat = outfit[Data.Slot.Hat];
-            var back = outfit[Data.Slot.Back];
-            // A build with a longer body wears its gear that much higher (head and arms all of it, back and badge half).
+            // A build with a longer body wears its badge that much higher (half of it), the longer legs lift it too.
             float extra = HeroModels.TorsoExtra(hero);
-            if (!hat.IsDefault) CosmeticModels.Hat(Raised(extra), hat.id, hat.color);
-            float lift = HeroModels.LegLift(hero); // (the longer legs lift the body: its gear with it)
-            if (!back.IsDefault) CosmeticModels.Back(Raised(extra * 0.6f + lift), back.id, back.color);
-            accessories.gameObject.SetActive(hat.IsDefault && back.IsDefault);
-            // Arm and leg pieces replace the plain ones; shaped eyes replace the plain eye blocks.
-            var arms = outfit[Data.Slot.Arms];
-            var legs = outfit[Data.Slot.Legs];
-            if (!arms.IsDefault) CosmeticModels.Arms(Raised(extra + lift), arms.id, arms.color);
-            if (!legs.IsDefault)
-            {
-                var legHolder = Raised(0.0001f);
-                legHolder.localScale = new Vector3(1f, HeroModels.LegStretch(hero), 1f); // as long as the legs they replace
-                CosmeticModels.Legs(legHolder, legs.id, legs.color);
-            }
-            foreach (var part in new[] { "ArmL", "ArmR" }) SetPartShown(part, arms.IsDefault);
-            foreach (var part in new[] { "LegL", "LegR", "FootL", "FootR" }) SetPartShown(part, legs.IsDefault);
+            float lift = HeroModels.LegLift(hero);
+            accessories.gameObject.SetActive(true); // (the world's own gear: the garage's hats and back pieces are gone)
+            // Shaped eyes replace the plain eye blocks.
             var badge = outfit[Data.Slot.Badge];
             if (!badge.IsDefault) CosmeticModels.Badge(Raised(extra * 0.5f + lift), badge.id, badge.color);
 
@@ -302,14 +287,12 @@ namespace SquashBot.Gameplay
         }
 
         /// <summary>
-        /// foi (the rigged build) in a workshop outfit: its head, hair and skin colour, its armour's paint, a hat on its head,
-        /// a cape as cloth or another back piece on its back, arm and leg gear on its bones, a badge on its chest.
+        /// foi (the rigged build) in a workshop outfit: its head, hair, skin and eye colours, a badge on its chest.
         /// </summary>
         private void DressSkin(SkinnedHero skin, System.Collections.Generic.Dictionary<Data.Slot, Data.Cosmetic> outfit)
         {
             accessories.gameObject.SetActive(false);
             if (cosmetics != null) cosmetics.gameObject.SetActive(false);
-            var suit = outfit[Data.Slot.Suit];
             var headPiece = outfit[Data.Slot.Head];
             var hair = outfit[Data.Slot.Hair];
             var skinPiece = outfit[Data.Slot.Skin];
@@ -319,23 +302,12 @@ namespace SquashBot.Gameplay
                 hair = hair.IsDefault ? (Color?)null : hair.color,
                 skin = skinPiece.color,
                 eyes = outfit.TryGetValue(Data.Slot.Iris, out var iris) && iris != null ? iris.color : (Color?)null,
-                suit = suit.IsDefault ? null : suit.id.Replace("suit.", ""),
             });
             foreach (var mount in new[] { skin.HatMount, skin.BackMount, skin.BadgeMount })
                 if (mount != null)
                     for (int i = mount.childCount - 1; i >= 0; i--) DestroyImmediate(mount.GetChild(i).gameObject); // at once: a lookalike may be copied right after
-            var hat = outfit[Data.Slot.Hat];
-            bool hood = hat.id.StartsWith("hat.hood"); // a hooded cloak: over the head, not on it
-            SkinnedHero.Hood(skin.transform, hood ? hat.color : (Color?)null);
-            if (!hat.IsDefault && !hood && skin.HatMount != null) CosmeticModels.Hat(skin.HatMount, hat.id, hat.color);
-            var oldCape = skin.transform.Find("Hero_Cape");
-            if (oldCape != null) DestroyImmediate(oldCape.gameObject);
-            var back = outfit[Data.Slot.Back];
-            if (back.id.StartsWith("back.cape")) SoftCape.Build(skin.transform, back.id, back.color); // a cape is cloth on this body
-            // (other back pieces belonged to the old robot: foi wears capes only)
-            var arms = outfit[Data.Slot.Arms];
-            var legs = outfit[Data.Slot.Legs];
-            SkinnedHero.Gear(skin.transform, arms.IsDefault ? null : arms.id, arms.color, null, legs.color);
+            var badge = outfit[Data.Slot.Badge];
+            if (!badge.IsDefault && skin.BadgeMount != null) CosmeticModels.Badge(skin.BadgeMount, badge.id, badge.color); // (a story badge on the chest)
             // its parts' look (a rival's copy is given the rival's own after it is made)
             PartLooks.Apply(skin.transform, Data.RobotParts.Level(Data.RobotPart.Body), Data.RobotParts.Level(Data.RobotPart.Arms), Data.RobotParts.Level(Data.RobotPart.Shell));
             BodyShape.Apply(skin.transform, Data.RobotParts.Level(Data.RobotPart.Body), Data.RobotParts.Level(Data.RobotPart.Arms), true); // (the player's own: never thinner than before the bag came)
@@ -355,12 +327,6 @@ namespace SquashBot.Gameplay
         /// <summary>Step mark from the paint workshop (null = none) and its colour.</summary>
         public string StepId { get; private set; }
         public Color StepColor { get; private set; }
-
-        private void SetPartShown(string name, bool shown)
-        {
-            var part = visual.Find(name);
-            if (part != null) part.gameObject.SetActive(shown);
-        }
 
         private void UpdateShieldAndBlink()
         {
@@ -529,7 +495,7 @@ namespace SquashBot.Gameplay
             copy.transform.localPosition = Vector3.zero;
             copy.transform.localRotation = Quaternion.identity;
             copy.transform.localScale = Vector3.one;
-            foreach (var b in copy.GetComponentsInChildren<MonoBehaviour>()) if (!(b is CapeWave || b is SkinnedHero || b is SoftCape || b is ShieldHold)) Destroy(b); // (a cape still waves, a rigged build still moves, its shield stays in hand)
+            foreach (var b in copy.GetComponentsInChildren<MonoBehaviour>()) if (!(b is SkinnedHero || b is ShieldHold)) Destroy(b); // (a rigged build still moves, its shield stays in hand)
             if (HeroModels.IsSkinned(hero))
                 foreach (var r in copy.GetComponentsInChildren<Renderer>(true)) r.enabled = true; // (a stand-in may have hidden its pieces at the moment it was copied)
             return copy;

@@ -4,10 +4,9 @@ using UnityEngine;
 namespace SquashBot.Visual
 {
     /// <summary>
-    /// The gear made as models (Resources/Gear: a mesh and its colour picture each): weapons, shields and capes.
-    /// The files are prepared so that a weapon stands up its length with the hand's place on its grip at the origin,
-    /// a shield stands up facing the front, and a cape hangs down from its top; here they are put in place, sized and
-    /// painted. Which item wears which model is listed below; the rest keep the looks made in code.
+    /// The gear made as models (Resources/Gear: a mesh and its colour picture each): weapons and shields (the capes are
+    /// gone). The files are prepared so that a weapon stands up its length with the hand's place on its grip at the
+    /// origin and a shield stands up facing the front; here they are put in place, sized and painted. Which item wears which model is listed below; the rest keep the looks made in code.
     /// </summary>
     public static class GearFiles
     {
@@ -60,24 +59,7 @@ namespace SquashBot.Visual
         /// <summary>A weapon's own light colour (a = 0: none).</summary>
         public static Color LightOf(string id) => weaponLight.TryGetValue(id, out var c) ? c : new Color(0f, 0f, 0f, 0f);
 
-        /// <summary>Cape id → its model.</summary>
-        private static readonly Dictionary<string, string> capes = new Dictionary<string, string>
-        {
-            ["back.cape.basic"] = "basit_pelerin",
-            ["back.cape.mid"] = "orta_seviye_pelerin",
-            ["back.cape.rank3"] = "bascavus_pelerin",
-            ["back.cape.rank6"] = "ustegmen_pelerin",
-            ["back.cape.rank9"] = "yarbay_pelerin",
-            ["back.cape.rank12"] = "maresal_pelerin",
-        };
-
-        /// <summary>The capes whose model was made seen from the front (its lining toward the viewer): worn turned round.</summary>
-        private static readonly HashSet<string> flipped = new HashSet<string> { "back.cape.rank3" };
-
-        public static bool CapeFlipped(string id) => flipped.Contains(id);
-
         public static bool HasWeapon(string id) => weapons.ContainsKey(id) && Resources.Load<GameObject>("Gear/" + weapons[id]) != null;
-        public static string CapeModel(string id) => id != null && capes.TryGetValue(id, out var m) && Resources.Load<GameObject>("Gear/" + m) != null ? m : null;
 
         private static readonly Dictionary<string, Material> paints = new Dictionary<string, Material>();
 
@@ -126,7 +108,7 @@ namespace SquashBot.Visual
             // its long side up (the file's own up may have come in turned by the import)
             var b = LocalBounds(root, inner);
             var s = b.size;
-            if (!turnUp) { if (s.z > s.y && s.z >= s.x * 0.5f) inner.localRotation = Quaternion.Euler(-90f, 0f, 0f) * inner.localRotation; } // (a cape: made upright, only the import's z-up undone)
+            if (!turnUp) { if (s.z > s.y && s.z >= s.x * 0.5f) inner.localRotation = Quaternion.Euler(-90f, 0f, 0f) * inner.localRotation; } // (made upright: only the import's z-up undone)
             else if (s.z > s.y && s.z >= s.x) inner.localRotation = Quaternion.Euler(-90f, 0f, 0f) * inner.localRotation;
             else if (s.x > s.y && s.x > s.z) inner.localRotation = Quaternion.Euler(0f, 0f, 90f) * inner.localRotation;
             if (flip) inner.localRotation = Quaternion.Euler(0f, 0f, 180f) * inner.localRotation; // (made the other way up)
@@ -202,12 +184,5 @@ namespace SquashBot.Visual
         /// <summary>A shield's model, <paramref name="height"/> tall, centred, facing +Z (out from the arm it is on).</summary>
         public static Transform Shield(Transform parent, string model, float height, float glow)
             => Place(parent, model, model, height, 0.5f, Paint(model, glow));
-
-        /// <summary>A cape standing as a picture (the workshop's and the chests'), <paramref name="height"/> tall, its top at the origin.</summary>
-        public static Transform CapePicture(Transform parent, string capeId, float height)
-        {
-            var m = CapeModel(capeId);
-            return m == null ? null : Place(parent, capeId, m, height, 1f, Paint(m, 0f, true), false);
-        }
     }
 }

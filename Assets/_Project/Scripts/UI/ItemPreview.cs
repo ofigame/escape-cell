@@ -59,12 +59,12 @@ namespace SquashBot.UI
         }
 
         /// <summary>
-        /// A picture of a garage piece (a hat, a cape or back gear, arms, legs), built on its own and framed whole: hats,
-        /// arms and legs three-quarters from the front, back gear from behind. Null for the other kinds and the plain ones.
+        /// A picture of a garage piece built on its own and framed whole: a head with its haircut from the front, a story
+        /// badge face on. Null for the other kinds and the plain badge.
         /// </summary>
         public static Texture Cosmetic(Cosmetic c)
         {
-            if (c == null || !(c.slot == Slot.Head || (!c.IsDefault && (c.slot == Slot.Hat || c.slot == Slot.Back || c.slot == Slot.Arms || c.slot == Slot.Legs || c.slot == Slot.Suit)))) return null;
+            if (c == null || !(c.slot == Slot.Head || (c.slot == Slot.Badge && !c.IsDefault))) return null;
             string key = "cos." + c.id;
             if (cache.TryGetValue(key, out var rt) && rt != null && rt.IsCreated()) return rt;
             Setup();
@@ -72,51 +72,9 @@ namespace SquashBot.UI
             holder.SetParent(stage, false);
             var piece = new GameObject("Piece").transform;
             piece.SetParent(holder, false);
-            switch (c.slot)
-            {
-                case Slot.Hat:
-                    if (c.id.StartsWith("hat.hood"))
-                    {
-                        var hp = Resources.Load<GameObject>("Heroes/Foi/hood");
-                        if (hp != null) { var made = Object.Instantiate(hp, piece, false); var m = MaterialFactory.CreateSurface(c.color, Color.black, 0.15f, 0f); var tx = Resources.Load<Texture2D>("Heroes/Foi/hood"); if (tx != null) { m.SetTexture("_BaseMap", tx); m.SetTexture("_MainTex", tx); } foreach (var r in made.GetComponentsInChildren<Renderer>()) r.sharedMaterial = m; }
-                    }
-                    else CosmeticModels.Hat(piece, c.id, c.color);
-                    break;
-                case Slot.Back:
-                    if (c.id.StartsWith("back.cape"))
-                    {
-                        // a cape as it is worn: foi seen from behind, the cape hanging on it
-                        var look = new GameObject("Foi").transform;
-                        look.SetParent(piece, false);
-                        SkinnedHero.Build(look);
-                        var body = look.GetComponentInChildren<SkinnedHero>().transform;
-                        SkinnedHero.Dress(body, new SkinnedHero.Look { head = 1 });
-                        SoftCape.Build(body, c.id, c.color).Settle();
-                        // the cape alone in the picture (foi only holds it up)
-                        foreach (var r in look.GetComponentsInChildren<Renderer>(true))
-                        {
-                            bool cape = false;
-                            for (var p = r.transform; p != null && p != look; p = p.parent) if (p.name == "Hero_Cape" || p.name == "Fittings") { cape = true; break; }
-                            if (!cape) r.enabled = false;
-                        }
-                    }
-                    else CosmeticModels.Back(piece, c.id, c.color);
-                    break;
-                case Slot.Suit:
-                {
-                    // an armour paint: foi wearing it
-                    var look = new GameObject("Foi").transform;
-                    look.SetParent(piece, false);
-                    SkinnedHero.Build(look);
-                    var body = look.GetComponentInChildren<SkinnedHero>().transform;
-                    SkinnedHero.Dress(body, new SkinnedHero.Look { head = 1, suit = c.IsDefault ? null : c.id.Replace("suit.", "") });
-                    body.GetComponent<SkinnedHero>().PoseNow(); // (standing, not in its T)
-                    break;
-                }
-                case Slot.Head: { int n = SkinnedHero.HeadNumber(c.id); SkinnedHero.HeadParts(piece, n); SkinnedHero.PaintHead(piece, n, null, null, null); break; } // (the head with its haircut, as made)
-                default: GearModels.Picture(piece, c.id, c.color); break; // arm and leg gear, as foi wears it
-            }
-            holder.localRotation = Quaternion.Euler(c.slot == Slot.Head ? 0f : 10f, c.slot == Slot.Back ? (c.id.StartsWith("back.cape") ? 20f : 330f) : c.slot == Slot.Head ? 180f : 200f, 0f); // (a cape: foi from behind)
+            if (c.slot == Slot.Head) { int n = SkinnedHero.HeadNumber(c.id); SkinnedHero.HeadParts(piece, n); SkinnedHero.PaintHead(piece, n, null, null, null); } // (the head with its haircut, as made)
+            else CosmeticModels.Badge(piece, c.id, c.color);
+            holder.localRotation = Quaternion.Euler(c.slot == Slot.Head ? 0f : 10f, c.slot == Slot.Head ? 180f : 200f, 0f);
             // Framed on what was built: its middle in the middle of the picture, all of it in view.
             var renderers = System.Array.FindAll(holder.GetComponentsInChildren<Renderer>(), r => r.enabled); // (what shows)
             if (renderers.Length > 0)
@@ -125,12 +83,6 @@ namespace SquashBot.UI
                 foreach (var r in renderers) b.Encapsulate(r.bounds);
                 holder.position += stage.position - b.center;
                 cam.orthographicSize = Mathf.Max(0.05f, Mathf.Max(b.extents.y, b.extents.x) * 1.18f);
-                if (c.slot == Slot.Suit)
-                {
-                    // an armour paint: close on the chest and shoulders, where the paints differ (not foi small and whole)
-                    holder.position -= Vector3.up * (b.extents.y * 0.3f);
-                    cam.orthographicSize = b.extents.y * 0.62f;
-                }
             }
             cam.transform.localPosition = new Vector3(0f, 0f, -4f);
             rt = Snapshot.Take(cam, 256, "Cosmetic " + c.id);
