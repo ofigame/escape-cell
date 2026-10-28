@@ -52,9 +52,4 @@ void EscapeCell_ScheduleNote(int slot, const char* title, const char* body, doub
     ((void (*)(id, SEL, NSUInteger, id))objc_msgSend)(center, NSSelectorFromString(@"requestAuthorizationWithOptions:completionHandler:"), options, asked);
 }
 
-void EscapeCell_ScheduleReminder(const char* title, const char* body, double seconds)
-{
-    EscapeCell_ScheduleNote(0, title, body, seconds);
-}
-
 }

@@ -512,6 +512,8 @@ namespace SquashBot.Visual
         {
             /// <summary>Its models' folder and names' start (platform, stand, tree_1.., rock).</summary>
             public string folder;
+            /// <summary>Where its platform and stand come from when another stage's are the same (London: Europe's); null: its own folder.</summary>
+            public string baseFolder;
             /// <summary>How far out the plain marble middle reaches, of the floor's half width (over the emblem, short of the rim).</summary>
             public float cover = 1.22f;
             public int trees;
@@ -1325,7 +1327,8 @@ namespace SquashBot.Visual
         {
             var holder = new GameObject(name).transform;
             holder.SetParent(p, false);
-            var prefab = Resources.Load<GameObject>(look.folder + name);
+            string dir = look.baseFolder != null && (name == "platform" || name == "stand") ? look.baseFolder : look.folder;
+            var prefab = Resources.Load<GameObject>(dir + name);
             if (prefab == null) return holder;
             Instantiate(prefab, holder, false);
             var m = Surface(Color.white, matte ? 0f : 0.12f);
@@ -1335,11 +1338,11 @@ namespace SquashBot.Visual
                 m.SetFloat("_SpecularHighlights", 0f); m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
                 m.SetFloat("_EnvironmentReflections", 0f); m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
             }
-            var tex = Resources.Load<Texture2D>(look.folder + name + "_tex");
+            var tex = Resources.Load<Texture2D>(dir + name + "_tex");
             m.SetTexture("_BaseMap", tex); m.SetTexture("_MainTex", tex);
             m.EnableKeyword("_EMISSION");
             m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
-            var glow = runes ? Resources.Load<Texture2D>(look.folder + name + "_glow") : null;
+            var glow = runes ? Resources.Load<Texture2D>(dir + name + "_glow") : null;
             // (a little of its own colour too: the grove is dark, but nothing in it goes black)
             m.SetTexture("_EmissionMap", glow != null ? glow : tex);
             m.SetColor("_EmissionColor", glow != null ? look.glow * (matte ? 0.55f : 1.4f) : look.selfLight); // (the platform's runes show, never glare)

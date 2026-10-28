@@ -19,7 +19,7 @@ namespace SquashBot.Visual
         private static readonly Look LondonLook = new Look
         {
             pebbles = new Color(0.5f, 0.5f, 0.5f),
-            folder = "Duel/London/london_", sky = "Duel/London/london_sky", cover = 1.22f, street = false, city = "london", rim = 1.03f, standRise = 0.6f, paving = "Duel/London/london_ground", crystals = false, backTree = false,
+            folder = "Duel/London/london_", baseFolder = "Duel/Euro/euro_", sky = "Duel/London/london_sky", cover = 1.22f, street = false, city = "london", rim = 1.03f, standRise = 0.6f, paving = "Duel/London/london_ground", crystals = false, backTree = false,
             thick = 1f,
             glow = new Color(1f, 0.9f, 0.7f), selfLight = new Color(0.3f, 0.3f, 0.3f),
             ground = new Color(0.32f, 0.5f, 0.22f), mound = new Color(0.36f, 0.55f, 0.25f), bank = new Color(0.3f, 0.46f, 0.2f), grassColour = Color.white,
