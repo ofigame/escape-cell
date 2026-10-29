@@ -240,6 +240,7 @@ namespace SquashBot.Visual
             var hc = hair ?? DefaultHair;
             foreach (var r in holder.GetComponentsInChildren<Renderer>(true))
             {
+                if (r.GetComponentInParent<RankCrown>(true) != null) continue; // (the crown on the head keeps its own paint: given the head's, its glow coloured the whole face)
                 string nm = r.name.ToLowerInvariant();
                 r.sharedMaterial = r.name == "Cover" ? (lid ?? LidPaint(SkinOf(n, skin))) : nm.Contains("hair") ? HairPaint(hc) : nm.Contains("brows") ? BrowPaint(hc) : HeadPaint(n, skin, eyes);
                 r.receiveShadows = false; // (no flickering self-shadow on the face from the hair, hat or crown)

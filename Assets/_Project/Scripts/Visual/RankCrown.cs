@@ -200,7 +200,9 @@ namespace SquashBot.Visual
             }
             if (core != null)
             {
-                var cr = core.GetComponent<Renderer>(); if (cr != null) corePaint = cr.sharedMaterial; // (a copy's own)
+                var cr = core.GetComponent<Renderer>();
+                if (cr != null && cr.sharedMaterial != null && cr.sharedMaterial.name.StartsWith(CorePaintName)) corePaint = cr.sharedMaterial; // (a copy's own)
+                else if (cr != null) { cr.sharedMaterial = corePaint; foreach (var m in motes) { var mr = m.GetComponent<Renderer>(); if (mr != null) mr.sharedMaterial = corePaint; } } // (never another's paint: the glow coloured it)
                 float beat = 0.5f + 0.5f * Mathf.Sin(Time.time * Mathf.PI * 2f / Mathf.Max(0.2f, data.marshalPulse));
                 MaterialFactory.SetColors(corePaint, data.marshalGlow, data.marshalGlow * Mathf.Lerp(0.8f, 2.6f, beat));
                 for (int i = 0; i < motes.Count; i++)
@@ -213,11 +215,14 @@ namespace SquashBot.Visual
 
         private void OnDestroy() => RestoreHair();
 
+        private const string CorePaintName = "CrownCore";
+
         // the Marshal's: the cyan core on its front gem, and the motes (none on low quality)
         private void MakeMarshal(CrownInfo info)
         {
             var data = RankGearData.Current;
             corePaint = MaterialFactory.Create(data.marshalGlow, data.marshalGlow * 2f);
+            corePaint.name = CorePaintName;
             float h = info.height * data.Of(Tier).crownHeight;
             core = Shapes.Primitive(PrimitiveType.Sphere, "Core", transform, new Vector3(0f, h * 0.36f, info.outer * 0.93f), Vector3.one * 0.075f, corePaint).transform;
             Destroy(core.GetComponent<Collider>());
