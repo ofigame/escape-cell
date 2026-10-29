@@ -281,7 +281,19 @@ namespace SquashBot.Gameplay
             int world = LevelCatalog.WorldOf(Mathf.Max(0, SaveData.UnlockedLevel - 1));
 
             bool ok = false;
-            if (ahead != null) { yield return LobbyAhead(ahead, token, started); yield break; }
+            if (ahead != null)
+            {
+                // PLAY AGAIN: a live rival looked for first (the whole wait, as any search), the rival found ahead only if none comes
+                if (FoiNet.Registered && chFriend == 0)
+                {
+                    LiveNet.Msg matched = null;
+                    yield return LiveSearch(token, m => matched = m);
+                    if (LobbyOver(token)) { LiveNet.Close(); chPhase = ChPhase.Off; yield break; }
+                    if (matched != null) { yield return FoiNet.CancelAhead(); yield return StartLive(matched, world, token); yield break; }
+                }
+                yield return LobbyAhead(ahead, token, started);
+                yield break;
+            }
             yield return FoiNet.EnsurePlayer(r => ok = r);
             if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
             if (ok) yield return FoiNet.CancelAhead(); // (a rival found ahead and never fought: dropped, not a loss)
@@ -840,6 +852,8 @@ namespace SquashBot.Gameplay
         /// <summary>The fixed duel camera's turn: how far along the stands' line it looks off the middle (world units, eased).</summary>
         private float duelPanYaw, duelPanVelocity;
         private const float DuelPan = 4.5f;
+        /// <summary>The fixed duel camera a touch further back than the fit, and lower (the user's word, 2026-10-29).</summary>
+        private const float DuelBack = 1.1f, DuelLower = 0.82f;
 
         /// <summary>
         /// The fight filmed as the floors are (the user's call, 2026-10-28): from one place in the middle between the two
@@ -855,6 +869,7 @@ namespace SquashBot.Gameplay
             float hfov = 2f * Mathf.Atan(Mathf.Tan(CloseCamFov * Mathf.Deg2Rad * 0.5f) * Mathf.Max(0.3f, cameraRig.Cam.aspect));
             float need = (BoardH * 0.5f + 1f - DuelPan * 0.5f) / Mathf.Tan(hfov * 0.5f), slant = Mathf.Sqrt(back * back + high * high);
             if (slant < need) { back *= need / slant; high *= need / slant; }
+            back *= DuelBack; high *= DuelLower; // (a touch further back, and lower: less from above)
             var look = boardCentre + Vector3.up * 0.35f;
             pos = look + sideDir * back + Vector3.up * high;
             // turned toward the two's middle along the stands' line (at most DuelPan either way), never moving itself
