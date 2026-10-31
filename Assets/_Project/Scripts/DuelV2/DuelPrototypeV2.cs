@@ -29,6 +29,8 @@ namespace SquashBot.DuelV2
         public DuelCoreSettings Settings => DuelCoreSettings.Current; // (the live-tuned numbers)
         public bool IsPrototype => true;
         public void MatchDone(DuelSim sim) { } // (its own match panel: again or the menu)
+        public bool NextState(out DuelSnapshot state) { state = null; return false; } // (never live)
+        public void SendInput(FighterInput input) { }
         private string message = "";
 
         /// <summary>The prototype's own speed (slow motion, pause, a frame) times any slow motion the fight asks for.</summary>
@@ -43,7 +45,8 @@ namespace SquashBot.DuelV2
             yield return new WaitForSeconds(4f); // (the game's own start: its world, its screens)
             var startArgs = System.Environment.GetCommandLineArgs();
             int gi = System.Array.IndexOf(startArgs, "-v2Game");
-            if (gi >= 0) { Game.V2Boot(prototype: false); StartCoroutine(GameAuto(startArgs[gi + 1], float.Parse(startArgs[gi + 2], System.Globalization.CultureInfo.InvariantCulture))); yield break; }
+            int li = System.Array.IndexOf(startArgs, "-v2Live"); // (a live duel against a local server: -v2Live http://localhost:5199)
+            if (gi >= 0) { Game.V2Boot(prototype: false, server: li >= 0 ? startArgs[li + 1] : "http://127.0.0.1:9"); StartCoroutine(GameAuto(startArgs[gi + 1], float.Parse(startArgs[gi + 2], System.Globalization.CultureInfo.InvariantCulture))); yield break; }
             Game.V2Boot();
             yield return new WaitForSeconds(0.5f);
             Game.V2HideScreens();

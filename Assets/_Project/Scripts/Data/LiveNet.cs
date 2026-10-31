@@ -17,7 +17,7 @@ namespace SquashBot.Data
     public static class LiveNet
     {
         /// <summary>The live protocol this game speaks (the server turns older ones away).</summary>
-        private const int Protocol = 9; // 9: the body's attacks (pa), the crouch (cr), the jump (jp), the blow's height (h); 8: the duel's one table (rv = its version; a newer one comes with "matched"), air blows, the moves' stuns; 7: the defence (block, perfect guard, dodge) (6: the league ceiling; 5: harder bars and combos; 4: the duel moves)
+        private const int Protocol = 10; // 10: the duel's v2 rules run by the server (ready with the fighters' height, "in" the wishes, "v2" the state); 9: the body's attacks (pa), the crouch (cr), the jump (jp), the blow's height (h); 8: the duel's one table (rv = its version; a newer one comes with "matched"), air blows, the moves' stuns; 7: the defence (block, perfect guard, dodge) (6: the league ceiling; 5: harder bars and combos; 4: the duel moves)
         private static string Url => (FoiNet.DevServer != null ? FoiNet.DevServer.Replace("https://", "wss://").Replace("http://", "ws://") + "/v1/live" : "wss://apifoi.ofigame.com/v1/live") + "?v=" + Protocol + "&rv=" + DuelBalanceTable.Version;
 
         /// <summary>A message from the server (only the fields its kind uses are set; <see cref="raw"/> is the text itself).</summary>
@@ -179,6 +179,17 @@ namespace SquashBot.Data
         /// <summary>An emote for the rival.</summary>
         public static void Emote(int e) => Send("{\"t\":\"em\",\"e\":" + e + "}");
         public static void Ready() => Send("{\"t\":\"ready\"}");
+
+        /// <summary>Protocol 10: ready, with the fighters' height (the rules' sizes are shares of it).</summary>
+        public static void ReadyV2(float height) => Send("{\"t\":\"ready\",\"h\":" + I(height) + "}");
+
+        /// <summary>Protocol 10: this game's wishes (bits: 1 strike, 2 shield held, 4 jump, 8 dodge, 16 special, 32 ultimate,
+        /// 64 the context button, 128 a heart; the walk toward (+1) or away; a power slot or -1).</summary>
+        public static void InputV2(DuelV2.FighterInput i)
+        {
+            int b = (i.attack ? 1 : 0) | (i.block ? 2 : 0) | (i.jump ? 4 : 0) | (i.dodge ? 8 : 0) | (i.special ? 16 : 0) | (i.ulti ? 32 : 0) | (i.context ? 64 : 0) | (i.heart ? 128 : 0);
+            Send("{\"t\":\"in\",\"b\":" + b + ",\"w\":" + I(i.walk) + ",\"p\":" + i.power + "}");
+        }
 
         /// <summary>The duel: where this game's foi is, its facing, the blows it has swung, and its squad (see HuntSystem.SquadState).</summary>
         public static void DuelState(Vector3 pos, float yaw, int swings, string squad) =>

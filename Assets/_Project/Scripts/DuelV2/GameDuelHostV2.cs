@@ -33,6 +33,23 @@ namespace SquashBot.DuelV2
         public DuelFightV2 Fight { get; set; }
 
         public void MatchDone(DuelSim sim) => done?.Invoke(sim);
+
+        /// <summary>A live duel's states from the server, in order (the game's connection puts them here).</summary>
+        public readonly System.Collections.Generic.Queue<DuelSnapshot> States = new System.Collections.Generic.Queue<DuelSnapshot>();
+        /// <summary>This game is the server's side 1 (its states mirrored: this foi always on the left).</summary>
+        public bool Mirror;
+        /// <summary>A live duel's wishes out (the game's connection sends them).</summary>
+        public System.Action<FighterInput> Send;
+
+        public bool NextState(out DuelSnapshot state)
+        {
+            if (States.Count == 0) { state = null; return false; }
+            state = States.Dequeue();
+            if (Mirror) state = DuelSim.Mirrored(state);
+            return true;
+        }
+
+        public void SendInput(FighterInput input) => Send?.Invoke(input);
         public void BackToMenu() { }
 
         /// <summary>

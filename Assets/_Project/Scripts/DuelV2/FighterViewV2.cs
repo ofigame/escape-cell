@@ -25,6 +25,9 @@ namespace SquashBot.DuelV2
         private readonly float scale;
         private FighterState shown = FighterState.Idle;
         public int Family;
+        /// <summary>A live duel: the place glided to (the server's come in steps).</summary>
+        public bool Smooth;
+        private float shownX;
 
         /// <summary>Another weapon in the hand (the weapons' sheet): the old one gone, the new one fitted from scratch.</summary>
         public void Hold(Data.WeaponDef w)
@@ -88,7 +91,10 @@ namespace SquashBot.DuelV2
         public void Update(Fighter f, Fighter o, DuelSim sim)
         {
             if (Root == null) return;
-            var at = World(f.x);
+            // a live duel's places come 20 times a second: glided to (a jump far off at once)
+            if (!Smooth || Mathf.Abs(f.x - shownX) > 2.5f * scale / 3.5f * 2f) shownX = f.x;
+            else shownX = Mathf.Lerp(shownX, f.x, 1f - Mathf.Exp(-22f * Time.deltaTime));
+            var at = World(shownX);
             Root.position = new Vector3(at.x, Root.position.y, at.z);
             var face = line * f.facing;
             if (f.state != FighterState.Airborne && f.state != FighterState.Down && f.state != FighterState.KO)

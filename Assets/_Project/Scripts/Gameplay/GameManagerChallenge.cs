@@ -594,6 +594,7 @@ namespace SquashBot.Gameplay
         /// <param name="outcome">1 won, 0 a draw, -1 lost.</param>
         private void ChallengeFinish(int outcome, string score)
         {
+            if (DuelV2.DuelCoreV2.InGame) V2GameRelease(); // (a live duel lost to a dropped connection: the v2 fight let go first)
             if (chPhase == ChPhase.Done) return;
             chPhase = ChPhase.Done;
             if (levelTps) { levelTps = false; ExitTps(); } // the result card upright

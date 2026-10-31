@@ -169,7 +169,7 @@ namespace SquashBot.Gameplay
             if (!chLive || !challengeRun) return;
             if (liveRejoining) return; // coming back after a drop: its own loop reads the server
             // This game's own state (foi and its squad), some times a second.
-            if (chPhase == ChPhase.Duel && Time.unscaledTime >= liveStateAt)
+            if (chPhase == ChPhase.Duel && !DuelV2.DuelCoreV2.InGame && Time.unscaledTime >= liveStateAt)
             {
                 liveStateAt = Time.unscaledTime + 1f / 12f;
                 LiveNet.DuelState(robot.transform.position, robot.Visual.eulerAngles.y, robot.Swings, hunt.SquadState());
@@ -179,8 +179,12 @@ namespace SquashBot.Gameplay
             {
                 switch (m.t)
                 {
+                    case "v2":
+                        V2LiveState(m);
+                        break;
                     case "start":
                         liveWait = LiveWait.None;
+                        if (DuelV2.DuelCoreV2.InGame) break; // (the v2 fight starts with the server's states)
                         chDuelLeft = m.secs;
                         BeginDuel();
                         break;
@@ -263,6 +267,7 @@ namespace SquashBot.Gameplay
                         hunt.SquadStruckRemote(m.u, m.d, m.f == 1);
                         break;
                     case "result":
+                        if (DuelV2.DuelCoreV2.InGame) { V2LiveResult(m); break; }
                         FinishLive(m);
                         break;
                     case "closed":
@@ -360,7 +365,7 @@ namespace SquashBot.Gameplay
             liveRejoining = false;
             if (back && challengeRun)
             {
-                hunt.Resume();
+                if (!DuelV2.DuelCoreV2.InGame) hunt.Resume(); // (the v2 fight: the server's states carry on)
                 if (chPhase == ChPhase.Break) chPhase = ChPhase.Duel;
                 RefreshDuelClock();
                 chUi.SetStatus(Loc.T("live.back"));

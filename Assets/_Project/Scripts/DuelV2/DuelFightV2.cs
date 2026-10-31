@@ -24,7 +24,17 @@ namespace SquashBot.DuelV2
         private DuelCameraV2 cam;
         private Vector3 centre, line;
         private float sHeld = -1f;
-        private bool playerLeft;
+        private bool playerLeft, live;
+        private FighterInput sentHeld = FighterInput.None;
+
+        /// <summary>A live duel's wishes out: every press at once, the held ones (shield, walk) when they change.</summary>
+        private void SendLive(FighterInput i)
+        {
+            bool press = i.attack || i.jump || i.dodge || i.special || i.ulti || i.context || i.heart || i.power >= 0;
+            if (!press && i.block == sentHeld.block && Mathf.Approximately(i.walk, sentHeld.walk)) return;
+            sentHeld = i;
+            proto.SendInput(i);
+        }
         private DuelCoreSettings S => proto.Settings;
 
         public static DuelFightV2 Begin(IDuelHostV2 proto, DuelCameraV2 cam)
@@ -51,8 +61,11 @@ namespace SquashBot.DuelV2
             Sim = new DuelSim(S, o.family, o.tier, half, tall);
             for (int i = 0; i < 2; i++) views[i].Family = o.family[i];
             playerLeft = o.mode != PrototypeOptions.Mode.BotVsBot;
+            live = o.mode == PrototypeOptions.Mode.Live;
+            if (live) for (int i = 0; i < 2; i++) views[i].Smooth = true; // (the server's places 20 times a second: shown gliding)
             bots[0] = playerLeft ? null : new DuelBotV2(o.skill[0], o.persona[0], 11);
-            bots[1] = o.mode == PrototypeOptions.Mode.PlayerVsDummy ? null : new DuelBotV2(o.skill[1], o.persona[1], 23);
+            if (live && GameDuelHostV2.BotPlaysFoi) bots[0] = new DuelBotV2(0.6f, BotPersonality.Balanced, 11);
+            bots[1] = o.mode == PrototypeOptions.Mode.PlayerVsDummy || o.mode == PrototypeOptions.Mode.Live ? null : new DuelBotV2(o.skill[1], o.persona[1], 23);
             MomentsV2.Clear();
             DuelSoundsV2.Warm();
             rains = new RainViewV2(game, WorldOf, scale);
@@ -98,9 +111,19 @@ namespace SquashBot.DuelV2
             if (Sim == null) return;
             Time.timeScale = MomentsV2.Scale(proto.ToolScale);
             if (Frozen) { for (int i = 0; i < 2; i++) { views[i].Update(Sim.F[i], Sim.F[1 - i], Sim); views[i].FitWeapon(S.weaponLength[Sim.F[i].family] * Sim.Height); } return; }
-            var a = playerLeft ? PlayerInput(Sim.F[0], Sim.F[1]) : bots[0].Think(Sim, Sim.F[0], Sim.F[1]);
-            var b = bots[1] != null ? bots[1].Think(Sim, Sim.F[1], Sim.F[0]) : FighterInput.None;
-            Sim.Tick(Time.deltaTime, a, b);
+            if (live)
+            {
+                // a live duel: the server's states shown (this copy never ticks), this game's wishes sent
+                Sim.AdvanceClock(Time.deltaTime);
+                while (proto.NextState(out var state)) Sim.Apply(state);
+                SendLive(bots[0] != null ? bots[0].Think(Sim, Sim.F[0], Sim.F[1]) : PlayerInput(Sim.F[0], Sim.F[1])); // (the self-test: a bot plays foi live too)
+            }
+            else
+            {
+                var a = playerLeft ? PlayerInput(Sim.F[0], Sim.F[1]) : bots[0].Think(Sim, Sim.F[0], Sim.F[1]);
+                var b = bots[1] != null ? bots[1].Think(Sim, Sim.F[1], Sim.F[0]) : FighterInput.None;
+                Sim.Tick(Time.deltaTime, a, b);
+            }
             foreach (var e in Sim.Events) Show(e);
             Sim.Events.Clear();
             Countdown();

@@ -16,12 +16,12 @@ namespace SquashBot.Gameplay
     public partial class GameManager
     {
         /// <summary>The prototype's start: offline (the bot rival at once), no menus or screens of the game's own.</summary>
-        internal void V2Boot(bool prototype = true)
+        internal void V2Boot(bool prototype = true, string server = "http://127.0.0.1:9")
         {
             DuelCoreV2.PrototypeScene = prototype;
             var fn = typeof(FoiNet);
             fn.GetField("devServerRead", BindingFlags.NonPublic | BindingFlags.Static)?.SetValue(null, true);
-            fn.GetField("devServer", BindingFlags.NonPublic | BindingFlags.Static)?.SetValue(null, "http://127.0.0.1:9");
+            fn.GetField("devServer", BindingFlags.NonPublic | BindingFlags.Static)?.SetValue(null, server); // (no server: offline; the live self-test: a local one)
             SaveData.HeroChosen = true;
             Challenge.PlayerName = "foi";
             Challenge.NameChosen = true;

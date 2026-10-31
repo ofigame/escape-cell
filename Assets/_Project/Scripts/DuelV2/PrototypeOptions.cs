@@ -3,7 +3,7 @@ namespace SquashBot.DuelV2
     /// <summary>The prototype menu's choices (Docs/DUELLO_DOVUS_CEKIRDEGI_V2.md 9.2).</summary>
     public class PrototypeOptions
     {
-        public enum Mode { PlayerVsBot, BotVsBot, PlayerVsDummy }
+        public enum Mode { PlayerVsBot, BotVsBot, PlayerVsDummy, Live }
 
         public Mode mode = Mode.PlayerVsBot;
         /// <summary>Weapon family (0 sword, 1 spear, 2 axe, 3 heavy) and league tier (1..5), each side.</summary>
