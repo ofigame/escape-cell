@@ -59,12 +59,14 @@ namespace SquashBot.DuelV2
         {
             for (int r = Rains.Count - 1; r >= 0; r--)
             {
+                if (r >= Rains.Count) continue; // (a knock-out cleared the rains meanwhile)
                 var rain = Rains[r];
                 var target = F[rain.target];
                 // lightning's circle follows its target (slowly: the hardest to get out of)
                 if (rain.follows && !rain.Done) rain.centre = Mathf.MoveTowards(rain.centre, target.x, S.lightningFollow * dt);
-                while (!rain.Done && Time >= rain.dropAt[rain.fallen]) Drop(rain, rain.fallen++);
-                if (rain.Done) { Emit(DuelEventKind.RainEnd, rain.caster, element: rain.kind); Rains.RemoveAt(r); }
+                while (!rain.Done && Time >= rain.dropAt[rain.fallen] && Rains.Contains(rain)) Drop(rain, rain.fallen++);
+                if (!Rains.Contains(rain)) continue;
+                if (rain.Done) { Emit(DuelEventKind.RainEnd, rain.caster, element: rain.kind); Rains.Remove(rain); }
             }
         }
 

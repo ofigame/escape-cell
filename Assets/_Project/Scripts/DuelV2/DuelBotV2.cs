@@ -112,8 +112,10 @@ namespace SquashBot.DuelV2
                 else { inp.block = true; blockUntil = t + 0.3f; }
                 return inp;
             }
-            // out of reach: closer
+            // out of reach: closer; inside the other's longer reach (a spear's), behind the shield (a blocked blow gives the turn)
             walkDir = 1f; walkUntil = t + 0.25f; inp.walk = 1f;
+            bool underThreat = dist <= sim.ReachOf(o.family) + 0.3f && sim.ReachOf(o.family) > reach + 0.3f;
+            if (underThreat && me.shield > s.shieldDurability * 0.25f && R < 0.35f + 0.55f * skill) { inp.block = true; blockUntil = t + 0.3f; }
             return inp;
         }
     }

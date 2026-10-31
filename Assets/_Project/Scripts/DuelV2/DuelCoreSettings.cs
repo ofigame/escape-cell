@@ -18,15 +18,15 @@ namespace SquashBot.DuelV2
         public float tempo = 1f;
 
         [Header("Moves by family (ms): sword, spear, axe, heavy")]
-        public float[] windupMs = { 90f, 120f, 160f, 190f };
+        public float[] windupMs = { 90f, 170f, 130f, 140f };
         public float[] activeMs = { 50f, 60f, 70f, 80f };
-        public float[] recoveryMs = { 160f, 200f, 240f, 280f };
+        public float[] recoveryMs = { 160f, 260f, 230f, 250f };
         [Tooltip("The struck one's stun on a hit")]
-        public float[] hitStunMs = { 260f, 290f, 330f, 360f };
+        public float[] hitStunMs = { 230f, 230f, 380f, 420f };
         [Tooltip("The blocker's push back on a block")]
         public float[] blockPushMs = { 180f, 190f, 200f, 210f };
         [Tooltip("The weapon's seen length, a share of the fighter's height (Docs 7.2: sword 55-65%, axe/heavy 50-60%, spear 100-110%)")]
-        public float[] weaponLength = { 0.6f, 1.05f, 0.55f, 0.55f };
+        public float[] weaponLength = { 0.6f, 1.0f, 0.6f, 0.6f };
         [Tooltip("The arm's reach from the body's middle to the fist (share of the height)")]
         public float armReach = 0.22f;
         [Tooltip("The blow lands with this much of the weapon (the reach: arm + weapon x this; what is seen is what reaches)")]
@@ -69,7 +69,7 @@ namespace SquashBot.DuelV2
         public bool rhythmVibration = false;
 
         [Header("Damage (share of the reference health, %)")]
-        public float[] blowPct = { 4.0f, 4.8f, 6.0f, 6.6f };
+        public float[] blowPct = { 5.0f, 3.2f, 9.0f, 11.0f };
         public float powerHitPct = 10f;
         public float knockdownPct = 12f;
         [Tooltip("A blow in the air after a KNOCKDOWN (each, %)")]

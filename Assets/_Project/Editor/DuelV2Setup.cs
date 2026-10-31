@@ -36,6 +36,24 @@ namespace SquashBot.EditorTools
             catch (Exception e) { Debug.LogException(e); EditorApplication.Exit(1); }
         }
 
+        /// <summary>The bot-against-bot balance report (Faz 8), by the rules alone: -benchMatches n -benchOut file.</summary>
+        public static void BenchBatch()
+        {
+            try
+            {
+                var args = Environment.GetCommandLineArgs();
+                int mi = Array.IndexOf(args, "-benchMatches"), oi = Array.IndexOf(args, "-benchOut");
+                int n = mi >= 0 ? int.Parse(args[mi + 1]) : 500;
+                string outFile = oi >= 0 ? args[oi + 1] : "Builds/DuelV2Bench.md";
+                var t0 = DateTime.Now;
+                string report = DuelBenchV2.Run(n, Math.Max(40, n / 5), 3, 12345);
+                File.WriteAllText(outFile, report + "\n(" + (DateTime.Now - t0).TotalSeconds.ToString("0.0") + " s)\n");
+                Debug.Log("[DuelV2] bench written " + outFile);
+                EditorApplication.Exit(0);
+            }
+            catch (Exception e) { Debug.LogException(e); EditorApplication.Exit(1); }
+        }
+
         /// <summary>The prototype as a Windows exe: windowed, upright (the game's desktop window), its scene only.</summary>
         public static void BuildBatch()
         {
