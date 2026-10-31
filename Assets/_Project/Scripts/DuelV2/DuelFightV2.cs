@@ -135,7 +135,7 @@ namespace SquashBot.DuelV2
             Countdown();
             for (int i = 0; i < 2; i++) { views[i].Update(Sim.F[i], Sim.F[1 - i], Sim); views[i].FitWeapon(S.weaponLength[Sim.F[i].family] * Sim.Height); }
             rains.Update(Sim);
-            if (cam != null) cam.Rise(Sim.Rains.Count > 0 ? 2.2f * game.V2FighterScale / 3.5f : 0f);
+            if (cam != null) cam.Rise(Sim.Rains.Count > 0 ? 0.8f * game.V2FighterScale / 3.5f : 0f); // (a little sky: the fight stays in the picture)
             LastSeconds();
             ShowScreen();
             if (replayAt > 0f && Time.unscaledTime >= replayAt) { replayAt = -1f; PlayReplay(); }
@@ -332,6 +332,7 @@ namespace SquashBot.DuelV2
                     if (e.result == HitResult.Hit || e.result == HitResult.Blocked)
                     {
                         rains.OnDrop(e, WorldOf(e.at));
+                        if (e.element == ElementKind.Lightning && cam != null) cam.Shake(Vector3.up, e.why == "last" ? 0.5f : 0.2f); // (a bolt: the ground jolts)
                         if (e.result == HitResult.Hit) { if (ov.Skin != null) ov.Skin.Shudder(WorldOf(e.at) + Vector3.up * 5f, e.why == "last" ? 1f : 0.4f); }
                         hud.Float((e.result == HitResult.Blocked ? Loc.T("v2.res.blocked") + " " : "") + "-" + Mathf.RoundToInt(e.damage), RainViewV2.ColourOf(e.element), ov.Head, e.why == "last" ? 32 : 20);
                         if (e.element == ElementKind.Snow && e.result == HitResult.Hit && ov.Look != null) Combat.StatusFx.On(Combat.CombatFeel.RootOf(ov.Look) ?? ov.Root).Freeze(e.why == "last" ? 1.2f : 0.4f);

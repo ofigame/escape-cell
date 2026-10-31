@@ -46,25 +46,45 @@ namespace SquashBot.Gameplay
         /// <summary>Connects and queues (or makes / enters a friend's code); reports the match, or null (none found).</summary>
         private IEnumerator LiveSearch(int token, Action<LiveNet.Msg> done)
         {
+            float until = Time.realtimeSinceStartup + (chFriend == 0 ? LiveWaitSeconds : chFriend == 3 ? 32f : 600f);
             var connect = LiveNet.Connect();
             while (!connect.IsCompleted) yield return null;
-            if (!connect.Result)
+            bool connected = connect.Result;
+            if (!connected && chFriend != 0)
             {
-                if (chFriend != 0) { chUi.SetFriendStatus(Loc.T("live.offline")); chUi.SetFriendBusy(false); }
+                chUi.SetFriendStatus(Loc.T("live.offline")); chUi.SetFriendBusy(false);
                 done(null);
                 yield break;
             }
-            if (chFriend == 1) LiveNet.Host(friendMinutes, friendInvite);
-            else if (chFriend == 2) LiveNet.Join(chFriendCode);
-            else if (chFriend == 3) LiveNet.Rematch(rematchMatch);
-            else LiveNet.Queue(chDuelMinutes);
-            float until = Time.realtimeSinceStartup + (chFriend == 0 ? LiveWaitSeconds : chFriend == 3 ? 32f : 600f);
+            void Ask()
+            {
+                if (chFriend == 1) LiveNet.Host(friendMinutes, friendInvite);
+                else if (chFriend == 2) LiveNet.Join(chFriendCode);
+                else if (chFriend == 3) LiveNet.Rematch(rematchMatch);
+                else LiveNet.Queue(chDuelMinutes);
+            }
+            if (connected) Ask();
+            float retryAt = Time.realtimeSinceStartup + 3f;
             while (!LobbyOver(token))
             {
                 float left = until - Time.realtimeSinceStartup;
                 if (left <= 0f) break;
                 if (chFriend == 0) chUi.SetLobbyStatus(Loc.F("live.searching", Mathf.CeilToInt(left)));
                 else if (chFriend == 3) chUi.SetLobbyStatus(Loc.F("live.rematchWait", Mathf.CeilToInt(left)));
+                if (!connected)
+                {
+                    // the whole wait shown even when the connection failed: tried again every 3 s (a rival may still come)
+                    if (Time.realtimeSinceStartup >= retryAt)
+                    {
+                        var again = LiveNet.Connect();
+                        while (!again.IsCompleted) yield return null;
+                        connected = again.Result;
+                        if (connected) Ask();
+                        retryAt = Time.realtimeSinceStartup + 3f;
+                    }
+                    yield return null;
+                    continue;
+                }
                 var m = LiveNet.Poll();
                 if (m != null)
                 {
@@ -97,8 +117,9 @@ namespace SquashBot.Gameplay
                             yield break;
                         case "closed":
                         case "error":
-                            if (chFriend == 1 || chFriend == 2) { chUi.SetFriendStatus(Loc.T("live.offline")); chUi.SetFriendBusy(false); }
                             LiveNet.Close();
+                            if (chFriend == 0) { connected = false; retryAt = Time.realtimeSinceStartup + 3f; break; } // (the public search: on with the wait)
+                            if (chFriend == 1 || chFriend == 2) { chUi.SetFriendStatus(Loc.T("live.offline")); chUi.SetFriendBusy(false); }
                             done(null);
                             yield break;
                     }

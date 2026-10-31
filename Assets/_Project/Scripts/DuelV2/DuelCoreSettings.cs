@@ -31,7 +31,7 @@ namespace SquashBot.DuelV2
         [Tooltip("The blocker's push back on a block")]
         public float[] blockPushMs = { 180f, 190f, 200f, 210f };
         [Tooltip("The weapon's seen length, a share of the fighter's height (Docs 7.2: sword 55-65%, axe/heavy 50-60%, spear 100-110%)")]
-        public float[] weaponLength = { 0.72f, 1.05f, 0.72f, 0.72f };
+        public float[] weaponLength = { 0.72f, 1.15f, 0.72f, 0.72f };
         [Tooltip("The arm's reach from the body's middle to the fist (share of the height)")]
         public float armReach = 0.22f;
         [Tooltip("The blow lands with this much of the weapon (the reach: arm + weapon x this; what is seen is what reaches)")]
@@ -124,7 +124,7 @@ namespace SquashBot.DuelV2
         [Tooltip("Jump: time in the air (s)")]
         public float jumpSeconds = 0.6f;
         [Tooltip("Walk speed (units/s)")]
-        public float walkSpeed = 4.2f;
+        public float walkSpeed = 7f;
         [Tooltip("Bodies never closer than this (centre to centre, share of the height)")]
         public float bodyGap = 0.34f;
         [Tooltip("More room while one lies on the ground (its body along the floor), share of the height")]
@@ -143,7 +143,7 @@ namespace SquashBot.DuelV2
 
         [Header("Rounds")]
         public float roundSeconds = 60f;
-        public int roundsToWin = 2;
+        public int roundsToWin = 3;
         public float goldenRoundSeconds = 15f;
         [Tooltip("Equal within this share: the golden round")]
         public float tieShare = 0.01f;
@@ -151,10 +151,10 @@ namespace SquashBot.DuelV2
         public float roundIntro = 2f;
 
         [Header("Elemental powers")]
-        public int snowAtSeries = 4;
-        public int fireAtSeries = 6;
-        public int maxPowers = 3;
-        public float powerCooldown = 1.5f;
+        public int snowAtSeries = 5;
+        public int fireAtSeries = 8;
+        public int maxPowers = 1;
+        public float powerCooldown = 12f;
         [Tooltip("The rain's total damage (% of the reference health)")]
         public float rainPct = 13f;
         [Tooltip("Snow / fire / lightning: drops, seconds, warning before (s)")]

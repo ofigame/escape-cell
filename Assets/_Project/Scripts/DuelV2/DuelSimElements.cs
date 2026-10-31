@@ -17,11 +17,19 @@ namespace SquashBot.DuelV2
 
         private void OnSeries(Fighter f)
         {
-            if (f.series >= S.snowAtSeries && !f.snowThisSeries) { f.snowThisSeries = true; Earn(f, ElementKind.Snow); }
-            if (f.series >= S.fireAtSeries && !f.fireThisSeries) { f.fireThisSeries = true; Earn(f, ElementKind.Fire); }
+            // a long series earns a power: lightning, fire, snow in turn (each kind comes round; the owner never met lightning)
+            if (f.series >= S.snowAtSeries && !f.snowThisSeries) { f.snowThisSeries = true; Earn(f, NextKind(f)); }
+            if (f.series >= S.fireAtSeries && !f.fireThisSeries) { f.fireThisSeries = true; Earn(f, NextKind(f)); }
         }
 
         private void OnPerfectBlock(Fighter f) => Earn(f, ElementKind.Lightning);
+
+        private static ElementKind NextKind(Fighter f)
+        {
+            var k = f.nextElement % 3 == 0 ? ElementKind.Lightning : f.nextElement % 3 == 1 ? ElementKind.Fire : ElementKind.Snow;
+            f.nextElement++;
+            return k;
+        }
 
         private void Earn(Fighter f, ElementKind k)
         {

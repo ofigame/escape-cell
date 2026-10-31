@@ -34,9 +34,10 @@ namespace SquashBot.DuelV2
         private int seriesValue;
         private readonly List<(TextMeshProUGUI text, Vector3 at, float born)> floats = new List<(TextMeshProUGUI, Vector3, float)>();
         private readonly Stack<TextMeshProUGUI> spare = new Stack<TextMeshProUGUI>();
-        private HoldButtonV2 strike, shield, special, ulti, context, heart, pause;
-        private readonly HoldButtonV2[] power = new HoldButtonV2[3];
-        private TextMeshProUGUI specialText, ultiText, contextText, heartText;
+        // the old duel's round buttons (icons, the ultimate's ring, the special's wait sweep), where the player set them
+        private DuelButton shield, special, ulti, context, jump, heart, power, pause;
+        private bool pSpecial, pUlti, pContext, pJump, pHeart, pPower, pPause;
+        private RectTransform cluster;
         private readonly List<RectTransform> buttonRects = new List<RectTransform>();
         private DuelTouchReader touch;
         private string[] names = { "", "" };
@@ -105,25 +106,67 @@ namespace SquashBot.DuelV2
             banner = Flat.Label(root, "", new Vector2(0.5f, 0.64f), Vector2.zero, new Vector2(1040f, 190f), 120f, Color.white, TextAlignmentOptions.Center, true);
 
             // the buttons: the right thumb's (strike, shield, the moves), the left's (the heart, the powers); pause at the top
-            strike = Btn("Strike", Loc.T("v2.btn.strike"), new Vector2(1f, 0f), new Vector2(-40f, 60f), new Vector2(250f, 250f), new Color(0.85f, 0.35f, 0.25f), out _);
-            shield = Btn("Shield", Loc.T("v2.btn.shield"), new Vector2(1f, 0f), new Vector2(-310f, 60f), new Vector2(190f, 190f), new Color(0.3f, 0.5f, 0.85f), out _);
-            special = Btn("Special", Loc.T("v2.btn.special"), new Vector2(1f, 0f), new Vector2(-40f, 330f), new Vector2(170f, 130f), new Color(0.55f, 0.35f, 0.8f), out specialText);
-            ulti = Btn("Ulti", Loc.T("v2.btn.ulti"), new Vector2(1f, 0f), new Vector2(-230f, 270f), new Vector2(170f, 130f), new Color(0.85f, 0.6f, 0.15f), out ultiText);
-            context = Btn("Context", "", new Vector2(1f, 0f), new Vector2(-40f, 480f), new Vector2(360f, 120f), new Color(0.9f, 0.45f, 0.15f), out contextText);
-            heart = Btn("Heart", "♥", new Vector2(0f, 0f), new Vector2(40f, 330f), new Vector2(130f, 110f), new Color(0.75f, 0.25f, 0.35f), out heartText);
-            for (int p = 0; p < 3; p++) power[p] = Btn("Power" + p, (p + 1).ToString(), new Vector2(0f, 0f), new Vector2(40f + p * 140f, 60f), new Vector2(120f, 120f), new Color(0.25f, 0.3f, 0.4f), out _);
-            if (canPause) pause = Btn("Pause", "II", new Vector2(0.5f, 1f), new Vector2(0f, -80f), new Vector2(90f, 70f), new Color(0.2f, 0.22f, 0.3f), out _);
+            BuildButtons(canPause);
             touch = new DuelTouchReader { Ignore = OverButton };
         }
 
-        private HoldButtonV2 Btn(string name, string text, Vector2 anchor, Vector2 pos, Vector2 size, Color face, out TextMeshProUGUI label)
+        /// <summary>
+        /// The old duel's button cluster (the player's size, opacity and hand from the settings): SHIELD in the corner, the
+        /// ULTIMATE over it (its three-part ring), SPECIAL beside it (its wait sweeping), the context move over the ultimate
+        /// (BREAK / POWER HIT / KNOCKDOWN, only while offered), JUMP; the heart on the other side; the power when one is held.
+        /// A tap anywhere else strikes.
+        /// </summary>
+        private void BuildButtons(bool canPause)
         {
-            var r = UiFactory.Box(name, root, anchor, pos, size);
-            UiFactory.Fill(r, new Color(face.r, face.g, face.b, 0.82f), UiSprites.Rounded, 2.5f);
-            label = UiFactory.Text(r, text, Mathf.Min(48f, size.y * 0.32f), Color.white);
-            label.raycastTarget = false;
-            buttonRects.Add(r);
-            return r.gameObject.AddComponent<HoldButtonV2>();
+            var s = DuelControlsSettings.Current;
+            cluster = UiFactory.Stretch("Buttons", root);
+            shield = DuelButton.Create(cluster, "Shield", s.Units(s.shieldDp), UiKit.Style.mine, DuelIcon.Shield);
+            ulti = DuelButton.Create(cluster, "Ultimate", s.Units(s.ultiDp), UiKit.Style.warning, DuelIcon.Ulti, 3);
+            special = DuelButton.Create(cluster, "Special", s.Units(s.specialDp), UiKit.Style.purple, DuelIcon.SpecialShock);
+            context = DuelButton.Create(cluster, "Context", s.Units(s.contextDp), UiKit.Style.orange, DuelIcon.Heavy);
+            jump = DuelButton.Create(cluster, "Jump", s.Units(s.jumpDp), UiKit.Style.success, DuelIcon.Jump);
+            heart = DuelButton.Create(cluster, "Heart", s.Units(s.heartDp), UiKit.Style.danger, DuelIcon.Heart);
+            power = DuelButton.Create(cluster, "Power", s.Units(s.specialDp), UiKit.Style.info, DuelIcon.SpecialSkyStrike);
+            if (canPause) pause = DuelButton.Create(cluster, "Pause", s.Units(s.pauseDp), UiKit.Style.royal, DuelIcon.Pause);
+            special.Down += () => pSpecial = true;
+            ulti.Down += () => pUlti = true;
+            context.Down += () => pContext = true;
+            jump.Down += () => pJump = true;
+            heart.Down += () => pHeart = true;
+            power.Down += () => pPower = true;
+            if (pause != null) pause.Down += () => pPause = true;
+            foreach (var b in new[] { shield, ulti, special, context, jump, heart, power, pause }) if (b != null) buttonRects.Add(b.Rect);
+
+            float size = s.sizeSteps[Mathf.Clamp(SaveData.DuelButtonSize, 0, s.sizeSteps.Length - 1)];
+            float alpha = s.opacitySteps[Mathf.Clamp(SaveData.DuelButtonOpacity, 0, s.opacitySteps.Length - 1)];
+            bool left = SaveData.DuelLeftHanded;
+            float edge = s.Units(s.edgeDp), gap = s.Units(s.gapDp);
+            float rShield = s.Units(s.shieldDp) * 0.5f, rUlti = s.Units(s.ultiDp) * 0.5f, rSpecial = s.Units(s.specialDp) * 0.5f;
+            float rContext = s.Units(s.contextDp) * 0.5f, rJump = s.Units(s.jumpDp) * 0.5f, rHeart = s.Units(s.heartDp) * 0.5f, rPause = s.Units(s.pauseDp) * 0.5f;
+            var shieldAt = new Vector2(edge + rShield * 1.1f, edge + rShield * 1.1f) * size;
+            var ultiAt = new Vector2(shieldAt.x, shieldAt.y + (rShield + rUlti) * 1.12f * size + gap * size);
+            var specialAt = new Vector2(shieldAt.x + (rShield + rSpecial) * 1.12f * size + gap * size, shieldAt.y - (rShield - rSpecial) * size);
+            var contextAt = new Vector2(ultiAt.x, ultiAt.y + (rUlti + rContext) * 1.12f * size + gap * size);
+            var jumpAt = new Vector2(specialAt.x + (rSpecial + rJump) * 1.12f * size + gap * size, specialAt.y);
+            var powerAt = new Vector2(specialAt.x, specialAt.y + (rSpecial * 2f) * 1.12f * size + gap * size);
+            Corner(shield, shieldAt, left, size, alpha);
+            Corner(ulti, ultiAt, left, size, alpha);
+            Corner(special, specialAt, left, size, alpha);
+            Corner(context, contextAt, left, size, 1f);
+            Corner(jump, jumpAt, left, size, alpha);
+            Corner(power, powerAt, left, size, 1f);
+            Place(heart, new Vector2(left ? 1f : 0f, 0f), new Vector2((left ? -1f : 1f) * (edge + rHeart * 1.2f + 40f) * size, 600f), size, alpha);
+            if (pause != null) Place(pause, new Vector2(0f, 1f), new Vector2(edge + rPause + 20f, -(edge + rPause + 20f) - 230f), 1f, 1f);
+        }
+
+        private static void Corner(DuelButton b, Vector2 fromCorner, bool left, float size, float alpha) =>
+            Place(b, new Vector2(left ? 0f : 1f, 0f), new Vector2(left ? fromCorner.x : -fromCorner.x, fromCorner.y), size, alpha);
+
+        private static void Place(DuelButton b, Vector2 anchor, Vector2 at, float size, float alpha)
+        {
+            b.Rect.anchorMin = b.Rect.anchorMax = anchor;
+            b.Rect.anchoredPosition = at;
+            b.SetLook(alpha, size);
         }
 
         /// <summary>A finger on a button (its touch is the button's, not a strike or a walk).</summary>
@@ -202,14 +245,26 @@ namespace SquashBot.DuelV2
         /// <summary>The buttons' words for foi now (cooldowns, the bar, what the context button offers), and who shows.</summary>
         public void ShowButtons(DuelSim sim, Fighter me, DuelCoreSettings s)
         {
-            specialText.text = sim.Time < me.specialReadyAt ? Mathf.CeilToInt(me.specialReadyAt - sim.Time).ToString() : Loc.T("v2.btn.special");
-            ultiText.text = me.meter >= s.meterMax ? Loc.T("v2.btn.ulti") : Mathf.FloorToInt(me.meter) + "/3";
-            string ctx = me.inChain && me.meter >= s.breakCost ? Loc.T("v2.btn.break") : sim.Time <= me.knockdownUntil ? Loc.T("v2.btn.knockdown") : sim.Time <= me.powerHitUntil ? Loc.T("v2.btn.power") : "";
-            context.gameObject.SetActive(ctx.Length > 0);
-            contextText.text = ctx;
+            float wait = sim.Time < me.specialReadyAt ? (me.specialReadyAt - sim.Time) / Mathf.Max(0.1f, s.specialCooldown) : 0f;
+            special.SetWait(wait);
+            special.SetUsable(wait <= 0f && me.Free);
+            ulti.SetParts(me.meter / Mathf.Max(0.01f, s.meterMax) * 3f, UiKit.Style.warning, UiKit.A(UiKit.Style.warning, 0.55f));
+            ulti.SetUsable(me.meter >= s.meterMax);
+            ulti.SetPulse(me.meter >= s.meterMax);
+            DuelIcon? ctx = me.inChain && me.meter >= s.breakCost ? DuelIcon.Breaker : sim.Time <= me.knockdownUntil ? DuelIcon.Upper : sim.Time <= me.powerHitUntil ? DuelIcon.Heavy : (DuelIcon?)null;
+            context.gameObject.SetActive(ctx.HasValue);
+            if (ctx.HasValue) { context.SetIcon(ctx.Value); context.SetColour(ctx.Value == DuelIcon.Breaker ? UiKit.Style.info : UiKit.Style.orange); context.SetPulse(true); }
             heart.gameObject.SetActive(me.hearts > 0);
-            heartText.text = "♥" + me.hearts;
-            for (int p = 0; p < 3; p++) power[p].gameObject.SetActive(p < me.powers.Count);
+            bool has = me.powers.Count > 0;
+            power.gameObject.SetActive(has);
+            if (has)
+            {
+                var k = me.powers[0];
+                power.SetIcon(k == ElementKind.Snow ? DuelIcon.SpecialIceWall : k == ElementKind.Fire ? DuelIcon.SpecialSkyStrike : DuelIcon.SpecialShock);
+                power.SetColour(RainViewV2.ColourOf(k));
+                power.SetUsable(sim.Time >= me.powerReadyAt);
+                power.SetPulse(sim.Time >= me.powerReadyAt);
+            }
         }
 
         /// <summary>This frame's wishes from the thumbs (the fight adds the keys): taps, slides and swipes, the buttons.</summary>
@@ -221,15 +276,15 @@ namespace SquashBot.DuelV2
             if (c.stick.HasValue) inp.walk = Mathf.Abs(c.stick.Value.x) > 0.25f ? Mathf.Sign(c.stick.Value.x) * towardOther : 0f;
             if (c.flick.HasValue && c.flick.Value.y > 0.5f) inp.jump = true;
             if (c.dodge) inp.dodge = true;
-            if (strike.TakePress()) inp.attack = true;
             inp.block = shield.Held;
-            shield.TakePress();
-            if (special.TakePress()) inp.special = true;
-            if (ulti.TakePress()) inp.ulti = true;
-            if (context.TakePress()) inp.context = true;
-            if (heart.TakePress()) inp.heart = true;
-            for (int p = 0; p < 3; p++) if (power[p].TakePress()) inp.power = p;
-            if (pause != null && pause.TakePress()) Paused?.Invoke();
+            if (pSpecial) inp.special = true;
+            if (pUlti) inp.ulti = true;
+            if (pContext) inp.context = true;
+            if (pJump) inp.jump = true;
+            if (pHeart) inp.heart = true;
+            if (pPower) inp.power = 0;
+            if (pPause) Paused?.Invoke();
+            pSpecial = pUlti = pContext = pJump = pHeart = pPower = pPause = false;
             return inp;
         }
 

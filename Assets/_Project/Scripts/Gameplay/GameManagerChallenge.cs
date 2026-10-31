@@ -330,8 +330,8 @@ namespace SquashBot.Gameplay
                     Armory.Equipped.id, RobotParts.Level(RobotPart.Arms), RobotParts.Armor, Shields.All.IndexOf(Shields.Equipped) + 1, r => ok = r); // (the shield field: the carried shield, 1 wooden … 4 amethyst) // (the weapon level's field carries the arms' level)
                 if (LobbyOver(token)) { chPhase = ChPhase.Off; yield break; }
             }
-            // A live rival first (a friend's code: only that).
-            if (ok)
+            // A live rival first (a friend's code: only that); registered is enough (a failed army upload never skips the search)
+            if (ok || FoiNet.Registered)
             {
                 LiveNet.Msg matched = null;
                 yield return LiveSearch(token, m => matched = m);
