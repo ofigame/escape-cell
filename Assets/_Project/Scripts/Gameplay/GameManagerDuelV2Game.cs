@@ -14,6 +14,8 @@ namespace SquashBot.Gameplay
     public partial class GameManager
     {
         private GameDuelHostV2 v2Host;
+        /// <summary>The last v2 match's flawless rounds won (their XP in the rewards).</summary>
+        private int v2Flawless;
         private DuelCameraV2 v2Cam;
 
         /// <summary>This duel is fought by the v2 core (against the computer: here; live: the server runs it, protocol 10).</summary>
@@ -50,7 +52,7 @@ namespace SquashBot.Gameplay
             chPhase = ChPhase.Duel;
             v2Cam = DuelCameraV2.Create(sideDir, V2Line, V2FighterScale);
             if (cameraRig != null) { cameraRig.SetMenuFocus(false); if (cameraRig.Cam != null) cameraRig.Cam.enabled = false; } // (the menu's blur off: it is a global volume, on the v2 camera too)
-            v2Host = new GameDuelHostV2(this, o, s, V2GameDone) { Pause = Pause };
+            v2Host = new GameDuelHostV2(this, o, s, V2GameDone) { Pause = Pause, Happened = V2GameEvent };
             V2HideBattleHud(true);
             if (LiveActive) { v2Host.Mirror = liveSide == 1; v2Host.Send = LiveNet.InputV2; }
             v2Host.Fight = DuelFightV2.Begin(v2Host, v2Cam);
@@ -65,8 +67,45 @@ namespace SquashBot.Gameplay
             if (ui != null) { ui.SetHudHidden(hide); ui.ShowStick(false, default, default); ui.SetFire(false, false); }
         }
 
-        /// <summary>The week's rule and the tournament on the match's numbers (Docs 3.4).</summary>
-        private void V2ApplyRule(DuelCoreSettings s) { }
+        /// <summary>
+        /// The week's rule and the tournament on the match's numbers (Docs 3.4): sudden death one round of 30 s, the quick
+        /// ultimate a bar of two parts, no hearts, shields twice as strong, the combo frenzy's series lasting longer and its
+        /// knockdown sooner; the tournament's rounds 45 s. (One weapon, the giant and the random set: the game's own, as before.)
+        /// </summary>
+        private void V2ApplyRule(DuelCoreSettings s)
+        {
+            if (chMode == 3) s.roundSeconds = 45f;
+            if (duelRule == null) return;
+            switch (duelRule.Value)
+            {
+                case WeeklyMode.Rule.SuddenDeath: s.roundsToWin = 1; s.roundSeconds = 30f; break;
+                case WeeklyMode.Rule.QuickUlti: s.meterMax = 2f; break;
+                case WeeklyMode.Rule.Heartless: s.heartsPerMatch = 0; break;
+                case WeeklyMode.Rule.ShieldWar: s.shieldDurability *= 2f; break;
+                case WeeklyMode.Rule.ComboFrenzy: s.seriesGap *= 2f; s.knockdownAt = Mathf.Max(3, s.knockdownAt - 2); break;
+            }
+        }
+
+        /// <summary>
+        /// A fight's deed counted as the old duel counted it (the quests, the match's challenge): the chain's set of three
+        /// for the old combo, a knockdown landed for the finish, a perfect block, an ultimate dodged, a special, an ultimate,
+        /// a heart used.
+        /// </summary>
+        private void V2GameEvent(DuelEvent e)
+        {
+            switch (e.kind)
+            {
+                case DuelEventKind.Result:
+                    if (e.who == 0 && e.result == HitResult.Hit && e.why == "set end") NoteDuel(DuelGoal.Combo5);
+                    if (e.who == 0 && e.result == HitResult.Hit && e.move == MoveKind.Knockdown) ChallengeQuests.Report(DuelGoal.Finish);
+                    if (e.who == 1 && e.result == HitResult.Perfect) { mcPerfects++; NoteDuel(DuelGoal.Perfect); }
+                    if (e.who == 1 && e.result == HitResult.Dodged && e.move == MoveKind.Ulti) { mcUltiDodges++; NoteDuel(DuelGoal.DodgeUlti); }
+                    break;
+                case DuelEventKind.Special: if (e.who == 0) NoteDuel(DuelGoal.Special); break;
+                case DuelEventKind.UltiStart: if (e.who == 0) NoteDuel(DuelGoal.Ultimate); break;
+                case DuelEventKind.Heart: if (e.who == 0) mcHearts++; break;
+            }
+        }
 
         /// <summary>Each frame while the v2 core fights a game duel: the back button, the pause (the fight stands still).</summary>
         private void V2GameTick()
@@ -104,6 +143,7 @@ namespace SquashBot.Gameplay
                 chDuelMe = sim.F[0].roundsWon; chDuelThem = sim.F[1].roundsWon;
                 if (sim.MatchWinner == 0 && sim.Comeback) matchWorst = 2;
                 wonInOvertime = sim.MatchWinner == 0 && sim.LastRoundGolden;
+                v2Flawless = sim.F[0].flawlessRounds;
                 v2LiveDone = true;
                 if (v2LiveResult != null) { var r = v2LiveResult; V2GameRelease(); FinishLive(r); }
                 return;
@@ -112,6 +152,7 @@ namespace SquashBot.Gameplay
             chDuelThem = sim.F[1].roundsWon;
             if (sim.MatchWinner == 0 && sim.Comeback) matchWorst = 2; // (0–1, then won: the comeback's reward)
             wonInOvertime = sim.MatchWinner == 0 && sim.LastRoundGolden;
+            v2Flawless = sim.F[0].flawlessRounds;
             V2GameRelease();
             ChallengeEnd();
         }

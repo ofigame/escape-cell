@@ -266,6 +266,7 @@ namespace SquashBot.DuelV2
         private void Show(DuelEvent e)
         {
             if (DuelPrototypeV2.AutoDir != null && e.kind != DuelEventKind.Swing) AutoLog.AppendLine(e.time.ToString("0.00") + " " + e.kind + " " + (e.who == 0 ? "L" : "R") + " " + e.move + " " + e.result + " " + e.damage.ToString("0") + " n" + e.count + " " + e.why);
+            proto.Event(e);
             var me = Sim.F[e.who]; var other = Sim.F[1 - e.who];
             var mv = views[e.who]; var ov = views[1 - e.who];
             switch (e.kind)

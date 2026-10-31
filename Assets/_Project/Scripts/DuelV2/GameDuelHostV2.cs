@@ -54,6 +54,10 @@ namespace SquashBot.DuelV2
         /// <summary>The screen's pause button: the game's pause screen.</summary>
         public System.Action Pause;
         public void PauseAsked() => Pause?.Invoke();
+
+        /// <summary>The fight's events to the game (its quests and the match's challenge).</summary>
+        public System.Action<DuelEvent> Happened;
+        public void Event(DuelEvent e) => Happened?.Invoke(e);
         public void BackToMenu() { }
 
         /// <summary>

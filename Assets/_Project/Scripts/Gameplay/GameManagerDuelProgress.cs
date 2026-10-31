@@ -102,6 +102,8 @@ namespace SquashBot.Gameplay
             if (firstWin) xp += DuelLevel.FirstWin;
             if (r.goalDone) xp += DuelLevel.Challenge;
             if (r.comeback) xp += DuelLevel.Comeback;
+            xp += v2Flawless * DuelLevel.Flawless; // (the v2 duel: each flawless round)
+            v2Flawless = 0;
             r.xp = xp;
             r.levelBefore = DuelLevel.Level; r.xpBefore = DuelLevel.Xp;
             r.levelUps = DuelLevel.Add(xp);

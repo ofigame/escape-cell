@@ -12,6 +12,8 @@ namespace SquashBot.Data
     {
         public const int Max = 50;
         public const int Win = 100, Draw = 60, Loss = 40, FirstWin = 100, Challenge = 50, Comeback = 50;
+        /// <summary>Each round won without a scratch (the v2 duel's flawless round).</summary>
+        public const int Flawless = 25;
         private const string LevelKey = "sb_dlv", XpKey = "sb_dxp";
 
         public static int Level => Mathf.Clamp(Prefs.GetInt(LevelKey, 1), 1, Max);

@@ -32,6 +32,7 @@ namespace SquashBot.DuelV2
         public bool NextState(out DuelSnapshot state) { state = null; return false; } // (never live)
         public void SendInput(FighterInput input) { }
         public void PauseAsked() { }
+        public void Event(DuelEvent e) { }
         private string message = "";
 
         /// <summary>The prototype's own speed (slow motion, pause, a frame) times any slow motion the fight asks for.</summary>

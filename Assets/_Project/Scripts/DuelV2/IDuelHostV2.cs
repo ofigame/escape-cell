@@ -26,6 +26,8 @@ namespace SquashBot.DuelV2
         void BackToMenu();
         /// <summary>The screen's pause button (the game: its pause screen; never in a live duel).</summary>
         void PauseAsked();
+        /// <summary>Something happened in the fight (the game counts its deeds: the quests, the match's challenge).</summary>
+        void Event(DuelEvent e);
         /// <summary>A live duel: the server's next state (mirrored to this game's side), or false when none came.</summary>
         bool NextState(out DuelSnapshot state);
         /// <summary>A live duel: this game's wishes go to the server (only when they change, and every press).</summary>

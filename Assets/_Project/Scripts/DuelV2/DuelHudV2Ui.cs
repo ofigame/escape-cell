@@ -172,7 +172,7 @@ namespace SquashBot.DuelV2
                     meterFill[i, p].color = part >= 1f ? MeterFull : MeterC;
                     bool has = p < f.powers.Count;
                     slot[i, p].color = has ? RainViewV2.ColourOf(f.powers[p]) : Color.clear;
-                    slotMark[i, p].text = has ? (f.powers[p] == ElementKind.Snow ? "S" : f.powers[p] == ElementKind.Fire ? "F" : "L") : ""; // (letters: the font has no snowflake or bolt)
+                    slotMark[i, p].text = ""; // (the slot's colour tells the power: the font has no snowflake or bolt)
                 }
                 nameText[i].text = names[i] + "  " + new string('♥', Mathf.Max(0, f.hearts));
             }
