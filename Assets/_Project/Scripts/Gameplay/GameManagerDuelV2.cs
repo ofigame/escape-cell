@@ -129,6 +129,7 @@ namespace SquashBot.Gameplay
         /// <summary>The game's sparks and rings, for the v2 fight's pictures.</summary>
         internal void V2Burst(Vector3 at, Color color, Color glow, int count, float speed) { if (fx != null) fx.Burst(at, color, glow, count, speed); }
         internal void V2Ring(Vector3 at, float size, Color color) => Shockwave.Create(at, size, color);
+        internal void V2Cheer(int side, float strength) { if (colosseum != null) colosseum.Cheer(side, strength); }
         internal void V2Dust(Vector3 at, Color color, int count, float speed) { if (fx != null) fx.Dust(at, color, count, speed); }
     }
 }

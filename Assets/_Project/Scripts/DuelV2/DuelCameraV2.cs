@@ -11,13 +11,16 @@ namespace SquashBot.DuelV2
     {
         public Camera Cam { get; private set; }
         private Vector3 mid, side, line;
-        private float dist = 16f, scale = 1f;
+        private float dist = 16f, scale = 1f, height = 6f;
         private bool placed;
         // the moments laid over the follow: a zoom (share nearer), a shake, a push toward a point
         private float zoom, zoomTarget, shake, shakeTime;
         private Vector3 shakeDir;
         private Vector3 focusOverride; private float focusWeight, focusTarget;
         private float rise;
+
+        /// <summary>A fighter's height in the world (the band on screen is worked out from it).</summary>
+        public float FighterHeight { get => height; set => height = Mathf.Max(0.5f, value); }
 
         public static DuelCameraV2 Create(Vector3 side, Vector3 line, float fighterScale)
         {
@@ -41,8 +44,13 @@ namespace SquashBot.DuelV2
             var s = DuelCoreSettings.Current;
             var m = (a + b) * 0.5f;
             float apart = Mathf.Abs(Vector3.Dot(b - a, line));
-            float hf = 2f * Mathf.Atan(Mathf.Tan(Cam.fieldOfView * Mathf.Deg2Rad * 0.5f) * Mathf.Max(0.3f, Cam.aspect));
-            float want = Mathf.Clamp((apart * 0.5f + s.camSideRoom) / Mathf.Tan(hf * 0.5f), s.camNear, s.camFar);
+            float vf = Cam.fieldOfView * Mathf.Deg2Rad;
+            float hf = 2f * Mathf.Atan(Mathf.Tan(vf * 0.5f) * Mathf.Max(0.3f, Cam.aspect));
+            // near enough for the fighters to fill their band of the screen, far enough for both (and room) across it
+            float visible = height / Mathf.Max(0.1f, s.camBand);
+            float forBand = visible * 0.5f / Mathf.Tan(vf * 0.5f);
+            float forWidth = (apart * 0.5f + s.camSideRoom) / Mathf.Tan(hf * 0.5f);
+            float want = Mathf.Clamp(Mathf.Max(forBand, forWidth), s.camNear, s.camFar);
             float k = placed ? 1f - Mathf.Exp(-s.camFollow * dt) : 1f;
             mid = placed ? Vector3.Lerp(mid, m, k) : m;
             dist = placed ? Mathf.Lerp(dist, want, k) : want;
@@ -51,9 +59,12 @@ namespace SquashBot.DuelV2
             focusWeight = Mathf.MoveTowards(focusWeight, focusTarget, dt * 3f);
             if (shakeTime > 0f) shakeTime -= dt;
             float d = dist * (1f - zoom);
-            var look = mid + Vector3.up * (1.0f * scale + rise);
+            // the feet at camFeetAt of the screen: the middle of the view stands this much over them
+            float shown = 2f * d * Mathf.Tan(vf * 0.5f);
+            var look = mid + Vector3.up * (shown * (0.5f - s.camFeetAt) + rise);
             if (focusWeight > 0.001f) look = Vector3.Lerp(look, focusOverride, focusWeight);
-            var pos = look + side * d + Vector3.up * (0.12f * d + rise * 0.5f) - Vector3.up * (0.06f * d);
+            float pitch = s.camPitch * Mathf.Deg2Rad;
+            var pos = look + side * d * Mathf.Cos(pitch) + Vector3.up * (d * Mathf.Sin(pitch) + rise * 0.5f);
             if (shakeTime > 0f && s.screenShake) pos += shakeDir * shake * Mathf.Sin(Time.unscaledTime * 70f) * (shakeTime / 0.25f);
             transform.position = pos;
             transform.rotation = Quaternion.LookRotation(look - pos);

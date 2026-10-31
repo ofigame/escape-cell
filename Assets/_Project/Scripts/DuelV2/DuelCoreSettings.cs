@@ -169,10 +169,19 @@ namespace SquashBot.DuelV2
         public float koSlow = 0.6f;
         public float replaySeconds = 2f;
         [Tooltip("The camera's nearest and furthest (world units from the fighters' middle)")]
-        public float camNear = 17f;
-        public float camFar = 32f;
+        public float camNear = 18f;
+        public float camFar = 46f;
         [Tooltip("Room either side of the two fighters (world units)")]
-        public float camSideRoom = 3.2f;
+        public float camSideRoom = 2.6f;
+        [Tooltip("A fighter's height as a share of the screen's (the 30-60% band: 0.3)")]
+        public float camBand = 0.3f;
+        [Tooltip("The feet at this height of the screen")]
+        public float camFeetAt = 0.3f;
+        [Tooltip("The camera looks down this much (degrees)")]
+        public float camPitch = 6f;
+        [Tooltip("The last seconds of a round: the camera this much nearer, a heartbeat")]
+        public float lastSeconds = 10f;
+        public float lastSecondsZoom = 0.06f;
         public float camFollow = 4f;
         public bool screenShake = true;
         public bool replay = true;

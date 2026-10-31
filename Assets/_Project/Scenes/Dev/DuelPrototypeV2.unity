@@ -148,9 +148,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85d4ce9f9af7829469fe285c993c4def, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SquashBot.DuelV2.DuelPrototypeV2
-  ShowLog: 1
-  ShowAdvantage: 1
-  ShowBoxes: 0
 --- !u!4 &1190529663
 Transform:
   m_ObjectHideFlags: 0

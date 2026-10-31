@@ -18,6 +18,9 @@ namespace SquashBot.DuelV2
         private readonly DuelBotV2[] bots = new DuelBotV2[2];
         private readonly DuelHudV2 hud = new DuelHudV2();
         private RainViewV2 rains;
+        private ReplayRecorderV2 replay;
+        private float flashUntil, heartAt;
+        private bool replayDone;
         private DuelCameraV2 cam;
         private Vector3 centre, line;
         private float sHeld = -1f;
@@ -50,11 +53,27 @@ namespace SquashBot.DuelV2
             bots[1] = o.mode == PrototypeOptions.Mode.PlayerVsDummy ? null : new DuelBotV2(o.skill[1], o.persona[1], 23);
             MomentsV2.Clear();
             rains = new RainViewV2(game, WorldOf, scale);
+            float height = FighterHeight(views[0]);
+            if (cam != null) cam.FighterHeight = height;
+            if (S.replay) replay = ReplayRecorderV2.Create(game.V2CameraSide, line, height, S.replaySeconds);
             OnStarted();
         }
 
         /// <summary>The fight's first moment (the rounds' intro from Faz 4 on).</summary>
         private void OnStarted() { }
+
+        /// <summary>A fighter's height (its body's top over its feet).</summary>
+        private static float FighterHeight(FighterViewV2 v)
+        {
+            if (v.Look == null) return 6f;
+            float top = v.Root.position.y;
+            foreach (var r in v.Look.GetComponentsInChildren<Renderer>())
+            {
+                if (!r.enabled || r is ParticleSystemRenderer || r.GetComponentInParent<Visual.HeldWeapon>() != null) continue;
+                top = Mathf.Max(top, r.bounds.max.y);
+            }
+            return Mathf.Max(1f, top - v.Root.position.y);
+        }
 
         /// <summary>A place on the line in the world (on the floor).</summary>
         public Vector3 WorldOf(float x) => views[0] != null ? views[0].World(x) : centre + line * x;
@@ -72,12 +91,15 @@ namespace SquashBot.DuelV2
             for (int i = 0; i < 2; i++) views[i].Update(Sim.F[i], Sim.F[1 - i], Sim);
             rains.Update(Sim);
             if (cam != null) cam.Rise(Sim.Rains.Count > 0 ? 2.2f * game.V2FighterScale / 3.5f : 0f);
+            LastSeconds();
+            if (replayAt > 0f && Time.unscaledTime >= replayAt) { replayAt = -1f; PlayReplay(); }
         }
 
         private void LateUpdate()
         {
             if (cam == null || Sim == null) return;
             cam.Follow(WorldOf(Sim.F[0].x), WorldOf(Sim.F[1].x), Time.unscaledDeltaTime);
+            if (replay != null) replay.Record(WorldOf(Sim.F[0].x), WorldOf(Sim.F[1].x));
         }
 
         private void OnGUI()
@@ -85,6 +107,17 @@ namespace SquashBot.DuelV2
             if (Sim == null) return;
             hud.Draw(Sim, cam != null ? cam.Cam : null, proto, S, playerLeft, TopLine());
             if (rains != null && rains.Tint.a > 0.01f) GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), DuelHudV2.Tex(rains.Tint));
+            // the ultimate: the world darkened round it; a perfect block: a short white flash
+            if (Sim.F[0].state == FighterState.Casting && Sim.F[0].move == MoveKind.Ulti || Sim.F[1].state == FighterState.Casting && Sim.F[1].move == MoveKind.Ulti) GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), DuelHudV2.Tex(new Color(0f, 0f, 0.05f, 0.35f)));
+            if (Time.unscaledTime < flashUntil) GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), DuelHudV2.Tex(new Color(1f, 1f, 1f, 0.55f * (flashUntil - Time.unscaledTime) / 0.12f)));
+            var frame = replay != null ? replay.Frame() : null;
+            if (frame != null)
+            {
+                GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), frame, ScaleMode.ScaleAndCrop);
+                GUI.Label(new Rect(0f, Screen.height * 0.08f, Screen.width, 60f), Loc.T("v2.replay"), DuelHudV2.Style(34, Color.white, TextAnchor.MiddleCenter));
+                if (Event.current.type == EventType.MouseDown || Input.GetKeyDown(KeyCode.Space)) replay.Stop();
+                return;
+            }
             if (matchOver) MatchPanel();
         }
 
@@ -112,7 +145,7 @@ namespace SquashBot.DuelV2
 
         private bool matchOver;
 
-        private void OnDestroy() { Time.timeScale = 1f; MomentsV2.Clear(); rains?.Clear(); }
+        private void OnDestroy() { Time.timeScale = 1f; MomentsV2.Clear(); rains?.Clear(); if (replay != null) Destroy(replay.gameObject); }
 
         // ---------- the player ----------
 
@@ -269,7 +302,7 @@ namespace SquashBot.DuelV2
             {
                 case HitResult.Hit:
                     if (e.move == MoveKind.PowerHit) { MomentsV2.HitStop(S.powerHitStopMs); if (cam != null) cam.Shake(line * me.facing, 0.45f); }
-                    else if (e.move == MoveKind.Knockdown) { MomentsV2.Slow(S.knockdownSlow, 0.3f); if (cam != null) cam.Shake(Vector3.up, 0.4f); }
+                    else if (e.move == MoveKind.Knockdown) { MomentsV2.Slow(S.knockdownSlow, 0.3f); if (cam != null) { cam.Shake(Vector3.up, 0.4f); cam.Focus(ov.Chest + Vector3.up * 1.5f, 0.3f); Invoke(nameof(Unfocus), S.airSeconds); } }
                     else
                     {
                         bool third = e.move == MoveKind.Chain && me.chainStep >= S.chainLength - 1;
@@ -279,6 +312,7 @@ namespace SquashBot.DuelV2
                     break;
                 case HitResult.Perfect:
                     MomentsV2.Slow(S.perfectSlow, 0.3f);
+                    flashUntil = Time.unscaledTime + 0.12f;
                     hud.Banner(Loc.T("v2.res.perfect"), Color.white, 0.6f);
                     break;
                 case HitResult.Blocked:
@@ -291,13 +325,38 @@ namespace SquashBot.DuelV2
         private void Unfocus() { if (cam != null) cam.Focus(Vector3.zero, 0f); }
         private void HandsDown() { foreach (var v in views) if (v.Weapon != null) v.Weapon.HoldUp(false); }
 
-        /// <summary>A knock-out: the round's (the replay of the match's comes with the camera's cuts).</summary>
-        private void OnKnockOut(int winner, bool matchEnds) { }
+        /// <summary>A knock-out: the crowd roars for the winner; the match's ends with its replay after the slow motion.</summary>
+        private void OnKnockOut(int winner, bool matchEnds)
+        {
+            game.V2Cheer(winner, 1f);
+            if (matchEnds && replay != null && S.replay && !replayDone) { replayDone = true; replayAt = Time.unscaledTime + S.koSlow + 0.3f; }
+        }
+
+        private float replayAt = -1f;
+
+        private void PlayReplay() { if (replay != null) replay.Play(S.replaySeconds, S.replaySeconds * 1.6f); }
+
+        /// <summary>The round's last seconds: the camera a touch nearer, a heartbeat each second.</summary>
+        private void LastSeconds()
+        {
+            bool last = Sim.Phase == RoundPhase.Fight && Sim.RoundLeft <= S.lastSeconds;
+            if (cam != null && Sim.Rains.Count == 0) cam.Zoom(last ? S.lastSecondsZoom : 0f);
+            if (!last) return;
+            if (Time.unscaledTime >= heartAt)
+            {
+                heartAt = Time.unscaledTime + 1f;
+                Audio.AudioManager.PlaySfx(Audio.Sfx.Impact, 0.35f, 0.45f);
+                Invoke(nameof(HeartSecond), 0.18f);
+            }
+        }
+
+        private void HeartSecond() => Audio.AudioManager.PlaySfx(Audio.Sfx.Impact, 0.25f, 0.42f);
 
         /// <summary>A new match on the same stage.</summary>
         public void Restart()
         {
             matchOver = false;
+            replayDone = false;
             Sim = new DuelSim(S, proto.Options.family, proto.Options.tier, Sim.HalfLength);
             foreach (var v in views) if (v.Skin != null) v.Skin.CleanSlate();
             if (cam != null) cam.Focus(Vector3.zero, 0f);

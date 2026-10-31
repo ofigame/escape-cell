@@ -23,7 +23,7 @@ namespace SquashBot.DuelV2
         private static readonly float[] Speeds = { 1f, 0.5f, 0.25f };
         private int speed;
         private bool paused, stepOnce;
-        public bool ShowLog = true, ShowAdvantage = true, ShowBoxes;
+        [System.NonSerialized] public bool ShowLog, ShowAdvantage = true, ShowBoxes; // (never kept in the scene: the code's defaults)
         private string message = "";
 
         /// <summary>The prototype's own speed (slow motion, pause, a frame) times any slow motion the fight asks for.</summary>
