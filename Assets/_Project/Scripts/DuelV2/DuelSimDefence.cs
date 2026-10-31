@@ -75,8 +75,33 @@ namespace SquashBot.DuelV2
             Push(f, from, 0.6f);
         }
 
-        private void OnWall(Fighter f) { }
+        /// <summary>Thrown hard into the line's end: it bounces off and falls forward (never pinned in the corner).</summary>
+        private void OnWall(Fighter f)
+        {
+            if (Time >= f.pushUntil || Mathf.Abs(f.pushVel) < 8f) return;
+            f.pushVel = -f.pushVel * 0.25f;
+            var o = F[1 - f.index];
+            if (f.state == FighterState.HitStun || f.state == FighterState.Staggered) { Fall(f, o); Emit(DuelEventKind.Result, o.index, MoveKind.PowerHit, HitResult.Hit, 0f, at: f.x, why: "wall"); }
+        }
 
-        private bool TryBreak(Fighter f, Fighter o) => false;
+        /// <summary>
+        /// BREAK (Docs 4.2): caught in the other's chain, a bar part cuts it: the attacker staggers back, the caught one is
+        /// free at once (a moment untouchable, so the chain's next blow already on its way cannot land).
+        /// </summary>
+        private bool TryBreak(Fighter f, Fighter o)
+        {
+            if (!f.inChain || f.meter < S.breakCost - 0.001f || !(f.state == FighterState.HitStun)) return false;
+            if (!o.Attacking || o.move != MoveKind.Chain) return false;
+            f.meter -= S.breakCost;
+            f.breaks++;
+            f.inChain = false;
+            SetState(f, f.blockHeld ? FighterState.Blocking : FighterState.Idle, 0f);
+            f.invulnUntil = Time + S.S(S.minReactMs);
+            o.series = 0; o.windowOpen = false; o.chainBroken = true;
+            SetState(o, FighterState.Staggered, Time + S.S(S.breakStunMs));
+            Push(o, f, 0.8f);
+            Emit(DuelEventKind.BreakUsed, f.index, at: o.x);
+            return true;
+        }
     }
 }

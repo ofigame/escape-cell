@@ -350,6 +350,9 @@ namespace SquashBot.DuelV2
             {
                 float rec = Mathf.Max(f.attackEnd - f.recoveryAt, (o.stateEnd - Time) + S.S(S.minReactMs) - S.Windup(f.family) - (f.recoveryAt - Time));
                 f.attackEnd = f.recoveryAt + rec;
+                // the gap the other has (measured: never under the reaction window)
+                float gap = (f.attackEnd + S.Windup(f.family)) - o.stateEnd;
+                f.minGap = Mathf.Min(f.minGap, gap);
                 f.powerHitUntil = f.attackEnd + OfferSeconds;
                 Emit(DuelEventKind.PowerHitOffered, f.index);
             }

@@ -74,6 +74,9 @@ namespace SquashBot.DuelV2
         public int roundsWon;
         public int hitsDealt, hitsTaken, blocks, perfects, whiffs, clashes, taps, wastedTaps;
         public float damageTaken;
+        /// <summary>The shortest gap its sets of three left the other (s; the rule wants at least the reaction window).</summary>
+        public float minGap = 9f;
+        public int breaks;
         public float lastDamagedAt = -99f;
 
         public bool Alive => hp > 0.0001f && state != FighterState.KO;

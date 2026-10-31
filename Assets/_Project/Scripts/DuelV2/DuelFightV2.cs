@@ -118,7 +118,7 @@ namespace SquashBot.DuelV2
         public string Stats()
         {
             var sb = new System.Text.StringBuilder();
-            foreach (var f in Sim.F) sb.AppendLine((f.index == 0 ? "L" : "R") + " fam " + f.family + " hp " + Mathf.RoundToInt(f.hp) + "/" + Mathf.RoundToInt(f.maxHp) + " hits " + f.hitsDealt + " taken " + f.hitsTaken + " blocks " + f.blocks + " perfects " + f.perfects + " whiffs " + f.whiffs + " clashes " + f.clashes + " taps " + f.taps + " wasted " + f.wastedTaps + " meter " + f.meter.ToString("0.0") + " rounds " + f.roundsWon);
+            foreach (var f in Sim.F) sb.AppendLine((f.index == 0 ? "L" : "R") + " fam " + f.family + " hp " + Mathf.RoundToInt(f.hp) + "/" + Mathf.RoundToInt(f.maxHp) + " hits " + f.hitsDealt + " taken " + f.hitsTaken + " blocks " + f.blocks + " perfects " + f.perfects + " whiffs " + f.whiffs + " clashes " + f.clashes + " taps " + f.taps + " wasted " + f.wastedTaps + " meter " + f.meter.ToString("0.0") + " rounds " + f.roundsWon + " breaks " + f.breaks + " minGap " + (f.minGap < 9f ? Mathf.RoundToInt(f.minGap * 1000f) + "ms" : "-"));
             return sb.ToString();
         }
 
@@ -139,7 +139,17 @@ namespace SquashBot.DuelV2
                 case DuelEventKind.ChainOpen: mv.OnChainOpen(S); break;
                 case DuelEventKind.ChainBroken: mv.OnChainBroken(); hud.Float(Loc.T("v2.chainBroken"), new Color(1f, 0.5f, 0.4f), mv.Head, 22); hud.Log(Side(e.who) + " " + Loc.T("v2.chainBroken")); break;
                 case DuelEventKind.Series: hud.Series(e.who, e.count); break;
-                case DuelEventKind.PowerHitOffered: if (e.who == 0 && playerLeft) hud.Float(Loc.T("v2.btn.power") + " (R)", new Color(1f, 0.7f, 0.3f), mv.Head + Vector3.up * 0.6f, 20); break;
+                case DuelEventKind.PowerHitOffered:
+                    if (e.who == 0 && playerLeft) hud.Float(Loc.T("v2.btn.power") + " (R)", new Color(1f, 0.7f, 0.3f), mv.Head + Vector3.up * 0.6f, 20);
+                    if (S.showAdvantageHints) hud.Float(Loc.T("v2.gap"), new Color(0.5f, 1f, 0.7f), ov.Head + Vector3.up * 0.9f, 24); // (the set's end: the struck one's way out)
+                    break;
+                case DuelEventKind.BreakUsed:
+                    hud.Banner(Loc.T("v2.btn.break"), new Color(0.4f, 0.8f, 1f), 0.6f);
+                    hud.Log(Side(e.who) + " " + Loc.T("v2.btn.break"));
+                    views[1 - e.who].OnChainBroken();
+                    game.V2Ring(views[e.who].Root.position, 2.2f, new Color(0.4f, 0.8f, 1f));
+                    MomentsV2.HitStop(70f);
+                    break;
                 case DuelEventKind.KnockdownOffered: if (e.who == 0 && playerLeft) hud.Float(Loc.T("v2.btn.knockdown") + " (R)", new Color(1f, 0.4f, 0.3f), mv.Head + Vector3.up * 0.6f, 22); break;
                 case DuelEventKind.Dodge: mv.OnDodge(0.35f); break;
                 case DuelEventKind.Jump: mv.OnJump(S.jumpSeconds * S.tempo); break;
