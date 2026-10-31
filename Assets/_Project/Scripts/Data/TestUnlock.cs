@@ -7,6 +7,6 @@ namespace SquashBot.Data
     /// </summary>
     public static class TestUnlock
     {
-        public const bool All = false;
+        public const bool All = true;
     }
 }
