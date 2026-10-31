@@ -685,7 +685,7 @@ namespace SquashBot.Gameplay
 
         private void LateUpdate()
         {
-            if (ui == null) return;
+            if (ui == null || DuelV2.DuelCoreV2.Running) return;
             if (garageView && !ui.Garage.Screen.IsVisible) { garageView = false; cameraRig.EndChase(); }
             // The splash waits for the menu to stand (a few frames in, when the lobby has drawn).
             if (!SplashScreen.Ready && Time.frameCount > 5) SplashScreen.Ready = true;
@@ -1600,6 +1600,7 @@ namespace SquashBot.Gameplay
 
         private void Update()
         {
+            if (DuelV2.DuelCoreV2.Running) return; // (the duel fight core v2's prototype fights: the game's own duel waits)
             UpdateFortressView();
             HandleBackButton();
             WatchArmyFromMenu();
