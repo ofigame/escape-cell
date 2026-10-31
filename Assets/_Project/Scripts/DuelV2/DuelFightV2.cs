@@ -17,6 +17,7 @@ namespace SquashBot.DuelV2
         private readonly FighterViewV2[] views = new FighterViewV2[2];
         private readonly DuelBotV2[] bots = new DuelBotV2[2];
         private readonly DuelHudV2 hud = new DuelHudV2();
+        private RainViewV2 rains;
         private DuelCameraV2 cam;
         private Vector3 centre, line;
         private float sHeld = -1f;
@@ -48,6 +49,7 @@ namespace SquashBot.DuelV2
             bots[0] = playerLeft ? null : new DuelBotV2(o.skill[0], o.persona[0], 11);
             bots[1] = o.mode == PrototypeOptions.Mode.PlayerVsDummy ? null : new DuelBotV2(o.skill[1], o.persona[1], 23);
             MomentsV2.Clear();
+            rains = new RainViewV2(game, WorldOf, scale);
             OnStarted();
         }
 
@@ -68,6 +70,8 @@ namespace SquashBot.DuelV2
             Sim.Events.Clear();
             Countdown();
             for (int i = 0; i < 2; i++) views[i].Update(Sim.F[i], Sim.F[1 - i], Sim);
+            rains.Update(Sim);
+            if (cam != null) cam.Rise(Sim.Rains.Count > 0 ? 2.2f * game.V2FighterScale / 3.5f : 0f);
         }
 
         private void LateUpdate()
@@ -80,6 +84,7 @@ namespace SquashBot.DuelV2
         {
             if (Sim == null) return;
             hud.Draw(Sim, cam != null ? cam.Cam : null, proto, S, playerLeft, TopLine());
+            if (rains != null && rains.Tint.a > 0.01f) GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), DuelHudV2.Tex(rains.Tint));
             if (matchOver) MatchPanel();
         }
 
@@ -107,7 +112,7 @@ namespace SquashBot.DuelV2
 
         private bool matchOver;
 
-        private void OnDestroy() { Time.timeScale = 1f; MomentsV2.Clear(); }
+        private void OnDestroy() { Time.timeScale = 1f; MomentsV2.Clear(); rains?.Clear(); }
 
         // ---------- the player ----------
 
@@ -197,6 +202,34 @@ namespace SquashBot.DuelV2
                     if (cam != null) cam.Focus(ov.Chest, 0.5f);
                     OnKnockOut(e.who, e.why == "match");
                     break;
+                case DuelEventKind.PowerEarned:
+                    hud.Float(Loc.T("v2.power." + e.element), RainViewV2.ColourOf(e.element), mv.Head + Vector3.up * 0.4f, 26);
+                    hud.Log(Side(e.who) + " +" + Loc.T("v2.power." + e.element));
+                    Audio.AudioManager.PlaySfx(Audio.Sfx.Coin, 0.8f, 1.3f);
+                    break;
+                case DuelEventKind.PowerLost: hud.Float(Loc.T("v2.powerFull"), new Color(1f, 1f, 1f, 0.8f), mv.Head + Vector3.up * 0.4f, 18); break;
+                case DuelEventKind.RainStart:
+                    if (mv.Weapon != null) mv.Weapon.HoldUp(true);
+                    Invoke(nameof(HandsDown), S.summonSeconds * S.tempo);
+                    hud.Log(Side(e.who) + " " + Loc.T("v2.rain." + e.element));
+                    break;
+                case DuelEventKind.RainDrop:
+                    if (e.result == HitResult.Hit || e.result == HitResult.Blocked)
+                    {
+                        rains.OnDrop(e, WorldOf(e.at));
+                        if (e.result == HitResult.Hit) { if (ov.Skin != null) ov.Skin.Shudder(WorldOf(e.at) + Vector3.up * 5f, e.why == "last" ? 1f : 0.4f); }
+                        hud.Float((e.result == HitResult.Blocked ? Loc.T("v2.res.blocked") + " " : "") + "-" + Mathf.RoundToInt(e.damage), RainViewV2.ColourOf(e.element), ov.Head, e.why == "last" ? 32 : 20);
+                        if (e.element == ElementKind.Snow && e.result == HitResult.Hit && ov.Look != null) Combat.StatusFx.On(Combat.CombatFeel.RootOf(ov.Look) ?? ov.Root).Freeze(e.why == "last" ? 1.2f : 0.4f);
+                        if (e.element == ElementKind.Fire && e.result == HitResult.Hit && ov.Look != null) Combat.StatusFx.On(Combat.CombatFeel.RootOf(ov.Look) ?? ov.Root).Burn(0.8f);
+                    }
+                    else if (e.result == HitResult.Dodged) rains.OnDrop(e, WorldOf(e.at));
+                    if (e.why == "last" && e.result == HitResult.Hit)
+                    {
+                        ov.OnFall(WorldOf(e.at) + Vector3.up, S.downSeconds * S.tempo);
+                        MomentsV2.Slow(S.rainLastSlow, 0.3f);
+                        if (cam != null) { cam.Shake(Vector3.up, 0.6f); cam.Focus(ov.Chest, 0.35f); Invoke(nameof(Unfocus), 0.8f); }
+                    }
+                    break;
                 case DuelEventKind.RoundIntro:
                     if (e.count > 1) foreach (var v in views) if (v.Skin != null) v.Skin.CleanSlate();
                     if (cam != null) cam.Focus(Vector3.zero, 0f);
@@ -255,6 +288,8 @@ namespace SquashBot.DuelV2
         }
 
         private void Unzoom() { if (cam != null) cam.Zoom(0f); }
+        private void Unfocus() { if (cam != null) cam.Focus(Vector3.zero, 0f); }
+        private void HandsDown() { foreach (var v in views) if (v.Weapon != null) v.Weapon.HoldUp(false); }
 
         /// <summary>A knock-out: the round's (the replay of the match's comes with the camera's cuts).</summary>
         private void OnKnockOut(int winner, bool matchEnds) { }
