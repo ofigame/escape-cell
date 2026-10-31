@@ -113,7 +113,7 @@ namespace SquashBot.DuelV2
             int n = last ? 40 : 14;
             game.V2Burst(at + Vector3.up * 0.5f, c, c * 3f, n, last ? 8f : 4f);
             if (last || e.element == ElementKind.Fire) game.V2Ring(new Vector3(at.x, at.y + 0.05f, at.z), last ? 3f : 1.4f, c);
-            AudioManager.PlaySfx(e.element == ElementKind.Lightning ? Sfx.Clang : e.element == ElementKind.Fire ? Sfx.Impact : Sfx.Squash, last ? 1f : 0.6f, e.element == ElementKind.Snow ? 1.3f : 1f, 0.1f);
+            DuelSoundsV2.Play(e.element == ElementKind.Lightning ? DuelSoundV2.Lightning : e.element == ElementKind.Fire ? DuelSoundV2.Fire : DuelSoundV2.Snow, last ? 1f : 0.55f, 0.08f);
         }
 
         public void Clear()

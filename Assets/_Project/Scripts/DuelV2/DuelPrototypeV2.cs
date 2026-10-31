@@ -54,6 +54,14 @@ namespace SquashBot.DuelV2
             ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, "menu.png"));
             yield return new WaitForSeconds(0.5f);
             var args = System.Environment.GetCommandLineArgs();
+            if (System.Array.IndexOf(args, "-v2Sounds") >= 0)
+            {
+                // the fight sounds as .wav files (to listen to), timed
+                float s0 = Time.realtimeSinceStartup;
+                DuelSoundsV2.WriteAll(System.IO.Path.Combine(dir, "sesler"));
+                DuelFightV2.AutoLog.AppendLine("sounds written in " + Mathf.RoundToInt((Time.realtimeSinceStartup - s0) * 1000f) + " ms");
+                OnAutoDone(); Application.Quit(); yield break;
+            }
             Options.mode = System.Array.IndexOf(args, "-v2Player") >= 0 ? PrototypeOptions.Mode.PlayerVsBot : PrototypeOptions.Mode.BotVsBot;
             int si = System.Array.IndexOf(args, "-v2Stage"); if (si >= 0) Options.stage = int.Parse(args[si + 1]);
             int ri = System.Array.IndexOf(args, "-v2RoundSec"); if (ri >= 0) Options.roundSeconds = float.Parse(args[ri + 1], System.Globalization.CultureInfo.InvariantCulture);

@@ -54,6 +54,7 @@ namespace SquashBot.DuelV2
             bots[0] = playerLeft ? null : new DuelBotV2(o.skill[0], o.persona[0], 11);
             bots[1] = o.mode == PrototypeOptions.Mode.PlayerVsDummy ? null : new DuelBotV2(o.skill[1], o.persona[1], 23);
             MomentsV2.Clear();
+            DuelSoundsV2.Warm();
             rains = new RainViewV2(game, WorldOf, scale);
             float height = FighterHeight(views[0]);
             if (cam != null) cam.FighterHeight = height;

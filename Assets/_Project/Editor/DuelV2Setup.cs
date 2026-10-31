@@ -37,6 +37,19 @@ namespace SquashBot.EditorTools
         }
 
         /// <summary>The bot-against-bot balance report (Faz 8), by the rules alone: -benchMatches n -benchOut file.</summary>
+        /// <summary>The prototype's fight sounds as .wav files (-soundsOut dir): to listen to and check without the exe.</summary>
+        public static void SoundsBatch()
+        {
+            try
+            {
+                var args = Environment.GetCommandLineArgs();
+                int oi = Array.IndexOf(args, "-soundsOut");
+                DuelSoundsV2.WriteAll(oi >= 0 ? args[oi + 1] : "Builds/DuelV2Sounds");
+                EditorApplication.Exit(0);
+            }
+            catch (Exception e) { Debug.LogException(e); EditorApplication.Exit(1); }
+        }
+
         public static void BenchBatch()
         {
             try

@@ -119,7 +119,7 @@ namespace SquashBot.DuelV2
                     Weapon.SwingToContact(windup);
                     break;
             }
-            AudioManager.PlaySfx(f.family == 0 ? Sfx.SwishSword : f.family == 1 ? Sfx.SwishSpear : f.family == 2 ? Sfx.SwishAxe : Sfx.SwishHeavy, 0.6f, 1f, 0.08f);
+            DuelSoundsV2.Play(f.family == 0 ? DuelSoundV2.SwingSword : f.family == 1 ? DuelSoundV2.SwingSpear : f.family == 2 ? DuelSoundV2.SwingAxe : DuelSoundV2.SwingHeavy, 0.7f, 0.06f);
         }
 
         /// <summary>This fighter was struck (or its blow was met): its body answers.</summary>
@@ -134,19 +134,20 @@ namespace SquashBot.DuelV2
                     else if (e.move == MoveKind.AirHit) { if (Skin != null) Skin.AirHit(from); }
                     else if (Skin != null) Skin.React(HitDirection.Horizontal_RightToLeft, HitHeight.Mid, strength, from, 1f);
                     game.V2Burst(Chest, new Color(1f, 0.85f, 0.4f), new Color(3f, 2.2f, 0.8f), e.move == MoveKind.Chain ? 10 : 24, e.move == MoveKind.Chain ? 4f : 7f);
-                    AudioManager.PlaySfx(by.family == 0 ? Sfx.HitSword : by.family == 1 ? Sfx.HitSpear : by.family == 2 ? Sfx.HitAxe : Sfx.HitHeavy, 0.9f, 1f, 0.06f);
+                    DuelSoundsV2.Play(by.family == 0 ? DuelSoundV2.HitSword : by.family == 1 ? DuelSoundV2.HitSpear : by.family == 2 ? DuelSoundV2.HitAxe : DuelSoundV2.HitHeavy, 1f);
+                    if (strength >= HitStrength.Heavy) DuelSoundsV2.Play(DuelSoundV2.Smash, 0.8f); // (a power hit, a knock-down, the ultimate: weight under it)
                     if (s.showAdvantageHints && me.state == FighterState.HitStun) StatusFx.On(CombatFeel.RootOf(Look) ?? Root).Stun(Mathf.Max(0.15f, me.stateEnd - me.stateTime));
                     break;
                 case HitResult.Blocked:
                     if (shield != null) shield.Raise();
                     if (Skin != null) Skin.Shudder(from, 0.3f);
                     game.V2Burst(Chest + (from - Root.position).normalized * 0.4f * scale / 3.5f, new Color(0.8f, 0.9f, 1f), new Color(2f, 2.4f, 3f), 8, 4f);
-                    AudioManager.PlaySfx(Sfx.Blocked, 0.9f, 1f, 0.06f);
+                    DuelSoundsV2.Play(DuelSoundV2.Block, 0.9f);
                     break;
                 case HitResult.Perfect:
                     if (shield != null) shield.Raise();
                     game.V2Burst(Chest, Color.white, new Color(3f, 3f, 3f), 26, 6f);
-                    AudioManager.PlaySfx(Sfx.Shield, 1f, 1.3f);
+                    DuelSoundsV2.Play(DuelSoundV2.Parry, 1f, 0.02f);
                     if (byView.Skin != null) byView.Skin.Stagger(Root.position, 1f);
                     break;
             }
@@ -157,7 +158,7 @@ namespace SquashBot.DuelV2
             var mid = (Chest + other.Chest) * 0.5f;
             game.V2Burst(mid, new Color(1f, 0.95f, 0.7f), new Color(3.2f, 3f, 2f), 34, 7f);
             game.V2Ring(new Vector3(mid.x, Root.position.y, mid.z), 1.4f, new Color(1f, 0.95f, 0.8f));
-            AudioManager.PlaySfx(Sfx.Clang, 1f, 1f);
+            DuelSoundsV2.Play(DuelSoundV2.Clash, 1f);
             if (Skin != null) Skin.Shudder(other.Root.position, 0.6f);
             if (other.Skin != null) other.Skin.Shudder(Root.position, 0.6f);
         }
@@ -166,17 +167,18 @@ namespace SquashBot.DuelV2
         {
             if (Skin != null) Skin.Launch(from, 0.6f * scale / 3.5f, lie);
             game.V2Dust(Root.position, new Color(0.6f, 0.55f, 0.48f), 16, 3f);
+            DuelSoundsV2.Play(DuelSoundV2.BodyFall, 0.9f);
         }
 
         public void OnKO(Vector3 from)
         {
             if (Skin != null) Skin.Launch(from, 1.4f * scale / 3.5f, 3f);
             game.V2Burst(Chest, new Color(1f, 0.8f, 0.4f), new Color(3f, 2f, 0.6f), 40, 8f);
-            AudioManager.PlaySfx(Sfx.Impact, 1f, 0.6f);
+            DuelSoundsV2.Play(DuelSoundV2.KO, 1f, 0.02f);
         }
 
         public void OnDodge(float seconds) { if (Skin != null) Skin.DodgeClip(seconds); }
-        public void OnJump(float seconds) { if (Skin != null) Skin.Hop(1.1f, seconds); AudioManager.PlaySfx(Sfx.Hop, 0.7f, 1.1f); }
+        public void OnJump(float seconds) { if (Skin != null) Skin.Hop(1.1f, seconds); DuelSoundsV2.Play(DuelSoundV2.Jump, 0.6f); }
         public void OnUlti(float seconds) { if (Skin != null) Skin.PlayAction(DuelAction.UltiCinematic, seconds); CombatFeel.UltiStart(Look); }
         public void OnChainOpen(DuelCoreSettings s) { if (Weapon != null && s.showAdvantageHints) Weapon.Tremble(); }
         public void OnChainBroken() { if (Weapon != null) Weapon.Recoil(); }
