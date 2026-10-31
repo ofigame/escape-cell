@@ -63,7 +63,7 @@ Teşhisle karşılaştırma: eskiden nakavt için 50–140 isabet gerekiyordu ve
 ## Bilinen sorunlar ve eksikler
 
 1. **Faz 9'da yakalanan hata:** proje yalnız Input System kullanıyor, prototip ise eski `Input` sınıfını okuyordu. Sonuç olarak exe'de tuşlar çalışmıyordu ve saniyede yüzlerce hata yazılıyordu. Yeni `KeysV2` ile düzeltildi; Editor'de bu sorun görünmüyordu.
-2. **Güçler sık çıkıyor:** maç başına ~11,5 yağmur ve ~39 isabet eden damla var. Gerekirse `snowSeries`, `fireSeries` ya da yağmur hasarı düşürülebilir.
+2. **Güçler sık çıkıyor:** maç başına ~11,5 yağmur ve ~39 isabet eden damla var. Gerekirse `snowAtSeries`, `fireAtSeries` ya da `rainPct` düşürülebilir.
 3. **KIR sık kullanılıyor:** maç başına 6,5 (bot açgözlü olabilir). Daha az görmek için `breakCost` artırılabilir.
 4. **Mızrak hafif önde** (%59, Ağır'a karşı %71). Mızrağın `weaponLength` (1,0) ya da `windupMs` (170) değeri oynanarak ayarlanabilir.
 5. **Altın raunt** ölçümde hiç oluşmadı; yalnız kodda ve kısa raunt denemesinde görüldü.
