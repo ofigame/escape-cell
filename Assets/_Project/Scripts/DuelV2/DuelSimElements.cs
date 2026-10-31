@@ -13,6 +13,7 @@ namespace SquashBot.DuelV2
     public partial class DuelSim
     {
         public readonly List<ElementRain> Rains = new List<ElementRain>();
+        private int rainCount;
 
         private void OnSeries(Fighter f)
         {
@@ -43,6 +44,7 @@ namespace SquashBot.DuelV2
             int e = (int)k;
             var rain = new ElementRain
             {
+                id = ++rainCount,
                 kind = k, caster = f.index, target = o.index, centre = o.x, radius = S.rainRadius,
                 warnEnd = Time + S.summonSeconds * S.tempo + S.rainWarn[e] * S.tempo,
                 follows = k == ElementKind.Lightning,

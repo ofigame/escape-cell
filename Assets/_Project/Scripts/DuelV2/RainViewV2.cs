@@ -51,11 +51,12 @@ namespace SquashBot.DuelV2
         {
             // circles: one for each rain, kept on its centre
             for (int i = shown.Count - 1; i >= 0; i--)
-                if (!sim.Rains.Contains(shown[i].rain)) { if (shown[i].ring != null) Object.Destroy(shown[i].ring.gameObject); shown.RemoveAt(i); }
+                if (!sim.Rains.Exists(r => r.id == shown[i].rain.id)) { if (shown[i].ring != null) Object.Destroy(shown[i].ring.gameObject); shown.RemoveAt(i); }
             Tint = Color.clear;
             foreach (var r in sim.Rains)
             {
-                var s = shown.Find(x => x.rain == r);
+                var s = shown.Find(x => x.rain.id == r.id);
+                if (s != null) s.rain = r; // (a live duel: the same rain, its newest state)
                 if (s == null) { s = new Shown { rain = r, ring = Ring(ColourOf(r.kind)) }; shown.Add(s); }
                 var at = world(r.centre);
                 float next = r.Done ? 1f : Mathf.Clamp01((r.dropAt[r.fallen] - sim.Time) / 0.8f);

@@ -10,6 +10,8 @@ namespace SquashBot.DuelV2
     [System.Serializable]
     public class ElementRain
     {
+        /// <summary>Its number in the match (the same rain from one live state to the next).</summary>
+        public int id;
         public ElementKind kind;
         public int caster, target;
         public float centre, radius;
