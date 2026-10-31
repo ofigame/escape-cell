@@ -73,7 +73,12 @@ namespace SquashBot.DuelV2
         public static string AutoDir;
 
         /// <summary>The self-test is over (the fight's parts write their numbers).</summary>
-        private void OnAutoDone() { }
+        private void OnAutoDone()
+        {
+            if (AutoDir == null) return;
+            System.IO.File.WriteAllText(System.IO.Path.Combine(AutoDir, "events.txt"), DuelFightV2.AutoLog.ToString());
+            if (Fight != null) System.IO.File.WriteAllText(System.IO.Path.Combine(AutoDir, "stats.txt"), Fight.Stats());
+        }
 
         private void Update()
         {
@@ -108,17 +113,17 @@ namespace SquashBot.DuelV2
         {
             if (Camera == null) Camera = DuelCameraV2.Create(Game.V2CameraSide, Game.V2Line, Game.V2FighterScale);
             Camera.gameObject.SetActive(true);
+            if (Fight != null) Destroy(Fight.gameObject);
+            Fight = DuelFightV2.Begin(this, Camera);
         }
 
-        private void LateUpdate()
-        {
-            if (State != Phase.Fighting || Camera == null || Game.V2MeRoot == null || Game.V2FoeRoot == null) return;
-            Camera.Follow(Game.V2MeRoot.position, Game.V2FoeRoot.position, Time.unscaledDeltaTime);
-        }
+        /// <summary>The fight being fought (null on the menu).</summary>
+        public DuelFightV2 Fight { get; private set; }
 
         private void BackToMenu()
         {
             if (Camera != null) Camera.gameObject.SetActive(false);
+            if (Fight != null) { Destroy(Fight.gameObject); Fight = null; }
             Game.V2Release();
             State = Phase.Menu;
         }

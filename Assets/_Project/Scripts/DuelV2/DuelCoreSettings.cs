@@ -169,8 +169,8 @@ namespace SquashBot.DuelV2
         public float koSlow = 0.6f;
         public float replaySeconds = 2f;
         [Tooltip("The camera's nearest and furthest (world units from the fighters' middle)")]
-        public float camNear = 11f;
-        public float camFar = 26f;
+        public float camNear = 17f;
+        public float camFar = 32f;
         [Tooltip("Room either side of the two fighters (world units)")]
         public float camSideRoom = 3.2f;
         public float camFollow = 4f;

@@ -125,5 +125,10 @@ namespace SquashBot.Gameplay
         internal static int V2StageCount => DuelStages.Length;
         internal static string V2StageName(int i) => Loc.T(DuelStages[Mathf.Clamp(i, 0, DuelStages.Length - 1)].key);
         internal float V2FighterScale => robot != null && robot.Visual != null ? robot.Visual.lossyScale.y : 1f;
+
+        /// <summary>The game's sparks and rings, for the v2 fight's pictures.</summary>
+        internal void V2Burst(Vector3 at, Color color, Color glow, int count, float speed) { if (fx != null) fx.Burst(at, color, glow, count, speed); }
+        internal void V2Ring(Vector3 at, float size, Color color) => Shockwave.Create(at, size, color);
+        internal void V2Dust(Vector3 at, Color color, int count, float speed) { if (fx != null) fx.Dust(at, color, count, speed); }
     }
 }
