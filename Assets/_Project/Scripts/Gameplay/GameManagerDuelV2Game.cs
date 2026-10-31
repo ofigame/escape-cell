@@ -35,6 +35,8 @@ namespace SquashBot.Gameplay
             o.persona[1] = GameDuelHostV2.PersonaOf(botTuning);
             if (LiveActive) o.mode = PrototypeOptions.Mode.Live; // (the server runs the rules: this game shows its states)
             else if (GameDuelHostV2.BotPlaysFoi) { o.mode = PrototypeOptions.Mode.BotVsBot; o.skill[0] = 0.6f; }
+            o.names[0] = Challenge.PlayerName;
+            o.names[1] = rival != null ? rival.name : Loc.T("v2.side.rival");
             V2ApplyRule(s);
             o.roundSeconds = s.roundSeconds; o.roundsToWin = s.roundsToWin;
 
@@ -47,12 +49,20 @@ namespace SquashBot.Gameplay
             DuelCoreV2.Running = DuelCoreV2.InGame = true;
             chPhase = ChPhase.Duel;
             v2Cam = DuelCameraV2.Create(sideDir, V2Line, V2FighterScale);
-            if (cameraRig != null && cameraRig.Cam != null) cameraRig.Cam.enabled = false;
-            v2Host = new GameDuelHostV2(this, o, s, V2GameDone);
+            if (cameraRig != null) { cameraRig.SetMenuFocus(false); if (cameraRig.Cam != null) cameraRig.Cam.enabled = false; } // (the menu's blur off: it is a global volume, on the v2 camera too)
+            v2Host = new GameDuelHostV2(this, o, s, V2GameDone) { Pause = Pause };
+            V2HideBattleHud(true);
             if (LiveActive) { v2Host.Mirror = liveSide == 1; v2Host.Send = LiveNet.InputV2; }
             v2Host.Fight = DuelFightV2.Begin(v2Host, v2Cam);
             if (LiveActive) { v2LiveResult = null; v2LiveDone = false; LiveNet.ReadyV2(v2Host.Fight.Sim.Height); }
             FirstSession.DuelStarted(); // (time_to_first_duel)
+        }
+
+        /// <summary>The old duel's screen (its bars, clock, skill bar, the stick) out of sight while the v2 one shows (and back).</summary>
+        private void V2HideBattleHud(bool hide)
+        {
+            if (chUi != null && chUi.BattleHud != null) chUi.BattleHud.gameObject.SetActive(!hide); // (its bars, clock, squad bar, the skill bar)
+            if (ui != null) { ui.SetHudHidden(hide); ui.ShowStick(false, default, default); ui.SetFire(false, false); }
         }
 
         /// <summary>The week's rule and the tournament on the match's numbers (Docs 3.4).</summary>
@@ -114,6 +124,7 @@ namespace SquashBot.Gameplay
             if (v2Cam != null) Destroy(v2Cam.gameObject);
             v2Cam = null;
             if (cameraRig != null && cameraRig.Cam != null) cameraRig.Cam.enabled = true;
+            V2HideBattleHud(false);
             DuelCoreV2.Running = DuelCoreV2.InGame = false;
             Time.timeScale = 1f;
             if (robot != null) robot.enabled = true;

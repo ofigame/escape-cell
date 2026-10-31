@@ -23,6 +23,8 @@ namespace SquashBot.DuelV2
 
         /// <summary>The buttons pressed this frame (the touch layer; the fight reads and clears them).</summary>
         public FighterInput Pressed = FighterInput.None;
+        /// <summary>The game's screen (uGUI): the words go there instead (the prototype's IMGUI draws nothing then).</summary>
+        public DuelHudV2Ui Ui;
         public bool HoldBlock, HoldLeft, HoldRight;
 
         private static readonly Color HitC = new Color(1f, 0.85f, 0.3f), BlockC = new Color(0.6f, 0.85f, 1f), PerfectC = Color.white,
@@ -41,15 +43,18 @@ namespace SquashBot.DuelV2
                 case HitResult.Clash: word = Loc.T("v2.res.clash"); c = ClashC; break;
                 default: word = Loc.T("v2.res.immune"); c = WhiffC; break;
             }
-            labels.Add(new Label { text = word + (e.damage >= 0.5f ? "  -" + Mathf.RoundToInt(e.damage) : ""), colour = c, at = overHead, born = Time.unscaledTime, size = e.result == HitResult.Perfect || e.move != MoveKind.Chain ? 34 : 26 });
+            string text = word + (e.damage >= 0.5f ? "  -" + Mathf.RoundToInt(e.damage) : "");
+            float size = e.result == HitResult.Perfect || e.move != MoveKind.Chain ? 34 : 26;
+            if (Ui != null) { Ui.Float(text, c, overHead, size); return; }
+            labels.Add(new Label { text = text, colour = c, at = overHead, born = Time.unscaledTime, size = size });
             Log(Loc.T(e.who == 0 ? "v2.log.left" : "v2.log.right") + " " + e.move + " → " + e.result + (e.damage >= 0.5f ? " (" + Mathf.RoundToInt(e.damage) + ")" : "") + (string.IsNullOrEmpty(e.why) ? "" : " · " + e.why));
         }
 
-        public void Float(string text, Color c, Vector3 at, float size = 28f) => labels.Add(new Label { text = text, colour = c, at = at, born = Time.unscaledTime, size = size });
+        public void Float(string text, Color c, Vector3 at, float size = 28f) { if (Ui != null) Ui.Float(text, c, at, size); else labels.Add(new Label { text = text, colour = c, at = at, born = Time.unscaledTime, size = size }); }
 
-        public void Series(int who, int n) { seriesWho = who; seriesValue = n; seriesAt = Time.unscaledTime; }
+        public void Series(int who, int n) { if (Ui != null && who == 0) Ui.Series(n); seriesWho = who; seriesValue = n; seriesAt = Time.unscaledTime; }
 
-        public void Banner(string text, Color c, float seconds) { banner = text; bannerColour = c; bannerUntil = Time.unscaledTime + seconds; }
+        public void Banner(string text, Color c, float seconds) { if (Ui != null) Ui.Banner(text, c, seconds); banner = text; bannerColour = c; bannerUntil = Time.unscaledTime + seconds; }
 
         public void Log(string line)
         {

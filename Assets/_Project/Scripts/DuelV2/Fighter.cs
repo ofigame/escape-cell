@@ -32,6 +32,8 @@ namespace SquashBot.DuelV2
         public int chainStep;
         /// <summary>Rounds won without a scratch (the flawless round's XP).</summary>
         public int flawlessRounds;
+        /// <summary>A live duel: how late this side's taps arrive (s, half its round trip; the server sets it). 0 here.</summary>
+        public float lag;
         /// <summary>This attack's phases (sim time of each start; recovery's end).</summary>
         public float activeAt, recoveryAt, attackEnd;
         /// <summary>The contact was made (whichever result); the result.</summary>

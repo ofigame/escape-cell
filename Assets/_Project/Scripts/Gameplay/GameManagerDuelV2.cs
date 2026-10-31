@@ -29,7 +29,7 @@ namespace SquashBot.Gameplay
             if (lobby != null) { Destroy(lobby.gameObject); lobby = null; }
             ShowMenu();
             if (ui != null && ui.LoginView != null) ui.LoginView.Hide();
-            V2HideScreens();
+            if (prototype) V2HideScreens(); // (the game's own duel tested: its screens as a player sees them)
         }
 
         /// <summary>The game's own screens out of sight (the prototype draws its own).</summary>

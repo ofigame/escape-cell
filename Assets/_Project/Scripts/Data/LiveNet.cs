@@ -188,7 +188,7 @@ namespace SquashBot.Data
         public static void InputV2(DuelV2.FighterInput i)
         {
             int b = (i.attack ? 1 : 0) | (i.block ? 2 : 0) | (i.jump ? 4 : 0) | (i.dodge ? 8 : 0) | (i.special ? 16 : 0) | (i.ulti ? 32 : 0) | (i.context ? 64 : 0) | (i.heart ? 128 : 0);
-            Send("{\"t\":\"in\",\"b\":" + b + ",\"w\":" + I(i.walk) + ",\"p\":" + i.power + "}");
+            Send("{\"t\":\"in\",\"b\":" + b + ",\"w\":" + I(i.walk) + ",\"p\":" + i.power + ",\"r\":" + Mathf.RoundToInt(RttMs) + "}");
         }
 
         /// <summary>The duel: where this game's foi is, its facing, the blows it has swung, and its squad (see HuntSystem.SquadState).</summary>

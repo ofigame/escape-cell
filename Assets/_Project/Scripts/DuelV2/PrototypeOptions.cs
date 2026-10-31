@@ -17,5 +17,7 @@ namespace SquashBot.DuelV2
         public float width = 1.5f;
         public float roundSeconds = 60f;
         public int roundsToWin = 2;
+        /// <summary>The two names on the screen (the game's: foi's player and the rival).</summary>
+        public string[] names = { "", "" };
     }
 }

@@ -31,6 +31,7 @@ namespace SquashBot.DuelV2
         public void MatchDone(DuelSim sim) { } // (its own match panel: again or the menu)
         public bool NextState(out DuelSnapshot state) { state = null; return false; } // (never live)
         public void SendInput(FighterInput input) { }
+        public void PauseAsked() { }
         private string message = "";
 
         /// <summary>The prototype's own speed (slow motion, pause, a frame) times any slow motion the fight asks for.</summary>
@@ -135,6 +136,7 @@ namespace SquashBot.DuelV2
         {
             System.IO.Directory.CreateDirectory(dir);
             AutoDir = dir;
+            gameTest = true; // (no prototype words or buttons over the game)
             var args = System.Environment.GetCommandLineArgs();
             int si = System.Array.IndexOf(args, "-v2Stage"), fi = System.Array.IndexOf(args, "-v2Fam");
             int stage = si >= 0 ? int.Parse(args[si + 1]) : 3, fam = fi >= 0 ? int.Parse(args[fi + 1]) : 0;
@@ -147,7 +149,15 @@ namespace SquashBot.DuelV2
                 ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, "game_" + (n++).ToString("00") + ".png"));
                 DuelFightV2.AutoLog.AppendLine("state " + (Time.realtimeSinceStartup - t0).ToString("0") + "s " + Game.V2GameState);
                 if (DuelCoreV2.InGame) seenFight = true;
-                if (seenFight && Game.V2GameOver) { yield return new WaitForSecondsRealtime(4f); ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, "result.png")); yield return null; break; }
+                if (n == 6 || n == 14)
+                    foreach (var g in FindObjectsByType<UnityEngine.UI.Graphic>(FindObjectsSortMode.None))
+                    {
+                        if (!g.isActiveAndEnabled || g.color.a < 0.05f) continue;
+                        var r = g.rectTransform.rect; var c = g.canvas;
+                        float share = c != null ? r.width * r.height * c.scaleFactor * c.scaleFactor / (Screen.width * (float)Screen.height) : 0f;
+                        if (share > 0.4f) DuelFightV2.AutoLog.AppendLine("big ui: " + g.name + " <" + (g.transform.parent != null ? g.transform.parent.name : "") + "> canvas " + (c != null ? c.name : "-") + " a " + g.color.a.ToString("0.00") + " group " + Alpha(g.transform).ToString("0.00") + " t " + n + " share " + share.ToString("0.00"));
+                    }
+                if (seenFight && Game.V2GameOver) { yield return new WaitForSecondsRealtime(9f); ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, "result.png")); yield return null; break; }
             }
             over = true;
             DuelFightV2.AutoLog.AppendLine("end " + Game.V2GameState);
@@ -155,6 +165,8 @@ namespace SquashBot.DuelV2
             yield return new WaitForSecondsRealtime(0.5f);
             Application.Quit();
         }
+
+        private static float Alpha(Transform t) { float a = 1f; for (; t != null; t = t.parent) { var g = t.GetComponent<CanvasGroup>(); if (g != null) a *= g.alpha; } return a; }
 
         /// <summary>Where the self-test writes (null: not testing).</summary>
         public static string AutoDir;
@@ -219,8 +231,12 @@ namespace SquashBot.DuelV2
 
         private float Scale => Mathf.Max(0.6f, Screen.height / 1170f);
 
+        /// <summary>The game's own duel under test (-v2Game): the prototype draws nothing.</summary>
+        private bool gameTest;
+
         private void OnGUI()
         {
+            if (gameTest) return;
             GUI.skin.label.fontSize = GUI.skin.button.fontSize = GUI.skin.toggle.fontSize = GUI.skin.textField.fontSize = Mathf.RoundToInt(18 * Scale);
             if (State == Phase.Booting || State == Phase.Loading)
             {

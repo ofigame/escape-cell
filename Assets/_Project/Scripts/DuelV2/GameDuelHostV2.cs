@@ -50,6 +50,10 @@ namespace SquashBot.DuelV2
         }
 
         public void SendInput(FighterInput input) => Send?.Invoke(input);
+
+        /// <summary>The screen's pause button: the game's pause screen.</summary>
+        public System.Action Pause;
+        public void PauseAsked() => Pause?.Invoke();
         public void BackToMenu() { }
 
         /// <summary>

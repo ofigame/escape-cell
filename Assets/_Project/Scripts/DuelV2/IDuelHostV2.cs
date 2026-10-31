@@ -24,6 +24,8 @@ namespace SquashBot.DuelV2
         /// <summary>The match is decided and its last moments shown (the knock-out's slow motion, the replay).</summary>
         void MatchDone(DuelSim sim);
         void BackToMenu();
+        /// <summary>The screen's pause button (the game: its pause screen; never in a live duel).</summary>
+        void PauseAsked();
         /// <summary>A live duel: the server's next state (mirrored to this game's side), or false when none came.</summary>
         bool NextState(out DuelSnapshot state);
         /// <summary>A live duel: this game's wishes go to the server (only when they change, and every press).</summary>

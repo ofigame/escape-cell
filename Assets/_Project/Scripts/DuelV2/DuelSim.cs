@@ -350,6 +350,7 @@ namespace SquashBot.DuelV2
             }
             // the window for the chain's next, and the gap after a set (never shorter than a reaction)
             f.windowAt = f.recoveryAt + S.S(S.chainOpenMs);
+            if (f.move == MoveKind.Chain && !lastOfSet && f.lag > 0f) f.attackEnd += f.lag; // (a live duel: the window open as much longer as this side's taps take to arrive; the struck one's stun runs on with it)
             if (lastOfSet)
             {
                 float rec = Mathf.Max(f.attackEnd - f.recoveryAt, (o.stateEnd - Time) + S.S(S.minReactMs) - S.Windup(f.family) - (f.recoveryAt - Time));

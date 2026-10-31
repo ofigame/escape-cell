@@ -68,6 +68,12 @@ namespace SquashBot.DuelV2
             bots[1] = o.mode == PrototypeOptions.Mode.PlayerVsDummy || o.mode == PrototypeOptions.Mode.Live ? null : new DuelBotV2(o.skill[1], o.persona[1], 23);
             MomentsV2.Clear();
             DuelSoundsV2.Warm();
+            if (!proto.IsPrototype)
+            {
+                ui = DuelHudV2Ui.Create(o.names[0], o.names[1], canPause: !live);
+                ui.Paused = () => proto.PauseAsked();
+                hud.Ui = ui;
+            }
             rains = new RainViewV2(game, WorldOf, scale);
             float height = FighterHeight(views[0]);
             if (cam != null) cam.FighterHeight = height;
@@ -131,6 +137,7 @@ namespace SquashBot.DuelV2
             rains.Update(Sim);
             if (cam != null) cam.Rise(Sim.Rains.Count > 0 ? 2.2f * game.V2FighterScale / 3.5f : 0f);
             LastSeconds();
+            ShowScreen();
             if (replayAt > 0f && Time.unscaledTime >= replayAt) { replayAt = -1f; PlayReplay(); }
             if (doneAt > 0f && Time.unscaledTime >= doneAt && (replay == null || replay.Frame() == null)) { doneAt = -1f; proto.MatchDone(Sim); }
         }
@@ -147,7 +154,7 @@ namespace SquashBot.DuelV2
 
         private void OnGUI()
         {
-            if (Sim == null) return;
+            if (Sim == null || ui != null) return; // (the game: its uGUI screen)
             hud.Draw(Sim, cam != null ? cam.Cam : null, proto, S, playerLeft, TopLine());
             if (rains != null && rains.Tint.a > 0.01f) GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), DuelHudV2.Tex(rains.Tint));
             // the ultimate: the world darkened round it; a perfect block: a short white flash
@@ -188,12 +195,42 @@ namespace SquashBot.DuelV2
 
         private bool matchOver;
 
-        private void OnDestroy() { Time.timeScale = 1f; MomentsV2.Clear(); rains?.Clear(); if (replay != null) Destroy(replay.gameObject); }
+        private void OnDestroy() { Time.timeScale = 1f; MomentsV2.Clear(); rains?.Clear(); if (replay != null) Destroy(replay.gameObject); if (ui != null) Destroy(ui.gameObject); }
+
+        /// <summary>The game's screen (uGUI); null in the prototype (its IMGUI).</summary>
+        private DuelHudV2Ui ui;
+
+        /// <summary>The game's screen this frame: the bars and words, the tints (a rain's sky, the ultimate's dark, a perfect block's flash), the replay.</summary>
+        private void ShowScreen()
+        {
+            if (ui == null) return;
+            var c = rains != null ? rains.Tint : Color.clear;
+            c.a *= 0.5f; // (a rain's sky on a phone: a hint, the fight still clear)
+            if (Sim.F[0].state == FighterState.Casting && Sim.F[0].move == MoveKind.Ulti || Sim.F[1].state == FighterState.Casting && Sim.F[1].move == MoveKind.Ulti) c = Color.Lerp(c, new Color(0f, 0f, 0.05f, 0.35f), 0.7f);
+            if (Time.unscaledTime < flashUntil) c = new Color(1f, 1f, 1f, 0.55f * (flashUntil - Time.unscaledTime) / 0.12f);
+            ui.Show(Sim, cam != null ? cam.Cam : null, S, TopLine(), c, replay != null ? replay.Frame() : null);
+            if (playerLeft) ui.ShowButtons(Sim, Sim.F[0], S);
+        }
 
         // ---------- the player ----------
 
         private FighterInput PlayerInput(Fighter me, Fighter o)
         {
+            if (ui != null)
+            {
+                // the game: the thumbs (taps, slides, swipes, the buttons; the touch layer reads A/D, W, S too), and the other keys
+                var t = ui.Read(o.x >= me.x ? 1f : -1f);
+                if (KeysV2.Down(UnityEngine.InputSystem.Key.Space)) t.attack = true;
+                t.block |= KeysV2.Held(UnityEngine.InputSystem.Key.LeftShift) || KeysV2.Held(UnityEngine.InputSystem.Key.RightShift);
+                if (KeysV2.Down(UnityEngine.InputSystem.Key.Q)) t.special = true;
+                if (KeysV2.Down(UnityEngine.InputSystem.Key.E)) t.ulti = true;
+                if (KeysV2.Down(UnityEngine.InputSystem.Key.R)) t.context = true;
+                if (KeysV2.Down(UnityEngine.InputSystem.Key.H)) t.heart = true;
+                if (KeysV2.Down(UnityEngine.InputSystem.Key.Digit1)) t.power = 0;
+                if (KeysV2.Down(UnityEngine.InputSystem.Key.Digit2)) t.power = 1;
+                if (KeysV2.Down(UnityEngine.InputSystem.Key.Digit3)) t.power = 2;
+                return t;
+            }
             var inp = hud.Pressed; hud.Pressed = FighterInput.None;
             if (KeysV2.Down(UnityEngine.InputSystem.Key.Space)) inp.attack = true;
             if (KeysV2.MouseDown && !hud.OverButton(new Vector2(KeysV2.MousePos.x, Screen.height - KeysV2.MousePos.y))) inp.attack = true;
