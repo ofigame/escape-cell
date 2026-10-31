@@ -61,6 +61,25 @@ namespace SquashBot.DuelV2
             int wi2 = System.Array.IndexOf(args, "-v2Width"); if (wi2 >= 0) Options.width = float.Parse(args[wi2 + 1], System.Globalization.CultureInfo.InvariantCulture);
             yield return Begin();
             if (System.Array.IndexOf(args, "-v2Weapons") >= 0 && Fight != null) { yield return Fight.WeaponSheet(dir); OnAutoDone(); Application.Quit(); yield break; }
+            if (System.Array.IndexOf(args, "-v2Panel") >= 0)
+            {
+                // the tuning panel open, saved and read back (its file beside the game)
+                yield return new WaitForSecondsRealtime(3f);
+                panel.Open = true;
+                yield return new WaitForSecondsRealtime(0.5f);
+                ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, "panel.png"));
+                float before = DuelCoreSettings.Current.tempo;
+                DuelCoreSettings.Current.tempo = 1.1f;
+                DuelCoreSettings.Save();
+                DuelCoreSettings.Current.tempo = 0.9f;
+                bool read = DuelCoreSettings.Load();
+                DuelFightV2.AutoLog.AppendLine("panel save/load: file " + DuelCoreSettings.FilePath + " read " + read + " tempo " + DuelCoreSettings.Current.tempo.ToString("0.00"));
+                DuelCoreSettings.Current.tempo = before;
+                System.IO.File.Delete(DuelCoreSettings.FilePath);
+                yield return new WaitForSecondsRealtime(0.3f);
+                panel.Open = false;
+            }
+            if (System.Array.IndexOf(args, "-v2Keys") >= 0) StartCoroutine(PressKeys());
             float t0 = Time.realtimeSinceStartup; int n = 0;
             while (Time.realtimeSinceStartup - t0 < seconds && State == Phase.Fighting)
             {
@@ -70,6 +89,20 @@ namespace SquashBot.DuelV2
             OnAutoDone();
             yield return new WaitForSecondsRealtime(0.5f);
             Application.Quit();
+        }
+
+        /// <summary>The self-test's keys: Space and D pressed and let go through the Input System (the player's keyboard path).</summary>
+        private IEnumerator PressKeys()
+        {
+            var kb = UnityEngine.InputSystem.Keyboard.current ?? UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+            DuelFightV2.AutoLog.AppendLine("keys: keyboard " + kb.displayName);
+            while (State == Phase.Fighting)
+            {
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.Space, UnityEngine.InputSystem.Key.D));
+                yield return new WaitForSecondsRealtime(0.1f);
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState());
+                yield return new WaitForSecondsRealtime(0.25f);
+            }
         }
 
         /// <summary>Where the self-test writes (null: not testing).</summary>
@@ -85,13 +118,13 @@ namespace SquashBot.DuelV2
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.F1)) panel.Open = !panel.Open;
-            if (Input.GetKeyDown(KeyCode.F2)) speed = (speed + 1) % Speeds.Length;
-            if (Input.GetKeyDown(KeyCode.F3)) paused = !paused;
-            stepOnce = paused && Input.GetKeyDown(KeyCode.F4);
-            if (Input.GetKeyDown(KeyCode.F5)) ShowLog = !ShowLog;
-            if (Input.GetKeyDown(KeyCode.F6)) ShowAdvantage = !ShowAdvantage;
-            if (Input.GetKeyDown(KeyCode.F7)) ShowBoxes = !ShowBoxes;
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.F1)) panel.Open = !panel.Open;
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.F2)) speed = (speed + 1) % Speeds.Length;
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.F3)) paused = !paused;
+            stepOnce = paused && KeysV2.Down(UnityEngine.InputSystem.Key.F4);
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.F5)) ShowLog = !ShowLog;
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.F6)) ShowAdvantage = !ShowAdvantage;
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.F7)) ShowBoxes = !ShowBoxes;
             if (State == Phase.Fighting || State == Phase.Menu) Game?.V2HideScreens();
             if (State != Phase.Fighting) Time.timeScale = 1f;
         }

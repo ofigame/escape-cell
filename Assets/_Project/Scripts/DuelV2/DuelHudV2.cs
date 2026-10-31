@@ -192,7 +192,7 @@ namespace SquashBot.DuelV2
         {
             ButtonRects.Add(r);
             GUI.Box(r, text);
-            return Input.GetMouseButton(0) && r.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y));
+            return KeysV2.MouseHeld && r.Contains(new Vector2(KeysV2.MousePos.x, Screen.height - KeysV2.MousePos.y));
         }
 
         public bool OverButton(Vector2 guiPos) { foreach (var r in ButtonRects) if (r.Contains(guiPos)) return true; return false; }

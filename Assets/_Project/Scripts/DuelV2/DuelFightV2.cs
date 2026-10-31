@@ -119,7 +119,7 @@ namespace SquashBot.DuelV2
             {
                 GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), frame, ScaleMode.ScaleAndCrop);
                 GUI.Label(new Rect(0f, Screen.height * 0.08f, Screen.width, 60f), Loc.T("v2.replay"), DuelHudV2.Style(34, Color.white, TextAnchor.MiddleCenter));
-                if (Event.current.type == EventType.MouseDown || Input.GetKeyDown(KeyCode.Space)) replay.Stop();
+                if (Event.current.type == EventType.MouseDown || KeysV2.Down(UnityEngine.InputSystem.Key.Space)) replay.Stop();
                 return;
             }
             if (matchOver) MatchPanel();
@@ -156,22 +156,22 @@ namespace SquashBot.DuelV2
         private FighterInput PlayerInput(Fighter me, Fighter o)
         {
             var inp = hud.Pressed; hud.Pressed = FighterInput.None;
-            if (Input.GetKeyDown(KeyCode.Space)) inp.attack = true;
-            if (Input.GetMouseButtonDown(0) && !hud.OverButton(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y))) inp.attack = true;
-            float world = (Input.GetKey(KeyCode.D) || hud.HoldRight ? 1f : 0f) - (Input.GetKey(KeyCode.A) || hud.HoldLeft ? 1f : 0f);
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.Space)) inp.attack = true;
+            if (KeysV2.MouseDown && !hud.OverButton(new Vector2(KeysV2.MousePos.x, Screen.height - KeysV2.MousePos.y))) inp.attack = true;
+            float world = (KeysV2.Held(UnityEngine.InputSystem.Key.D) || hud.HoldRight ? 1f : 0f) - (KeysV2.Held(UnityEngine.InputSystem.Key.A) || hud.HoldLeft ? 1f : 0f);
             inp.walk = world * (o.x >= me.x ? 1f : -1f);
-            if (Input.GetKeyDown(KeyCode.W)) inp.jump = true;
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.W)) inp.jump = true;
             // S: a tap dodges, held it crouches (the picture's; the rules have no low blows yet)
-            if (Input.GetKeyDown(KeyCode.S)) sHeld = Time.unscaledTime;
-            if (Input.GetKeyUp(KeyCode.S) && sHeld >= 0f) { if (Time.unscaledTime - sHeld < 0.2f) inp.dodge = true; sHeld = -1f; }
-            inp.block |= Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || hud.HoldBlock;
-            if (Input.GetKeyDown(KeyCode.Q)) inp.special = true;
-            if (Input.GetKeyDown(KeyCode.E)) inp.ulti = true;
-            if (Input.GetKeyDown(KeyCode.R)) inp.context = true;
-            if (Input.GetKeyDown(KeyCode.H)) inp.heart = true;
-            if (Input.GetKeyDown(KeyCode.Alpha1)) inp.power = 0;
-            if (Input.GetKeyDown(KeyCode.Alpha2)) inp.power = 1;
-            if (Input.GetKeyDown(KeyCode.Alpha3)) inp.power = 2;
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.S)) sHeld = Time.unscaledTime;
+            if (KeysV2.Up(UnityEngine.InputSystem.Key.S) && sHeld >= 0f) { if (Time.unscaledTime - sHeld < 0.2f) inp.dodge = true; sHeld = -1f; }
+            inp.block |= KeysV2.Held(UnityEngine.InputSystem.Key.LeftShift) || KeysV2.Held(UnityEngine.InputSystem.Key.RightShift) || hud.HoldBlock;
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.Q)) inp.special = true;
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.E)) inp.ulti = true;
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.R)) inp.context = true;
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.H)) inp.heart = true;
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.Digit1)) inp.power = 0;
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.Digit2)) inp.power = 1;
+            if (KeysV2.Down(UnityEngine.InputSystem.Key.Digit3)) inp.power = 2;
             return inp;
         }
 
