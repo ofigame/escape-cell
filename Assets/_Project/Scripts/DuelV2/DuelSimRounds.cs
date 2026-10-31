@@ -20,6 +20,8 @@ namespace SquashBot.DuelV2
         /// <summary>The round just won was flawless (no damage taken); the match was a comeback (0–1, then won).</summary>
         public bool LastRoundFlawless { get; private set; }
         public bool Comeback { get; private set; }
+        /// <summary>The last round was decided in the golden round.</summary>
+        public bool LastRoundGolden { get; private set; }
         private float phaseEnd;
         private int lastHitter = -1;
         private bool behind0, behind1;
@@ -128,6 +130,8 @@ namespace SquashBot.DuelV2
             w.roundsWon++;
             LastRoundWinner = who;
             LastRoundFlawless = w.roundDamage <= 0.01f;
+            LastRoundGolden = why.StartsWith("golden");
+            if (LastRoundFlawless) w.flawlessRounds++;
             Phase = RoundPhase.Over;
             phaseEnd = Time + S.roundWinPose + 1.5f;
             ClearRains();

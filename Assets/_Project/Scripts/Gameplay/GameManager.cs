@@ -1600,7 +1600,14 @@ namespace SquashBot.Gameplay
 
         private void Update()
         {
-            if (DuelV2.DuelCoreV2.Running) return; // (the duel fight core v2's prototype fights: the game's own duel waits)
+            if (DuelV2.DuelCoreV2.Running)
+            {
+                // the v2 core fights: the game's own duel waits (the prototype scene: everything does)
+                if (!DuelV2.DuelCoreV2.InGame) return;
+                HandleBackButton();
+                V2GameTick();
+                return;
+            }
             UpdateFortressView();
             HandleBackButton();
             WatchArmyFromMenu();

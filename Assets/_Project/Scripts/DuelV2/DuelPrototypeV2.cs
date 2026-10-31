@@ -10,7 +10,7 @@ namespace SquashBot.DuelV2
     /// the bot, the stage and its width, the rounds), the live tuning panel (F1), slow motion (F2), pause and frame by
     /// frame (F3 / F4) and the helpers (F5 hit log, F6 advantage bar, F7 boxes). The game sets the duel up; this takes it.
     /// </summary>
-    public class DuelPrototypeV2 : MonoBehaviour
+    public class DuelPrototypeV2 : MonoBehaviour, IDuelHostV2
     {
         public enum Phase { Booting, Menu, Loading, Fighting }
 
@@ -23,7 +23,12 @@ namespace SquashBot.DuelV2
         private static readonly float[] Speeds = { 1f, 0.5f, 0.25f };
         private int speed;
         private bool paused, stepOnce;
-        [System.NonSerialized] public bool ShowLog, ShowAdvantage = true, ShowBoxes; // (never kept in the scene: the code's defaults)
+        public bool ShowLog { get; set; }
+        public bool ShowAdvantage { get; set; } = true;
+        public bool ShowBoxes { get; set; } // (properties: never kept in the scene, the code's defaults)
+        public DuelCoreSettings Settings => DuelCoreSettings.Current; // (the live-tuned numbers)
+        public bool IsPrototype => true;
+        public void MatchDone(DuelSim sim) { } // (its own match panel: again or the menu)
         private string message = "";
 
         /// <summary>The prototype's own speed (slow motion, pause, a frame) times any slow motion the fight asks for.</summary>
@@ -36,6 +41,9 @@ namespace SquashBot.DuelV2
             Application.runInBackground = true;
             while ((Game = FindAnyObjectByType<GameManager>()) == null) yield return null;
             yield return new WaitForSeconds(4f); // (the game's own start: its world, its screens)
+            var startArgs = System.Environment.GetCommandLineArgs();
+            int gi = System.Array.IndexOf(startArgs, "-v2Game");
+            if (gi >= 0) { Game.V2Boot(prototype: false); StartCoroutine(GameAuto(startArgs[gi + 1], float.Parse(startArgs[gi + 2], System.Globalization.CultureInfo.InvariantCulture))); yield break; }
             Game.V2Boot();
             yield return new WaitForSeconds(0.5f);
             Game.V2HideScreens();
@@ -113,6 +121,36 @@ namespace SquashBot.DuelV2
                 UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState());
                 yield return new WaitForSecondsRealtime(0.25f);
             }
+        }
+
+        /// <summary>
+        /// The game's own v2 duel tested (-v2Game dir seconds [-v2Stage n] [-v2Fam f]): a challenge duel against the
+        /// computer as the menu starts it, a bot fighting for foi; pictures every 2 s, the game's state, the events and the
+        /// result screen; then it quits.
+        /// </summary>
+        private IEnumerator GameAuto(string dir, float seconds)
+        {
+            System.IO.Directory.CreateDirectory(dir);
+            AutoDir = dir;
+            var args = System.Environment.GetCommandLineArgs();
+            int si = System.Array.IndexOf(args, "-v2Stage"), fi = System.Array.IndexOf(args, "-v2Fam");
+            int stage = si >= 0 ? int.Parse(args[si + 1]) : 3, fam = fi >= 0 ? int.Parse(args[fi + 1]) : 0;
+            bool over = false;
+            StartCoroutine(Game.V2GameDuel(stage, fam, () => over));
+            float t0 = Time.realtimeSinceStartup; int n = 0; bool seenFight = false;
+            while (Time.realtimeSinceStartup - t0 < seconds)
+            {
+                yield return new WaitForSecondsRealtime(2f);
+                ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, "game_" + (n++).ToString("00") + ".png"));
+                DuelFightV2.AutoLog.AppendLine("state " + (Time.realtimeSinceStartup - t0).ToString("0") + "s " + Game.V2GameState);
+                if (DuelCoreV2.InGame) seenFight = true;
+                if (seenFight && Game.V2GameOver) { yield return new WaitForSecondsRealtime(4f); ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, "result.png")); yield return null; break; }
+            }
+            over = true;
+            DuelFightV2.AutoLog.AppendLine("end " + Game.V2GameState);
+            System.IO.File.WriteAllText(System.IO.Path.Combine(dir, "events.txt"), DuelFightV2.AutoLog.ToString());
+            yield return new WaitForSecondsRealtime(0.5f);
+            Application.Quit();
         }
 
         /// <summary>Where the self-test writes (null: not testing).</summary>

@@ -150,7 +150,9 @@ namespace SquashBot.Gameplay
             levelTps = false; // (the duel is always seen from the board's camera)
             zoneRadius = 99f; zoneDrawn = -1; zoneHurtMe = zoneHurtFoe = 0f; zoneAnnounced = false;
             hunt.Unsafe = null;
+            DuelStands.LineWidth = V2BoardWidth; // (the v2 duel's platform wider along the line: built so)
             BuildCourtyard();
+            DuelStands.LineWidth = 1f;
             chDuelMe = chDuelThem = 0;
             ResetOvertime();
             chDuelLeft = chDuelMinutes * 60f;
@@ -171,7 +173,8 @@ namespace SquashBot.Gameplay
             RefreshSquadBar();
             hunt.Freeze(); // nobody moves while it counts down
             chPhase = ChPhase.Lobby; // the count first
-            cameraRig.StartCoroutine(DuelOpening());
+            if (V2Duel) V2GameBegin(); // (the v2 core's own round intro and 3-2-1)
+            else cameraRig.StartCoroutine(DuelOpening());
             AudioManager.PlaySfx(Sfx.Win, 0.6f, 0.9f);
         }
 

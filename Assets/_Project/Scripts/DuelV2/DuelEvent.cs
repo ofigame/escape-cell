@@ -3,6 +3,7 @@ using UnityEngine;
 namespace SquashBot.DuelV2
 {
     /// <summary>One thing that happened in a v2 tick: who, what, the result, the damage, where.</summary>
+    [System.Serializable]
     public struct DuelEvent
     {
         public DuelEventKind kind;

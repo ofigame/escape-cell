@@ -57,7 +57,7 @@ namespace SquashBot.DuelV2
             if (log.Count > 10) log.RemoveAt(0);
         }
 
-        public void Draw(DuelSim sim, Camera cam, DuelPrototypeV2 proto, DuelCoreSettings s, bool playerLeft, string topLine)
+        public void Draw(DuelSim sim, Camera cam, IDuelHostV2 proto, DuelCoreSettings s, bool playerLeft, string topLine)
         {
             float k = Mathf.Max(0.6f, Screen.height / 1170f);
             ButtonRects.Clear();
@@ -128,7 +128,7 @@ namespace SquashBot.DuelV2
             if (playerLeft) Buttons(sim, sim.F[0], k, s);
         }
 
-        private void ReachBox(DuelSim sim, Fighter f, Camera cam, DuelPrototypeV2 proto, DuelCoreSettings s)
+        private void ReachBox(DuelSim sim, Fighter f, Camera cam, IDuelHostV2 proto, DuelCoreSettings s)
         {
             var fight = proto.Fight; if (fight == null) return;
             var a = cam.WorldToScreenPoint(fight.WorldOf(f.x)); var b = cam.WorldToScreenPoint(fight.WorldOf(f.x + f.facing * sim.ReachOf(f.family)));

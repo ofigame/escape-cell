@@ -2,6 +2,9 @@ using System;
 using System.IO;
 using UnityEngine;
 
+// (also built into the game's server, Ofigame.FoiApi: the same numbers on both sides of a live duel; the file and the
+// editor's parts are the game's alone)
+
 namespace SquashBot.DuelV2
 {
     /// <summary>
@@ -10,7 +13,9 @@ namespace SquashBot.DuelV2
     /// the camera's cuts and slow motions, the platform's width. The prototype edits them live (F1) and saves them to
     /// DuelCoreSettings.json beside the game; a saved file overrides the defaults below.
     /// </summary>
+#if UNITY_5_3_OR_NEWER
     [CreateAssetMenu(menuName = "foi/Duel/Core Settings V2", fileName = "DuelCoreSettings")]
+#endif
     public class DuelCoreSettings : ScriptableObject
     {
         [Header("Tempo")]
@@ -198,6 +203,7 @@ namespace SquashBot.DuelV2
         [Tooltip("The platform's width along the fighters' line (x the stage's own)")]
         public float platformWidth = 1.5f;
 
+#if UNITY_5_3_OR_NEWER
         // ---------- Loading, saving ----------
 
         private static DuelCoreSettings current;
@@ -213,6 +219,9 @@ namespace SquashBot.DuelV2
                 return current;
             }
         }
+
+        /// <summary>A match's own numbers: the code's defaults alone (never the prototype's file), free to change for one match.</summary>
+        public static DuelCoreSettings Fresh() => CreateInstance<DuelCoreSettings>();
 
         /// <summary>Beside the game (the build's folder; the project's in the editor).</summary>
         public static string FilePath => Path.GetFullPath(Path.Combine(Application.dataPath, "..", "DuelCoreSettings.json"));
@@ -233,6 +242,10 @@ namespace SquashBot.DuelV2
             JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(fresh), Current);
             Destroy(fresh);
         }
+
+#else
+        public static DuelCoreSettings Fresh() => new DuelCoreSettings();
+#endif
 
         // ---------- Reading ----------
 

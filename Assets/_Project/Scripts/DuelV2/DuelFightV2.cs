@@ -12,7 +12,7 @@ namespace SquashBot.DuelV2
     public class DuelFightV2 : MonoBehaviour
     {
         public DuelSim Sim { get; private set; }
-        private DuelPrototypeV2 proto;
+        private IDuelHostV2 proto;
         private GameManager game;
         private readonly FighterViewV2[] views = new FighterViewV2[2];
         private readonly DuelBotV2[] bots = new DuelBotV2[2];
@@ -25,9 +25,9 @@ namespace SquashBot.DuelV2
         private Vector3 centre, line;
         private float sHeld = -1f;
         private bool playerLeft;
-        private DuelCoreSettings S => DuelCoreSettings.Current;
+        private DuelCoreSettings S => proto.Settings;
 
-        public static DuelFightV2 Begin(DuelPrototypeV2 proto, DuelCameraV2 cam)
+        public static DuelFightV2 Begin(IDuelHostV2 proto, DuelCameraV2 cam)
         {
             var go = new GameObject("DuelFightV2");
             var f = go.AddComponent<DuelFightV2>();
@@ -101,7 +101,6 @@ namespace SquashBot.DuelV2
             var a = playerLeft ? PlayerInput(Sim.F[0], Sim.F[1]) : bots[0].Think(Sim, Sim.F[0], Sim.F[1]);
             var b = bots[1] != null ? bots[1].Think(Sim, Sim.F[1], Sim.F[0]) : FighterInput.None;
             Sim.Tick(Time.deltaTime, a, b);
-            if (AutoLog.Length < 60000 && Sim.F[1].x - Sim.F[0].x < S.bodyGap * Sim.Height * 0.9f && Sim.F[0].state != FighterState.Jumping && Sim.F[1].state != FighterState.Jumping) AutoLog.AppendLine("close " + Sim.Time.ToString("0.00") + " gap " + ((Sim.F[1].x - Sim.F[0].x) / Sim.Height).ToString("0.00") + "h " + Sim.F[0].state + "/" + Sim.F[1].state);
             foreach (var e in Sim.Events) Show(e);
             Sim.Events.Clear();
             Countdown();
@@ -110,7 +109,10 @@ namespace SquashBot.DuelV2
             if (cam != null) cam.Rise(Sim.Rains.Count > 0 ? 2.2f * game.V2FighterScale / 3.5f : 0f);
             LastSeconds();
             if (replayAt > 0f && Time.unscaledTime >= replayAt) { replayAt = -1f; PlayReplay(); }
+            if (doneAt > 0f && Time.unscaledTime >= doneAt && (replay == null || replay.Frame() == null)) { doneAt = -1f; proto.MatchDone(Sim); }
         }
+
+        private float doneAt = -1f;
 
         private void LateUpdate()
         {
@@ -136,7 +138,7 @@ namespace SquashBot.DuelV2
                 if (Event.current.type == EventType.MouseDown || KeysV2.Down(UnityEngine.InputSystem.Key.Space)) replay.Stop();
                 return;
             }
-            if (matchOver) MatchPanel();
+            if (matchOver && proto.IsPrototype) MatchPanel();
         }
 
         /// <summary>The line over the bars: the round, its clock, each side's rounds won.</summary>
@@ -297,6 +299,7 @@ namespace SquashBot.DuelV2
                     break;
                 case DuelEventKind.MatchOver:
                     matchOver = true;
+                    doneAt = Time.unscaledTime + S.koSlow + 2.5f + (replay != null && S.replay ? S.replaySeconds * 1.6f : 0f); // (the knock-out's slow motion, the pose, the replay: then the match is handed back)
                     hud.Banner(Sim.Comeback ? Loc.T("v2.comeback") : Loc.T(e.who == 0 && playerLeft ? "v2.youWin" : e.who == 1 && playerLeft ? "v2.youLose" : e.who == 0 ? "v2.leftWins" : "v2.rightWins"), Color.white, 4f);
                     if (mv.Weapon != null) mv.Weapon.Flourish();
                     break;
@@ -522,6 +525,7 @@ namespace SquashBot.DuelV2
         {
             matchOver = false;
             replayDone = false;
+            doneAt = -1f;
             Sim = new DuelSim(S, proto.Options.family, proto.Options.tier, Sim.HalfLength, Sim.Height);
             foreach (var v in views) if (v.Skin != null) v.Skin.CleanSlate();
             if (cam != null) cam.Focus(Vector3.zero, 0f);

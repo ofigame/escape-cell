@@ -791,6 +791,7 @@ namespace SquashBot.Gameplay
         /// <summary>Leaving a challenge (the menu): the board and its screens go; a match the server knows of is lost.</summary>
         private void EndChallenge()
         {
+            if (DuelV2.DuelCoreV2.InGame) V2GameRelease(); // (the v2 fight left mid-match)
             if (ui != null && ui.DuelRewardsView != null) ui.DuelRewardsView.Hide(); // (left another way: the end screen goes too)
             EndTutorial(false);
             EndTraining();

@@ -7,6 +7,7 @@ namespace SquashBot.DuelV2
     /// reference health of its league tier, its shield, bar, hearts and powers, what it is doing and for how long, its
     /// attack (kind, chain step, contact made, taps), its series, what the context button offers it.
     /// </summary>
+    [System.Serializable]
     public class Fighter
     {
         public int index;
@@ -29,6 +30,8 @@ namespace SquashBot.DuelV2
         public MoveKind move;
         /// <summary>The chain blow (0, 1, 2 within the set).</summary>
         public int chainStep;
+        /// <summary>Rounds won without a scratch (the flawless round's XP).</summary>
+        public int flawlessRounds;
         /// <summary>This attack's phases (sim time of each start; recovery's end).</summary>
         public float activeAt, recoveryAt, attackEnd;
         /// <summary>The contact was made (whichever result); the result.</summary>
@@ -66,7 +69,7 @@ namespace SquashBot.DuelV2
         // ---------- moves on cooldowns, powers ----------
         public float specialReadyAt;
         public float powerReadyAt;
-        public readonly List<ElementKind> powers = new List<ElementKind>();
+        public List<ElementKind> powers = new List<ElementKind>(); // (not readonly: a live duel's state is read into it)
         /// <summary>Slowed by snow until (walk and moves a little slower).</summary>
         public float slowUntil;
 

@@ -16,8 +16,9 @@ namespace SquashBot.Gameplay
     public partial class GameManager
     {
         /// <summary>The prototype's start: offline (the bot rival at once), no menus or screens of the game's own.</summary>
-        internal void V2Boot()
+        internal void V2Boot(bool prototype = true)
         {
+            DuelCoreV2.PrototypeScene = prototype;
             var fn = typeof(FoiNet);
             fn.GetField("devServerRead", BindingFlags.NonPublic | BindingFlags.Static)?.SetValue(null, true);
             fn.GetField("devServer", BindingFlags.NonPublic | BindingFlags.Static)?.SetValue(null, "http://127.0.0.1:9");
@@ -84,6 +85,32 @@ namespace SquashBot.Gameplay
             V2HideScreens();
             done(true);
         }
+
+        /// <summary>
+        /// The self-test of the game's own v2 duel (-v2Game): a challenge duel against the computer started as the menu
+        /// would, on this stage with a weapon of this family; foi fought by a bot too.
+        /// </summary>
+        internal IEnumerator V2GameDuel(int stage, int family, System.Func<bool> stop)
+        {
+            TestStage = Mathf.Clamp(stage, 0, DuelStages.Length - 1);
+            var mine = V2Weapon(family, 3);
+            if (mine != null) { PlayerPrefs.SetInt("sb_weapon_own_" + mine.id, 1); Armory.Equip(mine); }
+            GameDuelHostV2.BotPlaysFoi = true;
+            ShowMenu();
+            yield return new WaitForSeconds(0.5f);
+            if (chUi == null) InitChallenge();
+            chMode = 1; chDuelMinutes = 3;
+            StartChallenge(false);
+            while (!stop())
+            {
+                if (ui.Briefing.IsOpen) ui.Briefing.SendMessage("Finish");
+                yield return null;
+            }
+        }
+
+        /// <summary>Where the game's duel is (the self-test's log): its phase, the v2 core on or off.</summary>
+        internal string V2GameState => "phase " + chPhase + " v2 " + DuelCoreV2.InGame + " run " + challengeRun + " score " + chDuelMe + "-" + chDuelThem;
+        internal bool V2GameOver => chPhase == ChPhase.Done;
 
         /// <summary>The prototype gives the duel back (to the menu).</summary>
         internal void V2Release()

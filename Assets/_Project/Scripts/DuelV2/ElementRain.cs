@@ -7,13 +7,14 @@ namespace SquashBot.DuelV2
     /// circle (where on the line, how wide; locked for snow and fire, following its target for lightning), when the
     /// warning ends, the drops' times and how many have fallen, each drop's share of the damage (the last one twice).
     /// </summary>
+    [System.Serializable]
     public class ElementRain
     {
         public ElementKind kind;
         public int caster, target;
         public float centre, radius;
         public float warnEnd;
-        public readonly List<float> dropAt = new List<float>();
+        public List<float> dropAt = new List<float>();
         public int fallen;
         /// <summary>A plain drop's damage (% of the reference health); the last one does twice this.</summary>
         public float dropPct;
