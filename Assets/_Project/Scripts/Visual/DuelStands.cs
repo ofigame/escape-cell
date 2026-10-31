@@ -678,6 +678,7 @@ namespace SquashBot.Visual
                 pb = BoundsOf(plat);
                 float kp = Mathf.Max(hw, hd) * 2f * 1.28f / Mathf.Max(pb.size.x, pb.size.z);
                 plat.localScale = new Vector3(kp, kp * look.thick, kp);
+                if (LineWidth != 1f) { var lz = plat.InverseTransformDirection(Vector3.forward); plat.localScale = Vector3.Scale(plat.localScale, Vector3.one + new Vector3(Mathf.Abs(lz.x), Mathf.Abs(lz.y), Mathf.Abs(lz.z)) * (LineWidth - 1f)); } // (stretched along the fighters' line only)
                 pb = BoundsOf(plat);
                 plat.position += new Vector3(centre.x - pb.center.x, 0f, centre.z - pb.center.z);
                 // its walking surface: the highest of several points across it (an inlaid emblem in the middle may sit lower)
@@ -1322,6 +1323,10 @@ namespace SquashBot.Visual
             marbles.Add(tex);
             return tex;
         }
+
+        /// <summary>The duel fight core v2's prototype: the platform this much wider along the fighters' line (the screen's left to
+        /// right); 1 everywhere else.</summary>
+        public static float LineWidth = 1f;
 
         private Transform MadeModel(Transform p, Look look, string name, bool runes, bool matte = false)
         {

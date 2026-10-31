@@ -19,13 +19,17 @@ namespace SquashBot.DuelV2
         /// <summary>Half the line's length (world units from the middle to an end).</summary>
         public float HalfLength;
         public DuelCoreSettings S;
+        /// <summary>A fighter's height (world units): the reach and the bodies' gap are shares of it.</summary>
+        public float Height = 6.5f;
+        public float ReachOf(int family) => S.Reach(family, Height);
 
         private const float OfferSeconds = 0.75f;
 
-        public DuelSim(DuelCoreSettings settings, int[] family, int[] tier, float halfLength)
+        public DuelSim(DuelCoreSettings settings, int[] family, int[] tier, float halfLength, float height = 6.5f)
         {
             S = settings;
             HalfLength = halfLength;
+            Height = height;
             for (int i = 0; i < 2; i++)
             {
                 var f = new Fighter { index = i, family = Mathf.Clamp(family[i], 0, 3), tier = Mathf.Clamp(tier[i], 1, 5) };
@@ -41,7 +45,7 @@ namespace SquashBot.DuelV2
         /// <summary>Both back on their marks, facing each other, standing.</summary>
         public void PlaceForRound()
         {
-            float start = Mathf.Min(HalfLength * 0.55f, 3.2f);
+            float start = Mathf.Min(HalfLength * 0.7f, Mathf.Max(ReachOf(F[0].family), ReachOf(F[1].family)) * 0.5f + Height * 0.35f); // (just out of each other's reach)
             F[0].x = -start; F[1].x = start;
             foreach (var f in F)
             {
@@ -241,7 +245,7 @@ namespace SquashBot.DuelV2
 
         private bool InReach(Fighter f, Fighter o)
         {
-            float reach = S.reach[f.family] + (f.move == MoveKind.Special ? 1f : 0f) + (f.move == MoveKind.PowerHit ? 0.4f : 0f);
+            float reach = ReachOf(f.family) * (f.move == MoveKind.Special ? 1.25f : f.move == MoveKind.PowerHit ? 1.1f : 1f);
             float d = (o.x - f.x) * f.facing;
             return d > -0.2f && d <= reach;
         }
@@ -428,7 +432,7 @@ namespace SquashBot.DuelV2
         private void Separate()
         {
             var a = F[0]; var b = F[1];
-            float gap = S.bodyGap;
+            float gap = S.bodyGap * Height;
             float d = b.x - a.x;
             if (Mathf.Abs(d) >= gap) return;
             if (a.state == FighterState.Airborne || b.state == FighterState.Airborne || a.state == FighterState.Jumping || b.state == FighterState.Jumping) return;

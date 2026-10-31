@@ -38,12 +38,12 @@ namespace SquashBot.DuelV2
             if (persona == BotPersonality.Spam)
             {
                 // a finger on the screen without end: closer, and tap, tap, tap
-                inp.walk = Mathf.Abs(o.x - me.x) > s.reach[me.family] * 0.85f ? 1f : 0f;
+                inp.walk = Mathf.Abs(o.x - me.x) > sim.ReachOf(me.family) * 0.85f ? 1f : 0f;
                 inp.attack = R < 0.55f;
                 return inp;
             }
             float dist = Mathf.Abs(o.x - me.x);
-            float reach = s.reach[me.family];
+            float reach = sim.ReachOf(me.family);
 
             // within the chain: tap in the window (with a human's timing), sometimes too early
             if (me.Attacking && me.move == MoveKind.Chain)
@@ -83,7 +83,7 @@ namespace SquashBot.DuelV2
 
             if (!me.Free) return inp;
             bool otherOpen = (o.state == FighterState.Recovery && (o.lastResult == HitResult.Whiff || o.lastResult == HitResult.Blocked || o.lastResult == HitResult.Perfect)) || o.state == FighterState.Staggered || o.state == FighterState.Casting && o.move != MoveKind.Ulti;
-            bool otherComing = o.state == FighterState.Windup && dist <= s.reach[o.family] + 0.4f;
+            bool otherComing = o.state == FighterState.Windup && dist <= sim.ReachOf(o.family) + 0.4f;
             float defend = persona == BotPersonality.Defensive ? 0.75f : persona == BotPersonality.Aggressive ? 0.35f : 0.55f;
 
             // the other is winding up at it: shield, dodge or strike first

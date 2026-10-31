@@ -41,7 +41,7 @@ namespace SquashBot.Gameplay
         /// A duel set up on <paramref name="stage"/> with these weapons (family, the league tier's weapon tier), then taken
         /// over: true when the two stand on their marks and the v2 core has them.
         /// </summary>
-        internal IEnumerator V2SetupDuel(int stage, int[] family, int[] tier, System.Action<bool> done)
+        internal IEnumerator V2SetupDuel(int stage, int[] family, int[] tier, System.Action<bool> done, float width = 1f)
         {
             DuelCoreV2.Running = false;
             Time.timeScale = 1f;
@@ -53,6 +53,7 @@ namespace SquashBot.Gameplay
             yield return new WaitForSeconds(0.5f);
             if (chUi == null) InitChallenge();
             chMode = 1; chDuelMinutes = 3;
+            DuelStands.LineWidth = width; // (the platform wider along the line: built so, then back to the game's own)
             StartChallenge(false);
             float until = Time.realtimeSinceStartup + 45f;
             while (!(chPhase == ChPhase.Lobby && duelCountdown) && Time.realtimeSinceStartup < until)
@@ -61,6 +62,7 @@ namespace SquashBot.Gameplay
                 V2HideScreens();
                 yield return null;
             }
+            DuelStands.LineWidth = 1f;
             if (!(chPhase == ChPhase.Lobby && duelCountdown)) { done(false); yield break; }
             // the takeover: the game's own duel stops where it stands
             cameraRig.StopAllCoroutines();

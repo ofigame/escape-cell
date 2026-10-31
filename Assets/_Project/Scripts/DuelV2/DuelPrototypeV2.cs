@@ -58,7 +58,9 @@ namespace SquashBot.DuelV2
             int si = System.Array.IndexOf(args, "-v2Stage"); if (si >= 0) Options.stage = int.Parse(args[si + 1]);
             int ri = System.Array.IndexOf(args, "-v2RoundSec"); if (ri >= 0) Options.roundSeconds = float.Parse(args[ri + 1], System.Globalization.CultureInfo.InvariantCulture);
             int fi = System.Array.IndexOf(args, "-v2Fam"); if (fi >= 0) { Options.family[0] = args[fi + 1][0] - '0'; Options.family[1] = args[fi + 1][1] - '0'; }
+            int wi2 = System.Array.IndexOf(args, "-v2Width"); if (wi2 >= 0) Options.width = float.Parse(args[wi2 + 1], System.Globalization.CultureInfo.InvariantCulture);
             yield return Begin();
+            if (System.Array.IndexOf(args, "-v2Weapons") >= 0 && Fight != null) { yield return Fight.WeaponSheet(dir); OnAutoDone(); Application.Quit(); yield break; }
             float t0 = Time.realtimeSinceStartup; int n = 0;
             while (Time.realtimeSinceStartup - t0 < seconds && State == Phase.Fighting)
             {
@@ -99,7 +101,7 @@ namespace SquashBot.DuelV2
             State = Phase.Loading;
             message = Loc.T("v2.loading");
             bool ok = false;
-            yield return Game.V2SetupDuel(Options.stage, Options.family, Options.tier, r => ok = r);
+            yield return Game.V2SetupDuel(Options.stage, Options.family, Options.tier, r => ok = r, Options.width);
             if (!ok) { message = Loc.T("v2.loadFailed"); State = Phase.Menu; Game.V2Release(); yield break; }
             message = "";
             State = Phase.Fighting;

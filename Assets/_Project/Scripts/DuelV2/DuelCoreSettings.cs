@@ -25,8 +25,12 @@ namespace SquashBot.DuelV2
         public float[] hitStunMs = { 260f, 290f, 330f, 360f };
         [Tooltip("The blocker's push back on a block")]
         public float[] blockPushMs = { 180f, 190f, 200f, 210f };
-        [Tooltip("Reach, centre to centre (world units)")]
-        public float[] reach = { 2.3f, 3.0f, 2.5f, 2.6f };
+        [Tooltip("The weapon's seen length, a share of the fighter's height (Docs 7.2: sword 55-65%, axe/heavy 50-60%, spear 100-110%)")]
+        public float[] weaponLength = { 0.6f, 1.05f, 0.55f, 0.55f };
+        [Tooltip("The arm's reach from the body's middle to the fist (share of the height)")]
+        public float armReach = 0.22f;
+        [Tooltip("The blow lands with this much of the weapon (the reach: arm + weapon x this; what is seen is what reaches)")]
+        public float tipShare = 0.9f;
         [Tooltip("A missed blow's recovery, more (ms)")]
         public float whiffExtraMs = 120f;
         [Tooltip("No window the other can answer in is shorter than this (ms; the live match's lag)")]
@@ -116,8 +120,8 @@ namespace SquashBot.DuelV2
         public float jumpSeconds = 0.6f;
         [Tooltip("Walk speed (units/s)")]
         public float walkSpeed = 4.2f;
-        [Tooltip("Bodies never closer than this (centre to centre)")]
-        public float bodyGap = 1.5f;
+        [Tooltip("Bodies never closer than this (centre to centre, share of the height)")]
+        public float bodyGap = 0.34f;
 
         [Header("Bar (ultimate)")]
         [Tooltip("Bar parts gained per hit dealt / per hit taken / per perfect block")]
@@ -235,5 +239,7 @@ namespace SquashBot.DuelV2
         public float Recovery(int f) => S(recoveryMs[f]);
         public float HitStun(int f) => Mathf.Max(S(hitStunMs[f]), S(minReactMs));
         public float BlockPush(int f) => S(blockPushMs[f]);
+        /// <summary>A family's reach (world units) for a fighter this tall: the arm, then the weapon as it is seen.</summary>
+        public float Reach(int f, float height) => (armReach + weaponLength[f] * tipShare) * height;
     }
 }

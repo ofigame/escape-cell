@@ -131,7 +131,7 @@ namespace SquashBot.DuelV2
         private void ReachBox(DuelSim sim, Fighter f, Camera cam, DuelPrototypeV2 proto, DuelCoreSettings s)
         {
             var fight = proto.Fight; if (fight == null) return;
-            var a = cam.WorldToScreenPoint(fight.WorldOf(f.x)); var b = cam.WorldToScreenPoint(fight.WorldOf(f.x + f.facing * s.reach[f.family]));
+            var a = cam.WorldToScreenPoint(fight.WorldOf(f.x)); var b = cam.WorldToScreenPoint(fight.WorldOf(f.x + f.facing * sim.ReachOf(f.family)));
             float y = Screen.height - a.y;
             var col = f.state == FighterState.Active ? new Color(1f, 0.2f, 0.2f, 0.7f) : f.state == FighterState.Windup ? new Color(1f, 0.8f, 0.2f, 0.6f) : new Color(1f, 1f, 1f, 0.35f);
             GUI.DrawTexture(new Rect(Mathf.Min(a.x, b.x), y - 4f, Mathf.Abs(b.x - a.x), 8f), Tex(col));

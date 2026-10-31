@@ -17,12 +17,58 @@ namespace SquashBot.DuelV2
     {
         public readonly Transform Root, Look;
         public readonly SkinnedHero Skin;
-        public readonly HeldWeapon Weapon;
+        public HeldWeapon Weapon { get; private set; }
         private ShieldHold shield;
         private readonly GameManager game;
         private readonly Vector3 centre, line;
         private readonly float scale;
         private FighterState shown = FighterState.Idle;
+        public int Family;
+
+        /// <summary>Another weapon in the hand (the weapons' sheet): the old one gone, the new one fitted from scratch.</summary>
+        public void Hold(Data.WeaponDef w)
+        {
+            if (Look == null || w == null) return;
+            foreach (var h in Look.GetComponentsInChildren<HeldWeapon>(true)) Object.Destroy(h.gameObject);
+            Weapon = HeldWeapon.Attach(Look, w);
+            weaponLength0 = -1f; weaponFitted = -1f;
+        }
+        private Vector3 weaponScale0;
+        private float weaponLength0 = -1f, weaponFitted = -1f;
+
+        /// <summary>
+        /// The weapon at its seen length (Docs 7.2: a share of the fighter's height; the scale only, never the model): the
+        /// rules' reach is worked out from the same length, so what is seen is what reaches.
+        /// </summary>
+        public void FitWeapon(float length)
+        {
+            if (Weapon == null || length <= 0f || Mathf.Abs(length - weaponFitted) < 0.001f) return;
+            if (weaponLength0 < 0f) { weaponScale0 = Weapon.transform.localScale; weaponLength0 = LengthOf(Weapon.transform); }
+            if (weaponLength0 <= 0.0001f) return;
+            Weapon.transform.localScale = weaponScale0 * (length / weaponLength0);
+            weaponFitted = length;
+        }
+
+        /// <summary>A weapon's longest extent in the world (its meshes, in its own frame, at its present scale).</summary>
+        public static float LengthOf(Transform w)
+        {
+            var min = Vector3.one * float.MaxValue; var max = Vector3.one * float.MinValue;
+            bool any = false;
+            foreach (var mf in w.GetComponentsInChildren<MeshFilter>())
+            {
+                if (mf.sharedMesh == null) continue;
+                var b = mf.sharedMesh.bounds;
+                for (int i = 0; i < 8; i++)
+                {
+                    var c = b.center + Vector3.Scale(b.extents, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1));
+                    var p = w.InverseTransformPoint(mf.transform.TransformPoint(c));
+                    min = Vector3.Min(min, p); max = Vector3.Max(max, p); any = true;
+                }
+            }
+            if (!any) return 0f;
+            var size = Vector3.Scale(max - min, w.lossyScale);
+            return Mathf.Max(size.x, Mathf.Max(size.y, size.z));
+        }
 
         public FighterViewV2(GameManager game, Transform root, Transform look, HeldWeapon weapon, Vector3 centre, Vector3 line, float scale)
         {

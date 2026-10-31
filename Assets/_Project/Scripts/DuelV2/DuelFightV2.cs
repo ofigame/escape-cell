@@ -43,11 +43,13 @@ namespace SquashBot.DuelV2
             S.platformWidth = o.width;
             S.roundSeconds = o.roundSeconds; S.roundsToWin = o.roundsToWin;
             float half = 5.5f * o.width;
-            Sim = new DuelSim(S, o.family, o.tier, half);
             float scale = game.V2FighterScale;
             views[0] = new FighterViewV2(game, game.V2MeRoot, game.V2MeLook, game.V2MeWeapon, centre, line, scale);
             var foeLook = game.V2FoeRoot != null ? game.V2FoeRoot.GetComponentInChildren<Visual.SkinnedHero>()?.transform.parent : null;
             views[1] = new FighterViewV2(game, game.V2FoeRoot, foeLook != null ? foeLook : game.V2FoeRoot, game.V2FoeWeapon, centre, line, scale);
+            float tall = FighterHeight(views[0]);
+            Sim = new DuelSim(S, o.family, o.tier, half, tall);
+            for (int i = 0; i < 2; i++) views[i].Family = o.family[i];
             playerLeft = o.mode != PrototypeOptions.Mode.BotVsBot;
             bots[0] = playerLeft ? null : new DuelBotV2(o.skill[0], o.persona[0], 11);
             bots[1] = o.mode == PrototypeOptions.Mode.PlayerVsDummy ? null : new DuelBotV2(o.skill[1], o.persona[1], 23);
@@ -82,13 +84,14 @@ namespace SquashBot.DuelV2
         {
             if (Sim == null) return;
             Time.timeScale = MomentsV2.Scale(proto.ToolScale);
+            if (Frozen) { for (int i = 0; i < 2; i++) { views[i].Update(Sim.F[i], Sim.F[1 - i], Sim); views[i].FitWeapon(S.weaponLength[Sim.F[i].family] * Sim.Height); } return; }
             var a = playerLeft ? PlayerInput(Sim.F[0], Sim.F[1]) : bots[0].Think(Sim, Sim.F[0], Sim.F[1]);
             var b = bots[1] != null ? bots[1].Think(Sim, Sim.F[1], Sim.F[0]) : FighterInput.None;
             Sim.Tick(Time.deltaTime, a, b);
             foreach (var e in Sim.Events) Show(e);
             Sim.Events.Clear();
             Countdown();
-            for (int i = 0; i < 2; i++) views[i].Update(Sim.F[i], Sim.F[1 - i], Sim);
+            for (int i = 0; i < 2; i++) { views[i].Update(Sim.F[i], Sim.F[1 - i], Sim); views[i].FitWeapon(S.weaponLength[Sim.F[i].family] * Sim.Height); }
             rains.Update(Sim);
             if (cam != null) cam.Rise(Sim.Rains.Count > 0 ? 2.2f * game.V2FighterScale / 3.5f : 0f);
             LastSeconds();
@@ -98,7 +101,8 @@ namespace SquashBot.DuelV2
         private void LateUpdate()
         {
             if (cam == null || Sim == null) return;
-            cam.Follow(WorldOf(Sim.F[0].x), WorldOf(Sim.F[1].x), Time.unscaledDeltaTime);
+            if (Frozen) cam.Follow(WorldOf(Sim.F[0].x - 0.6f), WorldOf(Sim.F[0].x + 0.6f), Time.unscaledDeltaTime); // (the weapons' sheet: foi alone)
+            else cam.Follow(WorldOf(Sim.F[0].x), WorldOf(Sim.F[1].x), Time.unscaledDeltaTime);
             if (replay != null) replay.Record(WorldOf(Sim.F[0].x), WorldOf(Sim.F[1].x));
         }
 
@@ -352,12 +356,44 @@ namespace SquashBot.DuelV2
 
         private void HeartSecond() => Audio.AudioManager.PlaySfx(Audio.Sfx.Impact, 0.25f, 0.42f);
 
+        /// <summary>The weapons' sheet (Docs 7.2): every hand weapon in foi's hand, standing and mid-blow, fitted to its family's length.</summary>
+        /// <summary>The rules stand still (the weapons' sheet): the two only shown where they are.</summary>
+        public bool Frozen;
+
+        public System.Collections.IEnumerator WeaponSheet(string dir)
+        {
+            while (Sim.Phase != RoundPhase.Fight) yield return null;
+            Frozen = true;
+            Sim.F[0].x = 0f; Sim.F[0].facing = 1;
+            Sim.F[1].x = Sim.HalfLength * 3f; // (the rival out of the way)
+            if (cam != null) cam.Zoom(0.3f);
+            int n = 0;
+            foreach (var w in Data.Armory.All)
+            {
+                if (w.kind == Data.WeaponKind.Gun) continue;
+                int fam = (int)Data.Armory.Family(w);
+                views[0].Hold(w);
+                Sim.F[0].family = fam;
+                yield return new WaitForSecondsRealtime(0.35f);
+                views[0].FitWeapon(S.weaponLength[fam] * Sim.Height);
+                if (cam != null) cam.Focus(views[0].Chest, 0.6f);
+                yield return new WaitForSecondsRealtime(0.25f);
+                ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, "w" + (n).ToString("00") + "_" + w.id + "_rest.png"));
+                yield return new WaitForSecondsRealtime(0.2f);
+                if (views[0].Weapon != null) views[0].Weapon.Swing();
+                yield return new WaitForSecondsRealtime(0.11f);
+                ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, "w" + (n++).ToString("00") + "_" + w.id + "_blow.png"));
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
+            AutoLog.AppendLine("weapons " + n + " height " + Sim.Height.ToString("0.00"));
+        }
+
         /// <summary>A new match on the same stage.</summary>
         public void Restart()
         {
             matchOver = false;
             replayDone = false;
-            Sim = new DuelSim(S, proto.Options.family, proto.Options.tier, Sim.HalfLength);
+            Sim = new DuelSim(S, proto.Options.family, proto.Options.tier, Sim.HalfLength, Sim.Height);
             foreach (var v in views) if (v.Skin != null) v.Skin.CleanSlate();
             if (cam != null) cam.Focus(Vector3.zero, 0f);
             MomentsV2.Clear();
