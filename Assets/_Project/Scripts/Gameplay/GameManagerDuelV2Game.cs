@@ -19,7 +19,7 @@ namespace SquashBot.Gameplay
         private DuelCameraV2 v2Cam;
 
         /// <summary>This duel is fought by the v2 core (against the computer: here; live: the server runs it, protocol 10).</summary>
-        private bool V2Duel => DuelCoreV2.Enabled && !DuelCoreV2.PrototypeScene && challengeRun;
+        private bool V2Duel => DuelCoreV2.Enabled && !DuelCoreV2.PrototypeScene && challengeRun && !trainingOn && !LabOn; // (the training room and the lab: the old moves' own panels)
 
         /// <summary>The platform's width along the fighters' line for the duel about to be built (1: the old duel's).</summary>
         private float V2BoardWidth => V2Duel ? DuelCoreSettings.Fresh().platformWidth : 1f;
@@ -36,6 +36,7 @@ namespace SquashBot.Gameplay
             o.skill[1] = GameDuelHostV2.SkillOf(botTuning);
             o.persona[1] = GameDuelHostV2.PersonaOf(botTuning);
             if (LiveActive) o.mode = PrototypeOptions.Mode.Live; // (the server runs the rules: this game shows its states)
+            else if (tutorialOn) { o.skill[1] = 0.05f; o.persona[1] = BotPersonality.Balanced; o.tier[1] = o.tier[0]; } // (the first duel: a rival that gives the player time)
             else if (GameDuelHostV2.BotPlaysFoi) { o.mode = PrototypeOptions.Mode.BotVsBot; o.skill[0] = 0.6f; }
             o.names[0] = Challenge.PlayerName;
             o.names[1] = rival != null ? rival.name : Loc.T("v2.side.rival");
@@ -110,8 +111,20 @@ namespace SquashBot.Gameplay
         /// <summary>Each frame while the v2 core fights a game duel: the back button, the pause (the fight stands still).</summary>
         private void V2GameTick()
         {
+            V2TutorialHints();
             if (v2Host != null) v2Host.Paused = State == GameState.Paused && !LiveActive; // (a live duel never stands still)
             if (LiveActive) UpdateLive();
+        }
+
+        /// <summary>The first duel's hints, one after another over the fight (tap, the chain, the shield, the slides), then quiet.</summary>
+        private void V2TutorialHints()
+        {
+            var screen = v2Host != null && v2Host.Fight != null ? v2Host.Fight.GameScreen : null;
+            if (screen == null || !tutorialOn) return;
+            var sim = v2Host.Fight.Sim;
+            if (sim == null || sim.Round > 1 || sim.Phase == RoundPhase.Intro || sim.Phase == RoundPhase.Countdown) { screen.Status(""); return; }
+            int hint = 1 + Mathf.FloorToInt(Mathf.Max(0f, sim.Time - 5f) / 6f);
+            screen.Status(hint <= 4 ? Loc.T("v2.tut." + hint) : "");
         }
 
         /// <summary>A live duel's state from the server: into the fight's queue.</summary>

@@ -199,6 +199,7 @@ namespace SquashBot.DuelV2
 
         /// <summary>The game's screen (uGUI); null in the prototype (its IMGUI).</summary>
         private DuelHudV2Ui ui;
+        public DuelHudV2Ui GameScreen => ui;
 
         /// <summary>The game's screen this frame: the bars and words, the tints (a rain's sky, the ultimate's dark, a perfect block's flash), the replay.</summary>
         private void ShowScreen()

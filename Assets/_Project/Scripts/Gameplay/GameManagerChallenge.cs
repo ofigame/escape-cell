@@ -289,6 +289,7 @@ namespace SquashBot.Gameplay
                     LiveNet.Msg matched = null;
                     yield return LiveSearch(token, m => matched = m);
                     if (LobbyOver(token)) { LiveNet.Close(); chPhase = ChPhase.Off; yield break; }
+                    if (matched != null && matched.v2 != 1) { LiveNet.Close(); matched = null; } // (a server without the v2 rules yet: the computer instead)
                     if (matched != null) { yield return FoiNet.CancelAhead(); yield return StartLive(matched, world, token); yield break; }
                 }
                 yield return LobbyAhead(ahead, token, started);
@@ -335,6 +336,7 @@ namespace SquashBot.Gameplay
                 LiveNet.Msg matched = null;
                 yield return LiveSearch(token, m => matched = m);
                 if (LobbyOver(token)) { LiveNet.Close(); chPhase = ChPhase.Off; yield break; }
+                if (matched != null && matched.v2 != 1) { LiveNet.Close(); matched = null; } // (a server without the v2 rules yet: the computer instead)
                 if (matched != null) { yield return StartLive(matched, world, token); yield break; }
             }
             if (chFriend == 3)

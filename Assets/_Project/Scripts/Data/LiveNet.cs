@@ -46,6 +46,8 @@ namespace SquashBot.Data
             public int w = -1, on;
             /// <summary>"matched": the server's duel table (JSON) when this game's is another version; else empty.</summary>
             public string rules;
+            /// <summary>"matched" from a server running the v2 rules (protocol 10): 1. An older server: 0 (no live duel then).</summary>
+            public int v2;
             public FoiNet.Rival rival;
             public FoiNet.Profile profile;
             [NonSerialized] public string raw;

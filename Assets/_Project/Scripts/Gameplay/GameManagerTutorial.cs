@@ -41,6 +41,7 @@ namespace SquashBot.Gameplay
             tutJumped = false;
             tutSwept = false;
             BuildDuelBoard(3);
+            if (DuelV2.DuelCoreV2.InGame) return; // (the v2 duel: an easy rival and the hints over the fight; it counts as done at its end)
             tutHand = TutorialHand.Create(skillBar.Root);
             var skip = UI.Flat.Button(skillBar.Root, Loc.T("tut.skip"), new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(240f, 84f), new Color(0.15f, 0.18f, 0.3f, 0.9f), UI.Flat.Text, () => EndTutorial(true), 32f);
             ((RectTransform)skip.transform).pivot = new Vector2(0.5f, 0.5f);
