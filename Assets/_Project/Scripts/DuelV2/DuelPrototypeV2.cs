@@ -91,6 +91,7 @@ namespace SquashBot.DuelV2
             float t0 = Time.realtimeSinceStartup; int n = 0;
             while (Time.realtimeSinceStartup - t0 < seconds && State == Phase.Fighting)
             {
+                if (n == 2 && Fight != null) DuelFightV2.AutoLog.AppendLine("facing: " + Fight.Facing());
                 yield return new WaitForSecondsRealtime(2f);
                 ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, "fight_" + (n++).ToString("00") + ".png"));
             }

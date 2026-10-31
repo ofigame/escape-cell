@@ -90,7 +90,11 @@ namespace SquashBot.DuelV2
             Root.position = new Vector3(at.x, Root.position.y, at.z);
             var face = line * f.facing;
             if (f.state != FighterState.Airborne && f.state != FighterState.Down && f.state != FighterState.KO)
+            {
                 Root.rotation = Quaternion.Slerp(Root.rotation, Quaternion.LookRotation(face), 1f - Mathf.Exp(-18f * Time.deltaTime));
+                // the body straight on its root (the old duel's lobby turned foi's body to the camera and left it so)
+                if (Look != null && Look != Root && Look.IsChildOf(Root)) Look.localRotation = Quaternion.Slerp(Look.localRotation, Quaternion.identity, 1f - Mathf.Exp(-18f * Time.deltaTime));
+            }
             if (shield == null && Look != null) shield = Look.GetComponentInChildren<ShieldHold>();
             if (shield != null) shield.Guarding = f.ShieldUp;
             shown = f.state;

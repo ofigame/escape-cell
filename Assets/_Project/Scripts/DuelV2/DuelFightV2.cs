@@ -65,6 +65,18 @@ namespace SquashBot.DuelV2
         /// <summary>The fight's first moment (the rounds' intro from Faz 4 on).</summary>
         private void OnStarted() { }
 
+        /// <summary>Where each fighter's parts look (the self-test): root, look, body, against the line and the camera.</summary>
+        public string Facing()
+        {
+            var sb = new System.Text.StringBuilder("line " + line + " cam " + (cam != null && cam.Cam != null ? cam.Cam.transform.forward.ToString() : "-"));
+            for (int i = 0; i < 2; i++)
+            {
+                var v = views[i];
+                sb.Append(" | " + i + " facing " + Sim.F[i].facing + " root " + v.Root.name + " " + v.Root.forward + " look " + (v.Look != null ? v.Look.name + " " + v.Look.forward : "-") + " skin " + (v.Skin != null ? v.Skin.name + " " + v.Skin.transform.forward : "-"));
+            }
+            return sb.ToString();
+        }
+
         /// <summary>A fighter's height (its body's top over its feet).</summary>
         private static float FighterHeight(FighterViewV2 v)
         {
