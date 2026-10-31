@@ -19,6 +19,7 @@ namespace SquashBot.DuelV2
         public readonly SkinnedHero Skin;
         public HeldWeapon Weapon { get; private set; }
         private ShieldHold shield;
+        private readonly OffHandGuardV2 guard;
         private readonly GameManager game;
         private readonly Vector3 centre, line;
         private readonly float scale;
@@ -75,6 +76,7 @@ namespace SquashBot.DuelV2
             this.game = game; Root = root; Look = look; Weapon = weapon; this.centre = centre; this.line = line; this.scale = scale;
             Skin = look != null ? look.GetComponentInChildren<SkinnedHero>() : null;
             shield = look != null ? look.GetComponentInChildren<ShieldHold>() : null;
+            guard = OffHandGuardV2.On(Skin, root);
         }
 
         public Vector3 World(float x) => new Vector3(centre.x, Root != null ? Root.position.y : centre.y, centre.z) + line * x;
@@ -97,6 +99,7 @@ namespace SquashBot.DuelV2
             }
             if (shield == null && Look != null) shield = Look.GetComponentInChildren<ShieldHold>();
             if (shield != null) shield.Guarding = f.ShieldUp;
+            if (guard != null) guard.Wanted = f.state != FighterState.Airborne && f.state != FighterState.Down && f.state != FighterState.GettingUp && f.state != FighterState.KO && f.state != FighterState.Casting;
             shown = f.state;
         }
 
@@ -120,10 +123,31 @@ namespace SquashBot.DuelV2
                     if (Skin != null) Skin.Hop(0.6f, windup + 0.1f);
                     break;
                 default:
+                    // the body swings it (the arm's own cut or thrust, the weapon riding in the fist), else the weapon alone
+                    SwungByBody = Skin != null && Skin.PlayChainAction(ChainBlow(f), windup);
                     Weapon.SwingToContact(windup);
                     break;
             }
             DuelSoundsV2.Play(f.family == 0 ? DuelSoundV2.SwingSword : f.family == 1 ? DuelSoundV2.SwingSpear : f.family == 2 ? DuelSoundV2.SwingAxe : DuelSoundV2.SwingHeavy, 0.7f, 0.06f);
+        }
+
+        /// <summary>The last plain blow was swung by the body's clip (the self-test checks it).</summary>
+        public bool SwungByBody { get; private set; }
+
+        /// <summary>
+        /// The plain chain's blow for the body: a spear thrusts, a sword cuts then thrusts, an axe and a heavy weapon cut;
+        /// the set's third the family's finishing blow (where it has one).
+        /// </summary>
+        private static DuelAction ChainBlow(Fighter f)
+        {
+            if (f.chainStep >= 2)
+            {
+                var finish = f.family == 0 ? DuelAction.ChainFinishSword : f.family == 1 ? DuelAction.ChainFinishSpear : f.family == 2 ? DuelAction.ChainFinishAxe : DuelAction.ChainFinishHeavy;
+                if (SkinnedHero.HasAction(finish)) return finish;
+            }
+            if (f.family == 1) return DuelAction.ChainStab;
+            if (f.family == 0 && f.chainStep % 2 == 1) return DuelAction.ChainStab;
+            return DuelAction.ChainSlash;
         }
 
         /// <summary>This fighter was struck (or its blow was met): its body answers.</summary>

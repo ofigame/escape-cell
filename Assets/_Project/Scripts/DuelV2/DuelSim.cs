@@ -70,7 +70,7 @@ namespace SquashBot.DuelV2
             for (int i = 0; i < 2; i++) entered[i] = Advance(F[i], F[1 - i]);
             ResolveContacts(entered);
             for (int i = 0; i < 2; i++) Move(F[i], F[1 - i], inputs[i], dt);
-            Separate();
+            Separate(dt);
             for (int i = 0; i < 2; i++)
             {
                 var f = F[i];
@@ -429,16 +429,34 @@ namespace SquashBot.DuelV2
             if (f.x > lim || f.x < -lim) { f.x = Mathf.Clamp(f.x, -lim, lim); OnWall(f); }
         }
 
-        private void Separate()
+        /// <summary>
+        /// The two bodies never in each other: their middles at least the body gap apart (a jump may pass over, a launch
+        /// may not); round one lying on the ground more (its body along the floor), the lying one slid away (the standing
+        /// one held back) at a rate, never a jump; what a wall keeps one from taking the other takes.
+        /// </summary>
+        private void Separate(float dt)
         {
             var a = F[0]; var b = F[1];
-            float gap = S.bodyGap * Height;
+            if (a.state == FighterState.Jumping || b.state == FighterState.Jumping) return;
+            bool aLying = Lying(a), bLying = Lying(b);
+            float gap = (S.bodyGap + (aLying || bLying ? S.lyingGap : 0f)) * Height;
             float d = b.x - a.x;
             if (Mathf.Abs(d) >= gap) return;
-            if (a.state == FighterState.Airborne || b.state == FighterState.Airborne || a.state == FighterState.Jumping || b.state == FighterState.Jumping) return;
-            float mid = (a.x + b.x) * 0.5f, sign = d >= 0f ? 1f : -1f;
-            a.x = mid - sign * gap * 0.5f; b.x = mid + sign * gap * 0.5f;
+            float sign = Mathf.Abs(d) > 1e-4f ? Mathf.Sign(d) : a.facing >= 0 ? 1f : -1f;
+            float need = gap - Mathf.Abs(d);
+            float step = aLying || bLying ? Mathf.Min(need, S.lyingPushRate * Height * dt) : need;
+            float shareA = aLying && !bLying ? 0.8f : bLying && !aLying ? 0.2f : 0.5f;
+            float lim = HalfLength - 0.3f;
+            float na = Mathf.Clamp(a.x - sign * step * shareA, -lim, lim);
+            float nb = Mathf.Clamp(b.x + sign * step * (1f - shareA), -lim, lim);
+            float left = step - Mathf.Abs(na - a.x) - Mathf.Abs(nb - b.x);
+            if (left > 1e-5f) { float nb2 = Mathf.Clamp(nb + sign * left, -lim, lim); left -= Mathf.Abs(nb2 - nb); nb = nb2; }
+            if (left > 1e-5f) na = Mathf.Clamp(na - sign * left, -lim, lim);
+            a.x = na; b.x = nb;
         }
+
+        /// <summary>On the ground (knocked down or out): its body lies along the floor.</summary>
+        private static bool Lying(Fighter f) => f.state == FighterState.Down || f.state == FighterState.KO;
 
         /// <summary>Pushed away from <paramref name="from"/> by <paramref name="dist"/> over a short time.</summary>
         private void Push(Fighter f, Fighter from, float dist)

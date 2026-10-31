@@ -26,7 +26,7 @@ namespace SquashBot.DuelV2
         [Tooltip("The blocker's push back on a block")]
         public float[] blockPushMs = { 180f, 190f, 200f, 210f };
         [Tooltip("The weapon's seen length, a share of the fighter's height (Docs 7.2: sword 55-65%, axe/heavy 50-60%, spear 100-110%)")]
-        public float[] weaponLength = { 0.6f, 1.0f, 0.6f, 0.6f };
+        public float[] weaponLength = { 0.72f, 1.05f, 0.72f, 0.72f };
         [Tooltip("The arm's reach from the body's middle to the fist (share of the height)")]
         public float armReach = 0.22f;
         [Tooltip("The blow lands with this much of the weapon (the reach: arm + weapon x this; what is seen is what reaches)")]
@@ -122,6 +122,10 @@ namespace SquashBot.DuelV2
         public float walkSpeed = 4.2f;
         [Tooltip("Bodies never closer than this (centre to centre, share of the height)")]
         public float bodyGap = 0.34f;
+        [Tooltip("More room while one lies on the ground (its body along the floor), share of the height")]
+        public float lyingGap = 0.6f;
+        [Tooltip("How fast the two are slid apart round a lying body (heights per second): no jump")]
+        public float lyingPushRate = 4f;
 
         [Header("Bar (ultimate)")]
         [Tooltip("Bar parts gained per hit dealt / per hit taken / per perfect block")]

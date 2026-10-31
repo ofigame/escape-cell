@@ -69,6 +69,7 @@ namespace SquashBot.DuelV2
             int wi2 = System.Array.IndexOf(args, "-v2Width"); if (wi2 >= 0) Options.width = float.Parse(args[wi2 + 1], System.Globalization.CultureInfo.InvariantCulture);
             yield return Begin();
             if (System.Array.IndexOf(args, "-v2Weapons") >= 0 && Fight != null) { yield return Fight.WeaponSheet(dir); OnAutoDone(); Application.Quit(); yield break; }
+            if (System.Array.IndexOf(args, "-v2Pose") >= 0 && Fight != null) { yield return Fight.PoseSheet(dir); OnAutoDone(); Application.Quit(); yield break; }
             if (System.Array.IndexOf(args, "-v2Panel") >= 0)
             {
                 // the tuning panel open, saved and read back (its file beside the game)

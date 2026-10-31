@@ -101,6 +101,7 @@ namespace SquashBot.DuelV2
             var a = playerLeft ? PlayerInput(Sim.F[0], Sim.F[1]) : bots[0].Think(Sim, Sim.F[0], Sim.F[1]);
             var b = bots[1] != null ? bots[1].Think(Sim, Sim.F[1], Sim.F[0]) : FighterInput.None;
             Sim.Tick(Time.deltaTime, a, b);
+            if (AutoLog.Length < 60000 && Sim.F[1].x - Sim.F[0].x < S.bodyGap * Sim.Height * 0.9f && Sim.F[0].state != FighterState.Jumping && Sim.F[1].state != FighterState.Jumping) AutoLog.AppendLine("close " + Sim.Time.ToString("0.00") + " gap " + ((Sim.F[1].x - Sim.F[0].x) / Sim.Height).ToString("0.00") + "h " + Sim.F[0].state + "/" + Sim.F[1].state);
             foreach (var e in Sim.Events) Show(e);
             Sim.Events.Clear();
             Countdown();
@@ -399,6 +400,121 @@ namespace SquashBot.DuelV2
                 yield return new WaitForSecondsRealtime(0.5f);
             }
             AutoLog.AppendLine("weapons " + n + " height " + Sim.Height.ToString("0.00"));
+        }
+
+        /// <summary>
+        /// The self-test's poses (-v2Pose): the two face to face at striking distance, each family's weapon in both hands'
+        /// sides, at rest and through a blow (wind-up, contact, after), from the side; the off arm's place logged.
+        /// </summary>
+        public System.Collections.IEnumerator PoseSheet(string dir)
+        {
+            while (Sim.Phase != RoundPhase.Fight) yield return null;
+            Frozen = true;
+            if (cam != null) cam.Zoom(0f);
+            for (int fam = 0; fam < 4; fam++)
+            {
+                var w = Data.Armory.All.Find(x => x.kind != Data.WeaponKind.Gun && (int)Data.Armory.Family(x) == fam);
+                for (int i = 0; i < 2; i++) { views[i].Hold(w); Sim.F[i].family = fam; }
+                float d = Sim.ReachOf(fam) * 0.95f;
+                Sim.F[0].x = -d * 0.5f; Sim.F[0].facing = 1; Sim.F[1].x = d * 0.5f; Sim.F[1].facing = -1;
+                yield return new WaitForSecondsRealtime(0.5f);
+                if (cam != null) cam.Focus((views[0].Chest + views[1].Chest) * 0.5f, 0.5f);
+                yield return new WaitForSecondsRealtime(0.4f);
+                ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, "pose_" + fam + "_rest.png"));
+                if (cam != null) { cam.Zoom(0.5f); cam.Focus(views[1].Chest, 1f); }
+                yield return new WaitForSecondsRealtime(0.5f);
+                ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, "pose_" + fam + "_rival.png"));
+                yield return null;
+                if (cam != null) { cam.Zoom(0f); cam.Focus((views[0].Chest + views[1].Chest) * 0.5f, 0.5f); }
+                yield return new WaitForSecondsRealtime(0.4f);
+                AutoLog.AppendLine("pose fam " + fam + " " + w.id + ": " + OffArm(views[0]) + " | " + OffArm(views[1]));
+                if (fam == 0 || fam == 2) { Around(0, dir, "around_" + fam + "_me"); Around(1, dir, "around_" + fam + "_rival"); }
+                for (int i = 0; i < 2; i++)
+                {
+                    float windup = S.Windup(fam);
+                    views[i].OnSwing(Sim.F[i], new DuelEvent { kind = DuelEventKind.Swing, who = i, move = MoveKind.Chain }, windup);
+                    float t0 = Time.realtimeSinceStartup;
+                    float[] at = { windup * 0.5f, windup, windup + S.S(S.activeMs[fam]) + 0.06f };
+                    for (int k = 0; k < at.Length; k++)
+                    {
+                        while (Time.realtimeSinceStartup - t0 < at[k]) yield return null;
+                        ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, "pose_" + fam + "_" + (i == 0 ? "L" : "R") + k + ".png"));
+                        yield return null;
+                    }
+                    AutoLog.AppendLine("  swing " + (i == 0 ? "L" : "R") + " by body " + views[i].SwungByBody + " contact: " + OffArm(views[i]));
+                    yield return new WaitForSecondsRealtime(0.8f);
+                }
+            }
+        }
+
+        /// <summary>The off (left) hand's place against the chest, in body heights (sunk into the trunk when small), and its arm's scale.</summary>
+        private string OffArm(FighterViewV2 v)
+        {
+            if (v.Skin == null) return "no skin";
+            Transform Find(string end) { foreach (var t in v.Skin.GetComponentsInChildren<Transform>(true)) if (t.name.EndsWith(":" + end) || t.name == end) return t; return null; }
+            var hand = Find("LeftHand"); var chest = Find("Spine2") ?? Find("Spine1"); var arm = Find("LeftArm");
+            if (hand == null || chest == null) return "no bones";
+            float h = Mathf.Max(0.01f, Sim.Height);
+            var local = v.Root.InverseTransformPoint(hand.position) - v.Root.InverseTransformPoint(chest.position);
+            var shield = v.Skin.GetComponent<Visual.ShieldHold>();
+            return "hand-chest " + (Vector3.Distance(hand.position, chest.position) / h).ToString("0.00") + "h local " + (local / h).ToString("0.00") + " armScale " + (arm != null ? arm.lossyScale.x.ToString("0.000") : "-") + " shield " + (shield != null && shield.Carried) + " twoHanded " + v.Skin.TwoHandedNow;
+        }
+
+        /// <summary>
+        /// The left forearm's skin as drawn (the self-test): for each skinned mesh, how many of its points the forearm
+        /// carries and how far their middle sits from the forearm bone (in body heights), with the blend shapes' weights.
+        /// </summary>
+        public string ArmMesh(int i)
+        {
+            var v = views[i];
+            if (v.Skin == null) return "no skin";
+            var sb = new System.Text.StringBuilder();
+            foreach (var smr in v.Skin.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
+                var mesh = smr.sharedMesh;
+                if (mesh == null) continue;
+                int fore = System.Array.FindIndex(smr.bones, b => b != null && (b.name == "LeftForeArm" || b.name.EndsWith(":LeftForeArm")));
+                sb.Append(" [" + smr.name + " on " + smr.enabled + "/" + smr.gameObject.activeInHierarchy + " v" + mesh.vertexCount);
+                for (int s = 0; s < mesh.blendShapeCount; s++) if (smr.GetBlendShapeWeight(s) > 0.01f) sb.Append(" " + mesh.GetBlendShapeName(s) + "=" + smr.GetBlendShapeWeight(s).ToString("0"));
+                if (fore >= 0)
+                {
+                    var baked = new Mesh(); smr.BakeMesh(baked, true);
+                    var pts = baked.vertices; var bw = mesh.boneWeights;
+                    Vector3 sum = Vector3.zero; int n = 0;
+                    for (int k = 0; k < bw.Length && k < pts.Length; k++) if (bw[k].boneIndex0 == fore && bw[k].weight0 > 0.5f) { sum += smr.transform.TransformPoint(pts[k]); n++; }
+                    if (n > 0) sb.Append(" foreL pts " + n + " off " + (Vector3.Distance(sum / n, smr.bones[fore].position) / Mathf.Max(0.01f, Sim.Height)).ToString("0.00") + "h");
+                    Destroy(baked);
+                }
+                sb.Append("]");
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>A picture of fighter <paramref name="i"/> from its front, its left and its right (the self-test), each its own file.</summary>
+        public void Around(int i, string dir, string tag)
+        {
+            var v = views[i];
+            var go = new GameObject("PoseCam");
+            var c = go.AddComponent<Camera>();
+            c.fieldOfView = 35f; c.nearClipPlane = 0.05f;
+            var rt = new RenderTexture(480, 720, 24);
+            c.targetTexture = rt;
+            float h = Sim.Height;
+            var mid = v.Root.position + Vector3.up * h * 0.55f;
+            var sides = new[] { ("front", v.Root.forward), ("left", -v.Root.right), ("right", v.Root.right) };
+            foreach (var (name, dirV) in sides)
+            {
+                go.transform.position = mid + dirV * h * 2.2f;
+                go.transform.LookAt(mid);
+                c.Render();
+                RenderTexture.active = rt;
+                var tex = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
+                tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); tex.Apply();
+                System.IO.File.WriteAllBytes(System.IO.Path.Combine(dir, tag + "_" + name + ".png"), tex.EncodeToPNG());
+                Destroy(tex);
+            }
+            RenderTexture.active = null;
+            c.targetTexture = null; Destroy(rt); Destroy(go);
         }
 
         /// <summary>A new match on the same stage.</summary>
