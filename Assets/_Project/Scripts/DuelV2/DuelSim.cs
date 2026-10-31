@@ -35,7 +35,7 @@ namespace SquashBot.DuelV2
                 f.hearts = S.heartsPerMatch;
                 F[i] = f;
             }
-            PlaceForRound();
+            BeginMatch();
         }
 
         /// <summary>Both back on their marks, facing each other, standing.</summary>
@@ -361,6 +361,7 @@ namespace SquashBot.DuelV2
             if (f.series >= 2) Emit(DuelEventKind.Series, f.index, count: f.series);
             OnSeries(f);
             if (o.hp <= 0f) KnockOut(f, o);
+            else NoteHit(f);
         }
 
         /// <summary>The blow's damage share (% of the reference health) by its kind.</summary>
@@ -383,6 +384,7 @@ namespace SquashBot.DuelV2
             o.hp = Mathf.Max(0f, o.hp - dmg);
             o.damageTaken += dmg;
             o.lastDamagedAt = Time;
+            o.roundDamage += dmg;
             return dmg;
         }
 

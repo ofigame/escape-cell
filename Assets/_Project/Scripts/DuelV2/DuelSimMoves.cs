@@ -40,13 +40,5 @@ namespace SquashBot.DuelV2
             if (o.hp <= 0f) { KnockOut(f, o); return; }
             Fall(o, f);
         }
-
-        private void TryHeart(Fighter f)
-        {
-            if (f.hearts <= 0 || !f.Free || f.hp >= f.maxHp - 0.5f) return;
-            f.hearts--;
-            f.hp = Mathf.Min(f.maxHp, f.hp + f.maxHp * S.heartShare);
-            Emit(DuelEventKind.Heart, f.index, count: f.hearts);
-        }
     }
 }

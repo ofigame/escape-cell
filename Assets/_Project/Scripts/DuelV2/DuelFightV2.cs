@@ -66,6 +66,7 @@ namespace SquashBot.DuelV2
             Sim.Tick(Time.deltaTime, a, b);
             foreach (var e in Sim.Events) Show(e);
             Sim.Events.Clear();
+            Countdown();
             for (int i = 0; i < 2; i++) views[i].Update(Sim.F[i], Sim.F[1 - i], Sim);
         }
 
@@ -79,10 +80,32 @@ namespace SquashBot.DuelV2
         {
             if (Sim == null) return;
             hud.Draw(Sim, cam != null ? cam.Cam : null, proto, S, playerLeft, TopLine());
+            if (matchOver) MatchPanel();
         }
 
-        /// <summary>The line over the bars (the rounds' from Faz 4 on).</summary>
-        private string TopLine() => "";
+        /// <summary>The line over the bars: the round, its clock, each side's rounds won.</summary>
+        private string TopLine()
+        {
+            string dots(Fighter f) { var sb = new System.Text.StringBuilder(); for (int i = 0; i < S.roundsToWin; i++) sb.Append(i < f.roundsWon ? "●" : "○"); return sb.ToString(); }
+            int secs = Mathf.CeilToInt(Mathf.Max(0f, Sim.RoundLeft));
+            string clock = Sim.Golden ? Loc.T("v2.golden") + " " + secs : secs.ToString();
+            return dots(Sim.F[0]) + "   " + Loc.F("v2.round", Sim.Round) + "  " + clock + "   " + dots(Sim.F[1]);
+        }
+
+        private int countShown = -1;
+
+        /// <summary>The 3-2-1 over the two (the rules count; the screen shows it).</summary>
+        private void Countdown()
+        {
+            if (Sim.Phase != RoundPhase.Countdown) { countShown = -1; return; }
+            int n = Mathf.CeilToInt(Sim.PhaseLeft);
+            if (n == countShown || n <= 0) return;
+            countShown = n;
+            hud.Banner(n.ToString(), new Color(1f, 0.85f, 0.3f), 0.9f);
+            Audio.AudioManager.PlaySfx(Audio.Sfx.Click, 1f, 0.75f + 0.08f * (3 - n));
+        }
+
+        private bool matchOver;
 
         private void OnDestroy() { Time.timeScale = 1f; MomentsV2.Clear(); }
 
@@ -172,7 +195,26 @@ namespace SquashBot.DuelV2
                     hud.Banner(Loc.T("v2.ko"), new Color(1f, 0.3f, 0.2f), 2f);
                     MomentsV2.Slow(S.koSlow, 0.25f);
                     if (cam != null) cam.Focus(ov.Chest, 0.5f);
-                    OnKnockOut(e.who);
+                    OnKnockOut(e.who, e.why == "match");
+                    break;
+                case DuelEventKind.RoundIntro:
+                    if (e.count > 1) foreach (var v in views) if (v.Skin != null) v.Skin.CleanSlate();
+                    if (cam != null) cam.Focus(Vector3.zero, 0f);
+                    hud.Banner(e.why == "final" ? Loc.T("v2.finalRound") : Loc.F("v2.round", e.count), Color.white, S.roundIntro);
+                    break;
+                case DuelEventKind.RoundFight: hud.Banner(Loc.T("v2.fight"), new Color(1f, 0.4f, 0.2f), 0.8f); Audio.AudioManager.PlaySfx(Audio.Sfx.Win, 0.8f, 1.1f); break;
+                case DuelEventKind.TimeUp: hud.Banner(Loc.T("v2.timeUp"), Color.white, 1.4f); break;
+                case DuelEventKind.GoldenRound: hud.Banner(Loc.T("v2.golden"), new Color(1f, 0.85f, 0.2f), 1.6f); break;
+                case DuelEventKind.RoundOver:
+                    string who = Loc.T(e.who == 0 ? (playerLeft ? "v2.side.me" : "v2.log.left") : "v2.side.rival");
+                    hud.Banner(e.why.Contains("flawless") ? Loc.T("v2.flawless") : Loc.F("v2.roundWon", who), e.who == 0 ? new Color(0.5f, 0.85f, 1f) : new Color(1f, 0.55f, 0.45f), S.roundWinPose + 1f);
+                    if (mv.Skin != null) mv.Skin.Clap();
+                    hud.Log(Loc.F("v2.roundWon", who) + " (" + e.why + ")");
+                    break;
+                case DuelEventKind.MatchOver:
+                    matchOver = true;
+                    hud.Banner(Sim.Comeback ? Loc.T("v2.comeback") : Loc.T(e.who == 0 && playerLeft ? "v2.youWin" : e.who == 1 && playerLeft ? "v2.youLose" : e.who == 0 ? "v2.leftWins" : "v2.rightWins"), Color.white, 4f);
+                    if (mv.Weapon != null) mv.Weapon.Flourish();
                     break;
             }
         }
@@ -214,14 +256,27 @@ namespace SquashBot.DuelV2
 
         private void Unzoom() { if (cam != null) cam.Zoom(0f); }
 
-        /// <summary>A knock-out (the rounds take it from Faz 4 on: here the fight starts over after a moment).</summary>
-        private void OnKnockOut(int winner) => Invoke(nameof(Restart), 3.5f);
+        /// <summary>A knock-out: the round's (the replay of the match's comes with the camera's cuts).</summary>
+        private void OnKnockOut(int winner, bool matchEnds) { }
 
-        private void Restart()
+        /// <summary>A new match on the same stage.</summary>
+        public void Restart()
         {
+            matchOver = false;
             Sim = new DuelSim(S, proto.Options.family, proto.Options.tier, Sim.HalfLength);
             foreach (var v in views) if (v.Skin != null) v.Skin.CleanSlate();
             if (cam != null) cam.Focus(Vector3.zero, 0f);
+            MomentsV2.Clear();
+        }
+
+        private void MatchPanel()
+        {
+            float k = Mathf.Max(0.6f, Screen.height / 1170f);
+            var r = new Rect(Screen.width * 0.15f, Screen.height * 0.55f, Screen.width * 0.7f, 160f * k);
+            GUI.Box(r, "");
+            GUI.Label(new Rect(r.x, r.y + 6f, r.width, 34f * k), Loc.F("v2.score", Sim.F[0].roundsWon, Sim.F[1].roundsWon), DuelHudV2.Style(26, Color.white, TextAnchor.MiddleCenter));
+            if (GUI.Button(new Rect(r.x + 12f, r.y + 54f * k, r.width * 0.5f - 18f, 80f * k), Loc.T("v2.again"))) Restart();
+            if (GUI.Button(new Rect(r.center.x + 6f, r.y + 54f * k, r.width * 0.5f - 18f, 80f * k), Loc.T("v2.menu"))) proto.BackToMenu();
         }
 
         private string Side(int who) => Loc.T(who == 0 ? "v2.log.left" : "v2.log.right");

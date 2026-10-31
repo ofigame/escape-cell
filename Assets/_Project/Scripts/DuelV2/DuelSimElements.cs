@@ -4,6 +4,7 @@ namespace SquashBot.DuelV2
     public partial class DuelSim
     {
         private void AdvanceElements(float dt) { }
+        private void ClearRains() { }
         /// <summary>A rain's circle is on this fighter.</summary>
         public bool RainOn(int who) => false;
         private void OnPerfectBlock(Fighter f) { }

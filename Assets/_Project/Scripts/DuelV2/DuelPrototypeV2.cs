@@ -56,6 +56,7 @@ namespace SquashBot.DuelV2
             var args = System.Environment.GetCommandLineArgs();
             Options.mode = System.Array.IndexOf(args, "-v2Player") >= 0 ? PrototypeOptions.Mode.PlayerVsBot : PrototypeOptions.Mode.BotVsBot;
             int si = System.Array.IndexOf(args, "-v2Stage"); if (si >= 0) Options.stage = int.Parse(args[si + 1]);
+            int ri = System.Array.IndexOf(args, "-v2RoundSec"); if (ri >= 0) Options.roundSeconds = float.Parse(args[ri + 1], System.Globalization.CultureInfo.InvariantCulture);
             int fi = System.Array.IndexOf(args, "-v2Fam"); if (fi >= 0) { Options.family[0] = args[fi + 1][0] - '0'; Options.family[1] = args[fi + 1][1] - '0'; }
             yield return Begin();
             float t0 = Time.realtimeSinceStartup; int n = 0;
@@ -120,7 +121,7 @@ namespace SquashBot.DuelV2
         /// <summary>The fight being fought (null on the menu).</summary>
         public DuelFightV2 Fight { get; private set; }
 
-        private void BackToMenu()
+        public void BackToMenu()
         {
             if (Camera != null) Camera.gameObject.SetActive(false);
             if (Fight != null) { Destroy(Fight.gameObject); Fight = null; }
