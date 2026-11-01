@@ -107,7 +107,7 @@ namespace SquashBot.DuelV2
 
             // the buttons: the right thumb's (strike, shield, the moves), the left's (the heart, the powers); pause at the top
             BuildButtons(canPause);
-            touch = new DuelTouchReader { Ignore = OverButton };
+            touch = new DuelTouchReader { Ignore = p => OverButton(p) || StrikeSide(p) };
         }
 
         /// <summary>
@@ -167,6 +167,30 @@ namespace SquashBot.DuelV2
             b.Rect.anchorMin = b.Rect.anchorMax = anchor;
             b.Rect.anchoredPosition = at;
             b.SetLook(alpha, size);
+        }
+
+        /// <summary>The striking side: the screen's right part (the left one walks and swipes; the left-handed: mirrored).</summary>
+        private static bool StrikeSide(Vector2 screen) => SaveData.DuelLeftHanded ? screen.x < Screen.width * 0.45f : screen.x > Screen.width * 0.45f;
+
+        /// <summary>A finger landed on the striking side this frame (not on a button): a blow at once, never waiting for it to lift.</summary>
+        private bool StrikeDown()
+        {
+            bool hit = false;
+            var ts = UnityEngine.InputSystem.Touchscreen.current;
+            if (ts != null)
+                foreach (var t in ts.touches)
+                {
+                    if (!t.press.wasPressedThisFrame) continue;
+                    var p = t.position.ReadValue();
+                    if (StrikeSide(p) && !OverButton(p)) hit = true;
+                }
+            var m = UnityEngine.InputSystem.Mouse.current;
+            if (!hit && (ts == null || !ts.press.isPressed) && m != null && m.leftButton.wasPressedThisFrame)
+            {
+                var p = m.position.ReadValue();
+                if (StrikeSide(p) && !OverButton(p)) hit = true;
+            }
+            return hit;
         }
 
         /// <summary>A finger on a button (its touch is the button's, not a strike or a walk).</summary>
@@ -272,7 +296,8 @@ namespace SquashBot.DuelV2
         {
             var inp = FighterInput.None;
             var c = touch.Poll();
-            if (c.tap.HasValue) inp.attack = true;
+            if (c.tap.HasValue) inp.attack = true; // (a quick tap on the walking side strikes too)
+            inp.attack |= StrikeDown();
             if (c.stick.HasValue) inp.walk = Mathf.Abs(c.stick.Value.x) > 0.25f ? Mathf.Sign(c.stick.Value.x) * towardOther : 0f;
             if (c.flick.HasValue && c.flick.Value.y > 0.5f) inp.jump = true;
             if (c.dodge) inp.dodge = true;

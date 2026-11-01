@@ -70,6 +70,10 @@ namespace SquashBot.Visual
         /// <summary>Held up across the front for as long as it is set (the duel's block).</summary>
         public bool Guarding { get; set; }
 
+        /// <summary>Held up over the head (a rain from the sky: the v2 duel), for as long as it is set.</summary>
+        public bool Overhead { get; set; }
+        private float overK;
+
         /// <summary>A shield is carried (shown on the arm).</summary>
         public bool Carried => holder != null;
 
@@ -106,10 +110,13 @@ namespace SquashBot.Visual
                 return;
             }
             var thrust = arm.position + ahead * reach * 0.98f + right * reach * 0.1f - up * reach * 0.05f; // (the arm straight out ahead)
-            if (hero == null || !hero.Flailing) Reach(arm, fore, hand, Vector3.Lerp(Vector3.Lerp(carry, guard, k), thrust, b)); // (the shield arm always its own, a clip playing too: a clip's hand at the chest took the shield into the body; thrown about: the shield goes with the hand)
+            overK = Mathf.MoveTowards(overK, Overhead && k > 0.5f ? 1f : 0f, Time.deltaTime / 0.12f);
+            var over = arm.position + up * reach * 0.95f + right * reach * 0.35f + ahead * reach * 0.1f; // (the arm up, the shield over the head)
+            if (hero == null || !hero.Flailing) Reach(arm, fore, hand, Vector3.Lerp(Vector3.Lerp(Vector3.Lerp(carry, guard, k), over, overK), thrust, b)); // (the shield arm always its own, a clip playing too: a clip's hand at the chest took the shield into the body; thrown about: the shield goes with the hand)
             // the shield: its back on the hand (the grip), its face forward and out to the left
-            var face = Vector3.Lerp((ahead * (0.55f + 0.45f * k) - right * (0.85f - 0.7f * k)).normalized, ahead, b).normalized;
-            holder.rotation = Quaternion.LookRotation(face, up);
+            var face = Vector3.Lerp(Vector3.Lerp((ahead * (0.55f + 0.45f * k) - right * (0.85f - 0.7f * k)).normalized, up, overK), ahead, b).normalized;
+            if (face.sqrMagnitude < 1e-4f) face = up;
+            holder.rotation = Quaternion.LookRotation(face, overK > 0.5f ? ahead : up);
             float s = size * transform.lossyScale.y; // (as big as foi is now)
             holder.position = hand.position + face * s * 0.07f - right * s * 0.08f; // (the hand on its grip, behind its middle)
         }

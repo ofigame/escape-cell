@@ -24,6 +24,9 @@ namespace SquashBot.DuelV2
             f.move = MoveKind.Ulti;
             float t = UltiSeconds * S.tempo;
             SetState(f, FighterState.Casting, Time + t);
+            // far off: it dashes in first (a quarter of a second), to strike from beside the other
+            float d = o.x - f.x, near = S.bodyGap * Height + ReachOf(f.family) * 0.4f;
+            if (Mathf.Abs(d) > near) { const float Dash = 0.25f; f.pushVel = Mathf.Sign(d) * (Mathf.Abs(d) - near) / Dash; f.pushUntil = Time + Dash; }
             o.blockHeld = false;
             SetState(o, FighterState.HitStun, Time + t + 0.05f); // (held through it: the ultimate is the ultimate)
             o.inChain = false;

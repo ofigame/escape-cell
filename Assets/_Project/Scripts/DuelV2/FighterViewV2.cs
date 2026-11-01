@@ -104,7 +104,7 @@ namespace SquashBot.DuelV2
                 if (Look != null && Look != Root && Look.IsChildOf(Root)) Look.localRotation = Quaternion.Slerp(Look.localRotation, Quaternion.identity, 1f - Mathf.Exp(-18f * Time.deltaTime));
             }
             if (shield == null && Look != null) shield = Look.GetComponentInChildren<ShieldHold>();
-            if (shield != null) shield.Guarding = f.ShieldUp;
+            if (shield != null) { shield.Guarding = f.ShieldUp; shield.Overhead = f.ShieldUp && sim.RainOn(f.index); } // (a rain on it: the shield over the head)
             if (guard != null) guard.Wanted = f.state != FighterState.Airborne && f.state != FighterState.Down && f.state != FighterState.GettingUp && f.state != FighterState.KO && f.state != FighterState.Casting;
             shown = f.state;
         }
