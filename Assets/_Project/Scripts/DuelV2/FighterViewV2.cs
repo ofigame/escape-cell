@@ -169,6 +169,9 @@ namespace SquashBot.DuelV2
                     else if (Skin != null) Skin.React(HitDirection.Horizontal_RightToLeft, HitHeight.Mid, strength, from, 1f);
                     game.V2Burst(Chest, new Color(1f, 0.85f, 0.4f), new Color(3f, 2.2f, 0.8f), e.move == MoveKind.Chain ? 10 : 24, e.move == MoveKind.Chain ? 4f : 7f);
                     DuelSoundsV2.Play(by.family == 0 ? DuelSoundV2.HitSword : by.family == 1 ? DuelSoundV2.HitSpear : by.family == 2 ? DuelSoundV2.HitAxe : DuelSoundV2.HitHeavy, 1f);
+                    DuelSoundsV2.Play(DuelSoundV2.Hurt, 0.85f); // (the struck body's own sound)
+                    if (Look != null) Combat.StatusFx.On(Combat.CombatFeel.RootOf(Look) ?? Root).Flash(0.14f); // (its body flashes white)
+                    game.V2Burst(Chest + (from - Root.position).normalized * 0.3f * scale / 3.5f, Color.white, new Color(4f, 3.6f, 2.6f), 12, 2.5f); // (a bright flare where it landed)
                     if (strength >= HitStrength.Heavy) DuelSoundsV2.Play(DuelSoundV2.Smash, 0.8f); // (a power hit, a knock-down, the ultimate: weight under it)
                     if (s.showAdvantageHints && me.state == FighterState.HitStun) StatusFx.On(CombatFeel.RootOf(Look) ?? Root).Stun(Mathf.Max(0.15f, me.stateEnd - me.stateTime));
                     break;

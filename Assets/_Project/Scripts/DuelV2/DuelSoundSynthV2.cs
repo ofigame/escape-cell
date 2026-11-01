@@ -156,6 +156,14 @@ namespace SquashBot.DuelV2
                     Ticks(b, r, 0.05f, 0.55f, 18, 3000f, 0.3f); // (crackling)
                     wet = 0.2f;
                     break;
+                case DuelSoundV2.Hurt:
+                    // an armoured body taking the blow: a deep "umph", a dull plate's clank, a short scrape
+                    b = New(0.3f);
+                    Thump(b, 0f, 110f * k, 50f, 0.1f, 0.6f, 2.8f);
+                    Noise(b, r, 0f, 0.08f, Pass.Band, 480f * k, 300f, 0.8f, 1.2f, 0.001f, 0.03f);
+                    Modes(b, r, 0.004f, new[] { 330f * k, 610f * k, 980f * k }, new[] { 0.05f, 0.035f, 0.02f }, new[] { 0.3f, 0.2f, 0.1f });
+                    Noise(b, r, 0.01f, 0.05f, Pass.Band, 1800f * k, 1300f, 1f, 0.5f, 0.002f, 0.015f);
+                    break;
                 default: // Lightning
                     b = New(1f);
                     Noise(b, r, 0f, 0.03f, Pass.High, 1500f, 1500f, 0.7f, 1f, 0.0002f, 0.008f); // (the crack)

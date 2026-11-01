@@ -110,32 +110,25 @@ namespace SquashBot.DuelV2
         private void Tap(Fighter f, Fighter o)
         {
             f.taps++;
-            if (f.Free)
+            // a blow's stun (or a blocked one's push back) never holds a tap: it strikes out of it
+            if (f.Free || f.state == FighterState.HitStun || f.state == FighterState.BlockStun)
             {
                 if (f.state == FighterState.Blocking) f.blockHeld = false;
+                f.inChain = false;
                 StartAttack(f, o, MoveKind.Chain, 0);
                 return;
             }
-            // free again in a moment (a stun, a push, the set's last blow): the tap kept for that moment, never lost
-            bool chainGoesOn = f.Attacking && f.move == MoveKind.Chain && f.lastResult == HitResult.Hit && !f.chainBroken && f.chainStep < S.chainLength - 1;
-            bool missedOwn = f.state == FighterState.Recovery && f.lastResult != HitResult.Hit; // (its own blow missed or blocked: no keeping, mashing gains nothing)
-            if (!chainGoesOn && !missedOwn && f.stateEnd > Time && f.stateEnd - Time <= S.S(S.bufferMs)) { f.tapKeptUntil = f.stateEnd + 0.05f; return; }
             if (f.Attacking && f.move == MoveKind.Chain)
             {
-                if (f.windowOpen && !f.chainBroken) { NextChain(f, o); return; }
-                bool soon = f.state == FighterState.Recovery && f.lastResult == HitResult.Hit && !f.windowOpen && f.windowAt - Time <= S.S(S.bufferMs) && f.windowAt > Time;
-                if (soon && !f.buffered) { f.buffered = true; return; }
-                f.outsideTaps++;
-                f.wastedTaps++;
-                if (f.outsideTaps >= S.spamTaps && !f.chainBroken)
-                {
-                    f.chainBroken = true;
-                    f.buffered = false;
-                    Emit(DuelEventKind.ChainBroken, f.index, why: "spam");
-                }
+                // its blow hit: the chain's next at once (from its recovery); else kept for the blow's end
+                bool goesOn = f.lastResult == HitResult.Hit && f.contacted && !f.chainBroken && f.chainStep < S.chainLength - 1;
+                if (goesOn && f.state == FighterState.Recovery) { NextChain(f, o); return; }
+                if (goesOn) { f.buffered = true; return; }
+                f.tapKeptUntil = f.attackEnd + 0.1f;
                 return;
             }
-            f.wastedTaps++;
+            if (f.stateEnd > Time) f.tapKeptUntil = f.stateEnd + 0.1f; // (anything else ending soon: the blow then)
+            else f.wastedTaps++;
         }
 
         /// <summary>An attack begins: its three phases from now (a slowed fighter a little slower).</summary>

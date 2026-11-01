@@ -8,6 +8,7 @@ namespace SquashBot.DuelV2
         Smash,
         Block, Parry, Clash,
         BodyFall, KO, Jump,
-        Snow, Fire, Lightning
+        Snow, Fire, Lightning,
+        Hurt
     }
 }
