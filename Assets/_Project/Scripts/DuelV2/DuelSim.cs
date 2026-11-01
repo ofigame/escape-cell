@@ -416,8 +416,9 @@ namespace SquashBot.DuelV2
 
         private void Move(Fighter f, Fighter o, FighterInput inp, float dt)
         {
-            // pushed back
+            // pushed back; a jump's travel (over the other)
             if (Time < f.pushUntil) f.x += f.pushVel * dt;
+            if (f.state == FighterState.Jumping) f.x += f.jumpVel * dt;
             bool canWalk = f.state == FighterState.Idle || f.state == FighterState.Walk || f.state == FighterState.Blocking;
             if (canWalk)
             {

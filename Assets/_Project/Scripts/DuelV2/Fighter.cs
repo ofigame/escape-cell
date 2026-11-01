@@ -36,6 +36,8 @@ namespace SquashBot.DuelV2
         public float lag;
         /// <summary>The next power a series earns (lightning, fire, snow in turn: every kind comes round).</summary>
         public int nextElement;
+        /// <summary>A jump's travel along the line (over the other: to land behind it), units a second.</summary>
+        public float jumpVel;
         /// <summary>A tap kept for the moment it is free again (pressed just before: never lost), until when.</summary>
         public float tapKeptUntil;
         /// <summary>This attack's phases (sim time of each start; recovery's end).</summary>

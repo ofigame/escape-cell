@@ -133,7 +133,7 @@ namespace SquashBot.DuelV2
             foreach (var e in Sim.Events) Show(e);
             Sim.Events.Clear();
             Countdown();
-            for (int i = 0; i < 2; i++) { views[i].Update(Sim.F[i], Sim.F[1 - i], Sim); views[i].FitWeapon(S.weaponLength[Sim.F[i].family] * Sim.Height); }
+            for (int i = 0; i < 2; i++) { views[i].Update(Sim.F[i], Sim.F[1 - i], Sim); views[i].FitWeapon(S.weaponLength[Sim.F[i].family] * Sim.Height); views[i].Aim(Sim.F[i], Sim, views[1 - i].Chest); }
             rains.Update(Sim);
             if (cam != null) cam.Rise(Sim.Rains.Count > 0 ? 0.8f * game.V2FighterScale / 3.5f : 0f); // (a little sky: the fight stays in the picture)
             LastSeconds();
@@ -295,7 +295,7 @@ namespace SquashBot.DuelV2
                     break;
                 case DuelEventKind.KnockdownOffered: if (e.who == 0 && playerLeft) hud.Float(Loc.T("v2.btn.knockdown") + " (R)", new Color(1f, 0.4f, 0.3f), mv.Head + Vector3.up * 0.6f, 22); break;
                 case DuelEventKind.Dodge: mv.OnDodge(0.35f); break;
-                case DuelEventKind.Jump: mv.OnJump(S.jumpSeconds * S.tempo); break;
+                case DuelEventKind.Jump: mv.OnJump(S.jumpSeconds * S.tempo, e.count == 1 ? Sim.Height * 0.95f : Sim.Height * 0.3f); break; // (over the other: high enough to clear its head)
                 case DuelEventKind.ShieldBroke: hud.Float(Loc.T("v2.shieldBroke"), new Color(1f, 0.4f, 0.4f), mv.Head, 26); hud.Log(Side(e.who) + " " + Loc.T("v2.shieldBroke")); break;
                 case DuelEventKind.Heart: hud.Float("+♥", new Color(1f, 0.4f, 0.5f), mv.Head, 30); break;
                 case DuelEventKind.Special: hud.Float(Loc.T("v2.btn.special"), new Color(0.8f, 0.6f, 1f), mv.Head, 24); break;

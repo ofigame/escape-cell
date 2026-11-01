@@ -61,9 +61,16 @@ namespace SquashBot.DuelV2
         {
             if (!f.CanAct) return;
             float t = S.jumpSeconds * S.tempo;
+            // near the other: over it, landing a body's width behind it (a way out of a corner or a chain); else straight up
+            var o = F[1 - f.index];
+            float d = o.x - f.x;
+            bool over = o.Alive && Mathf.Abs(d) <= S.jumpOverReach * Height && o.state != FighterState.Airborne && o.state != FighterState.Jumping;
+            float lim = HalfLength - 0.3f;
+            float land = over ? Mathf.Clamp(o.x + Mathf.Sign(Mathf.Abs(d) > 1e-3f ? d : f.facing) * S.bodyGap * Height * 1.4f, -lim, lim) : f.x;
+            f.jumpVel = (land - f.x) / t;
             SetState(f, FighterState.Jumping, Time + t);
             f.invulnUntil = Time + t * 0.8f; // (over a blow along the ground for most of it)
-            Emit(DuelEventKind.Jump, f.index);
+            Emit(DuelEventKind.Jump, f.index, count: over ? 1 : 0);
         }
 
         /// <summary>Knocked down where it stands (an ultimate, a rain's last drop, a wall): lying, then up.</summary>

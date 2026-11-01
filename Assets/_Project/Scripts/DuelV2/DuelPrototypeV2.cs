@@ -102,6 +102,22 @@ namespace SquashBot.DuelV2
                 panel.Open = false;
             }
             if (System.Array.IndexOf(args, "-v2Keys") >= 0) StartCoroutine(PressKeys());
+            int bi = System.Array.IndexOf(args, "-v2Burst");
+            if (bi >= 0)
+            {
+                // the fight frame by frame (30 a second) once it is on: the blows' pictures to look at
+                while (Fight == null || Fight.Sim == null || Fight.Sim.Phase != RoundPhase.Fight) yield return null;
+                yield return new WaitForSecondsRealtime(1f);
+                int count = int.Parse(args[bi + 1]);
+                Time.captureFramerate = 30;
+                for (int f = 0; f < count; f++)
+                {
+                    yield return new WaitForEndOfFrame();
+                    ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, "burst_" + f.ToString("000") + ".png"));
+                    yield return null;
+                }
+                Time.captureFramerate = 0;
+            }
             float t0 = Time.realtimeSinceStartup; int n = 0;
             while (Time.realtimeSinceStartup - t0 < seconds && State == Phase.Fighting)
             {

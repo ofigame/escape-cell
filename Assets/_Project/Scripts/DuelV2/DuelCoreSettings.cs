@@ -124,7 +124,9 @@ namespace SquashBot.DuelV2
         public float airSeconds = 1f;
         public int airHitsMax = 3;
         [Tooltip("Jump: time in the air (s)")]
-        public float jumpSeconds = 0.6f;
+        public float jumpSeconds = 0.9f;
+        [Tooltip("A jump this near the other (share of the height) goes over it and lands behind it (a way out)")]
+        public float jumpOverReach = 1.6f;
         [Tooltip("Walk speed (units/s)")]
         public float walkSpeed = 7f;
         [Tooltip("Bodies never closer than this (centre to centre, share of the height)")]

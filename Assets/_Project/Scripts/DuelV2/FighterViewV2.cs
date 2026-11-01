@@ -27,6 +27,28 @@ namespace SquashBot.DuelV2
         public int Family;
         /// <summary>A live duel: the place glided to (the server's come in steps).</summary>
         public bool Smooth;
+        private WeaponAimV2 aim;
+        private float aimWeight;
+
+        /// <summary>
+        /// The weapon aimed at the other's chest through a blow (its tip or its head meets the body at the contact): a
+        /// spear from the wind-up's start (a thrust), the others over the wind-up's second half; held through the strike,
+        /// let go over the recovery's first half.
+        /// </summary>
+        public void Aim(Fighter f, DuelSim sim, Vector3 otherChest)
+        {
+            if (Weapon == null) return;
+            if (aim == null || aim.Weapon != Weapon.transform) { aim = WeaponAimV2.On(Weapon.gameObject); aim.Weapon = Weapon.transform; }
+            bool blow = f.move == MoveKind.Chain || f.move == MoveKind.PowerHit || f.move == MoveKind.Knockdown;
+            float span = Mathf.Max(0.01f, f.stateEnd - f.stateTime), k = Mathf.Clamp01((sim.Time - f.stateTime) / span);
+            float want = 0f;
+            if (blow && f.state == FighterState.Windup) want = f.family == 1 ? k : Mathf.Clamp01((k - 0.5f) * 2f) * 0.8f;
+            else if (blow && f.state == FighterState.Active) want = 1f;
+            else if (blow && f.state == FighterState.Recovery) want = 1f - Mathf.Clamp01(k * 2f);
+            aimWeight = Mathf.MoveTowards(aimWeight, want, Time.deltaTime * 12f);
+            aim.Target = otherChest;
+            aim.Weight = aimWeight;
+        }
         private float shownX;
 
         /// <summary>Another weapon in the hand (the weapons' sheet): the old one gone, the new one fitted from scratch.</summary>
@@ -225,7 +247,7 @@ namespace SquashBot.DuelV2
         }
 
         public void OnDodge(float seconds) { if (Skin != null) Skin.DodgeClip(seconds); }
-        public void OnJump(float seconds) { if (Skin != null) Skin.Hop(1.1f, seconds); DuelSoundsV2.Play(DuelSoundV2.Jump, 0.6f); }
+        public void OnJump(float seconds, float height) { if (Skin != null) Skin.Hop(height, seconds); DuelSoundsV2.Play(DuelSoundV2.Jump, 0.6f); }
         public void OnUlti(float seconds) { if (Skin != null) Skin.PlayAction(DuelAction.UltiCinematic, seconds); CombatFeel.UltiStart(Look); }
         public void OnChainOpen(DuelCoreSettings s) { if (Weapon != null && s.showAdvantageHints) Weapon.Tremble(); }
         public void OnChainBroken() { if (Weapon != null) Weapon.Recoil(); }
