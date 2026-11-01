@@ -69,7 +69,7 @@ namespace SquashBot.DuelV2
             if (t == null) return 0.5f;
             float react = (t.reactMin + t.reactMax) * 0.5f;
             float quick = Mathf.InverseLerp(0.45f, 0.15f, react);
-            return Mathf.Clamp01(0.6f * quick + 0.4f * Mathf.Clamp01(t.shield));
+            return Mathf.Clamp01(0.6f * quick + 0.4f * Mathf.Clamp01(t.shield)) * 0.7f; // (the owner: the v2 bot fought too well; a third off)
         }
 
         /// <summary>A bot's personality from the game's tuning: bold → aggressive, much shield → defensive.</summary>

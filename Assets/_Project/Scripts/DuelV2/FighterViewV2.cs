@@ -134,7 +134,7 @@ namespace SquashBot.DuelV2
                     Weapon.SwingToContact(windup);
                     break;
             }
-            DuelSoundsV2.Play(f.family == 0 ? DuelSoundV2.SwingSword : f.family == 1 ? DuelSoundV2.SwingSpear : f.family == 2 ? DuelSoundV2.SwingAxe : DuelSoundV2.SwingHeavy, 0.7f, 0.06f);
+            DuelSoundsV2.Play(f.family == 0 ? DuelSoundV2.SwingSword : f.family == 1 ? DuelSoundV2.SwingSpear : f.family == 2 ? DuelSoundV2.SwingAxe : DuelSoundV2.SwingHeavy, 0.32f, 0.06f); // (the swing quiet: the hit is the sound that counts)
         }
 
         /// <summary>The last plain blow was swung by the body's clip (the self-test checks it).</summary>
@@ -163,13 +163,15 @@ namespace SquashBot.DuelV2
             switch (e.result)
             {
                 case HitResult.Hit:
-                    var strength = e.move == MoveKind.PowerHit ? HitStrength.Heavy : e.move == MoveKind.Knockdown ? HitStrength.Launch : e.move == MoveKind.Ulti ? HitStrength.Finisher : by.family >= 2 ? HitStrength.Medium : HitStrength.Light;
+                    if (Skin != null) Skin.StopMove(); // (its own blow cut off: the hit is what shows)
+                    var strength = e.move == MoveKind.PowerHit ? HitStrength.Heavy : e.move == MoveKind.Knockdown ? HitStrength.Launch : e.move == MoveKind.Ulti ? HitStrength.Finisher : e.why == "set end" || by.family >= 2 ? HitStrength.Heavy : HitStrength.Medium;
                     if (e.move == MoveKind.Knockdown) { if (Skin != null) Skin.LaunchUp(from, s.airSeconds * s.tempo, s.downSeconds * s.tempo); }
                     else if (e.move == MoveKind.AirHit) { if (Skin != null) Skin.AirHit(from); }
                     else if (Skin != null) Skin.React(HitDirection.Horizontal_RightToLeft, HitHeight.Mid, strength, from, 1f);
                     game.V2Burst(Chest, new Color(1f, 0.85f, 0.4f), new Color(3f, 2.2f, 0.8f), e.move == MoveKind.Chain ? 10 : 24, e.move == MoveKind.Chain ? 4f : 7f);
                     DuelSoundsV2.Play(by.family == 0 ? DuelSoundV2.HitSword : by.family == 1 ? DuelSoundV2.HitSpear : by.family == 2 ? DuelSoundV2.HitAxe : DuelSoundV2.HitHeavy, 1f);
-                    DuelSoundsV2.Play(DuelSoundV2.Hurt, 0.85f); // (the struck body's own sound)
+                    DuelSoundsV2.Play(DuelSoundV2.Hurt, 1f); // (the struck body's own sound)
+                    DuelSoundsV2.Play(DuelSoundV2.Smash, 0.45f, 0.08f); // (a crunch under it: a hit never sounds like a swing)
                     if (Look != null) Combat.StatusFx.On(Combat.CombatFeel.RootOf(Look) ?? Root).Flash(0.14f); // (its body flashes white)
                     game.V2Burst(Chest + (from - Root.position).normalized * 0.3f * scale / 3.5f, Color.white, new Color(4f, 3.6f, 2.6f), 12, 2.5f); // (a bright flare where it landed)
                     if (strength >= HitStrength.Heavy) DuelSoundsV2.Play(DuelSoundV2.Smash, 0.8f); // (a power hit, a knock-down, the ultimate: weight under it)
@@ -205,6 +207,14 @@ namespace SquashBot.DuelV2
             if (Skin != null) Skin.Launch(from, 0.6f * scale / 3.5f, lie);
             game.V2Dust(Root.position, new Color(0.6f, 0.55f, 0.48f), 16, 3f);
             DuelSoundsV2.Play(DuelSoundV2.BodyFall, 0.9f);
+        }
+
+        /// <summary>The ultimate landed on this one: thrown high into the air, down hard.</summary>
+        public void OnUltiStruck(Vector3 from, float air, float lie)
+        {
+            if (Skin != null) { Skin.StopMove(); Skin.LaunchUp(from, air, lie); }
+            if (Look != null) Combat.StatusFx.On(Combat.CombatFeel.RootOf(Look) ?? Root).Flash(0.25f);
+            DuelSoundsV2.Play(DuelSoundV2.Hurt, 1f);
         }
 
         public void OnKO(Vector3 from)

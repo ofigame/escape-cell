@@ -50,7 +50,7 @@ namespace SquashBot.DuelV2
 
         private void TryDodge(Fighter f, Fighter o)
         {
-            if (!(f.Free) || Time < f.dodgeReadyAt) return;
+            if (!f.CanAct || Time < f.dodgeReadyAt) return;
             f.dodgeReadyAt = Time + S.dodgeCooldown;
             f.invulnUntil = Time + S.dodgeInvuln;
             SetState(f, FighterState.Dodging, Time + Mathf.Max(S.dodgeInvuln, 0.3f * S.tempo));
@@ -59,7 +59,7 @@ namespace SquashBot.DuelV2
 
         private void TryJump(Fighter f)
         {
-            if (!f.Free) return;
+            if (!f.CanAct) return;
             float t = S.jumpSeconds * S.tempo;
             SetState(f, FighterState.Jumping, Time + t);
             f.invulnUntil = Time + t * 0.8f; // (over a blow along the ground for most of it)

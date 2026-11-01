@@ -11,7 +11,7 @@ namespace SquashBot.DuelV2
 
         private void TrySpecial(Fighter f, Fighter o)
         {
-            if (!f.Free || Time < f.specialReadyAt) return;
+            if (!f.CanAct || Time < f.specialReadyAt) return;
             f.specialReadyAt = Time + S.specialCooldown;
             StartAttack(f, o, MoveKind.Special, 0);
             Emit(DuelEventKind.Special, f.index, MoveKind.Special);
@@ -19,7 +19,7 @@ namespace SquashBot.DuelV2
 
         private void TryUlti(Fighter f, Fighter o)
         {
-            if (!f.Free || f.meter < S.meterMax - 0.001f || !o.Alive) return;
+            if (!f.CanAct || f.meter < S.meterMax - 0.001f || !o.Alive) return;
             f.meter = 0f;
             f.move = MoveKind.Ulti;
             float t = UltiSeconds * S.tempo;

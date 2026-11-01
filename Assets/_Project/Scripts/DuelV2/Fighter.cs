@@ -96,6 +96,10 @@ namespace SquashBot.DuelV2
         public bool Attacking => state == FighterState.Windup || state == FighterState.Active || state == FighterState.Recovery;
         /// <summary>Free to start something (stand, walk, block).</summary>
         public bool Free => state == FighterState.Idle || state == FighterState.Walk || state == FighterState.Blocking;
+        /// <summary>A move may start now (the special, the ultimate, a power, a heart, a dodge, a jump): free, or in its own blow
+        /// (cut short), or stunned or pushed back by one; never down, in the air, staggered or casting.</summary>
+        public bool CanAct => Free || state == FighterState.Windup || state == FighterState.Active || state == FighterState.Recovery
+            || state == FighterState.HitStun || state == FighterState.BlockStun;
         public bool ShieldUp => state == FighterState.Blocking || (blockHeld && state == FighterState.BlockStun);
     }
 }

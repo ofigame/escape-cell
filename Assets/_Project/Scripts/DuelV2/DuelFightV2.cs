@@ -312,7 +312,7 @@ namespace SquashBot.DuelV2
                     ultiBy = e.who;
                     break;
                 case DuelEventKind.UltiHit:
-                    ov.OnFall(mv.Root.position, S.downSeconds * S.tempo);
+                    ov.OnUltiStruck(mv.Root.position, S.airSeconds * S.tempo, S.downSeconds * S.tempo);
                     hud.Result(e, ov.Head);
                     if (cam != null) { cam.Zoom(0f); cam.Shake(Vector3.up, 0.8f); }
                     MomentsV2.HitStop(140f);

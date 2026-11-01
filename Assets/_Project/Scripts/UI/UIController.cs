@@ -2191,6 +2191,9 @@ namespace SquashBot.UI
         private void SetBanner(bool on)
         {
             on &= !Store.NoAds; // (ads removed: no banner)
+#if UNITY_ANDROID && !UNITY_EDITOR
+            if (Screen.fullScreen == on) Screen.fullScreen = !on; // (the menus' banner above the system's buttons, never under them; play: full screen)
+#endif
             Ads.BannerWanted = on;
             if (on) Ads.Banner.Show();
             else Ads.Banner.Hide();

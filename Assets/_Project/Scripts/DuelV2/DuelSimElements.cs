@@ -42,7 +42,7 @@ namespace SquashBot.DuelV2
         /// <summary>A power used from slot <paramref name="slot"/>: the hand raised to the sky, the circle on the other.</summary>
         private void TryPower(Fighter f, Fighter o, int slot)
         {
-            if (slot < 0 || slot >= f.powers.Count || !f.Free || Time < f.powerReadyAt || !o.Alive) return;
+            if (slot < 0 || slot >= f.powers.Count || !f.CanAct || Time < f.powerReadyAt || !o.Alive) return;
             var k = f.powers[slot];
             f.powers.RemoveAt(slot);
             f.powerReadyAt = Time + S.powerCooldown;

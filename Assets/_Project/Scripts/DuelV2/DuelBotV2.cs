@@ -73,11 +73,11 @@ namespace SquashBot.DuelV2
             // BREAK: chained, with a bar part to spend
             if (me.inChain && me.meter >= s.breakCost && R < 0.25f + 0.5f * skill * (persona == BotPersonality.Defensive ? 1.4f : 1f)) { inp.context = true; return inp; }
             // a heart when low
-            if (me.hearts > 0 && me.Health01 < 0.3f && me.Free && R < 0.7f) { inp.heart = true; return inp; }
+            if (me.hearts > 0 && me.Health01 < 0.3f && me.CanAct && R < 0.7f) { inp.heart = true; return inp; }
             // the ultimate on a full bar, in reach
-            if (me.meter >= s.meterMax && me.Free && dist <= reach + 1f && R < 0.7f) { inp.ulti = true; return inp; }
+            if (me.meter >= s.meterMax && me.CanAct && dist <= reach + 1f && R < 0.7f) { inp.ulti = true; return inp; }
             // a power when it has one (the defensive one keeps them a while)
-            if (me.powers.Count > 0 && me.Free && t >= me.powerReadyAt && R < (persona == BotPersonality.Defensive ? 0.25f : persona == BotPersonality.Aggressive ? 0.9f : 0.55f)) { inp.power = 0; return inp; }
+            if (me.powers.Count > 0 && me.CanAct && t >= me.powerReadyAt && R < (persona == BotPersonality.Defensive ? 0.25f : persona == BotPersonality.Aggressive ? 0.9f : 0.55f)) { inp.power = 0; return inp; }
             // a rain's circle on it: out of it
             if (sim.RainOn(me.index) && R < Mathf.Lerp(0.1f, 0.6f, skill)) { walkDir = -1f; walkUntil = t + 0.5f; inp.walk = -1f; if (me.Free && R < 0.4f) inp.dodge = true; return inp; }
 
