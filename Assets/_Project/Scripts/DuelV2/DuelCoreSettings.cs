@@ -62,6 +62,8 @@ namespace SquashBot.DuelV2
         public int chainLength = 3;
         [Tooltip("The struck one's stun after the set's last blow (ms)")]
         public float lastHitStunMs = 180f;
+        [Tooltip("The struck one's way out after a set of three (ms): it may strike, shield or dodge; longer by half again for each set in a row")]
+        public float setGapMs = 320f;
         [Tooltip("The series ends after this long with no hit (s)")]
         public float seriesGap = 1.2f;
         [Tooltip("Each hit in a series does this share of the one before")]

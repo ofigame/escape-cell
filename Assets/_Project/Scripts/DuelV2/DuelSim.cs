@@ -94,6 +94,8 @@ namespace SquashBot.DuelV2
             if (!f.blockHeld && f.state == FighterState.Blocking) SetState(f, FighterState.Idle, 0f);
 
             if (inp.attack) Tap(f, o);
+            else if (f.tapKeptUntil > 0f && f.Free) { f.tapKeptUntil = 0f; f.taps--; Tap(f, o); } // (the kept tap: the blow now)
+            if (f.tapKeptUntil > 0f && Time > f.tapKeptUntil) f.tapKeptUntil = 0f;
             if (inp.context) Context(f, o);
             if (inp.special) TrySpecial(f, o);
             if (inp.ulti) TryUlti(f, o);
@@ -114,6 +116,10 @@ namespace SquashBot.DuelV2
                 StartAttack(f, o, MoveKind.Chain, 0);
                 return;
             }
+            // free again in a moment (a stun, a push, the set's last blow): the tap kept for that moment, never lost
+            bool chainGoesOn = f.Attacking && f.move == MoveKind.Chain && f.lastResult == HitResult.Hit && !f.chainBroken && f.chainStep < S.chainLength - 1;
+            bool missedOwn = f.state == FighterState.Recovery && f.lastResult != HitResult.Hit; // (its own blow missed or blocked: no keeping, mashing gains nothing)
+            if (!chainGoesOn && !missedOwn && f.stateEnd > Time && f.stateEnd - Time <= S.S(S.bufferMs)) { f.tapKeptUntil = f.stateEnd + 0.05f; return; }
             if (f.Attacking && f.move == MoveKind.Chain)
             {
                 if (f.windowOpen && !f.chainBroken) { NextChain(f, o); return; }
@@ -353,7 +359,9 @@ namespace SquashBot.DuelV2
             if (f.move == MoveKind.Chain && !lastOfSet && f.lag > 0f) f.attackEnd += f.lag; // (a live duel: the window open as much longer as this side's taps take to arrive; the struck one's stun runs on with it)
             if (lastOfSet)
             {
-                float rec = Mathf.Max(f.attackEnd - f.recoveryAt, (o.stateEnd - Time) + S.S(S.minReactMs) - S.Windup(f.family) - (f.recoveryAt - Time));
+                int setsInRow = Mathf.Max(1, f.series / Mathf.Max(1, S.chainLength)); // (set upon set: the way out longer each time, never a lock)
+                float gapFor = Mathf.Max(S.S(S.minReactMs), S.S(S.setGapMs) * (1f + 0.5f * (setsInRow - 1)));
+                float rec = Mathf.Max(f.attackEnd - f.recoveryAt, (o.stateEnd - Time) + gapFor - S.Windup(f.family) - (f.recoveryAt - Time));
                 f.attackEnd = f.recoveryAt + rec;
                 // the gap the other has (measured: never under the reaction window)
                 float gap = (f.attackEnd + S.Windup(f.family)) - o.stateEnd;

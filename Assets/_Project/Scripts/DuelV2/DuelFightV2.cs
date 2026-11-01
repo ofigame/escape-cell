@@ -303,12 +303,26 @@ namespace SquashBot.DuelV2
                     mv.OnUlti(DuelSim.UltiSeconds * S.tempo);
                     hud.Banner(Loc.T("v2.btn.ulti"), new Color(1f, 0.8f, 0.3f), 1.2f);
                     if (cam != null) cam.Zoom(0.15f);
+                    // the charge: a ring of light at its feet, the weapon raised glowing, a rising rush of air
+                    game.V2Ring(mv.Root.position + Vector3.up * 0.05f, 3.2f, new Color(1f, 0.8f, 0.3f));
+                    game.V2Burst(mv.Chest, new Color(1f, 0.85f, 0.4f), new Color(3f, 2.4f, 0.8f), 30, 3f);
+                    if (mv.Weapon != null) mv.Weapon.HoldUp(true);
+                    DuelSoundsV2.Play(DuelSoundV2.SwingHeavy, 1f, 0.02f);
+                    Invoke(nameof(UltiSwing), Mathf.Max(0.1f, DuelSim.UltiSeconds * S.tempo - 0.3f));
+                    ultiBy = e.who;
                     break;
                 case DuelEventKind.UltiHit:
                     ov.OnFall(mv.Root.position, S.downSeconds * S.tempo);
                     hud.Result(e, ov.Head);
-                    if (cam != null) { cam.Zoom(0f); cam.Shake(Vector3.up, 0.5f); }
-                    MomentsV2.HitStop(120f);
+                    if (cam != null) { cam.Zoom(0f); cam.Shake(Vector3.up, 0.8f); }
+                    MomentsV2.HitStop(140f);
+                    // the crash: a big burst on the struck one, a shockwave on the floor, the heaviest sounds
+                    game.V2Burst(ov.Chest, new Color(1f, 0.75f, 0.3f), new Color(4f, 2.6f, 0.8f), 70, 11f);
+                    game.V2Ring(ov.Root.position + Vector3.up * 0.05f, 5f, new Color(1f, 0.8f, 0.35f));
+                    game.V2Dust(ov.Root.position, new Color(0.6f, 0.55f, 0.48f), 30, 5f);
+                    DuelSoundsV2.Play(DuelSoundV2.Smash, 1f, 0.02f);
+                    DuelSoundsV2.Play(DuelSoundV2.KO, 0.9f, 0.02f);
+                    game.V2Cheer(e.who, 0.8f);
                     break;
                 case DuelEventKind.KO:
                     ov.OnKO(mv.Root.position);
@@ -407,6 +421,19 @@ namespace SquashBot.DuelV2
 
         private void Unzoom() { if (cam != null) cam.Zoom(0f); }
         private void Unfocus() { if (cam != null) cam.Focus(Vector3.zero, 0f); }
+        private int ultiBy = -1;
+
+        /// <summary>The ultimate's blow a moment before it lands: the weapon down in a full swing, the body with it.</summary>
+        private void UltiSwing()
+        {
+            if (ultiBy < 0 || Sim == null) return;
+            var v = views[ultiBy];
+            if (v.Weapon != null) { v.Weapon.HoldUp(false); v.Weapon.SwingToContact(0.25f); }
+            if (v.Skin != null) v.Skin.PlayChainAction(Combat.DuelAction.ChainSlash, 0.25f);
+            DuelSoundsV2.Play(DuelSoundV2.SwingHeavy, 1f, 0.02f);
+            ultiBy = -1;
+        }
+
         private void HandsDown() { foreach (var v in views) if (v.Weapon != null) v.Weapon.HoldUp(false); }
 
         /// <summary>A knock-out: the crowd roars for the winner; the match's ends with its replay after the slow motion.</summary>
